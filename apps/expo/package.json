@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@expo/metro-config": "^0.7.1",
+    "@react-native-firebase/app": "^18.5.0",
+    "@react-native-firebase/auth": "^18.5.0",
     "@shopify/flash-list": "1.4.3",
     "@tanstack/react-query": "^4.29.23",
     "@trpc/client": "^10.34.0",
@@ -24,6 +26,7 @@
     "expo-router": "^1.5.3",
     "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "~1.4.4",
+    "install": "^0.13.0",
     "nativewind": "^2.0.11",
     "react": "18.2.0",
     "react-dom": "18.2.0",

@@ -18,10 +18,12 @@ const defineConfig = (): ExpoConfig => ({
   },
   assetBundlePatterns: ["**/*"],
   ios: {
+    googleServicesFile: "./GoogleService-Info.plist",
     supportsTablet: true,
     bundleIdentifier: "your.bundle.identifier",
   },
   android: {
+    googleServicesFile: "./google-services.json",
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
       backgroundColor: "#1F104A",
@@ -32,7 +34,12 @@ const defineConfig = (): ExpoConfig => ({
       // projectId: "your-project-id",
     },
   },
-  plugins: ["./expo-plugins/with-modify-gradle.js"],
+  plugins: [
+    "./expo-plugins/with-modify-gradle.js",
+    "@react-native-firebase/app",
+    "@react-native-firebase/perf",
+    "@react-native-firebase/crashlytics",
+  ],
 });
 
 export default defineConfig;

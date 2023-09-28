@@ -30,7 +30,11 @@ module.exports = function (api) {
         },
       ],
       "expo-router/babel",
-      ["module-resolver", { alias: { "~": "./src" } }],
+      ["module-resolver", 
+      { alias: {
+         "~": "./src", 
+         "@assets": "./assets" } 
+    }],
     ],
   };
 };
