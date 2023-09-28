@@ -8,10 +8,10 @@ const Index = () => {
   return (
     <FirebaseLoaded>
       <SignedIn>
-        <Redirect href="/home" />
+        <Redirect href="/" />
       </SignedIn>
       <SignedOut>
-        <Redirect href="/signin" />
+        <Redirect href="/" />
       </SignedOut>
     </FirebaseLoaded>
   );
