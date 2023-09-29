@@ -1,8 +1,8 @@
 import type { ExpoConfig } from "@expo/config";
 
 const defineConfig = (): ExpoConfig => ({
-  name: "expo",
-  slug: "expo",
+  name: "oppfy",
+  slug: "oppfy",
   scheme: "expo",
   version: "1.0.0",
   orientation: "portrait",
@@ -20,10 +20,11 @@ const defineConfig = (): ExpoConfig => ({
   ios: {
     googleServicesFile: "./GoogleService-Info.plist",
     supportsTablet: true,
-    bundleIdentifier: "your.bundle.identifier",
+    bundleIdentifier: "com.algkmp.oppfy",
   },
   android: {
     googleServicesFile: "./google-services.json",
+    package: "com.algkmp.oppfy",
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
       backgroundColor: "#1F104A",
@@ -31,7 +32,7 @@ const defineConfig = (): ExpoConfig => ({
   },
   extra: {
     eas: {
-      // projectId: "your-project-id",
+      projectId: "68175593-c314-48a6-8892-7afeeb66ab9f",
     },
   },
   plugins: [
