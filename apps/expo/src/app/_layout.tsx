@@ -11,36 +11,39 @@ import tamaguiConfig from "~/../tamagui.config";
 // It wraps your pages with the providers they need
 const RootLayout = () => {
   return (
-    <TRPCProvider>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme={"dark"}>
-        <SafeAreaProvider>
+    <SafeAreaProvider>
+      <TRPCProvider>
+        <TamaguiProvider config={tamaguiConfig} defaultTheme={"dark"}>
           {/*
           The Stack component displays the current page.
           It also allows you to configure your screens 
         */}
           <Stack
             screenOptions={{
-              headerTransparent: true 
+              headerStyle: {
+                backgroundColor: "$background",
+              },
+
             }}
           >
-            <Stack.Screen 
-            name="auth-welcome"
-            options={{headerShown: false}}
+            <Stack.Screen
+              name="auth-welcome"
+              options={{ headerShown: false }}
             />
-            <Stack.Screen 
-            name="auth/email-input"
-            options={{title:"", animation: "slide_from_right"}}
+            <Stack.Screen
+              name="auth/email-input"
+              options={{ title: "", animation: "slide_from_right" }}
             />
 
-            <Stack.Screen 
-            name="auth/pass-input"
-            options={{title:"", animation: "slide_from_right"}}
+            <Stack.Screen
+              name="auth/pass-input"
+              options={{ title: "", animation: "slide_from_right" }}
             />
           </Stack>
           <StatusBar />
-        </SafeAreaProvider>
-      </TamaguiProvider>
-    </TRPCProvider>
+        </TamaguiProvider>
+      </TRPCProvider>
+    </SafeAreaProvider>
   );
 };
 

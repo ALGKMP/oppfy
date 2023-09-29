@@ -1,12 +1,12 @@
 import {Text} from 'tamagui';
 
-const EmailInput = () => {
+const PassInput = () => {
     return (
         <Text>
-            fjsdk
+            PassInput
         </Text>
     )
 }
 
-export default EmailInput;
+export default PassInput;
 
