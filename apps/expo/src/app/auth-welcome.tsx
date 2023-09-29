@@ -2,8 +2,11 @@ import React from "react";
 import { SafeAreaView } from "react-native";
 import Tinder from "@assets/tinder.png";
 import { Button, Image, SizableText, Text, View, YStack } from "tamagui";
+import {useRouter} from "expo-router";
 
-const Index = () => {
+const AuthWelcome = () => {
+  const router = useRouter();
+
   return (
     <View flex={1} backgroundColor={"$background"}>
       <View
@@ -30,7 +33,7 @@ const Index = () => {
           </Text>
           .
         </Text>
-        <Button backgroundColor={"white"} padding={"$2"} borderRadius={16}>
+        <Button backgroundColor={"white"} padding={"$2"} borderRadius={16} onPress={ () => router.push("/auth/email-input")}>
           <Text color="black" fontWeight={"$2"}>
             CREATE AN ACCOUNT
           </Text>
@@ -56,4 +59,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default AuthWelcome;

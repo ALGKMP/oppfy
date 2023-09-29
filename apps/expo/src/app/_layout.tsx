@@ -2,7 +2,7 @@ import React from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { TamaguiProvider } from "tamagui";
+import { TamaguiProvider, Text } from "tamagui";
 
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "~/../tamagui.config";
@@ -20,14 +20,21 @@ const RootLayout = () => {
         */}
           <Stack
             screenOptions={{
-              headerStyle: {
-                backgroundColor: "blue",
-              },
+              headerTransparent: true 
             }}
           >
             <Stack.Screen 
-            name="auth/index"
+            name="auth-welcome"
             options={{headerShown: false}}
+            />
+            <Stack.Screen 
+            name="auth/email-input"
+            options={{title:"", animation: "slide_from_right"}}
+            />
+
+            <Stack.Screen 
+            name="auth/pass-input"
+            options={{title:"", animation: "slide_from_right"}}
             />
           </Stack>
           <StatusBar />
