@@ -24,7 +24,12 @@ const RootLayout = () => {
                 backgroundColor: "blue",
               },
             }}
-          />
+          >
+            <Stack.Screen 
+            name="auth/index"
+            options={{headerShown: false}}
+            />
+          </Stack>
           <StatusBar />
         </SafeAreaProvider>
       </TamaguiProvider>
