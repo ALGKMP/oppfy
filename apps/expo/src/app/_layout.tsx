@@ -12,7 +12,7 @@ import tamaguiConfig from "~/../tamagui.config";
 const RootLayout = () => {
   return (
     <TRPCProvider>
-      <TamaguiProvider config={tamaguiConfig}>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme={"dark"}>
         <SafeAreaProvider>
           {/*
           The Stack component displays the current page.

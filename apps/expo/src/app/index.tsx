@@ -2,7 +2,7 @@ import React from "react";
 import { Redirect } from "expo-router";
 import { TamaguiProvider } from "tamagui";
 
-import { FirebaseLoaded, SignedIn, SignedOut } from "~/app/components/Firebase";
+import { FirebaseLoaded, SignedIn, SignedOut } from "~/components/Firebase";
 
 const Index = () => {
   return (
