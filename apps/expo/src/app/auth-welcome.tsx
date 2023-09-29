@@ -1,7 +1,7 @@
 import React from "react";
 import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
-import { Button, Image, SizableText, Text, View, YStack } from "tamagui";
+import { Button, Image, Text, View, YStack } from "tamagui";
 
 const AuthWelcome = () => {
   const router = useRouter();

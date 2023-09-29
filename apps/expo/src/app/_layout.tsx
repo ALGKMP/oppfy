@@ -25,53 +25,9 @@ const RootLayout = () => {
     <SafeAreaProvider>
       <TRPCProvider>
         <TamaguiProvider config={tamaguiConfig} defaultTheme={"dark"}>
-          {/*
-          The Stack component displays the current page.
-          It also allows you to configure your screens 
-        */}
-          <View flex={1} backgroundColor={"$background"}>
-
-            {/* Auth Stack */}
-            <Stack
-              screenOptions={{
-                header: () => (
-                  <View
-                    height="$10"
-                    padding="$4"
-                    justifyContent="center"
-                    backgroundColor={"$background"}
-                  >
-                    <ChevronLeft size={24} onPress={() => router.back()} />
-                  </View>
-                ),
-              }}
-            >
-              <Stack.Screen
-                name="auth-welcome"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="auth/email-input"
-                options={{ title: "", animation: "fade_from_bottom" }}
-              />
-
-              <Stack.Screen
-                name="auth/password-input"
-                options={{ title: "", animation: "fade" }}
-              />
-              <Stack.Screen
-                name="auth/sign-in"
-                options={{ title: "", animation: "fade_from_bottom" }}
-              />
-            </Stack>
-
-            {/* Account Stack */}
-            {/* <Stack screenOptions={{headerShown: false}}>
-              <Stack.Screen name="profile" options={{ title: "" }} />
-            </Stack> */}
-
-            <StatusBar />
-          </View>
+          <Stack 
+          screenOptions={{headerShown: false}}>
+          </Stack>
         </TamaguiProvider>
       </TRPCProvider>
     </SafeAreaProvider>

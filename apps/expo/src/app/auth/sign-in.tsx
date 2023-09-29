@@ -1,12 +1,11 @@
 import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
-import type { Router } from "@trpc/server";
-import { Button, Image, Text, View, YStack, ZStack } from "tamagui";
+import { Button, Image, Text, View, YStack } from "tamagui";
 
 const SignIn = () => {
 
   const ProviderRoutes = {
-    apple: "auth/apple",
+    apple: "profile",
     google: "auth/google",
     email: "auth/email",
   };
@@ -16,7 +15,7 @@ const SignIn = () => {
 
     // TODO: Logo fixed in center}
   return (
-      <View flex={1} backgroundColor={"$background"}>
+      <View flex={1} backgroundColor="$background">
         <View
           flex={1}
           alignItems="center"
@@ -26,18 +25,18 @@ const SignIn = () => {
           <Image source={Tinder} resizeMode="contain" />
         </View>
 
-        <YStack marginHorizontal="$4" padding="$2" space={"$4"}>
-          <Text padding={"$2"} textAlign="center" fontSize={12}>
+        <YStack marginHorizontal="$4" padding="$2" space="$4">
+          <Text padding="$2" textAlign="center" fontSize={12}>
             By tapping &apos;Sign in&apos;, you agree with our{" "}
-            <Text fontWeight={"500"} textDecorationLine="underline">
+            <Text fontWeight="500" textDecorationLine="underline">
               Terms.
             </Text>{" "}
             Learn how we process your data in our{" "}
-            <Text fontWeight={"500"} textDecorationLine="underline">
+            <Text fontWeight="500" textDecorationLine="underline">
               Privacy Policy
             </Text>{" "}
             and{" "}
-            <Text fontWeight={"500"} textDecorationLine="underline">
+            <Text fontWeight="500" textDecorationLine="underline">
               Cookies Policy
             </Text>
             .
@@ -46,21 +45,21 @@ const SignIn = () => {
             return (
               <Button
                 key={provider.name}
-                backgroundColor={"$backgroundTransparent"}
-                padding={"$2"}
+                backgroundColor="$backgroundTransparent"
+                padding="$2"
                 borderRadius={16}
-                borderColor={"white"}
+                borderColor="white"
                 borderWidth={1}
                 onPress={() => router.push(provider.route)}
               >
-                <Text color="white" fontWeight={"$2"}>
+                <Text color="white" fontWeight="$2">
                   SIGN IN WITH {provider.name.toUpperCase()}
                 </Text>
               </Button>
             );
           })}
 
-          <Text fontWeight={"400"} alignSelf="center" marginBottom={"$4"}>
+          <Text fontWeight="400" alignSelf="center" marginBottom="$4">
             Trouble signing in?
           </Text>
         </YStack>
