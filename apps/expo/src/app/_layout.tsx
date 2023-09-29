@@ -30,8 +30,7 @@ const RootLayout = () => {
           It also allows you to configure your screens 
         */}
           <View flex={1} backgroundColor={"$background"}>
-
-          {/* {showHeader && (
+            {/* {showHeader && (
         <View
           height="$10"
           padding="$4"
