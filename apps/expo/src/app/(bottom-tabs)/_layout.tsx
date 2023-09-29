@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router/tabs';
-import { Home } from '@tamagui/lucide-icons';
+import { Camera, Home, Inbox, Search, User2 } from '@tamagui/lucide-icons';
 export default function Footer() {
   return (
     <Tabs 
@@ -15,16 +15,40 @@ export default function Footer() {
     }}>
 
       <Tabs.Screen
-        name="profile"
+        name="(top-tabs)"
         options={{
           tabBarIcon: () => <Home/>
-  
+        }}
+      />
+      
+      <Tabs.Screen
+        name="search"
+        options={{
+          tabBarIcon: () => <Search/>
         }}
       />
 
       <Tabs.Screen
-        name="(top-tabs)"
+        name="camera"
+        options={{
+          tabBarIcon: () => <Camera/>
+        }}
       />
+
+      <Tabs.Screen
+        name="inbox"
+        options={{
+          tabBarIcon: () => <Inbox/>
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: () => <User2/>
+        }}
+      />
+
     </Tabs>
   );
 }
