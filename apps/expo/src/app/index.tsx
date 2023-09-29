@@ -11,7 +11,7 @@ const Index = () => {
         <Redirect href="/home" />
       </SignedIn>
       <SignedOut>
-        <Redirect href="/signin" />
+        <Redirect href="/auth" />
       </SignedOut>
     </FirebaseLoaded>
   );
