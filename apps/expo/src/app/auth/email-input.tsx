@@ -32,9 +32,7 @@ const EmailInput = () => {
   });
 
   const onSubmit = (data: FormData) => {
-    // Do something with the form data
-    console.log(data);
-    router.push("/auth/pass-input");
+    router.push({ pathname: "/auth/password-input", params: data });
   };
 
   return (
@@ -45,16 +43,12 @@ const EmailInput = () => {
       <SafeAreaView style={{ flex: 1 }}>
         <View
           flex={1}
-          backgroundColor={"$background"}
-          padding={"$6"}
-          justifyContent={"space-between"}
+          backgroundColor="$background"
+          padding="$6"
+          justifyContent="space-between"
         >
           <YStack space>
-            <H1
-              fontFamily={"$silkscreen"}
-              fontWeight={"700"}
-              letterSpacing={"$4"}
-            >
+            <H1 fontFamily="$silkscreen" fontWeight="700" letterSpacing="$4">
               Lets start with your email
             </H1>
 
@@ -119,7 +113,7 @@ const EmailInput = () => {
               borderRadius="$8"
               backgroundColor="white"
             >
-              <Text color="black" fontWeight={"500"} fontSize={16}>
+              <Text color="black" fontWeight="500" fontSize={16}>
                 Next
               </Text>
             </Button>

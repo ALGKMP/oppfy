@@ -17,7 +17,7 @@ const RootLayout = () => {
   // Determine if you're in the auth flow
   // const showHeader = [
   //   "/auth/email-input",
-  //   "/auth/pass-input"
+  //   "/auth/password-input"
   // // ].includes(pathname);
   // ].includes(pathname);
 
@@ -67,7 +67,7 @@ const RootLayout = () => {
               />
 
               <Stack.Screen
-                name="auth/pass-input"
+                name="auth/password-input"
                 options={{ title: "", animation: "fade" }}
               />
             </Stack>
