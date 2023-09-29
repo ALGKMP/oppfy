@@ -38,7 +38,7 @@ const AuthWelcome = () => {
           backgroundColor={"white"}
           padding={"$2"}
           borderRadius={16}
-          onPress={() => router.push("/auth/email-input")}
+          onPress={() => router.push("auth/email-input")}
         >
           <Text color="black" fontWeight={"$2"}>
             CREATE AN ACCOUNT
@@ -51,7 +51,7 @@ const AuthWelcome = () => {
           borderRadius={16}
           borderColor={"white"}
           borderWidth={1}
-          onPress={() => router.push("/auth/sign-in")}
+          onPress={() => router.push("auth/sign-in")}
         >
           <Text color="white" fontWeight={"$2"}>
             SIGN IN

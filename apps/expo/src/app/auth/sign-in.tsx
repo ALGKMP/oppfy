@@ -50,7 +50,7 @@ const SignIn = () => {
                 borderRadius={16}
                 borderColor="white"
                 borderWidth={1}
-                onPress={() => router.push(provider.route)}
+                onPress={() => router.replace(provider.route)}
               >
                 <Text color="white" fontWeight="$2">
                   SIGN IN WITH {provider.name.toUpperCase()}

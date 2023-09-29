@@ -8,7 +8,7 @@ const Index = () => {
   return (
     <FirebaseLoaded>
       <SignedIn>
-        <Redirect href="/home" />
+        <Redirect href="/profile" />
       </SignedIn>
       <SignedOut>
         <Redirect href="/auth-welcome" />
