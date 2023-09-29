@@ -47,6 +47,18 @@ importers:
       '@react-native-firebase/perf':
         specifier: ^18.5.0
         version: 18.5.0(@react-native-firebase/app@18.5.0)(expo@48.0.20)
+      '@react-navigation/drawer':
+        specifier: ^6.6.4
+        version: 6.6.4(@react-navigation/native@6.1.8)(react-native-gesture-handler@2.13.1)(react-native-reanimated@3.5.4)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0)
+      '@react-navigation/material-bottom-tabs':
+        specifier: ^6.2.17
+        version: 6.2.17(@react-navigation/native@6.1.8)(react-native-paper@5.10.6)(react-native-safe-area-context@4.5.3)(react-native-vector-icons@10.0.0)(react-native@0.72.5)(react@18.2.0)
+      '@react-navigation/material-top-tabs':
+        specifier: ^6.6.4
+        version: 6.6.4(@react-navigation/native@6.1.8)(react-native-pager-view@6.2.1)(react-native-tab-view@3.5.2)(react-native@0.72.5)(react@18.2.0)
+      '@react-navigation/stack':
+        specifier: ^6.3.18
+        version: 6.3.18(@react-navigation/native@6.1.8)(react-native-gesture-handler@2.13.1)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0)
       '@shopify/flash-list':
         specifier: 1.4.3
         version: 1.4.3(@babel/runtime@7.23.1)(react-native@0.72.5)(react@18.2.0)
@@ -82,7 +94,7 @@ importers:
         version: 4.0.1(expo@48.0.20)
       expo-router:
         specifier: ^1.5.3
-        version: 1.5.3(@types/react@18.2.23)(expo-constants@14.2.1)(expo-linking@4.0.1)(expo-modules-autolinking@1.2.0)(expo-status-bar@1.4.4)(expo@48.0.20)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.13.1)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0)
+        version: 1.5.3(@react-navigation/drawer@6.6.4)(@types/react@18.2.23)(expo-constants@14.2.1)(expo-linking@4.0.1)(expo-modules-autolinking@1.2.0)(expo-status-bar@1.4.4)(expo@48.0.20)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.13.1)(react-native-reanimated@3.5.4)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0)
       expo-splash-screen:
         specifier: ~0.18.2
         version: 0.18.2(expo-modules-autolinking@1.2.0)(expo@48.0.20)
@@ -107,6 +119,15 @@ importers:
       react-native:
         specifier: 0.72.5
         version: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      react-native-gesture-handler:
+        specifier: ^2.13.1
+        version: 2.13.1(react-native@0.72.5)(react@18.2.0)
+      react-native-pager-view:
+        specifier: ^6.2.1
+        version: 6.2.1(react-native@0.72.5)(react@18.2.0)
+      react-native-reanimated:
+        specifier: ^3.5.4
+        version: 3.5.4(@babel/core@7.23.0)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.22.5)(@babel/plugin-transform-shorthand-properties@7.22.5)(@babel/plugin-transform-template-literals@7.22.5)(react-native@0.72.5)(react@18.2.0)
       react-native-safe-area-context:
         specifier: 4.5.3
         version: 4.5.3(react-native@0.72.5)(react@18.2.0)
@@ -116,6 +137,9 @@ importers:
       react-native-svg:
         specifier: ^13.14.0
         version: 13.14.0(react-native@0.72.5)(react@18.2.0)
+      react-native-tab-view:
+        specifier: ^3.5.2
+        version: 3.5.2(react-native-pager-view@6.2.1)(react-native@0.72.5)(react@18.2.0)
       superjson:
         specifier: 1.9.1
         version: 1.9.1
@@ -1270,6 +1294,16 @@ packages:
       '@babel/helper-plugin-utils': 7.22.5
       '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.23.0)
 
+  /@babel/plugin-transform-object-assign@7.22.5(@babel/core@7.23.0):
+    resolution: {integrity: sha512-iDhx9ARkXq4vhZ2CYOSnQXkmxkDgosLi3J8Z17mKz7LyzthtkdVchLD7WZ3aXeCuvJDOW3+1I5TpJmwIbF9MKQ==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.23.0
+      '@babel/helper-plugin-utils': 7.22.5
+    dev: false
+
   /@babel/plugin-transform-object-rest-spread@7.22.15(@babel/core@7.23.0):
     resolution: {integrity: sha512-fEB+I1+gAmfAyxZcX1+ZUwLeAuuf8VIg67CTznZE0MqVFumWkh8xWtn58I4dxdVf080wn7gzWoF8vndOViJe9Q==}
     engines: {node: '>=6.9.0'}
@@ -1729,6 +1763,16 @@ packages:
       react-native: '*'
     dependencies:
       react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+    dev: false
+
+  /@callstack/react-theme-provider@3.0.9(react@18.2.0):
+    resolution: {integrity: sha512-tTQ0uDSCL0ypeMa8T/E9wAZRGKWj8kXP7+6RYgPTfOPs9N07C9xM8P02GJ3feETap4Ux5S69D9nteq9mEj86NA==}
+    peerDependencies:
+      react: '>=16.3.0'
+    dependencies:
+      deepmerge: 3.3.0
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
     dev: false
 
   /@egjs/hammerjs@2.0.17:
@@ -3078,6 +3122,29 @@ packages:
       use-latest-callback: 0.1.6(react@18.2.0)
     dev: false
 
+  /@react-navigation/drawer@6.6.4(@react-navigation/native@6.1.8)(react-native-gesture-handler@2.13.1)(react-native-reanimated@3.5.4)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-MqEFDSkOdKowbtACcfGQeG185gV2V9burT/EgYxU9w9ivRrT1DEqCSwS7MpU1LjKbVuNqUVPBVE83rVWHbowuw==}
+    peerDependencies:
+      '@react-navigation/native': ^6.0.0
+      react: '*'
+      react-native: '*'
+      react-native-gesture-handler: '>= 1.0.0'
+      react-native-reanimated: '>= 1.0.0'
+      react-native-safe-area-context: '>= 3.0.0'
+      react-native-screens: '>= 3.0.0'
+    dependencies:
+      '@react-navigation/elements': 1.3.19(@react-navigation/native@6.1.8)(react-native-safe-area-context@4.5.3)(react-native@0.72.5)(react@18.2.0)
+      '@react-navigation/native': 6.1.8(react-native@0.72.5)(react@18.2.0)
+      color: 4.2.3
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      react-native-gesture-handler: 2.13.1(react-native@0.72.5)(react@18.2.0)
+      react-native-reanimated: 3.5.4(@babel/core@7.23.0)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.22.5)(@babel/plugin-transform-shorthand-properties@7.22.5)(@babel/plugin-transform-template-literals@7.22.5)(react-native@0.72.5)(react@18.2.0)
+      react-native-safe-area-context: 4.5.3(react-native@0.72.5)(react@18.2.0)
+      react-native-screens: 3.20.0(react-native@0.72.5)(react@18.2.0)
+      warn-once: 0.1.1
+    dev: false
+
   /@react-navigation/elements@1.3.19(@react-navigation/native@6.1.8)(react-native-safe-area-context@4.5.3)(react-native@0.72.5)(react@18.2.0):
     resolution: {integrity: sha512-7hLvSYKPuDS070pza5gd43WDX7QgfuEmuTWNbCJhKdWlLudYmq3qzxGCBwCfO2dEI6+p8tla5wruaWiGKAbTYw==}
     peerDependencies:
@@ -3090,6 +3157,43 @@ packages:
       react: 18.2.0
       react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
       react-native-safe-area-context: 4.5.3(react-native@0.72.5)(react@18.2.0)
+    dev: false
+
+  /@react-navigation/material-bottom-tabs@6.2.17(@react-navigation/native@6.1.8)(react-native-paper@5.10.6)(react-native-safe-area-context@4.5.3)(react-native-vector-icons@10.0.0)(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-Y3ULwLlViArC+XQeqU3jzUQp965Qrv0caQlJ8MeEw/6NLENazJ5f1mTFjWFpvVWthQL56rXv3Vo7DU+kRN/DzQ==}
+    peerDependencies:
+      '@react-navigation/native': ^6.0.0
+      react: '*'
+      react-native: '*'
+      react-native-paper: '>= 3.0.0'
+      react-native-safe-area-context: '>= 3.0.0'
+      react-native-vector-icons: '>= 6.0.0'
+    dependencies:
+      '@react-navigation/elements': 1.3.19(@react-navigation/native@6.1.8)(react-native-safe-area-context@4.5.3)(react-native@0.72.5)(react@18.2.0)
+      '@react-navigation/native': 6.1.8(react-native@0.72.5)(react@18.2.0)
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      react-native-paper: 5.10.6(react-native-safe-area-context@4.5.3)(react-native-vector-icons@10.0.0)(react-native@0.72.5)(react@18.2.0)
+      react-native-safe-area-context: 4.5.3(react-native@0.72.5)(react@18.2.0)
+      react-native-vector-icons: 10.0.0
+    dev: false
+
+  /@react-navigation/material-top-tabs@6.6.4(@react-navigation/native@6.1.8)(react-native-pager-view@6.2.1)(react-native-tab-view@3.5.2)(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-vl0YaUHVPk0Cmv+yBE5b811+jVgr8f0x5czZVwAyFaluedNgzBg9ybj9oo8GzjwfyOFJQwq8dpH/NV6EYi/LdQ==}
+    peerDependencies:
+      '@react-navigation/native': ^6.0.0
+      react: '*'
+      react-native: '*'
+      react-native-pager-view: '>= 4.0.0'
+      react-native-tab-view: '>= 3.0.0'
+    dependencies:
+      '@react-navigation/native': 6.1.8(react-native@0.72.5)(react@18.2.0)
+      color: 4.2.3
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      react-native-pager-view: 6.2.1(react-native@0.72.5)(react@18.2.0)
+      react-native-tab-view: 3.5.2(react-native-pager-view@6.2.1)(react-native@0.72.5)(react@18.2.0)
+      warn-once: 0.1.1
     dev: false
 
   /@react-navigation/native-stack@6.9.14(@react-navigation/native@6.1.8)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0):
@@ -3128,6 +3232,27 @@ packages:
     resolution: {integrity: sha512-lTM8gSFHSfkJvQkxacGM6VJtBt61ip2XO54aNfswD+KMw6eeZ4oehl7m0me3CR9hnDE4+60iAZR8sAhvCiI3NA==}
     dependencies:
       nanoid: 3.3.6
+    dev: false
+
+  /@react-navigation/stack@6.3.18(@react-navigation/native@6.1.8)(react-native-gesture-handler@2.13.1)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-jAXneaLAs57xvyMFkebEyGCZDyz90KnaN7fM9f5Bu+Gx3KnoppdNfT4drpmN/f5f32L0eXS4aRAvuDrFT1mFfw==}
+    peerDependencies:
+      '@react-navigation/native': ^6.0.0
+      react: '*'
+      react-native: '*'
+      react-native-gesture-handler: '>= 1.0.0'
+      react-native-safe-area-context: '>= 3.0.0'
+      react-native-screens: '>= 3.0.0'
+    dependencies:
+      '@react-navigation/elements': 1.3.19(@react-navigation/native@6.1.8)(react-native-safe-area-context@4.5.3)(react-native@0.72.5)(react@18.2.0)
+      '@react-navigation/native': 6.1.8(react-native@0.72.5)(react@18.2.0)
+      color: 4.2.3
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      react-native-gesture-handler: 2.13.1(react-native@0.72.5)(react@18.2.0)
+      react-native-safe-area-context: 4.5.3(react-native@0.72.5)(react@18.2.0)
+      react-native-screens: 3.20.0(react-native@0.72.5)(react@18.2.0)
+      warn-once: 0.1.1
     dev: false
 
   /@segment/loosely-validate-event@2.0.0:
@@ -5561,6 +5686,14 @@ packages:
       wrap-ansi: 6.2.0
     dev: false
 
+  /cliui@7.0.4:
+    resolution: {integrity: sha512-OcRE68cOsVMXp1Yvonl/fzkQOyjLSu/8bhPDfQt0e0/Eb283TKP20Fs2MqoPsr9SwA595rRCA+QMzYc9nBP+JQ==}
+    dependencies:
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      wrap-ansi: 7.0.0
+    dev: false
+
   /cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
@@ -5627,6 +5760,13 @@ packages:
     dependencies:
       color-name: 1.1.4
       simple-swizzle: 0.2.2
+    dev: false
+
+  /color@3.2.1:
+    resolution: {integrity: sha512-aBl7dZI9ENN6fUGC7mWpMTPNHmWUSNan9tuWN6ahh5ZLNk9baLJOnSMlrQkHcrfFgz2/RigjUVAjdx36VcemKA==}
+    dependencies:
+      color-convert: 1.9.3
+      color-string: 1.9.1
     dev: false
 
   /color@4.2.3:
@@ -5934,6 +6074,11 @@ packages:
 
   /deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
+
+  /deepmerge@3.3.0:
+    resolution: {integrity: sha512-GRQOafGHwMHpjPx9iCvTgpu9NojZ49q794EEL94JVEw6VaeA8XTUyBKvAkOOjBX9oJNiV6G3P+T+tihFjo2TqA==}
+    engines: {node: '>=0.10.0'}
+    dev: false
 
   /deepmerge@4.3.1:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
@@ -6796,7 +6941,7 @@ packages:
       invariant: 2.2.4
     dev: false
 
-  /expo-router@1.5.3(@types/react@18.2.23)(expo-constants@14.2.1)(expo-linking@4.0.1)(expo-modules-autolinking@1.2.0)(expo-status-bar@1.4.4)(expo@48.0.20)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.13.1)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0):
+  /expo-router@1.5.3(@react-navigation/drawer@6.6.4)(@types/react@18.2.23)(expo-constants@14.2.1)(expo-linking@4.0.1)(expo-modules-autolinking@1.2.0)(expo-status-bar@1.4.4)(expo@48.0.20)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.13.1)(react-native-reanimated@3.5.4)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0):
     resolution: {integrity: sha512-rZEoRpXjXpfcx549/MI7YRitaBGFOHpIGLO+cb18ecsShl3PzGPIDaBGMnTo0m1h7ip0sAIQg1EFrSAtM4LXLA==}
     peerDependencies:
       '@react-navigation/drawer': ^6.5.8
@@ -6819,6 +6964,7 @@ packages:
       '@expo/metro-runtime': 2.0.6(react-native@0.72.5)
       '@radix-ui/react-slot': 1.0.2(@types/react@18.2.23)(react@18.2.0)
       '@react-navigation/bottom-tabs': 6.5.9(@react-navigation/native@6.1.8)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0)
+      '@react-navigation/drawer': 6.6.4(@react-navigation/native@6.1.8)(react-native-gesture-handler@2.13.1)(react-native-reanimated@3.5.4)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0)
       '@react-navigation/native': 6.1.8(react-native@0.72.5)(react@18.2.0)
       '@react-navigation/native-stack': 6.9.14(@react-navigation/native@6.1.8)(react-native-safe-area-context@4.5.3)(react-native-screens@3.20.0)(react-native@0.72.5)(react@18.2.0)
       expo: 48.0.20(@babel/core@7.23.0)
@@ -6830,6 +6976,7 @@ packages:
       query-string: 7.1.3
       react-helmet-async: 1.3.0(react-dom@18.2.0)(react@18.2.0)
       react-native-gesture-handler: 2.13.1(react-native@0.72.5)(react@18.2.0)
+      react-native-reanimated: 3.5.4(@babel/core@7.23.0)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.22.5)(@babel/plugin-transform-shorthand-properties@7.22.5)(@babel/plugin-transform-template-literals@7.22.5)(react-native@0.72.5)(react@18.2.0)
       react-native-safe-area-context: 4.5.3(react-native@0.72.5)(react@18.2.0)
       react-native-screens: 3.20.0(react-native@0.72.5)(react@18.2.0)
       url: 0.11.3
@@ -10356,6 +10503,59 @@ packages:
       react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
     dev: false
 
+  /react-native-pager-view@6.2.1(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-fZ8chez5J+w831nSnbtK8hwlCiMy1DgpFv8xG6ajXLsAI8uMkGvP554QDIDNlUoCuVwMf7OFyd32Y2Nm2Iaj9Q==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+    dev: false
+
+  /react-native-paper@5.10.6(react-native-safe-area-context@4.5.3)(react-native-vector-icons@10.0.0)(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-n5r2S53/pGpHRyQV/n75W8ibU+VyamMGSqKWGSti9ZmChcgEWC0s4o/TnpUvmAKNZCQwcYwKSLrmMq5wR5nUNA==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-safe-area-context: '*'
+      react-native-vector-icons: '*'
+    dependencies:
+      '@callstack/react-theme-provider': 3.0.9(react@18.2.0)
+      color: 3.2.1
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      react-native-safe-area-context: 4.5.3(react-native@0.72.5)(react@18.2.0)
+      react-native-vector-icons: 10.0.0
+      use-latest-callback: 0.1.6(react@18.2.0)
+    dev: false
+
+  /react-native-reanimated@3.5.4(@babel/core@7.23.0)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.22.5)(@babel/plugin-transform-shorthand-properties@7.22.5)(@babel/plugin-transform-template-literals@7.22.5)(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-8we9LLDO1o4Oj9/DICeEJ2K1tjfqkJagqQUglxeUAkol/HcEJ6PGxIrpBcNryLqCDYEcu6FZWld/FzizBIw6bg==}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+      '@babel/plugin-proposal-nullish-coalescing-operator': ^7.0.0-0
+      '@babel/plugin-proposal-optional-chaining': ^7.0.0-0
+      '@babel/plugin-transform-arrow-functions': ^7.0.0-0
+      '@babel/plugin-transform-shorthand-properties': ^7.0.0-0
+      '@babel/plugin-transform-template-literals': ^7.0.0-0
+      react: '*'
+      react-native: '*'
+    dependencies:
+      '@babel/core': 7.23.0
+      '@babel/plugin-proposal-nullish-coalescing-operator': 7.18.6(@babel/core@7.23.0)
+      '@babel/plugin-proposal-optional-chaining': 7.21.0(@babel/core@7.23.0)
+      '@babel/plugin-transform-arrow-functions': 7.22.5(@babel/core@7.23.0)
+      '@babel/plugin-transform-object-assign': 7.22.5(@babel/core@7.23.0)
+      '@babel/plugin-transform-shorthand-properties': 7.22.5(@babel/core@7.23.0)
+      '@babel/plugin-transform-template-literals': 7.22.5(@babel/core@7.23.0)
+      '@babel/preset-typescript': 7.23.0(@babel/core@7.23.0)
+      convert-source-map: 2.0.0
+      invariant: 2.2.4
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+    dev: false
+
   /react-native-safe-area-context@4.5.3(react-native@0.72.5)(react@18.2.0):
     resolution: {integrity: sha512-ihYeGDEBSkYH+1aWnadNhVtclhppVgd/c0tm4mj0+HV11FoiWJ8N6ocnnZnRLvM5Fxc+hUqxR9bm5AXU3rXiyA==}
     peerDependencies:
@@ -10388,6 +10588,27 @@ packages:
       css-tree: 1.1.3
       react: 18.2.0
       react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+    dev: false
+
+  /react-native-tab-view@3.5.2(react-native-pager-view@6.2.1)(react-native@0.72.5)(react@18.2.0):
+    resolution: {integrity: sha512-nE5WqjbeEPsWQx4mtz81QGVvgHRhujTNIIZiMCx3Bj6CBFDafbk7XZp9ocmtzXUQaZ4bhtVS43R4FIiR4LboJw==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-pager-view: '*'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      react-native-pager-view: 6.2.1(react-native@0.72.5)(react@18.2.0)
+      use-latest-callback: 0.1.6(react@18.2.0)
+    dev: false
+
+  /react-native-vector-icons@10.0.0:
+    resolution: {integrity: sha512-efMOVbZIebY8RszZPzPBoXi9pvD/NFYmjIDYxRoc9LYSzV8rMJtT8FfcO2hPu85Rn2x9xktha0+qn0B7EqMAcQ==}
+    hasBin: true
+    dependencies:
+      prop-types: 15.8.1
+      yargs: 16.2.0
     dev: false
 
   /react-native-web@0.19.9(react-dom@18.2.0)(react@18.2.0):
@@ -12425,6 +12646,11 @@ packages:
       decamelize: 1.2.0
     dev: false
 
+  /yargs-parser@20.2.9:
+    resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
+    engines: {node: '>=10'}
+    dev: false
+
   /yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
@@ -12445,6 +12671,19 @@ packages:
       which-module: 2.0.1
       y18n: 4.0.3
       yargs-parser: 18.1.3
+    dev: false
+
+  /yargs@16.2.0:
+    resolution: {integrity: sha512-D1mvvtDG0L5ft/jGWkLpG1+m0eQxOfaBvTNELraWj22wSVUMWxZUvYgJYcKh6jGGIkJFhH4IZPQhR4TKpc8mBw==}
+    engines: {node: '>=10'}
+    dependencies:
+      cliui: 7.0.4
+      escalade: 3.1.1
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      string-width: 4.2.3
+      y18n: 5.0.8
+      yargs-parser: 20.2.9
     dev: false
 
   /yargs@17.7.2:
