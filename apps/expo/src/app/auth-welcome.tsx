@@ -1,8 +1,8 @@
 import React from "react";
 import { SafeAreaView } from "react-native";
+import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
 import { Button, Image, SizableText, Text, View, YStack } from "tamagui";
-import {useRouter} from "expo-router";
 
 const AuthWelcome = () => {
   const router = useRouter();
@@ -17,6 +17,7 @@ const AuthWelcome = () => {
       >
         <Image source={Tinder} resizeMode="contain" />
       </View>
+
       <YStack marginHorizontal="$4" padding="$2" space={"$4"}>
         <Text padding={"$2"} textAlign="center" fontSize={12}>
           By tapping &apos;Sign in&apos;, you agree with our{" "}
@@ -33,7 +34,13 @@ const AuthWelcome = () => {
           </Text>
           .
         </Text>
-        <Button backgroundColor={"white"} padding={"$2"} borderRadius={16} onPress={ () => router.push("/auth/email-input")}>
+
+        <Button
+          backgroundColor={"white"}
+          padding={"$2"}
+          borderRadius={16}
+          onPress={() => router.push("/auth/email-input")}
+        >
           <Text color="black" fontWeight={"$2"}>
             CREATE AN ACCOUNT
           </Text>
