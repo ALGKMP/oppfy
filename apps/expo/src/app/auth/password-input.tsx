@@ -15,16 +15,19 @@ interface SignUpFlowParams {
   [Key: string]: string | boolean;
 }
 
-const schema = z.object({
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
-  confirmPassword: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
-});
+const schemaValidation = z
+  .object({
+    password: z.string().min(8, { message: "Password must be 8 characters" }),
+    confirmPassword: z
+      .string()
+      .min(8, { message: "Password must be 8 characters" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<typeof schemaValidation>;
 
 const EmailInput = () => {
   const router = useRouter();
@@ -39,7 +42,7 @@ const EmailInput = () => {
       password: "",
       confirmPassword: "",
     },
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schemaValidation),
   });
 
   const onSubmit = (data: FormData) => {
@@ -121,9 +124,9 @@ const EmailInput = () => {
                   />
                 )}
               />
-              {errors.password && (
+              {errors.confirmPassword && (
                 <Text fontSize="$2" color="$red11">
-                  {errors.password.message}
+                  {errors.confirmPassword.message}
                 </Text>
               )}
             </YStack>

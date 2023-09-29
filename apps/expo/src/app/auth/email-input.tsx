@@ -9,12 +9,12 @@ import * as z from "zod";
 
 import { UnderlineInput } from "~/components/Inputs";
 
-const schema = z.object({
+const schemaValidation = z.object({
   email: z.string().email({ message: "Invalid email" }),
   marketing: z.boolean(),
 });
 
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<typeof schemaValidation>;
 
 const EmailInput = () => {
   const router = useRouter();
@@ -28,7 +28,7 @@ const EmailInput = () => {
       email: "",
       marketing: false,
     },
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schemaValidation),
   });
 
   const onSubmit = (data: FormData) => {
