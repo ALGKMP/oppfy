@@ -23,33 +23,8 @@ export default function Footer() {
       />
 
       <Tabs.Screen
-        name="(top-tabs)/following"
+        name="(top-tabs)"
       />
-
-      <Tabs.Screen
-        name=""
-        options={{
-          tabBarIcon: () => <Home/>
-  
-        }}
-      />
-
-      <Tabs.Screen
-        name="fg"
-        options={{
-          tabBarIcon: () => <Home/>
-  
-        }}
-      />
-
-      <Tabs.Screen
-        name="gfds"
-        options={{
-          tabBarIcon: () => <Home/>
-  
-        }}
-      />
-
     </Tabs>
   );
 }
