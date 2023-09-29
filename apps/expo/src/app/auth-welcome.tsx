@@ -1,5 +1,4 @@
 import React from "react";
-import { SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
 import { Button, Image, SizableText, Text, View, YStack } from "tamagui";
@@ -52,10 +51,11 @@ const AuthWelcome = () => {
           borderRadius={16}
           borderColor={"white"}
           borderWidth={1}
+          onPress={() => router.push("/auth/sign-in")}
         >
-          <SizableText color="white" fontWeight={"$2"}>
+          <Text color="white" fontWeight={"$2"}>
             SIGN IN
-          </SizableText>
+          </Text>
         </Button>
 
         <Text fontWeight={"400"} alignSelf="center" marginBottom={"$4"}>

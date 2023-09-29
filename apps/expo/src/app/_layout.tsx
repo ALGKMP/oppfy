@@ -30,17 +30,8 @@ const RootLayout = () => {
           It also allows you to configure your screens 
         */}
           <View flex={1} backgroundColor={"$background"}>
-            {/* {showHeader && (
-        <View
-          height="$10"
-          padding="$4"
-          justifyContent="center"
-          backgroundColor={"$background"}
-        >
-          <ChevronLeft size={24} onPress={() => router.back()} />
-        </View>
-      )} */}
 
+            {/* Auth Stack */}
             <Stack
               screenOptions={{
                 header: () => (
@@ -50,11 +41,9 @@ const RootLayout = () => {
                     justifyContent="center"
                     backgroundColor={"$background"}
                   >
-                    {/* <Button icon={ChevronLeft} size={"$2"}/> */}
                     <ChevronLeft size={24} onPress={() => router.back()} />
                   </View>
                 ),
-                // headerShown: false
               }}
             >
               <Stack.Screen
@@ -70,12 +59,22 @@ const RootLayout = () => {
                 name="auth/password-input"
                 options={{ title: "", animation: "fade" }}
               />
+              <Stack.Screen
+                name="auth/sign-in"
+                options={{ title: "", animation: "fade_from_bottom" }}
+              />
             </Stack>
+
+            {/* Account Stack */}
+            {/* <Stack screenOptions={{headerShown: false}}>
+              <Stack.Screen name="profile" options={{ title: "" }} />
+            </Stack> */}
+
             <StatusBar />
           </View>
-        </SafeAreaProvider>
-      </TamaguiProvider>
-    </TRPCProvider>
+        </TamaguiProvider>
+      </TRPCProvider>
+    </SafeAreaProvider>
   );
 };
 

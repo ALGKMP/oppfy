@@ -1,12 +1,14 @@
 import { credential } from "firebase-admin";
+import type {
+  ServiceAccount,
+} from "firebase-admin/app";
 import {
-  type ServiceAccount,
   getApp,
   getApps,
   initializeApp,
-} from "firebase-admin/app";
+} from "firebase-admin/app"
+
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
 
 import key from "~/admin-service-account.json";
       
@@ -25,6 +27,5 @@ const app = getApps().some(({ name }) => name === FIREBASE_APP_NAME)
     );
 
 const auth = getAuth(app);
-const firestore = getFirestore(app);
 
-export { auth, firestore };
+export { auth };
