@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 
-const Reccomended = () => {
+const ForYouPage = () => {
   return (
     <View>
       <Text>Reccomended</Text>
@@ -9,4 +9,4 @@ const Reccomended = () => {
   );
 };
 
-export default Reccomended;
+export default ForYouPage;
