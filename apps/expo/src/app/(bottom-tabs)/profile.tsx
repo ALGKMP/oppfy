@@ -19,7 +19,7 @@ const Profile = () => {
 
     return(
          <View flex={1} backgroundColor="black">
-            <View alignItems="center">
+            <View alignItems="center" margin={14}>
                 {/* Stats */}
                 <YStack space={2} marginBottom={5}>
                     <XStack space={2} marginBottom={1} flex={1} alignItems="center" maxHeight={150}>
@@ -45,11 +45,24 @@ const Profile = () => {
                     </View>
 
                     {/* Buttons */}
-                    <View flexDirection="row">
-                        <Button theme="active_Button" size={"$3"}>
+                    <View flexDirection="row" justifyContent="space-between" marginTop={10}>
+                        <Button
+                        height={35}
+                        backgroundColor="white"
+                        borderRadius={10}
+                        width="48%"
+                        color="black"
+                        >
                             Edit Profile
                         </Button>
-                        <Button theme="active_Button" size={"$3"}>
+
+                        <Button
+                        height={35}
+                        backgroundColor="white"
+                        borderRadius={10}
+                        width="48%"
+                        color="black"
+                        >
                             Share Profile
                         </Button>
                     </View>
