@@ -5,9 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import { Button, Checkbox, H1, Text, View, XStack, YStack } from "tamagui";
+import auth from "@react-native-firebase/auth";
 import * as z from "zod";
 
 import { UnderlineInput } from "~/components/Inputs";
+import { isFireBaseError } from "~/utils/firebase";
+
 
 const schemaValidation = z.object({
   email: z.string().email({ message: "Invalid email" }),
@@ -22,6 +25,7 @@ const EmailInput = () => {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -31,10 +35,33 @@ const EmailInput = () => {
     resolver: zodResolver(schemaValidation),
   });
 
-  const onSubmit = (data: FormData) => {
-    router.push({ pathname: "auth/password-input", params: data });
-  };
+  const onSubmit = async (data: FormData) => {
+    try {
+      auth().fetchSignInMethodsForEmail(data.email).then((signInMethods) => {
+        if (signInMethods.length === 0) {
+            // Email is not registered
+            console.log("email not in use")
+            router.push({ pathname: "auth/password-input", params: data });
+        } else {
+            // Email is registered
+            console.log("email already in use")
+        }
+    }).catch((error) => {
+        console.error("Error checking email:", error);
+    });
+    
 
+
+    } 
+    catch(error) {
+      if (isFireBaseError(error)) {
+        if (error.code === "auth/invalid-email") {
+          console.log("email already in use");
+          setError("email", { message: "Email already in use" });
+      }
+    }
+  };
+}
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}

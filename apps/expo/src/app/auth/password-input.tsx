@@ -37,6 +37,7 @@ const PasswordInput = () => {
   const signUpFlowParams = useParams<SignUpFlowParams>();
 
   const storeAccountFirebase = api.auth.storeAccountFirebase.useMutation();
+
   const {
     control,
     handleSubmit,
@@ -56,6 +57,10 @@ const PasswordInput = () => {
         signUpFlowParams.email,
         data.password,
       );
+
+      // send email verification
+      await authed.user.sendEmailVerification();
+      
       const uid = await authed.user.getIdToken();
       storeAccountFirebase.mutate({
         email: signUpFlowParams.email,
