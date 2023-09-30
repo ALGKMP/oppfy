@@ -63,7 +63,7 @@ const Profile = () => {
             <Button theme="active_Button" size="$3">
               Edit Profile
             </Button>
-            <Button theme="active_Button" size={"$3"}>
+            <Button theme="active_Button" size="$3">
               Share Profile
             </Button>
           </View>

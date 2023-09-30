@@ -1,23 +1,39 @@
-import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
-import { View } from "tamagui";
+import { Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { getTokens } from "@tamagui/core";
+import {
+  Camera,
+  Home,
+  Inbox,
+  MoreHorizontal,
+  Search,
+  User2,
+} from "@tamagui/lucide-icons";
+import { Button, Text, View, XStack } from "tamagui";
 
 import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
+  const router = useRouter();
+
   return (
-    <View flex={1} backgroundColor="$background">
+    <View flex={1} backgroundColor="$gray1">
       <BottomTabs
         screenOptions={{
-          headerShown: false,
           tabBarStyle: {
-            backgroundColor: "$background",
-            borderTopColor: "grey",
+            backgroundColor: getTokens().color.gray1Dark.val,
+            borderTopColor: getTokens().color.gray2Dark.val,
             height: 60,
             paddingTop: 10,
             paddingBottom: 10,
             borderTopWidth: 1,
           },
           tabBarShowLabel: false,
+          headerTitle: "",
+          headerStyle: {
+            backgroundColor: getTokens().color.gray1Dark.val,
+            shadowColor: "transparent",
+          },
         }}
       >
         <BottomTabs.Screen
@@ -49,13 +65,36 @@ const BottomTabsLayout = () => {
         />
 
         <BottomTabs.Screen
+          name="settings"
+          options={{
+            headerShown: false,
+            // dont show on bottom tabs
+            tabBarShowLabel: false,
+            tabBarshown
+          }}
+        />
+
+        <BottomTabs.Screen
           name="profile"
           options={{
             tabBarIcon: () => <User2 />,
+            headerRight: () => (
+              <View marginRight="$4">
+                <Pressable onPress={() => router.push("/settings")}>
+                  {({ pressed }) => (
+                    <MoreHorizontal
+                      size="$1"
+                      style={{ opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </View>
+            ),
           }}
         />
       </BottomTabs>
     </View>
   );
 };
+
 export default BottomTabsLayout;
