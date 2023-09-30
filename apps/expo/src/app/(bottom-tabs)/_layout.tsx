@@ -1,54 +1,61 @@
-import { Tabs } from 'expo-router/tabs';
-import { Camera, Home, Inbox, Search, User2 } from '@tamagui/lucide-icons';
-export default function Footer() {
+import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
+import { View } from "tamagui";
+
+import { BottomTabs } from "~/layouts";
+
+const BottomTabsLayout = () => {
   return (
-    <Tabs 
-    screenOptions={{headerShown: false, tabBarStyle: {
-      backgroundColor: 'black',
-      borderTopColor: 'grey',
-      height: 60,
-      paddingTop: 10,
-      paddingBottom: 10,
-      borderTopWidth: 1,
-    },
-    tabBarShowLabel: false
-    }}>
-
-      <Tabs.Screen
-        name="(top-tabs)"
-        options={{
-          tabBarIcon: () => <Home/>
+    <View flex={1} backgroundColor="$background">
+      <BottomTabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: "black",
+            borderTopColor: "grey",
+            height: 60,
+            paddingTop: 10,
+            paddingBottom: 10,
+            borderTopWidth: 1,
+          },
+          tabBarShowLabel: false,
         }}
-      />
-      
-      <Tabs.Screen
-        name="search"
-        options={{
-          tabBarIcon: () => <Search/>
-        }}
-      />
+      >
+        <BottomTabs.Screen
+          name="(top-tabs)"
+          options={{
+            tabBarIcon: () => <Home />,
+          }}
+        />
 
-      <Tabs.Screen
-        name="camera"
-        options={{
-          tabBarIcon: () => <Camera/>
-        }}
-      />
+        <BottomTabs.Screen
+          name="search"
+          options={{
+            tabBarIcon: () => <Search />,
+          }}
+        />
 
-      <Tabs.Screen
-        name="inbox"
-        options={{
-          tabBarIcon: () => <Inbox/>
-        }}
-      />
+        <BottomTabs.Screen
+          name="camera"
+          options={{
+            tabBarIcon: () => <Camera />,
+          }}
+        />
 
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: () => <User2/>
-        }}
-      />
+        <BottomTabs.Screen
+          name="inbox"
+          options={{
+            tabBarIcon: () => <Inbox />,
+          }}
+        />
 
-    </Tabs>
+        <BottomTabs.Screen
+          name="profile"
+          options={{
+            tabBarIcon: () => <User2 />,
+          }}
+        />
+      </BottomTabs>
+    </View>
   );
-}
+};
+export default BottomTabsLayout;

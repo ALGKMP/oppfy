@@ -1,29 +1,14 @@
 import React from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Stack, usePathname, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
-import { Button, TamaguiProvider, Text, View } from "tamagui";
+import { View } from "tamagui";
 
-import { TRPCProvider } from "~/utils/api";
-import tamaguiConfig from "~/../tamagui.config";
-
-// This is the main layout of the app
-// It wraps your pages with the providers they need
-const RootLayout = () => {
+const AuthLayout = () => {
   const router = useRouter();
-  const pathname = usePathname();
-
-  // Determine if you're in the auth flow
-  // const showHeader = [
-  //   "/auth/email-input",
-  //   "/auth/password-input"
-  // // ].includes(pathname);
-  // ].includes(pathname);
 
   return (
     <View flex={1} backgroundColor="$background">
-      {/* Auth Stack */}
       <Stack
         screenOptions={{
           header: () => (
@@ -49,7 +34,7 @@ const RootLayout = () => {
         />
         <Stack.Screen
           name="sign-in"
-          options={{ title: "", animation: "fade_from_bottom" }}
+          options={{ title: "", animation: "fade" }}
         />
       </Stack>
       <StatusBar />
@@ -57,4 +42,4 @@ const RootLayout = () => {
   );
 };
 
-export default RootLayout;
+export default AuthLayout;

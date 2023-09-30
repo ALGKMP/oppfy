@@ -4,7 +4,9 @@ import type { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
 
 const { Navigator } = createBottomTabNavigator();
 
-export const MaterialBottomTabs = withLayoutContext<
+const BottomTabs = withLayoutContext<
   BottomTabNavigationOptions,
   typeof Navigator
 >(Navigator);
+
+export default BottomTabs;

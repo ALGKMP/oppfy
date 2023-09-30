@@ -1,14 +1,15 @@
-import { Tabs } from 'expo-router/tabs';
-export default function Footer() {
-  return (
-    <Tabs>
-      {/* <Tabs.Screen
-        name="following"
-      />
+import { View } from "tamagui";
+import { TopTabs } from "~/layouts";
 
-      <Tabs.Screen
-        name="for-you-page"
-      /> */}
-    </Tabs>
+const TopTabsLayout = () => {
+  return (
+    <View flex={1} backgroundColor="$background">
+      <TopTabs>
+        <TopTabs.Screen name="following" />
+
+        <TopTabs.Screen name="for-you-page" />
+      </TopTabs>
+    </View>
   );
-}
+};
+export default TopTabsLayout;

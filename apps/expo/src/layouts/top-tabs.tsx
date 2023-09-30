@@ -4,7 +4,9 @@ import type { MaterialTopTabNavigationOptions } from "@react-navigation/material
 
 const { Navigator } = createMaterialTopTabNavigator();
 
-export const MaterialTopTabs = withLayoutContext<
+const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationOptions,
   typeof Navigator
 >(Navigator);
+ 
+export default MaterialTopTabs;
