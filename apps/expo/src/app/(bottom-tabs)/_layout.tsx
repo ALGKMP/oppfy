@@ -10,7 +10,7 @@ const BottomTabsLayout = () => {
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            backgroundColor: "black",
+            backgroundColor: "$background",
             borderTopColor: "grey",
             height: 60,
             paddingTop: 10,
