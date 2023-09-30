@@ -32,7 +32,7 @@ const EmailInput = () => {
   });
 
   const onSubmit = (data: FormData) => {
-    router.push({ pathname: "/auth/password-input", params: data });
+    router.push({ pathname: "auth/password-input", params: data });
   };
 
   return (

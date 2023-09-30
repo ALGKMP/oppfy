@@ -1,11 +1,15 @@
 import React from "react";
-import { Stack, useRouter } from "expo-router";
+import { useNavigation, useRootNavigation, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
+import { Stack } from "~/layouts";
+
 const AuthLayout = () => {
-  const router = useRouter();
+  // const router = useRouter();
+  // const navigation = useNavigation();
+  const rootNavigation = useRootNavigation();
 
   return (
     <View flex={1} backgroundColor="$background">
@@ -18,7 +22,7 @@ const AuthLayout = () => {
               justifyContent="center"
               backgroundColor="$background"
             >
-              <ChevronLeft size={24} onPress={() => router.back()} />
+              <ChevronLeft size={24} onPress={() => rootNavigation?.goBack()} />
             </View>
           ),
         }}

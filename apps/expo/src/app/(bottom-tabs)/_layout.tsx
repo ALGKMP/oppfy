@@ -65,31 +65,25 @@ const BottomTabsLayout = () => {
         />
 
         <BottomTabs.Screen
-          name="settings"
-          options={{
-            headerShown: false,
-            // dont show on bottom tabs
-            tabBarShowLabel: false,
-            tabBarshown
-          }}
-        />
-
-        <BottomTabs.Screen
           name="profile"
+          // options={{
+          //   tabBarIcon: () => <User2 />,
+          //   headerRight: () => (
+          //     <View marginRight="$4">
+          //       <Pressable onPress={() => router.push("/profile/settings")}>
+          //         {({ pressed }) => (
+          //           <MoreHorizontal
+          //             size="$1"
+          //             style={{ opacity: pressed ? 0.5 : 1 }}
+          //           />
+          //         )}
+          //       </Pressable>
+          //     </View>
+          //   ),
+          // }}
           options={{
             tabBarIcon: () => <User2 />,
-            headerRight: () => (
-              <View marginRight="$4">
-                <Pressable onPress={() => router.push("/settings")}>
-                  {({ pressed }) => (
-                    <MoreHorizontal
-                      size="$1"
-                      style={{ opacity: pressed ? 0.5 : 1 }}
-                    />
-                  )}
-                </Pressable>
-              </View>
-            ),
+            headerShown: false,
           }}
         />
       </BottomTabs>

@@ -3,7 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 
 type ParamValue = string | boolean | null | undefined;
 
-export default function useParams<T extends Record<string, ParamValue>>() {
+const useParams = <T extends Record<string, ParamValue>>() => {
   const params = useLocalSearchParams();
   const parsedParams = useMemo(
     () =>
@@ -44,4 +44,6 @@ export default function useParams<T extends Record<string, ParamValue>>() {
   );
 
   return parsedParams;
-}
+};
+
+export default useParams;
