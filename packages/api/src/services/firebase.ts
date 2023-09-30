@@ -1,17 +1,10 @@
 import { credential } from "firebase-admin";
-import type {
-  ServiceAccount,
-} from "firebase-admin/app";
-import {
-  getApp,
-  getApps,
-  initializeApp,
-} from "firebase-admin/app"
-
+import type { ServiceAccount } from "firebase-admin/app";
+import { getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
 import key from "~/admin-service-account.json";
-      
+
 const FIREBASE_APP_NAME = "SERVER";
 
 // Initialize Firebase

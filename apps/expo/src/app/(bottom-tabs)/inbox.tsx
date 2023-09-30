@@ -1,12 +1,12 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from "react";
+import { Text, View } from "react-native";
 
 const Inbox = () => {
   return (
     <View>
       <Text>Inbox</Text>
     </View>
-  )
-}
+  );
+};
 
-export default Inbox
+export default Inbox;

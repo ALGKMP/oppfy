@@ -6,20 +6,21 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { TRPCError, initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 // changed to top level import
-import type {  CreateNextContextOptions } from "@trpc/server/adapters/next";
+import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import {
+  getApp,
+  getApps,
+  initializeApp,
+  ServiceAccount,
+} from "firebase-admin/app";
+import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { prisma } from "@acme/db";
-import {
-  ServiceAccount,
-  getApp,
-  getApps,
-  initializeApp,
-} from "firebase-admin/app";
-import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
+
 import { auth } from "./services/firebase";
 
 /**
@@ -48,7 +49,7 @@ interface CreateContextOptions {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-    prisma
+    prisma,
   };
 };
 

@@ -44,7 +44,7 @@ const config = {
       { checksVoidReturn: { attributes: false } },
     ],
     "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
-  },  
+  },
 
   ignorePatterns: [
     "**/.eslintrc.cjs",

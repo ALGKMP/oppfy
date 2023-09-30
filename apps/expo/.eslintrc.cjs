@@ -6,9 +6,9 @@ const config = {
     /* 
         Existing rules
     */
-    'react/jsx-curly-brace-presence': [
-      'error',
-      { props: 'never', children: 'never' },
+    "react/jsx-curly-brace-presence": [
+      "error",
+      { props: "never", children: "never" },
     ],
   },
 };

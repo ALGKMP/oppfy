@@ -2,7 +2,6 @@ import React, { useEffect, useState, type ReactNode } from "react";
 import { Text } from "react-native";
 import auth from "@react-native-firebase/auth";
 
-
 interface FirebaseLoadedProps {
   children: ReactNode;
 }

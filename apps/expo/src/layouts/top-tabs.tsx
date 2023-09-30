@@ -8,5 +8,5 @@ const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationOptions,
   typeof Navigator
 >(Navigator);
- 
+
 export default MaterialTopTabs;

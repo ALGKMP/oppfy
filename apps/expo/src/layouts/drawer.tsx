@@ -4,9 +4,8 @@ import type { DrawerNavigationOptions } from "@react-navigation/drawer";
 
 const { Navigator } = createDrawerNavigator();
 
-const Drawer = withLayoutContext<
-  DrawerNavigationOptions,
-  typeof Navigator
->(Navigator);
+const Drawer = withLayoutContext<DrawerNavigationOptions, typeof Navigator>(
+  Navigator,
+);
 
 export default Drawer;
