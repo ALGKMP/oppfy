@@ -1,15 +1,14 @@
-import { View, Text, Image, Separator, Button, XStack, YStack} from "tamagui"
-import PFP from "@assets/pfp.png"
+import PFP from "@assets/pfp.png";
+import { Button, Image, Separator, Text, View, XStack, YStack } from "tamagui";
 
 const Profile = () => {
-
-    const testUser = {
-        name: "John Doe",
-        bio: "It’s me Katerina I like to post on this app",
-        friends: 129,
-        followers: 3900,
-        following: 1050 
-    }
+  const testUser = {
+    name: "John Doe",
+    bio: "It’s me Katerina I like to post on this app",
+    friends: 129,
+    followers: 3900,
+    following: 1050,
+  };
 
     const stats = [
         {name: "Friends", quantity: testUser.friends},
@@ -40,9 +39,9 @@ const Profile = () => {
                         {/* Name */}
                         <Text fontWeight="bold">{testUser.name}</Text>
 
-                        {/* Bio */}
-                        <Text>{testUser.bio}</Text>
-                    </View>
+            {/* Bio */}
+            <Text>{testUser.bio}</Text>
+          </View>
 
                     {/* Buttons */}
                     <View flexDirection="row" justifyContent="space-between" marginTop={10}>
