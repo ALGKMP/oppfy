@@ -2,10 +2,13 @@ import React from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import auth from "@react-native-firebase/auth";
 import { Controller, useForm } from "react-hook-form";
 import { Button, H1, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
+import { api } from "~/utils/api";
+import { isFireBaseError } from "~/utils/firebase";
 import { UnderlineInput } from "~/components/Inputs";
 import useParams from "~/hooks/useParams";
 
@@ -29,13 +32,15 @@ const schemaValidation = z
 
 type FormData = z.infer<typeof schemaValidation>;
 
-const EmailInput = () => {
+const PasswordInput = () => {
   const router = useRouter();
   const signUpFlowParams = useParams<SignUpFlowParams>();
 
+  const storeAccountFirebase = api.auth.storeAccountFirebase.useMutation();
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -45,11 +50,30 @@ const EmailInput = () => {
     resolver: zodResolver(schemaValidation),
   });
 
-  const onSubmit = (data: FormData) => {
-    router.push({
-      pathname: "/auth/verify-email",
-      params: { ...data, ...signUpFlowParams },
-    });
+  const onSubmit = async (data: FormData) => {
+    try {
+      const authed = await auth().createUserWithEmailAndPassword(
+        signUpFlowParams.email,
+        data.password,
+      );
+      const uid = await authed.user.getIdToken();
+      storeAccountFirebase.mutate({
+        email: signUpFlowParams.email,
+        password: data.password,
+        firebaseUid: uid,
+      });
+      router.push({
+        pathname: "/auth/verify-email",
+        params: { ...data, ...signUpFlowParams },
+      });
+    } catch (error) {
+      if (isFireBaseError(error)) {
+        if (error.code === "auth/email-already-in-use") {
+          console.log("email already in use");
+          setError("confirmPassword", { message: "Email already in use" });
+        }
+      }
+    }
   };
 
   return (
@@ -138,10 +162,11 @@ const EmailInput = () => {
               height="$5"
               borderRadius="$8"
               backgroundColor="white"
+              color="black"
+              fontWeight="500"
+              fontSize={16}
             >
-              <Text color="black" fontWeight="500" fontSize={16}>
-                Next
-              </Text>
+              Next
             </Button>
           </View>
         </View>
@@ -150,4 +175,4 @@ const EmailInput = () => {
   );
 };
 
-export default EmailInput;
+export default PasswordInput;
