@@ -18,15 +18,15 @@ const Profile = () => {
 
   return (
     <View flex={1} backgroundColor="black">
-      <View alignItems="center" margin={14}>
+      <View alignItems="center" marginHorizontal={14}>
         {/* Stats */}
-        <YStack space={2} marginBottom={5}>
+        <YStack space={2} marginVertical={20}>
           <XStack
             space={2}
-            marginBottom={1}
+            marginBottom={0}
             flex={1}
             alignItems="center"
-            maxHeight={150}
+            maxHeight={100}
           >
             <Image
               source={PFP}
@@ -62,7 +62,7 @@ const Profile = () => {
           <View
             flexDirection="row"
             justifyContent="space-between"
-            marginTop={10}
+            marginVertical={5}
           >
             <Button
               height={35}
