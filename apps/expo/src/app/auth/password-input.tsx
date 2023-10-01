@@ -101,7 +101,7 @@ const PasswordInput = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <UnderlineInput
                     height={30}
-                    fontSize="$5"
+                    fontSize="$6"
                     underlineColor={errors.password ? "$red11" : "white"}
                     placeholder="Password"
                     placeholderTextColor={
