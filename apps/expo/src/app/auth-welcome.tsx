@@ -33,9 +33,6 @@ const AuthScreen = () => {
       >
         {showSignInOptions && (
           <View style={{ position: "absolute", top: 40, left: 16 }}>
-            {/* <Button onPress={() => setShowSignInOptions(false)}>
-              <Text color="white">{"< Back"}</Text>
-            </Button> */}
             <Pressable onPress={() => setShowSignInOptions(false)}>
               {({ pressed }) => (
                 <ChevronLeft size="$2" style={{ opacity: pressed ? 0.5 : 1 }} />
@@ -66,17 +63,28 @@ const AuthScreen = () => {
             <YStack space="$3">
               {/* Enclosed the buttons in a YStack for vertical spacing */}
               <Button
+                animation="100ms"
+                pressStyle={{
+                  scale: 0.95,
+                  backgroundColor: "white",
+                }}
                 backgroundColor="white"
                 padding="$2"
                 borderRadius={16}
                 onPress={() => router.push({ pathname: "auth/email-input" })}
               >
                 <Text color="black" fontWeight="$2">
-                  CREATE AN ACCOUNT
+                  CREATE ACCOUNT
                 </Text>
               </Button>
               <Button
-                backgroundColor="$backgroundTransparent"
+                animation="100ms"
+                pressStyle={{
+                  scale: 0.95,
+                  backgroundColor: "transparent",
+                  borderColor: "white",
+                }}
+                backgroundColor="transparent"
                 padding="$2"
                 borderRadius={16}
                 borderColor="white"
