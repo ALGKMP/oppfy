@@ -1,10 +1,15 @@
 import React from "react";
-import { useNavigation, useRootNavigation, useRouter } from "expo-router";
+import {
+  Stack,
+  useNavigation,
+  useRootNavigation,
+  useRouter,
+} from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
-import { Stack } from "~/layouts";
+// import { Stack } from "~/layouts";
 
 const AuthLayout = () => {
   // const router = useRouter();
