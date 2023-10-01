@@ -36,7 +36,7 @@ const PasswordInput = () => {
   const router = useRouter();
   const signUpFlowParams = useParams<SignUpFlowParams>();
 
-  const storeAccountFirebase = api.auth.storeAccountFirebase.useMutation();
+  const storeAccountFirebase = api.auth.createUser.useMutation();
 
   const {
     control,
@@ -53,20 +53,16 @@ const PasswordInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const authed = await auth().createUserWithEmailAndPassword(
+      const { user } = await auth().createUserWithEmailAndPassword(
         signUpFlowParams.email,
         data.password,
       );
 
-      // send email verification
-      await authed.user.sendEmailVerification();
-
-      const uid = authed.user.uid;
       await storeAccountFirebase.mutateAsync({
         email: signUpFlowParams.email,
-        firebaseUid: uid,
+        firebaseUid: user.uid,
       });
-      console.log("fronted");
+
       router.push({
         pathname: "/auth/verify-email",
         params: { ...data, ...signUpFlowParams },
@@ -74,7 +70,7 @@ const PasswordInput = () => {
     } catch (error) {
       if (isFireBaseError(error)) {
         if (error.code === "auth/email-already-in-use") {
-          console.log("email already in use");
+          console.error("email already in use");
           setError("confirmPassword", { message: "Email already in use" });
         }
       }
@@ -168,13 +164,13 @@ const PasswordInput = () => {
                 scale: 0.95,
                 backgroundColor: "white",
               }}
-              onPress={handleSubmit(onSubmit)}
               height="$5"
               borderRadius="$8"
               backgroundColor="white"
               color="black"
               fontWeight="500"
               fontSize={16}
+              onPress={handleSubmit(onSubmit)}
             >
               Next
             </Button>

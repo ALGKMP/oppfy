@@ -17,13 +17,16 @@ datasource db {
 // @see https://next-auth.js.org/schemas/models
 
 model User {
-    id            String    @id @unique
-    name          String?
-    email         String    @unique
-    emailVerified Boolean?
-    image         String?
-    gender        Gender?
-    dateOfBirth   DateTime?
+    id String @id @unique
+
+    email         String  @unique
+    emailVerified Boolean @default(false)
+
+    name        String?
+    image       String?
+    gender      Gender?
+    dateOfBirth DateTime?
+
     // createdPosts  Posts[]   @relation("createdPosts")
     // postsOf       Posts[]   @relation("postsOf")
 }
@@ -48,8 +51,8 @@ model VerificationToken {
 }
 
 enum Gender {
-  MALE
-  FEMALE
-  OTHER
-  PREFER_NOT_TO_SAY
+    MALE
+    FEMALE
+    OTHER
+    PREFER_NOT_TO_SAY
 }

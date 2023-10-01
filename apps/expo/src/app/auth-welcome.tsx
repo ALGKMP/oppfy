@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { ImageBackground, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
-import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { Button, Image, Text, View, YStack } from "tamagui";
+import { ChevronLeft } from "@tamagui/lucide-icons";
+import { Button, Text, View, YStack } from "tamagui";
 
 const AuthScreen = () => {
   const router = useRouter();

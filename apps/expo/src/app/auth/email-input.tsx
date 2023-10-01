@@ -43,19 +43,14 @@ const EmailInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const u = await emailInUse.mutateAsync(data.email);
+      // const u = await emailInUse.mutateAsync(data.email);
 
-      setTriggerShake(true);
-      if (errors) {
-        console.log("Error detected, triggering shake");
-        setTriggerShake(true);
-      }
+      // if (u) {
+      //   console.log("email already in use");
+      //   setError("email", { message: "Email already in use" });
+      //   return;
+      // }
 
-      if (u) {
-        console.log("email already in use");
-        setError("email", { message: "Email already in use" });
-        return;
-      }
       router.push({ params: data, pathname: "auth/password-input" });
     } catch (error) {
       if (isFireBaseError(error)) {
@@ -70,8 +65,7 @@ const EmailInput = () => {
   const onSubmitError = () => {
     console.log("Error detected, triggering shake");
     setTriggerShake(true);
-  }
-
+  };
 
   const handleShakeComplete = () => {
     setTriggerShake(false);

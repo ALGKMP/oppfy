@@ -1,29 +1,40 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
-  getSession: publicProcedure.query(({ ctx }) => {
-    return ctx.session;
-  }),
   emailInUse: publicProcedure
     .input(z.string().email())
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.prisma.user.findUnique({
+      const possibleUser = await ctx.prisma.user.findUnique({
         where: { email: input },
       });
-      return !!user;
+
+      return !!possibleUser;
     }),
-  storeAccountFirebase: publicProcedure
+  getUser: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.prisma.user.findUniqueOrThrow({
+        where: { id: ctx.session.uid },
+      });
+    } catch (_err) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+  }),
+  createUser: publicProcedure
     .input(
       z.object({
         email: z.string().email(),
-        firebaseUid: z.string(),
+        firebaseUid: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { email, firebaseUid } = input;
-      console.log(firebaseUid);
+
       try {
         await ctx.prisma.user.create({
           data: {
@@ -31,8 +42,11 @@ export const authRouter = createTRPCRouter({
             email: email,
           },
         });
-      } catch (err) {
-        console.log(err);
+      } catch (_err) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Unique user info already exists",
+        });
       }
     }),
 });
