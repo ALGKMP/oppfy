@@ -53,8 +53,11 @@ const EmailInput = () => {
       }
 
       router.push({ params: data, pathname: "auth/password-input" });
+    } 
+    catch (error) {
+      console.log("email already in use");
+      setError("email", { message: "Email already in use" });
     }
-
   };
 
   const onSubmitError = () => {
@@ -149,10 +152,14 @@ const EmailInput = () => {
               onPress={handleSubmit(onSubmit, onSubmitError)}
               height="$4"
               borderRadius="$8"
-              backgroundColor={isValid ? "white" : "gray"}  // Change background color based on validity
+              backgroundColor={isValid ? "white" : "gray"} // Change background color based on validity
               disabled={!isValid}
             >
-              <Text color={isValid ? "black" : "lightgray"} fontWeight="500" fontSize={16}>
+              <Text
+                color={isValid ? "black" : "lightgray"}
+                fontWeight="500"
+                fontSize={16}
+              >
                 Next
               </Text>
             </Button>
