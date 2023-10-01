@@ -63,7 +63,11 @@ const AuthScreen = () => {
                 backgroundColor="white"
                 padding="$2"
                 borderRadius={16}
-                onPress={() => setShowSignInOptions(true)}
+                onPress={() => 
+                  router.push({
+                    pathname: "/auth/email-input",
+                  })
+                }
               >
                 <Text color="black" fontWeight="$2">
                   CREATE AN ACCOUNT
