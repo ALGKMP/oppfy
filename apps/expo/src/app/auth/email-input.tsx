@@ -3,12 +3,11 @@ import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "@tamagui/lucide-icons";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, set, useForm } from "react-hook-form";
 import { Button, Checkbox, H1, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";
-import { isFireBaseError } from "~/utils/firebase";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 
@@ -54,14 +53,8 @@ const EmailInput = () => {
       }
 
       router.push({ params: data, pathname: "auth/password-input" });
-    } catch (error) {
-      if (isFireBaseError(error)) {
-        if (error.code === "auth/invalid-email") {
-          console.log("email already in use");
-          setError("email", { message: "Email already in use" });
-        }
-      }
     }
+
   };
 
   const onSubmitError = () => {
