@@ -111,7 +111,7 @@ const VerifyEmail = () => {
             scale: 0.95,
             backgroundColor: "white",
           }}
-          height="$5"
+          height="$4"
           borderRadius="$8"
           backgroundColor="white"
           color="black"
@@ -128,7 +128,7 @@ const VerifyEmail = () => {
             scale: 0.95,
             backgroundColor: "white",
           }}
-          height="$5"
+          height="$4"
           borderRadius="$8"
           color="black"
           fontWeight="500"
