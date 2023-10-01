@@ -53,6 +53,7 @@ const PasswordInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
+
       const { user } = await auth().createUserWithEmailAndPassword(
         signUpFlowParams.email,
         data.password,
