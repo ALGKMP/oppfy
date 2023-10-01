@@ -3,11 +3,11 @@ import { Button, Image, Separator, Text, View, XStack, YStack } from "tamagui";
 
 const Profile = () => {
   const testUser = {
-    name: "Katerina Tess", // Updated name
+    name: "Katerina Tess",
     bio: "It’s me Katerina I like to post on this app",
-    friends: 23, // Updated friends count
-    followers: 680, // Updated followers count
-    following: 49, // Updated following count
+    friends: 23,
+    followers: 680,
+    following: 49,
   };
 
   const stats = [
@@ -49,7 +49,6 @@ const Profile = () => {
         </XStack>
       </YStack>
       <Separator borderColor="white" marginTop="$5" marginBottom="$2" />
-      {/* Adjusted margin */}
     </View>
   );
 };
