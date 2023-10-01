@@ -39,7 +39,6 @@ const EmailInput = () => {
       marketing: false,
       resolver: zodResolver(schemaValidation),
     },
-    resolver: zodResolver(schemaValidation),
     mode: "onChange",
   });
 
