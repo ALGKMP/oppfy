@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
-import auth from "@react-native-firebase/auth";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import { Button, Checkbox, H1, Text, View, XStack, YStack } from "tamagui";
@@ -13,10 +12,14 @@ import { isFireBaseError } from "~/utils/firebase";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 
-// const schemaValidation = z.object({
-//   email: z.string().email({ message: "Invalid email" }),
-//   marketing: z.boolean(),
-// });
+type FormData = z.infer<typeof schemaValidation>;
+
+const schemaValidation = z.object({
+  email: z
+    .string()
+    .email({ message: "Invalid email" }),
+  marketing: z.boolean(),
+});
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
@@ -25,24 +28,7 @@ const EmailInput = () => {
 
   const emailInUse = api.auth.emailInUse.useMutation();
 
-  const emailNotInUse = async (email: string) => {
-    // Assuming the emailInUse mutation returns a boolean (true if email is in use)
-    const isEmailInUse = await emailInUse.mutateAsync(email);
-    return !isEmailInUse;
-  };
-
   
-  type FormData = z.infer<typeof schemaValidation>;
-
-  const schemaValidation = z.object({
-    email: z
-      .string()
-      .email({ message: "Invalid email" })
-      .refine((val) => emailNotInUse(val), {
-        message: "Email is already in use",
-      }),
-    marketing: z.boolean(),
-  });
 
   const [triggerShake, setTriggerShake] = useState(false);
 
@@ -55,20 +41,21 @@ const EmailInput = () => {
     defaultValues: {
       email: "",
       marketing: false,
+      resolver: zodResolver(schemaValidation),
     },
     resolver: zodResolver(schemaValidation),
   });
 
   const onSubmit = async (data: FormData) => {
     try {
-      // const u = await emailInUse.mutateAsync(data.email);
+      const u = await emailInUse.mutateAsync(data.email);
 
-      // // TODO: move this to an async validator
-      // if (u) {
-      //   console.log("email already in use");
-      //   setError("email", { message: "Email already in use" });
-      //   return;
-      // }
+      // TODO: move this to an async validator
+      if (u) {
+        console.log("email already in use");
+        setError("email", { message: "Email already in use" });
+        return;
+      }
 
       router.push({ params: data, pathname: "auth/password-input" });
     } catch (error) {
