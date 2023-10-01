@@ -17,14 +17,13 @@ datasource db {
 // @see https://next-auth.js.org/schemas/models
 
 model User {
-    id            String    @id
+    id            String    @id @unique
     name          String?
-    email         String?   @unique
-    password      String?
-    emailVerified DateTime?
+    email         String    @unique
+    emailVerified Boolean?
     image         String?
-    gender        String?
-    dateOfBirth    DateTime?
+    gender        Gender?
+    dateOfBirth   DateTime?
     // createdPosts  Posts[]   @relation("createdPosts")
     // postsOf       Posts[]   @relation("postsOf")
 }
@@ -46,4 +45,11 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
 }

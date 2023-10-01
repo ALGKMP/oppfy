@@ -10,18 +10,21 @@ export const authRouter = createTRPCRouter({
     .input(
       z.object({
         email: z.string().email(),
-        password: z.string().min(6),
         firebaseUid: z.string(),
       }),
     )
-    .mutation(({ ctx, input }) => {
-      const { email, password, firebaseUid } = input;
-      ctx.prisma.user.create({
-        data: {
-          id: firebaseUid,
-          email: email,
-          password: password,
-        },
-      });
+    .mutation(async ({ ctx, input }) => {
+      const { email, firebaseUid } = input;
+      console.log(firebaseUid);
+      try {
+        await ctx.prisma.user.create({
+          data: {
+            id: firebaseUid,
+            email: email,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      }
     }),
 });
