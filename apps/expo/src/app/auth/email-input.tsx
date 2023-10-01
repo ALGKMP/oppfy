@@ -15,9 +15,7 @@ import withShake from "~/components/withShake";
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  email: z
-    .string()
-    .email({ message: "Invalid email" }),
+  email: z.string().email({ message: "Invalid email" }),
   marketing: z.boolean(),
 });
 
@@ -28,15 +26,13 @@ const EmailInput = () => {
 
   const emailInUse = api.auth.emailInUse.useMutation();
 
-  
-
   const [triggerShake, setTriggerShake] = useState(false);
 
   const {
     control,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm({
     defaultValues: {
       email: "",
@@ -44,6 +40,7 @@ const EmailInput = () => {
       resolver: zodResolver(schemaValidation),
     },
     resolver: zodResolver(schemaValidation),
+    mode: "onChange",
   });
 
   const onSubmit = async (data: FormData) => {
@@ -160,9 +157,10 @@ const EmailInput = () => {
               onPress={handleSubmit(onSubmit, onSubmitError)}
               height="$4"
               borderRadius="$8"
-              backgroundColor="white"
+              backgroundColor={isValid ? "white" : "gray"}  // Change background color based on validity
+              disabled={!isValid}
             >
-              <Text color="black" fontWeight="500" fontSize={16}>
+              <Text color={isValid ? "black" : "lightgray"} fontWeight="500" fontSize={16}>
                 Next
               </Text>
             </Button>
