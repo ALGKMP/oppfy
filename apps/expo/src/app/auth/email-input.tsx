@@ -43,13 +43,14 @@ const EmailInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      // const u = await emailInUse.mutateAsync(data.email);
+      const u = await emailInUse.mutateAsync(data.email);
 
-      // if (u) {
-      //   console.log("email already in use");
-      //   setError("email", { message: "Email already in use" });
-      //   return;
-      // }
+      // TODO: move this to an async validator
+      if (u) {
+        console.log("email already in use");
+        setError("email", { message: "Email already in use" });
+        return;
+      }
 
       router.push({ params: data, pathname: "auth/password-input" });
     } catch (error) {

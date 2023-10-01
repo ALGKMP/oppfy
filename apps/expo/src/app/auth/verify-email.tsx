@@ -6,7 +6,8 @@ import { Button, H1, H5, Text, View, YStack } from "tamagui";
 
 import { api } from "~/utils/api";
 
-const RESEND_EMAIL_VERIFICATION_COOLDOWN = 60000; // 60 seconds
+const RESEND_EMAIL_VERIFICATION_COOLDOWN = 60000;
+const CHECK_EMAIL_VERIFICATION_INTERVAL = 1000;
 
 const VerifyEmail = () => {
   const { data } = api.auth.getUser.useQuery();
@@ -26,8 +27,6 @@ const VerifyEmail = () => {
     try {
       await currentUser.sendEmailVerification();
       setCooldownEnd(Date.now() + RESEND_EMAIL_VERIFICATION_COOLDOWN);
-
-      console.log("Email sent");
     } catch (err) {
       console.log("Error sending email verification", err);
     }
@@ -52,14 +51,13 @@ const VerifyEmail = () => {
       }
     };
 
-    updateCountdown();
     const countdownInterval = setInterval(updateCountdown, 1000);
+
+    updateCountdown();
     return () => clearInterval(countdownInterval);
   }, [cooldownEnd]);
 
   useEffect(() => {
-    void sendVerificationEmail();
-
     const checkEmailVerification = async () => {
       const currentUser = auth().currentUser;
 
@@ -71,7 +69,6 @@ const VerifyEmail = () => {
         await currentUser.reload();
 
         if (currentUser.emailVerified) {
-          console.log("Email Verified!");
           router.replace("/auth/change-this");
         }
       } catch (err) {
@@ -83,7 +80,9 @@ const VerifyEmail = () => {
       void checkEmailVerification();
     }, 1000);
 
+    void sendVerificationEmail();
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
