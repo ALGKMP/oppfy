@@ -1,5 +1,6 @@
 import React from "react";
 import Constants from "expo-constants";
+import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
@@ -52,6 +53,17 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
+          async headers() {
+            const authToken = await auth().currentUser?.getIdToken();
+
+            if (!authToken) {
+              return {};
+            }
+
+            return {
+              authorization: `Bearer ${authToken}`,
+            };
+          },
         }),
       ],
     }),
