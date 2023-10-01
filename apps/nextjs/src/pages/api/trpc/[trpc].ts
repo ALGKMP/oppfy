@@ -8,7 +8,7 @@ export default createNextApiHandler({
   createContext: createTRPCContext,
 });
 
-// If you need to enable cors, you can do so like this:
+// // If you need to enable cors, you can do so like this:
 // const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 //   // Enable cors
 //   await cors(req, res);

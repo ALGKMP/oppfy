@@ -18,9 +18,9 @@ export const authRouter = createTRPCRouter({
       const { email, password, firebaseUid } = input;
       ctx.prisma.user.create({
         data: {
-          firebaseUid,
-          email,
-          password,
+          id: firebaseUid,
+          email: email,
+          password: password,
         },
       });
     }),

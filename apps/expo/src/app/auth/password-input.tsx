@@ -62,11 +62,11 @@ const PasswordInput = () => {
       await authed.user.sendEmailVerification();
 
       const uid = await authed.user.getIdToken();
-      // storeAccountFirebase.mutate({
-      //   email: signUpFlowParams.email,
-      //   password: data.password,
-      //   firebaseUid: uid,
-      // });
+      storeAccountFirebase.mutate({
+        email: signUpFlowParams.email,
+        password: data.password,
+        firebaseUid: uid,
+      });
       router.push({
         pathname: "/auth/verify-email",
         params: { ...data, ...signUpFlowParams },
