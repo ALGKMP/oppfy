@@ -2,14 +2,12 @@ import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
-import auth from "@react-native-firebase/auth";
 import { Check } from "@tamagui/lucide-icons";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, set, useForm } from "react-hook-form";
 import { Button, Checkbox, H1, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";
-import { isFireBaseError } from "~/utils/firebase";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 
@@ -56,29 +54,20 @@ const EmailInput = () => {
       email: "",
       marketing: false,
     },
-    resolver: zodResolver(schemaValidation),
+    // resolver: zodResolver(schemaValidation),
   });
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      // const u = await emailInUse.mutateAsync(data.email);
-
-      // // TODO: move this to an async validator
-      // if (u) {
-      //   console.log("email already in use");
-      //   setError("email", { message: "Email already in use" });
-      //   return;
-      // }
-
-      router.push({ params: data, pathname: "auth/password-input" });
-    } catch (error) {
-      if (isFireBaseError(error)) {
-        if (error.code === "auth/invalid-email") {
-          console.log("email already in use");
-          setError("email", { message: "Email already in use" });
-        }
-      }
+  const onSubmit = (data: FormData) => {
+    const u = schemaValidation.parse(data);
+    if (!u){
+      setError("email", {
+        message: "Email is already in use",
+      });
     }
+    else {
+      router.push({ params: data, pathname: "auth/password-input" });
+    }
+
   };
 
   const onSubmitError = () => {
