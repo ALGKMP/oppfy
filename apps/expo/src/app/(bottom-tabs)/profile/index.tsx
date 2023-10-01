@@ -3,90 +3,53 @@ import { Button, Image, Separator, Text, View, XStack, YStack } from "tamagui";
 
 const Profile = () => {
   const testUser = {
-    name: "John Doe",
+    name: "Katerina Tess", // Updated name
     bio: "It’s me Katerina I like to post on this app",
-    friends: 129,
-    followers: 3900,
-    following: 1050,
+    friends: 23, // Updated friends count
+    followers: 680, // Updated followers count
+    following: 49, // Updated following count
   };
 
   const stats = [
     { name: "Friends", quantity: testUser.friends },
-    { name: "Follwers", quantity: testUser.followers },
+    { name: "Followers", quantity: testUser.followers },
     { name: "Following", quantity: testUser.following },
   ];
 
   return (
-    <View flex={1} backgroundColor="black">
-      <View alignItems="center" marginHorizontal={14}>
-        {/* Stats */}
-        <YStack space={2} marginVertical={20}>
-          <XStack
-            space={2}
-            marginBottom={0}
-            flex={1}
-            alignItems="center"
-            maxHeight={100}
-          >
-            <Image
-              source={PFP}
-              borderRadius={50}
-              marginBottom={10}
-              marginRight={20}
-            />
-            <View
-              flexDirection="row"
-              justifyContent="space-between"
-              maxWidth="100%"
-            >
-              {stats.map((stat, index) => {
-                return (
-                  <View key={index} marginRight={10} alignItems="center">
-                    <Text>{stat.name}</Text>
-                    <Text fontWeight="bold">{stat.quantity}</Text>
-                  </View>
-                );
-              })}
-            </View>
+    <View flex={1} backgroundColor="$background" paddingHorizontal="$5">
+      <YStack space="$3">
+        <XStack justifyContent="space-between">
+          <Image source={PFP} width={70} height={70} borderRadius={35} />
+
+          <XStack alignItems="center" space="$4">
+            {stats.map((stat, index) => (
+              <View key={index} alignItems="center">
+                <Text fontWeight="bold" fontSize="$5">
+                  {stat.quantity}
+                </Text>
+                <Text>{stat.name}</Text>
+              </View>
+            ))}
           </XStack>
+        </XStack>
 
-          <View flexDirection="column" marginBottom={5}>
-            {/* Name */}
-            <Text fontWeight="bold">{testUser.name}</Text>
+        <View flexDirection="column" marginVertical={10}>
+          <Text fontWeight="bold">{testUser.name}</Text>
+          <Text>{testUser.bio}</Text>
+        </View>
 
-            {/* Bio */}
-            <Text>{testUser.bio}</Text>
-          </View>
-
-          {/* Buttons */}
-          <View
-            flexDirection="row"
-            justifyContent="space-between"
-            marginVertical={5}
-          >
-            <Button
-              height={35}
-              backgroundColor="white"
-              borderRadius={10}
-              width="48%"
-              color="black"
-            >
-              Edit Profile
-            </Button>
-
-            <Button
-              height={35}
-              backgroundColor="white"
-              borderRadius={10}
-              width="48%"
-              color="black"
-            >
-              Share Profile
-            </Button>
-          </View>
-        </YStack>
-        <Separator alignSelf="stretch" borderColor="white" />
-      </View>
+        <XStack space="$3">
+          <Button flex={1} height="$2.5" backgroundColor="white" color="black">
+            Edit Profile
+          </Button>
+          <Button flex={1} height="$2.5" backgroundColor="white" color="black">
+            Share Profile
+          </Button>
+        </XStack>
+      </YStack>
+      <Separator borderColor="white" marginTop="$5" marginBottom="$2" />
+      {/* Adjusted margin */}
     </View>
   );
 };

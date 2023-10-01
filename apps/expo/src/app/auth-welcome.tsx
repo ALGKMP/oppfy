@@ -124,7 +124,6 @@ const AuthScreen = () => {
           )}
 
           <Text fontWeight="400" alignSelf="center" marginTop="$2">
-            {" "}
             {/* Added marginTop for spacing */}
             Trouble signing in?
           </Text>
