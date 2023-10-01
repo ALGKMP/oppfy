@@ -36,9 +36,8 @@ const EmailInput = () => {
     defaultValues: {
       email: "",
       marketing: false,
-      resolver: zodResolver(schemaValidation),
     },
-    mode: "onChange",
+    resolver: zodResolver(schemaValidation),
   });
 
   const onSubmit = async (data: FormData) => {
@@ -52,10 +51,9 @@ const EmailInput = () => {
       }
 
       router.push({ params: data, pathname: "auth/password-input" });
-    } 
-    catch (error) {
-      console.log("invalid email");
-      setError("email", { message: "invalid email" });
+    } catch (error) {
+      console.log("email already in use");
+      setError("email", { message: "Email already in use" });
     }
   };
 
