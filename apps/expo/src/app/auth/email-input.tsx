@@ -114,7 +114,7 @@ const EmailInput = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ShakingUnderlineInput
                     height={30}
-                    fontSize="$5"
+                    fontSize="$6"
                     underlineColor={errors.email ? "$red11" : "white"}
                     placeholder="Email address"
                     placeholderTextColor={errors.email ? "$red11" : "$gray10"}
@@ -171,7 +171,7 @@ const EmailInput = () => {
                 backgroundColor: "white",
               }}
               onPress={handleSubmit(onSubmit, onSubmitError)}
-              height="$5"
+              height="$4"
               borderRadius="$8"
               backgroundColor="white"
             >
