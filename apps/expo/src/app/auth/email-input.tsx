@@ -45,7 +45,6 @@ const EmailInput = () => {
     try {
       const u = await emailInUse.mutateAsync(data.email);
 
-      // TODO: move this to an async validator
       if (u) {
         console.log("email already in use");
         setError("email", { message: "Email already in use" });
@@ -55,8 +54,8 @@ const EmailInput = () => {
       router.push({ params: data, pathname: "auth/password-input" });
     } 
     catch (error) {
-      console.log("email already in use");
-      setError("email", { message: "Email already in use" });
+      console.log("invalid email");
+      setError("email", { message: "invalid email" });
     }
   };
 
