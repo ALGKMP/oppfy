@@ -44,7 +44,6 @@ const EmailInput = () => {
     try {
       const u = await emailInUse.mutateAsync(data.email);
 
-      // TODO: move this to an async validator
       if (u) {
         console.log("email already in use");
         setError("email", { message: "Email already in use" });
