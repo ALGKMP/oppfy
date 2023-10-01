@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,20 +11,22 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { isFireBaseError } from "~/utils/firebase";
 import { UnderlineInput } from "~/components/Inputs";
+import withShake from "~/components/withShake";
 
 const schemaValidation = z.object({
   email: z.string().email({ message: "Invalid email" }),
   marketing: z.boolean(),
 });
 
-
-
 type FormData = z.infer<typeof schemaValidation>;
+
+const ShakingUnderlineInput = withShake(UnderlineInput);
 
 const EmailInput = () => {
   const router = useRouter();
 
   const emailInUse = api.auth.emailInUse.useMutation();
+  const [triggerShake, setTriggerShake] = useState(false);
 
   const {
     control,
@@ -41,14 +43,20 @@ const EmailInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const u = await emailInUse.mutateAsync(data.email); 
+      const u = await emailInUse.mutateAsync(data.email);
+
+      setTriggerShake(true);
+      if (errors) {
+        console.log("Error detected, triggering shake");
+        setTriggerShake(true);
+      }
+
       if (u) {
-        console.log('email already in use');
+        console.log("email already in use");
         setError("email", { message: "Email already in use" });
         return;
       }
-      router.push({params: data, pathname: 'auth/password-input'}) 
-
+      router.push({ params: data, pathname: "auth/password-input" });
     } catch (error) {
       if (isFireBaseError(error)) {
         if (error.code === "auth/invalid-email") {
@@ -58,6 +66,17 @@ const EmailInput = () => {
       }
     }
   };
+
+  const onSubmitError = () => {
+    console.log("Error detected, triggering shake");
+    setTriggerShake(true);
+  }
+
+
+  const handleShakeComplete = () => {
+    setTriggerShake(false);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -80,7 +99,7 @@ const EmailInput = () => {
                 control={control}
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <UnderlineInput
+                  <ShakingUnderlineInput
                     height={30}
                     fontSize="$5"
                     underlineColor={errors.email ? "$red11" : "white"}
@@ -93,6 +112,8 @@ const EmailInput = () => {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     value={value}
+                    triggerShake={triggerShake}
+                    onShakeComplete={handleShakeComplete}
                   />
                 )}
               />
@@ -136,7 +157,7 @@ const EmailInput = () => {
                 scale: 0.95,
                 backgroundColor: "white",
               }}
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSubmit(onSubmit, onSubmitError)}
               height="$5"
               borderRadius="$8"
               backgroundColor="white"

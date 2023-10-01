@@ -37,6 +37,7 @@ const defineConfig = (): ExpoConfig => ({
   },
   plugins: [
     "./expo-plugins/with-modify-gradle.js",
+    "react-native-email-link",
     "@react-native-firebase/app",
     "@react-native-firebase/perf",
     "@react-native-firebase/crashlytics",
