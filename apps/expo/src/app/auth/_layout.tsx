@@ -1,15 +1,10 @@
 import React from "react";
-import {
-  Stack,
-  useNavigation,
-  useRootNavigation,
-  useRouter,
-} from "expo-router";
+import { useNavigation, useRootNavigation, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
-// import { Stack } from "~/layouts";
+import { Stack } from "~/layouts";
 
 const AuthLayout = () => {
   // const router = useRouter();
@@ -34,16 +29,12 @@ const AuthLayout = () => {
       >
         <Stack.Screen
           name="email-input"
-          options={{ title: "", animation: "fade_from_bottom" }}
+          options={{ title: "", animation: "flip" }}
         />
 
         <Stack.Screen
           name="password-input"
-          options={{ title: "", animation: "fade" }}
-        />
-        <Stack.Screen
-          name="sign-in"
-          options={{ title: "", animation: "fade" }}
+          options={{ title: "", animation: "flip" }}
         />
       </Stack>
       <StatusBar />
