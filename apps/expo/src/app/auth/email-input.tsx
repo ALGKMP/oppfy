@@ -11,10 +11,12 @@ import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 
-// const schemaValidation = z.object({
-//   email: z.string().email({ message: "Invalid email" }),
-//   marketing: z.boolean(),
-// });
+type FormData = z.infer<typeof schemaValidation>;
+
+const schemaValidation = z.object({
+  email: z.string().email({ message: "Invalid email" }),
+  marketing: z.boolean(),
+});
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
@@ -23,48 +25,34 @@ const EmailInput = () => {
 
   const emailInUse = api.auth.emailInUse.useMutation();
 
-  const emailNotInUse = async (email: string) => {
-    // Assuming the emailInUse mutation returns a boolean (true if email is in use)
-    const isEmailInUse = await emailInUse.mutateAsync(email);
-    return !isEmailInUse;
-  };
-
-  
-  type FormData = z.infer<typeof schemaValidation>;
-
-  const schemaValidation = z.object({
-    email: z
-      .string()
-      .email({ message: "Invalid email" })
-      .refine((val) => emailNotInUse(val), {
-        message: "Email is already in use",
-      }),
-    marketing: z.boolean(),
-  });
-
   const [triggerShake, setTriggerShake] = useState(false);
 
   const {
     control,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm({
     defaultValues: {
       email: "",
       marketing: false,
+      resolver: zodResolver(schemaValidation),
     },
-    // resolver: zodResolver(schemaValidation),
+    resolver: zodResolver(schemaValidation),
+    mode: "onChange",
   });
 
-  const onSubmit = (data: FormData) => {
-    const u = schemaValidation.parse(data);
-    if (!u){
-      setError("email", {
-        message: "Email is already in use",
-      });
-    }
-    else {
+  const onSubmit = async (data: FormData) => {
+    try {
+      const u = await emailInUse.mutateAsync(data.email);
+
+      // TODO: move this to an async validator
+      if (u) {
+        console.log("email already in use");
+        setError("email", { message: "Email already in use" });
+        return;
+      }
+
       router.push({ params: data, pathname: "auth/password-input" });
     }
 
@@ -162,9 +150,10 @@ const EmailInput = () => {
               onPress={handleSubmit(onSubmit, onSubmitError)}
               height="$4"
               borderRadius="$8"
-              backgroundColor="white"
+              backgroundColor={isValid ? "white" : "gray"}  // Change background color based on validity
+              disabled={!isValid}
             >
-              <Text color="black" fontWeight="500" fontSize={16}>
+              <Text color={isValid ? "black" : "lightgray"} fontWeight="500" fontSize={16}>
                 Next
               </Text>
             </Button>
