@@ -19,23 +19,22 @@ datasource db {
 model User {
     id String @id @unique
 
-    email         String  @unique
-    emailVerified Boolean @default(false)
+    email         String    @unique
+    emailVerified Boolean?   @default(false)
+    name          String?
+    image         String?
+    gender        Gender?
+    dateOfBirth   DateTime?
 
-    name        String?
-    image       String?
-    gender      Gender?
-    dateOfBirth DateTime?
-
-    // createdPosts  Posts[]   @relation("createdPosts")
-    // postsOf       Posts[]   @relation("postsOf")
+    createdPosts Posts[] @relation("createdPosts")
+    postsOf      Posts[] @relation("postsOf")
 }
 
 model Posts {
     id         String   @id @default(cuid())
-    // author     User     @relation(fields: [authorId], references: [id], "createdPosts")
+    author     User     @relation(fields: [authorId], references: [id], "createdPosts")
     authorId   String
-    // postedOf   User     @relation(fields: [postedOfId], references: [id], "postsOf")
+    postedOf   User     @relation(fields: [postedOfId], references: [id], "postsOf")
     postedOfId String
     caption    String
     url        String
