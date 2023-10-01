@@ -20,7 +20,7 @@ const ProfileLayout = () => {
             backgroundColor: getTokens().color.gray1Dark.val,
           },
           headerLeft: () => (
-            <ChevronLeft size={24} onPress={() => rootNavigation?.goBack()} />
+            <ChevronLeft size="$2" onPress={() => rootNavigation?.goBack()} />
           ),
         }}
       >

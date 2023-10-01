@@ -27,7 +27,7 @@ const AuthLayout = () => {
               justifyContent="center"
               backgroundColor="$background"
             >
-              <ChevronLeft size={24} onPress={() => rootNavigation?.goBack()} />
+              <ChevronLeft size="$2" onPress={() => rootNavigation?.goBack()} />
             </View>
           ),
         }}

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { ImageBackground } from "react-native";
+import { ImageBackground, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
+import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Button, Image, Text, View, YStack } from "tamagui";
 
 const AuthScreen = () => {
@@ -31,12 +32,16 @@ const AuthScreen = () => {
         style={{ flex: 1, justifyContent: "flex-end" }}
       >
         {showSignInOptions && (
-          <Button
-            onPress={() => setShowSignInOptions(false)}
-            style={{ alignSelf: "flex-start", margin: 16 }}
-          >
-            <Text color="white">{"< Back"}</Text>
-          </Button>
+          <View style={{ position: "absolute", top: 40, left: 16 }}>
+            {/* <Button onPress={() => setShowSignInOptions(false)}>
+              <Text color="white">{"< Back"}</Text>
+            </Button> */}
+            <Pressable onPress={() => setShowSignInOptions(false)}>
+              {({ pressed }) => (
+                <ChevronLeft size="$2" style={{ opacity: pressed ? 0.5 : 1 }} />
+              )}
+            </Pressable>
+          </View>
         )}
 
         <YStack marginHorizontal="$4" padding="$2" space="$4" marginBottom="$6">
@@ -58,18 +63,18 @@ const AuthScreen = () => {
           </Text>
 
           {!showSignInOptions ? (
-            <>
+            <YStack space="$3">
+              {/* Enclosed the buttons in a YStack for vertical spacing */}
               <Button
                 backgroundColor="white"
                 padding="$2"
                 borderRadius={16}
-                onPress={() => setShowSignInOptions(true)}
+                onPress={() => router.push("/auth/email-input")}
               >
                 <Text color="black" fontWeight="$2">
                   CREATE AN ACCOUNT
                 </Text>
               </Button>
-
               <Button
                 backgroundColor="$backgroundTransparent"
                 padding="$2"
@@ -82,10 +87,11 @@ const AuthScreen = () => {
                   SIGN IN
                 </Text>
               </Button>
-            </>
+            </YStack>
           ) : (
-            providers.map((provider) => {
-              return (
+            <YStack space="$3">
+              {/* Enclosed the sign-in provider buttons in a YStack for vertical spacing */}
+              {providers.map((provider) => (
                 <Button
                   key={provider.name}
                   backgroundColor="$backgroundTransparent"
@@ -99,11 +105,13 @@ const AuthScreen = () => {
                     SIGN IN WITH {provider.name.toUpperCase()}
                   </Text>
                 </Button>
-              );
-            })
+              ))}
+            </YStack>
           )}
 
-          <Text fontWeight="400" alignSelf="center">
+          <Text fontWeight="400" alignSelf="center" marginTop="$2">
+            {" "}
+            {/* Added marginTop for spacing */}
             Trouble signing in?
           </Text>
         </YStack>
