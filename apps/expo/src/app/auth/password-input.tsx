@@ -61,12 +61,12 @@ const PasswordInput = () => {
       // send email verification
       await authed.user.sendEmailVerification();
 
-      const uid = await authed.user.uid;
+      const uid = authed.user.uid;
       await storeAccountFirebase.mutateAsync({
         email: signUpFlowParams.email,
         firebaseUid: uid,
       });
-      console.log("fronted")
+      console.log("fronted");
       router.push({
         pathname: "/auth/verify-email",
         params: { ...data, ...signUpFlowParams },
@@ -163,6 +163,11 @@ const PasswordInput = () => {
 
           <View alignSelf="stretch" marginTop="auto">
             <Button
+              animation="100ms"
+              pressStyle={{
+                scale: 0.95,
+                backgroundColor: "white",
+              }}
               onPress={handleSubmit(onSubmit)}
               height="$5"
               borderRadius="$8"

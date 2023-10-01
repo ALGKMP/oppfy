@@ -102,6 +102,12 @@ const AuthScreen = () => {
               {providers.map((provider) => (
                 <Button
                   key={provider.name}
+                  animation="100ms"
+                  pressStyle={{
+                    scale: 0.95,
+                    backgroundColor: "transparent",
+                    borderColor: "white",
+                  }}
                   backgroundColor="$backgroundTransparent"
                   padding="$2"
                   borderRadius={16}

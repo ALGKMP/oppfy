@@ -6,6 +6,14 @@ export const authRouter = createTRPCRouter({
   getSession: publicProcedure.query(({ ctx }) => {
     return ctx.session;
   }),
+  emailInUse: publicProcedure
+    .input(z.string().email())
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.prisma.user.findUnique({
+        where: { email: input },
+      });
+      return !!user;
+    }),
   storeAccountFirebase: publicProcedure
     .input(
       z.object({

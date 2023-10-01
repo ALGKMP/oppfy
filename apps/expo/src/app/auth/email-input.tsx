@@ -2,25 +2,29 @@ import React from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import auth from "@react-native-firebase/auth";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import { Button, Checkbox, H1, Text, View, XStack, YStack } from "tamagui";
-import auth from "@react-native-firebase/auth";
 import * as z from "zod";
 
-import { UnderlineInput } from "~/components/Inputs";
+import { api } from "~/utils/api";
 import { isFireBaseError } from "~/utils/firebase";
-
+import { UnderlineInput } from "~/components/Inputs";
 
 const schemaValidation = z.object({
   email: z.string().email({ message: "Invalid email" }),
   marketing: z.boolean(),
 });
 
+
+
 type FormData = z.infer<typeof schemaValidation>;
 
 const EmailInput = () => {
   const router = useRouter();
+
+  const emailInUse = api.auth.emailInUse.useMutation();
 
   const {
     control,
@@ -37,31 +41,23 @@ const EmailInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      auth().fetchSignInMethodsForEmail(data.email).then((signInMethods) => {
-        if (signInMethods.length === 0) {
-            // Email is not registered
-            console.log("email not in use")
-            router.push({ pathname: "auth/password-input", params: data });
-        } else {
-            // Email is registered
-            console.log("email already in use")
-        }
-    }).catch((error) => {
-        console.error("Error checking email:", error);
-    });
-    
+      const u = await emailInUse.mutateAsync(data.email); 
+      if (u) {
+        console.log('email already in use');
+        setError("email", { message: "Email already in use" });
+        return;
+      }
+      router.push({params: data, pathname: 'auth/password-input'}) 
 
-
-    } 
-    catch(error) {
+    } catch (error) {
       if (isFireBaseError(error)) {
         if (error.code === "auth/invalid-email") {
           console.log("email already in use");
           setError("email", { message: "Email already in use" });
+        }
       }
     }
   };
-}
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -135,6 +131,11 @@ const EmailInput = () => {
 
           <View alignSelf="stretch" marginTop="auto">
             <Button
+              animation="100ms"
+              pressStyle={{
+                scale: 0.95,
+                backgroundColor: "white",
+              }}
               onPress={handleSubmit(onSubmit)}
               height="$5"
               borderRadius="$8"
