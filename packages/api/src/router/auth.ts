@@ -1,5 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+  ListBucketsCommand,
+} from "@aws-sdk/client-s3";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -61,5 +64,8 @@ export const authRouter = createTRPCRouter({
         message: "User not found",
       });
     }
+  }),
+  test: publicProcedure.query(async ({ ctx }) => {
+    console.log(ctx.r2.send(new ListBucketsCommand('')))
   }),
 });
