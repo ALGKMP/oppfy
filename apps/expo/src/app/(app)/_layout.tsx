@@ -1,5 +1,5 @@
 import { Pressable } from "react-native";
-import { Redirect, useRouter } from "expo-router";
+import { Redirect, Slot, useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import { getTokens } from "@tamagui/core";
 import {
@@ -26,7 +26,7 @@ const AppLayout = () => {
     return <Redirect href="/" />;
   }
 
-  return <Stack />;
+  return <Slot />;
 };
 
 export default AppLayout;

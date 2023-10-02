@@ -10,9 +10,6 @@ import tamaguiConfig from "~/../tamagui.config";
 import { Stack } from "~/layouts";
 import SessionProvider from "../contexts/SessionsContext";
 
-// TODO: handle auth flow states before initial app render
-// 1. signed in -> redirect to feed
-// 2. signed out -> redirect to auth
 const RootLayout = () => {
   return (
     <TRPCProvider>
