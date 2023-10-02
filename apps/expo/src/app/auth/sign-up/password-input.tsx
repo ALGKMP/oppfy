@@ -65,7 +65,7 @@ const PasswordInput = () => {
       });
 
       router.push({
-        pathname: "/auth/verify-email",
+        pathname: "/auth/sign-up/verify-email",
         params: { ...data, ...signUpFlowParams },
       });
     } catch (error) {

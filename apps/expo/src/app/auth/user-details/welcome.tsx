@@ -15,7 +15,7 @@ const Welcome = () => {
   };
 
   const onSubmit = () => {
-    router.push("/auth/name-input");
+    router.push("/auth/sign-up/name-input");
   };
 
   return (

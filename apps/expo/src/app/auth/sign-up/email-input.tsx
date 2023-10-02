@@ -51,7 +51,7 @@ const EmailInput = () => {
         return;
       }
 
-      router.push({ params: data, pathname: "auth/password-input" });
+      router.push({ params: data, pathname: "auth/sign-up/password-input" });
     } catch (error) {
       console.log("email already in use");
       setError("email", { message: "Email already in use" });
