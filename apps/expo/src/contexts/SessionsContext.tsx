@@ -10,8 +10,8 @@ interface SessionProviderProps {
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
 }
 

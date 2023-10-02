@@ -47,6 +47,7 @@ const EmailInput = () => {
       if (u) {
         console.log("email already in use");
         setError("email", { message: "Email already in use" });
+        setTriggerShake(true);
         return;
       }
 
@@ -89,8 +90,9 @@ const EmailInput = () => {
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ShakingUnderlineInput
-                    height={30}
-                    fontSize="$6"
+                    height={40}
+                    fontSize="$5"
+                    underlineWidth={1}
                     underlineColor={errors.email ? "$red11" : "white"}
                     placeholder="Email address"
                     placeholderTextColor={errors.email ? "$red11" : "$gray10"}
