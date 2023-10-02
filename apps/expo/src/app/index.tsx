@@ -1,6 +1,8 @@
 import React from "react";
-import { Redirect } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import { TamaguiProvider } from "tamagui";
+
+import { auth } from "@acme/api/src/services/firebase";
 
 import { FirebaseLoaded, SignedIn, SignedOut } from "~/components/Firebase";
 

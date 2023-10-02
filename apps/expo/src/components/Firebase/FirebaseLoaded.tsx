@@ -19,7 +19,7 @@ const FirebaseLoaded = ({ children }: FirebaseLoadedProps) => {
   }, []);
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return null;
   }
 
   return <>{children}</>;

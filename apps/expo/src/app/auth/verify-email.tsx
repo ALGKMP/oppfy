@@ -69,7 +69,7 @@ const VerifyEmail = () => {
         await currentUser.reload();
 
         if (currentUser.emailVerified) {
-          router.replace("/auth/change-this");
+          router.replace("/auth/welcome");
         }
       } catch (err) {
         console.log("Error checking email verification", err);

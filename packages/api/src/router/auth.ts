@@ -49,4 +49,17 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
+  deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
+      await ctx.auth.deleteUser(ctx.session.uid);
+      await ctx.prisma.user.delete({
+        where: { id: ctx.session.uid },
+      });
+    } catch (_err) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+  }),
 });

@@ -1,5 +1,6 @@
 import { Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import auth from "@react-native-firebase/auth";
 import { getTokens } from "@tamagui/core";
 import {
   Camera,

@@ -37,4 +37,6 @@ const app = getApps().some(({ name }) => name === FIREBASE_APP_NAME)
 
 const auth = getAuth(app);
 
+
+
 export { auth };
