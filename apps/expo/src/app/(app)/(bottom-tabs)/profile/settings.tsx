@@ -2,16 +2,16 @@ import React from "react";
 import { Redirect, useRouter } from "expo-router";
 import { Button, Text, View } from "tamagui";
 
-import useLogout from "~/hooks/useLogout";
+import { useSession } from "~/contexts/SessionsContext";
 
 const Settings = () => {
   const router = useRouter();
-  const logout = useLogout();
+  const { signOut } = useSession();
 
   return (
     <View flex={1} backgroundColor="black">
       {/* <Text>Settings</Text> */}
-      <Button onPress={logout}>Logout</Button>
+      <Button onPress={signOut}>Logout</Button>
     </View>
   );
 };

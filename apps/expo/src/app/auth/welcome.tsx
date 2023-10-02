@@ -11,7 +11,7 @@ const Welcome = () => {
 
   const onCancel = async () => {
     await deleteUser.mutateAsync();
-    router.replace("/auth-welcome");
+    router.replace("/");
   };
 
   const onSubmit = () => {
