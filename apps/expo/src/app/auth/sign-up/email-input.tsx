@@ -40,6 +40,10 @@ const EmailInput = () => {
     resolver: zodResolver(schemaValidation),
   });
 
+  // todo: instead of checking if email is already in use
+  // check if the email is verified
+  // if verified: show email already in use error
+  // else: move to email verification screen
   const onSubmit = async (data: FormData) => {
     try {
       const u = await emailInUse.mutateAsync(data.email);
