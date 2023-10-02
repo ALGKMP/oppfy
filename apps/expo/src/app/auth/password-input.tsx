@@ -51,9 +51,9 @@ const PasswordInput = () => {
     resolver: zodResolver(schemaValidation),
   });
 
+  // TODO: Auth functionality needs to be moved to the session context
   const onSubmit = async (data: FormData) => {
     try {
-
       const { user } = await auth().createUserWithEmailAndPassword(
         signUpFlowParams.email,
         data.password,
