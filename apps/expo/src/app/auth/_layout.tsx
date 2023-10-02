@@ -25,12 +25,12 @@ const AuthLayout = () => {
         }}
       >
         <Stack.Screen
-          name="email-input"
+          name="sign-up/email-input"
           options={{ title: "", animation: "fade" }}
         />
 
         <Stack.Screen
-          name="password-input"
+          name="sign-up/password-input"
           options={{ title: "", animation: "fade" }}
         />
       </Stack>

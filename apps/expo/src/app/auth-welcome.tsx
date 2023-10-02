@@ -71,7 +71,7 @@ const AuthWelcome = () => {
                 backgroundColor="white"
                 padding="$2"
                 borderRadius={16}
-                onPress={() => router.push({ pathname: "auth/email-input" })}
+                onPress={() => router.push({ pathname: "auth/sign-up/email-input" })}
               >
                 <Text color="black" fontWeight="$2">
                   CREATE ACCOUNT

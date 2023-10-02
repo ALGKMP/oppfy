@@ -11,15 +11,17 @@ import { api } from "~/utils/api";
 const Index = () => {
   const user = auth().currentUser;
 
-  // Auth flow states
-  switch (user) {
-    case user && user.emailVerified:
-      return <Redirect href="(app)/(bottom-tabs)/profile" />;
-    case user && !user.emailVerified:
-      return <Redirect href="auth/verify-email" />;
-    default:
-      return <Redirect href="auth-welcome" />;
-  }
+  // // Auth flow states
+  // switch (user) {
+  //   case user && user.emailVerified:
+  //     return <Redirect href="(app)/(bottom-tabs)/profile" />;
+  //   case user && !user.emailVerified:
+  //     return <Redirect href="auth/verify-email" />;
+  //   default:
+  //     return <Redirect href="auth-welcome" />;
+  // }
+
+  return <Redirect href="auth-welcome" />;
 };
 
 export default Index;
