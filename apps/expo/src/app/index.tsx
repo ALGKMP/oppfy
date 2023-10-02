@@ -5,7 +5,8 @@ import Tinder from "@assets/tinder.png";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Button, Text, View, YStack } from "tamagui";
 
-const AuthScreen = () => {
+// TODO: figure out how to change this file name
+const Index = () => {
   const router = useRouter();
 
   const [showSignInOptions, setShowSignInOptions] = useState(false);
@@ -133,4 +134,4 @@ const AuthScreen = () => {
   );
 };
 
-export default AuthScreen;
+export default Index;

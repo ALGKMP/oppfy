@@ -1,14 +1,18 @@
 import React from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Slot } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { TamaguiProvider, View } from "tamagui";
+import auth from "@react-native-firebase/auth";
+import { TamaguiProvider, Text, View } from "tamagui";
 
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "~/../tamagui.config";
 import { Stack } from "~/layouts";
-import SessionProvider, { useSession } from "../contexts/SessionsContext";
+import SessionProvider from "../contexts/SessionsContext";
 
+// TODO: handle auth flow states before initial app render
+// 1. signed in -> redirect to feed
+// 2. signed out -> redirect to auth
 const RootLayout = () => {
   return (
     <TRPCProvider>
@@ -31,7 +35,6 @@ const RootLayout = () => {
               </Stack>
               <StatusBar />
             </View>
-            {/* <Slot/> */}
           </SafeAreaProvider>
         </TamaguiProvider>
       </SessionProvider>
