@@ -10,7 +10,6 @@ const Settings = () => {
 
   return (
     <View flex={1} backgroundColor="black">
-      {/* <Text>Settings</Text> */}
       <Button onPress={signOut}>Logout</Button>
     </View>
   );
