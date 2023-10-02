@@ -1,8 +1,22 @@
+import { S3Client } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
+
 
 export * from "@prisma/client";
 
 const globalForPrisma = globalThis as { prisma?: PrismaClient };
+const globalForR2 = globalThis as { r2?: S3Client };
+
+export const r2 =
+  globalForR2.r2 ||
+  new S3Client({
+    region: "auto",
+    endpoint: `https://${process.env.S3_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+    },
+  });
 
 export const prisma =
   globalForPrisma.prisma ||
