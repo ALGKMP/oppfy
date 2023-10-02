@@ -13,7 +13,7 @@ import {
 import { Button, Text, View, XStack } from "tamagui";
 
 import useSession from "~/hooks/useSession";
-import { BottomTabs, Stack } from "~/layouts";
+import { Stack } from "~/layouts";
 
 const AppLayout = () => {
   const { isLoading, user } = useSession();
