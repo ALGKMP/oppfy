@@ -35,6 +35,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const signIn = async (email: string, password: string) => {
     try {
       await auth().signInWithEmailAndPassword(email, password);
+      router.replace("profile");
     } catch (error) {
       console.error(error);
     }

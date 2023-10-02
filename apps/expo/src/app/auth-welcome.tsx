@@ -13,7 +13,7 @@ const AuthWelcome = () => {
   const ProviderRoutes = {
     apple: "profile",
     google: "auth/google",
-    email: "auth/email",
+    email: "auth/sign-in",
   };
 
   const providers = Object.entries(ProviderRoutes).map(([name, route]) => ({
@@ -71,7 +71,9 @@ const AuthWelcome = () => {
                 backgroundColor="white"
                 padding="$2"
                 borderRadius={16}
-                onPress={() => router.push({ pathname: "auth/sign-up/email-input" })}
+                onPress={() =>
+                  router.push({ pathname: "auth/sign-up/email-input" })
+                }
               >
                 <Text color="black" fontWeight="$2">
                   CREATE ACCOUNT
