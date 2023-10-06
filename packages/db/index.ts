@@ -10,7 +10,7 @@ export const r2 =
   globalForR2.r2 ||
   new S3Client({
     region: "auto",
-    endpoint: `https://${process.env.S3_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    endpoint: process.env.S3_ENDPOINT!,
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY_ID!,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,

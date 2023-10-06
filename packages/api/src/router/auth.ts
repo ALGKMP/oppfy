@@ -2,9 +2,11 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   ListBucketsCommand,
+  ListObjectsV2Command 
 } from "@aws-sdk/client-s3";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { r2 } from "@acme/db";
 
 export const authRouter = createTRPCRouter({
   emailInUse: publicProcedure
@@ -66,6 +68,9 @@ export const authRouter = createTRPCRouter({
     }
   }),
   test: publicProcedure.query(async ({ ctx }) => {
-    console.log(ctx.r2.send(new ListBucketsCommand('')))
+    const command = new ListObjectsV2Command({Bucket:"oppfy"});
+    const response = await ctx.r2.send(command);    
+    console.log(response.Contents)
+    return response.Contents;
   }),
 });

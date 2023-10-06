@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ImageBackground, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Button, Text, View, YStack } from "tamagui";
+import { api } from "~/utils/api";
 
 const AuthWelcome = () => {
   const router = useRouter();
@@ -15,6 +16,8 @@ const AuthWelcome = () => {
     google: "auth/google",
     email: "auth/sign-in",
   };
+
+  // api.auth.test.useQuery();
 
   const providers = Object.entries(ProviderRoutes).map(([name, route]) => ({
     name,

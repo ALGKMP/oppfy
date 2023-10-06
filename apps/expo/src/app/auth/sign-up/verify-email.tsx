@@ -7,7 +7,6 @@ import { Button, H1, H5, Text, View, YStack } from "tamagui";
 import { api } from "~/utils/api";
 
 const RESEND_EMAIL_VERIFICATION_COOLDOWN = 60000;
-const CHECK_EMAIL_VERIFICATION_INTERVAL = 1000;
 
 const VerifyEmail = () => {
   const { data } = api.auth.getUser.useQuery();
