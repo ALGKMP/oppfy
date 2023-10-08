@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, forwardRef } from 'react';
 import { Animated } from 'react-native';
 
 interface WithShakeProps {
@@ -9,7 +9,8 @@ interface WithShakeProps {
 const withShake = <P extends object>(
   WrappedComponent: React.ComponentType<P>
 ): React.FunctionComponent<P & WithShakeProps> => {
-  return ({ triggerShake, onShakeComplete, ...props }) => {
+  const WrappedWithShake = forwardRef((props: P & WithShakeProps, ref: React.Ref<any>) => {
+    const { triggerShake, onShakeComplete, ...restProps } = props;
     const shakeAnim = useRef(new Animated.Value(0)).current;
 
     const shake = () => {
@@ -21,7 +22,7 @@ const withShake = <P extends object>(
         Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true })
       ]).start(() => {
         if (onShakeComplete) {
-          onShakeComplete();  // Inform the parent component that the shake is done
+          onShakeComplete();
         }
       });
     };
@@ -34,10 +35,18 @@ const withShake = <P extends object>(
 
     return (
       <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
-        <WrappedComponent {...(props as P)} />
+        <WrappedComponent ref={ref} {...(restProps as P)} />
       </Animated.View>
     );
-  };
+  });
+
+  WrappedWithShake.displayName = `WithShake(${getDisplayName(WrappedComponent)})`;
+
+  return WrappedWithShake;
 };
+
+function getDisplayName(WrappedComponent: React.ComponentType<any>): string {
+  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+}
 
 export default withShake;

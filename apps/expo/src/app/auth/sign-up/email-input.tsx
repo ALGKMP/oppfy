@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
+import { TextInput } from "react-native-gesture-handler";
 
 type FormData = z.infer<typeof schemaValidation>;
 
@@ -35,7 +36,15 @@ const EmailInput = () => {
 
   const emailInUse = api.auth.emailInUse.useMutation();
 
-  const [triggerShake, setTriggerShake] = useState(false);
+  const [triggerShake, setTriggerShake] = useState<boolean>(false);
+
+  const emailInputRef = useRef<TextInput>(null); 
+
+  // useEffect(() => {
+  //   if (emailInputRef.current) {
+  //     emailInputRef.current.focus(); 
+  //   }
+  // }, []);
 
   const {
     control,
@@ -110,6 +119,7 @@ const EmailInput = () => {
                 <ShakingUnderlineInput
                   height={40}
                   // fontSize="$5"
+                 ref={emailInputRef}
                   underlineWidth={1}
                   underlineColor={errors.email ? "$red11" : "white"}
                   placeholder="Email address"

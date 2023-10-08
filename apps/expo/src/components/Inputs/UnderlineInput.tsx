@@ -1,4 +1,5 @@
 import React from "react";
+import { TextInput } from "react-native";
 import { Input } from "tamagui";
 import type { InputProps, SizeTokens } from "tamagui";
 
@@ -42,14 +43,11 @@ interface UnderlineInputProps extends Omit<InputProps, OmittedProps> {
   children?: React.ReactNode;
 }
 
-const UnderlineInput = ({
-  underlineColor = "black",
-  underlineWidth = 2,
-  children,
-  ...props
-}: UnderlineInputProps) => {
+const UnderlineInput = React.forwardRef<TextInput, UnderlineInputProps>(
+  ({ underlineColor = "black", underlineWidth = 2, children, ...props }, ref) => {
   return (
     <Input
+      ref={ref}
       padding={0}
       borderTopWidth={0}
       borderLeftWidth={0}
@@ -65,6 +63,8 @@ const UnderlineInput = ({
       {children}
     </Input>
   );
-};
+});
+
+UnderlineInput.displayName = "UnderlineInput"; // Useful for debugging
 
 export default UnderlineInput;
