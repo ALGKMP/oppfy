@@ -64,7 +64,6 @@ const SignIn = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
-      <SafeAreaView style={{ flex: 1 }}>
         <View
           flex={1}
           backgroundColor="$background"
@@ -161,7 +160,6 @@ const SignIn = () => {
             </Button>
           </View>
         </View>
-      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 };
