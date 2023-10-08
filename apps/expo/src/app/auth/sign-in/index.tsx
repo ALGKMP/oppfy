@@ -11,7 +11,7 @@ import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 import { useSession } from "~/contexts/SessionsContext";
 
-import * as Device from 'expo-device';
+// import * as Device from 'expo-device';
 
 
 type FormData = z.infer<typeof schemaValidation>;
@@ -64,7 +64,7 @@ const SignIn = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Device.modelName === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>

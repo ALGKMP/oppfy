@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Constants from "expo-constants";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,10 +27,9 @@ const getBaseUrl = () => {
    * **NOTE**: This is only for development. In production, you'll want to set the
    * baseUrl to your production API URL.
    */
-  const debuggerHost =
-    Constants.manifest?.debuggerHost ??
-    Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const debuggerHost = Constants.expoConfig?.hostUri;
   const localhost = debuggerHost?.split(":")[0];
+
   if (!localhost) {
     // return "https://your-production-url.com";
     throw new Error(
@@ -46,8 +45,8 @@ const getBaseUrl = () => {
  */
 
 export function TRPCProvider(props: { children: React.ReactNode }) {
-  const [queryClient] = React.useState(() => new QueryClient());
-  const [trpcClient] = React.useState(() =>
+  const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() =>
     api.createClient({
       transformer: superjson,
       links: [

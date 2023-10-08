@@ -6,7 +6,7 @@ import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
 import { Button, Checkbox, H1, H2, H5, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
-import * as Device from 'expo-device';
+// import * as Device from 'expo-device';
 
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
@@ -74,7 +74,7 @@ const EmailInput = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Device.modelName === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>

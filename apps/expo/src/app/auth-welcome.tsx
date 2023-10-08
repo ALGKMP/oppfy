@@ -5,7 +5,7 @@ import Tinder from "@assets/tinder.png";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Button, Text, View, YStack } from "tamagui";
 import { api } from "~/utils/api";
-import * as Device from 'expo-device';
+// import * as Device from 'expo-device';
 
 
 const AuthWelcome = () => {
