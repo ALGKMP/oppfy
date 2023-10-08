@@ -6,6 +6,8 @@ import auth from "@react-native-firebase/auth";
 import { Controller, useForm } from "react-hook-form";
 import { Button, H1, Text, View, YStack } from "tamagui";
 import * as z from "zod";
+import * as Device from 'expo-device';
+
 
 import { api } from "~/utils/api";
 import { isFireBaseError } from "~/utils/firebase";
@@ -80,7 +82,7 @@ const PasswordInput = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Device.modelName === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
       <SafeAreaView style={{ flex: 1 }}>
