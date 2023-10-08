@@ -11,9 +11,6 @@ import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 import { useSession } from "~/contexts/SessionsContext";
 
-// import * as Device from 'expo-device';
-
-
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({

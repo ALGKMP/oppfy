@@ -6,11 +6,11 @@ import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
 import { Button, Checkbox, H1, H2, H5, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
-// import * as Device from 'expo-device';
 
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
+import auth from '@react-native-firebase/auth';
 
 type FormData = z.infer<typeof schemaValidation>;
 
