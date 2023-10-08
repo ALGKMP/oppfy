@@ -35,12 +35,21 @@ const defineConfig = (): ExpoConfig => ({
       projectId: "68175593-c314-48a6-8892-7afeeb66ab9f",
     },
   },
+  
   plugins: [
     "./expo-plugins/with-modify-gradle.js",
     "react-native-email-link",
     "@react-native-firebase/app",
     "@react-native-firebase/perf",
     "@react-native-firebase/crashlytics",
+    [
+      'expo-build-properties',
+      {
+        "ios": {
+          "useFrameworks": "static"
+        }
+      },
+    ],
   ],
 });
 

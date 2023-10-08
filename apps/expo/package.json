@@ -4,7 +4,7 @@
   "main": "index.tsx",
   "scripts": {
     "clean": "git clean -xdf .expo .turbo node_modules",
-    "dev": "expo start --android",
+    "dev": "expo start --ios",
     "dev:android": "expo start --android",
     "dev:ios": "expo start --ios",
     "lint": "eslint .",
@@ -30,6 +30,7 @@
     "@trpc/react-query": "^10.34.0",
     "@trpc/server": "^10.34.0",
     "expo": "^48.0.19",
+    "expo-build-properties": "~0.6.0",
     "expo-constants": "~14.2.1",
     "expo-dev-client": "~2.2.1",
     "expo-linking": "~4.0.1",
