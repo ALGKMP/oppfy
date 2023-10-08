@@ -53,6 +53,7 @@ importers:
       expo-build-properties: ~0.6.0
       expo-constants: ~14.2.1
       expo-dev-client: ~2.2.1
+      expo-font: ^11.6.0
       expo-linking: ~4.0.1
       expo-router: ^1.5.3
       expo-splash-screen: ~0.18.2
@@ -99,6 +100,7 @@ importers:
       expo-build-properties: 0.6.0_expo@48.0.20
       expo-constants: 14.2.1_expo@48.0.20
       expo-dev-client: 2.2.1_expo@48.0.20
+      expo-font: 11.6.0_expo@48.0.20
       expo-linking: 4.0.1_expo@48.0.20
       expo-router: 1.5.3_5z6pceb6t5cgz6lidqvjjpvphu
       expo-splash-screen: 0.18.2_expo@48.0.20
@@ -7891,6 +7893,15 @@ packages:
 
   /expo-font/11.1.1_expo@48.0.20:
     resolution: {integrity: sha512-X+aICqYY69hiiDDtcNrjq8KutHrH2TrHuMqk0Rfq0P7hF6hMd+YefwLBNkvIrqrgmTAuqiLjMUwj2rHLqmgluw==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 48.0.20_@babel+core@7.23.0
+      fontfaceobserver: 2.3.0
+    dev: false
+
+  /expo-font/11.6.0_expo@48.0.20:
+    resolution: {integrity: sha512-ekfU0MN7vzJNGwQCJhxnhF2M9Fq/RtVF5xSQpr8+f4ISPimmKfEcArMHKCl4oG3saFVjSRX7fLbo38WOv3z5Mw==}
     peerDependencies:
       expo: '*'
     dependencies:

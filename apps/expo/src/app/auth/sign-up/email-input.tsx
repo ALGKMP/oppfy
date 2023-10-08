@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
-import { Button, Checkbox, H1, Text, View, XStack, YStack } from "tamagui";
+import { Button, Checkbox, H1, H2, H5, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";
@@ -84,9 +84,9 @@ const EmailInput = () => {
           justifyContent="space-between"
         >
           <YStack space>
-            <H1 fontFamily="$silkscreen" fontWeight="700" letterSpacing="$4">
+            <H2 fontFamily="$heading" fontWeight="700" letterSpacing="$5" lineHeight="$5">
               Lets start with your email
-            </H1>
+            </H2>
 
             <YStack space="$3">
               <Controller
@@ -95,7 +95,7 @@ const EmailInput = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ShakingUnderlineInput
                     height={40}
-                    fontSize="$5"
+                    // fontSize="$5"
                     underlineWidth={1}
                     underlineColor={errors.email ? "$red11" : "white"}
                     placeholder="Email address"

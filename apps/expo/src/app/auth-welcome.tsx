@@ -78,7 +78,10 @@ const AuthWelcome = () => {
                   router.push({ pathname: "auth/sign-up/email-input" })
                 }
               >
-                <Text color="black" fontWeight="$2">
+                <Text color="black" 
+                
+                // fontWeight="$2"
+                >
                   CREATE ACCOUNT
                 </Text>
               </Button>
@@ -96,7 +99,9 @@ const AuthWelcome = () => {
                 borderWidth={1}
                 onPress={() => setShowSignInOptions(true)}
               >
-                <Text color="white" fontWeight="$2">
+                <Text color="white" 
+                // fontWeight="$2"
+                >
                   SIGN IN
                 </Text>
               </Button>
@@ -120,7 +125,9 @@ const AuthWelcome = () => {
                   borderWidth={1}
                   onPress={() => router.replace(provider.route)}
                 >
-                  <Text color="white" fontWeight="$2">
+                  <Text color="white" 
+                  // fontWeight="$2"
+                  >
                     SIGN IN WITH {provider.name.toUpperCase()}
                   </Text>
                 </Button>

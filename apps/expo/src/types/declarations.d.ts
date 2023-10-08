@@ -22,3 +22,13 @@ declare module "*.svg" {
   const value: import("react-native").ImageSourcePropType;
   export default value;
 }
+
+declare module "*.otf" {
+  const value: import("expo-font").FontResource;
+  export default value;
+}
+
+declare module "*.ttf" {
+  const value: import("expo-font").FontResource;
+  export default value;
+}
