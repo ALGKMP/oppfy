@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
 import {
@@ -21,7 +22,6 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import useParams from "~/hooks/useParams";
 
 interface SignUpFlowParams {
@@ -46,7 +46,8 @@ const PhoneNumberOTPInput = () => {
 
   const phoneNumberOTPInputRef = useRef<TextInput>(null);
 
-  const [confirm, setConfirm] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
+  const [confirm, setConfirm] =
+    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
 
   const {
     control,
@@ -55,17 +56,20 @@ const PhoneNumberOTPInput = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      phoneNumber: "",
+      phoneNumberOTP: "",
     },
     resolver: zodResolver(schemaValidation),
   });
 
   useEffect(() => {
     const signInWithPhoneNumber = async () => {
-      const confirmation = await auth().signInWithPhoneNumber(signUpFlowParams.phoneNumber);
+      const confirmation = await auth().signInWithPhoneNumber(
+        `+${signUpFlowParams.phoneNumber}`,
+      );
       setConfirm(confirmation);
-    }
+    };
 
+    console.log("PHONE NUMBER: " + signUpFlowParams.phoneNumber);
     void signInWithPhoneNumber();
 
     if (phoneNumberOTPInputRef.current) {
@@ -75,12 +79,11 @@ const PhoneNumberOTPInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("PHONE NUMBER OTP: " + data.phoneNumberOTP);
-
+      await confirm?.confirm(data.phoneNumberOTP);
       router.push({ pathname: "auth/sign-up/email-input" });
-    } catch (error) {
-      console.error("Something went wrong");
-      setError("phoneNumber", { message: "Something went wrong" });
+    } catch (_err) {
+      console.log("Invalid code");
+      setError("phoneNumberOTP", { message: "Invalid code" });
     }
   };
 
@@ -117,22 +120,22 @@ const PhoneNumberOTPInput = () => {
           <YStack space="$3">
             <Controller
               control={control}
-              name="phoneNumber"
+              name="phoneNumberOTP"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ShakingUnderlineInput
                   height={40}
                   // fontSize="$5"
                   ref={phoneNumberOTPInputRef}
                   underlineWidth={1}
-                  underlineColor={errors.phoneNumber ? "$red11" : "white"}
-                  placeholder="Phone number"
+                  underlineColor={errors.phoneNumberOTP ? "$red11" : "white"}
+                  placeholder="OTP Code"
                   placeholderTextColor={
-                    errors.phoneNumber ? "$red11" : "$gray10"
+                    errors.phoneNumberOTP ? "$red11" : "$gray10"
                   }
                   focusStyle={{
-                    borderBottomColor: errors.phoneNumber ? "$red11" : "white",
+                    borderBottomColor: errors.phoneNumberOTP ? "$red11" : "white",
                   }}
-                  color={errors.phoneNumber ? "$red11" : "white"}
+                  color={errors.phoneNumberOTP ? "$red11" : "white"}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -141,9 +144,9 @@ const PhoneNumberOTPInput = () => {
                 />
               )}
             />
-            {errors.phoneNumber && (
+            {errors.phoneNumberOTP && (
               <Text fontSize="$2" color="$red11">
-                {errors.phoneNumber.message}
+                {errors.phoneNumberOTP.message}
               </Text>
             )}
           </YStack>

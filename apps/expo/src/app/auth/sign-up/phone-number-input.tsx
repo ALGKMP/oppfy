@@ -70,8 +70,6 @@ const PhoneNumberInput = () => {
         return;
       }
 
-      console.log("PHONE NUMBER: " + data.phoneNumber);
-
       router.push({ params: data, pathname: "auth/sign-up/phone-number-otp-input" });
     } catch (error) {
       console.error("Something went wrong");

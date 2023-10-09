@@ -21,6 +21,7 @@ import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 import { TextInput } from "react-native-gesture-handler";
+import auth from '@react-native-firebase/auth';
 
 type FormData = z.infer<typeof schemaValidation>;
 
@@ -65,19 +66,22 @@ const EmailInput = () => {
   // else: move to email verification screen
   const onSubmit = async (data: FormData) => {
     try {
-      const u = await emailInUse.mutateAsync(data.email);
+      const emailTaken = await emailInUse.mutateAsync(data.email);
 
-      if (u) {
+      console.log("EMAIL TAKEN: " + emailTaken)
+
+      if (emailTaken) {
         console.log("email already in use");
         setError("email", { message: "Email already in use" });
         setTriggerShake(true);
         return;
       }
 
+      await auth().currentUser?.updateEmail(data.email);
       router.push({ params: data, pathname: "auth/sign-up/password-input" });
-    } catch (error) {
-      console.log("email already in use");
-      setError("email", { message: "Email already in use" });
+    } catch (err) {
+      console.error("Error: " + err);
+      setError("email", { message: "something went wrong" });
     }
   };
 

@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import Tinder from "@assets/tinder.png";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Button, Text, View, YStack } from "tamagui";
+
 import { api } from "~/utils/api";
 
 const AuthWelcome = () => {
@@ -27,7 +28,7 @@ const AuthWelcome = () => {
   return (
     <View flex={1} backgroundColor="$background">
       <ImageBackground
-        // source={Tinder}
+        source={Tinder}
         resizeMode="contain"
         imageStyle={{
           margin: 100,
@@ -78,9 +79,10 @@ const AuthWelcome = () => {
                   router.push({ pathname: "auth/sign-up/phone-number-input" })
                 }
               >
-                <Text color="black" 
-                
-                // fontWeight="$2"
+                <Text
+                  color="black"
+
+                  // fontWeight="$2"
                 >
                   CREATE ACCOUNT
                 </Text>
@@ -99,8 +101,9 @@ const AuthWelcome = () => {
                 borderWidth={1}
                 onPress={() => setShowSignInOptions(true)}
               >
-                <Text color="white" 
-                // fontWeight="$2"
+                <Text
+                  color="white"
+                  // fontWeight="$2"
                 >
                   SIGN IN
                 </Text>
@@ -125,8 +128,9 @@ const AuthWelcome = () => {
                   borderWidth={1}
                   onPress={() => router.replace(provider.route)}
                 >
-                  <Text color="white" 
-                  // fontWeight="$2"
+                  <Text
+                    color="white"
+                    // fontWeight="$2"
                   >
                     SIGN IN WITH {provider.name.toUpperCase()}
                   </Text>

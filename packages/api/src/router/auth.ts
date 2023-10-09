@@ -15,8 +15,6 @@ export const authRouter = createTRPCRouter({
         await ctx.auth.getUserByEmail(input);
       } catch (err) {
         if (!isFireBaseError(err)) {
-          console.error(err);
-
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Unknown error",
