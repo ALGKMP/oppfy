@@ -6,7 +6,7 @@ export * from "@prisma/client";
 const globalForPrisma = globalThis as { prisma?: PrismaClient };
 const globalForR2 = globalThis as { r2?: S3Client };
 
-export const r2 =
+export const s3Client =
   globalForR2.r2 ||
   new S3Client({
     region: "auto",

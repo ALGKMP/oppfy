@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Button, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
+import * as Device from 'expo-device';
+
 
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
@@ -61,7 +63,7 @@ const SignIn = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Device.deviceName === "ios" ? "padding" : undefined}
       style={{ flex: 1 }}
     >
         <View
