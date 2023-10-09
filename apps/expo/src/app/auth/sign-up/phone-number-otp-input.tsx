@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
 import {
@@ -20,32 +22,32 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
-import { TextInput } from "react-native-gesture-handler";
-import auth from '@react-native-firebase/auth';
+import useParams from "~/hooks/useParams";
+
+interface SignUpFlowParams {
+  phoneNumber: string;
+  [Key: string]: string;
+}
 
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  email: z.string().email({ message: "Invalid email" }),
-  marketing: z.boolean(),
+  phoneNumberOTP: z.string().length(6, { message: "Invalid OTP" }),
 });
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
-const EmailInput = () => {
+const PhoneNumberOTPInput = () => {
   const router = useRouter();
 
-  const emailInUse = api.auth.emailInUse.useMutation();
+  const signUpFlowParams = useParams<SignUpFlowParams>();
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const emailInputRef = useRef<TextInput>(null); 
+  const phoneNumberOTPInputRef = useRef<TextInput>(null);
 
-  // useEffect(() => {
-  //   if (emailInputRef.current) {
-  //     emailInputRef.current.focus(); 
-  //   }
-  // }, []);
+  const [confirm, setConfirm] =
+    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
 
   const {
     control,
@@ -54,34 +56,34 @@ const EmailInput = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      email: "",
-      marketing: false,
+      phoneNumberOTP: "",
     },
     resolver: zodResolver(schemaValidation),
   });
 
-  // todo: instead of checking if email is already in use
-  // check if the email is verified
-  // if verified: show email already in use error
-  // else: move to email verification screen
+  useEffect(() => {
+    const signInWithPhoneNumber = async () => {
+      const confirmation = await auth().signInWithPhoneNumber(
+        `+${signUpFlowParams.phoneNumber}`,
+      );
+      setConfirm(confirmation);
+    };
+
+    console.log("PHONE NUMBER: " + signUpFlowParams.phoneNumber);
+    void signInWithPhoneNumber();
+
+    if (phoneNumberOTPInputRef.current) {
+      phoneNumberOTPInputRef.current.focus();
+    }
+  }, [signUpFlowParams.phoneNumber]);
+
   const onSubmit = async (data: FormData) => {
     try {
-      const emailTaken = await emailInUse.mutateAsync(data.email);
-
-      console.log("EMAIL TAKEN: " + emailTaken)
-
-      if (emailTaken) {
-        console.log("email already in use");
-        setError("email", { message: "Email already in use" });
-        setTriggerShake(true);
-        return;
-      }
-
-      await auth().currentUser?.updateEmail(data.email);
-      router.push({ params: data, pathname: "auth/sign-up/password-input" });
-    } catch (err) {
-      console.error("Error: " + err);
-      setError("email", { message: "something went wrong" });
+      await confirm?.confirm(data.phoneNumberOTP);
+      router.push({ pathname: "auth/sign-up/email-input" });
+    } catch (_err) {
+      console.log("Invalid code");
+      setError("phoneNumberOTP", { message: "Invalid code" });
     }
   };
 
@@ -112,26 +114,28 @@ const EmailInput = () => {
             letterSpacing="$5"
             lineHeight="$5"
           >
-            Lets start with your email
+            Lets start with your number
           </H2>
 
           <YStack space="$3">
             <Controller
               control={control}
-              name="email"
+              name="phoneNumberOTP"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ShakingUnderlineInput
                   height={40}
                   // fontSize="$5"
-                 ref={emailInputRef}
+                  ref={phoneNumberOTPInputRef}
                   underlineWidth={1}
-                  underlineColor={errors.email ? "$red11" : "white"}
-                  placeholder="Email address"
-                  placeholderTextColor={errors.email ? "$red11" : "$gray10"}
+                  underlineColor={errors.phoneNumberOTP ? "$red11" : "white"}
+                  placeholder="OTP Code"
+                  placeholderTextColor={
+                    errors.phoneNumberOTP ? "$red11" : "$gray10"
+                  }
                   focusStyle={{
-                    borderBottomColor: errors.email ? "$red11" : "white",
+                    borderBottomColor: errors.phoneNumberOTP ? "$red11" : "white",
                   }}
-                  color={errors.email ? "$red11" : "white"}
+                  color={errors.phoneNumberOTP ? "$red11" : "white"}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -140,36 +144,11 @@ const EmailInput = () => {
                 />
               )}
             />
-            {errors.email && (
+            {errors.phoneNumberOTP && (
               <Text fontSize="$2" color="$red11">
-                {errors.email.message}
+                {errors.phoneNumberOTP.message}
               </Text>
             )}
-
-            <XStack alignItems="center" space="$2">
-              <Controller
-                control={control}
-                name="marketing"
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    size="$4"
-                    checked={value}
-                    onPress={() => {
-                      onChange(!value);
-                    }}
-                  >
-                    <Checkbox.Indicator>
-                      <Check />
-                    </Checkbox.Indicator>
-                  </Checkbox>
-                )}
-              />
-
-              <Text fontSize="$2">
-                Receive marketing communications from{" "}
-                <Text fontWeight="700">OPPFY</Text>
-              </Text>
-            </XStack>
           </YStack>
         </YStack>
 
@@ -200,4 +179,4 @@ const EmailInput = () => {
   );
 };
 
-export default EmailInput;
+export default PhoneNumberOTPInput;

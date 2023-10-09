@@ -43,7 +43,7 @@ interface UnderlineInputProps extends Omit<InputProps, OmittedProps> {
   children?: React.ReactNode;
 }
 
-const UnderlineInput = React.forwardRef<TextInput, UnderlineInputProps>(
+const UnderlineInput = React.forwardRef<Input, UnderlineInputProps>(
   ({ underlineColor = "black", underlineWidth = 2, children, ...props }, ref) => {
   return (
     <Input
