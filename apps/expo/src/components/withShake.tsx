@@ -46,7 +46,7 @@ const withShake = <P extends object>(
 };
 
 function getDisplayName(WrappedComponent: React.ComponentType<any>): string {
-  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+  return (WrappedComponent.displayName ?? WrappedComponent.name) || 'Component';
 }
 
 export default withShake;

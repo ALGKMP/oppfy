@@ -2,9 +2,12 @@ import { credential } from "firebase-admin";
 import type { ServiceAccount } from "firebase-admin/app";
 import { getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { FirebaseAuthError } from 'firebase-admin/lib/utils/error';
+// import { FirebaseError } from "firebase-admin/app";
 
 // import key from "~/admin-service-account.json";
 
+// TODO: import as json instead
 const key = {
   "type": "service_account",
   "project_id": "oppfy-d63ef",
@@ -37,6 +40,8 @@ const app = getApps().some(({ name }) => name === FIREBASE_APP_NAME)
 
 const auth = getAuth(app);
 
+const isFireBaseError = (error: unknown): error is FirebaseAuthError => {
+  return (error as FirebaseAuthError).code.startsWith('auth/');
+};
 
-
-export { auth };
+export { auth, isFireBaseError };

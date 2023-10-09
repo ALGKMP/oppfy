@@ -3,7 +3,7 @@ import type { ExpoConfig } from "@expo/config";
 const defineConfig = (): ExpoConfig => ({
   name: "oppfy",
   slug: "oppfy",
-  scheme: "expo",
+  scheme: "oppfy",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",

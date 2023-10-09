@@ -1,22 +1,54 @@
+import { ListBucketsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import {
-  ListBucketsCommand,
-  ListObjectsV2Command 
-} from "@aws-sdk/client-s3";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { r2 } from "@acme/db";
+
+import { isFireBaseError } from "../services/firebase";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
   emailInUse: publicProcedure
     .input(z.string().email())
     .mutation(async ({ ctx, input }) => {
-      const possibleUser = await ctx.prisma.user.findUnique({
-        where: { email: input },
-      });
+      try {
+        await ctx.auth.getUserByEmail(input);
+      } catch (err) {
+        if (!isFireBaseError(err)) {
+          console.error(err);
 
-      return !!possibleUser;
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unknown error",
+          });
+        }
+
+        if (err.code === "auth/user-not-found") {
+          return false;
+        }
+      }
+
+      return false;
+    }),
+  phoneNumberInUse: publicProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input: phoneNumber }) => {
+      try {
+        await ctx.auth.getUserByPhoneNumber(phoneNumber);
+      } catch (err) {
+        if (!isFireBaseError(err)) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unknown error",
+          });
+        }
+
+        if (err.code === "auth/user-not-found") {
+          return false;
+        }
+      }
+
+      return false;
     }),
   getUser: protectedProcedure.query(async ({ ctx }) => {
     try {
@@ -68,9 +100,9 @@ export const authRouter = createTRPCRouter({
     }
   }),
   test: publicProcedure.query(async ({ ctx }) => {
-    const command = new ListObjectsV2Command({Bucket:"oppfy"});
-    const response = await ctx.r2.send(command);    
-    console.log(response.Contents)
+    const command = new ListObjectsV2Command({ Bucket: "oppfy" });
+    const response = await ctx.r2.send(command);
+    console.log(response.Contents);
     return response.Contents;
   }),
 });

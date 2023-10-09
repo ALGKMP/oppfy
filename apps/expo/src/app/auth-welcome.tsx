@@ -27,7 +27,7 @@ const AuthWelcome = () => {
   return (
     <View flex={1} backgroundColor="$background">
       <ImageBackground
-        source={Tinder}
+        // source={Tinder}
         resizeMode="contain"
         imageStyle={{
           margin: 100,
@@ -75,7 +75,7 @@ const AuthWelcome = () => {
                 padding="$2"
                 borderRadius={16}
                 onPress={() =>
-                  router.push({ pathname: "auth/sign-up/email-input" })
+                  router.push({ pathname: "auth/sign-up/phone-number-input" })
                 }
               >
                 <Text color="black" 
