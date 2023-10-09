@@ -28,5 +28,5 @@ export const prisma =
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
-  globalForR2.r2 = r2;
+  globalForR2.r2 = s3Client;
 }

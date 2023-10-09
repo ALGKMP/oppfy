@@ -2,8 +2,6 @@ import { ListBucketsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { r2 } from "@acme/db";
-
 import { isFireBaseError } from "../services/firebase";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 

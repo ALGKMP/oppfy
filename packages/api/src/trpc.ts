@@ -8,7 +8,6 @@
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import type { Auth } from "firebase-admin/auth";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import superjson from "superjson";
 import { ZodError } from "zod";
