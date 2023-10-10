@@ -23,7 +23,7 @@ const AppLayout = () => {
   }
 
   if (!user) {
-    return <Redirect href="/" />;
+    return <Redirect href="/"  />;
   }
 
   return <Slot />;

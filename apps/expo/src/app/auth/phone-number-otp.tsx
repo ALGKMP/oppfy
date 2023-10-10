@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
 import {
@@ -21,23 +22,32 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
+import useParams from "~/hooks/useParams";
+
+interface SignUpFlowParams {
+  phoneNumber: string;
+  [Key: string]: string;
+}
 
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  phoneNumber: z.string().min(1, { message: "Invalid number" }),
+  phoneNumberOTP: z.string().length(6, { message: "Invalid OTP" }),
 });
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
-const PhoneNumberInput = () => {
+const PhoneNumberOTPInput = () => {
   const router = useRouter();
 
-  const phoneNumberInUse = api.auth.phoneNumberInUse.useMutation();
+  const signUpFlowParams = useParams<SignUpFlowParams>();
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const phoneNumberInputRef = useRef<TextInput>(null);
+  const phoneNumberOTPInputRef = useRef<TextInput>(null);
+
+  const [confirm, setConfirm] =
+    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
 
   const {
     control,
@@ -46,34 +56,35 @@ const PhoneNumberInput = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      phoneNumber: "",
+      phoneNumberOTP: "",
     },
     resolver: zodResolver(schemaValidation),
   });
 
   useEffect(() => {
-    if (phoneNumberInputRef.current) {
-      phoneNumberInputRef.current.focus();
+    const signInWithPhoneNumber = async () => {
+      const confirmation = await auth().signInWithPhoneNumber(
+        `+${signUpFlowParams.phoneNumber}`,
+      );
+      setConfirm(confirmation);
+    };
+
+    console.log("PHONE NUMBER: " + signUpFlowParams.phoneNumber);
+    void signInWithPhoneNumber();
+
+    if (phoneNumberOTPInputRef.current) {
+      phoneNumberOTPInputRef.current.focus();
     }
-  }, []);
+  }, [signUpFlowParams.phoneNumber]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      const phoneNumberTaken = await phoneNumberInUse.mutateAsync(
-        data.phoneNumber,
-      );
-
-      if (phoneNumberTaken) {
-        console.log("Phone number already in use");
-        setError("phoneNumber", { message: "Phone number already in use" });
-        setTriggerShake(true);
-        return;
-      }
-
-      router.push({ params: data, pathname: "auth/sign-up/phone-number-otp-input" });
-    } catch (error) {
-      console.error("Something went wrong");
-      setError("phoneNumber", { message: "Something went wrong" });
+      await confirm?.confirm(data.phoneNumberOTP);
+      // router.push({ pathname: "auth/first-name" });
+      router.replace("/profile")
+    } catch (err) {
+      console.log("ERROR: " + err)
+      setError("phoneNumberOTP", { message: "Invalid code" });
     }
   };
 
@@ -104,28 +115,28 @@ const PhoneNumberInput = () => {
             letterSpacing="$5"
             lineHeight="$5"
           >
-            Lets start with your number
+            Enter otp code
           </H2>
 
           <YStack space="$3">
             <Controller
               control={control}
-              name="phoneNumber"
+              name="phoneNumberOTP"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ShakingUnderlineInput
                   height={40}
                   // fontSize="$5"
-                  ref={phoneNumberInputRef}
+                  ref={phoneNumberOTPInputRef}
                   underlineWidth={1}
-                  underlineColor={errors.phoneNumber ? "$red11" : "white"}
-                  placeholder="Phone number"
+                  underlineColor={errors.phoneNumberOTP ? "$red11" : "white"}
+                  placeholder="OTP Code"
                   placeholderTextColor={
-                    errors.phoneNumber ? "$red11" : "$gray10"
+                    errors.phoneNumberOTP ? "$red11" : "$gray10"
                   }
                   focusStyle={{
-                    borderBottomColor: errors.phoneNumber ? "$red11" : "white",
+                    borderBottomColor: errors.phoneNumberOTP ? "$red11" : "white",
                   }}
-                  color={errors.phoneNumber ? "$red11" : "white"}
+                  color={errors.phoneNumberOTP ? "$red11" : "white"}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -134,9 +145,9 @@ const PhoneNumberInput = () => {
                 />
               )}
             />
-            {errors.phoneNumber && (
+            {errors.phoneNumberOTP && (
               <Text fontSize="$2" color="$red11">
-                {errors.phoneNumber.message}
+                {errors.phoneNumberOTP.message}
               </Text>
             )}
           </YStack>
@@ -169,4 +180,4 @@ const PhoneNumberInput = () => {
   );
 };
 
-export default PhoneNumberInput;
+export default PhoneNumberOTPInput;

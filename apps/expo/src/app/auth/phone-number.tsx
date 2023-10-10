@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "@tamagui/lucide-icons";
@@ -20,32 +21,23 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
-import { TextInput } from "react-native-gesture-handler";
-import auth from '@react-native-firebase/auth';
 
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  email: z.string().email({ message: "Invalid email" }),
-  marketing: z.boolean(),
+  phoneNumber: z.string().min(1, { message: "Invalid number" }),
 });
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
-const EmailInput = () => {
+const PhoneNumberInput = () => {
   const router = useRouter();
 
-  const emailInUse = api.auth.emailInUse.useMutation();
+  const phoneNumberInUse = api.auth.phoneNumberInUse.useMutation();
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const emailInputRef = useRef<TextInput>(null); 
-
-  // useEffect(() => {
-  //   if (emailInputRef.current) {
-  //     emailInputRef.current.focus(); 
-  //   }
-  // }, []);
+  const phoneNumberInputRef = useRef<TextInput>(null);
 
   const {
     control,
@@ -54,34 +46,34 @@ const EmailInput = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      email: "",
-      marketing: false,
+      phoneNumber: "",
     },
     resolver: zodResolver(schemaValidation),
   });
 
-  // todo: instead of checking if email is already in use
-  // check if the email is verified
-  // if verified: show email already in use error
-  // else: move to email verification screen
+  useEffect(() => {
+    if (phoneNumberInputRef.current) {
+      phoneNumberInputRef.current.focus();
+    }
+  }, []);
+
   const onSubmit = async (data: FormData) => {
     try {
-      const emailTaken = await emailInUse.mutateAsync(data.email);
+      const phoneNumberTaken = await phoneNumberInUse.mutateAsync(
+        data.phoneNumber,
+      );
 
-      console.log("EMAIL TAKEN: " + emailTaken)
-
-      if (emailTaken) {
-        console.log("email already in use");
-        setError("email", { message: "Email already in use" });
+      if (phoneNumberTaken) {
+        console.log("Phone number already in use");
+        setError("phoneNumber", { message: "Phone number already in use" });
         setTriggerShake(true);
         return;
       }
 
-      await auth().currentUser?.updateEmail(data.email);
-      router.push({ params: data, pathname: "auth/sign-up/password-input" });
-    } catch (err) {
-      console.error("Error: " + err);
-      setError("email", { message: "something went wrong" });
+      router.push({ params: data, pathname: "auth/phone-number-otp" });
+    } catch (error) {
+      console.error("Something went wrong");
+      setError("phoneNumber", { message: "Something went wrong" });
     }
   };
 
@@ -112,26 +104,28 @@ const EmailInput = () => {
             letterSpacing="$5"
             lineHeight="$5"
           >
-            Lets start with your email
+            Lets start with your number
           </H2>
 
           <YStack space="$3">
             <Controller
               control={control}
-              name="email"
+              name="phoneNumber"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ShakingUnderlineInput
                   height={40}
                   // fontSize="$5"
-                 ref={emailInputRef}
+                  ref={phoneNumberInputRef}
                   underlineWidth={1}
-                  underlineColor={errors.email ? "$red11" : "white"}
-                  placeholder="Email address"
-                  placeholderTextColor={errors.email ? "$red11" : "$gray10"}
+                  underlineColor={errors.phoneNumber ? "$red11" : "white"}
+                  placeholder="Phone number"
+                  placeholderTextColor={
+                    errors.phoneNumber ? "$red11" : "$gray10"
+                  }
                   focusStyle={{
-                    borderBottomColor: errors.email ? "$red11" : "white",
+                    borderBottomColor: errors.phoneNumber ? "$red11" : "white",
                   }}
-                  color={errors.email ? "$red11" : "white"}
+                  color={errors.phoneNumber ? "$red11" : "white"}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -140,36 +134,11 @@ const EmailInput = () => {
                 />
               )}
             />
-            {errors.email && (
+            {errors.phoneNumber && (
               <Text fontSize="$2" color="$red11">
-                {errors.email.message}
+                {errors.phoneNumber.message}
               </Text>
             )}
-
-            <XStack alignItems="center" space="$2">
-              <Controller
-                control={control}
-                name="marketing"
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    size="$4"
-                    checked={value}
-                    onPress={() => {
-                      onChange(!value);
-                    }}
-                  >
-                    <Checkbox.Indicator>
-                      <Check />
-                    </Checkbox.Indicator>
-                  </Checkbox>
-                )}
-              />
-
-              <Text fontSize="$2">
-                Receive marketing communications from{" "}
-                <Text fontWeight="700">OPPFY</Text>
-              </Text>
-            </XStack>
           </YStack>
         </YStack>
 
@@ -183,7 +152,7 @@ const EmailInput = () => {
             onPress={handleSubmit(onSubmit, onSubmitError)}
             height="$4"
             borderRadius="$8"
-            backgroundColor={isValid ? "white" : "gray"} // Change background color based on validity
+            backgroundColor={isValid ? "white" : "gray"}
             disabled={!isValid}
           >
             <Text
@@ -200,4 +169,4 @@ const EmailInput = () => {
   );
 };
 
-export default EmailInput;
+export default PhoneNumberInput;

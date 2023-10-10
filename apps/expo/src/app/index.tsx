@@ -9,7 +9,7 @@ const Index = () => {
   if (user && user.emailVerified) {
     return <Redirect href="profile" />;
   } else {
-    return <Redirect href="auth-welcome" />;
+    return <Redirect href="auth/phone-number" />;
   }
 };
 
