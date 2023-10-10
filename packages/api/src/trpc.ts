@@ -8,12 +8,11 @@
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import type { Auth } from "firebase-admin/auth";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { prisma, r2 } from "@acme/db";
+import { prisma, s3Client } from "@acme/db";
 
 import { auth } from "./services/firebase";
 
@@ -45,7 +44,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
     session: opts.session,
     auth,
     prisma,
-    r2,
+    s3Client,
   };
 };
 

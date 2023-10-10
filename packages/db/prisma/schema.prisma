@@ -19,14 +19,23 @@ datasource db {
 model User {
     id String @id @unique
 
-    email         String    @unique
-    name          String?
-    image         String?
-    gender        Gender?
-    dateOfBirth   DateTime?
+    email       String    @unique
+    name        String?
+    image       String?
+    gender      Gender?
+    dateOfBirth DateTime?
 
-    createdPosts Posts[] @relation("createdPosts")
-    postsOf      Posts[] @relation("postsOf")
+    createdPosts Posts[]       @relation("createdPosts")
+    postsOf      Posts[]       @relation("postsOf")
+    profilePhoto ProfilePhoto? 
+}
+
+model ProfilePhoto {
+    id         String   @id @default(cuid())
+    user       User     @relation(fields: [userId], references: [id])
+    userId     String   @unique
+    s3Key      String
+    dateEdited DateTime?
 }
 
 model Posts {
@@ -36,8 +45,8 @@ model Posts {
     postedOf   User     @relation(fields: [postedOfId], references: [id], "postsOf")
     postedOfId String
     caption    String
-    url        String
-    datePosted DateTime
+    s3Key      String
+    datePosted DateTime?
 }
 
 model VerificationToken {
