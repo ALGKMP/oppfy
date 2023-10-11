@@ -16,12 +16,10 @@ import { Stack } from "~/layouts";
 
 const WelcomeLayout = () => {
   const router = useRouter();
-  const { user, signOut, isSignedIn, isLoading } = useSession();
-
-  const deleteUser = api.auth.deleteUser.useMutation();
+  const { user, signOut, deleteAccount, isSignedIn, isLoading } = useSession();
 
   const onAccountDeletion = async () => {
-    await deleteUser.mutateAsync();
+    await deleteAccount();
   };
 
   if (isLoading) {

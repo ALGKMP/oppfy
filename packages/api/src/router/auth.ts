@@ -30,7 +30,6 @@ export const authRouter = createTRPCRouter({
     }),
   getUser: protectedProcedure.query(async ({ ctx }) => {
     try {
-      console.log("RUNNING GET USER")
       return await ctx.prisma.user.findUniqueOrThrow({
         where: { id: ctx.session.uid },
       });
@@ -44,7 +43,6 @@ export const authRouter = createTRPCRouter({
   }),
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      // await ctx.auth.deleteUser(ctx.session.uid);
       await ctx.prisma.user.delete({
         where: { id: ctx.session.uid },
       });
