@@ -68,7 +68,6 @@ const DateOfBirth = () => {
   const onSubmit = async (data: FormData) => {
     console.log("FIRST NAME: " + userDetailsFlowParams.firstName);
     
-
     await updateUserDetails.mutateAsync({
       ...userDetailsFlowParams,
       ...data,

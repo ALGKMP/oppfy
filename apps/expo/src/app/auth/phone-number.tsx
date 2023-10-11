@@ -33,8 +33,6 @@ const ShakingUnderlineInput = withShake(UnderlineInput);
 const PhoneNumber = () => {
   const router = useRouter();
 
-  const phoneNumberInUse = api.auth.phoneNumberInUse.useMutation();
-
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
   const phoneNumberInputRef = useRef<TextInput>(null);

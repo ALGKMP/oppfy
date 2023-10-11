@@ -6,11 +6,13 @@ import { useSession } from "~/contexts/SessionsContext";
 
 const Settings = () => {
   const router = useRouter();
-  const { signOut } = useSession();
+  const { signOut, deleteAccount } = useSession();
 
   return (
     <View flex={1} backgroundColor="black">
       <Button onPress={signOut}>Logout</Button>
+
+      <Button theme="red" onPress={deleteAccount}>Delete Account</Button>
     </View>
   );
 };

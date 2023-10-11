@@ -30,6 +30,7 @@ export const authRouter = createTRPCRouter({
     }),
   getUser: protectedProcedure.query(async ({ ctx }) => {
     try {
+      console.log("RUNNING GET USER")
       return await ctx.prisma.user.findUniqueOrThrow({
         where: { id: ctx.session.uid },
       });
@@ -43,7 +44,7 @@ export const authRouter = createTRPCRouter({
   }),
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      await ctx.auth.deleteUser(ctx.session.uid);
+      // await ctx.auth.deleteUser(ctx.session.uid);
       await ctx.prisma.user.delete({
         where: { id: ctx.session.uid },
       });
@@ -69,7 +70,7 @@ export const authRouter = createTRPCRouter({
     } catch (_err) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "User not found",
+        message: "shits broken 5",
       });
     }
   }),
@@ -84,12 +85,16 @@ export const authRouter = createTRPCRouter({
       try {
         await ctx.prisma.user.update({
           where: { id: ctx.session.uid },
-          data: userDetails,
+          data: {
+            ...userDetails,
+          },
         });
       } catch (_err) {
+
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "User not found",
+          // message: "shits broken 8",
+          message: _err
         });
       }
     }),

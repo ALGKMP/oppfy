@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { api } from "~/utils/api";
 
 interface SessionProviderProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
   isLoading: boolean;
   isSignedIn: boolean;
+  deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -20,6 +22,8 @@ const AuthContext = createContext<SessionContextType | undefined>(undefined);
 
 const SessionProvider = ({ children }: SessionProviderProps) => {
   const router = useRouter();
+
+  const deleteUser = api.auth.deleteUser.useMutation();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
@@ -45,6 +49,15 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      await deleteUser.mutateAsync();
+      await auth().currentUser?.delete();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const signOut = async () => {
     try {
       await auth().signOut();
@@ -63,7 +76,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isSignedIn, signIn, signOut, signUp }}
+      value={{ user, isLoading, isSignedIn, deleteAccount, signIn, signOut, signUp }}
     >
       {children}
     </AuthContext.Provider>

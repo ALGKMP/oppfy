@@ -13,24 +13,18 @@ import {
 import { Button, Text, View, XStack } from "tamagui";
 
 import { api } from "~/utils/api";
-import { Stack } from "~/layouts";
 import { useSession } from "~/contexts/SessionsContext";
+import { Stack } from "~/layouts";
 
 const AppLayout = () => {
   const { isLoading: sessionIsLoading, isSignedIn, user } = useSession();
-  const { isLoading: getUserIsLoading, data: userData } =
-    api.auth.getUser.useQuery();
 
-  if (sessionIsLoading || getUserIsLoading) {
+  if (sessionIsLoading) {
     return <Text>Loading...</Text>;
   }
-  
+
   if (!isSignedIn) {
     return <Redirect href="/auth/phone-number" />;
-  }
-
-  if (!userData?.firstName || !userData?.dateOfBirth) {
-    return <Redirect href="/welcome" />;
   }
 
   return <Slot />;

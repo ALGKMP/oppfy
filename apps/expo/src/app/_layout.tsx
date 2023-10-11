@@ -56,13 +56,7 @@ const RootLayout = () => {
                   headerShown: false,
                 }}
               >
-                <Stack.Screen name="index" />
-                <Stack.Screen
-                  name="auth"
-                  options={{
-                    animation: "fade_from_bottom",
-                  }}
-                />
+                <Slot />
               </Stack>
               <StatusBar />
             </View>

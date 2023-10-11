@@ -46,7 +46,8 @@ const PhoneNumberOTP = () => {
 
   const phoneNumberOTPInputRef = useRef<TextInput>(null);
 
-  const createUser = api.auth.createUser.useMutation();
+  const createUserMutation = api.auth.createUser.useMutation();
+  const hasUserDetailsMutation = api.auth.hasUserDetails.useMutation();
 
   const [confirm, setConfirm] =
     useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
@@ -84,14 +85,17 @@ const PhoneNumberOTP = () => {
       const userCredential = await confirm?.confirm(data.phoneNumberOTP);
 
       if (userCredential?.additionalUserInfo?.isNewUser) {
-        await createUser.mutateAsync({
+        await createUserMutation.mutateAsync({
           firebaseUid: userCredential.user.uid,
         });
       }
 
       // TODO: temp solution to instantly update user object, once moved into the session provider we will use the returned userCredential to get the updated [user] info
       await auth().currentUser?.reload();
-      router.replace("/profile");
+
+      const hasUserDetails = await hasUserDetailsMutation.mutateAsync();
+
+      hasUserDetails ? router.replace("/profile") : router.replace("/welcome");
     } catch (err) {
       console.log("ERROR: " + err);
       setError("phoneNumberOTP", { message: "Invalid code" });

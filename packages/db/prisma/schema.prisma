@@ -19,7 +19,7 @@ datasource db {
 model User {
     id String @id @unique
 
-    firstName        String?
+    firstName   String?
     dateOfBirth String? //! string for testing purposes
 
     image String?
