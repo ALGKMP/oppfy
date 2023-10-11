@@ -12,18 +12,25 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, Text, View, XStack } from "tamagui";
 
-import useSession from "~/hooks/useSession";
+import { api } from "~/utils/api";
 import { Stack } from "~/layouts";
+import { useSession } from "~/contexts/SessionsContext";
 
 const AppLayout = () => {
-  const { isLoading, user } = useSession();
+  const { isLoading: sessionIsLoading, isSignedIn, user } = useSession();
+  const { isLoading: getUserIsLoading, data: userData } =
+    api.auth.getUser.useQuery();
 
-  if (isLoading) {
+  if (sessionIsLoading || getUserIsLoading) {
     return <Text>Loading...</Text>;
   }
+  
+  if (!isSignedIn) {
+    return <Redirect href="/auth/phone-number" />;
+  }
 
-  if (!user) {
-    return <Redirect href="/"  />;
+  if (!userData?.firstName || !userData?.dateOfBirth) {
+    return <Redirect href="/welcome" />;
   }
 
   return <Slot />;

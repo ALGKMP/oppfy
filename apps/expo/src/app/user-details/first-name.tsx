@@ -25,19 +25,17 @@ import withShake from "~/components/withShake";
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  phoneNumber: z.string().min(1, { message: "Invalid number" }),
+  firstName: z.string().min(1, { message: "Please enter a name" }),
 });
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
-const PhoneNumber = () => {
+const FirstName = () => {
   const router = useRouter();
-
-  const phoneNumberInUse = api.auth.phoneNumberInUse.useMutation();
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const phoneNumberInputRef = useRef<TextInput>(null);
+  const firstNameInputRef = useRef<TextInput>(null);
 
   const {
     control,
@@ -46,19 +44,19 @@ const PhoneNumber = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      phoneNumber: "",
+      firstName: "",
     },
     resolver: zodResolver(schemaValidation),
   });
 
   useEffect(() => {
-    if (phoneNumberInputRef.current) {
-      phoneNumberInputRef.current.focus();
+    if (firstNameInputRef.current) {
+      firstNameInputRef.current.focus();
     }
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "auth/phone-number-otp" });
+    router.push({ params: data, pathname: "/user-details/date-of-birth" });
   };
 
   const onSubmitError = () => {
@@ -87,28 +85,26 @@ const PhoneNumber = () => {
             letterSpacing="$5"
             lineHeight="$5"
           >
-            Lets start with your number
+            First name
           </H2>
 
           <YStack space="$3">
             <Controller
               control={control}
-              name="phoneNumber"
+              name="firstName"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ShakingUnderlineInput
                   height={40}
                   // fontSize="$5"
-                  ref={phoneNumberInputRef}
+                  ref={firstNameInputRef}
                   underlineWidth={1}
-                  underlineColor={errors.phoneNumber ? "$red11" : "white"}
-                  placeholder="Phone number"
-                  placeholderTextColor={
-                    errors.phoneNumber ? "$red11" : "$gray10"
-                  }
+                  underlineColor={errors.firstName ? "$red11" : "white"}
+                  placeholder="First name"
+                  placeholderTextColor={errors.firstName ? "$red11" : "$gray10"}
                   focusStyle={{
-                    borderBottomColor: errors.phoneNumber ? "$red11" : "white",
+                    borderBottomColor: errors.firstName ? "$red11" : "white",
                   }}
-                  color={errors.phoneNumber ? "$red11" : "white"}
+                  color={errors.firstName ? "$red11" : "white"}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -117,9 +113,9 @@ const PhoneNumber = () => {
                 />
               )}
             />
-            {errors.phoneNumber && (
+            {errors.firstName && (
               <Text fontSize="$2" color="$red11">
-                {errors.phoneNumber.message}
+                {errors.firstName.message}
               </Text>
             )}
           </YStack>
@@ -152,4 +148,4 @@ const PhoneNumber = () => {
   );
 };
 
-export default PhoneNumber;
+export default FirstName;

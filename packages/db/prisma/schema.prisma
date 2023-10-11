@@ -19,30 +19,30 @@ datasource db {
 model User {
     id String @id @unique
 
-    email       String    @unique
-    name        String?
-    image       String?
-    gender      Gender?
-    dateOfBirth DateTime?
+    firstName        String?
+    dateOfBirth String? //! string for testing purposes
 
-    createdPosts Posts[]       @relation("createdPosts")
+    image String?
+
+    createdPosts Posts[] @relation("createdPosts")
+
     postsOf      Posts[]       @relation("postsOf")
-    profilePhoto ProfilePhoto? 
+    profilePhoto ProfilePhoto?
 }
 
 model ProfilePhoto {
-    id         String   @id @default(cuid())
-    user       User     @relation(fields: [userId], references: [id])
-    userId     String   @unique
+    id         String    @id @default(cuid())
+    user       User      @relation(fields: [userId], references: [id])
+    userId     String    @unique
     s3Key      String
     dateEdited DateTime?
 }
 
 model Posts {
-    id         String   @id @default(cuid())
-    author     User     @relation(fields: [authorId], references: [id], "createdPosts")
+    id         String    @id @default(cuid())
+    author     User      @relation(fields: [authorId], references: [id], "createdPosts")
     authorId   String
-    postedOf   User     @relation(fields: [postedOfId], references: [id], "postsOf")
+    postedOf   User      @relation(fields: [postedOfId], references: [id], "postsOf")
     postedOfId String
     caption    String
     s3Key      String
@@ -55,11 +55,4 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
-}
-
-enum Gender {
-    MALE
-    FEMALE
-    OTHER
-    PREFER_NOT_TO_SAY
 }

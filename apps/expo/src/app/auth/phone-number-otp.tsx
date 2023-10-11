@@ -37,7 +37,7 @@ const schemaValidation = z.object({
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
-const PhoneNumberOTPInput = () => {
+const PhoneNumberOTP = () => {
   const router = useRouter();
 
   const signUpFlowParams = useParams<SignUpFlowParams>();
@@ -45,6 +45,8 @@ const PhoneNumberOTPInput = () => {
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
   const phoneNumberOTPInputRef = useRef<TextInput>(null);
+
+  const createUser = api.auth.createUser.useMutation();
 
   const [confirm, setConfirm] =
     useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
@@ -79,11 +81,19 @@ const PhoneNumberOTPInput = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await confirm?.confirm(data.phoneNumberOTP);
-      // router.push({ pathname: "auth/first-name" });
-      router.replace("/profile")
+      const userCredential = await confirm?.confirm(data.phoneNumberOTP);
+
+      if (userCredential?.additionalUserInfo?.isNewUser) {
+        await createUser.mutateAsync({
+          firebaseUid: userCredential.user.uid,
+        });
+      }
+
+      // TODO: temp solution to instantly update user object, once moved into the session provider we will use the returned userCredential to get the updated [user] info
+      await auth().currentUser?.reload();
+      router.replace("/profile");
     } catch (err) {
-      console.log("ERROR: " + err)
+      console.log("ERROR: " + err);
       setError("phoneNumberOTP", { message: "Invalid code" });
     }
   };
@@ -134,7 +144,9 @@ const PhoneNumberOTPInput = () => {
                     errors.phoneNumberOTP ? "$red11" : "$gray10"
                   }
                   focusStyle={{
-                    borderBottomColor: errors.phoneNumberOTP ? "$red11" : "white",
+                    borderBottomColor: errors.phoneNumberOTP
+                      ? "$red11"
+                      : "white",
                   }}
                   color={errors.phoneNumberOTP ? "$red11" : "white"}
                   onChangeText={onChange}
@@ -180,4 +192,4 @@ const PhoneNumberOTPInput = () => {
   );
 };
 
-export default PhoneNumberOTPInput;
+export default PhoneNumberOTP;

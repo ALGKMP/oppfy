@@ -10,6 +10,7 @@ interface SessionProviderProps {
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
   isLoading: boolean;
+  isSignedIn: boolean;
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -23,8 +24,11 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
+  const isSignedIn = !!user;
+
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authUser) => {
+      console.log("Auth state changed:", authUser);
       setUser(authUser);
       setIsLoading(false);
     });
@@ -58,7 +62,9 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signOut, signUp }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, isSignedIn, signIn, signOut, signUp }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -66,9 +72,11 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
 export const useSession = () => {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useSession must be used within a SessionProvider");
   }
+
   return context;
 };
 

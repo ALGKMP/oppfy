@@ -6,45 +6,27 @@ import { isFireBaseError } from "../services/firebase";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
-  emailInUse: publicProcedure
-    .input(z.string().email())
+  createUser: publicProcedure
+    .input(
+      z.object({
+        firebaseUid: z.string().min(1),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
+      const { firebaseUid } = input;
+
       try {
-        await ctx.auth.getUserByEmail(input);
-      } catch (err) {
-        if (!isFireBaseError(err)) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Unknown error",
-          });
-        }
-
-        if (err.code === "auth/user-not-found") {
-          return false;
-        }
+        await ctx.prisma.user.create({
+          data: {
+            id: firebaseUid,
+          },
+        });
+      } catch (_err) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "User already exists",
+        });
       }
-
-      return false;
-    }),
-  phoneNumberInUse: publicProcedure
-    .input(z.string())
-    .mutation(async ({ ctx, input: phoneNumber }) => {
-      try {
-        await ctx.auth.getUserByPhoneNumber(phoneNumber);
-      } catch (err) {
-        if (!isFireBaseError(err)) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Unknown error",
-          });
-        }
-
-        if (err.code === "auth/user-not-found") {
-          return false;
-        }
-      }
-
-      return false;
     }),
   getUser: protectedProcedure.query(async ({ ctx }) => {
     try {
@@ -54,34 +36,11 @@ export const authRouter = createTRPCRouter({
     } catch (_err) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "User not found",
+        // message: "User not found",
+        message: "shits broken 3"
       });
     }
   }),
-  createUser: publicProcedure
-    .input(
-      z.object({
-        email: z.string().email(),
-        firebaseUid: z.string().min(1),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { email, firebaseUid } = input;
-
-      try {
-        await ctx.prisma.user.create({
-          data: {
-            id: firebaseUid,
-            email: email,
-          },
-        });
-      } catch (_err) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Unique user info already exists",
-        });
-      }
-    }),
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await ctx.auth.deleteUser(ctx.session.uid);
@@ -91,14 +50,47 @@ export const authRouter = createTRPCRouter({
     } catch (_err) {
       throw new TRPCError({
         code: "NOT_FOUND",
+        // message: "User not found",
+        message: "shits broken 1"
+      });
+    }
+  }),
+  hasUserDetails: protectedProcedure.mutation(async ({ ctx, input }) => {
+    try {
+      const { firstName, dateOfBirth } = await ctx.prisma.user.findUniqueOrThrow({
+        where: { id: ctx.session.uid },
+        select: {
+          firstName: true,
+          dateOfBirth: true,
+        },
+      });
+
+      return !!firstName && !!dateOfBirth;
+    } catch (_err) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
         message: "User not found",
       });
     }
   }),
-  test: publicProcedure.query(async ({ ctx }) => {
-    const command = new ListObjectsV2Command({ Bucket: "oppfy" });
-    const response = await ctx.r2.send(command);
-    console.log(response.Contents);
-    return response.Contents;
-  }),
+  updateUserDetails: protectedProcedure
+    .input(
+      z.object({
+        firstName: z.string().min(1).optional(),
+        dateOfBirth: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input: userDetails }) => {
+      try {
+        await ctx.prisma.user.update({
+          where: { id: ctx.session.uid },
+          data: userDetails,
+        });
+      } catch (_err) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+    }),
 });

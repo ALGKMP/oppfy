@@ -21,23 +21,31 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
+import useParams from "~/hooks/useParams";
+
+interface UserDetailsFlowParams {
+  firstName: string;
+  [Key: string]: string;
+}
 
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  phoneNumber: z.string().min(1, { message: "Invalid number" }),
+  dateOfBirth: z.string()
 });
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
 
-const PhoneNumber = () => {
+const DateOfBirth = () => {
   const router = useRouter();
 
-  const phoneNumberInUse = api.auth.phoneNumberInUse.useMutation();
+  const userDetailsFlowParams = useParams<UserDetailsFlowParams>();
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const phoneNumberInputRef = useRef<TextInput>(null);
+  const dateOfBirthInputRef = useRef<TextInput>(null);
+
+  const updateUserDetails = api.auth.updateUserDetails.useMutation();
 
   const {
     control,
@@ -46,19 +54,27 @@ const PhoneNumber = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      phoneNumber: "",
+      dateOfBirth: "",
     },
     resolver: zodResolver(schemaValidation),
   });
 
   useEffect(() => {
-    if (phoneNumberInputRef.current) {
-      phoneNumberInputRef.current.focus();
+    if (dateOfBirthInputRef.current) {
+      dateOfBirthInputRef.current.focus();
     }
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "auth/phone-number-otp" });
+    console.log("FIRST NAME: " + userDetailsFlowParams.firstName);
+    
+
+    await updateUserDetails.mutateAsync({
+      ...userDetailsFlowParams,
+      ...data,
+    });
+
+    router.replace("/profile");
   };
 
   const onSubmitError = () => {
@@ -87,28 +103,26 @@ const PhoneNumber = () => {
             letterSpacing="$5"
             lineHeight="$5"
           >
-            Lets start with your number
+            Date of birth
           </H2>
 
           <YStack space="$3">
             <Controller
               control={control}
-              name="phoneNumber"
+              name="dateOfBirth"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ShakingUnderlineInput
                   height={40}
                   // fontSize="$5"
-                  ref={phoneNumberInputRef}
+                  ref={dateOfBirthInputRef}
                   underlineWidth={1}
-                  underlineColor={errors.phoneNumber ? "$red11" : "white"}
-                  placeholder="Phone number"
-                  placeholderTextColor={
-                    errors.phoneNumber ? "$red11" : "$gray10"
-                  }
+                  underlineColor={errors.dateOfBirth ? "$red11" : "white"}
+                  placeholder="Date of birth"
+                  placeholderTextColor={errors.dateOfBirth ? "$red11" : "$gray10"}
                   focusStyle={{
-                    borderBottomColor: errors.phoneNumber ? "$red11" : "white",
+                    borderBottomColor: errors.dateOfBirth ? "$red11" : "white",
                   }}
-                  color={errors.phoneNumber ? "$red11" : "white"}
+                  color={errors.dateOfBirth ? "$red11" : "white"}
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
@@ -117,9 +131,9 @@ const PhoneNumber = () => {
                 />
               )}
             />
-            {errors.phoneNumber && (
+            {errors.dateOfBirth && (
               <Text fontSize="$2" color="$red11">
-                {errors.phoneNumber.message}
+                {errors.dateOfBirth.message}
               </Text>
             )}
           </YStack>
@@ -152,4 +166,4 @@ const PhoneNumber = () => {
   );
 };
 
-export default PhoneNumber;
+export default DateOfBirth;
