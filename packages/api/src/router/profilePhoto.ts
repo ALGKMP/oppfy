@@ -11,6 +11,11 @@ const profilePhotoBucket = "oppfy-profile-pictures";
 import { Prisma } from '@prisma/client';
 
 
+/* TODO: Handle sending images on the frontend, and handle keys on the backend: 
+    Uploading: store image on client side and send key to server
+    Fetching: get key from backend and request for the image from R2 from the client.
+    Deleting: send key from backend to client and delete image from R2 on clientside.
+*/
 export const profilePhotoRouter = createTRPCRouter({
     upload: protectedProcedure.input(z.object({
         file: z.string(), // Replace with suitable file type
@@ -123,6 +128,7 @@ export const profilePhotoRouter = createTRPCRouter({
         } catch(err) {
             console.log(err);
             return { success: false, message: "Error getting profile photo." };
+            // TODO: If it fails, I want it to return a default profile photo, either from s3, or from an assets directory
         }
 
     }),
