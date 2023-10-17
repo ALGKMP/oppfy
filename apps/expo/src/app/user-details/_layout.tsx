@@ -7,10 +7,6 @@ import { getTokens, Text, View, XStack } from "tamagui";
 import { Stack } from "~/layouts";
 
 const UserDetailsLayout = () => {
-  // const router = useRouter();
-  // const navigation = useNavigation();
-  const rootNavigation = useRootNavigation();
-
   return (
     <View flex={1} backgroundColor="$background">
       <Stack

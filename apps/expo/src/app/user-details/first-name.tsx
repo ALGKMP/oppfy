@@ -79,14 +79,7 @@ const FirstName = () => {
         justifyContent="space-between"
       >
         <YStack space>
-          <H2
-            fontFamily="$heading"
-            fontWeight="700"
-            letterSpacing="$5"
-            lineHeight="$5"
-          >
-            First name
-          </H2>
+          <H2>First name</H2>
 
           <YStack space="$3">
             <Controller

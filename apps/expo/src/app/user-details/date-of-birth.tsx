@@ -31,7 +31,7 @@ interface UserDetailsFlowParams {
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  dateOfBirth: z.string()
+  dateOfBirth: z.string(),
 });
 
 const ShakingUnderlineInput = withShake(UnderlineInput);
@@ -67,7 +67,7 @@ const DateOfBirth = () => {
 
   const onSubmit = async (data: FormData) => {
     console.log("FIRST NAME: " + userDetailsFlowParams.firstName);
-    
+
     await updateUserDetails.mutateAsync({
       ...userDetailsFlowParams,
       ...data,
@@ -96,14 +96,7 @@ const DateOfBirth = () => {
         justifyContent="space-between"
       >
         <YStack space>
-          <H2
-            fontFamily="$heading"
-            fontWeight="700"
-            letterSpacing="$5"
-            lineHeight="$5"
-          >
-            Date of birth
-          </H2>
+          <H2>Date of birth</H2>
 
           <YStack space="$3">
             <Controller
@@ -117,7 +110,9 @@ const DateOfBirth = () => {
                   underlineWidth={1}
                   underlineColor={errors.dateOfBirth ? "$red11" : "white"}
                   placeholder="Date of birth"
-                  placeholderTextColor={errors.dateOfBirth ? "$red11" : "$gray10"}
+                  placeholderTextColor={
+                    errors.dateOfBirth ? "$red11" : "$gray10"
+                  }
                   focusStyle={{
                     borderBottomColor: errors.dateOfBirth ? "$red11" : "white",
                   }}

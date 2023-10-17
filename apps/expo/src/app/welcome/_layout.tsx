@@ -18,8 +18,8 @@ const WelcomeLayout = () => {
   const router = useRouter();
   const { user, signOut, deleteAccount, isSignedIn, isLoading } = useSession();
 
-  const onAccountDeletion = async () => {
-    await deleteAccount();
+  const onExitPress = async () => {
+    await signOut();
   };
 
   if (isLoading) {
@@ -51,7 +51,7 @@ const WelcomeLayout = () => {
                 justifyContent="space-between"
               >
                 <View>
-                  <ChevronLeft size="$2" onPress={onAccountDeletion} />
+                  <ChevronLeft size="$2" onPress={onExitPress} />
                 </View>
 
                 <Text>OPPFY</Text>

@@ -79,12 +79,7 @@ const PhoneNumber = () => {
         justifyContent="space-between"
       >
         <YStack space>
-          <H2
-            fontFamily="$heading"
-            fontWeight="700"
-            letterSpacing="$5"
-            lineHeight="$5"
-          >
+          <H2>
             Lets start with your number
           </H2>
 
