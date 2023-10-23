@@ -5,7 +5,7 @@ import { Text } from "tamagui";
 
 import { api } from "~/utils/api";
 import { useSession } from "~/contexts/SessionsContext";
-import FirstName from "./user-details/first-name";
+import FirstName from "./(user-info)/first-name";
 
 const Index = () => {
   const { isSignedIn, isLoading, signOut } = useSession();
