@@ -3,7 +3,8 @@ import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth from "@react-native-firebase/auth";
+import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
 import {
@@ -118,14 +119,12 @@ const PhoneNumberOTP = () => {
     >
       <View
         flex={1}
-        backgroundColor="$background"
+        backgroundColor="$backgroundStrong"
         padding="$6"
         justifyContent="space-between"
       >
         <YStack space>
-          <H2>
-            Enter otp code
-          </H2>
+          <H2>Enter otp code</H2>
 
           <YStack space="$3">
             <Controller

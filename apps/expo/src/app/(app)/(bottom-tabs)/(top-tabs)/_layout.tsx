@@ -4,7 +4,7 @@ import { TopTabs } from "~/layouts";
 
 const TopTabsLayout = () => {
   return (
-    <View flex={1} backgroundColor="$background">
+    <View flex={1} backgroundColor="$backgroundStrong">
       <TopTabs>
         <TopTabs.Screen name="following" />
         <TopTabs.Screen name="for-you-page" />

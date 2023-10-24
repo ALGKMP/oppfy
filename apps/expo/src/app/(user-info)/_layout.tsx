@@ -30,7 +30,7 @@ const UserDetailsLayout = () => {
   }
 
   return (
-    <View flex={1} backgroundColor="$background">
+    <View flex={1} backgroundColor="$backgroundStrong">
       <Stack
         screenOptions={{
           headerTitle: "OPPFY",

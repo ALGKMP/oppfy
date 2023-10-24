@@ -1,76 +1,10 @@
 import { config, createGenericFont } from "@tamagui/config";
-import { createFont, createTamagui } from "tamagui";
 import { createInterFont } from "@tamagui/font-inter";
-import { createSilkscreenFont } from '@tamagui/font-silkscreen'
+import { createSilkscreenFont } from "@tamagui/font-silkscreen";
+import { themes, tokens } from "@tamagui/themes";
+import { createFont, createTamagui, createTokens } from "tamagui";
 
-// const headingFont = createFont(
-//   {
-//     size: {
-//       4: 2,
-//       5: 13,
-//       6: 15,
-//       9: 35,
-//       10: 44,
-//     },
-//     weight: {
-//       6: '400',
-//       7: '700',
-//     },
-//     color: {
-//       6: '$colorFocus',
-//       7: '$color',
-//     },
-//     letterSpacing: {
-//       5: 2,
-//       6: 1,
-//       7: 0,
-//       8: 0,
-//       9: -1,
-//       10: -1.5,
-//       12: -2,
-//       14: -3,
-//       15: -4,
-//     },
-//     lineHeight: {
-//       5: 50,
-//       6: 1,
-//       7: 0,
-//       8: 0,
-//       9: -1,
-//       10: -1.5,
-//       12: -2,
-//       14: -3,
-//       15: -4,
-//     },
-
-//     // for native
-//     face: {
-//       100: { normal: 'SpartanThin' },
-//       200: { normal: 'SpartanExtraLight' },
-//       300: { normal: 'SpartanLight' },
-//       400: { normal: 'SpartanRegular' },
-//       500: { normal: 'SpartanMedium' },
-//       600: { normal: 'SpartanSemiBold' },
-//       700: { normal: 'SpartanBold' },
-//       800: { normal: 'SpartanExtraBold' },
-//     },
-//   },
-// );
-
-// const bodyFont = createInterFont(
-//   {
-//     weight: {
-//       1: '400',
-//       7: '600',
-//     },
-//   },
-//   {
-//     sizeSize: (size) => Math.round(size),
-//     sizeLineHeight: (size) => Math.round(size * 1.1 + (size >= 12 ? 8 : 4)),
-//   }
-// )
-
-const silkscreenFont = createSilkscreenFont()
+const silkscreenFont = createSilkscreenFont();
 
 const headingFont = createInterFont(
   {
@@ -81,16 +15,16 @@ const headingFont = createInterFont(
       10: 44,
     },
     transform: {
-      6: 'uppercase',
-      7: 'none',
+      6: "uppercase",
+      7: "none",
     },
     weight: {
-      6: '400',
-      7: '700',
+      6: "400",
+      7: "700",
     },
     color: {
-      6: '$colorFocus',
-      7: '$color',
+      6: "$colorFocus",
+      7: "$color",
     },
     letterSpacing: {
       5: 2,
@@ -105,32 +39,32 @@ const headingFont = createInterFont(
     },
     // for native
     face: {
-      700: { normal: 'InterBold' },
-      800: { normal: 'InterBold' },
-      900: { normal: 'InterBold' },
+      700: { normal: "InterBold" },
+      800: { normal: "InterBold" },
+      900: { normal: "InterBold" },
     },
   },
-  { sizeLineHeight: (size) => Math.round(size * 1.1 + (size < 30 ? 10 : 5)) }
-)
+  { sizeLineHeight: (size) => Math.round(size * 1.1 + (size < 30 ? 10 : 5)) },
+);
 
 const bodyFont = createInterFont(
   {
     weight: {
-      1: '400',
-      7: '600',
+      1: "400",
+      7: "600",
     },
   },
   {
     sizeSize: (size) => Math.round(size),
     sizeLineHeight: (size) => Math.round(size * 1.1 + (size >= 12 ? 8 : 4)),
-  }
-)
+  },
+);
 
 const monoFont = createGenericFont(
   `"ui-monospace", "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace`,
   {
     weight: {
-      1: '500',
+      1: "500",
     },
     size: {
       1: 11,
@@ -153,16 +87,16 @@ const monoFont = createGenericFont(
   },
   {
     sizeLineHeight: (x) => x * 1.5,
-  }
-)
+  },
+);
 
 const tamaguiConfig = createTamagui({
   ...config,
   fonts: {
-  heading: headingFont,
-  body: bodyFont,
-  mono: monoFont,
-  silkscreen: silkscreenFont,
+    heading: headingFont,
+    body: bodyFont,
+    mono: monoFont,
+    silkscreen: silkscreenFont,
   },
 });
 
@@ -170,6 +104,7 @@ const tamaguiConfig = createTamagui({
 type Conf = typeof tamaguiConfig;
 
 declare module "tamagui" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface TamaguiCustomConfig extends Conf {}
 }
 export default tamaguiConfig;

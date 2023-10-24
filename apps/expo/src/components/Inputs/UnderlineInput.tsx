@@ -43,27 +43,32 @@ interface UnderlineInputProps extends Omit<InputProps, OmittedProps> {
   children?: React.ReactNode;
 }
 
-const UnderlineInput = React.forwardRef<Input, UnderlineInputProps>(
-  ({ underlineColor = "black", underlineWidth = 2, children, ...props }, ref) => {
-  return (
-    <Input
-      ref={ref}
-      padding={0}
-      borderTopWidth={0}
-      borderLeftWidth={0}
-      borderRightWidth={0}
-      borderTopLeftRadius={0}
-      borderTopRightRadius={0}
-      borderBottomLeftRadius={0}
-      borderBottomRightRadius={0}
-      borderBottomWidth={underlineWidth}
-      borderBottomColor={underlineColor}
-      {...props}
-    >
-      {children}
-    </Input>
-  );
-});
+const UnderlineInput = React.forwardRef<TextInput, UnderlineInputProps>(
+  (
+    { underlineColor = "black", underlineWidth = 2, children, ...props },
+    ref,
+  ) => {
+    return (
+      <Input
+        ref={ref}
+        padding={0}
+        borderTopWidth={0}
+        borderLeftWidth={0}
+        borderRightWidth={0}
+        borderTopLeftRadius={0}
+        borderTopRightRadius={0}
+        borderBottomLeftRadius={0}
+        borderBottomRightRadius={0}
+        borderBottomWidth={underlineWidth}
+        borderBottomColor={underlineColor}
+        backgroundColor="transparent"
+        {...props}
+      >
+        {children}
+      </Input>
+    );
+  },
+);
 
 UnderlineInput.displayName = "UnderlineInput"; // Useful for debugging
 

@@ -17,7 +17,7 @@ const Profile = () => {
   ];
 
   return (
-    <View flex={1} backgroundColor="$background" paddingHorizontal="$5">
+    <View flex={1} backgroundColor="$backgroundStrong" paddingHorizontal="$5">
       <YStack space="$3">
         <XStack justifyContent="space-between">
           <Image source={PFP} width={70} height={70} borderRadius={35} />

@@ -49,7 +49,7 @@ const RootLayout = () => {
       <SessionProvider>
         <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
           <SafeAreaProvider>
-            <View flex={1} backgroundColor="$background">
+            <View flex={1} backgroundColor="$backgroundStrong">
               {/* <Stack
                 screenOptions={{
                   headerShown: false,

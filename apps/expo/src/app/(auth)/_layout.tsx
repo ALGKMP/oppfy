@@ -8,12 +8,17 @@ import { Stack } from "~/layouts";
 
 const AuthLayout = () => {
   return (
-    <View flex={1} backgroundColor="$background">
+    <View flex={1} backgroundColor="$backgroundStrong">
       <Stack
         screenOptions={{
           headerTitle: "OPPFY",
           header: ({ navigation, options, back }) => (
-            <XStack padding="$4" height="$6" alignItems="center" justifyContent="space-between">
+            <XStack
+              padding="$4"
+              height="$6"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <View>
                 {back && (
                   <ChevronLeft size="$2" onPress={() => navigation.goBack()} />
@@ -32,16 +37,9 @@ const AuthLayout = () => {
           },
         }}
       >
+        <Stack.Screen name="phone-number" options={{ animation: "fade" }} />
 
-        <Stack.Screen
-          name="phone-number"
-          options={{ animation: "fade" }}
-        />
-
-        <Stack.Screen
-          name="phone-number-otp"
-          options={{ animation: "fade" }}
-        />
+        <Stack.Screen name="phone-number-otp" options={{ animation: "fade" }} />
       </Stack>
       <StatusBar />
     </View>

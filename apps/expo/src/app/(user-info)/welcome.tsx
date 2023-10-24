@@ -14,7 +14,7 @@ const Welcome = () => {
   return (
     <View
       flex={1}
-      backgroundColor="$background"
+      backgroundColor="$backgroundStrong"
       padding="$6"
       justifyContent="space-between"
     >

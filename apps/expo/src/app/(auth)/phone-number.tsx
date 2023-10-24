@@ -74,14 +74,12 @@ const PhoneNumber = () => {
     >
       <View
         flex={1}
-        backgroundColor="$background"
+        backgroundColor="$backgroundStrong"
         padding="$6"
         justifyContent="space-between"
       >
         <YStack space>
-          <H2>
-            Lets start with your number
-          </H2>
+          <H2>Lets start with your number</H2>
 
           <YStack space="$3">
             <Controller
