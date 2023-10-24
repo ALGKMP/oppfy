@@ -56,7 +56,7 @@ const PhoneNumber = () => {
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "auth/phone-number-otp" });
+    router.push({ params: data, pathname: "phone-number-otp" });
   };
 
   const onSubmitError = () => {

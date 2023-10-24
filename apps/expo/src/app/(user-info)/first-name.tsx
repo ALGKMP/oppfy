@@ -56,7 +56,7 @@ const FirstName = () => {
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "/user-details/date-of-birth" });
+    router.push({ params: data, pathname: "date-of-birth" });
   };
 
   const onSubmitError = () => {

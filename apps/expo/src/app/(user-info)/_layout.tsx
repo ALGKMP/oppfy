@@ -26,7 +26,7 @@ const UserDetailsLayout = () => {
   }
 
   if (!isSignedIn) {
-    return <Redirect href="/auth/phone-number" />;
+    return <Redirect href="/(auth)/phone-number" />;
   }
 
   return (

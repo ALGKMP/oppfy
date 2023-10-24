@@ -8,7 +8,7 @@ const Welcome = () => {
   const router = useRouter();
 
   const onSubmit = () => {
-    router.push("/user-details/first-name");
+    router.push("first-name");
   };
 
   return (

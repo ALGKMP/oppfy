@@ -21,7 +21,7 @@ const Index = () => {
   } else if (isSignedIn && (!userData?.firstName || !userData?.dateOfBirth)) {
     return <Redirect href="welcome" />;
   } else {
-    return <Redirect href="auth/phone-number" />;
+    return <Redirect href="phone-number" />;
   }
 };
 
