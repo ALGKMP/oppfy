@@ -11,29 +11,35 @@ const AuthLayout = () => {
     <View flex={1} backgroundColor="$backgroundStrong">
       <Stack
         screenOptions={{
-          headerTitle: "OPPFY",
           header: ({ navigation, options, back }) => (
             <XStack
-              padding="$4"
-              height="$6"
+              padding="$6"
               alignItems="center"
               justifyContent="space-between"
+              style={{ backgroundColor: "black" }}
             >
-              <View>
+              <View width="$4">
                 {back && (
-                  <ChevronLeft size="$2" onPress={() => navigation.goBack()} />
+                  <ChevronLeft
+                    size="$1.5"
+                    onPress={() => navigation.goBack()}
+                  />
                 )}
               </View>
 
-              <Text>OPPFY</Text>
+              <Text fontSize={22} fontWeight="600">
+                OPPFY
+              </Text>
 
-              <Link href="https://help">
-                <Text>Help</Text>
-              </Link>
+              <View width="$4">
+                <Text fontWeight="500" fontSize={16}>
+                  Help
+                </Text>
+              </View>
             </XStack>
           ),
           headerStyle: {
-            backgroundColor: getTokens().color.gray1Dark.val,
+            backgroundColor: "black",
           },
         }}
       >

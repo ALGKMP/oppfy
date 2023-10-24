@@ -125,7 +125,7 @@ const PhoneNumber = () => {
             }}
             onPress={handleSubmit(onSubmit, onSubmitError)}
             height="$4"
-            borderRadius="$8"
+            borderRadius="$6"
             backgroundColor={isValid ? "white" : "gray"}
             disabled={!isValid}
           >
