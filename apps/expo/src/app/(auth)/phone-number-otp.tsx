@@ -190,7 +190,10 @@ const PhoneNumberOTP = () => {
             onPress={handleSubmit(onSubmit, onSubmitError)}
             height="$4"
             borderRadius="$6"
-            backgroundColor={isValid ? "white" : "gray"} // Change background color based on validity
+            // backgroundColor={isValid ? "white" : "gray"} // Change background color based on validity
+            backgroundColor={
+              !isValid || isSendingCode || isCheckingCode ? "gray" : "white"
+            }
             disabled={!isValid || isSendingCode || isCheckingCode}
           >
             {isSendingCode || isCheckingCode ? (

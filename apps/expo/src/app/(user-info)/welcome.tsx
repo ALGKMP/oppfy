@@ -31,7 +31,7 @@ const Welcome = () => {
           }}
           onPress={onSubmit}
           height="$4"
-          borderRadius="$8"
+          borderRadius="$6"
           backgroundColor="white"
         >
           <Text color="black" fontWeight="500" fontSize={16}>
