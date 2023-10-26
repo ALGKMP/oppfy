@@ -16,19 +16,19 @@ datasource db {
 // uncomment the @db.Text annotations below
 // @see https://next-auth.js.org/schemas/models
 
+
 model User {
     id String @id @unique
 
     firstName   String?
     dateOfBirth String? //! string for testing purposes
-
     image String?
-
-    createdPosts Posts[] @relation("createdPosts")
-
-    postsOf      Posts[]       @relation("postsOf")
+    createdPosts Post[] @relation("createdPosts")
+    postsOf      Post[]       @relation("postsOf")
     profilePhoto ProfilePhoto?
 }
+
+// TODO: UserDetails
 
 model ProfilePhoto {
     id         String    @id @default(cuid())
@@ -38,15 +38,43 @@ model ProfilePhoto {
     dateEdited DateTime?
 }
 
-model Posts {
+model Post {
     id         String    @id @default(cuid())
     author     User      @relation(fields: [authorId], references: [id], "createdPosts")
     authorId   String
     postedOf   User      @relation(fields: [postedOfId], references: [id], "postsOf")
     postedOfId String
+    // comments Comment[]
     caption    String
-    s3Key      String
+    // postStats PostStats
+
+    // TODO this 
+    // media      Media    @relation(fields: [mediaId], references: [id])
+    mediaId    String
     datePosted DateTime?
+}
+model PostStats{
+    id String @id @default(cuid())
+    // likes Like[] 
+    views Int
+}
+
+model Like {
+    id String @id @default(cuid())
+    // TODO liker
+    // TODO likee
+
+}
+
+model Comment {
+    id String @id @default(cuid())
+    // author User @relation(fields: [authorId], references: [id])
+    // authorId String
+    // post Post @relation(fields: [postId], references: [id])
+    // postId String
+    comment String
+    datePosted DateTime?
+
 }
 
 model VerificationToken {
@@ -55,4 +83,17 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Media {
+    id String @id @default(cuid())
+    type MediaTypes
+    url String
+    thumbnailUrl String
+    timestamp DateTime?
+}
+
+enum MediaTypes {
+  USER
+  ADMIN
 }
