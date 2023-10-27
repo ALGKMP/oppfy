@@ -33,6 +33,7 @@ import {
   YStack,
 } from "tamagui";
 import * as z from "zod";
+
 import { api } from "~/utils/api";
 import { PhoneNumberInput, UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
@@ -52,7 +53,6 @@ const PhoneNumber = () => {
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
   const phoneNumberInputRef = useRef<TextInput>(null);
-
 
   const {
     control,
@@ -78,7 +78,6 @@ const PhoneNumber = () => {
 
   // Test S3 connection
   // console.log(api.profilePhoto.test.useQuery());
-  
 
   const onSubmitError = () => {
     setTriggerShake(true);
@@ -103,9 +102,9 @@ const PhoneNumber = () => {
           <H2>Lets start with your number</H2>
 
           <PhoneNumberInput
-            // onCountrySelect={() => {
-            //   console.log("Country selected");
-            // }}
+            onChange={(value) => {
+              console.log(value);
+            }}
           />
 
           <YStack space="$3">

@@ -1,45 +1,68 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, SectionList, TextInput, TouchableOpacity } from "react-native";
 import { ChevronLeft } from "@tamagui/lucide-icons";
-import {
-  AsYouType,
-  CountryCode,
-  format,
-  formatNumber,
-} from "libphonenumber-js";
+import { AsYouType } from "libphonenumber-js";
+import type { CountryCode } from "libphonenumber-js";
 import { Button, Separator, Text, useTheme, View, XStack } from "tamagui";
 
-import { CountryData, groupedCountries } from "~/data/groupedCountries";
+import { groupedCountries } from "~/data/groupedCountries";
+import type { CountryData } from "~/data/groupedCountries";
 
 interface PhoneNumberInputProps {
-  onNumberChange?: (e164Formatted: string) => void;
+  onChange: (number: string, countryCode: string) => void;
 }
 
-const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
-  onNumberChange,
-}) => {
+const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({ onChange }) => {
   const theme = useTheme();
   const [show, setShow] = useState(false);
-  const [number, setNumber] = useState("");
   const [countryCode, setCountryCode] = useState<CountryCode>("US");
   const [dialingCode, setDialingCode] = useState("1");
-  const [rawInput, setRawInput] = useState(""); // <- New state to keep track of raw user input
 
-  const formatPhoneNumber = (inputNumber: string) => {
-    const formatted = new AsYouType(countryCode).input(inputNumber);
-    setNumber(formatted); // Set the formatted display number
+  const [formattedPhoneNumber, setFormattedPhoneNumber] = useState("");
+  const [unformattedPhoneNumber, setUnformattedPhoneNumber] = useState("");
 
-    const e164Formatted = formatNumber(formatted, countryCode, "E.164");
-    if (onNumberChange) {
-      onNumberChange(e164Formatted);
+  const [previousValue, setPreviousValue] = useState(""); // NEW: Store the previous input value
+
+  const unformatPhoneNumber = (phoneNumber: string) => {
+    return phoneNumber.replace(/\D+/g, "");
+  };
+
+  const handlePhoneNumberChange = (newPhoneNumber: string) => {
+    const isBackspacePressed =
+      newPhoneNumber.length < formattedPhoneNumber.length;
+
+    // Format the phone number
+    const newFormattedPhoneNumber = formatPhoneNumber(
+      newPhoneNumber,
+      isBackspacePressed,
+    );
+
+    setFormattedPhoneNumber(newFormattedPhoneNumber);
+    onChange(newFormattedPhoneNumber, countryCode);
+  };
+
+  const formatPhoneNumber = (number: string, isBackspace: boolean) => {
+    if (isBackspace) {
+      // Handle backspace by stripping the last digit from the unformatted number
+      const strippedValue = unformatPhoneNumber(formattedPhoneNumber).slice(
+        0,
+        -1,
+      );
+      return new AsYouType(countryCode).input(strippedValue);
+    } else {
+      return new AsYouType(countryCode).input(number);
     }
   };
 
-  const handleCountrySelect = (selectedCountry: CountryData) => {
-    setDialingCode(selectedCountry.dialingCode);
-    setCountryCode(selectedCountry.countryCode);
+  useEffect(() => {
+    setPreviousValue(formattedPhoneNumber);
+  }, [formattedPhoneNumber]);
+
+  const handleCountrySelect = ({ countryCode, dialingCode }: CountryData) => {
+    setDialingCode(dialingCode);
+    setCountryCode(countryCode);
     setShow(false);
-    formatPhoneNumber(number.replace(`+${dialingCode}`, ""));
+    onChange(unformattedPhoneNumber, countryCode);
   };
 
   const ModalContent = () => (
@@ -89,10 +112,10 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
       <Button onPress={() => setShow(true)}>{dialingCode}</Button>
 
       <TextInput
-        value={number}
+        value={formattedPhoneNumber}
+        onChangeText={handlePhoneNumberChange}
         placeholder="Enter phone number"
         keyboardType="number-pad"
-        onChangeText={formatPhoneNumber}
         style={{
           padding: 12,
           fontSize: 16,
