@@ -70,6 +70,6 @@ const UnderlineInput = React.forwardRef<TextInput, UnderlineInputProps>(
   },
 );
 
-UnderlineInput.displayName = "UnderlineInput"; // Useful for debugging
+UnderlineInput.displayName = "UnderlineInput";
 
 export default UnderlineInput;

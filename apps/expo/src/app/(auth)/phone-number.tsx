@@ -1,10 +1,26 @@
-import React, { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  SafeAreaView,
+  SectionList,
+  TouchableOpacity,
+} from "react-native";
 import type { TextInput } from "react-native";
+import {
+  CountryButton,
+  CountryPicker,
+  ListHeaderComponentProps,
+} from "react-native-country-codes-picker";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
+// import CountryPicker, {
+//   Country,
+//   CountryCode,
+// } from "react-native-country-picker-modal";
 import {
   Button,
   Checkbox,
@@ -19,8 +35,9 @@ import {
 import * as z from "zod";
 
 import { api } from "~/utils/api";
-import { UnderlineInput } from "~/components/Inputs";
+import { PhoneNumberInput, UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
+import { groupedCountries } from "~/data/groupedCountries";
 
 type FormData = z.infer<typeof schemaValidation>;
 
@@ -80,6 +97,12 @@ const PhoneNumber = () => {
       >
         <YStack space>
           <H2>Lets start with your number</H2>
+
+          <PhoneNumberInput
+            onCountrySelect={() => {
+              console.log("Country selected");
+            }}
+          />
 
           <YStack space="$3">
             <Controller

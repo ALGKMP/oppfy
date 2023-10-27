@@ -50,11 +50,6 @@ const RootLayout = () => {
         <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
           <SafeAreaProvider>
             <View flex={1} backgroundColor="$backgroundStrong">
-              {/* <Stack
-                screenOptions={{
-                  headerShown: false,
-                }}
-              /> */}
               <Slot />
               <StatusBar />
             </View>
