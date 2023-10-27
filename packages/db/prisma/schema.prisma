@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
@@ -8,44 +5,69 @@ generator client {
 datasource db {
     provider     = "mysql"
     url          = env("DATABASE_URL")
-    relationMode = "prisma"
 }
 
-// NextAuth.js Models
-// NOTE: When using postgresql, mysql or sqlserver, 
-// uncomment the @db.Text annotations below
-// @see https://next-auth.js.org/schemas/models
-
 model User {
-    id String @id @unique
-
-    firstName   String?
-    dateOfBirth String? //! string for testing purposes
-
-    image String?
-
-    createdPosts Posts[] @relation("createdPosts")
-
-    postsOf      Posts[]       @relation("postsOf")
+    id           String        @id @unique
+    firstName    String?
+    dateOfBirth  String?
+    image        String?
     profilePhoto ProfilePhoto?
+    createdPosts Post[]        @relation("createdPosts")
+    postsOf      Post[]        @relation("postsOf")
+    likedPosts   Like[]
+    comments     Comment[]
 }
 
 model ProfilePhoto {
     id         String    @id @default(cuid())
     user       User      @relation(fields: [userId], references: [id])
     userId     String    @unique
-    s3Key      String
+    media      Media     @relation(fields: [mediaId], references: [id])
+    mediaId    String    @unique
     dateEdited DateTime?
 }
 
-model Posts {
+model Post {
     id         String    @id @default(cuid())
-    author     User      @relation(fields: [authorId], references: [id], "createdPosts")
+    datePosted DateTime
+
+    author     User      @relation(fields: [authorId], references: [id], name: "createdPosts")
     authorId   String
-    postedOf   User      @relation(fields: [postedOfId], references: [id], "postsOf")
+    postedOf   User      @relation(fields: [postedOfId], references: [id], name: "postsOf")
     postedOfId String
+
     caption    String
-    s3Key      String
+    postStats  PostStats?
+    comments   Comment[]
+    media      Media[]     
+}
+
+model PostStats {
+    id    String @id @default(cuid())
+
+    likes Like[] 
+    views Int
+
+    post Post @relation(fields: [postId], references: [id])
+    postId String @unique
+}
+
+model Like {
+    id     String @id @default(cuid())
+    likedBy  User   @relation(fields: [userId], references: [id])
+    userId String
+    postStats   PostStats   @relation(fields: [postStatsId], references: [id])
+    postStatsId String @unique
+}
+
+model Comment {
+    id         String    @id @default(cuid())
+    author     User      @relation(fields: [authorId], references: [id])
+    authorId   String
+    post       Post      @relation(fields: [postId], references: [id])
+    postId     String
+    comment    String
     datePosted DateTime?
 }
 
@@ -53,6 +75,21 @@ model VerificationToken {
     identifier String
     token      String   @unique
     expires    DateTime
-
     @@unique([identifier, token])
+}
+
+model Media {
+    id           String      @id @default(cuid())
+    post       Post @relation(fields: [postId], references: [id])
+    postId     String
+    type         MediaTypes
+    objectKey    String
+    thumbnailUrl String
+    profilePhoto ProfilePhoto?
+    timestamp    DateTime?
+}
+
+enum MediaTypes {
+  USER
+  ADMIN
 }

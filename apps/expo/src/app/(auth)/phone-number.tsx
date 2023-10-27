@@ -33,7 +33,6 @@ import {
   YStack,
 } from "tamagui";
 import * as z from "zod";
-
 import { api } from "~/utils/api";
 import { PhoneNumberInput, UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
@@ -53,6 +52,7 @@ const PhoneNumber = () => {
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
   const phoneNumberInputRef = useRef<TextInput>(null);
+
 
   const {
     control,
@@ -75,6 +75,10 @@ const PhoneNumber = () => {
   const onSubmit = async (data: FormData) => {
     router.push({ params: data, pathname: "phone-number-otp" });
   };
+
+  // Test S3 connection
+  // console.log(api.profilePhoto.test.useQuery());
+  
 
   const onSubmitError = () => {
     setTriggerShake(true);

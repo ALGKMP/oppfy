@@ -1,5 +1,5 @@
 import { authRouter } from "./router/auth";
-import { profilePhotoRouter } from "./router/profilePhoto";
+import { profilePhotoRouter } from "./router/profile";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({

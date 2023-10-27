@@ -3,9 +3,10 @@ import {
     GetObjectCommand, 
     DeleteObjectCommand, 
     PutObjectCommand,
+    ListObjectsCommand
 } from "@aws-sdk/client-s3";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 const profilePhotoBucket = "oppfy-profile-pictures";
 import { Prisma } from '@prisma/client';
@@ -17,6 +18,7 @@ import { Prisma } from '@prisma/client';
     Deleting: send key from backend to client and delete image from R2 on clientside.
 */
 export const profilePhotoRouter = createTRPCRouter({
+    // TODO: change profile content
     upload: protectedProcedure.input(z.object({
         file: z.string(), // Replace with suitable file type
         key: z.string(),
@@ -122,7 +124,6 @@ export const profilePhotoRouter = createTRPCRouter({
                 console.log("Error: problem getting profile photo from R2.");
                 return { success: false, message: "Error getting file from R2." };
             }
-
                 console.log("Success: profile photo retrieved from R2")
                 return data;
         } catch(err) {
@@ -132,4 +133,11 @@ export const profilePhotoRouter = createTRPCRouter({
         }
 
     }),
+    test : publicProcedure.query(async ({ctx}) => {
+        // get all the objects in the bucket
+        const s3ListObjectCommandInput = { Bucket: "user-media-uploads-0xc3" };
+        const data = await ctx.s3Client.send(new ListObjectsCommand(s3ListObjectCommandInput));
+        console.log(data);
+        return { success: true, message: "Test successful." };
+    })
 })
