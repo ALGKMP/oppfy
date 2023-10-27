@@ -3,9 +3,10 @@ import {
     GetObjectCommand, 
     DeleteObjectCommand, 
     PutObjectCommand,
+    ListObjectsCommand
 } from "@aws-sdk/client-s3";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 const profilePhotoBucket = "oppfy-profile-pictures";
 import { Prisma } from '@prisma/client';
@@ -132,4 +133,11 @@ export const profilePhotoRouter = createTRPCRouter({
         }
 
     }),
+    test : publicProcedure.query(async ({ctx}) => {
+        // get all the objects in the bucket
+        const s3ListObjectCommandInput = { Bucket: "user-media-uploads-0xc3" };
+        const data = await ctx.s3Client.send(new ListObjectsCommand(s3ListObjectCommandInput));
+        console.log(data);
+        return { success: true, message: "Test successful." };
+    })
 })
