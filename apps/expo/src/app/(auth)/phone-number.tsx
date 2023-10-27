@@ -103,9 +103,9 @@ const PhoneNumber = () => {
           <H2>Lets start with your number</H2>
 
           <PhoneNumberInput
-            onCountrySelect={() => {
-              console.log("Country selected");
-            }}
+            // onCountrySelect={() => {
+            //   console.log("Country selected");
+            // }}
           />
 
           <YStack space="$3">
