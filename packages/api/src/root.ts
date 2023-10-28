@@ -1,10 +1,10 @@
 import { authRouter } from "./router/auth";
-import { profilePhotoRouter } from "./router/profile";
+import { profileRouter } from "./router/profile";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
   auth: authRouter,
-  profilePhoto: profilePhotoRouter,
+  profilePhoto: profileRouter,
 });
 
 // export type definition of API
