@@ -33,6 +33,7 @@ import { PhoneNumberInput, UnderlineInput } from "~/components/Inputs";
 import QuickList from "~/components/QuickList";
 import withShake from "~/components/withShake";
 import { groupedCountries } from "~/data/groupedCountries";
+import PhoneNumberOTP from "./phone-number-otp";
 
 type FormData = z.infer<typeof schemaValidation>;
 
@@ -138,11 +139,6 @@ const PhoneNumber = () => {
                 />
               )}
             />
-            {errors.phoneNumber && (
-              <Text fontSize="$2" color="$red11">
-                {errors.phoneNumber.message}
-              </Text>
-            )}
           </YStack>
 
           <Text

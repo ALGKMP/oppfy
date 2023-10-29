@@ -22,7 +22,7 @@ import {
 import * as z from "zod";
 
 import { api } from "~/utils/api";
-import { UnderlineInput } from "~/components/Inputs";
+import { PinCodeInput, UnderlineInput } from "~/components/Inputs";
 import withShake from "~/components/withShake";
 import useParams from "~/hooks/useParams";
 
@@ -138,6 +138,8 @@ const PhoneNumberOTP = () => {
       >
         <YStack space>
           <H2>Enter otp code</H2>
+
+          <PinCodeInput />
 
           <YStack space="$3">
             <Controller
