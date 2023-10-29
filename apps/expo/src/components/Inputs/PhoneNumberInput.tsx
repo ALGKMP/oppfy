@@ -1,35 +1,89 @@
-import React, { useEffect, useState } from "react";
-import { Modal, SectionList, TextInput, TouchableOpacity } from "react-native";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import {
+  Dimensions,
+  LayoutChangeEvent,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import { ChevronLeft } from "@tamagui/lucide-icons";
-import { AsYouType, getExampleNumber } from "libphonenumber-js";
+import parsePhoneNumberFromString, {
+  AsYouType,
+  getExampleNumber,
+  isValidNumber,
+} from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
 import examples from "libphonenumber-js/examples.mobile.json";
-import { Button, Separator, Text, useTheme, View, XStack } from "tamagui";
+import { Button, Input, Text, useTheme, View, XStack } from "tamagui";
+import type {
+  ButtonProps,
+  InputProps,
+  StackProps,
+  TextProps,
+  XStackProps,
+} from "tamagui";
+import { TypeOf } from "zod";
 
 import { groupedCountries } from "~/data/groupedCountries";
 import type { CountryData } from "~/data/groupedCountries";
 
-interface PhoneNumberInputProps {
-  onChange: (number: string, countryCode: string) => void;
+const screenHeight = Dimensions.get("window").height;
+
+interface OnChangeParams {
+  dialingCode: string;
+  phoneNumber: string;
+  isValid: boolean;
 }
 
-const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({ onChange }) => {
-  const theme = useTheme();
-  const [show, setShow] = useState(false);
+interface PhoneNumberInputProps {
+  onChange?: ({ dialingCode, phoneNumber }: OnChangeParams) => void;
+  onInputLayout?: (event: LayoutChangeEvent) => void;
+  dialingCodeButtonStyle?: ButtonProps;
+  dialingCodeTextStyle?: TextProps;
+  phoneNumberInputStyle?: InputProps;
+  inputsContainerStyle?: XStackProps;
+  modalContainerStyle?: StackProps;
+}
+
+interface PhoneNumberInputHandles {
+  focus: () => void;
+}
+
+const PhoneNumberInput = forwardRef<
+  PhoneNumberInputHandles,
+  PhoneNumberInputProps
+>((props, ref) => {
   const [countryCode, setCountryCode] = useState<CountryCode>("US");
-  const [dialingCode, setDialingCode] = useState("1");
+  const [dialingCode, setDialingCode] = useState("+1");
 
   const [rawInput, setRawInput] = useState("");
 
-  const getExpectedLengthForCountry = (countryCode: CountryCode) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const inputRef = useRef<TextInput>(null);
+
+  // Expose focus method to parent via ref
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+  }));
+
+  const getExpectedLengthForCountry = (countryCode: CountryCode): number => {
     const exampleNumber = getExampleNumber(countryCode, examples);
-    if (exampleNumber) {
-      return exampleNumber.formatNational().replace(/\D+/g, "").length;
-    }
-    return 10; // default value in case the library doesn't provide an example
+
+    return exampleNumber
+      ? exampleNumber.formatNational().replace(/\D+/g, "").length
+      : Infinity;
   };
 
-  const handleRawInputChange = (input: string) => {
+  const handleRawInputChange = (input: string): void => {
     setRawInput(input);
 
     const unformattedNumbers = input.replace(/\D+/g, "");
@@ -40,13 +94,25 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({ onChange }) => {
       setRawInput(formatted);
     }
 
-    onChange(unformattedNumbers, countryCode);
+    if (props.onChange) {
+      const completeNumber = `${dialingCode}${unformattedNumbers}`;
+      const valid = isValidNumber(completeNumber, countryCode);
+
+      props.onChange({
+        dialingCode,
+        phoneNumber: unformattedNumbers,
+        isValid: valid,
+      });
+    }
   };
 
-  const handleCountrySelect = ({ countryCode, dialingCode }: CountryData) => {
+  const handleCountrySelect = ({
+    countryCode,
+    dialingCode,
+  }: CountryData): void => {
     setDialingCode(dialingCode);
     setCountryCode(countryCode);
-    setShow(false);
+    setIsModalVisible(false);
 
     const unformattedNumbers = rawInput.replace(/\D+/g, "");
     const expectedLength = getExpectedLengthForCountry(countryCode);
@@ -58,90 +124,143 @@ const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({ onChange }) => {
     }
 
     setRawInput(newInput);
-    onChange(newInput, countryCode);
-  };
 
-  const ModalContent = () => (
-    <SectionList
-      sections={groupedCountries}
-      keyExtractor={(item) => item.dialingCode + item.name}
-      renderItem={({ item, index, section }) => (
-        <View paddingHorizontal="$6">
-          <TouchableOpacity
-            onPress={() => handleCountrySelect(item)}
-            style={{
-              padding: 12,
-              backgroundColor: theme.gray1.val,
-              borderTopLeftRadius: index === 0 ? 10 : 0,
-              borderTopRightRadius: index === 0 ? 10 : 0,
-              borderBottomLeftRadius:
-                index === section.data.length - 1 ? 10 : 0,
-              borderBottomRightRadius:
-                index === section.data.length - 1 ? 10 : 0,
-            }}
-          >
-            <XStack space={8} alignItems="center">
-              <Text fontSize={18}>{item.flag}</Text>
-              <Text fontSize={16} fontWeight="600">
-                {item.name}
-              </Text>
-              <Text fontSize={16} fontWeight="600" color="$gray11">
-                ({item.dialingCode})
-              </Text>
-            </XStack>
-          </TouchableOpacity>
-          {index !== section.data.length - 1 && <Separator />}
-        </View>
-      )}
-      renderSectionHeader={({ section: { title } }) => (
-        <View paddingHorizontal="$6" marginVertical={8}>
-          <Text fontSize={10} fontWeight="600">
-            {title}
-          </Text>
-        </View>
-      )}
-    />
-  );
+    if (props.onChange) {
+      props.onChange({ dialingCode, phoneNumber: unformattedNumbers });
+    }
+
+    setTimeout(() => inputRef.current?.focus(), 100);
+    // inputRef.current?.focus();
+  };
 
   return (
     <>
-      <Button onPress={() => setShow(true)}>{dialingCode}</Button>
+      <XStack {...props.inputsContainerStyle}>
+        <Button
+          onPress={() => {
+            setIsModalVisible(true);
+            inputRef.current?.blur();
+          }}
+          {...props.dialingCodeButtonStyle}
+        >
+          <XStack>
+            <Text {...props.dialingCodeTextStyle}>{dialingCode}</Text>
+          </XStack>
+        </Button>
 
-      <TextInput
-        value={rawInput}
-        onChangeText={handleRawInputChange}
-        placeholder="Enter phone number"
-        keyboardType="number-pad"
-        style={{
-          padding: 12,
-          fontSize: 16,
-          color: "white",
-          borderColor: "gray",
-          borderWidth: 1,
-          borderRadius: 8,
-        }}
-      />
+        <Input
+          ref={inputRef}
+          value={rawInput}
+          onLayout={props.onInputLayout}
+          onChangeText={handleRawInputChange}
+          keyboardType="number-pad"
+          {...props.phoneNumberInputStyle}
+        />
+      </XStack>
 
-      <Modal visible={show} animationType="slide">
-        <View backgroundColor="$backgroundStrong" flex={1}>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View {...props.modalContainerStyle}>
           <XStack
             padding="$6"
             alignItems="center"
             justifyContent="space-between"
-            backgroundColor="black"
           >
             <View width="$4">
-              <ChevronLeft size="$1.5" onPress={() => setShow(false)} />
+              <ChevronLeft
+                size="$1.5"
+                onPress={() => setIsModalVisible(false)}
+              />
             </View>
             <Text fontSize={16} fontWeight="600">
               Select Country
             </Text>
             <View width="$4" />
           </XStack>
-          <ModalContent />
+          <CountriesFlastList onSelect={handleCountrySelect} />
         </View>
       </Modal>
     </>
+  );
+});
+
+PhoneNumberInput.displayName = "PhoneNumberInput";
+
+interface CountriesFlastListProps {
+  onSelect: (countryData: CountryData) => void;
+}
+
+const CountriesFlastList = ({ onSelect }: CountriesFlastListProps) => {
+  const theme = useTheme();
+
+  return (
+    <FlashList
+      estimatedItemSize={48}
+      estimatedFirstItemOffset={76}
+      estimatedListSize={{
+        height: screenHeight - 76,
+        width: Dimensions.get("window").width,
+      }}
+      data={groupedCountries}
+      renderItem={({ item, index }) => {
+        const isFirstInGroup =
+          index === 0 || typeof groupedCountries[index - 1] === "string";
+
+        const isLastInGroup =
+          index === groupedCountries.length - 1 ||
+          typeof groupedCountries[index + 1] === "string";
+
+        if (typeof item === "string") {
+          // Rendering header
+          return (
+            <View paddingHorizontal="$6" marginVertical={8}>
+              <Text fontSize={10} fontWeight="600">
+                {item}
+              </Text>
+            </View>
+          );
+        } else {
+          // Render item
+          return (
+            <View paddingHorizontal="$6">
+              <TouchableOpacity
+                onPress={() => onSelect(item)}
+                style={{
+                  padding: 12,
+                  backgroundColor: theme.gray1.val,
+                  ...(isLastInGroup && {
+                    borderBottomLeftRadius: 10,
+                    borderBottomRightRadius: 10,
+                  }),
+                  ...(isFirstInGroup && {
+                    borderTopLeftRadius: 10,
+                    borderTopRightRadius: 10,
+                  }),
+                }}
+              >
+                <XStack space={8} alignItems="center">
+                  <Text fontSize={18}>{item.flag}</Text>
+                  <Text fontSize={16} fontWeight="600">
+                    {item.name}
+                  </Text>
+                  <Text fontSize={16} fontWeight="600" color="$gray11">
+                    ({item.dialingCode})
+                  </Text>
+                </XStack>
+              </TouchableOpacity>
+            </View>
+          );
+        }
+      }}
+      getItemType={(item) => {
+        // To achieve better performance, specify the type based on the item
+        return typeof item === "string" ? "sectionHeader" : "row";
+      }}
+    />
   );
 };
 

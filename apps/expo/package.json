@@ -45,10 +45,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.46.2",
-    "react-native": "0.71.13",
-    "react-native-country-codes-picker": "^2.3.4",
-    "react-native-country-picker-modal": "^2.0.0",
-    "react-native-email-link": "^1.14.7",
+    "react-native": "0.71.14",
     "react-native-gesture-handler": "^2.9.0",
     "react-native-pager-view": "^6.1.2",
     "react-native-reanimated": "^2.14.4",
@@ -58,7 +55,6 @@
     "react-native-tab-view": "^3.5.2",
     "superjson": "1.9.1",
     "tamagui": "^1.74.11",
-    "world-countries": "^5.0.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {

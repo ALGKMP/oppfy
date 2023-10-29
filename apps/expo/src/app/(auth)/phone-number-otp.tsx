@@ -49,7 +49,7 @@ const PhoneNumberOTP = () => {
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const phoneNumberOTPInputRef = useRef<TextInput>(null);
+  const phoneNumberOTPInputRef = useRef<TextInput | null>(null);
 
   const createUserMutation = api.auth.createUser.useMutation();
   const hasUserDetailsMutation = api.auth.hasUserDetails.useMutation();
@@ -85,12 +85,7 @@ const PhoneNumberOTP = () => {
       }
     };
 
-    console.log("PHONE NUMBER: " + signUpFlowParams.phoneNumber);
     void signInWithPhoneNumber();
-
-    if (phoneNumberOTPInputRef.current) {
-      phoneNumberOTPInputRef.current.focus();
-    }
   }, [signUpFlowParams.phoneNumber]);
 
   const onSubmit = async (data: FormData) => {
@@ -152,6 +147,7 @@ const PhoneNumberOTP = () => {
                 <ShakingUnderlineInput
                   height={40}
                   ref={phoneNumberOTPInputRef}
+                  onLayout={() => phoneNumberOTPInputRef.current?.focus()}
                   underlineWidth={1}
                   underlineColor={errors.phoneNumberOTP ? "$red11" : "white"}
                   placeholder="OTP Code"
