@@ -28,7 +28,6 @@ import type {
   TextProps,
   XStackProps,
 } from "tamagui";
-import { TypeOf } from "zod";
 
 import { groupedCountries } from "~/data/groupedCountries";
 import type { CountryData } from "~/data/groupedCountries";
@@ -38,13 +37,12 @@ const screenHeight = Dimensions.get("window").height;
 interface OnChangeParams {
   dialingCode: string;
   phoneNumber: string;
-  isValid: boolean;
 }
 
 interface PhoneNumberInputProps {
   onChange?: ({ dialingCode, phoneNumber }: OnChangeParams) => void;
   onInputLayout?: (event: LayoutChangeEvent) => void;
-  dialingCodeButtonStyle?: ButtonProps;
+  dialingCodeButtonStyle: ButtonProps;
   dialingCodeTextStyle?: TextProps;
   phoneNumberInputStyle?: InputProps;
   inputsContainerStyle?: XStackProps;
@@ -94,16 +92,11 @@ const PhoneNumberInput = forwardRef<
       setRawInput(formatted);
     }
 
-    if (props.onChange) {
-      const completeNumber = `${dialingCode}${unformattedNumbers}`;
-      const valid = isValidNumber(completeNumber, countryCode);
-
+    props.onChange &&
       props.onChange({
         dialingCode,
         phoneNumber: unformattedNumbers,
-        isValid: valid,
       });
-    }
   };
 
   const handleCountrySelect = ({
@@ -130,7 +123,6 @@ const PhoneNumberInput = forwardRef<
     }
 
     setTimeout(() => inputRef.current?.focus(), 100);
-    // inputRef.current?.focus();
   };
 
   return (

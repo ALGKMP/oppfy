@@ -1,43 +1,12 @@
 import React from "react";
-import { TextInput } from "react-native";
+import type { TextInput } from "react-native";
 import { Input } from "tamagui";
 import type { InputProps, SizeTokens } from "tamagui";
 
-type OmittedProps =
-  | "borderTopWidth"
-  | "borderLeftWidth"
-  | "borderRightWidth"
-  | "borderTopLeftRadius"
-  | "borderTopRightRadius"
-  | "borderBottomLeftRadius"
-  | "borderBottomRightRadius"
-  | "borderBlockColor"
-  | "borderBlockEndColor"
-  | "borderBlockStartColor"
-  | "borderBottomEndRadius"
-  | "borderBottomColor"
-  | "borderBottomWidth"
-  | "borderBottomStartRadius"
-  | "borderColor"
-  | "borderCurve"
-  | "borderEndColor"
-  | "borderEndEndRadius"
-  | "borderEndStartRadius"
-  | "borderEndWidth"
-  | "borderLeftColor"
-  | "borderRadius"
-  | "borderRightColor"
-  | "borderStartColor"
-  | "borderStartEndRadius"
-  | "borderStartStartRadius"
-  | "borderStartWidth"
-  | "borderStyle"
-  | "borderTopColor"
-  | "borderTopEndRadius"
-  | "borderTopStartRadius"
-  | "borderWidth";
+import type { OmitPropsStartingWith } from "@acme/types";
 
-interface UnderlineInputProps extends Omit<InputProps, OmittedProps> {
+interface UnderlineInputProps
+  extends OmitPropsStartingWith<InputProps, "border"> {
   underlineColor?: string;
   underlineWidth?: SizeTokens;
   children?: React.ReactNode;

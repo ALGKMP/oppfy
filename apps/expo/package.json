@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@acme/api": "^0.1.0",
+    "@acme/types": "^0.1.0",
     "@acme/eslint-config": "^0.2.0",
     "@acme/tailwind-config": "^0.1.0",
     "@babel/core": "^7.21.8",

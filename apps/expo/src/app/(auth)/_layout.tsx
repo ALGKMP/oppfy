@@ -44,7 +44,7 @@ const AuthLayout = () => {
         }}
       >
         <Stack.Screen name="phone-number" options={{ animation: "fade" }} />
-        <Stack.Screen name="phone-number-otp" options={{ animation: "fade" }} />
+        <Stack.Screen name="pin-code-otp" options={{ animation: "fade" }} />
       </Stack>
       <StatusBar />
     </View>

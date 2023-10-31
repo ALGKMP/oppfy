@@ -14,6 +14,7 @@ import {
   H2,
   H5,
   Spinner,
+  stylePropsText,
   Text,
   View,
   XStack,
@@ -34,10 +35,11 @@ interface SignUpFlowParams {
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  phoneNumberOTP: z.string().length(6, { message: "Invalid OTP" }),
+  phoneNumberOTP: z.string(),
 });
 
-const ShakingUnderlineInput = withShake(UnderlineInput);
+// const ShakingUnderlineInput = withShake(UnderlineInput);
+const ShakingPinCodeInput = withShake(PinCodeInput);
 
 const PhoneNumberOTP = () => {
   const router = useRouter();
@@ -49,7 +51,7 @@ const PhoneNumberOTP = () => {
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const phoneNumberOTPInputRef = useRef<TextInput | null>(null);
+  const PinCodeInputRef = useRef<TextInput | null>(null);
 
   const createUserMutation = api.auth.createUser.useMutation();
   const hasUserDetailsMutation = api.auth.hasUserDetails.useMutation();
@@ -93,8 +95,9 @@ const PhoneNumberOTP = () => {
       setIsCheckingCode(true); // Start the spinner when checking the code
 
       const userCredential = await confirm?.confirm(data.phoneNumberOTP);
+      const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
 
-      if (userCredential?.additionalUserInfo?.isNewUser) {
+      if (isNewUser) {
         await createUserMutation.mutateAsync({
           firebaseUid: userCredential.user.uid,
         });
@@ -109,7 +112,7 @@ const PhoneNumberOTP = () => {
     } catch (err) {
       console.log("ERROR: " + err);
       console.log("Error detected, triggering shake");
-      setError("phoneNumberOTP", { message: "Invalid code" });
+      setError("phoneNumberOTP", { message: "Incorrect code. Try again." });
       setTriggerShake(true);
     } finally {
       setIsCheckingCode(false); // Stop the spinner once the check is complete or there's an error
@@ -136,46 +139,113 @@ const PhoneNumberOTP = () => {
         padding="$6"
         justifyContent="space-between"
       >
-        <YStack space>
-          <H2>Enter otp code</H2>
-
-          <PinCodeInput />
+        <YStack flex={1} space="$8" alignItems="center">
+          <Text
+            alignSelf="center"
+            textAlign="center"
+            fontSize={22}
+            fontWeight="900"
+          >
+            Enter your 6 digit code
+          </Text>
 
           <YStack space="$3">
             <Controller
               control={control}
               name="phoneNumberOTP"
               render={({ field: { onChange, onBlur, value } }) => (
-                <ShakingUnderlineInput
-                  height={40}
-                  ref={phoneNumberOTPInputRef}
-                  onLayout={() => phoneNumberOTPInputRef.current?.focus()}
-                  underlineWidth={1}
-                  underlineColor={errors.phoneNumberOTP ? "$red11" : "white"}
-                  placeholder="OTP Code"
-                  placeholderTextColor={
-                    errors.phoneNumberOTP ? "$red11" : "$gray10"
-                  }
-                  focusStyle={{
-                    borderBottomColor: errors.phoneNumberOTP
-                      ? "$red11"
-                      : "white",
-                  }}
-                  color={errors.phoneNumberOTP ? "$red11" : "white"}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
+                <ShakingPinCodeInput
+                  ref={PinCodeInputRef}
+                  length={6}
                   value={value}
+                  onBlur={onBlur}
+                  onChange={onChange}
                   triggerShake={triggerShake}
                   onShakeComplete={handleShakeComplete}
+                  containerStyle={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  pinInputStyle={{
+                    width: 36,
+                    marginHorizontal: 4,
+                    borderColor: "gray",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderTopWidth: 0,
+                    borderLeftWidth: 0,
+                    borderRightWidth: 0,
+                    borderWidth: 2,
+                  }}
+                  activePinInputStyle={{
+                    borderColor: "white",
+                  }}
+                  textStyle={{
+                    fontSize: 36,
+                    color: "white",
+                    fontWeight: "900",
+                  }}
                 />
+
+                // <ShakingUnderlineInput
+                //   height={40}
+                //   ref={phoneNumberOTPInputRef}
+                //   onLayout={() => phoneNumberOTPInputRef.current?.focus()}
+                //   underlineWidth={1}
+                //   underlineColor={errors.phoneNumberOTP ? "$red11" : "white"}
+                //   placeholder="OTP Code"
+                //   placeholderTextColor={
+                //     errors.phoneNumberOTP ? "$red11" : "$gray10"
+                //   }
+                //   focusStyle={{
+                //     borderBottomColor: errors.phoneNumberOTP
+                //       ? "$red11"
+                //       : "white",
+                //   }}
+                //   color={errors.phoneNumberOTP ? "$red11" : "white"}
+                //   onChangeText={onChange}
+                //   onBlur={onBlur}
+                //   value={value}
+                //   triggerShake={triggerShake}
+                //   onShakeComplete={handleShakeComplete}
+                // />
               )}
             />
-            {errors.phoneNumberOTP && (
-              <Text fontSize="$2" color="$red11">
-                {errors.phoneNumberOTP.message}
-              </Text>
-            )}
           </YStack>
+
+          {isSendingCode && (
+            <Text
+              textAlign="center"
+              fontSize={14}
+              fontWeight="700"
+              color="$gray11"
+            >
+              Sending code...
+            </Text>
+          )}
+
+          {!isSendingCode && !errors.phoneNumberOTP && (
+            <Text
+              textAlign="center"
+              fontSize={14}
+              fontWeight="700"
+              color="$gray11"
+            >
+              Verification code sent to {signUpFlowParams.phoneNumber}
+            </Text>
+          )}
+
+          {errors.phoneNumberOTP && (
+            <Text
+              textAlign="center"
+              fontSize={14}
+              fontWeight="700"
+              color="$red11"
+            >
+              {errors.phoneNumberOTP.message}
+            </Text>
+          )}
         </YStack>
 
         <View alignSelf="stretch" marginTop="auto">

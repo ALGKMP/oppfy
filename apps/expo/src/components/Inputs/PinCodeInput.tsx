@@ -1,31 +1,51 @@
-// OTPInput.tsx
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import type { TouchableOpacityProps } from "react-native";
+import { Text } from "tamagui";
+import type { TextProps } from "tamagui";
 
-import React, { ChangeEvent, useRef, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-interface OTPInputProps {
-  length?: number;
+interface PinCodeInput {
+  focus: () => void;
 }
 
-const OTPInput: React.FC<OTPInputProps> = ({ length = 6 }) => {
-  const [code, setCode] = useState<string[]>(Array(length).fill(""));
+interface OTPInputProps {
+  onChange?: (value: string) => void;
+  onBlur?: () => void;
+  value?: string;
+  length: number;
+  containerStyle?: TouchableOpacityProps["style"];
+  pinInputStyle?: TouchableOpacityProps["style"];
+  activePinInputStyle?: TouchableOpacityProps["style"];
+  textStyle?: TextProps;
+}
+
+const PinCodeInput = forwardRef<PinCodeInput, OTPInputProps>((props, ref) => {
+  const [code, setCode] = useState<string[]>(Array(props.length).fill(""));
   const [activeIndex, setActiveIndex] = useState<number>(0);
+
   const inputRef = useRef<TextInput>(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+  }));
 
   const handleChangeText = (value: string) => {
     const newCode = [...code];
     const valueArr = value.split("");
-    for (let i = 0; i < length; i++) {
-      newCode[i] = valueArr[i] || "";
+    for (let i = 0; i < props.length; i++) {
+      newCode[i] = valueArr[i] ?? "";
     }
     setCode(newCode);
     setActiveIndex(value.length - 1);
+
+    props.onChange && props.onChange(value);
   };
 
   const handlePressBox = (index: number) => {
@@ -37,57 +57,37 @@ const OTPInput: React.FC<OTPInputProps> = ({ length = 6 }) => {
     <TouchableOpacity
       activeOpacity={1}
       onPress={() => inputRef.current?.focus()}
-      style={styles.container}
+      style={props.containerStyle}
     >
       {code.map((num, index) => (
         <TouchableOpacity
           key={index}
-          style={[styles.box, index === activeIndex ? styles.activeBox : {}]}
+          style={[
+            props.pinInputStyle,
+            index === activeIndex ? props.activePinInputStyle : {},
+          ]}
           onPress={() => handlePressBox(index)}
         >
-          <Text style={styles.text}>{num}</Text>
+          <Text {...props.textStyle}>{num}</Text>
         </TouchableOpacity>
       ))}
       <TextInput
         ref={inputRef}
-        value={code.join("")}
+        value={props.value}
         onChangeText={handleChangeText}
+        onBlur={props.onBlur}
         keyboardType="number-pad"
-        maxLength={length}
+        maxLength={props.length}
         style={styles.hiddenInput}
         caretHidden={true}
       />
     </TouchableOpacity>
   );
-};
+});
+
+PinCodeInput.displayName = "PinCodeInput";
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  box: {
-    width: 45,
-    height: 45,
-    margin: 5,
-    borderColor: "gray",
-    justifyContent: "center",
-    alignItems: "center",
-    borderTopWidth: 0,
-    borderLeftWidth: 0,
-    borderRightWidth: 0,
-    borderWidth: 2,
-  },
-  activeBox: {
-    borderColor: "white",
-  },
-  text: {
-    fontSize: 24,
-    color: "white",
-    fontWeight: "600",
-  },
   hiddenInput: {
     position: "absolute",
     width: "100%",
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OTPInput;
+export default PinCodeInput;
