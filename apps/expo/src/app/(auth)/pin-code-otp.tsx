@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
@@ -35,10 +35,9 @@ interface SignUpFlowParams {
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  phoneNumberOTP: z.string(),
+  phoneNumberOTP: z.string().length(6),
 });
 
-// const ShakingUnderlineInput = withShake(UnderlineInput);
 const ShakingPinCodeInput = withShake(PinCodeInput);
 
 const PhoneNumberOTP = () => {
@@ -48,6 +47,9 @@ const PhoneNumberOTP = () => {
 
   const [isSendingCode, setIsSendingCode] = useState<boolean>(false);
   const [isCheckingCode, setIsCheckingCode] = useState<boolean>(false);
+  const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState<number | null>(null);
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
@@ -63,6 +65,7 @@ const PhoneNumberOTP = () => {
     control,
     handleSubmit,
     setError,
+    getValues,
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
@@ -71,62 +74,94 @@ const PhoneNumberOTP = () => {
     resolver: zodResolver(schemaValidation),
   });
 
-  useEffect(() => {
-    const signInWithPhoneNumber = async () => {
+  const onSubmit = useCallback(
+    async (data: FormData) => {
+      setIsCheckingCode(true);
       try {
-        setIsSendingCode(true);
+        const userCredential = await confirm?.confirm(data.phoneNumberOTP);
+        const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
 
-        const confirmation = await auth().signInWithPhoneNumber(
-          `+${signUpFlowParams.phoneNumber}`,
-        );
-        setConfirm(confirmation);
+        if (isNewUser) {
+          await createUserMutation.mutateAsync({
+            firebaseUid: userCredential.user.uid,
+          });
+        }
+
+        await auth().currentUser?.reload();
+        const hasUserDetails = await hasUserDetailsMutation.mutateAsync();
+        hasUserDetails
+          ? router.replace("/profile")
+          : router.replace("/welcome");
       } catch (err) {
-        console.error("Error sending code:", err);
+        console.log("ERROR: " + err);
+        console.log("Error detected, triggering shake");
+        setServerError("Incorrect code. Try again.");
+        setTriggerShake(true);
       } finally {
-        setIsSendingCode(false);
+        setIsCheckingCode(false);
       }
-    };
+    },
+    [confirm, createUserMutation, hasUserDetailsMutation, router],
+  );
 
-    void signInWithPhoneNumber();
+  const signInWithPhoneNumber = useCallback(async () => {
+    setIsSendingCode(true);
+    try {
+      const confirmation = await auth().signInWithPhoneNumber(
+        `+${signUpFlowParams.phoneNumber}`,
+      );
+      setConfirm(confirmation);
+    } catch (err) {
+      console.error("Error sending code:", err);
+    } finally {
+      setIsSendingCode(false);
+    }
   }, [signUpFlowParams.phoneNumber]);
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setIsCheckingCode(true); // Start the spinner when checking the code
-
-      const userCredential = await confirm?.confirm(data.phoneNumberOTP);
-      const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
-
-      if (isNewUser) {
-        await createUserMutation.mutateAsync({
-          firebaseUid: userCredential.user.uid,
-        });
-      }
-
-      // TODO: temp solution to instantly update user object, once moved into the session provider we will use the returned userCredential to get the updated [@user] info
-      await auth().currentUser?.reload();
-
-      const hasUserDetails = await hasUserDetailsMutation.mutateAsync();
-
-      hasUserDetails ? router.replace("/profile") : router.replace("/welcome");
-    } catch (err) {
-      console.log("ERROR: " + err);
-      console.log("Error detected, triggering shake");
-      setError("phoneNumberOTP", { message: "Incorrect code. Try again." });
-      setTriggerShake(true);
-    } finally {
-      setIsCheckingCode(false); // Stop the spinner once the check is complete or there's an error
-    }
-  };
-
-  const onSubmitError = () => {
+  const onSubmitError = useCallback(() => {
     console.log("Error detected, triggering shake");
     setTriggerShake(true);
-  };
+  }, []);
 
   const handleShakeComplete = () => {
     setTriggerShake(false);
   };
+
+  useEffect(() => {
+    void signInWithPhoneNumber();
+  }, [signInWithPhoneNumber, signUpFlowParams.phoneNumber]);
+
+  useEffect(() => {
+    const otpValue = getValues().phoneNumberOTP;
+
+    if (otpValue.length === 6 && !isCheckingCode && !hasAutoSubmitted) {
+      setHasAutoSubmitted(true);
+      void handleSubmit(onSubmit, onSubmitError)();
+    } else if (otpValue.length < 6 && hasAutoSubmitted) {
+      setHasAutoSubmitted(false); // Reset if the user deletes any character
+    }
+  }, [
+    getValues,
+    isCheckingCode,
+    hasAutoSubmitted,
+    handleSubmit,
+    onSubmit,
+    onSubmitError,
+  ]);
+
+  useEffect(() => {
+    if (cooldown === null) return;
+
+    if (cooldown > 0) {
+      const timer = setTimeout(() => {
+        setCooldown((prev) => (prev !== null ? prev - 1 : null));
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setCooldown(null);
+    }
+  }, [cooldown]);
 
   return (
     <KeyboardAvoidingView
@@ -153,64 +188,43 @@ const PhoneNumberOTP = () => {
             <Controller
               control={control}
               name="phoneNumberOTP"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ShakingPinCodeInput
-                  ref={PinCodeInputRef}
-                  length={6}
-                  value={value}
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  triggerShake={triggerShake}
-                  onShakeComplete={handleShakeComplete}
-                  containerStyle={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  pinInputStyle={{
-                    width: 36,
-                    marginHorizontal: 4,
-                    borderColor: "gray",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderTopWidth: 0,
-                    borderLeftWidth: 0,
-                    borderRightWidth: 0,
-                    borderWidth: 2,
-                  }}
-                  activePinInputStyle={{
-                    borderColor: "white",
-                  }}
-                  textStyle={{
-                    fontSize: 36,
-                    color: "white",
-                    fontWeight: "900",
-                  }}
-                />
-
-                // <ShakingUnderlineInput
-                //   height={40}
-                //   ref={phoneNumberOTPInputRef}
-                //   onLayout={() => phoneNumberOTPInputRef.current?.focus()}
-                //   underlineWidth={1}
-                //   underlineColor={errors.phoneNumberOTP ? "$red11" : "white"}
-                //   placeholder="OTP Code"
-                //   placeholderTextColor={
-                //     errors.phoneNumberOTP ? "$red11" : "$gray10"
-                //   }
-                //   focusStyle={{
-                //     borderBottomColor: errors.phoneNumberOTP
-                //       ? "$red11"
-                //       : "white",
-                //   }}
-                //   color={errors.phoneNumberOTP ? "$red11" : "white"}
-                //   onChangeText={onChange}
-                //   onBlur={onBlur}
-                //   value={value}
-                //   triggerShake={triggerShake}
-                //   onShakeComplete={handleShakeComplete}
-                // />
-              )}
+              render={({ field: { onChange, onBlur, value } }) => {
+                return (
+                  <ShakingPinCodeInput
+                    ref={PinCodeInputRef}
+                    length={6}
+                    value={value}
+                    onBlur={onBlur}
+                    onChange={onChange}
+                    triggerShake={triggerShake}
+                    onShakeComplete={handleShakeComplete}
+                    containerStyle={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    pinInputStyle={{
+                      width: 36,
+                      marginHorizontal: 4,
+                      borderColor: "gray",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderTopWidth: 0,
+                      borderLeftWidth: 0,
+                      borderRightWidth: 0,
+                      borderWidth: 2,
+                    }}
+                    activePinInputStyle={{
+                      borderColor: "white",
+                    }}
+                    textStyle={{
+                      fontSize: 36,
+                      color: "white",
+                      fontWeight: "900",
+                    }}
+                  />
+                );
+              }}
             />
           </YStack>
 
@@ -225,7 +239,7 @@ const PhoneNumberOTP = () => {
             </Text>
           )}
 
-          {!isSendingCode && !errors.phoneNumberOTP && (
+          {!isSendingCode && !errors.phoneNumberOTP && !serverError && (
             <Text
               textAlign="center"
               fontSize={14}
@@ -236,14 +250,14 @@ const PhoneNumberOTP = () => {
             </Text>
           )}
 
-          {errors.phoneNumberOTP && (
+          {serverError && (
             <Text
               textAlign="center"
               fontSize={14}
               fontWeight="700"
               color="$red11"
             >
-              {errors.phoneNumberOTP.message}
+              {serverError}
             </Text>
           )}
         </YStack>
@@ -251,28 +265,26 @@ const PhoneNumberOTP = () => {
         <View alignSelf="stretch" marginTop="auto">
           <Button
             animation="100ms"
-            pressStyle={{
-              scale: 0.95,
-              backgroundColor: "white",
-            }}
-            onPress={handleSubmit(onSubmit, onSubmitError)}
+            pressStyle={{ scale: 0.95, backgroundColor: "white" }}
+            onPress={cooldown === null ? signInWithPhoneNumber : undefined}
             height="$4"
             borderRadius="$6"
-            // backgroundColor={isValid ? "white" : "gray"} // Change background color based on validity
             backgroundColor={
-              !isValid || isSendingCode || isCheckingCode ? "gray" : "white"
+              cooldown !== null || isSendingCode || isCheckingCode
+                ? "gray"
+                : "white"
             }
-            disabled={!isValid || isSendingCode || isCheckingCode}
+            disabled={cooldown !== null || isSendingCode || isCheckingCode}
           >
-            {isSendingCode || isCheckingCode ? (
+            {cooldown !== null ? (
+              <Text fontWeight="500" fontSize={16} color="lightgray">
+                Resend in {cooldown}s
+              </Text>
+            ) : isSendingCode || isCheckingCode ? (
               <Spinner size="large" color="$background" />
             ) : (
-              <Text
-                color={isValid ? "black" : "lightgray"}
-                fontWeight="500"
-                fontSize={16}
-              >
-                Next
+              <Text fontWeight="500" fontSize={16} color="black">
+                Send new code
               </Text>
             )}
           </Button>

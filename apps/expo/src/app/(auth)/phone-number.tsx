@@ -27,7 +27,6 @@ import PhoneNumberOTP from "./pin-code-otp";
 
 interface FormData {
   phoneNumber: string;
-  isValid: boolean;
   error: string | null;
 }
 
@@ -36,7 +35,7 @@ const PhoneNumber = () => {
 
   const inputRef = useRef<TextInput | null>(null);
 
-  const [formState, setFormState] = useState<FormData>({
+  const [formData, setFormData] = useState<FormData>({
     phoneNumber: "",
     isValid: false,
     error: null,
@@ -44,7 +43,7 @@ const PhoneNumber = () => {
 
   const setFormStateFn = useCallback(
     (newState: Partial<FormData>) =>
-      setFormState((prevState) => ({ ...prevState, ...newState })),
+      setFormData((prevState) => ({ ...prevState, ...newState })),
     [],
   );
 
@@ -82,7 +81,6 @@ const PhoneNumber = () => {
 
                 setFormStateFn({
                   phoneNumber: `${dialingCode}${phoneNumber}`,
-                  isValid,
                   error: isValid ? null : "Invalid phone number",
                 });
               }}
@@ -142,14 +140,14 @@ const PhoneNumber = () => {
               scale: 0.95,
               backgroundColor: "white",
             }}
-            onPress={() => onSubmit(formState)}
+            onPress={() => onSubmit(formData)}
             height="$4"
             borderRadius="$6"
-            backgroundColor={formState.isValid ? "white" : "gray"}
-            disabled={!formState.isValid}
+            backgroundColor={!formData.error ? "white" : "gray"}
+            disabled={!!formData.error}
           >
             <Text
-              color={formState.isValid ? "black" : "lightgray"}
+              color={!formData.error ? "black" : "lightgray"}
               fontWeight="500"
               fontSize={16}
             >
