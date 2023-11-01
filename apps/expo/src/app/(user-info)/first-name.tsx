@@ -11,6 +11,7 @@ import {
   H1,
   H2,
   H5,
+  Input,
   Text,
   View,
   XStack,
@@ -20,15 +21,12 @@ import * as z from "zod";
 
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
-import withShake from "~/components/withShake";
 
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
   firstName: z.string().min(1, { message: "Please enter a name" }),
 });
-
-const ShakingUnderlineInput = withShake(UnderlineInput);
 
 const FirstName = () => {
   const router = useRouter();
@@ -78,39 +76,37 @@ const FirstName = () => {
         padding="$6"
         justifyContent="space-between"
       >
-        <YStack space>
-          <H2>First name</H2>
+        <YStack flex={1} space="$8" alignItems="center">
+          <Text
+            alignSelf="center"
+            textAlign="center"
+            fontSize={22}
+            fontWeight="900"
+          >
+            What's your first name?
+          </Text>
 
-          <YStack space="$3">
+          <YStack width="100%" alignItems="center" space="$3">
             <Controller
               control={control}
               name="firstName"
               render={({ field: { onChange, onBlur, value } }) => (
-                <ShakingUnderlineInput
-                  height={40}
-                  // fontSize="$5"
+                <UnderlineInput
                   ref={firstNameInputRef}
-                  underlineWidth={1}
-                  underlineColor={errors.firstName ? "$red11" : "white"}
-                  placeholder="First name"
-                  placeholderTextColor={errors.firstName ? "$red11" : "$gray10"}
-                  focusStyle={{
-                    borderBottomColor: errors.firstName ? "$red11" : "white",
-                  }}
-                  color={errors.firstName ? "$red11" : "white"}
-                  onChangeText={onChange}
+                  onLayout={() => firstNameInputRef.current?.focus()}
+                  height={40}
+                  width="60%"
+                  fontSize={36}
+                  fontFamily="$mono"
+                  fontWeight="900"
+                  underlineWidth={2}
+                  underlineColor="$gray11"
+                  onChangeText={(text) => onChange(text)}
                   onBlur={onBlur}
                   value={value}
-                  triggerShake={triggerShake}
-                  onShakeComplete={handleShakeComplete}
                 />
               )}
             />
-            {errors.firstName && (
-              <Text fontSize="$2" color="$red11">
-                {errors.firstName.message}
-              </Text>
-            )}
           </YStack>
         </YStack>
 

@@ -28,7 +28,7 @@ const PinCodeInput = forwardRef<PinCodeInput, OTPInputProps>((props, ref) => {
   const [code, setCode] = useState<string[]>(Array(props.length).fill(""));
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInput | null>(null);
 
   useImperativeHandle(ref, () => ({
     focus: () => {

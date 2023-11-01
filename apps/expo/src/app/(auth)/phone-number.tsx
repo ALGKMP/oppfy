@@ -1,7 +1,17 @@
-import React, { useCallback, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
-import type { TextInput } from "react-native";
-import { Link, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  SafeAreaView,
+  SectionList,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { Link, Stack, useRouter } from "expo-router";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Check } from "@tamagui/lucide-icons";
 import { isValidNumber } from "libphonenumber-js";
 import { Controller, set, useForm } from "react-hook-form";
 import {
@@ -25,30 +35,37 @@ import withShake from "~/components/withShake";
 import { groupedCountries } from "~/data/groupedCountries";
 import PhoneNumberOTP from "./pin-code-otp";
 
-interface FormData {
-  phoneNumber: string;
-  error: string | null;
-}
+type FormData = z.infer<typeof schemaValidation>;
+
+const schemaValidation = z.object({
+  phoneNumber: z
+    .string()
+    .min(1, { message: "Invalid number" })
+    .refine((phoneNumber) => isValidNumber(phoneNumber), {
+      message: "Invalid phone number format",
+      path: ["phoneNumber"],
+    }),
+});
 
 const PhoneNumber = () => {
   const router = useRouter();
 
   const inputRef = useRef<TextInput | null>(null);
 
-  const [formData, setFormData] = useState<FormData>({
-    phoneNumber: "",
-    isValid: false,
-    error: null,
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors, isValid },
+  } = useForm({
+    defaultValues: {
+      phoneNumber: "",
+    },
+    resolver: zodResolver(schemaValidation),
   });
 
-  const setFormStateFn = useCallback(
-    (newState: Partial<FormData>) =>
-      setFormData((prevState) => ({ ...prevState, ...newState })),
-    [],
-  );
-
-  const onSubmit = ({ phoneNumber }: FormData) => {
-    router.push({ params: { phoneNumber }, pathname: "pin-code-otp" });
+  const onSubmit = async (data: FormData) => {
+    router.push({ params: data, pathname: "pin-code-otp" });
   };
 
   return (
@@ -73,44 +90,46 @@ const PhoneNumber = () => {
           </Text>
 
           <YStack space="$3">
-            <PhoneNumberInput
-              ref={inputRef}
-              onInputLayout={() => inputRef.current?.focus()}
-              onChange={({ dialingCode, phoneNumber }) => {
-                const isValid = isValidNumber(`${dialingCode}${phoneNumber}`);
-
-                setFormStateFn({
-                  phoneNumber: `${dialingCode}${phoneNumber}`,
-                  error: isValid ? null : "Invalid phone number",
-                });
-              }}
-              modalContainerStyle={{
-                flex: 1,
-                backgroundColor: "$backgroundStrong",
-              }}
-              inputsContainerStyle={{
-                width: "100%",
-                alignItems: "center",
-              }}
-              dialingCodeButtonStyle={{
-                backgroundColor: "transparent",
-                borderColor: "$gray7",
-                borderWidth: 2,
-                borderRadius: 12,
-                height: 50,
-                width: 70,
-              }}
-              dialingCodeTextStyle={{
-                fontSize: 22,
-              }}
-              phoneNumberInputStyle={{
-                flex: 1,
-                borderWidth: 0,
-                fontSize: 32,
-                fontFamily: "$mono",
-                fontWeight: "900",
-                backgroundColor: "transparent",
-              }}
+            <Controller
+              control={control}
+              name="phoneNumber"
+              render={({ field: { onChange, onBlur, value } }) => (
+                // TODO: set this up to work as a controlled input - onBlur, value, etc...
+                <PhoneNumberInput
+                  ref={inputRef}
+                  onInputLayout={() => inputRef.current?.focus()}
+                  onChange={({ dialingCode, phoneNumber }) =>
+                    onChange(`${dialingCode}${phoneNumber}`)
+                  }
+                  modalContainerStyle={{
+                    flex: 1,
+                    backgroundColor: "$backgroundStrong",
+                  }}
+                  inputsContainerStyle={{
+                    width: "100%",
+                    alignItems: "center",
+                  }}
+                  dialingCodeButtonStyle={{
+                    backgroundColor: "transparent",
+                    borderColor: "$gray7",
+                    borderWidth: 2,
+                    borderRadius: 12,
+                    height: 50,
+                    width: 70,
+                  }}
+                  dialingCodeTextStyle={{
+                    fontSize: 22,
+                  }}
+                  phoneNumberInputStyle={{
+                    flex: 1,
+                    borderWidth: 0,
+                    fontSize: 32,
+                    fontFamily: "$mono",
+                    fontWeight: "900",
+                    backgroundColor: "transparent",
+                  }}
+                />
+              )}
             />
           </YStack>
 
@@ -140,14 +159,14 @@ const PhoneNumber = () => {
               scale: 0.95,
               backgroundColor: "white",
             }}
-            onPress={() => onSubmit(formData)}
+            onPress={handleSubmit(onSubmit)}
             height="$4"
             borderRadius="$6"
-            backgroundColor={!formData.error ? "white" : "gray"}
-            disabled={!!formData.error}
+            backgroundColor={isValid ? "white" : "gray"}
+            disabled={!isValid}
           >
             <Text
-              color={!formData.error ? "black" : "lightgray"}
+              color={isValid ? "black" : "lightgray"}
               fontWeight="500"
               fontSize={16}
             >

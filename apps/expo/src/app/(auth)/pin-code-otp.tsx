@@ -24,7 +24,6 @@ import * as z from "zod";
 
 import { api } from "~/utils/api";
 import { PinCodeInput, UnderlineInput } from "~/components/Inputs";
-import withShake from "~/components/withShake";
 import useParams from "~/hooks/useParams";
 
 interface SignUpFlowParams {
@@ -38,7 +37,9 @@ const schemaValidation = z.object({
   phoneNumberOTP: z.string().length(6),
 });
 
-const ShakingPinCodeInput = withShake(PinCodeInput);
+const RESEND_CODE_COOLDOWN_DURATION = 60;
+
+auth().settings.appVerificationDisabledForTesting = true;
 
 const PhoneNumberOTP = () => {
   const router = useRouter();
@@ -106,13 +107,16 @@ const PhoneNumberOTP = () => {
 
   const signInWithPhoneNumber = useCallback(async () => {
     setIsSendingCode(true);
+    setServerError(null);
     try {
       const confirmation = await auth().signInWithPhoneNumber(
         `+${signUpFlowParams.phoneNumber}`,
       );
       setConfirm(confirmation);
+
+      setCooldown(RESEND_CODE_COOLDOWN_DURATION);
     } catch (err) {
-      console.error("Error sending code:", err);
+      setServerError("Error sending code. Try again later.");
     } finally {
       setIsSendingCode(false);
     }
@@ -122,10 +126,6 @@ const PhoneNumberOTP = () => {
     console.log("Error detected, triggering shake");
     setTriggerShake(true);
   }, []);
-
-  const handleShakeComplete = () => {
-    setTriggerShake(false);
-  };
 
   useEffect(() => {
     void signInWithPhoneNumber();
@@ -190,14 +190,12 @@ const PhoneNumberOTP = () => {
               name="phoneNumberOTP"
               render={({ field: { onChange, onBlur, value } }) => {
                 return (
-                  <ShakingPinCodeInput
+                  <PinCodeInput
                     ref={PinCodeInputRef}
                     length={6}
                     value={value}
                     onBlur={onBlur}
                     onChange={onChange}
-                    triggerShake={triggerShake}
-                    onShakeComplete={handleShakeComplete}
                     containerStyle={{
                       flexDirection: "row",
                       alignItems: "center",
@@ -228,6 +226,17 @@ const PhoneNumberOTP = () => {
             />
           </YStack>
 
+          {!isSendingCode && !serverError && cooldown !== null && (
+            <Text
+              textAlign="center"
+              fontSize={14}
+              fontWeight="700"
+              color="$gray11"
+            >
+              Verification code sent to {signUpFlowParams.phoneNumber}
+            </Text>
+          )}
+
           {isSendingCode && (
             <Text
               textAlign="center"
@@ -236,17 +245,6 @@ const PhoneNumberOTP = () => {
               color="$gray11"
             >
               Sending code...
-            </Text>
-          )}
-
-          {!isSendingCode && !errors.phoneNumberOTP && !serverError && (
-            <Text
-              textAlign="center"
-              fontSize={14}
-              fontWeight="700"
-              color="$gray11"
-            >
-              Verification code sent to {signUpFlowParams.phoneNumber}
             </Text>
           )}
 
@@ -276,11 +274,13 @@ const PhoneNumberOTP = () => {
             }
             disabled={cooldown !== null || isSendingCode || isCheckingCode}
           >
-            {cooldown !== null ? (
+            {isCheckingCode ? (
+              <Spinner size="large" color="$background" />
+            ) : cooldown !== null ? (
               <Text fontWeight="500" fontSize={16} color="lightgray">
                 Resend in {cooldown}s
               </Text>
-            ) : isSendingCode || isCheckingCode ? (
+            ) : isSendingCode ? (
               <Spinner size="large" color="$background" />
             ) : (
               <Text fontWeight="500" fontSize={16} color="black">

@@ -1,8 +1,8 @@
 import React from "react";
 import { useRouter } from "expo-router";
 import { Button, H2, Text, View, YStack } from "tamagui";
-import { api } from "~/utils/api";
 
+import { api } from "~/utils/api";
 import { useSession } from "~/contexts/SessionsContext";
 
 const Welcome = () => {

@@ -1,13 +1,13 @@
 import React from "react";
-import type { TextInput } from "react-native";
+import type { OpaqueColorValue, TextInput } from "react-native";
 import { Input } from "tamagui";
-import type { InputProps, SizeTokens } from "tamagui";
+import type { ColorTokens, InputProps, SizeTokens } from "tamagui";
 
 import type { OmitPropsStartingWith } from "@acme/types";
 
 interface UnderlineInputProps
   extends OmitPropsStartingWith<InputProps, "border"> {
-  underlineColor?: string;
+  underlineColor?: ColorTokens | OpaqueColorValue;
   underlineWidth?: SizeTokens;
   children?: React.ReactNode;
 }
@@ -28,9 +28,9 @@ const UnderlineInput = React.forwardRef<TextInput, UnderlineInputProps>(
         borderTopRightRadius={0}
         borderBottomLeftRadius={0}
         borderBottomRightRadius={0}
+        backgroundColor="transparent"
         borderBottomWidth={underlineWidth}
         borderBottomColor={underlineColor}
-        backgroundColor="transparent"
         {...props}
       >
         {children}

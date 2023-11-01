@@ -20,7 +20,6 @@ import * as z from "zod";
 
 import { api } from "~/utils/api";
 import { UnderlineInput } from "~/components/Inputs";
-import withShake from "~/components/withShake";
 import useParams from "~/hooks/useParams";
 
 interface UserDetailsFlowParams {
@@ -33,8 +32,6 @@ type FormData = z.infer<typeof schemaValidation>;
 const schemaValidation = z.object({
   dateOfBirth: z.string(),
 });
-
-const ShakingUnderlineInput = withShake(UnderlineInput);
 
 const DateOfBirth = () => {
   const router = useRouter();
@@ -95,15 +92,22 @@ const DateOfBirth = () => {
         padding="$6"
         justifyContent="space-between"
       >
-        <YStack space>
-          <H2>Date of birth</H2>
+        <YStack flex={1} space="$8" alignItems="center">
+          <Text
+            alignSelf="center"
+            textAlign="center"
+            fontSize={22}
+            fontWeight="900"
+          >
+            When is your birthday?
+          </Text>
 
-          <YStack space="$3">
+          <YStack width="100%" alignItems="center" space="$3">
             <Controller
               control={control}
               name="dateOfBirth"
               render={({ field: { onChange, onBlur, value } }) => (
-                <ShakingUnderlineInput
+                <UnderlineInput
                   height={40}
                   // fontSize="$5"
                   ref={dateOfBirthInputRef}
@@ -120,8 +124,6 @@ const DateOfBirth = () => {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   value={value}
-                  triggerShake={triggerShake}
-                  onShakeComplete={handleShakeComplete}
                 />
               )}
             />
