@@ -109,8 +109,8 @@ const DateOfBirth = () => {
                   onLayout={() => dateOfBirthInputRef.current?.focus()}
                   containerStyle={{
                     position: "relative",
-                    width: "100%",
                     alignItems: "center",
+                    height: 50,
                   }}
                   inputStyle={{}}
                   charStyle={{
@@ -129,11 +129,6 @@ const DateOfBirth = () => {
                 />
               )}
             />
-            {errors.dateOfBirth && (
-              <Text fontSize="$2" color="$red11">
-                {errors.dateOfBirth.message}
-              </Text>
-            )}
           </YStack>
         </YStack>
 

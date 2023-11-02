@@ -25,7 +25,10 @@ import { UnderlineInput } from "~/components/Inputs";
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  firstName: z.string().min(2),
+  firstName: z
+    .string()
+    .regex(/^[a-zA-Z]+$/)
+    .min(2),
 });
 
 const FirstName = () => {
@@ -77,7 +80,7 @@ const FirstName = () => {
             fontSize={22}
             fontWeight="900"
           >
-            When&apos;s your first name?
+            What&apos;s your first name?
           </Text>
 
           <YStack width="100%" alignItems="center" space="$3">
@@ -90,10 +93,10 @@ const FirstName = () => {
                   ref={firstNameInputRef}
                   value={value}
                   onBlur={onBlur}
-                  onChangeText={(text) => onChange(text)}
+                  onChangeText={onChange}
                   onLayout={() => firstNameInputRef.current?.focus()}
-                  height={40}
                   backgroundColor="transparent"
+                  height={50}
                   fontSize={36}
                   fontFamily="$mono"
                   borderWidth={0}
