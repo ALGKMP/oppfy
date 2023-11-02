@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@acme/db": "^0.1.0",
+    "@aws-sdk/s3-request-presigner": "^3.441.0",
     "@trpc/client": "^10.34.0",
     "@trpc/server": "^10.34.0",
     "firebase-admin": "^11.11.0",

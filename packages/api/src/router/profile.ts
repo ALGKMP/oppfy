@@ -1,21 +1,21 @@
+import { Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+import { createTRPCRouter, protectedProcedure } from "../trpc";
+
 import {
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
-import { Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  getSignedUrl,
+  S3RequestPresigner,
+} from "@aws-sdk/s3-request-presigner";
 
 const profilePhotoBucket = "oppfy-profile-pictures";
 
-/* TODO: Handle sending images on the frontend, and handle keys on the backend: 
-    Uploading: store image on client side and send key to server
-    Fetching: get key from backend and request for the image from R2 from the client.
-    Deleting: send key from backend to client and delete image from R2 on clientside.
-*/
 export const profileRouter = createTRPCRouter({
   // TODO: upload - upload profile photo to db and s3
   uploadProfilePhoto: protectedProcedure
@@ -38,9 +38,8 @@ export const profileRouter = createTRPCRouter({
         dateEdited: new Date(),
       };
 
-      const s3Response = await ctx.s3Client.send(
-        new PutObjectCommand(uploadParams),
-      );
+      const s3Response = new PutObjectCommand(uploadParams)
+      
 
       if (!s3Response) {
         throw new TRPCError({
