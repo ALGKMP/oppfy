@@ -19,7 +19,7 @@ import {
 import * as z from "zod";
 
 import { api } from "~/utils/api";
-import { UnderlineInput } from "~/components/Inputs";
+import { BirthdateInput, UnderlineInput } from "~/components/Inputs";
 import useParams from "~/hooks/useParams";
 
 interface UserDetailsFlowParams {
@@ -40,7 +40,7 @@ const DateOfBirth = () => {
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
 
-  const dateOfBirthInputRef = useRef<TextInput>(null);
+  const dateOfBirthInputRef = useRef<TextInput | null>(null);
 
   const updateUserDetails = api.auth.updateUserDetails.useMutation();
 
@@ -55,12 +55,6 @@ const DateOfBirth = () => {
     },
     resolver: zodResolver(schemaValidation),
   });
-
-  useEffect(() => {
-    if (dateOfBirthInputRef.current) {
-      dateOfBirthInputRef.current.focus();
-    }
-  }, []);
 
   const onSubmit = async (data: FormData) => {
     console.log("FIRST NAME: " + userDetailsFlowParams.firstName);
@@ -99,7 +93,7 @@ const DateOfBirth = () => {
             fontSize={22}
             fontWeight="900"
           >
-            When is your birthday?
+            When&apos;s your birthday?
           </Text>
 
           <YStack width="100%" alignItems="center" space="$3">
@@ -107,24 +101,50 @@ const DateOfBirth = () => {
               control={control}
               name="dateOfBirth"
               render={({ field: { onChange, onBlur, value } }) => (
-                <UnderlineInput
-                  height={40}
-                  // fontSize="$5"
+                <BirthdateInput
                   ref={dateOfBirthInputRef}
-                  underlineWidth={1}
-                  underlineColor={errors.dateOfBirth ? "$red11" : "white"}
-                  placeholder="Date of birth"
-                  placeholderTextColor={
-                    errors.dateOfBirth ? "$red11" : "$gray10"
-                  }
-                  focusStyle={{
-                    borderBottomColor: errors.dateOfBirth ? "$red11" : "white",
-                  }}
-                  color={errors.dateOfBirth ? "$red11" : "white"}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
                   value={value}
+                  onBlur={onBlur}
+                  onChange={onChange}
+                  onLayout={() => dateOfBirthInputRef.current?.focus()}
+                  containerStyle={{
+                    position: "relative",
+                    width: "100%",
+                    alignItems: "center",
+                  }}
+                  inputStyle={{}}
+                  charStyle={{
+                    fontFamily: "$monospace",
+                    textAlign: "center",
+                    fontSize: 36,
+                    fontWeight: "900",
+                  }}
+                  typedCharStyle={{}}
+                  untypedCharStyle={{
+                    color: "$gray6",
+                  }}
+                  slashCharStyle={{
+                    color: "$gray6",
+                  }}
                 />
+                // <UnderlineInput
+                //   height={40}
+                //   ref={dateOfBirthInputRef}
+                //   value={value}
+                //   onBlur={onBlur}
+                //   onChangeText={onChange}
+                //   onLayout={() => dateOfBirthInputRef.current?.focus()}
+                //   underlineWidth={1}
+                //   underlineColor={errors.dateOfBirth ? "$red11" : "white"}
+                //   placeholder="Date of birth"
+                //   placeholderTextColor={
+                //     errors.dateOfBirth ? "$red11" : "$gray10"
+                //   }
+                //   focusStyle={{
+                //     borderBottomColor: errors.dateOfBirth ? "$red11" : "white",
+                //   }}
+                //   color={errors.dateOfBirth ? "$red11" : "white"}
+                // />
               )}
             />
             {errors.dateOfBirth && (

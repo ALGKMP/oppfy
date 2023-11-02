@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { TextInput } from "react-native";
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -6,7 +7,6 @@ import {
   Platform,
   SafeAreaView,
   SectionList,
-  TextInput,
   TouchableOpacity,
 } from "react-native";
 import { Link, Stack, useRouter } from "expo-router";
@@ -31,7 +31,6 @@ import * as z from "zod";
 import { api } from "~/utils/api";
 import { PhoneNumberInput, UnderlineInput } from "~/components/Inputs";
 import QuickList from "~/components/QuickList";
-import withShake from "~/components/withShake";
 import { groupedCountries } from "~/data/groupedCountries";
 import PhoneNumberOTP from "./pin-code-otp";
 
@@ -50,7 +49,7 @@ const schemaValidation = z.object({
 const PhoneNumber = () => {
   const router = useRouter();
 
-  const inputRef = useRef<TextInput | null>(null);
+  const phoneNumberInputRef = useRef<TextInput | null>(null);
 
   const {
     control,
@@ -96,11 +95,11 @@ const PhoneNumber = () => {
               render={({ field: { onChange, onBlur, value } }) => (
                 // TODO: set this up to work as a controlled input - onBlur, value, etc...
                 <PhoneNumberInput
-                  ref={inputRef}
-                  onInputLayout={() => inputRef.current?.focus()}
+                  ref={phoneNumberInputRef}
                   onChange={({ dialingCode, phoneNumber }) =>
                     onChange(`${dialingCode}${phoneNumber}`)
                   }
+                  onLayout={() => phoneNumberInputRef.current?.focus()}
                   modalContainerStyle={{
                     flex: 1,
                     backgroundColor: "$backgroundStrong",

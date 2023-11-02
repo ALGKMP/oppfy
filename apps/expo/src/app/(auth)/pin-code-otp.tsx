@@ -46,6 +46,8 @@ const PhoneNumberOTP = () => {
 
   const signUpFlowParams = useParams<SignUpFlowParams>();
 
+  const pinCodeInputRef = useRef<TextInput | null>(null);
+
   const [isSendingCode, setIsSendingCode] = useState<boolean>(false);
   const [isCheckingCode, setIsCheckingCode] = useState<boolean>(false);
   const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
@@ -53,8 +55,6 @@ const PhoneNumberOTP = () => {
   const [cooldown, setCooldown] = useState<number | null>(null);
 
   const [triggerShake, setTriggerShake] = useState<boolean>(false);
-
-  const PinCodeInputRef = useRef<TextInput | null>(null);
 
   const createUserMutation = api.auth.createUser.useMutation();
   const hasUserDetailsMutation = api.auth.hasUserDetails.useMutation();
@@ -191,11 +191,12 @@ const PhoneNumberOTP = () => {
               render={({ field: { onChange, onBlur, value } }) => {
                 return (
                   <PinCodeInput
-                    ref={PinCodeInputRef}
+                    ref={pinCodeInputRef}
                     length={6}
                     value={value}
                     onBlur={onBlur}
                     onChange={onChange}
+                    onLayout={() => pinCodeInputRef.current?.focus()}
                     containerStyle={{
                       flexDirection: "row",
                       alignItems: "center",

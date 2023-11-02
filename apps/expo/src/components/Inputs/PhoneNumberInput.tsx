@@ -4,13 +4,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  Dimensions,
-  LayoutChangeEvent,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import type { LayoutChangeEvent, TextInput } from "react-native";
+import { Dimensions, Modal, TouchableOpacity } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import parsePhoneNumberFromString, {
@@ -41,7 +36,7 @@ interface OnChangeParams {
 
 interface PhoneNumberInputProps {
   onChange?: ({ dialingCode, phoneNumber }: OnChangeParams) => void;
-  onInputLayout?: (event: LayoutChangeEvent) => void;
+  onLayout?: (event: LayoutChangeEvent) => void;
   dialingCodeButtonStyle: ButtonProps;
   dialingCodeTextStyle?: TextProps;
   phoneNumberInputStyle?: InputProps;
@@ -143,7 +138,7 @@ const PhoneNumberInput = forwardRef<
         <Input
           ref={inputRef}
           value={rawInput}
-          onLayout={props.onInputLayout}
+          onLayout={props.onLayout}
           onChangeText={handleRawInputChange}
           keyboardType="number-pad"
           {...props.phoneNumberInputStyle}
@@ -173,7 +168,7 @@ const PhoneNumberInput = forwardRef<
             </Text>
             <View width="$4" />
           </XStack>
-          <CountriesFlastList onSelect={handleCountrySelect} />
+          <CountriesFlashList onSelect={handleCountrySelect} />
         </View>
       </Modal>
     </>
@@ -186,7 +181,7 @@ interface CountriesFlastListProps {
   onSelect: (countryData: CountryData) => void;
 }
 
-const CountriesFlastList = ({ onSelect }: CountriesFlastListProps) => {
+const CountriesFlashList = ({ onSelect }: CountriesFlastListProps) => {
   const theme = useTheme();
 
   return (

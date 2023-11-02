@@ -25,7 +25,7 @@ import { UnderlineInput } from "~/components/Inputs";
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  firstName: z.string().min(1, { message: "Please enter a name" }),
+  firstName: z.string().min(2),
 });
 
 const FirstName = () => {
@@ -46,12 +46,6 @@ const FirstName = () => {
     },
     resolver: zodResolver(schemaValidation),
   });
-
-  useEffect(() => {
-    if (firstNameInputRef.current) {
-      firstNameInputRef.current.focus();
-    }
-  }, []);
 
   const onSubmit = async (data: FormData) => {
     router.push({ params: data, pathname: "date-of-birth" });
@@ -83,7 +77,7 @@ const FirstName = () => {
             fontSize={22}
             fontWeight="900"
           >
-            What's your first name?
+            When&apos;s your first name?
           </Text>
 
           <YStack width="100%" alignItems="center" space="$3">
@@ -91,19 +85,19 @@ const FirstName = () => {
               control={control}
               name="firstName"
               render={({ field: { onChange, onBlur, value } }) => (
-                <UnderlineInput
+                <Input
+                  textAlign="center"
                   ref={firstNameInputRef}
+                  value={value}
+                  onBlur={onBlur}
+                  onChangeText={(text) => onChange(text)}
                   onLayout={() => firstNameInputRef.current?.focus()}
                   height={40}
-                  width="60%"
+                  backgroundColor="transparent"
                   fontSize={36}
                   fontFamily="$mono"
+                  borderWidth={0}
                   fontWeight="900"
-                  underlineWidth={2}
-                  underlineColor="$gray11"
-                  onChangeText={(text) => onChange(text)}
-                  onBlur={onBlur}
-                  value={value}
                 />
               )}
             />
