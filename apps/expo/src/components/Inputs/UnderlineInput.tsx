@@ -1,44 +1,13 @@
 import React from "react";
-import { TextInput } from "react-native";
+import type { OpaqueColorValue, TextInput } from "react-native";
 import { Input } from "tamagui";
-import type { InputProps, SizeTokens } from "tamagui";
+import type { ColorTokens, InputProps, SizeTokens } from "tamagui";
 
-type OmittedProps =
-  | "borderTopWidth"
-  | "borderLeftWidth"
-  | "borderRightWidth"
-  | "borderTopLeftRadius"
-  | "borderTopRightRadius"
-  | "borderBottomLeftRadius"
-  | "borderBottomRightRadius"
-  | "borderBlockColor"
-  | "borderBlockEndColor"
-  | "borderBlockStartColor"
-  | "borderBottomEndRadius"
-  | "borderBottomColor"
-  | "borderBottomWidth"
-  | "borderBottomStartRadius"
-  | "borderColor"
-  | "borderCurve"
-  | "borderEndColor"
-  | "borderEndEndRadius"
-  | "borderEndStartRadius"
-  | "borderEndWidth"
-  | "borderLeftColor"
-  | "borderRadius"
-  | "borderRightColor"
-  | "borderStartColor"
-  | "borderStartEndRadius"
-  | "borderStartStartRadius"
-  | "borderStartWidth"
-  | "borderStyle"
-  | "borderTopColor"
-  | "borderTopEndRadius"
-  | "borderTopStartRadius"
-  | "borderWidth";
+import type { OmitPropsStartingWith } from "@acme/types";
 
-interface UnderlineInputProps extends Omit<InputProps, OmittedProps> {
-  underlineColor?: string;
+interface UnderlineInputProps
+  extends OmitPropsStartingWith<InputProps, "border"> {
+  underlineColor?: ColorTokens | OpaqueColorValue;
   underlineWidth?: SizeTokens;
   children?: React.ReactNode;
 }
@@ -59,9 +28,9 @@ const UnderlineInput = React.forwardRef<TextInput, UnderlineInputProps>(
         borderTopRightRadius={0}
         borderBottomLeftRadius={0}
         borderBottomRightRadius={0}
+        backgroundColor="transparent"
         borderBottomWidth={underlineWidth}
         borderBottomColor={underlineColor}
-        backgroundColor="transparent"
         {...props}
       >
         {children}
@@ -70,6 +39,6 @@ const UnderlineInput = React.forwardRef<TextInput, UnderlineInputProps>(
   },
 );
 
-UnderlineInput.displayName = "UnderlineInput"; // Useful for debugging
+UnderlineInput.displayName = "UnderlineInput";
 
 export default UnderlineInput;

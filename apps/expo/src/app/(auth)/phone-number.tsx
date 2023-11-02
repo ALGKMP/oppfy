@@ -1,9 +1,18 @@
-import React, { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { TextInput } from "react-native";
-import { useRouter } from "expo-router";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  SafeAreaView,
+  SectionList,
+  TouchableOpacity,
+} from "react-native";
+import { Link, Stack, useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check } from "@tamagui/lucide-icons";
+import { isValidNumber } from "libphonenumber-js";
 import { Controller, set, useForm } from "react-hook-form";
 import {
   Button,
@@ -11,31 +20,36 @@ import {
   H1,
   H2,
   H5,
+  Input,
   Text,
   View,
   XStack,
   YStack,
 } from "tamagui";
 import * as z from "zod";
+
 import { api } from "~/utils/api";
-import { UnderlineInput } from "~/components/Inputs";
-import withShake from "~/components/withShake";
+import { PhoneNumberInput, UnderlineInput } from "~/components/Inputs";
+import QuickList from "~/components/QuickList";
+import { groupedCountries } from "~/data/groupedCountries";
+import PhoneNumberOTP from "./pin-code-otp";
 
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
-  phoneNumber: z.string().min(1, { message: "Invalid number" }),
+  phoneNumber: z
+    .string()
+    .min(1, { message: "Invalid number" })
+    .refine((phoneNumber) => isValidNumber(phoneNumber), {
+      message: "Invalid phone number format",
+      path: ["phoneNumber"],
+    }),
 });
-
-const ShakingUnderlineInput = withShake(UnderlineInput);
 
 const PhoneNumber = () => {
   const router = useRouter();
 
-  const [triggerShake, setTriggerShake] = useState<boolean>(false);
-
-  const phoneNumberInputRef = useRef<TextInput>(null);
-
+  const phoneNumberInputRef = useRef<TextInput | null>(null);
 
   const {
     control,
@@ -49,26 +63,8 @@ const PhoneNumber = () => {
     resolver: zodResolver(schemaValidation),
   });
 
-  useEffect(() => {
-    if (phoneNumberInputRef.current) {
-      phoneNumberInputRef.current.focus();
-    }
-  }, []);
-
   const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "phone-number-otp" });
-  };
-
-  // Test S3 connection
-  // console.log(api.profilePhoto.test.useQuery());
-  
-
-  const onSubmitError = () => {
-    setTriggerShake(true);
-  };
-
-  const handleShakeComplete = () => {
-    setTriggerShake(false);
+    router.push({ params: data, pathname: "pin-code-otp" });
   };
 
   return (
@@ -82,42 +78,77 @@ const PhoneNumber = () => {
         padding="$6"
         justifyContent="space-between"
       >
-        <YStack space>
-          <H2>Lets start with your number</H2>
+        <YStack flex={1} space="$8" alignItems="center">
+          <Text
+            alignSelf="center"
+            textAlign="center"
+            fontSize={22}
+            fontWeight="900"
+          >
+            What's your phone number?
+          </Text>
 
           <YStack space="$3">
             <Controller
               control={control}
               name="phoneNumber"
               render={({ field: { onChange, onBlur, value } }) => (
-                <ShakingUnderlineInput
-                  height={40}
-                  // fontSize="$5"
+                // TODO: set this up to work as a controlled input - onBlur, value, etc...
+                <PhoneNumberInput
                   ref={phoneNumberInputRef}
-                  underlineWidth={1}
-                  underlineColor={errors.phoneNumber ? "$red11" : "white"}
-                  placeholder="Phone number"
-                  placeholderTextColor={
-                    errors.phoneNumber ? "$red11" : "$gray10"
+                  onChange={({ dialingCode, phoneNumber }) =>
+                    onChange(`${dialingCode}${phoneNumber}`)
                   }
-                  focusStyle={{
-                    borderBottomColor: errors.phoneNumber ? "$red11" : "white",
+                  onLayout={() => phoneNumberInputRef.current?.focus()}
+                  modalContainerStyle={{
+                    flex: 1,
+                    backgroundColor: "$backgroundStrong",
                   }}
-                  color={errors.phoneNumber ? "$red11" : "white"}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  triggerShake={triggerShake}
-                  onShakeComplete={handleShakeComplete}
+                  inputsContainerStyle={{
+                    width: "100%",
+                    alignItems: "center",
+                  }}
+                  dialingCodeButtonStyle={{
+                    backgroundColor: "transparent",
+                    borderColor: "$gray7",
+                    borderWidth: 2,
+                    borderRadius: 12,
+                    height: 50,
+                    width: 70,
+                  }}
+                  dialingCodeTextStyle={{
+                    fontSize: 22,
+                  }}
+                  phoneNumberInputStyle={{
+                    flex: 1,
+                    borderWidth: 0,
+                    fontSize: 32,
+                    fontFamily: "$mono",
+                    fontWeight: "900",
+                    backgroundColor: "transparent",
+                  }}
                 />
               )}
             />
-            {errors.phoneNumber && (
-              <Text fontSize="$2" color="$red11">
-                {errors.phoneNumber.message}
-              </Text>
-            )}
           </YStack>
+
+          <Text
+            textAlign="center"
+            fontSize={14}
+            fontWeight="700"
+            color="$gray11"
+          >
+            {[
+              "By continuing, you agree to our ",
+              <Link key="privacy-policy" href="">
+                <Text color="$gray10">Privacy Policy</Text>
+              </Link>,
+              " and ",
+              <Link key="terms-of-service" href="">
+                <Text color="$gray10">Terms of Service.</Text>
+              </Link>,
+            ]}
+          </Text>
         </YStack>
 
         <View alignSelf="stretch" marginTop="auto">
@@ -127,7 +158,7 @@ const PhoneNumber = () => {
               scale: 0.95,
               backgroundColor: "white",
             }}
-            onPress={handleSubmit(onSubmit, onSubmitError)}
+            onPress={handleSubmit(onSubmit)}
             height="$4"
             borderRadius="$6"
             backgroundColor={isValid ? "white" : "gray"}

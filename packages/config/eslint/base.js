@@ -30,20 +30,6 @@ const config = {
       { checksVoidReturn: { attributes: false } },
     ],
     "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
-
-    "@typescript-eslint/consistent-type-imports": [
-      "error",
-      {
-        prefer: "type-imports",
-        fixStyle: "inline-type-imports",
-        disallowTypeAnnotations: false,
-      },
-    ],
-    "@typescript-eslint/no-misused-promises": [
-      2,
-      { checksVoidReturn: { attributes: false } },
-    ],
-    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
   },
 
   ignorePatterns: [
