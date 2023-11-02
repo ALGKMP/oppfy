@@ -127,24 +127,6 @@ const DateOfBirth = () => {
                     color: "$gray6",
                   }}
                 />
-                // <UnderlineInput
-                //   height={40}
-                //   ref={dateOfBirthInputRef}
-                //   value={value}
-                //   onBlur={onBlur}
-                //   onChangeText={onChange}
-                //   onLayout={() => dateOfBirthInputRef.current?.focus()}
-                //   underlineWidth={1}
-                //   underlineColor={errors.dateOfBirth ? "$red11" : "white"}
-                //   placeholder="Date of birth"
-                //   placeholderTextColor={
-                //     errors.dateOfBirth ? "$red11" : "$gray10"
-                //   }
-                //   focusStyle={{
-                //     borderBottomColor: errors.dateOfBirth ? "$red11" : "white",
-                //   }}
-                //   color={errors.dateOfBirth ? "$red11" : "white"}
-                // />
               )}
             />
             {errors.dateOfBirth && (
