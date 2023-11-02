@@ -120,6 +120,62 @@ const monospaceFont = createGenericFont(
   },
 );
 
+const chivoMono = createFont({
+  size: {
+    4: 2,
+    5: 13,
+    6: 15,
+    9: 35,
+    10: 44,
+  },
+  weight: {
+    6: "400",
+    7: "700",
+  },
+  color: {
+    6: "$colorFocus",
+    7: "$color",
+  },
+  letterSpacing: {
+    5: 2,
+    6: 1,
+    7: 0,
+    8: 0,
+    9: -1,
+    10: -1.5,
+    12: -2,
+    14: -3,
+    15: -4,
+  },
+  lineHeight: {
+    5: 50,
+    6: 1,
+    7: 0,
+    8: 0,
+    9: -1,
+    10: -1.5,
+    12: -2,
+    14: -3,
+    15: -4,
+  },
+
+  // for native
+  face: {
+    100: { normal: "ChivoMono-Thin", italic: "ChivoMono-ThinItalic" },
+    200: {
+      normal: "ChivoMono-ExtraLight",
+      italic: "ChivoMono-ExtraLightItalic",
+    },
+    300: { normal: "ChivoMono-Light", italic: "ChivoMono-LightItalic" },
+    400: { normal: "ChivoMono-Regular", italic: "ChivoMono-RegularItalic" },
+    500: { normal: "ChivoMono-Medium", italic: "ChivoMono-MediumItalic" },
+    600: { normal: "ChivoMono-SemiBold", italic: "ChivoMono-SemiBoldItalic" },
+    700: { normal: "ChivoMono-Bold", italic: "ChivoMono-BoldItalic" },
+    800: { normal: "ChivoMono-ExtraBold", italic: "ChivoMono-ExtraBoldItalic" },
+    900: { normal: "ChivoMono-Black", italic: "ChivoMono-BlackItalic" },
+  },
+});
+
 const tamaguiConfig = createTamagui({
   ...config,
   fonts: {
@@ -127,6 +183,7 @@ const tamaguiConfig = createTamagui({
     body: bodyFont,
     mono: monoFont,
     monospace: monospaceFont,
+    chivoMono: chivoMono,
     silkscreen: silkscreenFont,
   },
 });
