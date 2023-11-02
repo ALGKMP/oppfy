@@ -1,14 +1,11 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
-  ListObjectsCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
-import { prisma } from "@acme/db";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
