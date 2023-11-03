@@ -29,6 +29,10 @@ import type { CountryData } from "~/data/groupedCountries";
 
 const screenHeight = Dimensions.get("window").height;
 
+interface PhoneNumberInputHandles {
+  focus: () => void;
+}
+
 interface OnChangeParams {
   dialingCode: string;
   phoneNumber: string;
@@ -44,10 +48,6 @@ interface PhoneNumberInputProps {
   modalContainerStyle?: StackProps;
 }
 
-interface PhoneNumberInputHandles {
-  focus: () => void;
-}
-
 const PhoneNumberInput = forwardRef<
   PhoneNumberInputHandles,
   PhoneNumberInputProps
@@ -59,7 +59,7 @@ const PhoneNumberInput = forwardRef<
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInput | null>(null);
 
   // Expose focus method to parent via ref
   useImperativeHandle(ref, () => ({

@@ -35,39 +35,34 @@ const defineConfig = (): ExpoConfig => ({
       projectId: "68175593-c314-48a6-8892-7afeeb66ab9f",
     },
   },
-  
+
   plugins: [
     "./expo-plugins/with-modify-gradle.js",
+    "expo-router",
     "@react-native-firebase/app",
     "@react-native-firebase/perf",
     "@react-native-firebase/crashlytics",
     [
-        "expo-media-library",
-        {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos."
-        }
-      ],
-      [
-        "expo-media-library",
-        {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
-          "isAccessMediaLocationEnabled": true
-        }
-      ],
-       [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ],
-    [
-      'expo-build-properties',
+      "expo-media-library",
       {
-        "ios": {
-          "useFrameworks": "static"
-        }
+        photosPermission: "Allow $(PRODUCT_NAME) to access your photos.",
+        savePhotosPermission: "Allow $(PRODUCT_NAME) to save photos.",
+        isAccessMediaLocationEnabled: true,
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "The app accesses your photos to let you share them with your friends.",
+      },
+    ],
+    [
+      "expo-build-properties",
+      {
+        ios: {
+          useFrameworks: "static",
+        },
       },
     ],
   ],

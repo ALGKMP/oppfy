@@ -48,7 +48,6 @@ const schemaValidation = z.object({
 
 const PhoneNumber = () => {
   const router = useRouter();
-  const test = api.auth.test.useQuery();
 
   const phoneNumberInputRef = useRef<TextInput | null>(null);
 
@@ -86,15 +85,7 @@ const PhoneNumber = () => {
             fontSize={22}
             fontWeight="900"
           >
-            TESTING: {test.data?.message}
-          </Text>
-          <Text
-            alignSelf="center"
-            textAlign="center"
-            fontSize={22}
-            fontWeight="900"
-          >
-            What's your phone number?
+            What&apos;s your phone number?
           </Text>
 
           <YStack space="$3">

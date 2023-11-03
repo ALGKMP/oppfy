@@ -75,6 +75,10 @@ const DateOfBirth = () => {
     setTriggerShake(false);
   };
 
+  // useEffect(() => {
+  //   setTimeout(() => dateOfBirthInputRef.current?.focus(), 500);
+  // }, []);
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}

@@ -1,5 +1,5 @@
 import { Pressable } from "react-native";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import { getTokens } from "@tamagui/core";
 import {
@@ -12,10 +12,19 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, Text, View, XStack } from "tamagui";
 
+import { api } from "~/utils/api";
 import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
-  const router = useRouter();
+  const { isLoading, data: user } = api.auth.getUser.useQuery();
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (!user?.firstName || !user?.dateOfBirth) {
+    return <Redirect href="welcome" />;
+  }
 
   return (
     <View flex={1} backgroundColor="$gray1">

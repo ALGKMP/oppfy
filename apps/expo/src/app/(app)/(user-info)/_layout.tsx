@@ -29,14 +29,6 @@ const UserDetailsLayout = () => {
     await signOut();
   };
 
-  if (isLoading) {
-    return <Text>Loading...</Text>;
-  }
-
-  if (!isSignedIn) {
-    return <Redirect href="/(auth)/phone-number" />;
-  }
-
   return (
     <View flex={1} backgroundColor="$backgroundStrong">
       <Stack
@@ -87,7 +79,9 @@ const UserDetailsLayout = () => {
                 <View width="$4">
                   <AlertDialog>
                     <AlertDialog.Trigger asChild>
-                      <ChevronLeft size="$1.5" />
+                      <View>
+                        <ChevronLeft size="$1.5" />
+                      </View>
                     </AlertDialog.Trigger>
 
                     <AlertDialog.Portal>

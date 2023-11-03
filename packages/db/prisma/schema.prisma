@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
+    provider     = "mysql"
+    relationMode = "prisma"
+    url          = env("DATABASE_URL")
 }
 
 model User {
@@ -42,6 +43,9 @@ model Post {
     postStats PostStats?
     comments  Comment[]
     media     Media[]
+
+    @@index([authorId])
+    @@index([postedOfId])
 }
 
 model PostStats {
@@ -58,6 +62,8 @@ model Like {
     userId      String
     postStats   PostStats @relation(fields: [postStatsId], references: [id])
     postStatsId String    @unique
+
+    @@index([userId])
 }
 
 model Comment {
@@ -68,6 +74,9 @@ model Comment {
     postId     String
     comment    String
     datePosted DateTime?
+
+    @@index([authorId])
+    @@index([postId])
 }
 
 model VerificationToken {
@@ -87,6 +96,8 @@ model Media {
     thumbnailUrl String
     profilePhoto ProfilePhoto?
     timestamp    DateTime?
+
+    @@index([postId])
 }
 
 enum MediaTypes {

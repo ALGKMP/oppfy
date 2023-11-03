@@ -17,13 +17,14 @@ import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 
 const AppLayout = () => {
-  const { isLoading: sessionIsLoading, isSignedIn, user } = useSession();
+  const { isLoading, isSignedIn } = useSession();
 
-  if (sessionIsLoading) {
+  if (isLoading) {
     return <Text>Loading...</Text>;
   }
 
   if (!isSignedIn) {
+    console.log("NOT SIGNED IN");
     return <Redirect href="/(auth)/phone-number" />;
   }
 

@@ -9,7 +9,7 @@ import { LayoutChangeEvent, StyleSheet } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { StackProps, Text, TextProps, View, XStack } from "tamagui";
 
-interface BirthdateInputRef {
+interface BirthdateInputHandles {
   focus: () => void;
 }
 
@@ -19,7 +19,6 @@ interface BirthdateInputProps {
   onBlur?: () => void;
   onChange?: (value: string) => void;
   onLayout?: (event: LayoutChangeEvent) => void;
-  onInputLayout?: (event: LayoutChangeEvent) => void;
   containerStyle?: StackProps;
   inputStyle?: StackProps;
   charStyle?: TextProps;
@@ -29,10 +28,10 @@ interface BirthdateInputProps {
 }
 
 // const BirthdateInput = (props: BirthdateInputProps) => {
-const BirthdateInput = forwardRef<BirthdateInputRef, BirthdateInputProps>(
+const BirthdateInput = forwardRef<BirthdateInputHandles, BirthdateInputProps>(
   (props, ref) => {
     const isControlled = props.value !== undefined;
-    const [localValue, setLocalValue] = useState(props.defaultValue || "");
+    const [localValue, setLocalValue] = useState(props.defaultValue ?? "");
 
     const effectiveValue = isControlled ? props.value ?? "" : localValue;
 
@@ -96,7 +95,7 @@ const BirthdateInput = forwardRef<BirthdateInputRef, BirthdateInputProps>(
           ref={inputRef}
           value={effectiveValue}
           onBlur={props.onBlur}
-          onLayout={props.onInputLayout}
+          onLayout={props.onLayout}
           onChangeText={handleTextChange}
           style={styles.actualInput}
           keyboardType="number-pad"
