@@ -1,9 +1,3 @@
-import { Prisma } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -13,6 +7,11 @@ import {
   getSignedUrl,
   S3RequestPresigner,
 } from "@aws-sdk/s3-request-presigner";
+import { Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 const profilePhotoBucket = "oppfy-profile-pictures";
 
@@ -21,7 +20,6 @@ export const profileRouter = createTRPCRouter({
   uploadProfilePhoto: protectedProcedure
     .input(
       z.object({
-        file: z.string(), // Replace with suitable file type
         key: z.string(), // For now will be a uuid, but will need to be changed to something else
       }),
     )
@@ -29,7 +27,6 @@ export const profileRouter = createTRPCRouter({
       const uploadParams = {
         Bucket: profilePhotoBucket,
         Key: input.key,
-        Body: input.file,
       };
 
       const prismaInput: Prisma.ProfilePhotoCreateInput = {
@@ -38,16 +35,10 @@ export const profileRouter = createTRPCRouter({
         dateEdited: new Date(),
       };
 
-      const s3Response = new PutObjectCommand(uploadParams)
-      
-
-      if (!s3Response) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error uploading file to R2.",
-          cause: s3Response,
-        });
-      }
+      const command = new PutObjectCommand(uploadParams);
+      const url = await getSignedUrl(ctx.s3Client, command, {
+        expiresIn: 3600,
+      });
 
       const prismaResponse = await ctx.prisma.profilePhoto.create({
         data: prismaInput,
@@ -216,7 +207,6 @@ export const profileRouter = createTRPCRouter({
 
   // TODO: getProfilePosts - get posts from db
   getProfilePosts: protectedProcedure.query(async ({ ctx }) => {
-
     const prismaResponse = await ctx.prisma.post.findMany({
       where: { authorId: ctx.session.uid },
     });
