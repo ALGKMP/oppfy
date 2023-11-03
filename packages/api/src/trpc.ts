@@ -6,10 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
+import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
+import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import superjson from "superjson";
+import { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
 import { prisma, s3Client } from "@acme/db";
@@ -27,6 +31,8 @@ import { auth } from "./services/firebase";
 // type CreateContextOptions = Record<string, never>;
 interface CreateContextOptions {
   session: DecodedIdToken | null;
+  req: Express.Request;
+  res: Express.Response;
 }
 
 /**
@@ -42,7 +48,8 @@ interface CreateContextOptions {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-    auth,
+    req: opts.req,
+    res: opts.res,
     prisma,
     s3Client,
   };
@@ -54,8 +61,12 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const { req } = opts;
+export const createTRPCContext = async ({
+  req,
+  res,
+}: CreateExpressContextOptions) => {
+  const requestId = crypto.randomUUID();
+  res.setHeader("x-request-id", requestId);
 
   const token = req.headers.authorization?.split("Bearer ")[1];
 
@@ -73,6 +84,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   }
 
   return createInnerTRPCContext({
+    req,
+    res,
     session,
   });
 };
@@ -85,19 +98,34 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  * errors on the backend.
  */
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
-});
+// const t = initTRPC
+//   .context<Context>()
+//   .meta<OpenApiMeta>()
+//   .create({
+//     errorFormatter: ({ error, shape }) => {
+//       if (error.code === 'INTERNAL_SERVER_ERROR' && process.env.NODE_ENV === 'production') {
+//         return { ...shape, message: 'Internal server error' };
+//       }
+//       return shape;
+//     },
+//   });
+
+const t = initTRPC
+  .context<typeof createTRPCContext>()
+  .meta<OpenApiMeta>()
+  .create({
+    transformer: superjson,
+    errorFormatter({ shape, error }) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          zodError:
+            error.cause instanceof ZodError ? error.cause.flatten() : null,
+        },
+      };
+    },
+  });
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
