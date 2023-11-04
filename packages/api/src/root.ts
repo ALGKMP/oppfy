@@ -2,11 +2,13 @@ import { generateOpenApiDocument } from "trpc-openapi";
 
 import { authRouter } from "./router/auth";
 // import { profilePhotoRouter } from "./router/profile";
+import { mediaRouter } from "./router/media";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   // profilePhoto: profilePhotoRouter,
+  media: mediaRouter,
 });
 
 export const openApiDocument = generateOpenApiDocument(appRouter, {
