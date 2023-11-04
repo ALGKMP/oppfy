@@ -31,7 +31,7 @@ export const mediaRouter = createTRPCRouter({
         Key: ctx.session.uid,
       };
       return await getSignedUrl(
-        ctx.s3Client,
+        ctx.s3,
         new PutObjectCommand(putObjectParams),
         {
           expiresIn: 3600,
@@ -123,7 +123,7 @@ export const mediaRouter = createTRPCRouter({
       };
       // Generate a pre-signed URL to retrieve the image from S3
       return await getSignedUrl(
-        ctx.s3Client,
+        ctx.s3,
         new GetObjectCommand(getObjectParams),
         {
           expiresIn: 3600,
