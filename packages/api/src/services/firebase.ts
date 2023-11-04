@@ -22,8 +22,6 @@ const key = {
   "universe_domain": "googleapis.com"
 }
 
-
-
 const FIREBASE_APP_NAME = "SERVER";
 
 // Initialize Firebase
