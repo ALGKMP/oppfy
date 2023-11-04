@@ -12,15 +12,20 @@ const ProfileLayout = () => {
   const rootNavigation = useRootNavigation();
 
   return (
-    <View flex={1} backgroundColor="$gray1Dark">
+    <View flex={1} backgroundColor="black">
       <Stack
         screenOptions={{
+          // always go back to the root navigation
+          // when going back from the profile
+          // screen
+
+          
           headerTitle: "",
           headerStyle: {
-            backgroundColor: getTokens().color.gray1Dark.val,
+            backgroundColor: "black",
           },
           headerLeft: () => (
-            <ChevronLeft size="$2" onPress={() => rootNavigation?.goBack()} />
+            <ChevronLeft size="$2" onPress={() => router?.back()} />
           ),
         }}
       >

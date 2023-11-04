@@ -27,11 +27,11 @@ const BottomTabsLayout = () => {
   }
 
   return (
-    <View flex={1} backgroundColor="$gray1">
+    <View flex={1} backgroundColor="black">
       <BottomTabs
         screenOptions={{
           tabBarStyle: {
-            backgroundColor: getTokens().color.gray1Dark.val,
+            backgroundColor: "black",
             borderTopColor: getTokens().color.gray2Dark.val,
             height: 60,
             paddingTop: 10,
@@ -41,7 +41,7 @@ const BottomTabsLayout = () => {
           tabBarShowLabel: false,
           headerTitle: "",
           headerStyle: {
-            backgroundColor: getTokens().color.gray1Dark.val,
+            backgroundColor: "black",
             shadowColor: "transparent",
           },
         }}
