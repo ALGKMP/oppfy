@@ -12,7 +12,7 @@ export const appRouter = createTRPCRouter({
 export const openApiDocument = generateOpenApiDocument(appRouter, {
   title: "tRPC OpenAPI",
   version: "1.0.0",
-  baseUrl: "http://localhost:4000/api",
+  baseUrl: "http://localhost:3000/api",
 });
 
 // export type definition of API
