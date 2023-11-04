@@ -8,6 +8,14 @@ datasource db {
     url          = env("DATABASE_URL")
 }
 
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
 model User {
     id           String        @id @unique // Firebase UID
     firstName    String?
@@ -22,45 +30,64 @@ model User {
 }
 
 model ProfilePhoto {
-    id         String    @id @default(cuid())
-    user       User      @relation(fields: [userId], references: [id])
-    userId     String    @unique
-    media      Media     @relation(fields: [mediaId], references: [id])
-    mediaId    String    @unique
-    dateEdited DateTime?
+    id          String   @id @default(cuid())
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String   @unique
+    media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+    mediaId     String   @unique
+    lastUpdated DateTime
 }
 
 model Post {
     id         String   @id @default(cuid())
     datePosted DateTime
 
-    author     User   @relation(fields: [authorId], references: [id], name: "createdPosts")
+    author     User   @relation(fields: [authorId], references: [id], name: "createdPosts", onDelete: Cascade)
     authorId   String
-    postedOf   User   @relation(fields: [postedOfId], references: [id], name: "postsOf")
+    postedOf   User   @relation(fields: [postedOfId], references: [id], name: "postsOf", onDelete: Cascade)
     postedOfId String
+    media      Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+    mediaId    String @unique
 
     caption   String
     postStats PostStats?
     comments  Comment[]
-    media     Media[]
 
     @@index([authorId])
     @@index([postedOfId])
+    @@index([mediaId])
+}
+
+model Media {
+    id           String        @id @default(cuid())
+    type         MediaTypes
+    objectKey    String
+    thumbnailUrl String
+    lastUpdated  DateTime?
+    ProfilePhoto ProfilePhoto?
+    Post         Post?
+}
+
+enum MediaTypes {
+    PHOTO
+    VIDEO
 }
 
 model PostStats {
     id     String @id @default(cuid())
     likes  Like[]
     views  Int
-    post   Post   @relation(fields: [postId], references: [id])
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
     postId String @unique
+
+    @@index([postId])
 }
 
 model Like {
     id          String    @id @default(cuid())
-    likedBy     User      @relation(fields: [userId], references: [id])
+    likedBy     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId      String
-    postStats   PostStats @relation(fields: [postStatsId], references: [id])
+    postStats   PostStats @relation(fields: [postStatsId], references: [id], onDelete: Cascade)
     postStatsId String    @unique
 
     @@index([userId])
@@ -68,39 +95,13 @@ model Like {
 
 model Comment {
     id         String    @id @default(cuid())
-    author     User      @relation(fields: [authorId], references: [id])
+    author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
     authorId   String
-    post       Post      @relation(fields: [postId], references: [id])
+    post       Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
     postId     String
     comment    String
     datePosted DateTime?
 
     @@index([authorId])
     @@index([postId])
-}
-
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
-
-    @@unique([identifier, token])
-}
-
-model Media {
-    id           String        @id @default(cuid())
-    post         Post          @relation(fields: [postId], references: [id])
-    postId       String
-    type         MediaTypes
-    objectKey    String
-    thumbnailUrl String
-    profilePhoto ProfilePhoto?
-    timestamp    DateTime?
-
-    @@index([postId])
-}
-
-enum MediaTypes {
-    PHOTO
-    VIDEO
 }

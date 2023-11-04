@@ -1,38 +1,23 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {  useRef } from "react";
 import type { TextInput } from "react-native";
 import {
-  Keyboard,
   KeyboardAvoidingView,
-  Modal,
   Platform,
-  SafeAreaView,
-  SectionList,
-  TouchableOpacity,
+
 } from "react-native";
-import { Link, Stack, useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check } from "@tamagui/lucide-icons";
 import { isValidNumber } from "libphonenumber-js";
-import { Controller, set, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   Button,
-  Checkbox,
-  H1,
-  H2,
-  H5,
-  Input,
   Text,
   View,
-  XStack,
   YStack,
 } from "tamagui";
 import * as z from "zod";
 
-import { api } from "~/utils/api";
-import { PhoneNumberInput, UnderlineInput } from "~/components/Inputs";
-import QuickList from "~/components/QuickList";
-import { groupedCountries } from "~/data/groupedCountries";
-import PhoneNumberOTP from "./pin-code-otp";
+import { PhoneNumberInput } from "~/components/Inputs";
 
 type FormData = z.infer<typeof schemaValidation>;
 
@@ -54,7 +39,6 @@ const PhoneNumber = () => {
   const {
     control,
     handleSubmit,
-    setError,
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
