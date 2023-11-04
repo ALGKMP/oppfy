@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
 import { api } from "~/utils/api";
 
 interface SessionProviderProps {
@@ -49,6 +50,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     }
   };
 
+  // TODO: account deletion needs to be handled on the backend
+  // we run into the firebase feature: user has not recently signed in
   const deleteAccount = async () => {
     try {
       await deleteUser.mutateAsync();
@@ -56,7 +59,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const signOut = async () => {
     try {
@@ -76,7 +79,15 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isSignedIn, deleteAccount, signIn, signOut, signUp }}
+      value={{
+        user,
+        isLoading,
+        isSignedIn,
+        deleteAccount,
+        signIn,
+        signOut,
+        signUp,
+      }}
     >
       {children}
     </AuthContext.Provider>

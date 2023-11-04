@@ -22,9 +22,11 @@
     "@trpc/react-query": "^10.34.0",
     "@trpc/server": "^10.34.0",
     "next": "^13.4.9",
+    "nextjs-cors": "^2.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "1.9.1",
+    "swagger-ui-react": "^5.9.1",
     "zod": "^3.21.4"
   },
   "devDependencies": {

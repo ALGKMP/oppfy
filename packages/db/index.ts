@@ -6,7 +6,7 @@ export * from "@prisma/client";
 const globalForPrisma = globalThis as { prisma?: PrismaClient };
 const globalForS3 = globalThis as { s3?: S3Client };
 
-export const s3Client =
+export const s3 =
   globalForS3.s3 ||
   new S3Client({
     region: "ca-central-1",
@@ -27,5 +27,5 @@ export const prisma =
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
-  globalForS3.s3 = s3Client;
+  globalForS3.s3 = s3;
 }
