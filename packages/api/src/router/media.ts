@@ -14,9 +14,9 @@ import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
-const mediaRouter = createTRPCRouter({
+export const mediaRouter = createTRPCRouter({
   /*
    *    @param {string} bucket - bucket in S3 for the image to be uploaded to.
    *   The `uploadImage` function is a protected procedure that accepts a string input parameter called
@@ -37,12 +37,17 @@ const mediaRouter = createTRPCRouter({
           expiresIn: 3600,
         },
       );
-      
+    }),
+  awsSNS: protectedProcedure
+    .meta({ openapi: { method: "POST", path: "/aws-sns" } })
+    .input(z.void())
+    .output(z.object({ message: z.string() }))
+    .mutation(async ({ ctx }) => {
       // TODO: for OpenAPI
       const prismaFindUniqueInput: Prisma.ProfilePhotoFindUniqueArgs = {
         where: { userId: ctx.session.uid },
       };
-  
+
       const prismaResponse = await ctx.prisma.profilePhoto.findUnique(
         prismaFindUniqueInput,
       );
@@ -54,6 +59,9 @@ const mediaRouter = createTRPCRouter({
           cause: prismaResponse,
         });
       }
+
+      return { message: "prisma query" };
+
     }),
 
   /*
