@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Redirect, useRouter } from "expo-router";
+import { ChevronLeft, ChevronRight } from "@tamagui/lucide-icons";
 import {
+  AlertDialog,
   Button,
   ListItem,
   Separator,
@@ -19,10 +21,6 @@ const Settings = () => {
 
   return (
     <View flex={1} backgroundColor="black" paddingHorizontal="$6">
-      {/* <Button onPress={signOut}>Logout</Button>
-
-      <Button theme="red" onPress={deleteAccount}>Delete Account</Button> */}
-
       <YStack space={20}>
         <YStack space={8}>
           <Text fontSize={10} fontWeight="600" color="$gray11">
@@ -31,13 +29,30 @@ const Settings = () => {
 
           <YGroup separator={<Separator />}>
             <YGroup.Item>
-              <ListItem hoverTheme pressTheme title="Notifications" />
+              <ListItem
+                title="Notifications"
+                hoverTheme
+                pressTheme
+                iconAfter={ChevronRight}
+                onPress={() => router.push("profile/notifications")}
+              />
             </YGroup.Item>
             <YGroup.Item>
-              <ListItem hoverTheme pressTheme title="Privacy" />
+              <ListItem
+                title="Privacy"
+                hoverTheme
+                pressTheme
+                iconAfter={ChevronRight}
+              />
             </YGroup.Item>
             <YGroup.Item>
-              <ListItem hoverTheme pressTheme title="Other" />
+              <ListItem
+                title="Other"
+                hoverTheme
+                pressTheme
+                iconAfter={ChevronRight}
+                onPress={() => router.push("profile/other")}
+              />
             </YGroup.Item>
           </YGroup>
         </YStack>
@@ -49,16 +64,36 @@ const Settings = () => {
 
           <YGroup separator={<Separator />}>
             <YGroup.Item>
-              <ListItem hoverTheme pressTheme title="Share Oppfy" />
+              <ListItem
+                title="Share Oppfy"
+                hoverTheme
+                pressTheme
+                iconAfter={ChevronRight}
+              />
             </YGroup.Item>
             <YGroup.Item>
-              <ListItem hoverTheme pressTheme title="Rate Oppfy" />
+              <ListItem
+                title="Rate Oppfy"
+                hoverTheme
+                pressTheme
+                iconAfter={ChevronRight}
+              />
             </YGroup.Item>
             <YGroup.Item>
-              <ListItem hoverTheme pressTheme title="Help" />
+              <ListItem
+                title="Help"
+                hoverTheme
+                pressTheme
+                iconAfter={ChevronRight}
+              />
             </YGroup.Item>
             <YGroup.Item>
-              <ListItem hoverTheme pressTheme title="About" />
+              <ListItem
+                title="About"
+                hoverTheme
+                pressTheme
+                iconAfter={ChevronRight}
+              />
             </YGroup.Item>
           </YGroup>
         </YStack>
@@ -69,6 +104,7 @@ const Settings = () => {
           </Text>
         </Button>
       </YStack>
+
     </View>
   );
 };

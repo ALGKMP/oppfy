@@ -19,34 +19,6 @@ const Profile = () => {
   return (
     <View flex={1} backgroundColor="black" paddingHorizontal="$5">
       <YStack space="$3">
-        {/* <XStack justifyContent="space-between">
-          <Image source={PFP} width={70} height={70} borderRadius={35} />
-
-          <XStack alignItems="center" space="$4">
-            {stats.map((stat, index) => (
-              <View key={index} alignItems="center">
-                <Text fontWeight="bold" fontSize="$5">
-                  {stat.quantity}
-                </Text>
-                <Text>{stat.name}</Text>
-              </View>
-            ))}
-          </XStack>
-        </XStack>
-
-        <View flexDirection="column" marginVertical={10}>
-          <Text fontWeight="bold">{testUser.name}</Text>
-          <Text>{testUser.bio}</Text>
-        </View>
-
-        <XStack space="$3">
-          <Button flex={1} height="$2.5" backgroundColor="white" color="black">
-            Edit Profile
-          </Button>
-          <Button flex={1} height="$2.5" backgroundColor="white" color="black">
-            Share Profile
-          </Button>
-        </XStack> */}
         <XStack justifyContent="space-between" alignItems="center">
           <YStack space>
             <Text fontWeight="700" fontSize={20}>
