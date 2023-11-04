@@ -48,6 +48,7 @@ export const mediaRouter = createTRPCRouter({
         where: { userId: ctx.session.uid },
       };
 
+
       const prismaResponse = await ctx.prisma.profilePhoto.findUnique(
         prismaFindUniqueInput,
       );
@@ -79,7 +80,7 @@ export const mediaRouter = createTRPCRouter({
         Key: bucket,
       };
 
-      const s3Response = await ctx.s3Client.send(
+      const s3Response = await ctx.s3.send(
         new DeleteObjectCommand(deleteObjectParams),
       );
 
@@ -145,9 +146,7 @@ export const mediaRouter = createTRPCRouter({
         Key: key,
       };
       // Check if the image exists in S3
-      const exists = await ctx.s3Client.send(
-        new HeadObjectCommand(headObjectParams),
-      );
+      const exists = await ctx.s3.send(new HeadObjectCommand(headObjectParams));
       if (!exists) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -157,7 +156,7 @@ export const mediaRouter = createTRPCRouter({
 
       // Generate a pre-signed URL to update the image in S3
       const signedUrl = await getSignedUrl(
-        ctx.s3Client,
+        ctx.s3,
         new PutObjectCommand(headObjectParams),
         {
           expiresIn: 3600,

@@ -16,7 +16,7 @@ import superjson from "superjson";
 import { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
-import { prisma, s3Client } from "@acme/db";
+import { prisma, s3 } from "@acme/db";
 
 import { auth } from "./services/firebase";
 
@@ -31,8 +31,6 @@ import { auth } from "./services/firebase";
 // type CreateContextOptions = Record<string, never>;
 interface CreateContextOptions {
   session: DecodedIdToken | null;
-  req: Express.Request;
-  res: Express.Response;
 }
 
 /**
@@ -48,10 +46,8 @@ interface CreateContextOptions {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-    req: opts.req,
-    res: opts.res,
     prisma,
-    s3Client,
+    s3,
   };
 };
 
@@ -64,13 +60,13 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 export const createTRPCContext = async ({
   req,
   res,
-}: CreateExpressContextOptions) => {
+}: CreateNextContextOptions) => {
   const requestId = crypto.randomUUID();
   res.setHeader("x-request-id", requestId);
 
   const token = req.headers.authorization?.split("Bearer ")[1];
 
-  let session = null;
+  let session: DecodedIdToken | null = null;
 
   if (token) {
     try {
@@ -84,8 +80,6 @@ export const createTRPCContext = async ({
   }
 
   return createInnerTRPCContext({
-    req,
-    res,
     session,
   });
 };
