@@ -39,7 +39,7 @@ export const mediaRouter = createTRPCRouter({
       );
     }),
     awsSNS: publicProcedure
-    .meta({ openapi: { method: "POST", path: "/aws-sns" }})
+    .meta({ openapi: { method: "POST", path: "/aws-sns", contentTypes: ["application/json", "text/plain"]}})
     .input(
       z.object({
         Type: z.string(), // Ensure the Type is "SubscriptionConfirmation"
@@ -56,7 +56,6 @@ export const mediaRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
       console.log("input", input);
-      // // Check if the input Type is "SubscriptionConfirmation"
       // if (input.Type !== "SubscriptionConfirmation") {
       //   throw new TRPCError({
       //     code: "BAD_REQUEST",
