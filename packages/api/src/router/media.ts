@@ -38,31 +38,30 @@ export const mediaRouter = createTRPCRouter({
         },
       );
     }),
-  awsSNS: protectedProcedure
-    .meta({ openapi: { method: "POST", path: "/aws-sns" } })
-    .input(z.void())
-    .output(z.object({ message: z.string() }))
-    .mutation(async ({ ctx }) => {
-      // TODO: for OpenAPI
-      const prismaFindUniqueInput: Prisma.ProfilePhotoFindUniqueArgs = {
-        where: { userId: ctx.session.uid },
-      };
-
-
-      const prismaResponse = await ctx.prisma.profilePhoto.findUnique(
-        prismaFindUniqueInput,
-      );
-
-      if (!prismaResponse) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error finding profile photo in DB",
-          cause: prismaResponse,
-        });
-      }
-
-      return { message: "prisma query" };
-
+    awsSNS: publicProcedure
+    .meta({ openapi: { method: "POST", path: "/aws-sns", contentTypes: ["application/json", "text/plain"]}})
+    .input(
+      z.object({
+        Type: z.string(), // Ensure the Type is "SubscriptionConfirmation"
+        MessageId: z.string(),
+        TopicArn: z.string(),
+        Message: z.string(),
+        Timestamp: z.string(),
+        Token: z.string(),
+        SignatureVersion: z.string(),
+        Signature: z.string(),
+        SigningCertURL: z.string(),
+      })
+    )
+    .output(z.void())
+    .mutation(async ({ input, ctx }) => {
+      console.log("input", input);
+      // if (input.Type !== "SubscriptionConfirmation") {
+      //   throw new TRPCError({
+      //     code: "BAD_REQUEST",
+      //     message: "Invalid message type",
+      //   });
+      // }
     }),
 
   /*
