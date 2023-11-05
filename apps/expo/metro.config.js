@@ -11,6 +11,7 @@ const config = getDefaultConfig(projectRoot);
 // Add import aliases
 config.resolver.alias = {
   "~": path.resolve(projectRoot, "src"),
+  "@assets": path.resolve(projectRoot, "assets"),
 };
 
 // Add the additional `cjs` extension to the resolver
