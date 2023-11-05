@@ -13,6 +13,7 @@ import {
 import { Button, Text, View, XStack } from "tamagui";
 
 import { api } from "~/utils/api";
+import BottomTabsHeader from "~/components/Headers/BottomTabHeader";
 import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
@@ -30,6 +31,7 @@ const BottomTabsLayout = () => {
     <View flex={1} backgroundColor="black">
       <BottomTabs
         screenOptions={{
+          tabBarShowLabel: false,
           tabBarStyle: {
             backgroundColor: "black",
             borderTopColor: getTokens().color.gray2Dark.val,
@@ -38,12 +40,9 @@ const BottomTabsLayout = () => {
             paddingBottom: 10,
             borderTopWidth: 1,
           },
-          tabBarShowLabel: false,
-          headerTitle: "",
-          headerStyle: {
-            backgroundColor: "black",
-            shadowColor: "transparent",
-          },
+          header: ({ navigation, options }) => (
+            <BottomTabsHeader navigation={navigation} options={options} />
+          ),
         }}
       >
         <BottomTabs.Screen

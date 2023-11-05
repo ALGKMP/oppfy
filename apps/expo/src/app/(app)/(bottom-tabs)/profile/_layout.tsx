@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getTokens, Text, View, XStack } from "tamagui";
 
+import StackHeader from "~/components/Headers/StackHeader";
 import { Stack } from "~/layouts";
 
 const ProfileLayout = () => {
@@ -16,41 +17,11 @@ const ProfileLayout = () => {
       <Stack
         screenOptions={{
           header: ({ navigation, options, back }) => (
-            <XStack
-              padding="$6"
-              alignItems="center"
-              justifyContent="space-between"
-              style={{ backgroundColor: "black" }}
-            >
-              <View width="$4" alignItems="flex-start">
-                {back ? (
-                  options.headerLeft ? (
-                    options.headerLeft({ canGoBack: navigation.canGoBack() })
-                  ) : (
-                    <ChevronLeft
-                      size="$1.5"
-                      onPress={() => navigation.goBack()}
-                    />
-                  )
-                ) : (
-                  // Render a placeholder to keep the header balanced if there's no back option
-                  <View width={48} /> // Adjust the width to match your back button's width
-                )}
-              </View>
-
-              <Text fontSize={16} fontWeight="600">
-                {options.headerTitle
-                  ? options.headerTitle
-                  : options.title
-                  ? options.title
-                  : null}
-              </Text>
-
-              <View width="$4" alignItems="flex-end">
-                {options.headerRight &&
-                  options.headerRight({ canGoBack: navigation.canGoBack() })}
-              </View>
-            </XStack>
+            <StackHeader
+              navigation={navigation}
+              options={options}
+              back={back}
+            />
           ),
         }}
       >

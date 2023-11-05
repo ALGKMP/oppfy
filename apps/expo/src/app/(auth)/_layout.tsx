@@ -4,43 +4,31 @@ import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { getTokens, Text, View, XStack } from "tamagui";
 
+import { StackHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
 const AuthLayout = () => {
   return (
-    <View flex={1} backgroundColor="$backgroundStrong">
+    <View flex={1} backgroundColor="black">
       <Stack
         screenOptions={{
-          header: ({ navigation, options, back }) => (
-            <XStack
-              padding="$6"
-              alignItems="center"
-              justifyContent="space-between"
-              style={{ backgroundColor: "black" }}
-            >
-              <View width="$4">
-                {back && (
-                  <ChevronLeft
-                    size="$1.5"
-                    onPress={() => navigation.goBack()}
-                  />
-                )}
-              </View>
-
-              <Text fontSize={22} fontWeight="600">
-                OPPFY
-              </Text>
-
-              <View width="$4">
-                <Text fontWeight="500" fontSize={16}>
-                  Help
-                </Text>
-              </View>
-            </XStack>
+          headerTitle: () => (
+            <Text fontSize={22} fontWeight="600">
+              OPPFY
+            </Text>
           ),
-          headerStyle: {
-            backgroundColor: "black",
-          },
+          headerRight: () => (
+            <Text fontWeight="500" fontSize={16}>
+              Help
+            </Text>
+          ),
+          header: ({ navigation, options, back }) => (
+            <StackHeader
+              navigation={navigation}
+              options={options}
+              back={back}
+            />
+          ),
         }}
       >
         <Stack.Screen name="phone-number" options={{ animation: "fade" }} />

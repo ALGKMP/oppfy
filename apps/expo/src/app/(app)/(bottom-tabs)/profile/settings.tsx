@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Platform } from "react-native";
+import { Linking, Platform, Share } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Redirect, useRouter } from "expo-router";
 import { ChevronLeft, ChevronRight } from "@tamagui/lucide-icons";
@@ -17,8 +17,7 @@ import {
 import { useSession } from "~/contexts/SessionsContext";
 
 const ITUNES_ITEM_ID = 982107779;
-
-
+const ANDROID_PACKAGE_NAME = "host.exp.exponent";
 
 const Settings = () => {
   const router = useRouter();
@@ -26,11 +25,27 @@ const Settings = () => {
 
   const openStoreForReview = async () => {
     if (Platform.OS === "ios") {
-      // Replace 'YOUR_APP_ID' with your actual App ID from the Apple App Store
-      storeURL = `itms-apps://itunes.apple.com/app/idYOUR_APP_ID?action=write-review`;
+      await Linking.openURL(
+        `itms-apps://itunes.apple.com/app/viewContentsUserReviews/id${ITUNES_ITEM_ID}?action=write-review`,
+      );
     } else if (Platform.OS === "android") {
-      // Replace 'YOUR_PACKAGE_NAME' with your actual package name from the Google Play Store
-      storeURL = `market://details?id=YOUR_PACKAGE_NAME`;
+      await Linking.openURL(
+        `market://details?id=${ANDROID_PACKAGE_NAME}&showAllReviews=true`,
+      );
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      // TODO: update share message
+      await Share.share({
+        title: "Share Oppfy",
+        message: "Check out Oppfy, it's a great app!",
+        // Optionally, you can add a URL to share:
+        // url: 'https://yourappurl.com'
+      });
+    } catch (error) {
+      alert("Error sharing, try again later.");
     }
   };
 
@@ -84,6 +99,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
+                onPress={handleShare}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -92,6 +108,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
+                onPress={openStoreForReview}
               />
             </YGroup.Item>
             <YGroup.Item>
