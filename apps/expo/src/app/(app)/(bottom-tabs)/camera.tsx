@@ -7,7 +7,7 @@ import { api } from "~/utils/api";
 
 const Camera = () => {
 
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<string>();
   const mutation = api.media.postImage.useMutation();
 
   const getPermissionAsync = async () => {
