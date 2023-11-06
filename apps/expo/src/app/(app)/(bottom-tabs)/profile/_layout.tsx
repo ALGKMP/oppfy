@@ -61,6 +61,26 @@ const ProfileLayout = () => {
           name="other"
           options={{ title: "Other", animation: "fade" }}
         />
+        <Stack.Screen
+          name="delete-account"
+          options={{
+            title: "Delete Account",
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            headerLeft: () => null,
+            headerRight: () => null,
+            
+          }}
+        />
+
+        <Stack.Screen
+          name="privacy"
+          options={{ title: "Privacy", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="blocked-users"
+          options={{ title: "Blocked Users", animation: "fade" }}
+        />
       </Stack>
     </View>
   );

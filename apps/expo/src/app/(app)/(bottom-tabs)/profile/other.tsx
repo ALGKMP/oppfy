@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Redirect, useRouter } from "expo-router";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import {
   AlertDialog,
@@ -16,7 +17,32 @@ import {
 import { useSession } from "~/contexts/SessionsContext";
 
 const Other = () => {
-  const { signOut, deleteAccount } = useSession();
+  const router = useRouter();
+  const { showActionSheetWithOptions } = useActionSheet();
+
+  const onPress = () => {
+    const options = ["Clear Cache", "Cancel"];
+    const destructiveButtonIndex = 0;
+    const cancelButtonIndex = 1;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        destructiveButtonIndex,
+      },
+      (selectedIndex) => {
+        switch (selectedIndex) {
+          case destructiveButtonIndex:
+            // Delete
+            break;
+
+          case cancelButtonIndex:
+          // Canceled
+        }
+      },
+    );
+  };
 
   return (
     <View flex={1} backgroundColor="black" paddingHorizontal="$6">
@@ -29,13 +55,14 @@ const Other = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
+                onPress={onPress}
               />
             </YGroup.Item>
           </YGroup>
         </YStack>
 
         <Button
-          onPress={deleteAccount}
+          onPress={() => router.push("profile/delete-account")}
           borderWidth={0}
           backgroundColor="$gray1"
         >

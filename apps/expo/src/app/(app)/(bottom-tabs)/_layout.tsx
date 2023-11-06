@@ -32,6 +32,7 @@ const BottomTabsLayout = () => {
       <BottomTabs
         screenOptions={{
           tabBarShowLabel: false,
+          tabBarHideOnKeyboard: true,
           tabBarStyle: {
             backgroundColor: "black",
             borderTopColor: getTokens().color.gray2Dark.val,
