@@ -31,6 +31,7 @@ import SpartanMedium from "@assets/fonts/Spartan/Spartan-Medium.ttf";
 import SpartanRegular from "@assets/fonts/Spartan/Spartan-Regular.ttf";
 import SpartanSemiBold from "@assets/fonts/Spartan/Spartan-SemiBold.ttf";
 import SpartanThin from "@assets/fonts/Spartan/Spartan-Thin.ttf";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import auth from "@react-native-firebase/auth";
 import { TamaguiProvider, Text, View } from "tamagui";
 
@@ -77,12 +78,14 @@ const RootLayout = () => {
     <TRPCProvider>
       <SessionProvider>
         <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-          <SafeAreaProvider>
-            <View flex={1} backgroundColor="$backgroundStrong">
-              <Slot />
-              <StatusBar />
-            </View>
-          </SafeAreaProvider>
+          <ActionSheetProvider>
+            <SafeAreaProvider>
+              <View flex={1} backgroundColor="$backgroundStrong">
+                <Slot />
+                <StatusBar />
+              </View>
+            </SafeAreaProvider>
+          </ActionSheetProvider>
         </TamaguiProvider>
       </SessionProvider>
     </TRPCProvider>

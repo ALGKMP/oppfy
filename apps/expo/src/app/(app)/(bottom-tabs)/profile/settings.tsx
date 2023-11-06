@@ -73,6 +73,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
+                onPress={() => router.push("profile/privacy")}
               />
             </YGroup.Item>
             <YGroup.Item>

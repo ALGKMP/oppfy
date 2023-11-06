@@ -32,6 +32,9 @@ importers:
       '@expo/metro-config':
         specifier: ^0.10.7
         version: 0.10.7
+      '@expo/react-native-action-sheet':
+        specifier: ^4.0.1
+        version: 4.0.1(react@18.2.0)
       '@hookform/resolvers':
         specifier: ^3.3.1
         version: 3.3.1(react-hook-form@7.46.2)
@@ -2761,6 +2764,16 @@ packages:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    dev: false
+
+  /@expo/react-native-action-sheet@4.0.1(react@18.2.0):
+    resolution: {integrity: sha512-FwCFpjpB6yzrK8CIWssLlh/i6zQFytFBiJfNdz0mJ2ckU4hWk8SrjB37P0Q4kF7w0bnIdYzPgRbdPR9hnfFqPw==}
+    peerDependencies:
+      react: '>=16.3.0'
+    dependencies:
+      '@types/hoist-non-react-statics': 3.3.4
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
     dev: false
 
   /@expo/rudder-sdk-node@1.1.1:
