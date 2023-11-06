@@ -28,15 +28,17 @@ export const mediaRouter = createTRPCRouter({
       z.object({
         bucket: z.string(),
         key: z.string(),
-        caption: z.string(),
+        caption: z.string().optional(),
         tags: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const metadata = {
-        Caption: input.caption,
         AuthorId: ctx.session.uid,
       };
+      if (input.caption) {
+        metadata["Caption" as keyof typeof metadata] = input.caption;
+      }
 
       if (input.tags.length > 0) {
         input.tags.forEach((tag, index) => {
@@ -50,9 +52,11 @@ export const mediaRouter = createTRPCRouter({
         Metadata: metadata,
       };
 
-      return await getSignedUrl(ctx.s3, new PutObjectCommand(putObjectParams), {
+      const url = await getSignedUrl(ctx.s3, new PutObjectCommand(putObjectParams), {
         expiresIn: 3600,
       });
+      console.log("url", url);
+      return {url};
     }),
 
   awsPostImage: publicProcedure

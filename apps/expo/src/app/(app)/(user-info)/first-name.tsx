@@ -19,9 +19,6 @@ import {
 } from "tamagui";
 import * as z from "zod";
 
-import { api } from "~/utils/api";
-import { UnderlineInput } from "~/components/Inputs";
-
 type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({

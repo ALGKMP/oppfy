@@ -1,25 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check } from "@tamagui/lucide-icons";
 import { Controller, set, useForm } from "react-hook-form";
 import {
   Button,
-  Checkbox,
-  H1,
-  H2,
-  H5,
   Text,
   View,
-  XStack,
   YStack,
 } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";
-import { BirthdateInput, UnderlineInput } from "~/components/Inputs";
+import { BirthdateInput } from "~/components/Inputs";
 import useParams from "~/hooks/useParams";
 
 interface UserDetailsFlowParams {
