@@ -34,6 +34,7 @@ import SpartanThin from "@assets/fonts/Spartan/Spartan-Thin.ttf";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import auth from "@react-native-firebase/auth";
 import { TamaguiProvider, Text, View } from "tamagui";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "~/../tamagui.config";
@@ -71,11 +72,14 @@ const RootLayout = () => {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null;
+
   }
+
+  const queryClient = new QueryClient();
 
   return (
     <TRPCProvider>
+      <QueryClientProvider client={queryClient}>
       <SessionProvider>
         <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
           <ActionSheetProvider>
@@ -88,6 +92,7 @@ const RootLayout = () => {
           </ActionSheetProvider>
         </TamaguiProvider>
       </SessionProvider>
+      </QueryClientProvider>
     </TRPCProvider>
   );
 };
