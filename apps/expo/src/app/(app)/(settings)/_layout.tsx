@@ -28,27 +28,7 @@ const ProfileLayout = () => {
         <Stack.Screen
           name="index"
           options={{
-            headerLeft: () => null,
-            headerRight: () => (
-              <View>
-                <Pressable onPress={() => router.push("/profile/settings")}>
-                  {({ pressed }) => (
-                    <MoreHorizontal
-                      size="$1"
-                      style={{ opacity: pressed ? 0.5 : 1 }}
-                    />
-                  )}
-                </Pressable>
-              </View>
-            ),
-          }}
-        />
-
-        <Stack.Screen
-          name="settings"
-          options={{
             title: "Settings",
-            animation: "fade",
           }}
         />
 
@@ -69,7 +49,6 @@ const ProfileLayout = () => {
             animation: "slide_from_bottom",
             headerLeft: () => null,
             headerRight: () => null,
-            
           }}
         />
 
