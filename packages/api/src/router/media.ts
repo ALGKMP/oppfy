@@ -23,45 +23,83 @@ export const mediaRouter = createTRPCRouter({
    *   `bucket`. It is a mutation, which means it will modify data on the server.
    */
 
-  uploadImage: protectedProcedure
-    .input(z.string())
-    .mutation(async ({ ctx, input: bucket }) => {
-      const putObjectParams = {
-        Bucket: bucket,
-        Key: ctx.session.uid,
-      };
-      return await getSignedUrl(
-        ctx.s3,
-        new PutObjectCommand(putObjectParams),
-        {
-          expiresIn: 3600,
-        },
-      );
-    }),
-    awsSNS: publicProcedure
-    .meta({ openapi: { method: "POST", path: "/aws-sns", contentTypes: ["application/json", "text/plain"]}})
+  postImage: protectedProcedure
     .input(
       z.object({
-        Type: z.string(), // Ensure the Type is "SubscriptionConfirmation"
-        MessageId: z.string(),
-        TopicArn: z.string(),
-        Message: z.string(),
-        Timestamp: z.string(),
-        Token: z.string(),
-        SignatureVersion: z.string(),
-        Signature: z.string(),
-        SigningCertURL: z.string(),
-      })
+        bucket: z.string(),
+        key: z.string(),
+        caption: z.string().optional(),
+        tags: z.array(z.string()),
+      }),
     )
+    .mutation(async ({ ctx, input }) => {
+      const metadata = {
+        AuthorId: ctx.session.uid,
+      };
+      if (input.caption) {
+        metadata["Caption" as keyof typeof metadata] = input.caption;
+      }
+
+      if (input.tags.length > 0) {
+        input.tags.forEach((tag, index) => {
+          metadata[`Tag${index}` as keyof typeof metadata] = tag;
+        });
+      }
+
+      const putObjectParams = {
+        Bucket: input.bucket,
+        Key: input.key,
+        Metadata: metadata,
+      };
+
+      const url = await getSignedUrl(ctx.s3, new PutObjectCommand(putObjectParams), {
+        expiresIn: 3600,
+      });
+      console.log("url", url);
+      return {url};
+    }),
+
+  awsPostImage: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/aws-post-image",
+        contentTypes: ["application/json", "text/plain"],
+      },
+    })
+    .input(z.object({}))
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
       console.log("input", input);
-      // if (input.Type !== "SubscriptionConfirmation") {
-      //   throw new TRPCError({
-      //     code: "BAD_REQUEST",
-      //     message: "Invalid message type",
-      //   });
-      // }
+    }),
+
+  postProfilePicture: protectedProcedure
+    .input(z.object({ bucket: z.string(), key: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const putObjectParams = {
+        Bucket: input.bucket,
+        Key: input.key,
+        Metadata: {
+          profile: "true",
+        },
+      };
+      return await getSignedUrl(ctx.s3, new PutObjectCommand(putObjectParams), {
+        expiresIn: 3600,
+      });
+    }),
+
+  awsPostProfilePicture: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/aws-post-profile-picture",
+        contentTypes: ["application/json", "text/plain"],
+      },
+    })
+    .input(z.object({}))
+    .output(z.void())
+    .mutation(async ({ input, ctx }) => {
+      console.log("input", input);
     }),
 
   /*
@@ -121,13 +159,9 @@ export const mediaRouter = createTRPCRouter({
         Key: key,
       };
       // Generate a pre-signed URL to retrieve the image from S3
-      return await getSignedUrl(
-        ctx.s3,
-        new GetObjectCommand(getObjectParams),
-        {
-          expiresIn: 3600,
-        },
-      );
+      return await getSignedUrl(ctx.s3, new GetObjectCommand(getObjectParams), {
+        expiresIn: 3600,
+      });
     }),
 
   /*
@@ -136,13 +170,12 @@ export const mediaRouter = createTRPCRouter({
    *    The `updateImage` function is a protected procedure that checks if an image exists in S3 and, if it does,
    *    generates a pre-signed URL for replacing that image and updates its associated database record.
    */
-  updateImage: protectedProcedure
+  updateProfilePicture: protectedProcedure
     .input(z.object({ key: z.string(), bucket: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { key, bucket } = input;
       const headObjectParams = {
-        Bucket: bucket,
-        Key: key,
+        Bucket: input.bucket,
+        Key: input.key,
       };
       // Check if the image exists in S3
       const exists = await ctx.s3.send(new HeadObjectCommand(headObjectParams));
@@ -163,19 +196,33 @@ export const mediaRouter = createTRPCRouter({
       );
 
       // Update the lastUpdated timestamp for the image record in the database
-      const prismaUpdateInput: Prisma.MediaUpdateArgs = {
-        where: { id: ctx.session.uid },
-        data: { lastUpdated: new Date() },
-      };
-      const prismaResponse = await ctx.prisma.media.update(prismaUpdateInput);
-      if (!prismaResponse) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error updating file in DB.",
-          cause: prismaResponse,
-        });
-      }
 
       return signedUrl;
+    }),
+
+  awsUpdateProfilePicture: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/aws-update-profile-picture",
+        contentTypes: ["application/json", "text/plain"],
+      },
+    })
+    .input(z.object({}))
+    .output(z.void())
+    .mutation(async ({ input, ctx }) => {
+      console.log("input", input);
+      // const prismaUpdateInput: Prisma.MediaUpdateArgs = {
+      //   where: { id: input.key },
+      //   data: { lastUpdated: new Date() },
+      // };
+      // const prismaResponse = await ctx.prisma.media.update(prismaUpdateInput);
+      // if (!prismaResponse) {
+      //   throw new TRPCError({
+      //     code: "INTERNAL_SERVER_ERROR",
+      //     message: "Error updating file in DB.",
+      //     cause: prismaResponse,
+      //   });
+      // }
     }),
 });
