@@ -64,7 +64,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("profile/notifications")}
+                onPress={() => router.push("/notifications")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -73,7 +73,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("profile/privacy")}
+                onPress={() => router.push("/privacy")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -82,7 +82,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("profile/other")}
+                onPress={() => router.push("/other")}
               />
             </YGroup.Item>
           </YGroup>

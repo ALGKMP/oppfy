@@ -28,7 +28,7 @@ const AppLayout = () => {
     return <Redirect href="/(auth)/phone-number" />;
   }
 
-  return <Slot />;
+  return <Stack screenOptions={{ header: () => null }} />;
 };
 
 export default AppLayout;

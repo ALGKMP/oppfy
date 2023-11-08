@@ -29,7 +29,7 @@ const Privacy = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("profile/blocked-users")}
+                onPress={() => router.push("/blocked-users")}
               />
             </YGroup.Item>
           </YGroup>

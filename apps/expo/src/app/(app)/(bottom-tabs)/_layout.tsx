@@ -17,6 +17,7 @@ import BottomTabsHeader from "~/components/Headers/BottomTabHeader";
 import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
+  const router = useRouter();
   const { isLoading, data: user } = api.auth.getUser.useQuery();
 
   if (isLoading) {
@@ -76,24 +77,21 @@ const BottomTabsLayout = () => {
 
         <BottomTabs.Screen
           name="profile"
-          // options={{
-          //   tabBarIcon: () => <User2 />,
-          //   headerRight: () => (
-          //     <View marginRight="$4">
-          //       <Pressable onPress={() => router.push("/profile/settings")}>
-          //         {({ pressed }) => (
-          //           <MoreHorizontal
-          //             size="$1"
-          //             style={{ opacity: pressed ? 0.5 : 1 }}
-          //           />
-          //         )}
-          //       </Pressable>
-          //     </View>
-          //   ),
-          // }}
           options={{
             tabBarIcon: () => <User2 />,
-            headerShown: false,
+            headerLeft: () => null,
+            headerRight: () => (
+              <View>
+                <Pressable onPress={() => router.push("/(settings)")}>
+                  {({ pressed }) => (
+                    <MoreHorizontal
+                      size="$1"
+                      style={{ opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </View>
+            ),
           }}
         />
       </BottomTabs>

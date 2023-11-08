@@ -62,7 +62,7 @@ const Other = () => {
         </YStack>
 
         <Button
-          onPress={() => router.push("profile/delete-account")}
+          onPress={() => router.push("/delete-account")}
           borderWidth={0}
           backgroundColor="$gray1"
         >
