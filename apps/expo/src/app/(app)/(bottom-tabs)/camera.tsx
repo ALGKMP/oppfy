@@ -2,22 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Button, Image, Platform, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { api } from "~/utils/api";
 
 const Camera = () => {
-  const [image, setImage] = useState<string>();
+  const [image, setImage] = useState("");
 
   const mutation = api.media.postImage.useMutation();
 
-
   const response = useMutation(async (url: string) => {
     console.log("Sending image to S3");
+
     return await fetch(url, {
       method: "PUT",
       headers: {
-        
         "Content-Type": "image/jpeg",
       },
       body: image,
