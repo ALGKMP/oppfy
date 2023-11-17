@@ -15,11 +15,7 @@ const Index = () => {
     return <Text>Loading...</Text>;
   }
 
-  return isSignedIn ? (
-    <Redirect href="profile" />
-  ) : (
-    <Redirect href="phone-number" />
-  );
+  return isSignedIn ? <Redirect href="profile" /> : <Redirect href="(intro)" />;
 };
 
 export default Index;

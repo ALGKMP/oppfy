@@ -37,7 +37,11 @@ const AppLayout = () => {
   //   return <Redirect href="/(permissions)" />;
   // }
 
-  return <Stack screenOptions={{ header: () => null }} />;
+  return (
+    <View flex={1} backgroundColor="black">
+      <Stack screenOptions={{ header: () => null }} />
+    </View>
+  );
 };
 
 export default AppLayout;
