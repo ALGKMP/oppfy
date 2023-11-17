@@ -6,17 +6,17 @@ import * as Contacts from "expo-contacts";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 
-type PermissionsStatus = {
+interface PermissionsStatus {
   media: boolean;
   camera: boolean;
   location: boolean;
   contacts: boolean;
-};
+}
 
-type PermissionsContextType = {
+interface PermissionsContextType {
   permissions: PermissionsStatus;
   checkPermissions: () => Promise<void>;
-};
+}
 
 const PermissionsContext = createContext<PermissionsContextType | undefined>(
   undefined,

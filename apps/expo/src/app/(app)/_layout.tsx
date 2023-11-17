@@ -32,10 +32,10 @@ const AppLayout = () => {
     return <Redirect href="/(auth)/phone-number" />;
   }
 
-  if (!allPermissions) {
-    console.log("NOT ALL PERMISSIONS");
-    return <Redirect href="/(permissions)" />;
-  }
+  // if (!allPermissions) {
+  //   console.log("NOT ALL PERMISSIONS");
+  //   return <Redirect href="/(permissions)" />;
+  // }
 
   return <Stack screenOptions={{ header: () => null }} />;
 };
