@@ -4,25 +4,6 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
-  test: publicProcedure.query(async ({ ctx }) => {
-    return { message: "hello world" };
-  }),
-  testing: publicProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/test",
-      },
-    })
-    .input(z.void())
-    .output(
-      z.object({
-        message: z.string(),
-      }),
-    )
-    .query(() => {
-      return { message: "hello world" };
-    }),
   createUser: publicProcedure
     .input(
       z.object({

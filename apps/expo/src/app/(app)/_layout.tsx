@@ -13,11 +13,15 @@ import {
 import { Button, Text, View, XStack } from "tamagui";
 
 import { api } from "~/utils/api";
+import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 
 const AppLayout = () => {
   const { isLoading, isSignedIn } = useSession();
+  const { permissions } = usePermissions();
+
+  const allPermissions = Object.values(permissions).every((p) => p === true);
 
   if (isLoading) {
     return <Text>Loading...</Text>;
@@ -26,6 +30,11 @@ const AppLayout = () => {
   if (!isSignedIn) {
     console.log("NOT SIGNED IN");
     return <Redirect href="/(auth)/phone-number" />;
+  }
+
+  if (!allPermissions) {
+    console.log("NOT ALL PERMISSIONS");
+    return <Redirect href="/(permissions)" />;
   }
 
   return <Stack screenOptions={{ header: () => null }} />;

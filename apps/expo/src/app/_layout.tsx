@@ -33,11 +33,12 @@ import SpartanSemiBold from "@assets/fonts/Spartan/Spartan-SemiBold.ttf";
 import SpartanThin from "@assets/fonts/Spartan/Spartan-Thin.ttf";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import auth from "@react-native-firebase/auth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TamaguiProvider, Text, View } from "tamagui";
-import { QueryClient, QueryClientProvider } from "react-query";
 
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "~/../tamagui.config";
+import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { Stack } from "~/layouts";
 import SessionProvider from "../contexts/SessionsContext";
 
@@ -72,7 +73,7 @@ const RootLayout = () => {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-
+    return null;
   }
 
   const queryClient = new QueryClient();
@@ -80,18 +81,20 @@ const RootLayout = () => {
   return (
     <TRPCProvider>
       <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-          <ActionSheetProvider>
-            <SafeAreaProvider>
-              <View flex={1} backgroundColor="$backgroundStrong">
-                <Slot />
-                <StatusBar />
-              </View>
-            </SafeAreaProvider>
-          </ActionSheetProvider>
-        </TamaguiProvider>
-      </SessionProvider>
+        <SessionProvider>
+          <PermissionsProvider>
+            <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+              <ActionSheetProvider>
+                <SafeAreaProvider>
+                  <View flex={1} backgroundColor="$backgroundStrong">
+                    <Slot />
+                    <StatusBar />
+                  </View>
+                </SafeAreaProvider>
+              </ActionSheetProvider>
+            </TamaguiProvider>
+          </PermissionsProvider>
+        </SessionProvider>
       </QueryClientProvider>
     </TRPCProvider>
   );
