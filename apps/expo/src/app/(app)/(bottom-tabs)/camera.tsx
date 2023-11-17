@@ -11,7 +11,7 @@ const Camera = () => {
 
   const mutation = api.media.postImage.useMutation();
 
-  const response = useMutation(async (url: string) => {
+  const fetchMutation = useMutation(async (url: string) => {
     console.log("Sending image to S3");
 
     return await fetch(url, {
@@ -24,8 +24,7 @@ const Camera = () => {
   });
 
   const getPermissionAsync = async () => {
-    // Only ask for permission if the device is an iOS device, since
-    // permissions for accessing the camera roll on Android are automatically granted according to chatgpt
+    // Only ask for permission if the device is an iOS device
     if (Platform.OS === "ios") {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -59,16 +58,15 @@ const Camera = () => {
       bucket: "myawsbucket-0xc3",
       key: "testKey123",
       caption: "test caption",
-      tags: ["otherUserKey"],
+      tags: ["otherUserKey1, otherUserKey2"],
     });
     if (mutation.isError) {
       console.log(mutation.error);
     } else if (mutation.isSuccess) {
       console.log("mutation data: ", mutation.data);
-      response.mutate(mutation.data?.url);
-      console.log(response.data);
+      fetchMutation.mutate(mutation.data?.url);
+      console.log(fetchMutation.data);
     }
-
     // use react-query to post image to s3 bucket
   };
 

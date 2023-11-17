@@ -52,12 +52,17 @@ export const mediaRouter = createTRPCRouter({
         Metadata: metadata,
       };
 
-      const url = await getSignedUrl(ctx.s3, new PutObjectCommand(putObjectParams), {
-        expiresIn: 3600,
-      });
-      return {url};
+      const url = await getSignedUrl(
+        ctx.s3,
+        new PutObjectCommand(putObjectParams),
+        {
+          expiresIn: 3600,
+        },
+      );
+      return { url };
     }),
 
+  // OpenAPI Endpoint
   awsPostImage: publicProcedure
     .meta({
       openapi: {
