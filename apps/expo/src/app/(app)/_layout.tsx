@@ -13,22 +13,34 @@ import {
 import { Button, Text, View, XStack } from "tamagui";
 
 import { api } from "~/utils/api";
+import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 
 const AppLayout = () => {
   const { isLoading, isSignedIn } = useSession();
+  const { permissions } = usePermissions();
+
+  const requiredPermissions =
+    permissions.camera && permissions.contacts && permissions.notifications;
 
   if (isLoading) {
     return <Text>Loading...</Text>;
   }
 
   if (!isSignedIn) {
-    console.log("NOT SIGNED IN");
     return <Redirect href="/(auth)/phone-number" />;
   }
 
-  return <Stack screenOptions={{ header: () => null }} />;
+  if (!requiredPermissions) {
+    return <Redirect href="/(permissions)" />;
+  }
+
+  return (
+    <View flex={1} backgroundColor="black">
+      <Stack screenOptions={{ header: () => null }} />
+    </View>
+  );
 };
 
 export default AppLayout;
