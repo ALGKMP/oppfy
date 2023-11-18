@@ -65,7 +65,12 @@ const Permissions = () => {
         </Text>
         <View style={styles.permissionItem}>
           <Text>Camera</Text>
-          <Checkbox size="$8" onPress={requestCameraPermission} checked={permissions.camera}>
+          <Checkbox
+            size="$8"
+            onPress={requestCameraPermission}
+            checked={permissions.camera}
+            disabled={permissions.camera}
+          >
             <Checkbox.Indicator>
               <Check />
             </Checkbox.Indicator>
@@ -73,7 +78,12 @@ const Permissions = () => {
         </View>
         <View style={styles.permissionItem}>
           <Text>Contacts</Text>
-          <Checkbox size="$8" onPress={requestContactsPermission} checked={permissions.contacts}>
+          <Checkbox
+            size="$8"
+            onPress={requestContactsPermission}
+            checked={permissions.contacts}
+            disabled={permissions.contacts}
+          >
             <Checkbox.Indicator>
               <Check />
             </Checkbox.Indicator>
@@ -81,7 +91,12 @@ const Permissions = () => {
         </View>
         <View style={styles.permissionItem}>
           <Text>Notifications</Text>
-          <Checkbox size="$8" onPress={requestNotificationsPermission} checked={permissions.notifications}>
+          <Checkbox
+            size="$8"
+            onPress={requestNotificationsPermission}
+            checked={permissions.notifications}
+            disabled={permissions.notifications}
+          >
             <Checkbox.Indicator>
               <Check />
             </Checkbox.Indicator>

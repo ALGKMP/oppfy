@@ -17,16 +17,16 @@ model VerificationToken {
 }
 
 model User {
-    id            String        @id @unique // Firebase UID
-    firstName     String?
-    dateOfBirth   String?
-    image         String?
-    bio           String?
-    profilePhoto  ProfilePhoto?
-    postsOfOthers Post[]        @relation("postsOfOthers")
-    tags          Tag[]
-    likedPosts    Like[]
-    comments      Comment[]
+    id                  String               @id @unique // Firebase UID
+    firstName           String?
+    dateOfBirth         String?
+    image               String?
+    bio                 String?
+    profilePhoto        ProfilePhoto?
+    postsOfOthers       Post[]               @relation("postsOfOthers")
+    tags                Tag[]
+    likedPosts          Like[]
+    comments            Comment[]
     notificationSetting NotificationSetting?
 }
 

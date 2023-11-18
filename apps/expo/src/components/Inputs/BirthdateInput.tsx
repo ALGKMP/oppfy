@@ -5,9 +5,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { LayoutChangeEvent, StyleSheet } from "react-native";
+import type { LayoutChangeEvent} from "react-native";
+import { StyleSheet } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
-import { StackProps, Text, TextProps, View, XStack } from "tamagui";
+import type { StackProps, TextProps} from "tamagui";
+import { Text, View, XStack } from "tamagui";
 
 interface BirthdateInputHandles {
   focus: () => void;

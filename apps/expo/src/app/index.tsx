@@ -1,21 +1,32 @@
 import React, { useEffect } from "react";
-import { Redirect } from "expo-router";
-import { Text } from "tamagui";
+import { Redirect, SplashScreen } from "expo-router";
+import { Text, View } from "tamagui";
 
 import { api } from "~/utils/api";
+import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 
 const Index = () => {
-  const { isSignedIn, isLoading, signOut } = useSession();
-  const { permissions } = usePermissions();
-  const allPermissions = Object.values(permissions).every((p) => p === true);
+  const { isSignedIn, isLoading: sessionIsLoading, signOut } = useSession();
+  const { isLoading: permissionsIsLoading } = usePermissions();
 
-  if (isLoading) {
-    return <Text>Loading...</Text>;
+  useEffect(() => {
+    // When loading is complete, hide the splash screen
+    if (!sessionIsLoading && !permissionsIsLoading && !isSignedIn) {
+      void SplashScreen.hideAsync();
+    }
+  }, [sessionIsLoading, permissionsIsLoading, isSignedIn]);
+
+  if (sessionIsLoading || permissionsIsLoading) {
+    return <LoadingIndicatorOverlay />;
   }
 
-  return isSignedIn ? <Redirect href="profile" /> : <Redirect href="(intro)" />;
+  return isSignedIn ? (
+    <Redirect href="profile" />
+  ) : (
+    <Redirect href="(onboarding)" />
+  );
 };
 
 export default Index;

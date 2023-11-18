@@ -18,6 +18,7 @@ interface PermissionsStatus {
 
 interface PermissionsContextType {
   permissions: PermissionsStatus;
+  isLoading: boolean;
   checkPermissions: () => Promise<void>;
 }
 
@@ -37,8 +38,11 @@ export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
     contacts: false,
     notifications: false,
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   const checkPermissions = async () => {
+    setIsLoading(true);
+
     const { status: contactsStatus } = await Contacts.getPermissionsAsync();
     const { status: cameraStatus } = await Camera.getCameraPermissionsAsync();
     const { status: mediaStatus } =
@@ -55,6 +59,8 @@ export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
       contacts: contactsStatus === PermissionStatus.GRANTED,
       notifications: notificationsStatus === PermissionStatus.GRANTED,
     });
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -71,7 +77,7 @@ export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
     };
   }, []);
 
-  const value = { permissions, checkPermissions };
+  const value = { permissions, isLoading, checkPermissions };
 
   return (
     <PermissionsContext.Provider value={value}>

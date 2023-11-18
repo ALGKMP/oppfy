@@ -37,12 +37,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TamaguiProvider, Text, View } from "tamagui";
 
 import { TRPCProvider } from "~/utils/api";
+import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import tamaguiConfig from "~/../tamagui.config";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { Stack } from "~/layouts";
 import SessionProvider from "../contexts/SessionsContext";
-
-void SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
   const [fontsLoaded] = useFonts({
@@ -66,14 +65,8 @@ const RootLayout = () => {
     "ChivoMono-BlackItalic": ChivoMonoBlackItalic,
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      void SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
   if (!fontsLoaded) {
-    return null;
+    return <LoadingIndicatorOverlay />;
   }
 
   const queryClient = new QueryClient();

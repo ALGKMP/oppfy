@@ -91,8 +91,8 @@ const PhoneNumberOTP = () => {
         await auth().currentUser?.reload();
         const hasUserDetails = await hasUserDetailsMutation.mutateAsync();
         hasUserDetails
-          ? router.replace("/profile")
-          : router.replace("/welcome");
+          ? router.replace("/(app)/(bottom-tabs)/profile")
+          : router.replace("user-info/welcome");
       } catch (err) {
         console.log("ERROR: " + err);
         console.log("Error detected, triggering shake");

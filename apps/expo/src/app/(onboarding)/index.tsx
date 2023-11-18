@@ -5,7 +5,7 @@ import { Button, Text, View, YStack } from "tamagui";
 
 import { usePermissions } from "~/contexts/PermissionsContext";
 
-const Intro = () => {
+const Start = () => {
   const router = useRouter();
   const { permissions } = usePermissions();
 
@@ -14,8 +14,8 @@ const Intro = () => {
 
   const onSubmit = () => {
     requiredPermissions
-      ? router.push("phone-number")
-      : router.push("(permissions)");
+      ? router.push("auth/phone-number")
+      : router.push("permissions");
   };
 
   return (
@@ -57,4 +57,4 @@ const Intro = () => {
   );
 };
 
-export default Intro;
+export default Start;

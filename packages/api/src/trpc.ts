@@ -13,7 +13,7 @@ import { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 import superjson from "superjson";
-import { OpenApiMeta } from "trpc-openapi";
+import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
 import { prisma, s3 } from "@acme/db";
@@ -150,7 +150,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 /**
  * S3 Verification
  */
-
 
 /**
  * Public (unauthenticated) procedure

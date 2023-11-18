@@ -6,7 +6,7 @@ const Welcome = () => {
   const router = useRouter();
 
   const onSubmit = () => {
-    router.push("first-name");
+    router.push("user-info/first-name");
   };
 
   return (

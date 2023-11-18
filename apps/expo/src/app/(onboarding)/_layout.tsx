@@ -1,11 +1,5 @@
-import React, { useState } from "react";
-import {
-  Link,
-  Redirect,
-  useNavigation,
-  useRootNavigation,
-  useRouter,
-} from "expo-router";
+import React from "react";
+import { Link, useNavigation, useRootNavigation, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import {
@@ -22,13 +16,8 @@ import { StackHeader } from "~/components/Headers";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 
-const UserDetailsLayout = () => {
-  const router = useRouter();
-  const { user, signOut, deleteAccount, isSignedIn, isLoading } = useSession();
-
-  const onExitPress = async () => {
-    await signOut();
-  };
+const OnboardingLayout = () => {
+  const { signOut } = useSession();
 
   return (
     <View flex={1} backgroundColor="black">
@@ -54,7 +43,22 @@ const UserDetailsLayout = () => {
         }}
       >
         <Stack.Screen
-          name="welcome"
+          name="index"
+          options={{ animation: "fade", header: () => null }}
+        />
+        <Stack.Screen name="permissions" options={{ animation: "fade" }} />
+
+        <Stack.Screen
+          name="auth/phone-number"
+          options={{ animation: "fade" }}
+        />
+        <Stack.Screen
+          name="auth/pin-code-otp"
+          options={{ animation: "fade" }}
+        />
+
+        <Stack.Screen
+          name="user-info/welcome"
           options={{
             animation: "fade",
             headerLeft: () => (
@@ -125,7 +129,13 @@ const UserDetailsLayout = () => {
                           </Button>
                         </AlertDialog.Cancel>
                         <AlertDialog.Action asChild>
-                          <Button size="$3" themeInverse onPress={onExitPress}>
+                          <Button
+                            size="$3"
+                            themeInverse
+                            onPress={() =>
+                              signOut({ redirect: "/(onboarding)" })
+                            }
+                          >
                             Leave
                           </Button>
                         </AlertDialog.Action>
@@ -137,12 +147,18 @@ const UserDetailsLayout = () => {
             ),
           }}
         />
-        <Stack.Screen name="first-name" options={{ animation: "fade" }} />
-        <Stack.Screen name="date-of-birth" options={{ animation: "fade" }} />
+        <Stack.Screen
+          name="user-info/first-name"
+          options={{ animation: "fade" }}
+        />
+        <Stack.Screen
+          name="user-info/date-of-birth"
+          options={{ animation: "fade" }}
+        />
       </Stack>
       <StatusBar />
     </View>
   );
 };
 
-export default UserDetailsLayout;
+export default OnboardingLayout;

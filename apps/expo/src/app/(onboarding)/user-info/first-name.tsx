@@ -47,8 +47,8 @@ const FirstName = () => {
     resolver: zodResolver(schemaValidation),
   });
 
-  const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "date-of-birth" });
+  const onSubmit = (data: FormData) => {
+    router.push({ params: data, pathname: "user-info/date-of-birth" });
   };
 
   const onSubmitError = () => {

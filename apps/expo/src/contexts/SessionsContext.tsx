@@ -5,14 +5,34 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import { api } from "~/utils/api";
 
+interface SignInOptions {
+  email: string;
+  password: string;
+}
+
+interface SignUpOptions {
+  email: string;
+  password: string;
+}
+
+type SignOutOptions =
+  | {
+      redirect: string;
+      replace?: boolean;
+    }
+  | {
+      redirect?: never;
+      replace?: never;
+    };
+
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
   isLoading: boolean;
   isSignedIn: boolean;
   deleteAccount: () => Promise<void>;
-  signOut: () => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signOut: (options?: SignOutOptions) => Promise<void>;
+  signIn: (options: SignInOptions) => Promise<void>;
+  signUp: (options: SignUpOptions) => Promise<void>;
 }
 
 interface SessionProviderProps {
@@ -41,10 +61,27 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     return unsubscribe;
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async ({ email, password }: SignInOptions) => {
     try {
       await auth().signInWithEmailAndPassword(email, password);
       router.replace("profile");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const signUp = async ({ email, password }: SignUpOptions) => {
+    try {
+      await auth().createUserWithEmailAndPassword(email, password);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const signOut = async ({ redirect, replace = true }: SignOutOptions) => {
+    try {
+      await auth().signOut();
+      redirect && router[replace ? "replace" : "push"](redirect);
     } catch (error) {
       console.error(error);
     }
@@ -56,22 +93,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     try {
       await deleteUser.mutateAsync();
       await auth().currentUser?.delete();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      await auth().signOut();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const signUp = async (email: string, password: string) => {
-    try {
-      await auth().createUserWithEmailAndPassword(email, password);
     } catch (error) {
       console.error(error);
     }

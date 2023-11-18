@@ -3,5 +3,4 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
-export const notificationsRouter = createTRPCRouter({
-});
+export const notificationsRouter = createTRPCRouter({});

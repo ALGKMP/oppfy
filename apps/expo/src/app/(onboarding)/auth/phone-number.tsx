@@ -1,20 +1,11 @@
-import React, {  useRef } from "react";
+import React, { useRef } from "react";
 import type { TextInput } from "react-native";
-import {
-  KeyboardAvoidingView,
-  Platform,
-
-} from "react-native";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isValidNumber } from "libphonenumber-js";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Button,
-  Text,
-  View,
-  YStack,
-} from "tamagui";
+import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { PhoneNumberInput } from "~/components/Inputs";
@@ -48,7 +39,7 @@ const PhoneNumber = () => {
   });
 
   const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "pin-code-otp" });
+    router.push({ params: data, pathname: "auth/pin-code-otp" });
   };
 
   return (

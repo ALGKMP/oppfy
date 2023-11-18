@@ -13,6 +13,7 @@ import {
 import { Button, Text, View, XStack } from "tamagui";
 
 import { api } from "~/utils/api";
+import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
@@ -25,15 +26,15 @@ const AppLayout = () => {
     permissions.camera && permissions.contacts && permissions.notifications;
 
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return <LoadingIndicatorOverlay />;
   }
 
   if (!isSignedIn) {
-    return <Redirect href="/(auth)/phone-number" />;
+    return <Redirect href="/(onboarding)" />;
   }
 
   if (!requiredPermissions) {
-    return <Redirect href="/(permissions)" />;
+    return <Redirect href="/(onboarding)/permissions" />;
   }
 
   return (

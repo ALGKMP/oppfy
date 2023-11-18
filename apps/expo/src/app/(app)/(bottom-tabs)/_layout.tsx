@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { Pressable } from "react-native";
-import { Redirect, useRouter } from "expo-router";
+import { Redirect, SplashScreen, useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import { getTokens } from "@tamagui/core";
 import {
@@ -14,14 +15,22 @@ import { Button, Text, View, XStack } from "tamagui";
 
 import { api } from "~/utils/api";
 import BottomTabsHeader from "~/components/Headers/BottomTabHeader";
+import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
   const router = useRouter();
   const { isLoading, data: user } = api.auth.getUser.useQuery();
 
+  useEffect(() => {
+    // When loading is complete, hide the splash screen
+    if (!isLoading) {
+      void SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return <LoadingIndicatorOverlay />;
   }
 
   if (!user?.firstName || !user?.dateOfBirth) {

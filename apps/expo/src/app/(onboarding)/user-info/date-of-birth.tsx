@@ -4,12 +4,7 @@ import type { TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, set, useForm } from "react-hook-form";
-import {
-  Button,
-  Text,
-  View,
-  YStack,
-} from "tamagui";
+import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";

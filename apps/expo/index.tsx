@@ -1,5 +1,7 @@
 import { registerRootComponent } from "expo";
-import { ExpoRoot } from "expo-router";
+import { ExpoRoot, SplashScreen } from "expo-router";
+
+void SplashScreen.preventAutoHideAsync();
 
 // Must be exported or Fast Refresh won't update the context
 export function App() {
