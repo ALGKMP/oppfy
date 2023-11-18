@@ -43,6 +43,25 @@ const defineConfig = (): ExpoConfig => ({
     "@react-native-firebase/perf",
     "@react-native-firebase/crashlytics",
     [
+      "expo-camera",
+      {
+        cameraPermission: "Allow $(PRODUCT_NAME) to access your camera.",
+      },
+    ],
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "Allow $(PRODUCT_NAME) to use your location.",
+      },
+    ],
+    [
+      "expo-contacts",
+      {
+        contactsPermission: "Allow $(PRODUCT_NAME) to access your contacts.",
+      },
+    ],
+    [
       "expo-media-library",
       {
         photosPermission: "Allow $(PRODUCT_NAME) to access your photos.",

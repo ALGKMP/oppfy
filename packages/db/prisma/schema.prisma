@@ -27,6 +27,7 @@ model User {
     tags          Tag[]
     likedPosts    Like[]
     comments      Comment[]
+    notificationSetting NotificationSetting?
 }
 
 model ProfilePhoto {
@@ -109,4 +110,16 @@ model Comment {
 
     @@index([authorId])
     @@index([postId])
+}
+
+model NotificationSetting {
+    id             String  @id @default(cuid())
+    userId         String  @unique
+    user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    posts          Boolean @default(true)
+    mentions       Boolean @default(true)
+    comments       Boolean @default(true)
+    friendRequests Boolean @default(true)
+
+    @@index([userId])
 }

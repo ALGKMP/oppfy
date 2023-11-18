@@ -31,7 +31,7 @@ const UserDetailsLayout = () => {
   };
 
   return (
-    <View flex={1} backgroundColor="$backgroundStrong">
+    <View flex={1} backgroundColor="black">
       <Stack
         screenOptions={{
           headerTitle: () => (
