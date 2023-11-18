@@ -53,7 +53,10 @@ const UserDetailsLayout = () => {
           ),
         }}
       >
-        <Stack.Screen name="index" options={{ animation: "fade" }} />
+        <Stack.Screen
+          name="index"
+          options={{ animation: "fade", header: () => null }}
+        />
       </Stack>
       <StatusBar />
     </View>

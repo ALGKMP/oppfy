@@ -21,21 +21,20 @@ const AppLayout = () => {
   const { isLoading, isSignedIn } = useSession();
   const { permissions } = usePermissions();
 
-  const allPermissions = Object.values(permissions).every((p) => p === true);
+  const requiredPermissions =
+    permissions.camera && permissions.contacts && permissions.notifications;
 
   if (isLoading) {
     return <Text>Loading...</Text>;
   }
 
   if (!isSignedIn) {
-    console.log("NOT SIGNED IN");
     return <Redirect href="/(auth)/phone-number" />;
   }
 
-  // if (!allPermissions) {
-  //   console.log("NOT ALL PERMISSIONS");
-  //   return <Redirect href="/(permissions)" />;
-  // }
+  if (!requiredPermissions) {
+    return <Redirect href="/(permissions)" />;
+  }
 
   return (
     <View flex={1} backgroundColor="black">

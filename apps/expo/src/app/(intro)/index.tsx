@@ -1,24 +1,21 @@
-import React, { useRef } from "react";
-import type { TextInput } from "react-native";
+import React from "react";
 import { KeyboardAvoidingView, Platform } from "react-native";
-import { Link, useRouter } from "expo-router";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { isValidNumber } from "libphonenumber-js";
-import { Controller, useForm } from "react-hook-form";
+import { useRouter } from "expo-router";
 import { Button, Text, View, YStack } from "tamagui";
-import * as z from "zod";
 
-import { PhoneNumberInput } from "~/components/Inputs";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
 const Intro = () => {
   const router = useRouter();
   const { permissions } = usePermissions();
 
-  const allPermissions = Object.values(permissions).every((p) => p === true);
+  const requiredPermissions =
+    permissions.camera && permissions.contacts && permissions.notifications;
 
   const onSubmit = () => {
-    allPermissions ? router.push("phone-number") : router.push("(permissions)");
+    requiredPermissions
+      ? router.push("phone-number")
+      : router.push("(permissions)");
   };
 
   return (
@@ -28,13 +25,20 @@ const Intro = () => {
     >
       <View
         flex={1}
-        backgroundColor="$backgroundStrong"
         padding="$6"
+        backgroundColor="black"
         justifyContent="space-between"
       >
-        <YStack flex={1} space="$8" alignItems="center"></YStack>
+        <YStack flex={1} alignItems="center" justifyContent="center">
+          <Text fontSize={64} fontWeight="700">
+            OPPFY.
+          </Text>
+          <Text fontSize={24} fontWeight="700">
+            Capture Real Memories.
+          </Text>
+        </YStack>
 
-        <View alignSelf="stretch" marginTop="auto">
+        <View>
           <Button
             onPress={onSubmit}
             borderWidth={0}

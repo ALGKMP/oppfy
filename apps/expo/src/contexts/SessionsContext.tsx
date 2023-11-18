@@ -5,10 +5,6 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import { api } from "~/utils/api";
 
-interface SessionProviderProps {
-  children: React.ReactNode;
-}
-
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
   isLoading: boolean;
@@ -17,6 +13,10 @@ interface SessionContextType {
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
+}
+
+interface SessionProviderProps {
+  children: React.ReactNode;
 }
 
 const AuthContext = createContext<SessionContextType | undefined>(undefined);

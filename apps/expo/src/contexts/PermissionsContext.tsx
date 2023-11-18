@@ -5,12 +5,15 @@ import * as Camera from "expo-camera";
 import * as Contacts from "expo-contacts";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
+import { PermissionStatus } from "expo-modules-core";
+import * as Notifications from "expo-notifications";
 
 interface PermissionsStatus {
   media: boolean;
   camera: boolean;
   location: boolean;
   contacts: boolean;
+  notifications: boolean;
 }
 
 interface PermissionsContextType {
@@ -18,16 +21,21 @@ interface PermissionsContextType {
   checkPermissions: () => Promise<void>;
 }
 
+interface PermissionsProviderProps {
+  children: ReactNode;
+}
+
 const PermissionsContext = createContext<PermissionsContextType | undefined>(
   undefined,
 );
 
-export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
+export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
   const [permissions, setPermissions] = useState<PermissionsStatus>({
     media: false,
     camera: false,
     location: false,
     contacts: false,
+    notifications: false,
   });
 
   const checkPermissions = async () => {
@@ -37,12 +45,15 @@ export const PermissionsProvider = ({ children }: { children: ReactNode }) => {
       await ImagePicker.getMediaLibraryPermissionsAsync();
     const { status: locationStatus } =
       await Location.getForegroundPermissionsAsync();
+    const { status: notificationsStatus } =
+      await Notifications.getPermissionsAsync();
 
     setPermissions({
-      camera: cameraStatus === Camera.PermissionStatus.GRANTED,
-      media: mediaStatus === ImagePicker.PermissionStatus.GRANTED,
-      location: locationStatus === Location.PermissionStatus.GRANTED,
-      contacts: contactsStatus === Contacts.PermissionStatus.GRANTED,
+      camera: cameraStatus === PermissionStatus.GRANTED,
+      media: mediaStatus === PermissionStatus.GRANTED,
+      location: locationStatus === PermissionStatus.GRANTED,
+      contacts: contactsStatus === PermissionStatus.GRANTED,
+      notifications: notificationsStatus === PermissionStatus.GRANTED,
     });
   };
 
