@@ -1,4 +1,5 @@
 import React from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Link, useNavigation, useRootNavigation, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
