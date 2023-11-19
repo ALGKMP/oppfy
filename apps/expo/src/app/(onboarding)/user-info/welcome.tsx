@@ -20,7 +20,7 @@ const Welcome = () => {
         <H2>Welcome</H2>
       </YStack>
 
-      <View alignSelf="stretch" marginTop="auto">
+      <View>
         <Button
           animation="100ms"
           pressStyle={{
@@ -33,7 +33,7 @@ const Welcome = () => {
           backgroundColor="white"
         >
           <Text color="black" fontWeight="500" fontSize={16}>
-            Next
+            Welcome
           </Text>
         </Button>
       </View>

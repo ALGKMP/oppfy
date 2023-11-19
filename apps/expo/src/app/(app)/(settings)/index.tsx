@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Linking, Platform, Share } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Redirect, useRouter } from "expo-router";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { ChevronLeft, ChevronRight } from "@tamagui/lucide-icons";
 import {
   AlertDialog,
@@ -21,7 +22,34 @@ const ANDROID_PACKAGE_NAME = "host.exp.exponent";
 
 const Settings = () => {
   const router = useRouter();
+
   const { signOut, deleteAccount } = useSession();
+  const { showActionSheetWithOptions } = useActionSheet();
+
+  const onPress = () => {
+    const options = ["Log Out", "Cancel"];
+    const destructiveButtonIndex = 0;
+    const cancelButtonIndex = 1;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        destructiveButtonIndex,
+      },
+      async (selectedIndex) => {
+        switch (selectedIndex) {
+          case destructiveButtonIndex:
+            // Delete
+            await signOut();
+            break;
+
+          case cancelButtonIndex:
+          // Canceled
+        }
+      },
+    );
+  };
 
   const openStoreForReview = async () => {
     if (Platform.OS === "ios") {
@@ -64,7 +92,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("/notifications")}
+                onPress={() => router.push("notifications")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -73,7 +101,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("/privacy")}
+                onPress={() => router.push("privacy")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -82,7 +110,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("/other")}
+                onPress={() => router.push("other")}
               />
             </YGroup.Item>
           </YGroup>
@@ -118,6 +146,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
+                onPress={() => router.push("help")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -126,12 +155,13 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
+                onPress={() => router.push("about")}
               />
             </YGroup.Item>
           </YGroup>
         </YStack>
 
-        <Button onPress={signOut} backgroundColor="$gray1">
+        <Button onPress={onPress} backgroundColor="$gray1">
           <Text color="$red9" fontSize={16} fontWeight="600">
             Log Out
           </Text>

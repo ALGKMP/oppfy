@@ -38,6 +38,15 @@ const ProfileLayout = () => {
         />
 
         <Stack.Screen
+          name="privacy"
+          options={{ title: "Privacy", animation: "fade" }}
+        />
+        <Stack.Screen
+          name="blocked-users"
+          options={{ title: "Blocked Users", animation: "fade" }}
+        />
+
+        <Stack.Screen
           name="other"
           options={{ title: "Other", animation: "fade" }}
         />
@@ -53,12 +62,17 @@ const ProfileLayout = () => {
         />
 
         <Stack.Screen
-          name="privacy"
-          options={{ title: "Privacy", animation: "fade" }}
+          name="help"
+          options={{ title: "Help", animation: "fade" }}
         />
         <Stack.Screen
-          name="blocked-users"
-          options={{ title: "Blocked Users", animation: "fade" }}
+          name="contact-us"
+          options={{ title: "Contact Us", animation: "fade" }}
+        />
+
+        <Stack.Screen
+          name="about"
+          options={{ title: "About", animation: "fade" }}
         />
       </Stack>
     </View>

@@ -1,9 +1,11 @@
-import React, { useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
-import type { TextInput } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  TextInput,
+} from "react-native";
 import { useRouter } from "expo-router";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, set, useForm } from "react-hook-form";
 import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
@@ -16,9 +18,8 @@ interface UserDetailsFlowParams {
   [Key: string]: string;
 }
 
-type FormData = z.infer<typeof schemaValidation>;
-
-const schemaValidation = z.object({
+// Define your schema for validation
+const dateOfBirthSchema = z.object({
   dateOfBirth: z.string(),
 });
 
@@ -27,46 +28,26 @@ const DateOfBirth = () => {
 
   const userDetailsFlowParams = useParams<UserDetailsFlowParams>();
 
-  const [triggerShake, setTriggerShake] = useState<boolean>(false);
-
   const dateOfBirthInputRef = useRef<TextInput | null>(null);
+
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [isValid, setIsValid] = useState(false);
 
   const updateUserDetails = api.auth.updateUserDetails.useMutation();
 
-  const {
-    control,
-    handleSubmit,
-    setError,
-    formState: { errors, isValid },
-  } = useForm({
-    defaultValues: {
-      dateOfBirth: "",
-    },
-    resolver: zodResolver(schemaValidation),
-  });
-
-  const onSubmit = async (data: FormData) => {
-    console.log("FIRST NAME: " + userDetailsFlowParams.firstName);
-
+  const onSubmit = async () => {
     await updateUserDetails.mutateAsync({
       ...userDetailsFlowParams,
-      ...data,
+      dateOfBirth,
     });
 
     router.replace("/profile");
   };
 
-  const onSubmitError = () => {
-    setTriggerShake(true);
-  };
-
-  const handleShakeComplete = () => {
-    setTriggerShake(false);
-  };
-
-  // useEffect(() => {
-  //   setTimeout(() => dateOfBirthInputRef.current?.focus(), 500);
-  // }, []);
+  // Use useEffect to update the validation state
+  useEffect(() => {
+    setIsValid(dateOfBirthSchema.safeParse({ dateOfBirth }).success);
+  }, [dateOfBirth]);
 
   return (
     <KeyboardAvoidingView
@@ -86,53 +67,47 @@ const DateOfBirth = () => {
             fontSize={22}
             fontWeight="900"
           >
-            When&apos;s your birthday?
+            When's your birthday?
           </Text>
 
           <YStack width="100%" alignItems="center" space="$3">
-            <Controller
-              control={control}
-              name="dateOfBirth"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <BirthdateInput
-                  ref={dateOfBirthInputRef}
-                  value={value}
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  onLayout={() => dateOfBirthInputRef.current?.focus()}
-                  containerStyle={{
-                    position: "relative",
-                    alignItems: "center",
-                    height: 50,
-                  }}
-                  inputStyle={{}}
-                  charStyle={{
-                    fontFamily: "$monospace",
-                    textAlign: "center",
-                    fontSize: 36,
-                    fontWeight: "900",
-                  }}
-                  typedCharStyle={{}}
-                  untypedCharStyle={{
-                    color: "$gray6",
-                  }}
-                  slashCharStyle={{
-                    color: "$gray6",
-                  }}
-                />
-              )}
+            <BirthdateInput
+              ref={dateOfBirthInputRef}
+              value={dateOfBirth}
+              onBlur={() => {}}
+              onChange={(value) => setDateOfBirth(value)}
+              onLayout={() => dateOfBirthInputRef.current?.focus()}
+              containerStyle={{
+                position: "relative",
+                alignItems: "center",
+                height: 50,
+              }}
+              inputStyle={{}}
+              charStyle={{
+                fontFamily: "$monospace",
+                textAlign: "center",
+                fontSize: 36,
+                fontWeight: "900",
+              }}
+              typedCharStyle={{}}
+              untypedCharStyle={{
+                color: "$gray6",
+              }}
+              slashCharStyle={{
+                color: "$gray6",
+              }}
             />
           </YStack>
         </YStack>
 
-        <View alignSelf="stretch" marginTop="auto">
+        <View>
           <Button
             animation="100ms"
             pressStyle={{
               scale: 0.95,
               backgroundColor: "white",
             }}
-            onPress={handleSubmit(onSubmit, onSubmitError)}
+            onPress={onSubmit}
             height="$4"
             borderRadius="$6"
             backgroundColor={isValid ? "white" : "gray"}

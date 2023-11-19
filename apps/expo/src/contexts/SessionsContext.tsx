@@ -78,7 +78,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     }
   };
 
-  const signOut = async ({ redirect, replace = true }: SignOutOptions) => {
+  const signOut = async ({ redirect, replace = true }: SignOutOptions = {}) => {
     try {
       await auth().signOut();
       redirect && router[replace ? "replace" : "push"](redirect);

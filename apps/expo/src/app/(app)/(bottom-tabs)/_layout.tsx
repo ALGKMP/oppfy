@@ -34,7 +34,7 @@ const BottomTabsLayout = () => {
   }
 
   if (!user?.firstName || !user?.dateOfBirth) {
-    return <Redirect href="welcome" />;
+    return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 
   return (
