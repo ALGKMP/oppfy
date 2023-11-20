@@ -40,13 +40,12 @@ const Permissions = () => {
     }
   };
 
-  const isValid =
-    permissions.camera && permissions.contacts && permissions.notifications;
+  const requiredPermissions = permissions.camera && permissions.contacts;
 
   const onPress = () => {
     isSignedIn
       ? router.push("/(app)/(bottom-tabs)/profile")
-      : router.push("/auth/phone-number");
+      : router.push("auth/phone-number");
   };
 
   return (
@@ -57,12 +56,15 @@ const Permissions = () => {
       justifyContent="space-between"
     >
       <YStack flex={1}>
-        <Text style={styles.title}>Permissions</Text>
-        <Text style={styles.description}>
-          Poparazzi is a photo sharing app where you create your friend's
-          profiles and they create yours. We'll need you to allow a few
-          permissions to get started.
-        </Text>
+        <YStack>
+          <Text style={styles.title}>Permissions</Text>
+          <Text style={styles.description}>
+            Poparazzi is a photo sharing app where you create your friend's
+            profiles and they create yours. We'll need you to allow a few
+            permissions to get started.
+          </Text>
+        </YStack>
+
         <View style={styles.permissionItem}>
           <Text>Camera</Text>
           <Checkbox
@@ -76,6 +78,7 @@ const Permissions = () => {
             </Checkbox.Indicator>
           </Checkbox>
         </View>
+
         <View style={styles.permissionItem}>
           <Text>Contacts</Text>
           <Checkbox
@@ -89,6 +92,7 @@ const Permissions = () => {
             </Checkbox.Indicator>
           </Checkbox>
         </View>
+
         <View style={styles.permissionItem}>
           <Text>Notifications</Text>
           <Checkbox
@@ -110,8 +114,8 @@ const Permissions = () => {
         pressStyle={{
           backgroundColor: "$gray12",
         }}
-        disabled={!isValid}
-        backgroundColor={isValid ? "white" : "$gray9"}
+        disabled={!requiredPermissions}
+        backgroundColor={requiredPermissions ? "white" : "$gray9"}
       >
         <Text color="black" fontSize={16} fontWeight="600">
           Save

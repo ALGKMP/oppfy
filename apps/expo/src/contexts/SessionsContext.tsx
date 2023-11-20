@@ -5,16 +5,6 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import { api } from "~/utils/api";
 
-interface SignInOptions {
-  email: string;
-  password: string;
-}
-
-interface SignUpOptions {
-  email: string;
-  password: string;
-}
-
 type SignOutOptions =
   | {
       redirect: string;
@@ -31,8 +21,12 @@ interface SessionContextType {
   isSignedIn: boolean;
   deleteAccount: () => Promise<void>;
   signOut: (options?: SignOutOptions) => Promise<void>;
-  signIn: (options: SignInOptions) => Promise<void>;
-  signUp: (options: SignUpOptions) => Promise<void>;
+  signInWithPhoneNumber: (
+    phoneNumber: string,
+  ) => Promise<FirebaseAuthTypes.ConfirmationResult | null>;
+  verifyPhoneNumberOTP: (
+    otp: string,
+  ) => Promise<FirebaseAuthTypes.UserCredential | null>; // Updated signature
 }
 
 interface SessionProviderProps {
@@ -48,6 +42,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
 
   const isSignedIn = !!user;
 
@@ -61,41 +57,29 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     return unsubscribe;
   }, []);
 
-  const signIn = async ({ email, password }: SignInOptions) => {
-    try {
-      await auth().signInWithEmailAndPassword(email, password);
-      router.replace("profile");
-    } catch (error) {
-      console.error(error);
-    }
+  const signInWithPhoneNumber = async (phoneNumber: string) => {
+    const result = await auth().signInWithPhoneNumber(phoneNumber);
+    setConfirmationResult(result);
+
+    return result;
   };
 
-  const signUp = async ({ email, password }: SignUpOptions) => {
-    try {
-      await auth().createUserWithEmailAndPassword(email, password);
-    } catch (error) {
-      console.error(error);
+  const verifyPhoneNumberOTP = async (otp: string) => {
+    if (!confirmationResult) {
+      throw new Error("No confirmation result available for OTP verification.");
     }
+
+    return await confirmationResult.confirm(otp);
   };
 
   const signOut = async ({ redirect, replace = true }: SignOutOptions = {}) => {
-    try {
-      await auth().signOut();
-      redirect && router[replace ? "replace" : "push"](redirect);
-    } catch (error) {
-      console.error(error);
-    }
+    await auth().signOut();
+    redirect && router[replace ? "replace" : "push"](redirect);
   };
 
-  // TODO: account deletion needs to be handled on the backend
-  // we run into the firebase feature: user has not recently signed in
   const deleteAccount = async () => {
-    try {
-      await deleteUser.mutateAsync();
-      await auth().currentUser?.delete();
-    } catch (error) {
-      console.error(error);
-    }
+    await deleteUser.mutateAsync();
+    await auth().currentUser?.delete();
   };
 
   return (
@@ -105,9 +89,9 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
         isLoading,
         isSignedIn,
         deleteAccount,
-        signIn,
         signOut,
-        signUp,
+        signInWithPhoneNumber,
+        verifyPhoneNumberOTP,
       }}
     >
       {children}

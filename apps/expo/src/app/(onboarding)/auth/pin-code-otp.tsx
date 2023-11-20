@@ -1,37 +1,28 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { TextInput } from "react-native";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { zodResolver } from "@hookform/resolvers/zod";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { Check } from "@tamagui/lucide-icons";
-import { Controller, set, useForm } from "react-hook-form";
-import {
-  Button,
-  Checkbox,
-  H1,
-  H2,
-  H5,
-  Spinner,
-  stylePropsText,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Button, Input, Spinner, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";
-import { PinCodeInput, UnderlineInput } from "~/components/Inputs";
+import { PinCodeInput } from "~/components/Inputs";
+import { useSession } from "~/contexts/SessionsContext";
+import useCooldown from "~/hooks/useCooldown";
 import useParams from "~/hooks/useParams";
 
 interface SignUpFlowParams {
   phoneNumber: string;
-  [Key: string]: string;
+  [key: string]: string;
 }
-
-type FormData = z.infer<typeof schemaValidation>;
 
 const schemaValidation = z.object({
   phoneNumberOTP: z.string().length(6),
@@ -39,129 +30,127 @@ const schemaValidation = z.object({
 
 const RESEND_CODE_COOLDOWN_DURATION = 60;
 
-auth().settings.appVerificationDisabledForTesting = true;
-
 const PhoneNumberOTP = () => {
   const router = useRouter();
-
   const signUpFlowParams = useParams<SignUpFlowParams>();
 
   const pinCodeInputRef = useRef<TextInput | null>(null);
 
-  const [isSendingCode, setIsSendingCode] = useState<boolean>(false);
+  const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
+
+  const [isSendingCode, setIsSendingCode] = useState(true);
   const [isCheckingCode, setIsCheckingCode] = useState<boolean>(false);
   const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [cooldown, setCooldown] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [triggerShake, setTriggerShake] = useState<boolean>(false);
-
-  const createUserMutation = api.auth.createUser.useMutation();
-  const hasUserDetailsMutation = api.auth.hasUserDetails.useMutation();
-
-  const [confirm, setConfirm] =
-    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
-
-  const {
-    control,
-    handleSubmit,
-    setError,
-    getValues,
-    formState: { errors, isValid },
-  } = useForm({
-    defaultValues: {
-      phoneNumberOTP: "",
-    },
-    resolver: zodResolver(schemaValidation),
-  });
-
-  const onSubmit = useCallback(
-    async (data: FormData) => {
-      setIsCheckingCode(true);
-      try {
-        const userCredential = await confirm?.confirm(data.phoneNumberOTP);
-        const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
-
-        if (isNewUser) {
-          await createUserMutation.mutateAsync({
-            firebaseUid: userCredential.user.uid,
-          });
-        }
-
-        await auth().currentUser?.reload();
-        const hasUserDetails = await hasUserDetailsMutation.mutateAsync();
-        hasUserDetails
-          ? router.replace("/(app)/(bottom-tabs)/profile")
-          : router.replace("user-info/welcome");
-      } catch (err) {
-        console.log("ERROR: " + err);
-        console.log("Error detected, triggering shake");
-        setServerError("Incorrect code. Try again.");
-        setTriggerShake(true);
-      } finally {
-        setIsCheckingCode(false);
-      }
-    },
-    [confirm, createUserMutation, hasUserDetailsMutation, router],
+  const { cooldown, startCooldown, resetCooldown } = useCooldown(
+    RESEND_CODE_COOLDOWN_DURATION,
+    { autoStart: true },
   );
 
-  const signInWithPhoneNumber = useCallback(async () => {
-    setIsSendingCode(true);
-    setServerError(null);
+  const createUser = api.auth.createUser.useMutation();
+  const hasUserDetails = api.auth.hasUserDetails.useMutation();
+
+  const { verifyPhoneNumberOTP, signInWithPhoneNumber } = useSession();
+
+  const buttonIsDisabled = useMemo(
+    () => cooldown !== 0 || isSendingCode || isCheckingCode,
+    [cooldown, isCheckingCode, isSendingCode],
+  );
+
+  const completeSignIn = useCallback(async () => {
+    setIsCheckingCode(true);
+
     try {
-      const confirmation = await auth().signInWithPhoneNumber(
-        `+${signUpFlowParams.phoneNumber}`,
-      );
-      setConfirm(confirmation);
+      const userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
+      const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
 
-      setCooldown(RESEND_CODE_COOLDOWN_DURATION);
+      isNewUser &&
+        (await createUser.mutateAsync({
+          firebaseUid: userCredential.user.uid,
+        }));
+
+      await auth().currentUser?.reload();
+
+      // TODO: I dont like this
+      const completedUserDetailsProcess = await hasUserDetails.mutateAsync();
+
+      completedUserDetailsProcess
+        ? router.replace("/(app)/(bottom-tabs)/profile")
+        : router.replace("/user-info/welcome");
     } catch (err) {
-      setServerError("Error sending code. Try again later.");
-    } finally {
-      setIsSendingCode(false);
+      setError("Incorrect code. Try again.");
     }
-  }, [signUpFlowParams.phoneNumber]);
 
-  const onSubmitError = useCallback(() => {
-    console.log("Error detected, triggering shake");
-    setTriggerShake(true);
+    setIsCheckingCode(false);
+  }, [
+    createUser,
+    hasUserDetails,
+    phoneNumberOTP,
+    router,
+    verifyPhoneNumberOTP,
+  ]);
+
+  const resendCode = useCallback(async () => {
+    setError(null);
+    setIsSendingCode(true);
+
+    try {
+      await signInWithPhoneNumber(signUpFlowParams.phoneNumber);
+    } catch (err) {
+      setError("Error sending code. Try again later.");
+    }
+
+    resetCooldown();
+    setIsSendingCode(false);
+  }, [resetCooldown, signInWithPhoneNumber, signUpFlowParams.phoneNumber]);
+
+  useEffect(() => {
+    const sendCode = async () => {
+      try {
+        await signInWithPhoneNumber(signUpFlowParams.phoneNumber);
+      } catch (err) {
+        setError("Error sending code. Try again later.");
+      }
+
+      setIsSendingCode(false);
+    };
+
+    void sendCode();
   }, []);
 
   useEffect(() => {
-    void signInWithPhoneNumber();
-  }, [signInWithPhoneNumber, signUpFlowParams.phoneNumber]);
-
-  useEffect(() => {
-    const otpValue = getValues().phoneNumberOTP;
-
-    if (otpValue.length === 6 && !isCheckingCode && !hasAutoSubmitted) {
+    if (phoneNumberOTP.length === 6 && !isCheckingCode && !hasAutoSubmitted) {
       setHasAutoSubmitted(true);
-      void handleSubmit(onSubmit, onSubmitError)();
-    } else if (otpValue.length < 6 && hasAutoSubmitted) {
+      void completeSignIn();
+    } else if (phoneNumberOTP.length < 6 && hasAutoSubmitted) {
       setHasAutoSubmitted(false); // Reset if the user deletes any character
     }
-  }, [
-    getValues,
-    isCheckingCode,
-    hasAutoSubmitted,
-    handleSubmit,
-    onSubmit,
-    onSubmitError,
-  ]);
+  }, [phoneNumberOTP, isCheckingCode, hasAutoSubmitted, completeSignIn]);
 
-  useEffect(() => {
-    if (cooldown === null) return;
-
-    if (cooldown > 0) {
-      const timer = setTimeout(() => {
-        setCooldown((prev) => (prev !== null ? prev - 1 : null));
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    } else {
-      setCooldown(null);
+  const renderButtonContent = () => {
+    if (isCheckingCode || isSendingCode) {
+      return <Spinner size="large" color="$background" />;
     }
-  }, [cooldown]);
+
+    if (cooldown !== 0) {
+      return (
+        <Text fontWeight="500" fontSize={16} color="lightgray">
+          Resend in {cooldown}s
+        </Text>
+      );
+    }
+
+    return (
+      <Text fontWeight="500" fontSize={16} color="black">
+        Send new code
+      </Text>
+    );
+  };
+
+  const buttonDisabled = buttonIsDisabled || isCheckingCode || isSendingCode;
+  const buttonPressHandler =
+    cooldown === 0 && !buttonDisabled ? resendCode : undefined;
 
   return (
     <KeyboardAvoidingView
@@ -170,7 +159,7 @@ const PhoneNumberOTP = () => {
     >
       <View
         flex={1}
-        backgroundColor="$backgroundStrong"
+        backgroundColor="black"
         padding="$6"
         justifyContent="space-between"
       >
@@ -185,114 +174,71 @@ const PhoneNumberOTP = () => {
           </Text>
 
           <YStack space="$3">
-            <Controller
-              control={control}
-              name="phoneNumberOTP"
-              render={({ field: { onChange, onBlur, value } }) => {
-                return (
-                  <PinCodeInput
-                    ref={pinCodeInputRef}
-                    length={6}
-                    value={value}
-                    onBlur={onBlur}
-                    onChange={onChange}
-                    onLayout={() => pinCodeInputRef.current?.focus()}
-                    containerStyle={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                    pinInputStyle={{
-                      width: 36,
-                      marginHorizontal: 4,
-                      borderColor: "gray",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderTopWidth: 0,
-                      borderLeftWidth: 0,
-                      borderRightWidth: 0,
-                      borderWidth: 2,
-                    }}
-                    activePinInputStyle={{
-                      borderColor: "white",
-                    }}
-                    textStyle={{
-                      fontSize: 36,
-                      color: "white",
-                      fontWeight: "900",
-                    }}
-                  />
-                );
+            <PinCodeInput
+              ref={pinCodeInputRef}
+              length={6}
+              onChange={(value) => setPhoneNumberOTP(value)}
+              onLayout={() => pinCodeInputRef.current?.focus()}
+              containerStyle={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              pinInputStyle={{
+                width: 36,
+                marginHorizontal: 4,
+                borderColor: "gray",
+                justifyContent: "center",
+                alignItems: "center",
+                borderTopWidth: 0,
+                borderLeftWidth: 0,
+                borderRightWidth: 0,
+                borderWidth: 2,
+              }}
+              activePinInputStyle={{
+                borderColor: "white",
+              }}
+              textStyle={{
+                fontSize: 36,
+                color: "white",
+                fontWeight: "900",
               }}
             />
           </YStack>
 
-          {!isSendingCode && !serverError && cooldown !== null && (
-            <Text
-              textAlign="center"
-              fontSize={14}
-              fontWeight="700"
-              color="$gray11"
-            >
-              Verification code sent to {signUpFlowParams.phoneNumber}
-            </Text>
-          )}
-
-          {isSendingCode && (
-            <Text
-              textAlign="center"
-              fontSize={14}
-              fontWeight="700"
-              color="$gray11"
-            >
-              Sending code...
-            </Text>
-          )}
-
-          {serverError && (
-            <Text
-              textAlign="center"
-              fontSize={14}
-              fontWeight="700"
-              color="$red11"
-            >
-              {serverError}
-            </Text>
-          )}
+          <Text
+            textAlign="center"
+            fontSize={14}
+            fontWeight="700"
+            color={error ? "$red11" : "$gray11"}
+          >
+            {error
+              ? error
+              : isSendingCode
+              ? "Sending code..."
+              : `Verification code sent to ${signUpFlowParams.phoneNumber}`}
+          </Text>
         </YStack>
 
         <View alignSelf="stretch" marginTop="auto">
           <Button
             animation="100ms"
             pressStyle={{ scale: 0.95, backgroundColor: "white" }}
-            onPress={cooldown === null ? signInWithPhoneNumber : undefined}
+            onPress={buttonPressHandler}
             height="$4"
             borderRadius="$6"
-            backgroundColor={
-              cooldown !== null || isSendingCode || isCheckingCode
-                ? "gray"
-                : "white"
-            }
-            disabled={cooldown !== null || isSendingCode || isCheckingCode}
+            backgroundColor={buttonDisabled ? "gray" : "white"}
+            disabled={buttonDisabled}
           >
-            {isCheckingCode ? (
-              <Spinner size="large" color="$background" />
-            ) : cooldown !== null ? (
-              <Text fontWeight="500" fontSize={16} color="lightgray">
-                Resend in {cooldown}s
-              </Text>
-            ) : isSendingCode ? (
-              <Spinner size="large" color="$background" />
-            ) : (
-              <Text fontWeight="500" fontSize={16} color="black">
-                Send new code
-              </Text>
-            )}
+            {renderButtonContent()}
           </Button>
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 };
+
+// ! This is for testing purposes only, do not use in production
+auth().settings.appVerificationDisabledForTesting = true;
 
 export default PhoneNumberOTP;

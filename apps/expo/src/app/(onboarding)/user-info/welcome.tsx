@@ -5,14 +5,12 @@ import { Button, H2, Text, View, YStack } from "tamagui";
 const Welcome = () => {
   const router = useRouter();
 
-  const onSubmit = () => {
-    router.push("user-info/first-name");
-  };
+  const onPress = () => router.push("user-info/first-name");
 
   return (
     <View
       flex={1}
-      backgroundColor="$backgroundStrong"
+      backgroundColor="black"
       padding="$6"
       justifyContent="space-between"
     >
@@ -27,7 +25,7 @@ const Welcome = () => {
             scale: 0.95,
             backgroundColor: "white",
           }}
-          onPress={onSubmit}
+          onPress={onPress}
           height="$4"
           borderRadius="$6"
           backgroundColor="white"
