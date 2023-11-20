@@ -23,7 +23,7 @@ export const mediaRouter = createTRPCRouter({
    *   `bucket`. It is a mutation, which means it will modify data on the server.
    */
 
-  postImage: protectedProcedure
+  createPresignedUrlWithClient: protectedProcedure
     .input(
       z.object({
         bucket: z.string(),
@@ -49,7 +49,7 @@ export const mediaRouter = createTRPCRouter({
       const putObjectParams = {
         Bucket: input.bucket,
         Key: input.key,
-        Metadata: metadata,
+        // Metadata: metadata,
       };
 
       const url = await getSignedUrl(
@@ -59,7 +59,7 @@ export const mediaRouter = createTRPCRouter({
           expiresIn: 3600,
         },
       );
-      return { url };
+      return url ;
     }),
 
   // OpenAPI Endpoint
