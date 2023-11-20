@@ -6,13 +6,13 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
-  HeadObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { MediaTypes } from '@prisma/client';
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -49,7 +49,7 @@ export const mediaRouter = createTRPCRouter({
       const putObjectParams = {
         Bucket: input.bucket,
         Key: input.key,
-        // Metadata: metadata,
+        Metadata: metadata,
       };
 
       const url = await getSignedUrl(
@@ -59,15 +59,17 @@ export const mediaRouter = createTRPCRouter({
           expiresIn: 3600,
         },
       );
-      return url ;
+      return url;
     }),
 
-  // OpenAPI Endpoint
-  awsPostImage: publicProcedure
+  /**
+   * OpenAPI Endpoint
+   */
+  prismaCreate: publicProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/aws-post-image",
+        path: "/aws-prisma-create",
         contentTypes: ["application/json", "text/plain"],
       },
     })
@@ -92,51 +94,37 @@ export const mediaRouter = createTRPCRouter({
       });
     }),
 
-  awsPostProfilePicture: publicProcedure
-    .meta({
-      openapi: {
-        method: "POST",
-        path: "/aws-post-profile-picture",
-        contentTypes: ["application/json", "text/plain"],
-      },
-    })
-    .input(z.object({}))
-    .output(z.void())
-    .mutation(async ({ input, ctx }) => {
-      console.log("input", input);
-    }),
-
   /*
    *    @param {string} key - key of the image to be retrieved from S3.
    *    @param {string} bucket - bucket in S3 for the image to be retrieved from.
    *    The `deleteImage` function is a protected procedure that accepts an input object with two
    *    properties: `key` and `bucket`. It is a mutation, which means it will modify data on the server.
+   *    The procedure will delete the image from S3 and its associated record from the database.
    */
   deleteImage: protectedProcedure
     .input(z.object({ key: z.string(), bucket: z.string() }))
     .mutation(async ({ ctx, input }) => {
+
       const { key, bucket } = input;
       const deleteObjectParams = {
-        Bucket: key,
-        Key: bucket,
+        Bucket: bucket,
+        Key: key,
       };
-
-      const s3Response = await ctx.s3.send(
-        new DeleteObjectCommand(deleteObjectParams),
-      );
-
-      if (!s3Response.DeleteMarker) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error deleting file from S3.",
-          cause: s3Response,
-        });
-      }
-
       const prismaDeleteInput: Prisma.MediaDeleteArgs = {
-        where: { id: ctx.session.uid },
+        where: { objectKey: key },
+      };
+      const prismaFindUniqueInput: Prisma.MediaFindUniqueArgs = {
+        where: { objectKey: key },
+      };
+      const prismaCreateInput: Prisma.MediaCreateArgs = {
+        data: {
+          objectKey: key,
+          lastUpdated: new Date(),
+          type: MediaTypes.PHOTO,
+        },
       };
 
+      const prismaCopy = await ctx.prisma.media.findUnique(prismaFindUniqueInput);
       const prismaResponse = await ctx.prisma.media.delete(prismaDeleteInput);
 
       if (!prismaResponse) {
@@ -146,6 +134,23 @@ export const mediaRouter = createTRPCRouter({
           cause: prismaResponse,
         });
       }
+
+      const s3Response = await ctx.s3.send(
+        new DeleteObjectCommand(deleteObjectParams),
+      );
+
+      if (!s3Response.DeleteMarker) {
+        // If the file was successfully deleted from S3, but not from the database, re-create the database record
+        ctx.prisma.media.create(prismaCreateInput);
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error deleting file from S3.",
+          cause: s3Response,
+        });
+
+      }
+
     }),
 
   /*
@@ -155,78 +160,16 @@ export const mediaRouter = createTRPCRouter({
    *    `key` and `bucket`. It is a query, which means it will fetch data without modifying anything on the server.
    */
   getImage: protectedProcedure
-    .input(z.object({ key: z.string(), bucket: z.string() }))
+    .input(z.object({ objectKey: z.string(), bucket: z.string() }))
     .query(async ({ ctx, input }) => {
-      const { key, bucket } = input;
+      const { objectKey, bucket } = input;
       const getObjectParams = {
         Bucket: bucket,
-        Key: key,
+        Key: objectKey,
       };
       // Generate a pre-signed URL to retrieve the image from S3
       return await getSignedUrl(ctx.s3, new GetObjectCommand(getObjectParams), {
         expiresIn: 3600,
       });
-    }),
-
-  /*
-   *    @param {string} key - key of the image in S3 to be updated.
-   *    @param {string} bucket - bucket in S3 where the image is stored.
-   *    The `updateImage` function is a protected procedure that checks if an image exists in S3 and, if it does,
-   *    generates a pre-signed URL for replacing that image and updates its associated database record.
-   */
-  updateProfilePicture: protectedProcedure
-    .input(z.object({ key: z.string(), bucket: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const headObjectParams = {
-        Bucket: input.bucket,
-        Key: input.key,
-      };
-      // Check if the image exists in S3
-      const exists = await ctx.s3.send(new HeadObjectCommand(headObjectParams));
-      if (!exists) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "File does not exist in Bucket",
-        });
-      }
-
-      // Generate a pre-signed URL to update the image in S3
-      const signedUrl = await getSignedUrl(
-        ctx.s3,
-        new PutObjectCommand(headObjectParams),
-        {
-          expiresIn: 3600,
-        },
-      );
-
-      // Update the lastUpdated timestamp for the image record in the database
-
-      return signedUrl;
-    }),
-
-  awsUpdateProfilePicture: publicProcedure
-    .meta({
-      openapi: {
-        method: "POST",
-        path: "/aws-update-profile-picture",
-        contentTypes: ["application/json", "text/plain"],
-      },
-    })
-    .input(z.object({}))
-    .output(z.void())
-    .mutation(async ({ input, ctx }) => {
-      console.log("input", input);
-      // const prismaUpdateInput: Prisma.MediaUpdateArgs = {
-      //   where: { id: input.key },
-      //   data: { lastUpdated: new Date() },
-      // };
-      // const prismaResponse = await ctx.prisma.media.update(prismaUpdateInput);
-      // if (!prismaResponse) {
-      //   throw new TRPCError({
-      //     code: "INTERNAL_SERVER_ERROR",
-      //     message: "Error updating file in DB.",
-      //     cause: prismaResponse,
-      //   });
-      // }
     }),
 });

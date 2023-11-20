@@ -67,8 +67,7 @@ model Tag {
 model Media {
     id           String        @id @default(cuid())
     type         MediaTypes
-    objectKey    String
-    thumbnailUrl String
+    objectKey    String         @unique
     lastUpdated  DateTime?
     ProfilePhoto ProfilePhoto?
     Post         Post?
