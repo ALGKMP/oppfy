@@ -79,7 +79,7 @@ const RootLayout = () => {
             <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
               <ActionSheetProvider>
                 <SafeAreaProvider>
-                  <View flex={1} backgroundColor="$backgroundStrong">
+                  <View flex={1} backgroundColor="black">
                     <Slot />
                     <StatusBar />
                   </View>

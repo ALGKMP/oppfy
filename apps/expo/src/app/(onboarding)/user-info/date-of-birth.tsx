@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -13,41 +13,30 @@ import { api } from "~/utils/api";
 import { BirthdateInput } from "~/components/Inputs";
 import useParams from "~/hooks/useParams";
 
-interface UserDetailsFlowParams {
-  firstName: string;
-  [Key: string]: string;
-}
-
-// Define your schema for validation
-const dateOfBirthSchema = z.object({
-  dateOfBirth: z.string(),
+const schemaValidation = z.object({
+  dateOfBirth: z.string().length(8),
 });
 
 const DateOfBirth = () => {
   const router = useRouter();
 
-  const userDetailsFlowParams = useParams<UserDetailsFlowParams>();
-
-  const dateOfBirthInputRef = useRef<TextInput | null>(null);
-
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [isValid, setIsValid] = useState(false);
+  const dateOfBirthInputRef = useRef<TextInput | null>(null);
 
   const updateUserDetails = api.auth.updateUserDetails.useMutation();
 
-  const onSubmit = async () => {
+  const dataOfBirthIsValid = useMemo(
+    () => schemaValidation.safeParse({ dateOfBirth }).success,
+    [dateOfBirth],
+  );
+
+  const onPress = async () => {
     await updateUserDetails.mutateAsync({
-      ...userDetailsFlowParams,
       dateOfBirth,
     });
 
-    router.replace("/profile");
+    router.replace("/(app)/(bottom-tabs)/profile");
   };
-
-  // Use useEffect to update the validation state
-  useEffect(() => {
-    setIsValid(dateOfBirthSchema.safeParse({ dateOfBirth }).success);
-  }, [dateOfBirth]);
 
   return (
     <KeyboardAvoidingView
@@ -56,21 +45,21 @@ const DateOfBirth = () => {
     >
       <View
         flex={1}
-        backgroundColor="$backgroundStrong"
         padding="$6"
+        backgroundColor="black"
         justifyContent="space-between"
       >
         <YStack flex={1} space="$8" alignItems="center">
           <Text
-            alignSelf="center"
-            textAlign="center"
             fontSize={22}
             fontWeight="900"
+            alignSelf="center"
+            textAlign="center"
           >
             When's your birthday?
           </Text>
 
-          <YStack width="100%" alignItems="center" space="$3">
+          <YStack space="$3">
             <BirthdateInput
               ref={dateOfBirthInputRef}
               value={dateOfBirth}
@@ -100,28 +89,26 @@ const DateOfBirth = () => {
           </YStack>
         </YStack>
 
-        <View>
-          <Button
-            animation="100ms"
-            pressStyle={{
-              scale: 0.95,
-              backgroundColor: "white",
-            }}
-            onPress={onSubmit}
-            height="$4"
-            borderRadius="$6"
-            backgroundColor={isValid ? "white" : "gray"}
-            disabled={!isValid}
+        <Button
+          animation="100ms"
+          pressStyle={{
+            scale: 0.95,
+            backgroundColor: "white",
+          }}
+          onPress={onPress}
+          height="$4"
+          borderRadius="$6"
+          backgroundColor={dataOfBirthIsValid ? "white" : "gray"}
+          disabled={!dataOfBirthIsValid}
+        >
+          <Text
+            color={dataOfBirthIsValid ? "black" : "lightgray"}
+            fontWeight="500"
+            fontSize={16}
           >
-            <Text
-              color={isValid ? "black" : "lightgray"}
-              fontWeight="500"
-              fontSize={16}
-            >
-              Next
-            </Text>
-          </Button>
-        </View>
+            Next
+          </Text>
+        </Button>
       </View>
     </KeyboardAvoidingView>
   );

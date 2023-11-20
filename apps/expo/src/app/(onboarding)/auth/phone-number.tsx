@@ -1,46 +1,30 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { isValidNumber } from "libphonenumber-js";
-import { Controller, useForm } from "react-hook-form";
 import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { PhoneNumberInput } from "~/components/Inputs";
 
-type FormData = z.infer<typeof schemaValidation>;
-
 const schemaValidation = z.object({
-  phoneNumber: z
-    .string()
-    .min(1, { message: "Invalid number" })
-    .refine((phoneNumber) => isValidNumber(phoneNumber), {
-      message: "Invalid phone number format",
-      path: ["phoneNumber"],
-    }),
+  phoneNumber: z.string().refine((phoneNumber) => isValidNumber(phoneNumber)),
 });
 
 const PhoneNumber = () => {
   const router = useRouter();
 
+  const [phoneNumber, setPhoneNumber] = useState("");
   const phoneNumberInputRef = useRef<TextInput | null>(null);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm({
-    defaultValues: {
-      phoneNumber: "",
-    },
-    resolver: zodResolver(schemaValidation),
-  });
+  const phoneNumberIsValid = useMemo(
+    () => schemaValidation.safeParse({ phoneNumber }).success,
+    [phoneNumber],
+  );
 
-  const onSubmit = async (data: FormData) => {
-    router.push({ params: data, pathname: "auth/pin-code-otp" });
-  };
+  const onPress = () =>
+    router.push({ params: { phoneNumber }, pathname: "auth/pin-code-otp" });
 
   return (
     <KeyboardAvoidingView
@@ -49,7 +33,7 @@ const PhoneNumber = () => {
     >
       <View
         flex={1}
-        backgroundColor="$backgroundStrong"
+        backgroundColor="black"
         padding="$6"
         justifyContent="space-between"
       >
@@ -64,46 +48,39 @@ const PhoneNumber = () => {
           </Text>
 
           <YStack space="$3">
-            <Controller
-              control={control}
-              name="phoneNumber"
-              render={({ field: { onChange, onBlur, value } }) => (
-                // TODO: set this up to work as a controlled input - onBlur, value, etc...
-                <PhoneNumberInput
-                  ref={phoneNumberInputRef}
-                  onChange={({ dialingCode, phoneNumber }) =>
-                    onChange(`${dialingCode}${phoneNumber}`)
-                  }
-                  onLayout={() => phoneNumberInputRef.current?.focus()}
-                  modalContainerStyle={{
-                    flex: 1,
-                    backgroundColor: "$backgroundStrong",
-                  }}
-                  inputsContainerStyle={{
-                    width: "100%",
-                    alignItems: "center",
-                  }}
-                  dialingCodeButtonStyle={{
-                    backgroundColor: "transparent",
-                    borderColor: "$gray7",
-                    borderWidth: 2,
-                    borderRadius: 12,
-                    height: 50,
-                    width: 70,
-                  }}
-                  dialingCodeTextStyle={{
-                    fontSize: 22,
-                  }}
-                  phoneNumberInputStyle={{
-                    flex: 1,
-                    borderWidth: 0,
-                    fontSize: 32,
-                    fontFamily: "$mono",
-                    fontWeight: "900",
-                    backgroundColor: "transparent",
-                  }}
-                />
-              )}
+            <PhoneNumberInput
+              ref={phoneNumberInputRef}
+              onLayout={() => phoneNumberInputRef.current?.focus()}
+              onChange={({ dialingCode, phoneNumber }) =>
+                setPhoneNumber(dialingCode + phoneNumber)
+              }
+              modalContainerStyle={{
+                flex: 1,
+                backgroundColor: "$backgroundStrong",
+              }}
+              inputsContainerStyle={{
+                width: "100%",
+                alignItems: "center",
+              }}
+              dialingCodeButtonStyle={{
+                backgroundColor: "transparent",
+                borderColor: "$gray7",
+                borderWidth: 2,
+                borderRadius: 12,
+                height: 50,
+                width: 70,
+              }}
+              dialingCodeTextStyle={{
+                fontSize: 22,
+              }}
+              phoneNumberInputStyle={{
+                flex: 1,
+                borderWidth: 0,
+                fontSize: 32,
+                fontFamily: "$mono",
+                fontWeight: "900",
+                backgroundColor: "transparent",
+              }}
             />
           </YStack>
 
@@ -126,28 +103,26 @@ const PhoneNumber = () => {
           </Text>
         </YStack>
 
-        <View alignSelf="stretch" marginTop="auto">
-          <Button
-            animation="100ms"
-            pressStyle={{
-              scale: 0.95,
-              backgroundColor: "white",
-            }}
-            onPress={handleSubmit(onSubmit)}
-            height="$4"
-            borderRadius="$6"
-            backgroundColor={isValid ? "white" : "gray"}
-            disabled={!isValid}
+        <Button
+          animation="100ms"
+          pressStyle={{
+            scale: 0.95,
+            backgroundColor: "white",
+          }}
+          onPress={onPress}
+          height="$4"
+          borderRadius="$6"
+          backgroundColor={phoneNumberIsValid ? "white" : "gray"}
+          disabled={!phoneNumberIsValid}
+        >
+          <Text
+            color={phoneNumberIsValid ? "black" : "lightgray"}
+            fontWeight="500"
+            fontSize={16}
           >
-            <Text
-              color={isValid ? "black" : "lightgray"}
-              fontWeight="500"
-              fontSize={16}
-            >
-              Next
-            </Text>
-          </Button>
-        </View>
+            Next
+          </Text>
+        </Button>
       </View>
     </KeyboardAvoidingView>
   );

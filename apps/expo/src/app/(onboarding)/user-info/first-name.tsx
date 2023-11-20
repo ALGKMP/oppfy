@@ -1,28 +1,34 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, TextInput } from "react-native";
 import { useRouter } from "expo-router";
-import { Button, debounce, Input, Text, View } from "tamagui";
+import { Button, debounce, Input, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
-// Define the schema outside the component
-const firstNameSchema = z
-  .string()
-  .regex(/^[a-zA-Z]+$/)
-  .min(2);
+import { api } from "~/utils/api";
+
+const schemaValidation = z.object({
+  firstName: z.string().min(2),
+});
 
 const FirstName = () => {
   const router = useRouter();
 
-  const firstNameInputRef = useRef<TextInput>(null);
-
   const [firstName, setFirstName] = useState("");
-  const isValid = firstNameSchema.safeParse(firstName).success;
+  const firstNameInputRef = useRef<TextInput | null>(null);
 
-  const onSubmit = () => {
-    router.push({
-      params: { firstName },
-      pathname: "user-info/date-of-birth",
+  const updateUserDetails = api.auth.updateUserDetails.useMutation();
+
+  const firstNameIsValid = useMemo(
+    () => schemaValidation.safeParse({ firstName }).success,
+    [firstName],
+  );
+
+  const onPress = async () => {
+    await updateUserDetails.mutateAsync({
+      firstName,
     });
+
+    router.replace("user-info/date-of-birth");
   };
 
   return (
@@ -36,7 +42,7 @@ const FirstName = () => {
         padding="$6"
         justifyContent="space-between"
       >
-        <View flex={1} space="$8" alignItems="center">
+        <YStack flex={1} space="$8" alignItems="center">
           <Text
             alignSelf="center"
             textAlign="center"
@@ -46,7 +52,7 @@ const FirstName = () => {
             What&apos;s your first name?
           </Text>
 
-          <View width="100%" alignItems="center" space="$3">
+          <YStack space="$3">
             <Input
               ref={firstNameInputRef}
               value={firstName}
@@ -60,26 +66,24 @@ const FirstName = () => {
               fontFamily="$mono"
               borderWidth={0}
             />
-          </View>
-        </View>
+          </YStack>
+        </YStack>
 
-        <View>
-          <Button
-            height="$4"
-            borderRadius="$6"
-            onPress={onSubmit}
-            disabled={!isValid}
-            backgroundColor={isValid ? "white" : "gray"}
+        <Button
+          height="$4"
+          borderRadius="$6"
+          onPress={onPress}
+          disabled={!firstNameIsValid}
+          backgroundColor={firstNameIsValid ? "white" : "gray"}
+        >
+          <Text
+            fontSize={16}
+            fontWeight="500"
+            color={firstNameIsValid ? "black" : "lightgray"}
           >
-            <Text
-              fontSize={16}
-              fontWeight="500"
-              color={isValid ? "black" : "lightgray"}
-            >
-              Next
-            </Text>
-          </Button>
-        </View>
+            Next
+          </Text>
+        </Button>
       </View>
     </KeyboardAvoidingView>
   );

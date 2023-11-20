@@ -27,7 +27,8 @@ import type {
 import { groupedCountries } from "~/data/groupedCountries";
 import type { CountryData } from "~/data/groupedCountries";
 
-const screenHeight = Dimensions.get("window").height;
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 interface PhoneNumberInputHandles {
   focus: () => void;
@@ -61,7 +62,6 @@ const PhoneNumberInput = forwardRef<
 
   const inputRef = useRef<TextInput | null>(null);
 
-  // Expose focus method to parent via ref
   useImperativeHandle(ref, () => ({
     focus: () => {
       inputRef.current?.focus();
@@ -189,8 +189,8 @@ const CountriesFlashList = ({ onSelect }: CountriesFlastListProps) => {
       estimatedItemSize={48}
       estimatedFirstItemOffset={76}
       estimatedListSize={{
-        height: screenHeight - 76,
-        width: Dimensions.get("window").width,
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT - 76,
       }}
       data={groupedCountries}
       renderItem={({ item, index }) => {
