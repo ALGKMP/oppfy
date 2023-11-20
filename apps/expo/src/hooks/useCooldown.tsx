@@ -6,31 +6,41 @@ interface CooldownOptions {
 
 const useCooldown = (
   duration: number,
-  { autoStart: startActive = false }: CooldownOptions = {},
+  { autoStart = false }: CooldownOptions = {},
 ) => {
-  const [cooldown, setCooldown] = useState(duration);
-  const [isActive, setIsActive] = useState(startActive);
+  const [cooldown, setCooldown] = useState(autoStart ? duration : 0);
+  const [isActive, setIsActive] = useState(autoStart);
 
   useEffect(() => {
-    if (!isActive || cooldown <= 0) {
+    if (!isActive) return;
+
+    if (cooldown <= 0) {
       setIsActive(false);
       return;
     }
 
-    const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    const timer = setTimeout(() => {
+      setCooldown((currentCooldown) => currentCooldown - 1);
+    }, 1000);
+
     return () => clearTimeout(timer);
   }, [isActive, cooldown]);
 
   const startCooldown = () => {
-    setCooldown(duration);
+    if (cooldown <= 0) setCooldown(duration);
     setIsActive(true);
   };
 
-  const resetCooldown = () => {
+  const pauseCooldown = () => {
     setIsActive(false);
   };
 
-  return { cooldown, startCooldown, resetCooldown };
+  const resetCooldown = () => {
+    setCooldown(duration);
+    setIsActive(autoStart);
+  };
+
+  return { cooldown, startCooldown, pauseCooldown, resetCooldown };
 };
 
 export default useCooldown;

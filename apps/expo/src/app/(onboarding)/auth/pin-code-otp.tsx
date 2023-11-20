@@ -39,11 +39,13 @@ const PhoneNumberOTP = () => {
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
 
   const [isSendingCode, setIsSendingCode] = useState(true);
-  const [isCheckingCode, setIsCheckingCode] = useState<boolean>(false);
-  const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
+  const [isCheckingCode, setIsCheckingCode] = useState(false);
+
+  const [codeChecked, setCodeChecked] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
-  const { cooldown, startCooldown, resetCooldown } = useCooldown(
+  const { cooldown, resetCooldown } = useCooldown(
     RESEND_CODE_COOLDOWN_DURATION,
     { autoStart: true },
   );
@@ -72,7 +74,7 @@ const PhoneNumberOTP = () => {
 
       await auth().currentUser?.reload();
 
-      // TODO: I dont like this
+      // TODO: Would be nice if this was refactored to requiresAdditionalDetails
       const completedUserDetailsProcess = await hasUserDetails.mutateAsync();
 
       completedUserDetailsProcess
@@ -120,13 +122,15 @@ const PhoneNumberOTP = () => {
   }, []);
 
   useEffect(() => {
-    if (phoneNumberOTP.length === 6 && !isCheckingCode && !hasAutoSubmitted) {
-      setHasAutoSubmitted(true);
-      void completeSignIn();
-    } else if (phoneNumberOTP.length < 6 && hasAutoSubmitted) {
-      setHasAutoSubmitted(false); // Reset if the user deletes any character
-    }
-  }, [phoneNumberOTP, isCheckingCode, hasAutoSubmitted, completeSignIn]);
+    const checkCode = async () => {
+      const isValidOTP = schemaValidation.safeParse({ phoneNumberOTP }).success;
+
+      isValidOTP && !isCheckingCode && !codeChecked && (await completeSignIn());
+      setCodeChecked(isValidOTP);
+    };
+
+    void checkCode();
+  }, [phoneNumberOTP, isCheckingCode, codeChecked, completeSignIn]);
 
   const renderButtonContent = () => {
     if (isCheckingCode || isSendingCode) {
