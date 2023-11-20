@@ -1,57 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { Button, Image, Platform, Text, View } from "react-native";
+import { Button, Image, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as MediaLibrary from "expo-media-library";
 import { useMutation } from "@tanstack/react-query";
 
 import { api } from "~/utils/api";
 
 const Camera = () => {
   const [image, setImage] = useState("");
+  const mutation = api.media.createPresignedUrlWithClient.useMutation();
 
-  const mutation = api.media.postImage.useMutation();
-
-  const fetchMutation = useMutation(async (url: string) => {
+  const putMutation = useMutation(async (url: string) => {
+    console.log("presigned url: ", url);
     console.log("Sending image to S3");
 
-    return await fetch(url, {
+    console.log("Content-Length: ", new Blob([image]).size.toString());
+    const response = await fetch(url, {
       method: "PUT",
       headers: {
-        "Content-Type": "image/jpeg",
+        "Content-Length": new Blob([image]).size.toString(),
       },
       body: image,
     });
+    console.log(response.status);
   });
 
-  const getPermissionAsync = async () => {
-    // Only ask for permission if the device is an iOS device
-    if (Platform.OS === "ios") {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        alert("Sorry, we need camera roll permissions to make this work!");
-        return false;
-      }
-    }
-    return true;
-  };
-
+  
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    const hasPermission = await getPermissionAsync();
-    if (!hasPermission) return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
 
-    console.log(result);
+    console.log("image data: ", result);
 
-    if (result != undefined && !result.canceled) {
-      setImage(result.assets[0]?.uri.toString());
+    if (result.assets != undefined && result.assets[0]?.uri) {
+      setImage(result.assets[0].uri);
     }
 
     mutation.mutate({
@@ -60,14 +45,13 @@ const Camera = () => {
       caption: "test caption",
       tags: ["otherUserKey1, otherUserKey2"],
     });
+
     if (mutation.isError) {
-      console.log(mutation.error);
+      console.log("mutation error: ", mutation.error);
     } else if (mutation.isSuccess) {
-      console.log("mutation data: ", mutation.data);
-      fetchMutation.mutate(mutation.data?.url);
-      console.log(fetchMutation.data);
+      putMutation.mutate(mutation.data);
     }
-    // use react-query to post image to s3 bucket
+    console.log("Put request status: ", putMutation.status);
   };
 
   return (
