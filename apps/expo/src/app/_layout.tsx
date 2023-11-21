@@ -35,10 +35,10 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TamaguiProvider, Text, View } from "tamagui";
+import tamaguiConfig from "../../tamagui.config";
 
 import { TRPCProvider } from "~/utils/api";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
-import tamaguiConfig from "~/../tamagui.config";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { Stack } from "~/layouts";
 import SessionProvider from "../contexts/SessionsContext";
@@ -66,7 +66,7 @@ const RootLayout = () => {
   });
 
   if (!fontsLoaded) {
-    return <LoadingIndicatorOverlay />;
+    return null;
   }
 
   const queryClient = new QueryClient();
@@ -74,9 +74,9 @@ const RootLayout = () => {
   return (
     <TRPCProvider>
       <QueryClientProvider client={queryClient}>
-        <SessionProvider>
-          <PermissionsProvider>
-            <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+        <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+          <SessionProvider>
+            <PermissionsProvider>
               <ActionSheetProvider>
                 <SafeAreaProvider>
                   <View flex={1} backgroundColor="black">
@@ -85,9 +85,9 @@ const RootLayout = () => {
                   </View>
                 </SafeAreaProvider>
               </ActionSheetProvider>
-            </TamaguiProvider>
-          </PermissionsProvider>
-        </SessionProvider>
+            </PermissionsProvider>
+          </SessionProvider>
+        </TamaguiProvider>
       </QueryClientProvider>
     </TRPCProvider>
   );
