@@ -12,6 +12,7 @@ import { Button, Checkbox, Text, View, YStack } from "tamagui";
 
 import { useSession } from "~/contexts/SessionsContext";
 import { usePermissions } from "../../contexts/PermissionsContext";
+import * as MediaLibrary from "expo-media-library";
 
 const Permissions = () => {
   const router = useRouter();
