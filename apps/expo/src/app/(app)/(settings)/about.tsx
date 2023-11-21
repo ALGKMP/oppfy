@@ -17,9 +17,9 @@ import {
 } from "tamagui";
 
 const REDIRECT_URLS = {
-  termsOfService: "https://example.com/terms",
-  privacyPolicy: "https://example.com/privacy",
-  joinUs: "https://example.com/joinus",
+  termsOfService: "https://example.com/terms-of-service",
+  privacyPolicy: "https://example.com/privacy-policy",
+  joinUs: "https://example.com/join-us",
 } as const satisfies Record<string, string>;
 
 const About = () => {

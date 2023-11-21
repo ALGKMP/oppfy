@@ -4,16 +4,16 @@ import Error from "next/error";
 
 import "swagger-ui-react/swagger-ui.css";
 
-const SwaggerUIComponent = dynamic(() => import("swagger-ui-react"), {
+const SwaggerUI = dynamic(() => import("swagger-ui-react"), {
   ssr: false,
 });
 
-const SwaggerUI: NextPage = () => {
+const ApiSpec: NextPage = () => {
   if (process.env.NODE_ENV !== "development") {
     return <Error statusCode={404} />;
   }
 
-  return <SwaggerUIComponent url="/api/openapi.json" />;
+  return <SwaggerUI url="/api/openapi.json" />;
 };
 
-export default SwaggerUI;
+export default ApiSpec;
