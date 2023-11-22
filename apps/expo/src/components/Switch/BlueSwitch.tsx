@@ -7,7 +7,6 @@ import { SwitchContext } from "tamagui";
 
 export const SwitchThumb = styled(ThemeableStack, {
   name: "SwitchThumb",
-  context: SwitchContext,
 
   variants: {
     unstyled: {
@@ -45,7 +44,6 @@ const getSwitchWidth = (val: SizeTokens) => getSwitchHeight(val) * 2;
 
 export const SwitchFrame = styled(YStack, {
   name: "Switch",
-  context: SwitchContext,
 
   variants: {
     unstyled: {
