@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
     "type-check": "tsc --noEmit",
-    "lambda:push" : "bash ./setup.sh"
+    "push" : "bash ./setup.sh"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.128",

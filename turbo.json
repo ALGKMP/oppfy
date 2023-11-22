@@ -10,10 +10,6 @@
       "inputs": ["prisma/schema.prisma"],
       "cache": false
     },
-    "lambda:push": {
-      "inputs": ["lambda/**/*.{ts,tsx}"],
-      "cache": false
-    },
     "dev": {
       "persistent": true,
       "cache": false
