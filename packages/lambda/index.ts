@@ -1,1 +1,1 @@
-export { handler } from "./src/functions/function-a/handler";
+export { type Metadata } from "./src/functions/function-a/handler";

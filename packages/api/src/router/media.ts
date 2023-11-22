@@ -10,12 +10,13 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Prisma } from "@prisma/client";
+import { MediaTypes } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { MediaTypes } from '@prisma/client';
+
+import type { Metadata } from "@acme/lambda";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-
 
 // interface Metadata1 {
 //   [index: string]: string;
@@ -34,15 +35,6 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 // }
 // type Metadata = Metadata1 | Metadata2 | Metadata3;
 
-
-interface Metadata {
-  [index: string]: string;
-  AuthorId: string;
-  Caption: string;
-  Tags: string;
-}
-
-
 export const mediaRouter = createTRPCRouter({
   /*
    *    @param {string} bucket - bucket in S3 for the image to be uploaded to.
@@ -60,13 +52,13 @@ export const mediaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const metadata : Metadata = {
+      const metadata: Metadata = {
         AuthorId: ctx.session.uid,
-      }
+      };
 
       if (input.caption) {
         metadata.Caption = input.caption;
-      } 
+      }
 
       // if (input.tags) {
       //   metadata.Tags = input.tags;
@@ -130,7 +122,6 @@ export const mediaRouter = createTRPCRouter({
   deleteImage: protectedProcedure
     .input(z.object({ key: z.string(), bucket: z.string() }))
     .mutation(async ({ ctx, input }) => {
-
       const { key, bucket } = input;
       const deleteObjectParams = {
         Bucket: bucket,
@@ -150,7 +141,9 @@ export const mediaRouter = createTRPCRouter({
         },
       };
 
-      const prismaCopy = await ctx.prisma.media.findUnique(prismaFindUniqueInput);
+      const prismaCopy = await ctx.prisma.media.findUnique(
+        prismaFindUniqueInput,
+      );
       const prismaResponse = await ctx.prisma.media.delete(prismaDeleteInput);
 
       if (!prismaResponse) {
@@ -174,9 +167,7 @@ export const mediaRouter = createTRPCRouter({
           message: "Error deleting file from S3.",
           cause: s3Response,
         });
-
       }
-
     }),
 
   /*

@@ -321,6 +321,9 @@ importers:
       '@acme/db':
         specifier: ^0.1.0
         version: link:../db
+      '@acme/lambda':
+        specifier: ^0.1.0
+        version: link:../lambda
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.441.0
         version: 3.441.0
@@ -432,9 +435,6 @@ importers:
 
   packages/lambda:
     devDependencies:
-      '@acme/eslint-config':
-        specifier: ^0.2.0
-        version: link:../config/eslint
       '@types/aws-lambda':
         specifier: ^8.10.128
         version: 8.10.128
