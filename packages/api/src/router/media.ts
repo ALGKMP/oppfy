@@ -14,26 +14,27 @@ import { MediaTypes } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-// import type { Metadata } from "@acme/lambda";
+import type { Metadata } from "@acme/lambda";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
-interface Metadata1 {
-  [index: string]: string;
-  AuthorId: string;
-}
-interface Metadata2 {
-  [index: string]: string;
-  AuthorId: string;
-  Caption: string;
-}
-interface Metadata3 {
-  [index: string]: string;
-  AuthorId: string;
-  Caption: string;
-  Tags: string;
-}
-type Metadata = Metadata1 | Metadata2 | Metadata3;
+// interface Metadata1 {
+//   [index: string]: string;
+//   AuthorId: string;
+// }
+// interface Metadata2 {
+//   [index: string]: string;
+//   AuthorId: string;
+//   Caption: string;
+// }
+// interface Metadata3 {
+//   [index: string]: string;
+//   AuthorId: string;
+//   Caption: string;
+//   Tags: string;
+// }
+
+// type Metadata = Metadata1 | Metadata2 | Metadata3;
 
 export const mediaRouter = createTRPCRouter({
   /*
@@ -52,17 +53,11 @@ export const mediaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const metadata: Metadata = {
+      const metadata = {
         AuthorId: ctx.session.uid,
-      };
-
-      if (input.caption) {
-        metadata.Caption = input.caption;
-      }
-
-      // if (input.tags) {
-      //   metadata.Tags = input.tags;
-      // }
+        ...(input.caption && { Caption: input.caption }),
+        ...(input.tags && { Tags: input.tags.join(",") }),
+      } satisfies Metadata;
 
       const putObjectParams = {
         Bucket: input.bucket,
