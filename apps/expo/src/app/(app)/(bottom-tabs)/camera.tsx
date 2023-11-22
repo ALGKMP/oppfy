@@ -24,7 +24,7 @@ const Camera = () => {
     console.log(response.status);
   });
 
-  const pickImage = async () => {
+  const pickImage = async () =>{
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       aspect: [4, 3],
