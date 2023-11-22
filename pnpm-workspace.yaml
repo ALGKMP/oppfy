@@ -3,5 +3,6 @@ packages:
   - apps/nextjs
   - packages/api
   - packages/db
+  - packages/lambda
   - packages/types
   - packages/config/*
