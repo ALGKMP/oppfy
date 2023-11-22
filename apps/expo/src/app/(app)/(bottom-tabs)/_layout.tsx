@@ -20,22 +20,6 @@ import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
   const router = useRouter();
-  const { isLoading, data: user } = api.auth.getUser.useQuery();
-
-  useEffect(() => {
-    // When loading is complete, hide the splash screen
-    if (!isLoading) {
-      void SplashScreen.hideAsync();
-    }
-  }, [isLoading]);
-
-  if (isLoading) {
-    return <LoadingIndicatorOverlay />;
-  }
-
-  if (!user?.firstName || !user?.dateOfBirth) {
-    return <Redirect href="/(onboarding)/user-info/welcome" />;
-  }
 
   return (
     <View flex={1} backgroundColor="black">
