@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Button, Image, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
+import { Button, Image, Text, View } from "tamagui";
 
 import { api } from "~/utils/api";
 
@@ -24,9 +24,7 @@ const Camera = () => {
     console.log(response.status);
   });
 
-  
-  const pickImage = async () => {
-
+  const pickImage = async () =>{
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       aspect: [4, 3],
@@ -55,8 +53,13 @@ const Camera = () => {
   };
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Button title="Pick an image from camera roll" onPress={pickImage} />
+    <View
+      flex={1}
+      backgroundColor="black"
+      paddingHorizontal="$4"
+      justifyContent="center"
+    >
+      <Button onPress={pickImage}>Pick an image from camera roll</Button>
       {image && (
         <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
       )}

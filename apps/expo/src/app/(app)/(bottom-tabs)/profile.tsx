@@ -17,7 +17,7 @@ const Profile = () => {
   ];
 
   return (
-    <View flex={1} backgroundColor="black" paddingHorizontal="$5">
+    <View flex={1} backgroundColor="black" paddingHorizontal="$4">
       <YStack space="$3">
         <XStack justifyContent="space-between" alignItems="center">
           <YStack space>

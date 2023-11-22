@@ -1,0 +1,1 @@
+export { handler } from "./src/functions/function-a/handler";

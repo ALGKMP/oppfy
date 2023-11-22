@@ -16,6 +16,33 @@ import { MediaTypes } from '@prisma/client';
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
+
+// interface Metadata1 {
+//   [index: string]: string;
+//   AuthorId: string;
+// }
+// interface Metadata2 {
+//   [index: string]: string;
+//   AuthorId: string;
+//   Caption: string;
+// }
+// interface Metadata3 {
+//   [index: string]: string;
+//   AuthorId: string;
+//   Caption: string;
+//   Tags: string;
+// }
+// type Metadata = Metadata1 | Metadata2 | Metadata3;
+
+
+interface Metadata {
+  [index: string]: string;
+  AuthorId: string;
+  Caption: string;
+  Tags: string;
+}
+
+
 export const mediaRouter = createTRPCRouter({
   /*
    *    @param {string} bucket - bucket in S3 for the image to be uploaded to.
@@ -33,18 +60,17 @@ export const mediaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const metadata = {
+      const metadata : Metadata = {
         AuthorId: ctx.session.uid,
-      };
-      if (input.caption) {
-        metadata["Caption" as keyof typeof metadata] = input.caption;
       }
 
-      if (input.tags.length > 0) {
-        input.tags.forEach((tag, index) => {
-          metadata[`Tag${index}` as keyof typeof metadata] = tag;
-        });
-      }
+      if (input.caption) {
+        metadata.Caption = input.caption;
+      } 
+
+      // if (input.tags) {
+      //   metadata.Tags = input.tags;
+      // }
 
       const putObjectParams = {
         Bucket: input.bucket,

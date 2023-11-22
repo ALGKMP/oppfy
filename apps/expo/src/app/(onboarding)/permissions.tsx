@@ -4,9 +4,10 @@ import * as Camera from "expo-camera";
 import * as Contacts from "expo-contacts";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
+import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
-import { useRouter } from "expo-router";
+import { SplashScreen, useRouter } from "expo-router";
 import { Check } from "@tamagui/lucide-icons";
 import { Button, Checkbox, Text, View, YStack } from "tamagui";
 

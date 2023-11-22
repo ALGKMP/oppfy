@@ -20,22 +20,6 @@ import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
   const router = useRouter();
-  const { isLoading, data: user } = api.auth.getUser.useQuery();
-
-  useEffect(() => {
-    // When loading is complete, hide the splash screen
-    if (!isLoading) {
-      void SplashScreen.hideAsync();
-    }
-  }, [isLoading]);
-
-  if (isLoading) {
-    return <LoadingIndicatorOverlay />;
-  }
-
-  if (!user?.firstName || !user?.dateOfBirth) {
-    return <Redirect href="/(onboarding)/user-info/welcome" />;
-  }
 
   return (
     <View flex={1} backgroundColor="black">
@@ -45,7 +29,7 @@ const BottomTabsLayout = () => {
           tabBarHideOnKeyboard: true,
           tabBarStyle: {
             backgroundColor: "black",
-            borderTopColor: getTokens().color.gray2Dark.val,
+            borderTopColor: getTokens().color.gray1Dark.val,
             height: 60,
             paddingTop: 10,
             paddingBottom: 10,
@@ -59,35 +43,48 @@ const BottomTabsLayout = () => {
         <BottomTabs.Screen
           name="(top-tabs)"
           options={{
-            tabBarIcon: () => <Home />,
+            title: "Home",
+            tabBarIcon: ({ focused }) => <Home strokeWidth={focused ? 3 : 2} />,
           }}
         />
 
         <BottomTabs.Screen
           name="search"
           options={{
-            tabBarIcon: () => <Search />,
+            title: "Search",
+            tabBarIcon: ({ focused }) => (
+              <Search strokeWidth={focused ? 2 : 1.5} />
+            ),
           }}
         />
 
         <BottomTabs.Screen
           name="camera"
           options={{
-            tabBarIcon: () => <Camera />,
+            title: "Camera",
+            tabBarIcon: ({ focused }) => (
+              <Camera strokeWidth={focused ? 2 : 1.5} />
+            ),
           }}
         />
 
         <BottomTabs.Screen
           name="inbox"
           options={{
-            tabBarIcon: () => <Inbox />,
+            title: "Inbox",
+            tabBarIcon: ({ focused }) => (
+              <Inbox strokeWidth={focused ? 2 : 1.5} />
+            ),
           }}
         />
 
         <BottomTabs.Screen
           name="profile"
           options={{
-            tabBarIcon: () => <User2 />,
+            title: "Profile",
+            tabBarIcon: ({ focused }) => (
+              <User2 strokeWidth={focused ? 2 : 1.5} />
+            ),
             headerLeft: () => null,
             headerRight: () => (
               <View>
