@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 
-interface Metadata {
+export interface Metadata {
   AuthorId: string;
   Caption?: string;
   Tags?: string;
