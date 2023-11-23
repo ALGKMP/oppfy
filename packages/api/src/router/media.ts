@@ -57,7 +57,7 @@ export const mediaRouter = createTRPCRouter({
         AuthorId: ctx.session.uid,
         ...(input.caption && { Caption: input.caption }),
         ...(input.tags && { Tags: input.tags.join(",") }),
-      } satisfies Metadata;
+      };
 
       const putObjectParams = {
         Bucket: input.bucket,
@@ -180,8 +180,22 @@ export const mediaRouter = createTRPCRouter({
         Key: objectKey,
       };
       // Generate a pre-signed URL to retrieve the image from S3
-      return await getSignedUrl(ctx.s3, new GetObjectCommand(getObjectParams), {
+      const s3Response = await getSignedUrl(ctx.s3, new GetObjectCommand(getObjectParams), {
         expiresIn: 3600,
       });
+      if (!s3Response) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error retrieving file from S3.",
+          cause: s3Response,
+        });
+      }
+    }),
+    deletePrisma: protectedProcedure.input(z.object({key: z.string()})).mutation(async ({ ctx, input }) => {
+      const { key } = input;
+      const prismaDeleteInput: Prisma.MediaDeleteArgs = {
+        where: { objectKey: key },
+      };
+      await ctx.prisma.media.delete(prismaDeleteInput);
     }),
 });
