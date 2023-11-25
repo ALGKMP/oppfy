@@ -92,7 +92,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("notifications")}
+                onPress={() => router.push("/notifications")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -101,7 +101,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("privacy")}
+                onPress={() => router.push("/privacy")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -110,7 +110,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("other")}
+                onPress={() => router.push("/other")}
               />
             </YGroup.Item>
           </YGroup>
@@ -146,7 +146,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("help")}
+                onPress={() => router.push("/help")}
               />
             </YGroup.Item>
             <YGroup.Item>
@@ -155,7 +155,7 @@ const Settings = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("about")}
+                onPress={() => router.push("/about")}
               />
             </YGroup.Item>
           </YGroup>

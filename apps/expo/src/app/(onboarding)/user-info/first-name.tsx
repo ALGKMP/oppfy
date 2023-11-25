@@ -28,7 +28,7 @@ const FirstName = () => {
       firstName,
     });
 
-    router.replace("user-info/date-of-birth");
+    router.replace("/user-info/date-of-birth");
   };
 
   return (

@@ -38,7 +38,7 @@ const Help = () => {
                 hoverTheme
                 pressTheme
                 iconAfter={ChevronRight}
-                onPress={() => router.push("contact-us")}
+                onPress={() => router.push("/contact-us")}
               />
             </YGroup.Item>
           </YGroup>

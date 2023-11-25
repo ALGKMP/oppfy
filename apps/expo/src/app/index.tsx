@@ -1,14 +1,12 @@
 import React, { useEffect } from "react";
 import { Redirect, SplashScreen } from "expo-router";
-import { Text, View } from "tamagui";
 
-import { api } from "~/utils/api";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 
 const Index = () => {
-  const { isSignedIn, isLoading: sessionIsLoading, signOut } = useSession();
+  const { isSignedIn, isLoading: sessionIsLoading } = useSession();
   const { isLoading: permissionsIsLoading } = usePermissions();
 
   useEffect(() => {
@@ -23,9 +21,9 @@ const Index = () => {
   }
 
   return isSignedIn ? (
-    <Redirect href="profile" />
+    <Redirect href="/profile" />
   ) : (
-    <Redirect href="(onboarding)" />
+    <Redirect href="/(onboarding)" />
   );
 };
 

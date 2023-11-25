@@ -24,7 +24,7 @@ const PhoneNumber = () => {
   );
 
   const onPress = () =>
-    router.push({ params: { phoneNumber }, pathname: "auth/pin-code-otp" });
+    router.push({ params: { phoneNumber }, pathname: "/auth/pin-code-otp" });
 
   return (
     <KeyboardAvoidingView
@@ -92,11 +92,11 @@ const PhoneNumber = () => {
           >
             {[
               "By continuing, you agree to our ",
-              <Link key="privacy-policy" href="">
+              <Link key="privacy-policy" href="https://fill">
                 <Text color="$gray10">Privacy Policy</Text>
               </Link>,
               " and ",
-              <Link key="terms-of-service" href="">
+              <Link key="terms-of-service" href="https://fill">
                 <Text color="$gray10">Terms of Service.</Text>
               </Link>,
             ]}

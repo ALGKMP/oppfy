@@ -13,10 +13,10 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, Text, View, XStack } from "tamagui";
 
-import { api } from "~/utils/api";
 import BottomTabsHeader from "~/components/Headers/BottomTabHeader";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { BottomTabs } from "~/layouts";
+import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
   const router = useRouter();
@@ -88,7 +88,7 @@ const BottomTabsLayout = () => {
             headerLeft: () => null,
             headerRight: () => (
               <View>
-                <Pressable onPress={() => router.push("/(settings)")}>
+                <Pressable onPress={() => router.push("/(app)/(settings)")}>
                   {({ pressed }) => (
                     <MoreHorizontal
                       size="$1"

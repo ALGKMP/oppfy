@@ -5,7 +5,7 @@ import { Button, H2, Text, View, YStack } from "tamagui";
 const Welcome = () => {
   const router = useRouter();
 
-  const onPress = () => router.push("user-info/first-name");
+  const onPress = () => router.push("/user-info/first-name");
 
   return (
     <View
