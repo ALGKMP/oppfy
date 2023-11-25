@@ -1,0 +1,1 @@
+export { type Metadata } from "./src/functions/function-a/handler";

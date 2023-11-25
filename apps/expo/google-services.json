@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "980786271179",
+    "project_id": "oppfy-d63ef",
+    "storage_bucket": "oppfy-d63ef.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:980786271179:android:3d188645445846a3051c4e",
+        "android_client_info": {
+          "package_name": "com.algkmp.oppfy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaKQMWFv51_M8QrJaupH3fKd_A-yVCCdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
