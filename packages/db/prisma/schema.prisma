@@ -67,7 +67,7 @@ model Tag {
 model Media {
     id           String        @id @default(cuid())
     type         MediaTypes
-    objectKey    String         @unique
+    objectKey    String        @unique
     lastUpdated  DateTime?
     ProfilePhoto ProfilePhoto?
     Post         Post?
@@ -79,21 +79,33 @@ enum MediaTypes {
 }
 
 model PostStats {
-    id     String @id @default(cuid())
-    likes  Like[]
-    views  Int
-    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId String @unique
+    id        String @id @default(cuid())
+    likeCount Int
+    views     Int
+    likes     Likes?
+    post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId    String @unique
 
     @@index([postId])
 }
 
-model Like {
+// Had to do this to make likes optional in PostStats
+model Likes {
     id          String    @id @default(cuid())
-    likedBy     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId      String
+    likes       Like[]
+    views       Int
     postStats   PostStats @relation(fields: [postStatsId], references: [id], onDelete: Cascade)
     postStatsId String    @unique
+
+    @@index([postStatsId])
+}
+
+model Like {
+    id      String @id @default(cuid())
+    likedBy User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId  String
+    Likes   Likes  @relation(fields: [LikesId], references: [id], onDelete: Cascade)
+    LikesId String @unique
 
     @@index([userId])
 }
