@@ -35,7 +35,10 @@ const defineConfig = (): ExpoConfig => ({
       projectId: "68175593-c314-48a6-8892-7afeeb66ab9f",
     },
   },
-
+  experiments: {
+    tsconfigPaths: true,
+    typedRoutes: true,
+  },
   plugins: [
     "./expo-plugins/with-modify-gradle.js",
     "expo-router",

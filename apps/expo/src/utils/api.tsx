@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Constants from "expo-constants";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,11 +27,12 @@ const getBaseUrl = () => {
    * **NOTE**: This is only for development. In production, you'll want to set the
    * baseUrl to your production API URL.
    */
+
   const debuggerHost = Constants.expoConfig?.hostUri;
   const localhost = debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    // return "https://your-production-url.com";
+    // return "https://turbo.t3.gg";
     throw new Error(
       "Failed to get localhost. Please point to your production server.",
     );
@@ -45,23 +46,23 @@ const getBaseUrl = () => {
  */
 
 export function TRPCProvider(props: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
+  const [queryClient] = React.useState(() => new QueryClient());
+  const [trpcClient] = React.useState(() =>
     api.createClient({
       transformer: superjson,
       links: [
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           async headers() {
-            const authToken = await auth().currentUser?.getIdToken();
+            const headers = new Map<string, string>();
+            headers.set("x-trpc-source", "expo-react");
 
-            if (!authToken) {
-              return {};
+            const authToken = await auth().currentUser?.getIdToken();
+            if (authToken) {
+              headers.set("authorization", `Bearer ${authToken}`);
             }
 
-            return {
-              authorization: `Bearer ${authToken}`,
-            };
+            return Object.fromEntries(headers);
           },
         }),
       ],

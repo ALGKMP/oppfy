@@ -7,7 +7,7 @@ const globalForPrisma = globalThis as { prisma?: PrismaClient };
 const globalForS3 = globalThis as { s3?: S3Client };
 
 export const s3 =
-  globalForS3.s3 ||
+  globalForS3.s3 ??
   new S3Client({
     region: "us-east-1",
     credentials: {

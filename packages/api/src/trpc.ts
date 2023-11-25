@@ -8,10 +8,8 @@
  */
 import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import type { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
+import { DecodedIdToken } from "firebase-admin/auth";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";

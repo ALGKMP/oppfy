@@ -14,7 +14,7 @@ import { MediaTypes } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { Metadata } from "@acme/lambda";
+import { camelToKebab, Metadata } from "@acme/lambda";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -48,21 +48,35 @@ export const mediaRouter = createTRPCRouter({
       z.object({
         bucket: z.string(),
         key: z.string(),
+        uid: z.string(),
+        contentLength: z.number(),
+        contentType: z.string(),
         caption: z.string().optional(),
         tags: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const metadata = {
-        AuthorId: ctx.session.uid,
-        ...(input.caption && { Caption: input.caption }),
-        ...(input.tags && { Tags: input.tags.join(",") }),
+        authorId: input.uid,
+        ...(input.caption && { caption: input.caption }),
+        ...(input.tags && { tags: input.tags.join(",") }),
       };
+
+      // for (const key in metadata) {
+      //   metadata[camelToKebab(key)] = metadata[key];
+      // }
 
       const putObjectParams = {
         Bucket: input.bucket,
         Key: input.key,
         Metadata: metadata,
+        Fields: {
+          "Content-Length": input.contentLength,
+          // "Content-Type": input.contentType,
+          // "x-amz-meta-authorid": input.uid,
+          // "x-amz-meta-caption": input.caption,
+          // "x-amz-meta-tags": input.tags.join(","),
+        },
       };
 
       const url = await getSignedUrl(
@@ -78,33 +92,68 @@ export const mediaRouter = createTRPCRouter({
   /**
    * OpenAPI Endpoint
    */
-  prismaCreate: publicProcedure
+  lambdaHitThis: publicProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/aws-prisma-create",
+        path: "/lambdaHitThis",
         contentTypes: ["application/json", "text/plain"],
       },
     })
-    .input(z.object({}))
+    .input(
+      z.object({
+        authorId: z.string(),
+        caption: z.string(),
+        tags: z.array(z.string()),
+        objectKey: z.string(),
+      }),
+    )
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
-      console.log("input", input);
-    }),
+      console.log("HITTING LAMDAENPOINT");
+      const { authorId, caption, tags, objectKey } = input;
 
-  postProfilePicture: protectedProcedure
-    .input(z.object({ bucket: z.string(), key: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const putObjectParams = {
-        Bucket: input.bucket,
-        Key: input.key,
-        Metadata: {
-          profile: "true",
+      // TODO what should we do for ID's
+      const postId = Math.floor(Math.random() * 1000000).toString();
+
+      const prismaPostCreateInput: Prisma.PostCreateArgs = {
+        data: {
+          id: postId,
+          caption: caption,
+          datePosted: new Date(),
+          author: {
+            connect: {
+              id: authorId,
+            },
+          },
+          tags: {
+            create: tags.map((tag) => {
+              return {
+                postId: postId,
+                userId: tag,
+              };
+            }),
+          },
+          media: {
+            create: {
+              objectKey: objectKey,
+              lastUpdated: new Date(),
+              type: MediaTypes.PHOTO,
+            },
+          },
+          postStats: {
+            create: {
+              views: 0,
+              likeCount: 0,
+            },
+          },
         },
       };
-      return await getSignedUrl(ctx.s3, new PutObjectCommand(putObjectParams), {
-        expiresIn: 3600,
-      });
+
+      const prismaResponse = await ctx.prisma.post.create(
+        prismaPostCreateInput,
+      );
+      console.log(`Created Prisma Post : ${prismaResponse.id}`);
     }),
 
   /*
@@ -125,9 +174,6 @@ export const mediaRouter = createTRPCRouter({
       const prismaDeleteInput: Prisma.MediaDeleteArgs = {
         where: { objectKey: key },
       };
-      const prismaFindUniqueInput: Prisma.MediaFindUniqueArgs = {
-        where: { objectKey: key },
-      };
       const prismaCreateInput: Prisma.MediaCreateArgs = {
         data: {
           objectKey: key,
@@ -136,9 +182,6 @@ export const mediaRouter = createTRPCRouter({
         },
       };
 
-      const prismaCopy = await ctx.prisma.media.findUnique(
-        prismaFindUniqueInput,
-      );
       const prismaResponse = await ctx.prisma.media.delete(prismaDeleteInput);
 
       if (!prismaResponse) {
@@ -155,7 +198,7 @@ export const mediaRouter = createTRPCRouter({
 
       if (!s3Response.DeleteMarker) {
         // If the file was successfully deleted from S3, but not from the database, re-create the database record
-        ctx.prisma.media.create(prismaCreateInput);
+        await ctx.prisma.media.create(prismaCreateInput);
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -171,19 +214,28 @@ export const mediaRouter = createTRPCRouter({
    *    The `getImage` function is a protected procedure that accepts an input object with two properties:
    *    `key` and `bucket`. It is a query, which means it will fetch data without modifying anything on the server.
    */
-  getImage: protectedProcedure
-    .input(z.object({ objectKey: z.string(), bucket: z.string() }))
+  getImageV1: protectedProcedure
+    .input(z.object({ key: z.string(), bucket: z.string() }))
     .query(async ({ ctx, input }) => {
-      const { objectKey, bucket } = input;
+      const { key, bucket } = input;
       const getObjectParams = {
         Bucket: bucket,
-        Key: objectKey,
+        Key: key,
+      };
+      const prismaDeleteInput: Prisma.MediaDeleteArgs = {
+        where: { objectKey: key },
       };
       // Generate a pre-signed URL to retrieve the image from S3
-      const s3Response = await getSignedUrl(ctx.s3, new GetObjectCommand(getObjectParams), {
-        expiresIn: 3600,
-      });
+      const s3Response = await getSignedUrl(
+        ctx.s3,
+        new GetObjectCommand(getObjectParams),
+        {
+          expiresIn: 3600,
+        },
+      );
       if (!s3Response) {
+        // Delete the record from the database if the file was not found in S3
+        await ctx.prisma.media.delete(prismaDeleteInput);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error retrieving file from S3.",
@@ -191,11 +243,66 @@ export const mediaRouter = createTRPCRouter({
         });
       }
     }),
-    deletePrisma: protectedProcedure.input(z.object({key: z.string()})).mutation(async ({ ctx, input }) => {
-      const { key } = input;
+
+  getImageV2: protectedProcedure
+    .input(z.object({ postId: z.string(), bucket: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { postId, bucket } = input;
+
+      const prismaPostFindUniqueInput: Prisma.PostFindUniqueArgs = {
+        where: { id: postId },
+        include: { media: true },
+      };
+      const prismaPostResponse = await ctx.prisma.post.findUnique(
+        prismaPostFindUniqueInput,
+      );
+      if (!prismaPostResponse) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error retrieving file from DB.",
+          cause: prismaPostResponse,
+        });
+      }
+
+      const prismaMediaFindUniqueInput: Prisma.MediaFindUniqueArgs = {
+        where: { id: prismaPostResponse.mediaId },
+      };
+      const prismaMediaResponse = await ctx.prisma.media.findUnique(
+        prismaMediaFindUniqueInput,
+      );
+      if (!prismaMediaResponse) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error retrieving file from DB.",
+          cause: prismaMediaResponse,
+        });
+      }
+
+      const key = prismaMediaResponse.objectKey;
+      const getObjectParams = {
+        Bucket: bucket,
+        Key: key,
+      };
       const prismaDeleteInput: Prisma.MediaDeleteArgs = {
         where: { objectKey: key },
       };
-      await ctx.prisma.media.delete(prismaDeleteInput);
+
+      // Generate a pre-signed URL to retrieve the image from S3
+      const s3Response = await getSignedUrl(
+        ctx.s3,
+        new GetObjectCommand(getObjectParams),
+        {
+          expiresIn: 3600,
+        },
+      );
+      if (!s3Response) {
+        // Delete the record from the database if the file was not found in S3
+        await ctx.prisma.media.delete(prismaDeleteInput);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error retrieving file from S3.",
+          cause: s3Response,
+        });
+      }
     }),
 });

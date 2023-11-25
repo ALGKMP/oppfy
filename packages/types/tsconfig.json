@@ -1,9 +1,8 @@
 {
+  "extends": "@acme/tsconfig/base.json",
   "compilerOptions": {
-    "paths": {
-      "~/*": ["./*"]
-    }
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "extends": "../../tsconfig.json",
-  "include": ["src", "index.ts"]
+  "include": ["*.ts", "src"],
+  "exclude": ["node_modules"]
 }
