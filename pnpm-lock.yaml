@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 overrides:
   '@auth/core': 0.18.0
 
@@ -274,7 +270,7 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       superjson:
-        specifier: ^2.2.0
+        specifier: 2.2.0
         version: 2.2.0
       swagger-ui-react:
         specifier: ^5.9.1
@@ -320,7 +316,7 @@ importers:
         specifier: ^8.4.24
         version: 8.4.26
       tailwindcss:
-        specifier: ^3.3.5
+        specifier: 3.3.5
         version: 3.3.5
       typescript:
         specifier: ^5.2.2
@@ -16516,3 +16512,7 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
