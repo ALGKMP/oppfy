@@ -6,5 +6,5 @@ Resources:
     Properties:
       CodeUri: packages/lambda/src/functions/function-a/
       Handler: index.handler
-      Runtime: nodejs18
+      Runtime: nodejs20.x
       # Add other necessary configuration like Events, Environment variables, IAM Role, etc.
