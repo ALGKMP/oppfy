@@ -11,4 +11,3 @@ Resources:
     Properties:
       Handler: function-a/index.handler
       Runtime: nodejs20.x
-      # Additional configuration
