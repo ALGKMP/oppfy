@@ -3,10 +3,9 @@ import type { OpaqueColorValue, TextInput } from "react-native";
 import { Input } from "tamagui";
 import type { ColorTokens, InputProps, SizeTokens } from "tamagui";
 
-import type { OmitPropsStartingWith } from "@acme/types";
+import type { OmitKeysStartingWith } from "@acme/types";
 
-interface UnderlineInputProps
-  extends OmitPropsStartingWith<InputProps, "border"> {
+interface UnderlineInputProps extends OmitKeysStartingWith<InputProps, "border"> {
   underlineColor?: ColorTokens | OpaqueColorValue;
   underlineWidth?: SizeTokens;
   children?: React.ReactNode;
