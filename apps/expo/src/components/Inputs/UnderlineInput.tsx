@@ -5,7 +5,8 @@ import type { ColorTokens, InputProps, SizeTokens } from "tamagui";
 
 import type { OmitKeysStartingWith } from "@acme/types";
 
-interface UnderlineInputProps extends OmitKeysStartingWith<InputProps, "border"> {
+interface UnderlineInputProps
+  extends OmitKeysStartingWith<InputProps, "border"> {
   underlineColor?: ColorTokens | OpaqueColorValue;
   underlineWidth?: SizeTokens;
   children?: React.ReactNode;

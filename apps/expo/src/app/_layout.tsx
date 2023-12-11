@@ -35,12 +35,12 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TamaguiProvider, Text, View } from "tamagui";
-import tamaguiConfig from "../../tamagui.config";
 
-import { TRPCProvider } from "~/utils/api";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { Stack } from "~/layouts";
+import { TRPCProvider } from "~/utils/api";
+import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionsContext";
 
 const RootLayout = () => {

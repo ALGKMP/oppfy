@@ -13,11 +13,11 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, Text, View, XStack } from "tamagui";
 
-import { api } from "~/utils/api";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
+import { api } from "~/utils/api";
 
 const AppLayout = () => {
   const { permissions } = usePermissions();

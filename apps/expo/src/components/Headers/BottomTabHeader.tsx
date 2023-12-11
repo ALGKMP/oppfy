@@ -1,6 +1,8 @@
 import React from "react";
-import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import type { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
+import type {
+  BottomTabNavigationOptions,
+  BottomTabNavigationProp,
+} from "@react-navigation/bottom-tabs";
 import type {
   NativeStackNavigationOptions,
   NativeStackNavigationProp,

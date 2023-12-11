@@ -13,11 +13,11 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { Button, Input, Spinner, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
-import { api } from "~/utils/api";
 import { PinCodeInput } from "~/components/Inputs";
 import { useSession } from "~/contexts/SessionsContext";
 import useCooldown from "~/hooks/useCooldown";
 import useParams from "~/hooks/useParams";
+import { api } from "~/utils/api";
 
 interface SignUpFlowParams {
   phoneNumber: string;
@@ -219,8 +219,8 @@ const PhoneNumberOTP = () => {
             {error
               ? error
               : isSendingCode
-              ? "Sending code..."
-              : `Verification code sent to ${signUpFlowParams.phoneNumber}`}
+                ? "Sending code..."
+                : `Verification code sent to ${signUpFlowParams.phoneNumber}`}
           </Text>
         </YStack>
 

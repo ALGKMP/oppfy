@@ -17,7 +17,7 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "push" : "bash ./setup.sh",
+    "push": "bash ./setup.sh",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

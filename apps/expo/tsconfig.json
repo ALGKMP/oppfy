@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "@assets/*": ["./assets/*"],
+      "@assets/*": ["./assets/*"]
     },
     "jsx": "react-native",
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
@@ -16,7 +16,8 @@
     "index.tsx",
     "*.js",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "utils"  ],
+    "expo-env.d.ts",
+    "utils"
+  ],
   "exclude": ["node_modules"]
 }

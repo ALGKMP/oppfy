@@ -9,9 +9,9 @@ import { useRouter } from "expo-router";
 import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
-import { api } from "~/utils/api";
 import { BirthdateInput } from "~/components/Inputs";
 import useParams from "~/hooks/useParams";
+import { api } from "~/utils/api";
 
 const schemaValidation = z.object({
   dateOfBirth: z.string().length(8),
