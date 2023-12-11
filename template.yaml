@@ -1,10 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: "AWS::Serverless-2016-10-31"
+
+Globals:
+  Function:
+    CodeUri: packages/lambda/src/functions/
+
 Resources:
   FunctionA:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: packages/lambda/src/functions/function-a/
-      Handler: index.handler
+      Handler: function-a/index.handler
       Runtime: nodejs20.x
-      # Add other necessary configuration like Events, Environment variables, IAM Role, etc.
+      # Additional configuration

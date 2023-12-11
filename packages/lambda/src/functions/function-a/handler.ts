@@ -42,8 +42,9 @@ export const pascalToKebab = (str: string) => {
   );
 };
 
-const S3_ACCESS_KEY_ID = "AKIA5OJS54YNU5J6NZNU";
-const S3_SECRET_ACCESS_KEY = "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";
+// TODO: we can upload our env vars to lambda through our template.yaml file
+const AWS_ACCESS_KEY_ID = "AKIA5OJS54YNU5J6NZNU";
+const AWS_SECRET_ACCESS_KEY = "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";
 
 export const handler = async (
   event: S3Event,
@@ -56,8 +57,8 @@ export const handler = async (
   const s3Client = new S3Client({
     region: region,
     credentials: {
-      accessKeyId: S3_ACCESS_KEY_ID,
-      secretAccessKey: S3_SECRET_ACCESS_KEY,
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY,
     },
   });
 

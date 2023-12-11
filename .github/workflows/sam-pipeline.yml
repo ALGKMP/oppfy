@@ -1,10 +1,9 @@
-name: Deploy to AWS Lambda
+name: Sam Pipeline
 
 on:
   push:
     branches:
       - main
-      - lambda-github-actions
 
 jobs:
   deploy:
