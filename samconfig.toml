@@ -3,7 +3,7 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "lambda"
-s3_bucket = "sam-artifacts"
+s3_bucket = "sam-artifacts-oppfy"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
