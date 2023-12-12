@@ -3,7 +3,7 @@ Transform: "AWS::Serverless-2016-10-31"
 
 Globals:
   Function:
-    CodeUri: packages/lambda/src/functions/function-a/handler.ts
+    CodeUri: packages/lambda/src/functions/function-a
 
 Resources:
   FunctionA:
