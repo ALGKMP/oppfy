@@ -9,5 +9,5 @@ Resources:
   FunctionA:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: function-a/index.handler
+      Handler: function-a/handler.handler
       Runtime: nodejs20.x
