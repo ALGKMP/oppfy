@@ -3,11 +3,11 @@ Transform: "AWS::Serverless-2016-10-31"
 
 Globals:
   Function:
-    CodeUri: packages/lambda/src/functions/
+    CodeUri: packages/lambda/src/functions/function-a
 
 Resources:
   FunctionA:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: function-a/index.handler
+      Handler: function-a/handler.handler
       Runtime: nodejs20.x

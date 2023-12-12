@@ -4,5 +4,8 @@
       "mode": "auto"
     }
   ],
-  "eslint.lintTask.enable": true
+  "eslint.lintTask.enable": true,
+  "github-actions.workflows.pinned.workflows": [
+    ".github/workflows/sam-pipeline.yml"
+  ]
 }

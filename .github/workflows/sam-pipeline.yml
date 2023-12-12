@@ -6,7 +6,8 @@ on:
       - main
     paths:
       - "packages/lambda/**"
-
+  workflow_dispatch:
+    
 jobs:
   deploy:
     runs-on: ubuntu-latest
