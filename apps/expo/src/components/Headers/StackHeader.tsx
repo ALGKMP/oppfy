@@ -19,11 +19,6 @@ interface HeaderProps {
 }
 
 const StackHeader = ({ navigation, options, back }: HeaderProps) => {
-  useEffect(() => {
-    // console.log("BACK: ", back);
-    console.log("NAVIGATION: " + navigation.canGoBack());
-  }, [navigation]);
-
   return (
     <SafeAreaView>
       <XStack
