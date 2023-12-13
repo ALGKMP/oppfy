@@ -18,4 +18,4 @@ Resources:
         Target: "ES2022"
         # Sourcemap: true,
         EntryPoints:
-        - "function-a/app.js"
+        - "function-a/app.ts"
