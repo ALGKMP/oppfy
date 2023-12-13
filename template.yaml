@@ -3,11 +3,19 @@ Transform: "AWS::Serverless-2016-10-31"
 
 Globals:
   Function:
-    CodeUri: packages/lambda/src/functions/function-a
+    CodeUri: packages/lambda/src/functions/
 
 Resources:
   FunctionA:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: function-a/handler.handler
+      Handler: function-a/app.handler
       Runtime: nodejs20.x
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "ES2022"
+        # Sourcemap: true,
+        EntryPoints:
+        - "function-a/app.js"

@@ -34,5 +34,8 @@
       "@acme/eslint-config/base"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@acme/prettier-config",
+  "dependencies": {
+    "esbuild": "^0.19.9"
+  }
 }
