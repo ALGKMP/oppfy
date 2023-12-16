@@ -1,6 +1,8 @@
 import type { HeadObjectCommandInput } from "@aws-sdk/client-s3";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
+import { z } from "zod";
+import isEven from "is-even";
 
 export interface Metadata {
   authorId: string;
@@ -53,6 +55,7 @@ export const handler = async (
   const record = event.Records[0];
   const objectKey = record?.s3.object.key;
   const objectBucket = record?.s3.bucket.name;
+  console.log(`record : ${JSON.stringify(record)}`);
 
   const s3Client = new S3Client({
     region: region,
@@ -97,6 +100,10 @@ export const handler = async (
   console.log(`Tags: ${tags}`);
   console.log(`Caption: ${caption}`);
   console.log(`AuthorId: ${authorId}`);
+
+  const n = 2;
+  const r:boolean = isEven(n as number);
+  console.log(`isEven: ${r}`)
 
   // TODO NOT FETCHING RIGHT NOW???????????
   const fetchResponse = await fetch(
