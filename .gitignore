@@ -49,4 +49,4 @@ yarn-error.log*
 .turbo
 
 # aws-sam
-aws-sam
+.aws-sam
