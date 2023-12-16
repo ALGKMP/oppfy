@@ -17,9 +17,7 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "push": "bash ./setup.sh",
-    "typecheck": "tsc --noEmit",
-    "not-sure-what-to-call-this": "sam build & sam deploy --guided"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:^0.2.0",
