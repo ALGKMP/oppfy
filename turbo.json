@@ -12,12 +12,30 @@
         "!.next/cache/**",
         "next-env.d.ts",
         ".expo/**",
+        "dist/**",
         ".output/**",
         ".vercel/output/**"
       ]
     },
     "dev": {
       "persistent": true,
+      "cache": false
+    },
+    "package": {
+      "dependsOn": [
+      ],
+      "cache": false
+    },
+    "deploy:staging": {
+      "dependsOn": [
+        "package"
+      ],
+      "cache": false
+    },
+    "deploy:production": {
+      "dependsOn": [
+        "package"
+      ],
       "cache": false
     },
     "format": {

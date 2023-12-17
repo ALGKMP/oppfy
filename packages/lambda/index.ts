@@ -6,4 +6,4 @@ export {
   pascalToKebab,
   isMetadata,
   camelToKebab,
-} from "./src/functions/function-a/app";
+} from "./src/functions/function-a";

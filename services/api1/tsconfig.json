@@ -1,0 +1,16 @@
+{
+  "extends": "@acme/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "moduleResolution": "Node",
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+  },
+  "include": ["src/**/*.ts", "serverless.ts"],
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "moduleTypes": {
+      "**/*.ts": "cjs"
+    }
+  }
+}
+
