@@ -1,47 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="89567291-832a-48ae-bc5f-89382e5d43ab" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/apps/auth-proxy/.env.example" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/auth-proxy/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/auth-proxy/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/auth-proxy/routes/[...auth].ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/auth-proxy/tsconfig.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/app.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/app.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/eas.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/eas.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/expo/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/src/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/src/app/_layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/src/app/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/src/app/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/src/app/post/[id].tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/src/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/src/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/src/types/nativewind-env.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/src/utils/api.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/src/utils/api.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/expo/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/expo/tsconfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/nextjs/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/apps/nextjs/next.config.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/nextjs/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/nextjs/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/nextjs/src/app/_components/auth-showcase.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/nextjs/src/app/_components/posts.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/nextjs/src/app/api/auth/[...nextauth]/route.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/nextjs/src/app/api/trpc/[trpc]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/nextjs/src/app/api/trpc/[trpc]/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/nextjs/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/nextjs/src/app/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/src/root.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/src/root.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/src/router/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/src/router/auth.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/src/router/post.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/src/trpc.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/src/trpc.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/auth/env.mjs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/auth/index.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/auth/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/auth/tsconfig.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/db/drizzle.config.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/db/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/db/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/db/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/db/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/db/schema/_table.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/db/schema/auth.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/db/schema/post.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/lambda/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/lambda/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/lambda/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/lambda/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/lambda/src/functions/function-a/app.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-workspace.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-workspace.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/template.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/template.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/turbo.json" beforeDir="false" afterPath="$PROJECT_DIR$/turbo.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,10 +27,10 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2YbUZlXu6mjcF4sNnR7XsODHaHb" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -72,8 +45,13 @@
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/ghait/WebstormProjects/iraqinuclearweaponproject",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "pnpm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/einsight/WebstormProjects/oppfy/node_modules/prettier",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "/Users/einsight/WebstormProjects/oppfy/node_modules/typescript/lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -86,6 +64,7 @@
       <option name="presentableId" value="Default" />
       <updated>1700793834709</updated>
       <workItem from="1700793839816" duration="91000" />
+      <workItem from="1702793373095" duration="369000" />
     </task>
     <servers />
   </component>
