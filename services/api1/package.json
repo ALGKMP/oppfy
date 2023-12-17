@@ -13,7 +13,7 @@
     "package": "serverless package"
   },
   "dependencies": {
-    "@acme/helpers": "workspace:^0.1.0"
+    "@acme/serverless-helpers": "workspace:^0.1.0"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:^0.2.0",

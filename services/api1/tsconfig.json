@@ -2,15 +2,13 @@
   "extends": "@acme/tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "moduleResolution": "Node",
+    "module": "commonjs",
     "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
   },
   "include": ["src/**/*.ts", "serverless.ts"],
   "exclude": ["node_modules"],
   "ts-node": {
-    "moduleTypes": {
-      "**/*.ts": "cjs"
-    }
+    "require": ["tsconfig-paths/register"]
   }
 }
 

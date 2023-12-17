@@ -362,8 +362,9 @@ importers:
   services/api1:
     specifiers:
       '@acme/eslint-config': workspace:^0.2.0
-      '@acme/helpers': workspace:^0.1.0
+      '@acme/lambda': workspace:^0.1.0
       '@acme/prettier-config': workspace:^0.1.0
+      '@acme/serverless-helpers': workspace:^0.1.0
       '@acme/tailwind-config': workspace:^0.1.0
       '@acme/tsconfig': workspace:^0.1.0
       '@serverless/typescript': ^3.38.0
@@ -377,7 +378,8 @@ importers:
       ts-node: ^10.9.2
       typescript: ^5.2.2
     dependencies:
-      '@acme/helpers': link:../../packages/serverless-helpers
+      '@acme/lambda': link:../../packages/lambda
+      '@acme/serverless-helpers': link:../../packages/serverless-helpers
     devDependencies:
       '@acme/eslint-config': link:../../tooling/eslint
       '@acme/prettier-config': link:../../tooling/prettier
@@ -7499,7 +7501,7 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@tanstack/react-query': 4.36.1_5u6uxarkkagyrf2r4skk7vt2wm
+      '@tanstack/react-query': 4.36.1_biqbaboplfbrettd7655fr4n2y
       '@trpc/client': 10.43.6_@trpc+server@10.43.6
       '@trpc/server': 10.43.6
       react: 18.2.0

@@ -9,6 +9,7 @@ const hello = async (
 ): Promise<APIGatewayProxyResult> => {
   await new Promise((res) => setTimeout(res, 500));
 
+  
   return formatJSONResponse({
     message: `Hello ${event.body.name} !`,
   });
