@@ -20,17 +20,14 @@ const Welcome = () => {
 
       <View>
         <Button
-          animation="100ms"
-          pressStyle={{
-            scale: 0.95,
-            backgroundColor: "white",
-          }}
           onPress={onPress}
-          height="$4"
-          borderRadius="$6"
+          borderWidth={0}
           backgroundColor="white"
+          pressStyle={{
+            backgroundColor: "$gray12",
+          }}
         >
-          <Text color="black" fontWeight="500" fontSize={16}>
+          <Text color="black" fontWeight="600" fontSize={16}>
             Welcome
           </Text>
         </Button>

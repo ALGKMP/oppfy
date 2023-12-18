@@ -73,7 +73,7 @@ const DateOfBirth = () => {
               }}
               inputStyle={{}}
               charStyle={{
-                fontFamily: "$monospace",
+                fontFamily: "$chivoMono",
                 textAlign: "center",
                 fontSize: 36,
                 fontWeight: "900",
@@ -90,20 +90,17 @@ const DateOfBirth = () => {
         </YStack>
 
         <Button
-          animation="100ms"
-          pressStyle={{
-            scale: 0.95,
-            backgroundColor: "white",
-          }}
           onPress={onPress}
-          height="$4"
-          borderRadius="$6"
+          borderWidth={0}
+          pressStyle={{
+            backgroundColor: "$gray12",
+          }}
           backgroundColor={dataOfBirthIsValid ? "white" : "gray"}
           disabled={!dataOfBirthIsValid}
         >
           <Text
             color={dataOfBirthIsValid ? "black" : "lightgray"}
-            fontWeight="500"
+            fontWeight="600"
             fontSize={16}
           >
             Next

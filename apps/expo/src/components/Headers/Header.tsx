@@ -43,7 +43,9 @@ const StackHeader = ({ navigation, options, back }: HeaderProps) => {
           ? options.headerLeft({ canGoBack: navigation.canGoBack() })
           : back && (
               <TouchableOpacity
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                  navigation.goBack();
+                }}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <ChevronLeft size="$1.5" />

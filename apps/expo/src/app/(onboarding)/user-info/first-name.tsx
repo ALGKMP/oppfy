@@ -28,7 +28,7 @@ const FirstName = () => {
       firstName,
     });
 
-    router.replace("/user-info/date-of-birth");
+    router.push("/user-info/date-of-birth");
   };
 
   return (
@@ -70,16 +70,18 @@ const FirstName = () => {
         </YStack>
 
         <Button
-          height="$4"
-          borderRadius="$6"
           onPress={onPress}
-          disabled={!firstNameIsValid}
+          borderWidth={0}
+          pressStyle={{
+            backgroundColor: "$gray12",
+          }}
           backgroundColor={firstNameIsValid ? "white" : "gray"}
+          disabled={!firstNameIsValid}
         >
           <Text
-            fontSize={16}
-            fontWeight="500"
             color={firstNameIsValid ? "black" : "lightgray"}
+            fontWeight="600"
+            fontSize={16}
           >
             Next
           </Text>
