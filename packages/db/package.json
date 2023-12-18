@@ -12,6 +12,7 @@
     "generate": "pnpm with-env prisma generate",
     "push": "pnpm with-env prisma db push --skip-generate",
     "studio": "pnpm with-env prisma studio --port 5556",
+    "dev": "pnpm studio",
     "with-env": "dotenv -e ../../.env --",
     "typecheck": "tsc --noEmit"
   },

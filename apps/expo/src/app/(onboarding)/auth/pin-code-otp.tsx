@@ -119,6 +119,7 @@ const PhoneNumberOTP = () => {
     };
 
     void sendCode();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
