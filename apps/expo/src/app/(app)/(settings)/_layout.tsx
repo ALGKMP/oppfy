@@ -7,7 +7,6 @@ import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getTokens, Text, View, XStack } from "tamagui";
 
 import { Header } from "~/components/Headers";
-import StackHeader from "~/components/Headers/StackHeader";
 import { Stack } from "~/layouts";
 
 const ProfileLayout = () => {

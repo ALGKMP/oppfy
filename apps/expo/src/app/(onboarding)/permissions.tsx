@@ -1,13 +1,10 @@
-import React from "react";
-import { Platform, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Alert, Linking, Platform, StyleSheet } from "react-native";
 import * as Camera from "expo-camera";
 import * as Contacts from "expo-contacts";
-import * as ImagePicker from "expo-image-picker";
-import * as Location from "expo-location";
-import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
-import { SplashScreen, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Check } from "@tamagui/lucide-icons";
 import { Button, Checkbox, Text, View, YStack } from "tamagui";
 
@@ -16,38 +13,56 @@ import { usePermissions } from "../../contexts/PermissionsContext";
 
 const Permissions = () => {
   const router = useRouter();
-
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
 
+  const openSettings = async () => {
+    await Linking.openSettings();
+  };
+
   const requestCameraPermission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
-    if (status === PermissionStatus.GRANTED) {
-      await checkPermissions();
+    if (status !== PermissionStatus.GRANTED) {
+      Alert.alert(
+        "Camera Permission",
+        "Camera permission is required for this app. Please enable it in your device settings.",
+        [{ text: "Open Settings", onPress: void openSettings }],
+      );
     }
+    await checkPermissions();
   };
 
   const requestContactsPermission = async () => {
     const { status } = await Contacts.requestPermissionsAsync();
-    if (status === PermissionStatus.GRANTED) {
-      await checkPermissions();
+    if (status !== PermissionStatus.GRANTED) {
+      Alert.alert(
+        "Contacts Permission",
+        "Contacts permission is required for this app. Please enable it in your device settings.",
+        [{ text: "Open Settings", onPress: void openSettings }],
+      );
     }
+    await checkPermissions();
   };
 
   const requestNotificationsPermission = async () => {
     const { status } = await Notifications.requestPermissionsAsync();
-    if (status === PermissionStatus.GRANTED) {
-      await checkPermissions();
+    if (status !== PermissionStatus.GRANTED) {
+      Alert.alert(
+        "Notifications Permission",
+        "Notifications permission is required for this app. Please enable it in your device settings.",
+        [{ text: "Open Settings", onPress: void openSettings }],
+      );
     }
+    await checkPermissions();
   };
-
-  const requiredPermissions = permissions.camera && permissions.contacts;
 
   const onPress = () => {
     isSignedIn
       ? router.push("/(app)/(bottom-tabs)/profile")
       : router.push("/auth/phone-number");
   };
+
+  const requiredPermissions = permissions.camera && permissions.contacts;
 
   return (
     <View
@@ -60,9 +75,8 @@ const Permissions = () => {
         <YStack>
           <Text style={styles.title}>Permissions</Text>
           <Text style={styles.description}>
-            Poparazzi is a photo sharing app where you create your friend's
-            profiles and they create yours. We'll need you to allow a few
-            permissions to get started.
+            This app requires certain permissions to function properly. Please
+            allow the necessary permissions to continue.
           </Text>
         </YStack>
 
@@ -119,7 +133,7 @@ const Permissions = () => {
         backgroundColor={requiredPermissions ? "white" : "$gray9"}
       >
         <Text color="black" fontSize={16} fontWeight="600">
-          Save
+          Continue
         </Text>
       </Button>
     </View>
@@ -127,11 +141,6 @@ const Permissions = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
   title: {
     fontSize: 22,
     fontWeight: "bold",

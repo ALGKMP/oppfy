@@ -68,7 +68,7 @@ const DeleteAccount = () => {
                 backgroundColor="$gray1"
               >
                 <Text color="$blue11" fontSize={16} fontWeight="600">
-                  I changed my mind
+                  I change my mind
                 </Text>
               </Button>
               <Button
