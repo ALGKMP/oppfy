@@ -10,5 +10,3 @@ export const App = () => {
 };
 
 registerRootComponent(App);
-
-// import "expo-router/entry";

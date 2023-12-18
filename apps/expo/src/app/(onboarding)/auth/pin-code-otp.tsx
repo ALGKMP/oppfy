@@ -20,15 +20,15 @@ import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
 
 interface SignUpFlowParams {
-  phoneNumber: string;
   [key: string]: string;
+  phoneNumber: string;
 }
 
 const schemaValidation = z.object({
   phoneNumberOTP: z.string().length(6),
 });
 
-const RESEND_CODE_COOLDOWN_DURATION = 60;
+const RESEND_CODE_COOLDOWN_DURATION_SEC = 60;
 
 const PhoneNumberOTP = () => {
   const router = useRouter();
@@ -46,7 +46,7 @@ const PhoneNumberOTP = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { cooldown, resetCooldown } = useCooldown(
-    RESEND_CODE_COOLDOWN_DURATION,
+    RESEND_CODE_COOLDOWN_DURATION_SEC,
     { autoStart: true },
   );
 
@@ -75,9 +75,9 @@ const PhoneNumberOTP = () => {
       await auth().currentUser?.reload();
 
       // TODO: Would be nice if this was refactored to requiresAdditionalDetails
-      const completedUserDetailsProcess = await hasUserDetails.mutateAsync();
+      const completedUserDetailsFlow = await hasUserDetails.mutateAsync();
 
-      completedUserDetailsProcess
+      completedUserDetailsFlow
         ? router.replace("/(app)/(bottom-tabs)/profile")
         : router.replace("/user-info/welcome");
     } catch (err) {
@@ -119,6 +119,7 @@ const PhoneNumberOTP = () => {
     };
 
     void sendCode();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -134,27 +135,26 @@ const PhoneNumberOTP = () => {
 
   const renderButtonContent = () => {
     if (isCheckingCode || isSendingCode) {
-      return <Spinner size="large" color="$background" />;
+      return <Spinner size="small" color="$background"  />;
     }
 
     if (cooldown !== 0) {
       return (
-        <Text fontWeight="500" fontSize={16} color="lightgray">
+        <Text fontWeight="600" fontSize={16} color="lightgray">
           Resend in {cooldown}s
         </Text>
       );
     }
 
     return (
-      <Text fontWeight="500" fontSize={16} color="black">
+      <Text fontWeight="600" fontSize={16} color="black">
         Send new code
       </Text>
     );
   };
 
   const buttonDisabled = buttonIsDisabled || isCheckingCode || isSendingCode;
-  const buttonPressHandler =
-    cooldown === 0 && !buttonDisabled ? resendCode : undefined;
+  const onPress = cooldown === 0 && !buttonDisabled ? resendCode : undefined;
 
   return (
     <KeyboardAvoidingView
@@ -187,9 +187,11 @@ const PhoneNumberOTP = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
+                height: 50, // fixed height for the input container
               }}
               pinInputStyle={{
                 width: 36,
+                height: "100%",
                 marginHorizontal: 4,
                 borderColor: "gray",
                 justifyContent: "center",
@@ -226,11 +228,11 @@ const PhoneNumberOTP = () => {
 
         <View alignSelf="stretch" marginTop="auto">
           <Button
-            animation="100ms"
-            pressStyle={{ scale: 0.95, backgroundColor: "white" }}
-            onPress={buttonPressHandler}
-            height="$4"
-            borderRadius="$6"
+            onPress={onPress}
+            borderWidth={0}
+            pressStyle={{
+              backgroundColor: "$gray12",
+            }}
             backgroundColor={buttonDisabled ? "gray" : "white"}
             disabled={buttonDisabled}
           >

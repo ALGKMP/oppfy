@@ -1,4 +1,6 @@
 import React from "react";
+import { TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type {
   BottomTabNavigationOptions,
   BottomTabNavigationProp,
@@ -15,30 +17,37 @@ interface BackOption {
   title: string;
 }
 
+type Options = NativeStackNavigationOptions | BottomTabNavigationOptions;
+
+type Navigation =
+  | NativeStackNavigationProp<ParamListBase, string, undefined>
+  | BottomTabNavigationProp<ParamListBase, string, undefined>;
+
 interface HeaderProps {
-  navigation: BottomTabNavigationProp<ParamListBase, string, undefined>;
-  options: BottomTabNavigationOptions;
   back?: BackOption;
+  options: Options;
+  navigation: Navigation;
 }
 
-const BottomTabHeader = ({ navigation, options, back }: HeaderProps) => {
+const StackHeader = ({ navigation, options, back }: HeaderProps) => {
   return (
     <XStack
-      padding="$6"
+      paddingBottom="$4"
+      paddingHorizontal="$6"
+      backgroundColor="black"
       alignItems="center"
       justifyContent="space-between"
-      style={{ backgroundColor: "black" }}
     >
       <View width="$4" alignItems="flex-start">
         {options.headerLeft
-          ? options.headerLeft({
-              tintColor: options.headerTintColor,
-              pressColor: options.headerPressColor,
-              pressOpacity: options.headerPressOpacity,
-              labelVisible: options.headerLeftLabelVisible,
-            })
+          ? options.headerLeft({ canGoBack: navigation.canGoBack() })
           : back && (
-              <ChevronLeft size="$1.5" onPress={() => navigation.goBack()} />
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <ChevronLeft size="$1.5" />
+              </TouchableOpacity>
             )}
       </View>
 
@@ -57,14 +66,10 @@ const BottomTabHeader = ({ navigation, options, back }: HeaderProps) => {
 
       <View width="$4" alignItems="flex-end">
         {options.headerRight &&
-          options.headerRight({
-            tintColor: options.headerTintColor,
-            pressColor: options.headerPressColor,
-            pressOpacity: options.headerPressOpacity,
-          })}
+          options.headerRight({ canGoBack: navigation.canGoBack() })}
       </View>
     </XStack>
   );
 };
 
-export default BottomTabHeader;
+export default StackHeader;
