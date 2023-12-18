@@ -63,11 +63,9 @@ const ProfileLayout = () => {
         <Stack.Screen
           name="delete-account"
           options={{
-            title: "Delete Account",
-            presentation: "modal",
+            header: () => null,
+            presentation: "fullScreenModal",
             animation: "slide_from_bottom",
-            headerLeft: () => null,
-            headerRight: () => null,
           }}
         />
 
