@@ -1,5 +1,9 @@
 import React from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Link, useNavigation, useRootNavigation, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
@@ -13,15 +17,27 @@ import {
   YStack,
 } from "tamagui";
 
-import { StackHeader } from "~/components/Headers";
+import { Header, StackHeader } from "~/components/Headers";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 
 const OnboardingLayout = () => {
   const { signOut } = useSession();
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <View flex={1} backgroundColor="black">
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: "black",
+        // Paddings to handle safe area
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+      }}
+    >
       <Stack
         screenOptions={{
           headerTitle: () => (
@@ -35,11 +51,7 @@ const OnboardingLayout = () => {
             </Text>
           ),
           header: ({ navigation, options, back }) => (
-            <StackHeader
-              navigation={navigation}
-              options={options}
-              back={back}
-            />
+            <Header navigation={navigation} options={options} back={back} />
           ),
         }}
       >

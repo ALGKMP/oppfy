@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import type { LayoutChangeEvent, TextInput } from "react-native";
 import { Dimensions, Modal, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import parsePhoneNumberFromString, {
@@ -53,6 +54,8 @@ const PhoneNumberInput = forwardRef<
   PhoneNumberInputHandles,
   PhoneNumberInputProps
 >((props, ref) => {
+  const insets = useSafeAreaInsets();
+
   const [countryCode, setCountryCode] = useState<CountryCode>("US");
   const [dialingCode, setDialingCode] = useState("+1");
 
@@ -151,23 +154,43 @@ const PhoneNumberInput = forwardRef<
         visible={isModalVisible}
         onRequestClose={() => setIsModalVisible(false)}
       >
-        <View {...props.modalContainerStyle}>
+        <View
+          {...props.modalContainerStyle}
+          style={{
+            flex: 1,
+            backgroundColor: "black",
+            // Paddings to handle safe area
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom,
+            paddingLeft: insets.left,
+            paddingRight: insets.right,
+          }}
+        >
           <XStack
-            padding="$6"
+            paddingBottom="$4"
+            paddingHorizontal="$6"
+            backgroundColor="black"
             alignItems="center"
             justifyContent="space-between"
           >
-            <View width="$4">
-              <ChevronLeft
-                size="$1.5"
+            <View width="$4" alignItems="flex-start">
+              <TouchableOpacity
                 onPress={() => setIsModalVisible(false)}
-              />
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <ChevronLeft size="$1.5" />
+              </TouchableOpacity>
             </View>
-            <Text fontSize={16} fontWeight="600">
-              Select Country
-            </Text>
-            <View width="$4" />
+
+            <View>
+              <Text fontSize={16} fontWeight="600">
+                Select Country
+              </Text>
+            </View>
+
+            <View width="$4" alignItems="flex-end" />
           </XStack>
+
           <CountriesFlashList onSelect={handleCountrySelect} />
         </View>
       </Modal>

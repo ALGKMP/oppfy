@@ -1,4 +1,3 @@
-import { SectionListData } from "react-native";
 import type { CountryCode } from "libphonenumber-js";
 
 export interface CountryData {

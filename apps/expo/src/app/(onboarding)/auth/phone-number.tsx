@@ -104,20 +104,17 @@ const PhoneNumber = () => {
         </YStack>
 
         <Button
-          animation="100ms"
-          pressStyle={{
-            scale: 0.95,
-            backgroundColor: "white",
-          }}
           onPress={onPress}
-          height="$4"
-          borderRadius="$6"
+          borderWidth={0}
+          pressStyle={{
+            backgroundColor: "$gray12",
+          }}
           backgroundColor={phoneNumberIsValid ? "white" : "gray"}
           disabled={!phoneNumberIsValid}
         >
           <Text
             color={phoneNumberIsValid ? "black" : "lightgray"}
-            fontWeight="500"
+            fontWeight="600"
             fontSize={16}
           >
             Next

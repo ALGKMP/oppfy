@@ -1,7 +1,10 @@
 import { useEffect } from "react";
-import { Pressable } from "react-native";
+import { Pressable, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Redirect, SplashScreen, useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
+import { BottomTabProps } from "@react-navigation/bottom-tabs";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { getTokens } from "@tamagui/core";
 import {
   Camera,
@@ -13,30 +16,35 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, Text, View, XStack } from "tamagui";
 
+import { Header } from "~/components/Headers";
 import BottomTabsHeader from "~/components/Headers/BottomTabHeader";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
+import { TabBar } from "~/components/TabBars";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View flex={1} backgroundColor="black">
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: "black",
+        // Paddings to handle safe area
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+      }}
+    >
       <BottomTabs
+        tabBar={(props) => <TabBar {...props} />}
         screenOptions={{
-          tabBarShowLabel: false,
           tabBarHideOnKeyboard: true,
-          tabBarStyle: {
-            backgroundColor: "black",
-            borderTopColor: getTokens().color.gray1Dark.val,
-            height: 60,
-            paddingTop: 10,
-            paddingBottom: 10,
-            borderTopWidth: 1,
-          },
           header: ({ navigation, options }) => (
-            <BottomTabsHeader navigation={navigation} options={options} />
+            <Header navigation={navigation} options={options} />
           ),
         }}
       >
