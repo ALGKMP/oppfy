@@ -21,23 +21,6 @@
       "persistent": true,
       "cache": false
     },
-    "package": {
-      "dependsOn": [
-      ],
-      "cache": false
-    },
-    "deploy:staging": {
-      "dependsOn": [
-        "package"
-      ],
-      "cache": false
-    },
-    "deploy:production": {
-      "dependsOn": [
-        "package"
-      ],
-      "cache": false
-    },
     "format": {
       "outputs": ["node_modules/.cache/.prettiercache"],
       "outputMode": "new-only"

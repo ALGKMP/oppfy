@@ -36,5 +36,5 @@ const serverlessConfiguration: AWS = {
   },
 };
 
-// ! Serverless framework does not support es modules yet
+// ! Lib within serverless doesn't support es modules
 module.exports = serverlessConfiguration;

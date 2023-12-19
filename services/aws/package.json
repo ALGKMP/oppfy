@@ -8,9 +8,9 @@
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit",
     "dev": "serverless offline start",
-    "deploy:staging": "serverless deploy --stage staging",
-    "deploy:production": "serverless deploy --stage production",
-    "package": "serverless package"
+    "package": "serverless package",
+    "deploy-staging": "serverless deploy --stage staging",
+    "deploy-production": "serverless deploy --stage production"
   },
   "dependencies": {
     "@acme/serverless-helpers": "workspace:^0.1.0"
