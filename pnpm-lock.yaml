@@ -24,6 +24,7 @@ importers:
       '@acme/tailwind-config': workspace:^0.1.0
       '@acme/tsconfig': workspace:^0.1.0
       '@acme/types': workspace:^0.1.0
+      '@acme/utils': workspace:^0.1.0
       '@babel/core': ^7.23.2
       '@babel/preset-env': ^7.23.2
       '@babel/runtime': ^7.23.2
@@ -89,6 +90,7 @@ importers:
       uuid: 3.4.0
       zod: ^3.22.2
     dependencies:
+      '@acme/utils': link:../../packages/utils
       '@expo/metro-config': 0.10.7
       '@expo/react-native-action-sheet': 4.0.1_react@18.2.0
       '@hookform/resolvers': 3.3.2_react-hook-form@7.49.2
@@ -231,6 +233,7 @@ importers:
       '@acme/lambda': workspace:^0.1.0
       '@acme/prettier-config': workspace:^0.1.0
       '@acme/tsconfig': workspace:^0.1.0
+      '@acme/utils': workspace:^0.1.0
       '@aws-sdk/s3-request-presigner': ^3.441.0
       '@trpc/client': ^10.34.0
       '@trpc/server': ^10.34.0
@@ -246,6 +249,7 @@ importers:
     dependencies:
       '@acme/db': link:../db
       '@acme/lambda': link:../lambda
+      '@acme/utils': link:../utils
       '@aws-sdk/s3-request-presigner': 3.476.0
       '@trpc/client': 10.44.1_@trpc+server@10.44.1
       '@trpc/server': 10.44.1
@@ -273,6 +277,7 @@ importers:
       dotenv-cli: ^7.3.0
       eslint: ^8.53.0
       prettier: ^3.1.0
+      prettier-plugin-prisma: ^5.0.0
       prisma: ^5.6.0
       typescript: ^5.2.2
     dependencies:
@@ -285,6 +290,7 @@ importers:
       dotenv-cli: 7.3.0
       eslint: 8.56.0
       prettier: 3.1.1
+      prettier-plugin-prisma: 5.0.0_prettier@3.1.1
       prisma: 5.7.1
       typescript: 5.3.3
 
@@ -351,6 +357,23 @@ importers:
       '@acme/tsconfig': workspace:^0.1.0
       eslint: ^8.53.0
       typescript: ^5.2.2
+    devDependencies:
+      '@acme/eslint-config': link:../../tooling/eslint
+      '@acme/prettier-config': link:../../tooling/prettier
+      '@acme/tsconfig': link:../../tooling/typescript
+      eslint: 8.56.0
+      typescript: 5.3.3
+
+  packages/utils:
+    specifiers:
+      '@acme/eslint-config': workspace:^0.2.0
+      '@acme/prettier-config': workspace:^0.1.0
+      '@acme/tsconfig': workspace:^0.1.0
+      date-fns: ^3.0.1
+      eslint: ^8.53.0
+      typescript: ^5.2.2
+    dependencies:
+      date-fns: 3.0.1
     devDependencies:
       '@acme/eslint-config': link:../../tooling/eslint
       '@acme/prettier-config': link:../../tooling/prettier
@@ -4089,6 +4112,10 @@ packages:
     resolution: {integrity: sha512-eDlswr3a1m5z9D/55Iyt/nZqS5UpD+DZ9MooBB3hvrcPhDQrcf9m4Tl7buy4mvAtrubQ626ECtb8c6L/f7rGSQ==}
     dependencies:
       '@prisma/debug': 5.7.1
+
+  /@prisma/prisma-schema-wasm/4.17.0-26.6b0aef69b7cdfc787f822ecd7cdc76d5f1991584:
+    resolution: {integrity: sha512-JFdsnSgBPN8reDTLOI9Vh/6ccCb2aD1LbY/LWQnkcIgNo6IdpzvuM+qRVbBuA6IZP2SdqQI8Lu6RL2P8EFBQUA==}
+    dev: true
 
   /@protobufjs/aspromise/1.1.2:
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -8941,6 +8968,10 @@ packages:
     resolution: {integrity: sha512-MZd3VlchQkp8rdend6vrx7MmVDJzSNTBvghvKjirLkD+WTChA3KUf0jkE68Q4UyctNqI11zZO9/x2Yx+ub5Cvg==}
     engines: {node: '>= 14'}
     dev: true
+
+  /date-fns/3.0.1:
+    resolution: {integrity: sha512-cr9igCUa0QSqgAMj7JOrYTY6Nh1rmyGrFDko7ADqfmaQqP/I2N4rlfrLl7AWuzDaoIpz6MNjoEcTPzgZYIrhnA==}
+    dev: false
 
   /dayjs/1.11.10:
     resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
@@ -14688,6 +14719,16 @@ packages:
     resolution: {integrity: sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==}
     engines: {node: '>=4'}
     dev: false
+
+  /prettier-plugin-prisma/5.0.0_prettier@3.1.1:
+    resolution: {integrity: sha512-jTJV04D9+yF7ziOOMs7CJe4ijgAH7DEGjt0SAWAToGNRy1H6BEhvcKA2UQH6gC6KVW5zeeOSAvsoiDDTt9oKXg==}
+    engines: {node: '>=14', npm: '>=8'}
+    peerDependencies:
+      prettier: '>=2 || >=3'
+    dependencies:
+      '@prisma/prisma-schema-wasm': 4.17.0-26.6b0aef69b7cdfc787f822ecd7cdc76d5f1991584
+      prettier: 3.1.1
+    dev: true
 
   /prettier-plugin-tailwindcss/0.5.9_gvheyyfozfiqaf6n5hfxaiq6sm:
     resolution: {integrity: sha512-9x3t1s2Cjbut2QiP+O0mDqV3gLXTe2CgRlQDgucopVkUdw26sQi53p/q4qvGxMLBDfk/dcTV57Aa/zYwz9l8Ew==}

@@ -12,14 +12,15 @@ model VerificationToken {
     identifier String
     token      String   @unique
     expires    DateTime
+    createdAt  DateTime @default(now())
 
     @@unique([identifier, token])
 }
 
 model User {
-    id                  String               @id @unique // Firebase UID
+    id                  String               @id
     firstName           String?
-    dateOfBirth         String?
+    dateOfBirth         DateTime?
     image               String?
     bio                 String?
     profilePhoto        ProfilePhoto?
@@ -28,6 +29,8 @@ model User {
     likedPosts          Like[]
     comments            Comment[]
     notificationSetting NotificationSetting?
+    createdAt           DateTime             @default(now())
+    updatedAt           DateTime             @updatedAt
 }
 
 model ProfilePhoto {
@@ -37,11 +40,16 @@ model ProfilePhoto {
     media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
     mediaId     String   @unique
     lastUpdated DateTime
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([userId])
+    @@index([mediaId])
 }
 
 model Post {
     id         String     @id @default(cuid())
-    datePosted DateTime
+    datePosted DateTime   @default(now())
     author     User       @relation(fields: [authorId], references: [id], name: "postsOfOthers", onDelete: Cascade)
     authorId   String
     tags       Tag[]
@@ -50,18 +58,25 @@ model Post {
     caption    String?
     postStats  PostStats?
     comments   Comment[]
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+    Like       Like[]
 
     @@index([authorId])
     @@index([mediaId])
 }
 
 model Tag {
-    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId String @unique
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId String @unique
+    id        String   @id @default(cuid())
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    @@id([postId, userId])
+    @@index([postId, userId]) // Composite index for postId and userId
+    @@index([userId])
 }
 
 model Media {
@@ -69,8 +84,10 @@ model Media {
     type         MediaTypes
     objectKey    String        @unique
     lastUpdated  DateTime?
-    ProfilePhoto ProfilePhoto?
-    Post         Post?
+    profilePhoto ProfilePhoto?
+    post         Post?
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
 }
 
 enum MediaTypes {
@@ -79,58 +96,54 @@ enum MediaTypes {
 }
 
 model PostStats {
-    id        String @id @default(cuid())
+    id        String   @id @default(cuid())
     likeCount Int
     views     Int
-    likes     Likes?
-    post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId    String @unique
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId    String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@index([postId])
 }
 
-// Had to do this to make likes optional in PostStats
-model Likes {
-    id          String    @id @default(cuid())
-    likes       Like[]
-    views       Int
-    postStats   PostStats @relation(fields: [postStatsId], references: [id], onDelete: Cascade)
-    postStatsId String    @unique
-
-    @@index([postStatsId])
-}
-
 model Like {
-    id      String @id @default(cuid())
-    likedBy User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId  String
-    Likes   Likes  @relation(fields: [LikesId], references: [id], onDelete: Cascade)
-    LikesId String @unique
+    id        String   @id @default(cuid())
+    likedBy   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId    String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
+    @@index([postId])
     @@index([userId])
 }
 
 model Comment {
-    id         String    @id @default(cuid())
-    author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-    authorId   String
-    post       Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId     String
-    comment    String
-    datePosted DateTime?
+    id        String   @id @default(cuid())
+    author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    authorId  String
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    postId    String
+    comment   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@index([authorId])
     @@index([postId])
 }
 
 model NotificationSetting {
-    id             String  @id @default(cuid())
-    userId         String  @unique
-    user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    posts          Boolean @default(true)
-    mentions       Boolean @default(true)
-    comments       Boolean @default(true)
-    friendRequests Boolean @default(true)
+    id             String   @id @default(cuid())
+    user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId         String   @unique
+    posts          Boolean  @default(true)
+    mentions       Boolean  @default(true)
+    comments       Boolean  @default(true)
+    friendRequests Boolean  @default(true)
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
 
     @@index([userId])
 }

@@ -45,7 +45,8 @@ const BirthdateInput = forwardRef<BirthdateInputHandles, BirthdateInputProps>(
 
     const getDisplayTextComponents = () => {
       const chars = effectiveValue.split("");
-      const format = ["D", "D", "/", "M", "M", "/", "Y", "Y", "Y", "Y"];
+      // const format = ["D", "D", "/", "M", "M", "/", "Y", "Y", "Y", "Y"];
+      const format = ["M", "M", "/", "D", "D", "/", "Y", "Y", "Y", "Y"];
       let j = 0;
       const result = [];
 

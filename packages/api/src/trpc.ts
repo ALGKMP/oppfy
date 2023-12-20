@@ -43,9 +43,10 @@ interface CreateContextOptions {
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    session: opts.session,
-    prisma,
     s3,
+    db: prisma,
+    auth: auth,
+    session: opts.session,
   };
 };
 
@@ -134,7 +135,7 @@ const t = initTRPC
 export const createTRPCRouter = t.router;
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.uid) {
+  if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({

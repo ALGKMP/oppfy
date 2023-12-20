@@ -150,9 +150,7 @@ export const mediaRouter = createTRPCRouter({
         },
       };
 
-      const prismaResponse = await ctx.prisma.post.create(
-        prismaPostCreateInput,
-      );
+      const prismaResponse = await ctx.db.post.create(prismaPostCreateInput);
       console.log(`Created Prisma Post : ${prismaResponse.id}`);
     }),
 
@@ -182,7 +180,7 @@ export const mediaRouter = createTRPCRouter({
         },
       };
 
-      const prismaResponse = await ctx.prisma.media.delete(prismaDeleteInput);
+      const prismaResponse = await ctx.db.media.delete(prismaDeleteInput);
 
       if (!prismaResponse) {
         throw new TRPCError({
@@ -198,7 +196,7 @@ export const mediaRouter = createTRPCRouter({
 
       if (!s3Response.DeleteMarker) {
         // If the file was successfully deleted from S3, but not from the database, re-create the database record
-        await ctx.prisma.media.create(prismaCreateInput);
+        await ctx.db.media.create(prismaCreateInput);
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -235,7 +233,7 @@ export const mediaRouter = createTRPCRouter({
       );
       if (!s3Response) {
         // Delete the record from the database if the file was not found in S3
-        await ctx.prisma.media.delete(prismaDeleteInput);
+        await ctx.db.media.delete(prismaDeleteInput);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error retrieving file from S3.",
@@ -253,7 +251,7 @@ export const mediaRouter = createTRPCRouter({
         where: { id: postId },
         include: { media: true },
       };
-      const prismaPostResponse = await ctx.prisma.post.findUnique(
+      const prismaPostResponse = await ctx.db.post.findUnique(
         prismaPostFindUniqueInput,
       );
       if (!prismaPostResponse) {
@@ -267,7 +265,7 @@ export const mediaRouter = createTRPCRouter({
       const prismaMediaFindUniqueInput: Prisma.MediaFindUniqueArgs = {
         where: { id: prismaPostResponse.mediaId },
       };
-      const prismaMediaResponse = await ctx.prisma.media.findUnique(
+      const prismaMediaResponse = await ctx.db.media.findUnique(
         prismaMediaFindUniqueInput,
       );
       if (!prismaMediaResponse) {
@@ -297,7 +295,7 @@ export const mediaRouter = createTRPCRouter({
       );
       if (!s3Response) {
         // Delete the record from the database if the file was not found in S3
-        await ctx.prisma.media.delete(prismaDeleteInput);
+        await ctx.db.media.delete(prismaDeleteInput);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Error retrieving file from S3.",

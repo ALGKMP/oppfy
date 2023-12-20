@@ -17,7 +17,6 @@ import {
 import { Button, Text, View, XStack } from "tamagui";
 
 import { Header } from "~/components/Headers";
-import BottomTabsHeader from "~/components/Headers/BottomTabHeader";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { TabBar } from "~/components/TabBars";
 import { BottomTabs } from "~/layouts";

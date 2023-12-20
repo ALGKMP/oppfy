@@ -5,22 +5,12 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import { api } from "~/utils/api";
 
-type SignOutOptions =
-  | {
-      redirect: string;
-      replace?: boolean;
-    }
-  | {
-      redirect?: never;
-      replace?: never;
-    };
-
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
   isLoading: boolean;
   isSignedIn: boolean;
+  signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
-  signOut: (options?: SignOutOptions) => Promise<void>;
   signInWithPhoneNumber: (
     phoneNumber: string,
   ) => Promise<FirebaseAuthTypes.ConfirmationResult | null>;
@@ -72,14 +62,13 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     return await confirmationResult.confirm(otp);
   };
 
-  const signOut = async ({ redirect, replace = true }: SignOutOptions = {}) => {
+  const signOut = async () => {
     await auth().signOut();
-    redirect && router[replace ? "replace" : "push"](redirect);
   };
 
   const deleteAccount = async () => {
     await deleteUser.mutateAsync();
-    await auth().currentUser?.delete();
+    await user?.reload();
   };
 
   return (

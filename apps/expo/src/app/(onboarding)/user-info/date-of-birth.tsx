@@ -9,12 +9,21 @@ import { useRouter } from "expo-router";
 import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
+import { Date } from "@acme/utils";
+
 import { BirthdateInput } from "~/components/Inputs";
 import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
 
 const schemaValidation = z.object({
-  dateOfBirth: z.string().length(8),
+  dateOfBirth: z.string().refine(
+    (date) =>
+      date.length === 8 && // needed to short-circuit next check
+      new Date.AgeChecker(Date.convertToDateObject(date, "MMDDYYYY"))
+        .isAtLeast(13)
+        .isAtMost(100)
+        .checkValid(),
+  ),
 });
 
 const DateOfBirth = () => {
@@ -32,7 +41,7 @@ const DateOfBirth = () => {
 
   const onPress = async () => {
     await updateUserDetails.mutateAsync({
-      dateOfBirth,
+      dateOfBirth: Date.convertToDateObject(dateOfBirth, "MMDDYYYY"),
     });
 
     router.replace("/(app)/(bottom-tabs)/profile");
@@ -63,7 +72,6 @@ const DateOfBirth = () => {
             <BirthdateInput
               ref={dateOfBirthInputRef}
               value={dateOfBirth}
-              onBlur={() => {}}
               onChange={(value) => setDateOfBirth(value)}
               onLayout={() => dateOfBirthInputRef.current?.focus()}
               containerStyle={{

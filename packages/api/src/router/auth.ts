@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { Date } from "@acme/utils";
+
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
@@ -14,7 +16,7 @@ export const authRouter = createTRPCRouter({
       const { firebaseUid } = input;
 
       try {
-        await ctx.prisma.user.create({
+        await ctx.db.user.create({
           data: {
             id: firebaseUid,
           },
@@ -28,7 +30,7 @@ export const authRouter = createTRPCRouter({
     }),
   getUser: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.prisma.user.findUniqueOrThrow({
+      return await ctx.db.user.findUniqueOrThrow({
         where: { id: ctx.session.uid },
       });
     } catch (_err) {
@@ -41,11 +43,16 @@ export const authRouter = createTRPCRouter({
   }),
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      console.log("deleting user", ctx.session.uid);
-      await ctx.prisma.user.delete({
-        where: { id: ctx.session.uid },
+      // transaction to ensure an atomic operation
+      await ctx.db.$transaction(async (db) => {
+        await db.user.delete({
+          where: { id: ctx.session.uid },
+        });
+
+        await ctx.auth.deleteUser(ctx.session.uid);
       });
     } catch (_err) {
+      console.log(_err);
       throw new TRPCError({
         code: "NOT_FOUND",
         // message: "User not found",
@@ -53,16 +60,15 @@ export const authRouter = createTRPCRouter({
       });
     }
   }),
-  hasUserDetails: protectedProcedure.mutation(async ({ ctx, input }) => {
+  hasUserDetails: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      const { firstName, dateOfBirth } =
-        await ctx.prisma.user.findUniqueOrThrow({
-          where: { id: ctx.session.uid },
-          select: {
-            firstName: true,
-            dateOfBirth: true,
-          },
-        });
+      const { firstName, dateOfBirth } = await ctx.db.user.findUniqueOrThrow({
+        where: { id: ctx.session.uid },
+        select: {
+          firstName: true,
+          dateOfBirth: true,
+        },
+      });
 
       return !!firstName && !!dateOfBirth;
     } catch (_err) {
@@ -76,12 +82,17 @@ export const authRouter = createTRPCRouter({
     .input(
       z.object({
         firstName: z.string().min(1).optional(),
-        dateOfBirth: z.string().optional(),
+        dateOfBirth: z
+          .date()
+          .refine((date) =>
+            new Date.AgeChecker(date).isAtLeast(13).isAtMost(100).checkValid(),
+          )
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input: userDetails }) => {
       try {
-        await ctx.prisma.user.update({
+        await ctx.db.user.update({
           where: { id: ctx.session.uid },
           data: {
             ...userDetails,
