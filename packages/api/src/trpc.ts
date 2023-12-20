@@ -70,7 +70,7 @@ export const createTRPCContext = async ({
   if (token) {
     try {
       session = await auth.verifyIdToken(token);
-    } catch (_e) {
+    } catch (_err) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         cause: "Invalid Firebase Token",

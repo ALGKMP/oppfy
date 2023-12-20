@@ -8,7 +8,6 @@ import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
   auth: authRouter,
-  // profilePhoto: profilePhotoRouter,
   media: mediaRouter,
   notifications: notificationsRouter,
 });
