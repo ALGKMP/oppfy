@@ -81,7 +81,8 @@ export const authRouter = createTRPCRouter({
   updateUserDetails: protectedProcedure
     .input(
       z.object({
-        firstName: z.string().min(1).optional(),
+        firstName: z.string().min(2).optional(),
+        username: z.string().min(1).optional(),
         dateOfBirth: z
           .date()
           .refine((date) =>

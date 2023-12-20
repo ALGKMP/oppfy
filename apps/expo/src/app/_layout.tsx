@@ -31,6 +31,26 @@ import SpartanMedium from "@assets/fonts/Spartan/Spartan-Medium.ttf";
 import SpartanRegular from "@assets/fonts/Spartan/Spartan-Regular.ttf";
 import SpartanSemiBold from "@assets/fonts/Spartan/Spartan-SemiBold.ttf";
 import SpartanThin from "@assets/fonts/Spartan/Spartan-Thin.ttf";
+import {
+  ChivoMono_100Thin,
+  ChivoMono_100Thin_Italic,
+  ChivoMono_200ExtraLight,
+  ChivoMono_200ExtraLight_Italic,
+  ChivoMono_300Light,
+  ChivoMono_300Light_Italic,
+  ChivoMono_400Regular,
+  ChivoMono_400Regular_Italic,
+  ChivoMono_500Medium,
+  ChivoMono_500Medium_Italic,
+  ChivoMono_600SemiBold,
+  ChivoMono_600SemiBold_Italic,
+  ChivoMono_700Bold,
+  ChivoMono_700Bold_Italic,
+  ChivoMono_800ExtraBold,
+  ChivoMono_800ExtraBold_Italic,
+  ChivoMono_900Black,
+  ChivoMono_900Black_Italic,
+} from "@expo-google-fonts/chivo-mono";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -45,24 +65,24 @@ import SessionProvider from "../contexts/SessionsContext";
 
 const RootLayout = () => {
   const [fontsLoaded] = useFonts({
-    "ChivoMono-Thin": ChivoMonoThin,
-    "ChivoMono-ThinItalic": ChivoMonoThinItalic,
-    "ChivoMono-ExtraLight": ChivoMonoExtraLight,
-    "ChivoMono-ExtraLightItalic": ChivoMonoExtraLightItalic,
-    "ChivoMono-Light": ChivoMonoLight,
-    "ChivoMono-LightItalic": ChivoMonoLightItalic,
-    "ChivoMono-Regular": ChivoMonoRegular,
-    "ChivoMono-RegularItalic": ChivoMonoRegularItalic,
-    "ChivoMono-Medium": ChivoMonoMedium,
-    "ChivoMono-MediumItalic": ChivoMonoMediumItalic,
-    "ChivoMono-SemiBold": ChivoMonoSemiBold,
-    "ChivoMono-SemiBoldItalic": ChivoMonoSemiBoldItalic,
-    "ChivoMono-Bold": ChivoMonoBold,
-    "ChivoMono-BoldItalic": ChivoMonoBoldItalic,
-    "ChivoMono-ExtraBold": ChivoMonoExtraBold,
-    "ChivoMono-ExtraBoldItalic": ChivoMonoExtraBoldItalic,
-    "ChivoMono-Black": ChivoMonoBlack,
-    "ChivoMono-BlackItalic": ChivoMonoBlackItalic,
+    "ChivoMono-Thin": ChivoMono_100Thin,
+    "ChivoMono-ThinItalic": ChivoMono_100Thin_Italic,
+    "ChivoMono-ExtraLight": ChivoMono_200ExtraLight,
+    "ChivoMono-ExtraLightItalic": ChivoMono_200ExtraLight_Italic,
+    "ChivoMono-Light": ChivoMono_300Light,
+    "ChivoMono-LightItalic": ChivoMono_300Light_Italic,
+    "ChivoMono-Regular": ChivoMono_400Regular,
+    "ChivoMono-RegularItalic": ChivoMono_400Regular_Italic,
+    "ChivoMono-Medium": ChivoMono_500Medium,
+    "ChivoMono-MediumItalic": ChivoMono_500Medium_Italic,
+    "ChivoMono-SemiBold": ChivoMono_600SemiBold,
+    "ChivoMono-SemiBoldItalic": ChivoMono_600SemiBold_Italic,
+    "ChivoMono-Bold": ChivoMono_700Bold,
+    "ChivoMono-BoldItalic": ChivoMono_700Bold_Italic,
+    "ChivoMono-ExtraBold": ChivoMono_800ExtraBold,
+    "ChivoMono-ExtraBoldItalic": ChivoMono_800ExtraBold_Italic,
+    "ChivoMono-Black": ChivoMono_900Black,
+    "ChivoMono-BlackItalic": ChivoMono_900Black_Italic,
   });
 
   if (!fontsLoaded) {

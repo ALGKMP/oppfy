@@ -22,6 +22,7 @@ import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 
 const OnboardingLayout = () => {
+  const router = useRouter();
   const { signOut } = useSession();
 
   const insets = useSafeAreaInsets();
@@ -145,9 +146,10 @@ const OnboardingLayout = () => {
                           <Button
                             size="$3"
                             themeInverse
-                            onPress={() =>
-                              signOut({ redirect: "/(onboarding)" })
-                            }
+                            onPress={() => {
+                              void signOut();
+                              router.replace("/(onboarding)");
+                            }}
                           >
                             Leave
                           </Button>
