@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import type {
+  TextInput} from "react-native";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  TextInput,
+  SafeAreaView
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Button, Text, View, YStack } from "tamagui";

@@ -45,8 +45,7 @@ const Camera = () => {
     console.log("image data: ", result);
 
     if (
-      result.assets != undefined &&
-      result.assets[0]?.uri &&
+      result.assets?.[0]?.uri &&
       result.assets[0]?.type
     ) {
       setImage(result.assets[0].uri);

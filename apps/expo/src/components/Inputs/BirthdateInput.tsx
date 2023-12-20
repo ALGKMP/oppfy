@@ -5,7 +5,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { LayoutChangeEvent, StyleSheet, TextInput } from "react-native";
+import type { LayoutChangeEvent} from "react-native";
+import { StyleSheet, TextInput } from "react-native";
 import type { StackProps, TextProps } from "tamagui";
 import { Text, View, XStack } from "tamagui";
 

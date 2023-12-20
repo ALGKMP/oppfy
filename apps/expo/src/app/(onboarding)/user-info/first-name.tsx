@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, TextInput } from "react-native";
+import type { TextInput } from "react-native";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Button, debounce, Input, Text, View, YStack } from "tamagui";
 import * as z from "zod";
