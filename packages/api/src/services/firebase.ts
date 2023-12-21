@@ -1,4 +1,4 @@
-import admin, { credential } from "firebase-admin";
+import admin from "firebase-admin";
 import type { ServiceAccount } from "firebase-admin/app";
 
 import serviceKey from "../../admin-service-account.json";

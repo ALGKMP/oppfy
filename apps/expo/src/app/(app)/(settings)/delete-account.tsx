@@ -22,10 +22,7 @@ const DeleteAccount = () => {
 
   const { deleteAccount } = useSession();
 
-  const onPress = async () => {
-    await deleteAccount();
-    router.push("/(onboarding)");
-  };
+  const onPress = async () => await deleteAccount();
 
   return (
     <KeyboardAvoidingView

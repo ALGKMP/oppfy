@@ -9,11 +9,7 @@ import { Dimensions, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronLeft } from "@tamagui/lucide-icons";
-import parsePhoneNumberFromString, {
-  AsYouType,
-  getExampleNumber,
-  isValidNumber,
-} from "libphonenumber-js";
+import { AsYouType, getExampleNumber } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
 import examples from "libphonenumber-js/examples.mobile.json";
 import { Button, Input, Text, useTheme, View, XStack } from "tamagui";
@@ -90,11 +86,12 @@ const PhoneNumberInput = forwardRef<
       setRawInput(formatted);
     }
 
-    props.onChange &&
+    if (props.onChange) {
       props.onChange({
         dialingCode,
         phoneNumber: unformattedNumbers,
       });
+    }
   };
 
   const handleCountrySelect = ({
