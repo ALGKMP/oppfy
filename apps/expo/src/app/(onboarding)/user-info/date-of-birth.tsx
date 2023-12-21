@@ -45,7 +45,7 @@ const DateOfBirth = () => {
       dateOfBirth: Date.convertToDateObject(dateOfBirth, "MMDDYYYY"),
     });
 
-    router.replace("/(app)/(bottom-tabs)/profile");
+    router.push("/user-info/username");
   };
 
   return (

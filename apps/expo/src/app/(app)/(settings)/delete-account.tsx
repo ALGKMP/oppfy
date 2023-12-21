@@ -22,6 +22,11 @@ const DeleteAccount = () => {
 
   const { deleteAccount } = useSession();
 
+  const onPress = async () => {
+    await deleteAccount();
+    router.push("/(onboarding)");
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -72,7 +77,7 @@ const DeleteAccount = () => {
                 </Text>
               </Button>
               <Button
-                onPress={deleteAccount}
+                onPress={onPress}
                 borderWidth={0}
                 backgroundColor="$gray1"
               >

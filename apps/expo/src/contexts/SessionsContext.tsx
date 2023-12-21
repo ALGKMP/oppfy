@@ -68,7 +68,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const deleteAccount = async () => {
     await deleteUser.mutateAsync();
-    await user?.reload();
   };
 
   return (

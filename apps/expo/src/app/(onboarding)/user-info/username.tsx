@@ -29,7 +29,8 @@ const Username = () => {
       username,
     });
 
-    router.push("/user-info/date-of-birth");
+    router.push("/user-info/profile-picture");
+    // router.replace("/(app)/(bottom-tabs)/profile");
   };
 
   return (
