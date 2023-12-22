@@ -1,5 +1,5 @@
 {
-  "name": "@acme/aws",
+  "name": "@acme/lambdas",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -38,5 +38,3 @@
   },
   "prettier": "@acme/prettier-config"
 }
-
-

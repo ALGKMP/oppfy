@@ -67,10 +67,11 @@ const PhoneNumberOTP = () => {
       const userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
       const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
 
-      isNewUser &&
-        (await createUser.mutateAsync({
+      if (isNewUser) {
+        await createUser.mutateAsync({
           firebaseUid: userCredential.user.uid,
-        }));
+        });
+      }
 
       await auth().currentUser?.reload();
 
@@ -119,7 +120,7 @@ const PhoneNumberOTP = () => {
     };
 
     void sendCode();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -135,7 +136,7 @@ const PhoneNumberOTP = () => {
 
   const renderButtonContent = () => {
     if (isCheckingCode || isSendingCode) {
-      return <Spinner size="small" color="$background"  />;
+      return <Spinner size="small" color="$background" />;
     }
 
     if (cooldown !== 0) {

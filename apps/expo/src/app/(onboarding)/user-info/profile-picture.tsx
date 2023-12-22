@@ -15,7 +15,7 @@ const ProfilePicture: React.FC = () => {
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const updateUserDetails = api.auth.updateUserDetails.useMutation();
 
-  // TODO: Implement S3 bucket upload
+  // TODO: Implement S3 bucket upload - @TONY
   const onSubmit = async () => {
     // await updateUserDetails.mutateAsync({
     //   profilePic,
@@ -33,8 +33,8 @@ const ProfilePicture: React.FC = () => {
       quality: 1,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      setProfilePic(result.assets[0].uri);
+    if (!result.canceled) {
+      setProfilePic(result.assets[0]?.uri ?? null);
     }
   };
 
@@ -58,17 +58,6 @@ const ProfilePicture: React.FC = () => {
           >
             Upload Your Profile Picture
           </Text>
-
-          {/* <YStack space="$3" alignItems="center">
-            {profilePic && (
-              <Image
-                source={{ uri: profilePic } as ImageSourcePropType}
-                style={{ width: 100, height: 100, borderRadius: 50 }}
-              />
-            )}
-            <Circle size="$13" borderWidth={2} borderColor="white" />
-            <Button onPress={handleImagePicking}>Choose Image</Button>
-          </YStack> */}
 
           <YStack
             ai="center"
