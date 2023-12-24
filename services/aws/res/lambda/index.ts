@@ -42,7 +42,7 @@ export const pascalToKebab = (str: string) => {
   );
 };
 
-// TODO: Implement env plugin - https://www.serverless.com/plugins/serverless-dotenv-plugin
+// TODO: we can upload our env vars to lambda through our template.yaml file
 const AWS_ACCESS_KEY_ID = "AKIA5OJS54YNU5J6NZNU";
 const AWS_SECRET_ACCESS_KEY = "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";
 
@@ -124,5 +124,3 @@ export const handler = async (
     }),
   };
 };
-
-export const main = handler;
