@@ -1,5 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { Client as ElasticSearchClient } from "@elastic/elasticsearch";
+import { faker } from "@faker-js/faker";
 import { PrismaClient } from "@prisma/client";
 
 export * from "@prisma/client";
@@ -39,6 +40,17 @@ const elasticSearch = new ElasticSearchClient({
     },
   },
 });
+
+// for (let i = 0; i < 100; i++) {
+//   await prisma.user.create({
+//     data: {
+//       id: faker.string.uuid(),
+//       username: faker.internet.userName(),
+//       firstName: faker.person.firstName(),
+//       dateOfBirth: faker.date.past(),
+//     },
+//   });
+// }
 
 if (process.env.NODE_ENV !== "production") {
   globalForS3.s3 = s3;

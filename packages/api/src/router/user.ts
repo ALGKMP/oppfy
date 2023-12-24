@@ -6,7 +6,13 @@ import { Date } from "@acme/utils";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
-  search: protectedProcedure.query(async ({ ctx: { db } }) => {
-
+  search: protectedProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.user.findMany({
+      where: {
+        username: {
+          contains: 
+        }
+      },
+    });
   }),
 });

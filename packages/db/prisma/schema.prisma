@@ -1,5 +1,6 @@
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -18,13 +19,14 @@ model VerificationToken {
 }
 
 model User {
-    id                  String               @id
-    firstName           String?
-    username            String?
-    dateOfBirth         DateTime?
-    image               String?
-    bio                 String?
-    profilePhoto        ProfilePhoto?
+    id String @id
+
+    username     String?       @unique
+    firstName    String?
+    dateOfBirth  DateTime?
+    bio          String?
+    profilePhoto ProfilePhoto?
+
     postsOfOthers       Post[]               @relation("postsOfOthers")
     tags                Tag[]
     likedPosts          Like[]
