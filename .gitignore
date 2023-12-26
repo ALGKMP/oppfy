@@ -56,3 +56,8 @@ cdk.out/
 
 # prisma
 .prisma
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+
