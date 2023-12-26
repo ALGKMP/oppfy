@@ -21,6 +21,10 @@
       "persistent": true,
       "cache": false
     },
+    "test": {},
+    "test:watch": {
+      "cache": false
+    },
     "package": {
       "dependsOn": [
       ],
