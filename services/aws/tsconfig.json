@@ -1,0 +1,6 @@
+{
+  "extends": "@acme/tsconfig/aws-cdk.json",
+  "compilerOptions": {
+    "outDir": "dist",
+  },
+}
