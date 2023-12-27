@@ -7,6 +7,7 @@ import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { PhoneNumberInput } from "~/components/Inputs";
+import type { SignUpFlowParams } from "./pin-code-otp";
 
 const schemaValidation = z.object({
   phoneNumber: z.string().refine((phoneNumber) => isValidNumber(phoneNumber)),
@@ -24,7 +25,10 @@ const PhoneNumber = () => {
   );
 
   const onPress = () =>
-    router.push({ params: { phoneNumber }, pathname: "/auth/pin-code-otp" });
+    router.push({
+      params: { phoneNumber } satisfies SignUpFlowParams,
+      pathname: "/auth/pin-code-otp",
+    });
 
   return (
     <KeyboardAvoidingView

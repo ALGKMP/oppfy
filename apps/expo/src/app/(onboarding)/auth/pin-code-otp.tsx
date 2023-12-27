@@ -19,7 +19,7 @@ import useCooldown from "~/hooks/useCooldown";
 import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
 
-interface SignUpFlowParams {
+export interface SignUpFlowParams {
   [key: string]: string;
   phoneNumber: string;
 }
