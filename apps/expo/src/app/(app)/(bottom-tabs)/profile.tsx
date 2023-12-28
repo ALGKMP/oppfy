@@ -48,6 +48,7 @@ const Profile = () => {
           ))}
         </XStack>
       </YStack>
+
       <Separator borderColor="white" marginTop="$5" marginBottom="$2" />
     </View>
   );
