@@ -199,12 +199,6 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    // Define the replication instance security group
-    const dmsSecurityGroup = new ec2.SecurityGroup(this, "DmsSecurityGroup", {
-      vpc,
-      description: "Security group for DMS replication instance",
-    });
-
     // Create the DMS replication instance
     const dmsReplicationInstance = new dms.CfnReplicationInstance(
       this,
