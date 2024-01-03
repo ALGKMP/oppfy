@@ -11,6 +11,9 @@ import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import type { Construct } from "constructs";
 
+// ! Adhere to free tier specs
+// https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all
+
 export class AwsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -61,27 +64,31 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    new rds.DatabaseInstance(this, "MyFreeTierRdsInstance", {
-      engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_12,
-      }),
-      databaseName: "mydatabase", // Specify the database name here
-      instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE2,
-        ec2.InstanceSize.MICRO,
-      ),
-      vpc,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
+    const rdsInstance = new rds.DatabaseInstance(
+      this,
+      "MyFreeTierRdsInstance",
+      {
+        engine: rds.DatabaseInstanceEngine.postgres({
+          version: rds.PostgresEngineVersion.VER_12,
+        }),
+        databaseName: "mydatabase", // Specify the database name here
+        instanceType: ec2.InstanceType.of(
+          ec2.InstanceClass.BURSTABLE2,
+          ec2.InstanceSize.MICRO,
+        ),
+        vpc,
+        vpcSubnets: {
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
+        securityGroups: [dbSecurityGroup],
+        credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
+        multiAz: false,
+        allocatedStorage: 20,
+        storageType: rds.StorageType.GP2,
+        backupRetention: cdk.Duration.days(0),
+        deletionProtection: false,
       },
-      securityGroups: [dbSecurityGroup],
-      credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
-      multiAz: false,
-      allocatedStorage: 20,
-      storageType: rds.StorageType.GP2,
-      backupRetention: cdk.Duration.days(0),
-      deletionProtection: false,
-    });
+    );
 
     const bucket = new s3.Bucket(this, "MyBucket", {
       versioned: true,
@@ -165,6 +172,150 @@ export class AwsStack extends cdk.Stack {
     // Output the OpenSearch domain endpoint
     new cdk.CfnOutput(this, "OpenSearchDomainEndpoint", {
       value: openSearchDomain.domainEndpoint,
+    });
+
+    // Create the IAM role for DMS VPC management
+    const dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
+      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
+      roleName: "dms-vpc-role", // This should match the name expected by DMS
+    });
+
+    // Attach the AWS managed policy for DMS VPC management to the role
+    dmsVpcRole.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName(
+        "service-role/AmazonDMSVPCManagementRole",
+      ),
+    );
+
+    // Define the replication subnet group using the VPC's private subnets
+    const dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
+      this,
+      "DmsSubnetGroup",
+      {
+        replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
+        replicationSubnetGroupDescription:
+          "Subnet group for DMS replication instances",
+        subnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
+      },
+    );
+
+    // Define the replication instance security group
+    const dmsSecurityGroup = new ec2.SecurityGroup(this, "DmsSecurityGroup", {
+      vpc,
+      description: "Security group for DMS replication instance",
+    });
+
+    // Create the DMS replication instance
+    const dmsReplicationInstance = new dms.CfnReplicationInstance(
+      this,
+      "MyDmsReplicationInstance",
+      {
+        replicationInstanceClass: "dms.t2.micro",
+        allocatedStorage: 50,
+        publiclyAccessible: true,
+        vpcSecurityGroupIds: [dbSecurityGroup.securityGroupId],
+        replicationSubnetGroupIdentifier:
+          dmsSubnetGroup.replicationSubnetGroupIdentifier,
+        multiAz: false,
+      },
+    );
+
+    const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
+      endpointType: "source",
+      engineName: "postgres",
+      username: dbCredentialsSecret
+        .secretValueFromJson("username")
+        .unsafeUnwrap(),
+      password: dbCredentialsSecret
+        .secretValueFromJson("password")
+        .unsafeUnwrap(),
+      serverName: rdsInstance.dbInstanceEndpointAddress,
+      port: 5432,
+      databaseName: "mydatabase",
+      sslMode: "require",
+    });
+
+    // IAM role for DMS to access OpenSearch
+    const dmsAccessRole = new iam.Role(this, "DmsAccessRole", {
+      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "AmazonOpenSearchServiceFullAccess",
+        ),
+      ],
+    });
+
+    dmsAccessRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ["es:ESHttp*"],
+        resources: [`${openSearchDomain.domainArn}/*`],
+      }),
+    );
+
+    // DMS Target Endpoint for OpenSearch
+    const dmsTargetEndpoint = new dms.CfnEndpoint(this, "MyDmsTargetEndpoint", {
+      endpointType: "target",
+      engineName: "opensearch",
+      elasticsearchSettings: {
+        serviceAccessRoleArn: dmsAccessRole.roleArn,
+        endpointUri: openSearchDomain.domainEndpoint,
+      },
+    });
+
+    const tableMappings = JSON.stringify({
+      rules: [
+        {
+          "rule-type": "selection",
+          "rule-id": "1",
+          "rule-name": "1",
+          "object-locator": {
+            "schema-name": "public", // Default schema for PostgreSQL
+            "table-name": "User",
+          },
+          "rule-action": "include",
+          filters: [],
+        },
+      ],
+    });
+
+    // Create the DMS replication task
+    const dmsReplicationTask = new dms.CfnReplicationTask(
+      this,
+      "MyDmsReplicationTask",
+      {
+        replicationInstanceArn: dmsReplicationInstance.ref, // ARN of the replication instance
+        sourceEndpointArn: dmsSourceEndpoint.ref, // ARN of the source endpoint
+        targetEndpointArn: dmsTargetEndpoint.ref, // ARN of the target endpoint
+        migrationType: "full-load-and-cdc", // Perform full load and then replicate ongoing changes
+        tableMappings: tableMappings, // Use the table mappings defined above
+        replicationTaskSettings: JSON.stringify({
+          // Default task settings; adjust as needed
+          TargetMetadata: {
+            TargetSchema: "",
+            SupportLobs: true,
+            FullLobMode: false,
+            LobChunkSize: 64,
+            LimitedSizeLobMode: true,
+            LobMaxSize: 32,
+            InlineLobMaxSize: 0,
+            LoadMaxFileSize: 0,
+            ParallelLoadThreads: 0,
+            BatchApplyEnabled: false,
+          },
+          FullLoadSettings: {
+            FullLoadEnabled: true,
+            ApplyChangesEnabled: true,
+          },
+          Logging: {
+            EnableLogging: true,
+          },
+        }),
+      },
+    );
+
+    // Output the replication task ARN
+    new cdk.CfnOutput(this, "ReplicationTaskArn", {
+      value: dmsReplicationTask.ref,
     });
   }
 }
