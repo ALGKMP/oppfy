@@ -218,6 +218,7 @@ export class AwsStack extends cdk.Stack {
       value: openSearchDomain.domainEndpoint,
     });
 
+    // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management
     const dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
@@ -261,13 +262,18 @@ export class AwsStack extends cdk.Stack {
     const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
       endpointType: "source",
       engineName: "postgres",
-      username: dbCredentialsSecret
-        // todo: unsafeUnwrap() needs to be replaced with something safe
-        .secretValueFromJson("username")
-        .unsafeUnwrap(),
-      password: dbCredentialsSecret
-        .secretValueFromJson("password")
-        .unsafeUnwrap(),
+      username: cdk.Fn.sub(
+        "{{resolve:secretsmanager:${MyDbSecret}:SecretString:username}}",
+        {
+          MyDbSecret: dbCredentialsSecret.secretArn,
+        },
+      ),
+      password: cdk.Fn.sub(
+        "{{resolve:secretsmanager:${MyDbSecret}:SecretString:password}}",
+        {
+          MyDbSecret: dbCredentialsSecret.secretArn,
+        },
+      ),
       serverName: rdsInstance.dbInstanceEndpointAddress,
       port: 5432,
       databaseName: "mydatabase",
