@@ -37,8 +37,8 @@ export class AwsStack extends cdk.Stack {
     // Define a security group for the RDS instance within the VPC
     const dbSecurityGroup = new ec2.SecurityGroup(this, "MyDbSecurityGroup", {
       vpc,
-      description: "Security group for RDS DB instance",
       allowAllOutbound: true,
+      description: "Security group for RDS DB instance",
     });
 
     // Allow inbound PostgreSQL connections on the default port (5432)
@@ -59,7 +59,22 @@ export class AwsStack extends cdk.Stack {
           }),
           generateStringKey: "password",
           passwordLength: 16,
-          excludeCharacters: '"@/\\', // Exclude characters that are not valid in a PostgreSQL password
+          excludeCharacters: '"@/\\;:%+`?[]{}()<>|~!#$^&*_=', // Exclude non compliant characters
+        },
+      },
+    );
+
+    // Create a new parameter group with the required settings for DMS
+    const customParameterGroup = new rds.ParameterGroup(
+      this,
+      "CustomParameterGroup",
+      {
+        engine: rds.DatabaseInstanceEngine.postgres({
+          version: rds.PostgresEngineVersion.VER_12,
+        }),
+        parameters: {
+          "rds.logical_replication": "1", // Enable logical replication
+          shared_preload_libraries: "pglogical", // Include pglogical for logical replication
         },
       },
     );
@@ -71,7 +86,8 @@ export class AwsStack extends cdk.Stack {
         engine: rds.DatabaseInstanceEngine.postgres({
           version: rds.PostgresEngineVersion.VER_12,
         }),
-        databaseName: "mydatabase", // Specify the database name here
+        parameterGroup: customParameterGroup, // Use the custom parameter group
+        databaseName: "mydatabase",
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.BURSTABLE2,
           ec2.InstanceSize.MICRO,
@@ -80,6 +96,7 @@ export class AwsStack extends cdk.Stack {
         vpcSubnets: {
           subnetType: ec2.SubnetType.PUBLIC,
         },
+        publiclyAccessible: true,
         securityGroups: [dbSecurityGroup],
         credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
         multiAz: false,
@@ -134,7 +151,7 @@ export class AwsStack extends cdk.Stack {
     const bastionHostLinux = new ec2.BastionHostLinux(this, "BastionHost", {
       vpc,
       instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE2,
+        ec2.InstanceClass.BURSTABLE3,
         ec2.InstanceSize.MICRO,
       ),
       securityGroup: bastionSecurityGroup,
@@ -159,13 +176,14 @@ export class AwsStack extends cdk.Stack {
       {
         vpc,
         description: "Security group for Open Search Service",
+        allowAllOutbound: true,
       },
     );
 
     openSearchSecurityGroup.addIngressRule(
-      ec2.Peer.securityGroupId(bastionSecurityGroup.securityGroupId),
+      ec2.Peer.anyIpv4(),
       ec2.Port.tcp(443),
-      "Allow access from Bastion Host",
+      "Allow HTTPS access from any IPv4 address",
     );
 
     const openSearchDomain = new opensearch.Domain(this, "MyOpenSearchDomain", {
@@ -190,7 +208,7 @@ export class AwsStack extends cdk.Stack {
         {
           subnets: [
             vpc.selectSubnets({
-              subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+              subnetType: ec2.SubnetType.PUBLIC,
             }).subnets[0],
           ],
         },
@@ -222,15 +240,24 @@ export class AwsStack extends cdk.Stack {
     // Create the IAM role for DMS VPC management
     const dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
-      roleName: "dms-vpc-role", // This should match the name expected by DMS
+      roleName: "dms-vpc-role",
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AmazonDMSVPCManagementRole",
+        ),
+      ],
     });
 
-    // Attach the AWS managed policy for DMS VPC management to the role
-    dmsVpcRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName(
-        "service-role/AmazonDMSVPCManagementRole",
-      ),
-    );
+    // Create the IAM role for DMS CloudWatch Logs
+    const dmsCloudWatchLogsRole = new iam.Role(this, "DmsCloudWatchLogsRole", {
+      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
+      roleName: "dms-cloudwatch-logs-role",
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AmazonDMSCloudWatchLogsRole",
+        ),
+      ],
+    });
 
     // Define the replication subnet group using the VPC's private subnets
     const dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
@@ -252,6 +279,7 @@ export class AwsStack extends cdk.Stack {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
         publiclyAccessible: true,
+
         vpcSecurityGroupIds: [dbSecurityGroup.securityGroupId],
         replicationSubnetGroupIdentifier:
           dmsSubnetGroup.replicationSubnetGroupIdentifier,
@@ -280,29 +308,12 @@ export class AwsStack extends cdk.Stack {
       sslMode: "require",
     });
 
-    // IAM role for DMS to access OpenSearch
-    const dmsAccessRole = new iam.Role(this, "DmsAccessRole", {
-      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "AmazonOpenSearchServiceFullAccess",
-        ),
-      ],
-    });
-
-    dmsAccessRole.addToPolicy(
-      new iam.PolicyStatement({
-        actions: ["es:ESHttp*"],
-        resources: [`${openSearchDomain.domainArn}/*`],
-      }),
-    );
-
     // DMS Target Endpoint for OpenSearch
     const dmsTargetEndpoint = new dms.CfnEndpoint(this, "MyDmsTargetEndpoint", {
       endpointType: "target",
       engineName: "opensearch",
       elasticsearchSettings: {
-        serviceAccessRoleArn: dmsAccessRole.roleArn,
+        serviceAccessRoleArn: dmsVpcRole.roleArn,
         endpointUri: openSearchDomain.domainEndpoint,
       },
     });
@@ -314,11 +325,20 @@ export class AwsStack extends cdk.Stack {
           "rule-id": "1",
           "rule-name": "1",
           "object-locator": {
-            "schema-name": "public", // Default schema for PostgreSQL
+            "schema-name": "public",
             "table-name": "User",
           },
           "rule-action": "include",
-          filters: [],
+          "column-mapping": [
+            {
+              "column-name": "id",
+              type: "include",
+            },
+            {
+              "column-name": "username",
+              type: "include",
+            },
+          ],
         },
       ],
     });
@@ -334,14 +354,13 @@ export class AwsStack extends cdk.Stack {
         migrationType: "full-load-and-cdc", // Perform full load and then replicate ongoing changes
         tableMappings: tableMappings, // Use the table mappings defined above
         replicationTaskSettings: JSON.stringify({
-          // Default task settings; adjust as needed
           TargetMetadata: {
             TargetSchema: "",
-            SupportLobs: true,
-            FullLobMode: false,
-            LobChunkSize: 64,
-            LimitedSizeLobMode: true,
-            LobMaxSize: 32,
+            SupportLobs: true, // Enable LOB support
+            FullLobMode: true, // Set to true to include entire LOB in the migration
+            LobChunkSize: 64, // Size in KB of LOB chunks
+            LimitedSizeLobMode: false, // Set to false if FullLobMode is true
+            LobMaxSize: 32, // Maximum size in KB for LOB columns (if LimitedSizeLobMode is true)
             InlineLobMaxSize: 0,
             LoadMaxFileSize: 0,
             ParallelLoadThreads: 0,

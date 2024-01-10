@@ -1,15 +1,13 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import { Client as ElasticSearchClient } from "@elastic/elasticsearch";
 import { faker } from "@faker-js/faker";
+import { Client as OpenSearchClient } from "@opensearch-project/opensearch";
 import { PrismaClient } from "@prisma/client";
 
 export * from "@prisma/client";
 
 const globalForS3 = globalThis as { s3?: S3Client };
 const globalForPrisma = globalThis as { prisma?: PrismaClient };
-const globalForElasticSearch = globalThis as {
-  elasticSearch?: ElasticSearchClient;
-};
+// const globalForOpenSearch = globalThis as { openSearch?: OpenSearchClient };
 
 export const s3 =
   globalForS3.s3 ??
@@ -30,30 +28,24 @@ export const prisma =
         : ["error"],
   });
 
-const elasticSearch = new ElasticSearchClient({
-  node: "https://...", // Elasticsearch endpoint
-  auth: {
-    apiKey: {
-      // API key ID and secret
-      id: "foo",
-      api_key: "bar",
-    },
-  },
-});
+// const openSearch = new OpenSearchClient({
+//   // connect to aws opensearch using vpc
+//   node: "https://...", // Elasticsearch endpoint
+// });
 
-// for (let i = 0; i < 100; i++) {
-//   await prisma.user.create({
-//     data: {
-//       id: faker.string.uuid(),
-//       username: faker.internet.userName(),
-//       firstName: faker.person.firstName(),
-//       dateOfBirth: faker.date.past(),
-//     },
-//   });
-// }
+for (let i = 0; i < 10; i++) {
+  await prisma.user.create({
+    data: {
+      id: faker.string.uuid(),
+      username: faker.internet.userName(),
+      firstName: faker.person.firstName(),
+      dateOfBirth: faker.date.past(),
+    },
+  });
+}
 
 if (process.env.NODE_ENV !== "production") {
   globalForS3.s3 = s3;
   globalForPrisma.prisma = prisma;
-  globalForElasticSearch.elasticSearch = elasticSearch;
+  // globalForOpenSearch.openSearch = openSearch;
 }
