@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -54,7 +58,7 @@ importers:
         version: 0.2.9(react-native@0.72.6)(react@18.2.0)
       '@react-navigation/drawer':
         specifier: ^6.6.4
-        version: 6.6.6(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.1)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
+        version: 6.6.6(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.0)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
       '@react-navigation/material-bottom-tabs':
         specifier: ^6.2.17
         version: 6.2.19(@react-navigation/native@6.1.9)(react-native-paper@5.11.4)(react-native-safe-area-context@4.6.3)(react-native-vector-icons@10.0.3)(react-native@0.72.6)(react@18.2.0)
@@ -63,7 +67,7 @@ importers:
         version: 6.6.5(@react-navigation/native@6.1.9)(react-native-pager-view@6.2.0)(react-native-tab-view@3.5.2)(react-native@0.72.6)(react@18.2.0)
       '@react-navigation/stack':
         specifier: ^6.3.18
-        version: 6.3.20(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.1)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
+        version: 6.3.20(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
       '@shopify/flash-list':
         specifier: 1.4.3
         version: 1.4.3(@babel/runtime@7.23.6)(react-native@0.72.6)(react@18.2.0)
@@ -126,7 +130,7 @@ importers:
         version: 0.20.1(expo@49.0.21)
       expo-router:
         specifier: 2.0.12
-        version: 2.0.12(@react-navigation/drawer@6.6.6)(expo-constants@14.4.2)(expo-linking@5.0.2)(expo-modules-autolinking@1.5.1)(expo-status-bar@1.6.0)(expo@49.0.21)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.12.1)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
+        version: 2.0.12(@react-navigation/drawer@6.6.6)(expo-constants@14.4.2)(expo-linking@5.0.2)(expo-modules-autolinking@1.5.1)(expo-status-bar@1.6.0)(expo@49.0.21)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.12.0)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
       expo-splash-screen:
         specifier: ~0.20.5
         version: 0.20.5(expo-modules-autolinking@1.5.1)(expo@49.0.21)
@@ -158,8 +162,8 @@ importers:
         specifier: ^0.72.6
         version: 0.72.6(@babel/core@7.23.6)(@babel/preset-env@7.23.6)(react@18.2.0)
       react-native-gesture-handler:
-        specifier: ~2.12.0
-        version: 2.12.1(react-native@0.72.6)(react@18.2.0)
+        specifier: 2.12.0
+        version: 2.12.0(react-native@0.72.6)(react@18.2.0)
       react-native-pager-view:
         specifier: ^6.2.0
         version: 6.2.0(react-native@0.72.6)(react@18.2.0)
@@ -398,8 +402,8 @@ importers:
         specifier: ^2.4.0
         version: 2.4.0
       '@prisma/client':
-        specifier: ^5.6.0
-        version: 5.7.1(prisma@5.7.1)
+        specifier: ^5.8.0
+        version: 5.8.0(prisma@5.8.0)
     devDependencies:
       '@acme/eslint-config':
         specifier: workspace:^0.2.0
@@ -423,8 +427,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.1
       prisma:
-        specifier: ^5.6.0
-        version: 5.7.1
+        specifier: ^5.8.0
+        version: 5.8.0
       typescript:
         specifier: ^5.2.2
         version: 5.3.3
@@ -3920,8 +3924,8 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@prisma/client@5.7.1(prisma@5.7.1):
-    resolution: {integrity: sha512-TUSa4nUcC4nf/e7X3jyO1pEd6XcI/TLRCA0KjkA46RDIpxUaRsBYEOqITwXRW2c0bMFyKcCRXrH4f7h4q9oOlg==}
+  /@prisma/client@5.8.0(prisma@5.8.0):
+    resolution: {integrity: sha512-QxO6C4MaA/ysTIbC+EcAH1aX/YkpymhXtO6zPdk+FvA7+59tNibIYpd+7koPdViLg2iKES4ojsxWNUGNJaEcbA==}
     engines: {node: '>=16.13'}
     requiresBuild: true
     peerDependencies:
@@ -3930,35 +3934,35 @@ packages:
       prisma:
         optional: true
     dependencies:
-      prisma: 5.7.1
+      prisma: 5.8.0
     dev: false
 
-  /@prisma/debug@5.7.1:
-    resolution: {integrity: sha512-yrVSO/YZOxdeIxcBtZ5BaNqUfPrZkNsAKQIQg36cJKMxj/VYK3Vk5jMKkI+gQLl0KReo1YvX8GWKfV788SELjw==}
+  /@prisma/debug@5.8.0:
+    resolution: {integrity: sha512-ZqPpkvbovu/kQJ1bvy57NO4dw97fpQGcbQSCtsqlwSE1UNKJP75R3BKxdznk8ZPMY+GJdMRetWNv4oAvSbWn8Q==}
 
-  /@prisma/engines-version@5.7.1-1.0ca5ccbcfa6bdc81c003cf549abe4269f59c41e5:
-    resolution: {integrity: sha512-dIR5IQK/ZxEoWRBDOHF87r1Jy+m2ih3Joi4vzJRP+FOj5yxCwS2pS5SBR3TWoVnEK1zxtLI/3N7BjHyGF84fgw==}
+  /@prisma/engines-version@5.8.0-37.0a83d8541752d7582de2ebc1ece46519ce72a848:
+    resolution: {integrity: sha512-cXcoVweYbnv8xRfkWq9oj8BECOdzHUazrSpYCa0ehp5TNz4l5Spa8jbq/VROCTzj3ZncH5D9Q2TmySYTOUeKlw==}
 
-  /@prisma/engines@5.7.1:
-    resolution: {integrity: sha512-R+Pqbra8tpLP2cvyiUpx+SIKglav3nTCpA+rn6826CThviQ8yvbNG0s8jNpo51vS9FuZO3pOkARqG062vKX7uA==}
+  /@prisma/engines@5.8.0:
+    resolution: {integrity: sha512-Qhqm9WWLujNEC13AuZlUO14SQ15tNLe5puaz+tOk7UqINqJ3PtqMmuSuzomiw2diGVqZ+HYiSQzlR3+pPucVHA==}
     requiresBuild: true
     dependencies:
-      '@prisma/debug': 5.7.1
-      '@prisma/engines-version': 5.7.1-1.0ca5ccbcfa6bdc81c003cf549abe4269f59c41e5
-      '@prisma/fetch-engine': 5.7.1
-      '@prisma/get-platform': 5.7.1
+      '@prisma/debug': 5.8.0
+      '@prisma/engines-version': 5.8.0-37.0a83d8541752d7582de2ebc1ece46519ce72a848
+      '@prisma/fetch-engine': 5.8.0
+      '@prisma/get-platform': 5.8.0
 
-  /@prisma/fetch-engine@5.7.1:
-    resolution: {integrity: sha512-9ELauIEBkIaEUpMIYPRlh5QELfoC6pyHolHVQgbNxglaINikZ9w9X7r1TIePAcm05pCNp2XPY1ObQIJW5nYfBQ==}
+  /@prisma/fetch-engine@5.8.0:
+    resolution: {integrity: sha512-1CAuE+JoYsPNggMEn6qk0zos06Uc9bYZBJ0VBPHD6R7REL05614koAbOCmn52IaYz3nobb7f25hqW6AY7rLkIw==}
     dependencies:
-      '@prisma/debug': 5.7.1
-      '@prisma/engines-version': 5.7.1-1.0ca5ccbcfa6bdc81c003cf549abe4269f59c41e5
-      '@prisma/get-platform': 5.7.1
+      '@prisma/debug': 5.8.0
+      '@prisma/engines-version': 5.8.0-37.0a83d8541752d7582de2ebc1ece46519ce72a848
+      '@prisma/get-platform': 5.8.0
 
-  /@prisma/get-platform@5.7.1:
-    resolution: {integrity: sha512-eDlswr3a1m5z9D/55Iyt/nZqS5UpD+DZ9MooBB3hvrcPhDQrcf9m4Tl7buy4mvAtrubQ626ECtb8c6L/f7rGSQ==}
+  /@prisma/get-platform@5.8.0:
+    resolution: {integrity: sha512-Nk3rhTFZ1LYkFZJnpSvQcLPCaBWgJQfteHII6UEENOOkYlmP0k3FuswND54tzzEr4qs39wOdV9pbXKX9U2lv7A==}
     dependencies:
-      '@prisma/debug': 5.7.1
+      '@prisma/debug': 5.8.0
 
   /@protobufjs/aspromise@1.1.2:
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -4376,7 +4380,7 @@ packages:
       use-latest-callback: 0.1.9(react@18.2.0)
     dev: false
 
-  /@react-navigation/drawer@6.6.6(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.1)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0):
+  /@react-navigation/drawer@6.6.6(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.0)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0):
     resolution: {integrity: sha512-DW/oNRisSOGOqvZfCzfhKBxnzT97Teqtg1Gal85g+K3gnVbM1jOBE2PdnYsKU0fULfFtDwvp/QZSbcgjDpr12A==}
     peerDependencies:
       '@react-navigation/native': ^6.0.0
@@ -4392,7 +4396,7 @@ packages:
       color: 4.2.3
       react: 18.2.0
       react-native: 0.72.6(@babel/core@7.23.6)(@babel/preset-env@7.23.6)(react@18.2.0)
-      react-native-gesture-handler: 2.12.1(react-native@0.72.6)(react@18.2.0)
+      react-native-gesture-handler: 2.12.0(react-native@0.72.6)(react@18.2.0)
       react-native-reanimated: 3.3.0(@babel/core@7.23.6)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.23.3)(@babel/plugin-transform-shorthand-properties@7.23.3)(@babel/plugin-transform-template-literals@7.23.3)(react-native@0.72.6)(react@18.2.0)
       react-native-safe-area-context: 4.6.3(react-native@0.72.6)(react@18.2.0)
       react-native-screens: 3.22.1(react-native@0.72.6)(react@18.2.0)
@@ -4488,7 +4492,7 @@ packages:
       nanoid: 3.3.7
     dev: false
 
-  /@react-navigation/stack@6.3.20(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.1)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0):
+  /@react-navigation/stack@6.3.20(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0):
     resolution: {integrity: sha512-vE6mgZzOgoa5Uy7ayT97Cj+ZIK7DK+JBYVuKUViILlWZy6IWK7HFDuqoChSbZ1ajTIfAxj/acVGg1jkbAKsToA==}
     peerDependencies:
       '@react-navigation/native': ^6.0.0
@@ -4503,7 +4507,7 @@ packages:
       color: 4.2.3
       react: 18.2.0
       react-native: 0.72.6(@babel/core@7.23.6)(@babel/preset-env@7.23.6)(react@18.2.0)
-      react-native-gesture-handler: 2.12.1(react-native@0.72.6)(react@18.2.0)
+      react-native-gesture-handler: 2.12.0(react-native@0.72.6)(react@18.2.0)
       react-native-safe-area-context: 4.6.3(react-native@0.72.6)(react@18.2.0)
       react-native-screens: 3.22.1(react-native@0.72.6)(react@18.2.0)
       warn-once: 0.1.1
@@ -9758,7 +9762,7 @@ packages:
       - supports-color
     dev: false
 
-  /expo-router@2.0.12(@react-navigation/drawer@6.6.6)(expo-constants@14.4.2)(expo-linking@5.0.2)(expo-modules-autolinking@1.5.1)(expo-status-bar@1.6.0)(expo@49.0.21)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.12.1)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0):
+  /expo-router@2.0.12(@react-navigation/drawer@6.6.6)(expo-constants@14.4.2)(expo-linking@5.0.2)(expo-modules-autolinking@1.5.1)(expo-status-bar@1.6.0)(expo@49.0.21)(metro@0.76.8)(react-dom@18.2.0)(react-native-gesture-handler@2.12.0)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0):
     resolution: {integrity: sha512-4Z4hUE3H+jCjpbkoHD2da6osjnkSeoE882B8ynQTOZWSeKiLj8itM4tM0Dhctjo6OGuIV7A3fkqj843Yb6aHgQ==}
     peerDependencies:
       '@react-navigation/drawer': ^6.5.8
@@ -9784,7 +9788,7 @@ packages:
       '@expo/metro-runtime': 2.2.14(react-native@0.72.6)
       '@radix-ui/react-slot': 1.0.1(react@18.2.0)
       '@react-navigation/bottom-tabs': 6.5.11(@react-navigation/native@6.1.9)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
-      '@react-navigation/drawer': 6.6.6(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.1)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
+      '@react-navigation/drawer': 6.6.6(@react-navigation/native@6.1.9)(react-native-gesture-handler@2.12.0)(react-native-reanimated@3.3.0)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
       '@react-navigation/native': 6.1.9(react-native@0.72.6)(react@18.2.0)
       '@react-navigation/native-stack': 6.9.17(@react-navigation/native@6.1.9)(react-native-safe-area-context@4.6.3)(react-native-screens@3.22.1)(react-native@0.72.6)(react@18.2.0)
       expo: 49.0.21(@babel/core@7.23.6)
@@ -9796,7 +9800,7 @@ packages:
       metro: 0.76.8
       query-string: 7.1.3
       react-helmet-async: 1.3.0(react-dom@18.2.0)(react@18.2.0)
-      react-native-gesture-handler: 2.12.1(react-native@0.72.6)(react@18.2.0)
+      react-native-gesture-handler: 2.12.0(react-native@0.72.6)(react@18.2.0)
       react-native-reanimated: 3.3.0(@babel/core@7.23.6)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.23.3)(@babel/plugin-transform-shorthand-properties@7.23.3)(@babel/plugin-transform-template-literals@7.23.3)(react-native@0.72.6)(react@18.2.0)
       react-native-safe-area-context: 4.6.3(react-native@0.72.6)(react@18.2.0)
       react-native-screens: 3.22.1(react-native@0.72.6)(react@18.2.0)
@@ -14256,13 +14260,13 @@ packages:
       ansi-styles: 5.2.0
       react-is: 18.2.0
 
-  /prisma@5.7.1:
-    resolution: {integrity: sha512-ekho7ziH0WEJvC4AxuJz+ewRTMskrebPcrKuBwcNzVDniYxx+dXOGcorNeIb9VEMO5vrKzwNYvhD271Ui2jnNw==}
+  /prisma@5.8.0:
+    resolution: {integrity: sha512-hDKoEqPt2qEUTH5yGO3l27CBnPtwvte0CGMKrpCr9+/A919JghfqJ3qgCGgMbOwdkXUOzdho0RH9tyUF3UhpMw==}
     engines: {node: '>=16.13'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@prisma/engines': 5.7.1
+      '@prisma/engines': 5.8.0
 
   /prismjs@1.27.0:
     resolution: {integrity: sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==}
@@ -14708,8 +14712,8 @@ packages:
       - supports-color
     dev: false
 
-  /react-native-gesture-handler@2.12.1(react-native@0.72.6)(react@18.2.0):
-    resolution: {integrity: sha512-deqh36bw82CFUV9EC4tTo2PP1i9HfCOORGS3Zmv71UYhEZEHkzZv18IZNPB+2Awzj45vLIidZxGYGFxHlDSQ5A==}
+  /react-native-gesture-handler@2.12.0(react-native@0.72.6)(react@18.2.0):
+    resolution: {integrity: sha512-rr+XwVzXAVpY8co25ukvyI38fKCxTQjz7WajeZktl8qUPdh1twnSExgpT47DqDi4n+m+OiJPAnHfZOkqqAQMOg==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -17566,7 +17570,3 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
