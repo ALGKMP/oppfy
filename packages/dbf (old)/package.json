@@ -1,24 +1,26 @@
 {
-  "name": "@acme/db",
+  "name": "@acme/dbo2",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "main": "./index.ts",
+  "types": "./index.ts",
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint .",
-    "push": "drizzle-kit push:mysql",
-    "studio": "drizzle-kit studio",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "generate": "pnpm with-env prisma generate",
+    "push": "pnpm with-env prisma db push --skip-generate",
+    "studio": "pnpm with-env prisma studio --port 5556",
+    "dev": "pnpm studio",
+    "with-env": "dotenv -e ../../.env --",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-rds-data": "^3.490.0",
-    "@aws-sdk/credential-providers": "^3.490.0",
-    "@planetscale/database": "^1.13.0",
-    "drizzle-orm": "^0.29.3",
-    "mysql2": "^3.7.0"
+    "@aws-sdk/client-s3": "^3.441.0",
+    "@elastic/elasticsearch": "^8.11.0",
+    "@opensearch-project/opensearch": "^2.4.0",
+    "@prisma/client": "^5.8.0"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:^0.2.0",
@@ -26,7 +28,6 @@
     "@acme/tsconfig": "workspace:^0.1.0",
     "@faker-js/faker": "^8.3.1",
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.20.10",
     "eslint": "^8.53.0",
     "prettier": "^3.1.0",
     "prisma": "^5.8.0",
