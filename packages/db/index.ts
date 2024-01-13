@@ -33,16 +33,16 @@ export const prisma =
 //   node: "https://...", // Elasticsearch endpoint
 // });
 
-for (let i = 0; i < 10; i++) {
-  await prisma.user.create({
-    data: {
-      id: faker.string.uuid(),
-      username: faker.internet.userName(),
-      firstName: faker.person.firstName(),
-      dateOfBirth: faker.date.past(),
-    },
-  });
-}
+// for (let i = 0; i < 10; i++) {
+//   await prisma.user.create({
+//     data: {
+//       id: faker.string.uuid(),
+//       username: faker.internet.userName(),
+//       firstName: faker.person.firstName(),
+//       dateOfBirth: faker.date.past(),
+//     },
+//   });
+// }
 
 if (process.env.NODE_ENV !== "production") {
   globalForS3.s3 = s3;

@@ -115,8 +115,8 @@ export class AwsStack extends cdk.Stack {
 
     const myLambda = new lambda.Function(this, "MyLambdaFunction", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("dist/res/lambda"),
-      handler: "handler.handler",
+      code: lambda.Code.fromAsset("dist/res/lambdas/s3-one-time-use"),
+      handler: "index.handler",
     });
 
     // Grant the Lambda function permissions to be invoked by S3 events
@@ -133,6 +133,7 @@ export class AwsStack extends cdk.Stack {
       new s3n.LambdaDestination(myLambda),
     );
 
+    // ! do not delete, this is used for testing
     // const bastionSecurityGroup = new ec2.SecurityGroup(
     //   this,
     //   "BastionSecurityGroup",
@@ -238,6 +239,58 @@ export class AwsStack extends cdk.Stack {
       value: openSearchDomain.domainEndpoint,
     });
 
+    // Define the IAM role for the Lambda function
+    const lambdaRole = new iam.Role(this, "LambdaExecutionRole", {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+      description: "Role for Lambda to access OpenSearch",
+    });
+
+    // Define a policy statement that allows specific actions on the OpenSearch domain
+    const policyStatement = new iam.PolicyStatement({
+      actions: [
+        "es:ESHttpGet",
+        "es:ESHttpPut",
+        "es:ESHttpPost",
+        "es:ESHttpDelete",
+      ],
+      resources: [openSearchDomain.domainArn],
+    });
+
+    // Create a policy and attach the policy statement
+    const lambdaPolicy = new iam.Policy(this, "LambdaPolicy", {
+      statements: [policyStatement],
+    });
+
+    // Attach the policy to the role
+    lambdaRole.attachInlinePolicy(lambdaPolicy);
+
+    // Add permissions for Lambda to write logs
+    lambdaRole.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName(
+        "service-role/AWSLambdaBasicExecutionRole",
+      ),
+    );
+
+    // Define the Lambda function
+    const lambdaFunction = new lambda.Function(this, "OpenSearchProxyLambda", {
+      runtime: lambda.Runtime.NODEJS_20_X, // choose your desired Node.js runtime
+      handler: "index.handler", // file is "index.js", function is "handler"
+      code: lambda.Code.fromAsset("dist/res/lambdas/opensearch-proxy"),
+      vpc: vpc, // deploy the Lambda in the same VPC as OpenSearch
+      vpcSubnets: {
+        subnets: vpc.selectSubnets({
+          subnetType: ec2.SubnetType.PUBLIC, // Assuming OpenSearch is in a private subnet
+        }).subnets,
+      },
+      role: lambdaRole,
+      environment: {
+        OPENSEARCH_DOMAIN_ENDPOINT: openSearchDomain.domainEndpoint, // Pass the OpenSearch endpoint to the Lambda
+      },
+    });
+
+    // Grant the Lambda function read/write access to the OpenSearch domain
+    openSearchDomain.grantReadWrite(lambdaFunction);
+
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management
     const dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
@@ -319,31 +372,6 @@ export class AwsStack extends cdk.Stack {
         endpointUri: openSearchDomain.domainEndpoint,
       },
     });
-
-    // const tableMappings = JSON.stringify({
-    //   rules: [
-    //     {
-    //       "rule-type": "selection",
-    //       "rule-id": "1",
-    //       "rule-name": "1",
-    //       "object-locator": {
-    //         "schema-name": "public",
-    //         "table-name": "User",
-    //       },
-    //       "rule-action": "include",
-    //       "column-mapping": [
-    //         {
-    //           "column-name": "id",
-    //           type: "include",
-    //         },
-    //         {
-    //           "column-name": "username",
-    //           type: "include",
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // });
 
     const tableMappings = JSON.stringify({
       rules: [
