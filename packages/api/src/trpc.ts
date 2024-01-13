@@ -14,7 +14,7 @@ import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
-import { prisma, s3 } from "@acme/db";
+import { openSearch, prisma, s3 } from "@acme/db";
 
 import { auth } from "./services/firebase";
 
@@ -44,8 +44,9 @@ interface CreateContextOptions {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     s3,
+    auth,
     db: prisma,
-    auth: auth,
+    openSearch,
     session: opts.session,
   };
 };
