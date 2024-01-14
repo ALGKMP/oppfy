@@ -12,17 +12,17 @@ const globalForPrisma = globalThis as { prisma?: PrismaClient };
 const globalForOpenSearch = globalThis as { openSearch?: OpenSearchClient };
 
 // ! use for testing purposes
-const testingInit = () => {
-  // for (let i = 0; i < 10; i++) {
-  //   await prisma.user.create({
-  //     data: {
-  //       id: faker.string.uuid(),
-  //       username: faker.internet.userName(),
-  //       firstName: faker.person.firstName(),
-  //       dateOfBirth: faker.date.past(),
-  //     },
-  //   });
-  // }
+const testingInit = async () => {
+  for (let i = 0; i < 99999; i++) {
+    await prisma.user.create({
+      data: {
+        id: faker.string.uuid(),
+        username: faker.internet.userName(),
+        firstName: faker.person.firstName(),
+        dateOfBirth: faker.date.past(),
+      },
+    });
+  }
 };
 
 export const s3 =
@@ -40,7 +40,8 @@ export const prisma =
   new PrismaClient({
     log:
       process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
+        // ? ["query", "error", "warn"]
+        ? ["error"]
         : ["error"],
   });
 
@@ -55,6 +56,8 @@ export const openSearch = new OpenSearchClient({
   }),
   node: process.env.OPENSEARCH_URL!,
 });
+
+testingInit();
 
 if (process.env.NODE_ENV !== "production") {
   globalForS3.s3 = s3;

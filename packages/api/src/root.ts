@@ -4,11 +4,13 @@ import { authRouter } from "./router/auth";
 // import { profilePhotoRouter } from "./router/profile";
 import { mediaRouter } from "./router/media";
 import { notificationsRouter } from "./router/notifications";
+import { usersRouter } from "./router/users";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   media: mediaRouter,
+  users: usersRouter,
   notifications: notificationsRouter,
 });
 
