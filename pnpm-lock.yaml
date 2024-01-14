@@ -247,7 +247,7 @@ importers:
         version: link:../../packages/api
       '@acme/db':
         specifier: ^0.1.0
-        version: link:../../packages/db (old)
+        version: link:../../packages/db
       '@t3-oss/env-nextjs':
         specifier: ^0.6.0
         version: 0.6.1(typescript@5.3.3)(zod@3.22.4)
@@ -335,7 +335,7 @@ importers:
     dependencies:
       '@acme/db':
         specifier: workspace:^0.1.0
-        version: link:../db (old)
+        version: link:../db
       '@acme/utils':
         specifier: workspace:^0.1.0
         version: link:../utils
@@ -435,7 +435,7 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  packages/db (old):
+  packages/db:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.441.0
