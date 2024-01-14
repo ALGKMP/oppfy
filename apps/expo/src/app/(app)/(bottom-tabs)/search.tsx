@@ -4,6 +4,8 @@ import { Input, Text, useDebounce, View } from "tamagui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
+const SEARCH_REFRESH_DELAY = 500;
+
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<
@@ -32,7 +34,7 @@ const Search = () => {
     } else {
       setSearchResults([]); // Clear results if search term is empty
     }
-  }, 500); // 500ms delay
+  }, SEARCH_REFRESH_DELAY); // 500ms delay
 
   useEffect(() => {
     debouncedSearch(searchTerm);
