@@ -172,13 +172,13 @@ export class AwsStack extends cdk.Stack {
     // new cdk.CfnOutput(this, "PushSshKeyCommand", { value: pushSshKeyCommand });
     // new cdk.CfnOutput(this, "SshCommand", { value: sshCommand });
 
-    // Define a security group for the RDS instance within the VPC
-    const dmsAccessRole = new iam.Role(this, "DMSAccessRole", {
+    // Define a security group for OpenSearch access
+    const openSearchRole = new iam.Role(this, "DMSAccessRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
-      description: "Role for DMS to access OpenSearch Service",
+      description: "Role for OpenSearch Service access",
     });
 
-    dmsAccessRole.addToPolicy(
+    openSearchRole.addToPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["es:*"],
@@ -204,18 +204,6 @@ export class AwsStack extends cdk.Stack {
       "Allow HTTPS access from any IPv4 address",
     );
 
-    const openSearchRole = new iam.Role(this, "OpenSearchRole", {
-      assumedBy: new iam.ServicePrincipal("opensearchservice.amazonaws.com"),
-      description: "Role for OpenSearch Service access",
-    });
-
-    // const openSearchAccessPolicy = new iam.PolicyStatement({
-    //   effect: iam.Effect.ALLOW,
-    //   principals: [new iam.ArnPrincipal(openSearchRole.roleArn)],
-    //   actions: ["es:*"],
-    //   resources: [`arn:aws:es:${this.region}:${this.account}:domain/testing/*`],
-    // });
-
     const openSearchDomain = new opensearch.Domain(this, "MyOpenSearchDomain", {
       domainName: "testing",
       version: opensearch.EngineVersion.OPENSEARCH_1_0,
@@ -238,7 +226,7 @@ export class AwsStack extends cdk.Stack {
       accessPolicies: [
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          principals: [new iam.ArnPrincipal(dmsAccessRole.roleArn)],
+          principals: [new iam.ArnPrincipal(openSearchRole.roleArn)],
           actions: ["es:*"],
           resources: [
             `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
@@ -258,61 +246,9 @@ export class AwsStack extends cdk.Stack {
       value: openSearchDomain.domainEndpoint,
     });
 
-    // // Define the IAM role for the Lambda function
-    // const lambdaRole = new iam.Role(this, "LambdaExecutionRole", {
-    //   assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-    //   description: "Role for Lambda to access OpenSearch",
-    // });
-
-    // // Define a policy statement that allows specific actions on the OpenSearch domain
-    // const policyStatement = new iam.PolicyStatement({
-    //   actions: [
-    //     "es:ESHttpGet",
-    //     "es:ESHttpPut",
-    //     "es:ESHttpPost",
-    //     "es:ESHttpDelete",
-    //   ],
-    //   resources: [openSearchDomain.domainArn],
-    // });
-
-    // // Create a policy and attach the policy statement
-    // const lambdaPolicy = new iam.Policy(this, "LambdaPolicy", {
-    //   statements: [policyStatement],
-    // });
-
-    // // Attach the policy to the role
-    // lambdaRole.attachInlinePolicy(lambdaPolicy);
-
-    // // Add permissions for Lambda to write logs
-    // lambdaRole.addManagedPolicy(
-    //   iam.ManagedPolicy.fromAwsManagedPolicyName(
-    //     "service-role/AWSLambdaBasicExecutionRole",
-    //   ),
-    // );
-
-    // // Define the Lambda function
-    // const lambdaFunction = new lambda.Function(this, "OpenSearchProxyLambda", {
-    //   runtime: lambda.Runtime.NODEJS_20_X, // choose your desired Node.js runtime
-    //   handler: "index.handler", // file is "index.js", function is "handler"
-    //   code: lambda.Code.fromAsset("dist/res/lambdas/opensearch-proxy"),
-    //   vpc: vpc, // deploy the Lambda in the same VPC as OpenSearch
-    //   vpcSubnets: {
-    //     subnets: vpc.selectSubnets({
-    //       subnetType: ec2.SubnetType.PUBLIC, // Assuming OpenSearch is in a private subnet
-    //     }).subnets,
-    //   },
-    //   role: lambdaRole,
-    //   environment: {
-    //     OPENSEARCH_DOMAIN_ENDPOINT: openSearchDomain.domainEndpoint, // Pass the OpenSearch endpoint to the Lambda
-    //   },
-    // });
-
-    // // Grant the Lambda function read/write access to the OpenSearch domain
-    // openSearchDomain.grantReadWrite(lambdaFunction);
-
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management
-    const dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
+    const _dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
       roleName: "dms-vpc-role",
       managedPolicies: [
@@ -345,6 +281,13 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
+    // Define a security group for the RDS instance within the VPC
+    const dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
+      vpc,
+      allowAllOutbound: true,
+      description: "Security group for DMS replication instance",
+    });
+
     // Create the DMS replication instance
     const dmsReplicationInstance = new dms.CfnReplicationInstance(
       this,
@@ -353,8 +296,7 @@ export class AwsStack extends cdk.Stack {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
         publiclyAccessible: true,
-
-        vpcSecurityGroupIds: [dbSecurityGroup.securityGroupId],
+        vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
         replicationSubnetGroupIdentifier:
           dmsSubnetGroup.replicationSubnetGroupIdentifier,
         multiAz: false,
@@ -387,7 +329,7 @@ export class AwsStack extends cdk.Stack {
       endpointType: "target",
       engineName: "opensearch",
       elasticsearchSettings: {
-        serviceAccessRoleArn: dmsAccessRole.roleArn,
+        serviceAccessRoleArn: openSearchRole.roleArn,
         endpointUri: openSearchDomain.domainEndpoint,
       },
     });
