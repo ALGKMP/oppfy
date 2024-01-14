@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Pressable, TouchableOpacity } from "react-native";
+import { Dimensions, Pressable, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Redirect, SplashScreen, useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
@@ -22,6 +22,8 @@ import { TabBar } from "~/components/TabBars";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
 
+const { width, height } = Dimensions.get("window");
+
 const BottomTabsLayout = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -29,8 +31,10 @@ const BottomTabsLayout = () => {
   return (
     <View
       style={{
-        flex: 1,
         backgroundColor: "black",
+        // needed to handle hiding the tab bar on keyboard open
+        width,
+        height,
         // Paddings to handle safe area
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -41,7 +45,6 @@ const BottomTabsLayout = () => {
       <BottomTabs
         tabBar={(props) => <TabBar {...props} />}
         screenOptions={{
-          tabBarHideOnKeyboard: true,
           header: ({ navigation, options }) => (
             <Header navigation={navigation} options={options} />
           ),
