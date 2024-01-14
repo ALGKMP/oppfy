@@ -232,7 +232,6 @@ export class AwsStack extends cdk.Stack {
             `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
           ],
         }),
-        // Add additional policies if other services or users need access
       ],
       nodeToNodeEncryption: true,
       encryptionAtRest: {
@@ -305,7 +304,7 @@ export class AwsStack extends cdk.Stack {
 
     const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
       endpointType: "source",
-      engineName: "mysql", // Updated to MySQL
+      engineName: "mysql",
       username: cdk.Fn.sub(
         "{{resolve:secretsmanager:${MyDbSecret}:SecretString:username}}",
         {
@@ -319,7 +318,7 @@ export class AwsStack extends cdk.Stack {
         },
       ),
       serverName: rdsInstance.dbInstanceEndpointAddress,
-      port: 3306, // Updated to MySQL's default port
+      port: 3306, // MySQL's default port
       databaseName: "mydatabase",
       sslMode: "none",
     });
@@ -342,7 +341,7 @@ export class AwsStack extends cdk.Stack {
           "rule-id": "1",
           "rule-name": "SelectTable",
           "object-locator": {
-            "schema-name": "mydatabase", // Use the database name here
+            "schema-name": "mydatabase",
             "table-name": "User",
           },
           "rule-action": "include",
@@ -355,7 +354,7 @@ export class AwsStack extends cdk.Stack {
           "rule-action": "include-column",
           "rule-target": "column",
           "object-locator": {
-            "schema-name": "mydatabase", // Use the database name here
+            "schema-name": "mydatabase",
             "table-name": "User",
             "column-name": "id",
           },
@@ -368,15 +367,13 @@ export class AwsStack extends cdk.Stack {
           "rule-action": "include-column",
           "rule-target": "column",
           "object-locator": {
-            "schema-name": "mydatabase", // Use the database name here
+            "schema-name": "mydatabase",
             "table-name": "User",
             "column-name": "username",
           },
         },
       ],
     });
-
-    // ... (rest of the code remains the same)
 
     // Create the DMS replication task
     const dmsReplicationTask = new dms.CfnReplicationTask(
