@@ -1,28 +1,40 @@
-import { drizzle } from 'drizzle-orm/aws-data-api/pg';
-import { RDSDataClient } from '@aws-sdk/client-rds-data';
-import { fromIni } from '@aws-sdk/credential-providers';
-import { S3Client } from "@aws-sdk/client-s3";
+// import { drizzle } from 'drizzle-orm/aws-data-api/pg';
 
-import * as auth from "./schema/auth";
-import * as post from "./schema/post";
+// import { RDSDataClient } from '@aws-sdk/client-rds-data';
+// import { fromIni } from '@aws-sdk/credential-providers';
+import { S3Client } from "@aws-sdk/client-s3";
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
+
 import * as migration from "./schema/migration";
 
-export const schema = { ...auth, ...post, ...migration };
+export const schema = { ...migration };
 
 export { mySqlTable as tableCreator } from "./schema/_table";
 
 export * from "drizzle-orm";
 
+// const rdsClient = new RDSDataClient({
+//     credentials: fromIni({ profile: process.env.PROFILE }),
+//     region: 'us-east-1',
+// });
 
-const rdsClient = new RDSDataClient({
-    credentials: fromIni({ profile: process.env.PROFILE }),
-    region: 'us-east-1',
+// export const db = drizzle(rdsClient, {
+//   database: process.env.DATABASE!,
+//   secretArn: process.env.SECRET_ARN!,
+//   resourceArn: process.env.RESOURCE_ARN!,
+//   logger: true,
+// });
+
+const connection = await mysql.createConnection({
+  host: process.env.AWS_RDS_ENDPOINT,
+  user: process.env.AWS_RDS_USERNAME,
+  port: 3306,
+  database: process.env.AWS_RDS_NAME,
+  password: process.env.AWS_RDS_PASSWORD,
 });
 
-export const db = drizzle(rdsClient, {
-  database: process.env.DATABASE!,
-  secretArn: process.env.SECRET_ARN!,
-  resourceArn: process.env.RESOURCE_ARN!,
+export const db = drizzle(connection, {
   logger: true,
 });
 

@@ -22,12 +22,10 @@ export const verificationToken = mySqlTable("VerificationToken", {
 });
 
 export const user = mySqlTable("User", {
-  id: serial("id").primaryKey(),
-  email: varchar("email", { length: 255 }).unique().notNull(),
-  password: varchar("password", { length: 255 }).notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  dateOfBirth: date("dateOfBirth").notNull(),
-  emailVerified: boolean("emailVerified").default(false).notNull(),
+  id: varchar("id", {length: 255}).primaryKey(),
+  // email: varchar("email", { length: 255 }).unique().notNull(),
+  name: varchar("name", { length: 255 }),
+  dateOfBirth: date("dateOfBirth"),
   profileId: int("profileId").references(() => profile.id),
   notificationSetting: int("notificationSetting").references(
     () => notificationSetting.id,
@@ -51,8 +49,10 @@ export const userRelations = relations(user, ({ one }) => ({
 
 export const notificationSetting = mySqlTable("NotificationSetting", {
   id: serial("id").primaryKey(),
-  email: boolean("email").default(true).notNull(),
-  push: boolean("push").default(true).notNull(),
+  posts: boolean("posts").default(true).notNull(),
+  mentions: boolean("mentions").default(true).notNull(),
+  comments: boolean("comments").default(true).notNull(),
+  friendRequests: boolean("friendRequests").default(true).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -61,6 +61,7 @@ export const notificationSetting = mySqlTable("NotificationSetting", {
 
 export const profile = mySqlTable("Profile", {
   id: serial("id").primaryKey(),
+  userName: varchar("userName", { length: 255 }).unique().notNull(),
   bio: text("bio"),
   profilePhotoId: int("profilePhoto").references(() => profilePhoto.id),
   createdAt: timestamp("createdAt")
@@ -69,7 +70,7 @@ export const profile = mySqlTable("Profile", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const profileRelations = relations(profile, ({ one }) => ({
+export const profileRelations = relations(profile, ({ one, many }) => ({
   profilePhoto: one(profilePhoto, {
     fields: [profile.profilePhotoId],
     references: [profilePhoto.id],
@@ -78,6 +79,7 @@ export const profileRelations = relations(profile, ({ one }) => ({
     fields: [profile.id],
     references: [user.profileId],
   }),
+  posts: many(post),
 }));
 
 export const profilePhoto = mySqlTable("ProfilePhoto", {
@@ -110,11 +112,18 @@ export const post = mySqlTable("Post", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const postRelations = relations(post, ({ one }) => ({
+export const postRelations = relations(post, ({ one, many }) => ({
   author: one(profile, {
     fields: [post.authorId],
     references: [profile.id],
   }),
+  stats: one(postStats, {
+    fields: [post.id],
+    references: [postStats.postId],
+  }),
+  likes: many(like),
+  comments: many(comment),
+  tags: many(tag)
 }));
 
 export const postStats = mySqlTable("PostStats", {
@@ -153,6 +162,10 @@ export const tagRelations = relations(tag, ({ one }) => ({
   profile: one(profile, {
     fields: [tag.profileId],
     references: [profile.id],
+  }),
+  post: one(post, {
+    fields: [tag.id],
+    references: [post.id],
   }),
 }));
 
