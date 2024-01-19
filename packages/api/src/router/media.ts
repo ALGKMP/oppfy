@@ -4,19 +4,16 @@
 */
 
 import {
-  DeleteObjectCommand,
-  GetObjectCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import type { Prisma } from "@prisma/client";
 // import { MediaTypes } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
+// import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 // import { camelToKebab, Metadata } from "@acme/lambda";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 
 export const mediaRouter = createTRPCRouter({
@@ -191,4 +188,4 @@ export const mediaRouter = createTRPCRouter({
 //         });
 //       }
 //     }),
-// });
+});

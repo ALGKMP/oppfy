@@ -435,49 +435,6 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
-  packages/db (old):
-    dependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.441.0
-        version: 3.441.0
-      '@elastic/elasticsearch':
-        specifier: ^8.11.0
-        version: 8.11.0
-      '@opensearch-project/opensearch':
-        specifier: ^2.4.0
-        version: 2.4.0
-      '@prisma/client':
-        specifier: ^5.8.0
-        version: 5.8.0(prisma@5.8.0)
-    devDependencies:
-      '@acme/eslint-config':
-        specifier: workspace:^0.2.0
-        version: link:../../tooling/eslint
-      '@acme/prettier-config':
-        specifier: workspace:^0.1.0
-        version: link:../../tooling/prettier
-      '@acme/tsconfig':
-        specifier: workspace:^0.1.0
-        version: link:../../tooling/typescript
-      '@faker-js/faker':
-        specifier: ^8.3.1
-        version: 8.3.1
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
-      eslint:
-        specifier: ^8.53.0
-        version: 8.53.0
-      prettier:
-        specifier: ^3.1.0
-        version: 3.1.1
-      prisma:
-        specifier: ^5.8.0
-        version: 5.8.0
-      typescript:
-        specifier: ^5.2.2
-        version: 5.2.2
-
   packages/dbf (old):
     dependencies:
       '@aws-sdk/client-s3':
