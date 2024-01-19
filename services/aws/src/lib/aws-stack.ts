@@ -4,6 +4,7 @@ import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as neptune from "aws-cdk-lib/aws-neptune";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -20,6 +21,7 @@ export class AwsStack extends cdk.Stack {
 
     const vpc = new ec2.Vpc(this, "MyVpc", {
       maxAzs: 2,
+      natGateways: 0,
       subnetConfiguration: [
         {
           subnetType: ec2.SubnetType.PUBLIC,
@@ -104,7 +106,7 @@ export class AwsStack extends cdk.Stack {
         multiAz: false,
         allocatedStorage: 20,
         storageType: rds.StorageType.GP2,
-        backupRetention: cdk.Duration.days(1),
+        backupRetention: cdk.Duration.days(0),
         deletionProtection: false,
       },
     );
