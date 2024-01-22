@@ -21,7 +21,7 @@ export class AwsStack extends cdk.Stack {
 
     const vpc = new ec2.Vpc(this, "MyVpc", {
       maxAzs: 2,
-      natGateways: 0,
+      // natGateways: 0,
       subnetConfiguration: [
         {
           subnetType: ec2.SubnetType.PUBLIC,
