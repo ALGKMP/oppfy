@@ -17,11 +17,17 @@ import type { Construct } from "constructs";
 
 export class AwsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+    super(scope, id, {
+      env: {
+        account: process.env.AWS_ACCOUNT_ID,
+        region: process.env.AWS_REGION,
+      },
+      ...props,
+    });
 
     const vpc = new ec2.Vpc(this, "MyVpc", {
       maxAzs: 2,
-      // natGateways: 0,
+      natGateways: 0,
       subnetConfiguration: [
         {
           subnetType: ec2.SubnetType.PUBLIC,
@@ -35,6 +41,9 @@ export class AwsStack extends cdk.Stack {
         },
       ],
     });
+    // const vpc = ec2.Vpc.fromLookup(this, "VPC", {
+    //   isDefault: true,
+    // });
 
     // Define a security group for the RDS instance within the VPC
     const dbSecurityGroup = new ec2.SecurityGroup(this, "MyDbSecurityGroup", {
@@ -106,7 +115,7 @@ export class AwsStack extends cdk.Stack {
         multiAz: false,
         allocatedStorage: 20,
         storageType: rds.StorageType.GP2,
-        backupRetention: cdk.Duration.days(0),
+        backupRetention: cdk.Duration.days(1),
         deletionProtection: false,
       },
     );
@@ -278,7 +287,7 @@ export class AwsStack extends cdk.Stack {
         replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
         replicationSubnetGroupDescription:
           "Subnet group for DMS replication instances",
-        subnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
+        subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
       },
     );
 
@@ -297,9 +306,9 @@ export class AwsStack extends cdk.Stack {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
         publiclyAccessible: true,
-        vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
-        replicationSubnetGroupIdentifier:
-          dmsSubnetGroup.replicationSubnetGroupIdentifier,
+        // vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
+        // replicationSubnetGroupIdentifier:
+        //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
         multiAz: false,
       },
     );
