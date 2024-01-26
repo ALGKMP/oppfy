@@ -4,6 +4,7 @@ import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as neptune from "aws-cdk-lib/aws-neptune";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -16,10 +17,17 @@ import type { Construct } from "constructs";
 
 export class AwsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+    super(scope, id, {
+      env: {
+        account: process.env.AWS_ACCOUNT_ID,
+        region: process.env.AWS_REGION,
+      },
+      ...props,
+    });
 
     const vpc = new ec2.Vpc(this, "MyVpc", {
       maxAzs: 2,
+      natGateways: 0,
       subnetConfiguration: [
         {
           subnetType: ec2.SubnetType.PUBLIC,
@@ -33,6 +41,9 @@ export class AwsStack extends cdk.Stack {
         },
       ],
     });
+    // const vpc = ec2.Vpc.fromLookup(this, "VPC", {
+    //   isDefault: true,
+    // });
 
     // Define a security group for the RDS instance within the VPC
     const dbSecurityGroup = new ec2.SecurityGroup(this, "MyDbSecurityGroup", {
@@ -41,11 +52,11 @@ export class AwsStack extends cdk.Stack {
       description: "Security group for RDS DB instance",
     });
 
-    // Allow inbound PostgreSQL connections on the default port (5432)
+    // Allow inbound MySQL connections on the default port (3306)
     dbSecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(5432),
-      "Allow PostgreSQL access from any IPv4 address",
+      ec2.Port.tcp(3306),
+      "Allow MySQL access from any IPv4 address",
     );
 
     // Create a secret for the RDS credentials
@@ -59,35 +70,35 @@ export class AwsStack extends cdk.Stack {
           }),
           generateStringKey: "password",
           passwordLength: 16,
-          excludeCharacters: '"@/\\;:%+`?[]{}()<>|~!#$^&*_=', // Exclude non compliant characters
+          excludeCharacters: '"@/\\;:%+`?[]{}()<>|~!#$^&*_=',
         },
       },
     );
 
-    // Create a new parameter group with the required settings for DMS
-    const customParameterGroup = new rds.ParameterGroup(
+    // Create a new parameter group for MySQL
+    const mysqlParameterGroup = new rds.ParameterGroup(
       this,
-      "CustomParameterGroup",
+      "MySqlParameterGroup",
       {
-        engine: rds.DatabaseInstanceEngine.postgres({
-          version: rds.PostgresEngineVersion.VER_12,
+        engine: rds.DatabaseInstanceEngine.mysql({
+          version: rds.MysqlEngineVersion.VER_8_0,
         }),
         parameters: {
-          "rds.logical_replication": "1", // Enable logical replication
-          shared_preload_libraries: "pglogical", // Include pglogical for logical replication
+          binlog_format: "ROW",
+          binlog_checksum: "NONE",
+          binlog_row_image: "FULL",
         },
       },
     );
 
+    // Create the RDS MySQL instance
     const rdsInstance = new rds.DatabaseInstance(
       this,
       "MyFreeTierRdsInstance",
       {
-        engine: rds.DatabaseInstanceEngine.postgres({
-          version: rds.PostgresEngineVersion.VER_12,
+        engine: rds.DatabaseInstanceEngine.mysql({
+          version: rds.MysqlEngineVersion.VER_8_0,
         }),
-        parameterGroup: customParameterGroup, // Use the custom parameter group
-        databaseName: "mydatabase",
         instanceType: ec2.InstanceType.of(
           ec2.InstanceClass.BURSTABLE2,
           ec2.InstanceSize.MICRO,
@@ -99,10 +110,12 @@ export class AwsStack extends cdk.Stack {
         publiclyAccessible: true,
         securityGroups: [dbSecurityGroup],
         credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
+        parameterGroup: mysqlParameterGroup,
+        databaseName: "mydatabase",
         multiAz: false,
         allocatedStorage: 20,
         storageType: rds.StorageType.GP2,
-        backupRetention: cdk.Duration.days(0),
+        backupRetention: cdk.Duration.days(1),
         deletionProtection: false,
       },
     );
@@ -113,8 +126,8 @@ export class AwsStack extends cdk.Stack {
 
     const myLambda = new lambda.Function(this, "MyLambdaFunction", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("dist/res/lambda"),
-      handler: "handler.handler",
+      code: lambda.Code.fromAsset("dist/res/lambdas/s3-one-time-use"),
+      handler: "index.handler",
     });
 
     // Grant the Lambda function permissions to be invoked by S3 events
@@ -131,45 +144,61 @@ export class AwsStack extends cdk.Stack {
       new s3n.LambdaDestination(myLambda),
     );
 
-    const bastionSecurityGroup = new ec2.SecurityGroup(
-      this,
-      "BastionSecurityGroup",
-      {
-        vpc,
-        description: "Allow SSH access to Bastion Host",
-        allowAllOutbound: true,
-      },
-    );
+    // ! do not delete, this is used for testing
+    // const bastionSecurityGroup = new ec2.SecurityGroup(
+    //   this,
+    //   "BastionSecurityGroup",
+    //   {
+    //     vpc,
+    //     description: "Allow SSH access to Bastion Host",
+    //     allowAllOutbound: true,
+    //   },
+    // );
 
-    // Allow inbound SSH connections on the default port (22)
-    bastionSecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(22),
-      "Allow SSH access",
-    );
+    // // Allow inbound SSH connections on the default port (22)
+    // bastionSecurityGroup.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(22),
+    //   "Allow SSH access",
+    // );
 
-    const bastionHostLinux = new ec2.BastionHostLinux(this, "BastionHost", {
-      vpc,
-      instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE3,
-        ec2.InstanceSize.MICRO,
-      ),
-      securityGroup: bastionSecurityGroup,
-      subnetSelection: { subnetType: ec2.SubnetType.PUBLIC },
+    // const bastionHostLinux = new ec2.BastionHostLinux(this, "BastionHost", {
+    //   vpc,
+    //   instanceType: ec2.InstanceType.of(
+    //     ec2.InstanceClass.BURSTABLE3,
+    //     ec2.InstanceSize.MICRO,
+    //   ),
+    //   securityGroup: bastionSecurityGroup,
+    //   subnetSelection: { subnetType: ec2.SubnetType.PUBLIC },
+    // });
+
+    // // Display commands for connect bastion host using ec2 instance connect
+    // const createSshKeyCommand = "ssh-keygen -t rsa -f my_rsa_key";
+    // const pushSshKeyCommand = `aws ec2-instance-connect send-ssh-public-key --region ${cdk.Aws.REGION} --instance-id ${bastionHostLinux.instanceId} --availability-zone ${bastionHostLinux.instanceAvailabilityZone} --instance-os-user ec2-user --ssh-public-key file://my_rsa_key.pub --profile default`;
+    // const sshCommand = `ssh -o "IdentitiesOnly=yes" -i my_rsa_key ec2-user@${bastionHostLinux.instancePublicDnsName}`;
+
+    // new cdk.CfnOutput(this, "CreateSshKeyCommand", {
+    //   value: createSshKeyCommand,
+    // });
+    // new cdk.CfnOutput(this, "PushSshKeyCommand", { value: pushSshKeyCommand });
+    // new cdk.CfnOutput(this, "SshCommand", { value: sshCommand });
+
+    // Define a security group for OpenSearch access
+    const openSearchRole = new iam.Role(this, "DMSAccessRole", {
+      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
+      description: "Role for OpenSearch Service access",
     });
 
-    // Display commands for connect bastion host using ec2 instance connect
-    const createSshKeyCommand = "ssh-keygen -t rsa -f my_rsa_key";
-    const pushSshKeyCommand = `aws ec2-instance-connect send-ssh-public-key --region ${cdk.Aws.REGION} --instance-id ${bastionHostLinux.instanceId} --availability-zone ${bastionHostLinux.instanceAvailabilityZone} --instance-os-user ec2-user --ssh-public-key file://my_rsa_key.pub --profile default`;
-    const sshCommand = `ssh -o "IdentitiesOnly=yes" -i my_rsa_key ec2-user@${bastionHostLinux.instancePublicDnsName}`;
+    openSearchRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["es:*"],
+        resources: [
+          `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
+        ],
+      }),
+    );
 
-    new cdk.CfnOutput(this, "CreateSshKeyCommand", {
-      value: createSshKeyCommand,
-    });
-    new cdk.CfnOutput(this, "PushSshKeyCommand", { value: pushSshKeyCommand });
-    new cdk.CfnOutput(this, "SshCommand", { value: sshCommand });
-
-    // Define a security group for the RDS instance within the VPC
     const openSearchSecurityGroup = new ec2.SecurityGroup(
       this,
       "MyOpenSearchSecurityGroup",
@@ -187,7 +216,7 @@ export class AwsStack extends cdk.Stack {
     );
 
     const openSearchDomain = new opensearch.Domain(this, "MyOpenSearchDomain", {
-      domainName: "my-opensearch-domain",
+      domainName: "testing",
       version: opensearch.EngineVersion.OPENSEARCH_1_0,
       capacity: {
         masterNodes: 0,
@@ -203,24 +232,15 @@ export class AwsStack extends cdk.Stack {
       zoneAwareness: {
         enabled: false,
       },
-      vpc,
-      vpcSubnets: [
-        {
-          subnets: [
-            vpc.selectSubnets({
-              subnetType: ec2.SubnetType.PUBLIC,
-            }).subnets[0],
-          ],
-        },
-      ],
+      // Removed VPC and Subnet configurations
       securityGroups: [openSearchSecurityGroup],
       accessPolicies: [
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          principals: [new iam.AnyPrincipal()], // This allows all AWS principals
+          principals: [new iam.ArnPrincipal(openSearchRole.roleArn)],
           actions: ["es:*"],
           resources: [
-            `arn:aws:es:${this.region}:${this.account}:domain/my-opensearch-domain/*`,
+            `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
           ],
         }),
       ],
@@ -238,7 +258,7 @@ export class AwsStack extends cdk.Stack {
 
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management
-    const dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
+    const _dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
       roleName: "dms-vpc-role",
       managedPolicies: [
@@ -249,7 +269,7 @@ export class AwsStack extends cdk.Stack {
     });
 
     // Create the IAM role for DMS CloudWatch Logs
-    const dmsCloudWatchLogsRole = new iam.Role(this, "DmsCloudWatchLogsRole", {
+    const _dmsCloudWatchLogsRole = new iam.Role(this, "DmsCloudWatchLogsRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
       roleName: "dms-cloudwatch-logs-role",
       managedPolicies: [
@@ -267,9 +287,16 @@ export class AwsStack extends cdk.Stack {
         replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
         replicationSubnetGroupDescription:
           "Subnet group for DMS replication instances",
-        subnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
+        subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
       },
     );
+
+    // Define a security group for the RDS instance within the VPC
+    const dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
+      vpc,
+      allowAllOutbound: true,
+      description: "Security group for DMS replication instance",
+    });
 
     // Create the DMS replication instance
     const dmsReplicationInstance = new dms.CfnReplicationInstance(
@@ -279,17 +306,16 @@ export class AwsStack extends cdk.Stack {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
         publiclyAccessible: true,
-
-        vpcSecurityGroupIds: [dbSecurityGroup.securityGroupId],
-        replicationSubnetGroupIdentifier:
-          dmsSubnetGroup.replicationSubnetGroupIdentifier,
+        // vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
+        // replicationSubnetGroupIdentifier:
+        //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
         multiAz: false,
       },
     );
 
     const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
       endpointType: "source",
-      engineName: "postgres",
+      engineName: "mysql",
       username: cdk.Fn.sub(
         "{{resolve:secretsmanager:${MyDbSecret}:SecretString:username}}",
         {
@@ -303,9 +329,9 @@ export class AwsStack extends cdk.Stack {
         },
       ),
       serverName: rdsInstance.dbInstanceEndpointAddress,
-      port: 5432,
+      port: 3306, // MySQL's default port
       databaseName: "mydatabase",
-      sslMode: "require",
+      sslMode: "none",
     });
 
     // DMS Target Endpoint for OpenSearch
@@ -313,32 +339,49 @@ export class AwsStack extends cdk.Stack {
       endpointType: "target",
       engineName: "opensearch",
       elasticsearchSettings: {
-        serviceAccessRoleArn: dmsVpcRole.roleArn,
+        serviceAccessRoleArn: openSearchRole.roleArn,
         endpointUri: openSearchDomain.domainEndpoint,
       },
     });
 
     const tableMappings = JSON.stringify({
       rules: [
+        // Rule to select the table
         {
           "rule-type": "selection",
           "rule-id": "1",
-          "rule-name": "1",
+          "rule-name": "SelectTable",
           "object-locator": {
-            "schema-name": "public",
+            "schema-name": "mydatabase",
             "table-name": "User",
           },
           "rule-action": "include",
-          "column-mapping": [
-            {
-              "column-name": "id",
-              type: "include",
-            },
-            {
-              "column-name": "username",
-              type: "include",
-            },
-          ],
+        },
+        // Rule to include the 'id' column
+        {
+          "rule-type": "transformation",
+          "rule-id": "2",
+          "rule-name": "IncludeIdColumn",
+          "rule-action": "include-column",
+          "rule-target": "column",
+          "object-locator": {
+            "schema-name": "mydatabase",
+            "table-name": "User",
+            "column-name": "id",
+          },
+        },
+        // Rule to include the 'username' column
+        {
+          "rule-type": "transformation",
+          "rule-id": "3",
+          "rule-name": "IncludeUsernameColumn",
+          "rule-action": "include-column",
+          "rule-target": "column",
+          "object-locator": {
+            "schema-name": "mydatabase",
+            "table-name": "User",
+            "column-name": "username",
+          },
         },
       ],
     });
