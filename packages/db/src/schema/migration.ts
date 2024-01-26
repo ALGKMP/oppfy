@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   date,
   datetime,
@@ -26,8 +27,8 @@ export const user = mySqlTable("User", {
   // email: varchar("email", { length: 255 }).unique().notNull(),
   name: varchar("name", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
-  profileId: int("profileId").references(() => profile.id),
-  notificationSetting: int("notificationSetting").references(
+  profileId: bigint("profileId", {mode: "bigint", unsigned: true}).references(() => profile.id),
+  notificationSetting: bigint("notificationSetting", {mode: "bigint", unsigned: true}).references(
     () => notificationSetting.id,
   ),
   createdAt: timestamp("createdAt")
@@ -63,7 +64,7 @@ export const profile = mySqlTable("Profile", {
   id: serial("id").primaryKey(),
   userName: varchar("userName", { length: 255 }).unique().notNull(),
   bio: text("bio"),
-  profilePhotoId: int("profilePhoto").references(() => profilePhoto.id),
+  profilePhotoId: bigint("profilePhoto", {mode: "bigint", unsigned: true}).references(() => profilePhoto.id),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -100,7 +101,7 @@ export const profilePhotoRelations = relations(profilePhoto, ({ one }) => ({
 
 export const post = mySqlTable("Post", {
   id: serial("id").primaryKey(),
-  authorId: int("authorId")
+  authorId: bigint("authorId", {mode: "bigint", unsigned: true})
     .references(() => profile.id)
     .notNull(),
   title: varchar("title", { length: 255 }).notNull(),
@@ -128,7 +129,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
 
 export const postStats = mySqlTable("PostStats", {
   id: serial("id").primaryKey(),
-  postId: int("postId")
+  postId: bigint("postId", {mode: "bigint", unsigned: true})
     .references(() => post.id)
     .notNull(),
   likes: int("likes").default(0).notNull(),
@@ -149,7 +150,7 @@ export const postStatsRelations = relations(postStats, ({one}) => ({
 
 export const tag = mySqlTable("Tag", {
   id: serial("id").primaryKey(),
-  profileId: int("profileId")
+  profileId: bigint("profileId", {mode: "bigint", unsigned: true})
     .references(() => profile.id)
     .notNull(),
   createdAt: timestamp("createdAt")
@@ -171,10 +172,10 @@ export const tagRelations = relations(tag, ({ one }) => ({
 
 export const like = mySqlTable("Like", {
   id: serial("id").primaryKey(),
-  postId: int("postId")
+  postId: bigint("postId", {mode: "bigint", unsigned: true})
     .references(() => post.id)
     .notNull(),
-  profileId: int("profileId")
+  profileId: bigint("profileId", {mode: "bigint", unsigned: true})
     .references(() => profile.id)
     .notNull(),
   createdAt: timestamp("createdAt")
@@ -195,10 +196,10 @@ export const likeRelations = relations(like, ({ one }) => ({
 
 export const comment = mySqlTable("Comment", {
   id: serial("id").primaryKey(),
-  userId: int("userId")
+  userId: varchar("userId", {length: 255})
     .references(() => user.id)
     .notNull(),
-  postId: int("postId")
+  postId: bigint("postId", {mode: "bigint", unsigned: true})
     .references(() => post.id)
     .notNull(),
   body: text("body").notNull(),
