@@ -42,7 +42,7 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!user?.firstName || !user?.dateOfBirth) {
+  if (!user?.name || !user?.dateOfBirth) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 

@@ -46,7 +46,16 @@ export const authRouter = createTRPCRouter({
       // return await ctx.db.user.findUniqueOrThrow({
       //   where: { id: ctx.session.uid },
       // });
-      await ctx.db.select().from(schema.user).where(eq(schema.user.id, ctx.session.uid));
+
+      await ctx.db
+        .select()
+        .from(schema.user)
+        .where(eq(schema.user.id, ctx.session.uid));
+      const possibleUsers = await ctx.db.selectDistinct().from(schema.user).where(eq(schema.user.id, ctx.session.uid));
+
+      const user = possibleUsers[0];
+
+      return user;
     } catch (_err) {
       throw new TRPCError({
         code: "NOT_FOUND",
@@ -86,10 +95,13 @@ export const authRouter = createTRPCRouter({
       //     dateOfBirth: true,
       //   },
       // });
-      const result = await ctx.db.select({
-        name: schema.user.name,
-        dateOfBirth: schema.user.dateOfBirth,
-      }).from(schema.user).where(eq(schema.user.id, ctx.session.uid));
+      const result = await ctx.db
+        .select({
+          name: schema.user.name,
+          dateOfBirth: schema.user.dateOfBirth,
+        })
+        .from(schema.user)
+        .where(eq(schema.user.id, ctx.session.uid));
 
       if (result[0] == undefined) {
         throw new TRPCError({
@@ -128,9 +140,24 @@ export const authRouter = createTRPCRouter({
         //     ...userDetails,
         //   },
         // });
-        await ctx.db.update(schema.user).set({
-          ...userDetails,
-        }).where(eq(schema.user.id, ctx.session.uid));
+
+        // TODO: Problem with Drizzle  https://www.answeroverflow.com/m/1144754734423625920
+
+        if (userDetails.dateOfBirth != undefined || userDetails.name != undefined) {
+          console.log('updating user details')
+          await ctx.db
+            .update(schema.user)
+            .set({
+              ...userDetails,
+            })
+            .where(eq(schema.user.id, ctx.session.uid));
+        }
+        if (userDetails.username) {
+          console.log('updating profile details')
+          await ctx.db.insert(schema.profile).values({
+            userName: userDetails.username,
+          });
+        }
       } catch (_err) {
         throw new TRPCError({
           code: "NOT_FOUND",

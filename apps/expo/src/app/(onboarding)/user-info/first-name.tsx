@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { Button, debounce, Input, Text, View, YStack } from "tamagui";
+import { Button, Input, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";
@@ -14,19 +14,19 @@ const schemaValidation = z.object({
 const FirstName = () => {
   const router = useRouter();
 
-  const [firstName, setFirstName] = useState("");
+  const [name, setName] = useState("");
   const firstNameInputRef = useRef<TextInput | null>(null);
 
   const updateUserDetails = api.auth.updateUserDetails.useMutation();
 
   const firstNameIsValid = useMemo(
-    () => schemaValidation.safeParse({ firstName }).success,
-    [firstName],
+    () => schemaValidation.safeParse({ firstName: name }).success,
+    [name],
   );
 
   const onPress = async () => {
     await updateUserDetails.mutateAsync({
-      firstName,
+      name,
     });
 
     router.push("/user-info/date-of-birth");
@@ -56,8 +56,8 @@ const FirstName = () => {
           <YStack space="$3">
             <Input
               ref={firstNameInputRef}
-              value={firstName}
-              onChangeText={setFirstName}
+              value={name}
+              onChangeText={setName}
               onLayout={() => firstNameInputRef.current?.focus()}
               textAlign="center"
               backgroundColor="transparent"
