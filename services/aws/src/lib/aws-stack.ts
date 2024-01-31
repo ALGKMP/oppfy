@@ -280,7 +280,7 @@ export class AwsStack extends cdk.Stack {
     });
 
     // Define the replication subnet group using the VPC's private subnets
-    const dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
+    const _dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
       this,
       "DmsSubnetGroup",
       {
@@ -292,7 +292,7 @@ export class AwsStack extends cdk.Stack {
     );
 
     // Define a security group for the RDS instance within the VPC
-    const dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
+    const _dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
       vpc,
       allowAllOutbound: true,
       description: "Security group for DMS replication instance",

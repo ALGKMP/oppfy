@@ -27,11 +27,11 @@ export * from "drizzle-orm";
 // });
 
 const connection = await mysql.createConnection({
-  host: process.env.AWS_RDS_ENDPOINT,
-  user: process.env.AWS_RDS_USERNAME,
-  port: 3306,
-  database: process.env.AWS_RDS_NAME,
-  password: process.env.AWS_RDS_PASSWORD,
+  port: Number(process.env.DATABASE_PORT),
+  host: process.env.DATABASE_ENDPOINT,
+  user: process.env.DATABASE_USERNAME,
+  database: process.env.DATABASE_NAME,
+  password: process.env.DATABASE_PASSWORD,
 });
 
 export const db = drizzle(connection, {
