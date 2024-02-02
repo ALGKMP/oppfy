@@ -26,8 +26,6 @@ export const mediaRouter = createTRPCRouter({
   createPresignedUrlWithClient: protectedProcedure
     .input(
       z.object({
-        bucket: z.string(),
-        key: z.string(),
         uid: z.string(),
         contentLength: z.number(),
         contentType: z.string(),
@@ -36,26 +34,23 @@ export const mediaRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+
+      const key = "test123";
+      const bucket = "awsstack-mybucketf68f3ff0-9iienul0dff2"
+
       const metadata = {
         authorId: input.uid,
         ...(input.caption && { caption: input.caption }),
-        ...(input.tags && { tags: input.tags.join(",") }),
+        ...(input.tags && { tags: input.tags.join(", ") }),
       };
 
-      // for (const key in metadata) {
-      //   metadata[camelToKebab(key)] = metadata[key];
-      // }
-
       const putObjectParams = {
-        Bucket: input.bucket,
-        Key: input.key,
+        Bucket: bucket,
+        Key: key,
         Metadata: metadata,
         Fields: {
-          "Content-Length": input.contentLength,
-          // "Content-Type": input.contentType,
-          // "x-amz-meta-authorid": input.uid,
-          // "x-amz-meta-caption": input.caption,
-          // "x-amz-meta-tags": input.tags.join(","),
+          "Content-Length": input.contentLength, // Content-Length is to ensure we get the file we expected from the frontend
+          "Content-Type": input.contentType, // Content-Type is to ensure we get the file we expected from the frontend 
         },
       };
 

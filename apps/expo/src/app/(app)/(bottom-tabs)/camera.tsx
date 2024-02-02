@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Image, Text, View } from "tamagui";
+import { Button, Image, View } from "tamagui";
 
 import { useSession } from "~/contexts/SessionsContext";
 import { api } from "~/utils/api";
@@ -56,8 +56,6 @@ const Camera = () => {
     }
 
     mutation.mutate({
-      bucket: "myawsbucket-0xc3",
-      key: "testKey123",
       uid: userSession.user!.uid,
       contentType: contentType,
       contentLength: contentLength,

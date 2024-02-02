@@ -1,7 +1,4 @@
-// import { drizzle } from 'drizzle-orm/aws-data-api/pg';
 
-// import { RDSDataClient } from '@aws-sdk/client-rds-data';
-// import { fromIni } from '@aws-sdk/credential-providers';
 import { S3Client } from "@aws-sdk/client-s3";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
@@ -14,18 +11,6 @@ export { mySqlTable as tableCreator } from "./schema/_table";
 
 export * from "drizzle-orm";
 
-// const rdsClient = new RDSDataClient({
-//     credentials: fromIni({ profile: process.env.PROFILE }),
-//     region: 'us-east-1',
-// });
-
-// export const db = drizzle(rdsClient, {
-//   database: process.env.DATABASE!,
-//   secretArn: process.env.SECRET_ARN!,
-//   resourceArn: process.env.RESOURCE_ARN!,
-//   logger: true,
-// });
-
 const connection = await mysql.createConnection({
   port: Number(process.env.DATABASE_PORT),
   host: process.env.DATABASE_ENDPOINT,
@@ -36,7 +21,11 @@ const connection = await mysql.createConnection({
 
 export const db = drizzle(connection, {
   logger: true,
+  schema,
+  mode: "default"
 });
+
+// const test = db.query.user.findFirst({ where: eq(migration.user.id, "sdt") });
 
 const globalForS3 = globalThis as { s3?: S3Client };
 
