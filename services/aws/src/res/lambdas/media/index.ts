@@ -1,7 +1,7 @@
 import type { HeadObjectCommandInput } from "@aws-sdk/client-s3";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
-import {db} from "../../../../../../packages/db/src" // TODO: fix this import
+// import {db} from "../../../../../../packages/db/src" // TODO: fix this import
 import { Metadata } from "../../../utils";
 
 
