@@ -1,12 +1,11 @@
 import type { HeadObjectCommandInput } from "@aws-sdk/client-s3";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
-import {db} from "../../../../../../packages/db/src" // TODO: fix this import
-import { Metadata } from "../../../utils";
+// import {db} from "../../../../../../packages/db/src" // TODO: fix this import
+import type { Metadata } from "../../../utils";
 
 
 export const region = "us-east-1";
-export const bucket = "myawsbucket-0xc3";
 
 // TODO: we can upload our env vars to lambda through our template.yaml file
 const AWS_ACCESS_KEY_ID = "AKIA5OJS54YNU5J6NZNU";
@@ -30,8 +29,8 @@ export const handler = async (
     };
   }
 
-  const objectKey = record?.s3.object.key;
-  const objectBucket = record?.s3.bucket.name;
+  const objectKey = record.s3.object.key;
+  const objectBucket = record.s3.bucket.name;
 
   const s3Client = new S3Client({
     region: region,
@@ -63,6 +62,13 @@ export const handler = async (
     }
 
     console.log(`Response: ${JSON.stringify(response)}`);
+
+    console.log(`Metadata: ${JSON.stringify(metadata)}`)
+
+    console.log(`Tags: ${metadata.tags}`);
+    console.log(`Caption: ${metadata.caption}`);
+    console.log(`AuthorId: ${metadata.authorId}`)
+
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -81,7 +87,6 @@ export const handler = async (
     }
 
   // const { Metadata } = response;
-
 
   // if (!Metadata) {
   //   // TODO: Handle this error
