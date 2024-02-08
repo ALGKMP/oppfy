@@ -7,7 +7,6 @@
   "private": true,
   "scripts": {
     "build": "rimraf dist && tsc",
-    "deploy": "pnpm build && pnpm -F aws cdk deploy",
     "test": "jest",
     "test:watch": "jest --watch",
     "cdk": "pnpm with-env cdk",

@@ -126,7 +126,7 @@ export class AwsStack extends cdk.Stack {
 
     const myLambda = new lambda.Function(this, "MyLambdaFunction", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("dist/res/lambdas/s3-one-time-use"),
+      code: lambda.Code.fromAsset("dist/res/lambdas/media"),
       handler: "index.handler",
     });
 
@@ -287,7 +287,9 @@ export class AwsStack extends cdk.Stack {
         replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
         replicationSubnetGroupDescription:
           "Subnet group for DMS replication instances",
-        subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
+        // subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
+        subnetIds: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnetIds, // Use private subnets if publiclyAccessible is false
+
       },
     );
 
@@ -306,12 +308,17 @@ export class AwsStack extends cdk.Stack {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
         publiclyAccessible: true,
+        replicationInstanceIdentifier: _dmsVpcRole.roleId,
         // vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
         // replicationSubnetGroupIdentifier:
         //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
+        vpcSecurityGroupIds: [_dmsSecurityGroup.securityGroupId], // Make sure to assign the correct Security Group
+    replicationSubnetGroupIdentifier: _dmsSubnetGroup.replicationSubnetGroupIdentifier, // Assign the Replication Subnet Group
         multiAz: false,
       },
     );
+
+    // dmsReplicationInstance.node.addDependency(_dmsVpcRole)
 
     const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
       endpointType: "source",
