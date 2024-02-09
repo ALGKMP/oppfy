@@ -8,10 +8,10 @@ export default {
   tablesFilter: ["t3turbo_*"],
   driver: "mysql2",
   dbCredentials: {
-    host: process.env.AWS_RDS_ENDPOINT!,
+    host: process.env.DATABASE_ENDPOINT!,
     port: 3306,
-    user: process.env.AWS_RDS_USERNAME!,
-    password: process.env.AWS_RDS_PASSWORD!,
-    database: process.env.DATABASE!,
+    user: process.env.DATABASE_USERNAME!,
+    password: process.env.DATABASE_PASSWORD!,
+    database: process.env.DATABASE_NAME!,
   }
 } satisfies Config;
