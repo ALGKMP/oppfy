@@ -1,8 +1,10 @@
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { Date } from "@acme/utils";
 
+import { schema } from "../../../db/src";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
@@ -14,13 +16,27 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { firebaseUid } = input;
+      console.log("creating user")
 
       try {
-        await ctx.db.user.create({
-          data: {
-            id: firebaseUid,
-          },
-        });
+        // await ctx.db.user.create({
+        //   data: {
+        //     id: firebaseUid,
+        //   },
+        // });
+        const exists = await ctx.db
+          .select()
+          .from(schema.user)
+          .where(eq(schema.user.id, firebaseUid));
+
+        console.log('exists', exists)
+        if (exists.length > 0) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "User already exists",
+          });
+        }
+        await ctx.db.insert(schema.user).values({ id: firebaseUid });
       } catch (_err) {
         throw new TRPCError({
           code: "CONFLICT",
@@ -30,25 +46,45 @@ export const authRouter = createTRPCRouter({
     }),
   getUser: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.db.user.findUniqueOrThrow({
-        where: { id: ctx.session.uid },
-      });
+      // return await ctx.db.user.findUniqueOrThrow({
+      //   where: { id: ctx.session.uid },
+      // });
+
+      await ctx.db
+        .select()
+        .from(schema.user)
+        .where(eq(schema.user.id, ctx.session.uid));
+      const possibleUsers = await ctx.db.selectDistinct().from(schema.user).where(eq(schema.user.id, ctx.session.uid));
+
+      const user = possibleUsers[0];
+      
+      if (user == undefined) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      return user;
     } catch (_err) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        // message: "User not found",
-        message: "shits broken 3",
+        message: "User not found",
       });
     }
   }),
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       // transaction to ensure an atomic operation
-      await ctx.db.$transaction(async (db) => {
-        await db.user.delete({
-          where: { id: ctx.session.uid },
-        });
+      // await ctx.db.$transaction(async (db) => {
+      //   await db.user.delete({
+      //     where: { id: ctx.session.uid },
+      //   });
 
+      //   await ctx.auth.deleteUser(ctx.session.uid);
+      // });
+      await ctx.db.transaction(async (db) => {
+        await db.delete(schema.user).where(eq(schema.user.id, ctx.session.uid));
         await ctx.auth.deleteUser(ctx.session.uid);
       });
     } catch (_err) {
@@ -62,15 +98,27 @@ export const authRouter = createTRPCRouter({
   }),
   hasUserDetails: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      const { firstName, dateOfBirth } = await ctx.db.user.findUniqueOrThrow({
-        where: { id: ctx.session.uid },
-        select: {
-          firstName: true,
-          dateOfBirth: true,
-        },
-      });
+      // const { firstName, dateOfBirth } = await ctx.db.user.findUniqueOrThrow({
+      //   where: { id: ctx.session.uid },
+      //   select: {
+      //     firstName: true,
+      //     dateOfBirth: true,
+      //   },
+      // });
+      const result = await ctx.db
+        .select({
+          name: schema.user.name,
+          dateOfBirth: schema.user.dateOfBirth,
+        })
+        .from(schema.user)
+        .where(eq(schema.user.id, ctx.session.uid));
+      if (result[0] == undefined) {
+        return false;
+      }
 
-      return !!firstName && !!dateOfBirth;
+      const { name, dateOfBirth } = result[0];
+
+      return !!name && !!dateOfBirth;
     } catch (_err) {
       throw new TRPCError({
         code: "NOT_FOUND",
@@ -81,7 +129,7 @@ export const authRouter = createTRPCRouter({
   updateUserDetails: protectedProcedure
     .input(
       z.object({
-        firstName: z.string().min(2).optional(),
+        name: z.string().min(2).optional(),
         username: z.string().min(1).optional(),
         dateOfBirth: z
           .date()
@@ -93,12 +141,30 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input: userDetails }) => {
       try {
-        await ctx.db.user.update({
-          where: { id: ctx.session.uid },
-          data: {
-            ...userDetails,
-          },
-        });
+        // await ctx.db.user.update({
+        //   where: { id: ctx.session.uid },
+        //   data: {
+        //     ...userDetails,
+        //   },
+        // });
+
+        // TODO: Problem with Drizzle  https://www.answeroverflow.com/m/1144754734423625920
+
+        if (userDetails.dateOfBirth != undefined || userDetails.name != undefined) {
+          console.log('updating user details')
+          return await ctx.db
+            .update(schema.user)
+            .set({
+              ...userDetails,
+            })
+            .where(eq(schema.user.id, ctx.session.uid));
+        }
+        if (userDetails.username) {
+          console.log('updating profile details')
+          return await ctx.db.insert(schema.profile).values({
+            userName: userDetails.username,
+          });
+        }
       } catch (_err) {
         throw new TRPCError({
           code: "NOT_FOUND",

@@ -9,8 +9,8 @@ import type { TextInput } from "react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
-import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { Button, Input, Spinner, Text, View, YStack } from "tamagui";
+// import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { Button, Spinner, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { PinCodeInput } from "~/components/Inputs";
@@ -68,6 +68,7 @@ const PhoneNumberOTP = () => {
       const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
 
       if (isNewUser) {
+        console.log("creating new user")
         await createUser.mutateAsync({
           firebaseUid: userCredential.user.uid,
         });

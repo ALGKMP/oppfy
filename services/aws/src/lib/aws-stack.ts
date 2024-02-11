@@ -4,7 +4,7 @@ import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as neptune from "aws-cdk-lib/aws-neptune";
+// import * as neptune from "aws-cdk-lib/aws-neptune";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -120,13 +120,13 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    const bucket = new s3.Bucket(this, "MyBucket", {
+    const bucket = new s3.Bucket(this, "MyBucket2", {
       versioned: true,
     });
 
-    const myLambda = new lambda.Function(this, "MyLambdaFunction", {
+    const myLambda = new lambda.Function(this, "MyLambdaFunction2", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("dist/res/lambdas/s3-one-time-use"),
+      code: lambda.Code.fromAsset("dist/res/lambdas/media"),
       handler: "index.handler",
     });
 
@@ -143,6 +143,77 @@ export class AwsStack extends cdk.Stack {
       s3.EventType.OBJECT_CREATED,
       new s3n.LambdaDestination(myLambda),
     );
+
+//     // Create three S3 buckets
+// const postBucket = new s3.Bucket(this, "PostBucket", {
+//   versioned: true,
+// });
+
+// const storyBucket = new s3.Bucket(this, "StoryBucket", {
+//   versioned: true,
+// });
+
+// const profileBucket = new s3.Bucket(this, "ProfileBucket", {
+//   versioned: true,
+// });
+
+// // Create three Lambda functions
+// const postLambda = new lambda.Function(this, "PostLambdaFunction", {
+//   runtime: lambda.Runtime.NODEJS_20_X,
+//   code: lambda.Code.fromAsset("dist/res/lambdas/post"),
+//   handler: "index.handler",
+// });
+
+// const storyLambda = new lambda.Function(this, "StoryLambdaFunction", {
+//   runtime: lambda.Runtime.NODEJS_20_X,
+//   code: lambda.Code.fromAsset("dist/res/lambdas/story"),
+//   handler: "index.handler",
+// });
+
+// const profileLambda = new lambda.Function(this, "ProfileLambdaFunction", {
+//   runtime: lambda.Runtime.NODEJS_20_X,
+//   code: lambda.Code.fromAsset("dist/res/lambdas/profile"),
+//   handler: "index.handler",
+// });
+
+// // Grant read permissions and set event notifications for each Lambda function and bucket pair
+
+// // Post Bucket and Lambda
+// postBucket.grantRead(postLambda);
+// postLambda.addPermission("AllowPostS3Invocation", {
+//   action: "lambda:InvokeFunction",
+//   principal: new iam.ServicePrincipal("s3.amazonaws.com"),
+//   sourceArn: postBucket.bucketArn,
+// });
+// postBucket.addEventNotification(
+//   s3.EventType.OBJECT_CREATED,
+//   new s3n.LambdaDestination(postLambda),
+// );
+
+// // Story Bucket and Lambda
+// storyBucket.grantRead(storyLambda);
+// storyLambda.addPermission("AllowStoryS3Invocation", {
+//   action: "lambda:InvokeFunction",
+//   principal: new iam.ServicePrincipal("s3.amazonaws.com"),
+//   sourceArn: storyBucket.bucketArn,
+// });
+// storyBucket.addEventNotification(
+//   s3.EventType.OBJECT_CREATED,
+//   new s3n.LambdaDestination(storyLambda),
+// );
+
+// // Profile Bucket and Lambda
+// profileBucket.grantRead(profileLambda);
+// profileLambda.addPermission("AllowProfileS3Invocation", {
+//   action: "lambda:InvokeFunction",
+//   principal: new iam.ServicePrincipal("s3.amazonaws.com"),
+//   sourceArn: profileBucket.bucketArn,
+// });
+// profileBucket.addEventNotification(
+//   s3.EventType.OBJECT_CREATED,
+//   new s3n.LambdaDestination(profileLambda),
+// );
+
 
     // ! do not delete, this is used for testing
     // const bastionSecurityGroup = new ec2.SecurityGroup(
@@ -280,19 +351,21 @@ export class AwsStack extends cdk.Stack {
     });
 
     // Define the replication subnet group using the VPC's private subnets
-    const dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
+    const _dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
       this,
       "DmsSubnetGroup",
       {
         replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
         replicationSubnetGroupDescription:
           "Subnet group for DMS replication instances",
-        subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
+        // subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
+        subnetIds: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnetIds, // Use private subnets if publiclyAccessible is false
+
       },
     );
 
     // Define a security group for the RDS instance within the VPC
-    const dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
+    const _dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
       vpc,
       allowAllOutbound: true,
       description: "Security group for DMS replication instance",
@@ -306,12 +379,17 @@ export class AwsStack extends cdk.Stack {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
         publiclyAccessible: true,
+        replicationInstanceIdentifier: _dmsVpcRole.roleId,
         // vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
         // replicationSubnetGroupIdentifier:
         //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
+        vpcSecurityGroupIds: [_dmsSecurityGroup.securityGroupId], // Make sure to assign the correct Security Group
+    replicationSubnetGroupIdentifier: _dmsSubnetGroup.replicationSubnetGroupIdentifier, // Assign the Replication Subnet Group
         multiAz: false,
       },
     );
+
+    // dmsReplicationInstance.node.addDependency(_dmsVpcRole)
 
     const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
       endpointType: "source",

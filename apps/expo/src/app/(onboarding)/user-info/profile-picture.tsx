@@ -16,14 +16,14 @@ const ProfilePicture: React.FC = () => {
   const updateUserDetails = api.auth.updateUserDetails.useMutation();
 
   // TODO: Implement S3 bucket upload - @TONY
-  const onSubmit = async () => {
-    // await updateUserDetails.mutateAsync({
-    //   profilePic,
-    // });
+  const onSubmit = () => {
     router.replace("/(app)/(bottom-tabs)/profile");
   };
 
-  const onSkip = () => router.replace("/(app)/(bottom-tabs)/profile");
+  const onSkip = () => {
+    console.log("routing to profile")
+    router.replace("/(app)/(bottom-tabs)/profile")
+  };
 
   const handleImagePicking = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
