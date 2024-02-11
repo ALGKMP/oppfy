@@ -16,6 +16,7 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { firebaseUid } = input;
+      console.log("creating user")
 
       try {
         // await ctx.db.user.create({
@@ -27,6 +28,8 @@ export const authRouter = createTRPCRouter({
           .select()
           .from(schema.user)
           .where(eq(schema.user.id, firebaseUid));
+
+        console.log('exists', exists)
         if (exists.length > 0) {
           throw new TRPCError({
             code: "CONFLICT",
@@ -54,6 +57,13 @@ export const authRouter = createTRPCRouter({
       const possibleUsers = await ctx.db.selectDistinct().from(schema.user).where(eq(schema.user.id, ctx.session.uid));
 
       const user = possibleUsers[0];
+      
+      if (user == undefined) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
 
       return user;
     } catch (_err) {
@@ -102,13 +112,10 @@ export const authRouter = createTRPCRouter({
         })
         .from(schema.user)
         .where(eq(schema.user.id, ctx.session.uid));
-
       if (result[0] == undefined) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "failed to find user",
-        });
+        return false;
       }
+
       const { name, dateOfBirth } = result[0];
 
       return !!name && !!dateOfBirth;
@@ -145,7 +152,7 @@ export const authRouter = createTRPCRouter({
 
         if (userDetails.dateOfBirth != undefined || userDetails.name != undefined) {
           console.log('updating user details')
-          await ctx.db
+          return await ctx.db
             .update(schema.user)
             .set({
               ...userDetails,
@@ -154,7 +161,7 @@ export const authRouter = createTRPCRouter({
         }
         if (userDetails.username) {
           console.log('updating profile details')
-          await ctx.db.insert(schema.profile).values({
+          return await ctx.db.insert(schema.profile).values({
             userName: userDetails.username,
           });
         }
