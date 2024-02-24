@@ -18,8 +18,6 @@ const Camera = () => {
 
   const putMutation = useMutation(async (url: string) => {
     console.log("presigned url: ", url);
-
-    console.log("Content-Length:" + contentLength);
     const response = await fetch(url, {
       method: "PUT",
       headers: {
@@ -32,7 +30,6 @@ const Camera = () => {
       body: image,
     });
     console.log("status: ", response.status);
-    console.log(response.headers);
   });
 
   const pickImage = async () => {
@@ -55,6 +52,7 @@ const Camera = () => {
       throw new Error("Image not found");
     }
 
+    console.log("user session UID: ", userSession.user!.uid);
     mutation.mutate({
       uid: userSession.user!.uid,
       contentType: contentType,

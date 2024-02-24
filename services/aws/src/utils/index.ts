@@ -1,5 +1,6 @@
+// AWS transforms all metadata keys to lowercase. TODO: Fix this in the future -> just ship
 export interface Metadata {
-  authorId: string;
+  authorid: string;
   caption?: string;
   tags?: string;
 }
@@ -13,7 +14,7 @@ export const kebabToPascal = (str: string) => {
 export const isMetadata = (metadata: unknown): metadata is Metadata => {
   const m = metadata as Metadata;
   return (
-    m.authorId !== undefined && m.caption !== undefined && m.tags !== undefined
+    m.authorid !== undefined && m.caption !== undefined && m.tags !== undefined
   );
 };
 

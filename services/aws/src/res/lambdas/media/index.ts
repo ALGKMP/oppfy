@@ -1,7 +1,7 @@
 import type { HeadObjectCommandInput } from "@aws-sdk/client-s3";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
-import {db} from "../../../../../../packages/db/src" // TODO: fix this import
+import { db } from "../../../../../../packages/db/src"
 import type { Metadata } from "../../../utils";
 
 
@@ -15,6 +15,10 @@ export const handler = async (
   event: S3Event,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
+
+  const test = db.query.profile.findMany()
+  console.log(test)
+
   console.log(`Records: ${JSON.stringify(event.Records)}`)
 
   const record = event.Records[0];
@@ -66,7 +70,7 @@ export const handler = async (
 
     console.log(`Tags: ${metadata.tags}`);
     console.log(`Caption: ${metadata.caption}`);
-    console.log(`AuthorId: ${metadata.authorId}`)
+    console.log(`AuthorId: ${metadata.authorid}`)
 
     return {
       statusCode: 200,

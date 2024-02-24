@@ -1,7 +1,7 @@
 
 import { S3Client } from "@aws-sdk/client-s3";
 import { drizzle } from "drizzle-orm/mysql2";
-import mysql from "mysql2/promise";
+import * as mysql from "mysql2/promise";
 
 import * as migration from "./schema/migration";
 

@@ -126,7 +126,7 @@ export class AwsStack extends cdk.Stack {
 
     const myLambda = new lambda.Function(this, "MyLambdaFunction2", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("dist/res/lambdas/media"),
+      code: lambda.Code.fromAsset("dist/services/aws/src/res/lambdas/media"),
       handler: "index.handler",
     });
 
