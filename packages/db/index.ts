@@ -3,11 +3,13 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { drizzle } from "drizzle-orm/mysql2";
 import * as mysql from "mysql2/promise";
 
-import * as migration from "./schema/migration";
+// import * as migration from "@acme/db/src/schema/migration";
+import * as migration from "./src/schema/migration"
 
 export const schema = { ...migration };
 
-export { mySqlTable as tableCreator } from "./schema/_table";
+// export { mySqlTable as tableCreator } from "@acme/db/src/schema/_table";
+export { mySqlTable as tableCreator } from "./src/schema/_table";
 
 export * from "drizzle-orm";
 

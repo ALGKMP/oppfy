@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { Date } from "@acme/utils";
 
-import { schema } from "../../../db/src";
+import { schema } from "../../../db";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({

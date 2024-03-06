@@ -3,7 +3,6 @@ import { RemovalPolicy } from "aws-cdk-lib";
 import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 // import * as neptune from "aws-cdk-lib/aws-neptune";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
@@ -11,6 +10,8 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import type { Construct } from "constructs";
+import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as lambda from "aws-cdk-lib/aws-lambda";
 
 // ! Adhere to free tier specs
 // https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all
@@ -124,11 +125,52 @@ export class AwsStack extends cdk.Stack {
       versioned: true,
     });
 
-    const myLambda = new lambda.Function(this, "MyLambdaFunction2", {
+    // const myLayer = new lambda.LayerVersion(this, 'MyLayer', {
+    //   code: lambda.Code.fromAsset('node_modules.zip'),
+    //   compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
+    // });
+
+    // const myLambda = new lambda.Function(this, "MyLambdaFunction2", {
+    //   runtime: lambda.Runtime.NODEJS_20_X,
+    //   code: lambda.Code.fromAsset("dist"),
+    //   handler: "src/res/lambdas/media/index.handler",
+    //   layers: [myLayer]
+    // });
+
+    const myLambda = new lambdaNodeJs.NodejsFunction(this, "DynamoLambdaHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset("dist/services/aws/src/res/lambdas/media"),
-      handler: "index.handler",
+      entry: 'src/res/lambdas/media/index.ts', // Entry file
+      handler: "handler",
+      bundling: {
+        format: lambdaNodeJs.OutputFormat.ESM, // Set output format to ESM
+        mainFields: ["module", "main"],
+        esbuildArgs: {
+          "--conditions": "module",
+        }
+      }
     });
+
+    // const myLambda = new lambdaNodeJs.NodejsFunction(this, 'MyFunction', {
+    //   runtime: lambda.Runtime.NODEJS_18_X, // Choose your runtime
+    //   entry: 'src/res/lambdas/media/index.ts', // Entry file
+    //   handler: 'handler', // Name of the export in your entry file
+    //   bundling: {
+    //     format: lambdaNodeJs.OutputFormat.ESM, // Set output format to ESM
+    //     target: "esnext",
+    //     minify: true,
+    //     externalModules: [],
+    //     banner: 
+    //     `
+    //     import path from 'path';
+    //     js=import { createRequire } from 'module';
+    //     import { fileURLToPath } from 'url';
+    //     import { createRequire as topLevelCreateRequire } from 'module';
+    //     const require = createRequire(import.meta.url);
+    //     const __filename = fileURLToPath(import.meta.url);
+    //     const __dirname = path.dirname(__filename);
+    //     `
+    //   },
+    // });
 
     // Grant the Lambda function permissions to be invoked by S3 events
     bucket.grantRead(myLambda);

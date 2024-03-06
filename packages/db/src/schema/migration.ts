@@ -11,6 +11,7 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 
+// import { mySqlTable } from "@acme/db/src/schema/_table";
 import { mySqlTable } from "./_table";
 
 export const verificationToken = mySqlTable("VerificationToken", {
