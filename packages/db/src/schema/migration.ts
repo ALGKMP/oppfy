@@ -28,8 +28,8 @@ export const user = mySqlTable("User", {
   // email: varchar("email", { length: 255 }).unique().notNull(),
   name: varchar("name", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
-  profileId: bigint("profileId", {mode: "bigint", unsigned: true}).references(() => profile.id),
-  notificationSetting: bigint("notificationSetting", {mode: "bigint", unsigned: true}).references(
+  profileId: bigint("profileId", {mode: "number", unsigned: true}).references(() => profile.id),
+  notificationSetting: bigint("notificationSetting", {mode: "number", unsigned: true}).references(
     () => notificationSetting.id,
   ),
   createdAt: timestamp("createdAt")
@@ -49,6 +49,41 @@ export const userRelations = relations(user, ({ one }) => ({
   }),
 }));
 
+export const profile = mySqlTable("Profile", {
+  id: serial("id").primaryKey(),
+  userName: varchar("userName", { length: 255 }).unique().notNull(),
+  bio: text("bio"),
+  profilePhotoId: bigint("profilePhoto", {mode: "number", unsigned: true}).references(() => profilePhoto.id),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const profileRelations = relations(profile, ({ one, many }) => ({
+  authoredPosts: many(post, {
+    fields: [profile.id],
+    references: [post.authorId],
+  }),
+  receivedPosts: many(post, {
+    fields: [profile.id],
+    references: [post.recipientProfileId],
+  }),
+  profilePhoto: one(profilePhoto, {
+    fields: [profile.profilePhotoId],
+    references: [profilePhoto.id],
+  }),
+}));
+
+export const profilePhoto = mySqlTable("ProfilePhoto", {
+  id: serial("id").primaryKey().notNull(),
+  key: varchar("url", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
 export const notificationSetting = mySqlTable("NotificationSetting", {
   id: serial("id").primaryKey(),
   posts: boolean("posts").default(true).notNull(),
@@ -61,48 +96,12 @@ export const notificationSetting = mySqlTable("NotificationSetting", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const profile = mySqlTable("Profile", {
-  id: serial("id").primaryKey(),
-  userName: varchar("userName", { length: 255 }).unique().notNull(),
-  bio: text("bio"),
-  profilePhotoId: bigint("profilePhoto", {mode: "bigint", unsigned: true}).references(() => profilePhoto.id),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
-
-export const profileRelations = relations(profile, ({ one, many }) => ({
-  profilePhoto: one(profilePhoto, {
-    fields: [profile.profilePhotoId],
-    references: [profilePhoto.id],
-  }),
-  user: one(user, {
-    fields: [profile.id],
-    references: [user.profileId],
-  }),
-  posts: many(post),
-}));
-
-export const profilePhoto = mySqlTable("ProfilePhoto", {
-  id: serial("id").primaryKey(),
-  url: varchar("url", { length: 255 }).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
-
-export const profilePhotoRelations = relations(profilePhoto, ({ one }) => ({
-  profile: one(profile, {
-    fields: [profilePhoto.id],
-    references: [profile.id],
-  }),
-}));
-
 export const post = mySqlTable("Post", {
   id: serial("id").primaryKey(),
-  authorId: bigint("authorId", {mode: "bigint", unsigned: true})
+  authorId: bigint("authorId", {mode: "number", unsigned: true})
+    .references(() => profile.id)
+    .notNull(),
+  recipientProfileId: bigint("recipientProfileId", {mode: "number", unsigned: true})
     .references(() => profile.id)
     .notNull(),
   title: varchar("title", { length: 255 }).notNull(),
@@ -114,9 +113,14 @@ export const post = mySqlTable("Post", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
+
 export const postRelations = relations(post, ({ one, many }) => ({
   author: one(profile, {
     fields: [post.authorId],
+    references: [profile.id],
+  }),
+  recipient: one(profile, {
+    fields: [post.recipientProfileId],
     references: [profile.id],
   }),
   stats: one(postStats, {
@@ -130,7 +134,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
 
 export const postStats = mySqlTable("PostStats", {
   id: serial("id").primaryKey(),
-  postId: bigint("postId", {mode: "bigint", unsigned: true})
+  postId: bigint("postId", {mode: "number", unsigned: true})
     .references(() => post.id)
     .notNull(),
   likes: int("likes").default(0).notNull(),
@@ -151,7 +155,7 @@ export const postStatsRelations = relations(postStats, ({one}) => ({
 
 export const tag = mySqlTable("Tag", {
   id: serial("id").primaryKey(),
-  profileId: bigint("profileId", {mode: "bigint", unsigned: true})
+  profileId: bigint("profileId", {mode: "number", unsigned: true})
     .references(() => profile.id)
     .notNull(),
   createdAt: timestamp("createdAt")
@@ -173,10 +177,10 @@ export const tagRelations = relations(tag, ({ one }) => ({
 
 export const like = mySqlTable("Like", {
   id: serial("id").primaryKey(),
-  postId: bigint("postId", {mode: "bigint", unsigned: true})
+  postId: bigint("postId", {mode: "number", unsigned: true})
     .references(() => post.id)
     .notNull(),
-  profileId: bigint("profileId", {mode: "bigint", unsigned: true})
+  profileId: bigint("profileId", {mode: "number", unsigned: true})
     .references(() => profile.id)
     .notNull(),
   createdAt: timestamp("createdAt")
@@ -200,7 +204,7 @@ export const comment = mySqlTable("Comment", {
   userId: varchar("userId", {length: 255})
     .references(() => user.id)
     .notNull(),
-  postId: bigint("postId", {mode: "bigint", unsigned: true})
+  postId: bigint("postId", {mode: "number", unsigned: true})
     .references(() => post.id)
     .notNull(),
   body: text("body").notNull(),

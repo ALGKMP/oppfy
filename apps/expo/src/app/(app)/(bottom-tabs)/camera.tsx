@@ -9,26 +9,27 @@ import { api } from "~/utils/api";
 const Camera = () => {
   const [image, setImage] = useState("");
   const [contentLength, setContentLength] = useState(0);
-  const [contentType, setContentType] = useState("image/jpeg");
-  const mutation = api.media.createPresignedUrlWithClient.useMutation();
+  const [contentType, setContentType] = useState("");
+  const mutation = api.profile.createPresignedUrlWithClient.useMutation();
 
-  const caption = "test caption";
-  const tags = ["otherUserKey1", "otherUserKey2"];
   const userSession = useSession();
 
+  // const caption = "test caption";
+  // const tags = ["otherUserKey1", "otherUserKey2"];
+  const userId = userSession.user!.uid;
+
   const putMutation = useMutation(async (url: string) => {
-    console.log("presigned url: ", url);
+    if (!image) return;
+
     const response = await fetch(url, {
       method: "PUT",
       headers: {
-        "Content-Length": contentLength.toString(),
-        // "Content-Type": "image/jpeg",
-        // "x-amz-meta-user": userSession.user!.uid,
-        // "x-amz-meta-caption": caption,
-        // "x-amz-meta-tags": tags.join(",")
+        "Content-Type": contentType, // Use the dynamically set content type
+        "Content-Length": contentLength.toString(), // Use the dynamically set content length
       },
-      body: image,
+      body: await (await fetch(image)).blob(), // Convert the image URI to a blob
     });
+
     console.log("status: ", response.status);
   });
 
@@ -39,34 +40,34 @@ const Camera = () => {
       quality: 1,
     });
 
-    console.log("image data: ", result);
+    if (result.canceled) return;
 
-    if (
-      result.assets?.[0]?.uri &&
-      result.assets[0]?.type
-    ) {
-      setImage(result.assets[0].uri);
-      setContentType(result.assets[0].type);
-      setContentLength(new Blob([image]).size);
-    } else {
-      throw new Error("Image not found");
+    if (result.assets[0]?.uri && result.assets[0]?.mimeType) {
+      const uri = result.assets[0].uri;
+      const type = result.assets[0].mimeType;
+      const blob = await (await fetch(uri)).blob();
+      const size = blob.size;
+
+      setImage(uri);
+      setContentType(type);
+      setContentLength(size);
+
+      mutation.mutate({
+        userId: userId, 
+        contentType: type,
+        contentLength: size,
+        // caption: caption,
+        // tags: tags,
+      }, {
+        onSuccess: (url) => {
+          // Use the URL from the successful mutation to upload the image
+          putMutation.mutate(url);
+        }
+      });
     }
-
-    console.log("user session UID: ", userSession.user!.uid);
-    mutation.mutate({
-      uid: userSession.user!.uid,
-      contentType: contentType,
-      contentLength: contentLength,
-      caption: caption,
-      tags: tags,
-    });
-
-    if (mutation.isError) {
-      console.log("mutation error: ", mutation.error);
-    } else if (mutation.isSuccess) {
-      putMutation.mutate(mutation.data);
+    else {
+      console.log("shits broken on the camera page 1")
     }
-    console.log("Put request status: ", putMutation.status);
   };
 
   return (
@@ -83,4 +84,5 @@ const Camera = () => {
     </View>
   );
 };
+
 export default Camera;

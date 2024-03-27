@@ -1,5 +1,6 @@
 import { registerRootComponent } from "expo";
-import { ExpoRoot, SplashScreen } from "expo-router";
+import { ExpoRoot } from "expo-router";
+import * as SplashScreen from 'expo-splash-screen';
 
 void SplashScreen.preventAutoHideAsync();
 

@@ -109,16 +109,20 @@ export const authRouter = createTRPCRouter({
         .select({
           name: schema.user.name,
           dateOfBirth: schema.user.dateOfBirth,
+          profileId: schema.user.profileId,
         })
         .from(schema.user)
         .where(eq(schema.user.id, ctx.session.uid));
-      if (result[0] == undefined) {
+        console.log('result: ', result)
+
+      if (result.length == 0 || result[0] == undefined) {
+        console.log("empty")
         return false;
       }
 
-      const { name, dateOfBirth } = result[0];
+      const { name, dateOfBirth, profileId } = result[0];
 
-      return !!name && !!dateOfBirth;
+      return !!name && !!dateOfBirth && !!profileId;
     } catch (_err) {
       throw new TRPCError({
         code: "NOT_FOUND",
@@ -152,24 +156,61 @@ export const authRouter = createTRPCRouter({
 
         if (userDetails.dateOfBirth != undefined || userDetails.name != undefined) {
           console.log('updating user details')
-          return await ctx.db
+          await ctx.db
             .update(schema.user)
             .set({
               ...userDetails,
             })
             .where(eq(schema.user.id, ctx.session.uid));
+            return { success: true, message: "User details updated successfully" };
         }
         if (userDetails.username) {
           console.log('updating profile details')
-          return await ctx.db.insert(schema.profile).values({
-            userName: userDetails.username,
+
+          // check if the user already has a profile
+          const user = await ctx.db.query.user.findFirst({
+            columns: {
+              profileId: true,
+            },
+            where: eq(schema.user.id, ctx.session.uid),
           });
+
+          if (!user) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "shits broken 7",
+            });
+          }
+
+          // if the user has a profile, update the username
+          if (user.profileId) {
+            console.log("user has a profile")
+            await ctx.db.update(schema.profile).set({
+              userName: userDetails.username,
+            }).where(eq(schema.profile.id, user.profileId!));
+          }
+          else {
+            // if the user does not have a profile, create one
+            const profile = await ctx.db.insert(schema.profile).values({
+              userName: userDetails.username,
+            });
+            if (!profile) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "(error inserting new profile)",
+              });
+            }
+            await ctx.db.update(schema.user).set({
+              profileId: profile[0].insertId,
+            }).where(eq(schema.user.id, ctx.session.uid));
+          }
+
+          return { success: true, message: "User details updated successfully" };
         }
       } catch (_err) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "shits broken 8",
-          // message: _err
         });
       }
     }),

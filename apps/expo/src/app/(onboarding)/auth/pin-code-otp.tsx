@@ -67,6 +67,10 @@ const PhoneNumberOTP = () => {
       const userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
       const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
 
+      if (!isNewUser) {
+        console.log("not new user")
+      }
+
       if (isNewUser) {
         console.log("creating new user")
         await createUser.mutateAsync({

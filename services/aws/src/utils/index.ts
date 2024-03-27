@@ -1,8 +1,14 @@
 // AWS transforms all metadata keys to lowercase. TODO: Fix this in the future -> just ship
-export interface Metadata {
+export interface MediaMedata {
   authorid: string;
   caption?: string;
   tags?: string;
+}
+
+export interface ProfileMetadata {
+  userid: string;
+  key: string;
+  bucket: string;
 }
 
 export const kebabToPascal = (str: string) => {
@@ -11,8 +17,8 @@ export const kebabToPascal = (str: string) => {
   );
 };
 
-export const isMetadata = (metadata: unknown): metadata is Metadata => {
-  const m = metadata as Metadata;
+export const isMetadata = (metadata: unknown): metadata is MediaMedata => {
+  const m = metadata as MediaMedata;
   return (
     m.authorid !== undefined && m.caption !== undefined && m.tags !== undefined
   );

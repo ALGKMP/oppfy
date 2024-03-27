@@ -1,21 +1,16 @@
 import type { HeadObjectCommandInput } from "@aws-sdk/client-s3";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
-import type { Metadata } from "../../../utils";
-import {db} from "@acme/db"
+import type { MediaMedata } from "../../../utils";
 
 export const region = "us-east-1";
 
-// TODO: we can upload our env vars to lambda through our template.yaml file
-const AWS_ACCESS_KEY_ID="AKIA5OJS54YNU5J6NZNU"
-const AWS_SECRET_ACCESS_KEY="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"
+const s3Client = new S3Client();
+
 export const handler = async (
   event: S3Event,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
-
-  const test = db.query.profile.findMany()
-  console.log(test)
 
   console.log(`Records: ${JSON.stringify(event.Records)}`)
 
@@ -34,41 +29,44 @@ export const handler = async (
   const objectKey = record.s3.object.key;
   const objectBucket = record.s3.bucket.name;
 
-  const s3Client = new S3Client({
-    region: region,
-    credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID,
-      secretAccessKey: AWS_SECRET_ACCESS_KEY,
-    },
-  });
+  const headObjectCommandInput: HeadObjectCommandInput = {
+    Bucket: objectBucket,
+    Key: objectKey,
+  };
 
-  // const headObjectCommandInput: HeadObjectCommandInput = {
-  //   Bucket: objectBucket,
-  //   Key: objectKey,
-  // };
+  const command = new HeadObjectCommand(headObjectCommandInput);
 
-  // const command = new HeadObjectCommand(headObjectCommandInput);
+  try {
+    const response = await s3Client.send(command);
 
-  // try {
-  //   const response = await s3Client.send(command);
+    const metadata = response.Metadata as MediaMedata | undefined;
 
-  //   const metadata = response.Metadata as Metadata | undefined;
+    if (metadata === undefined) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "No Metadata found on object",
+        }),
+      };
+    }
 
-  //   if (metadata === undefined) {
-  //     return {
-  //       statusCode: 400,
-  //       body: JSON.stringify({
-  //         message: "No Metadata found on object",
-  //       }),
-  //     };
-  //   }
+    const payload = {metadata: metadata};
+    const serverEndpoint = ' https://5bdc-74-12-66-138.ngrok-free.app/api/uploadMetadata';
 
-  //   console.log(`Response: ${JSON.stringify(response)}`);
-  //   console.log(`Metadata: ${JSON.stringify(metadata)}`)
+    try {
+      const response = await fetch(serverEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-  //   console.log(`Tags: ${metadata.tags}`);
-  //   console.log(`Caption: ${metadata.caption}`);
-  //   console.log(`AuthorId: ${metadata.authorid}`)
+      const jsonResponse = await response.json();
+      console.log('Server response:', jsonResponse);
+    } catch (error) {
+      console.error('Error sending metadata to server:', error);
+    }
 
     return {
       statusCode: 200,
@@ -77,47 +75,13 @@ export const handler = async (
       }),
     };
 
-  // } catch (error) {
-  //   console.error(error);
-  //   return {
-  //     statusCode: 500,
-  //     body: JSON.stringify({
-  //       message: "Error getting object from S3",
-  //     }),
-  //   };
-  //   }
-
-  // const { Metadata } = response;
-
-  // if (!Metadata) {
-  //   // TODO: Handle this error
-  //   return {
-  //     statusCode: 400,
-  //     body: JSON.stringify({
-  //       message: "No Metadata found on object",
-  //     }),
-  //   };
-  // }
-
-  // const { authorId, caption, tags } = Metadata;
-
-  // console.log(`Tags: ${tags}`);
-  // console.log(`Caption: ${caption}`);
-  // console.log(`AuthorId: ${authorId}`);
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: "Error getting object from S3",
+      }),
+    };
+    }
 };
-
-// import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
-
-// export const handler = async (
-//   event: S3Event,
-//   _context: Context,
-// ): Promise<APIGatewayProxyResult> => {
-//   console.log(`PRINTING OUT RANDOM SHIT`);
-
-//   return {
-//     statusCode: 200,
-//     body: JSON.stringify({
-//       message: "OpenAPI Endpoint Hit",
-//     }),
-//   };
-// };

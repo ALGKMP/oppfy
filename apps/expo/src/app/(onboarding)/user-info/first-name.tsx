@@ -26,7 +26,7 @@ const FirstName = () => {
 
   const onPress = async () => {
     await updateUserDetails.mutateAsync({
-      name,
+      name: name,
     });
 
     router.push("/user-info/date-of-birth");

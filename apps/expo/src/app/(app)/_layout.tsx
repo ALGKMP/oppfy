@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Pressable } from "react-native";
-import { Redirect, Slot, SplashScreen, useRouter } from "expo-router";
+import { Redirect, Slot, useRouter } from "expo-router";
+import * as SplashScreen from 'expo-splash-screen';
 import auth from "@react-native-firebase/auth";
 import { getTokens } from "@tamagui/core";
 import {

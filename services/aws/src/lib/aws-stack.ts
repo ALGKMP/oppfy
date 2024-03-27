@@ -16,6 +16,40 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 // ! Adhere to free tier specs
 // https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all
 
+function createBucket(scope, name) {
+  return new s3.Bucket(scope, name, {
+    versioned: true,
+  });
+}
+
+function createLambdaFunction(scope, name, entryPath) {
+  return new lambdaNodeJs.NodejsFunction(scope, name, {
+    runtime: lambda.Runtime.NODEJS_20_X,
+    entry: entryPath,
+    handler: "handler",
+    bundling: {
+      format: lambdaNodeJs.OutputFormat.ESM,
+      mainFields: ["module", "main"],
+      esbuildArgs: {
+        "--conditions": "module",
+      },
+    },
+  });
+}
+
+function setupBucketLambdaIntegration(bucket, lambdaFunction, permissionId) {
+  bucket.grantRead(lambdaFunction);
+  lambdaFunction.addPermission(permissionId, {
+    action: "lambda:InvokeFunction",
+    principal: new iam.ServicePrincipal("s3.amazonaws.com"),
+    sourceArn: bucket.bucketArn,
+  });
+  bucket.addEventNotification(
+    s3.EventType.OBJECT_CREATED,
+    new s3n.LambdaDestination(lambdaFunction),
+  );
+}
+
 export class AwsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, {
@@ -125,18 +159,7 @@ export class AwsStack extends cdk.Stack {
       versioned: true,
     });
 
-    // const myLayer = new lambda.LayerVersion(this, 'MyLayer', {
-    //   code: lambda.Code.fromAsset('node_modules.zip'),
-    //   compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-    // });
-
-    // const myLambda = new lambda.Function(this, "MyLambdaFunction2", {
-    //   runtime: lambda.Runtime.NODEJS_20_X,
-    //   code: lambda.Code.fromAsset("dist"),
-    //   handler: "src/res/lambdas/media/index.handler",
-    //   layers: [myLayer]
-    // });
-
+    // This one is for testing purposes
     const myLambda = new lambdaNodeJs.NodejsFunction(this, "DynamoLambdaHandler", {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: 'src/res/lambdas/media/index.ts', // Entry file
@@ -149,28 +172,6 @@ export class AwsStack extends cdk.Stack {
         }
       }
     });
-
-    // const myLambda = new lambdaNodeJs.NodejsFunction(this, 'MyFunction', {
-    //   runtime: lambda.Runtime.NODEJS_18_X, // Choose your runtime
-    //   entry: 'src/res/lambdas/media/index.ts', // Entry file
-    //   handler: 'handler', // Name of the export in your entry file
-    //   bundling: {
-    //     format: lambdaNodeJs.OutputFormat.ESM, // Set output format to ESM
-    //     target: "esnext",
-    //     minify: true,
-    //     externalModules: [],
-    //     banner: 
-    //     `
-    //     import path from 'path';
-    //     js=import { createRequire } from 'module';
-    //     import { fileURLToPath } from 'url';
-    //     import { createRequire as topLevelCreateRequire } from 'module';
-    //     const require = createRequire(import.meta.url);
-    //     const __filename = fileURLToPath(import.meta.url);
-    //     const __dirname = path.dirname(__filename);
-    //     `
-    //   },
-    // });
 
     // Grant the Lambda function permissions to be invoked by S3 events
     bucket.grantRead(myLambda);
@@ -186,76 +187,18 @@ export class AwsStack extends cdk.Stack {
       new s3n.LambdaDestination(myLambda),
     );
 
-//     // Create three S3 buckets
-// const postBucket = new s3.Bucket(this, "PostBucket", {
-//   versioned: true,
-// });
-
-// const storyBucket = new s3.Bucket(this, "StoryBucket", {
-//   versioned: true,
-// });
-
-// const profileBucket = new s3.Bucket(this, "ProfileBucket", {
-//   versioned: true,
-// });
-
-// // Create three Lambda functions
-// const postLambda = new lambda.Function(this, "PostLambdaFunction", {
-//   runtime: lambda.Runtime.NODEJS_20_X,
-//   code: lambda.Code.fromAsset("dist/res/lambdas/post"),
-//   handler: "index.handler",
-// });
-
-// const storyLambda = new lambda.Function(this, "StoryLambdaFunction", {
-//   runtime: lambda.Runtime.NODEJS_20_X,
-//   code: lambda.Code.fromAsset("dist/res/lambdas/story"),
-//   handler: "index.handler",
-// });
-
-// const profileLambda = new lambda.Function(this, "ProfileLambdaFunction", {
-//   runtime: lambda.Runtime.NODEJS_20_X,
-//   code: lambda.Code.fromAsset("dist/res/lambdas/profile"),
-//   handler: "index.handler",
-// });
-
-// // Grant read permissions and set event notifications for each Lambda function and bucket pair
-
-// // Post Bucket and Lambda
-// postBucket.grantRead(postLambda);
-// postLambda.addPermission("AllowPostS3Invocation", {
-//   action: "lambda:InvokeFunction",
-//   principal: new iam.ServicePrincipal("s3.amazonaws.com"),
-//   sourceArn: postBucket.bucketArn,
-// });
-// postBucket.addEventNotification(
-//   s3.EventType.OBJECT_CREATED,
-//   new s3n.LambdaDestination(postLambda),
-// );
-
-// // Story Bucket and Lambda
-// storyBucket.grantRead(storyLambda);
-// storyLambda.addPermission("AllowStoryS3Invocation", {
-//   action: "lambda:InvokeFunction",
-//   principal: new iam.ServicePrincipal("s3.amazonaws.com"),
-//   sourceArn: storyBucket.bucketArn,
-// });
-// storyBucket.addEventNotification(
-//   s3.EventType.OBJECT_CREATED,
-//   new s3n.LambdaDestination(storyLambda),
-// );
-
-// // Profile Bucket and Lambda
-// profileBucket.grantRead(profileLambda);
-// profileLambda.addPermission("AllowProfileS3Invocation", {
-//   action: "lambda:InvokeFunction",
-//   principal: new iam.ServicePrincipal("s3.amazonaws.com"),
-//   sourceArn: profileBucket.bucketArn,
-// });
-// profileBucket.addEventNotification(
-//   s3.EventType.OBJECT_CREATED,
-//   new s3n.LambdaDestination(profileLambda),
-// );
-
+    const postBucket = createBucket(this, "PostBucket");
+    const storyBucket = createBucket(this, "StoryBucket");
+    const profileBucket = createBucket(this, "ProfileBucket");
+    
+    const postLambda = createLambdaFunction(this, "postLambda", 'src/res/lambdas/post/index.ts');
+    const storyLambda = createLambdaFunction(this, "storyLambda", 'src/res/lambdas/story/index.ts');
+    const profileLambda = createLambdaFunction(this, "profileLambda", 'src/res/lambdas/profile/index.ts');
+    
+    // Setup integrations
+    setupBucketLambdaIntegration(postBucket, postLambda, "AllowPostS3Invocation");
+    setupBucketLambdaIntegration(storyBucket, storyLambda, "AllowStoryS3Invocation");
+    setupBucketLambdaIntegration(profileBucket, profileLambda, "AllowProfileS3Invocation");
 
     // ! do not delete, this is used for testing
     // const bastionSecurityGroup = new ec2.SecurityGroup(

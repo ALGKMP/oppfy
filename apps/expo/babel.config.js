@@ -4,12 +4,16 @@ module.exports = function (api) {
 
   return {
     presets: [
-      ["babel-preset-expo", { jsxImportSource: "nativewind" }],
+      [
+        "babel-preset-expo", 
+      { jsxImportSource: "nativewind" }],
       "nativewind/babel",
     ],
     plugins: [
-      require.resolve("expo-router/babel"),
-      require.resolve("react-native-reanimated/plugin"),
+      // require.resolve("babel-preset-expo"),
+      // require.resolve("react-native-reanimated/plugin"),
+      // "babel-preset-expo",
+      "react-native-reanimated/plugin",
     ],
   };
 };

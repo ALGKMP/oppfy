@@ -7,11 +7,13 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
+    "dev": "tsc --watch",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint .",
     "push": "drizzle-kit push:mysql",
-    "studio": "drizzle-kit studio",
-    "typecheck": "tsc --noEmit"
+    "studio": "pnpm with-env drizzle-kit studio --config drizzle.config.ts",
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@aws-sdk/client-rds-data": "^3.490.0",
@@ -29,7 +31,7 @@
     "@acme/tsconfig": "workspace:^0.1.0",
     "@faker-js/faker": "^8.3.1",
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.20.10",
+    "drizzle-kit": "^0.20.14",
     "prettier": "^3.1.0",
     "prisma": "^5.8.0",
     "typescript": "^5.2.2"

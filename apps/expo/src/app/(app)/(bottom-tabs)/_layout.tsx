@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Dimensions, Pressable, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Redirect, SplashScreen, useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import { BottomTabProps } from "@react-navigation/bottom-tabs";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
