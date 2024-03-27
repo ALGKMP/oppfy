@@ -61,14 +61,8 @@ export const profile = mySqlTable("Profile", {
 });
 
 export const profileRelations = relations(profile, ({ one, many }) => ({
-  authoredPosts: many(post, {
-    fields: [profile.id],
-    references: [post.authorId],
-  }),
-  receivedPosts: many(post, {
-    fields: [profile.id],
-    references: [post.recipientProfileId],
-  }),
+  authoredPosts: many(post),
+  receivedPosts: many(post),
   profilePhoto: one(profilePhoto, {
     fields: [profile.profilePhotoId],
     references: [profilePhoto.id],
