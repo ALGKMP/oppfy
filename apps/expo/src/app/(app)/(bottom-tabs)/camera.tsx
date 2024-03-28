@@ -10,13 +10,12 @@ const Camera = () => {
   const [image, setImage] = useState("");
   const [contentLength, setContentLength] = useState(0);
   const [contentType, setContentType] = useState("");
-  const mutation = api.profile.createPresignedUrlWithClient.useMutation();
+  const mutation = api.post.createPresignedUrlForPost.useMutation();
 
-  const userSession = useSession();
+  const session = useSession();
 
-  // const caption = "test caption";
-  // const tags = ["otherUserKey1", "otherUserKey2"];
-  const userId = userSession.user!.uid;
+  const caption = "test caption";
+  const userId = session.user!.uid;
 
   const putMutation = useMutation(async (url: string) => {
     if (!image) return;
@@ -53,14 +52,15 @@ const Camera = () => {
       setContentLength(size);
 
       mutation.mutate({
-        userId: userId, 
+        author: userId, 
+        recipient: userId,
+        caption: caption,
         contentType: type,
         contentLength: size,
-        // caption: caption,
-        // tags: tags,
       }, {
         onSuccess: (url) => {
           // Use the URL from the successful mutation to upload the image
+          console.log("url: ", url)
           putMutation.mutate(url);
         }
       });

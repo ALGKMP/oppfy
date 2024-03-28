@@ -116,7 +116,7 @@ export const profileRouter = createTRPCRouter({
       const profile = await ctx.db.query.profile.findFirst({
         where: eq(schema.profile.id, user.profileId),
         columns: {
-          profilePhotoId: true,
+          profilePhoto: true,
         },
       });
 
@@ -127,7 +127,7 @@ export const profileRouter = createTRPCRouter({
         });
       }
 
-      if (!profile?.profilePhotoId) {
+      if (!profile?.profilePhoto) {
         // Create new profile photo record
         const profilePhoto = await ctx.db
           .insert(schema.profilePhoto)
@@ -141,7 +141,7 @@ export const profileRouter = createTRPCRouter({
         await ctx.db
           .update(schema.profile)
           .set({
-            profilePhotoId: profilePhoto[0].insertId,
+            profilePhoto: profilePhoto[0].insertId,
           })
           .where(eq(schema.profile.id, user.profileId));
       }
@@ -152,8 +152,8 @@ export const profileRouter = createTRPCRouter({
           .set({
             key: input.key,
           })
-          .where(eq(schema.profilePhoto.id, profile.profilePhotoId));
-        console.log(`Updated profile photo: ${profile.profilePhotoId}`);
+          .where(eq(schema.profilePhoto.id, profile.profilePhoto));
+        console.log(`Updated profile photo: ${profile.profilePhoto}`);
       }
     }),
 });

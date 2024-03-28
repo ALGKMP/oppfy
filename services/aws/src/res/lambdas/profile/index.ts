@@ -59,7 +59,7 @@ export const handler = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userid: metadata.userid,
+        userid: metadata.user,
         key: objectKey,
         bucket: objectBucket,
       }),

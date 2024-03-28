@@ -1,73 +1,104 @@
-import { z } from "zod";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+import { eq, schema } from "@acme/db";
+
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
     .input(
-      z.object({
-        authorId: z.string(),
-        recipientProfileId: z.string(),
-        title: z.string(),
-        body: z.string(),
-        // Optionally include other fields as necessary
-      })
+      z
+        .object({
+          author: z.string(),
+          recipient: z.string(),
+          caption: z.string(),
+          contentLength: z.number(),
+          contentType: z.string(),
+        })
+        .refine(
+          (data) =>
+            ["image/jpeg", "image/png", "image/gif", "image"].includes(
+              data.contentType,
+            ),
+          {
+            // Validates file type
+            message: "Invalid file type",
+          },
+        ),
     )
+    .output(z.string())
     .mutation(async ({ ctx, input }) => {
-      const s3Client = new S3Client({ region: "us-east-1" });
-      const bucketName = "awsstack-profilebucket3c1f9a36-udj4vt6odzg7";
-      const objectKey = `posts/${Date.now()}-${input.authorId}`;
+      const s3Client = ctx.s3;
+      const bucketName = "awsstack-postbucketf37978b4-nyf2h7ran1kr";
+      const objectKey = `posts/${Date.now()}-${input.author}`;
 
-      const command = new PutObjectCommand({
+      const metadata = {
+        author: input.author,
+        recipient: input.recipient,
+        caption: input.caption,
+      };
+
+      const putObjectParams = {
         Bucket: bucketName,
         Key: objectKey,
-        ContentType: 'binary/octet-stream', // or as per your requirement
-      });
+        Metadata: metadata,
+        Fields: {
+          "Content-Length": input.contentLength,
+          "Content-Type": input.contentType,
+        },      
+      };
 
-      const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 }); // URL expires in 1 hour
+      const command = new PutObjectCommand(putObjectParams);
+      
+      const url = await getSignedUrl(s3Client, command, { expiresIn: 300 }); // URL expires in 1 hour
 
-      return { presignedUrl: url, objectKey };
+      return url;
     }),
-    finalizePostUpload: publicProcedure
-    .meta({ openapi: { method: "POST", path: "/finalizePostUpload" } })
+  uploadPost: publicProcedure
+    .meta({ openapi: { method: "POST", path: "/uploadPost" } })
     .input(
       z.object({
-        authorId: z.string(),
-        recipientProfileId: z.string(),
-        title: z.string(),
-        body: z.string(),
-        mediaKey: z.string(), // The S3 object key from the presigned URL upload
-        // Optionally include other fields as necessary
-      })
-    )
+        author: z.string(),
+        recipient: z.string(),
+        caption: z.string(),
+        objectKey: z.string(),
+      }),
+    ).output(z.void())
     .mutation(async ({ ctx, input }) => {
       // Validate the author and recipient exist
-      const authorExists = await ctx.db.query.profile.findFirst({
-        where: { id: input.authorId },
+      const authorExists = await ctx.db.query.user.findFirst({
+        where: eq(schema.user.id, input.author),
       });
-      if (!authorExists) throw new TRPCError({ code: 'NOT_FOUND', message: 'Author profile not found' });
+      if (!authorExists)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Author not found" });
 
-      const recipientExists = await ctx.db.profile.findUnique({
-        where: { id: input.recipientProfileId },
+      const recipientExists = await ctx.db.query.user.findFirst({
+        where: eq(schema.user.id, input.recipient),
       });
-      if (!recipientExists) throw new TRPCError({ code: 'NOT_FOUND', message: 'Recipient profile not found' });
+      if (!recipientExists)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Recipient not found",
+        });
 
       // Insert the post into the database
-      const post = await ctx.db.post.create({
-        data: {
-          authorId: input.authorId,
-          recipientProfileId: input.recipientProfileId,
-          title: input.title,
-          body: input.body,
-          mediaKey: input.mediaKey, // Assuming your post table has a field for this
-          // Add other fields as necessary
-        },
+      const post = await ctx.db.insert(schema.post).values({
+        author: input.author,
+        recipient: input.recipient,
+        caption: input.caption,
+        key: input.objectKey, // Assuming your post table has a field for this
+        // Add other fields as necessary
       });
 
-      if (!post) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create post' });
+      if (!post)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create post",
+        });
 
-      return { success: true, postId: post.id };
+      return;
     }),
-});
 });
