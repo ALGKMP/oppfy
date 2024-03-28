@@ -92,7 +92,7 @@ export const profileRouter = createTRPCRouter({
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
     .input(
       z.object({
-        userid: z.string(),
+        user: z.string(),
         key: z.string(),
         bucket: z.string(),
       }),
@@ -100,12 +100,12 @@ export const profileRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
       const user = await ctx.db.query.user.findFirst({
-        where: eq(schema.user.id, input.userid),
+        where: eq(schema.user.id, input.user),
         columns: {
-          profileId: true,
+          profile: true,
         },
       });
-      if (!user?.profileId) {
+      if (!user?.profile) {
         // For now, assume a profile is always created in the auth flow
         throw new TRPCError({
           message: "User profile not found",
@@ -114,7 +114,7 @@ export const profileRouter = createTRPCRouter({
       }
 
       const profile = await ctx.db.query.profile.findFirst({
-        where: eq(schema.profile.id, user.profileId),
+        where: eq(schema.profile.id, user.profile),
         columns: {
           profilePhoto: true,
         },
@@ -143,7 +143,7 @@ export const profileRouter = createTRPCRouter({
           .set({
             profilePhoto: profilePhoto[0].insertId,
           })
-          .where(eq(schema.profile.id, user.profileId));
+          .where(eq(schema.profile.id, user.profile));
       }
       else {
         // Update existing profile photo record

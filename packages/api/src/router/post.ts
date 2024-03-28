@@ -99,6 +99,16 @@ export const postRouter = createTRPCRouter({
           message: "Failed to create post",
         });
 
+      const stats = await ctx.db.insert(schema.postStats).values({
+        post: post[0].insertId
+      });
+
+      if (!stats)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create post stats",
+        });
+
       return;
     }),
 });

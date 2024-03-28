@@ -28,7 +28,7 @@ export const user = mySqlTable("User", {
   // email: varchar("email", { length: 255 }).unique().notNull(),
   name: varchar("name", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
-  profileId: bigint("profileId", {mode: "number", unsigned: true}).references(() => profile.id),
+  profile: bigint("profile", {mode: "number", unsigned: true}).references(() => profile.id),
   notificationSetting: bigint("notificationSetting", {mode: "number", unsigned: true}).references(
     () => notificationSetting.id,
   ),
@@ -40,7 +40,7 @@ export const user = mySqlTable("User", {
 
 export const userRelations = relations(user, ({ one }) => ({
   profile: one(profile, {
-    fields: [user.profileId],
+    fields: [user.profile],
     references: [profile.id],
   }),
   notificationSetting: one(notificationSetting, {
@@ -118,7 +118,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
   }),
   stats: one(postStats, {
     fields: [post.id],
-    references: [postStats.postr],
+    references: [postStats.post],
   }),
   likes: many(like),
   comments: many(comment),
@@ -127,7 +127,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
 
 export const postStats = mySqlTable("PostStats", {
   id: serial("id").primaryKey(),
-  postr: bigint("post", {mode: "number", unsigned: true})
+  post: bigint("post", {mode: "number", unsigned: true})
     .references(() => post.id)
     .notNull(),
   likes: int("likes").default(0).notNull(),
@@ -141,7 +141,7 @@ export const postStats = mySqlTable("PostStats", {
 
 export const postStatsRelations = relations(postStats, ({one}) => ({
   post: one(post, {
-    fields: [postStats.postr],
+    fields: [postStats.post],
     references: [post.id],
     }),
 }));
@@ -170,7 +170,7 @@ export const postStatsRelations = relations(postStats, ({one}) => ({
 
 export const like = mySqlTable("Like", {
   id: serial("id").primaryKey(),
-  postId: bigint("postId", {mode: "number", unsigned: true})
+  post: bigint("post", {mode: "number", unsigned: true})
     .references(() => post.id)
     .notNull(),
   user: varchar("user", {length: 255})
@@ -183,7 +183,7 @@ export const like = mySqlTable("Like", {
 
 export const likeRelations = relations(like, ({ one }) => ({
   post: one(post, {
-    fields: [like.postId],
+    fields: [like.post],
     references: [post.id],
   }),
   likedBy: one(user, {

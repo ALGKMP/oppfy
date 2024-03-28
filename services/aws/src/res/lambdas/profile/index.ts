@@ -1,18 +1,15 @@
-import type { HeadObjectCommandInput } from "@aws-sdk/client-s3";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
 import type { ProfileMetadata } from "../../../utils";
 
-export const region = "us-east-1";
-
-const s3Client = new S3Client();
+const s3Client = new S3Client({region: "us-east-1"});
 
 export const handler = async (
   event: S3Event,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
-
   const record = event.Records[0];
 
   if (!record) {
@@ -27,12 +24,10 @@ export const handler = async (
   const objectKey = record.s3.object.key;
   const objectBucket = record.s3.bucket.name;
 
-  const headObjectCommandInput: HeadObjectCommandInput = {
+  const command = new HeadObjectCommand({
     Bucket: objectBucket,
     Key: objectKey,
-  };
-
-  const command = new HeadObjectCommand(headObjectCommandInput);
+  });
 
   try {
     const response = await s3Client.send(command);
@@ -47,40 +42,37 @@ export const handler = async (
         }),
       };
     }
-    console.log("Metadata:", metadata);
 
     const serverEndpoint =
-    " https://5bdc-74-12-66-138.ngrok-free.app/api/profilePicture";
+      " https://5bdc-74-12-66-138.ngrok-free.app/api/profilePicture";
 
-  try {
-    const response = await fetch(serverEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userid: metadata.user,
-        key: objectKey,
-        bucket: objectBucket,
-      }),
-    });
+    try {
+      const response = await fetch(serverEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: metadata.user,
+          key: objectKey,
+          bucket: objectBucket,
+        }),
+      });
 
-    const jsonResponse = await response.json();
+      const jsonResponse = await response.json();
 
-    console.log("Server response:", jsonResponse);
+      console.log("Server response:", jsonResponse);
+    } catch (error) {
+      console.error("Error sending metadata to server:", error);
+    }
   } catch (error) {
-    console.error("Error sending metadata to server:", error);
-  }
-}
-
-catch (error) {
-  console.error(error);
-  return {
-    statusCode: 500,
-    body: JSON.stringify({
-      message: "Error getting object from S3",
-    }),
-  };
+    console.error(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: "Error getting object from S3",
+      }),
+    };
   }
 
   return {
@@ -89,5 +81,4 @@ catch (error) {
       message: "Object found in S3",
     }),
   };
-
 };

@@ -17,7 +17,6 @@ export const handler = async (
       body: JSON.stringify({ message: "No record found in event" }),
     };
   }
-  console.log("Record: ", record);
 
   const objectKey = record.s3.object.key;
   const objectBucket = record.s3.bucket.name;
@@ -28,18 +27,15 @@ export const handler = async (
   });
 
   try {
-    console.log("Getting metadata for object: ", objectKey);
     const { Metadata } = await s3Client.send(command);
     const metadata = Metadata as PostMetadata | undefined;
 
     if (!metadata?.author || !metadata?.recipient) {
-      console.log("Metadata: ", metadata)
       return {
         statusCode: 400,
-        body: JSON.stringify({ message: "Required metadata (authorid | recipientid) not found on object" }),
+        body: JSON.stringify({ message: "Required metadata (author | recipient) not found on object" }),
       };
     }
-    console.log("Metadata: ", metadata);
 
     const serverEndpoint =     
     "https://5bdc-74-12-66-138.ngrok-free.app/api/uploadPost";
@@ -60,9 +56,6 @@ export const handler = async (
     if (!response.ok) {
       throw new Error(`Server responded with status: ${response.status}`);
     }
-
-    const jsonResponse = await response.json();
-    console.log("Server response:", jsonResponse);
 
     return {
       statusCode: 200,

@@ -109,7 +109,7 @@ export const authRouter = createTRPCRouter({
         .select({
           name: schema.user.name,
           dateOfBirth: schema.user.dateOfBirth,
-          profileId: schema.user.profileId,
+          profileId: schema.user.profile,
         })
         .from(schema.user)
         .where(eq(schema.user.id, ctx.session.uid));
@@ -170,7 +170,7 @@ export const authRouter = createTRPCRouter({
           // check if the user already has a profile
           const user = await ctx.db.query.user.findFirst({
             columns: {
-              profileId: true,
+              profile: true,
             },
             where: eq(schema.user.id, ctx.session.uid),
           });
@@ -183,11 +183,11 @@ export const authRouter = createTRPCRouter({
           }
 
           // if the user has a profile, update the username
-          if (user.profileId) {
+          if (user.profile) {
             console.log("user has a profile")
             await ctx.db.update(schema.profile).set({
               userName: userDetails.username,
-            }).where(eq(schema.profile.id, user.profileId!));
+            }).where(eq(schema.profile.id, user.profile!));
           }
           else {
             // if the user does not have a profile, create one
@@ -201,7 +201,7 @@ export const authRouter = createTRPCRouter({
               });
             }
             await ctx.db.update(schema.user).set({
-              profileId: profile[0].insertId,
+              profile: profile[0].insertId,
             }).where(eq(schema.user.id, ctx.session.uid));
           }
 
