@@ -17,7 +17,7 @@ const FirstName = () => {
   const [name, setName] = useState("");
   const firstNameInputRef = useRef<TextInput | null>(null);
 
-  const updateUserDetails = api.auth.updateUserDetails.useMutation();
+  const updateName = api.user.updateName.useMutation();
 
   const firstNameIsValid = useMemo(
     () => schemaValidation.safeParse({ firstName: name }).success,
@@ -25,7 +25,7 @@ const FirstName = () => {
   );
 
   const onPress = async () => {
-    await updateUserDetails.mutateAsync({
+    await updateName.mutateAsync({
       name: name,
     });
 

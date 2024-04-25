@@ -1,24 +1,12 @@
 import { useEffect } from "react";
-import { Pressable } from "react-native";
-import { Redirect, Slot, useRouter } from "expo-router";
+import { Redirect } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import auth from "@react-native-firebase/auth";
-import { getTokens } from "@tamagui/core";
-import {
-  Camera,
-  Home,
-  Inbox,
-  MoreHorizontal,
-  Search,
-  User2,
-} from "@tamagui/lucide-icons";
-import { Button, Text, View, XStack } from "tamagui";
-
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 import { api } from "~/utils/api";
+import { View } from "tamagui";
 
 const AppLayout = () => {
   const { permissions } = usePermissions();
@@ -43,7 +31,7 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!user?.name || !user?.dateOfBirth) {
+  if (!user?.username) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 

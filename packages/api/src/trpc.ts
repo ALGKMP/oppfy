@@ -16,7 +16,7 @@ import { ZodError } from "zod";
 
 import {db, s3} from "@acme/db"
 
-import { auth } from "./services/firebase";
+import { auth } from "./utils/firebase";
 
 /**
  * 1. CONTEXT

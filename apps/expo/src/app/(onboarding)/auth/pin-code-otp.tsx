@@ -51,7 +51,7 @@ const PhoneNumberOTP = () => {
   );
 
   const createUser = api.auth.createUser.useMutation();
-  const hasUserDetails = api.auth.hasUserDetails.useMutation();
+  const requiresAdditionalDetails = api.user.userComplete.useMutation();
 
   const { verifyPhoneNumberOTP, signInWithPhoneNumber } = useSession();
 
@@ -67,25 +67,26 @@ const PhoneNumberOTP = () => {
       const userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
       const isNewUser = userCredential?.additionalUserInfo?.isNewUser;
 
-      if (!isNewUser) {
-        console.log("not new user")
+      if (!userCredential?.user?.uid) {
+        throw new Error("Error verifying phone number.");
       }
 
       if (isNewUser) {
-        console.log("creating new user")
         await createUser.mutateAsync({
-          firebaseUid: userCredential.user.uid,
+          userId: userCredential.user.uid,
         });
       }
 
       await auth().currentUser?.reload();
 
-      // TODO: Would be nice if this was refactored to requiresAdditionalDetails
-      const completedUserDetailsFlow = await hasUserDetails.mutateAsync();
+      await requiresAdditionalDetails.mutateAsync({
+        userId: userCredential.user.uid,
+      });
 
-      completedUserDetailsFlow
-        ? router.replace("/(app)/(bottom-tabs)/profile")
-        : router.replace("/user-info/welcome");
+      !requiresAdditionalDetails.data
+        ? router.replace("/user-info/welcome")
+        : router.replace("/(app)/(bottom-tabs)/profile");
+
     } catch (err) {
       setError("Incorrect code. Try again.");
     }
@@ -93,7 +94,7 @@ const PhoneNumberOTP = () => {
     setIsCheckingCode(false);
   }, [
     createUser,
-    hasUserDetails,
+    requiresAdditionalDetails,
     phoneNumberOTP,
     router,
     verifyPhoneNumberOTP,

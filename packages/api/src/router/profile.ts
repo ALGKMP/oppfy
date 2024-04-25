@@ -33,6 +33,8 @@ export const profileRouter = createTRPCRouter({
         and straightforward access patterns.
       - TODO: Look into compressing photos before uploading to reduce file size, or storing a compressed version
   */
+
+
   createPresignedUrlWithClient: protectedProcedure
     .input(
       z
