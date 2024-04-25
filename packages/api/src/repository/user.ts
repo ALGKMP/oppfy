@@ -32,14 +32,6 @@ const UserRepository = {
     return users[0];
   },
 
-  getUserByUserName: async (userName: string) => {
-    const users = await db
-      .selectDistinct()
-      .from(schema.user)
-      .where(eq(schema.user.username, userName));
-    return users[0];
-  },
-
   getUserProfile: async (userId: string) => {
     const user = await UserRepository.getUser(userId);
     if (!user) {
@@ -49,6 +41,14 @@ const UserRepository = {
       .select()
       .from(schema.profile)
       .where(eq(schema.profile.id, user.profile));
+  },
+
+  getUserByUserName: async (userName: string) => {
+    const users = await db
+      .selectDistinct()
+      .from(schema.user)
+      .where(eq(schema.user.username, userName));
+    return users[0];
   },
 
   updateProfile: async (userId: string, profileId: number) => {
