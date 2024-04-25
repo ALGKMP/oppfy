@@ -18,7 +18,7 @@ const AWSS3Service  = {
 
         return getSignedUrl(s3, command, { expiresIn: 300 });  // 5 minutes
     },
-    
+
 }
 
 export default AWSS3Service;

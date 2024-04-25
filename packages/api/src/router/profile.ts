@@ -3,16 +3,15 @@
   functionality for generating presigned URLs for secure, client-side file uploads
 */
 
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
 import Services from "../service";
-import {createPresignedUrlSchema} from "../validation/profile";
-
-import { eq, schema } from "@acme/db";
-
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createPresignedUrlSchema,
+  profilePhotoSchema,
+} from "../validation/profile";
 
 export const profileRouter = createTRPCRouter({
   /*
@@ -36,79 +35,32 @@ export const profileRouter = createTRPCRouter({
       - TODO: Look into compressing photos before uploading to reduce file size, or storing a compressed version
   */
 
-
   createPresignedUrlWithClient: protectedProcedure
     .input(createPresignedUrlSchema)
     .mutation(async ({ ctx, input }) => {
-      return await Services.aws.createPresignedUrl(ctx.session.uid, input.contentLength, input.contentType);
+      return await Services.aws.createPresignedUrl(
+        ctx.session.uid,
+        input.contentLength,
+        input.contentType,
+      );
     }),
 
   profilePicture: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
-    .input(
-      z.object({
-        user: z.string(),
-        key: z.string(),
-        bucket: z.string(),
-      }),
-    )
+    .input(profilePhotoSchema)
     .output(z.void())
-    .mutation(async ({ input, ctx }) => {
-      const user = await ctx.db.query.user.findFirst({
-        where: eq(schema.user.id, input.user),
-        columns: {
-          profile: true,
-        },
-      });
-      if (!user?.profile) {
-        // For now, assume a profile is always created in the auth flow
+    .mutation(async ({ input }) => {
+      try{
+        await Services.profile.uploadProfilePhoto(input.userId, input.key)
+      } catch (error) {
+        console.error(
+          "Error uploading profile photo:",
+          error instanceof Error ? error.message : error,
+        );
         throw new TRPCError({
-          message: "User profile not found",
-          code: "NOT_FOUND",
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to upload profile photo.",
         });
-      }
-
-      const profile = await ctx.db.query.profile.findFirst({
-        where: eq(schema.profile.id, user.profile),
-        columns: {
-          profilePhoto: true,
-        },
-      });
-
-      if (!profile) {
-        throw new TRPCError({
-          message: "Error getting profile",
-          code: "NOT_FOUND",
-        });
-      }
-
-      if (!profile?.profilePhoto) {
-        // Create new profile photo record
-        const profilePhoto = await ctx.db
-          .insert(schema.profilePhoto)
-          .values({
-            key: input.key,
-          });
-
-        console.log(`New profile photo: ${profilePhoto[0].insertId}`);
-
-        // Associate the profile photo with the user's profile
-        await ctx.db
-          .update(schema.profile)
-          .set({
-            profilePhoto: profilePhoto[0].insertId,
-          })
-          .where(eq(schema.profile.id, user.profile));
-      }
-      else {
-        // Update existing profile photo record
-        await ctx.db
-          .update(schema.profilePhoto)
-          .set({
-            key: input.key,
-          })
-          .where(eq(schema.profilePhoto.id, profile.profilePhoto));
-        console.log(`Updated profile photo: ${profile.profilePhoto}`);
       }
     }),
 });

@@ -19,3 +19,8 @@ export const createPresignedUrlSchema = z
       message: "Invalid file type",
     },
   );
+
+export const profilePhotoSchema = z.object({
+  userId: z.string(),
+  key: z.string(),
+});
