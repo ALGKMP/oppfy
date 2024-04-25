@@ -20,7 +20,7 @@ const AWSS3Service  = {
     },
 
     removeObject: async (key: string, bucket: string) => {
-        const command = new DeleteObjectCommand({
+        const _command = new DeleteObjectCommand({
             Bucket: bucket,
             Key: key
         })

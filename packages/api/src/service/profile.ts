@@ -154,7 +154,7 @@ const ProfileService = {
         throw new Error("Profile does not have a profile photo.");
       }
 
-      await Repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
+      return await Repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
     } catch (error) {
       console.error(
         "Error deleting profile photo:",

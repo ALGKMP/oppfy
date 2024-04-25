@@ -36,7 +36,7 @@ export const profileRouter = createTRPCRouter({
       - TODO: Look into compressing photos before uploading to reduce file size, or storing a compressed version
   */
 
-  createPresignedUrlWithClient: protectedProcedure
+  createPresignedUrlForProfilePictureWithClient: protectedProcedure
     .input(createPresignedUrlSchema)
     .mutation(async ({ ctx, input }) => {
       return await Services.aws.createPresignedUrl(
@@ -68,6 +68,18 @@ export const profileRouter = createTRPCRouter({
   removeProfilePhoto: protectedProcedure
     .input(removeProfilePhotoSchema)
     .mutation(async ({ ctx, input }) => {
-      Services.aws.removeObject(ctx.session.uid, input.key);
+      try{
+        await Services.profile.deleteProfilePhoto(ctx.session.uid);
+        await Services.aws.removeObject(ctx.session.uid, input.key);
+      } catch (error) {
+        console.error(
+          "Error removing profile photo:",
+          error instanceof Error ? error.message : error,
+        );
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to remove profile photo.",
+        });
+      }
     }),
 });
