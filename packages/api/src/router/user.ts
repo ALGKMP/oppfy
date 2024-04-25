@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import Services from "../services";
+import Services from "../service";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {
   updateDateOfBirthSchema,

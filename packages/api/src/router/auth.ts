@@ -1,4 +1,4 @@
-import Services from "../services";
+import Services from "../service";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import * as Schemas from "../validation/auth";

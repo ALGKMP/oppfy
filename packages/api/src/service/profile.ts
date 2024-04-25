@@ -1,4 +1,4 @@
-import ProfileRepository from '../repositories/profile';
+import Repositories from '../repository';
 import UserService from './user';
 
 const ProfileService = {
@@ -8,7 +8,7 @@ const ProfileService = {
                 throw new Error("User already has a profile.");
             }
 
-            const profileId = await ProfileRepository.createProfile();
+            const profileId = await Repositories.profile.createProfile();  // Updated repository access
             await UserService.addProfile(userId, profileId);
             return profileId;
         } catch (error) {
@@ -32,7 +32,7 @@ const ProfileService = {
 
     getProfile: async (profileId: number) => {
         try {
-            const profile = await ProfileRepository.getProfile(profileId);
+            const profile = await Repositories.profile.getProfile(profileId);  // Updated repository access
             if (!profile) {
                 throw new Error("Profile does not exist.");
             }
@@ -45,7 +45,7 @@ const ProfileService = {
 
     profileExists: async (profileId: number) => {
         try {
-            const profile = await ProfileRepository.getProfile(profileId);
+            const profile = await Repositories.profile.getProfile(profileId);  // Updated repository access
             return profile !== null;
         } catch (error) {
             console.error('Error checking if profile exists:', profileId, error instanceof Error ? error.message : error);
@@ -56,7 +56,7 @@ const ProfileService = {
     updateName: async (userId: string, name: string) => {
         try {
             const profile = await ProfileService.getProfileByUserId(userId);
-            await ProfileRepository.updateProfileName(profile.id, name);
+            await Repositories.profile.updateProfileName(profile.id, name);  // Updated repository access
         } catch (error) {
             console.error('Error updating profile name:', userId, error instanceof Error ? error.message : error);
             throw new Error("Failed to update profile name.");
@@ -66,7 +66,7 @@ const ProfileService = {
     updateDateOfBirth: async (userId: string, dateOfBirth: Date) => {
         try {
             const profile = await ProfileService.getProfileByUserId(userId);
-            await ProfileRepository.updateProfileDateOfBirth(profile.id, dateOfBirth);
+            await Repositories.profile.updateProfileDateOfBirth(profile.id, dateOfBirth);  // Updated repository access
         } catch (error) {
             console.error('Error updating profile date of birth:', userId, error instanceof Error ? error.message : error);
             throw new Error("Failed to update profile date of birth.");

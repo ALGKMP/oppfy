@@ -1,4 +1,4 @@
-import UserRepository from '../repositories/user';
+import Repositories from '../repository';
 
 const UserService = {
     createUser: async (userId: string) => {
@@ -6,7 +6,7 @@ const UserService = {
             if (await UserService.userExists(userId)) {
                 throw new Error("User already exists.");
             }
-            await UserRepository.createUserWithProfileAndNotifications(userId);
+            await Repositories.user.createUserWithProfileAndNotifications(userId);  // Updated repository access
         } catch (error) {
             console.error(`Error creating user ${userId}:`, error instanceof Error ? error.message : error);
             throw new Error("Failed to create user.");
@@ -15,7 +15,7 @@ const UserService = {
 
     getUser: async (userId: string) => {
         try {
-            const user = await UserRepository.getUser(userId);
+            const user = await Repositories.user.getUser(userId);  // Updated repository access
             if (!user) {
                 throw new Error(`Unable to retrieve user with id ${userId}`);
             }
@@ -28,7 +28,7 @@ const UserService = {
 
     deleteUser: async (userId: string) => {
         try {
-            await UserRepository.deleteUser(userId);
+            await Repositories.user.deleteUser(userId);  // Updated repository access
         } catch (error) {
             console.error(`Error deleting user ${userId}:`, error instanceof Error ? error.message : error);
             throw new Error("Failed to delete user.");
@@ -37,7 +37,7 @@ const UserService = {
 
     updateUserUsername: async (userId: string, newName: string) => {
         try {
-            await UserRepository.updateUsername(userId, newName);
+            await Repositories.user.updateUsername(userId, newName);  // Updated repository access
         } catch (error) {
             console.error(`Error updating username for user ${userId}:`, error instanceof Error ? error.message : error);
             throw new Error("Failed to update username.");
@@ -46,7 +46,7 @@ const UserService = {
 
     userExists: async (userId: string) => {
         try {
-            const user = await UserRepository.getUser(userId);
+            const user = await Repositories.user.getUser(userId);  // Updated repository access
             return !!user;
         } catch (error) {
             console.error(`Error checking existence of user ${userId}:`, error instanceof Error ? error.message : error);
@@ -56,7 +56,7 @@ const UserService = {
 
     userHasProfile: async (userId: string) => {
         try {
-            const user = await UserRepository.getUser(userId);
+            const user = await Repositories.user.getUser(userId);  // Updated repository access
             return !!user?.profile;
         } catch (error) {
             console.error(`Error checking user profile for ${userId}:`, error instanceof Error ? error.message : error);
@@ -66,7 +66,7 @@ const UserService = {
 
     addProfile: async (userId: string, profileId: number) => {
         try {
-            await UserRepository.updateProfile(userId, profileId);
+            await Repositories.user.updateProfile(userId, profileId);  // Updated repository access
         } catch (error) {
             console.error(`Error adding profile ${profileId} to user ${userId}:`, error instanceof Error ? error.message : error);
             throw new Error("Failed to add profile to user.");
