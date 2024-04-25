@@ -19,6 +19,15 @@ const AWSS3Service  = {
         return getSignedUrl(s3, command, { expiresIn: 300 });  // 5 minutes
     },
 
+    removeObject: async (key: string, bucket: string) => {
+        const command = new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: key
+        })
+        // TODO: Delete from S3 google when you're off the plane
+
+    }
+
 }
 
 export default AWSS3Service;

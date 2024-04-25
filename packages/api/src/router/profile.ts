@@ -11,6 +11,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import {
   createPresignedUrlSchema,
   profilePhotoSchema,
+  removeProfilePhotoSchema,
 } from "../validation/profile";
 
 export const profileRouter = createTRPCRouter({
@@ -50,8 +51,8 @@ export const profileRouter = createTRPCRouter({
     .input(profilePhotoSchema)
     .output(z.void())
     .mutation(async ({ input }) => {
-      try{
-        await Services.profile.uploadProfilePhoto(input.userId, input.key)
+      try {
+        await Services.profile.uploadProfilePhoto(input.userId, input.key);
       } catch (error) {
         console.error(
           "Error uploading profile photo:",
@@ -62,5 +63,11 @@ export const profileRouter = createTRPCRouter({
           message: "Failed to upload profile photo.",
         });
       }
+    }),
+
+  removeProfilePhoto: protectedProcedure
+    .input(removeProfilePhotoSchema)
+    .mutation(async ({ ctx, input }) => {
+      Services.aws.removeObject(ctx.session.uid, input.key);
     }),
 });

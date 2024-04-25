@@ -24,3 +24,7 @@ export const profilePhotoSchema = z.object({
   userId: z.string(),
   key: z.string(),
 });
+
+export const removeProfilePhotoSchema = z.object({
+    key: z.string(),
+})
