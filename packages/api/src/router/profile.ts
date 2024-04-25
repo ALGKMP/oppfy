@@ -8,6 +8,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import Services from "../service";
+import {createPresignedUrlSchema} from "../validation/profile";
 
 import { eq, schema } from "@acme/db";
 
@@ -37,58 +38,9 @@ export const profileRouter = createTRPCRouter({
 
 
   createPresignedUrlWithClient: protectedProcedure
-    .input(
-      z
-        .object({
-          userId: z.string(),
-          contentLength: z.number(),
-          contentType: z.string(),
-        })
-        .refine((data) => data.contentLength <= 5 * 1024 * 1024, {
-          // Validates file size
-          message: "File too large",
-        })
-        .refine(
-          (data) =>
-            ["image/jpeg", "image/png", "image/gif", "image"].includes(
-              data.contentType,
-            ),
-          {
-            // Validates file type
-            message: "Invalid file type",
-          },
-        ),
-    )
+    .input(createPresignedUrlSchema)
     .mutation(async ({ ctx, input }) => {
-      // Define the S3 object key and bucket
-      const key = `profile-pictures/${ctx.session.uid}.jpg`;
-      const bucket = "awsstack-profilebucket3c1f9a36-udj4vt6odzg7";
-
-      const metadata = {
-        userId: input.userId,
-      };
-
-      // Parameters for the PutObject command, including the file's content length and type
-      const putObjectParams = {
-        Bucket: bucket,
-        Key: key,
-        Metadata: metadata,
-        Fields: {
-          "Content-Length": input.contentLength,
-          "Content-Type": input.contentType,
-        },
-      };
-
-      // Generate and return the presigned URL with a 5-minute expiration
-      const url = await getSignedUrl(
-        ctx.s3,
-        new PutObjectCommand(putObjectParams),
-        {
-          expiresIn: 300, // 5 minutes
-        },
-      );
-      console.log(`presigned URL: ${url}`);
-      return url;
+      return await Services.aws.createPresignedUrl(ctx.session.uid, input.contentLength, input.contentType);
     }),
 
   profilePicture: publicProcedure
