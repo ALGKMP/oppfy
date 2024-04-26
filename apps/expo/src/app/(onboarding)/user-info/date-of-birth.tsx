@@ -33,7 +33,7 @@ const DateOfBirth = () => {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const dateOfBirthInputRef = useRef<TextInput | null>(null);
 
-  const updateUserDetails = api.auth.updateUserDetails.useMutation();
+  const updateDateOfBirth = api.user.updateDateOfBirth.useMutation();
 
   const dataOfBirthIsValid = useMemo(
     () => schemaValidation.safeParse({ dateOfBirth }).success,
@@ -41,7 +41,7 @@ const DateOfBirth = () => {
   );
 
   const onPress = async () => {
-    await updateUserDetails.mutateAsync({
+    await updateDateOfBirth.mutateAsync({
       dateOfBirth: Date.convertToDateObject(dateOfBirth, "MMDDYYYY"),
     });
 

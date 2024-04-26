@@ -17,7 +17,7 @@ const Username = () => {
   const [username, setUsername] = useState("");
   const usernameInputRef = useRef<TextInput | null>(null);
 
-  const updateUserDetails = api.auth.updateUserDetails.useMutation();
+  const updateUserDetails = api.user.updateUsername.useMutation();
 
   const usernameIsValid = useMemo(
     () => schemaValidation.safeParse({ username }).success,
@@ -26,7 +26,7 @@ const Username = () => {
 
   const onPress = async () => {
     await updateUserDetails.mutateAsync({
-      username,
+      username: username,
     });
 
     // router.push("/user-info/profile-picture");

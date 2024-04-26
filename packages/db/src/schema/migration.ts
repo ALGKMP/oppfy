@@ -25,10 +25,8 @@ export const verificationToken = mySqlTable("VerificationToken", {
 
 export const user = mySqlTable("User", {
   id: varchar("id", {length: 255}).primaryKey(),
-  // email: varchar("email", { length: 255 }).unique().notNull(),
-  name: varchar("name", { length: 255 }),
-  dateOfBirth: date("dateOfBirth"),
-  profile: bigint("profile", {mode: "number", unsigned: true}).references(() => profile.id),
+  profile: bigint("profile", {mode: "number", unsigned: true}).references(() => profile.id).notNull(),
+  username: varchar("username", { length: 255 }).unique(),
   notificationSetting: bigint("notificationSetting", {mode: "number", unsigned: true}).references(
     () => notificationSetting.id,
   ),
@@ -51,7 +49,8 @@ export const userRelations = relations(user, ({ one }) => ({
 
 export const profile = mySqlTable("Profile", {
   id: serial("id").primaryKey(),
-  userName: varchar("userName", { length: 255 }).unique().notNull(),
+  name: varchar("name", { length: 255 }),
+  dateOfBirth: date("dateOfBirth"),
   bio: text("bio"),
   profilePhoto: bigint("profilePhoto", {mode: "number", unsigned: true}).references(() => profilePhoto.id),
   createdAt: timestamp("createdAt")
@@ -103,7 +102,6 @@ export const post = mySqlTable("Post", {
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
-
 
 export const postRelations = relations(post, ({ one, many }) => ({
   author: one(user, {

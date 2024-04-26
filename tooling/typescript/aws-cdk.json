@@ -20,7 +20,7 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "esModuleInterop": true, 
+    "esModuleInterop": true
   },
   "exclude": [
     "cdk.out"

@@ -1,0 +1,77 @@
+import Repositories from '../repository';
+
+const UserService = {
+    createUser: async (userId: string) => {
+        try {
+            if (await UserService.userExists(userId)) {
+                throw new Error("User already exists.");
+            }
+            await Repositories.user.createUserWithProfileAndNotifications(userId);  // Updated repository access
+        } catch (error) {
+            console.error(`Error creating user ${userId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to create user.");
+        }
+    },
+
+    getUser: async (userId: string) => {
+        try {
+            const user = await Repositories.user.getUser(userId);  // Updated repository access
+            if (!user) {
+                throw new Error(`Unable to retrieve user with id ${userId}`);
+            }
+            return user;
+        } catch (error) {
+            console.error(`Error retrieving user ${userId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to retrieve user.");
+        }
+    },
+
+    deleteUser: async (userId: string) => {
+        try {
+            await Repositories.user.deleteUser(userId);  // Updated repository access
+        } catch (error) {
+            console.error(`Error deleting user ${userId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to delete user.");
+        }
+    },
+
+    updateUserUsername: async (userId: string, newName: string) => {
+        try {
+            await Repositories.user.updateUsername(userId, newName);  // Updated repository access
+        } catch (error) {
+            console.error(`Error updating username for user ${userId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to update username.");
+        }
+    },
+
+    userExists: async (userId: string) => {
+        try {
+            const user = await Repositories.user.getUser(userId);  // Updated repository access
+            return !!user;
+        } catch (error) {
+            console.error(`Error checking existence of user ${userId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to check user existence.");
+        }
+    },
+
+    userHasProfile: async (userId: string) => {
+        try {
+            const user = await Repositories.user.getUser(userId);  // Updated repository access
+            return !!user?.profile;
+        } catch (error) {
+            console.error(`Error checking user profile for ${userId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to check if user has a profile.");
+        }
+    },
+
+    addProfile: async (userId: string, profileId: number) => {
+        try {
+            await Repositories.user.updateProfile(userId, profileId);  // Updated repository access
+        } catch (error) {
+            console.error(`Error adding profile ${profileId} to user ${userId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to add profile to user.");
+        }
+    }
+};
+
+export default UserService;

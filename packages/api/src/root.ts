@@ -5,12 +5,13 @@ import { authRouter } from "./router/auth";
 import { profileRouter } from "./router/profile";
 import { mediaRouter } from "./router/media";
 import { postRouter } from "./router/post";
-
+import { userRouter } from "./router/user";
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   media: mediaRouter,
   profile: profileRouter,
   post: postRouter,
+  user: userRouter,
 });
 
 export const openApiDocument = generateOpenApiDocument(appRouter, {

@@ -1,4 +1,4 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -111,4 +111,38 @@ export const postRouter = createTRPCRouter({
 
       return;
     }),
+    deletePost: protectedProcedure // Using protectedProcedure to ensure that the caller is authenticated
+    .input(
+      z.object({
+        objectKey: z.string(), // The unique key of the object/post to be deleted
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Validate that the post exists and that the requester is authorized to delete it
+      const post = await ctx.db.query.post.findFirst({
+        where: eq(schema.post.key, input.objectKey),
+      });
+      if (!post)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" });
+      
+      // Example authorization check (adjust according to your auth logic)
+      if (post.author !== ctx.session.userId && !ctx.session.isAdmin) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Unauthorized to delete this post" });
+      }
+
+      // Delete the post from the database
+      await ctx.db.delete(schema.post).where(eq(schema.post.key, input.objectKey));
+
+      // Delete the object from S3
+      const deleteObjectParams = {
+        Bucket: "awsstack-postbucketf37978b4-nyf2h7ran1kr",
+        Key: input.objectKey,
+      };
+      const command = new DeleteObjectCommand(deleteObjectParams);
+      await ctx.s3.send(command);
+
+      // Optionally, return some information or confirmation
+      return { success: true, message: "Post deleted successfully" };
+    }),
+
 });

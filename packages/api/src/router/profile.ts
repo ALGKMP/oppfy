@@ -3,157 +3,60 @@
   functionality for generating presigned URLs for secure, client-side file uploads
 */
 
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { eq, schema } from "@acme/db";
-
+import Services from "../service";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import ZodSchemas from "../validation"
 
 export const profileRouter = createTRPCRouter({
-  /*
-    createPresignedUrlWithClient:
-    A protected procedure that generates a presigned URL for uploading user profile pictures to S3. It ensures
-    that the uploaded files are within a specified size limit and are of an allowed content type.
-    
-    Inputs:
-      - uid: The user's unique identifier.
-      - contentLength: The size of the file to be uploaded, used for validating against the set maximum size.
-      - contentType: The MIME type of the file, used for validating allowed file types.
-      - caption (optional): A caption for the profile picture.
-      - tags (optional): An array of tags associated with the picture.
-    
-    Outputs: A presigned URL for uploading the profile picture directly to S3.
-    
-    Notes:
-      - The procedure enforces a file size limit of 5MB and restricts uploads to JPEG, PNG, and GIF formats.
-      - It constructs the S3 object key using the user's UID and a standard file extension, ensuring uniqueness
-        and straightforward access patterns.
-      - TODO: Look into compressing photos before uploading to reduce file size, or storing a compressed version
-  */
-  createPresignedUrlWithClient: protectedProcedure
-    .input(
-      z
-        .object({
-          userId: z.string(),
-          contentLength: z.number(),
-          contentType: z.string(),
-        })
-        .refine((data) => data.contentLength <= 5 * 1024 * 1024, {
-          // Validates file size
-          message: "File too large",
-        })
-        .refine(
-          (data) =>
-            ["image/jpeg", "image/png", "image/gif", "image"].includes(
-              data.contentType,
-            ),
-          {
-            // Validates file type
-            message: "Invalid file type",
-          },
-        ),
-    )
+
+  createPresignedUrlForProfilePictureUpload: protectedProcedure
+    .input(ZodSchemas.profile.createPresignedUrl)
     .mutation(async ({ ctx, input }) => {
-      // Define the S3 object key and bucket
-      const key = `profile-pictures/${ctx.session.uid}.jpg`;
-      const bucket = "awsstack-profilebucket3c1f9a36-udj4vt6odzg7";
-
-      const metadata = {
-        userId: input.userId,
-      };
-
-      // Parameters for the PutObject command, including the file's content length and type
-      const putObjectParams = {
-        Bucket: bucket,
-        Key: key,
-        Metadata: metadata,
-        Fields: {
-          "Content-Length": input.contentLength,
-          "Content-Type": input.contentType,
-        },
-      };
-
-      // Generate and return the presigned URL with a 5-minute expiration
-      const url = await getSignedUrl(
-        ctx.s3,
-        new PutObjectCommand(putObjectParams),
-        {
-          expiresIn: 300, // 5 minutes
-        },
+      return await Services.aws.uploadProfilePictureUrl(
+        ctx.session.uid,
+        input.contentLength,
+        input.contentType,
       );
-      console.log(`presigned URL: ${url}`);
-      return url;
     }),
 
-  profilePicture: publicProcedure
+
+  uploadProfilePicture: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
-    .input(
-      z.object({
-        user: z.string(),
-        key: z.string(),
-        bucket: z.string(),
-      }),
-    )
+    .input(ZodSchemas.profile.uploadProfilePhotoOpenApi)
     .output(z.void())
-    .mutation(async ({ input, ctx }) => {
-      const user = await ctx.db.query.user.findFirst({
-        where: eq(schema.user.id, input.user),
-        columns: {
-          profile: true,
-        },
-      });
-      if (!user?.profile) {
-        // For now, assume a profile is always created in the auth flow
+    .mutation(async ({ input }) => {
+      try {
+        await Services.profile.uploadProfilePhoto(input.userId, input.key);
+      } catch (error) {
+        console.error(
+          "Error uploading profile photo:",
+          error instanceof Error ? error.message : error,
+        );
         throw new TRPCError({
-          message: "User profile not found",
-          code: "NOT_FOUND",
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to upload profile photo.",
         });
       }
+    }),
 
-      const profile = await ctx.db.query.profile.findFirst({
-        where: eq(schema.profile.id, user.profile),
-        columns: {
-          profilePhoto: true,
-        },
-      });
-
-      if (!profile) {
+  removeProfilePhoto: protectedProcedure
+    .input(ZodSchemas.profile.removeProfilePhoto)
+    .mutation(async ({ ctx, input }) => {
+      try{
+        await Services.profile.deleteProfilePhoto(ctx.session.uid);
+        await Services.aws.deleteObject(ctx.session.uid, input.key);
+      } catch (error) {
+        console.error(
+          "Error removing profile photo:",
+          error instanceof Error ? error.message : error,
+        );
         throw new TRPCError({
-          message: "Error getting profile",
-          code: "NOT_FOUND",
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to remove profile photo.",
         });
-      }
-
-      if (!profile?.profilePhoto) {
-        // Create new profile photo record
-        const profilePhoto = await ctx.db
-          .insert(schema.profilePhoto)
-          .values({
-            key: input.key,
-          });
-
-        console.log(`New profile photo: ${profilePhoto[0].insertId}`);
-
-        // Associate the profile photo with the user's profile
-        await ctx.db
-          .update(schema.profile)
-          .set({
-            profilePhoto: profilePhoto[0].insertId,
-          })
-          .where(eq(schema.profile.id, user.profile));
-      }
-      else {
-        // Update existing profile photo record
-        await ctx.db
-          .update(schema.profilePhoto)
-          .set({
-            key: input.key,
-          })
-          .where(eq(schema.profilePhoto.id, profile.profilePhoto));
-        console.log(`Updated profile photo: ${profile.profilePhoto}`);
       }
     }),
 });

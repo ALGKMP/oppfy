@@ -132,10 +132,10 @@ export class AwsStack extends cdk.Stack {
       "MyFreeTierRdsInstance",
       {
         engine: rds.DatabaseInstanceEngine.mysql({
-          version: rds.MysqlEngineVersion.VER_8_0,
+          version: rds.MysqlEngineVersion.VER_8_0, // Change to a supported version
         }),
         instanceType: ec2.InstanceType.of(
-          ec2.InstanceClass.BURSTABLE3,
+          ec2.InstanceClass.BURSTABLE2,
           ec2.InstanceSize.MICRO,
         ),
         vpc,
@@ -154,6 +154,7 @@ export class AwsStack extends cdk.Stack {
         deletionProtection: false,
       },
     );
+    
 
     const bucket = new s3.Bucket(this, "MyBucket2", {
       versioned: true,
