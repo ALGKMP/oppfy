@@ -51,6 +51,14 @@ const UserRepository = {
     return users[0];
   },
 
+  getUserByProfileId: async (profileId: number) => {
+    const users = await db
+      .selectDistinct()
+      .from(schema.user)
+      .where(eq(schema.user.profile, profileId));
+    return users[0];
+  },
+
   updateProfile: async (userId: string, profileId: number) => {
     await db
       .update(schema.user)

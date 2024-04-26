@@ -114,7 +114,7 @@ const ProfileService = {
     }
   },
 
-  uploadProfilePhoto: async (userId: string, key: string) => {
+  uploadProfilePicture: async (userId: string, key: string) => {
     try {
       const profile = await ProfileService.getProfileByUserId(userId);
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { userId, key } from "../utils";
+import { userId, key, profiles } from "../utils";
 
 const profileSchemas = {
     createPresignedUrl: z.object({
@@ -16,7 +16,7 @@ const profileSchemas = {
         },
     ),
     
-    uploadProfilePhotoOpenApi: z.object({
+    uploadProfilePictureOpenApi: z.object({
         userId,
         key
     }),
@@ -28,6 +28,9 @@ const profileSchemas = {
     removeProfilePhoto: z.object({
         key
     }),
+    getListOfProfilePictureUrls: z.object({
+        profiles
+    })
 };
 
 export default profileSchemas

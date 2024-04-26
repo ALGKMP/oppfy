@@ -2,6 +2,7 @@
 import { s3 } from "@acme/db";
 import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import Repositories from "../repository";
 
 const AWSS3Service  = {
 
@@ -60,9 +61,25 @@ const AWSS3Service  = {
         return await AWSS3Service.createPutPresignedUrl(bucket, `profile-pictures/${userId}.jpg`, contentLength, contentType);
     },
 
-    getProfilePictureUrl: async (userId: string): Promise<string> => {
+    getProfilePictureUrls: async (profiles: number[]): Promise<string[]> => {
         const bucket = process.env.S3_BUCKET_NAME!;
-        return await AWSS3Service.createGetPresignedUrl(bucket, `profile-pictures/${userId}.jpg`);
+        const urls: string[] = [];
+        for (const profileId of profiles) {
+            try {
+                const user = await Repositories.user.getUserByProfileId(profileId);
+                // TODO: in the future, we delete the profile picture if the user doesn't exist
+                if (!user) {
+                    throw new Error(`User with profile ID ${profileId} not found`);
+                }
+                const url = await AWSS3Service.createGetPresignedUrl(bucket, `profile-pictures/${user.id}.jpg`);
+                urls.push(url);
+            } catch (err) {
+                console.error(`Error retrieving object: profile-pictures/${profileId}.jpg`, err);
+                // Optionally, you might want to continue instead of throwing, depending on desired behavior
+                throw new Error(`Failed to retrieve object from S3 for user ${profileId}`);
+            }
+        }
+        return urls;
     },
 
     deleteObjectProfilePicture: async (userId: string) => {

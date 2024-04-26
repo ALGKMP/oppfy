@@ -22,14 +22,13 @@ export const profileRouter = createTRPCRouter({
       );
     }),
 
-
   uploadProfilePicture: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
-    .input(ZodSchemas.profile.uploadProfilePhotoOpenApi)
+    .input(ZodSchemas.profile.uploadProfilePictureOpenApi)
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        await Services.profile.uploadProfilePhoto(input.userId, input.key);
+        await Services.profile.uploadProfilePicture(input.userId, input.key);
       } catch (error) {
         console.error(
           "Error uploading profile photo:",
@@ -41,6 +40,12 @@ export const profileRouter = createTRPCRouter({
         });
       }
     }),
+
+  getListOfProfilePictureUrls: protectedProcedure
+  .input(ZodSchemas.profile.getListOfProfilePictureUrls)
+  .mutation(async ({ input }) => {
+    return await Services.aws.getProfilePictureUrls(input.profiles);
+  }),
 
   removeProfilePhoto: protectedProcedure
     .input(ZodSchemas.profile.removeProfilePhoto)
