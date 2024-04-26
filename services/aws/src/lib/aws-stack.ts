@@ -135,7 +135,7 @@ export class AwsStack extends cdk.Stack {
           version: rds.MysqlEngineVersion.VER_8_0,
         }),
         instanceType: ec2.InstanceType.of(
-          ec2.InstanceClass.BURSTABLE2,
+          ec2.InstanceClass.BURSTABLE3,
           ec2.InstanceSize.MICRO,
         ),
         vpc,
