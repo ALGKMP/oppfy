@@ -20,13 +20,19 @@ const AWSS3Service  = {
     },
 
     removeObject: async (key: string, bucket: string) => {
-        const _command = new DeleteObjectCommand({
+        const command = new DeleteObjectCommand({
             Bucket: bucket,
             Key: key
         })
         // TODO: Delete from S3 google when you're off the plane
-
-    }
+        try {
+            const response = await s3.send(command);
+            console.log(response);
+          } catch (err) {
+            console.error(err);
+            throw new Error("Failed to delete object from S3");
+          };
+    },
 
 }
 

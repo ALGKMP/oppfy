@@ -46,7 +46,7 @@ export const profileRouter = createTRPCRouter({
       );
     }),
 
-  profilePicture: publicProcedure
+  uploadProfilePicture: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
     .input(profilePhotoSchema)
     .output(z.void())
