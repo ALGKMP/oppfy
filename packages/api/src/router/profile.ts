@@ -8,47 +8,24 @@ import { z } from "zod";
 
 import Services from "../service";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import {
-  createPresignedUrlSchema,
-  profilePhotoSchema,
-  removeProfilePhotoSchema,
-} from "../validation/profile";
+import ZodSchemas from "../validation"
 
 export const profileRouter = createTRPCRouter({
-  /*
-    createPresignedUrlWithClient:
-    A protected procedure that generates a presigned URL for uploading user profile pictures to S3. It ensures
-    that the uploaded files are within a specified size limit and are of an allowed content type.
-    
-    Inputs:
-      - uid: The user's unique identifier.
-      - contentLength: The size of the file to be uploaded, used for validating against the set maximum size.
-      - contentType: The MIME type of the file, used for validating allowed file types.
-      - caption (optional): A caption for the profile picture.
-      - tags (optional): An array of tags associated with the picture.
-    
-    Outputs: A presigned URL for uploading the profile picture directly to S3.
-    
-    Notes:
-      - The procedure enforces a file size limit of 5MB and restricts uploads to JPEG, PNG, and GIF formats.
-      - It constructs the S3 object key using the user's UID and a standard file extension, ensuring uniqueness
-        and straightforward access patterns.
-      - TODO: Look into compressing photos before uploading to reduce file size, or storing a compressed version
-  */
 
-  createPresignedUrlForProfilePictureWithClient: protectedProcedure
-    .input(createPresignedUrlSchema)
+  createPresignedUrlForProfilePictureUpload: protectedProcedure
+    .input(ZodSchemas.profile.createPresignedUrl)
     .mutation(async ({ ctx, input }) => {
-      return await Services.aws.createPresignedUrl(
+      return await Services.aws.uploadProfilePictureUrl(
         ctx.session.uid,
         input.contentLength,
         input.contentType,
       );
     }),
 
+
   uploadProfilePicture: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
-    .input(profilePhotoSchema)
+    .input(ZodSchemas.profile.uploadProfilePhotoOpenApi)
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
@@ -66,11 +43,11 @@ export const profileRouter = createTRPCRouter({
     }),
 
   removeProfilePhoto: protectedProcedure
-    .input(removeProfilePhotoSchema)
+    .input(ZodSchemas.profile.removeProfilePhoto)
     .mutation(async ({ ctx, input }) => {
       try{
         await Services.profile.deleteProfilePhoto(ctx.session.uid);
-        await Services.aws.removeObject(ctx.session.uid, input.key);
+        await Services.aws.deleteObject(ctx.session.uid, input.key);
       } catch (error) {
         console.error(
           "Error removing profile photo:",

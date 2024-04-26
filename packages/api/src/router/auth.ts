@@ -1,11 +1,11 @@
 import Services from "../service";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import * as Schemas from "../validation/auth";
+import ZodSchemas from "../validation";
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
-    .input(Schemas.createUserSchema)
+    .input(ZodSchemas.auth.createUser)
     .mutation(async ({ input }) => {
       try {
         return await Services.user.createUser(input.userId);
@@ -30,7 +30,7 @@ export const authRouter = createTRPCRouter({
       }
     }),
   deleteUser: protectedProcedure
-    .input(Schemas.deleteUserSchema)
+    .input(ZodSchemas.auth.deleteUser)
     .mutation(async ({ input }) => {
       try {
         await Services.user.deleteUser(input.userId);
@@ -44,7 +44,7 @@ export const authRouter = createTRPCRouter({
       }
     }),
   updateUserUsername: protectedProcedure
-    .input(Schemas.updateUserSchema)
+    .input(ZodSchemas.auth.updateUser)
     .mutation(async ({ input }) => {
       try {
         await Services.user.updateUserUsername(input.userId, input.username);
