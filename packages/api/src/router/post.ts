@@ -5,57 +5,28 @@ import { z } from "zod";
 
 import { eq, schema } from "@acme/db";
 
+import ZodSchemas from "../validation";
+
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import Services from "../service";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
     .input(
-      z
-        .object({
-          author: z.string(),
-          recipient: z.string(),
-          caption: z.string(),
-          contentLength: z.number(),
-          contentType: z.string(),
-        })
-        .refine(
-          (data) =>
-            ["image/jpeg", "image/png", "image/gif", "image"].includes(
-              data.contentType,
-            ),
-          {
-            // Validates file type
-            message: "Invalid file type",
-          },
-        ),
+      ZodSchemas.post.createPresignedUrl
     )
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
-      const s3Client = ctx.s3;
-      const bucketName = "awsstack-postbucketf37978b4-nyf2h7ran1kr";
+      const bucket = "awsstack-postbucketf37978b4-nyf2h7ran1kr";
       const objectKey = `posts/${Date.now()}-${input.author}`;
-
       const metadata = {
-        author: input.author,
-        recipient: input.recipient,
-        caption: input.caption,
-      };
-
-      const putObjectParams = {
-        Bucket: bucketName,
-        Key: objectKey,
-        Metadata: metadata,
-        Fields: {
-          "Content-Length": input.contentLength,
-          "Content-Type": input.contentType,
-        },      
-      };
-
-      const command = new PutObjectCommand(putObjectParams);
-      
-      const url = await getSignedUrl(s3Client, command, { expiresIn: 300 }); // URL expires in 1 hour
-
-      return url;
+        author: ctx.session.userId,
+        friend: input.friend,
+        caption: input.caption
+      }
+      try{
+        return await Services.aws.putObjectPresignedUrlWithMetadata(bucket, objectKey, input.contentLength, input.contentType, metadata)
+      }
     }),
   uploadPost: publicProcedure
     .meta({ openapi: { method: "POST", path: "/uploadPost" } })

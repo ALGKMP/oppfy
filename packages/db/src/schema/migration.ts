@@ -52,7 +52,7 @@ export const profile = mySqlTable("Profile", {
   name: varchar("name", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
   bio: text("bio"),
-  profilePhoto: bigint("profilePhoto", {mode: "number", unsigned: true}).references(() => profilePhoto.id),
+  profilePhoto: bigint("profilePhoto", {mode: "number", unsigned: true}).references(() => profilePicture.id),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -60,13 +60,13 @@ export const profile = mySqlTable("Profile", {
 });
 
 export const profileRelations = relations(profile, ({ one }) => ({
-  profilePhoto: one(profilePhoto, {
+  profilePhoto: one(profilePicture, {
     fields: [profile.profilePhoto],
-    references: [profilePhoto.id],
+    references: [profilePicture.id],
   }),
 }));
 
-export const profilePhoto = mySqlTable("ProfilePhoto", {
+export const profilePicture = mySqlTable("ProfilePhoto", {
   id: serial("id").primaryKey().notNull(),
   key: varchar("url", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt")

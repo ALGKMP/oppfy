@@ -1,3 +1,4 @@
+import Services from ".";
 import Repositories from "../repository";
 import UserService from "./user";
 
@@ -120,7 +121,7 @@ const ProfileService = {
 
       // New Profile Photo
       if (!profile.profilePhoto) {
-        return await ProfileService.createAndLinkProfilePhoto(profile.id, key);
+        return await ProfileService.createAndLinkProfilePicture(profile.id);
       }
 
       const profilePhoto = await Repositories.profilePhoto.getProfilePhoto(
@@ -142,19 +143,78 @@ const ProfileService = {
     }
   },
 
-  createAndLinkProfilePhoto : async (profileId: number, key: string) => {
-    const profilePhotoId = await Repositories.profilePhoto.createProfilePhoto(key);
-    return Repositories.profilePhoto.addProfilePhotoToProfile(profileId, profilePhotoId);
+  createAndLinkProfilePicture : async (profileId: number) => {
+    try{
+      const user = await Repositories.user.getUserByProfileId(profileId);
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const key = `profile-pictures/${user.id}.jpg`;
+
+      return await Repositories.profilePhoto.createProfilePhoto(key);
+    } catch (error) {
+      console.error(
+        "Error creating and linking profile photo:",
+        profileId,
+        error instanceof Error ? error.message : error,
+      );
+      throw new Error("Failed to create and link profile photo.");
+    }
   },
 
-  deleteProfilePhoto: async (userId: string) => {
+  getProfilePicture: async (userId: string): Promise<string> => {
+    const bucket = process.env.S3_BUCKET_NAME!;
+    const key = `profile-pictures/${userId}.jpg`;
+    try {
+      return await Services.aws.objectPresignedUrl(bucket, key);
+    } catch (err) {
+      console.error(`Error retrieving object: ${key}`, err);
+      throw new Error(`Failed to retrieve object from S3 for user ${userId}`);
+    }
+  },
+  
+
+  // Batch get operation for multiple profile pictures
+  getProfilePictureBatch : async (profiles: number[]): Promise<string[]> => {
+    const bucket = process.env.S3_BUCKET_NAME!;
+    const urlPromises = profiles.map(async (profileId) => {
+        try {
+            const user = await Repositories.user.getUserByProfileId(profileId);
+            if (!user) {
+                throw new Error(`User with profile ID ${profileId} not found`);
+            }
+            const url = await Services.aws.objectPresignedUrl(
+                bucket,
+                `profile-pictures/${user.id}.jpg`,
+            );
+            return url;
+        } catch (err) {
+            console.error(
+                `Error retrieving object: profile-pictures/${profileId}.jpg`,
+                err,
+            );
+            return `Failed to retrieve object from S3 for user ${profileId}`;
+        }
+    });
+    return Promise.all(urlPromises);
+  },
+
+  deleteProfilePicture: async (userId: string) => {
     try {
       const profile = await ProfileService.getProfileByUserId(userId);
       if (!profile.profilePhoto) {
         throw new Error("Profile does not have a profile photo.");
       }
 
-      return await Repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
+      // Throws if fails
+      await Repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
+
+      // Update profile to remove profile photo
+    const bucket = process.env.S3_BUCKET_NAME!;
+    const key = `profile-pictures/${userId}.jpg`;
+    return await Services.aws.deleteObject(bucket, key);
+
     } catch (error) {
       console.error(
         "Error deleting profile photo:",
@@ -164,7 +224,6 @@ const ProfileService = {
       throw new Error("Failed to delete profile photo.");
     }
   },
-  
 };
 
 export default ProfileService;
