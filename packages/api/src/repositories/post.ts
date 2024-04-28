@@ -22,11 +22,11 @@ const PostRepository = {
     return result[0].insertId; // Assuming auto-increment ID
   },
 
-  getPost: async (key: string) => {
+  getPost: async (postId: number) => {
     const result = await db
       .select()
       .from(schema.post)
-      .where(eq(schema.post.key, key))
+      .where(eq(schema.post.id, postId))
       .execute();
     return result[0]; // Assuming unique key
   },

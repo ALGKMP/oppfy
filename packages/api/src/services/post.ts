@@ -43,13 +43,13 @@ const PostService = {
     }
   },
 
-  getPost: async (key: string) => {
+  getPost: async (postId: number) => {
     try {
-      const post = await Repositories.post.getPost(key);
+      const post = await Repositories.post.getPost(postId);
       if (!post) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: `Post with key ${key} not found.`,
+          message: `Post with key ${postId} not found.`,
         });
       }
       return post;
@@ -81,25 +81,25 @@ const PostService = {
     }
   },
 
-  getBatchPosts: async (keys: string[]) => {
+  getBatchPosts: async (postIds: number[]) => {
     const bucket = process.env.S3_BUCKET_NAME!;
     try {
-      const urlPromises = keys.map(async (postKey) => {
+      const urlPromises = postIds.map(async (postId) => {
         try {
-          const post = await Repositories.post.getPost(postKey);
+          const post = await Repositories.post.getPost(postId);
           if (!post) {
-            throw new Error(`Post with key ${postKey} not found`);
+            throw new Error(`Post with key ${postId} not found`);
           }
           return await Services.aws.objectPresignedUrl(
             bucket,
-            `post-images/${postKey}.jpg`,
+            `post-images/${post.key}.jpg`,
           );
         } catch (err) {
           console.error(
-            `Error retrieving object: post-images/${postKey}.jpg`,
+            `Error retrieving post: post-images/${postId}.jpg`,
             err,
           );
-          return `Failed to retrieve object from S3 for post ${postKey}`;
+          return `Failed to retrieve object from S3 for post ${postId}`;
         }
       });
       return Promise.all(urlPromises);

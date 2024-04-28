@@ -61,7 +61,7 @@ const postSchema = {
   }),
 
   getBatchPost: z.object({
-    keys: z.array(key),
+    postIds: z.array(postId),
   }),
 };
 
