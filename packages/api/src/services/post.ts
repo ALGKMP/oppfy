@@ -12,12 +12,16 @@ const PostService = {
     objectKey: string,
   ) => {
     try {
-      return await Repositories.post.createPost(
+      const postId = await Repositories.post.createPost(
         author,
         friend,
         caption,
         objectKey,
       );
+      if (!postId) {
+        throw new Error("Failed to create post.");
+      }
+      return await Repositories.post.createPostStats(postId);
     } catch (error) {
       console.error("Failed to create post:", error);
       throw new TRPCError({

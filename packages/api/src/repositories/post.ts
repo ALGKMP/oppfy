@@ -42,6 +42,14 @@ const PostRepository = {
   deletePost: async (key: string) => {
     await db.delete(schema.post).where(eq(schema.post.key, key)).execute();
   },
+
+  createPostStats: async (postId: number) => {
+    const result = await db
+      .insert(schema.postStats)
+      .values({ post: postId })
+      .execute();
+      return result[0].insertId; // Assuming auto-increment ID
+  },
 };
 
 export default PostRepository;
