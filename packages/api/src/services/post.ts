@@ -7,14 +7,14 @@ import Repositories from "../repositories";
 const PostService = {
   createPost: async (
     author: string,
-    recipient: string,
+    friend: string,
     caption: string,
     objectKey: string,
   ) => {
     try {
       return await Repositories.post.createPost(
         author,
-        recipient,
+        friend,
         caption,
         objectKey,
       );
@@ -55,14 +55,14 @@ const PostService = {
     }
   },
 
-  // getProfilePosts: async (profile: number) => {
-  //   try {
-  //     return await Repositories.post.getAllProfilePosts(profile);
-  //   } catch (error) {
-  //     console.error("Failed to retrieve user posts:", error);
-  //     throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error retrieving user posts.' });
-  //   }
-  // },
+  getProfilePosts: async (profile: number) => {
+    try {
+      return await Repositories.post.getAllProfilePosts(profile);
+    } catch (error) {
+      console.error("Failed to retrieve user posts:", error);
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error retrieving user posts.' });
+    }
+  },
 
   deletePost: async (key: string) => {
     try {

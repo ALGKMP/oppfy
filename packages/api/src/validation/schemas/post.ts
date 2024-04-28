@@ -32,8 +32,8 @@ const postSchema = {
     ),
 
   uploadPost: z.object({
-    userId,
-    friend,
+    author: userId,
+    friend: userId,
     caption,
     key,
   }),

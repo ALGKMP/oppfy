@@ -40,7 +40,7 @@ export const postRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        await Services.post.createPost(input.userId, input.friend, input.caption, input.key);
+        await Services.post.createPost(input.author, input.friend, input.caption, input.key);
         return;
       } catch (error) {
         throw new TRPCError({

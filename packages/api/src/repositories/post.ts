@@ -6,7 +6,7 @@ import { db, schema } from "@acme/db";
 const PostRepository = {
   createPost: async (
     author: string,
-    recipient: string,
+    friend: string,
     caption: string,
     objectKey: string,
   ) => {
@@ -14,7 +14,7 @@ const PostRepository = {
       .insert(schema.post)
       .values({
         author,
-        recipient,
+        recipient: friend,
         caption,
         key: objectKey,
       })
