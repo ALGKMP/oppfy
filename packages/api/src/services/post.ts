@@ -68,9 +68,10 @@ const PostService = {
     }
   },
 
-  deletePost: async (key: string) => {
+  deletePost: async (postId: number) => {
     try {
-      return await Repositories.post.deletePost(key);
+      await Repositories.post.deletePost(postId);
+      return;
     } catch (error) {
       console.error("Failed to delete post:", error);
       throw new TRPCError({

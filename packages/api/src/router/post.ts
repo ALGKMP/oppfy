@@ -49,9 +49,6 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
-
-    // getUserPosts: 
-    // getProfilePosts:
     
   editPost: protectedProcedure
     .input(ZodSchemas.post.updatePost)
@@ -71,7 +68,7 @@ export const postRouter = createTRPCRouter({
     .input(ZodSchemas.post.deletePost)
     .mutation(async ({ input }) => {
       try {
-        await Services.post.deletePost(input.key);
+        await Services.post.deletePost(input.postId);
         return { success: true, message: "Post deleted successfully" };
       } catch (error) {
         throw new TRPCError({

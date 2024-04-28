@@ -39,8 +39,8 @@ const PostRepository = {
       .execute();
   },
 
-  deletePost: async (key: string) => {
-    await db.delete(schema.post).where(eq(schema.post.key, key)).execute();
+  deletePost: async (postId: number) => {
+    await db.delete(schema.post).where(eq(schema.post.id, postId)).execute();
   },
 
   createPostStats: async (postId: number) => {

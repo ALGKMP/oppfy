@@ -45,7 +45,7 @@ const postSchema = {
   }),
 
   deletePost: z.object({
-    key,
+    postId,
   }),
 
   getPost: z.object({
