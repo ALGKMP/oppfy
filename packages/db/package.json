@@ -16,23 +16,23 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@aws-sdk/client-rds-data": "^3.490.0",
-    "@aws-sdk/client-s3": "^3.495.0",
-    "@aws-sdk/credential-providers": "^3.490.0",
-    "@typescript-eslint/eslint-plugin": "^6.10.0",
-    "@typescript-eslint/parser": "^6.10.0",
-    "drizzle-orm": "^0.29.3",
+    "@aws-sdk/client-rds-data": "^3.564.0",
+    "@aws-sdk/client-s3": "^3.564.0",
+    "@aws-sdk/credential-providers": "^3.564.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "drizzle-orm": "^0.29.5",
     "eslint-plugin-drizzle": "^0.2.3",
-    "mysql2": "^3.7.0"
+    "mysql2": "^3.9.7"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:^0.2.0",
-    "@acme/prettier-config": "workspace:^0.1.0",
-    "@acme/tsconfig": "workspace:^0.1.0",
-    "dotenv-cli": "^7.3.0",
+    "@acme/eslint-config": "workspace:^",
+    "@acme/prettier-config": "workspace:^",
+    "@acme/tsconfig": "workspace:^",
+    "dotenv-cli": "^7.4.1",
     "drizzle-kit": "^0.20.17",
-    "prettier": "^3.1.0",
-    "typescript": "^5.2.2"
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "eslintConfig": {
     "root": true,
