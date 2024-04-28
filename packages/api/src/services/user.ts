@@ -1,4 +1,4 @@
-import Repositories from "../repository";
+import Repositories from "../repositories";
 
 const UserService = {
   createUser: async (userId: string) => {

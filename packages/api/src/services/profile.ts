@@ -1,5 +1,5 @@
 import Services from ".";
-import Repositories from "../repository";
+import Repositories from "../repositories";
 import UserService from "./user";
 
 const ProfileService = {

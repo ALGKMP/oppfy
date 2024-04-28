@@ -2,7 +2,7 @@
 import { TRPCError } from "@trpc/server";
 
 import Services from ".";
-import Repositories from "../repository";
+import Repositories from "../repositories";
 
 const PostService = {
   createPost: async (
