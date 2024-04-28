@@ -71,6 +71,14 @@ const UserService = {
             console.error(`Error adding profile ${profileId} to user ${userId}:`, error instanceof Error ? error.message : error);
             throw new Error("Failed to add profile to user.");
         }
+    },
+    getUserFromProfileId: async (profileId: number) => {
+        try {
+            return await Repositories.user.getUserByProfileId(profileId);
+        } catch (error) {
+            console.error(`Error getting user from profile id ${profileId}:`, error instanceof Error ? error.message : error);
+            throw new Error("Failed to get user from profile id.");
+        }
     }
 };
 

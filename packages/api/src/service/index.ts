@@ -2,11 +2,13 @@
 import ProfileService from "./profile"
 import UserService from "./user"
 import AWSS3Service from "./aws";
+import PostService from "./post";
 
 const Services = {
   user: UserService,
   profile: ProfileService,
   aws: AWSS3Service,
+  post: PostService
 };
 
 export default Services;

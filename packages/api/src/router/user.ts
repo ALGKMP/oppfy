@@ -11,10 +11,6 @@ export const userRouter = createTRPCRouter({
       try {
         return await Services.profile.updateName(ctx.session.uid, input.name);
       } catch (error) {
-        console.error(
-          "Error updating name:",
-          error instanceof Error ? error.message : error,
-        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update name.",
@@ -31,10 +27,6 @@ export const userRouter = createTRPCRouter({
           input.dateOfBirth,
         );
       } catch (error) {
-        console.error(
-          "Error updating date of birth:",
-          error instanceof Error ? error.message : error,
-        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update date of birth.",
@@ -51,10 +43,6 @@ export const userRouter = createTRPCRouter({
           input.username,
         );
       } catch (error) {
-        console.error(
-          "Error updating username:",
-          error instanceof Error ? error.message : error,
-        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update username.",
@@ -72,10 +60,6 @@ export const userRouter = createTRPCRouter({
         const hasName = await Services.profile.profileHasName(ctx.session.uid);
         return hasDOB && hasName;
       } catch (error) {
-        console.error(
-          "Error checking profile completion:",
-          error instanceof Error ? error.message : error,
-        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to check user completion.",

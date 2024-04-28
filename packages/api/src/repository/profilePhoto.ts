@@ -5,7 +5,7 @@ import { db, schema } from "@acme/db";
 const ProfilePhotoRepository = {
   createProfilePhoto: async (key: string) => {
     const result = await db
-      .insert(schema.profilePhoto)
+      .insert(schema.profilePicture)
       .values({ key })
       .execute();
     return result[0].insertId;
@@ -13,16 +13,16 @@ const ProfilePhotoRepository = {
 
   updateProfilePhotoKey: async (profilePhotoId: number, newKey: string) => {
     await db
-      .update(schema.profilePhoto)
+      .update(schema.profilePicture)
       .set({ key: newKey })
-      .where(eq(schema.profilePhoto.id, profilePhotoId));
+      .where(eq(schema.profilePicture.id, profilePhotoId));
   },
 
   getProfilePhoto: async (profilePhotoId: number) => {
     const profilePhotos = await db
       .select()
-      .from(schema.profilePhoto)
-      .where(eq(schema.profilePhoto.id, profilePhotoId));
+      .from(schema.profilePicture)
+      .where(eq(schema.profilePicture.id, profilePhotoId));
     return profilePhotos.length > 0 ? profilePhotos[0] : null;
   },
   
@@ -35,8 +35,8 @@ const ProfilePhotoRepository = {
 
   deleteProfilePhoto: async (profilePhotoId: number) => {
     return await db
-      .delete(schema.profilePhoto)
-      .where(eq(schema.profilePhoto.id, profilePhotoId));
+      .delete(schema.profilePicture)
+      .where(eq(schema.profilePicture.id, profilePhotoId));
   }
 };
 

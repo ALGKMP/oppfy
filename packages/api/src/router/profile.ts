@@ -8,33 +8,39 @@ import { z } from "zod";
 
 import Services from "../service";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import ZodSchemas from "../validation"
+import ZodSchemas from "../validation";
 
 export const profileRouter = createTRPCRouter({
-
-  createPresignedUrlForProfilePictureUpload: protectedProcedure
+  uploadProfilePictureUrl: protectedProcedure
     .input(ZodSchemas.profile.createPresignedUrl)
     .mutation(async ({ ctx, input }) => {
-      return await Services.aws.uploadProfilePictureUrl(
-        ctx.session.uid,
-        input.contentLength,
-        input.contentType,
-      );
+      const bucket = process.env.S3_BUCKET_NAME!;
+      const key = `profile-pictures/${ctx.session.userId}.jpg`;
+      try {
+        return await Services.aws.putObjectPresignedUrl(
+          bucket,
+          key,
+          input.contentLength,
+          input.contentType,
+        );
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Failed to generate presigned URL for profile picture upload.",
+        });
+      }
     }),
 
-
+  // OpenAPI endponit for Lambda
   uploadProfilePicture: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
-    .input(ZodSchemas.profile.uploadProfilePhotoOpenApi)
+    .input(ZodSchemas.profile.uploadProfilePictureOpenApi)
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        await Services.profile.uploadProfilePhoto(input.userId, input.key);
+        await Services.profile.uploadProfilePicture(input.userId, input.key);
       } catch (error) {
-        console.error(
-          "Error uploading profile photo:",
-          error instanceof Error ? error.message : error,
-        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to upload profile photo.",
@@ -42,21 +48,24 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  removeProfilePhoto: protectedProcedure
-    .input(ZodSchemas.profile.removeProfilePhoto)
-    .mutation(async ({ ctx, input }) => {
-      try{
-        await Services.profile.deleteProfilePhoto(ctx.session.uid);
-        await Services.aws.deleteObject(ctx.session.uid, input.key);
-      } catch (error) {
-        console.error(
-          "Error removing profile photo:",
-          error instanceof Error ? error.message : error,
-        );
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to remove profile photo.",
-        });
-      }
+  getProfilePicture: protectedProcedure.query(async ({ ctx }) => {
+    return await Services.profile.getProfilePicture(ctx.session.uid);
+  }),
+
+  getProfilePictureBatch: protectedProcedure
+    .input(ZodSchemas.profile.getListOfProfilePictureUrls)
+    .query(async ({ input }) => {
+      return await Services.profile.getProfilePictureBatch(input.profiles);
     }),
+
+  deleteProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
+      await Services.profile.deleteProfilePicture(ctx.session.uid);
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to remove profile photo.",
+      });
+    }
+  }),
 });
