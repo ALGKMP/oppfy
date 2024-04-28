@@ -179,41 +179,33 @@ const ProfileService = {
   },
 
   // for other users
-  getProfilePicture: async (profileId: number): Promise<string> => {
-    const user = await Repositories.user.getUserByProfileId(profileId);
-    if (!user) {
-      throw new Error(`User with profile ID ${profileId} not found`);
-    }
+  getProfilePicture: async (userId: string): Promise<string> => {
     const bucket = process.env.S3_BUCKET_NAME!;
-    const key = `profile-pictures/${user.id}.jpg`;
+    const key = `profile-pictures/${userId}.jpg`;
     try {
       return await Services.aws.objectPresignedUrl(bucket, key);
     } catch (err) {
       console.error(`Error retrieving object: ${key}`, err);
-      throw new Error(`Failed to retrieve object from S3 for user ${profileId}`);
+      throw new Error(`Failed to retrieve object from S3 for user ${userId}`);
     }
   },
 
   // Batch get operation for multiple profile pictures
-  getProfilePictureBatch: async (profiles: number[]): Promise<string[]> => {
+  getProfilePictureBatch: async (userIds: string[]): Promise<string[]> => {
     const bucket = process.env.S3_BUCKET_NAME!;
-    const urlPromises = profiles.map(async (profileId) => {
+    const urlPromises = userIds.map(async (userId) => {
       try {
-        const user = await Repositories.user.getUserByProfileId(profileId);
-        if (!user) {
-          throw new Error(`User with profile ID ${profileId} not found`);
-        }
         const url = await Services.aws.objectPresignedUrl(
           bucket,
-          `profile-pictures/${user.id}.jpg`,
+          `profile-pictures/${userId}.jpg`,
         );
         return url;
       } catch (err) {
         console.error(
-          `Error retrieving object: profile-pictures/${profileId}.jpg`,
+          `Error retrieving object: profile-pictures/${userId}.jpg`,
           err,
         );
-        return `Failed to retrieve object from S3 for user ${profileId}`;
+        return `Failed to retrieve object from S3 for user ${userId}`;
       }
     });
     return Promise.all(urlPromises);

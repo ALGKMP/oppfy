@@ -94,18 +94,18 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    getProfilePosts: protectedProcedure
-    .input(ZodSchemas.post.getProfilePosts)
-    .query(async ({ input }) => {
-      try {
-        return await Services.post.getProfilePosts(input.profileId);
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get all profile posts"
-        });
-      }
-    }),
+    // getProfilePosts: protectedProcedure
+    // .input(ZodSchemas.post.getProfilePosts)
+    // .query(async ({ input }) => {
+    //   try {
+    //     return await Services.post.getProfilePosts(input.profileId);
+    //   } catch (error) {
+    //     throw new TRPCError({
+    //       code: "INTERNAL_SERVER_ERROR",
+    //       message: "Failed to get all profile posts"
+    //     });
+    //   }
+    // }),
 });
 
 export default postRouter;

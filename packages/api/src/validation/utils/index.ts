@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const userId = z.string().min(1);
 export const profileId = z.number().int();
-export const profiles = z.array(profileId);
 export const name = z.string().min(1);
 export const username = z.string().min(1);
 export const dateOfBirth = z.date();
