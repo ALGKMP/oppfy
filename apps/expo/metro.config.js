@@ -4,7 +4,9 @@ const { FileStore } = require("metro-cache");
 
 const path = require("path");
 
-module.exports = withTurborepoManagedCache(withMonorepoPaths());
+module.exports = withTurborepoManagedCache(
+  withMonorepoPaths(getDefaultConfig(__dirname)),
+);
 
 /**
  * Add the monorepo paths to the Metro config.
