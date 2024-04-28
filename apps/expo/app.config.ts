@@ -1,6 +1,7 @@
-import type { ExpoConfig } from "@expo/config";
+import type { ConfigContext, ExpoConfig } from "expo/config";
 
-const defineConfig = (): ExpoConfig => ({
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
   name: "oppfy",
   slug: "oppfy",
   scheme: "oppfy",
@@ -40,7 +41,6 @@ const defineConfig = (): ExpoConfig => ({
     typedRoutes: true,
   },
   plugins: [
-    "./expo-plugins/with-modify-gradle.js",
     "expo-router",
     "@react-native-firebase/app",
     "@react-native-firebase/auth",
@@ -90,5 +90,3 @@ const defineConfig = (): ExpoConfig => ({
     ],
   ],
 });
-
-export default defineConfig;

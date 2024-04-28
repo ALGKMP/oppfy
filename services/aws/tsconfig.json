@@ -4,7 +4,6 @@
     "outDir": "dist",
   },
   "include": [
-    "node_modules/@acme/db/**/*.ts", // Specify the path to the TypeScript files you want to compile
     "src/res/lambdas",
   ],
   "exclude": [
