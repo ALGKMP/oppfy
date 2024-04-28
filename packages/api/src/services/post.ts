@@ -69,12 +69,12 @@ const PostService = {
         try {
           const url = await Services.aws.objectPresignedUrl(
             bucket,
-            `post-images/${post.key}.jpg`,
+            `posts/${post.key}.jpg`,
           );
           results[post.id] = url;  // Store URL with postId as key
         } catch (err) {
           console.error(
-            `Error retrieving post: post-images/${post.id}.jpg`,
+            `Error retrieving post: posts/${post.id}.jpg`,
             err,
           );
           return `Failed to retrieve object from S3 for post ${post.id}`;
@@ -104,7 +104,7 @@ const PostService = {
     }
   },
 
-  getBatchPosts: async (postIds: number[]): Promise<Record<number, string | null>> => {
+  getPostsBatch: async (postIds: number[]): Promise<Record<number, string | null>> => {
     const bucket = process.env.S3_BUCKET_NAME!;
     try {
       const results: Record<number, string | null> = {};
@@ -116,12 +116,12 @@ const PostService = {
           }
           const url = await Services.aws.objectPresignedUrl(
             bucket,
-            `post-images/${post.key}.jpg`,
+            `post/${post.key}.jpg`,
           );
           results[postId] = url;  // Store URL with postId as key
         } catch (err) {
           console.error(
-            `Error retrieving post: post-images/${postId}.jpg`,
+            `Error retrieving post: post/${postId}.jpg`,
             err,
           );
           return `Failed to retrieve object from S3 for post ${postId}`;

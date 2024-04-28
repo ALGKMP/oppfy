@@ -82,7 +82,7 @@ export const postRouter = createTRPCRouter({
     .input(ZodSchemas.post.getBatchPost)
     .query(async ({ input }) => {
       try {
-        return await Services.post.getBatchPosts(input.postIds);
+        return await Services.post.getPostsBatch(input.postIds);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
