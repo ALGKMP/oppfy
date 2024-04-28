@@ -59,7 +59,7 @@ const PostService = {
     }
   },
 
-  allUserPosts: async (userId: string) => {
+  getUserPosts: async (userId: string) => {
     try {
       return await Repositories.post.allUserPosts(userId);
     } catch (error) {

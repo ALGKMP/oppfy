@@ -191,15 +191,17 @@ const ProfileService = {
   },
 
   // Batch get operation for multiple profile pictures
-  getProfilePictureBatch: async (userIds: string[]): Promise<string[]> => {
+  getProfilePictureBatch: async (userIds: string[]): Promise<Record<string, string | null>> => {
     const bucket = process.env.S3_BUCKET_NAME!;
+    const result: Record<string, string | null> = {};
+
     const urlPromises = userIds.map(async (userId) => {
       try {
         const url = await Services.aws.objectPresignedUrl(
           bucket,
           `profile-pictures/${userId}.jpg`,
         );
-        return url;
+        result[userId] = url;
       } catch (err) {
         console.error(
           `Error retrieving object: profile-pictures/${userId}.jpg`,
@@ -208,7 +210,8 @@ const ProfileService = {
         return `Failed to retrieve object from S3 for user ${userId}`;
       }
     });
-    return Promise.all(urlPromises);
+    await Promise.all(urlPromises);
+    return result;
   },
 
   deleteProfilePicture: async (userId: string) => {

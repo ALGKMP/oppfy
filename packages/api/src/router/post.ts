@@ -94,7 +94,7 @@ export const postRouter = createTRPCRouter({
     getUserPosts: protectedProcedure
     .query(async ({ ctx }) => {
       try {
-        await Services.post.allUserPosts(ctx.session.uid);
+        await Services.post.getUserPosts(ctx.session.uid);
 
       } catch (error) {
         throw new TRPCError({
@@ -108,7 +108,7 @@ export const postRouter = createTRPCRouter({
     .input(ZodSchemas.post.getUserPosts)
     .query(async ({ input }) => {
       try {
-        const posts = await Services.post.allUserPosts(input.userId);
+        await Services.post.getUserPosts(input.userId);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
