@@ -22,7 +22,7 @@ const PostRepository = {
     return result[0].insertId; // Assuming auto-increment ID
   },
 
-  getPostByKey: async (key: string) => {
+  getPost: async (key: string) => {
     const result = await db
       .select()
       .from(schema.post)
@@ -31,11 +31,11 @@ const PostRepository = {
     return result[0]; // Assuming unique key
   },
 
-  updatePost: async (postId: string, newCaption: string) => {
+  updatePost: async (postId: number, newCaption: string) => {
     await db
       .update(schema.post)
       .set({ caption: newCaption })
-      .where(eq(schema.post.key, postId))
+      .where(eq(schema.post.id, postId))
       .execute();
   },
 

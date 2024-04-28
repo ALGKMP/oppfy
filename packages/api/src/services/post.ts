@@ -27,7 +27,7 @@ const PostService = {
     }
   },
 
-  editPost: async (postId: string, newCaption: string) => {
+  editPost: async (postId: number, newCaption: string) => {
     try {
       return await Repositories.post.updatePost(postId, newCaption);
     } catch (error) {
@@ -41,7 +41,7 @@ const PostService = {
 
   getPost: async (key: string) => {
     try {
-      const post = await Repositories.post.getPostByKey(key);
+      const post = await Repositories.post.getPost(key);
       if (!post) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -81,7 +81,7 @@ const PostService = {
     try {
       const urlPromises = keys.map(async (postKey) => {
         try {
-          const post = await Repositories.post.getPostByKey(postKey);
+          const post = await Repositories.post.getPost(postKey);
           if (!post) {
             throw new Error(`Post with key ${postKey} not found`);
           }

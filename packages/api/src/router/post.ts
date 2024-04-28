@@ -57,7 +57,7 @@ export const postRouter = createTRPCRouter({
     .input(ZodSchemas.post.updatePost)
     .mutation(async ({ input }) => {
       try {
-        await Services.post.editPost(input.key, input.caption);
+        await Services.post.editPost(input.postId, input.caption);
         return { success: true, message: "Post updated successfully" };
       } catch (error) {
         throw new TRPCError({
