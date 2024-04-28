@@ -1,10 +1,9 @@
-
 import { S3Client } from "@aws-sdk/client-s3";
 import { drizzle } from "drizzle-orm/mysql2";
 import * as mysql from "mysql2/promise";
 
 // import * as migration from "@acme/db/src/schema/migration";
-import * as migration from "./src/schema/migration"
+import * as migration from "./src/schema/migration";
 
 export const schema = { ...migration };
 
@@ -24,19 +23,13 @@ const connection = await mysql.createConnection({
 export const db = drizzle(connection, {
   logger: true,
   schema,
-  mode: "default"
+  mode: "default",
 });
 
-// const test = db.query.user.findFirst({ where: eq(migration.user.id, "sdt") });
-
-const globalForS3 = globalThis as { s3?: S3Client };
-
-export const s3 =
-  globalForS3.s3 ??
-  new S3Client({
-    region: "us-east-1",
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    },
-  });
+export const s3 = new S3Client({
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
