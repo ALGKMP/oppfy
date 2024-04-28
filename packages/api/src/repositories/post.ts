@@ -31,11 +31,11 @@ const PostRepository = {
     return result[0]; // Assuming unique key
   },
 
-  updatePost: async (key: string, newCaption: string) => {
+  updatePost: async (postId: string, newCaption: string) => {
     await db
       .update(schema.post)
       .set({ caption: newCaption })
-      .where(eq(schema.post.key, key))
+      .where(eq(schema.post.key, postId))
       .execute();
   },
 

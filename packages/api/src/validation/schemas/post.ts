@@ -9,6 +9,7 @@ import {
   profileId,
   key,
   userId,
+  postId,
 } from "../utils";
 
 const postSchema = {
@@ -39,7 +40,7 @@ const postSchema = {
   }),
 
   updatePost: z.object({
-    key,
+    postId,
     caption,
   }),
 

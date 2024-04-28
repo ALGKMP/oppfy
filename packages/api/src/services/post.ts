@@ -27,9 +27,9 @@ const PostService = {
     }
   },
 
-  editPost: async (key: string, newCaption: string) => {
+  editPost: async (postId: string, newCaption: string) => {
     try {
-      return await Repositories.post.updatePost(key, newCaption);
+      return await Repositories.post.updatePost(postId, newCaption);
     } catch (error) {
       console.error("Failed to edit post:", error);
       throw new TRPCError({
