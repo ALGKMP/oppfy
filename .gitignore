@@ -21,6 +21,8 @@ next-env.d.ts
 .expo/
 expo-env.d.ts
 apps/expo/.gitignore
+ios/
+android/
 
 # production
 build
