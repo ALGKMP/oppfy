@@ -6,6 +6,7 @@ import {
   contentLength,
   contentType,
   friend,
+  profileId,
   key,
   userId,
 } from "../utils";
@@ -54,9 +55,13 @@ const postSchema = {
     author,
   }),
 
+  getProfilePosts: z.object({
+    profileId,
+  }),
+
   getBatchPost: z.object({
     keys: z.array(key),
-  })
+  }),
 };
 
 export default postSchema;

@@ -43,20 +43,6 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
-  updateUserUsername: protectedProcedure
-    .input(ZodSchemas.auth.updateUser)
-    .mutation(async ({ input }) => {
-      try {
-        await Services.user.updateUserUsername(input.userId, input.username);
-        return { success: true, message: "Username successfully updated." };
-      } catch (error) {
-        console.error('Error updating username:', error instanceof Error ? error.message : error);
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to update username.'
-        });
-      }
-    }),
 });
 
 export type AuthRouter = typeof authRouter;

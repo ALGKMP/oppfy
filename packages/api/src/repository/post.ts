@@ -10,6 +10,10 @@ const PostRepository = {
     return result[0].insertId; // Assuming auto-increment ID
   },
 
+  getAllProfilePosts: async (profileId: number) => {
+    return await db.select().from(schema.post).where(eq(schema.post.recipient, profileId)).execute();
+  },
+
   getPostByKey: async (key: string) => {
     const result = await db.select().from(schema.post).where(eq(schema.post.key, key)).execute();
     return result[0]; // Assuming unique key

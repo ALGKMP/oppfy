@@ -48,9 +48,15 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getProfilePicture: protectedProcedure.query(async ({ ctx }) => {
-    return await Services.profile.getProfilePicture(ctx.session.uid);
+  getUserProfilePicture: protectedProcedure.query(async ({ ctx }) => {
+    return await Services.profile.getUserProfilePicture(ctx.session.uid);
   }),
+
+  getProfilePicture: protectedProcedure
+    .input(ZodSchemas.profile.getProfilePicture)
+    .query(async ({ input }) => {
+      return await Services.profile.getProfilePicture(input.profileId);
+    }),
 
   getProfilePictureBatch: protectedProcedure
     .input(ZodSchemas.profile.getListOfProfilePictureUrls)

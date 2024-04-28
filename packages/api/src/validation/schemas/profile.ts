@@ -5,6 +5,7 @@ import {
   contentType,
   key,
   profiles,
+  profileId,
   userId,
 } from "../utils";
 
@@ -32,8 +33,8 @@ const profileSchemas = {
     key,
   }),
 
-  getProfilePictureUrl: z.object({
-    userId,
+  getProfilePicture: z.object({
+    profileId,
   }),
 
   removeProfilePhoto: z.object({

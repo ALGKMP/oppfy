@@ -35,6 +35,15 @@ const PostService = {
     }
   },
 
+  getProfilePosts: async (profile: number) => {
+    try {
+      return await Repositories.post.getAllProfilePosts(profile);
+    } catch (error) {
+      console.error("Failed to retrieve user posts:", error);
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error retrieving user posts.' });
+    }
+  },
+
   deletePost: async (key: string) => {
     try {
       return await Repositories.post.deletePost(key);

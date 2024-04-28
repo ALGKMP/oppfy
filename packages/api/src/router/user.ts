@@ -17,7 +17,6 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
-
   updateDateOfBirth: protectedProcedure
     .input(ZodSchemas.user.updateDateOfBirth)
     .mutation(async ({ input, ctx }) => {

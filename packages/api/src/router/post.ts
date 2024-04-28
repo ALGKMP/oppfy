@@ -34,8 +34,8 @@ export const postRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        const postId = await Services.post.createPost(input.userId, input.friend, input.caption, input.key);
-        return { success: true, postId };
+        await Services.post.createPost(input.userId, input.friend, input.caption, input.key);
+        return;
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -44,6 +44,9 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+    // getUserPosts: 
+    // getProfilePosts:
+    
   editPost: protectedProcedure
     .input(ZodSchemas.post.updatePost)
     .mutation(async ({ input }) => {
@@ -81,6 +84,19 @@ export const postRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to get batch posts"
+        });
+      }
+    }),
+
+    getProfilePosts: protectedProcedure
+    .input(ZodSchemas.post.getProfilePosts)
+    .query(async ({ input }) => {
+      try {
+        return await Services.post.getProfilePosts(input.profileId);
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get all profile posts"
         });
       }
     }),

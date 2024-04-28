@@ -163,7 +163,8 @@ const ProfileService = {
     }
   },
 
-  getProfilePicture: async (userId: string): Promise<string> => {
+  // for current user
+  getUserProfilePicture: async (userId: string): Promise<string> => {
     const bucket = process.env.S3_BUCKET_NAME!;
     const key = `profile-pictures/${userId}.jpg`;
     try {
@@ -171,6 +172,22 @@ const ProfileService = {
     } catch (err) {
       console.error(`Error retrieving object: ${key}`, err);
       throw new Error(`Failed to retrieve object from S3 for user ${userId}`);
+    }
+  },
+
+  // for other users
+  getProfilePicture: async (profileId: number): Promise<string> => {
+    const user = await Repositories.user.getUserByProfileId(profileId);
+    if (!user) {
+      throw new Error(`User with profile ID ${profileId} not found`);
+    }
+    const bucket = process.env.S3_BUCKET_NAME!;
+    const key = `profile-pictures/${user.id}.jpg`;
+    try {
+      return await Services.aws.objectPresignedUrl(bucket, key);
+    } catch (err) {
+      console.error(`Error retrieving object: ${key}`, err);
+      throw new Error(`Failed to retrieve object from S3 for user ${profileId}`);
     }
   },
 
