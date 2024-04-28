@@ -83,7 +83,7 @@ const PhoneNumberOTP = () => {
         userId: userCredential.user.uid,
       });
 
-      !requiresAdditionalDetails.data
+      requiresAdditionalDetails.data
         ? router.replace("/user-info/welcome")
         : router.replace("/(app)/(bottom-tabs)/profile");
     } catch (err) {

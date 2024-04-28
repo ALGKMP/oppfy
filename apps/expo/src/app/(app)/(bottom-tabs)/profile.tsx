@@ -1,5 +1,6 @@
 import PFP from "@assets/pfp.png";
 import { Button, Image, Separator, Text, View, XStack, YStack } from "tamagui";
+import { router } from 'expo-router';
 
 const Profile = () => {
   const user = {
@@ -16,6 +17,10 @@ const Profile = () => {
     { name: "Following", quantity: user.following },
   ];
 
+  const onPress = () => {
+    router.push('/(app)/(bottom-tabs)/(top-tabs)/editProfile');
+  }
+
   return (
     <View flex={1} backgroundColor="black" paddingHorizontal="$4">
       <YStack space="$3">
@@ -29,7 +34,7 @@ const Profile = () => {
             </Text>
 
             <XStack space>
-              <Button>Edit Profile</Button>
+              <Button onPress={onPress}>Edit Profile</Button>
               <Button>Share Profile</Button>
             </XStack>
           </YStack>
