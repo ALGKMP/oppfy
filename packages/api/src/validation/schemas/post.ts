@@ -53,11 +53,7 @@ const postSchema = {
   }),
 
   getUserPosts: z.object({
-    author,
-  }),
-
-  getProfilePosts: z.object({
-    profileId,
+    userId,
   }),
 
   getBatchPost: z.object({

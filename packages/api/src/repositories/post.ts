@@ -31,7 +31,7 @@ const PostRepository = {
     return result[0]; // Assuming unique key
   },
 
-  getAllUserPosts: async (userId: string) => {
+  allUserPosts: async (userId: string) => {
     const result = await db
       .select()
       .from(schema.post)
