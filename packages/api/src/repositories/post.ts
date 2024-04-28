@@ -31,6 +31,14 @@ const PostRepository = {
     return result[0]; // Assuming unique key
   },
 
+  getAllUserPosts: async (userId: string) => {
+    const result = await db
+      .select()
+      .from(schema.post)
+      .where(eq(schema.post.author, userId));
+    return result;
+  },
+
   updatePost: async (postId: number, newCaption: string) => {
     await db
       .update(schema.post)
