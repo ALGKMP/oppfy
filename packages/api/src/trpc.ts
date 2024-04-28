@@ -14,7 +14,7 @@ import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
-import {db, s3} from "@acme/db"
+import { db, s3 } from "@acme/db";
 
 import { auth } from "./utils/firebase";
 
@@ -145,7 +145,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
     },
   });
 });
-
 
 /**
  * S3 Verification

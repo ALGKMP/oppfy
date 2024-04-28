@@ -1,7 +1,7 @@
-import userSchemas from "./schemas/user";
 import authSchemas from "./schemas/auth";
-import profileSchemas from "./schemas/profile";
 import postSchemas from "./schemas/post";
+import profileSchemas from "./schemas/profile";
+import userSchemas from "./schemas/user";
 
 const ZodSchemas = {
     user: userSchemas,

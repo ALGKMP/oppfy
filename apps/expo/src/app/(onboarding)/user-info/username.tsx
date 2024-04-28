@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import type { TextInput } from "react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { Button , Input, Text, View, YStack } from "tamagui";
+import { Button, Input, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";

@@ -1,7 +1,4 @@
 import type { Config } from "drizzle-kit";
-import * as dotenv from "dotenv";
-
-dotenv.config({ path: "../../.env" });
 
 export default {
   schema: "./src/schema",
@@ -13,5 +10,5 @@ export default {
     user: process.env.DATABASE_USERNAME!,
     password: process.env.DATABASE_PASSWORD!,
     database: process.env.DATABASE_NAME!,
-  }
+  },
 } satisfies Config;

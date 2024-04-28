@@ -15,7 +15,7 @@ export interface PostMetadata {
   author: string;
   recipient: string;
   caption?: string;
-};
+}
 
 export const kebabToPascal = (str: string) => {
   return str.replace(/(^|-)./g, (match) =>
@@ -47,4 +47,3 @@ export const pascalToKebab = (str: string) => {
       .toLowerCase()
   );
 };
-

@@ -22,6 +22,6 @@ export const friend = z.string();
 export const metadataSchema = z.object({
   author,
   friend,
-  caption
+  caption,
 });
 export type PutObjectMetadata = z.infer<typeof metadataSchema>;

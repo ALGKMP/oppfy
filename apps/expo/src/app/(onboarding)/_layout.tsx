@@ -1,19 +1,11 @@
 import React from "react";
-import {
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft } from "@tamagui/lucide-icons";
-import {
-  AlertDialog,
-  Button,
-  Text,
-  View,
-  YStack,
-} from "tamagui";
+import { AlertDialog, Button, Text, View, YStack } from "tamagui";
 
-import { Header  } from "~/components/Headers";
+import { Header } from "~/components/Headers";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 

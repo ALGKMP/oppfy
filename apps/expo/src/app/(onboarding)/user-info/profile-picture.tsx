@@ -21,8 +21,8 @@ const ProfilePicture: React.FC = () => {
   };
 
   const onSkip = () => {
-    console.log("routing to profile")
-    router.replace("/(app)/(bottom-tabs)/profile")
+    console.log("routing to profile");
+    router.replace("/(app)/(bottom-tabs)/profile");
   };
 
   const handleImagePicking = async () => {

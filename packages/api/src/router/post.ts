@@ -2,9 +2,9 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import ZodSchemas from "../validation";
+import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import Services from "../service";
+import ZodSchemas from "../validation";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -16,14 +16,20 @@ export const postRouter = createTRPCRouter({
       const metadata = {
         author: ctx.session.uid,
         friend: input.friend,
-        caption: input.caption
-      }
+        caption: input.caption,
+      };
       try {
-        return await Services.aws.putObjectPresignedUrlWithMetadata(bucket, objectKey, input.contentLength, input.contentType, metadata);
+        return await Services.aws.putObjectPresignedUrlWithMetadata(
+          bucket,
+          objectKey,
+          input.contentLength,
+          input.contentType,
+          metadata,
+        );
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create presigned URL"
+          message: "Failed to create presigned URL",
         });
       }
     }),
@@ -39,7 +45,7 @@ export const postRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create post"
+          message: "Failed to create post",
         });
       }
     }),
@@ -56,7 +62,7 @@ export const postRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update post"
+          message: "Failed to update post",
         });
       }
     }),
@@ -70,7 +76,7 @@ export const postRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete post"
+          message: "Failed to delete post",
         });
       }
     }),
