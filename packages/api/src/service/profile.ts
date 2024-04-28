@@ -173,7 +173,6 @@ const ProfileService = {
       throw new Error(`Failed to retrieve object from S3 for user ${userId}`);
     }
   },
-  
 
   // Batch get operation for multiple profile pictures
   getProfilePictureBatch : async (profiles: number[]): Promise<string[]> => {

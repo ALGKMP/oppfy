@@ -24,10 +24,6 @@ export const profileRouter = createTRPCRouter({
           input.contentType,
         );
       } catch (error) {
-        console.error(
-          "Error generating presigned URL for profile picture upload:",
-          error instanceof Error ? error.message : error,
-        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -45,10 +41,6 @@ export const profileRouter = createTRPCRouter({
       try {
         await Services.profile.uploadProfilePicture(input.userId, input.key);
       } catch (error) {
-        console.error(
-          "Error uploading profile photo:",
-          error instanceof Error ? error.message : error,
-        );
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to upload profile photo.",
@@ -70,10 +62,6 @@ export const profileRouter = createTRPCRouter({
     try {
       await Services.profile.deleteProfilePicture(ctx.session.uid);
     } catch (error) {
-      console.error(
-        "Error removing profile photo:",
-        error instanceof Error ? error.message : error,
-      );
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to remove profile photo.",

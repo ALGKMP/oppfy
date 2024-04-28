@@ -7,6 +7,7 @@ import {
   contentType,
   friend,
   key,
+  userId,
 } from "../utils";
 
 const postSchema = {
@@ -30,7 +31,7 @@ const postSchema = {
     ),
 
   uploadPost: z.object({
-    author,
+    userId,
     friend,
     caption,
     key,
@@ -52,6 +53,10 @@ const postSchema = {
   getUserPosts: z.object({
     author,
   }),
+
+  getBatchPost: z.object({
+    keys: z.array(key),
+  })
 };
 
 export default postSchema;
