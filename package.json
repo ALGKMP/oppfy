@@ -2,7 +2,7 @@
   "name": "oppfy",
   "private": true,
   "engines": {
-    "node": ">=18.18.2"
+    "node": ">=18"
   },
   "packageManager": "pnpm@8.15.5",
   "scripts": {
