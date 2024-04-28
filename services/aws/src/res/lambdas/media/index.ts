@@ -1,6 +1,7 @@
 import type { HeadObjectCommandInput } from "@aws-sdk/client-s3";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
+
 import type { MediaMedata } from "../../../utils";
 
 export const region = "us-east-1";
@@ -11,11 +12,10 @@ export const handler = async (
   event: S3Event,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
-
-  console.log(`Records: ${JSON.stringify(event.Records)}`)
+  console.log(`Records: ${JSON.stringify(event.Records)}`);
 
   const record = event.Records[0];
-  console.log("Record: ", record)
+  console.log("Record: ", record);
 
   if (!record) {
     return {
@@ -50,22 +50,23 @@ export const handler = async (
       };
     }
 
-    const payload = {metadata: metadata};
-    const serverEndpoint = ' https://5bdc-74-12-66-138.ngrok-free.app/api/uploadMetadata';
+    const payload = { metadata: metadata };
+    const serverEndpoint =
+      " https://5bdc-74-12-66-138.ngrok-free.app/api/uploadMetadata";
 
     try {
       const response = await fetch(serverEndpoint, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
 
       const jsonResponse = await response.json();
-      console.log('Server response:', jsonResponse);
+      console.log("Server response:", jsonResponse);
     } catch (error) {
-      console.error('Error sending metadata to server:', error);
+      console.error("Error sending metadata to server:", error);
     }
 
     return {
@@ -74,7 +75,6 @@ export const handler = async (
         message: "Object found in S3",
       }),
     };
-
   } catch (error) {
     console.error(error);
     return {
@@ -83,5 +83,5 @@ export const handler = async (
         message: "Error getting object from S3",
       }),
     };
-    }
+  }
 };

@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { Redirect } from "expo-router";
-import * as SplashScreen from 'expo-splash-screen';
+import * as SplashScreen from "expo-splash-screen";
+import { View } from "tamagui";
+
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
 import { Stack } from "~/layouts";
 import { api } from "~/utils/api";
-import { View } from "tamagui";
 
 const AppLayout = () => {
   const { permissions } = usePermissions();

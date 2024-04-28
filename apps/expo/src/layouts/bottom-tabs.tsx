@@ -6,8 +6,7 @@ const { Navigator } = createBottomTabNavigator();
 
 const BottomTabs = withLayoutContext<
   BottomTabNavigationOptions,
-  typeof Navigator,
-  
+  typeof Navigator
 >(Navigator);
 
 export default BottomTabs;

@@ -1,5 +1,5 @@
-import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
-import type { APIGatewayProxyResult, S3Event, Context } from "aws-lambda";
+import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
 import type { PostMetadata } from "../../../utils";
 
@@ -33,12 +33,14 @@ export const handler = async (
     if (!metadata?.author || !metadata?.recipient) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ message: "Required metadata (author | recipient) not found on object" }),
+        body: JSON.stringify({
+          message: "Required metadata (author | recipient) not found on object",
+        }),
       };
     }
 
-    const serverEndpoint =     
-    "https://5bdc-74-12-66-138.ngrok-free.app/api/uploadPost";
+    const serverEndpoint =
+      "https://5bdc-74-12-66-138.ngrok-free.app/api/uploadPost";
 
     const response = await fetch(serverEndpoint, {
       method: "POST",

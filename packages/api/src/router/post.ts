@@ -2,9 +2,9 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import ZodSchemas from "../validation";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import Services from "../service";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import ZodSchemas from "../validation";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -16,14 +16,20 @@ export const postRouter = createTRPCRouter({
       const metadata = {
         author: ctx.session.uid,
         friend: input.friend,
-        caption: input.caption
-      }
+        caption: input.caption,
+      };
       try {
-        return await Services.aws.putObjectPresignedUrlWithMetadata(bucket, objectKey, input.contentLength, input.contentType, metadata);
+        return await Services.aws.putObjectPresignedUrlWithMetadata(
+          bucket,
+          objectKey,
+          input.contentLength,
+          input.contentType,
+          metadata,
+        );
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create presigned URL"
+          message: "Failed to create presigned URL",
         });
       }
     }),
@@ -33,12 +39,17 @@ export const postRouter = createTRPCRouter({
     .input(ZodSchemas.post.uploadPost)
     .mutation(async ({ input }) => {
       try {
-        const postId = await Services.post.createPost(input.userId, input.friend, input.caption, input.key);
+        const postId = await Services.post.createPost(
+          input.userId,
+          input.friend,
+          input.caption,
+          input.key,
+        );
         return { success: true, postId };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create post"
+          message: "Failed to create post",
         });
       }
     }),
@@ -52,7 +63,7 @@ export const postRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update post"
+          message: "Failed to update post",
         });
       }
     }),
@@ -66,7 +77,7 @@ export const postRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete post"
+          message: "Failed to delete post",
         });
       }
     }),
@@ -79,7 +90,7 @@ export const postRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get batch posts"
+          message: "Failed to get batch posts",
         });
       }
     }),

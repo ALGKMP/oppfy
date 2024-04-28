@@ -86,7 +86,6 @@ const PhoneNumberOTP = () => {
       !requiresAdditionalDetails.data
         ? router.replace("/user-info/welcome")
         : router.replace("/(app)/(bottom-tabs)/profile");
-
     } catch (err) {
       setError("Incorrect code. Try again.");
     }

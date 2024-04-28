@@ -1,12 +1,8 @@
 {
   "extends": "@acme/tsconfig/aws-cdk.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "dist"
   },
-  "include": [
-    "src/res/lambdas",
-  ],
-  "exclude": [
-    "src/lib"
-  ]
+  "include": ["src/res/lambdas"],
+  "exclude": ["src/lib"]
 }

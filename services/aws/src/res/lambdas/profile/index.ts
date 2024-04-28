@@ -1,10 +1,9 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
-
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
 import type { ProfileMetadata } from "../../../utils";
 
-const s3Client = new S3Client({region: "us-east-1"});
+const s3Client = new S3Client({ region: "us-east-1" });
 
 export const handler = async (
   event: S3Event,

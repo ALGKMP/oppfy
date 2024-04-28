@@ -56,7 +56,7 @@ const postSchema = {
 
   getBatchPost: z.object({
     keys: z.array(key),
-  })
+  }),
 };
 
 export default postSchema;

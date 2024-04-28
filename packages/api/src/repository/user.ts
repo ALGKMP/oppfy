@@ -1,12 +1,16 @@
 // src/repositories/UserRepository.ts
 import { eq } from "drizzle-orm";
+
 import { db, schema } from "@acme/db";
 
 const UserRepository = {
   createUserWithProfileAndNotifications: async (userId: string) => {
     return await db.transaction(async (transactionDb) => {
       // Create the profile for the user
-      const profile = await transactionDb.insert(schema.profile).values({}).execute();
+      const profile = await transactionDb
+        .insert(schema.profile)
+        .values({})
+        .execute();
       // Create default notification settings for the user
       const notificationSetting = await transactionDb
         .insert(schema.notificationSetting)
@@ -77,7 +81,7 @@ const UserRepository = {
     await db.transaction(async (transactionDb) => {
       await transactionDb.delete(schema.user).where(eq(schema.user.id, userId));
     });
-  }
+  },
 };
 
 export default UserRepository;

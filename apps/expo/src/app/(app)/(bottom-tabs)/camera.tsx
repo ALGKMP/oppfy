@@ -51,22 +51,24 @@ const Camera = () => {
       setContentType(type);
       setContentLength(size);
 
-      mutation.mutate({
-        author: userId, 
-        recipient: userId,
-        caption: caption,
-        contentType: type,
-        contentLength: size,
-      }, {
-        onSuccess: (url) => {
-          // Use the URL from the successful mutation to upload the image
-          console.log("url: ", url)
-          putMutation.mutate(url);
-        }
-      });
-    }
-    else {
-      console.log("shits broken on the camera page 1")
+      mutation.mutate(
+        {
+          author: userId,
+          recipient: userId,
+          caption: caption,
+          contentType: type,
+          contentLength: size,
+        },
+        {
+          onSuccess: (url) => {
+            // Use the URL from the successful mutation to upload the image
+            console.log("url: ", url);
+            putMutation.mutate(url);
+          },
+        },
+      );
+    } else {
+      console.log("shits broken on the camera page 1");
     }
   };
 

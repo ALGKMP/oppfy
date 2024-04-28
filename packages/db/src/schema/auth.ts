@@ -13,4 +13,3 @@ import {
 
 // import { mySqlTable } from "@acme/db/src/schema/_table";
 import { mySqlTable } from "./_table";
-

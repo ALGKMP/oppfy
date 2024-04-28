@@ -25,8 +25,11 @@ const ProfilePhotoRepository = {
       .where(eq(schema.profilePicture.id, profilePhotoId));
     return profilePhotos.length > 0 ? profilePhotos[0] : null;
   },
-  
-  addProfilePhotoToProfile: async (profileId: number, profilePhotoId: number) => {
+
+  addProfilePhotoToProfile: async (
+    profileId: number,
+    profilePhotoId: number,
+  ) => {
     return await db
       .update(schema.profile)
       .set({ profilePhoto: profilePhotoId })
@@ -37,7 +40,7 @@ const ProfilePhotoRepository = {
     return await db
       .delete(schema.profilePicture)
       .where(eq(schema.profilePicture.id, profilePhotoId));
-  }
+  },
 };
 
 export default ProfilePhotoRepository;

@@ -60,19 +60,23 @@ export const mediaRouter = createTRPCRouter({
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/uploadMetadata" } })
     .input(
       z.object({
-        metadata: z.object({
-          authorid: z.string().optional(),
-          caption: z.string().optional(),
-          tags: z.string().optional(),
-        }).optional(),
+        metadata: z
+          .object({
+            authorid: z.string().optional(),
+            caption: z.string().optional(),
+            tags: z.string().optional(),
+          })
+          .optional(),
       }),
     )
     .output(z.object({ greeting: z.string() }))
     .mutation(({ input }) => {
-      if (input.metadata){
-        console.log(`metadata: ${input.metadata.authorid}, ${input.metadata.caption}, ${input.metadata.tags}`)
+      if (input.metadata) {
+        console.log(
+          `metadata: ${input.metadata.authorid}, ${input.metadata.caption}, ${input.metadata.tags}`,
+        );
         return { greeting: `Hello ${input.metadata.authorid}!` };
       }
-      return {greeting: 'no metadata'}
+      return { greeting: "no metadata" };
     }),
 });

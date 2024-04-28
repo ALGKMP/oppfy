@@ -3,6 +3,8 @@ import { RemovalPolicy } from "aws-cdk-lib";
 import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 // import * as neptune from "aws-cdk-lib/aws-neptune";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
@@ -10,8 +12,6 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import type { Construct } from "constructs";
-import * as lambdaNodeJs from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as lambda from "aws-cdk-lib/aws-lambda";
 
 // ! Adhere to free tier specs
 // https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all
@@ -154,25 +154,28 @@ export class AwsStack extends cdk.Stack {
         deletionProtection: false,
       },
     );
-    
 
     const bucket = new s3.Bucket(this, "MyBucket2", {
       versioned: true,
     });
 
     // This one is for testing purposes
-    const myLambda = new lambdaNodeJs.NodejsFunction(this, "DynamoLambdaHandler", {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      entry: 'src/res/lambdas/media/index.ts', // Entry file
-      handler: "handler",
-      bundling: {
-        format: lambdaNodeJs.OutputFormat.ESM, // Set output format to ESM
-        mainFields: ["module", "main"],
-        esbuildArgs: {
-          "--conditions": "module",
-        }
-      }
-    });
+    const myLambda = new lambdaNodeJs.NodejsFunction(
+      this,
+      "DynamoLambdaHandler",
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: "src/res/lambdas/media/index.ts", // Entry file
+        handler: "handler",
+        bundling: {
+          format: lambdaNodeJs.OutputFormat.ESM, // Set output format to ESM
+          mainFields: ["module", "main"],
+          esbuildArgs: {
+            "--conditions": "module",
+          },
+        },
+      },
+    );
 
     // Grant the Lambda function permissions to be invoked by S3 events
     bucket.grantRead(myLambda);
@@ -191,15 +194,39 @@ export class AwsStack extends cdk.Stack {
     const postBucket = createBucket(this, "PostBucket");
     const storyBucket = createBucket(this, "StoryBucket");
     const profileBucket = createBucket(this, "ProfileBucket");
-    
-    const postLambda = createLambdaFunction(this, "postLambda", 'src/res/lambdas/post/index.ts');
-    const storyLambda = createLambdaFunction(this, "storyLambda", 'src/res/lambdas/story/index.ts');
-    const profileLambda = createLambdaFunction(this, "profileLambda", 'src/res/lambdas/profile/index.ts');
-    
+
+    const postLambda = createLambdaFunction(
+      this,
+      "postLambda",
+      "src/res/lambdas/post/index.ts",
+    );
+    const storyLambda = createLambdaFunction(
+      this,
+      "storyLambda",
+      "src/res/lambdas/story/index.ts",
+    );
+    const profileLambda = createLambdaFunction(
+      this,
+      "profileLambda",
+      "src/res/lambdas/profile/index.ts",
+    );
+
     // Setup integrations
-    setupBucketLambdaIntegration(postBucket, postLambda, "AllowPostS3Invocation");
-    setupBucketLambdaIntegration(storyBucket, storyLambda, "AllowStoryS3Invocation");
-    setupBucketLambdaIntegration(profileBucket, profileLambda, "AllowProfileS3Invocation");
+    setupBucketLambdaIntegration(
+      postBucket,
+      postLambda,
+      "AllowPostS3Invocation",
+    );
+    setupBucketLambdaIntegration(
+      storyBucket,
+      storyLambda,
+      "AllowStoryS3Invocation",
+    );
+    setupBucketLambdaIntegration(
+      profileBucket,
+      profileLambda,
+      "AllowProfileS3Invocation",
+    );
 
     // ! do not delete, this is used for testing
     // const bastionSecurityGroup = new ec2.SecurityGroup(
@@ -345,17 +372,22 @@ export class AwsStack extends cdk.Stack {
         replicationSubnetGroupDescription:
           "Subnet group for DMS replication instances",
         // subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
-        subnetIds: vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnetIds, // Use private subnets if publiclyAccessible is false
-
+        subnetIds: vpc.selectSubnets({
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        }).subnetIds, // Use private subnets if publiclyAccessible is false
       },
     );
 
     // Define a security group for the RDS instance within the VPC
-    const _dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
-      vpc,
-      allowAllOutbound: true,
-      description: "Security group for DMS replication instance",
-    });
+    const _dmsSecurityGroup = new ec2.SecurityGroup(
+      this,
+      "MyDmsSecurityGroup",
+      {
+        vpc,
+        allowAllOutbound: true,
+        description: "Security group for DMS replication instance",
+      },
+    );
 
     // Create the DMS replication instance
     const dmsReplicationInstance = new dms.CfnReplicationInstance(
@@ -370,7 +402,8 @@ export class AwsStack extends cdk.Stack {
         // replicationSubnetGroupIdentifier:
         //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
         vpcSecurityGroupIds: [_dmsSecurityGroup.securityGroupId], // Make sure to assign the correct Security Group
-    replicationSubnetGroupIdentifier: _dmsSubnetGroup.replicationSubnetGroupIdentifier, // Assign the Replication Subnet Group
+        replicationSubnetGroupIdentifier:
+          _dmsSubnetGroup.replicationSubnetGroupIdentifier, // Assign the Replication Subnet Group
         multiAz: false,
       },
     );
