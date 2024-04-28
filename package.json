@@ -4,13 +4,12 @@
   "engines": {
     "node": ">=18.18.2"
   },
-  "packageManager": "pnpm@8.10.5",
+  "packageManager": "pnpm@8.15.5",
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "postinstall": "pnpm lint:ws",
-    "db:generate": "pnpm -F db generate",
     "db:push": "pnpm -F db push",
     "db:studio": "pnpm -F db studio",
     "aws:cdk": "pnpm -F aws cdk",
