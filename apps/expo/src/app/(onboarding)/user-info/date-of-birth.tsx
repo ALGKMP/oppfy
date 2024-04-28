@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import type {
   TextInput} from "react-native";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Button, Text, View, YStack } from "tamagui";
@@ -13,7 +12,6 @@ import * as z from "zod";
 import { Date } from "@acme/utils";
 
 import { BirthdateInput } from "~/components/Inputs";
-import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
 
 const schemaValidation = z.object({

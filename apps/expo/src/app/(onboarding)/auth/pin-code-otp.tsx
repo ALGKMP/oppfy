@@ -88,6 +88,7 @@ const PhoneNumberOTP = () => {
         : router.replace("/(app)/(bottom-tabs)/profile");
 
     } catch (err) {
+      console.log(err)
       setError("Incorrect code. Try again.");
     }
 

@@ -31,6 +31,7 @@ export const postRouter = createTRPCRouter({
   uploadPost: publicProcedure
     .meta({ openapi: { method: "POST", path: "/uploadPost" } })
     .input(ZodSchemas.post.uploadPost)
+    .output(z.void())
     .mutation(async ({ input }) => {
       try {
         const postId = await Services.post.createPost(input.userId, input.friend, input.caption, input.key);
