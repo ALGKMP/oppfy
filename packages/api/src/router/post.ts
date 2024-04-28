@@ -78,7 +78,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  getBatchPosts: protectedProcedure
+  batchPosts: protectedProcedure
     .input(ZodSchemas.post.getBatchPost)
     .query(async ({ input }) => {
       try {
@@ -91,7 +91,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    getUserPosts: protectedProcedure
+    userAllPosts: protectedProcedure
     .query(async ({ ctx }) => {
       try {
         await Services.post.getUserPosts(ctx.session.uid);
@@ -104,7 +104,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    getOtherUserPosts: protectedProcedure
+    otherUserAllPosts: protectedProcedure
     .input(ZodSchemas.post.getUserPosts)
     .query(async ({ input }) => {
       try {

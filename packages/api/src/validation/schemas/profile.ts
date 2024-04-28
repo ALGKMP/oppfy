@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-import {
-  contentLength,
-  contentType,
-  key,
-  userId,
-} from "../utils";
+import { contentLength, contentType, key, userId } from "../utils";
 
 const profileSchemas = {
   createPresignedUrl: z
@@ -35,8 +30,7 @@ const profileSchemas = {
     userId,
   }),
 
-  batchProfilePictures: z.object({userIds : z.array(userId)
-  }),
+  batchProfilePictures: z.object({ userIds: z.array(userId) }),
 };
 
 export default profileSchemas;

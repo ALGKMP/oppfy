@@ -60,11 +60,34 @@ const PostService = {
   },
 
   getUserPosts: async (userId: string) => {
+    const bucket = process.env.S3_BUCKET_NAME!;
     try {
-      return await Repositories.post.allUserPosts(userId);
+      const posts = await Repositories.post.allUserPosts(userId);
+      const results: Record<number, string | null> = {};
+
+      const urlPromises = posts.map(async (post) => {
+        try {
+          const url = await Services.aws.objectPresignedUrl(
+            bucket,
+            `post-images/${post.key}.jpg`,
+          );
+          results[post.id] = url;  // Store URL with postId as key
+        } catch (err) {
+          console.error(
+            `Error retrieving post: post-images/${post.id}.jpg`,
+            err,
+          );
+          return `Failed to retrieve object from S3 for post ${post.id}`;
+        }
+      });
+      await Promise.all(urlPromises);
+      return results;
     } catch (error) {
-      console.error("Failed to retrieve user posts:", error);
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Error retrieving user posts.' });
+      console.error("Failed to get batch posts:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error retrieving batch posts.",
+      });
     }
   },
 
