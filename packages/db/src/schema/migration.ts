@@ -5,6 +5,7 @@ import {
   date,
   datetime,
   int,
+  mysqlEnum,
   serial,
   text,
   timestamp,
@@ -234,7 +235,7 @@ export const friendRequest = mySqlTable("FriendRequest", {
   requestedId: varchar("requestedId", { length: 255 })
     .references(() => user.id)
     .notNull(),
-  status: varchar("status", { length: 50 }) // Possible values: "pending", "accepted", "declined"
+  status: mysqlEnum('status', ['pending', 'accepted', 'declined']) // Possible values: "pending", "accepted", "declined"
     .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
