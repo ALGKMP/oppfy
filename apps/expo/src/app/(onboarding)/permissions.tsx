@@ -22,8 +22,11 @@ import { usePermissions } from "../../contexts/PermissionsContext";
 
 const Permissions = () => {
   const router = useRouter();
+
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
+
+  const requiredPermissions = permissions.camera && permissions.contacts;
 
   const openSettings = async () => {
     await Linking.openSettings();
@@ -70,8 +73,6 @@ const Permissions = () => {
       ? router.push("/(app)/(bottom-tabs)/profile")
       : router.push("/auth/phone-number");
   };
-
-  const requiredPermissions = permissions.camera && permissions.contacts;
 
   return (
     <View flex={1} padding="$4" backgroundColor="$background">

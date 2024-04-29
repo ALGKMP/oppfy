@@ -12,6 +12,8 @@ import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionsContext";
 
+const fonts 
+
 const RootLayout = () => {
   const [fontsLoaded] = useFonts({
     Modak: Modak_400Regular,
