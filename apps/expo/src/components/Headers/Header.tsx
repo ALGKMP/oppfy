@@ -1,41 +1,56 @@
 import React from "react";
-import type { ColorValue, ViewStyle } from "react-native";
-import { StackProps, View, XStack } from "tamagui";
+import type { StackProps } from "tamagui";
+import { Text, View, XStack } from "tamagui";
 
 interface HeaderProps {
-  LeftComponent?: React.ReactNode;
-  MiddleComponent?: React.ReactNode;
-  RightComponent?: React.ReactNode;
+  title?: string;
+  HeaderLeft?: React.ReactNode;
+  HeaderRight?: React.ReactNode;
+  HeaderTitle?: React.ReactNode;
+
   containerProps?: StackProps;
 }
 
 const StackHeader = ({
-  LeftComponent,
-  MiddleComponent,
-  RightComponent,
+  title,
+  HeaderLeft,
+  HeaderRight,
+  HeaderTitle = title ? <DefaultHeaderTitle title={title} /> : null,
+
   containerProps,
 }: HeaderProps) => {
   return (
     <XStack
       alignItems="center"
       justifyContent="space-between"
+      height="$4"
       paddingHorizontal="$4"
       backgroundColor="$background"
       {...containerProps}
     >
       <View flex={1} alignItems="flex-start">
-        {LeftComponent}
+        {HeaderLeft}
       </View>
 
       <View flex={2} alignItems="center">
-        {MiddleComponent}
+        {HeaderTitle}
       </View>
 
       <View flex={1} alignItems="flex-end">
-        {RightComponent}
+        {HeaderRight}
       </View>
     </XStack>
   );
 };
+
+interface DefaultHeaderTitleProps {
+  title: string;
+}
+
+const DefaultHeaderTitle = ({ title }: DefaultHeaderTitleProps) => (
+  <Text fontSize="$5" fontWeight="bold">
+    {title}
+  </Text>
+);
 
 export default StackHeader;

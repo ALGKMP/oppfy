@@ -39,7 +39,7 @@ const OnboardingLayout = () => {
                 canGoBack ? void router.back() : null;
               }}
             >
-              <ChevronLeft size="$1.5" />
+              <ChevronLeft />
             </TouchableOpacity>
           ),
           headerRight: () => (
@@ -54,7 +54,7 @@ const OnboardingLayout = () => {
           ),
           header: ({ navigation, options }) => (
             <Header
-              LeftComponent={
+              HeaderLeft={
                 options.headerLeft
                   ? options.headerLeft({
                       canGoBack: navigation.canGoBack(),
@@ -62,7 +62,7 @@ const OnboardingLayout = () => {
                     })
                   : undefined
               }
-              MiddleComponent={
+              HeaderTitle={
                 typeof options.headerTitle === "function" ? (
                   options.headerTitle({
                     children: options.title ?? "",
@@ -72,7 +72,7 @@ const OnboardingLayout = () => {
                   <Text>{options.title}</Text>
                 ) : null
               }
-              RightComponent={
+              HeaderRight={
                 options.headerRight
                   ? options.headerRight({
                       canGoBack: navigation.canGoBack(),
@@ -80,7 +80,7 @@ const OnboardingLayout = () => {
                     })
                   : undefined
               }
-            ></Header>
+            />
           ),
         }}
       >
