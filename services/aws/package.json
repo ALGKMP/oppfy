@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@acme/validators": "workspace:^",
     "@acme/db": "workspace:^",
     "@aws-sdk/client-s3": "^3.564.0",
     "aws-cdk-lib": "2.116.1",

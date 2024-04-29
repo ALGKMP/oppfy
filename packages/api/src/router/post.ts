@@ -12,10 +12,10 @@ export const postRouter = createTRPCRouter({
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
       const bucket = process.env.S3_BUCKET_NAME!;
-      const objectKey = `posts/${Date.now()}-${input.author}`;
+      const objectKey = `posts/${Date.now()}-postedBy:${ctx.session.uid}-postedFor:${input.postedFor}`;
       const metadata = {
-        author: ctx.session.uid,
-        friend: input.friend,
+        postedBy: ctx.session.uid,
+        postedFor: input.postedFor,
         caption: input.caption,
       };
       try {
@@ -40,7 +40,7 @@ export const postRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        await Services.post.createPost(input.author, input.friend, input.caption, input.key);
+        await Services.post.createPost(input.postedBy, input.postedFor, input.caption, input.key);
         return;
       } catch (error) {
         throw new TRPCError({

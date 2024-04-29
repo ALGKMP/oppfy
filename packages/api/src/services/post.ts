@@ -4,15 +4,15 @@ import Repositories from "../repositories";
 
 const PostService = {
   createPost: async (
-    author: string,
-    friend: string,
+    postedBy: string,
+    postedFor: string,
     caption: string,
     objectKey: string,
   ) => {
     try {
       const postId = await Repositories.post.createPost(
-        author,
-        friend,
+        postedBy,
+        postedFor,
         caption,
         objectKey,
       );

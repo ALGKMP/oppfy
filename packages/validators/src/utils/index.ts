@@ -19,10 +19,3 @@ export const contentLength = z.number();
 export const caption = z.string();
 export const author = z.string();
 export const friend = z.string();
-
-export const metadataSchema = z.object({
-  author,
-  friend,
-  caption,
-});
-export type PutObjectMetadata = z.infer<typeof metadataSchema>;

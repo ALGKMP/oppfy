@@ -1,7 +1,7 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
-import type { PostMetadata } from "../../../utils";
+import ZodSchemas from "@acme/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
 
@@ -28,17 +28,18 @@ export const handler = async (
 
   try {
     const { Metadata } = await s3Client.send(command);
-    const metadata = Metadata as PostMetadata | undefined;
-
-    if (!metadata?.author || !metadata?.friend) {
+    if (!Metadata) {
       return {
         statusCode: 400,
         body: JSON.stringify({
-          message: "Required metadata (author | recipient) not found on object",
+          message: "No metadata found on object",
         }),
       };
-    }
+    };
+    
+    const metadata = ZodSchemas.post.metadata.parse(Metadata);
 
+    // Temporarily hardcoding the server endpoint
     const serverEndpoint =
       "https://5bdc-74-12-66-138.ngrok-free.app/api/uploadPost";
 
@@ -48,8 +49,8 @@ export const handler = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        author: metadata.author,
-        recipient: metadata.friend,
+        postedBy: metadata.postedBy,
+        postedFor: metadata.postedFor,
         caption: metadata.caption, // Handle other fields similarly
         objectKey: objectKey,
       }),

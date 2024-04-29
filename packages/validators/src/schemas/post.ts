@@ -1,11 +1,9 @@
 import { z } from "zod";
 
 import {
-  author,
   caption,
   contentLength,
   contentType,
-  friend,
   key,
   userId,
   postId,
@@ -14,8 +12,7 @@ import {
 const postSchema = {
   createPresignedUrl: z
     .object({
-      author,
-      friend,
+      postedFor: userId,
       caption,
       contentLength,
       contentType,
@@ -32,8 +29,8 @@ const postSchema = {
     ),
 
   uploadPost: z.object({
-    author: userId,
-    friend: userId,
+    postedBy: userId,
+    postedFor: userId,
     caption,
     key,
   }),
@@ -58,6 +55,13 @@ const postSchema = {
   getBatchPost: z.object({
     postIds: z.array(postId),
   }),
+
+  metadata: z.object({
+    postedBy: userId,
+    postedFor: userId,
+    caption,
+  }),
 };
+
 
 export default postSchema;

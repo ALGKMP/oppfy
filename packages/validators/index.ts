@@ -8,7 +8,6 @@ const ZodSchemas = {
     auth: authSchemas,
     profile: profileSchemas,
     post: postSchemas,
-
     };
 
 export default ZodSchemas;
