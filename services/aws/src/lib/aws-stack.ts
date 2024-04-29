@@ -16,9 +16,17 @@ import type { Construct } from "constructs";
 // ! Adhere to free tier specs
 // https://aws.amazon.com/free/?all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc&awsf.Free%20Tier%20Types=*all&awsf.Free%20Tier%20Categories=*all
 
-function createBucket(scope, name) {
+function createBucket(scope: Construct, name: string) {
   return new s3.Bucket(scope, name, {
     versioned: true,
+    cors: [
+      {
+        allowedHeaders: ["*"],
+        allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
+        allowedOrigins: ["*"],
+        exposedHeaders: []
+      },
+    ]
   });
 }
 
@@ -155,55 +163,13 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    const bucket = new s3.Bucket(this, "MyBucket2", {
-      versioned: true,
-    });
-
-    // This one is for testing purposes
-    const myLambda = new lambdaNodeJs.NodejsFunction(
-      this,
-      "DynamoLambdaHandler",
-      {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        entry: "src/res/lambdas/media/index.ts", // Entry file
-        handler: "handler",
-        bundling: {
-          format: lambdaNodeJs.OutputFormat.ESM, // Set output format to ESM
-          mainFields: ["module", "main"],
-          esbuildArgs: {
-            "--conditions": "module",
-          },
-        },
-      },
-    );
-
-    // Grant the Lambda function permissions to be invoked by S3 events
-    bucket.grantRead(myLambda);
-    myLambda.addPermission("AllowS3Invocation", {
-      action: "lambda:InvokeFunction",
-      principal: new iam.ServicePrincipal("s3.amazonaws.com"),
-      sourceArn: bucket.bucketArn,
-    });
-
-    // Add event notification to the bucket
-    bucket.addEventNotification(
-      s3.EventType.OBJECT_CREATED,
-      new s3n.LambdaDestination(myLambda),
-    );
-
-    const postBucket = createBucket(this, "PostBucket");
-    const storyBucket = createBucket(this, "StoryBucket");
-    const profileBucket = createBucket(this, "ProfileBucket");
+    const postBucket = createBucket(this, "Post");
+    const profileBucket = createBucket(this, "Profile");
 
     const postLambda = createLambdaFunction(
       this,
       "postLambda",
       "src/res/lambdas/post/index.ts",
-    );
-    const storyLambda = createLambdaFunction(
-      this,
-      "storyLambda",
-      "src/res/lambdas/story/index.ts",
     );
     const profileLambda = createLambdaFunction(
       this,
@@ -216,11 +182,6 @@ export class AwsStack extends cdk.Stack {
       postBucket,
       postLambda,
       "AllowPostS3Invocation",
-    );
-    setupBucketLambdaIntegration(
-      storyBucket,
-      storyLambda,
-      "AllowStoryS3Invocation",
     );
     setupBucketLambdaIntegration(
       profileBucket,
