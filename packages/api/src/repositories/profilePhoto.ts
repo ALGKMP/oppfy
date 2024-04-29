@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const ProfilePhotoRepository = {
+const profilePhotoRepository = {
   createProfilePhoto: async (key: string) => {
     const result = await db
       .insert(schema.profilePicture)
@@ -43,4 +43,4 @@ const ProfilePhotoRepository = {
   },
 };
 
-export default ProfilePhotoRepository;
+export default profilePhotoRepository;

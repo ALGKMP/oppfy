@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const PostRepository = {
+const postRepository = {
   createPost: async (
     author: string,
     friend: string,
@@ -60,4 +60,4 @@ const PostRepository = {
   },
 };
 
-export default PostRepository;
+export default postRepository;

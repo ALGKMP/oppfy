@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const UserRepository = {
+const userRepository = {
   createUserWithProfileAndNotifications: async (userId: string) => {
     return await db.transaction(async (transactionDb) => {
       // Create the profile for the user
@@ -73,4 +73,4 @@ const UserRepository = {
   },
 };
 
-export default UserRepository;
+export default userRepository;

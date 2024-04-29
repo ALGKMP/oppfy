@@ -1,14 +1,14 @@
-import PostRepository from "./post";
+import postRepository from "./post";
 import postStatsRepository from "./postStats";
-import ProfileRepository from "./profile";
-import ProfilePhotoRepository from "./profilePhoto";
-import UserRepository from "./user";
+import profileRepository from "./profile";
+import profilePhotoRepository from "./profilePhoto";
+import userRepository from "./user";
 
 const Repositories = {
-  user: UserRepository,
-  profile: ProfileRepository,
-  profilePhoto: ProfilePhotoRepository,
-  post: PostRepository,
+  user: userRepository,
+  profile: profileRepository,
+  profilePhoto: profilePhotoRepository,
+  post: postRepository,
   postStats: postStatsRepository
 };
 

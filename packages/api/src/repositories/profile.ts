@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const ProfileRepository = {
+const profileRepository = {
   // Function to create a profile
   createProfile: async () => {
     const result = await db.insert(schema.profile).values({}).execute();
@@ -41,4 +41,4 @@ const ProfileRepository = {
   },
 };
 
-export default ProfileRepository;
+export default profileRepository;
