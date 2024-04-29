@@ -1,3 +1,4 @@
+// import { config } from "@tamagui/config";
 import { config } from "@tamagui/config";
 import { createFont, createTamagui } from "tamagui";
 
@@ -29,6 +30,7 @@ const modakFont = createFont({
 const tamaguiConfig = createTamagui({
   ...config,
   fonts: {
+    ...config.fonts,
     modak: modakFont,
   },
 });
