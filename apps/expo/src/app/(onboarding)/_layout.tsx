@@ -1,8 +1,9 @@
 import React from "react";
+import { Linking, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ChevronLeft } from "@tamagui/lucide-icons";
+import { ChevronLeft, Info } from "@tamagui/lucide-icons";
 import { AlertDialog, Button, Text, View, YStack } from "tamagui";
 
 import { Header } from "~/components/Headers";
@@ -17,28 +18,31 @@ const OnboardingLayout = () => {
 
   return (
     <View
-      style={{
-        flex: 1,
-        backgroundColor: "black",
-        // Paddings to handle safe area
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }}
+      flex={1}
+      backgroundColor="$background"
+      paddingTop={insets.top}
+      paddingBottom={insets.bottom}
+      paddingLeft={insets.left}
+      paddingRight={insets.right}
     >
       <Stack
         screenOptions={{
           headerTitle: () => (
-            <Text fontSize={22} fontWeight="600">
+            <Text fontFamily="$modak" fontSize="$9">
               OPPFY
             </Text>
           ),
           headerRight: () => (
-            <Text fontWeight="500" fontSize={16}>
-              Help
-            </Text>
+            <TouchableOpacity
+              hitSlop={10}
+              onPress={() => {
+                void Linking.openURL("https://www.oppfy.com");
+              }}
+            >
+              <Info />
+            </TouchableOpacity>
           ),
+
           header: ({ navigation, options, back }) => (
             <Header navigation={navigation} options={options} back={back} />
           ),
