@@ -1,6 +1,4 @@
 // src/service/PostService.ts
-import { TRPCError } from "@trpc/server";
-
 import Services from ".";
 import Repositories from "../repositories";
 
@@ -24,10 +22,7 @@ const PostService = {
       return await Repositories.post.createPostStats(postId);
     } catch (error) {
       console.error("Failed to create post:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error creating post.",
-      });
+      throw new Error("Error creating post.");
     }
   },
 
@@ -36,10 +31,7 @@ const PostService = {
       return await Repositories.post.updatePost(postId, newCaption);
     } catch (error) {
       console.error("Failed to edit post:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error editing post.",
-      });
+      throw new Error("Error editing post.");
     }
   },
 
@@ -47,10 +39,7 @@ const PostService = {
     try {
       const post = await Repositories.post.getPost(postId);
       if (!post) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: `Post with key ${postId} not found.`,
-        });
+        throw new Error(`Post with key ${postId} not found.`);
       }
       return post;
     } catch (error) {
@@ -84,10 +73,7 @@ const PostService = {
       return results;
     } catch (error) {
       console.error("Failed to get batch posts:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error retrieving batch posts.",
-      });
+      throw new Error("Error retrieving batch posts.");
     }
   },
 
@@ -97,10 +83,7 @@ const PostService = {
       return;
     } catch (error) {
       console.error("Failed to delete post:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error deleting post.",
-      });
+      throw new Error("Error deleting post.");
     }
   },
 
@@ -131,10 +114,7 @@ const PostService = {
       return results;
     } catch (error) {
       console.error("Failed to get batch posts:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error retrieving batch posts.",
-      });
+      throw new Error("Error retrieving batch posts.");
     }
   },
 };

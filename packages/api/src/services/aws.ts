@@ -5,14 +5,12 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { TRPCError } from "@trpc/server"; // Import if error handling needs to propagate in an API context
 
 import { s3 } from "@acme/db";
 
 import { metadataSchema, PutObjectMetadata } from "../validation/utils";
 
 const AWSS3Service = {
-  // TODO: Make Lambda function triggered on upload that optimize image size and format.
   putObjectPresignedUrl: async (
     bucket: string,
     key: string,
@@ -29,10 +27,7 @@ const AWSS3Service = {
       return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
     } catch (error) {
       console.error("Error creating presigned URL without metadata:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create presigned URL without metadata",
-      });
+      throw new Error("Failed to create presigned URL without metadata");
     }
   },
 
@@ -49,14 +44,13 @@ const AWSS3Service = {
         Bucket: bucket,
         Key: objectKey,
         Metadata: validatedMetadata,
+        ContentType: contentType,
+        ContentLength: contentLength,
       });
       return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
     } catch (error) {
       console.error("Error creating presigned URL with metadata:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create presigned URL with metadata",
-      });
+      throw new Error("Failed to create presigned URL with metadata");
     }
   },
 
@@ -69,10 +63,7 @@ const AWSS3Service = {
       return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
     } catch (error) {
       console.error("Error creating object presigned URL:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create object presigned URL",
-      });
+      throw new Error("Failed to create object presigned URL");
     }
   },
 
@@ -85,10 +76,7 @@ const AWSS3Service = {
       return await s3.send(command);
     } catch (error) {
       console.error("Error deleting object from S3:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to delete object from S3",
-      });
+      throw new Error("Failed to delete object from S3");
     }
   },
 };
