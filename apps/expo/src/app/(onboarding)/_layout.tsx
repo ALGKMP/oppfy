@@ -17,15 +17,12 @@ const OnboardingLayout = () => {
 
   return (
     <View
-      style={{
-        flex: 1,
-        backgroundColor: "black",
-        // Paddings to handle safe area
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }}
+      flex={1}
+      backgroundColor="$background"
+      paddingTop={insets.top}
+      paddingBottom={insets.bottom}
+      paddingLeft={insets.left}
+      paddingRight={insets.right}
     >
       <Stack
         screenOptions={{
