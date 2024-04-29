@@ -8,7 +8,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { s3 } from "@acme/db";
 
-import { metadataSchema, PutObjectMetadata } from "../validation/utils";
+import { metadataSchema, PutObjectMetadata } from "../../../validators/src/utils";
 
 const AWSS3Service = {
   putObjectPresignedUrl: async (

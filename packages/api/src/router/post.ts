@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import ZodSchemas from "../validation";
+import ZodSchemas from "../../../validators";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure

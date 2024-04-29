@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import ZodSchemas from "../validation";
+import ZodSchemas from "@acme/validators";
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
