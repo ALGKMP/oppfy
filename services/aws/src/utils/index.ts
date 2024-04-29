@@ -2,7 +2,7 @@
 export interface MediaMedata {
   author: string;
   caption?: string;
-  tags?: string;
+  friend: string;
 }
 
 export interface ProfileMetadata {
@@ -13,7 +13,7 @@ export interface ProfileMetadata {
 
 export interface PostMetadata {
   author: string;
-  recipient: string;
+  friend: string;
   caption?: string;
 }
 
@@ -26,7 +26,7 @@ export const kebabToPascal = (str: string) => {
 export const isMetadata = (metadata: unknown): metadata is MediaMedata => {
   const m = metadata as MediaMedata;
   return (
-    m.author !== undefined && m.caption !== undefined && m.tags !== undefined
+    m.author !== undefined && m.caption !== undefined && m.friend !== undefined
   );
 };
 
