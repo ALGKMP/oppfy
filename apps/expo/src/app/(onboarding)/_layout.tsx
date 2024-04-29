@@ -32,6 +32,16 @@ const OnboardingLayout = () => {
               OPPFY
             </Text>
           ),
+          headerLeft: ({ canGoBack }) => (
+            <TouchableOpacity
+              hitSlop={10}
+              onPress={() => {
+                canGoBack ? void router.back() : null;
+              }}
+            >
+              <ChevronLeft size="$1.5" />
+            </TouchableOpacity>
+          ),
           headerRight: () => (
             <TouchableOpacity
               hitSlop={10}
@@ -42,9 +52,35 @@ const OnboardingLayout = () => {
               <Info />
             </TouchableOpacity>
           ),
-
-          header: ({ navigation, options, back }) => (
-            <Header navigation={navigation} options={options} back={back} />
+          header: ({ navigation, options }) => (
+            <Header
+              LeftComponent={
+                options.headerLeft
+                  ? options.headerLeft({
+                      canGoBack: navigation.canGoBack(),
+                      tintColor: options.headerTintColor,
+                    })
+                  : undefined
+              }
+              MiddleComponent={
+                typeof options.headerTitle === "function" ? (
+                  options.headerTitle({
+                    children: options.title ?? "",
+                    tintColor: options.headerTintColor,
+                  })
+                ) : options.title ? (
+                  <Text>{options.title}</Text>
+                ) : null
+              }
+              RightComponent={
+                options.headerRight
+                  ? options.headerRight({
+                      canGoBack: navigation.canGoBack(),
+                      tintColor: options.headerTintColor,
+                    })
+                  : undefined
+              }
+            ></Header>
           ),
         }}
       >
