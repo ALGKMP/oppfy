@@ -150,28 +150,6 @@ export const postStatsRelations = relations(postStats, ({ one }) => ({
   }),
 }));
 
-// export const tag = mySqlTable("Tag", {
-//   id: serial("id").primaryKey(),
-//   user: varchar("user", {length: 255})
-//     .references(() => user.id)
-//     .notNull(),
-//   createdAt: timestamp("createdAt")
-//     .default(sql`CURRENT_TIMESTAMP`)
-//     .notNull(),
-//   updatedAt: timestamp("updatedAt").onUpdateNow(),
-// });
-
-// export const tagRelations = relations(tag, ({ one }) => ({
-//   profile: one(user, {
-//     fields: [tag.user],
-//     references: [user.id],
-//   }),
-//   post: one(post, {
-//     fields: [tag.id],
-//     references: [post.id],
-//   }),
-// }));
-
 export const like = mySqlTable("Like", {
   id: serial("id").primaryKey(),
   post: bigint("post", { mode: "number", unsigned: true })
@@ -218,6 +196,87 @@ export const commentRelations = relations(comment, ({ one }) => ({
   }),
   commenetedBy: one(user, {
     fields: [comment.user],
+    references: [user.id],
+  }),
+}));
+
+export const follower = mySqlTable("Follower", {
+  id: serial("id").primaryKey(),
+  followerId: varchar("followerId", { length: 255 })
+    .references(() => user.id)
+    .notNull(),
+  followedId: varchar("followedId", { length: 255 })
+    .references(() => user.id)
+    .notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const followerRelations = relations(follower, ({ one }) => ({
+  follower: one(user, {
+    relationName: "followerUser",
+    fields: [follower.followerId],
+    references: [user.id],
+  }),
+  followed: one(user, {
+    relationName: "followedUser",
+    fields: [follower.followedId],
+    references: [user.id],
+  }),
+}));
+
+export const friendRequest = mySqlTable("FriendRequest", {
+  id: serial("id").primaryKey(),
+  requesterId: varchar("requesterId", { length: 255 })
+    .references(() => user.id)
+    .notNull(),
+  requestedId: varchar("requestedId", { length: 255 })
+    .references(() => user.id)
+    .notNull(),
+  status: varchar("status", { length: 50 }) // Possible values: "pending", "accepted", "declined"
+    .notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
+  requester: one(user, {
+    relationName: "requester",
+    fields: [friendRequest.requesterId],
+    references: [user.id],
+  }),
+  requested: one(user, {
+    relationName: "requested",
+    fields: [friendRequest.requestedId],
+    references: [user.id],
+  }),
+}));
+
+export const friend = mySqlTable("Friend", {
+  id: serial("id").primaryKey(),
+  userId1: varchar("userId1", { length: 255 })
+    .references(() => user.id)
+    .notNull(),
+  userId2: varchar("userId2", { length: 255 })
+    .references(() => user.id)
+    .notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const friendRelations = relations(friend, ({ one }) => ({
+  user1: one(user, {
+    relationName: "user1",
+    fields: [friend.userId1],
+    references: [user.id],
+  }),
+  user2: one(user, {
+    relationName: "user2",
+    fields: [friend.userId2],
     references: [user.id],
   }),
 }));
