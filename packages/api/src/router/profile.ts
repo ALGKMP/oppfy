@@ -8,7 +8,7 @@ import { z } from "zod";
 
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import ZodSchemas from "../../../validators";
+import ZodSchemas from "@acme/validators";
 
 export const profileRouter = createTRPCRouter({
   uploadProfilePictureUrl: protectedProcedure
