@@ -8,8 +8,7 @@ const Start = () => {
   const router = useRouter();
   const { permissions } = usePermissions();
 
-  const requiredPermissions =
-    permissions.camera && permissions.contacts && permissions.notifications;
+  const requiredPermissions = permissions.camera && permissions.contacts;
 
   const onSubmit = () => {
     requiredPermissions
@@ -18,12 +17,7 @@ const Start = () => {
   };
 
   return (
-    <View
-      flex={1}
-      padding="$6"
-      backgroundColor="$background"
-      justifyContent="space-between"
-    >
+    <View flex={1} padding="$4" backgroundColor="$background">
       <YStack flex={1} alignItems="center" justifyContent="center">
         <Text fontFamily="$modak" fontSize={64} margin={-24}>
           OPPFY
@@ -32,6 +26,7 @@ const Start = () => {
           Capture Real Memories.
         </Text>
       </YStack>
+
       <Button onPress={onSubmit}>Welcome</Button>
     </View>
   );

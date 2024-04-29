@@ -32,9 +32,8 @@ interface HeaderProps {
 const StackHeader = ({ navigation, options, back }: HeaderProps) => {
   return (
     <XStack
-      paddingBottom="$4"
-      paddingHorizontal="$6"
-      backgroundColor="black"
+      paddingHorizontal="$4"
+      backgroundColor="$background"
       alignItems="center"
       justifyContent="space-between"
     >
@@ -43,12 +42,12 @@ const StackHeader = ({ navigation, options, back }: HeaderProps) => {
           ? options.headerLeft({ canGoBack: navigation.canGoBack() })
           : back && (
               <TouchableOpacity
+                hitSlop={10}
                 onPress={() => {
                   navigation.goBack();
                 }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <ChevronLeft size="$1.5" />
+                <ChevronLeft size="$2" />
               </TouchableOpacity>
             )}
       </View>
