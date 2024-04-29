@@ -32,6 +32,12 @@ const Permissions = () => {
     await Linking.openSettings();
   };
 
+  const onPress = () => {
+    isSignedIn
+      ? router.push("/(app)/(bottom-tabs)/profile")
+      : router.push("/auth/phone-number");
+  };
+
   const requestCameraPermission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
     if (status !== PermissionStatus.GRANTED) {
@@ -66,12 +72,6 @@ const Permissions = () => {
       );
     }
     await checkPermissions();
-  };
-
-  const onPress = () => {
-    isSignedIn
-      ? router.push("/(app)/(bottom-tabs)/profile")
-      : router.push("/auth/phone-number");
   };
 
   return (
