@@ -18,37 +18,7 @@ import {
 } from "tamagui";
 
 import { useSession } from "~/contexts/SessionsContext";
-import { key } from "../../../../../packages/api/src/validation/utils/index";
 import { usePermissions } from "../../contexts/PermissionsContext";
-
-interface PermissionListItemProps {
-  emoji: string;
-  title: string;
-  subTitle: string;
-  checkbox: React.ReactNode;
-}
-
-const PermissionListItem = ({
-  emoji,
-  title,
-  subTitle,
-  checkbox,
-}: PermissionListItemProps) => {
-  return (
-    <XStack alignItems="center" gap="$2">
-      <Text fontSize="$10">{emoji}</Text>
-
-      <YStack flex={1} gap>
-        <Text fontSize="$7" fontWeight="bold">
-          {title}
-        </Text>
-        <Text color="$gray9">{subTitle}</Text>
-      </YStack>
-
-      {checkbox}
-    </XStack>
-  );
-};
 
 const Permissions = () => {
   const router = useRouter();
@@ -110,7 +80,7 @@ const Permissions = () => {
           We&apos;ll just need a few permissions to get started.
         </Text>
 
-        <YGroup separator={<Separator />} gap={"$4"}>
+        <YGroup gap="$4">
           <YGroup.Item>
             <PermissionListItem
               emoji="📸"
@@ -131,6 +101,8 @@ const Permissions = () => {
             />
           </YGroup.Item>
 
+          <Separator />
+
           <YGroup.Item>
             <PermissionListItem
               emoji="📱"
@@ -150,6 +122,8 @@ const Permissions = () => {
               }
             />
           </YGroup.Item>
+
+          <Separator />
 
           <YGroup.Item>
             <PermissionListItem
@@ -177,6 +151,35 @@ const Permissions = () => {
         Continue
       </Button>
     </View>
+  );
+};
+
+interface PermissionListItemProps {
+  emoji: string;
+  title: string;
+  subTitle: string;
+  checkbox: React.ReactNode;
+}
+
+const PermissionListItem = ({
+  emoji,
+  title,
+  subTitle,
+  checkbox,
+}: PermissionListItemProps) => {
+  return (
+    <XStack alignItems="center" gap="$2">
+      <Text fontSize="$10">{emoji}</Text>
+
+      <YStack flex={1} gap>
+        <Text fontSize="$7" fontWeight="bold">
+          {title}
+        </Text>
+        <Text color="$gray9">{subTitle}</Text>
+      </YStack>
+
+      {checkbox}
+    </XStack>
   );
 };
 

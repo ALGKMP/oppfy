@@ -2,11 +2,10 @@ import React from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { Modak_400Regular } from "@expo-google-fonts/modak";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TamaguiProvider, View } from "tamagui";
+import { TamaguiProvider } from "tamagui";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { TRPCProvider } from "~/utils/api";
