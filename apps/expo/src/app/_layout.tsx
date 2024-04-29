@@ -32,10 +32,7 @@ const RootLayout = () => {
             <PermissionsProvider>
               <ActionSheetProvider>
                 <SafeAreaProvider>
-                  <>
-                    <Slot />
-                    <StatusBar />
-                  </>
+                  <Slot />
                 </SafeAreaProvider>
               </ActionSheetProvider>
             </PermissionsProvider>
