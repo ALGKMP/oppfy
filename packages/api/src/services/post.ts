@@ -19,7 +19,7 @@ const PostService = {
       if (!postId) {
         throw new Error("Failed to create post.");
       }
-      return await Repositories.post.createPostStats(postId);
+      return await Repositories.postStats.createPostStats(postId);
     } catch (error) {
       console.error("Failed to create post:", error);
       throw new Error("Error creating post.");

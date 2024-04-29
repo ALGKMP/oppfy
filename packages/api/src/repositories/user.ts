@@ -36,17 +36,6 @@ const UserRepository = {
     return users[0];
   },
 
-  getUserProfile: async (userId: string) => {
-    const user = await UserRepository.getUser(userId);
-    if (!user) {
-      return null;
-    }
-    return await db
-      .select()
-      .from(schema.profile)
-      .where(eq(schema.profile.id, user.profile));
-  },
-
   getUserByUserName: async (userName: string) => {
     const users = await db
       .selectDistinct()

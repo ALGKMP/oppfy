@@ -22,12 +22,9 @@ const ProfileService = {
     }
   },
 
-  getProfileByUserId: async (userId: string) => {
+  getUserProfile: async (userId: string) => {
     try {
       const user = await UserService.getUser(userId);
-      if (!user?.profile) {
-        throw new Error("User does not have an associated profile.");
-      }
       return await ProfileService.getProfileById(user.profile);
     } catch (error) {
       console.error(
@@ -58,7 +55,7 @@ const ProfileService = {
 
   updateName: async (userId: string, name: string) => {
     try {
-      const profile = await ProfileService.getProfileByUserId(userId);
+      const profile = await ProfileService.getUserProfile(userId);
       await Repositories.profile.updateProfileName(profile.id, name); // Updated repository access
     } catch (error) {
       console.error(
@@ -72,7 +69,7 @@ const ProfileService = {
 
   updateDateOfBirth: async (userId: string, dateOfBirth: Date) => {
     try {
-      const profile = await ProfileService.getProfileByUserId(userId);
+      const profile = await ProfileService.getUserProfile(userId);
       await Repositories.profile.updateProfileDateOfBirth(
         profile.id,
         dateOfBirth,
@@ -89,7 +86,7 @@ const ProfileService = {
 
   profileHasName: async (userId: string) => {
     try {
-      const profile = await ProfileService.getProfileByUserId(userId);
+      const profile = await ProfileService.getUserProfile(userId);
       return !!profile.name;
     } catch (error) {
       console.error(
@@ -103,7 +100,7 @@ const ProfileService = {
 
   profileHasDateOfBirth: async (userId: string) => {
     try {
-      const profile = await ProfileService.getProfileByUserId(userId);
+      const profile = await ProfileService.getUserProfile(userId);
       return !!profile.dateOfBirth;
     } catch (error) {
       console.error(
@@ -117,7 +114,7 @@ const ProfileService = {
 
   uploadProfilePicture: async (userId: string, key: string) => {
     try {
-      const profile = await ProfileService.getProfileByUserId(userId);
+      const profile = await ProfileService.getUserProfile(userId);
 
       // New Profile Photo
       if (!profile.profilePhoto) {
@@ -216,7 +213,7 @@ const ProfileService = {
 
   deleteProfilePicture: async (userId: string) => {
     try {
-      const profile = await ProfileService.getProfileByUserId(userId);
+      const profile = await ProfileService.getUserProfile(userId);
       if (!profile.profilePhoto) {
         throw new Error("Profile does not have a profile photo.");
       }

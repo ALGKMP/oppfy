@@ -12,7 +12,7 @@ export const key = z
     /^(profile-pictures\/|posts\/).*/,
     "Key must start with 'profile-pictures/' or 'posts/'.",
   );
-  
+ 
 export const postId = z.number();
 export const contentType = z.string();
 export const contentLength = z.number();

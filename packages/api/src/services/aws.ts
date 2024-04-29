@@ -6,6 +6,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import ZodSchemas from "@acme/validators";
+import {z} from "zod";
 
 import { s3 } from "@acme/db";
 
@@ -35,7 +36,7 @@ const AWSS3Service = {
     objectKey: string,
     contentLength: number,
     contentType: string,
-    metadata: PutObjectMetadata,
+    metadata: z.infer<typeof ZodSchemas.post.metadata>,
   ): Promise<string> => {
     try {
       const validatedMetadata = ZodSchemas.post.metadata.parse(metadata);

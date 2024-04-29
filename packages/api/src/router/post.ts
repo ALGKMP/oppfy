@@ -91,7 +91,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    userAllPosts: protectedProcedure
+    allUserPosts: protectedProcedure
     .query(async ({ ctx }) => {
       try {
         await Services.post.getUserPosts(ctx.session.uid);
@@ -104,7 +104,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    otherUserAllPosts: protectedProcedure
+    allOtherUserPosts: protectedProcedure
     .input(ZodSchemas.post.getUserPosts)
     .query(async ({ input }) => {
       try {
