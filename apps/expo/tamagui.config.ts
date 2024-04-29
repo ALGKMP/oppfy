@@ -1,8 +1,36 @@
 import { config } from "@tamagui/config";
-import { createTamagui } from "tamagui";
+import { createFont, createTamagui } from "tamagui";
+
+const modakFont = createFont({
+  family: "Modak",
+  weight: {
+    1: "400",
+  },
+  size: {
+    1: 11,
+    2: 12,
+    3: 13,
+    4: 14,
+    5: 16,
+    6: 18,
+    7: 20,
+    8: 22,
+    9: 30,
+    10: 42,
+    11: 52,
+    12: 62,
+    13: 72,
+    14: 92,
+    15: 114,
+    16: 124,
+  },
+});
 
 const tamaguiConfig = createTamagui({
   ...config,
+  fonts: {
+    modak: modakFont,
+  },
 });
 
 // this makes typescript properly type everything based on the config
