@@ -10,12 +10,10 @@ const Camera = () => {
   const [image, setImage] = useState("");
   const [contentLength, setContentLength] = useState(0);
   const [contentType, setContentType] = useState("");
-  const mutation = api.post.createPresignedUrlForPost.useMutation();
+  const urlMutation = api.profile.uploadProfilePictureUrl.useMutation();
+  const deleteMutation = api.profile.deleteProfilePicture.useMutation();
+  const updateMutation = api.profile.updateProfile.useMutation();
 
-  const session = useSession();
-
-  const caption = "test caption";
-  const userId = session.user!.uid;
 
   const putMutation = useMutation(async (url: string) => {
     if (!image) return;
@@ -51,10 +49,7 @@ const Camera = () => {
       setContentType(type);
       setContentLength(size);
 
-      mutation.mutate({
-        author: userId, 
-        friend: userId,
-        caption: caption,
+      urlMutation.mutate({
         contentType: type,
         contentLength: size,
       }, {

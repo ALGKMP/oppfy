@@ -11,7 +11,7 @@ export const postRouter = createTRPCRouter({
     .input(ZodSchemas.post.createPresignedUrl)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
-      const bucket = "awsstack-postbucketf37978b4-nyf2h7ran1kr";
+      const bucket = process.env.S3_BUCKET_NAME!;
       const objectKey = `posts/${Date.now()}-${input.author}`;
       const metadata = {
         author: ctx.session.uid,

@@ -38,7 +38,7 @@ const AWSS3Service = {
 
   putObjectPresignedUrlWithMetadata: async (
     bucket: string,
-    key: string,
+    objectKey: string,
     contentLength: number,
     contentType: string,
     metadata: PutObjectMetadata,
@@ -47,9 +47,7 @@ const AWSS3Service = {
       const validatedMetadata = metadataSchema.parse(metadata);
       const command = new PutObjectCommand({
         Bucket: bucket,
-        Key: key,
-        ContentType: contentType,
-        ContentLength: contentLength,
+        Key: objectKey,
         Metadata: validatedMetadata,
       });
       return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes

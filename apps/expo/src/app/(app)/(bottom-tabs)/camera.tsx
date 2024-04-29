@@ -8,49 +8,23 @@ import { api } from "~/utils/api";
 
 const Camera = () => {
   const [image, setImage] = useState("");
-  const [contentLength, setContentLength] = useState(0);
-  const [contentType, setContentType] = useState("");
-
-  const session = useSession();
-  const userId = session.user!.uid;
-  const postId = "your-post-id"; // You need to have the post ID that you want to delete or edit
-
   const mutation = api.post.createPresignedUrlForPost.useMutation();
 
-  const deletePostMutation = useMutation(async () => {
-    await api.post.deletePost(postId)}
-    , {
-    onSuccess: () => {
-      console.log("Post deleted successfully");
-    },
-    onError: (error) => {
-      console.error("Failed to delete post:", error);
-    }
-  });
+  const session = useSession();
 
-  const editPostMutation = useMutation(async () => {
-    await api.post.editPost(postId, "New hardcoded caption")
-  }
-    , {
-    onSuccess: () => {
-      console.log("Post updated successfully");
-    },
-    onError: (error) => {
-      console.error("Failed to update post:", error);
-    }
-  });
+  const caption = "test caption";
+  const userId = session.user!.uid;
 
   const putMutation = useMutation(async (url: string) => {
     if (!image) return;
 
     const response = await fetch(url, {
       method: "PUT",
-      headers: {
-        "Content-Type": contentType,
-        "Content-Length": contentLength.toString(),
-      },
-      body: await (await fetch(image)).blob(),
+      body: await (await fetch(image)).blob(), // Convert the image URI to a blob
     });
+    if (!response.ok) {
+      console.log(response)
+    }
 
     console.log("status: ", response.status);
   });
@@ -71,23 +45,23 @@ const Camera = () => {
       const size = blob.size;
 
       setImage(uri);
-      setContentType(type);
-      setContentLength(size);
 
       mutation.mutate({
         author: userId, 
         friend: userId,
-        caption: "Initial caption", // Updated this to reflect the post's initial upload
+        caption: caption,
         contentType: type,
         contentLength: size,
       }, {
         onSuccess: (url) => {
-          console.log("url: ", url);
+          // Use the URL from the successful mutation to upload the image
+          console.log("url: ", url)
           putMutation.mutate(url);
         }
       });
-    } else {
-      console.log("Error accessing the camera roll");
+    }
+    else {
+      console.log("shits broken on the camera page 1")
     }
   };
 
@@ -99,9 +73,9 @@ const Camera = () => {
       justifyContent="center"
     >
       <Button onPress={pickImage}>Pick an image from camera roll</Button>
-      {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
-      <Button onPress={() => deletePostMutation.mutate()}>Delete Post</Button>
-      <Button onPress={() => editPostMutation.mutate()}>Edit Post</Button>
+      {image && (
+        <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
+      )}
     </View>
   );
 };

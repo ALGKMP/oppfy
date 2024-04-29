@@ -30,7 +30,7 @@ export const handler = async (
     const { Metadata } = await s3Client.send(command);
     const metadata = Metadata as PostMetadata | undefined;
 
-    if (!metadata?.author || !metadata?.recipient) {
+    if (!metadata?.author || !metadata?.friend) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -49,7 +49,7 @@ export const handler = async (
       },
       body: JSON.stringify({
         author: metadata.author,
-        recipient: metadata.recipient,
+        recipient: metadata.friend,
         caption: metadata.caption, // Handle other fields similarly
         objectKey: objectKey,
       }),
