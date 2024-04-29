@@ -1,15 +1,54 @@
-import React, { useEffect, useState } from "react";
-import { Alert, Linking, Platform, StyleSheet } from "react-native";
+import React from "react";
+import { Alert, Linking } from "react-native";
 import * as Camera from "expo-camera";
 import * as Contacts from "expo-contacts";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { Check } from "@tamagui/lucide-icons";
-import { Button, Checkbox, Text, View, YStack } from "tamagui";
+import {
+  Button,
+  Checkbox,
+  Separator,
+  Text,
+  View,
+  XStack,
+  YGroup,
+  YStack,
+} from "tamagui";
 
 import { useSession } from "~/contexts/SessionsContext";
+import { key } from "../../../../../packages/api/src/validation/utils/index";
 import { usePermissions } from "../../contexts/PermissionsContext";
+
+interface PermissionListItemProps {
+  emoji: string;
+  title: string;
+  subTitle: string;
+  checkbox: React.ReactNode;
+}
+
+const PermissionListItem = ({
+  emoji,
+  title,
+  subTitle,
+  checkbox,
+}: PermissionListItemProps) => {
+  return (
+    <XStack alignItems="center" gap="$2">
+      <Text fontSize="$10">{emoji}</Text>
+
+      <YStack flex={1} gap>
+        <Text fontSize="$7" fontWeight="bold">
+          {title}
+        </Text>
+        <Text color="$gray9">{subTitle}</Text>
+      </YStack>
+
+      {checkbox}
+    </XStack>
+  );
+};
 
 const Permissions = () => {
   const router = useRouter();
@@ -65,97 +104,80 @@ const Permissions = () => {
   const requiredPermissions = permissions.camera && permissions.contacts;
 
   return (
-    <View
-      flex={1}
-      padding="$6"
-      backgroundColor="black"
-      justifyContent="space-between"
-    >
-      <YStack flex={1}>
-        <YStack>
-          <Text style={styles.title}>Permissions</Text>
-          <Text style={styles.description}>
-            This app requires certain permissions to function properly. Please
-            allow the necessary permissions to continue.
-          </Text>
-        </YStack>
+    <View flex={1} padding="$4" backgroundColor="$background">
+      <YStack flex={1} gap="$8">
+        <Text alignSelf="center" color="$gray9" fontWeight="bold">
+          We&apos;ll just need a few permissions to get started.
+        </Text>
 
-        <View style={styles.permissionItem}>
-          <Text>Camera</Text>
-          <Checkbox
-            size="$8"
-            onPress={requestCameraPermission}
-            checked={permissions.camera}
-            disabled={permissions.camera}
-          >
-            <Checkbox.Indicator>
-              <Check />
-            </Checkbox.Indicator>
-          </Checkbox>
-        </View>
+        <YGroup separator={<Separator />} gap={"$4"}>
+          <YGroup.Item>
+            <PermissionListItem
+              emoji="📸"
+              title="Camera"
+              subTitle="So you can take and upload photos of your friends"
+              checkbox={
+                <Checkbox
+                  size="$6"
+                  onPress={requestCameraPermission}
+                  checked={permissions.camera}
+                  disabled={permissions.camera}
+                >
+                  <Checkbox.Indicator>
+                    <Check />
+                  </Checkbox.Indicator>
+                </Checkbox>
+              }
+            />
+          </YGroup.Item>
 
-        <View style={styles.permissionItem}>
-          <Text>Contacts</Text>
-          <Checkbox
-            size="$8"
-            onPress={requestContactsPermission}
-            checked={permissions.contacts}
-            disabled={permissions.contacts}
-          >
-            <Checkbox.Indicator>
-              <Check />
-            </Checkbox.Indicator>
-          </Checkbox>
-        </View>
+          <YGroup.Item>
+            <PermissionListItem
+              emoji="📱"
+              title="Contacts"
+              subTitle="So you can find your friends and your friends can find you"
+              checkbox={
+                <Checkbox
+                  size="$6"
+                  onPress={requestContactsPermission}
+                  checked={permissions.contacts}
+                  disabled={permissions.contacts}
+                >
+                  <Checkbox.Indicator>
+                    <Check />
+                  </Checkbox.Indicator>
+                </Checkbox>
+              }
+            />
+          </YGroup.Item>
 
-        <View style={styles.permissionItem}>
-          <Text>Notifications</Text>
-          <Checkbox
-            size="$8"
-            onPress={requestNotificationsPermission}
-            checked={permissions.notifications}
-            disabled={permissions.notifications}
-          >
-            <Checkbox.Indicator>
-              <Check />
-            </Checkbox.Indicator>
-          </Checkbox>
-        </View>
+          <YGroup.Item>
+            <PermissionListItem
+              emoji="🔔"
+              title="Notifications"
+              subTitle="So you know when your friends have snapped a pic of you"
+              checkbox={
+                <Checkbox
+                  size="$6"
+                  onPress={requestNotificationsPermission}
+                  checked={permissions.notifications}
+                  disabled={permissions.notifications}
+                >
+                  <Checkbox.Indicator>
+                    <Check />
+                  </Checkbox.Indicator>
+                </Checkbox>
+              }
+            />
+          </YGroup.Item>
+        </YGroup>
       </YStack>
 
-      <Button
-        onPress={onPress}
-        borderWidth={0}
-        pressStyle={{
-          backgroundColor: "$gray12",
-        }}
-        disabled={!requiredPermissions}
-        backgroundColor={requiredPermissions ? "white" : "$gray9"}
-      >
-        <Text color="black" fontSize={16} fontWeight="600">
-          Continue
-        </Text>
+      <Button onPress={onPress} disabled={!requiredPermissions}>
+        Continue
       </Button>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  description: {
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  permissionItem: {
-    marginVertical: 10,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-});
 
 export default Permissions;
