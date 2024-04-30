@@ -7,7 +7,7 @@ export interface CountryData {
   countryCode: CountryCode;
 }
 
-export const groupedCountries: (string | CountryData)[] = [
+export const suggestedCountriesData: (string | CountryData)[] = [
   "SUGGESTED",
   {
     name: "Canada",
@@ -21,6 +21,9 @@ export const groupedCountries: (string | CountryData)[] = [
     dialingCode: "+1",
     countryCode: "US",
   },
+];
+
+export const countriesData: (string | CountryData)[] = [
   "A",
   {
     name: "Afghanistan",
