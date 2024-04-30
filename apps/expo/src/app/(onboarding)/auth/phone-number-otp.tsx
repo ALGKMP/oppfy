@@ -97,6 +97,7 @@ const PhoneNumberOTP = () => {
               onChangeText={setPhoneNumberOTP}
               placeholder="6 Digit Code"
               keyboardType="phone-pad"
+              autoFocus
             />
           </XStack>
 

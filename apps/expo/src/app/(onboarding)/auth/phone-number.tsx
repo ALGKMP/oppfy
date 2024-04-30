@@ -75,6 +75,7 @@ const PhoneNumber = () => {
               onChangeText={setPhoneNumber}
               placeholder="Phone number"
               keyboardType="phone-pad"
+              autoFocus
             />
           </XStack>
 

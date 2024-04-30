@@ -43,6 +43,7 @@ const FullName = () => {
               value={fullName}
               onChangeText={setFullName}
               placeholder="Full Name"
+              autoFocus
             />
           </XStack>
         </YStack>
