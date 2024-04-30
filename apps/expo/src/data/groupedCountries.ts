@@ -8,7 +8,7 @@ export interface CountryData {
 }
 
 export const groupedCountries: (string | CountryData)[] = [
-  "SUGGESTED COUNTRIES",
+  "SUGGESTED",
   {
     name: "Canada",
     flag: "🇨🇦",
