@@ -52,8 +52,8 @@ const PhoneNumberOTP = () => {
     });
 
     userOnboardingCompleted.data
-      ? router.replace("/user-info/welcome")
-      : router.replace("/(app)/(bottom-tabs)/profile");
+      ? router.replace("/(app)/(bottom-tabs)/profile")
+      : router.replace("/user-info/welcome");
   };
 
   const onSubmit = async () => {
