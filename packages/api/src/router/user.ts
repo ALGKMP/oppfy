@@ -12,7 +12,7 @@ export const userRouter = createTRPCRouter({
       try {
         return await Services.profile.updateFullName(
           ctx.session.uid,
-          input.fullName,
+          input.fullName
         );
       } catch (error) {
         throw new TRPCError({

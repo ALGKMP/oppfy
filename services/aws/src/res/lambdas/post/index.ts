@@ -54,22 +54,31 @@ export const handler = async (
 
     const metadata = ZodSchemas.post.metadata.parse(Metadata);
 
-    console.log(metadata)
     // Temporarily hardcoding the server endpoint
     const serverEndpoint =
       "https://5bdc-74-12-66-138.ngrok-free.app/api/uploadPost";
+
+    const body = ZodSchemas.post.uploadPost.parse({
+        author: metadata.author,
+        friend: metadata.friend,
+        caption: metadata.caption,
+        key: objectKey,
+    });
+
+    if (!body) {
+      console.log("Failed to parse metadata:", Metadata);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "Failed to parse metadata" }),
+      };
+    }
 
     const response = await fetch(serverEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        author: metadata.author,
-        friend: metadata.friend,
-        caption: metadata.caption,
-        key: objectKey,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

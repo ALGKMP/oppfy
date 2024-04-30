@@ -13,7 +13,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const bucket = process.env.S3_BUCKET_NAME!;
       // const objectKey = `posts/${Date.now()}-postedBy:${ctx.session.uid}`;
-      const objectKey = "test";
+      const objectKey = "posts/test2";
       const metadata = {
         author: ctx.session.uid,
         friend: input.friend,
@@ -41,6 +41,7 @@ export const postRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
+        console.log('here')
         await Services.post.createPost(input.author, input.friend, input.caption, input.key);
         return;
       } catch (error) {

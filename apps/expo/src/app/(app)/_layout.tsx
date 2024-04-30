@@ -33,6 +33,7 @@ const AppLayout = () => {
   }
 
   if (!user?.username) {
+    console.log("username not found in app")
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 

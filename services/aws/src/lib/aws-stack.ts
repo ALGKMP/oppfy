@@ -37,6 +37,7 @@ function createLambdaFunction(scope, name, entryPath) {
     runtime: lambda.Runtime.NODEJS_20_X,
     entry: entryPath,
     handler: "handler",
+    timeout: cdk.Duration.minutes(3),  // Set timeout to 5 minutes
     bundling: {
       format: lambdaNodeJs.OutputFormat.ESM,
       mainFields: ["module", "main"],
