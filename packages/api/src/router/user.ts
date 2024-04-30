@@ -10,7 +10,10 @@ export const userRouter = createTRPCRouter({
     .input(ZodSchemas.user.updateName)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await Services.profile.updateName(ctx.session.uid, input.name);
+        return await Services.profile.updateFullName(
+          ctx.session.uid,
+          input.fullName,
+        );
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

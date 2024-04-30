@@ -53,7 +53,7 @@ const ProfileService = {
     }
   },
 
-  updateName: async (userId: string, name: string) => {
+  updateFullName: async (userId: string, name: string) => {
     try {
       const profile = await ProfileService.getUserProfile(userId);
       await Repositories.profile.updateProfileName(profile.id, name); // Updated repository access
@@ -188,7 +188,9 @@ const ProfileService = {
   },
 
   // Batch get operation for multiple profile pictures
-  getProfilePictureBatch: async (userIds: string[]): Promise<Record<string, string | null>> => {
+  getProfilePictureBatch: async (
+    userIds: string[],
+  ): Promise<Record<string, string | null>> => {
     const bucket = process.env.S3_BUCKET_NAME!;
     const result: Record<string, string | null> = {};
 
