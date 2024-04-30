@@ -24,7 +24,9 @@ function createBucket(scope: Construct, name: string) {
         allowedHeaders: ["*"],
         allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
         allowedOrigins: ["*"],
-        exposedHeaders: []
+        exposedHeaders: [],
+        maxAge: 600 // Set to a practical value for caching preflight responses
+
       },
     ]
   });

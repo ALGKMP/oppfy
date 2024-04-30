@@ -59,6 +59,7 @@ export const userRouter = createTRPCRouter({
         const hasName = await Services.profile.profileHasName(ctx.session.uid);
         return hasDOB && hasName;
       } catch (error) {
+        console.log(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to check user completion.",

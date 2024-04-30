@@ -39,6 +39,7 @@ export const handler = async (
     
     const metadata = ZodSchemas.post.metadata.parse(Metadata);
 
+    console.log(metadata)
     // Temporarily hardcoding the server endpoint
     const serverEndpoint =
       "https://5bdc-74-12-66-138.ngrok-free.app/api/uploadPost";

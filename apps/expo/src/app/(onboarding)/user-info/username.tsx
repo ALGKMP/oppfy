@@ -6,6 +6,8 @@ import { Button, Input, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { api } from "~/utils/api";
+import auth from "@react-native-firebase/auth";
+
 
 const schemaValidation = z.object({
   username: z.string().min(1),
@@ -25,12 +27,17 @@ const Username = () => {
   );
 
   const onPress = async () => {
-    await updateUserDetails.mutateAsync({
-      username: username,
-    });
+    try {
+      await updateUserDetails.mutateAsync({
+        username: username,
+      });
 
-    // router.push("/user-info/profile-picture");
-    router.replace("/(app)/(bottom-tabs)/profile");
+      await auth().currentUser?.reload();
+  
+      router.replace("/(app)/(bottom-tabs)/profile");
+    } catch (error) {
+      console.error("Failed to update username:", error);
+    }
   };
 
   return (
