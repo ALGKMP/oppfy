@@ -5,9 +5,7 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import Fuse from "fuse.js";
-import { CountryCode, isValidPhoneNumber } from "libphonenumber-js";
 import { Button, Input, Text, useTheme, View, XStack, YStack } from "tamagui";
-import { z } from "zod";
 
 import { sharedValidators } from "@acme/validators";
 

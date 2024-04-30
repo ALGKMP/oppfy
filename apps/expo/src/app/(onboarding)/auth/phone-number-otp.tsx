@@ -3,7 +3,8 @@ import { useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
 import { Button, Input, Text, View, XStack, YStack } from "tamagui";
-import * as z from "zod";
+
+import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { useSession } from "~/contexts/SessionContext";
@@ -21,8 +22,6 @@ export interface SignUpFlowParams {
   phoneNumber: string;
 }
 
-const phoneNumberOTPValidation = z.string().length(6);
-
 const PhoneNumberOTP = () => {
   const router = useRouter();
   const signUpFlowParams = useParams<SignUpFlowParams>();
@@ -37,7 +36,7 @@ const PhoneNumberOTP = () => {
     api.user.userOnboardingCompleted.useMutation();
 
   const isValidPhoneNumberOTP =
-    phoneNumberOTPValidation.safeParse(phoneNumberOTP);
+    sharedValidators.user.phoneNumberOTPValidation.safeParse(phoneNumberOTP);
 
   const handleNewUser = async (userId: string) => {
     await createUser.mutateAsync({

@@ -1,16 +1,11 @@
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { Button, Input, Text, View, XStack, YStack } from "tamagui";
-import * as z from "zod";
+
+import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { api } from "~/utils/api";
-
-const fullNameValidation = z
-  .string()
-  .min(3)
-  .max(50)
-  .regex(/^[a-zA-Z]+([ '-][a-zA-Z]+)*$/);
 
 const FullName = () => {
   const router = useRouter();
@@ -19,7 +14,8 @@ const FullName = () => {
 
   const updateName = api.user.updateFullName.useMutation();
 
-  const isValidFullName = fullNameValidation.safeParse(fullName).success;
+  const isValidFullName =
+    sharedValidators.user.fullName.safeParse(fullName).success;
 
   const onSubmit = async () => {
     await updateName.mutateAsync({
