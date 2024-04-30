@@ -2,15 +2,11 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { Button, Separator, Text, View, XStack, YGroup, YStack } from "tamagui";
 
-import { useSession } from "~/contexts/SessionsContext";
-
 const Welcome = () => {
   const router = useRouter();
 
-  const { isSignedIn } = useSession();
-
   const onSubmit = () => {
-    router.push("/user-info/first-name");
+    router.push("/user-info/full-name");
   };
 
   return (

@@ -6,7 +6,7 @@ import Services from "../services";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
-  updateName: protectedProcedure
+  updateFullName: protectedProcedure
     .input(ZodSchemas.user.updateName)
     .mutation(async ({ input, ctx }) => {
       try {

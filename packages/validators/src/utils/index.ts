@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const userId = z.string().min(1);
 export const profileId = z.number().int();
-export const name = z.string().min(1);
+export const fullName = z.string().min(1);
 export const username = z.string().min(1);
 export const dateOfBirth = z.date();
 
@@ -12,7 +12,7 @@ export const key = z
     /^(profile-pictures\/|posts\/).*/,
     "Key must start with 'profile-pictures/' or 'posts/'.",
   );
- 
+
 export const postId = z.number();
 export const contentType = z.string();
 export const contentLength = z.number();

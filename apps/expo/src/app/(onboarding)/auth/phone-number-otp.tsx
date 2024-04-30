@@ -21,9 +21,7 @@ export interface SignUpFlowParams {
   phoneNumber: string;
 }
 
-const phoneNumberOTPValidation = z.object({
-  phoneNumberOTP: z.string().length(6),
-});
+const phoneNumberOTPValidation = z.string().length(6);
 
 const PhoneNumberOTP = () => {
   const router = useRouter();
@@ -38,9 +36,8 @@ const PhoneNumberOTP = () => {
   const userOnboardingCompleted =
     api.user.userOnboardingCompleted.useMutation();
 
-  const isValidPhoneNumberOTP = phoneNumberOTPValidation.safeParse({
-    phoneNumberOTP,
-  }).success;
+  const isValidPhoneNumberOTP =
+    phoneNumberOTPValidation.safeParse(phoneNumberOTP);
 
   const handleNewUser = async (userId: string) => {
     await createUser.mutateAsync({

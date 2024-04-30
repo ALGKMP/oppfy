@@ -7,6 +7,7 @@ import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import Fuse from "fuse.js";
 import { isValidPhoneNumber as validatePhoneNumber } from "libphonenumber-js";
 import { Button, Input, Text, useTheme, View, XStack, YStack } from "tamagui";
+import { z } from "zod";
 
 import { Header } from "~/components/Headers";
 import { KeyboardSafeView } from "~/components/SafeViews";

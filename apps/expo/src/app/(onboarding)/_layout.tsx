@@ -59,7 +59,7 @@ const OnboardingLayout = () => {
           }}
         />
         <Stack.Screen
-          name="user-info/first-name"
+          name="user-info/full-name"
           options={{ animation: "fade" }}
         />
         <Stack.Screen
