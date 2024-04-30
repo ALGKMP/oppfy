@@ -51,7 +51,7 @@ const PhoneNumber = () => {
       params: {
         phoneNumber: e164PhoneNumber,
       } satisfies SignUpFlowParams,
-      pathname: "/auth/pin-code-otp",
+      pathname: "/auth/phone-number-otp",
     });
   };
 

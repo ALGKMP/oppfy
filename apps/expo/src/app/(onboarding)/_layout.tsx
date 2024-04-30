@@ -95,7 +95,7 @@ const OnboardingLayout = () => {
           options={{ animation: "fade" }}
         />
         <Stack.Screen
-          name="auth/pin-code-otp"
+          name="auth/phone-number-otp"
           options={{ animation: "fade" }}
         />
 
