@@ -155,10 +155,10 @@ const Header = ({ navigation, options }: headerProps) => (
 
 const WelcomeHeaderLeft = ({ canGoBack }: headerLeftProps) => {
   const router = useRouter();
-  const { signOut } = useSession();
+  const { user, signOut } = useSession();
 
-  const onSubmit = () => {
-    void signOut();
+  const onSubmit = async () => {
+    await signOut();
     router.replace("/(onboarding)");
   };
 
@@ -216,8 +216,8 @@ const WelcomeHeaderLeft = ({ canGoBack }: headerLeftProps) => {
                   Stay
                 </Button>
               </AlertDialog.Cancel>
-              <AlertDialog.Action asChild>
-                <Button flex={1} theme="active" onPress={onSubmit}>
+              <AlertDialog.Action onPress={onSubmit} asChild>
+                <Button flex={1} theme="active">
                   Leave
                 </Button>
               </AlertDialog.Action>
