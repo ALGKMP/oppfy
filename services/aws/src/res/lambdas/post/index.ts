@@ -3,7 +3,9 @@ import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
 import ZodSchemas from "@acme/validators";
 
-const s3Client = new S3Client({ region: "us-east-1" });
+export const s3Client = new S3Client({
+  region: "us-east-1",
+});
 
 export const handler = async (
   event: S3Event,
@@ -21,22 +23,35 @@ export const handler = async (
   const objectKey = record.s3.object.key;
   const objectBucket = record.s3.bucket.name;
 
+  console.log("Bucket:", objectBucket);
+  console.log("Key:", objectKey);
+
+  console.log("Received event:", JSON.stringify(event));
+
   const command = new HeadObjectCommand({
     Bucket: objectBucket,
     Key: objectKey,
   });
+  console.log(command)
 
   try {
-    const { Metadata } = await s3Client.send(command);
+    const res = await s3Client.send(command).catch(err => {
+      console.error("Failed to retrieve S3 object metadata:", err);
+      throw err; // Rethrow to handle it in the outer try-catch block
+    });
+
+    const Metadata = res.Metadata;
+
+    console.log(res.Metadata);
+
     if (!Metadata) {
+      console.log("No metadata present for the object:", objectKey);
       return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "No metadata found on object",
-        }),
+        statusCode: 404,
+        body: JSON.stringify({ message: "Metadata for the object not found." })
       };
     };
-    
+
     const metadata = ZodSchemas.post.metadata.parse(Metadata);
 
     console.log(metadata)
@@ -50,10 +65,10 @@ export const handler = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        postedBy: metadata.postedBy,
-        postedFor: metadata.postedFor,
-        caption: metadata.caption, // Handle other fields similarly
-        objectKey: objectKey,
+        author: metadata.author,
+        friend: metadata.friend,
+        caption: metadata.caption,
+        key: objectKey,
       }),
     });
 

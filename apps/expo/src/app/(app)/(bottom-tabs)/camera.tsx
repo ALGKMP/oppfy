@@ -47,7 +47,7 @@ const Camera = () => {
       setImage(uri);
 
       mutation.mutate({
-        postedFor: userId,
+        friend: userId,
         caption: caption,
         contentType: type,
         contentLength: size,

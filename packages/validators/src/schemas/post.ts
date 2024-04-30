@@ -12,7 +12,7 @@ import {
 const postSchema = {
   createPresignedUrl: z
     .object({
-      postedFor: userId,
+      friend: userId,
       caption,
       contentLength,
       contentType,
@@ -29,8 +29,8 @@ const postSchema = {
     ),
 
   uploadPost: z.object({
-    postedBy: userId,
-    postedFor: userId,
+    author: userId,
+    friend: userId,
     caption,
     key,
   }),
@@ -57,8 +57,8 @@ const postSchema = {
   }),
 
   metadata: z.object({
-    postedBy: userId,
-    postedFor: userId,
+    author: userId,
+    friend: userId,
     caption,
   }),
 };
