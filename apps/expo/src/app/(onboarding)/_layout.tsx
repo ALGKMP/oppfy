@@ -40,7 +40,7 @@ const OnboardingLayout = () => {
           options={{ animation: "fade", header: () => null }}
         />
 
-        <Stack.Screen name="permissions" options={{ animation: "fade" }} />
+        <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
 
         <Stack.Screen
           name="auth/phone-number"

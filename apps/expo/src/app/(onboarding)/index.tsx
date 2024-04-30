@@ -13,7 +13,7 @@ const Start = () => {
   const onSubmit = () => {
     requiredPermissions
       ? router.push("/auth/phone-number")
-      : router.push("/permissions");
+      : router.push("/misc/permissions");
   };
 
   return (

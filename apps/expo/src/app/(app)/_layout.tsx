@@ -37,7 +37,7 @@ const AppLayout = () => {
   }
 
   if (!requiredPermissions) {
-    return <Redirect href="/(onboarding)/permissions" />;
+    return <Redirect href="/(onboarding)/misc/permissions" />;
   }
 
   return (
