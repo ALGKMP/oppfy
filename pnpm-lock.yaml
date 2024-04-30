@@ -29,6 +29,9 @@ importers:
       '@acme/utils':
         specifier: workspace:^
         version: link:../../packages/utils
+      '@acme/validators':
+        specifier: workspace:^
+        version: link:../../packages/validators
       '@expo-google-fonts/modak':
         specifier: ^0.2.3
         version: 0.2.3

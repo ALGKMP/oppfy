@@ -9,6 +9,8 @@ import { CountryCode, isValidPhoneNumber } from "libphonenumber-js";
 import { Button, Input, Text, useTheme, View, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
+import { sharedValidators } from "@acme/validators";
+
 import { Header } from "~/components/Headers";
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { useSession } from "~/contexts/SessionContext";
@@ -38,7 +40,7 @@ const PhoneNumber = () => {
     flag: "🇺🇸",
   });
 
-  const isValidPhoneNumber = phoneNumberSchema.safeParse({
+  const isValidPhoneNumber = sharedValidators.user.phoneNumber.safeParse({
     phoneNumber,
     countryCode: countryData.countryCode,
   }).success;

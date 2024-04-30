@@ -11,8 +11,8 @@ const trpcValidators = {
   post: trpcPostSchema,
 };
 
-const sharedSchemas = {
+const sharedValidators = {
   user: sharedUserSchema,
 };
 
-export { trpcValidators, sharedSchemas };
+export { trpcValidators, sharedValidators };
