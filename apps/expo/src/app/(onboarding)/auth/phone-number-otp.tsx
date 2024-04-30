@@ -1,22 +1,12 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import type { TextInput } from "react-native";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-// import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { Button, Input, Spinner, Text, View, XStack, YStack } from "tamagui";
+import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth from "@react-native-firebase/auth";
+import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
 
-import { PinCodeInput } from "~/components/Inputs";
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { useSession } from "~/contexts/SessionsContext";
-import useCooldown from "~/hooks/useCooldown";
 import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
 
