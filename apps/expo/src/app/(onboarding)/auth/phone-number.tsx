@@ -1,48 +1,123 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
+import Fuse from "fuse.js";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import { Button, Input, Text, useTheme, View, XStack, YStack } from "tamagui";
 
 import { Header } from "~/components/Headers";
 import { KeyboardSafeView } from "~/components/SafeViews";
 import type { CountryData } from "~/data/groupedCountries";
-import { groupedCountries as groupedCountriesData } from "~/data/groupedCountries";
+import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
+import type { SignUpFlowParams } from "./pin-code-otp";
+
+const countriesWithoutSections = countriesData.filter(
+  (item) => typeof item !== "string",
+) as CountryData[];
+
+const fuse = new Fuse(countriesWithoutSections, {
+  keys: ["name", "dialingCode"],
+  threshold: 0.2,
+});
 
 const PhoneNumber = () => {
-  return (
-    <KeyboardSafeView>
-      <View flex={1} padding="$4" backgroundColor="$background">
-        <YStack flex={1}>
-          <XStack gap="$2">
-            <CountryPicker />
-            <Input flex={1} placeholder="Phone number" />
-          </XStack>
-        </YStack>
+  const router = useRouter();
 
-        <Button>Welcome</Button>
-      </View>
-    </KeyboardSafeView>
-  );
-};
-
-const CountryPicker = () => {
-  const insets = useSafeAreaInsets();
-
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const [selectedCountryData, setSelectedCountryData] = useState<CountryData>({
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryData, setCountryData] = useState<CountryData>({
     name: "United States",
     countryCode: "US",
     dialingCode: "+1",
     flag: "🇺🇸",
   });
 
+  const isPhoneNumberValid = useMemo(() => {
+    return isValidPhoneNumber(phoneNumber, countryData.countryCode);
+  }, [phoneNumber, countryData.countryCode]);
+
+  const onSubmit = () =>
+    router.push({
+      params: {
+        phoneNumber: `${countryData.countryCode}${phoneNumber}`,
+      } satisfies SignUpFlowParams,
+      pathname: "/auth/pin-code-otp",
+    });
+
+  return (
+    <KeyboardSafeView>
+      <View flex={1} padding="$4" backgroundColor="$background">
+        <YStack flex={1} gap="$4">
+          <Text fontSize="$8" fontWeight="bold">
+            What&apos;s your phone number?
+          </Text>
+
+          <XStack gap="$2">
+            <CountryPicker
+              selectedCountryData={countryData}
+              setSelectedCountryData={setCountryData}
+            />
+            <Input
+              flex={1}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              placeholder="Phone number"
+              keyboardType="phone-pad"
+            />
+          </XStack>
+
+          <Text color="$gray9">
+            By continuing, you agree to our{" "}
+            <Text color="$gray11" fontWeight="bold">
+              Privacy Policy
+            </Text>{" "}
+            and{" "}
+            <Text color="$gray11" fontWeight="bold">
+              Terms of Service
+            </Text>
+            .
+          </Text>
+        </YStack>
+
+        <Button
+          onPress={onSubmit}
+          disabled={!isPhoneNumberValid}
+          disabledStyle={{ opacity: 0.5 }}
+        >
+          Welcome
+        </Button>
+      </View>
+    </KeyboardSafeView>
+  );
+};
+
+interface CountryPickerProps {
+  selectedCountryData?: CountryData;
+  setSelectedCountryData?: (countryData: CountryData) => void;
+}
+
+const CountryPicker = ({
+  selectedCountryData,
+  setSelectedCountryData,
+}: CountryPickerProps) => {
+  const insets = useSafeAreaInsets();
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
   const onCountrySelect = (countryData: CountryData) => {
-    setSelectedCountryData(countryData);
+    setSelectedCountryData && setSelectedCountryData(countryData);
     setModalVisible(false);
   };
+
+  const filteredCountries = useMemo(() => {
+    return searchTerm
+      ? fuse.search(searchTerm).map((result) => result.item)
+      : [...suggestedCountriesData, ...countriesData];
+  }, [searchTerm]);
 
   return (
     <>
@@ -72,11 +147,16 @@ const CountryPicker = () => {
           />
           <View flex={1} paddingHorizontal="$4" backgroundColor="$background">
             <YStack flex={1} gap="$4">
-              <Input placeholder="Search" />
+              <Input
+                placeholder="Search"
+                value={searchTerm}
+                onChangeText={setSearchTerm}
+              />
 
               <CountriesFlashList
+                data={filteredCountries}
                 onSelect={onCountrySelect}
-                selectedCountryCode={selectedCountryData.countryCode}
+                selectedCountryCode={selectedCountryData?.countryCode}
               />
             </YStack>
           </View>
@@ -84,12 +164,14 @@ const CountryPicker = () => {
       </Modal>
 
       <Button onPress={() => setModalVisible(true)} paddingHorizontal="$2">
-        <XStack alignItems="center" gap="$1">
-          <Text fontSize="$8">{selectedCountryData.flag}</Text>
-          <Text fontSize="$5" fontWeight="bold">
-            {selectedCountryData.dialingCode}
-          </Text>
-        </XStack>
+        {selectedCountryData && (
+          <XStack alignItems="center" gap="$1">
+            <Text fontSize="$8">{selectedCountryData.flag}</Text>
+            <Text fontSize="$5" fontWeight="bold">
+              {selectedCountryData.dialingCode}
+            </Text>
+          </XStack>
+        )}
       </Button>
     </>
   );
@@ -98,17 +180,19 @@ const CountryPicker = () => {
 interface CountriesFlastListProps {
   onSelect?: (countryData: CountryData) => void;
   selectedCountryCode?: string;
+  data: (string | CountryData)[];
 }
 
 const CountriesFlashList = ({
   onSelect,
   selectedCountryCode,
+  data,
 }: CountriesFlastListProps) => {
   const theme = useTheme();
 
   return (
     <FlashList
-      data={groupedCountriesData}
+      data={data}
       showsVerticalScrollIndicator={false}
       estimatedItemSize={43}
       renderItem={({ item, index }) => {
@@ -125,11 +209,10 @@ const CountriesFlashList = ({
           const isSelected = item.countryCode === selectedCountryCode;
 
           const isFirstInGroup =
-            index === 0 || typeof groupedCountriesData[index - 1] === "string";
+            index === 0 || typeof data[index - 1] === "string";
 
           const isLastInGroup =
-            index === groupedCountriesData.length - 1 ||
-            typeof groupedCountriesData[index + 1] === "string";
+            index === data.length - 1 || typeof data[index + 1] === "string";
 
           // Render item
           return (
