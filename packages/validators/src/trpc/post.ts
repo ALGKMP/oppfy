@@ -7,7 +7,7 @@ import {
   key,
   userId,
   postId,
-} from "../utils";
+} from "../shared";
 
 const postSchema = {
   createPresignedUrl: z

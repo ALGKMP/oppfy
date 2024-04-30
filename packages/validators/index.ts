@@ -1,7 +1,7 @@
-import authSchemas from "./src/schemas/auth";
-import postSchemas from "./src/schemas/post";
-import profileSchemas from "./src/schemas/profile";
-import userSchemas from "./src/schemas/user";
+import authSchemas from "./src/trpc/auth";
+import postSchemas from "./src/trpc/post";
+import profileSchemas from "./src/trpc/profile";
+import userSchemas from "./src/trpc/user";
 
 const ZodSchemas = {
     user: userSchemas,

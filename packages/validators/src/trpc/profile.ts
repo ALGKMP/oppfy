@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { contentLength, contentType, key, userId } from "../utils";
+import { contentLength, contentType, key, userId } from "../shared";
 
 const profileSchemas = {
   createPresignedUrl: z

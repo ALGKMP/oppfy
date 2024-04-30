@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { userId, username } from "../utils";
+import { userId, username } from "../shared";
 
 const authSchemas = {
   createUser: z.object({

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { dateOfBirth, fullName, userId, username } from "../utils";
+import { dateOfBirth, fullName, userId, username } from "../shared";
 
 const userSchemas = {
   userId,
