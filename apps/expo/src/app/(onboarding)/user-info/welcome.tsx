@@ -10,9 +10,7 @@ const Welcome = () => {
   const { isSignedIn } = useSession();
 
   const onSubmit = () => {
-    isSignedIn
-      ? router.push("/(app)/(bottom-tabs)/profile")
-      : router.push("/auth/phone-number");
+    router.push("/user-info/first-name");
   };
 
   return (
