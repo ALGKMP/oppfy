@@ -206,8 +206,8 @@ const WelcomeHeaderLeft = ({ canGoBack }: headerLeftProps) => {
           <YStack alignItems="center" gap="$3">
             <AlertDialog.Title>Exit Onboarding</AlertDialog.Title>
             <AlertDialog.Description textAlign="center">
-              Are you sure you want to quit? You'll lose any changes you've
-              made.
+              Are you sure you want to quit? You&apos;ll lose any changes
+              you&apos;ve made.
             </AlertDialog.Description>
 
             <XStack justifyContent="flex-end" gap="$3">
