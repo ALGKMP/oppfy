@@ -88,7 +88,7 @@ const Permissions = () => {
 
         <YGroup gap="$4">
           <YGroup.Item>
-            <PermissionListItem
+            <ListItem
               emoji="📸"
               title="Camera"
               subTitle="So you can take and upload photos of your friends"
@@ -110,7 +110,7 @@ const Permissions = () => {
           <Separator />
 
           <YGroup.Item>
-            <PermissionListItem
+            <ListItem
               emoji="📱"
               title="Contacts"
               subTitle="So you can find your friends and your friends can find you"
@@ -132,7 +132,7 @@ const Permissions = () => {
           <Separator />
 
           <YGroup.Item>
-            <PermissionListItem
+            <ListItem
               emoji="🔔"
               title="Notifications"
               subTitle="So you know when your friends have snapped a pic of you"
@@ -160,19 +160,14 @@ const Permissions = () => {
   );
 };
 
-interface PermissionListItemProps {
+interface ListItemProps {
   emoji: string;
   title: string;
   subTitle: string;
   checkbox: React.ReactNode;
 }
 
-const PermissionListItem = ({
-  emoji,
-  title,
-  subTitle,
-  checkbox,
-}: PermissionListItemProps) => {
+const ListItem = ({ emoji, title, subTitle, checkbox }: ListItemProps) => {
   return (
     <XStack alignItems="center" gap="$2">
       <Text fontSize="$10">{emoji}</Text>
