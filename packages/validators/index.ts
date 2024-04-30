@@ -1,3 +1,4 @@
+import * as sharedMediaSchema from "./src/shared/shared.media.schema";
 import * as sharedUserSchema from "./src/shared/shared.user.schema";
 import trpcAuthSchema from "./src/trpc/trpc.auth.schema";
 import trpcPostSchema from "./src/trpc/trpc.post.schema";
@@ -13,6 +14,7 @@ const trpcValidators = {
 
 const sharedValidators = {
   user: sharedUserSchema,
+  media: sharedMediaSchema,
 };
 
 export { trpcValidators, sharedValidators };
