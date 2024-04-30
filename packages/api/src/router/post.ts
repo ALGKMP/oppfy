@@ -2,13 +2,14 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { trpcValidators } from "@acme/validators";
+
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import ZodSchemas from "@acme/validators";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
-    .input(ZodSchemas.post.createPresignedUrl)
+    .input(trpcValidators.post.createPresignedUrl)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
       const bucket = process.env.S3_BUCKET_NAME!;
@@ -37,12 +38,17 @@ export const postRouter = createTRPCRouter({
 
   uploadPost: publicProcedure
     .meta({ openapi: { method: "POST", path: "/uploadPost" } })
-    .input(ZodSchemas.post.uploadPost)
+    .input(trpcValidators.post.uploadPost)
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        console.log('here')
-        await Services.post.createPost(input.author, input.friend, input.caption, input.key);
+        console.log("here");
+        await Services.post.createPost(
+          input.author,
+          input.friend,
+          input.caption,
+          input.key,
+        );
         return;
       } catch (error) {
         throw new TRPCError({
@@ -51,9 +57,9 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
-    
+
   editPost: protectedProcedure
-    .input(ZodSchemas.post.updatePost)
+    .input(trpcValidators.post.updatePost)
     .mutation(async ({ input }) => {
       try {
         await Services.post.editPost(input.postId, input.caption);
@@ -67,7 +73,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   deletePost: protectedProcedure
-    .input(ZodSchemas.post.deletePost)
+    .input(trpcValidators.post.deletePost)
     .mutation(async ({ input }) => {
       try {
         await Services.post.deletePost(input.postId);
@@ -81,40 +87,38 @@ export const postRouter = createTRPCRouter({
     }),
 
   batchPosts: protectedProcedure
-    .input(ZodSchemas.post.getBatchPost)
+    .input(trpcValidators.post.getBatchPost)
     .query(async ({ input }) => {
       try {
         return await Services.post.getPostsBatch(input.postIds);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get batch posts"
+          message: "Failed to get batch posts",
         });
       }
     }),
 
-    allUserPosts: protectedProcedure
-    .query(async ({ ctx }) => {
-      try {
-        await Services.post.getUserPosts(ctx.session.uid);
+  allUserPosts: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      await Services.post.getUserPosts(ctx.session.uid);
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get all profile posts",
+      });
+    }
+  }),
 
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get all profile posts"
-        });
-      }
-    }),
-
-    allOtherUserPosts: protectedProcedure
-    .input(ZodSchemas.post.getUserPosts)
+  allOtherUserPosts: protectedProcedure
+    .input(trpcValidators.post.getUserPosts)
     .query(async ({ input }) => {
       try {
         await Services.post.getUserPosts(input.userId);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get all profile posts"
+          message: "Failed to get all profile posts",
         });
       }
     }),

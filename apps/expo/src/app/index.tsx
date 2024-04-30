@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 
 const Index = () => {
   const { isSignedIn, isLoading: sessionIsLoading } = useSession();

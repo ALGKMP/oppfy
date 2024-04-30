@@ -1,13 +1,13 @@
 import { TRPCError } from "@trpc/server";
 
-import ZodSchemas from "@acme/validators";
+import { trpcValidators } from "@acme/validators";
 
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
   updateFullName: protectedProcedure
-    .input(ZodSchemas.user.updateName)
+    .input(trpcValidators.user.updateName)
     .mutation(async ({ input, ctx }) => {
       try {
         return await Services.profile.updateFullName(
@@ -22,7 +22,7 @@ export const userRouter = createTRPCRouter({
       }
     }),
   updateDateOfBirth: protectedProcedure
-    .input(ZodSchemas.user.updateDateOfBirth)
+    .input(trpcValidators.user.updateDateOfBirth)
     .mutation(async ({ input, ctx }) => {
       try {
         return await Services.profile.updateDateOfBirth(
@@ -38,7 +38,7 @@ export const userRouter = createTRPCRouter({
     }),
 
   updateUsername: protectedProcedure
-    .input(ZodSchemas.user.updateUsername)
+    .input(trpcValidators.user.updateUsername)
     .mutation(async ({ input, ctx }) => {
       try {
         return await Services.user.updateUserUsername(
@@ -54,7 +54,7 @@ export const userRouter = createTRPCRouter({
     }),
 
   userOnboardingCompleted: protectedProcedure
-    .input(ZodSchemas.user.userComplete)
+    .input(trpcValidators.user.userComplete)
     .mutation(async ({ ctx }) => {
       try {
         const hasDOB = await Services.profile.profileHasDateOfBirth(

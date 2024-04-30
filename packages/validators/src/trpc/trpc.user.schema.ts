@@ -1,8 +1,13 @@
 import { z } from "zod";
 
-import { dateOfBirth, fullName, userId, username } from "../shared";
+import {
+  dateOfBirth,
+  fullName,
+  userId,
+  username,
+} from "../shared/shared.user.schema";
 
-const userSchemas = {
+const trpcUserSchema = {
   userId,
   updateName: z.object({
     fullName,
@@ -18,4 +23,4 @@ const userSchemas = {
   }),
 };
 
-export default userSchemas;
+export default trpcUserSchema;

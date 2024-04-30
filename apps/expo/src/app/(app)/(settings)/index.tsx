@@ -15,7 +15,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 
 const ITUNES_ITEM_ID = 982107779;
 const ANDROID_PACKAGE_NAME = "host.exp.exponent";

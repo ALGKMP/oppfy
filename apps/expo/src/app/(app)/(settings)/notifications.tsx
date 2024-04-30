@@ -18,7 +18,7 @@ import {
 } from "tamagui";
 
 import { BlueSwitch } from "~/components/Switches";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 
 const Notifications = () => {
   const router = useRouter();

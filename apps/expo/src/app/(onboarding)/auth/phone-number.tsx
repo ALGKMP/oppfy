@@ -5,13 +5,13 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import Fuse from "fuse.js";
-import { isValidPhoneNumber as validatePhoneNumber } from "libphonenumber-js";
+import { CountryCode, isValidPhoneNumber } from "libphonenumber-js";
 import { Button, Input, Text, useTheme, View, XStack, YStack } from "tamagui";
 import { z } from "zod";
 
 import { Header } from "~/components/Headers";
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
 import type { SignUpFlowParams } from "./phone-number-otp";
@@ -38,10 +38,10 @@ const PhoneNumber = () => {
     flag: "🇺🇸",
   });
 
-  const isValidPhoneNumber = useMemo(
-    () => validatePhoneNumber(phoneNumber, countryData.countryCode),
-    [phoneNumber, countryData.countryCode],
-  );
+  const isValidPhoneNumber = phoneNumberSchema.safeParse({
+    phoneNumber,
+    countryCode: countryData.countryCode,
+  }).success;
 
   const onSubmit = async () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;

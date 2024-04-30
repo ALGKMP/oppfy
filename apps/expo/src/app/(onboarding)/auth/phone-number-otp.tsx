@@ -6,7 +6,7 @@ import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 import * as z from "zod";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
 

@@ -18,7 +18,7 @@ import {
 } from "tamagui";
 
 import { usePermissions } from "~/contexts/PermissionsContext";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 
 const Permissions = () => {
   const router = useRouter();

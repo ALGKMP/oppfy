@@ -1,13 +1,18 @@
-import authSchemas from "./src/trpc/auth";
-import postSchemas from "./src/trpc/post";
-import profileSchemas from "./src/trpc/profile";
-import userSchemas from "./src/trpc/user";
+import * as sharedUserSchema from "./src/shared/shared.user.schema";
+import trpcAuthSchema from "./src/trpc/trpc.auth.schema";
+import trpcPostSchema from "./src/trpc/trpc.post.schema";
+import trpcProfileSchema from "./src/trpc/trpc.profile.schema";
+import trpcUserSchema from "./src/trpc/trpc.user.schema";
 
-const ZodSchemas = {
-    user: userSchemas,
-    auth: authSchemas,
-    profile: profileSchemas,
-    post: postSchemas,
-    };
+const trpcValidators = {
+  user: trpcUserSchema,
+  auth: trpcAuthSchema,
+  profile: trpcProfileSchema,
+  post: trpcPostSchema,
+};
 
-export default ZodSchemas;
+const sharedSchemas = {
+  user: sharedUserSchema,
+};
+
+export { trpcValidators, sharedSchemas };

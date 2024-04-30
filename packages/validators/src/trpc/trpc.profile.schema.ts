@@ -1,8 +1,10 @@
 import { z } from "zod";
 
-import { contentLength, contentType, key, userId } from "../shared";
+// import { contentLength, contentType, key, userId } from "../shared";
+import { contentLength, contentType, profilePictureKey } from "../shared/shared.media.schema";
+import { userId } from "../shared/shared.user.schema";
 
-const profileSchemas = {
+const trpcProfileSchema = {
   createPresignedUrl: z
     .object({
       contentLength,
@@ -23,7 +25,7 @@ const profileSchemas = {
 
   uploadProfilePictureOpenApi: z.object({
     userId,
-    key,
+    key: profilePictureKey,
   }),
 
   userProfilePicture: z.object({
@@ -33,4 +35,4 @@ const profileSchemas = {
   batchProfilePictures: z.object({ userIds: z.array(userId) }),
 };
 
-export default profileSchemas;
+export default trpcProfileSchema;

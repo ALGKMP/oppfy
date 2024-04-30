@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Image, View } from "tamagui";
 
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
 const Camera = () => {

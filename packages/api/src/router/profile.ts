@@ -8,11 +8,11 @@ import { z } from "zod";
 
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import ZodSchemas from "@acme/validators";
+import { trpcValidators } from "@acme/validators";
 
 export const profileRouter = createTRPCRouter({
   uploadProfilePictureUrl: protectedProcedure
-    .input(ZodSchemas.profile.createPresignedUrl)
+    .input(trpcValidators.profile.createPresignedUrl)
     .mutation(async ({ ctx, input }) => {
       const bucket = process.env.S3_BUCKET_NAME!;
       const key = `profile-pictures/${ctx.session.userId}.jpg`;
@@ -35,7 +35,7 @@ export const profileRouter = createTRPCRouter({
   // OpenAPI endponit for Lambda
   uploadProfilePicture: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
-    .input(ZodSchemas.profile.uploadProfilePictureOpenApi)
+    .input(trpcValidators.profile.uploadProfilePictureOpenApi)
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
@@ -53,13 +53,13 @@ export const profileRouter = createTRPCRouter({
   }),
 
   userProfilePicture: protectedProcedure
-    .input(ZodSchemas.profile.userProfilePicture)
+    .input(trpcValidators.profile.userProfilePicture)
     .query(async ({ input }) => {
       return await Services.profile.getProfilePicture(input.userId);
     }),
 
   batchProfilePictures: protectedProcedure
-    .input(ZodSchemas.profile.batchProfilePictures)
+    .input(trpcValidators.profile.batchProfilePictures)
     .query(async ({ input }) => {
       return await Services.profile.getProfilePictureBatch(input.userIds);
     }),

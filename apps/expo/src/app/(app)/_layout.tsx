@@ -5,7 +5,7 @@ import { View } from "tamagui";
 
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 import { Stack } from "~/layouts";
 import { api } from "~/utils/api";
 

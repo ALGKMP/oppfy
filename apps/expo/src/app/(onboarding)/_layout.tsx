@@ -12,7 +12,7 @@ import { ChevronLeft, Info, X } from "@tamagui/lucide-icons";
 import { AlertDialog, Button, Text, View, XStack, YStack } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 import { Stack } from "~/layouts";
 
 const OnboardingLayout = () => {

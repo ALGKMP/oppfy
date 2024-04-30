@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { userId, username } from "../shared";
+import { userId, username } from "../shared/shared.user.schema";
 
-const authSchemas = {
+const trpcAuthSchema = {
   createUser: z.object({
     userId,
   }),
@@ -18,4 +18,4 @@ const authSchemas = {
   }),
 };
 
-export default authSchemas;
+export default trpcAuthSchema;

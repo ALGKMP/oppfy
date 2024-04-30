@@ -4,12 +4,12 @@ import {
   caption,
   contentLength,
   contentType,
-  key,
-  userId,
   postId,
-} from "../shared";
+  postKey,
+} from "../shared/shared.media.schema";
+import { userId } from "../shared/shared.user.schema";
 
-const postSchema = {
+const trpcPostSchema = {
   createPresignedUrl: z
     .object({
       friend: userId,
@@ -32,7 +32,7 @@ const postSchema = {
     author: userId,
     friend: userId,
     caption,
-    key,
+    key: postKey,
   }),
 
   updatePost: z.object({
@@ -45,7 +45,7 @@ const postSchema = {
   }),
 
   getPost: z.object({
-    key,
+    key: postKey,
   }),
 
   getUserPosts: z.object({
@@ -63,5 +63,4 @@ const postSchema = {
   }),
 };
 
-
-export default postSchema;
+export default trpcPostSchema;

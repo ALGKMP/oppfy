@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@acme/utils": "workspace:^",
+    "@acme/validators": "workspace:^",
     "@expo-google-fonts/modak": "^0.2.3",
     "@expo/metro-config": "^0.17.7",
     "@expo/react-native-action-sheet": "^4.0.1",
@@ -60,7 +61,6 @@
     "expo-store-review": "^6.8.3",
     "expo-web-browser": "^12.8.2",
     "fuse.js": "^7.0.0",
-    "libphonenumber-js": "^1.10.61",
     "nativewind": "^4.0.36",
     "react": "18.2.0",
     "react-dom": "18.2.0",

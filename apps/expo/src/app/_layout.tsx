@@ -10,7 +10,7 @@ import { TamaguiProvider } from "tamagui";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
-import SessionProvider from "../contexts/SessionsContext";
+import SessionProvider from "../contexts/SessionContext";
 
 const RootLayout = () => {
   const [fontsLoaded] = useFonts({

@@ -5,10 +5,10 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import ZodSchemas from "@acme/validators";
-import {z} from "zod";
+import { z } from "zod";
 
 import { s3 } from "@acme/db";
+import { trpcValidators } from "@acme/validators";
 
 const AWSS3Service = {
   putObjectPresignedUrl: async (
@@ -36,10 +36,10 @@ const AWSS3Service = {
     objectKey: string,
     contentLength: number,
     contentType: string,
-    metadata: z.infer<typeof ZodSchemas.post.metadata>,
+    metadata: z.infer<typeof trpcValidators.post.metadata>,
   ): Promise<string> => {
     try {
-      const validatedMetadata = ZodSchemas.post.metadata.parse(metadata);
+      const validatedMetadata = trpcValidators.post.metadata.parse(metadata);
       const command = new PutObjectCommand({
         Bucket: bucket,
         Key: objectKey,

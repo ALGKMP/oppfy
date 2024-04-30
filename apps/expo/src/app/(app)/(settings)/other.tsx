@@ -14,7 +14,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 
 const Other = () => {
   const router = useRouter();

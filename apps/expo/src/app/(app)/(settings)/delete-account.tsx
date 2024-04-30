@@ -13,7 +13,7 @@ import { Button, Text, View, YStack } from "tamagui";
 import * as z from "zod";
 
 import { PhoneNumberInput } from "~/components/Inputs";
-import { useSession } from "~/contexts/SessionsContext";
+import { useSession } from "~/contexts/SessionContext";
 
 const DeleteAccount = () => {
   const insets = useSafeAreaInsets();
