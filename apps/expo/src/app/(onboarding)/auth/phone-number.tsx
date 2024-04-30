@@ -5,11 +5,12 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import Fuse from "fuse.js";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { isValidPhoneNumber as validatePhoneNumber } from "libphonenumber-js";
 import { Button, Input, Text, useTheme, View, XStack, YStack } from "tamagui";
 
 import { Header } from "~/components/Headers";
 import { KeyboardSafeView } from "~/components/SafeViews";
+import { useSession } from "~/contexts/SessionsContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
 import type { SignUpFlowParams } from "./pin-code-otp";
@@ -26,6 +27,8 @@ const fuse = new Fuse(countriesWithoutSections, {
 const PhoneNumber = () => {
   const router = useRouter();
 
+  const { signInWithPhoneNumber } = useSession();
+
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryData, setCountryData] = useState<CountryData>({
     name: "United States",
@@ -34,17 +37,23 @@ const PhoneNumber = () => {
     flag: "🇺🇸",
   });
 
-  const isPhoneNumberValid = useMemo(() => {
-    return isValidPhoneNumber(phoneNumber, countryData.countryCode);
-  }, [phoneNumber, countryData.countryCode]);
+  const isValidPhoneNumber = useMemo(
+    () => validatePhoneNumber(phoneNumber, countryData.countryCode),
+    [phoneNumber, countryData.countryCode],
+  );
 
-  const onSubmit = () =>
+  const onSubmit = async () => {
+    const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
+
+    await signInWithPhoneNumber(e164PhoneNumber);
+
     router.push({
       params: {
-        phoneNumber: `${countryData.countryCode}${phoneNumber}`,
+        phoneNumber: e164PhoneNumber,
       } satisfies SignUpFlowParams,
       pathname: "/auth/pin-code-otp",
     });
+  };
 
   return (
     <KeyboardSafeView>
@@ -83,7 +92,7 @@ const PhoneNumber = () => {
 
         <Button
           onPress={onSubmit}
-          disabled={!isPhoneNumberValid}
+          disabled={!isValidPhoneNumber}
           disabledStyle={{ opacity: 0.5 }}
         >
           Welcome
