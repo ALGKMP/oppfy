@@ -1,15 +1,19 @@
 import { TRPCError } from "@trpc/server";
 
-import Services from "../services";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
 import ZodSchemas from "@acme/validators";
 
+import Services from "../services";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
+
 export const userRouter = createTRPCRouter({
-  updateName: protectedProcedure
+  updateFullName: protectedProcedure
     .input(ZodSchemas.user.updateName)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await Services.profile.updateName(ctx.session.uid, input.name);
+        return await Services.profile.updateFullName(
+          ctx.session.uid,
+          input.fullName,
+        );
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -49,7 +53,7 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  userComplete: protectedProcedure
+  userOnboardingCompleted: protectedProcedure
     .input(ZodSchemas.user.userComplete)
     .mutation(async ({ ctx }) => {
       try {

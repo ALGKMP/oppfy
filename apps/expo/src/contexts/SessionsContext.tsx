@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
@@ -7,41 +6,45 @@ import { api } from "~/utils/api";
 
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
+
   isLoading: boolean;
   isSignedIn: boolean;
+
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
+
   signInWithPhoneNumber: (
     phoneNumber: string,
   ) => Promise<FirebaseAuthTypes.ConfirmationResult | null>;
   verifyPhoneNumberOTP: (
     otp: string,
-  ) => Promise<FirebaseAuthTypes.UserCredential | null>; // Updated signature
+  ) => Promise<FirebaseAuthTypes.UserCredential | null>;
 }
 
 interface SessionProviderProps {
   children: React.ReactNode;
 }
+type Status = "loading" | "success" | "error";
 
 const AuthContext = createContext<SessionContextType | undefined>(undefined);
 
 const SessionProvider = ({ children }: SessionProviderProps) => {
-  const router = useRouter();
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+
+  const [confirmation, setConfirmation] =
+    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
+
+  const [status, setStatus] = useState<Status>("loading");
 
   const deleteUser = api.auth.deleteUser.useMutation();
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
-  const [confirmationResult, setConfirmationResult] =
-    useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
-
+  const isLoading = status === "loading";
   const isSignedIn = !!user;
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authUser) => {
-      console.log("Auth state changed:", authUser);
       setUser(authUser);
-      setIsLoading(false);
+      setStatus("success");
     });
 
     return unsubscribe;
@@ -49,17 +52,17 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const signInWithPhoneNumber = async (phoneNumber: string) => {
     const result = await auth().signInWithPhoneNumber(phoneNumber);
-    setConfirmationResult(result);
+    setConfirmation(result);
 
     return result;
   };
 
   const verifyPhoneNumberOTP = async (otp: string) => {
-    if (!confirmationResult) {
+    if (!confirmation) {
       throw new Error("No confirmation result available for OTP verification.");
     }
 
-    return await confirmationResult.confirm(otp);
+    return await confirmation.confirm(otp);
   };
 
   const signOut = async () => {

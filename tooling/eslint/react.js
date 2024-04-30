@@ -11,6 +11,7 @@ const config = {
       "error",
       { props: "never", children: "never" },
     ],
+    "jsx-a11y/no-autofocus": "off",
   },
   globals: {
     React: "writable",

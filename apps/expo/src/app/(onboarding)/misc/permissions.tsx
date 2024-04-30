@@ -17,16 +17,25 @@ import {
   YStack,
 } from "tamagui";
 
+import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
-import { usePermissions } from "../../contexts/PermissionsContext";
 
 const Permissions = () => {
   const router = useRouter();
+
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
 
+  const requiredPermissions = permissions.camera && permissions.contacts;
+
   const openSettings = async () => {
     await Linking.openSettings();
+  };
+
+  const onPress = () => {
+    isSignedIn
+      ? router.push("/(app)/(bottom-tabs)/profile")
+      : router.push("/auth/phone-number");
   };
 
   const requestCameraPermission = async () => {
@@ -65,24 +74,21 @@ const Permissions = () => {
     await checkPermissions();
   };
 
-  const onPress = () => {
-    isSignedIn
-      ? router.push("/(app)/(bottom-tabs)/profile")
-      : router.push("/auth/phone-number");
-  };
-
-  const requiredPermissions = permissions.camera && permissions.contacts;
-
   return (
     <View flex={1} padding="$4" backgroundColor="$background">
       <YStack flex={1} gap="$8">
-        <Text alignSelf="center" color="$gray9" fontWeight="bold">
+        <Text
+          alignSelf="center"
+          textAlign="center"
+          color="$gray9"
+          fontWeight="bold"
+        >
           We&apos;ll just need a few permissions to get started.
         </Text>
 
         <YGroup gap="$4">
           <YGroup.Item>
-            <PermissionListItem
+            <ListItem
               emoji="📸"
               title="Camera"
               subTitle="So you can take and upload photos of your friends"
@@ -104,7 +110,7 @@ const Permissions = () => {
           <Separator />
 
           <YGroup.Item>
-            <PermissionListItem
+            <ListItem
               emoji="📱"
               title="Contacts"
               subTitle="So you can find your friends and your friends can find you"
@@ -126,7 +132,7 @@ const Permissions = () => {
           <Separator />
 
           <YGroup.Item>
-            <PermissionListItem
+            <ListItem
               emoji="🔔"
               title="Notifications"
               subTitle="So you know when your friends have snapped a pic of you"
@@ -154,19 +160,14 @@ const Permissions = () => {
   );
 };
 
-interface PermissionListItemProps {
+interface ListItemProps {
   emoji: string;
   title: string;
   subTitle: string;
   checkbox: React.ReactNode;
 }
 
-const PermissionListItem = ({
-  emoji,
-  title,
-  subTitle,
-  checkbox,
-}: PermissionListItemProps) => {
+const ListItem = ({ emoji, title, subTitle, checkbox }: ListItemProps) => {
   return (
     <XStack alignItems="center" gap="$2">
       <Text fontSize="$10">{emoji}</Text>

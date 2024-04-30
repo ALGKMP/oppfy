@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { dateOfBirth, name, userId, username } from "../utils";
+import { dateOfBirth, fullName, userId, username } from "../utils";
 
 const userSchemas = {
   userId,
   updateName: z.object({
-    name,
+    fullName,
   }),
   updateUsername: z.object({
     username,
