@@ -17,7 +17,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { BlueSwitch } from "~/components/Switch";
+import { BlueSwitch } from "~/components/Switches";
 import { useSession } from "~/contexts/SessionsContext";
 
 const Notifications = () => {
