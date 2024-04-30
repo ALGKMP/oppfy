@@ -17,8 +17,8 @@ import {
   YStack,
 } from "tamagui";
 
+import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionsContext";
-import { usePermissions } from "../../contexts/PermissionsContext";
 
 const Permissions = () => {
   const router = useRouter();
@@ -77,7 +77,12 @@ const Permissions = () => {
   return (
     <View flex={1} padding="$4" backgroundColor="$background">
       <YStack flex={1} gap="$8">
-        <Text alignSelf="center" color="$gray9" fontWeight="bold">
+        <Text
+          alignSelf="center"
+          textAlign="center"
+          color="$gray9"
+          fontWeight="bold"
+        >
           We&apos;ll just need a few permissions to get started.
         </Text>
 
