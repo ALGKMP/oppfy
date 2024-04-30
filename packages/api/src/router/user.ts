@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server";
 
+import ZodSchemas from "@acme/validators";
+
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import ZodSchemas from "@acme/validators";
 
 export const userRouter = createTRPCRouter({
   updateName: protectedProcedure
@@ -49,7 +50,7 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  userComplete: protectedProcedure
+  userOnboardingCompleted: protectedProcedure
     .input(ZodSchemas.user.userComplete)
     .mutation(async ({ ctx }) => {
       try {
