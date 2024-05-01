@@ -96,9 +96,17 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  usersPosts: protectedProcedure.query(async ({ ctx }) => {
+  usersPosts: protectedProcedure
+  .query(async ({ ctx }) => {
     try {
-      return await Services.post.getUserPosts(ctx.session.uid);
+      const result = await Services.post.getUserPosts(ctx.session.uid);
+      if (!result || result.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND", // More specific error code
+          message: "No posts found for user",
+        });
+      }
+      return result; // Make sure to return the result
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

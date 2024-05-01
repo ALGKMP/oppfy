@@ -59,7 +59,7 @@ export const profile = mySqlTable("Profile", {
   profilePhoto: bigint("profilePhoto", {
     mode: "number",
     unsigned: true,
-  }).references(() => profilePicture.id),
+  }).references(() => profilePicture.id, { onDelete: 'cascade' }),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -100,7 +100,7 @@ export const post = mySqlTable("Post", {
     .references(() => user.id)
     .notNull(),
   recipient: varchar("recipient", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   caption: text("body").notNull(),
   key: varchar("url", { length: 255 }).notNull(),
@@ -133,7 +133,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
 export const postStats = mySqlTable("PostStats", {
   id: serial("id").primaryKey(),
   post: bigint("post", { mode: "number", unsigned: true })
-    .references(() => post.id)
+    .references(() => post.id, { onDelete: 'cascade' })
     .notNull(),
   likes: int("likes").default(0).notNull(),
   comments: int("comments").default(0).notNull(),
@@ -154,10 +154,10 @@ export const postStatsRelations = relations(postStats, ({ one }) => ({
 export const like = mySqlTable("Like", {
   id: serial("id").primaryKey(),
   post: bigint("post", { mode: "number", unsigned: true })
-    .references(() => post.id)
+    .references(() => post.id, { onDelete: 'cascade' })
     .notNull(),
   user: varchar("user", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
@@ -178,10 +178,10 @@ export const likeRelations = relations(like, ({ one }) => ({
 export const comment = mySqlTable("Comment", {
   id: serial("id").primaryKey(),
   user: varchar("user", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   post: bigint("post", { mode: "number", unsigned: true })
-    .references(() => post.id)
+    .references(() => post.id, { onDelete: 'cascade' })
     .notNull(),
   body: text("body").notNull(),
   createdAt: timestamp("createdAt")
@@ -204,10 +204,10 @@ export const commentRelations = relations(comment, ({ one }) => ({
 export const follower = mySqlTable("Follower", {
   id: serial("id").primaryKey(),
   followerId: varchar("followerId", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   followedId: varchar("followedId", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
@@ -230,10 +230,10 @@ export const followerRelations = relations(follower, ({ one }) => ({
 export const friendRequest = mySqlTable("FriendRequest", {
   id: serial("id").primaryKey(),
   requesterId: varchar("requesterId", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   requestedId: varchar("requestedId", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   status: mysqlEnum('status', ['pending', 'accepted', 'declined']) // Possible values: "pending", "accepted", "declined"
     .notNull(),
@@ -259,10 +259,10 @@ export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
 export const friend = mySqlTable("Friend", {
   id: serial("id").primaryKey(),
   userId1: varchar("userId1", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   userId2: varchar("userId2", { length: 255 })
-    .references(() => user.id)
+    .references(() => user.id, { onDelete: 'cascade' })
     .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
