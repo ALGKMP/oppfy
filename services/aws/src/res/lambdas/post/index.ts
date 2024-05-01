@@ -1,7 +1,7 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
-import ZodSchemas from "@acme/validators";
+import { trpcValidators } from "@acme/validators";
 
 export const s3Client = new S3Client({
   region: "us-east-1",
@@ -52,13 +52,13 @@ export const handler = async (
       };
     };
 
-    const metadata = ZodSchemas.post.metadata.parse(Metadata);
+    const metadata = trpcValidators.post.metadata.parse(Metadata);
 
     // Temporarily hardcoding the server endpoint
     const serverEndpoint =
       "https://5bdc-74-12-66-138.ngrok-free.app/api/uploadPost";
 
-    const body = ZodSchemas.post.uploadPost.parse({
+    const body = trpcValidators.post.uploadPost.parse({
         author: metadata.author,
         friend: metadata.friend,
         caption: metadata.caption,
