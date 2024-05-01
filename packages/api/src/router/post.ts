@@ -13,8 +13,7 @@ export const postRouter = createTRPCRouter({
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
       const bucket = process.env.S3_BUCKET_NAME!;
-      // const objectKey = `posts/${Date.now()}-postedBy:${ctx.session.uid}`;
-      const objectKey = "posts/test2";
+      const objectKey = `posts/${Date.now()}-${ctx.session.uid}`;
       const metadata = {
         author: ctx.session.uid,
         friend: input.friend,
@@ -63,7 +62,6 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       try {
         await Services.post.editPost(input.postId, input.caption);
-        return { success: true, message: "Post updated successfully" };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -77,7 +75,6 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       try {
         await Services.post.deletePost(input.postId);
-        return { success: true, message: "Post deleted successfully" };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -99,9 +96,9 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  allUserPosts: protectedProcedure.query(async ({ ctx }) => {
+  usersPosts: protectedProcedure.query(async ({ ctx }) => {
     try {
-      await Services.post.getUserPosts(ctx.session.uid);
+      return await Services.post.getUserPosts(ctx.session.uid);
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -110,7 +107,7 @@ export const postRouter = createTRPCRouter({
     }
   }),
 
-  allOtherUserPosts: protectedProcedure
+  otherUsersPosts: protectedProcedure
     .input(trpcValidators.post.getUserPosts)
     .query(async ({ input }) => {
       try {

@@ -2,8 +2,8 @@ import type { CountryCode } from "libphonenumber-js";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { z } from "zod";
 
-export const userId = z.string().uuid();
-export const profileId = z.string().uuid();
+export const userId = z.string();
+export const profileId = z.string();
 export const fullName = z
   .string()
   .min(3)

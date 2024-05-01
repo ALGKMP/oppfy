@@ -10,6 +10,8 @@ const Camera = () => {
   const [image, setImage] = useState("");
   const mutation = api.post.createPresignedUrlForPost.useMutation();
 
+  const posts = api.post.usersPosts.useQuery();
+  const deletePost = api.post.deletePost.useMutation();
   const session = useSession();
 
   const caption = "test caption";

@@ -58,8 +58,9 @@ const PostService = {
         try {
           const url = await Services.aws.objectPresignedUrl(
             bucket,
-            `posts/${post.key}.jpg`,
+            post.key
           );
+          console.log(url);
           results[post.id] = url;  // Store URL with postId as key
         } catch (err) {
           console.error(

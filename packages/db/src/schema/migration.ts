@@ -103,7 +103,7 @@ export const post = mySqlTable("Post", {
     .references(() => user.id)
     .notNull(),
   caption: text("body").notNull(),
-  key: varchar("url", { length: 255 }),
+  key: varchar("url", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
