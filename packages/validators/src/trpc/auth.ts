@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { userId, username } from "../shared/shared.user.schema";
+import { userId, username } from "../shared/user";
 
 const trpcAuthSchema = {
   createUser: z.object({

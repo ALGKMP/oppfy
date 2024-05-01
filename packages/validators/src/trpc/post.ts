@@ -6,8 +6,8 @@ import {
   contentType,
   postId,
   postKey,
-} from "../shared/shared.media.schema";
-import { userId } from "../shared/shared.user.schema";
+} from "../shared/media";
+import { userId } from "../shared/user";
 
 const trpcPostSchema = {
   createPresignedUrl: z

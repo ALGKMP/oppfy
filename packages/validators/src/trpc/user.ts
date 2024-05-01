@@ -5,7 +5,7 @@ import {
   fullName,
   userId,
   username,
-} from "../shared/shared.user.schema";
+} from "../shared/user";
 
 const trpcUserSchema = {
   userId,

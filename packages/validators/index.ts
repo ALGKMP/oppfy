@@ -1,15 +1,16 @@
-import * as sharedMediaSchema from "./src/shared/shared.media.schema";
-import * as sharedUserSchema from "./src/shared/shared.user.schema";
-import authSchemas from "./src/trpc/trpc.auth.schema";
-import postSchemas from "./src/trpc/trpc.post.schema";
-import profileSchemas from "./src/trpc/trpc.profile.schema";
-import userSchemas from "./src/trpc/trpc.user.schema";
+import * as sharedMediaSchema from "./src/shared/media";
+import * as sharedUserSchema from "./src/shared/user";
+
+import trpcAuthSchema from "./src/trpc/auth";
+import trpcPostSchema from "./src/trpc/post";
+import trpcProfileSchema from "./src/trpc/profile";
+import trpcUserSchema from "./src/trpc/user";
 
 const trpcValidators = {
-  user: userSchemas,
-  auth: authSchemas,
-  profile: profileSchemas,
-  post: postSchemas,
+  user: trpcUserSchema,
+  auth: trpcAuthSchema,
+  profile: trpcProfileSchema,
+  post: trpcPostSchema,
 };
 
 const sharedValidators = {

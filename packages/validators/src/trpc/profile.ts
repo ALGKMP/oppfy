@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 // import { contentLength, contentType, key, userId } from "../shared";
-import { contentLength, contentType, profilePictureKey } from "../shared/shared.media.schema";
-import { userId } from "../shared/shared.user.schema";
+import { contentLength, contentType, profilePictureKey } from "../shared/media";
+import { userId } from "../shared/user";
 
 const trpcProfileSchema = {
   createPresignedUrl: z
