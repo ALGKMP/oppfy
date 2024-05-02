@@ -1,5 +1,5 @@
 import Services from ".";
-import Repositories from "../repositories";
+import repositories from "../repositories";
 import UserService from "./user";
 
 const ProfileService = {
@@ -9,7 +9,7 @@ const ProfileService = {
         throw new Error("User already has a profile.");
       }
 
-      const profileId = await Repositories.profile.createProfile(); // Updated repository access
+      const profileId = await repositories.profile.createProfile(); // Updated repository access
       await UserService.addProfile(userId, profileId);
       return profileId;
     } catch (error) {
@@ -38,7 +38,7 @@ const ProfileService = {
 
   getProfileById: async (profileId: number) => {
     try {
-      const profile = await Repositories.profile.getProfile(profileId); // Updated repository access
+      const profile = await repositories.profile.getProfile(profileId); // Updated repository access
       if (!profile) {
         throw new Error("Profile does not exist.");
       }
@@ -56,7 +56,7 @@ const ProfileService = {
   updateFullName: async (userId: string, name: string) => {
     try {
       const profile = await ProfileService.getUserProfile(userId);
-      await Repositories.profile.updateProfileName(profile.id, name); // Updated repository access
+      await repositories.profile.updateProfileName(profile.id, name); // Updated repository access
     } catch (error) {
       console.error(
         "Error updating profile name:",
@@ -70,7 +70,7 @@ const ProfileService = {
   updateDateOfBirth: async (userId: string, dateOfBirth: Date) => {
     try {
       const profile = await ProfileService.getUserProfile(userId);
-      await Repositories.profile.updateProfileDateOfBirth(
+      await repositories.profile.updateProfileDateOfBirth(
         profile.id,
         dateOfBirth,
       ); // Updated repository access
@@ -121,7 +121,7 @@ const ProfileService = {
         return await ProfileService.createAndLinkProfilePicture(profile.id);
       }
 
-      const profilePhoto = await Repositories.profilePhoto.getProfilePhoto(
+      const profilePhoto = await repositories.profilePhoto.getProfilePhoto(
         profile.profilePhoto,
       );
 
@@ -129,7 +129,7 @@ const ProfileService = {
         throw new Error("Profile photo does not exist.");
       }
 
-      return await Repositories.profilePhoto.updateProfilePhotoKey(
+      return await repositories.profilePhoto.updateProfilePhotoKey(
         profilePhoto.id,
         key,
       );
@@ -145,14 +145,14 @@ const ProfileService = {
 
   createAndLinkProfilePicture: async (profileId: number) => {
     try {
-      const user = await Repositories.user.getUserByProfileId(profileId);
+      const user = await repositories.user.getUserByProfileId(profileId);
       if (!user) {
         throw new Error("User not found");
       }
 
       const key = `profile-pictures/${user.id}.jpg`;
 
-      return await Repositories.profilePhoto.createProfilePhoto(key);
+      return await repositories.profilePhoto.createProfilePhoto(key);
     } catch (error) {
       console.error(
         "Error creating and linking profile photo:",
@@ -165,18 +165,6 @@ const ProfileService = {
 
   // for current user
   getUserProfilePicture: async (userId: string): Promise<string> => {
-    const bucket = process.env.S3_BUCKET_NAME!;
-    const key = `profile-pictures/${userId}.jpg`;
-    try {
-      return await Services.aws.objectPresignedUrl(bucket, key);
-    } catch (err) {
-      console.error(`Error retrieving object: ${key}`, err);
-      throw new Error(`Failed to retrieve object from S3 for user ${userId}`);
-    }
-  },
-
-  // for other users
-  getProfilePicture: async (userId: string): Promise<string> => {
     const bucket = process.env.S3_BUCKET_NAME!;
     const key = `profile-pictures/${userId}.jpg`;
     try {
@@ -221,7 +209,7 @@ const ProfileService = {
       }
 
       // Throws if fails
-      await Repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
+      await repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
 
       // Update profile to remove profile photo
       const bucket = process.env.S3_BUCKET_NAME!;

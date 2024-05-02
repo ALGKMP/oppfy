@@ -1,10 +1,10 @@
-import { and, eq, or } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const followersRepository = {
+const followerRepository = {
     addFollower: async (userId: string, followerId: string) => {
-        const result = await db.insert(schema.follower).values({ userId, followerId });
+        const result = await db.insert(schema.follower).values({ followedId: userId, followerId });
         return result[0].insertId; // Assuming auto-increment ID
     },
     
@@ -28,7 +28,7 @@ const followersRepository = {
         )
         return result.map((follower) => follower.followerId);
     },
-    getFollowerCount: async (userId: string) => {
+    countFollowers: async (userId: string) => {
         const result = await db
         .select()
         .from(schema.follower)
@@ -37,7 +37,7 @@ const followersRepository = {
         )
         return result.length;
     },
-    getFollowingCount: async (userId: string) => {
+    countFollowing: async (userId: string) => {
         const result = await db
         .select()
         .from(schema.follower)
@@ -47,3 +47,5 @@ const followersRepository = {
         return result.length;
     }
 };
+
+export default followerRepository;

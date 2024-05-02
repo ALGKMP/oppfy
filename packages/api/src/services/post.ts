@@ -1,6 +1,6 @@
 // src/service/PostService.ts
 import Services from ".";
-import Repositories from "../repositories";
+import repositories from "../repositories";
 
 const PostService = {
   createPost: async (
@@ -10,7 +10,7 @@ const PostService = {
     objectKey: string,
   ) => {
     try {
-      const postId = await Repositories.post.createPost(
+      const postId = await repositories.post.createPost(
         postedBy,
         postedFor,
         caption,
@@ -19,7 +19,7 @@ const PostService = {
       if (!postId) {
         throw new Error("Failed to create post.");
       }
-      return await Repositories.postStats.createPostStats(postId);
+      return await repositories.postStats.createPostStats(postId);
     } catch (error) {
       console.error("Failed to create post:", error);
       throw new Error("Error creating post.");
@@ -28,7 +28,7 @@ const PostService = {
 
   editPost: async (postId: number, newCaption: string) => {
     try {
-      return await Repositories.post.updatePost(postId, newCaption);
+      return await repositories.post.updatePost(postId, newCaption);
     } catch (error) {
       console.error("Failed to edit post:", error);
       throw new Error("Error editing post.");
@@ -37,7 +37,7 @@ const PostService = {
 
   getPost: async (postId: number) => {
     try {
-      const post = await Repositories.post.getPost(postId);
+      const post = await repositories.post.getPost(postId);
       if (!post) {
         throw new Error(`Post with key ${postId} not found.`);
       }
@@ -51,7 +51,7 @@ const PostService = {
   getUserPosts : async (userId: string) => {
     const bucket = process.env.S3_BUCKET_NAME!;
     try {
-      const posts = await Repositories.post.allUserPosts(userId);
+      const posts = await repositories.post.allUserPosts(userId);
   
       if (posts.length === 0) {
         console.log("No posts");
@@ -94,7 +94,7 @@ const PostService = {
   
   deletePost: async (postId: number) => {
     try {
-      await Repositories.post.deletePost(postId);
+      await repositories.post.deletePost(postId);
       return;
     } catch (error) {
       console.error("Failed to delete post:", error);
@@ -110,7 +110,7 @@ const PostService = {
       const results: Record<number, string | null> = {};
       const urlPromises = postIds.map(async (postId) => {
         try {
-          const post = await Repositories.post.getPost(postId);
+          const post = await repositories.post.getPost(postId);
           if (!post) {
             throw new Error(`Post with key ${postId} not found`);
           }

@@ -100,7 +100,7 @@ export const profileRouter = createTRPCRouter({
   userProfilePicture: protectedProcedure
     .input(trpcValidators.profile.userProfilePicture)
     .query(async ({ input }) => {
-      return await Services.profile.getProfilePicture(input.userId);
+      return await Services.profile.getUserProfilePicture(input.userId);
     }),
 
   batchProfilePictures: protectedProcedure
