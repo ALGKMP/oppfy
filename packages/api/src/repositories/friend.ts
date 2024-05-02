@@ -39,6 +39,19 @@ const friendsRepository = {
       friend.userId1 === userId ? friend.userId2 : friend.userId1,
     );
   },
+
+  friendsCount: async (userId: string) => {
+    const result = await db
+      .select()
+      .from(schema.friend)
+      .where(
+        or(
+          eq(schema.friend.userId1, userId),
+          eq(schema.friend.userId2, userId),
+        ),
+      )
+    return result.length;
+  }
 };
 
 export default friendsRepository;
