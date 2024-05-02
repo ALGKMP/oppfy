@@ -9,11 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 import { sharedValidators } from "@acme/validators";
-
-  interface ItemProps {
-    id: number;
-    url: string;
-  }
+import { z } from "zod";
 
 const Camera = () => {
   const [image, setImage] = useState("");
@@ -63,6 +59,7 @@ const Camera = () => {
   let posts;
   try {
     posts = sharedValidators.media.userPosts.parse(postData);
+    console.log(posts)
   } catch (zodError) {
     console.error(zodError);
     return <Text>Error parsing posts data.</Text>;
@@ -116,19 +113,23 @@ const Camera = () => {
     }
   };
 
-  const RenderItem = ({ id, url }: ItemProps) => (
+  const RenderItem = ({ id, author, friend, caption, url }: z.infer<typeof sharedValidators.media.post>) => (
     <View style={{
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
+      flexDirection: "column",  // Changed from 'row' to 'column'
+      alignItems: "center",    // Align items centrally for a neater look
+      justifyContent: "flex-start",
       padding: 10,
     }}>
       <Image source={{ uri: url }} style={{ width: 100, height: 100 }} />
+      <Text className="bg-white" style={{ marginTop: 10 }}>Author: {author}</Text> 
+      <Text>Friend: {friend}</Text>                          
+      <Text style={{ marginBottom: 10 }}>Caption: {caption}</Text> 
       <Button onPress={() => deletePost.mutate({ postId: id })}>
         Delete
       </Button>
     </View>
   );
+  
 
   return (
     <View flex={1} backgroundColor="black" paddingHorizontal="$4" justifyContent="center">

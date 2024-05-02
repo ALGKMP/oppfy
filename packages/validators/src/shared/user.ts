@@ -21,3 +21,20 @@ export const phoneNumber = z
   .refine((data) =>
     isValidPhoneNumber(data.phoneNumber, data.countryCode as CountryCode),
   );
+
+// export const profileData = z.object({
+//     userId: z.string(),
+//     username: z.string(),
+//     bio: z.string().optional(),
+//     profilePhotoUrl: z.string().optional(),
+//     posts: z.array(z.object({
+//       postId: z.number(),
+//       caption: z.string(),
+//       imageUrl: z.string(),
+//       createdAt: z.string(),
+//       likes: z.number(),
+//       comments: z.number(),
+//     })),
+//     followersCount: z.number(),
+//     followingCount: z.number(),
+//   });

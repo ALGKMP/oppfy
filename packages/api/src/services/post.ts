@@ -52,34 +52,46 @@ const PostService = {
     const bucket = process.env.S3_BUCKET_NAME!;
     try {
       const posts = await Repositories.post.allUserPosts(userId);
-
+  
       if (posts.length === 0) {
-        console.log("no posts")
+        console.log("No posts");
         return [];
       }
   
       // Create an array of promises that resolve to {id, url} objects
-      const urlPromises = posts.map(post =>
-        Services.aws.objectPresignedUrl(bucket, post.key)
-          .then(url => ({ id: post.id, url })) // Successfully retrieved URL
-          .catch(err => {
-            console.error(`Error retrieving post: posts/${post.id}.jpg`, err);
-            return { id: post.id, url: null }; // Return null for URL on error
-          })
-      );
+      const results = await Promise.all(posts.map(async (post) => {
+        try {
+          const authorUsername = await Services.user.getUsername(post.author);
+          const friendUsername = await Services.user.getUsername(post.recipient);
+          const url = await Services.aws.objectPresignedUrl(bucket, post.key);
+          return {
+            id: post.id,
+            authorUsername: authorUsername,
+            authorId: post.author,
+            friendUsername: friendUsername,
+            friendId: post.recipient,
+            url,
+            caption: post.caption,
+          };
+        } catch (err) {
+          console.error(`Error retrieving post: posts/${post.id}.jpg`, err);
+          return {
+            id: post.id,
+            author: post.author,
+            friend: post.recipient,
+            url: null,
+            caption: post.caption,
+          }; // Return null for URL on error
+        }
+      }));
   
-      // Resolve all promises and return the array of {id, url} objects
-      const results = await Promise.all(urlPromises);
-      console.log(results)
       return results;
-  
     } catch (error) {
-      console.error("Failed to get batch posts:", error);
+      console.error("Failed to get posts:", error);
       throw new Error("Error retrieving batch posts.");
     }
   },
   
-
   deletePost: async (postId: number) => {
     try {
       await Repositories.post.deletePost(postId);
@@ -90,7 +102,9 @@ const PostService = {
     }
   },
 
-  getPostsBatch: async (postIds: number[]): Promise<Record<number, string | null>> => {
+  getPostsBatch: async (
+    postIds: number[],
+  ): Promise<Record<number, string | null>> => {
     const bucket = process.env.S3_BUCKET_NAME!;
     try {
       const results: Record<number, string | null> = {};
@@ -104,12 +118,9 @@ const PostService = {
             bucket,
             `post/${post.key}.jpg`,
           );
-          results[postId] = url;  // Store URL with postId as key
+          results[postId] = url; // Store URL with postId as key
         } catch (err) {
-          console.error(
-            `Error retrieving post: post/${postId}.jpg`,
-            err,
-          );
+          console.error(`Error retrieving post: post/${postId}.jpg`, err);
           return `Failed to retrieve object from S3 for post ${postId}`;
         }
       });

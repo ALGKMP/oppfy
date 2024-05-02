@@ -32,6 +32,23 @@ const UserService = {
     }
   },
 
+  getUsername : async (userId:string) => {
+    try {
+      const user = await Repositories.user.getUser(userId);
+      if (!user) {
+        throw new Error(`Unable to retrieve user with id ${userId}`);
+      }
+      return user.username;
+    } catch (error) {
+      console.error(
+        `Error retrieving user ${userId}:`,
+        error instanceof Error ? error.message : error,
+      );
+      throw new Error("Failed to retrieve user.");
+    }
+  
+  },
+
   deleteUser: async (userId: string) => {
     try {
       await Repositories.user.deleteUser(userId); // Updated repository access

@@ -6,9 +6,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { trpcValidators } from "@acme/validators";
+
 import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { trpcValidators } from "@acme/validators";
 
 export const profileRouter = createTRPCRouter({
   uploadProfilePictureUrl: protectedProcedure
@@ -47,6 +48,50 @@ export const profileRouter = createTRPCRouter({
         });
       }
     }),
+
+  // getUserProfile: protectedProcedure
+  //   .input(z.string()) // Input is the user ID
+  //   .query(async ({ input: userId, ctx }) => {
+  //     const user = await ctx.services.user.getUser(userId);
+  //     if (!user) {
+  //       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+  //     }
+
+  //     const profile = await ctx.services.profile.getProfileById(user.profile);
+  //     const posts = await ctx.services.post.getUserPosts(userId);
+
+  //     const followersCount =
+  //       await ctx.repositories.follower.countFollowers(userId);
+  //     const followingCount =
+  //       await ctx.repositories.follower.countFollowing(userId);
+
+  //     const postsData = await Promise.all(
+  //       posts.map(async (post) => {
+  //         const likes = await ctx.repositories.like.countLikes(post.id);
+  //         const comments = await ctx.repositories.comment.countComments(
+  //           post.id,
+  //         );
+  //         return {
+  //           postId: post.id,
+  //           caption: post.caption,
+  //           imageUrl,
+  //           createdAt: post.createdAt.toISOString(),
+  //           likes,
+  //           comments,
+  //         };
+  //       }),
+  //     );
+
+  //     return {
+  //       userId: user.id,
+  //       username: user.username,
+  //       bio: profile.bio,
+  //       profilePhotoUrl: profile.profilePhotoUrl,
+  //       posts: postsData,
+  //       followersCount,
+  //       followingCount,
+  //     };
+  //   }),
 
   profilePicture: protectedProcedure.query(async ({ ctx }) => {
     return await Services.profile.getUserProfilePicture(ctx.session.uid);
