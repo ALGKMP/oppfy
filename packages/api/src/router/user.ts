@@ -21,6 +21,7 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
+
   updateDateOfBirth: protectedProcedure
     .input(trpcValidators.user.updateDateOfBirth)
     .mutation(async ({ input, ctx }) => {
@@ -52,5 +53,4 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
-
 });

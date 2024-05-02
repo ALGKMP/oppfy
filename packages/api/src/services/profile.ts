@@ -92,7 +92,7 @@ const ProfileService = {
 
       // New Profile Photo
       if (!profile.profilePhoto) {
-        return await ProfileService.createAndLinkProfilePicture(profile.id);
+        return await ProfileService.createAndLinkProfilePicture(profile.id, userId);
       }
 
       const profilePhoto = await repositories.profilePhoto.getProfilePhoto(
@@ -117,16 +117,9 @@ const ProfileService = {
     }
   },
 
-  createAndLinkProfilePicture: async (profileId: number) => {
+  createAndLinkProfilePicture: async (profileId: number, userId = "profile-pictures/default.jpg") => {
     try {
-      const user = await repositories.user.getUserByProfileId(profileId);
-      if (!user) {
-        throw new Error("User not found");
-      }
-
-      const key = `profile-pictures/${user.id}.jpg`;
-
-      return await repositories.profilePhoto.createProfilePhoto(key);
+      return await repositories.profilePhoto.createProfilePhoto(userId);
     } catch (error) {
       console.error(
         "Error creating and linking profile photo:",
@@ -139,19 +132,48 @@ const ProfileService = {
 
   // for current user
   getUserProfilePicture: async (userId: string): Promise<string> => {
-    const bucket = process.env.S3_BUCKET_NAME!;
-    let key = `profile-pictures/${userId}.jpg`;
-
-    const profile = await Services.profile.getUserProfile(userId);
-    if (!profile.profilePhoto) {
-      key = `profile-pictures/default.jpg`
-    }
-
+      const bucket = process.env.S3_BUCKET_NAME!;
+      const key = `profile-pictures/${userId}.jpg`;
     try {
       return await Services.aws.objectPresignedUrl(bucket, key);
     } catch (err) {
       console.error(`Error retrieving object: ${key}`, err);
       throw new Error(`Failed to retrieve object from S3 for user ${userId}`);
+    }
+  },
+
+  getProfileDetails: async (userId: string) => {
+    try {
+      const user = await UserService.getUser(userId);
+      if (!user) {
+        throw new Error("User not found.");
+      }
+
+      const profile = await ProfileService.getUserProfile(userId);
+      const profilePhoto = await ProfileService.getUserProfilePicture(userId);
+      const posts = await Services.post.getUserPosts(userId);
+      const { followerCount, followingCount, friendCount } = await Services.userNetwork.getUserStats(
+        userId,
+      );
+
+      return {
+        userId: user.id,
+        username: user.username,
+        name: profile.name,
+        bio: profile.bio,
+        profilePhoto,
+        posts,
+        followerCount,
+        followingCount,
+        friendCount,
+      };
+    } catch (error) {
+      console.error(
+        "Error getting profile details:",
+        userId,
+        error instanceof Error ? error.message : error,
+      );
+      throw new Error("Failed to retrieve profile details.");
     }
   },
 

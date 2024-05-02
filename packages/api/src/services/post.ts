@@ -60,16 +60,16 @@ const PostService = {
   
       // Create an array of promises that resolve to {id, url} objects
       const results = await Promise.all(posts.map(async (post) => {
-        const authorsUsername = await Services.user.getUsername(post.author);
-        const friendsUsername = await Services.user.getUsername(post.recipient);
         try {
+          const authorsUsername = await Services.user.getUsername(post.author);
+          const friendsUsername = await Services.user.getUsername(post.recipient);
           const url = await Services.aws.objectPresignedUrl(bucket, post.key);
           return {
             id: post.id,
             authorsUsername,
-            authorId: post.author,
+            authorsId: post.author,
             friendsUsername,
-            friendId: post.recipient,
+            friendsId: post.recipient,
             url,
             caption: post.caption,
           };
@@ -77,10 +77,10 @@ const PostService = {
           console.error(`Error retrieving post: posts/${post.id}.jpg`, err);
           return {
             id: post.id,
-            authorsUsername,
-            authorId: post.author,
-            friendsUsername,
-            friendId: post.recipient,
+            authorsUsername: null,
+            authorsId: post.author,
+            friendsUsername: null,
+            friendsId: post.recipient,
             url: null,
             caption: post.caption,
           }; // Return null for URL on error

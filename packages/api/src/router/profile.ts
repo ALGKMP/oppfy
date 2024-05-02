@@ -51,47 +51,17 @@ export const profileRouter = createTRPCRouter({
 
   getProfileDetails: protectedProcedure
     .query(async ({ ctx }) => {
-      const userId = ctx.session.uid;
-      const user = await ctx.services.user.getUser(userId);
-      if (!user) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      try{
+        return await Services.profile.getProfileDetails(ctx.session.uid);
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to retrieve profile details.",
+        });
       }
-
-      const profile = await ctx.services.profile.getProfileById(user.profile);
-      const profilePhoto = await ctx.services.profile.getUserProfilePicture(userId);
-      const posts = await ctx.services.post.getUserPosts(userId);
-      const {followerCount, followingCount, friendCount} = await ctx.services.userNetwork.getUserStats(userId);
-
-      return {
-        userId: user.id,
-        username: user.username,
-        name: profile.name,
-        bio: profile.bio,
-        profilePhoto,
-        posts,
-        followerCount,
-        followingCount,
-        friendCount
-      };
     }),
 
-  profilePicture: protectedProcedure.query(async ({ ctx }) => {
-    return await Services.profile.getUserProfilePicture(ctx.session.uid);
-  }),
-
-  userProfilePicture: protectedProcedure
-    .input(trpcValidators.profile.userProfilePicture)
-    .query(async ({ input }) => {
-      return await Services.profile.getUserProfilePicture(input.userId);
-    }),
-
-  batchProfilePictures: protectedProcedure
-    .input(trpcValidators.profile.batchProfilePictures)
-    .query(async ({ input }) => {
-      return await Services.profile.getProfilePictureBatch(input.userIds);
-    }),
-
-  deleteProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
+  removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await Services.profile.deleteProfilePicture(ctx.session.uid);
     } catch (error) {

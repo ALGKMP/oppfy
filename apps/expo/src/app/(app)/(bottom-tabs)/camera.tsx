@@ -113,7 +113,7 @@ const Camera = () => {
     }
   };
 
-  const RenderItem = ({ id, author, friend, caption, url }: z.infer<typeof sharedValidators.media.post>) => (
+  const RenderItem = ({ id, authorsId, authorsUsername, friendsId, friendsUsername, caption, url }: z.infer<typeof sharedValidators.media.post>) => (
     <View style={{
       flexDirection: "column",  // Changed from 'row' to 'column'
       alignItems: "center",    // Align items centrally for a neater look
@@ -121,8 +121,8 @@ const Camera = () => {
       padding: 10,
     }}>
       <Image source={{ uri: url }} style={{ width: 100, height: 100 }} />
-      <Text className="bg-white" style={{ marginTop: 10 }}>Author: {author}</Text> 
-      <Text>Friend: {friend}</Text>                          
+      <Text className="bg-white" style={{ marginTop: 10 }}>Author: {authorsUsername}</Text> 
+      <Text>Friend: {friendsUsername}</Text>                          
       <Text style={{ marginBottom: 10 }}>Caption: {caption}</Text> 
       <Button onPress={() => deletePost.mutate({ postId: id })}>
         Delete

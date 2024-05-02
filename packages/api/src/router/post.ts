@@ -112,7 +112,7 @@ export const postRouter = createTRPCRouter({
     .input(trpcValidators.post.getUserPosts)
     .query(async ({ input }) => {
       try {
-        await Services.post.getUserPosts(input.userId);
+        return await Services.post.getUserPosts(input.userId);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

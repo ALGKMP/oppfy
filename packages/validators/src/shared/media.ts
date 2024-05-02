@@ -3,13 +3,13 @@ import { userId } from "./user";
 
 export const profilePictureKey = z.string().regex(/^(profile-pictures\/).*/);
 export const postKey = z.string().regex(/^(posts\/).*/);
-// TODO: Inherrit types from trpc route instead of defining it here
+// TODO: Inherrit type from trpc route instead of defining it here
 export const post = z.object({
   id: z.number(),
-  authorUsername: z.string(),
-  authorId: userId,
-  friendUsername: z.string(),
-  friendId: userId,
+  authorsUsername: z.string(),
+  authorsId: userId,
+  friendsUsername: z.string(),
+  friendsId: userId,
   caption: z.string(),
   url: z.string(),
 });
