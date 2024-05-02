@@ -11,6 +11,8 @@ const ProfileService = {
 
       const profileId = await repositories.profile.createProfile(); // Updated repository access
       await UserService.addProfile(userId, profileId);
+      await Services.profile.createAndLinkProfilePicture(profileId);
+
       return profileId;
     } catch (error) {
       console.error(
@@ -84,7 +86,7 @@ const ProfileService = {
     }
   },
 
-  uploadProfilePicture: async (userId: string, key: string) => {
+  uploadProfilePicture: async (userId: string) => {
     try {
       const profile = await ProfileService.getUserProfile(userId);
 
@@ -101,9 +103,9 @@ const ProfileService = {
         throw new Error("Profile photo does not exist.");
       }
 
-      return await repositories.profilePhoto.updateProfilePhotoKey(
+      return await repositories.profilePhoto.updateProfilePhoto(
         profilePhoto.id,
-        key,
+        userId
       );
     } catch (error) {
       console.error(
@@ -138,7 +140,13 @@ const ProfileService = {
   // for current user
   getUserProfilePicture: async (userId: string): Promise<string> => {
     const bucket = process.env.S3_BUCKET_NAME!;
-    const key = `profile-pictures/${userId}.jpg`;
+    let key = `profile-pictures/${userId}.jpg`;
+
+    const profile = await Services.profile.getUserProfile(userId);
+    if (!profile.profilePhoto) {
+      key = `profile-pictures/default.jpg`
+    }
+
     try {
       return await Services.aws.objectPresignedUrl(bucket, key);
     } catch (err) {

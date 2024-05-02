@@ -11,7 +11,7 @@ const profilePhotoRepository = {
     return result[0].insertId;
   },
 
-  updateProfilePhotoKey: async (profilePhotoId: number, newKey: string) => {
+  updateProfilePhoto: async (profilePhotoId: number, newKey: string) => {
     await db
       .update(schema.profilePicture)
       .set({ key: newKey })

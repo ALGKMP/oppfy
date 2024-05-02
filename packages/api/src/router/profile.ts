@@ -40,7 +40,7 @@ export const profileRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        await Services.profile.uploadProfilePicture(input.userId, input.key);
+        await Services.profile.uploadProfilePicture(input.userId);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
