@@ -1,8 +1,13 @@
 import PFP from "@assets/pfp.png";
 import { Button, Image, Separator, Text, View, XStack, YStack } from "tamagui";
 import { router } from 'expo-router';
+import { api } from "~/utils/api";
 
 const Profile = () => {
+
+  const profile = api.profile.getProfileDetails.useQuery();
+  console.log(profile.data);
+
   const user = {
     name: "Katerina Tess",
     bio: "It’s me Katerina I like to post on this app",

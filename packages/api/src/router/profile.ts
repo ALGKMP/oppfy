@@ -49,49 +49,31 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  // getUserProfile: protectedProcedure
-  //   .input(z.string()) // Input is the user ID
-  //   .query(async ({ input: userId, ctx }) => {
-  //     const user = await ctx.services.user.getUser(userId);
-  //     if (!user) {
-  //       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-  //     }
+  getProfileDetails: protectedProcedure
+    .query(async ({ ctx }) => {
+      const userId = ctx.session.uid;
+      const user = await ctx.services.user.getUser(userId);
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      }
 
-  //     const profile = await ctx.services.profile.getProfileById(user.profile);
-  //     const posts = await ctx.services.post.getUserPosts(userId);
+      const profile = await ctx.services.profile.getProfileById(user.profile);
+      const profilePhoto = await ctx.services.profile.getUserProfilePicture(userId);
+      const posts = await ctx.services.post.getUserPosts(userId);
+      const {followerCount, followingCount, friendCount} = await ctx.services.userNetwork.getUserStats(userId);
 
-  //     const followersCount =
-  //       await ctx.repositories.follower.countFollowers(userId);
-  //     const followingCount =
-  //       await ctx.repositories.follower.countFollowing(userId);
-
-  //     const postsData = await Promise.all(
-  //       posts.map(async (post) => {
-  //         const likes = await ctx.repositories.like.countLikes(post.id);
-  //         const comments = await ctx.repositories.comment.countComments(
-  //           post.id,
-  //         );
-  //         return {
-  //           postId: post.id,
-  //           caption: post.caption,
-  //           imageUrl,
-  //           createdAt: post.createdAt.toISOString(),
-  //           likes,
-  //           comments,
-  //         };
-  //       }),
-  //     );
-
-  //     return {
-  //       userId: user.id,
-  //       username: user.username,
-  //       bio: profile.bio,
-  //       profilePhotoUrl: profile.profilePhotoUrl,
-  //       posts: postsData,
-  //       followersCount,
-  //       followingCount,
-  //     };
-  //   }),
+      return {
+        userId: user.id,
+        username: user.username,
+        name: profile.name,
+        bio: profile.bio,
+        profilePhoto,
+        posts,
+        followerCount,
+        followingCount,
+        friendCount
+      };
+    }),
 
   profilePicture: protectedProcedure.query(async ({ ctx }) => {
     return await Services.profile.getUserProfilePicture(ctx.session.uid);

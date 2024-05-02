@@ -37,6 +37,7 @@ const followerRepository = {
         )
         return result.length;
     },
+    
     countFollowing: async (userId: string) => {
         const result = await db
         .select()

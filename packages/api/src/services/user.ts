@@ -1,3 +1,4 @@
+import Services from ".";
 import repositories from "../repositories";
 
 const UserService = {
@@ -34,9 +35,9 @@ const UserService = {
 
   getUsername : async (userId:string) => {
     try {
-      const user = await repositories.user.getUser(userId);
-      if (!user) {
-        throw new Error(`Unable to retrieve user with id ${userId}`);
+      const user = await Services.user.getUser(userId);
+      if (!user.username) {
+        throw new Error(`User ${userId} does not have a username.`);
       }
       return user.username;
     } catch (error) {

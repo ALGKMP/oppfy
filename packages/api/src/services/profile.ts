@@ -22,20 +22,6 @@ const ProfileService = {
     }
   },
 
-  getUserProfile: async (userId: string) => {
-    try {
-      const user = await UserService.getUser(userId);
-      return await ProfileService.getProfileById(user.profile);
-    } catch (error) {
-      console.error(
-        "Error retrieving profile by user ID:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to retrieve profile by user ID.");
-    }
-  },
-
   getProfileById: async (profileId: number) => {
     try {
       const profile = await repositories.profile.getProfile(profileId); // Updated repository access
@@ -50,6 +36,20 @@ const ProfileService = {
         error instanceof Error ? error.message : error,
       );
       throw new Error("Failed to retrieve profile.");
+    }
+  },
+
+  getUserProfile: async (userId: string) => {
+    try {
+      const user = await UserService.getUser(userId);
+      return await ProfileService.getProfileById(user.profile);
+    } catch (error) {
+      console.error(
+        "Error retrieving profile by user ID:",
+        userId,
+        error instanceof Error ? error.message : error,
+      );
+      throw new Error("Failed to retrieve profile by user ID.");
     }
   },
 
