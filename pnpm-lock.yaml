@@ -44,6 +44,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.3.4(react-hook-form@7.51.3)
+      '@react-native-community/datetimepicker':
+        specifier: 7.6.1
+        version: 7.6.1
       '@react-native-firebase/app':
         specifier: ^18.9.0
         version: 18.9.0(expo@50.0.17)(react-native@0.73.6)(react@18.2.0)
@@ -4791,6 +4794,12 @@ packages:
       - encoding
       - supports-color
       - utf-8-validate
+    dev: false
+
+  /@react-native-community/datetimepicker@7.6.1:
+    resolution: {integrity: sha512-g66Q2Kd9Uw3eRL7kkrTsGhi+eXxNoPDRFYH6z78sZQuYjPkUQgJDDMUYgBmaBsQx/fKMtemPrCj1ulGmyi0OSw==}
+    dependencies:
+      invariant: 2.2.4
     dev: false
 
   /@react-native-firebase/app@18.9.0(expo@50.0.17)(react-native@0.73.6)(react@18.2.0):
