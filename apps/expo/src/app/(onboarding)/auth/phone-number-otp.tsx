@@ -33,7 +33,7 @@ const PhoneNumberOTP = () => {
 
   const createUser = api.auth.createUser.useMutation();
   const userOnboardingCompleted =
-    api.user.userOnboardingCompleted.useMutation();
+    api.auth.userOnboardingCompleted.useMutation();
 
   const isValidPhoneNumberOTP =
     sharedValidators.user.phoneNumberOTPValidation.safeParse(phoneNumberOTP);

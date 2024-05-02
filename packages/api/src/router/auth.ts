@@ -53,6 +53,20 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
+    
+  userOnboardingCompleted: protectedProcedure
+    .input(trpcValidators.user.userComplete)
+    .mutation(async ({ ctx }) => {
+      try {
+        return await Services.user.userOnboardingCompleted(ctx.session.uid);
+      } catch (error) {
+        console.log(error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to check user completion.",
+        });
+      }
+    }),
 });
 
 export type AuthRouter = typeof authRouter;

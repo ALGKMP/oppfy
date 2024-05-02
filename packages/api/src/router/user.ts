@@ -53,21 +53,4 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  userOnboardingCompleted: protectedProcedure
-    .input(trpcValidators.user.userComplete)
-    .mutation(async ({ ctx }) => {
-      try {
-        const hasDOB = await Services.profile.profileHasDateOfBirth(
-          ctx.session.uid,
-        );
-        const hasName = await Services.profile.profileHasName(ctx.session.uid);
-        return hasDOB && hasName;
-      } catch (error) {
-        console.log(error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to check user completion.",
-        });
-      }
-    }),
 });

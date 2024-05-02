@@ -5,6 +5,7 @@ import { api } from "~/utils/api";
 
 const Profile = () => {
 
+  // testing route
   const profile = api.profile.getProfileDetails.useQuery();
   console.log(profile.data);
 

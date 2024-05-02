@@ -111,6 +111,7 @@ const UserService = {
       throw new Error("Failed to add profile to user.");
     }
   },
+
   getUserFromProfileId: async (profileId: number) => {
     try {
       return await repositories.user.getUserByProfileId(profileId);
@@ -122,6 +123,22 @@ const UserService = {
       throw new Error("Failed to get user from profile id.");
     }
   },
+
+  userOnboardingCompleted : async (userId: string) => {
+    try {
+      const profile = await Services.profile.getUserProfile(userId);
+      const user = await Services.user.getUser(userId);
+      return !!profile.dateOfBirth && !!profile.name && !!user.username;
+    } catch (error) {
+      console.error(
+        "Error checking if profile has name:",
+        userId,
+        error instanceof Error ? error.message : error,
+      );
+      throw new Error("Failed to check if profile has name.");
+    }
+  },
+
 };
 
 export default UserService;

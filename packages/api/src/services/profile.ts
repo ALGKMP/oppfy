@@ -84,34 +84,6 @@ const ProfileService = {
     }
   },
 
-  profileHasName: async (userId: string) => {
-    try {
-      const profile = await ProfileService.getUserProfile(userId);
-      return !!profile.name;
-    } catch (error) {
-      console.error(
-        "Error checking if profile has name:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to check if profile has name.");
-    }
-  },
-
-  profileHasDateOfBirth: async (userId: string) => {
-    try {
-      const profile = await ProfileService.getUserProfile(userId);
-      return !!profile.dateOfBirth;
-    } catch (error) {
-      console.error(
-        "Error checking if profile has date of birth:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to check if profile has date of birth.");
-    }
-  },
-
   uploadProfilePicture: async (userId: string, key: string) => {
     try {
       const profile = await ProfileService.getUserProfile(userId);
@@ -207,14 +179,16 @@ const ProfileService = {
       if (!profile.profilePhoto) {
         throw new Error("Profile does not have a profile photo.");
       }
-
-      // Throws if fails
-      await repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
-
-      // Update profile to remove profile photo
+      
       const bucket = process.env.S3_BUCKET_NAME!;
       const key = `profile-pictures/${userId}.jpg`;
-      return await Services.aws.deleteObject(bucket, key);
+      const deleted = await Services.aws.deleteObject(bucket, key);
+
+      if (!deleted.DeleteMarker) {
+        throw new Error("Failed to delete profile photo from S3.");
+      }
+
+      return await repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
     } catch (error) {
       console.error(
         "Error deleting profile photo:",
