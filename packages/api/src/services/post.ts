@@ -52,6 +52,11 @@ const PostService = {
     const bucket = process.env.S3_BUCKET_NAME!;
     try {
       const posts = await Repositories.post.allUserPosts(userId);
+
+      if (posts.length === 0) {
+        console.log("no posts")
+        return [];
+      }
   
       // Create an array of promises that resolve to {id, url} objects
       const urlPromises = posts.map(post =>
