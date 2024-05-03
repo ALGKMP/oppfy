@@ -1,10 +1,10 @@
+import { router } from "expo-router";
 import PFP from "@assets/pfp.png";
 import { Button, Image, Separator, Text, View, XStack, YStack } from "tamagui";
-import { router } from 'expo-router';
-import { api } from "~/utils/api";
+
+import { ScreenBaseView } from "~/components/Views";
 
 const Profile = () => {
-
   // testing route
   // const profile = api.profile.getProfileDetails.useQuery();
   // console.log(profile.data);
@@ -24,14 +24,14 @@ const Profile = () => {
   ];
 
   const onPress = () => {
-    router.push('/(app)/(bottom-tabs)/(top-tabs)/editProfile');
-  }
+    router.push("/(app)/(bottom-tabs)/(top-tabs)/");
+  };
 
   return (
-    <View flex={1} backgroundColor="black" paddingHorizontal="$4">
-      <YStack space="$3">
+    <ScreenBaseView>
+      <YStack gap="$2">
         <XStack justifyContent="space-between" alignItems="center">
-          <YStack space>
+          <YStack gap="$2">
             <Text fontWeight="700" fontSize={20}>
               {user.name}
             </Text>
@@ -39,7 +39,7 @@ const Profile = () => {
               {user.bio}
             </Text>
 
-            <XStack space>
+            <XStack gap="$2">
               <Button onPress={onPress}>Edit Profile</Button>
               <Button>Share Profile</Button>
             </XStack>
@@ -48,7 +48,7 @@ const Profile = () => {
           <Image source={PFP} width={70} height={70} borderRadius={35} />
         </XStack>
 
-        <XStack justifyContent="space-between" space="$4">
+        <XStack justifyContent="space-between" gap="$2">
           {stats.map((stat, index) => (
             <XStack key={index} alignItems="center" space={4}>
               <Text>{stat.name}</Text>
@@ -59,9 +59,7 @@ const Profile = () => {
           ))}
         </XStack>
       </YStack>
-
-      <Separator borderColor="white" marginTop="$5" marginBottom="$2" />
-    </View>
+    </ScreenBaseView>
   );
 };
 
