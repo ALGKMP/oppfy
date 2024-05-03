@@ -2,7 +2,7 @@ import React from "react";
 import Constants from "expo-constants";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
 
@@ -13,6 +13,17 @@ import type { AppRouter } from "@acme/api";
  */
 export const api = createTRPCReact<AppRouter>();
 export { type RouterInputs, type RouterOutputs } from "@acme/api";
+
+/**
+ * Check if an error is a `TRPCClientError`
+ * @param cause - error to check
+ * @example if (isTRPCClientError(cause)) { ... }
+ */
+export function isTRPCClientError(
+  cause: unknown,
+): cause is TRPCClientError<AppRouter> {
+  return cause instanceof TRPCClientError;
+}
 
 /**
  * Extend this function when going to production by
