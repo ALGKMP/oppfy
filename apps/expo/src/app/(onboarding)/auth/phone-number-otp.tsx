@@ -32,7 +32,7 @@ const PhoneNumberOTP = () => {
   const [error, setError] = useState<Error | null>(null);
 
   const createUser = api.auth.createUser.useMutation();
-  const userOnboardingCompleted =
+  const userOnboardingCompletedMutation =
     api.auth.userOnboardingCompleted.useMutation();
 
   const isValidPhoneNumberOTP =
@@ -46,11 +46,12 @@ const PhoneNumberOTP = () => {
   };
 
   const handleExistingUser = async (userId: string) => {
-    await userOnboardingCompleted.mutateAsync({
-      userId,
-    });
+    const userOnboardingCompleted =
+      await userOnboardingCompletedMutation.mutateAsync({
+        userId,
+      });
 
-    userOnboardingCompleted.data
+    userOnboardingCompleted
       ? router.replace("/(app)/(bottom-tabs)/profile")
       : router.replace("/user-info/welcome");
   };
