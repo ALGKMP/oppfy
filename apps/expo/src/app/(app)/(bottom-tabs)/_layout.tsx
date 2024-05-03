@@ -1,11 +1,7 @@
-import { useEffect } from "react";
-import { Dimensions, Pressable, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Redirect, useRouter } from "expo-router";
-import auth from "@react-native-firebase/auth";
-import { BottomTabProps } from "@react-navigation/bottom-tabs";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { getTokens } from "@tamagui/core";
+import { Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs/src/types";
 import {
   Camera,
   Home,
@@ -14,47 +10,36 @@ import {
   Search,
   User2,
 } from "@tamagui/lucide-icons";
-import { Button, Text, View, XStack } from "tamagui";
+import { Text, useTheme, View } from "tamagui";
 
-import { Header } from "~/components/Headers";
-import { LoadingIndicatorOverlay } from "~/components/Overlays";
+import { Header as BaseHeader } from "~/components/Headers";
 import { TabBar } from "~/components/TabBars";
 import { BottomTabs } from "~/layouts";
-import { api } from "~/utils/api";
-
-const { width, height } = Dimensions.get("window");
 
 const BottomTabsLayout = () => {
+  const theme = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   return (
-    <View
+    <SafeAreaView
       style={{
-        backgroundColor: "black",
-        // needed to handle hiding the tab bar on keyboard open
-        width,
-        height,
-        // Paddings to handle safe area
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
+        flex: 1,
+        backgroundColor: theme.background.val,
       }}
     >
       <BottomTabs
         tabBar={(props) => <TabBar {...props} />}
         screenOptions={{
-          header: ({ navigation, options }) => (
-            <Header navigation={navigation} options={options} />
-          ),
+          header: (props) => <Header {...props} />,
         }}
       >
         <BottomTabs.Screen
           name="(top-tabs)"
           options={{
             title: "Home",
-            tabBarIcon: ({ focused }) => <Home strokeWidth={focused ? 3 : 2} />,
+            tabBarIcon: ({ focused }) => (
+              <Home strokeWidth={focused ? 2 : 1.5} />
+            ),
           }}
         />
 
@@ -111,8 +96,47 @@ const BottomTabsLayout = () => {
           }}
         />
       </BottomTabs>
-    </View>
+    </SafeAreaView>
   );
 };
+
+type HeaderProps = BottomTabHeaderProps;
+
+const Header = ({ options }: HeaderProps) => (
+  <BaseHeader
+    HeaderLeft={
+      options.headerLeft
+        ? options.headerLeft({
+            labelVisible: options.tabBarShowLabel,
+            pressColor: options.headerPressColor,
+            pressOpacity: options.headerPressOpacity,
+            tintColor: options.headerTintColor,
+          })
+        : undefined
+    }
+    HeaderTitle={
+      typeof options.headerTitle === "function" ? (
+        options.headerTitle({
+          children: options.title ?? "",
+          tintColor: options.headerTintColor,
+          allowFontScaling: options.tabBarAllowFontScaling,
+        })
+      ) : options.title ? (
+        <Text fontSize="$5" fontWeight="bold">
+          {options.title}
+        </Text>
+      ) : null
+    }
+    HeaderRight={
+      options.headerRight
+        ? options.headerRight({
+            pressColor: options.headerPressColor,
+            pressOpacity: options.headerPressOpacity,
+            tintColor: options.headerTintColor,
+          })
+        : undefined
+    }
+  />
+);
 
 export default BottomTabsLayout;
