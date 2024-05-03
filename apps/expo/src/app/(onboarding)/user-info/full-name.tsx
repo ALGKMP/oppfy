@@ -49,7 +49,7 @@ const FullName = () => {
           disabled={!isValidFullName}
           disabledStyle={{ opacity: 0.5 }}
         >
-          Welcome
+          Continue
         </Button>
       </View>
     </KeyboardSafeView>
