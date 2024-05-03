@@ -497,7 +497,7 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@acme/utils':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../utils
       libphonenumber-js:
         specifier: ^1.10.61

@@ -61,6 +61,9 @@ const trpcPostSchema = {
     friend: userId,
     caption,
   }),
+  profilePictureMetadata: z.object({
+    user: z.string(),
+  }),
 };
 
 export default trpcPostSchema;

@@ -31,7 +31,7 @@ const AWSS3Service = {
     }
   },
 
-  putObjectPresignedUrlWithMetadata: async (
+  putObjectPresignedUrlWithMetadataPost: async (
     bucket: string,
     objectKey: string,
     contentLength: number,
@@ -39,11 +39,32 @@ const AWSS3Service = {
     metadata: z.infer<typeof trpcValidators.post.metadata>,
   ): Promise<string> => {
     try {
-      const validatedMetadata = trpcValidators.post.metadata.parse(metadata);
       const command = new PutObjectCommand({
         Bucket: bucket,
         Key: objectKey,
-        Metadata: validatedMetadata,
+        Metadata: metadata,
+        ContentType: contentType,
+        ContentLength: contentLength,
+      });
+      return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
+    } catch (error) {
+      console.error("Error creating presigned URL with metadata:", error);
+      throw new Error("Failed to create presigned URL with metadata");
+    }
+  },
+
+  putObjectPresignedUrlWithMetadataProfilePicture: async (
+    bucket: string,
+    objectKey: string,
+    contentLength: number,
+    contentType: string,
+    metadata: z.infer<typeof trpcValidators.post.profilePictureMetadata>,
+  ): Promise<string> => {
+    try {
+      const command = new PutObjectCommand({
+        Bucket: bucket,
+        Key: objectKey,
+        Metadata: metadata,
         ContentType: contentType,
         ContentLength: contentLength,
       });
