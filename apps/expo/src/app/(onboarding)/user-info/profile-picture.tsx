@@ -32,15 +32,13 @@ const ProfilePicture = () => {
     });
 
     if (!result.canceled && result.assets[0]) {
-      const { uri } = result.assets[0];
-
-      const manipResult = await ImageManipulator.manipulateAsync(
+      const { uri } = await ImageManipulator.manipulateAsync(
         result.assets[0].uri,
-        [], // No operations needed, just format conversion
-        { format: ImageManipulator.SaveFormat.PNG },
+        undefined, // No operations needed, just format conversion
+        { format: ImageManipulator.SaveFormat.JPEG },
       );
 
-      setProfilePicture(result.assets[0]?.uri ?? null);
+      setProfilePicture(uri);
     }
   };
 
