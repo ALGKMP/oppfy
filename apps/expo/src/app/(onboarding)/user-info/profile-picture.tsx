@@ -4,12 +4,12 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
-import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
 import { useMutation } from "@tanstack/react-query";
-import { api } from "~/utils/api";
+import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { ScreenBaseView } from "~/components/Views";
+import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
   const router = useRouter();
@@ -18,11 +18,12 @@ const ProfilePicture = () => {
   const [size, setSize] = useState<number | null>(null);
   const [type, setType] = useState<string | null>(null);
 
-  const pfpMutation = api.profile.createPresignedUrlForProfilePicture.useMutation();
+  const pfpMutation =
+    api.profile.createPresignedUrlForProfilePicture.useMutation();
 
   const putMutation = useMutation(async (url: string) => {
     if (!profilePicture) {
-      console.log("blyat wtf")
+      console.log("blyat wtf");
       return;
     }
 
@@ -40,14 +41,12 @@ const ProfilePicture = () => {
     console.log("status: ", response.status);
   });
 
-  // TODO: Implement photo upload to S3
-
   const onSubmit = async () => {
     if (!size || !type) {
       console.log("Error: Size or type of the image is missing");
       return;
     }
-  
+
     console.log("Submitting mutation with size:", size, "and type:", type);
     try {
       await pfpMutation.mutateAsync(
@@ -62,19 +61,19 @@ const ProfilePicture = () => {
               },
               onError: (error) => {
                 console.error("Error uploading image:", error);
-              }
+              },
             });
           },
           onError: (error) => {
             console.error("Error during presigned URL mutation:", error);
-          }
-        }
+          },
+        },
       );
     } catch (error) {
       console.error("Unexpected error during mutation:", error);
     }
   };
-  
+
   const onSkip = () => {
     router.replace("/(app)/(bottom-tabs)/profile");
   };
@@ -99,7 +98,7 @@ const ProfilePicture = () => {
         setSize(await (await fetch(uri)).blob().then((blob) => blob.size));
         setProfilePicture(uri);
       } else {
-        console.log("ffs missing size and type")
+        console.log("ffs missing size and type");
       }
     }
   };
