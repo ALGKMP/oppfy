@@ -119,6 +119,9 @@ importers:
       expo-haptics:
         specifier: ^12.8.1
         version: 12.8.1(expo@50.0.17)
+      expo-image-manipulator:
+        specifier: ~11.8.0
+        version: 11.8.0(expo@50.0.17)
       expo-image-picker:
         specifier: ^14.7.1
         version: 14.7.1(expo@50.0.17)
@@ -496,9 +499,6 @@ importers:
       '@acme/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@acme/utils':
-        specifier: workspace:^
-        version: link:../utils
       libphonenumber-js:
         specifier: ^1.10.61
         version: 1.10.61
@@ -11031,6 +11031,15 @@ packages:
       expo: '*'
     dependencies:
       expo: 50.0.17(@babel/core@7.24.4)(@react-native/babel-preset@0.74.81)
+    dev: false
+
+  /expo-image-manipulator@11.8.0(expo@50.0.17):
+    resolution: {integrity: sha512-ZWVrHnYmwJq6h7auk+ropsxcNi+LyZcPFKQc8oy+JA0SaJosfShvkCm7RADWAunHmfPCmjHrhwPGEu/rs7WG/A==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 50.0.17(@babel/core@7.24.4)(@react-native/babel-preset@0.74.81)
+      expo-image-loader: 4.6.0(expo@50.0.17)
     dev: false
 
   /expo-image-picker@14.7.1(expo@50.0.17):
