@@ -1,1 +1,1 @@
-export * as Date from "./src/date";
+export * from "./src/date";

@@ -36,7 +36,7 @@ const PhoneNumberOTP = () => {
     api.auth.userOnboardingCompleted.useMutation();
 
   const isValidPhoneNumberOTP =
-    sharedValidators.user.phoneNumberOTPValidation.safeParse(phoneNumberOTP);
+    sharedValidators.user.phoneNumberOTP.safeParse(phoneNumberOTP);
 
   const handleNewUser = async (userId: string) => {
     await createUser.mutateAsync({
