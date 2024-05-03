@@ -4,7 +4,7 @@ import { XStack } from "tamagui";
 
 const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
   return (
-    <XStack>
+    <XStack paddingTop="$4" paddingBottom="$2">
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key]!;
         const isFocused = state.index === index;
@@ -28,7 +28,6 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
           });
         };
 
-        // Use the tabBarIcon from options
         const TabBarIcon = options.tabBarIcon;
         const iconElement = TabBarIcon ? (
           <TabBarIcon focused={isFocused} color="white" size={24} />

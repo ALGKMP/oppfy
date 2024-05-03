@@ -1,37 +1,31 @@
 import React from "react";
-import { Pressable, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation, useRootNavigation, useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { getTokens, Text, View, XStack } from "tamagui";
+import { TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import type {
+  HeaderBackButtonProps,
+  NativeStackHeaderProps,
+} from "@react-navigation/native-stack/src/types";
+import { ChevronLeft } from "@tamagui/lucide-icons";
+import { Text, useTheme } from "tamagui";
 
-import { Header } from "~/components/Headers";
+import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
 const ProfileLayout = () => {
-  const router = useRouter();
-  const rootNavigation = useRootNavigation();
-
-  const insets = useSafeAreaInsets();
+  const theme = useTheme();
 
   return (
-    <View
+    <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: "black",
-        // Paddings to handle safe area
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
+        backgroundColor: theme.background.val,
       }}
     >
       <Stack
         screenOptions={{
-          header: ({ navigation, options, back }) => (
-            <Header navigation={navigation} options={options} back={back} />
-          ),
+          headerLeft: (props) => <HeaderLeft {...props} />,
+          header: (props) => <Header {...props} />,
         }}
       >
         <Stack.Screen
@@ -82,8 +76,60 @@ const ProfileLayout = () => {
           options={{ title: "About", animation: "fade" }}
         />
       </Stack>
-    </View>
+    </SafeAreaView>
   );
 };
+
+type HeaderLeftProps = HeaderBackButtonProps;
+
+type HeaderProps = NativeStackHeaderProps;
+
+const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
+  const router = useRouter();
+
+  return (
+    <TouchableOpacity
+      hitSlop={10}
+      onPress={() => {
+        canGoBack ? void router.back() : null;
+      }}
+    >
+      <ChevronLeft />
+    </TouchableOpacity>
+  );
+};
+
+const Header = ({ navigation, options }: HeaderProps) => (
+  <BaseHeader
+    HeaderLeft={
+      options.headerLeft
+        ? options.headerLeft({
+            canGoBack: navigation.canGoBack(),
+            tintColor: options.headerTintColor,
+          })
+        : undefined
+    }
+    HeaderTitle={
+      typeof options.headerTitle === "function" ? (
+        options.headerTitle({
+          children: options.title ?? "",
+          tintColor: options.headerTintColor,
+        })
+      ) : options.title ? (
+        <Text fontSize="$5" fontWeight="bold">
+          {options.title}
+        </Text>
+      ) : null
+    }
+    HeaderRight={
+      options.headerRight
+        ? options.headerRight({
+            canGoBack: navigation.canGoBack(),
+            tintColor: options.headerTintColor,
+          })
+        : undefined
+    }
+  />
+);
 
 export default ProfileLayout;

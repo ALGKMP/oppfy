@@ -83,9 +83,9 @@ interface HeaderTitleProps {
   children: string;
   tintColor?: string | undefined;
 }
-
 type HeaderLeftProps = HeaderBackButtonProps;
 type HeaderRightProps = HeaderButtonProps;
+
 type HeaderProps = NativeStackHeaderProps;
 
 const HeaderTitle = (_: HeaderTitleProps) => (
@@ -137,7 +137,9 @@ const Header = ({ navigation, options }: HeaderProps) => (
           tintColor: options.headerTintColor,
         })
       ) : options.title ? (
-        <Text>{options.title}</Text>
+        <Text fontSize="$5" fontWeight="bold">
+          {options.title}
+        </Text>
       ) : null
     }
     HeaderRight={
