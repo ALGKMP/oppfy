@@ -1,6 +1,8 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import { Button, Separator, Text, View, XStack, YGroup, YStack } from "tamagui";
+import { Button, Separator, Text, XStack, YGroup, YStack } from "tamagui";
+
+import { ScreenBaseView } from "~/components/Views";
 
 const Welcome = () => {
   const router = useRouter();
@@ -10,7 +12,7 @@ const Welcome = () => {
   };
 
   return (
-    <View flex={1} padding="$4" backgroundColor="$background">
+    <ScreenBaseView>
       <YStack flex={1} gap="$8">
         <Text
           alignSelf="center"
@@ -73,7 +75,7 @@ const Welcome = () => {
       </YStack>
 
       <Button onPress={onSubmit}>Continue</Button>
-    </View>
+    </ScreenBaseView>
   );
 };
 

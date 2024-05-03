@@ -4,9 +4,10 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
-import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
+import { Avatar, Button, Text, XStack, YStack } from "tamagui";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
+import { ScreenBaseView } from "~/components/Views";
 
 const ProfilePicture = () => {
   const router = useRouter();
@@ -44,7 +45,7 @@ const ProfilePicture = () => {
 
   return (
     <KeyboardSafeView>
-      <View flex={1} padding="$4" backgroundColor="$background">
+      <ScreenBaseView>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             Upload your profile pic.
@@ -70,7 +71,7 @@ const ProfilePicture = () => {
         <Button onPress={profilePicture ? onSubmit : onSkip}>
           {profilePicture ? "Continue" : "Skip"}
         </Button>
-      </View>
+      </ScreenBaseView>
     </KeyboardSafeView>
   );
 };

@@ -11,12 +11,12 @@ import {
   Checkbox,
   Separator,
   Text,
-  View,
   XStack,
   YGroup,
   YStack,
 } from "tamagui";
 
+import { ScreenBaseView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 
@@ -75,7 +75,7 @@ const Permissions = () => {
   };
 
   return (
-    <View flex={1} padding="$4" backgroundColor="$background">
+    <ScreenBaseView>
       <YStack flex={1} gap="$8">
         <Text
           alignSelf="center"
@@ -156,7 +156,7 @@ const Permissions = () => {
       <Button onPress={onPress} disabled={!requiredPermissions}>
         Continue
       </Button>
-    </View>
+    </ScreenBaseView>
   );
 };
 

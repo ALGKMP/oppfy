@@ -7,6 +7,7 @@ import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
+import { ScreenBaseView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const DateOfBirth = () => {
@@ -32,7 +33,7 @@ const DateOfBirth = () => {
 
   return (
     <KeyboardSafeView>
-      <View flex={1} padding="$4" backgroundColor="$background">
+      <ScreenBaseView>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             When&apos;s your birthday?
@@ -58,21 +59,21 @@ const DateOfBirth = () => {
         >
           Continue
         </Button>
-      </View>
 
-      <DatePicker
-        modal
-        mode="date"
-        open={open}
-        date={dateOfBirth ? dateOfBirth : new Date()}
-        onConfirm={(date) => {
-          setOpen(false);
-          setDateOfBirth(date);
-        }}
-        onCancel={() => {
-          setOpen(false);
-        }}
-      />
+        <DatePicker
+          modal
+          mode="date"
+          open={open}
+          date={dateOfBirth ? dateOfBirth : new Date()}
+          onConfirm={(date) => {
+            setOpen(false);
+            setDateOfBirth(date);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
+        />
+      </ScreenBaseView>
     </KeyboardSafeView>
   );
 };

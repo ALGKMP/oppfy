@@ -11,6 +11,7 @@ import { sharedValidators } from "@acme/validators";
 
 import { Header } from "~/components/Headers";
 import { KeyboardSafeView } from "~/components/SafeViews";
+import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
@@ -58,7 +59,7 @@ const PhoneNumber = () => {
 
   return (
     <KeyboardSafeView>
-      <View flex={1} padding="$4" backgroundColor="$background">
+      <ScreenBaseView>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             What&apos;s your phone number?
@@ -99,7 +100,7 @@ const PhoneNumber = () => {
         >
           Continue
         </Button>
-      </View>
+      </ScreenBaseView>
     </KeyboardSafeView>
   );
 };

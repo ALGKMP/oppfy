@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { TRPCClientError } from "@trpc/client";
-import { TRPCError } from "@trpc/server";
-import { getHTTPStatusCodeFromError } from "@trpc/server/http";
-import { Button, Input, Text, View, XStack, YStack } from "tamagui";
+import { Button, Input, Text, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
+import { ScreenBaseView } from "~/components/Views";
 import { api, isTRPCClientError } from "~/utils/api";
 
 enum Error {
@@ -45,7 +43,7 @@ const Username = () => {
 
   return (
     <KeyboardSafeView>
-      <View flex={1} padding="$4" backgroundColor="$background">
+      <ScreenBaseView>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             Pick a username?
@@ -70,7 +68,7 @@ const Username = () => {
         >
           Continue
         </Button>
-      </View>
+      </ScreenBaseView>
     </KeyboardSafeView>
   );
 };

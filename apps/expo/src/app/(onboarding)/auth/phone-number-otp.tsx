@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
-import { Button, Input, Text, View, XStack, YStack } from "tamagui";
+import { Button, Input, Text, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
+import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
@@ -84,7 +85,7 @@ const PhoneNumberOTP = () => {
 
   return (
     <KeyboardSafeView>
-      <View flex={1} padding="$4" backgroundColor="$background">
+      <ScreenBaseView>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             Please enter your code.
@@ -117,7 +118,7 @@ const PhoneNumberOTP = () => {
         >
           Continue
         </Button>
-      </View>
+      </ScreenBaseView>
     </KeyboardSafeView>
   );
 };
