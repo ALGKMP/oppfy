@@ -1,27 +1,24 @@
 import React, { useState } from "react";
-import type { ImageSourcePropType } from "react-native";
-import { Image, KeyboardAvoidingView, Platform } from "react-native";
+import { TouchableOpacity } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Link, useRouter } from "expo-router";
-import defaultProfilePic from "@assets/default-profile-pic.png";
-import { Plus } from "@tamagui/lucide-icons";
-import { Button, Circle, Text, View, XStack, YStack } from "tamagui";
+import { useRouter } from "expo-router";
+import defaultProfilePicture from "@assets/default-profile-picture.png";
+import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
 
-import { api } from "~/utils/api";
+import { KeyboardSafeView } from "~/components/SafeViews";
 
-const ProfilePicture: React.FC = () => {
+const ProfilePicture = () => {
   const router = useRouter();
 
-  const [profilePic, setProfilePic] = useState<string | null>(null);
-  const updateUserDetails = api.auth.updateUserDetails.useMutation();
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
-  // TODO: Implement S3 bucket upload - @TONY
+  // TODO: Implement photo upload to S3
+
   const onSubmit = () => {
     router.replace("/(app)/(bottom-tabs)/profile");
   };
 
   const onSkip = () => {
-    console.log("routing to profile");
     router.replace("/(app)/(bottom-tabs)/profile");
   };
 
@@ -34,86 +31,40 @@ const ProfilePicture: React.FC = () => {
     });
 
     if (!result.canceled) {
-      setProfilePic(result.assets[0]?.uri ?? null);
+      setProfilePicture(result.assets[0]?.uri ?? null);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1 }}
-    >
-      <View
-        flex={1}
-        backgroundColor="black"
-        padding="$6"
-        justifyContent="space-between"
-      >
-        <YStack flex={1} space="$8" alignItems="center">
-          <Text
-            alignSelf="center"
-            textAlign="center"
-            fontSize={22}
-            fontWeight="900"
-          >
-            Upload Your Profile Picture
+    <KeyboardSafeView>
+      <View flex={1} padding="$4" backgroundColor="$background">
+        <YStack flex={1} gap="$4">
+          <Text fontSize="$8" fontWeight="bold">
+            Upload your profile pic.
           </Text>
 
-          <YStack
-            ai="center"
-            jc="center"
-            position="relative"
-            onPress={handleImagePicking}
-          >
-            {profilePic ? (
-              <Image
-                source={{ uri: profilePic } as ImageSourcePropType}
-                style={{ width: 200, height: 200, borderRadius: 100 }}
-              />
-            ) : (
-              <Image
-                style={{ width: 200, height: 200, borderRadius: 100 }}
-                source={defaultProfilePic}
-              />
-            )}
-
-            <XStack
-              position="absolute"
-              bottom={-2}
-              right={-2}
-              ai="center"
-              jc="center"
+          <XStack height="70%" alignItems="center" gap="$2">
+            <TouchableOpacity
+              style={{ flex: 1, alignItems: "center" }}
+              onPress={handleImagePicking}
             >
-              <Circle
-                size="$6"
-                backgroundColor="black"
-                borderWidth={2}
-                borderColor="white"
-              >
-                <XStack ai="center" jc="center">
-                  <Plus size="$3" />
-                </XStack>
-              </Circle>
-            </XStack>
-          </YStack>
+              <Avatar circular size="$14">
+                <Avatar.Image
+                  {...(profilePicture
+                    ? { src: profilePicture }
+                    : { source: defaultProfilePicture })}
+                />
+                <Avatar.Fallback backgroundColor="$blue10" />
+              </Avatar>
+            </TouchableOpacity>
+          </XStack>
         </YStack>
 
-        <Button
-          onPress={profilePic ? onSubmit : onSkip}
-          borderWidth={0}
-          pressStyle={{ backgroundColor: profilePic ? "$gray12" : "$gray9" }}
-          backgroundColor={profilePic ? "white" : "gray"}
-        >
-          <Text
-            color={profilePic ? "black" : "lightgray"}
-            fontWeight="600"
-            fontSize={16}
-          >
-            {profilePic ? "Next" : "Skip"}
-          </Text>
+        <Button onPress={profilePicture ? onSubmit : onSkip}>
+          {profilePicture ? "Continue" : "Skip"}
         </Button>
       </View>
-    </KeyboardAvoidingView>
+    </KeyboardSafeView>
   );
 };
 
