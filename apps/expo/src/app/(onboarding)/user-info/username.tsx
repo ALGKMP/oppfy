@@ -56,7 +56,7 @@ const Username = () => {
               flex={1}
               value={username}
               onChangeText={setUsername}
-              placeholder="Full Name"
+              placeholder="Username"
               autoFocus
             />
           </XStack>

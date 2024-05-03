@@ -12,7 +12,7 @@ import { api } from "~/utils/api";
 const DateOfBirth = () => {
   const router = useRouter();
 
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [open, setOpen] = useState(false);
 
   const updateDateOfBirth = api.user.updateDateOfBirth.useMutation();
@@ -21,6 +21,8 @@ const DateOfBirth = () => {
     sharedValidators.user.dateOfBirth.safeParse(dateOfBirth).success;
 
   const onSubmit = async () => {
+    if (dateOfBirth === null) return;
+
     await updateDateOfBirth.mutateAsync({
       dateOfBirth,
     });
@@ -40,7 +42,7 @@ const DateOfBirth = () => {
             <TouchableOpacity style={{ flex: 1 }} onPress={() => setOpen(true)}>
               <View pointerEvents="none">
                 <Input placeholder="Birthdate">
-                  {dateOfBirth.toLocaleDateString()}
+                  {dateOfBirth?.toLocaleDateString()}
                 </Input>
               </View>
             </TouchableOpacity>
@@ -62,7 +64,7 @@ const DateOfBirth = () => {
         modal
         mode="date"
         open={open}
-        date={dateOfBirth}
+        date={dateOfBirth ? dateOfBirth : new Date()}
         onConfirm={(date) => {
           setOpen(false);
           setDateOfBirth(date);
