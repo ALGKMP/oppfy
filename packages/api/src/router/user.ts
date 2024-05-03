@@ -12,7 +12,7 @@ export const userRouter = createTRPCRouter({
       try {
         return await Services.profile.updateFullName(
           ctx.session.uid,
-          input.fullName
+          input.fullName,
         );
       } catch (error) {
         throw new TRPCError({
@@ -48,8 +48,8 @@ export const userRouter = createTRPCRouter({
         );
       } catch (error) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update username.",
+          code: "CONFLICT",
+          message: "Username already taken",
         });
       }
     }),

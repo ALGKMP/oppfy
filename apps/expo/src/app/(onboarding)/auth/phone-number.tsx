@@ -97,7 +97,7 @@ const PhoneNumber = () => {
           disabled={!isValidPhoneNumber}
           disabledStyle={{ opacity: 0.5 }}
         >
-          Welcome
+          Continue
         </Button>
       </View>
     </KeyboardSafeView>

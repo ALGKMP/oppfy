@@ -1,102 +1,77 @@
-import React, { useMemo, useRef, useState } from "react";
-import type { TextInput } from "react-native";
-import { KeyboardAvoidingView, Platform } from "react-native";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { Button, Input, Text, View, YStack } from "tamagui";
-import * as z from "zod";
+import { TRPCClientError } from "@trpc/client";
+import { TRPCError } from "@trpc/server";
+import { getHTTPStatusCodeFromError } from "@trpc/server/http";
+import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 
-import { api } from "~/utils/api";
-import auth from "@react-native-firebase/auth";
+import { sharedValidators } from "@acme/validators";
 
+import { KeyboardSafeView } from "~/components/SafeViews";
+import { api, isTRPCClientError } from "~/utils/api";
 
-const schemaValidation = z.object({
-  username: z.string().min(1),
-});
+enum Error {
+  USERNAME_TAKEN = "Username is already taken.",
+}
 
 const Username = () => {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
-  const usernameInputRef = useRef<TextInput | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
-  const updateUserDetails = api.user.updateUsername.useMutation();
+  const updateUsername = api.user.updateUsername.useMutation();
 
-  const usernameIsValid = useMemo(
-    () => schemaValidation.safeParse({ username }).success,
-    [username],
-  );
+  const isValidUsername =
+    sharedValidators.user.username.safeParse(username).success;
 
-  const onPress = async () => {
+  const onSubmit = async () => {
     try {
-      await updateUserDetails.mutateAsync({
-        username: username,
+      await updateUsername.mutateAsync({
+        username,
       });
 
-      await auth().currentUser?.reload();
-  
-      router.replace("/(app)/(bottom-tabs)/profile");
+      router.push("/user-info/profile-picture");
     } catch (error) {
-      console.error("Failed to update username:", error);
+      if (isTRPCClientError(error)) {
+        switch (error.data?.code) {
+          case "CONFLICT":
+            setError(Error.USERNAME_TAKEN);
+            break;
+        }
+      }
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1 }}
-    >
-      <View
-        flex={1}
-        backgroundColor="black"
-        padding="$6"
-        justifyContent="space-between"
-      >
-        <YStack flex={1} space="$8" alignItems="center">
-          <Text
-            alignSelf="center"
-            textAlign="center"
-            fontSize={22}
-            fontWeight="900"
-          >
-            Your favorite username?
+    <KeyboardSafeView>
+      <View flex={1} padding="$4" backgroundColor="$background">
+        <YStack flex={1} gap="$4">
+          <Text fontSize="$8" fontWeight="bold">
+            Pick a username?
           </Text>
 
-          <YStack space="$3">
+          <XStack gap="$2">
             <Input
-              ref={usernameInputRef}
+              flex={1}
               value={username}
               onChangeText={setUsername}
-              onLayout={() => usernameInputRef.current?.focus()}
-              textAlign="center"
-              backgroundColor="transparent"
-              height={50}
-              fontSize={36}
-              fontWeight="900"
-              fontFamily="$mono"
-              borderWidth={0}
+              placeholder="Username"
+              autoFocus
             />
-          </YStack>
+          </XStack>
+          {error && <Text color="$red9">{error}</Text>}
         </YStack>
 
         <Button
-          onPress={onPress}
-          borderWidth={0}
-          pressStyle={{
-            backgroundColor: "$gray12",
-          }}
-          backgroundColor={usernameIsValid ? "white" : "gray"}
-          disabled={!usernameIsValid}
+          onPress={onSubmit}
+          disabled={!isValidUsername}
+          disabledStyle={{ opacity: 0.5 }}
         >
-          <Text
-            color={usernameIsValid ? "black" : "lightgray"}
-            fontWeight="600"
-            fontSize={16}
-          >
-            Next
-          </Text>
+          Continue
         </Button>
       </View>
-    </KeyboardAvoidingView>
+    </KeyboardSafeView>
   );
 };
 

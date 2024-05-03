@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
@@ -30,8 +31,14 @@ const ProfilePicture = () => {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      setProfilePicture(result.assets[0]?.uri ?? null);
+    if (!result.canceled && result.assets[0]) {
+      const { uri } = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        undefined, // No operations needed, just format conversion
+        { format: ImageManipulator.SaveFormat.JPEG },
+      );
+
+      setProfilePicture(uri);
     }
   };
 

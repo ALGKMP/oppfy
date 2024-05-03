@@ -1,6 +1,6 @@
 import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import type {
@@ -9,23 +9,21 @@ import type {
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
 import { ChevronLeft, Info, X } from "@tamagui/lucide-icons";
-import { AlertDialog, Button, Text, View, XStack, YStack } from "tamagui";
+import { AlertDialog, Button, Text, useTheme, XStack, YStack } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { useSession } from "~/contexts/SessionContext";
 import { Stack } from "~/layouts";
 
 const OnboardingLayout = () => {
-  const insets = useSafeAreaInsets();
+  const theme = useTheme();
 
   return (
-    <View
-      flex={1}
-      backgroundColor="$background"
-      paddingTop={insets.top}
-      paddingBottom={insets.bottom}
-      paddingLeft={insets.left}
-      paddingRight={insets.right}
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: theme.background.val,
+      }}
     >
       <Stack
         screenOptions={{
@@ -77,26 +75,26 @@ const OnboardingLayout = () => {
         />
       </Stack>
       <StatusBar />
-    </View>
+    </SafeAreaView>
   );
 };
 
-interface headerTitleProps {
+interface HeaderTitleProps {
   children: string;
   tintColor?: string | undefined;
 }
 
-type headerLeftProps = HeaderBackButtonProps;
-type headerRightProps = HeaderButtonProps;
-type headerProps = NativeStackHeaderProps;
+type HeaderLeftProps = HeaderBackButtonProps;
+type HeaderRightProps = HeaderButtonProps;
+type HeaderProps = NativeStackHeaderProps;
 
-const HeaderTitle = (_: headerTitleProps) => (
+const HeaderTitle = (_: HeaderTitleProps) => (
   <Text fontFamily="$modak" fontSize="$9">
     OPPFY
   </Text>
 );
 
-const HeaderLeft = ({ canGoBack }: headerLeftProps) => {
+const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
   const router = useRouter();
 
   return (
@@ -111,7 +109,7 @@ const HeaderLeft = ({ canGoBack }: headerLeftProps) => {
   );
 };
 
-const HeaderRight = (_: headerRightProps) => (
+const HeaderRight = (_: HeaderRightProps) => (
   <TouchableOpacity
     hitSlop={10}
     onPress={() => {
@@ -122,7 +120,7 @@ const HeaderRight = (_: headerRightProps) => (
   </TouchableOpacity>
 );
 
-const Header = ({ navigation, options }: headerProps) => (
+const Header = ({ navigation, options }: HeaderProps) => (
   <BaseHeader
     HeaderLeft={
       options.headerLeft
@@ -153,9 +151,9 @@ const Header = ({ navigation, options }: headerProps) => (
   />
 );
 
-const WelcomeHeaderLeft = ({ canGoBack }: headerLeftProps) => {
+const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
   const router = useRouter();
-  const { user, signOut } = useSession();
+  const { signOut } = useSession();
 
   const onSubmit = async () => {
     await signOut();
@@ -165,12 +163,7 @@ const WelcomeHeaderLeft = ({ canGoBack }: headerLeftProps) => {
   return (
     <AlertDialog native>
       <AlertDialog.Trigger asChild>
-        <TouchableOpacity
-          hitSlop={10}
-          onPress={() => {
-            canGoBack ? void router.back() : null;
-          }}
-        >
+        <TouchableOpacity hitSlop={10}>
           <X />
         </TouchableOpacity>
       </AlertDialog.Trigger>
