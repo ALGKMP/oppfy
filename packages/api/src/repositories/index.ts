@@ -5,6 +5,7 @@ import postStatsRepository from "./postStats";
 import profileRepository from "./profile";
 import profilePhotoRepository from "./profilePhoto";
 import userRepository from "./user";
+import notificationSettingRepository from "./notificationSettings";
 
 const repositories = {
   user: userRepository,
@@ -13,7 +14,8 @@ const repositories = {
   post: postRepository,
   postStats: postStatsRepository,
   friend: friendsRepository,
-  follower: followersRepository
+  follower: followersRepository,
+  notificationSetting: notificationSettingRepository,
 };
 
 export default repositories;

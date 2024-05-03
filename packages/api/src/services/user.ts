@@ -139,6 +139,78 @@ const UserService = {
     }
   },
 
+  changeUserPrivacySetting: async (userId: string, newSetting: "public" | "private") => {
+    try {
+      await repositories.user.updatePrivacySetting(userId, newSetting); // Updated repository access
+    } catch (error) {
+      console.error(
+        `Error changing privacy setting for user ${userId}:`,
+        error instanceof Error ? error.message : error,
+      );
+      throw new Error("Failed to change privacy setting.");
+    }
+  },
+
+  changePostsNotificationSetting: async (userId: string, newSetting: boolean) => {
+    try {
+      const user = await Services.user.getUser(userId); // Updated repository access
+      await repositories.notificationSetting.updatePostsSetting(
+        user.notificationSetting,
+        newSetting,
+      );
+    } catch (error) {
+      throw new Error("Failed to change posts notification setting.");
+    }
+  },
+
+  changeMentionsNotificationSetting: async (userId: string, newSetting: boolean) => {
+    try {
+      const user = await Services.user.getUser(userId); // Updated repository access
+      await repositories.notificationSetting.updateMentionsSetting(
+        user.notificationSetting,
+        newSetting,
+      );
+    } catch (error) {
+      throw new Error("Failed to change mentions notification setting.");
+    }
+  },
+
+  changeCommentsNotificationSetting: async (userId: string, newSetting: boolean) => {
+    try {
+      const user = await Services.user.getUser(userId); // Updated repository access
+      await repositories.notificationSetting.updateCommentsSetting(
+        user.notificationSetting,
+        newSetting,
+      );
+    } catch (error) {
+      throw new Error("Failed to change comments notification setting.");
+    }
+  },
+
+  changeLikesNotificationSetting: async (userId: string, newSetting: boolean) => {
+    try {
+      const user = await Services.user.getUser(userId); // Updated repository access
+      await repositories.notificationSetting.updateLikesSetting(
+        user.notificationSetting,
+        newSetting,
+      );
+    } catch (error) {
+      throw new Error("Failed to change comments notification setting.");
+    }
+  },
+
+  changeFriendRequestsNotificationSetting: async (userId: string, newSetting: boolean) => {
+    try {
+      const user = await Services.user.getUser(userId); // Updated repository access
+      await repositories.notificationSetting.updateFriendRequestsSetting(
+        user.notificationSetting,
+        newSetting,
+      );
+    } catch (error) {
+      throw new Error("Failed to change friend requests notification setting.");
+    }
+  },
+
 };
 
 export default UserService;

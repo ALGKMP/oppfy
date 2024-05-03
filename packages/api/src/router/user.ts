@@ -53,4 +53,6 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
+    // TODO: Updates all the user settings
+
 });
