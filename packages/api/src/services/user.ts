@@ -1,5 +1,7 @@
+import { trpcValidators } from "@acme/validators";
 import Services from ".";
 import repositories from "../repositories";
+import { z } from "zod";
 
 const UserService = {
   createUser: async (userId: string) => {
@@ -151,65 +153,47 @@ const UserService = {
     }
   },
 
-  changePostsNotificationSetting: async (userId: string, newSetting: boolean) => {
+  getUserNotificationSettings: async (userId: string) => {
     try {
-      const user = await Services.user.getUser(userId); // Updated repository access
-      await repositories.notificationSetting.updatePostsSetting(
-        user.notificationSetting,
-        newSetting,
-      );
+      const user = await Services.user.getUser(userId);
+      const notificationSettings = await repositories.notificationSetting.getNotificationSettings(user.notificationSetting);
+      if (!notificationSettings) {
+        throw new Error(`Unable to retrieve notification settings for user ${userId}`);
+      }
+      return notificationSettings;
     } catch (error) {
-      throw new Error("Failed to change posts notification setting.");
+      console.error(
+        `Error getting notification settings for user ${userId}:`,
+        error instanceof Error ? error.message : error,
+      );
+      throw new Error("Failed to get notification settings.");
     }
   },
 
-  changeMentionsNotificationSetting: async (userId: string, newSetting: boolean) => {
+  // Should work 
+  updateNotificationSettings: async (userId: string, settings: z.infer<typeof trpcValidators.user.updateNotificationSettings>) => {
     try {
-      const user = await Services.user.getUser(userId); // Updated repository access
-      await repositories.notificationSetting.updateMentionsSetting(
-        user.notificationSetting,
-        newSetting,
-      );
-    } catch (error) {
-      throw new Error("Failed to change mentions notification setting.");
-    }
-  },
+      const currentSettings = await Services.user.getUserNotificationSettings(userId);
 
-  changeCommentsNotificationSetting: async (userId: string, newSetting: boolean) => {
-    try {
-      const user = await Services.user.getUser(userId); // Updated repository access
-      await repositories.notificationSetting.updateCommentsSetting(
-        user.notificationSetting,
-        newSetting,
-      );
-    } catch (error) {
-      throw new Error("Failed to change comments notification setting.");
+      // Iterate over each setting and update if necessary
+      for (const key of Object.keys(settings) as (keyof typeof settings)[]) {
+        // Only call the update function if the new setting value differs from the current setting value
+        if (settings[key] !== currentSettings[key]) {
+            await repositories.notificationSetting.updateNotificationSetting(currentSettings.id, key, settings[key]);
+            console.log(`Updated ${key} from ${currentSettings[key]} to ${settings[key]}.`);
+        } else {
+            console.log(`No change needed for ${key}.`);
+        }
     }
-  },
+    } catch (error) {
+      console.error(
+        `Error updating notification settings for user ${userId}:`,
+        error instanceof Error ? error.message : error
+      );
+      throw new Error("Failed to update notification settings.");
+    }
+}
 
-  changeLikesNotificationSetting: async (userId: string, newSetting: boolean) => {
-    try {
-      const user = await Services.user.getUser(userId); // Updated repository access
-      await repositories.notificationSetting.updateLikesSetting(
-        user.notificationSetting,
-        newSetting,
-      );
-    } catch (error) {
-      throw new Error("Failed to change comments notification setting.");
-    }
-  },
-
-  changeFriendRequestsNotificationSetting: async (userId: string, newSetting: boolean) => {
-    try {
-      const user = await Services.user.getUser(userId); // Updated repository access
-      await repositories.notificationSetting.updateFriendRequestsSetting(
-        user.notificationSetting,
-        newSetting,
-      );
-    } catch (error) {
-      throw new Error("Failed to change friend requests notification setting.");
-    }
-  },
 
 };
 

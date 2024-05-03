@@ -53,6 +53,21 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
-    // TODO: Updates all the user settings
+
+    updateNotificationSettings: protectedProcedure
+    .input(trpcValidators.user.updateNotificationSettings)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await Services.user.updateNotificationSettings(
+          ctx.session.uid,
+          input,
+        );
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update notification settings.",
+        });
+      }
+    }),
 
 });
