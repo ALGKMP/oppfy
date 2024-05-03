@@ -15,12 +15,12 @@ export const profileRouter = createTRPCRouter({
   createPresignedUrlForProfilePicture: protectedProcedure
     .input(trpcValidators.profile.createPresignedUrl)
     .mutation(async ({ ctx, input }) => {
-      console.log("writing presigned jawn here")
+      console.log("creating presigned jawn")
       const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.userId}.jpg`;
-      const metadata = {
+      const metadata = trpcValidators.post.profilePictureMetadata.parse({
         user: ctx.session.uid,
-      };
+      });
       try {
         return await Services.aws.putObjectPresignedUrlWithMetadataProfilePicture(
           bucket,
@@ -45,6 +45,7 @@ export const profileRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
+        console.log("Lambda hit our server")
         await Services.profile.uploadProfilePicture(input.user, input.key);
       } catch (error) {
         throw new TRPCError({

@@ -117,9 +117,9 @@ const ProfileService = {
     }
   },
 
-  createAndLinkProfilePicture: async (profileId: number, userId = "profile-pictures/default.jpg") => {
+  createAndLinkProfilePicture: async (profileId: number, key = "profile-pictures/default.jpg") => {
     try {
-      return await repositories.profilePhoto.createProfilePhoto(userId);
+      return await repositories.profilePhoto.createProfilePhoto(key);
     } catch (error) {
       console.error(
         "Error creating and linking profile photo:",
