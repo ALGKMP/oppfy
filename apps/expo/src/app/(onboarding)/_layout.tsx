@@ -79,22 +79,22 @@ const OnboardingLayout = () => {
   );
 };
 
-interface headerTitleProps {
+interface HeaderTitleProps {
   children: string;
   tintColor?: string | undefined;
 }
 
-type headerLeftProps = HeaderBackButtonProps;
-type headerRightProps = HeaderButtonProps;
-type headerProps = NativeStackHeaderProps;
+type HeaderLeftProps = HeaderBackButtonProps;
+type HeaderRightProps = HeaderButtonProps;
+type HeaderProps = NativeStackHeaderProps;
 
-const HeaderTitle = (_: headerTitleProps) => (
+const HeaderTitle = (_: HeaderTitleProps) => (
   <Text fontFamily="$modak" fontSize="$9">
     OPPFY
   </Text>
 );
 
-const HeaderLeft = ({ canGoBack }: headerLeftProps) => {
+const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
   const router = useRouter();
 
   return (
@@ -109,7 +109,7 @@ const HeaderLeft = ({ canGoBack }: headerLeftProps) => {
   );
 };
 
-const HeaderRight = (_: headerRightProps) => (
+const HeaderRight = (_: HeaderRightProps) => (
   <TouchableOpacity
     hitSlop={10}
     onPress={() => {
@@ -120,7 +120,7 @@ const HeaderRight = (_: headerRightProps) => (
   </TouchableOpacity>
 );
 
-const Header = ({ navigation, options }: headerProps) => (
+const Header = ({ navigation, options }: HeaderProps) => (
   <BaseHeader
     HeaderLeft={
       options.headerLeft
@@ -151,9 +151,9 @@ const Header = ({ navigation, options }: headerProps) => (
   />
 );
 
-const WelcomeHeaderLeft = ({ canGoBack }: headerLeftProps) => {
+const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
   const router = useRouter();
-  const { user, signOut } = useSession();
+  const { signOut } = useSession();
 
   const onSubmit = async () => {
     await signOut();
@@ -163,12 +163,7 @@ const WelcomeHeaderLeft = ({ canGoBack }: headerLeftProps) => {
   return (
     <AlertDialog native>
       <AlertDialog.Trigger asChild>
-        <TouchableOpacity
-          hitSlop={10}
-          onPress={() => {
-            canGoBack ? void router.back() : null;
-          }}
-        >
+        <TouchableOpacity hitSlop={10}>
           <X />
         </TouchableOpacity>
       </AlertDialog.Trigger>

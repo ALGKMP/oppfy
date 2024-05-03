@@ -114,7 +114,7 @@ const PhoneNumberOTP = () => {
           disabled={!isValidPhoneNumberOTP}
           disabledStyle={{ opacity: 0.5 }}
         >
-          Welcome
+          Continue
         </Button>
       </View>
     </KeyboardSafeView>
