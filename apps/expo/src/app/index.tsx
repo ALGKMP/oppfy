@@ -7,22 +7,22 @@ import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 
 const Index = () => {
-  const { isSignedIn, isLoading: sessionIsLoading } = useSession();
+  const { isLoading: sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: permissionsIsLoading } = usePermissions();
 
   useEffect(() => {
     // When loading is complete, hide the splash screen
-    if (!sessionIsLoading && !permissionsIsLoading && !isSignedIn) {
+    if (!sessionIsLoading && !permissionsIsLoading) {
       void SplashScreen.hideAsync();
     }
-  }, [sessionIsLoading, permissionsIsLoading, isSignedIn]);
+  }, [sessionIsLoading, permissionsIsLoading]);
 
   if (sessionIsLoading || permissionsIsLoading) {
     return <LoadingIndicatorOverlay />;
   }
 
   return isSignedIn ? (
-    <Redirect href="/profile" />
+    <Redirect href="/(app)/(bottom-tabs)/profile" />
   ) : (
     <Redirect href="/(onboarding)" />
   );
