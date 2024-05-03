@@ -34,6 +34,7 @@ export const user = mySqlTable("User", {
     mode: "number",
     unsigned: true,
   }).references(() => notificationSetting.id),
+  privacySetting: mysqlEnum("privacySetting", ["public", "private"]).default("public").notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
