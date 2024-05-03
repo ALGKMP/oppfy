@@ -12,17 +12,22 @@ import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const profileRouter = createTRPCRouter({
-  uploadProfilePictureUrl: protectedProcedure
+  createPresignedUrlForProfilePicture: protectedProcedure
     .input(trpcValidators.profile.createPresignedUrl)
     .mutation(async ({ ctx, input }) => {
-      const bucket = process.env.S3_BUCKET_NAME!;
+      console.log("writing presigned jawn here")
+      const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.userId}.jpg`;
+      const metadata = {
+        user: ctx.session.uid,
+      };
       try {
-        return await Services.aws.putObjectPresignedUrl(
+        return await Services.aws.putObjectPresignedUrlWithMetadataProfilePicture(
           bucket,
           key,
           input.contentLength,
           input.contentType,
+          metadata
         );
       } catch (error) {
         throw new TRPCError({
@@ -40,7 +45,7 @@ export const profileRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        await Services.profile.uploadProfilePicture(input.userId);
+        await Services.profile.uploadProfilePicture(input.user, input.key);
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

@@ -32,6 +32,7 @@ export const handler = async (
     const response = await s3Client.send(command);
 
     const metadata = response.Metadata as ProfileMetadata | undefined;
+    console.log(metadata)
 
     if (metadata === undefined) {
       return {
@@ -54,7 +55,6 @@ export const handler = async (
         body: JSON.stringify({
           user: metadata.user,
           key: objectKey,
-          bucket: objectBucket,
         }),
       });
 

@@ -86,13 +86,13 @@ const ProfileService = {
     }
   },
 
-  uploadProfilePicture: async (userId: string) => {
+  uploadProfilePicture: async (userId: string, key: string) => {
     try {
       const profile = await ProfileService.getUserProfile(userId);
 
       // New Profile Photo
       if (!profile.profilePhoto) {
-        return await ProfileService.createAndLinkProfilePicture(profile.id, userId);
+        return await ProfileService.createAndLinkProfilePicture(profile.id, key);
       }
 
       const profilePhoto = await repositories.profilePhoto.getProfilePhoto(
@@ -132,7 +132,7 @@ const ProfileService = {
 
   // for current user
   getUserProfilePicture: async (userId: string): Promise<string> => {
-      const bucket = process.env.S3_BUCKET_NAME!;
+      const bucket = process.env.S3_POST_BUCKET!;
       const key = `profile-pictures/${userId}.jpg`;
     try {
       return await Services.aws.objectPresignedUrl(bucket, key);
@@ -181,7 +181,7 @@ const ProfileService = {
   getProfilePictureBatch: async (
     userIds: string[],
   ): Promise<Record<string, string | null>> => {
-    const bucket = process.env.S3_BUCKET_NAME!;
+    const bucket = process.env.S3_POST_BUCKET!;
     const result: Record<string, string | null> = {};
 
     const urlPromises = userIds.map(async (userId) => {
@@ -210,7 +210,7 @@ const ProfileService = {
         throw new Error("Profile does not have a profile photo.");
       }
       
-      const bucket = process.env.S3_BUCKET_NAME!;
+      const bucket = process.env.S3_POST_BUCKET!;
       const key = `profile-pictures/${userId}.jpg`;
       const deleted = await Services.aws.deleteObject(bucket, key);
 

@@ -24,7 +24,7 @@ const trpcProfileSchema = {
     ),
 
   uploadProfilePictureOpenApi: z.object({
-    userId,
+    user: z.string(),
     key: profilePictureKey,
   }),
 

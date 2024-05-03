@@ -49,12 +49,11 @@ const PostService = {
   },
 
   getUserPosts : async (userId: string) => {
-    const bucket = process.env.S3_BUCKET_NAME!;
+    const bucket = process.env.S3_POST_BUCKET!;
     try {
       const posts = await repositories.post.allUserPosts(userId);
   
       if (posts.length === 0) {
-        console.log("No posts");
         return [];
       }
   
@@ -107,7 +106,7 @@ const PostService = {
   getPostsBatch: async (
     postIds: number[],
   ): Promise<Record<number, string | null>> => {
-    const bucket = process.env.S3_BUCKET_NAME!;
+    const bucket = process.env.S3_POST_BUCKET!;
     try {
       const results: Record<number, string | null> = {};
       const urlPromises = postIds.map(async (postId) => {

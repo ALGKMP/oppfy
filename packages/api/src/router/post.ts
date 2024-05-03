@@ -12,7 +12,7 @@ export const postRouter = createTRPCRouter({
     .input(trpcValidators.post.createPresignedUrl)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
-      const bucket = process.env.S3_BUCKET_NAME!;
+      const bucket = process.env.S3_POST_BUCKET!;
       const objectKey = `posts/${Date.now()}-${ctx.session.uid}`;
       const metadata = {
         author: ctx.session.uid,
@@ -20,7 +20,7 @@ export const postRouter = createTRPCRouter({
         caption: input.caption,
       };
       try {
-        return await Services.aws.putObjectPresignedUrlWithMetadata(
+        return await Services.aws.putObjectPresignedUrlWithMetadataPost(
           bucket,
           objectKey,
           input.contentLength,
@@ -41,7 +41,6 @@ export const postRouter = createTRPCRouter({
     .output(z.void())
     .mutation(async ({ input }) => {
       try {
-        console.log("here");
         await Services.post.createPost(
           input.author,
           input.friend,
