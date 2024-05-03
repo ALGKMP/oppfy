@@ -21,6 +21,13 @@ const trpcUserSchema = {
   userComplete: z.object({
     userId,
   }),
+  updateNotificationSettings: z.object({
+    posts: z.boolean(),
+    mentions: z.boolean(),
+    comments: z.boolean(),
+    likes: z.boolean(),
+    friendRequests: z.boolean(),
+  }),
 };
 
 export default trpcUserSchema;

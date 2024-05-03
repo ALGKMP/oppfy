@@ -28,6 +28,7 @@ const followerRepository = {
         )
         return result.map((follower) => follower.followerId);
     },
+    
     countFollowers: async (userId: string) => {
         const result = await db
         .select()

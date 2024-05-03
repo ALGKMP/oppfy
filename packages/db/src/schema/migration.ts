@@ -33,7 +33,8 @@ export const user = mySqlTable("User", {
   notificationSetting: bigint("notificationSetting", {
     mode: "number",
     unsigned: true,
-  }).references(() => notificationSetting.id),
+  }).references(() => notificationSetting.id).notNull(),
+  privacySetting: mysqlEnum("privacySetting", ["public", "private"]).default("public").notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -87,6 +88,7 @@ export const notificationSetting = mySqlTable("NotificationSetting", {
   posts: boolean("posts").default(true).notNull(),
   mentions: boolean("mentions").default(true).notNull(),
   comments: boolean("comments").default(true).notNull(),
+  likes: boolean("likes").default(true).notNull(),
   friendRequests: boolean("friendRequests").default(true).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)

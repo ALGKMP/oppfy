@@ -71,6 +71,14 @@ const userRepository = {
       await transactionDb.delete(schema.user).where(eq(schema.user.id, userId));
     });
   },
+
+  updatePrivacySetting: async (userId: string, privacySetting: "public" | "private") => {
+    await db
+      .update(schema.user)
+      .set({ privacySetting: privacySetting })
+      .where(eq(schema.user.id, userId));
+  },
+
 };
 
 export default userRepository;

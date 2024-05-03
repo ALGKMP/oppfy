@@ -1,7 +1,7 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
-import type { ProfileMetadata } from "../../../utils";
+import { trpcValidators } from "@acme/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
 
@@ -29,55 +29,49 @@ export const handler = async (
   });
 
   try {
-    const response = await s3Client.send(command);
+    const s3Response = await s3Client.send(command).catch(err => {
+      console.error("Failed to retrieve S3 object metadata:", err);
+      throw err; // Rethrow to handle it in the outer try-catch block
+    });
 
-    const metadata = response.Metadata as ProfileMetadata | undefined;
-    console.log(metadata)
+    const metadata = trpcValidators.post.profilePictureMetadata.parse(
+      s3Response.Metadata,
+    );
 
-    if (metadata === undefined) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "No Metadata found on object",
-        }),
-      };
-    }
+    const body = trpcValidators.profile.uploadProfilePictureOpenApi.parse({
+      user: metadata.user,
+      key: objectKey,
+    });
+
+    console.log(metadata);
+    console.log(body);
 
     const serverEndpoint =
       " https://5bdc-74-12-66-138.ngrok-free.app/api/profilePicture";
 
-    try {
-      const response = await fetch(serverEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user: metadata.user,
-          key: objectKey,
-        }),
-      });
+    const response = await fetch(serverEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
 
-      const jsonResponse = await response.json();
-
-      console.log("Server response:", jsonResponse);
-    } catch (error) {
-      console.error("Error sending metadata to server:", error);
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
     }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Post processed successfully" }),
+    };
   } catch (error) {
     console.error(error);
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: "Error getting object from S3",
+        message: "Error uploading profile picture.",
       }),
     };
   }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "Object found in S3",
-    }),
-  };
 };
