@@ -100,7 +100,7 @@ const Camera = () => {
           contentType: type,
         },
         {
-          onSuccess: (url) => {
+          onSuccess: (url: string) => {
             putMutation.mutate(url);
         }
       });
@@ -113,7 +113,7 @@ const Camera = () => {
           contentLength: size,
         },
         {
-          onSuccess: (url) => {
+          onSuccess: (url: string) => {
             putMutation.mutate(url);
           },
         },

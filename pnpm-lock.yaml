@@ -499,12 +499,9 @@ importers:
       '@acme/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
-<<<<<<< HEAD
       '@acme/utils':
         specifier: workspace:*
         version: link:../utils
-=======
->>>>>>> 4b4b951de67fc121846d37d55036a8f5908186f1
       libphonenumber-js:
         specifier: ^1.10.61
         version: 1.10.61
