@@ -49,10 +49,14 @@ export class UserService {
   }
 
   async updateUsername(userId: string, newUsername: string) {
-    const userExists = await this._userExists(userId);
+    const user = await this.userRepository.getUser(userId);
 
-    if (!userExists) {
+    if (user === undefined) {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+    }
+
+    if (user.username === newUsername) {
+      return;
     }
 
     const usernameExists =

@@ -40,6 +40,7 @@ export const profileRouter = createTRPCRouter({
     .input(trpcValidators.profile.uploadProfilePictureOpenApi)
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
+      console.log("uploadProfilePicture", input);
       await ctx.services.profile.updateProfilePicture(input.user, input.key);
     }),
 

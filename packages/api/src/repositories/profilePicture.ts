@@ -34,7 +34,7 @@ export class ProfilePictureRepository {
   ) {
     await this.db
       .update(schema.profile)
-      .set({ profilePicture: profilePictureId })
+      .set({ profilePictureId: profilePictureId })
       .where(eq(schema.profile.id, profileId));
   }
 

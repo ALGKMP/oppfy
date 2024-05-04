@@ -15,6 +15,8 @@ import {
 // import { mySqlTable } from "@acme/db/src/schema/_table";
 import { mySqlTable } from "./_table";
 
+// check if the current username is the same as the new username
+
 export const verificationToken = mySqlTable("VerificationToken", {
   id: serial("id").primaryKey(),
   token: varchar("token", { length: 255 }).unique().notNull(),
@@ -61,7 +63,7 @@ export const profile = mySqlTable("Profile", {
   fullName: varchar("fullName", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
   bio: text("bio"),
-  profilePicture: bigint("profilePicture", {
+  profilePictureId: bigint("profilePicture", {
     mode: "number",
     unsigned: true,
   }).references(() => profilePicture.id, { onDelete: "cascade" }),
@@ -72,13 +74,13 @@ export const profile = mySqlTable("Profile", {
 });
 
 export const profileRelations = relations(profile, ({ one }) => ({
-  profilePhoto: one(profilePicture, {
-    fields: [profile.profilePicture],
+  profilePicture: one(profilePicture, {
+    fields: [profile.profilePictureId],
     references: [profilePicture.id],
   }),
 }));
 
-export const profilePicture = mySqlTable("ProfilePhoto", {
+export const profilePicture = mySqlTable("ProfilePicture", {
   id: serial("id").primaryKey().notNull(),
   key: varchar("url", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt")

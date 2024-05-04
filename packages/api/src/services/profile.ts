@@ -64,7 +64,7 @@ export class ProfileService {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
-    if (profile.profilePicture === null) {
+    if (profile.profilePictureId === null) {
       const result =
         await this.profilePictureRepository.storeProfilePictureKey(key);
 
@@ -77,7 +77,7 @@ export class ProfileService {
     }
 
     await this.profilePictureRepository.updateProfilePictureKey(
-      profile.profilePicture,
+      profile.profilePictureId,
       key,
     );
   }
@@ -121,7 +121,7 @@ export class ProfileService {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
-    const profilePhoto = await this.getUserProfilePicture(userId);
+    const profilePicture = await this.getUserProfilePicture(userId);
 
     const posts = this.postRepository.getAllPosts(userId);
 
@@ -135,7 +135,7 @@ export class ProfileService {
       username: user.username,
       fullName: profile.fullName,
       bio: profile.bio,
-      profilePhoto,
+      profilePicture,
       posts,
       followerCount,
       followingCount,
@@ -156,7 +156,7 @@ export class ProfileService {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
-    if (profile.profilePicture === null) {
+    if (profile.profilePictureId === null) {
       throw new DomainError(ErrorCodes.PROFILE_PICTURE_NOT_FOUND);
     }
 
@@ -169,7 +169,7 @@ export class ProfileService {
     }
 
     await this.profilePictureRepository.deleteProfilePicture(
-      profile.profilePicture,
+      profile.profilePictureId,
     );
   }
 }

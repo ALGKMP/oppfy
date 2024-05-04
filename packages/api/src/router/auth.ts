@@ -1,3 +1,5 @@
+import { TRPCError } from "@trpc/server";
+
 import { trpcValidators } from "@acme/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
@@ -22,7 +24,7 @@ export const authRouter = createTRPCRouter({
   userOnboardingCompleted: protectedProcedure
     .input(trpcValidators.user.userComplete)
     .mutation(async ({ ctx }) => {
-      await ctx.services.user.userOnboardingCompleted(ctx.session.uid);
+      return await ctx.services.user.userOnboardingCompleted(ctx.session.uid);
     }),
 });
 
