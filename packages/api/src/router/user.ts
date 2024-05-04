@@ -1,8 +1,5 @@
-import { TRPCError } from "@trpc/server";
-
 import { trpcValidators } from "@acme/validators";
 
-import Services from "../services";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
