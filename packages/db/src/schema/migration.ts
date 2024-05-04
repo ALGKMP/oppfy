@@ -36,7 +36,7 @@ export const user = mySqlTable("User", {
     mode: "number",
     unsigned: true,
   })
-    .references(() => notificationSettings.id)
+    .references(() => notificationSettings.id, {onDelete: "cascade"})
     .notNull(),
   privacySetting: mysqlEnum("privacySetting", ["public", "private"])
     .default("public")

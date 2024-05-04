@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { dateOfBirth, fullName, userId, username } from "../shared/user";
+import { createInsertSchema } from 'drizzle-zod';
+import { schema } from "@acme/db";
 
 const trpcUserSchema = {
   userId,
@@ -16,6 +18,9 @@ const trpcUserSchema = {
   userComplete: z.object({
     userId,
   }),
+
+  test: createInsertSchema(schema.notificationSettings),
+
   updateNotificationSettings: z.object({
     posts: z.boolean().optional(),
     mentions: z.boolean().optional(),

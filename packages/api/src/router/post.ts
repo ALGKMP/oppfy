@@ -52,13 +52,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.services.post.deletePost(input.postId);
     }),
-
-  batchPosts: protectedProcedure
-    .input(trpcValidators.post.getBatchPost)
-    .query(async ({ ctx, input }) => {
-      await ctx.services.post.getPostsBatch(input.postIds);
-    }),
-
+    
   userPosts: protectedProcedure.query(async ({ ctx }) => {
     await ctx.services.post.getUserPosts(ctx.session.uid);
   }),

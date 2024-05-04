@@ -78,31 +78,4 @@ export class PostService {
   async deletePost(postId: number) {
     await this.postRepository.deletePost(postId);
   }
-
-  async getPostsBatch(postIds: number[]) {
-    const bucket = process.env.S3_POST_BUCKET!;
-
-    const results = await Promise.all(
-      postIds.map(async (postId) => {
-        const post = await this.postRepository.getPost(postId);
-
-        if (post === undefined) {
-          throw new DomainError(ErrorCodes.POST_NOT_FOUND);
-        }
-
-        const presignedUrl = await this.awsRepository.getObjectPresignedUrl({
-          Key: post.key,
-          Bucket: bucket,
-        });
-
-        return {
-          id: post.id,
-          caption: post.caption,
-          presignedUrl,
-        };
-      }),
-    );
-
-    return results;
-  }
 }
