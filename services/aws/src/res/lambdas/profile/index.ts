@@ -47,7 +47,7 @@ export const handler = async (
     console.log(body);
 
     const serverEndpoint =
-      " https://5bdc-74-12-66-138.ngrok-free.app/api/profilePicture";
+      "https://5bdc-74-12-66-138.ngrok-free.app/api/profilePicture";
 
     const response = await fetch(serverEndpoint, {
       method: "POST",
@@ -60,6 +60,7 @@ export const handler = async (
     if (!response.ok) {
       throw new Error(`Server responded with status: ${response.status}`);
     }
+    console.log("after response.ok")
 
     return {
       statusCode: 200,

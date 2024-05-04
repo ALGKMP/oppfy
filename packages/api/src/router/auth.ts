@@ -1,5 +1,3 @@
-import { TRPCError } from "@trpc/server";
-
 import { trpcValidators } from "@acme/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";

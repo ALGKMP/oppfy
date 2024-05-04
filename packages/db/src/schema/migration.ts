@@ -66,7 +66,9 @@ export const profile = mySqlTable("Profile", {
   profilePictureId: bigint("profilePicture", {
     mode: "number",
     unsigned: true,
-  }).references(() => profilePicture.id, { onDelete: "cascade" }),
+  })
+    .references(() => profilePicture.id, { onDelete: "cascade" })
+    .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -82,7 +84,7 @@ export const profileRelations = relations(profile, ({ one }) => ({
 
 export const profilePicture = mySqlTable("ProfilePicture", {
   id: serial("id").primaryKey().notNull(),
-  key: varchar("url", { length: 255 }).notNull(),
+  key: varchar("url", { length: 255 }),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

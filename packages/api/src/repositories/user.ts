@@ -17,8 +17,20 @@ export class UserRepository {
   @handleDatabaseErrors
   async createUser(userId: string) {
     await this.db.transaction(async (tx) => {
-      // Create the profile for the user
-      const profile = await tx.insert(schema.profile).values({}).execute();
+      // Create an empty profile picture entry for the user
+      const profilePicture = await tx
+        .insert(schema.profilePicture)
+        .values({})
+        .execute();
+
+      // Create an empty profile for the user, ready to be updated later
+      const profile = await tx
+        .insert(schema.profile)
+        .values({
+          profilePictureId: profilePicture[0].insertId, // Attach the profile picture ID
+          // Other fields are left empty and to be filled later
+        })
+        .execute();
 
       // Create default notification settings for the user
       const notificationSetting = await tx
@@ -27,11 +39,14 @@ export class UserRepository {
         .execute();
 
       // Create the user with the profileId and notificationSettingId
-      await tx.insert(schema.user).values({
-        id: userId,
-        profileId: profile[0].insertId,
-        notificationSettingsId: notificationSetting[0].insertId,
-      });
+      await tx
+        .insert(schema.user)
+        .values({
+          id: userId,
+          profileId: profile[0].insertId,
+          notificationSettingsId: notificationSetting[0].insertId,
+        })
+        .execute();
     });
   }
 
