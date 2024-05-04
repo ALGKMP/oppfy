@@ -2,17 +2,22 @@ import { and, eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const friendRequestRepository = {
-  sendFriendRequest: async (requesterId: string, requestedId: string) => {
-    const result = await db
+import { handleDatabaseErrors } from "../errors";
+
+export class FriendRequestRepository {
+  private db = db;
+
+  @handleDatabaseErrors
+  async sendFriendRequest(requesterId: string, requestedId: string) {
+    return await this.db
       .insert(schema.friendRequest)
       .values({ requesterId, requestedId, status: "pending" })
       .execute();
-    return result[0].insertId;
-  },
+  }
 
-  acceptFriendRequest: async (requesterId: string, requestedId: string) => {
-    await db
+  @handleDatabaseErrors
+  async acceptFriendRequest(requesterId: string, requestedId: string) {
+    await this.db
       .update(schema.friendRequest)
       .set({ status: "accepted" })
       .where(
@@ -20,14 +25,12 @@ const friendRequestRepository = {
           eq(schema.friendRequest.requesterId, requesterId),
           eq(schema.friendRequest.requestedId, requestedId),
         ),
-      )
+      );
+  }
 
-    // This can go into a service: optionally add to friends table automatically upon acceptance
-    //   await friendsRepository.addFriend(requesterId, requestedId);
-  },
-
-  rejectFriendRequest: async (requesterId: string, requestedId: string) => {
-    await db
+  @handleDatabaseErrors
+  async rejectFriendRequest(requesterId: string, requestedId: string) {
+    await this.db
       .update(schema.friendRequest)
       .set({ status: "declined" })
       .where(
@@ -36,10 +39,11 @@ const friendRequestRepository = {
           eq(schema.friendRequest.requestedId, requestedId),
         ),
       );
-  },
+  }
 
-  getPendingRequests: async (userId: string) => {
-    const result = await db
+  @handleDatabaseErrors
+  async getPendingRequests(userId: string) {
+    return await this.db
       .select()
       .from(schema.friendRequest)
       .where(
@@ -47,9 +51,6 @@ const friendRequestRepository = {
           eq(schema.friendRequest.requestedId, userId),
           eq(schema.friendRequest.status, "pending"),
         ),
-      )
-    return result;
-  },
-};
-
-export default friendRequestRepository;
+      );
+  }
+}

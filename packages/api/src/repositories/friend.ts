@@ -2,14 +2,22 @@ import { and, eq, or } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const friendsRepository = {
-  addFriend: async (userId1: string, userId2: string) => {
-    const result = await db.insert(schema.friend).values({ userId1, userId2 });
-    return result[0].insertId; // Assuming auto-increment ID
-  },
+import { handleDatabaseErrors } from "../errors";
 
-  removeFriend: async (userId1: string, userId2: string) => {
-    await db
+export class FriendsRepository {
+  private db = db;
+
+  @handleDatabaseErrors
+  async addFriend(userId1: string, userId2: string) {
+    return await this.db
+      .insert(schema.friend)
+      .values({ userId1, userId2 })
+      .execute();
+  }
+
+  @handleDatabaseErrors
+  async removeFriend(userId1: string, userId2: string) {
+    await this.db
       .delete(schema.friend)
       .where(
         or(
@@ -22,36 +30,27 @@ const friendsRepository = {
             eq(schema.friend.userId2, userId1),
           ),
         ),
-      )
-  },
-
-  getFriends: async (userId: string) => {
-    const result = await db
-      .select()
-      .from(schema.friend)
-      .where(
-        or(
-          eq(schema.friend.userId1, userId),
-          eq(schema.friend.userId2, userId),
-        ),
-      )
-    return result.map((friend) =>
-      friend.userId1 === userId ? friend.userId2 : friend.userId1,
-    );
-  },
-
-  friendsCount: async (userId: string) => {
-    const result = await db
-      .select()
-      .from(schema.friend)
-      .where(
-        or(
-          eq(schema.friend.userId1, userId),
-          eq(schema.friend.userId2, userId),
-        ),
-      )
-    return result.length;
+      );
   }
-};
 
-export default friendsRepository;
+  @handleDatabaseErrors
+  async getFriends(userId: string) {
+    return await this._getFriends(userId);
+  }
+
+  @handleDatabaseErrors
+  async friendsCount(userId: string) {
+    const friends = await this._getFriends(userId);
+    return friends.length;
+  }
+
+  @handleDatabaseErrors
+  private async _getFriends(userId: string) {
+    return await this.db.query.friend.findMany({
+      where: or(
+        eq(schema.friend.userId1, userId),
+        eq(schema.friend.userId2, userId),
+      ),
+    });
+  }
+}

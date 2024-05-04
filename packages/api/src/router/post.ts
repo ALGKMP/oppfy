@@ -1,10 +1,7 @@
-// src/trpc/postRouter.ts
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { trpcValidators } from "@acme/validators";
 
-import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
@@ -12,112 +9,64 @@ export const postRouter = createTRPCRouter({
     .input(trpcValidators.post.createPresignedUrl)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
+      const currentDate = Date.now();
+
       const bucket = process.env.S3_POST_BUCKET!;
-      const objectKey = `posts/${Date.now()}-${ctx.session.uid}`;
+      const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
       const metadata = {
         author: ctx.session.uid,
         friend: input.friend,
         caption: input.caption,
       };
-      try {
-        return await Services.aws.putObjectPresignedUrlWithMetadataPost(
-          bucket,
-          objectKey,
-          input.contentLength,
-          input.contentType,
-          metadata,
-        );
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create presigned URL",
-        });
-      }
+
+      return await ctx.services.aws.putObjectPresignedUrlWithPostMetadata({
+        Bucket: bucket,
+        Key: objectKey,
+        ContentType: input.contentType,
+        ContentLength: input.contentLength,
+        Metadata: metadata,
+      });
     }),
 
   uploadPost: publicProcedure
     .meta({ openapi: { method: "POST", path: "/uploadPost" } })
     .input(trpcValidators.post.uploadPost)
     .output(z.void())
-    .mutation(async ({ input }) => {
-      try {
-        await Services.post.createPost(
-          input.author,
-          input.friend,
-          input.caption,
-          input.key,
-        );
-        return;
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create post",
-        });
-      }
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.post.createPost(
+        input.author,
+        input.friend,
+        input.caption,
+        input.key,
+      );
     }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
-    .mutation(async ({ input }) => {
-      try {
-        await Services.post.editPost(input.postId, input.caption);
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update post",
-        });
-      }
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.post.editPost(input.postId, input.caption);
     }),
 
   deletePost: protectedProcedure
     .input(trpcValidators.post.deletePost)
-    .mutation(async ({ input }) => {
-      try {
-        await Services.post.deletePost(input.postId);
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete post",
-        });
-      }
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.post.deletePost(input.postId);
     }),
 
   batchPosts: protectedProcedure
     .input(trpcValidators.post.getBatchPost)
-    .query(async ({ input }) => {
-      try {
-        return await Services.post.getPostsBatch(input.postIds);
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get batch posts",
-        });
-      }
+    .query(async ({ ctx, input }) => {
+      await ctx.services.post.getPostsBatch(input.postIds);
     }),
 
-  userPosts: protectedProcedure
-  .query(async ({ ctx }) => {
-    try {
-      return await Services.post.getUserPosts(ctx.session.uid);
-    } catch (error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to get all profile posts",
-      });
-    }
+  userPosts: protectedProcedure.query(async ({ ctx }) => {
+    await ctx.services.post.getUserPosts(ctx.session.uid);
   }),
 
   otherUserPosts: protectedProcedure
     .input(trpcValidators.post.getUserPosts)
-    .query(async ({ input }) => {
-      try {
-        return await Services.post.getUserPosts(input.userId);
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get all profile posts",
-        });
-      }
+    .query(async ({ ctx, input }) => {
+      await ctx.services.post.getUserPosts(input.userId);
     }),
 });
 

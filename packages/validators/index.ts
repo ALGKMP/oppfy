@@ -1,6 +1,5 @@
 import * as sharedMediaSchema from "./src/shared/media";
 import * as sharedUserSchema from "./src/shared/user";
-
 import trpcAuthSchema from "./src/trpc/auth";
 import trpcPostSchema from "./src/trpc/post";
 import trpcProfileSchema from "./src/trpc/profile";

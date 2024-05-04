@@ -1,44 +1,44 @@
-// src/repositories/ProfileRepository.ts
 import { eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const profileRepository = {
-  // Function to create a profile
-  createProfile: async () => {
-    const result = await db.insert(schema.profile).values({}).execute();
-    return result[0].insertId;
-  },
+import { handleDatabaseErrors } from "../errors";
 
-  // Function to retrieve a profile by its ID
-  getProfile: async (profileId: number) => {
-    const profiles = await db
-      .select()
-      .from(schema.profile)
-      .where(eq(schema.profile.id, profileId));
-    return profiles.length > 0 ? profiles[0] : null;
-  },
+export class ProfileRepository {
+  private db = db;
 
-  // Function to update the name of a profile
-  updateProfileName: async (profileId: number, newName: string) => {
-    await db
+  @handleDatabaseErrors
+  async getProfile(profileId: number) {
+    return await this.db.query.profile.findFirst({
+      where: eq(schema.profile.id, profileId),
+    });
+  }
+
+  @handleDatabaseErrors
+  async createProfile() {
+    return await this.db.insert(schema.profile).values({});
+  }
+
+  @handleDatabaseErrors
+  async updateFullName(profileId: number, newName: string) {
+    return await this.db
       .update(schema.profile)
-      .set({ name: newName })
+      .set({ fullName: newName })
       .where(eq(schema.profile.id, profileId));
-  },
+  }
 
-  // Function to update the date of birth of a profile
-  updateProfileDateOfBirth: async (profileId: number, newDateOfBirth: Date) => {
-    await db
+  @handleDatabaseErrors
+  async updateDateOfBirth(profileId: number, newDateOfBirth: Date) {
+    return await this.db
       .update(schema.profile)
       .set({ dateOfBirth: newDateOfBirth })
       .where(eq(schema.profile.id, profileId));
-  },
+  }
 
-  // Function to delete a profile
-  deleteProfile: async (profileId: number) => {
-    await db.delete(schema.profile).where(eq(schema.profile.id, profileId));
-  },
-};
-
-export default profileRepository;
+  @handleDatabaseErrors
+  async deleteProfile(profileId: number) {
+    return await this.db
+      .delete(schema.profile)
+      .where(eq(schema.profile.id, profileId));
+  }
+}

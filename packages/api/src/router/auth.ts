@@ -2,70 +2,29 @@ import { TRPCError } from "@trpc/server";
 
 import { trpcValidators } from "@acme/validators";
 
-import Services from "../services";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
     .input(trpcValidators.auth.createUser)
-    .mutation(async ({ input }) => {
-      try {
-        return await Services.user.createUser(input.userId);
-      } catch (error) {
-        console.error(
-          "Error creating user:",
-          error instanceof Error ? error.message : error,
-        );
-        throw new TRPCError({
-          code: "CONFLICT", // Use 'CONFLICT' if user already exists, or another appropriate code based on the error
-          message: "Failed to create user.",
-        });
-      }
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.user.createUser(input.userId);
     }),
+
   getUser: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await Services.user.getUser(ctx.session.uid);
-    } catch (error) {
-      console.error(
-        "Error retrieving user:",
-        error instanceof Error ? error.message : error,
-      );
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: `Failed to retrieve user with ID ${ctx.session.uid}`,
-      });
-    }
+    await ctx.services.user.getUser(ctx.session.uid);
   }),
+
   deleteUser: protectedProcedure
     .input(trpcValidators.auth.deleteUser)
-    .mutation(async ({ input }) => {
-      try {
-        await Services.user.deleteUser(input.userId);
-        return { success: true, message: "User successfully deleted." };
-      } catch (error) {
-        console.error(
-          "Error deleting user:",
-          error instanceof Error ? error.message : error,
-        );
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete user.",
-        });
-      }
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.user.deleteUser(input.userId);
     }),
-    
+
   userOnboardingCompleted: protectedProcedure
     .input(trpcValidators.user.userComplete)
     .mutation(async ({ ctx }) => {
-      try {
-        return await Services.user.userOnboardingCompleted(ctx.session.uid);
-      } catch (error) {
-        console.log(error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to check user completion.",
-        });
-      }
+      return await ctx.services.user.userOnboardingCompleted(ctx.session.uid);
     }),
 });
 
