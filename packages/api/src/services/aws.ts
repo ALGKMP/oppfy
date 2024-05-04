@@ -1,105 +1,82 @@
-// src/utilities/AWSS3Service.ts
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { z } from "zod";
+import type { z } from "zod";
 
-import { s3 } from "@acme/db";
-import { trpcValidators } from "@acme/validators";
+import type { trpcValidators } from "@acme/validators";
 
-const AWSS3Service = {
-  putObjectPresignedUrl: async (
-    bucket: string,
-    key: string,
-    contentLength: number,
-    contentType: string,
-  ): Promise<string> => {
-    try {
-      const command = new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        ContentType: contentType,
-        ContentLength: contentLength,
-      });
-      return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
-    } catch (error) {
-      console.error("Error creating presigned URL without metadata:", error);
-      throw new Error("Failed to create presigned URL without metadata");
-    }
-  },
+import { AwsRepository } from "../repositories/aws";
 
-  putObjectPresignedUrlWithMetadataPost: async (
-    bucket: string,
-    objectKey: string,
-    contentLength: number,
-    contentType: string,
-    metadata: z.infer<typeof trpcValidators.post.metadata>,
-  ): Promise<string> => {
-    try {
-      const command = new PutObjectCommand({
-        Bucket: bucket,
-        Key: objectKey,
-        Metadata: metadata,
-        ContentType: contentType,
-        ContentLength: contentLength,
-      });
-      return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
-    } catch (error) {
-      console.error("Error creating presigned URL with metadata:", error);
-      throw new Error("Failed to create presigned URL with metadata");
-    }
-  },
+type PostMetadata = z.infer<typeof trpcValidators.post.metadata>;
+type ProfilePictureMetadata = z.infer<
+  typeof trpcValidators.post.profilePictureMetadata
+>;
 
-  putObjectPresignedUrlWithMetadataProfilePicture: async (
-    bucket: string,
-    objectKey: string,
-    contentLength: number,
-    contentType: string,
-    metadata: z.infer<typeof trpcValidators.post.profilePictureMetadata>,
-  ): Promise<string> => {
-    try {
-      const command = new PutObjectCommand({
-        Bucket: bucket,
-        Key: objectKey,
-        Metadata: metadata,
-        ContentType: contentType,
-        ContentLength: contentLength,
-      });
-      return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
-    } catch (error) {
-      console.error("Error creating presigned URL with metadata:", error);
-      throw new Error("Failed to create presigned URL with metadata");
-    }
-  },
+interface BasePutObjectPresignedUrlInput {
+  Bucket: string;
+  Key: string;
+  ContentLength: number;
+  ContentType: string;
+}
 
-  objectPresignedUrl: async (bucket: string, key: string): Promise<string> => {
-    try {
-      const command = new GetObjectCommand({
-        Bucket: bucket,
-        Key: key,
-      });
-      return await getSignedUrl(s3, command, { expiresIn: 300 }); // 5 minutes
-    } catch (error) {
-      console.error("Error creating object presigned URL:", error);
-      throw new Error("Failed to create object presigned URL");
-    }
-  },
+type PutObjectPresignedUrlInput = BasePutObjectPresignedUrlInput;
 
-  deleteObject: async (bucket: string, key: string) => {
-    try {
-      const command = new DeleteObjectCommand({
-        Bucket: bucket,
-        Key: key,
-      });
-      return await s3.send(command);
-    } catch (error) {
-      console.error("Error deleting object from S3:", error);
-      throw new Error("Failed to delete object from S3");
-    }
-  },
-};
+interface BasePutObjectPresignedUrlWithMetadataInput {
+  Bucket: string;
+  Key: string;
+  ContentLength: number;
+  ContentType: string;
+  Metadata: Record<string, string>;
+}
 
-export default AWSS3Service;
+interface PutObjectPresignedUrlWithPostMetadataInput
+  extends BasePutObjectPresignedUrlWithMetadataInput {
+  Metadata: PostMetadata;
+}
+
+interface PutObjectPresignedUrlWithProfilePictureMetadataInput
+  extends BasePutObjectPresignedUrlWithMetadataInput {
+  Metadata: ProfilePictureMetadata;
+}
+
+interface GetObjectPresignedUrlInput {
+  Bucket: string;
+  Key: string;
+}
+
+export class AwsService {
+  private awsRepository = new AwsRepository();
+
+  async putObjectPresignedUrl(
+    putObjectCommandInput: PutObjectPresignedUrlInput,
+  ) {
+    return await this.awsRepository.putObjectPresignedUrl(
+      putObjectCommandInput,
+    );
+  }
+
+  async putObjectPresignedUrlWithPostMetadata(
+    putObjectCommandInput: PutObjectPresignedUrlWithPostMetadataInput,
+  ) {
+    return await this.awsRepository.putObjectPresignedUrl(
+      putObjectCommandInput,
+    );
+  }
+
+  async putObjectPresignedUrlWithProfilePictureMetadata(
+    putObjectCommandInput: PutObjectPresignedUrlWithProfilePictureMetadataInput,
+  ) {
+    return await this.awsRepository.putObjectPresignedUrl(
+      putObjectCommandInput,
+    );
+  }
+
+  async getObjectPresignedUrl(
+    getObjectCommandInput: GetObjectPresignedUrlInput,
+  ) {
+    return await this.awsRepository.getObjectPresignedUrl(
+      getObjectCommandInput,
+    );
+  }
+
+  async deleteObject(bucket: string, key: string) {
+    return await this.awsRepository.deleteObject(bucket, key);
+  }
+}

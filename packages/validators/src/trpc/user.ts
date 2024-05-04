@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-import {
-  dateOfBirth,
-  fullName,
-  userId,
-  username,
-} from "../shared/user";
+import { dateOfBirth, fullName, userId, username } from "../shared/user";
 
 const trpcUserSchema = {
   userId,
@@ -22,11 +17,11 @@ const trpcUserSchema = {
     userId,
   }),
   updateNotificationSettings: z.object({
-    posts: z.boolean(),
-    mentions: z.boolean(),
-    comments: z.boolean(),
-    likes: z.boolean(),
-    friendRequests: z.boolean(),
+    posts: z.boolean().optional(),
+    mentions: z.boolean().optional(),
+    comments: z.boolean().optional(),
+    likes: z.boolean().optional(),
+    friendRequests: z.boolean().optional(),
   }),
 };
 

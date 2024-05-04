@@ -9,65 +9,33 @@ export const userRouter = createTRPCRouter({
   updateFullName: protectedProcedure
     .input(trpcValidators.user.updateName)
     .mutation(async ({ input, ctx }) => {
-      try {
-        return await Services.profile.updateFullName(
-          ctx.session.uid,
-          input.fullName,
-        );
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update name.",
-        });
-      }
+      await ctx.services.profile.updateFullName(
+        ctx.session.uid,
+        input.fullName,
+      );
     }),
 
   updateDateOfBirth: protectedProcedure
     .input(trpcValidators.user.updateDateOfBirth)
     .mutation(async ({ input, ctx }) => {
-      try {
-        return await Services.profile.updateDateOfBirth(
-          ctx.session.uid,
-          input.dateOfBirth,
-        );
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update date of birth.",
-        });
-      }
+      await ctx.services.profile.updateDateOfBirth(
+        ctx.session.uid,
+        input.dateOfBirth,
+      );
     }),
 
   updateUsername: protectedProcedure
     .input(trpcValidators.user.updateUsername)
     .mutation(async ({ input, ctx }) => {
-      try {
-        return await Services.user.updateUserUsername(
-          ctx.session.uid,
-          input.username,
-        );
-      } catch (error) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Username already taken",
-        });
-      }
+      await ctx.services.user.updateUsername(ctx.session.uid, input.username);
     }),
 
-    updateNotificationSettings: protectedProcedure
+  updateNotificationSettings: protectedProcedure
     .input(trpcValidators.user.updateNotificationSettings)
     .mutation(async ({ input, ctx }) => {
-      try {
-        return await Services.user.updateNotificationSettings(
-          ctx.session.uid,
-          input,
-        );
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update notification settings.",
-        });
-      }
+      await ctx.services.user.updateNotificationSettings(
+        ctx.session.uid,
+        input,
+      );
     }),
-
 });

@@ -1,36 +1,40 @@
-import { and, count, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const likesRepository = {
-  addLike: async (postId: number, userId: string) => {
-    const result = await db
+import { handleDatabaseErrors } from "../errors";
+
+export class LikesRepository {
+  private db = db;
+
+  @handleDatabaseErrors
+  async addLike(postId: number, userId: string) {
+    return await this.db
       .insert(schema.like)
-      .values({ post: postId, user: userId });
-    return result[0].insertId;
-  },
+      .values({ postId, user: userId })
+      .execute();
+  }
 
-  removeLike: async (postId: number, userId: string) => {
-    await db
+  @handleDatabaseErrors
+  async removeLike(postId: number, userId: string) {
+    await this.db
       .delete(schema.like)
-      .where(and(eq(schema.like.post, postId), eq(schema.like.user, userId)));
-  },
+      .where(and(eq(schema.like.postId, postId), eq(schema.like.user, userId)));
+  }
 
-  countLikes: async (postId: number) => {
-    const result = await db
-      .select({ count: count() })
-      .from(schema.like)
-      .where(eq(schema.like.post, postId));
-    return result[0]?.count;
-  },
+  @handleDatabaseErrors
+  async countLikes(postId: number) {
+    const like = await this.db.query.like.findMany({
+      where: eq(schema.like.postId, postId),
+    });
+    return like.length;
+  }
 
-  hasUserLiked: async (postId: number, userId: string) => {
-    const result = await db
-      .select()
-      .from(schema.like)
-      .where(and(eq(schema.like.post, postId), eq(schema.like.user, userId)));
-    return result.length > 0;
-  },
-};
-
-export default likesRepository;
+  @handleDatabaseErrors
+  async hasUserLiked(postId: number, userId: string) {
+    const like = await this.db.query.like.findFirst({
+      where: and(eq(schema.like.postId, postId), eq(schema.like.user, userId)),
+    });
+    return like !== undefined;
+  }
+}

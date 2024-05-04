@@ -13,10 +13,10 @@ import type { DecodedIdToken } from "firebase-admin/auth";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
-import Services from "./services";
 
 import { db, s3 } from "@acme/db";
 
+import { services } from "./services";
 import { auth } from "./utils/firebase";
 
 /**
@@ -46,9 +46,9 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     s3,
     db,
-    auth: auth,
+    auth,
+    services,
     session: opts.session,
-    services: Services
   };
 };
 

@@ -1,233 +1,175 @@
-import Services from ".";
-import repositories from "../repositories";
-import UserService from "./user";
+import { DomainError, ErrorCodes } from "../errors";
+import { AwsRepository } from "../repositories/aws";
+import { FollowerRepository } from "../repositories/follower";
+import { FriendsRepository } from "../repositories/friend";
+import { PostRepository } from "../repositories/post";
+import { ProfileRepository } from "../repositories/profile";
+import { ProfilePictureRepository } from "../repositories/profilePicture";
+import { UserRepository } from "../repositories/user";
 
-const ProfileService = {
-  createProfile: async (userId: string) => {
-    try {
-      if (await UserService.userHasProfile(userId)) {
-        throw new Error("User already has a profile.");
-      }
+export class ProfileService {
+  private userRepository = new UserRepository();
+  private profileRepository = new ProfileRepository();
+  private profilePictureRepository = new ProfilePictureRepository();
+  private awsRepository = new AwsRepository();
+  private postRepository = new PostRepository();
+  private followersRepository = new FollowerRepository();
+  private friendsRepository = new FriendsRepository();
 
-      const profileId = await repositories.profile.createProfile(); // Updated repository access
-      await UserService.addProfile(userId, profileId);
-      await Services.profile.createAndLinkProfilePicture(profileId);
+  async createProfile(userId: string) {
+    const user = await this.userRepository.getUser(userId);
 
-      return profileId;
-    } catch (error) {
-      console.error(
-        "Error creating profile for user:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to create profile for user.");
+    if (user === undefined) {
+      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
     }
-  },
 
-  getProfileById: async (profileId: number) => {
-    try {
-      const profile = await repositories.profile.getProfile(profileId); // Updated repository access
-      if (!profile) {
-        throw new Error("Profile does not exist.");
-      }
-      return profile;
-    } catch (error) {
-      console.error(
-        "Error getting profile:",
-        profileId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to retrieve profile.");
+    const profile = await this.userRepository.getProfile(user.profileId);
+
+    if (profile !== undefined) {
+      throw new DomainError(ErrorCodes.PROFILE_ALREADY_EXISTS);
     }
-  },
 
-  getUserProfile: async (userId: string) => {
-    try {
-      const user = await UserService.getUser(userId);
-      return await ProfileService.getProfileById(user.profile);
-    } catch (error) {
-      console.error(
-        "Error retrieving profile by user ID:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to retrieve profile by user ID.");
+    const result = await this.profileRepository.createProfile();
+    await this.userRepository.addProfile(userId, result[0].insertId);
+  }
+
+  async getProfileByProfileId(profileId: number) {
+    const profile = await this.profileRepository.getProfile(profileId);
+
+    if (profile === undefined) {
+      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
-  },
 
-  updateFullName: async (userId: string, name: string) => {
-    try {
-      const profile = await ProfileService.getUserProfile(userId);
-      await repositories.profile.updateProfileName(profile.id, name); // Updated repository access
-    } catch (error) {
-      console.error(
-        "Error updating profile name:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to update profile name.");
+    return profile;
+  }
+
+  async getUserProfileByUserId(userId: string) {
+    return await this._getUserProfileByUserId(userId);
+  }
+
+  async updateFullName(userId: string, fullName: string) {
+    const profile = await this._getUserProfileByUserId(userId);
+    await this.profileRepository.updateFullName(profile.id, fullName);
+  }
+
+  async updateDateOfBirth(userId: string, dateOfBirth: Date) {
+    const profile = await this._getUserProfileByUserId(userId);
+    await this.profileRepository.updateDateOfBirth(profile.id, dateOfBirth);
+  }
+
+  async updateProfilePicture(userId: string, key: string) {
+    const profile = await this._getUserProfileByUserId(userId);
+
+    if (profile === undefined) {
+      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
-  },
 
-  updateDateOfBirth: async (userId: string, dateOfBirth: Date) => {
-    try {
-      const profile = await ProfileService.getUserProfile(userId);
-      await repositories.profile.updateProfileDateOfBirth(
+    if (profile.profilePicture === null) {
+      const result =
+        await this.profilePictureRepository.storeProfilePictureKey(key);
+
+      await this.profilePictureRepository.addProfilePictureToProfile(
         profile.id,
-        dateOfBirth,
-      ); // Updated repository access
-    } catch (error) {
-      console.error(
-        "Error updating profile date of birth:",
-        userId,
-        error instanceof Error ? error.message : error,
+        result[0].insertId,
       );
-      throw new Error("Failed to update profile date of birth.");
+
+      return;
     }
-  },
 
-  uploadProfilePicture: async (userId: string, key: string) => {
-    try {
-      const profile = await ProfileService.getUserProfile(userId);
+    await this.profilePictureRepository.updateProfilePictureKey(
+      profile.profilePicture,
+      key,
+    );
+  }
 
-      // New Profile Photo
-      if (!profile.profilePhoto) {
-        return await ProfileService.createAndLinkProfilePicture(profile.id, key);
-      }
+  private async _getUserProfileByUserId(userId: string) {
+    const user = await this.userRepository.getUser(userId);
 
-      const profilePhoto = await repositories.profilePhoto.getProfilePhoto(
-        profile.profilePhoto,
-      );
-
-      if (!profilePhoto) {
-        throw new Error("Profile photo does not exist.");
-      }
-
-      return await repositories.profilePhoto.updateProfilePhoto(
-        profilePhoto.id,
-        userId
-      );
-    } catch (error) {
-      console.error(
-        "Error uploading profile photo:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to upload profile photo.");
+    if (user === undefined) {
+      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
     }
-  },
 
-  createAndLinkProfilePicture: async (profileId: number, key = "profile-pictures/default.jpg") => {
-    try {
-      return await repositories.profilePhoto.createProfilePhoto(key);
-    } catch (error) {
-      console.error(
-        "Error creating and linking profile photo:",
-        profileId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to create and link profile photo.");
+    const profile = await this.userRepository.getProfile(user.profileId);
+
+    if (profile === undefined) {
+      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
-  },
 
-  // for current user
-  getUserProfilePicture: async (userId: string): Promise<string> => {
-      const bucket = process.env.S3_POST_BUCKET!;
-      const key = `profile-pictures/${userId}.jpg`;
-    try {
-      return await Services.aws.objectPresignedUrl(bucket, key);
-    } catch (err) {
-      console.error(`Error retrieving object: ${key}`, err);
-      throw new Error(`Failed to retrieve object from S3 for user ${userId}`);
-    }
-  },
+    return profile;
+  }
 
-  getProfileDetails: async (userId: string) => {
-    try {
-      const user = await UserService.getUser(userId);
-      if (!user) {
-        throw new Error("User not found.");
-      }
-
-      const profile = await ProfileService.getUserProfile(userId);
-      const profilePhoto = await ProfileService.getUserProfilePicture(userId);
-      const posts = await Services.post.getUserPosts(userId);
-      const { followerCount, followingCount, friendCount } = await Services.userNetwork.getUserStats(
-        userId,
-      );
-
-      return {
-        userId: user.id,
-        username: user.username,
-        name: profile.name,
-        bio: profile.bio,
-        profilePhoto,
-        posts,
-        followerCount,
-        followingCount,
-        friendCount,
-      };
-    } catch (error) {
-      console.error(
-        "Error getting profile details:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to retrieve profile details.");
-    }
-  },
-
-  // Batch get operation for multiple profile pictures
-  getProfilePictureBatch: async (
-    userIds: string[],
-  ): Promise<Record<string, string | null>> => {
+  async getUserProfilePicture(userId: string) {
     const bucket = process.env.S3_POST_BUCKET!;
-    const result: Record<string, string | null> = {};
+    const key = `profile-pictures/${userId}.jpg`;
 
-    const urlPromises = userIds.map(async (userId) => {
-      try {
-        const url = await Services.aws.objectPresignedUrl(
-          bucket,
-          `profile-pictures/${userId}.jpg`,
-        );
-        result[userId] = url;
-      } catch (err) {
-        console.error(
-          `Error retrieving object: profile-pictures/${userId}.jpg`,
-          err,
-        );
-        return `Failed to retrieve object from S3 for user ${userId}`;
-      }
+    return await this.awsRepository.putObjectPresignedUrl({
+      Bucket: bucket,
+      Key: key,
     });
-    await Promise.all(urlPromises);
-    return result;
-  },
+  }
 
-  deleteProfilePicture: async (userId: string) => {
-    try {
-      const profile = await ProfileService.getUserProfile(userId);
-      if (!profile.profilePhoto) {
-        throw new Error("Profile does not have a profile photo.");
-      }
-      
-      const bucket = process.env.S3_POST_BUCKET!;
-      const key = `profile-pictures/${userId}.jpg`;
-      const deleted = await Services.aws.deleteObject(bucket, key);
+  async getProfileDetails(userId: string) {
+    const user = await this.userRepository.getUser(userId);
 
-      if (!deleted.DeleteMarker) {
-        throw new Error("Failed to delete profile photo from S3.");
-      }
-
-      return await repositories.profilePhoto.deleteProfilePhoto(profile.profilePhoto);
-    } catch (error) {
-      console.error(
-        "Error deleting profile photo:",
-        userId,
-        error instanceof Error ? error.message : error,
-      );
-      throw new Error("Failed to delete profile photo.");
+    if (user === undefined) {
+      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
     }
-  },
-};
 
-export default ProfileService;
+    const profile = await this.userRepository.getProfile(user.profileId);
+
+    if (profile === undefined) {
+      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+    }
+
+    const profilePhoto = await this.getUserProfilePicture(userId);
+
+    const posts = this.postRepository.getAllPosts(userId);
+
+    const followerCount = await this.followersRepository.followerCount(userId);
+    const followingCount =
+      await this.followersRepository.followingCount(userId);
+    const friendCount = await this.friendsRepository.friendsCount(userId);
+
+    return {
+      userId: user.id,
+      username: user.username,
+      fullName: profile.fullName,
+      bio: profile.bio,
+      profilePhoto,
+      posts,
+      followerCount,
+      followingCount,
+      friendCount,
+    };
+  }
+
+  async deleteProfilePicture(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+    }
+
+    const profile = await this.profileRepository.getProfile(user.profileId);
+
+    if (profile === undefined) {
+      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+    }
+
+    if (profile.profilePicture === null) {
+      throw new DomainError(ErrorCodes.PROFILE_PICTURE_NOT_FOUND);
+    }
+
+    const bucket = process.env.S3_POST_BUCKET!;
+    const key = `profile-pictures/${userId}.jpg`;
+    const deleteObject = await this.awsRepository.deleteObject(bucket, key);
+
+    if (!deleteObject.DeleteMarker) {
+      throw new DomainError(ErrorCodes.FAILED_TO_DELETE);
+    }
+
+    await this.profilePictureRepository.deleteProfilePicture(
+      profile.profilePicture,
+    );
+  }
+}

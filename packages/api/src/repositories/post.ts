@@ -1,63 +1,59 @@
-// src/repository/PostRepository.ts
 import { eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
-const postRepository = {
-  createPost: async (
+import { handleDatabaseErrors } from "../errors";
+
+export class PostRepository {
+  private db = db;
+
+  @handleDatabaseErrors
+  async createPost(
+    key: string,
     author: string,
-    friend: string,
+    recipient: string,
     caption: string,
-    objectKey: string,
-  ) => {
-    const result = await db
+  ) {
+    return await this.db
       .insert(schema.post)
       .values({
+        key,
         author,
-        recipient: friend,
+        recipient,
         caption,
-        key: objectKey,
       })
       .execute();
-    return result[0].insertId; // Assuming auto-increment ID
-  },
+  }
 
-  getPost: async (postId: number) => {
-    const result = await db
-      .select()
-      .from(schema.post)
-      .where(eq(schema.post.id, postId))
-      .execute();
-    return result[0]; // Assuming unique key
-  },
+  @handleDatabaseErrors
+  async getPost(postId: number) {
+    return await this.db.query.post.findFirst({
+      where: eq(schema.post.id, postId),
+    });
+  }
 
-  allUserPosts: async (userId: string) => {
-    const result = await db
-      .select()
-      .from(schema.post)
-      .where(eq(schema.post.author, userId));
-    return result;
-  },
+  @handleDatabaseErrors
+  async getAllPosts(userId: string) {
+    return await this.db.query.post.findMany({
+      where: eq(schema.post.author, userId),
+    });
+  }
 
-  updatePost: async (postId: number, newCaption: string) => {
-    await db
+  @handleDatabaseErrors
+  async updatePost(postId: number, newCaption: string) {
+    await this.db
       .update(schema.post)
       .set({ caption: newCaption })
-      .where(eq(schema.post.id, postId))
-      .execute();
-  },
+      .where(eq(schema.post.id, postId));
+  }
 
-  deletePost: async (postId: number) => {
-    await db.delete(schema.post).where(eq(schema.post.id, postId)).execute();
-  },
+  @handleDatabaseErrors
+  async createPostStats(postId: number) {
+    return await this.db.insert(schema.postStats).values({ postId });
+  }
 
-  createPostStats: async (postId: number) => {
-    const result = await db
-      .insert(schema.postStats)
-      .values({ post: postId })
-      .execute();
-      return result[0].insertId; // Assuming auto-increment ID
-  },
-};
-
-export default postRepository;
+  @handleDatabaseErrors
+  async deletePost(postId: number) {
+    await this.db.delete(schema.post).where(eq(schema.post.id, postId));
+  }
+}

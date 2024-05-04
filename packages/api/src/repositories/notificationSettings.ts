@@ -1,26 +1,35 @@
 import { eq } from "drizzle-orm";
+import type { z } from "zod";
 
 import { db, schema } from "@acme/db";
+import type { trpcValidators } from "@acme/validators";
 
-const notificationSettingRepository = {
-  getNotificationSettings: async (notificationSettingId: number) => {
-    const notificationSettings = await db
-      .selectDistinct()
-      .from(schema.notificationSetting)
-      .where(eq(schema.notificationSetting.id, notificationSettingId));
-    return notificationSettings[0];
-  },
+import { handleDatabaseErrors } from "../errors";
 
-  updateNotificationSetting: async (
-    notificationSettingId: number,
-    key: keyof typeof schema.notificationSetting,
-    newValue: boolean,
-  ) => {
-    await db
-      .update(schema.notificationSetting)
-      .set({ [key]: newValue })
-      .where(eq(schema.notificationSetting.id, notificationSettingId));
-  },
-};
+export type NotificationSettings = z.infer<
+  typeof trpcValidators.user.updateNotificationSettings
+>;
 
-export default notificationSettingRepository;
+export class NotificationSettingsRepository {
+  private db = db;
+
+  @handleDatabaseErrors
+  async getNotificationSettings(notificationSettingId: number) {
+    return await this.db.query.notificationSettings.findFirst({
+      where: eq(schema.notificationSettings.id, notificationSettingId),
+    });
+  }
+
+  @handleDatabaseErrors
+  async updateNotificationSettings(
+    notificationSettingsId: number,
+    notificationSettings: NotificationSettings,
+  ) {
+    await this.db
+      .update(schema.notificationSettings)
+      .set({
+        ...notificationSettings,
+      })
+      .where(eq(schema.notificationSettings.id, notificationSettingsId));
+  }
+}
