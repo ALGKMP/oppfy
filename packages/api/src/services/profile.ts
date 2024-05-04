@@ -16,73 +16,30 @@ export class ProfileService {
   private followersRepository = new FollowerRepository();
   private friendsRepository = new FriendsRepository();
 
-  async createProfile(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
-    }
-
-    const profile = await this.userRepository.getProfile(user.profileId);
-
-    if (profile !== undefined) {
-      throw new DomainError(ErrorCodes.PROFILE_ALREADY_EXISTS);
-    }
-
-    const result = await this.profileRepository.createProfile();
-    await this.userRepository.addProfile(userId, result[0].insertId);
-  }
-
-  async getProfileByProfileId(profileId: number) {
-    const profile = await this.profileRepository.getProfile(profileId);
-
-    if (profile === undefined) {
-      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
-    }
-
-    return profile;
-  }
-
-  async getUserProfileByUserId(userId: string) {
-    return await this._getUserProfileByUserId(userId);
-  }
-
   async updateFullName(userId: string, fullName: string) {
-    const profile = await this._getUserProfileByUserId(userId);
+    const profile = await this.getUserProfile(userId);
     await this.profileRepository.updateFullName(profile.id, fullName);
   }
 
   async updateDateOfBirth(userId: string, dateOfBirth: Date) {
-    const profile = await this._getUserProfileByUserId(userId);
+    const profile = await this.getUserProfile(userId);
     await this.profileRepository.updateDateOfBirth(profile.id, dateOfBirth);
   }
 
   async updateProfilePicture(userId: string, key: string) {
-    const profile = await this._getUserProfileByUserId(userId);
+    const profile = await this.getUserProfile(userId);
 
     if (profile === undefined) {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
-    if (profile.profilePictureId === null) {
-      const result =
-        await this.profilePictureRepository.storeProfilePictureKey(key);
-
-      await this.profilePictureRepository.addProfilePictureToProfile(
-        profile.id,
-        result[0].insertId,
-      );
-
-      return;
-    }
-
-    await this.profilePictureRepository.updateProfilePictureKey(
+    await this.profilePictureRepository.updateProfilePicture(
       profile.profilePictureId,
       key,
     );
   }
 
-  private async _getUserProfileByUserId(userId: string) {
+  async getUserProfile(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
@@ -98,7 +55,7 @@ export class ProfileService {
     return profile;
   }
 
-  async getUserProfilePicture(userId: string) {
+  async getProfilePicture(userId: string) {
     const bucket = process.env.S3_POST_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
 
@@ -121,7 +78,7 @@ export class ProfileService {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
-    const profilePicture = await this.getUserProfilePicture(userId);
+    const profilePicture = await this.getProfilePicture(userId);
 
     const posts = this.postRepository.getAllPosts(userId);
 
@@ -143,7 +100,7 @@ export class ProfileService {
     };
   }
 
-  async deleteProfilePicture(userId: string) {
+  async removeProfilePicture(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
@@ -156,10 +113,6 @@ export class ProfileService {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
-    if (profile.profilePictureId === null) {
-      throw new DomainError(ErrorCodes.PROFILE_PICTURE_NOT_FOUND);
-    }
-
     const bucket = process.env.S3_POST_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
     const deleteObject = await this.awsRepository.deleteObject(bucket, key);
@@ -168,7 +121,7 @@ export class ProfileService {
       throw new DomainError(ErrorCodes.FAILED_TO_DELETE);
     }
 
-    await this.profilePictureRepository.deleteProfilePicture(
+    await this.profilePictureRepository.removeProfilePicture(
       profile.profilePictureId,
     );
   }

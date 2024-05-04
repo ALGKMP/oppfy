@@ -15,12 +15,7 @@ export class ProfilePictureRepository {
   }
 
   @handleDatabaseErrors
-  async storeProfilePictureKey(key: string) {
-    return await this.db.insert(schema.profilePicture).values({ key });
-  }
-
-  @handleDatabaseErrors
-  async updateProfilePictureKey(profilePictureId: number, newKey: string) {
+  async updateProfilePicture(profilePictureId: number, newKey: string) {
     await this.db
       .update(schema.profilePicture)
       .set({ key: newKey })
@@ -28,20 +23,10 @@ export class ProfilePictureRepository {
   }
 
   @handleDatabaseErrors
-  async addProfilePictureToProfile(
-    profileId: number,
-    profilePictureId: number,
-  ) {
+  async removeProfilePicture(profilePictureId: number) {
     await this.db
-      .update(schema.profile)
-      .set({ profilePictureId: profilePictureId })
-      .where(eq(schema.profile.id, profileId));
-  }
-
-  @handleDatabaseErrors
-  async deleteProfilePicture(profilePictureId: number) {
-    await this.db
-      .delete(schema.profilePicture)
+      .update(schema.profilePicture)
+      .set({ key: null })
       .where(eq(schema.profilePicture.id, profilePictureId));
   }
 }

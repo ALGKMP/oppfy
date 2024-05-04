@@ -8,16 +8,6 @@ export class UserService {
   private userRepository = new UserRepository();
   private notificationSettingsRepository = new NotificationSettingsRepository();
 
-  async createUser(userId: string) {
-    const userExists = await this._userExists(userId);
-
-    if (userExists) {
-      throw new DomainError(ErrorCodes.USER_ALREADY_EXISTS);
-    }
-
-    await this.userRepository.createUser(userId);
-  }
-
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
@@ -28,14 +18,14 @@ export class UserService {
     return user;
   }
 
-  async getProfile(userId: string) {
-    const user = await this.userRepository.getUser(userId);
+  async createUser(userId: string) {
+    const userExists = await this._userExists(userId);
 
-    if (user === undefined) {
-      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+    if (userExists) {
+      throw new DomainError(ErrorCodes.USER_ALREADY_EXISTS);
     }
 
-    return await this.userRepository.getProfile(user.profileId);
+    await this.userRepository.createUser(userId);
   }
 
   async deleteUser(userId: string) {
@@ -67,17 +57,6 @@ export class UserService {
     }
 
     await this.userRepository.updateUsername(userId, newUsername);
-  }
-
-  async userHasProfile(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
-    }
-
-    const profile = await this.userRepository.getProfile(user.profileId);
-    return profile !== undefined;
   }
 
   async userOnboardingCompleted(userId: string) {

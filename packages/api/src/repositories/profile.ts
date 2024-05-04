@@ -15,11 +15,6 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  async createProfile() {
-    return await this.db.insert(schema.profile).values({});
-  }
-
-  @handleDatabaseErrors
   async updateFullName(profileId: number, newName: string) {
     return await this.db
       .update(schema.profile)
@@ -32,13 +27,6 @@ export class ProfileRepository {
     return await this.db
       .update(schema.profile)
       .set({ dateOfBirth: newDateOfBirth })
-      .where(eq(schema.profile.id, profileId));
-  }
-
-  @handleDatabaseErrors
-  async deleteProfile(profileId: number) {
-    return await this.db
-      .delete(schema.profile)
       .where(eq(schema.profile.id, profileId));
   }
 }

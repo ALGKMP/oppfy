@@ -49,6 +49,6 @@ export const profileRouter = createTRPCRouter({
   }),
 
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.services.profile.deleteProfilePicture(ctx.session.uid);
+    await ctx.services.profile.removeProfilePicture(ctx.session.uid);
   }),
 });
