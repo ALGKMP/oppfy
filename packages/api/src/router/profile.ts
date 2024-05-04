@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { trpcValidators } from "@acme/validators";
+import { sharedValidators, trpcValidators } from "@acme/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -44,11 +44,34 @@ export const profileRouter = createTRPCRouter({
       await ctx.services.profile.updateProfilePicture(input.user, input.key);
     }),
 
-  getProfileDetails: protectedProcedure.query(async ({ ctx }) => {
-    await ctx.services.profile.getProfileDetails(ctx.session.uid);
-  }),
-
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.services.profile.removeProfilePicture(ctx.session.uid);
   }),
+
+  getBasicProfile: publicProcedure
+  .input(z.object({
+    userId: z.string(),
+  }))
+  .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
+  .query(async ({ ctx, input }) => {
+    return await ctx.services.profile.getBasicProfile(input.userId);
+  }),
+
+getFullProfile: protectedProcedure
+  .input(z.object({
+    userId: z.string(),
+  }))
+  .output(sharedValidators.user.fullProfile) // Make sure this shit doesn't return more than necessary
+  .query(async ({ ctx, input }) => {
+    return await ctx.services.profile.getFullProfile(input.userId);
+  }),
+
+  // TODO: paginate getting followers
+
+  // TODO: paginate getting following
+
+  // TODO: paginate getting friends
+
+  // TODO: paginate getting posts
+
 });

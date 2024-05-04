@@ -1,3 +1,5 @@
+import { sharedValidators } from "@acme/validators";
+
 import { DomainError, ErrorCodes } from "../errors";
 import { AwsRepository } from "../repositories/aws";
 import { FollowerRepository } from "../repositories/follower";
@@ -65,39 +67,70 @@ export class ProfileService {
     });
   }
 
-  async getProfileDetails(userId: string) {
+  async getBasicProfile(userId: string) {
     const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
+    if (!user) {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);
     }
 
-    const profile = await this.userRepository.getProfile(user.profileId);
-
-    if (profile === undefined) {
+    const profile = await this.profileRepository.getProfile(user.profileId);
+    if (!profile) {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
-    const profilePicture = await this.getProfilePicture(userId);
-
-    const posts = this.postRepository.getAllPosts(userId);
-
-    const followerCount = await this.followersRepository.followerCount(userId);
-    const followingCount =
-      await this.followersRepository.followingCount(userId);
-    const friendCount = await this.friendsRepository.friendsCount(userId);
-
-    return {
+    return sharedValidators.user.basicProfile.parse({
       userId: user.id,
       username: user.username,
-      fullName: profile.fullName,
+      name: profile.fullName,
+      profilePictureUrl: profile.profilePictureId,
+    });
+  }
+
+  async getFullProfile(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+    }
+
+    const profile = await this.profileRepository.getProfile(user.profileId);
+    if (!profile) {
+      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+    }
+
+    const followerCount = await this.followersRepository.countFollowers(userId);
+    if (!followerCount) {
+      throw new DomainError(ErrorCodes.FAILED_TO_COUNT_FOLLOWERS);
+    }
+
+    const followingCount =
+      await this.followersRepository.countFollowing(userId);
+    if (!followingCount) {
+      throw new DomainError(ErrorCodes.FAILED_TO_COUNT_FOLLOWING);
+    }
+
+    const friendCount = await this.friendsRepository.friendsCount(userId);
+    if (!friendCount) {
+      throw new DomainError(ErrorCodes.FAILED_TO_COUNT_FRIENDS);
+    }
+
+    let profilePictureUrl = null;
+    if (profile.profilePictureId) {
+      profilePictureUrl = await this.getProfilePicture(userId);
+      if (!profilePictureUrl) {
+        throw new DomainError(ErrorCodes.PROFILE_PICTURE_NOT_FOUND);
+      }
+    }
+
+    return sharedValidators.user.fullProfile.parse({
+      userId: user.id,
+      username: user.username,
+      name: profile.fullName,
       bio: profile.bio,
-      profilePicture,
-      posts,
       followerCount,
       followingCount,
       friendCount,
-    };
+      profilePictureUrl,
+    });
   }
 
   async removeProfilePicture(userId: string) {
@@ -124,14 +157,14 @@ export class ProfileService {
     await this.profilePictureRepository.removeProfilePicture(
       profile.profilePictureId,
     );
-  };
+  }
 
   async getUserStats(userId: string) {
-    const followerCount = await this.followersRepository.followerCount(userId);
+    const followerCount = await this.followersRepository.countFollowers(userId);
     const followingCount =
-      await this.followersRepository.followingCount(userId);
+      await this.followersRepository.countFollowing(userId);
     const friendCount = await this.friendsRepository.friendsCount(userId);
 
     return { followerCount, followingCount, friendCount };
-  };
+  }
 }

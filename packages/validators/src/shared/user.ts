@@ -6,6 +6,7 @@ import { AgeChecker } from "@acme/utils";
 
 export const userId = z.string();
 export const profileId = z.string();
+export const profilePicture = z.union([z.string(), z.null()]);
 
 export const fullName = z
   .string()
@@ -32,19 +33,21 @@ export const phoneNumber = z
 
 export const phoneNumberOTP = z.string().length(6);
 
-// export const profileData = z.object({
-//     userId: z.string(),
-//     username: z.string(),
-//     bio: z.string().optional(),
-//     profilePhotoUrl: z.string().optional(),
-//     posts: z.array(z.object({
-//       postId: z.number(),
-//       caption: z.string(),
-//       imageUrl: z.string(),
-//       createdAt: z.string(),
-//       likes: z.number(),
-//       comments: z.number(),
-//     })),
-//     followersCount: z.number(),
-//     followingCount: z.number(),
-//   });
+// Use this for displaying profile header
+export const basicProfile = z.object({
+  userId: z.string(),
+  username: z.string(),
+  name: z.string(),
+  profilePictureUrl: profilePicture,
+})
+
+export const fullProfile = z.object({
+  userId: z.string(),
+  username: z.string(),
+  name: z.string(),
+  bio: z.union([z.string(), z.null()]),
+  followerCount: z.number(),
+  followingCount: z.number(),
+  friendCount: z.number(),
+  profilePictureUrl: profilePicture,
+})
