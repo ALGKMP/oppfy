@@ -49,22 +49,26 @@ export const profileRouter = createTRPCRouter({
   }),
 
   getBasicProfile: publicProcedure
-  .input(z.object({
-    userId: z.string(),
-  }))
-  .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
-  .query(async ({ ctx, input }) => {
-    return await ctx.services.profile.getBasicProfile(input.userId);
-  }),
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
+    .query(async ({ ctx, input }) => {
+      return await ctx.services.profile.getBasicProfile(input.userId);
+    }),
 
-getFullProfile: protectedProcedure
-  .input(z.object({
-    userId: z.string(),
-  }))
-  .output(sharedValidators.user.fullProfile) // Make sure this shit doesn't return more than necessary
-  .query(async ({ ctx, input }) => {
-    return await ctx.services.profile.getFullProfile(input.userId);
-  }),
+  getFullProfile: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .output(sharedValidators.user.fullProfile) // Make sure this shit doesn't return more than necessary
+    .query(async ({ ctx, input }) => {
+      return await ctx.services.profile.getFullProfile(input.userId);
+    }),
 
   // TODO: paginate getting followers
 
@@ -73,5 +77,4 @@ getFullProfile: protectedProcedure
   // TODO: paginate getting friends
 
   // TODO: paginate getting posts
-
 });

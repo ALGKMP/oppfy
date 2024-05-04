@@ -27,6 +27,10 @@ export const userRouter = createTRPCRouter({
       await ctx.services.user.updateUsername(ctx.session.uid, input.username);
     }),
 
+  getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.services.user.getUserNotificationSettings(ctx.session.uid);
+  }),
+
   updateNotificationSettings: protectedProcedure
     .input(trpcValidators.user.updateNotificationSettings)
     .mutation(async ({ input, ctx }) => {
