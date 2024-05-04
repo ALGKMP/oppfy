@@ -124,5 +124,14 @@ export class ProfileService {
     await this.profilePictureRepository.removeProfilePicture(
       profile.profilePictureId,
     );
-  }
+  };
+
+  async getUserStats(userId: string) {
+    const followerCount = await this.followersRepository.followerCount(userId);
+    const followingCount =
+      await this.followersRepository.followingCount(userId);
+    const friendCount = await this.friendsRepository.friendsCount(userId);
+
+    return { followerCount, followingCount, friendCount };
+  };
 }
