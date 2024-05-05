@@ -42,6 +42,9 @@ const trpcUserSchema = {
     userId,
     blockedUserId: userId,
   }),
+  followUser: z.object({
+    followerId: userId
+  })
 };
 
 export default trpcUserSchema;

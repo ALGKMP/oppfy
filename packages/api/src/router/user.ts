@@ -99,13 +99,13 @@ export const userRouter = createTRPCRouter({
   .input(trpcValidators.user.unblockUser)
   .mutation(async ({input, ctx}) => {
     return await ctx.services.user.unblockUser(ctx.session.uid, input.blockedUserId);
-  })
+  }),
 
   // TODO: Follow user - don't forget to check if the account is private, and neither are blocked
   followUser: protectedProcedure
   .input(trpcValidators.user.followUser)
   .mutation(async ({input, ctx})=> {
-    return await ctx.services.user.followUser(ctx.session.uid, input.followedId)
+    return await ctx.services.user.followUser(ctx.session.uid, input.followerId)
   })
 
   // TODO: Unfollow user - just delete the row

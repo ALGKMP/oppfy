@@ -24,14 +24,17 @@ export class FollowerRepository {
           eq(schema.follower.followerId, followerId),
         ),
       );
-      return result[0] // TODO: this feels wierd, I though this returned a delete marker
+    return result[0]; // TODO: this feels wierd, I though this returned a delete marker
   }
 
   @handleDatabaseErrors
   async getFollower(followerId: string, followedId: string) {
     return await this.db.query.follower.findFirst({
-      where: and(eq(schema.follower.followerId, followerId), eq(schema.follower.followedId, followedId))
-    })
+      where: and(
+        eq(schema.follower.followerId, followerId),
+        eq(schema.follower.followedId, followedId),
+      ),
+    });
   }
 
   @handleDatabaseErrors

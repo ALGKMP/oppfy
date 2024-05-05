@@ -164,8 +164,8 @@ export class UserService {
     return await this.userRepository.getPaginatedFollowing(cursor);
   }
 
-  async isFollowing(followedId: string, followerId: string) {
-    return !!(await this.followRepository.getFollower(followedId, followerId))
+  async isFollowing(followerId: string, followedId: string) {
+    return !!(await this.followRepository.getFollower(followerId, followedId))
   }
 
   async getFollowRequests(userId: string) {
@@ -173,7 +173,6 @@ export class UserService {
   };
 
   async blockUser(userId: string, blockUserId: string) {
-    // TODO: I think this removes all other relationships
     if (await this.isFollowing(userId, blockUserId)) {
       const a = await this.followRepository.removeFollower(userId, blockUserId);
       if (!a) { // giving up on variable names
@@ -214,7 +213,7 @@ export class UserService {
   }
 
   async followUser(followerId:string, followedId: string) {
-    const alreadyFollowing = await this.isFollowing(followedId, followerId);
+    const alreadyFollowing = await this.isFollowing(followerId, followedId);
     if (alreadyFollowing) {
       throw new DomainError(ErrorCodes.USER_ALREADY_FOLLOWED);
     }
