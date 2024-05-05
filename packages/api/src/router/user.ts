@@ -39,4 +39,25 @@ export const userRouter = createTRPCRouter({
         input,
       );
     }),
+
+    getFriends: protectedProcedure
+    .input(trpcValidators.user.getFriends)
+    .mutation(async ({input, ctx}) => {
+      return await ctx.services.user.getFriends(input.userId);
+    }) 
+
+  // TODO: Follow user (sends a follow request if user account is private)
+
+  // TODO: Unfollow user
+
+  // TODO: Block user
+
+  // TODO: send friend request
+
+  // TODO: accept friend request
+
+  // TODO: reject friend request
+
+  // TODO: remove friend
+
 });

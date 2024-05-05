@@ -152,18 +152,4 @@ export class UserService {
     return this.userRepository.getPaginatedFollowing(cursor);
   }
 
-  // TODO: Follow user (sends a follow request if user account is private)
-
-  // TODO: Unfollow user
-
-  // TODO: Block user
-
-  // TODO: send friend request
-
-  // TODO: accept friend request
-
-  // TODO: reject friend request
-
-  // TODO: remove friend
-
 }

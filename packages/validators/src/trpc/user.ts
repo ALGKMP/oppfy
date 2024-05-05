@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 import { dateOfBirth, fullName, userId, username } from "../shared/user";
-import { createInsertSchema } from 'drizzle-zod';
-import { schema } from "@acme/db";
 
 const trpcUserSchema = {
   userId,
@@ -26,6 +24,15 @@ const trpcUserSchema = {
     likes: z.boolean().optional(),
     friendRequests: z.boolean().optional(),
   }),
+  getFriends: z.object({
+    userId: z.string()
+  }),
+  getFollowers: z.object({
+    userId: z.string()
+  }),
+  getFollowing: z.object({
+    userId: z.string()
+  })
 };
 
 export default trpcUserSchema;
