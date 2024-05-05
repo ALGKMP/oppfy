@@ -132,24 +132,6 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedFollowRequests(cursor: string, pageSize = 10) {
-    return await this.db
-      .select({
-        userId: schema.user.id,
-        username: schema.user.username,
-        name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
-      })
-      .from(schema.user)
-      .fullJoin(schema.followRequest, eq(schema.user.id, schema.followRequest.requestedId))
-      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
-      .where(cursor ? gt(schema.user.id, cursor) : undefined)
-      .orderBy(asc(schema.user.createdAt))
-      .limit(pageSize);
-  }
-
-  @handleDatabaseErrors
   async getPaginatedFollowing(cursor: string, pageSize = 10) {
     return await this.db
       .select({
@@ -180,6 +162,42 @@ export class UserRepository {
       })
       .from(schema.user)
       .fullJoin(schema.friend, or(eq(schema.user.id, schema.friend.userId1), eq(schema.user.id, schema.friend.userId2)))
+      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .where(cursor ? gt(schema.user.id, cursor) : undefined)
+      .orderBy(asc(schema.user.createdAt))
+      .limit(pageSize);
+  }
+
+  @handleDatabaseErrors
+  async getPaginatedFollowRequests(cursor: string, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+      })
+      .from(schema.user)
+      .fullJoin(schema.followRequest, eq(schema.user.id, schema.followRequest.requestedId))
+      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .where(cursor ? gt(schema.user.id, cursor) : undefined)
+      .orderBy(asc(schema.user.createdAt))
+      .limit(pageSize);
+  }
+
+  @handleDatabaseErrors
+  async getPaginatedFriendRequests(cursor: string, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+      })
+      .from(schema.user)
+      .fullJoin(schema.friendRequest, eq(schema.user.id, schema.friendRequest.requestedId))
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
