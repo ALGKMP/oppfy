@@ -139,29 +139,37 @@ export class UserService {
 
   async getFollowers(userId: string) {
     const cursor = userId
-    return this.userRepository.getPaginatedFollowers(cursor);
+    return await this.userRepository.getPaginatedFollowers(cursor);
   }
 
   async getFriends(userId: string) {
     const cursor = userId 
-    return this.userRepository.getPaginatedFriends(cursor);
+    return await this.userRepository.getPaginatedFriends(cursor);
   }
 
   async getFollowing(userId: string) {
     const cursor = userId
-    return this.userRepository.getPaginatedFollowing(cursor);
+    return await this.userRepository.getPaginatedFollowing(cursor);
   }
 
   async getFollowRequests(userId: string) {
-    return this.userRepository.getPaginatedFollowRequests(userId);
+    return await this.userRepository.getPaginatedFollowRequests(userId);
   }
 
   async getFriendRequests(userId: string) {
-    return this.userRepository.getPaginatedFriendRequests(userId);
+    return await this.userRepository.getPaginatedFriendRequests(userId);
   }
 
   async blockUser(userId: string, blockedUserId: string) {
     // TODO: remove all other relationshiops
     return await this.userRepository.blockUser(userId, blockedUserId);
+  }
+
+  async isUserBlocked(userId: string, blockedUserId: string) {
+    return !!(await this.userRepository.getBlockedUser(userId, blockedUserId));
+  }
+
+  async unblockUser(userId:string, blockedUserId: string) {
+    return await this.userRepository.unblockUser(userId, blockedUserId);
   }
 }

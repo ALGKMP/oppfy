@@ -74,15 +74,27 @@ export const userRouter = createTRPCRouter({
     return await ctx.services.user.getFollowRequests(ctx.session.uid);
   }),
 
-  // TODO: Block user - ig add another table for this, and remove any relationships (follow and friendship)
-  blockUser: protectedProcedure.input(trpcValidators.user.blockUser).mutation(async ({input, ctx}) => {
-    return await ctx.services.user.blokUser(ctx.session.uid, input.blockedUserId);
-  })
+  // TODO: Block user - REMOVE OTHER RELATIONSHIPS
+  blockUser: protectedProcedure
+    .input(trpcValidators.user.blockUser)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.blockUser(
+        ctx.session.uid,
+        input.blockedUserId,
+      );
+    }),
 
-  // TODO: isUserBlocked
+  // TODO: Test this
+  isUserBlocked: protectedProcedure
+    .input(trpcValidators.user.isUserBlocked)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.isUserBlocked(
+        ctx.session.uid,
+        input.blockedUserId,
+      );
+    }),
 
   // TODO: Unblock User
-
 
   // TODO: Follow user - don't forget to check if the account is private, and neither are blocked
 
@@ -96,11 +108,13 @@ export const userRouter = createTRPCRouter({
 
   // TODO: accept friend request - delete request (or change status) and add a new graph connection
 
-  // TODO: reject friend request - delete the request 
+  // TODO: reject friend request - delete the request
 
   // TODO: remove friend - delete the friend graph connection
 
   // TODO: remove follower - delete the follow network connection
 
   // TODO: check for follow and friend request
+
+  // TODO: paginate blocked users
 });

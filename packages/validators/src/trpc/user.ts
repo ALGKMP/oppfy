@@ -35,6 +35,10 @@ const trpcUserSchema = {
   }),
   blockUser: z.object({
     blockedUserId: userId
+  }),
+  isUserBlocked: z.object({
+    userId,
+    blockedUserId: userId
   })
 };
 

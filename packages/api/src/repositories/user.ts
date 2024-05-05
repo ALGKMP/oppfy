@@ -234,10 +234,17 @@ export class UserRepository {
   @handleDatabaseErrors
   async getBlockedUser(userId: string, blockedUserId: string) {
     return await this.db.query.block.findFirst({
-      where: and(
-        eq(schema.block.userId, userId),
-        eq(schema.block.blockedUserId, blockedUserId),
-      ),
+      // checking both sides (it's the same render on the client. You can only unblock in settings so we can do this)
+      where: or( 
+        and(
+          eq(schema.block.userId, userId),
+          eq(schema.block.blockedUserId, blockedUserId),
+        ),
+        and(
+          eq(schema.block.blockedUserId, userId),
+          eq(schema.block.userId, blockedUserId),
+        ),
+      )
     });
   }
 
