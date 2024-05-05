@@ -52,6 +52,12 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFollowers(input.userId);
     }), 
 
+    getFollowing: protectedProcedure
+    .input(trpcValidators.user.getFollowing)
+    .mutation(async ({input, ctx}) => {
+      return await ctx.services.user.getFollowing(input.userId);
+    }), 
+
 
   // TODO: Follow user (sends a follow request if user account is private)
 
