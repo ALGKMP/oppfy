@@ -34,8 +34,19 @@ export class FriendsRepository {
   }
 
   @handleDatabaseErrors
-  async getFriends(userId: string) {
-    return await this._getFriends(userId);
+  async getFriend(userId1: string, userId2: string) {
+    return await this.db.query.friend.findFirst({
+      where: or(
+        and(
+          eq(schema.friend.userId1, userId1),
+          eq(schema.friend.userId2, userId2),
+        ),
+        and(
+          eq(schema.friend.userId1, userId2),
+          eq(schema.friend.userId2, userId1),
+        ),
+      ),
+    });
   }
 
   @handleDatabaseErrors
