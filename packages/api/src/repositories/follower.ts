@@ -16,7 +16,7 @@ export class FollowerRepository {
 
   @handleDatabaseErrors
   async removeFollower(userId: string, followerId: string) {
-    await this.db
+    const result = await this.db
       .delete(schema.follower)
       .where(
         and(
@@ -24,11 +24,12 @@ export class FollowerRepository {
           eq(schema.follower.followerId, followerId),
         ),
       );
+      return result[0] // TODO: this feels wierd, I though this returned a delete marker
   }
 
   @handleDatabaseErrors
   async getFollower(followerId: string, followedId: string) {
-    await this.db.query.follower.findFirst({
+    return await this.db.query.follower.findFirst({
       where: and(eq(schema.follower.followerId, followerId), eq(schema.follower.followedId, followedId))
     })
   }

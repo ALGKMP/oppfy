@@ -163,13 +163,24 @@ export class UserService {
   }
 
   async isFollowing(followedId: string, followerId: string) {
-    return await this.followRepository.getFollower(followedId, followerId);
+    return !!(await this.followRepository.getFollower(followedId, followerId))
   }
 
   async blockUser(userId: string, blockedUserId: string) {
-    // TODO: remove all other relationshiops
-    // const a = await this.followRepository.removeFollower(userId, blockedUserId);
-    // const b = await this.followRepository.removeFollower(blockedUserId, userId);
+    // TODO: I think this removes all other relationships
+    if (await this.isFollowing(userId, blockedUserId)) {
+      const a = await this.followRepository.removeFollower(userId, blockedUserId);
+      if (!a) { // gave up on variable names
+        throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER)
+      }
+    }
+
+    if (await this.isFollowing(blockedUserId, userId)) {
+      const b = await this.followRepository.removeFollower(blockedUserId, userId);
+      if (!b) {
+        throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER)
+      }
+    }
 
     const result = await this.userRepository.blockUser(userId, blockedUserId);
     if (!result) {
