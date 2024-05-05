@@ -5,7 +5,16 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import Fuse from "fuse.js";
-import { Button, Input, Text, useTheme, View, XStack, YStack } from "tamagui";
+import {
+  Button,
+  Input,
+  SizableText,
+  Text,
+  useTheme,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import { sharedValidators } from "@acme/validators";
 
@@ -212,9 +221,9 @@ const CountriesFlashList = ({
           // Render header
           return (
             <View marginVertical={8}>
-              <Text fontSize={10} fontWeight="600">
+              <SizableText size="$1" theme="alt1">
                 {item}
-              </Text>
+              </SizableText>
             </View>
           );
         } else {
