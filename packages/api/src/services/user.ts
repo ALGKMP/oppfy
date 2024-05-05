@@ -137,6 +137,21 @@ export class UserService {
     return user !== undefined;
   }
 
+  async getFollowers(userId: string) {
+    const cursor = userId
+    return this.userRepository.getPaginatedFollowers(cursor);
+  }
+
+  async getFriends(userId: string) {
+    const cursor = userId 
+    return this.userRepository.getPaginatedFriends(cursor);
+  }
+
+  async getFollowing(userId: string) {
+    const cursor = userId
+    return this.userRepository.getPaginatedFollowing(cursor);
+  }
+
   // TODO: Follow user (sends a follow request if user account is private)
 
   // TODO: Unfollow user
