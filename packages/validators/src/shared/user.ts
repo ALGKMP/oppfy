@@ -43,6 +43,7 @@ export const basicProfile = z.object({
 
 export const fullProfile = z.object({
   userId: z.string(),
+  privacy: z.enum(["public", "private"]),
   username: z.string(),
   name: z.string(),
   bio: z.union([z.string(), z.null()]),

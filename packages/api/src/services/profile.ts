@@ -67,6 +67,7 @@ export class ProfileService {
     });
   }
 
+  // TODO: I wanna use joins - that'll change the error handling
   async getBasicProfile(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
@@ -132,6 +133,7 @@ export class ProfileService {
 
     return sharedValidators.user.fullProfile.parse({
       userId: user.id,
+      privacy: user.privacySetting,
       username: user.username,
       name: profile.fullName,
       bio: profile.bio,
