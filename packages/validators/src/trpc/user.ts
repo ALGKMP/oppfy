@@ -19,8 +19,6 @@ const trpcUserSchema = {
     userId,
   }),
 
-  test: createInsertSchema(schema.notificationSettings),
-
   updateNotificationSettings: z.object({
     posts: z.boolean().optional(),
     mentions: z.boolean().optional(),
