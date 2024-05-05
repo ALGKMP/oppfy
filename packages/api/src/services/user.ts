@@ -152,4 +152,11 @@ export class UserService {
     return this.userRepository.getPaginatedFollowing(cursor);
   }
 
+  async getFollowRequests(userId: string) {
+    return this.userRepository.getPaginatedFollowRequests(userId);
+  }
+
+  async getFriendRequests(userId: string) {
+    return this.userRepository.getPaginatedFriendRequests(userId);
+  }
 }
