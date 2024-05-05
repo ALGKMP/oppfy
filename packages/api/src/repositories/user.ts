@@ -1,7 +1,7 @@
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { InferInsertModel } from "@acme/db";
-import { asc, db, gt, schema, or } from "@acme/db";
+import { asc, db, gt, or, schema } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
 import { auth } from "../utils/firebase";
@@ -112,7 +112,7 @@ export class UserRepository {
    TODO: Figure out what you wanna do with the Repository dir - clean up this mess
 
   */
-  
+
   @handleDatabaseErrors
   async getPaginatedFollowers(cursor: string, pageSize = 10) {
     return await this.db
@@ -125,7 +125,10 @@ export class UserRepository {
       .from(schema.user)
       .fullJoin(schema.follower, eq(schema.user.id, schema.follower.followedId))
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .fullJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
       .orderBy(asc(schema.user.createdAt))
       .limit(pageSize);
@@ -143,12 +146,13 @@ export class UserRepository {
       .from(schema.user)
       .fullJoin(schema.follower, eq(schema.user.id, schema.follower.followerId))
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .fullJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
       .orderBy(asc(schema.user.createdAt))
       .limit(pageSize);
-
-
   }
 
   @handleDatabaseErrors
@@ -161,9 +165,18 @@ export class UserRepository {
         profilePictureUrl: schema.profilePicture.key,
       })
       .from(schema.user)
-      .fullJoin(schema.friend, or(eq(schema.user.id, schema.friend.userId1), eq(schema.user.id, schema.friend.userId2)))
+      .fullJoin(
+        schema.friend,
+        or(
+          eq(schema.user.id, schema.friend.userId1),
+          eq(schema.user.id, schema.friend.userId2),
+        ),
+      )
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .fullJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
       .orderBy(asc(schema.user.createdAt))
       .limit(pageSize);
@@ -179,9 +192,15 @@ export class UserRepository {
         profilePictureUrl: schema.profilePicture.key,
       })
       .from(schema.user)
-      .fullJoin(schema.followRequest, eq(schema.user.id, schema.followRequest.requestedId))
+      .fullJoin(
+        schema.followRequest,
+        eq(schema.user.id, schema.followRequest.requestedId),
+      )
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .fullJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
       .orderBy(asc(schema.user.createdAt))
       .limit(pageSize);
@@ -197,21 +216,29 @@ export class UserRepository {
         profilePictureUrl: schema.profilePicture.key,
       })
       .from(schema.user)
-      .fullJoin(schema.friendRequest, eq(schema.user.id, schema.friendRequest.requestedId))
+      .fullJoin(
+        schema.friendRequest,
+        eq(schema.user.id, schema.friendRequest.requestedId),
+      )
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .fullJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
       .orderBy(asc(schema.user.createdAt))
       .limit(pageSize);
   }
 
-
   // Use this to check if a user is blocked (gonna need to use this a lot)
   @handleDatabaseErrors
   async getBlockedUser(userId: string, blockedUserId: string) {
     return await this.db.query.block.findFirst({
-      where: and(eq(schema.block.userId, userId), eq(schema.block.blockedUserId, blockedUserId))
-    })
+      where: and(
+        eq(schema.block.userId, userId),
+        eq(schema.block.blockedUserId, blockedUserId),
+      ),
+    });
   }
 
   // Should I remove all other relationships here, or do that in the service... prob services, that's business logic
@@ -219,12 +246,19 @@ export class UserRepository {
   async blockUser(userId: string, blockedUserId: string) {
     return await this.db.insert(schema.block).values({
       userId,
-      blockedUserId
-    })
+      blockedUserId,
+    });
   }
 
-  // @handleDatabaseErrors
-  // async unblockUser(userId: string, blockedUserId: string) {
-
-  // }
+  @handleDatabaseErrors
+  async unblockUser(userId: string, blockedUserId: string) {
+    return await this.db
+      .delete(schema.block)
+      .where(
+        and(
+          eq(schema.block.userId, userId),
+          eq(schema.block.blockedUserId, blockedUserId),
+        ),
+      );
+  }
 }
