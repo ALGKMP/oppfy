@@ -76,6 +76,7 @@ export const userRouter = createTRPCRouter({
 
   // TODO: Block user - ig add another table for this, and remove any relationships (follow and friendship)
 
+  
   // TODO: Follow user - don't forget to check if the account is private, and neither are blocked
 
   // TODO: Unfollow user - just delete the row

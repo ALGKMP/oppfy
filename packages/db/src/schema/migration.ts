@@ -274,7 +274,7 @@ export const followRequest = mySqlTable("FriendRequest", {
   requestedId: varchar("requestedId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  status: mysqlEnum("status", ["pending", "accepted", "declined"]) // Possible values: "pending", "accepted", "declined"
+  status: mysqlEnum("status", ["pending", "accepted", "declined"]) // TODO: prob don't need this. Consult w frontend
     .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
@@ -321,4 +321,28 @@ export const friendRelations = relations(friend, ({ one }) => ({
   }),
 }));
 
-export const blockedUser = 
+export const block = mySqlTable("Blocked", {
+  id: serial("id").primaryKey(),
+  userId: varchar("userId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  blockedUserId: varchar("blockedUserId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const blockRelation = relations(block, ({ one }) => ({
+  userId: one(user, {
+    relationName: "userId",
+    fields: [block.userId],
+    references: [user.id],
+  }),
+  blockedUserId: one(user, {
+    relationName: "blockedUserId",
+    fields: [block.blockedUserId],
+    references: [user.id],
+  }),
+}));
