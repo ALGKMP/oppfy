@@ -5,9 +5,6 @@ import { Button, Image, Separator, Text, View, XStack, YStack } from "tamagui";
 import { ScreenBaseView } from "~/components/Views";
 
 const Profile = () => {
-  // testing route
-  // const profile = api.profile.getProfileDetails.useQuery();
-  // console.log(profile.data);
 
   const user = {
     name: "Katerina Tess",

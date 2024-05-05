@@ -78,11 +78,19 @@ export class ProfileService {
       throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
     }
 
+    let profilePictureUrl = null;
+    if (profile.profilePictureId) {
+      profilePictureUrl = await this.getProfilePicture(userId);
+      if (!profilePictureUrl) {
+        throw new DomainError(ErrorCodes.PROFILE_PICTURE_NOT_FOUND);
+      }
+    }
+
     return sharedValidators.user.basicProfile.parse({
       userId: user.id,
       username: user.username,
       name: profile.fullName,
-      profilePictureUrl: profile.profilePictureId,
+      profilePictureUrl,
     });
   }
 
