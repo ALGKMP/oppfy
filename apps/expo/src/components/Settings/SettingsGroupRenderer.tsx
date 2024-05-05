@@ -10,14 +10,14 @@ export interface SettingsItem {
 }
 
 export interface SettingsGroup {
-  title: string;
+  headerTitle: string;
   items: SettingsItem[];
 }
 
 const renderSettingsGroup = (group: SettingsGroup) => (
-  <YStack gap="$2" key={group.title}>
+  <YStack gap="$2" key={group.headerTitle}>
     <SizableText size="$1" theme="alt1">
-      {group.title}
+      {group.headerTitle}
     </SizableText>
     <YGroup alignSelf="center" bordered separator={<Separator />}>
       {group.items.map((item, index) => (

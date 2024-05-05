@@ -36,7 +36,7 @@ const Settings = () => {
 
   const settingsGroups = [
     {
-      title: "Settings",
+      headerTitle: "Settings",
       items: [
         {
           title: "Notifications",
@@ -52,7 +52,7 @@ const Settings = () => {
       ],
     },
     {
-      title: "Other",
+      headerTitle: "Other",
       items: [
         { title: "Share Us", icon: <Share2 />, iconAfter: <ChevronRight /> },
         { title: "Rate Us", icon: <Star />, iconAfter: <ChevronRight /> },
