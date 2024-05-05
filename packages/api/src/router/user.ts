@@ -105,7 +105,7 @@ export const userRouter = createTRPCRouter({
   followUser: protectedProcedure
   .input(trpcValidators.user.followUser)
   .mutation(async ({input, ctx})=> {
-    return await ctx.services.user.followUser(ctx.session.uid, input.followerId)
+    return await ctx.services.user.followUser(ctx.session.uid, input.followedId)
   })
 
   // TODO: Unfollow user - just delete the row
