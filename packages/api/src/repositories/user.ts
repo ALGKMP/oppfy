@@ -206,18 +206,22 @@ export class UserRepository {
   }
 
 
+  // Use this to check if a user is blocked (gonna need to use this a lot)
   @handleDatabaseErrors
   async getBlockedUser(userId: string, blockedUserId: string) {
     return await this.db.query.block.findFirst({
       where: and(eq(schema.block.userId, userId), eq(schema.block.blockedUserId, blockedUserId))
     })
-
   }
 
-  // @handleDatabaseErrors
-  // async blockUser(userId: string, blockedUserId: string) {
-
-  // }
+  // Should I remove all other relationships here, or do that in the service... prob services, that's business logic
+  @handleDatabaseErrors
+  async blockUser(userId: string, blockedUserId: string) {
+    return await this.db.insert(schema.block).values({
+      userId,
+      blockedUserId
+    })
+  }
 
   // @handleDatabaseErrors
   // async unblockUser(userId: string, blockedUserId: string) {
