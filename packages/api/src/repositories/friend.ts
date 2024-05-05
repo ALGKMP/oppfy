@@ -4,7 +4,7 @@ import { db, schema } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
 
-export class FriendsRepository {
+export class FriendRepository {
   private db = db;
 
   @handleDatabaseErrors
@@ -17,7 +17,7 @@ export class FriendsRepository {
 
   @handleDatabaseErrors
   async removeFriend(userId1: string, userId2: string) {
-    await this.db
+    const result = await this.db
       .delete(schema.friend)
       .where(
         or(
@@ -31,6 +31,7 @@ export class FriendsRepository {
           ),
         ),
       );
+      return result[0];
   }
 
   @handleDatabaseErrors

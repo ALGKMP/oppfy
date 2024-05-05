@@ -1,5 +1,6 @@
 import { DomainError, ErrorCodes } from "../errors";
 import { FollowerRepository } from "../repositories/follower";
+import { FriendRepository } from "../repositories/friend";
 import type { NotificationSettings } from "../repositories/notificationSettings";
 import { NotificationSettingsRepository } from "../repositories/notificationSettings";
 import type { PrivacySetting } from "../repositories/user";
@@ -9,6 +10,7 @@ export class UserService {
   private userRepository = new UserRepository();
   private notificationSettingsRepository = new NotificationSettingsRepository();
   private followRepository = new FollowerRepository();
+  private friendRepository = new FriendRepository
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
@@ -149,40 +151,51 @@ export class UserService {
     return await this.userRepository.getPaginatedFriends(cursor);
   }
 
-  async getFollowing(userId: string) {
-    const cursor = userId
-    return await this.userRepository.getPaginatedFollowing(cursor);
-  }
-
-  async getFollowRequests(userId: string) {
-    return await this.userRepository.getPaginatedFollowRequests(userId);
+  async isFriends(userId1: string, userId2: string) {
+    return !!(await this.friendRepository.getFriend(userId1, userId2));
   }
 
   async getFriendRequests(userId: string) {
     return await this.userRepository.getPaginatedFriendRequests(userId);
   }
 
+  async getFollowing(userId: string) {
+    const cursor = userId
+    return await this.userRepository.getPaginatedFollowing(cursor);
+  }
+
   async isFollowing(followedId: string, followerId: string) {
     return !!(await this.followRepository.getFollower(followedId, followerId))
   }
 
-  async blockUser(userId: string, blockedUserId: string) {
+  async getFollowRequests(userId: string) {
+    return await this.userRepository.getPaginatedFollowRequests(userId);
+  };
+
+  async blockUser(userId: string, blockUserId: string) {
     // TODO: I think this removes all other relationships
-    if (await this.isFollowing(userId, blockedUserId)) {
-      const a = await this.followRepository.removeFollower(userId, blockedUserId);
-      if (!a) { // gave up on variable names
-        throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER)
-      }
-    }
+    if (await this.isFollowing(userId, blockUserId)) {
+      const a = await this.followRepository.removeFollower(userId, blockUserId);
+      if (!a) { // giving up on variable names
+        throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
+      };
+    };
 
-    if (await this.isFollowing(blockedUserId, userId)) {
-      const b = await this.followRepository.removeFollower(blockedUserId, userId);
+    if (await this.isFollowing(blockUserId, userId)) {
+      const b = await this.followRepository.removeFollower(blockUserId, userId);
       if (!b) {
-        throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER)
-      }
-    }
+        throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
+      };
+    };
 
-    const result = await this.userRepository.blockUser(userId, blockedUserId);
+    if (await this.isFriends(userId, blockUserId)) { 
+      const c = await this.friendRepository.removeFriend(userId, blockUserId);
+      if (!c) {
+        throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FRIEND);
+      };
+    };
+
+    const result = await this.userRepository.blockUser(userId, blockUserId);
     if (!result) {
       throw new DomainError(ErrorCodes.FAILED_TO_BLOCK_USER);
     }
