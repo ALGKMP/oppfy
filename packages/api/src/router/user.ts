@@ -44,6 +44,7 @@ export const userRouter = createTRPCRouter({
   getFriends: protectedProcedure
     .input(trpcValidators.user.getFriends)
     .mutation(async ({ input, ctx }) => {
+      // Could make this a query
       return await ctx.services.user.getFriends(input.userId);
     }),
 
@@ -51,31 +52,47 @@ export const userRouter = createTRPCRouter({
   getFollowers: protectedProcedure
     .input(trpcValidators.user.getFollowers)
     .mutation(async ({ input, ctx }) => {
+      // Could make this a query
       return await ctx.services.user.getFollowers(input.userId);
     }),
 
-  // TODO: Needs to be tested
+  // TODO: Revise this
   getFollowing: protectedProcedure
     .input(trpcValidators.user.getFollowing)
     .mutation(async ({ input, ctx }) => {
+      // Could make this a query
       return await ctx.services.user.getFollowing(input.userId);
     }),
 
-  // TODO: Get Friend Requests
+  // TODO: Revise this
+  getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
+    return await ctx.services.user.getFriendRequests(ctx.session.uid);
+  }),
 
-  // TODO: Get Follower Requests
+  // TODO: Revise this
+  getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
+    return await ctx.services.user.getFollowRequests(ctx.session.uid);
+  }),
 
-  // TODO: Follow user (sends a follow request if user account is private)
+  // TODO: Block user - ig add another table for this, and remove any relationships (follow and friendship)
 
-  // TODO: Unfollow user
+  // TODO: Follow user - don't forget to check if the account is private, and neither are blocked
 
-  // TODO: Block user
+  // TODO: Unfollow user - just delete the row
 
-  // TODO: send friend request
+  // TODO: Accept follow request - delete request (or change status) and create a new graph connection
 
-  // TODO: accept friend request
+  // TODO: Reject follow request - delete the request
 
-  // TODO: reject friend request
+  // TODO: send friend request - check if neither parties are blocked first
 
-  // TODO: remove friend
+  // TODO: accept friend request - delete request (or change status) and add a new graph connection
+
+  // TODO: reject friend request - delete the request 
+
+  // TODO: remove friend - delete the friend graph connection
+
+  // TODO: remove follower - delete the follow network connection
+
+  // TODO: check for follow and friend request
 });

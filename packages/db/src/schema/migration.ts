@@ -36,7 +36,7 @@ export const user = mySqlTable("User", {
     mode: "number",
     unsigned: true,
   })
-    .references(() => notificationSettings.id, {onDelete: "cascade"})
+    .references(() => notificationSettings.id, { onDelete: "cascade" })
     .notNull(),
   privacySetting: mysqlEnum("privacySetting", ["public", "private"])
     .default("public")
@@ -253,6 +253,19 @@ export const friendRequest = mySqlTable("FriendRequest", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
+export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
+  requester: one(user, {
+    relationName: "requester",
+    fields: [friendRequest.requesterId],
+    references: [user.id],
+  }),
+  requested: one(user, {
+    relationName: "requested",
+    fields: [friendRequest.requestedId],
+    references: [user.id],
+  }),
+}));
+
 export const followRequest = mySqlTable("FriendRequest", {
   id: serial("id").primaryKey(),
   requesterId: varchar("requesterId", { length: 255 })
@@ -269,15 +282,15 @@ export const followRequest = mySqlTable("FriendRequest", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
+export const followRequestRelation = relations(followRequest, ({ one }) => ({
   requester: one(user, {
     relationName: "requester",
-    fields: [friendRequest.requesterId],
+    fields: [followRequest.requesterId],
     references: [user.id],
   }),
   requested: one(user, {
     relationName: "requested",
-    fields: [friendRequest.requestedId],
+    fields: [followRequest.requestedId],
     references: [user.id],
   }),
 }));
@@ -307,3 +320,5 @@ export const friendRelations = relations(friend, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const blockedUser = 
