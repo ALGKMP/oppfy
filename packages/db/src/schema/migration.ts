@@ -253,6 +253,22 @@ export const friendRequest = mySqlTable("FriendRequest", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
+export const followRequest = mySqlTable("FriendRequest", {
+  id: serial("id").primaryKey(),
+  requesterId: varchar("requesterId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  requestedId: varchar("requestedId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  status: mysqlEnum("status", ["pending", "accepted", "declined"]) // Possible values: "pending", "accepted", "declined"
+    .notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
 export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
   requester: one(user, {
     relationName: "requester",

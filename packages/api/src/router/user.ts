@@ -40,24 +40,30 @@ export const userRouter = createTRPCRouter({
       );
     }),
 
-    getFriends: protectedProcedure
+  // TODO: Needs to be tested
+  getFriends: protectedProcedure
     .input(trpcValidators.user.getFriends)
-    .mutation(async ({input, ctx}) => {
+    .mutation(async ({ input, ctx }) => {
       return await ctx.services.user.getFriends(input.userId);
-    }), 
+    }),
 
-    getFollowers: protectedProcedure
+  // TODO: Needs to be tested
+  getFollowers: protectedProcedure
     .input(trpcValidators.user.getFollowers)
-    .mutation(async ({input, ctx}) => {
+    .mutation(async ({ input, ctx }) => {
       return await ctx.services.user.getFollowers(input.userId);
-    }), 
+    }),
 
-    getFollowing: protectedProcedure
+  // TODO: Needs to be tested
+  getFollowing: protectedProcedure
     .input(trpcValidators.user.getFollowing)
-    .mutation(async ({input, ctx}) => {
+    .mutation(async ({ input, ctx }) => {
       return await ctx.services.user.getFollowing(input.userId);
-    }), 
+    }),
 
+  // TODO: Get Friend Requests
+
+  // TODO: Get Follower Requests
 
   // TODO: Follow user (sends a follow request if user account is private)
 
@@ -72,5 +78,4 @@ export const userRouter = createTRPCRouter({
   // TODO: reject friend request
 
   // TODO: remove friend
-
 });

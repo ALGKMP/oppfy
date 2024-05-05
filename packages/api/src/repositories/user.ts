@@ -109,6 +109,8 @@ export class UserRepository {
    TODO: Should be able to use dynamic queries here, just can't see docs cuz I'm on a plan.
    - dynamic query for the cursor pagination.
    - table as a parameter solves dupliacted joins.
+   TODO: Figure out what you wanna do with the Repository dir - clean up this mess
+
   */
   
   @handleDatabaseErrors
@@ -122,6 +124,24 @@ export class UserRepository {
       })
       .from(schema.user)
       .fullJoin(schema.follower, eq(schema.user.id, schema.follower.followedId))
+      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .where(cursor ? gt(schema.user.id, cursor) : undefined)
+      .orderBy(asc(schema.user.createdAt))
+      .limit(pageSize);
+  }
+
+  @handleDatabaseErrors
+  async getPaginatedFollowRequests(cursor: string, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+      })
+      .from(schema.user)
+      .fullJoin(schema.followRequest, eq(schema.user.id, schema.followRequest.requestedId))
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
@@ -165,6 +185,5 @@ export class UserRepository {
       .where(cursor ? gt(schema.user.id, cursor) : undefined)
       .orderBy(asc(schema.user.createdAt))
       .limit(pageSize);
-
   }
 }
