@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 import type { InferInsertModel } from "@acme/db";
 import { asc, db, gt, schema, or } from "@acme/db";
@@ -204,4 +204,23 @@ export class UserRepository {
       .orderBy(asc(schema.user.createdAt))
       .limit(pageSize);
   }
+
+
+  @handleDatabaseErrors
+  async getBlockedUser(userId: string, blockedUserId: string) {
+    return await this.db.query.block.findFirst({
+      where: and(eq(schema.block.userId, userId), eq(schema.block.blockedUserId, blockedUserId))
+    })
+
+  }
+
+  // @handleDatabaseErrors
+  // async blockUser(userId: string, blockedUserId: string) {
+
+  // }
+
+  // @handleDatabaseErrors
+  // async unblockUser(userId: string, blockedUserId: string) {
+
+  // }
 }

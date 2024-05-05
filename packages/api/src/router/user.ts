@@ -56,7 +56,7 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFollowers(input.userId);
     }),
 
-  // TODO: Revise this
+  // TODO: Review this
   getFollowing: protectedProcedure
     .input(trpcValidators.user.getFollowing)
     .mutation(async ({ input, ctx }) => {
@@ -64,19 +64,19 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFollowing(input.userId);
     }),
 
-  // TODO: Revise this
+  // TODO: Review this
   getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
     return await ctx.services.user.getFriendRequests(ctx.session.uid);
   }),
 
-  // TODO: Revise this
+  // TODO: Review this
   getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
     return await ctx.services.user.getFollowRequests(ctx.session.uid);
   }),
 
   // TODO: Block user - ig add another table for this, and remove any relationships (follow and friendship)
 
-  
+
   // TODO: Follow user - don't forget to check if the account is private, and neither are blocked
 
   // TODO: Unfollow user - just delete the row

@@ -346,3 +346,5 @@ export const blockRelation = relations(block, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+
