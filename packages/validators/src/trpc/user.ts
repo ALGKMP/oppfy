@@ -25,13 +25,16 @@ const trpcUserSchema = {
     friendRequests: z.boolean().optional(),
   }),
   getFriends: z.object({
-    userId: z.string()
+    userId
   }),
   getFollowers: z.object({
-    userId: z.string()
+    userId
   }),
   getFollowing: z.object({
-    userId: z.string()
+    userId
+  }),
+  blockUser: z.object({
+    blockedUserId: userId
   })
 };
 

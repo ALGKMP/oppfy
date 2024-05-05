@@ -75,6 +75,13 @@ export const userRouter = createTRPCRouter({
   }),
 
   // TODO: Block user - ig add another table for this, and remove any relationships (follow and friendship)
+  blockUser: protectedProcedure.input(trpcValidators.user.blockUser).mutation(async ({input, ctx}) => {
+    return await ctx.services.user.blokUser(ctx.session.uid, input.blockedUserId);
+  })
+
+  // TODO: isUserBlocked
+
+  // TODO: Unblock User
 
 
   // TODO: Follow user - don't forget to check if the account is private, and neither are blocked

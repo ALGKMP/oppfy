@@ -159,4 +159,9 @@ export class UserService {
   async getFriendRequests(userId: string) {
     return this.userRepository.getPaginatedFriendRequests(userId);
   }
+
+  async blockUser(userId: string, blockedUserId: string) {
+    // TODO: remove all other relationshiops
+    return await this.userRepository.blockUser(userId, blockedUserId);
+  }
 }
