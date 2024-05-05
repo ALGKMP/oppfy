@@ -106,11 +106,9 @@ export class UserRepository {
   }
 
   /* 
-   TODO: Should be able to use dynamic queries here, just can't see docs cuz I'm on a plan.
-   - dynamic query for the cursor pagination.
-   - table as a parameter solves dupliacted joins.
-   TODO: Figure out what you wanna do with the Repository dir - clean up this mess
-
+   * TODO: Use dynamic queries here - no acces to docs while on a plan.
+   * 1. dynamic query for the cursor pagination.
+   * 2. table as a parameter solves duplicated code for joins.
   */
 
   @handleDatabaseErrors

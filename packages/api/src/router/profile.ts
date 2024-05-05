@@ -70,11 +70,5 @@ export const profileRouter = createTRPCRouter({
       return await ctx.services.profile.getFullProfile(input.userId);
     }),
 
-  // TODO: paginate getting followers
-
-  // TODO: paginate getting following
-
-  // TODO: paginate getting friends
-
   // TODO: paginate getting posts
 });

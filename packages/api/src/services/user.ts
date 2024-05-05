@@ -213,4 +213,15 @@ export class UserService {
     }
   }
 
+  async followUser(followerId:string, followedId: string) {
+    const alreadyFollowing = await this.isFollowing(followedId, followerId);
+    if (alreadyFollowing) {
+      throw new DomainError(ErrorCodes.USER_ALREADY_FOLLOWED);
+    }
+    const result = await this.followRepository.addFollower(followerId, followedId);
+    if (!result[0]) {
+      throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
+    }
+  }
+
 }

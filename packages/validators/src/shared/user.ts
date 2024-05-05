@@ -36,6 +36,7 @@ export const phoneNumberOTP = z.string().length(6);
 // Use this for displaying profile header
 export const basicProfile = z.object({
   userId: z.string(),
+  privacy: z.enum(["public", "private"]),
   username: z.string(),
   name: z.string(),
   profilePictureUrl: profilePicture,

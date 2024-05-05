@@ -8,10 +8,10 @@ export class FollowerRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addFollower(userId: string, followerId: string) {
+  async addFollower(userId: string, followedId: string) {
     return await this.db
       .insert(schema.follower)
-      .values({ followedId: userId, followerId });
+      .values({ followedId, followerId: userId });
   }
 
   @handleDatabaseErrors
