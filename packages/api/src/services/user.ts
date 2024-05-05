@@ -162,7 +162,10 @@ export class UserService {
 
   async blockUser(userId: string, blockedUserId: string) {
     // TODO: remove all other relationshiops
-    return await this.userRepository.blockUser(userId, blockedUserId);
+    const result = await this.userRepository.blockUser(userId, blockedUserId);
+    if (!result) {
+      throw new DomainError(ErrorCodes.FAILED_TO_BLOCK_USER);
+    }
   }
 
   async isUserBlocked(userId: string, blockedUserId: string) {
@@ -170,6 +173,12 @@ export class UserService {
   }
 
   async unblockUser(userId:string, blockedUserId: string) {
-    return await this.userRepository.unblockUser(userId, blockedUserId);
+    const result = await this.userRepository.unblockUser(userId, blockedUserId);
+    // TODO: There should be a delete marker, not sure why I'm not getting it with autocomplete!?!?!?
+    if (!result[0]) {
+      throw new DomainError(ErrorCodes.FAILED_TO_UNBLOCK_USER);
+    }
   }
+
+
 }

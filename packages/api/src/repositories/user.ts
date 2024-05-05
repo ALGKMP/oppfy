@@ -235,7 +235,7 @@ export class UserRepository {
   async getBlockedUser(userId: string, blockedUserId: string) {
     return await this.db.query.block.findFirst({
       // checking both sides (it's the same render on the client. You can only unblock in settings so we can do this)
-      where: or( 
+      where: or(
         and(
           eq(schema.block.userId, userId),
           eq(schema.block.blockedUserId, blockedUserId),
@@ -244,17 +244,18 @@ export class UserRepository {
           eq(schema.block.blockedUserId, userId),
           eq(schema.block.userId, blockedUserId),
         ),
-      )
+      ),
     });
   }
 
   // Should I remove all other relationships here, or do that in the service... prob services, that's business logic
   @handleDatabaseErrors
   async blockUser(userId: string, blockedUserId: string) {
-    return await this.db.insert(schema.block).values({
+    const blockedUser = await this.db.insert(schema.block).values({
       userId,
       blockedUserId,
     });
+    return blockedUser[0];
   }
 
   @handleDatabaseErrors

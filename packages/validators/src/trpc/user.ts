@@ -3,7 +3,6 @@ import { z } from "zod";
 import { dateOfBirth, fullName, userId, username } from "../shared/user";
 
 const trpcUserSchema = {
-  userId,
   updateName: z.object({
     fullName,
   }),
@@ -16,7 +15,6 @@ const trpcUserSchema = {
   userComplete: z.object({
     userId,
   }),
-
   updateNotificationSettings: z.object({
     posts: z.boolean().optional(),
     mentions: z.boolean().optional(),
@@ -25,21 +23,25 @@ const trpcUserSchema = {
     friendRequests: z.boolean().optional(),
   }),
   getFriends: z.object({
-    userId
+    userId,
   }),
   getFollowers: z.object({
-    userId
+    userId,
   }),
   getFollowing: z.object({
-    userId
+    userId,
   }),
   blockUser: z.object({
-    blockedUserId: userId
+    blockedUserId: userId,
   }),
   isUserBlocked: z.object({
     userId,
-    blockedUserId: userId
-  })
+    blockedUserId: userId,
+  }),
+  unblockUser: z.object({
+    userId,
+    blockedUserId: userId,
+  }),
 };
 
 export default trpcUserSchema;

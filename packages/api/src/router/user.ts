@@ -95,6 +95,11 @@ export const userRouter = createTRPCRouter({
     }),
 
   // TODO: Unblock User
+  unblockUser: protectedProcedure
+  .input(trpcValidators.user.unblockUser)
+  .mutation(async ({input, ctx}) => {
+    return await ctx.services.user.unblockUser(ctx.session.uid, input.blockedUserId);
+  })
 
   // TODO: Follow user - don't forget to check if the account is private, and neither are blocked
 
@@ -117,4 +122,6 @@ export const userRouter = createTRPCRouter({
   // TODO: check for follow and friend request
 
   // TODO: paginate blocked users
+
+  // TODO: error handling for all the new services
 });
