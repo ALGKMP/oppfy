@@ -1,4 +1,5 @@
 import { DomainError, ErrorCodes } from "../errors";
+import { FollowerRepository } from "../repositories/follower";
 import type { NotificationSettings } from "../repositories/notificationSettings";
 import { NotificationSettingsRepository } from "../repositories/notificationSettings";
 import type { PrivacySetting } from "../repositories/user";
@@ -7,6 +8,7 @@ import { UserRepository } from "../repositories/user";
 export class UserService {
   private userRepository = new UserRepository();
   private notificationSettingsRepository = new NotificationSettingsRepository();
+  private followRepository = new FollowerRepository();
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
@@ -160,8 +162,15 @@ export class UserService {
     return await this.userRepository.getPaginatedFriendRequests(userId);
   }
 
+  async isFollowing(followedId: string, followerId: string) {
+    return await this.followRepository.getFollower(followedId, followerId);
+  }
+
   async blockUser(userId: string, blockedUserId: string) {
     // TODO: remove all other relationshiops
+    // const a = await this.followRepository.removeFollower(userId, blockedUserId);
+    // const b = await this.followRepository.removeFollower(blockedUserId, userId);
+
     const result = await this.userRepository.blockUser(userId, blockedUserId);
     if (!result) {
       throw new DomainError(ErrorCodes.FAILED_TO_BLOCK_USER);

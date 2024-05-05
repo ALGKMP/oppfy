@@ -27,8 +27,10 @@ export class FollowerRepository {
   }
 
   @handleDatabaseErrors
-  async getFollowers(userId: string) {
-    return await this._getFollowers(userId);
+  async getFollower(followerId: string, followedId: string) {
+    await this.db.query.follower.findFirst({
+      where: and(eq(schema.follower.followerId, followerId), eq(schema.follower.followedId, followedId))
+    })
   }
 
   @handleDatabaseErrors

@@ -94,7 +94,7 @@ export const userRouter = createTRPCRouter({
       );
     }),
 
-  // TODO: Unblock User
+  // TODO: Test this
   unblockUser: protectedProcedure
   .input(trpcValidators.user.unblockUser)
   .mutation(async ({input, ctx}) => {
