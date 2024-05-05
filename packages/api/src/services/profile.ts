@@ -3,7 +3,7 @@ import { sharedValidators } from "@acme/validators";
 import { DomainError, ErrorCodes } from "../errors";
 import { AwsRepository } from "../repositories/aws";
 import { FollowerRepository } from "../repositories/follower";
-import { FriendsRepository } from "../repositories/friend";
+import { FriendRepository } from "../repositories/friend";
 import { PostRepository } from "../repositories/post";
 import { ProfileRepository } from "../repositories/profile";
 import { ProfilePictureRepository } from "../repositories/profilePicture";
@@ -16,7 +16,7 @@ export class ProfileService {
   private awsRepository = new AwsRepository();
   private postRepository = new PostRepository();
   private followersRepository = new FollowerRepository();
-  private friendsRepository = new FriendsRepository();
+  private friendsRepository = new FriendRepository();
 
   async updateFullName(userId: string, fullName: string) {
     const profile = await this.getUserProfile(userId);
@@ -95,6 +95,7 @@ export class ProfileService {
   }
 
   async getFullProfile(userId: string) {
+    // TODO: Fuck this, using joins
     const user = await this.userRepository.getUser(userId);
     if (!user) {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);
