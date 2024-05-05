@@ -11,7 +11,7 @@ export const profileRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
-      const metadata = trpcValidators.user.userId.safeParse(ctx.session.uid);
+      const metadata = sharedValidators.user.userId.safeParse(ctx.session.uid);
 
       if (!metadata.success) {
         throw new TRPCError({

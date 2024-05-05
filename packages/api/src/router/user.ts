@@ -123,5 +123,4 @@ export const userRouter = createTRPCRouter({
 
   // TODO: paginate blocked users
 
-  // TODO: error handling for all the new services
 });
