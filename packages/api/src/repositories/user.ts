@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
+import { MySqlSelectQueryBuilder } from "drizzle-orm/mysql-core";
 
 import type { InferInsertModel } from "@acme/db";
-import { db, schema } from "@acme/db";
+import { asc, db, gt, schema, or } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
 import { auth } from "../utils/firebase";
@@ -103,5 +104,68 @@ export class UserRepository {
       .update(schema.user)
       .set({ privacySetting: newPrivacySetting })
       .where(eq(schema.user.id, userId));
+  }
+
+  /* 
+   TODO: Should be able to use dynamic queries here, just can't see docs cuz I'm on a plan.
+   - dynamic query for the cursor pagination.
+   - table as a parameter solves dupliacted joins.
+  */
+  
+  @handleDatabaseErrors
+  async getPaginatedFollowers(cursor: string, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+      })
+      .from(schema.user)
+      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.followedId))
+      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .where(cursor ? gt(schema.user.id, cursor) : undefined)
+      .orderBy(asc(schema.user.createdAt))
+      .limit(pageSize);
+  }
+
+  @handleDatabaseErrors
+  async getPaginatedFollowing(cursor: string, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+      })
+      .from(schema.user)
+      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.followerId))
+      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .where(cursor ? gt(schema.user.id, cursor) : undefined)
+      .orderBy(asc(schema.user.createdAt))
+      .limit(pageSize);
+
+
+  }
+
+  @handleDatabaseErrors
+  async getPaginatedFriends(cursor: string, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+      })
+      .from(schema.user)
+      .fullJoin(schema.friend, or(eq(schema.user.id, schema.friend.userId1), eq(schema.user.id, schema.friend.userId2)))
+      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .fullJoin(schema.profilePicture, eq(schema.profile.profilePictureId, schema.profilePicture.id))
+      .where(cursor ? gt(schema.user.id, cursor) : undefined)
+      .orderBy(asc(schema.user.createdAt))
+      .limit(pageSize);
+
   }
 }
