@@ -63,10 +63,10 @@ const Settings = () => {
   ] satisfies SettingsGroup[];
 
   return (
-    <ScreenBaseView>
+    <ScreenBaseView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
-        <Button color="$red9" onPress={() => setIsModalVisible(true)}>
+        <Button size="$5" color="$red9" onPress={() => setIsModalVisible(true)}>
           Logout
         </Button>
       </YStack>
