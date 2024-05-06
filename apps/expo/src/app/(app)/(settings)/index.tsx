@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Share } from "react-native";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import * as StoreReview from "expo-store-review";
@@ -21,6 +22,11 @@ import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
+
+enum WEBSITE_URL {
+  HELP = "https://oppfy/help.com",
+  ABOUT = "https://oppfy/about.com",
+}
 
 const Settings = () => {
   const { signOut } = useSession();
@@ -98,13 +104,13 @@ const Settings = () => {
           title: "Help",
           icon: <LifeBuoy />,
           iconAfter: <ChevronRight />,
-          onPress: () => router.push("/help"),
+          onPress: () => void Linking.openURL(WEBSITE_URL.HELP),
         },
         {
           title: "About",
           icon: <Info />,
           iconAfter: <ChevronRight />,
-          onPress: () => router.push("/about"),
+          onPress: () => void Linking.openURL(WEBSITE_URL.ABOUT),
         },
       ],
     },
