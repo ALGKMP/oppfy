@@ -9,9 +9,10 @@ export class FollowerRepository {
 
   @handleDatabaseErrors
   async addFollower(userId: string, followedId: string) {
-    return await this.db
+    const result = await this.db
       .insert(schema.follower)
       .values({ followedId, followerId: userId });
+    return result[0];
   }
 
   @handleDatabaseErrors
@@ -20,8 +21,8 @@ export class FollowerRepository {
       .delete(schema.follower)
       .where(
         and(
-          eq(schema.follower.followedId, userId),
-          eq(schema.follower.followerId, followerId),
+          eq(schema.follower.followedId, followerId),
+          eq(schema.follower.followerId, userId),
         ),
       );
     return result[0]; // TODO: this feels wierd, I though this returned a delete marker
@@ -59,9 +60,10 @@ export class FollowerRepository {
   }
 
   @handleDatabaseErrors
-  async requestFollow(requesterId: string, requestedId: string) {
-    return await this.db
+  async followRequest(requesterId: string, requestedId: string) {
+    const result = await this.db
       .insert(schema.followRequest)
       .values({ requesterId, requestedId});
+      return result[0];
   }
 }

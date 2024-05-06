@@ -258,7 +258,7 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async unblockUser(userId: string, blockedUserId: string) {
-    return await this.db
+    const result = await this.db
       .delete(schema.block)
       .where(
         and(
@@ -266,5 +266,6 @@ export class UserRepository {
           eq(schema.block.blockedUserId, blockedUserId),
         ),
       );
+    return result[0];
   }
 }

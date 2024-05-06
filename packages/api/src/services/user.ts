@@ -207,7 +207,7 @@ export class UserService {
   async unblockUser(userId:string, blockedUserId: string) {
     const result = await this.userRepository.unblockUser(userId, blockedUserId);
     // TODO: There should be a delete marker, not sure why I'm not getting it with autocomplete!?!?!?
-    if (!result[0]) {
+    if (!result) {
       throw new DomainError(ErrorCodes.FAILED_TO_UNBLOCK_USER);
     }
   }
@@ -224,15 +224,22 @@ export class UserService {
     }
     
     if (user.privacySetting === "private") {
-      const result = await this.followRepository.requestFollow(followerId, followedId);
-      if (!result[0]) {
+      const result = await this.followRepository.followRequest(followerId, followedId);
+      if (!result) {
         throw new DomainError(ErrorCodes.FAILED_TO_REQUEST_FOLLOW);
       }
     }
 
     const result = await this.followRepository.addFollower(followerId, followedId);
-    if (!result[0]) {
+    if (!result) {
       throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
+    }
+  }
+
+  async unfollowUser(followerId: string, followedId: string) {
+    const result = await this.followRepository.removeFollower(followerId, followedId);
+    if (!result.insertId) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
     }
   }
 

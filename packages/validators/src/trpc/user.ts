@@ -44,7 +44,10 @@ const trpcUserSchema = {
   }),
   followUser: z.object({
     followedId: userId
-  })
+  }),
+  unfollowUser: z.object({
+    followedId: userId
+  }),
 };
 
 export default trpcUserSchema;

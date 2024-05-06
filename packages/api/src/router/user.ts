@@ -101,14 +101,19 @@ export const userRouter = createTRPCRouter({
     return await ctx.services.user.unblockUser(ctx.session.uid, input.blockedUserId);
   }),
 
-  // TODO: Follow user - don't forget to check if the account is private, and neither are blocked
+  // TODO: Test this
   followUser: protectedProcedure
   .input(trpcValidators.user.followUser)
   .mutation(async ({input, ctx})=> {
     return await ctx.services.user.followUser(ctx.session.uid, input.followedId)
-  })
+  }),
 
   // TODO: Unfollow user - just delete the row
+  unfollowUser: protectedProcedure
+  .input(trpcValidators.user.unfollowUser)
+  .mutation(async ({input, ctx}) => {
+    return await ctx.services.user.unfollowUser(ctx.session.uid, input.followedId);
+  }),
 
   // TODO: Accept follow request - delete request (or change status) and create a new graph connection
 
