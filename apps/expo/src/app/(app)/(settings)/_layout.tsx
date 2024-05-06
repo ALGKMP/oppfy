@@ -37,44 +37,28 @@ const ProfileLayout = () => {
 
         <Stack.Screen
           name="notifications"
-          options={{ title: "Notifications", animation: "fade" }}
+          options={{ title: "Notifications" }}
         />
 
-        <Stack.Screen
-          name="privacy"
-          options={{ title: "Privacy", animation: "fade" }}
-        />
+        <Stack.Screen name="privacy" options={{ title: "Privacy" }} />
         <Stack.Screen
           name="blocked-users"
-          options={{ title: "Blocked Users", animation: "fade" }}
+          options={{ title: "Blocked Users" }}
         />
 
-        <Stack.Screen
-          name="other"
-          options={{ title: "Other", animation: "fade" }}
-        />
+        <Stack.Screen name="other" options={{ title: "Other" }} />
         <Stack.Screen
           name="delete-account"
           options={{
             header: () => null,
             presentation: "fullScreenModal",
-            animation: "slide_from_bottom",
           }}
         />
 
-        <Stack.Screen
-          name="help"
-          options={{ title: "Help", animation: "fade" }}
-        />
-        <Stack.Screen
-          name="contact-us"
-          options={{ title: "Contact Us", animation: "fade" }}
-        />
+        <Stack.Screen name="help" options={{ title: "Help" }} />
+        <Stack.Screen name="contact-us" options={{ title: "Contact Us" }} />
 
-        <Stack.Screen
-          name="about"
-          options={{ title: "About", animation: "fade" }}
-        />
+        <Stack.Screen name="about" options={{ title: "About" }} />
       </Stack>
     </SafeAreaView>
   );

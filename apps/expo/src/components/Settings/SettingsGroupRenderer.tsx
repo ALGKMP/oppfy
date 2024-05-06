@@ -7,6 +7,7 @@ export interface SettingsItem {
   title: string;
   icon: IconProp | undefined;
   iconAfter: IconProp | undefined;
+  onPress?: () => void;
 }
 
 export interface SettingsGroup {
@@ -29,6 +30,7 @@ const renderSettingsGroup = (group: SettingsGroup) => (
             title={item.title}
             icon={item.icon}
             iconAfter={item.iconAfter}
+            onPress={item.onPress}
           />
         </YGroup.Item>
       ))}

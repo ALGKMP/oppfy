@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
+import type { GestureResponderEvent } from "react-native";
 import { Animated, Easing, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
-import { Button, Paragraph, Separator, SizableText, YStack } from "tamagui";
+import {
+  Button,
+  Paragraph,
+  Separator,
+  SizableText,
+  View,
+  YStack,
+} from "tamagui";
 
 export interface ButtonOption {
   text: string;
@@ -118,10 +126,9 @@ const ActionSheet = ({
               </YStack>
 
               {buttonOptions.map((option, index) => (
-                <>
+                <View key={index}>
                   <Separator theme="alt1" />
                   <Button
-                    key={index}
                     size="$5"
                     borderTopLeftRadius={0}
                     borderTopRightRadius={0}
@@ -137,7 +144,7 @@ const ActionSheet = ({
                       {option.text}
                     </SizableText>
                   </Button>
-                </>
+                </View>
               ))}
             </YStack>
             <Button size="$5" color="$blue9" onPress={onClose}>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import {
   BellRing,
   ChevronRight,
@@ -19,8 +20,15 @@ import { useSession } from "~/contexts/SessionContext";
 
 const Settings = () => {
   const { signOut } = useSession();
+  const router = useRouter();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  // TODO: Implement
+  const onShare = async () => {};
+
+  // TODO: Implement
+  const onRate = async () => {};
 
   const title = "Log Out";
   const subtitle = "Are you sure you want to log out?";
@@ -42,22 +50,49 @@ const Settings = () => {
           title: "Notifications",
           icon: <BellRing />,
           iconAfter: <ChevronRight />,
+          onPress: () => router.push("/notifications"),
         },
         {
           title: "Privacy",
           icon: <ShieldCheck />,
           iconAfter: <ChevronRight />,
+          onPress: () => router.push("/privacy"),
         },
-        { title: "Other", icon: <ShieldCheck />, iconAfter: <ChevronRight /> },
+        {
+          title: "Other",
+          icon: <ShieldCheck />,
+          iconAfter: <ChevronRight />,
+          onPress: () => router.push("/other"),
+        },
       ],
     },
     {
       headerTitle: "Other",
       items: [
-        { title: "Share Us", icon: <Share2 />, iconAfter: <ChevronRight /> },
-        { title: "Rate Us", icon: <Star />, iconAfter: <ChevronRight /> },
-        { title: "Help", icon: <LifeBuoy />, iconAfter: <ChevronRight /> },
-        { title: "About", icon: <Info />, iconAfter: <ChevronRight /> },
+        {
+          title: "Share Us",
+          icon: <Share2 />,
+          iconAfter: <ChevronRight />,
+          onPress: void onShare,
+        },
+        {
+          title: "Rate Us",
+          icon: <Star />,
+          iconAfter: <ChevronRight />,
+          onPress: void onRate,
+        },
+        {
+          title: "Help",
+          icon: <LifeBuoy />,
+          iconAfter: <ChevronRight />,
+          onPress: () => router.push("/help"),
+        },
+        {
+          title: "About",
+          icon: <Info />,
+          iconAfter: <ChevronRight />,
+          onPress: () => router.push("/about"),
+        },
       ],
     },
   ] satisfies SettingsGroup[];
@@ -81,4 +116,5 @@ const Settings = () => {
     </ScreenBaseView>
   );
 };
+
 export default Settings;
