@@ -108,7 +108,7 @@ export const userRouter = createTRPCRouter({
     return await ctx.services.user.followUser(ctx.session.uid, input.followedId)
   }),
 
-  // TODO: Unfollow user - just delete the row
+  // TODO: Unfollow user
   unfollowUser: protectedProcedure
   .input(trpcValidators.user.unfollowUser)
   .mutation(async ({input, ctx}) => {
@@ -116,6 +116,11 @@ export const userRouter = createTRPCRouter({
   }),
 
   // TODO: Accept follow request - delete request (or change status) and create a new graph connection
+  acceptFollowRequest: protectedProcedure
+  .input(trpcValidators.user.followUser)
+  .mutation(async ({input, ctx}) => {
+    return await ctx.services.user.acceptFollowRequest(ctx.session.uid, input.followedId);
+  }),
 
   // TODO: Reject follow request - delete the request
 

@@ -243,4 +243,16 @@ export class UserService {
     }
   }
 
+  async acceptFollowRequest(followerId: string, followedId: string) {
+    const result = await this.followRepository.removeFollowRequest(followerId, followedId);
+    if (!result.insertId) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOW_REQUEST);
+    }
+
+    const result2 = await this.followRepository.addFollower(followerId, followedId);
+    if (!result2) {
+      throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
+    }
+  }
+
 }

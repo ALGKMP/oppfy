@@ -25,7 +25,20 @@ export class FollowerRepository {
           eq(schema.follower.followerId, userId),
         ),
       );
-    return result[0]; // TODO: this feels wierd, I though this returned a delete marker
+    return result[0]; 
+  }
+
+  @handleDatabaseErrors
+  async removeFollowRequest(requesterId: string, requestedId: string) {
+    const result = await this.db
+      .delete(schema.followRequest)
+      .where(
+        and(
+          eq(schema.followRequest.requesterId, requesterId),
+          eq(schema.followRequest.requestedId, requestedId),
+        ),
+      );
+    return result[0];
   }
 
   @handleDatabaseErrors
