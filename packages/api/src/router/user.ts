@@ -123,6 +123,11 @@ export const userRouter = createTRPCRouter({
   }),
 
   // TODO: Reject follow request - delete the request
+  rejectFollowRequest: protectedProcedure
+  .input(trpcValidators.user.followUser)
+  .mutation(async ({input, ctx}) => {
+    return await ctx.services.user.rejectFollowRequest(ctx.session.uid, input.followedId);
+  }),
 
   // TODO: send friend request - check if neither parties are blocked first
 

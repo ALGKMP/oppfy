@@ -255,4 +255,11 @@ export class UserService {
     }
   }
 
+  async rejectFollowRequest(followerId: string, followedId: string) {
+    const result = await this.followRepository.removeFollowRequest(followerId, followedId);
+    if (!result.insertId) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOW_REQUEST);
+    }
+  }
+
 }
