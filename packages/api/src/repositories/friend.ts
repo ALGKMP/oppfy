@@ -31,7 +31,7 @@ export class FriendRepository {
           ),
         ),
       );
-      return result[0];
+    return result[0];
   }
 
   @handleDatabaseErrors
@@ -67,37 +67,25 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async sendFriendRequest(requesterId: string, requestedId: string) {
-    return await this.db
+  async createFriendRequest(requesterId: string, requestedId: string) {
+    const result = await this.db
       .insert(schema.friendRequest)
-      .values({ requesterId, requestedId, status: "pending" })
+      .values({ requesterId, requestedId })
       .execute();
+    return result[0];
   }
 
   @handleDatabaseErrors
-  async acceptFriendRequest(requesterId: string, requestedId: string) {
-    await this.db
-      .update(schema.friendRequest)
-      .set({ status: "accepted" })
+  async deleteFriendRequest(requesterId: string, requestedId: string) {
+    const result = await this.db
+      .delete(schema.friendRequest)
       .where(
         and(
           eq(schema.friendRequest.requesterId, requesterId),
           eq(schema.friendRequest.requestedId, requestedId),
         ),
       );
-  }
-
-  @handleDatabaseErrors
-  async rejectFriendRequest(requesterId: string, requestedId: string) {
-    await this.db
-      .update(schema.friendRequest)
-      .set({ status: "declined" })
-      .where(
-        and(
-          eq(schema.friendRequest.requesterId, requesterId),
-          eq(schema.friendRequest.requestedId, requestedId),
-        ),
-      );
+    return result[0];
   }
 
   @handleDatabaseErrors
@@ -108,9 +96,7 @@ export class FriendRepository {
       .where(
         and(
           eq(schema.friendRequest.requestedId, userId),
-          eq(schema.friendRequest.status, "pending"),
         ),
       );
   }
-
 }

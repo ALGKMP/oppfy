@@ -262,4 +262,16 @@ export class UserService {
     }
   }
 
+  async sendFriendRequest(senderId: string, recipientId: string) {
+    const alreadyFriends = await this.isFriends(senderId, recipientId);
+    if (alreadyFriends) {
+      throw new DomainError(ErrorCodes.USER_ALREADY_FRIENDS);
+    }
+
+    const result = await this.friendRepository.createFriendRequest(senderId, recipientId);
+    if (!result) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REQUEST_FOLLOW);
+    }
+  }
+
 }

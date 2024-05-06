@@ -132,6 +132,12 @@ export const userRouter = createTRPCRouter({
   }),
 
   // TODO: send friend request - check if neither parties are blocked first
+  sendFriendRequest: protectedProcedure
+  .input(trpcValidators.user.followUser)
+  .mutation(async ({input, ctx}) => {
+    return await ctx.services.user.sendFriendRequest(ctx.session.uid, input.recipientId);
+  }),
+
 
   // TODO: accept friend request - delete request (or change status) and add a new graph connection
 

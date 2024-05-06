@@ -244,8 +244,6 @@ export const friendRequest = mySqlTable("FriendRequest", {
   requestedId: varchar("requestedId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  status: mysqlEnum("status", ["pending", "accepted", "declined"]) // Possible values: "pending", "accepted", "declined"
-    .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
