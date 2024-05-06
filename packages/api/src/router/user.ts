@@ -27,10 +27,12 @@ export const userRouter = createTRPCRouter({
       await ctx.services.user.updateUsername(ctx.session.uid, input.username);
     }),
 
+  // TODO: Needs to be tested
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.services.user.getUserNotificationSettings(ctx.session.uid);
   }),
 
+  // TODO: Needs to be tested
   updateNotificationSettings: protectedProcedure
     .input(trpcValidators.user.updateNotificationSettings)
     .mutation(async ({ input, ctx }) => {
@@ -96,41 +98,120 @@ export const userRouter = createTRPCRouter({
 
   // TODO: Test this
   unblockUser: protectedProcedure
-  .input(trpcValidators.user.unblockUser)
-  .mutation(async ({input, ctx}) => {
-    return await ctx.services.user.unblockUser(ctx.session.uid, input.blockedUserId);
-  }),
+    .input(trpcValidators.user.unblockUser)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.unblockUser(
+        ctx.session.uid,
+        input.blockedUserId,
+      );
+    }),
 
   // TODO: Test this
   followUser: protectedProcedure
-  .input(trpcValidators.user.followUser)
-  .mutation(async ({input, ctx})=> {
-    return await ctx.services.user.followUser(ctx.session.uid, input.followedId)
-  }),
+    .input(trpcValidators.user.follow)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.followUser(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
-  // TODO: Unfollow user - just delete the row
+  // TODO: Unfollow user
   unfollowUser: protectedProcedure
-  .input(trpcValidators.user.unfollowUser)
-  .mutation(async ({input, ctx}) => {
-    return await ctx.services.user.unfollowUser(ctx.session.uid, input.followedId);
-  }),
+    .input(trpcValidators.user.follow)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.unfollowUser(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
   // TODO: Accept follow request - delete request (or change status) and create a new graph connection
+  acceptFollowRequest: protectedProcedure
+    .input(trpcValidators.user.follow)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.acceptFollowRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
   // TODO: Reject follow request - delete the request
+  rejectFollowRequest: protectedProcedure
+    .input(trpcValidators.user.follow)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.rejectFollowRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
-  // TODO: send friend request - check if neither parties are blocked first
+  sendFriendRequest: protectedProcedure
+    .input(trpcValidators.user.follow)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.user.sendFriendRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
   // TODO: accept friend request - delete request (or change status) and add a new graph connection
+  acceptFriendRequest: protectedProcedure
+    .input(trpcValidators.user.friendRequest)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.acceptFriendRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
   // TODO: reject friend request - delete the request
+  rejectFriendRequest: protectedProcedure
+    .input(trpcValidators.user.friendRequest)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.rejectFriendRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
   // TODO: remove friend - delete the friend graph connection
+  removeFriend: protectedProcedure
+    .input(trpcValidators.user.friendRequest)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.removeFriend(ctx.session.uid, input.recipientId);
+    }),
 
   // TODO: remove follower - delete the follow network connection
+  removeFollower: protectedProcedure
+    .input(trpcValidators.user.friendRequest)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.removeFollower(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
-  // TODO: check for follow and friend request
+  // TODO: Cancel follow/friend request
+  cancelFollowRequest: protectedProcedure
+    .input(trpcValidators.user.friendRequest)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.cancelFollowRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
+
+  cancelFriendRequest: protectedProcedure
+    .input(trpcValidators.user.follow)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.cancelFriendRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
+
+  // TODO: paginate follow and friend requests
 
   // TODO: paginate blocked users
-
 });

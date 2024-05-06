@@ -2,7 +2,7 @@ import { sharedValidators } from "@acme/validators";
 
 import { DomainError, ErrorCodes } from "../errors";
 import { AwsRepository } from "../repositories/aws";
-import { FollowerRepository } from "../repositories/follower";
+import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
 import { PostRepository } from "../repositories/post";
 import { ProfileRepository } from "../repositories/profile";
@@ -15,7 +15,7 @@ export class ProfileService {
   private profilePictureRepository = new ProfilePictureRepository();
   private awsRepository = new AwsRepository();
   private postRepository = new PostRepository();
-  private followersRepository = new FollowerRepository();
+  private followersRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
 
   async updateFullName(userId: string, fullName: string) {
@@ -66,9 +66,10 @@ export class ProfileService {
       Key: key,
     });
   }
-
-  // TODO: Fuck this might use joins here
+  
+  // TODO: Make a second one for other users - pass in cur userId and otherUserId because you'll need to look for friend/follow status
   async getBasicProfile(userId: string) {
+  // TODO: Fuck this might use joins here
     const user = await this.userRepository.getUser(userId);
     if (!user) {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);
@@ -96,8 +97,9 @@ export class ProfileService {
     });
   }
 
+  // TODO: Make a second one for other users - pass in cur userId and otherUserId because you'll need to look for friend/follow status
   async getFullProfile(userId: string) {
-    // TODO: Fuck this, using joins
+    // TODO: Fuck this, using joins later
     const user = await this.userRepository.getUser(userId);
     if (!user) {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);

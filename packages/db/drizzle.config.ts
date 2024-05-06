@@ -6,6 +6,7 @@ export default {
   schema: "./src/schema",
   tablesFilter: ["t3turbo_*"],
   driver: "mysql2",
+  out: "./drizzle",
   dbCredentials: {
     host: process.env.DATABASE_ENDPOINT!,
     port: 3306,

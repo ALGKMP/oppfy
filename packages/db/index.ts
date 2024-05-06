@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import * as mysql from "mysql2/promise";
 
 // import * as migration from "@acme/db/src/schema/migration";
-import * as migration from "./src/schema/migration";
+import * as migration from "./src/schema/schema";
 
 export const schema = { ...migration };
 
@@ -12,7 +12,7 @@ export { mySqlTable as tableCreator } from "./src/schema/_table";
 
 export * from "drizzle-orm";
 
-const connection = await mysql.createConnection({
+export const connection = await mysql.createConnection({
   port: Number(process.env.DATABASE_PORT),
   host: process.env.DATABASE_ENDPOINT,
   user: process.env.DATABASE_USERNAME,

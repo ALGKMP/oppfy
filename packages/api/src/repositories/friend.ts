@@ -31,7 +31,7 @@ export class FriendRepository {
           ),
         ),
       );
-      return result[0];
+    return result[0];
   }
 
   @handleDatabaseErrors
@@ -67,50 +67,46 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async sendFriendRequest(requesterId: string, requestedId: string) {
-    return await this.db
+  async createFriendRequest(senderId: string, recipientId: string) {
+    const result = await this.db
       .insert(schema.friendRequest)
-      .values({ requesterId, requestedId, status: "pending" })
+      .values({ senderId, recipientId })
       .execute();
+    return result[0];
   }
 
   @handleDatabaseErrors
-  async acceptFriendRequest(requesterId: string, requestedId: string) {
-    await this.db
-      .update(schema.friendRequest)
-      .set({ status: "accepted" })
+  async deleteFriendRequest(senderId: string, recipientId: string) {
+    const result = await this.db
+      .delete(schema.friendRequest)
       .where(
         and(
-          eq(schema.friendRequest.requesterId, requesterId),
-          eq(schema.friendRequest.requestedId, requestedId),
+          eq(schema.friendRequest.senderId, senderId),
+          eq(schema.friendRequest.recipientId, recipientId),
         ),
       );
+    return result[0];
   }
 
   @handleDatabaseErrors
-  async rejectFriendRequest(requesterId: string, requestedId: string) {
-    await this.db
-      .update(schema.friendRequest)
-      .set({ status: "declined" })
-      .where(
-        and(
-          eq(schema.friendRequest.requesterId, requesterId),
-          eq(schema.friendRequest.requestedId, requestedId),
-        ),
-      );
+  async getFriendRequest(senderId: string, recipientId: string) {
+    return await this.db.query.friendRequest.findFirst({
+      where: and(
+        eq(schema.friendRequest.senderId, senderId),
+        eq(schema.friendRequest.recipientId, recipientId),
+      ),
+    });
   }
 
   @handleDatabaseErrors
-  async getPendingRequests(userId: string) {
+  async getPendingRequests(senderId: string) {
     return await this.db
       .select()
       .from(schema.friendRequest)
       .where(
         and(
-          eq(schema.friendRequest.requestedId, userId),
-          eq(schema.friendRequest.status, "pending"),
+          eq(schema.friendRequest.senderId, senderId),
         ),
       );
   }
-
 }

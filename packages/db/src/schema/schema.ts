@@ -138,7 +138,6 @@ export const postRelations = relations(post, ({ one, many }) => ({
   }),
   likes: many(like),
   comments: many(comment),
-  // tags: many(tag)
 }));
 
 export const postStats = mySqlTable("PostStats", {
@@ -214,10 +213,10 @@ export const commentRelations = relations(comment, ({ one }) => ({
 
 export const follower = mySqlTable("Follower", {
   id: serial("id").primaryKey(),
-  followerId: varchar("followerId", { length: 255 })
+  senderId: varchar("senderId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  followedId: varchar("followedId", { length: 255 })
+  recipientId: varchar("recipientId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
@@ -226,27 +225,25 @@ export const follower = mySqlTable("Follower", {
 });
 
 export const followerRelations = relations(follower, ({ one }) => ({
-  follower: one(user, {
-    relationName: "followerUser",
-    fields: [follower.followerId],
+  sender: one(user, {
+    relationName: "sender",
+    fields: [follower.senderId],
     references: [user.id],
   }),
-  followed: one(user, {
-    relationName: "followedUser",
-    fields: [follower.followedId],
+  recipient: one(user, {
+    relationName: "recipient",
+    fields: [follower.recipientId],
     references: [user.id],
   }),
 }));
 
 export const friendRequest = mySqlTable("FriendRequest", {
   id: serial("id").primaryKey(),
-  requesterId: varchar("requesterId", { length: 255 })
+  senderId: varchar("senderId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  requestedId: varchar("requestedId", { length: 255 })
+  recipientId: varchar("recipientId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  status: mysqlEnum("status", ["pending", "accepted", "declined"]) // Possible values: "pending", "accepted", "declined"
     .notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
@@ -255,24 +252,24 @@ export const friendRequest = mySqlTable("FriendRequest", {
 });
 
 export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
-  requester: one(user, {
-    relationName: "requester",
-    fields: [friendRequest.requesterId],
+  sender: one(user, {
+    relationName: "sender",
+    fields: [friendRequest.senderId],
     references: [user.id],
   }),
-  requested: one(user, {
-    relationName: "requested",
-    fields: [friendRequest.requestedId],
+  recipient: one(user, {
+    relationName: "recipient",
+    fields: [friendRequest.recipientId],
     references: [user.id],
   }),
 }));
 
 export const followRequest = mySqlTable("FriendRequest", {
   id: serial("id").primaryKey(),
-  requesterId: varchar("requesterId", { length: 255 })
+  senderId: varchar("senderId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  requestedId: varchar("requestedId", { length: 255 })
+  recipientId: varchar("recipientId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
@@ -282,14 +279,14 @@ export const followRequest = mySqlTable("FriendRequest", {
 });
 
 export const followRequestRelation = relations(followRequest, ({ one }) => ({
-  requester: one(user, {
-    relationName: "requester",
-    fields: [followRequest.requesterId],
+  sender: one(user, {
+    relationName: "sender",
+    fields: [followRequest.senderId],
     references: [user.id],
   }),
-  requested: one(user, {
-    relationName: "requested",
-    fields: [followRequest.requestedId],
+  recipient: one(user, {
+    relationName: "recipient",
+    fields: [followRequest.recipientId],
     references: [user.id],
   }),
 }));

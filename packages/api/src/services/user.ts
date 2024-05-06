@@ -1,5 +1,5 @@
 import { DomainError, ErrorCodes } from "../errors";
-import { FollowerRepository } from "../repositories/follower";
+import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
 import type { NotificationSettings } from "../repositories/notificationSettings";
 import { NotificationSettingsRepository } from "../repositories/notificationSettings";
@@ -9,8 +9,8 @@ import { UserRepository } from "../repositories/user";
 export class UserService {
   private userRepository = new UserRepository();
   private notificationSettingsRepository = new NotificationSettingsRepository();
-  private followRepository = new FollowerRepository();
-  private friendRepository = new FriendRepository
+  private followRepository = new FollowRepository();
+  private friendRepository = new FriendRepository();
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
@@ -142,12 +142,12 @@ export class UserService {
   }
 
   async getFollowers(userId: string) {
-    const cursor = userId
+    const cursor = userId;
     return await this.userRepository.getPaginatedFollowers(cursor);
   }
 
   async getFriends(userId: string) {
-    const cursor = userId 
+    const cursor = userId;
     return await this.userRepository.getPaginatedFriends(cursor);
   }
 
@@ -160,39 +160,40 @@ export class UserService {
   }
 
   async getFollowing(userId: string) {
-    const cursor = userId
+    const cursor = userId;
     return await this.userRepository.getPaginatedFollowing(cursor);
   }
 
   async isFollowing(followerId: string, followedId: string) {
-    return !!(await this.followRepository.getFollower(followerId, followedId))
+    return !!(await this.followRepository.getFollower(followerId, followedId));
   }
 
   async getFollowRequests(userId: string) {
     return await this.userRepository.getPaginatedFollowRequests(userId);
-  };
+  }
 
   async blockUser(userId: string, blockUserId: string) {
     if (await this.isFollowing(userId, blockUserId)) {
       const a = await this.followRepository.removeFollower(userId, blockUserId);
-      if (!a) { // giving up on variable names
+      if (!a) {
+        // giving up on variable names
         throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
-      };
-    };
+      }
+    }
 
     if (await this.isFollowing(blockUserId, userId)) {
       const b = await this.followRepository.removeFollower(blockUserId, userId);
       if (!b) {
         throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
-      };
-    };
+      }
+    }
 
-    if (await this.isFriends(userId, blockUserId)) { 
+    if (await this.isFriends(userId, blockUserId)) {
       const c = await this.friendRepository.removeFriend(userId, blockUserId);
       if (!c) {
         throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FRIEND);
-      };
-    };
+      }
+    }
 
     const result = await this.userRepository.blockUser(userId, blockUserId);
     if (!result) {
@@ -204,7 +205,7 @@ export class UserService {
     return !!(await this.userRepository.getBlockedUser(userId, blockedUserId));
   }
 
-  async unblockUser(userId:string, blockedUserId: string) {
+  async unblockUser(userId: string, blockedUserId: string) {
     const result = await this.userRepository.unblockUser(userId, blockedUserId);
     // TODO: There should be a delete marker, not sure why I'm not getting it with autocomplete!?!?!?
     if (!result) {
@@ -212,35 +213,180 @@ export class UserService {
     }
   }
 
-  async followUser(followerId:string, followedId: string) {
-    const alreadyFollowing = await this.isFollowing(followerId, followedId);
+  async followUser(senderId: string, recipientId: string) {
+    const alreadyFollowing = await this.isFollowing(senderId, recipientId);
     if (alreadyFollowing) {
       throw new DomainError(ErrorCodes.USER_ALREADY_FOLLOWED);
     }
 
-    const user = await this.userRepository.getUser(followedId);
+    const user = await this.userRepository.getUser(recipientId);
     if (user === undefined) {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);
     }
-    
+
     if (user.privacySetting === "private") {
-      const result = await this.followRepository.followRequest(followerId, followedId);
+      const result = await this.followRepository.createFollowRequest(
+        senderId,
+        recipientId,
+      );
       if (!result) {
         throw new DomainError(ErrorCodes.FAILED_TO_REQUEST_FOLLOW);
       }
     }
 
-    const result = await this.followRepository.addFollower(followerId, followedId);
+    const result = await this.followRepository.addFollower(
+      senderId,
+      recipientId,
+    );
     if (!result) {
       throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
     }
   }
 
-  async unfollowUser(followerId: string, followedId: string) {
-    const result = await this.followRepository.removeFollower(followerId, followedId);
+  async unfollowUser(senderId: string, recipientId: string) {
+    const result = await this.followRepository.removeFollower(
+      senderId,
+      recipientId,
+    );
     if (!result.insertId) {
       throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
     }
   }
 
+  async acceptFollowRequest(senderId: string, recipientId: string) {
+    const result = await this.followRepository.removeFollowRequest(
+      senderId,
+      recipientId,
+    );
+    if (!result.insertId) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOW_REQUEST);
+    }
+
+    const result2 = await this.followRepository.addFollower(
+      senderId,
+      recipientId,
+    );
+    if (!result2) {
+      throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
+    }
+  }
+
+  async rejectFollowRequest(senderId: string, recipientId: string) {
+    const result = await this.followRepository.removeFollowRequest(
+      senderId,
+      recipientId,
+    );
+    if (!result.insertId) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOW_REQUEST);
+    }
+  }
+
+  async sendFriendRequest(senderId: string, recipientId: string) {
+    const alreadyFriends = await this.isFriends(senderId, recipientId);
+    if (alreadyFriends) {
+      throw new DomainError(ErrorCodes.USER_ALREADY_FRIENDS);
+    }
+
+    const result = await this.friendRepository.createFriendRequest(
+      senderId,
+      recipientId,
+    );
+    if (!result) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REQUEST_FOLLOW);
+    }
+  }
+
+  async acceptFriendRequest(requesterId: string, requestedId: string) {
+    const requestExists = await this.friendRepository.getFriendRequest(
+      requesterId,
+      requestedId,
+    );
+    if (!requestExists) {
+      throw new DomainError(ErrorCodes.FRIEND_REQUEST_NOT_FOUND);
+    }
+
+    await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
+    const addFriendResult = await this.friendRepository.addFriend(
+      requesterId,
+      requestedId,
+    );
+    if (!addFriendResult) {
+      throw new DomainError(ErrorCodes.FAILED_TO_ADD_FRIEND);
+    }
+  }
+
+  async rejectFriendRequest(requesterId: string, requestedId: string) {
+    const requestExists = await this.friendRepository.getFriendRequest(
+      requesterId,
+      requestedId,
+    );
+    if (!requestExists) {
+      throw new DomainError(ErrorCodes.FRIEND_REQUEST_NOT_FOUND);
+    }
+
+    const deleteResult = await this.friendRepository.deleteFriendRequest(
+      requesterId,
+      requestedId,
+    );
+    if (!deleteResult) {
+      throw new DomainError(ErrorCodes.FAILED_TO_DELETE_FRIEND_REQUEST);
+    }
+  }
+
+  async removeFriend(userId1: string, userId2: string) {
+    const friendshipExists = await this.friendRepository.getFriend(
+      userId1,
+      userId2,
+    );
+    if (!friendshipExists) {
+      throw new DomainError(ErrorCodes.FRIENDSHIP_NOT_FOUND);
+    }
+
+    const removeResult = await this.friendRepository.removeFriend(
+      userId1,
+      userId2,
+    );
+    if (!removeResult) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FRIEND);
+    }
+  }
+
+  async removeFollower(followerId: string, followedId: string) {
+    const followerExists = await this.followRepository.getFollower(followerId, followedId);
+    if (!followerExists) {
+      throw new DomainError(ErrorCodes.FOLLOW_NOT_FOUND);
+    }
+  
+    const removeResult = await this.followRepository.removeFollower(followerId, followedId);
+    if (!removeResult) {
+      throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
+    }
+  }
+
+  async cancelFollowRequest(senderId: string, recipientId: string) {
+  const followRequestExists = await this.followRepository.getFollowRequest(senderId, recipientId);
+  if (!followRequestExists) {
+    throw new DomainError(ErrorCodes.FOLLOW_REQUEST_NOT_FOUND);
+  }
+
+  const deleteResult = await this.followRepository.removeFollowRequest(senderId, recipientId);
+  if (!deleteResult) {
+    throw new DomainError(ErrorCodes.FAILED_TO_CANCEL_FOLLOW_REQUEST);
+  }
+}
+
+
+  async cancelFriendRequest(requesterId: string, requestedId: string) {
+  const friendRequestExists = await this.friendRepository.getFriendRequest(requesterId, requestedId);
+  if (!friendRequestExists) {
+    throw new DomainError(ErrorCodes.FRIEND_REQUEST_NOT_FOUND);
+  }
+
+  const deleteResult = await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
+  if (!deleteResult) {
+    throw new DomainError(ErrorCodes.FAILED_TO_CANCEL_FRIEND_REQUEST);
+  }
+}
+
+  
 }
