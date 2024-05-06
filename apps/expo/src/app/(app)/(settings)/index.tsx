@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import {
   BellRing,
   ChevronRight,
+  Hammer,
   Info,
   LifeBuoy,
   Share2,
@@ -60,7 +61,7 @@ const Settings = () => {
         },
         {
           title: "Other",
-          icon: <ShieldCheck />,
+          icon: <Hammer />,
           iconAfter: <ChevronRight />,
           onPress: () => router.push("/other"),
         },
@@ -101,7 +102,11 @@ const Settings = () => {
     <ScreenBaseView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
-        <Button size="$5" color="$red9" onPress={() => setIsModalVisible(true)}>
+        <Button
+          size="$4.5"
+          color="$red9"
+          onPress={() => setIsModalVisible(true)}
+        >
           Logout
         </Button>
       </YStack>

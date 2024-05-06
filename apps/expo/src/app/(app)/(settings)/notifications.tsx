@@ -1,41 +1,35 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import {
-  BellRing,
-  ChevronRight,
-  Info,
-  LifeBuoy,
-  MessageCircle,
-  Share2,
-  ShieldCheck,
-  Star,
-  StickyNote,
-  UsersRound,
-} from "@tamagui/lucide-icons";
-import { Button, YStack } from "tamagui";
+import { MessageCircle, StickyNote, UsersRound } from "@tamagui/lucide-icons";
+import { Button, Switch, YStack } from "tamagui";
 
 import type { SettingsGroup } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
-import type { ButtonOption } from "~/components/Sheets";
-import { ActionSheet } from "~/components/Sheets";
 import { ScreenBaseView } from "~/components/Views";
-import { useSession } from "~/contexts/SessionContext";
+
+interface SwitchState {
+  friendPosts: boolean;
+  comments: boolean;
+  friendRequests: boolean;
+}
 
 const Notifications = () => {
-  const { signOut } = useSession();
   const router = useRouter();
 
-  const title = "Log Out";
-  const subtitle = "Are you sure you want to log out?";
-  const buttonOptions = [
-    {
-      text: "Log Out",
-      textProps: {
-        color: "$red9",
-      },
-      onPress: () => void signOut(),
-    },
-  ] satisfies ButtonOption[];
+  const [switchState, setSwitchState] = useState<SwitchState>({
+    friendPosts: false,
+    comments: false,
+    friendRequests: false,
+  });
+
+  const updateSwitchState = (key: keyof SwitchState, value: boolean) => {
+    setSwitchState({ ...switchState, [key]: value });
+  };
+
+  // TODO: Implement
+  const onSubmit = () => {
+    console.log("onSubmit");
+  };
 
   const settingsGroups = [
     {
@@ -44,34 +38,58 @@ const Notifications = () => {
         {
           title: "Friends Posts",
           icon: <StickyNote />,
-          iconAfter: <ChevronRight />,
+          iconAfter: (
+            <Switch
+              size="$3"
+              checked={switchState.friendPosts}
+              onCheckedChange={(value) =>
+                updateSwitchState("friendPosts", value)
+              }
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+          ),
           onPress: () => router.push("/notifications"),
         },
         {
           title: "Comments",
           icon: <MessageCircle />,
-          iconAfter: <ChevronRight />,
+          iconAfter: (
+            <Switch
+              size="$3"
+              checked={switchState.comments}
+              onCheckedChange={(value) => updateSwitchState("comments", value)}
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+          ),
           onPress: () => router.push("/privacy"),
         },
         {
           title: "Friend Requests",
           icon: <UsersRound />,
-          iconAfter: <ChevronRight />,
+          iconAfter: (
+            <Switch
+              size="$3"
+              checked={switchState.friendRequests}
+              onCheckedChange={(value) =>
+                updateSwitchState("friendRequests", value)
+              }
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+          ),
           onPress: () => router.push("/other"),
         },
       ],
     },
   ] satisfies SettingsGroup[];
 
-  const onSubmit = () => {
-    console.log("onSubmit");
-  };
-
   return (
     <ScreenBaseView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
-        <Button size="$5" onPress={onSubmit}>
+        <Button size="$4.5" onPress={onSubmit}>
           Save
         </Button>
       </YStack>
