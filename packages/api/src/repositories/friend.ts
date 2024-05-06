@@ -89,6 +89,16 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
+  async getFriendRequest(requesterId: string, requestedId: string) {
+    return await this.db.query.friendRequest.findFirst({
+      where: and(
+        eq(schema.friendRequest.requesterId, requesterId),
+        eq(schema.friendRequest.requestedId, requestedId),
+      ),
+    });
+  }
+
+  @handleDatabaseErrors
   async getPendingRequests(userId: string) {
     return await this.db
       .select()

@@ -42,11 +42,11 @@ const trpcUserSchema = {
     userId,
     blockedUserId: userId,
   }),
-  followUser: z.object({
+  follow: z.object({
     recipientId: userId
   }),
-  unfollowUser: z.object({
-    recipientId: userId
+  friendRequest: z.object({
+    recipientId: userId,
   }),
 };
 
