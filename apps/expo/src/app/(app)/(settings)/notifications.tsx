@@ -14,8 +14,6 @@ interface SwitchState {
 }
 
 const Notifications = () => {
-  const router = useRouter();
-
   const [switchState, setSwitchState] = useState<SwitchState>({
     friendPosts: false,
     comments: false,
@@ -49,7 +47,8 @@ const Notifications = () => {
               <Switch.Thumb animation="quick" />
             </Switch>
           ),
-          onPress: () => router.push("/notifications"),
+          hoverTheme: false,
+          pressTheme: false,
         },
         {
           title: "Comments",
@@ -63,7 +62,8 @@ const Notifications = () => {
               <Switch.Thumb animation="quick" />
             </Switch>
           ),
-          onPress: () => router.push("/privacy"),
+          hoverTheme: false,
+          pressTheme: false,
         },
         {
           title: "Friend Requests",
@@ -79,7 +79,8 @@ const Notifications = () => {
               <Switch.Thumb animation="quick" />
             </Switch>
           ),
-          onPress: () => router.push("/other"),
+          hoverTheme: false,
+          pressTheme: false,
         },
       ],
     },

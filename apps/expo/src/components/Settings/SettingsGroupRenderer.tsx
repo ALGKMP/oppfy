@@ -15,6 +15,8 @@ export interface SettingsItem {
   title: string;
   icon: IconProp | undefined;
   iconAfter: IconProp | undefined;
+  hoverTheme?: boolean | undefined;
+  pressTheme?: boolean | undefined;
   onPress?: () => void;
 }
 
@@ -31,7 +33,12 @@ const renderSettingsGroup = (group: SettingsGroup) => (
     <YGroup alignSelf="center" bordered separator={<Separator />}>
       {group.items.map((item, index) => (
         <YGroup.Item key={index}>
-          <ListItem hoverTheme pressTheme size="$4.5" onPress={item.onPress}>
+          <ListItem
+            size="$4.5"
+            onPress={item.onPress}
+            hoverTheme={item.hoverTheme ?? true}
+            pressTheme={item.pressTheme ?? true}
+          >
             <XStack flex={1} alignItems="center">
               <XStack flex={1} alignItems="center" gap="$2">
                 {item.icon &&

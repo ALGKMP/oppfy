@@ -15,7 +15,7 @@ import {
 export interface ButtonOption {
   text: string;
   textProps?: SizableTextProps;
-  onPress?: ((event: GestureResponderEvent) => void) | undefined;
+  onPress?: () => void;
 }
 
 export interface ActionSheetProps {
