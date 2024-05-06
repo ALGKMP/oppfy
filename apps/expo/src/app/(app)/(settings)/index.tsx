@@ -1,7 +1,12 @@
 import { useState } from "react";
+import { Share } from "react-native";
+import { useRouter } from "expo-router";
+import * as Sharing from "expo-sharing";
+import * as StoreReview from "expo-store-review";
 import {
   BellRing,
   ChevronRight,
+  Hammer,
   Info,
   LifeBuoy,
   Share2,
@@ -19,8 +24,24 @@ import { useSession } from "~/contexts/SessionContext";
 
 const Settings = () => {
   const { signOut } = useSession();
+  const router = useRouter();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  // TODO: Update details
+  const handleShare = async () => {
+    await Share.share({
+      title: "Share Oppfy",
+      message: "Check out Oppfy, it's a great app!",
+      url: "https://oppfy.com",
+    });
+  };
+
+  const handleRate = async () => {
+    if (await StoreReview.hasAction()) {
+      await StoreReview.requestReview();
+    }
+  };
 
   const title = "Log Out";
   const subtitle = "Are you sure you want to log out?";
@@ -42,22 +63,49 @@ const Settings = () => {
           title: "Notifications",
           icon: <BellRing />,
           iconAfter: <ChevronRight />,
+          onPress: () => router.push("/notifications"),
         },
         {
           title: "Privacy",
           icon: <ShieldCheck />,
           iconAfter: <ChevronRight />,
+          onPress: () => router.push("/privacy"),
         },
-        { title: "Other", icon: <ShieldCheck />, iconAfter: <ChevronRight /> },
+        {
+          title: "Other",
+          icon: <Hammer />,
+          iconAfter: <ChevronRight />,
+          onPress: () => router.push("/other"),
+        },
       ],
     },
     {
       headerTitle: "Other",
       items: [
-        { title: "Share Us", icon: <Share2 />, iconAfter: <ChevronRight /> },
-        { title: "Rate Us", icon: <Star />, iconAfter: <ChevronRight /> },
-        { title: "Help", icon: <LifeBuoy />, iconAfter: <ChevronRight /> },
-        { title: "About", icon: <Info />, iconAfter: <ChevronRight /> },
+        {
+          title: "Share Us",
+          icon: <Share2 />,
+          iconAfter: <ChevronRight />,
+          onPress: () => void handleShare(),
+        },
+        {
+          title: "Rate Us",
+          icon: <Star />,
+          iconAfter: <ChevronRight />,
+          onPress: () => void handleRate(),
+        },
+        {
+          title: "Help",
+          icon: <LifeBuoy />,
+          iconAfter: <ChevronRight />,
+          onPress: () => router.push("/help"),
+        },
+        {
+          title: "About",
+          icon: <Info />,
+          iconAfter: <ChevronRight />,
+          onPress: () => router.push("/about"),
+        },
       ],
     },
   ] satisfies SettingsGroup[];
@@ -66,7 +114,11 @@ const Settings = () => {
     <ScreenBaseView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
-        <Button size="$5" color="$red9" onPress={() => setIsModalVisible(true)}>
+        <Button
+          size="$4.5"
+          color="$red9"
+          onPress={() => setIsModalVisible(true)}
+        >
           Logout
         </Button>
       </YStack>
@@ -81,4 +133,5 @@ const Settings = () => {
     </ScreenBaseView>
   );
 };
+
 export default Settings;

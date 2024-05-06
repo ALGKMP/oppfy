@@ -1,41 +1,56 @@
-import React, { useState } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { Redirect, useRouter } from "expo-router";
-import { ChevronRight } from "@tamagui/lucide-icons";
-import {
-  AlertDialog,
-  Button,
-  ListItem,
-  Separator,
-  Text,
-  View,
-  YGroup,
-  YStack,
-} from "tamagui";
+import { useState } from "react";
+import { useRouter } from "expo-router";
+import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
+import { Switch, YStack } from "tamagui";
 
-import { useSession } from "~/contexts/SessionContext";
+import type { SettingsGroup } from "~/components/Settings";
+import { renderSettingsGroup } from "~/components/Settings";
+import { ScreenBaseView } from "~/components/Views";
 
 const Privacy = () => {
   const router = useRouter();
 
+  const [privateAccount, setPrivateAccount] = useState(false);
+
+  // TODO: Implement
+  const onSubmit = (checked: boolean) => {
+    console.log("onSubmit");
+    setPrivateAccount(checked);
+  };
+
+  const settingsGroups = [
+    {
+      headerTitle: "Privacy",
+      items: [
+        {
+          title: "Private Account",
+          icon: <BookLock />,
+          iconAfter: (
+            <Switch
+              size="$3"
+              checked={privateAccount}
+              onCheckedChange={onSubmit}
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+          ),
+          hoverTheme: false,
+          pressTheme: false,
+        },
+        {
+          title: "Blocked Users",
+          icon: <ShieldBan />,
+          iconAfter: <ChevronRight />,
+          onPress: () => router.push("/blocked-users"),
+        },
+      ],
+    },
+  ] satisfies SettingsGroup[];
+
   return (
-    <View flex={1} backgroundColor="black" paddingHorizontal="$6">
-      <YStack space={20}>
-        <YStack space={8}>
-          <YGroup separator={<Separator />}>
-            <YGroup.Item>
-              <ListItem
-                title="Blocked Users"
-                hoverTheme
-                pressTheme
-                iconAfter={ChevronRight}
-                onPress={() => router.push("/blocked-users")}
-              />
-            </YGroup.Item>
-          </YGroup>
-        </YStack>
-      </YStack>
-    </View>
+    <ScreenBaseView scrollable>
+      <YStack gap="$4">{settingsGroups.map(renderSettingsGroup)}</YStack>
+    </ScreenBaseView>
   );
 };
 

@@ -1,77 +1,104 @@
-import React, { useState } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { Redirect, useRouter } from "expo-router";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { ChevronRight } from "@tamagui/lucide-icons";
-import {
-  AlertDialog,
-  Button,
-  ListItem,
-  Separator,
-  Text,
-  View,
-  YGroup,
-  YStack,
-} from "tamagui";
+import { useState } from "react";
+import * as FileSystem from "expo-file-system";
+import { ChevronRight, XCircle } from "@tamagui/lucide-icons";
+import { Button, YStack } from "tamagui";
 
+import type { SettingsGroup } from "~/components/Settings";
+import { renderSettingsGroup } from "~/components/Settings";
+import type { ButtonOption } from "~/components/Sheets";
+import { ActionSheet } from "~/components/Sheets";
+import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 
 const Other = () => {
-  const router = useRouter();
-  const { showActionSheetWithOptions } = useActionSheet();
+  const { deleteAccount } = useSession();
 
-  const onPress = () => {
-    const options = ["Clear Cache", "Cancel"];
-    const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 1;
+  const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
+    useState(false);
+  const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
+    useState(false);
 
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-        destructiveButtonIndex,
-      },
-      (selectedIndex) => {
-        switch (selectedIndex) {
-          case destructiveButtonIndex:
-            // Delete
-            break;
-
-          case cancelButtonIndex:
-          // Canceled
-        }
-      },
-    );
+  const handleClearCache = async () => {
+    if (FileSystem.cacheDirectory === null) return;
+    await FileSystem.deleteAsync(FileSystem.cacheDirectory, {
+      idempotent: true,
+    });
   };
 
-  return (
-    <View flex={1} backgroundColor="black" paddingHorizontal="$6">
-      <YStack space={20}>
-        <YStack space={8}>
-          <YGroup separator={<Separator />}>
-            <YGroup.Item>
-              <ListItem
-                title="Clear cache"
-                hoverTheme
-                pressTheme
-                iconAfter={ChevronRight}
-                onPress={onPress}
-              />
-            </YGroup.Item>
-          </YGroup>
-        </YStack>
+  const clearCachetitle = "Clear Cache";
+  const clearCacheSubtitle =
+    "Clearing cache can help resolve issues with the app.";
+  const clearCacheButtonOptions = [
+    {
+      text: "Clear Cache",
+      textProps: {
+        color: "$red9",
+      },
+      onPress: () => {
+        void handleClearCache();
+        setIsClearCacheModalVisible(false);
+      },
+    },
+  ] satisfies ButtonOption[];
 
+  const deleteAccounttitle = "Delete Account";
+  const deleteAccountSubtitle =
+    "Are you sure you want to delete your account? This action cannot be undone.";
+  const deleteAccountButtonOptions = [
+    {
+      text: "Delete Account",
+      textProps: {
+        color: "$red9",
+      },
+      onPress: () => {
+        void deleteAccount();
+        setIsDeleteAccountModalVisible(false);
+      },
+    },
+  ] satisfies ButtonOption[];
+
+  const settingsGroups = [
+    {
+      headerTitle: "Other",
+      items: [
+        {
+          title: "Clear Cache",
+          icon: <XCircle />,
+          iconAfter: <ChevronRight />,
+          onPress: () => setIsClearCacheModalVisible(true),
+        },
+      ],
+    },
+  ] satisfies SettingsGroup[];
+
+  return (
+    <ScreenBaseView scrollable>
+      <YStack gap="$4">
+        {settingsGroups.map(renderSettingsGroup)}
         <Button
-          onPress={() => router.push("/delete-account")}
-          borderWidth={0}
-          backgroundColor="$gray1"
+          size="$4.5"
+          color="$red9"
+          onPress={() => setIsDeleteAccountModalVisible(true)}
         >
-          <Text color="$red9" fontSize={16} fontWeight="600">
-            Delete Account
-          </Text>
+          Delete Account
         </Button>
       </YStack>
-    </View>
+
+      <ActionSheet
+        title={clearCachetitle}
+        subtitle={clearCacheSubtitle}
+        buttonOptions={clearCacheButtonOptions}
+        isVisible={isClearCacheModalVisible}
+        onClose={() => setIsClearCacheModalVisible(false)}
+      />
+      <ActionSheet
+        title={deleteAccounttitle}
+        subtitle={deleteAccountSubtitle}
+        buttonOptions={deleteAccountButtonOptions}
+        isVisible={isDeleteAccountModalVisible}
+        onClose={() => setIsDeleteAccountModalVisible(false)}
+      />
+    </ScreenBaseView>
   );
 };
 

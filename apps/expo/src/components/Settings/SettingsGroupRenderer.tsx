@@ -1,5 +1,13 @@
-import React from "react";
-import { ListItem, Separator, SizableText, YGroup, YStack } from "tamagui";
+import React, { ReactElement } from "react";
+import type { IconProps } from "@tamagui/helpers-icon";
+import {
+  ListItem,
+  Separator,
+  SizableText,
+  XStack,
+  YGroup,
+  YStack,
+} from "tamagui";
 
 type IconProp = JSX.Element;
 
@@ -7,6 +15,9 @@ export interface SettingsItem {
   title: string;
   icon: IconProp | undefined;
   iconAfter: IconProp | undefined;
+  hoverTheme?: boolean | undefined;
+  pressTheme?: boolean | undefined;
+  onPress?: () => void;
 }
 
 export interface SettingsGroup {
@@ -23,13 +34,28 @@ const renderSettingsGroup = (group: SettingsGroup) => (
       {group.items.map((item, index) => (
         <YGroup.Item key={index}>
           <ListItem
-            hoverTheme
-            pressTheme
             size="$4.5"
-            title={item.title}
-            icon={item.icon}
-            iconAfter={item.iconAfter}
-          />
+            onPress={item.onPress}
+            hoverTheme={item.hoverTheme ?? true}
+            pressTheme={item.pressTheme ?? true}
+          >
+            <XStack flex={1} alignItems="center">
+              <XStack flex={1} alignItems="center" gap="$2">
+                {item.icon &&
+                  React.cloneElement(item.icon, {
+                    size:
+                      ((item.icon.props as IconProps).size as string) || "$1",
+                  })}
+                <SizableText size="$5">{item.title}</SizableText>
+              </XStack>
+              {item.iconAfter &&
+                React.cloneElement(item.iconAfter, {
+                  size:
+                    ((item.iconAfter.props as IconProps).size as string) ||
+                    "$1",
+                })}
+            </XStack>
+          </ListItem>
         </YGroup.Item>
       ))}
     </YGroup>
