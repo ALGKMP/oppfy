@@ -57,4 +57,11 @@ export class FollowerRepository {
       where: eq(schema.follower.followedId, userId),
     });
   }
+
+  @handleDatabaseErrors
+  async requestFollow(requesterId: string, requestedId: string) {
+    return await this.db
+      .insert(schema.followRequest)
+      .values({ requesterId, requestedId});
+  }
 }

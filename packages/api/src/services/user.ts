@@ -217,6 +217,19 @@ export class UserService {
     if (alreadyFollowing) {
       throw new DomainError(ErrorCodes.USER_ALREADY_FOLLOWED);
     }
+
+    const user = await this.userRepository.getUser(followedId);
+    if (user === undefined) {
+      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+    }
+    
+    if (user.privacySetting === "private") {
+      const result = await this.followRepository.requestFollow(followerId, followedId);
+      if (!result[0]) {
+        throw new DomainError(ErrorCodes.FAILED_TO_REQUEST_FOLLOW);
+      }
+    }
+
     const result = await this.followRepository.addFollower(followerId, followedId);
     if (!result[0]) {
       throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
