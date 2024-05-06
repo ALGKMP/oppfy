@@ -10,7 +10,7 @@ export class UserService {
   private userRepository = new UserRepository();
   private notificationSettingsRepository = new NotificationSettingsRepository();
   private followRepository = new FollowerRepository();
-  private friendRepository = new FriendRepository
+  private friendRepository = new FriendRepository();
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);

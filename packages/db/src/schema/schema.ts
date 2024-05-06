@@ -137,7 +137,6 @@ export const postRelations = relations(post, ({ one, many }) => ({
   }),
   likes: many(like),
   comments: many(comment),
-  // tags: many(tag)
 }));
 
 export const postStats = mySqlTable("PostStats", {
