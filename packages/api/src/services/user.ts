@@ -212,51 +212,51 @@ export class UserService {
     }
   }
 
-  async followUser(followerId:string, followedId: string) {
-    const alreadyFollowing = await this.isFollowing(followerId, followedId);
+  async followUser(senderId:string, recipientId: string) {
+    const alreadyFollowing = await this.isFollowing(senderId, recipientId);
     if (alreadyFollowing) {
       throw new DomainError(ErrorCodes.USER_ALREADY_FOLLOWED);
     }
 
-    const user = await this.userRepository.getUser(followedId);
+    const user = await this.userRepository.getUser(recipientId);
     if (user === undefined) {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);
     }
     
     if (user.privacySetting === "private") {
-      const result = await this.followRepository.followRequest(followerId, followedId);
+      const result = await this.followRepository.followRequest(senderId, recipientId);
       if (!result) {
         throw new DomainError(ErrorCodes.FAILED_TO_REQUEST_FOLLOW);
       }
     }
 
-    const result = await this.followRepository.addFollower(followerId, followedId);
+    const result = await this.followRepository.addFollower(senderId, recipientId);
     if (!result) {
       throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
     }
   }
 
-  async unfollowUser(followerId: string, followedId: string) {
-    const result = await this.followRepository.removeFollower(followerId, followedId);
+  async unfollowUser(senderId: string, recipientId: string) {
+    const result = await this.followRepository.removeFollower(senderId, recipientId);
     if (!result.insertId) {
       throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
     }
   }
 
-  async acceptFollowRequest(followerId: string, followedId: string) {
-    const result = await this.followRepository.removeFollowRequest(followerId, followedId);
+  async acceptFollowRequest(senderId: string, recipientId: string) {
+    const result = await this.followRepository.removeFollowRequest(senderId, recipientId);
     if (!result.insertId) {
       throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOW_REQUEST);
     }
 
-    const result2 = await this.followRepository.addFollower(followerId, followedId);
+    const result2 = await this.followRepository.addFollower(senderId, recipientId);
     if (!result2) {
       throw new DomainError(ErrorCodes.FAILED_TO_FOLLOW_USER);
     }
   }
 
-  async rejectFollowRequest(followerId: string, followedId: string) {
-    const result = await this.followRepository.removeFollowRequest(followerId, followedId);
+  async rejectFollowRequest(senderId: string, recipientId: string) {
+    const result = await this.followRepository.removeFollowRequest(senderId, recipientId);
     if (!result.insertId) {
       throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOW_REQUEST);
     }

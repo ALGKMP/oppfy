@@ -107,28 +107,28 @@ export const userRouter = createTRPCRouter({
   followUser: protectedProcedure
   .input(trpcValidators.user.followUser)
   .mutation(async ({input, ctx})=> {
-    return await ctx.services.user.followUser(ctx.session.uid, input.followedId)
+    return await ctx.services.user.followUser(ctx.session.uid, input.recipientId)
   }),
 
   // TODO: Unfollow user
   unfollowUser: protectedProcedure
   .input(trpcValidators.user.unfollowUser)
   .mutation(async ({input, ctx}) => {
-    return await ctx.services.user.unfollowUser(ctx.session.uid, input.followedId);
+    return await ctx.services.user.unfollowUser(ctx.session.uid, input.recipientId);
   }),
 
   // TODO: Accept follow request - delete request (or change status) and create a new graph connection
   acceptFollowRequest: protectedProcedure
   .input(trpcValidators.user.followUser)
   .mutation(async ({input, ctx}) => {
-    return await ctx.services.user.acceptFollowRequest(ctx.session.uid, input.followedId);
+    return await ctx.services.user.acceptFollowRequest(ctx.session.uid, input.recipientId);
   }),
 
   // TODO: Reject follow request - delete the request
   rejectFollowRequest: protectedProcedure
   .input(trpcValidators.user.followUser)
   .mutation(async ({input, ctx}) => {
-    return await ctx.services.user.rejectFollowRequest(ctx.session.uid, input.followedId);
+    return await ctx.services.user.rejectFollowRequest(ctx.session.uid, input.recipientId);
   }),
 
   // TODO: send friend request - check if neither parties are blocked first
