@@ -17,9 +17,10 @@ const trpcUserSchema = {
   }),
   updateNotificationSettings: z.object({
     posts: z.boolean().optional(),
+    likes: z.boolean().optional(),
     mentions: z.boolean().optional(),
     comments: z.boolean().optional(),
-    likes: z.boolean().optional(),
+    followRequests: z.boolean().optional(),
     friendRequests: z.boolean().optional(),
   }),
   getFriends: z.object({
@@ -43,10 +44,10 @@ const trpcUserSchema = {
     blockedUserId: userId,
   }),
   followUser: z.object({
-    followedId: userId
+    followedId: userId,
   }),
   unfollowUser: z.object({
-    followedId: userId
+    followedId: userId,
   }),
 };
 

@@ -94,9 +94,10 @@ export const profilePicture = mySqlTable("ProfilePicture", {
 export const notificationSettings = mySqlTable("NotificationSettings", {
   id: serial("id").primaryKey(),
   posts: boolean("posts").default(true).notNull(),
+  likes: boolean("likes").default(true).notNull(),
   mentions: boolean("mentions").default(true).notNull(),
   comments: boolean("comments").default(true).notNull(),
-  likes: boolean("likes").default(true).notNull(),
+  followRequests: boolean("followRequests").default(true).notNull(),
   friendRequests: boolean("friendRequests").default(true).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
@@ -344,5 +345,3 @@ export const blockRelation = relations(block, ({ one }) => ({
     references: [user.id],
   }),
 }));
-
-
