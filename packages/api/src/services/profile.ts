@@ -2,7 +2,7 @@ import { sharedValidators } from "@acme/validators";
 
 import { DomainError, ErrorCodes } from "../errors";
 import { AwsRepository } from "../repositories/aws";
-import { FollowerRepository } from "../repositories/follower";
+import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
 import { PostRepository } from "../repositories/post";
 import { ProfileRepository } from "../repositories/profile";
@@ -15,7 +15,7 @@ export class ProfileService {
   private profilePictureRepository = new ProfilePictureRepository();
   private awsRepository = new AwsRepository();
   private postRepository = new PostRepository();
-  private followersRepository = new FollowerRepository();
+  private followersRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
 
   async updateFullName(userId: string, fullName: string) {

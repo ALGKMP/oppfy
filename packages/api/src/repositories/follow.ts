@@ -1,0 +1,95 @@
+import { and, eq } from "drizzle-orm";
+
+import { db, schema } from "@acme/db";
+
+import { handleDatabaseErrors } from "../errors";
+
+export class FollowRepository {
+  private db = db;
+
+  @handleDatabaseErrors
+  async addFollower(senderId: string, recipientId: string) {
+    const result = await this.db
+      .insert(schema.follower)
+      .values({ recipientId, senderId });
+    return result[0];
+  }
+
+  @handleDatabaseErrors
+  async removeFollower(senderId: string, recipientId: string) {
+    const result = await this.db
+      .delete(schema.follower)
+      .where(
+        // Sender is removing the recipient from their followers
+        and(
+          eq(schema.follower.senderId, recipientId), 
+          eq(schema.follower.recipientId, senderId),
+        ),
+      );
+    return result[0]; 
+  }
+
+  @handleDatabaseErrors
+  async removeFollowRequest(senderId: string, recipientId: string) {
+    const result = await this.db
+      .delete(schema.followRequest)
+      .where(
+        and(
+          eq(schema.followRequest.senderId, senderId),
+          eq(schema.followRequest.recipientId, recipientId),
+        ),
+      );
+    return result[0];
+  }
+
+  @handleDatabaseErrors
+  async getFollower(senderId: string, recipientId: string) {
+    return await this.db.query.follower.findFirst({
+      where: and(
+        eq(schema.follower.senderId, senderId),
+        eq(schema.follower.recipientId, recipientId),
+      ),
+    });
+  }
+
+  @handleDatabaseErrors
+  async countFollowers(userId: string) {
+    const followers = await this.db.query.follower.findMany({
+      where: eq(schema.follower.recipientId, userId),
+    });
+    return followers.length;
+  }
+
+  @handleDatabaseErrors
+  async countFollowing(userId: string) {
+    const following = await this.db.query.follower.findMany({
+      where: eq(schema.follower.senderId, userId),
+    });
+    return following.length;
+  }
+
+  @handleDatabaseErrors
+  private async _getFollowers(userId: string) {
+    return await this.db.query.follower.findMany({
+      where: eq(schema.follower.recipientId, userId),
+    });
+  }
+
+  @handleDatabaseErrors
+  async createFollowRequest(senderId: string, recipientId: string) {
+    const result = await this.db
+      .insert(schema.followRequest)
+      .values({ senderId, recipientId});
+      return result[0];
+  }
+
+  @handleDatabaseErrors
+  async getFollowRequest(senderId: string, recipientId: string) {
+    return await this.db.query.followRequest.findFirst({
+      where: and(
+        eq(schema.followRequest.senderId, senderId),
+        eq(schema.followRequest.recipientId, recipientId),
+      ),
+    });
+  }
+}

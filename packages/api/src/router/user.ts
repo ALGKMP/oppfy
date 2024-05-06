@@ -186,10 +186,30 @@ export const userRouter = createTRPCRouter({
   removeFollower: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.removeFollower(ctx.session.uid, input.recipientId);
+      await ctx.services.user.removeFollower(
+        ctx.session.uid,
+        input.recipientId,
+      );
     }),
 
-    // TODO: Cancel follow/friend request
+  // TODO: Cancel follow/friend request
+  cancelFollowRequest: protectedProcedure
+    .input(trpcValidators.user.friendRequest)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.cancelFollowRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
+
+  cancelFriendRequest: protectedProcedure
+    .input(trpcValidators.user.follow)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.cancelFriendRequest(
+        ctx.session.uid,
+        input.recipientId,
+      );
+    }),
 
   // TODO: paginate follow and friend requests
 

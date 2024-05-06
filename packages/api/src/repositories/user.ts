@@ -121,7 +121,7 @@ export class UserRepository {
         profilePictureUrl: schema.profilePicture.key,
       })
       .from(schema.user)
-      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.followedId))
+      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.recipientId))
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .fullJoin(
         schema.profilePicture,
@@ -142,7 +142,7 @@ export class UserRepository {
         profilePictureUrl: schema.profilePicture.key,
       })
       .from(schema.user)
-      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.followerId))
+      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.senderId))
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .fullJoin(
         schema.profilePicture,
@@ -192,7 +192,7 @@ export class UserRepository {
       .from(schema.user)
       .fullJoin(
         schema.followRequest,
-        eq(schema.user.id, schema.followRequest.requestedId),
+        eq(schema.user.id, schema.followRequest.recipientId),
       )
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .fullJoin(
@@ -216,7 +216,7 @@ export class UserRepository {
       .from(schema.user)
       .fullJoin(
         schema.friendRequest,
-        eq(schema.user.id, schema.friendRequest.requestedId),
+        eq(schema.user.id, schema.friendRequest.recipientId),
       )
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .fullJoin(

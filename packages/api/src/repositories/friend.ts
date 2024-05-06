@@ -67,45 +67,45 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async createFriendRequest(requesterId: string, requestedId: string) {
+  async createFriendRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .insert(schema.friendRequest)
-      .values({ requesterId, requestedId })
+      .values({ senderId, recipientId })
       .execute();
     return result[0];
   }
 
   @handleDatabaseErrors
-  async deleteFriendRequest(requesterId: string, requestedId: string) {
+  async deleteFriendRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .delete(schema.friendRequest)
       .where(
         and(
-          eq(schema.friendRequest.requesterId, requesterId),
-          eq(schema.friendRequest.requestedId, requestedId),
+          eq(schema.friendRequest.senderId, senderId),
+          eq(schema.friendRequest.recipientId, recipientId),
         ),
       );
     return result[0];
   }
 
   @handleDatabaseErrors
-  async getFriendRequest(requesterId: string, requestedId: string) {
+  async getFriendRequest(senderId: string, recipientId: string) {
     return await this.db.query.friendRequest.findFirst({
       where: and(
-        eq(schema.friendRequest.requesterId, requesterId),
-        eq(schema.friendRequest.requestedId, requestedId),
+        eq(schema.friendRequest.senderId, senderId),
+        eq(schema.friendRequest.recipientId, recipientId),
       ),
     });
   }
 
   @handleDatabaseErrors
-  async getPendingRequests(userId: string) {
+  async getPendingRequests(senderId: string) {
     return await this.db
       .select()
       .from(schema.friendRequest)
       .where(
         and(
-          eq(schema.friendRequest.requestedId, userId),
+          eq(schema.friendRequest.senderId, senderId),
         ),
       );
   }

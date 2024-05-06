@@ -1,5 +1,5 @@
 import { DomainError, ErrorCodes } from "../errors";
-import { FollowerRepository } from "../repositories/follower";
+import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
 import type { NotificationSettings } from "../repositories/notificationSettings";
 import { NotificationSettingsRepository } from "../repositories/notificationSettings";
@@ -9,7 +9,7 @@ import { UserRepository } from "../repositories/user";
 export class UserService {
   private userRepository = new UserRepository();
   private notificationSettingsRepository = new NotificationSettingsRepository();
-  private followRepository = new FollowerRepository();
+  private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
 
   async getUser(userId: string) {
@@ -225,7 +225,7 @@ export class UserService {
     }
 
     if (user.privacySetting === "private") {
-      const result = await this.followRepository.followRequest(
+      const result = await this.followRepository.createFollowRequest(
         senderId,
         recipientId,
       );
@@ -362,5 +362,31 @@ export class UserService {
       throw new DomainError(ErrorCodes.FAILED_TO_REMOVE_FOLLOWER);
     }
   }
+
+  async cancelFollowRequest(senderId: string, recipientId: string) {
+  const followRequestExists = await this.followRepository.getFollowRequest(senderId, recipientId);
+  if (!followRequestExists) {
+    throw new DomainError(ErrorCodes.FOLLOW_REQUEST_NOT_FOUND);
+  }
+
+  const deleteResult = await this.followRepository.removeFollowRequest(senderId, recipientId);
+  if (!deleteResult) {
+    throw new DomainError(ErrorCodes.FAILED_TO_CANCEL_FOLLOW_REQUEST);
+  }
+}
+
+
+  async cancelFriendRequest(requesterId: string, requestedId: string) {
+  const friendRequestExists = await this.friendRepository.getFriendRequest(requesterId, requestedId);
+  if (!friendRequestExists) {
+    throw new DomainError(ErrorCodes.FRIEND_REQUEST_NOT_FOUND);
+  }
+
+  const deleteResult = await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
+  if (!deleteResult) {
+    throw new DomainError(ErrorCodes.FAILED_TO_CANCEL_FRIEND_REQUEST);
+  }
+}
+
   
 }
