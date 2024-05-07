@@ -1,4 +1,4 @@
-import React from "react";
+import { cloneElement } from "react";
 import type { IconProps } from "@tamagui/helpers-icon";
 import {
   ListItem,
@@ -59,7 +59,7 @@ const SettingsItem = (item: SettingsItemParams) => {
         <XStack flex={1} alignItems="center">
           <XStack flex={1} alignItems="center" gap="$2">
             {item.icon &&
-              React.cloneElement(item.icon, {
+              cloneElement(item.icon, {
                 size: ((item.icon.props as IconProps).size as string) || "$1",
               })}
             <YStack>
@@ -72,7 +72,7 @@ const SettingsItem = (item: SettingsItemParams) => {
             </YStack>
           </XStack>
           {item.iconAfter &&
-            React.cloneElement(item.iconAfter, {
+            cloneElement(item.iconAfter, {
               size:
                 ((item.iconAfter.props as IconProps).size as string) || "$1",
             })}

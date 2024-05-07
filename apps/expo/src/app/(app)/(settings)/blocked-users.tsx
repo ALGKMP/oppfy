@@ -1,13 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as FileSystem from "expo-file-system";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronRight, UserRoundX, XCircle } from "@tamagui/lucide-icons";
-import { Avatar, Button, Text, YStack } from "tamagui";
+import {
+  ChevronRight,
+  MessageCircle,
+  UserRoundX,
+  XCircle,
+} from "@tamagui/lucide-icons";
+import {
+  Avatar,
+  Button,
+  Paragraph,
+  SizableText,
+  Text,
+  View,
+  YStack,
+} from "tamagui";
 
 import type { SettingsGroup, SettingsItem } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
@@ -59,17 +74,36 @@ const BlockedUsers = () => {
   //   },
   // ] satisfies SettingsGroup[];
 
+  const headerHeight = useHeaderHeight();
+
   return (
     <ScreenBaseView>
       {/* <YStack gap="$4">{settingsGroups.map(renderSettingsGroup)}</YStack> */}
-      {data ? (
+      {data?.pages[0]?.items.length ? (
         <FlashList
           data={data.pages.flatMap((page) => page.items)}
           renderItem={({ item }) => <Text>{item}</Text>}
           onEndReached={fetchNextPage}
           estimatedItemSize={200}
         />
-      ) : null}
+      ) : (
+        <View flex={1} justifyContent="center" bottom={headerHeight}>
+          <EmptyPlaceholder
+            title="Blocked Users"
+            subtitle="If you block someone, you'll be able to manage them here."
+            icon={<UserRoundX />}
+          />
+          {/* <YStack alignItems="center" bottom={headerHeight} gap="$2">
+            <UserRoundX size="$10" />
+            <SizableText textAlign="center" size="$5" fontWeight="bold">
+              Blocked Users
+            </SizableText>
+            <Paragraph textAlign="center" theme="alt2">
+              If you block someone, you&apos;ll be able to manage them here.
+            </Paragraph>
+          </YStack> */}
+        </View>
+      )}
     </ScreenBaseView>
   );
 };

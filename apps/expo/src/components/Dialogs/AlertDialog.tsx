@@ -14,7 +14,6 @@ interface AlertDialogProps {
 
   trigger: JSX.Element;
 
-  isVisible?: boolean;
   onAccept?: () => void;
   onCancel?: () => void;
 }
@@ -25,7 +24,6 @@ const AlertDialog = ({
   acceptText,
   cancelText,
   trigger,
-  isVisible,
   onCancel,
   onAccept,
 }: AlertDialogProps) => {
