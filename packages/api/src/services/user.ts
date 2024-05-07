@@ -89,7 +89,10 @@ export class UserService {
       throw new DomainError(ErrorCodes.USER_NOT_FOUND);
     }
 
-    await this.userRepository.updatePrivacySetting(userId, newPrivacySetting);
+    const updatedPrivacy = await this.userRepository.updatePrivacySetting(userId, newPrivacySetting);
+    if (!updatedPrivacy) {
+      throw new DomainError(ErrorCodes.FAILED_TO_UPDATE_PRIVACY_SETTING);
+    }
   }
 
   async getUserNotificationSettings(userId: string) {

@@ -18,6 +18,7 @@ export class NotificationSettingsRepository {
     return await this.db.query.notificationSettings.findFirst({
       where: eq(schema.notificationSettings.id, notificationSettingId),
       columns: {
+        id: true,
         posts: true,
         likes: true,
         comments: true,
