@@ -181,7 +181,7 @@ export class UserService {
   async getBlockedUsers(
     userId: string,
     cursor: string | null = null,
-    pageSize = 10,
+    pageSize = 2,
   ) {
     const items = await this.userRepository.getPaginatedBlockedUsers(
       userId,
