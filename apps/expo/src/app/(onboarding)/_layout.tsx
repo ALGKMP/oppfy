@@ -9,8 +9,9 @@ import type {
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
 import { ChevronLeft, Info, X } from "@tamagui/lucide-icons";
-import { AlertDialog, Button, Text, useTheme, XStack, YStack } from "tamagui";
+import { Text, useTheme } from "tamagui";
 
+import { AlertDialog } from "~/components/Dialogs";
 import { Header as BaseHeader } from "~/components/Headers";
 import { useSession } from "~/contexts/SessionContext";
 import { Stack } from "~/layouts";
@@ -163,64 +164,16 @@ const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
   };
 
   return (
-    <AlertDialog native>
-      <AlertDialog.Trigger asChild>
+    <AlertDialog
+      title="Exit Onboarding"
+      subtitle="Are you sure you want to quit? You'll lose any changes you've made."
+      trigger={
         <TouchableOpacity hitSlop={10}>
           <X />
         </TouchableOpacity>
-      </AlertDialog.Trigger>
-
-      <AlertDialog.Portal>
-        <AlertDialog.Overlay
-          key="overlay"
-          animation="quick"
-          opacity={0.5}
-          enterStyle={{ opacity: 0 }}
-          exitStyle={{ opacity: 0 }}
-        />
-        <AlertDialog.Content
-          width="75%"
-          bordered
-          elevate
-          key="content"
-          animation={[
-            "quick",
-            {
-              opacity: {
-                overshootClamping: true,
-              },
-            },
-          ]}
-          enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
-          exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
-          x={0}
-          scale={1}
-          opacity={1}
-          y={0}
-        >
-          <YStack alignItems="center" gap="$3">
-            <AlertDialog.Title>Exit Onboarding</AlertDialog.Title>
-            <AlertDialog.Description textAlign="center">
-              Are you sure you want to quit? You&apos;ll lose any changes
-              you&apos;ve made.
-            </AlertDialog.Description>
-
-            <XStack justifyContent="flex-end" gap="$3">
-              <AlertDialog.Cancel asChild>
-                <Button size="$4" flex={1}>
-                  Stay
-                </Button>
-              </AlertDialog.Cancel>
-              <AlertDialog.Action onPress={onSubmit} asChild>
-                <Button flex={1} theme="active">
-                  Leave
-                </Button>
-              </AlertDialog.Action>
-            </XStack>
-          </YStack>
-        </AlertDialog.Content>
-      </AlertDialog.Portal>
-    </AlertDialog>
+      }
+      onAccept={onSubmit}
+    />
   );
 };
 

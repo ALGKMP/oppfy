@@ -5,14 +5,31 @@ import {
   YStack,
 } from "tamagui";
 
-const AlertDialog = () => {
+interface AlertDialogProps {
+  title: string;
+  subtitle?: string;
+
+  acceptText?: string;
+  cancelText?: string;
+
+  trigger: JSX.Element;
+
+  onAccept?: () => void;
+  onCancel?: () => void;
+}
+
+const AlertDialog = ({
+  title,
+  subtitle,
+  acceptText,
+  cancelText,
+  trigger,
+  onCancel,
+  onAccept,
+}: AlertDialogProps) => {
   return (
     <BaseAlertDialog native>
-      <BaseAlertDialog.Trigger asChild>
-        <TouchableOpacity hitSlop={10}>
-          <X />
-        </TouchableOpacity>
-      </BaseAlertDialog.Trigger>
+      <BaseAlertDialog.Trigger asChild>{trigger}</BaseAlertDialog.Trigger>
 
       <BaseAlertDialog.Portal>
         <BaseAlertDialog.Overlay
@@ -43,21 +60,22 @@ const AlertDialog = () => {
           y={0}
         >
           <YStack alignItems="center" gap="$3">
-            <BaseAlertDialog.Title>Exit Onboarding</BaseAlertDialog.Title>
-            <BaseAlertDialog.Description textAlign="center">
-              Are you sure you want to quit? You&apos;ll lose any changes
-              you&apos;ve made.
-            </BaseAlertDialog.Description>
+            <BaseAlertDialog.Title>{title}</BaseAlertDialog.Title>
+            {subtitle && (
+              <BaseAlertDialog.Description textAlign="center">
+                {subtitle}
+              </BaseAlertDialog.Description>
+            )}
 
             <XStack justifyContent="flex-end" gap="$3">
               <BaseAlertDialog.Cancel asChild>
                 <Button size="$4" flex={1}>
-                  Stay
+                  {cancelText ?? "Cancel"}
                 </Button>
               </BaseAlertDialog.Cancel>
-              <BaseAlertDialog.Action onPress={onSubmit} asChild>
+              <BaseAlertDialog.Action onPress={onAccept} asChild>
                 <Button flex={1} theme="active">
-                  Leave
+                  {acceptText ?? "Accept"}
                 </Button>
               </BaseAlertDialog.Action>
             </XStack>
