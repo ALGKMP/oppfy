@@ -210,8 +210,6 @@ const CountriesFlashList = ({
   selectedCountryCode,
   data,
 }: CountriesFlastListProps) => {
-  const theme = useTheme();
-
   return (
     <FlashList
       data={data}
@@ -239,30 +237,8 @@ const CountriesFlashList = ({
           // Render item
           return (
             <View>
-              {/* <TouchableOpacity
-                onPress={() => onSelect && onSelect(item)}
-                style={{
-                  padding: 12,
-                  borderColor: theme.gray4.val,
-                  borderWidth: 1,
-                  borderBottomWidth: 0,
-                  backgroundColor: theme.gray2.val,
-                  ...(isFirstInGroup && {
-                    borderTopLeftRadius: 10,
-                    borderTopRightRadius: 10,
-                  }),
-                  ...(isLastInGroup && {
-                    borderBottomWidth: 1,
-                    borderBottomLeftRadius: 10,
-                    borderBottomRightRadius: 10,
-                  }),
-                }}
-              > */}
-
               <ListItem
                 size="$4.5"
-                hoverTheme={false}
-                pressTheme={false}
                 padding={12}
                 borderColor="$gray4"
                 borderWidth={1}
@@ -290,7 +266,6 @@ const CountriesFlashList = ({
                   {isSelected && <CheckCircle2 />}
                 </XStack>
               </ListItem>
-              {/* </TouchableOpacity> */}
             </View>
           );
         }
