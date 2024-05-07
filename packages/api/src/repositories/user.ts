@@ -248,7 +248,7 @@ export class UserRepository {
         cursor ? gt(schema.user.id, cursor) : undefined
       ))
       .orderBy(asc(schema.user.id)) // Ordering by userId to support cursor-based pagination
-      .limit(pageSize);
+      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
 
   // Use this to check if a user is blocked (gonna need to use this a lot)

@@ -79,15 +79,7 @@ export const userRouter = createTRPCRouter({
   getBlockedUsers: protectedProcedure
     .input(trpcValidators.user.paginate)
     .query(async ({ ctx }) => {
-      const a = await ctx.services.user.getBlockedUsers(ctx.session.uid);
-      if (a.length == 0) {
-        return a;
-      }
-      const cursor = a[a.length -1]!.userId;
-      return {
-        items: a,
-        cursor,
-      }
+      return await ctx.services.user.getBlockedUsers(ctx.session.uid);
     }),
 
   // TODO: Loading...
