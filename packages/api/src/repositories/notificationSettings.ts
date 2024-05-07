@@ -17,6 +17,14 @@ export class NotificationSettingsRepository {
   async getNotificationSettings(notificationSettingId: number) {
     return await this.db.query.notificationSettings.findFirst({
       where: eq(schema.notificationSettings.id, notificationSettingId),
+      columns: {
+        posts: true,
+        likes: true,
+        comments: true,
+        mentions: true,
+        friendRequests: true,
+        followRequests: true,
+      },
     });
   }
 

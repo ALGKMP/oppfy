@@ -6,6 +6,7 @@ import { Button, Switch, YStack } from "tamagui";
 import type { SettingsGroup } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import { ScreenBaseView } from "~/components/Views";
+import { api } from "~/utils/api";
 
 interface SwitchState {
   friendPosts: boolean;
@@ -14,8 +15,10 @@ interface SwitchState {
 }
 
 const Notifications = () => {
+  const notificationSettings = api.user.getNotificationSettings.useQuery();
+
   const [switchState, setSwitchState] = useState<SwitchState>({
-    friendPosts: false,
+    friendPosts: notificationSettings.data?.friendPosts ?? false,
     comments: false,
     friendRequests: false,
   });

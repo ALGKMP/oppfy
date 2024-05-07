@@ -54,11 +54,6 @@ const ProfileLayout = () => {
             presentation: "fullScreenModal",
           }}
         />
-
-        <Stack.Screen name="help" options={{ title: "Help" }} />
-        <Stack.Screen name="contact-us" options={{ title: "Contact Us" }} />
-
-        <Stack.Screen name="about" options={{ title: "About" }} />
       </Stack>
     </SafeAreaView>
   );
