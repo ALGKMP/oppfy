@@ -149,7 +149,7 @@ export class UserService {
     }
 
     await this.notificationSettingsRepository.updateNotificationSettings(
-      notificationSettings.id,
+      user.notificationSettingsId,
       newNotificationSettings,
     );
   }

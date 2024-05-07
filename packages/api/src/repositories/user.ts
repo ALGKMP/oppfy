@@ -104,11 +104,11 @@ export class UserRepository {
       .where(eq(schema.user.id, userId));
   }
 
-  /* 
+  /*
    * TODO: Use dynamic queries here - no acces to docs while on a plan.
    * 1. dynamic query for the cursor pagination.
    * 2. table as a parameter solves duplicated code for joins.
-  */
+   */
 
   @handleDatabaseErrors
   async getPaginatedFollowers(cursor: string, pageSize = 10) {
@@ -120,7 +120,10 @@ export class UserRepository {
         profilePictureUrl: schema.profilePicture.key,
       })
       .from(schema.user)
-      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.recipientId))
+      .fullJoin(
+        schema.follower,
+        eq(schema.user.id, schema.follower.recipientId),
+      )
       .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .fullJoin(
         schema.profilePicture,
@@ -228,13 +231,19 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedBlockedUsers(forUserId: string, cursor: string | null = null, pageSize = 10) {
+  async getPaginatedBlockedUsers(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
         username: schema.user.username,
         name: schema.profile.fullName,
         profilePictureUrl: schema.profilePicture.key,
+        createdAt: schema.block.createdAt, // Assuming block has a createdAt column
+        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
       })
       .from(schema.user)
       .innerJoin(schema.block, eq(schema.user.id, schema.block.blockedUserId))
@@ -243,11 +252,24 @@ export class UserRepository {
         schema.profilePicture,
         eq(schema.profile.profilePictureId, schema.profilePicture.id),
       )
-      .where(and(
-        eq(schema.block.userId, forUserId), // Filtering for the specific user who blocked others
-        cursor ? gt(schema.user.id, cursor) : undefined
-      ))
-      .orderBy(asc(schema.user.profileId)) // Ordering by userId to support cursor-based pagination
+      .where(
+        and(
+          eq(schema.block.userId, forUserId), // Filtering for the specific user who blocked others
+          cursor
+            ? or(
+                gt(schema.block.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.block.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(schema.block.createdAt), // Primary order by the creation date
+        asc(schema.profile.id), // Tiebreaker order by profile ID
+      )
       .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
 
