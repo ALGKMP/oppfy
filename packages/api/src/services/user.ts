@@ -5,12 +5,14 @@ import type { NotificationSettings } from "../repositories/notificationSettings"
 import { NotificationSettingsRepository } from "../repositories/notificationSettings";
 import type { PrivacySetting } from "../repositories/user";
 import { UserRepository } from "../repositories/user";
+import { AwsService } from "./aws";
 
 export class UserService {
   private userRepository = new UserRepository();
   private notificationSettingsRepository = new NotificationSettingsRepository();
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
+  private awsService = new AwsService();
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
@@ -183,11 +185,33 @@ export class UserService {
     cursor: string | null = null,
     pageSize = 10,
   ) {
-    const items = await this.userRepository.getPaginatedBlockedUsers(
+    const data = await this.userRepository.getPaginatedBlockedUsers(
       userId,
       cursor,
       pageSize,
     );
+    // Update each item's profilePictureUrl with a presigned URL
+    const items = await Promise.all(
+      data.map(async (item) => {
+        if (item.profilePictureUrl) {
+          const presignedUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Key: item.profilePictureUrl,}
+          );
+          item.profilePictureUrl = presignedUrl;
+        }
+        if (!item.profilePictureUrl) {
+          const presignedUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Key: "profilePictures/default.jpg",}
+          );
+          item.profilePictureUrl = presignedUrl;
+
+        }
+        return item;
+      }),
+    );
+
     let nextCursor: typeof cursor | undefined = undefined;
     if (items.length > pageSize) {
       const nextItem = items.pop();
