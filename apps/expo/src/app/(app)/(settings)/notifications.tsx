@@ -1,56 +1,56 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, StickyNote, UsersRound } from "@tamagui/lucide-icons";
-import { Button, Switch, YStack } from "tamagui";
+import { Button, Spinner, Switch, YStack } from "tamagui";
 
 import type { SettingsGroup } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import { ScreenBaseView } from "~/components/Views";
-import { api, RouterInputs } from "~/utils/api";
-
-// interface SwitchState {
-//   posts: boolean;
-//   comments: boolean;
-//   friendRequests: boolean;
-// }
+import type { RouterInputs } from "~/utils/api";
+import { api } from "~/utils/api";
 
 type SwitchState = RouterInputs["user"]["updateNotificationSettings"];
 
 const Notifications = () => {
   const utils = api.useUtils();
 
-  const { data: notificationSettings, isLoading } =
-    api.user.getNotificationSettings.useQuery();
-  const updateNotificationSettings =
-    api.user.updateNotificationSettings.useMutation({
-      onMutate: async (newNotificationSettings) => {
-        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.user.getNotificationSettings.cancel();
+  const {
+    data: notificationSettings,
+    isLoading: isLoadingNotificationSettings,
+  } = api.user.getNotificationSettings.useQuery();
 
-        // Get the data from the queryCache
-        const prevData = utils.user.getNotificationSettings.getData();
-        if (prevData === undefined) return;
+  const {
+    isLoading: isUpdatingNotficationSettings,
+    ...updateNotificationSettings
+  } = api.user.updateNotificationSettings.useMutation({
+    onMutate: async (newNotificationSettings) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.user.getNotificationSettings.cancel();
 
-        // Optimistically update the data
-        utils.user.getNotificationSettings.setData(undefined, {
-          ...prevData,
-          ...newNotificationSettings,
-        });
+      // Get the data from the queryCache
+      const prevData = utils.user.getNotificationSettings.getData();
+      if (prevData === undefined) return;
 
-        // Return the previous data so we can revert if something goes wrong
-        return { prevData };
-      },
-      onError: (_err, _newNoticationSettings, ctx) => {
-        if (ctx === undefined) return;
-        if (ctx.prevData === undefined) return;
+      // Optimistically update the data
+      utils.user.getNotificationSettings.setData(undefined, {
+        ...prevData,
+        ...newNotificationSettings,
+      });
 
-        // If the mutation fails, use the context-value from onMutate
-        utils.user.getNotificationSettings.setData(undefined, ctx.prevData);
-      },
-      onSettled: async () => {
-        // Sync with server once mutation has settled
-        await utils.user.getNotificationSettings.invalidate();
-      },
-    });
+      // Return the previous data so we can revert if something goes wrong
+      return { prevData };
+    },
+    onError: (_err, _newNoticationSettings, ctx) => {
+      if (ctx === undefined) return;
+      if (ctx.prevData === undefined) return;
+
+      // If the mutation fails, use the context-value from onMutate
+      utils.user.getNotificationSettings.setData(undefined, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.user.getNotificationSettings.invalidate();
+    },
+  });
 
   const [switchState, setSwitchState] = useState<SwitchState>({
     likes: false,
@@ -66,14 +66,14 @@ const Notifications = () => {
   };
 
   useEffect(() => {
-    if (!isLoading && notificationSettings) {
+    if (!isLoadingNotificationSettings && notificationSettings) {
       setSwitchState({
         posts: notificationSettings.posts,
         comments: notificationSettings.comments,
         friendRequests: notificationSettings.friendRequests,
       });
     }
-  }, [notificationSettings, isLoading]);
+  }, [notificationSettings, isLoadingNotificationSettings]);
 
   const onSubmit = async () => {
     console.log(switchState);
@@ -140,7 +140,7 @@ const Notifications = () => {
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
         <Button size="$4.5" onPress={onSubmit}>
-          Save
+          {isUpdatingNotficationSettings ? <Spinner /> : "Save"}
         </Button>
       </YStack>
     </ScreenBaseView>

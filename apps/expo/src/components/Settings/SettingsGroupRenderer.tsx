@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React from "react";
 import type { IconProps } from "@tamagui/helpers-icon";
 import {
   ListItem,
@@ -13,8 +13,9 @@ type IconProp = JSX.Element;
 
 export interface SettingsItem {
   title: string;
-  icon: IconProp | undefined;
-  iconAfter: IconProp | undefined;
+  subtitle?: string | undefined;
+  icon?: IconProp | undefined;
+  iconAfter?: IconProp | undefined;
   hoverTheme?: boolean | undefined;
   pressTheme?: boolean | undefined;
   onPress?: () => void;
@@ -27,7 +28,7 @@ export interface SettingsGroup {
 
 const renderSettingsGroup = (group: SettingsGroup) => (
   <YStack gap="$2" key={group.headerTitle}>
-    <SizableText size="$1" theme="alt1">
+    <SizableText size="$3" theme="alt1">
       {group.headerTitle}
     </SizableText>
     <YGroup alignSelf="center" bordered separator={<Separator />}>
@@ -46,7 +47,14 @@ const renderSettingsGroup = (group: SettingsGroup) => (
                     size:
                       ((item.icon.props as IconProps).size as string) || "$1",
                   })}
-                <SizableText size="$5">{item.title}</SizableText>
+                <YStack>
+                  <SizableText size="$5">{item.title}</SizableText>
+                  {item.subtitle && (
+                    <SizableText size="$3" theme="alt1">
+                      {item.subtitle}
+                    </SizableText>
+                  )}
+                </YStack>
               </XStack>
               {item.iconAfter &&
                 React.cloneElement(item.iconAfter, {
