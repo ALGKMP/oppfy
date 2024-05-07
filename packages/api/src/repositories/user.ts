@@ -247,7 +247,7 @@ export class UserRepository {
         eq(schema.block.userId, forUserId), // Filtering for the specific user who blocked others
         cursor ? gt(schema.user.id, cursor) : undefined
       ))
-      .orderBy(asc(schema.user.id)) // Ordering by userId to support cursor-based pagination
+      .orderBy(asc(schema.user.profileId)) // Ordering by userId to support cursor-based pagination
       .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
 
