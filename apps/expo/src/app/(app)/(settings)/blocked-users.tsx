@@ -9,6 +9,7 @@ import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
+import { api } from "~/utils/api";
 
 const test = {
   title: "Christina",
@@ -33,6 +34,7 @@ const test = {
 
 const BlockedUsers = () => {
   const { deleteAccount } = useSession();
+  const test = api.user.getBlockedUsers.useMutation();
 
   const settingsGroups = [
     {
