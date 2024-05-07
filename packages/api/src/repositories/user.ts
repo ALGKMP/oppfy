@@ -207,27 +207,49 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedFriendRequests(cursor: string, pageSize = 10) {
+  async getPaginatedFriendRequests(
+    forUserId: string, // Assuming you need this to identify the recipient of friend requests
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
         username: schema.user.username,
         name: schema.profile.fullName,
         profilePictureUrl: schema.profilePicture.key,
+        createdAt: schema.friendRequest.createdAt, // Assuming friendRequest has a createdAt column
+        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
       })
       .from(schema.user)
-      .fullJoin(
+      .innerJoin(
         schema.friendRequest,
         eq(schema.user.id, schema.friendRequest.recipientId),
       )
-      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(
         schema.profilePicture,
         eq(schema.profile.profilePictureId, schema.profilePicture.id),
       )
-      .where(cursor ? gt(schema.user.id, cursor) : undefined)
-      .orderBy(asc(schema.user.createdAt))
-      .limit(pageSize);
+      .where(
+        and(
+          eq(schema.friendRequest.recipientId, forUserId), // Filtering for the specific user receiving friend requests
+          cursor
+            ? or(
+                gt(schema.friendRequest.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.friendRequest.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(schema.friendRequest.createdAt), // Primary order by the creation date of the friend request
+        asc(schema.profile.id), // Tiebreaker order by profile ID
+      )
+      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
 
   @handleDatabaseErrors
