@@ -111,10 +111,10 @@ export class UserRepository {
    */
 
   @handleDatabaseErrors
-  async getPaginatedFollowRequests(
-    forUserId: string, // Assuming you need this to identify the recipient of follow requests
+  async getPaginatedFollowers(
+    forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
-    pageSize = 10
+    pageSize = 10,
   ) {
     return await this.db
       .select({
@@ -122,13 +122,13 @@ export class UserRepository {
         username: schema.user.username,
         name: schema.profile.fullName,
         profilePictureUrl: schema.profilePicture.key,
-        createdAt: schema.followRequest.createdAt, // Assuming followRequest has a createdAt column
-        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
+        createdAt: schema.follower.createdAt,
+        profileId: schema.profile.id,
       })
       .from(schema.user)
       .innerJoin(
-        schema.followRequest,
-        eq(schema.user.id, schema.followRequest.recipientId),
+        schema.follower,
+        eq(schema.user.id, schema.follower.recipientId),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .innerJoin(
@@ -137,24 +137,22 @@ export class UserRepository {
       )
       .where(
         and(
-          eq(schema.followRequest.recipientId, forUserId), // Filtering for the specific user receiving follow requests
+          eq(schema.follower.recipientId, forUserId),
           cursor
             ? or(
-                gt(schema.followRequest.createdAt, cursor.createdAt),
+                gt(schema.follower.createdAt, cursor.createdAt),
                 and(
-                  eq(schema.followRequest.createdAt, cursor.createdAt),
+                  eq(schema.follower.createdAt, cursor.createdAt),
                   gt(schema.profile.id, cursor.profileId),
                 ),
               )
             : undefined,
         ),
       )
-      .orderBy(
-        asc(schema.followRequest.createdAt), // Primary order by the creation date of the follow request
-        asc(schema.profile.id), // Tiebreaker order by profile ID
-      )
-      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
+      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
   }
+
   @handleDatabaseErrors
   async getPaginatedFollowing(cursor: string, pageSize = 10) {
     return await this.db
@@ -207,7 +205,7 @@ export class UserRepository {
   async getPaginatedFollowRequests(
     forUserId: string, // Assuming you need this to identify the recipient of follow requests
     cursor: { createdAt: Date; profileId: number } | null = null,
-    pageSize = 10
+    pageSize = 10,
   ) {
     return await this.db
       .select({
@@ -248,13 +246,12 @@ export class UserRepository {
       )
       .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
-  
 
   @handleDatabaseErrors
   async getPaginatedFriendRequests(
     forUserId: string, // Assuming you need this to identify the recipient of friend requests
     cursor: { createdAt: Date; profileId: number } | null = null,
-    pageSize = 10
+    pageSize = 10,
   ) {
     return await this.db
       .select({
