@@ -179,6 +179,11 @@ export class AwsStack extends cdk.Stack {
       "profileLambda",
       "src/res/lambdas/profile/index.ts",
     );
+    const processProfilePictureLambda = createLambdaFunction(
+      this,
+      "processProfilePictureLambda",
+      "src/res/lambdas/processProfilePicture/index.ts",
+    );
 
     // Setup integrations
     setupBucketLambdaIntegration(
@@ -190,6 +195,11 @@ export class AwsStack extends cdk.Stack {
       profileBucket,
       profileLambda,
       "AllowProfileS3Invocation",
+    );
+    setupBucketLambdaIntegration(
+      profileBucket,
+      processProfilePictureLambda,
+      "AllowProcessProfilePictureS3Invocation",
     );
 
     // ! do not delete, this is used for testing
