@@ -7,7 +7,7 @@ import {
 
 interface AlertDialogProps {
   title: string;
-  subtitle?: string;
+  description?: string;
 
   acceptText?: string;
   cancelText?: string;
@@ -20,7 +20,7 @@ interface AlertDialogProps {
 
 const AlertDialog = ({
   title,
-  subtitle,
+  description,
   acceptText,
   cancelText,
   trigger,
@@ -61,15 +61,15 @@ const AlertDialog = ({
         >
           <YStack alignItems="center" gap="$3">
             <BaseAlertDialog.Title>{title}</BaseAlertDialog.Title>
-            {subtitle && (
+            {description && (
               <BaseAlertDialog.Description textAlign="center">
-                {subtitle}
+                {description}
               </BaseAlertDialog.Description>
             )}
 
             <XStack justifyContent="flex-end" gap="$3">
               <BaseAlertDialog.Cancel asChild>
-                <Button size="$4" flex={1}>
+                <Button size="$4" flex={1} onPress={onCancel}>
                   {cancelText ?? "Cancel"}
                 </Button>
               </BaseAlertDialog.Cancel>
