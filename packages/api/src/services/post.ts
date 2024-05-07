@@ -1,4 +1,4 @@
-import { DomainError, ErrorCodes } from "../errors";
+import { DomainError, ErrorCode } from "../errors";
 import { AwsRepository } from "../repositories/aws";
 import { PostRepository } from "../repositories/post";
 import { PostStatsRepository } from "../repositories/postStats";
@@ -35,7 +35,7 @@ export class PostService {
     const post = await this.postRepository.getPost(postId);
 
     if (post === undefined) {
-      throw new DomainError(ErrorCodes.POST_NOT_FOUND);
+      throw new DomainError(ErrorCode.POST_NOT_FOUND);
     }
 
     return post;
@@ -52,7 +52,7 @@ export class PostService {
         const recipient = await this.userRepository.getUser(post.recipient);
 
         if (!author || !recipient) {
-          throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+          throw new DomainError(ErrorCode.USER_NOT_FOUND);
         }
 
         const presignedUrl = await this.awsRepository.getObjectPresignedUrl({

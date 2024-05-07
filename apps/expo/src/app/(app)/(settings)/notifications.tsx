@@ -5,10 +5,10 @@ import { Button, Spinner, Switch, YStack } from "tamagui";
 import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import { ScreenBaseView } from "~/components/Views";
-import type { RouterInputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type SwitchState = RouterInputs["user"]["updateNotificationSettings"];
+type SwitchState = RouterOutputs["user"]["getNotificationSettings"];
 
 const Notifications = () => {
   const utils = api.useUtils();
@@ -41,7 +41,6 @@ const Notifications = () => {
     },
     onError: (_err, _newNoticationSettings, ctx) => {
       if (ctx === undefined) return;
-      if (ctx.prevData === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
       utils.user.getNotificationSettings.setData(undefined, ctx.prevData);
@@ -67,16 +66,11 @@ const Notifications = () => {
 
   useEffect(() => {
     if (!isLoadingNotificationSettings && notificationSettings) {
-      setSwitchState({
-        posts: notificationSettings.posts,
-        comments: notificationSettings.comments,
-        friendRequests: notificationSettings.friendRequests,
-      });
+      setSwitchState(notificationSettings);
     }
   }, [notificationSettings, isLoadingNotificationSettings]);
 
   const onSubmit = async () => {
-    console.log(switchState);
     await updateNotificationSettings.mutateAsync(switchState);
   };
 

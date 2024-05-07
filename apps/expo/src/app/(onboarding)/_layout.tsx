@@ -166,7 +166,7 @@ const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
   return (
     <AlertDialog
       title="Exit Onboarding"
-      subtitle="Are you sure you want to quit? You'll lose any changes you've made."
+      description="Are you sure you want to quit? You'll lose any changes you've made."
       trigger={
         <TouchableOpacity hitSlop={10}>
           <X />
