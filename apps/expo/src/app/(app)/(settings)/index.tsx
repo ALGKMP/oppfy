@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Share } from "react-native";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
 import * as StoreReview from "expo-store-review";
 import {
   BellRing,
@@ -16,7 +15,7 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, YStack } from "tamagui";
 
-import type { SettingsGroup } from "~/components/Settings";
+import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
@@ -114,7 +113,7 @@ const Settings = () => {
         },
       ],
     },
-  ] satisfies SettingsGroup[];
+  ] satisfies SettingsGroupInput[];
 
   return (
     <ScreenBaseView scrollable>

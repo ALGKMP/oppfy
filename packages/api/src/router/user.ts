@@ -51,7 +51,7 @@ export const userRouter = createTRPCRouter({
       );
     }),
 
-  // TODO: Loading... 
+  // TODO: Loading...
   getFriends: protectedProcedure
     .input(trpcValidators.user.getFriends)
     .mutation(async ({ input, ctx }) => {

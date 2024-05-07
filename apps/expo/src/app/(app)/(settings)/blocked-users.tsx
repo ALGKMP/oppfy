@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as FileSystem from "expo-file-system";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
@@ -8,28 +8,6 @@ import {
   UserRoundX,
   XCircle,
 } from "@tamagui/lucide-icons";
-import {
-  Avatar,
-  Button,
-  Paragraph,
-  SizableText,
-  Text,
-  View,
-  YStack,
-} from "tamagui";
-
-import {
-  renderSettingsGroup,
-  SettingsGroup,
-  SettingsItem,
-} from "~/components/Settings";
-import type { ButtonOption } from "~/components/Sheets";
-import { ActionSheet } from "~/components/Sheets";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { ScreenBaseView } from "~/components/Views";
-import { useSession } from "~/contexts/SessionContext";
-import { api } from "~/utils/api";
-
 // const test = {
 //   title: "Christina",
 //   subtitle: "christinaikl",
@@ -50,8 +28,34 @@ import { api } from "~/utils/api";
 //   pressTheme: false,
 //   hoverTheme: false,
 // } satisfies SettingsItem;
+import {
+  Avatar,
+  Button,
+  ListItem,
+  Paragraph,
+  SizableText,
+  Text,
+  useTheme,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
+
+import {
+  renderSettingsGroup,
+  SettingsGroup,
+  SettingsItem,
+} from "~/components/Settings";
+import type { ButtonOption } from "~/components/Sheets";
+import { ActionSheet } from "~/components/Sheets";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import { ScreenBaseView } from "~/components/Views";
+import { useSession } from "~/contexts/SessionContext";
+import { api } from "~/utils/api";
 
 const BlockedUsers = () => {
+  const headerHeight = useHeaderHeight();
+
   const { deleteAccount } = useSession();
 
   const {
@@ -70,14 +74,10 @@ const BlockedUsers = () => {
     },
   );
 
-  // const settingsGroups = [
-  //   {
-  //     headerTitle: "Blocked Users (6)",
-  //     items: [test, test, test, test, test, test],
-  //   },
-  // ] satisfies SettingsGroup[];
-
-  const headerHeight = useHeaderHeight();
+  const totalCount = useMemo(() => {
+    if (data === undefined) return 0;
+    return data.pages.reduce((total, page) => total + page.items.length, 0);
+  }, [data]);
 
   return (
     <ScreenBaseView>
@@ -85,14 +85,44 @@ const BlockedUsers = () => {
       {data?.pages[0]?.items.length ? (
         <FlashList
           data={data.pages.flatMap((page) => page.items)}
-          renderItem={({ item }) => (
-            <SettingsItem
-              title={item.name ?? ""}
-              subtitle={item.username ?? undefined}
-            />
-          )}
+          estimatedItemSize={75}
           onEndReached={fetchNextPage}
-          estimatedItemSize={200}
+          renderItem={({ item, index }) => {
+            const isFirstInGroup = index === 0;
+            const isLastInGroup = index === totalCount - 1;
+
+            return (
+              <ListItem
+                size="$4.5"
+                hoverTheme={false}
+                pressTheme={false}
+                padding={12}
+                borderColor="$gray4"
+                borderWidth={1}
+                borderBottomWidth={0}
+                {...(isFirstInGroup && {
+                  borderTopLeftRadius: 10,
+                  borderTopRightRadius: 10,
+                })}
+                {...(isLastInGroup && {
+                  borderBottomWidth: 1,
+                  borderBottomLeftRadius: 10,
+                  borderBottomRightRadius: 10,
+                })}
+              >
+                <XStack flex={1} alignItems="center">
+                  <XStack flex={1} alignItems="center" gap="$2">
+                    <YStack>
+                      <SizableText size="$5">{item.name}</SizableText>
+                      <SizableText size="$3" theme="alt1">
+                        {item.username}
+                      </SizableText>
+                    </YStack>
+                  </XStack>
+                </XStack>
+              </ListItem>
+            );
+          }}
         />
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>

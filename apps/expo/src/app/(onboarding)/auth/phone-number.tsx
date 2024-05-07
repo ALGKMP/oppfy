@@ -8,6 +8,7 @@ import Fuse from "fuse.js";
 import {
   Button,
   Input,
+  ListItem,
   SizableText,
   Text,
   useTheme,
@@ -238,7 +239,7 @@ const CountriesFlashList = ({
           // Render item
           return (
             <View>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={() => onSelect && onSelect(item)}
                 style={{
                   padding: 12,
@@ -256,8 +257,28 @@ const CountriesFlashList = ({
                     borderBottomRightRadius: 10,
                   }),
                 }}
+              > */}
+
+              <ListItem
+                size="$4.5"
+                hoverTheme={false}
+                pressTheme={false}
+                padding={12}
+                borderColor="$gray4"
+                borderWidth={1}
+                borderBottomWidth={0}
+                {...(isFirstInGroup && {
+                  borderTopLeftRadius: 10,
+                  borderTopRightRadius: 10,
+                })}
+                {...(isLastInGroup && {
+                  borderBottomWidth: 1,
+                  borderBottomLeftRadius: 10,
+                  borderBottomRightRadius: 10,
+                })}
+                onPress={() => onSelect && onSelect(item)}
               >
-                <XStack justifyContent="space-between">
+                <XStack flex={1} justifyContent="space-between">
                   <XStack alignItems="center" gap="$2">
                     <Text fontSize="$8">{item.flag}</Text>
                     <Text fontSize="$5">{item.name}</Text>
@@ -268,7 +289,8 @@ const CountriesFlashList = ({
 
                   {isSelected && <CheckCircle2 />}
                 </XStack>
-              </TouchableOpacity>
+              </ListItem>
+              {/* </TouchableOpacity> */}
             </View>
           );
         }

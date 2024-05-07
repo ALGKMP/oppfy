@@ -3,7 +3,7 @@ import * as FileSystem from "expo-file-system";
 import { ChevronRight, XCircle } from "@tamagui/lucide-icons";
 import { Button, YStack } from "tamagui";
 
-import type { SettingsGroup } from "~/components/Settings";
+import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
@@ -69,7 +69,7 @@ const Other = () => {
         },
       ],
     },
-  ] satisfies SettingsGroup[];
+  ] satisfies SettingsGroupInput[];
 
   return (
     <ScreenBaseView scrollable>

@@ -47,13 +47,6 @@ const ProfileLayout = () => {
         />
 
         <Stack.Screen name="other" options={{ title: "Other" }} />
-        <Stack.Screen
-          name="delete-account"
-          options={{
-            header: () => null,
-            presentation: "fullScreenModal",
-          }}
-        />
       </Stack>
     </SafeAreaView>
   );

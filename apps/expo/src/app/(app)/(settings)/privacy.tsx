@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
 import { Switch, YStack } from "tamagui";
 
-import type { SettingsGroup } from "~/components/Settings";
+import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import { ScreenBaseView } from "~/components/Views";
 
@@ -45,7 +45,7 @@ const Privacy = () => {
         },
       ],
     },
-  ] satisfies SettingsGroup[];
+  ] satisfies SettingsGroupInput[];
 
   return (
     <ScreenBaseView scrollable>

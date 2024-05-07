@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MessageCircle, StickyNote, UsersRound } from "@tamagui/lucide-icons";
 import { Button, Spinner, Switch, YStack } from "tamagui";
 
-import type { SettingsGroup } from "~/components/Settings";
+import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import { ScreenBaseView } from "~/components/Views";
 import type { RouterInputs } from "~/utils/api";
@@ -133,7 +133,7 @@ const Notifications = () => {
         },
       ],
     },
-  ] satisfies SettingsGroup[];
+  ] satisfies SettingsGroupInput[];
 
   return (
     <ScreenBaseView scrollable>

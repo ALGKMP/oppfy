@@ -66,7 +66,36 @@ export const renderSettingsGroup = (group: SettingsGroupInput) => (
     <YGroup alignSelf="center" bordered separator={<Separator />}>
       {group.items.map((item, index) => (
         <YGroup.Item key={index}>
-          <SettingsItem {...item} />
+          <ListItem
+            size="$4.5"
+            onPress={item.onPress}
+            hoverTheme={item.hoverTheme ?? true}
+            pressTheme={item.pressTheme ?? true}
+          >
+            <XStack flex={1} alignItems="center">
+              <XStack flex={1} alignItems="center" gap="$2">
+                {item.icon &&
+                  cloneElement(item.icon, {
+                    size:
+                      ((item.icon.props as IconProps).size as string) || "$1",
+                  })}
+                <YStack>
+                  <SizableText size="$5">{item.title}</SizableText>
+                  {item.subtitle && (
+                    <SizableText size="$3" theme="alt1">
+                      {item.subtitle}
+                    </SizableText>
+                  )}
+                </YStack>
+              </XStack>
+              {item.iconAfter &&
+                cloneElement(item.iconAfter, {
+                  size:
+                    ((item.iconAfter.props as IconProps).size as string) ||
+                    "$1",
+                })}
+            </XStack>
+          </ListItem>
         </YGroup.Item>
       ))}
     </YGroup>
