@@ -19,9 +19,6 @@ export interface ButtonOption {
 }
 
 export interface ActionSheetProps {
-  isVisible?: boolean;
-  onClose?: () => void;
-
   title: string;
   titleProps?: SizableTextProps;
 
@@ -29,6 +26,9 @@ export interface ActionSheetProps {
   subtitleProps?: ParagraphProps;
 
   buttonOptions: ButtonOption[];
+
+  isVisible?: boolean;
+  onClose?: () => void;
 }
 
 const ActionSheet = ({
