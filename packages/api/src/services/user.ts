@@ -1,3 +1,5 @@
+import { Primitive } from "firebase-admin/firestore";
+
 import { DomainError, ErrorCode } from "../errors";
 import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
@@ -6,6 +8,25 @@ import { NotificationSettingsRepository } from "../repositories/notificationSett
 import type { PrivacySetting } from "../repositories/user";
 import { UserRepository } from "../repositories/user";
 import { AwsService } from "./aws";
+
+interface PaginatedResponse<T> {
+  items: T[];
+  nextCursor: Cursor | undefined;
+}
+
+interface Cursor {
+  createdAt: Date;
+  profileId: number;
+}
+
+interface UserProfile {
+  userId: string;
+  username: string | null;
+  name: string | null;
+  profilePictureUrl: string | null;
+  createdAt: Date;
+  profileId: number;
+}
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -159,48 +180,18 @@ export class UserService {
     return user !== undefined;
   }
 
-  async getFollowers(userId: string) {
-    const cursor = userId;
-    return await this.userRepository.getPaginatedFollowers(cursor);
-  }
-
-  async getFriends(userId: string) {
-    const cursor = userId;
-    return await this.userRepository.getPaginatedFriends(cursor);
-  }
-
   async isFriends(userId1: string, userId2: string) {
     return !!(await this.friendRepository.getFriend(userId1, userId2));
-  }
-
-  async getFriendRequests(userId: string) {
-    return await this.userRepository.getPaginatedFriendRequests(userId);
-  }
-
-  async getFollowing(userId: string) {
-    const cursor = userId;
-    return await this.userRepository.getPaginatedFollowing(cursor);
   }
 
   async isFollowing(followerId: string, followedId: string) {
     return !!(await this.followRepository.getFollower(followerId, followedId));
   }
 
-  async getFollowRequests(userId: string) {
-    return await this.userRepository.getPaginatedFollowRequests(userId);
-  }
-
-  async getBlockedUsers(
-    userId: string,
-    cursor: {createdAt: Date, profileId: number} | null = null,
-    pageSize = 10,
-  ) {
-    const data = await this.userRepository.getPaginatedBlockedUsers(
-      userId,
-      cursor,
-      pageSize,
-    );
-    // Update each item's profilePictureUrl with a presigned URL
+  private async _updateProfilePictureUrls(
+    data: UserProfile[],
+    pageSize: number,
+  ): Promise<PaginatedResponse<UserProfile>> {
     const items = await Promise.all(
       data.map(async (item) => {
         if (item.profilePictureUrl) {
@@ -209,8 +200,7 @@ export class UserService {
             Key: item.profilePictureUrl,
           });
           item.profilePictureUrl = presignedUrl;
-        }
-        if (!item.profilePictureUrl) {
+        } else {
           const presignedUrl = await this.awsService.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: "profilePictures/default.jpg",
@@ -221,19 +211,97 @@ export class UserService {
       }),
     );
 
-    let nextCursor: typeof cursor | undefined = undefined;
+    let nextCursor: Cursor | undefined = undefined;
     if (items.length > pageSize) {
       const nextItem = items.pop();
       nextCursor = {
         createdAt: nextItem!.createdAt,
         profileId: nextItem!.profileId,
-      }
+      };
       console.log("server: ", nextCursor);
     }
     return {
       items,
       nextCursor,
     };
+  }
+
+  async getFollowers(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedFollowers(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
+  async getFriends(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedFriends(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
+  async getFollowing(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedFollowing(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
+  async getFriendRequests(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedFriendRequests(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
+  async getFollowRequests(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedFollowRequests(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
+  async getBlockedUsers(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedBlockedUsers(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
   }
 
   async blockUser(userId: string, blockUserId: string) {
