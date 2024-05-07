@@ -177,7 +177,7 @@ export class AwsStack extends cdk.Stack {
     const profileLambda = createLambdaFunction(
       this,
       "profileLambda",
-      "src/res/lambdas/profile/index.ts",
+      "src/res/lambdas/profilePicture/index.ts",
     );
     const processProfilePictureLambda = createLambdaFunction(
       this,

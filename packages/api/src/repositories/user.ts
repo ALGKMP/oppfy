@@ -1,14 +1,11 @@
 import { and, eq } from "drizzle-orm";
 
-import type { InferInsertModel } from "@acme/db";
 import { asc, db, gt, or, schema } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
 import { auth } from "../utils/firebase";
 
-export type PrivacySetting = InferInsertModel<
-  typeof schema.user
->["privacySetting"];
+export type PrivacySetting = "public" | "private";
 
 export class UserRepository {
   private db = db;
