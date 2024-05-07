@@ -57,9 +57,6 @@ dist/
 # aws cdk
 cdk.out/
 
-# drizzle
-drizzle/
-
 # CDK asset staging directory
 .cdk.staging
 cdk.out
