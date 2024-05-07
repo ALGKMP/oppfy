@@ -200,6 +200,14 @@ export class UserService {
           );
           item.profilePictureUrl = presignedUrl;
         }
+        if (!item.profilePictureUrl) {
+          const presignedUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Key: "profilePictures/default.jpg",}
+          );
+          item.profilePictureUrl = presignedUrl;
+
+        }
         return item;
       }),
     );
