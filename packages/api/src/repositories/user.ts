@@ -154,51 +154,43 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedFollowing(cursor: string, pageSize = 10) {
+  async getPaginatedFollowing(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
         username: schema.user.username,
         name: schema.profile.fullName,
         profilePictureUrl: schema.profilePicture.key,
+        createdAt: schema.follower.createdAt,
+        profileId: schema.profile.id,
       })
       .from(schema.user)
-      .fullJoin(schema.follower, eq(schema.user.id, schema.follower.senderId))
-      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(
+      .innerJoin(schema.follower, eq(schema.user.id, schema.follower.senderId))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(
         schema.profilePicture,
         eq(schema.profile.profilePictureId, schema.profilePicture.id),
       )
-      .where(cursor ? gt(schema.user.id, cursor) : undefined)
-      .orderBy(asc(schema.user.createdAt))
-      .limit(pageSize);
-  }
-
-  @handleDatabaseErrors
-  async getPaginatedFriends(cursor: string, pageSize = 10) {
-    return await this.db
-      .select({
-        userId: schema.user.id,
-        username: schema.user.username,
-        name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
-      })
-      .from(schema.user)
-      .fullJoin(
-        schema.friend,
-        or(
-          eq(schema.user.id, schema.friend.userId1),
-          eq(schema.user.id, schema.friend.userId2),
+      .where(
+        and(
+          eq(schema.follower.senderId, forUserId),
+          cursor
+            ? or(
+                gt(schema.follower.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.follower.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
         ),
       )
-      .fullJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .fullJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
-      .where(cursor ? gt(schema.user.id, cursor) : undefined)
-      .orderBy(asc(schema.user.createdAt))
-      .limit(pageSize);
+      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
   }
 
   @handleDatabaseErrors
