@@ -60,7 +60,7 @@ export interface SettingsGroupInput {
 
 export const renderSettingsGroup = (group: SettingsGroupInput) => (
   <YStack gap="$2" key={group.headerTitle}>
-    <SizableText size="$3" theme="alt1">
+    <SizableText size="$2" theme="alt1">
       {group.headerTitle}
     </SizableText>
     <YGroup alignSelf="center" bordered separator={<Separator />}>
