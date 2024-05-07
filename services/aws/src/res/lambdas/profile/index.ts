@@ -62,6 +62,7 @@ export const handler = async (
     }
     console.log("after response.ok")
 
+
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Post processed successfully" }),
