@@ -1,6 +1,6 @@
 import { sharedValidators } from "@acme/validators";
 
-import { DomainError, ErrorCodes } from "../errors";
+import { DomainError, ErrorCode } from "../errors";
 import { AwsRepository } from "../repositories/aws";
 import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
@@ -32,7 +32,7 @@ export class ProfileService {
     const profile = await this.getUserProfile(userId);
 
     if (profile === undefined) {
-      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
     await this.profilePictureRepository.updateProfilePicture(
@@ -45,13 +45,13 @@ export class ProfileService {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
-      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
     const profile = await this.userRepository.getProfile(user.profileId);
 
     if (profile === undefined) {
-      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
     return profile;
@@ -66,25 +66,25 @@ export class ProfileService {
       Key: key,
     });
   }
-  
+
   // TODO: Make a second one for other users - pass in cur userId and otherUserId because you'll need to look for friend/follow status
   async getBasicProfile(userId: string) {
-  // TODO: Fuck this might use joins here
+    // TODO: Fuck this might use joins here
     const user = await this.userRepository.getUser(userId);
     if (!user) {
-      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
     let profilePictureUrl = null;
     if (profile.profilePictureId) {
       profilePictureUrl = await this.getProfilePicture(userId);
       if (!profilePictureUrl) {
-        throw new DomainError(ErrorCodes.PROFILE_PICTURE_NOT_FOUND);
+        throw new DomainError(ErrorCode.PROFILE_PICTURE_NOT_FOUND);
       }
     }
 
@@ -102,35 +102,35 @@ export class ProfileService {
     // TODO: Fuck this, using joins later
     const user = await this.userRepository.getUser(userId);
     if (!user) {
-      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
     const followerCount = await this.followersRepository.countFollowers(userId);
     if (!followerCount) {
-      throw new DomainError(ErrorCodes.FAILED_TO_COUNT_FOLLOWERS);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS);
     }
 
     const followingCount =
       await this.followersRepository.countFollowing(userId);
     if (!followingCount) {
-      throw new DomainError(ErrorCodes.FAILED_TO_COUNT_FOLLOWING);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
     }
 
     const friendCount = await this.friendsRepository.friendsCount(userId);
     if (!friendCount) {
-      throw new DomainError(ErrorCodes.FAILED_TO_COUNT_FRIENDS);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
     }
 
     let profilePictureUrl = null;
     if (profile.profilePictureId) {
       profilePictureUrl = await this.getProfilePicture(userId);
       if (!profilePictureUrl) {
-        throw new DomainError(ErrorCodes.PROFILE_PICTURE_NOT_FOUND);
+        throw new DomainError(ErrorCode.PROFILE_PICTURE_NOT_FOUND);
       }
     }
 
@@ -151,13 +151,13 @@ export class ProfileService {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
-      throw new DomainError(ErrorCodes.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
 
     if (profile === undefined) {
-      throw new DomainError(ErrorCodes.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
     const bucket = process.env.S3_POST_BUCKET!;
@@ -165,7 +165,7 @@ export class ProfileService {
     const deleteObject = await this.awsRepository.deleteObject(bucket, key);
 
     if (!deleteObject.DeleteMarker) {
-      throw new DomainError(ErrorCodes.FAILED_TO_DELETE);
+      throw new DomainError(ErrorCode.FAILED_TO_DELETE);
     }
 
     await this.profilePictureRepository.removeProfilePicture(

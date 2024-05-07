@@ -1,5 +1,8 @@
+import { TRPCError } from "@trpc/server";
+
 import { trpcValidators } from "@acme/validators";
 
+import { DomainError, ErrorCode } from "../errors";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
@@ -42,8 +45,27 @@ export const userRouter = createTRPCRouter({
       );
     }),
 
-  updatePrivacySettings: protectedProcedure
-    .input(trpcValidators.user.updatePrivacySettings)
+  getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.user.getUserPrivacySetting(ctx.session.uid);
+    } catch (err) {
+      if (err instanceof DomainError) {
+        switch (err.code) {
+          case ErrorCode.USER_NOT_FOUND:
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+            });
+        }
+      }
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  }),
+
+  updatePrivacySetting: protectedProcedure
+    .input(trpcValidators.user.updatePrivacySetting)
     .mutation(async ({ input, ctx }) => {
       await ctx.services.user.updatePrivacySetting(
         ctx.session.uid,
