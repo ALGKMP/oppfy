@@ -47,7 +47,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await ctx.services.user.updatePrivacySetting(
         ctx.session.uid,
-        input,
+        input.privacy,
       );
     }),
 
