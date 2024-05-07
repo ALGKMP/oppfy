@@ -41,6 +41,15 @@ export const userRouter = createTRPCRouter({
         input,
       );
     }),
+  
+    updatePrivacySettings: protectedProcedure
+    .input(trpcValidators.user.updatePrivacySettings)
+    .mutation(async ({ input, ctx }) => {
+      await ctx.services.user.updatePrivacySetting(
+        ctx.session.uid,
+        input,
+      );
+    }),
 
   // TODO: Needs to be tested
   getFriends: protectedProcedure

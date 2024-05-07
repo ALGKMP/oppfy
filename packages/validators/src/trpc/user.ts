@@ -23,6 +23,9 @@ const trpcUserSchema = {
     followRequests: z.boolean().optional(),
     friendRequests: z.boolean().optional(),
   }),
+  updatePrivacySettings: z.object({
+    privacy: z.enum(["public", "private"]),
+  }),
   getFriends: z.object({
     userId,
   }),
