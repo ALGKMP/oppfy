@@ -175,8 +175,8 @@ export class UserService {
     return await this.userRepository.getPaginatedFollowRequests(userId);
   }
   
-  async getBlockedUsers(userId: string) {
-    return await this.userRepository.getPaginatedBlockedUsers(userId);
+  async getBlockedUsers(userId: string, cursor: string | null = null, pageSize = 10) {
+    return await this.userRepository.getPaginatedBlockedUsers(userId, cursor, pageSize);
   }
 
   async blockUser(userId: string, blockUserId: string) {
