@@ -41,8 +41,8 @@ export const userRouter = createTRPCRouter({
         input,
       );
     }),
-  
-    updatePrivacySettings: protectedProcedure
+
+  updatePrivacySettings: protectedProcedure
     .input(trpcValidators.user.updatePrivacySettings)
     .mutation(async ({ input, ctx }) => {
       await ctx.services.user.updatePrivacySetting(
@@ -51,7 +51,7 @@ export const userRouter = createTRPCRouter({
       );
     }),
 
-  // TODO: Needs to be tested
+  // TODO: Loading... 
   getFriends: protectedProcedure
     .input(trpcValidators.user.getFriends)
     .mutation(async ({ input, ctx }) => {
@@ -59,7 +59,7 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFriends(input.userId);
     }),
 
-  // TODO: Needs to be tested
+  // TODO: Loading
   getFollowers: protectedProcedure
     .input(trpcValidators.user.getFollowers)
     .mutation(async ({ input, ctx }) => {
@@ -67,7 +67,7 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFollowers(input.userId);
     }),
 
-  // TODO: Review this
+  // TODO: Loading...
   getFollowing: protectedProcedure
     .input(trpcValidators.user.getFollowing)
     .mutation(async ({ input, ctx }) => {
@@ -75,12 +75,19 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFollowing(input.userId);
     }),
 
-  // TODO: Review this
+  // TODO: TESTING THIS RN
+  getBlockedUsers: protectedProcedure
+    .input(trpcValidators.user.paginate)
+    .mutation(async ({ ctx }) => {
+      return await ctx.services.user.getBlockedUsers(ctx.session.uid);
+    }),
+
+  // TODO: Loading...
   getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
     return await ctx.services.user.getFriendRequests(ctx.session.uid);
   }),
 
-  // TODO: Review this
+  // TODO: Loading...
   getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
     return await ctx.services.user.getFollowRequests(ctx.session.uid);
   }),
