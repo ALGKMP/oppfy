@@ -194,6 +194,53 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
+  async getPaginatedFriends(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+        createdAt: schema.friend.createdAt,
+        profileId: schema.profile.id,
+      })
+      .from(schema.user)
+      .innerJoin(
+        schema.friend,
+        or(
+          eq(schema.user.id, schema.friend.userId1),
+          eq(schema.user.id, schema.friend.userId2),
+        ),
+      )
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
+      .where(
+        or(
+          eq(schema.friend.userId1, forUserId),
+          eq(schema.friend.userId2, forUserId),
+          cursor
+            ? or(
+                gt(schema.friend.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.friend.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
+  }
+
+  @handleDatabaseErrors
   async getPaginatedFollowRequests(
     forUserId: string, // Assuming you need this to identify the recipient of follow requests
     cursor: { createdAt: Date; profileId: number } | null = null,
