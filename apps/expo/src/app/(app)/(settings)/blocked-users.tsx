@@ -18,8 +18,11 @@ import {
   YStack,
 } from "tamagui";
 
-import type { SettingsGroup, SettingsItem } from "~/components/Settings";
-import { renderSettingsGroup } from "~/components/Settings";
+import {
+  renderSettingsGroup,
+  SettingsGroup,
+  SettingsItem,
+} from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -60,7 +63,7 @@ const BlockedUsers = () => {
     error,
   } = api.user.getBlockedUsers.useInfiniteQuery(
     {
-      pageSize: 10,
+      pageSize: 2,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -82,7 +85,12 @@ const BlockedUsers = () => {
       {data?.pages[0]?.items.length ? (
         <FlashList
           data={data.pages.flatMap((page) => page.items)}
-          renderItem={({ item }) => <Text>{item}</Text>}
+          renderItem={({ item }) => (
+            <SettingsItem
+              title={item.name ?? ""}
+              subtitle={item.username ?? undefined}
+            />
+          )}
           onEndReached={fetchNextPage}
           estimatedItemSize={200}
         />
@@ -93,15 +101,6 @@ const BlockedUsers = () => {
             subtitle="If you block someone, you'll be able to manage them here."
             icon={<UserRoundX />}
           />
-          {/* <YStack alignItems="center" bottom={headerHeight} gap="$2">
-            <UserRoundX size="$10" />
-            <SizableText textAlign="center" size="$5" fontWeight="bold">
-              Blocked Users
-            </SizableText>
-            <Paragraph textAlign="center" theme="alt2">
-              If you block someone, you&apos;ll be able to manage them here.
-            </Paragraph>
-          </YStack> */}
         </View>
       )}
     </ScreenBaseView>
