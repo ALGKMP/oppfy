@@ -227,6 +227,30 @@ export class UserRepository {
       .limit(pageSize);
   }
 
+  @handleDatabaseErrors
+  async getPaginatedBlockedUsers(forUserId: string, cursor: string | null = null, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+      })
+      .from(schema.user)
+      .innerJoin(schema.block, eq(schema.user.id, schema.block.blockedUserId))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
+      .where(and(
+        eq(schema.block.userId, forUserId), // Filtering for the specific user who blocked others
+        cursor ? gt(schema.user.id, cursor) : undefined
+      ))
+      .orderBy(asc(schema.user.id)) // Ordering by userId to support cursor-based pagination
+      .limit(pageSize);
+  }
+
   // Use this to check if a user is blocked (gonna need to use this a lot)
   @handleDatabaseErrors
   async getBlockedUser(userId: string, blockedUserId: string) {

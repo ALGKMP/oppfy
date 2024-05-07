@@ -26,6 +26,12 @@ const trpcUserSchema = {
   updatePrivacySettings: z.object({
     privacy: z.enum(["public", "private"]),
   }),
+
+  paginate: z.object({
+    cursor: z.string().optional(),
+    pageSize: z.number().optional(),
+  }),
+
   getFriends: z.object({
     userId,
   }),
