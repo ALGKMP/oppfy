@@ -22,7 +22,7 @@ export const verificationToken = mySqlTable("VerificationToken", {
   token: varchar("token", { length: 255 }).unique().notNull(),
   expires: datetime("expires").notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
 });
 
@@ -42,7 +42,7 @@ export const user = mySqlTable("User", {
     .default("public")
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -70,7 +70,7 @@ export const profile = mySqlTable("Profile", {
     .references(() => profilePicture.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -86,7 +86,7 @@ export const profilePicture = mySqlTable("ProfilePicture", {
   id: serial("id").primaryKey().notNull(),
   key: varchar("url", { length: 255 }),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -100,7 +100,7 @@ export const notificationSettings = mySqlTable("NotificationSettings", {
   followRequests: boolean("followRequests").default(true).notNull(),
   friendRequests: boolean("friendRequests").default(true).notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -116,7 +116,7 @@ export const post = mySqlTable("Post", {
   caption: text("body").notNull(),
   key: varchar("url", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -149,7 +149,7 @@ export const postStats = mySqlTable("PostStats", {
   comments: int("comments").default(0).notNull(),
   views: int("views").default(0).notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -170,7 +170,7 @@ export const like = mySqlTable("Like", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
 });
 
@@ -195,7 +195,7 @@ export const comment = mySqlTable("Comment", {
     .notNull(),
   body: text("body").notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -220,7 +220,7 @@ export const follower = mySqlTable("Follower", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
 });
 
@@ -246,7 +246,7 @@ export const friendRequest = mySqlTable("FriendRequest", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -273,7 +273,7 @@ export const followRequest = mySqlTable("FriendRequest", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -300,7 +300,7 @@ export const friend = mySqlTable("Friend", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
 });
 
@@ -326,7 +326,7 @@ export const block = mySqlTable("Blocked", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
+    .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
 });
 
