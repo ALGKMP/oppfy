@@ -192,7 +192,7 @@ export class UserService {
 
   async getBlockedUsers(
     userId: string,
-    cursor: string | null = null,
+    cursor: {createdAt: Date, profileId: number} | null = null,
     pageSize = 10,
   ) {
     const data = await this.userRepository.getPaginatedBlockedUsers(
@@ -224,7 +224,10 @@ export class UserService {
     let nextCursor: typeof cursor | undefined = undefined;
     if (items.length > pageSize) {
       const nextItem = items.pop();
-      nextCursor = nextItem!.userId;
+      nextCursor = {
+        createdAt: nextItem!.createdAt,
+        profileId: nextItem!.profileId,
+      }
       console.log("server: ", nextCursor);
     }
     return {
