@@ -216,6 +216,7 @@ export class UserService {
     if (items.length > pageSize) {
       const nextItem = items.pop();
       nextCursor = nextItem!.userId;
+      console.log("server: ", nextCursor);
     }
     return {
       items,

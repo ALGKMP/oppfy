@@ -229,9 +229,11 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async getPaginatedBlockedUsers(forUserId: string, cursor: string | null = null, pageSize = 10) {
+    console.log("cursor: ", cursor)
     return await this.db
       .select({
         userId: schema.user.id,
+        profileId: schema.user.profileId,
         username: schema.user.username,
         name: schema.profile.fullName,
         profilePictureUrl: schema.profilePicture.key,
