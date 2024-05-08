@@ -33,13 +33,6 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async getAllPosts(userId: string) {
-    return await this.db.query.post.findMany({
-      where: eq(schema.post.author, userId),
-    });
-  }
-
-  @handleDatabaseErrors
   async getPaginatedUserPosts(
     userId: string,
     cursor: { createdAt: Date; postId: number } | null = null,
@@ -60,6 +53,8 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))
       .innerJoin(schema.user, eq(schema.post.author, schema.user.id))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.user, eq(schema.post.recipient, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         and(

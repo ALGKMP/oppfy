@@ -3,12 +3,71 @@ import { AwsRepository } from "../repositories/aws";
 import { PostRepository } from "../repositories/post";
 import { PostStatsRepository } from "../repositories/postStats";
 import { UserRepository } from "../repositories/user";
+import { AwsService } from "./aws";
+
+interface PaginatedResponse<T> {
+  items: T[];
+  nextCursor: Cursor | undefined;
+}
+
+interface Cursor {
+  createdAt: Date;
+  postId: number;
+}
+
+interface Post {
+  postId: number;
+  authorId: string;
+  recipientId: string;
+  caption: string | null;
+  imageUrl: string;
+  createdAt: Date;
+  // profileId
+}
 
 export class PostService {
-  private awsRepository = new AwsRepository();
+  private awsService = new AwsService();
   private userRepository = new UserRepository();
   private postRepository = new PostRepository();
   private postStatsRepository = new PostStatsRepository();
+
+  private async _updateProfilePictureUrls(
+    data: UserProfile[],
+    pageSize: number,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const items = await Promise.all(
+      data.map(async (item) => {
+        if (item.profilePictureUrl) {
+          const presignedUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Key: item.profilePictureUrl,
+          });
+          item.profilePictureUrl = presignedUrl;
+        } else {
+          const presignedUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Key: "profile-pictures/default.jpg",
+          });
+          item.profilePictureUrl = presignedUrl;
+        }
+        return item;
+      }),
+    );
+
+    let nextCursor: Cursor | undefined = undefined;
+    if (items.length > pageSize) {
+      const nextItem = items.pop();
+      nextCursor = {
+        createdAt: nextItem!.createdAt,
+        profileId: nextItem!.profileId,
+      };
+      console.log("server: ", nextCursor);
+    }
+    return {
+      items,
+      nextCursor,
+    };
+  }
 
   async createPost(
     postedBy: string,
@@ -39,40 +98,6 @@ export class PostService {
     }
 
     return post;
-  }
-
-  async getUserPosts(userId: string) {
-    const bucket = process.env.S3_POST_BUCKET!;
-
-    const posts = await this.postRepository.getAllPosts(userId);
-
-    const results = await Promise.all(
-      posts.map(async (post) => {
-        const author = await this.userRepository.getUser(post.author);
-        const recipient = await this.userRepository.getUser(post.recipient);
-
-        if (!author || !recipient) {
-          throw new DomainError(ErrorCode.USER_NOT_FOUND);
-        }
-
-        const presignedUrl = await this.awsRepository.getObjectPresignedUrl({
-          Key: post.key,
-          Bucket: bucket,
-        });
-
-        return {
-          id: post.id,
-          authorsId: author.id,
-          authorsUsername: author.username,
-          recipientsId: recipient.id,
-          recipientsUsername: recipient.username,
-          caption: post.caption,
-          presignedUrl,
-        };
-      }),
-    );
-
-    return results;
   }
 
   async deletePost(postId: number) {
