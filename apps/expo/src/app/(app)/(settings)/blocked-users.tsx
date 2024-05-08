@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
@@ -6,10 +6,7 @@ import {
   Avatar,
   Button,
   ListItem,
-  Paragraph,
   SizableText,
-  Text,
-  useTheme,
   View,
   XStack,
   YStack,
@@ -24,28 +21,26 @@ import { api } from "~/utils/api";
 const BlockedUsers = () => {
   const headerHeight = useHeaderHeight();
 
-  const { deleteAccount } = useSession();
-
-  const {
-    data,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    isError,
-    error,
-  } = api.user.getBlockedUsers.useInfiniteQuery(
-    {
-      pageSize: 10,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
-  );
+  const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    api.user.getBlockedUsers.useInfiniteQuery(
+      {
+        pageSize: 10,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
 
   const itemCount = useMemo(() => {
     if (data === undefined) return 0;
     return data.pages.reduce((total, page) => total + page.items.length, 0);
   }, [data]);
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
 
   return (
     <ScreenBaseView>
@@ -55,11 +50,11 @@ const BlockedUsers = () => {
             data={data.pages.flatMap((page) => page.items)}
             ListHeaderComponent={
               <SizableText size="$2" theme="alt1" marginBottom="$2">
-                BLOCKED USERS ({itemCount})
+                BLOCKED USERS
               </SizableText>
             }
             estimatedItemSize={75}
-            onEndReached={fetchNextPage}
+            onEndReached={handleOnEndReached}
             renderItem={({ item, index }) => {
               const isFirstInGroup = index === 0;
               const isLastInGroup = index === itemCount - 1;
@@ -89,10 +84,10 @@ const BlockedUsers = () => {
                       {item.profilePictureUrl && (
                         <Avatar.Image
                           accessibilityLabel="Cam"
-                          src={item.profilePictureUrl}
+                          {...(item.profilePictureUrl && {
+                            src: item.profilePictureUrl,
+                          })}
                         />
-                      )}                         
-                        <Avatar.Fallback backgroundColor="$blue10" />
                       </Avatar>
 
                       <YStack>
