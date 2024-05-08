@@ -1,21 +1,13 @@
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View } from "tamagui";
+import { useTheme, View } from "tamagui";
 
 import { TopTabs } from "~/layouts";
 
 const TopTabsLayout = () => {
-  const insets = useSafeAreaInsets();
-
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: "black",
-        // Paddings to handle safe area
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
+        backgroundColor: "$background",
       }}
     >
       <TopTabs
