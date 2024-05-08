@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useRouter } from "expo-router";
 import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
 import { Switch, YStack } from "tamagui";
@@ -6,19 +5,23 @@ import { Switch, YStack } from "tamagui";
 import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import { ScreenBaseView } from "~/components/Views";
-import { api, RouterInputs, RouterOutputs } from "~/utils/api";
-
-type Privacy = RouterOutputs["user"]["getPrivacySetting"];
+import { api } from "~/utils/api";
 
 const Privacy = () => {
   const router = useRouter();
 
   const utils = api.useUtils();
 
-  const { data: privacy } = api.user.getPrivacySetting.useQuery();
+  const { data: privacySetting } = api.user.getPrivacySetting.useQuery(
+    undefined,
+    {
+      initialData: "public",
+    },
+  );
 
   const updatePrivacySetting = api.user.updatePrivacySetting.useMutation({
     onMutate: async (newPrivacySettings) => {
+      console.log(newPrivacySettings);
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.user.getPrivacySetting.cancel();
 
@@ -47,15 +50,10 @@ const Privacy = () => {
     },
   });
 
-  const [privateAccount, setPrivateAccount] = useState<Privacy>("private");
-
-  // TODO: Implement
   const onSubmit = async (checked: boolean) => {
-    console.log("onSubmit", checked);
-    // setPrivateAccount(checked);
-
-    const privacy = checked ? "private" : "public";
-    await updatePrivacySetting.mutateAsync({ privacy });
+    await updatePrivacySetting.mutateAsync({
+      privacy: checked ? "private" : "public",
+    });
   };
 
   const settingsGroups = [
@@ -66,12 +64,11 @@ const Privacy = () => {
           title: "Private Account",
           icon: <BookLock />,
           iconAfter: (
-            <Switch
-              size="$3"
-              checked={privacy === "private"}
-              onCheckedChange={onSubmit}
-            >
-              <Switch.Thumb animation="quick" />
+            <Switch size="$3" onCheckedChange={onSubmit}>
+              <Switch.Thumb
+                animation="quick"
+                checked={privacySetting === "private"}
+              />
             </Switch>
           ),
           hoverTheme: false,
