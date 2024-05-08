@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
@@ -6,10 +6,7 @@ import {
   Avatar,
   Button,
   ListItem,
-  Paragraph,
   SizableText,
-  Text,
-  useTheme,
   View,
   XStack,
   YStack,
@@ -22,30 +19,69 @@ import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
 const BlockedUsers = () => {
+  const utils = api.useUtils();
   const headerHeight = useHeaderHeight();
 
-  const { deleteAccount } = useSession();
+  const unblockUser = api.user.unblockUser.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.user.getBlockedUsers.cancel();
 
-  const {
-    data,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    isError,
-    error,
-  } = api.user.getBlockedUsers.useInfiniteQuery(
-    {
-      pageSize: 10,
+      // Get the data from the queryCache
+      const prevData = utils.user.getBlockedUsers.getData();
+      if (prevData === undefined) return;
+
+      // prevData// Optimistically update the data
+      utils.user.getBlockedUsers.setData(
+        {},
+        {
+          ...prevData,
+          items: prevData.items.filter(
+            (item) => item.userId !== newData.blockedUserId,
+          ),
+        },
+      );
+
+      return { prevData };
     },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    // onError: (_err, _newData, ctx) => {
+    //   if (ctx === undefined) return;
+
+    //   // If the mutation fails, use the context-value from onMutate
+    //   utils.user.getBlockedUsers.setData(ctx.prevData);
+    // },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.user.getBlockedUsers.invalidate();
     },
-  );
+  });
+
+  const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    api.user.getBlockedUsers.useInfiniteQuery(
+      {
+        pageSize: 10,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
+
+  const handleUnblock = async (blockedUserId: string) => {
+    await unblockUser.mutateAsync({
+      blockedUserId,
+    });
+  };
 
   const itemCount = useMemo(() => {
     if (data === undefined) return 0;
     return data.pages.reduce((total, page) => total + page.items.length, 0);
   }, [data]);
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
 
   return (
     <ScreenBaseView>
@@ -55,11 +91,11 @@ const BlockedUsers = () => {
             data={data.pages.flatMap((page) => page.items)}
             ListHeaderComponent={
               <SizableText size="$2" theme="alt1" marginBottom="$2">
-                BLOCKED USERS ({itemCount})
+                BLOCKED USERS
               </SizableText>
             }
             estimatedItemSize={75}
-            onEndReached={fetchNextPage}
+            onEndReached={handleOnEndReached}
             renderItem={({ item, index }) => {
               const isFirstInGroup = index === 0;
               const isLastInGroup = index === itemCount - 1;
@@ -86,11 +122,14 @@ const BlockedUsers = () => {
                   <XStack flex={1} alignItems="center">
                     <XStack flex={1} alignItems="center" gap="$2">
                       <Avatar circular size="$5">
-                        <Avatar.Image
-                          accessibilityLabel="Cam"
-                          src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
-                        />
-                        <Avatar.Fallback backgroundColor="$blue10" />
+                        {item.profilePictureUrl && (
+                          <Avatar.Image
+                            accessibilityLabel="Cam"
+                            {...(item.profilePictureUrl && {
+                              src: item.profilePictureUrl,
+                            })}
+                          />
+                        )}
                       </Avatar>
 
                       <YStack>
@@ -104,7 +143,11 @@ const BlockedUsers = () => {
                       title={`Unblock ${item.name}`}
                       description={`Are you sure you want to unblock ${item.name}?`}
                       trigger={
-                        <Button size={"$3"} icon={<UserRoundX size="$1" />}>
+                        <Button
+                          size="$3"
+                          icon={<UserRoundX size="$1" />}
+                          onPress={() => handleUnblock(item.userId)}
+                        >
                           Unblock
                         </Button>
                       }
