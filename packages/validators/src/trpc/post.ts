@@ -45,9 +45,12 @@ const trpcPostSchema = {
   }),
 
   getPosts: z.object({
-    postId,
-    createdAt: z.date(),
-
+    cursor: z.object({
+      postId,
+      createdAt: z.date(),
+      pageSize: z.number().optional(),
+    }),
+    pageSize: z.number().optional(),
   }),
 
   getUserPosts: z.object({

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { trpcValidators } from "@acme/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { caption } from "@acme/validators/src/shared/media";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -55,33 +56,10 @@ export const postRouter = createTRPCRouter({
 
   getPosts: protectedProcedure
     .input(trpcValidators.post.getPosts)
-    .output(
-      z.object({
-        items: z.array(
-          z.object({
-            postId: z.number(),
-            authorId: z.string(),
-            recipientId: z.string(),
-            caption: z.string(),
-            imageUrl: z.string(),
-            createdAt: z.date(),
-            profileId: z.string(),
-            commentsCount: z.number(),
-            likesCount: z.number(),
-          }),
-        ),
-        nextCursor: z
-          .object({
-            createdAt: z.date(),
-            postId: z.number(),
-          })
-          .nullable(),
-      }),
-    )
     .query(async ({ ctx, input }) => {
-      return await ctx.services.post.getPaginatedPosts(
-        input.postId,
-        input.createdAt,
+      return await ctx.services.post.getPosts(
+        ctx.session.uid,
+        input.cursor,
         input.pageSize,
       );
     }),

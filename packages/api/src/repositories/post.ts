@@ -34,7 +34,7 @@ export class PostRepository {
 
   // TODO: Test This
   @handleDatabaseErrors
-  async getPaginatedUserPosts(
+  async getPaginatedPosts(
     userId: string,
     cursor: { createdAt: Date; postId: number } | null = null,
     pageSize = 10,
@@ -62,10 +62,9 @@ export class PostRepository {
         recipientProfilePicture: recipientProfilePicture.key,
         caption: schema.post.caption,
         imageUrl: schema.post.key,
-        createdAt: schema.post.createdAt,
-        profileId: schema.profile.id,
         commentsCount: schema.postStats.comments,
         likesCount: schema.postStats.likes,
+        createdAt: schema.post.createdAt,
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))

@@ -1,5 +1,4 @@
 import { DomainError, ErrorCode } from "../errors";
-import { AwsRepository } from "../repositories/aws";
 import { PostRepository } from "../repositories/post";
 import { PostStatsRepository } from "../repositories/postStats";
 import { UserRepository } from "../repositories/user";
@@ -13,16 +12,22 @@ interface PaginatedResponse<T> {
 interface Cursor {
   createdAt: Date;
   postId: number;
+  pageSize?: number;
 }
 
 interface Post {
   postId: number;
   authorId: string;
+  authorUsername: string | null;
+  authorProfilePicture: string | null;
   recipientId: string;
-  caption: string | null;
+  recipientUsername: string | null;
+  recipientProfilePicture: string | null;
   imageUrl: string;
+  caption: string | null;
+  likesCount: number | null;
+  commentsCount: number | null;
   createdAt: Date;
-  // profileId
 }
 
 export class PostService {
@@ -32,24 +37,31 @@ export class PostService {
   private postStatsRepository = new PostStatsRepository();
 
   private async _updateProfilePictureUrls(
-    data: UserProfile[],
-    pageSize: number,
-  ): Promise<PaginatedResponse<UserProfile>> {
+    data: Post[],
+    pageSize = 20,
+  ): Promise<PaginatedResponse<Post>> {
     const items = await Promise.all(
       data.map(async (item) => {
-        if (item.profilePictureUrl) {
-          const presignedUrl = await this.awsService.getObjectPresignedUrl({
+        // Update author profile picture URL
+        const authorPresignedUrl = await this.awsService.getObjectPresignedUrl({
+          Bucket: process.env.S3_PROFILE_BUCKET!,
+          Key: item.authorProfilePicture ?? "profile-pictures/default.jpg",
+        });
+        item.authorProfilePicture = authorPresignedUrl;
+
+        // Update recipient profile picture URL
+        const recipientPresignedUrl =
+          await this.awsService.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: item.profilePictureUrl,
+            Key: item.recipientProfilePicture ?? "profile-pictures/default.jpg",
           });
-          item.profilePictureUrl = presignedUrl;
-        } else {
-          const presignedUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: "profile-pictures/default.jpg",
-          });
-          item.profilePictureUrl = presignedUrl;
-        }
+        item.recipientProfilePicture = recipientPresignedUrl;
+
+        const imageUrl = await this.awsService.getObjectPresignedUrl({
+          Bucket: process.env.S3_POST_BUCKET!,
+          Key: item.imageUrl,
+        });
+        item.imageUrl = imageUrl;
         return item;
       }),
     );
@@ -59,7 +71,7 @@ export class PostService {
       const nextItem = items.pop();
       nextCursor = {
         createdAt: nextItem!.createdAt,
-        profileId: nextItem!.profileId,
+        postId: nextItem!.postId,
       };
       console.log("server: ", nextCursor);
     }
@@ -67,6 +79,12 @@ export class PostService {
       items,
       nextCursor,
     };
+  }
+
+  async getPosts(userId: string, cursor: Cursor | null = null, pageSize?: number) {
+    const data = await this.postRepository.getPaginatedPosts(userId, cursor);
+
+    return this._updateProfilePictureUrls(data, pageSize);
   }
 
   async createPost(
