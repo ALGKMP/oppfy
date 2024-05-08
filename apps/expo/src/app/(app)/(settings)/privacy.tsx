@@ -1,23 +1,29 @@
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
 import { Switch, YStack } from "tamagui";
 
 import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
+import type { ButtonOption } from "~/components/Sheets";
+import { ActionSheet } from "~/components/Sheets";
 import { ScreenBaseView } from "~/components/Views";
+import type { RouterInputs } from "~/utils/api";
 import { api } from "~/utils/api";
+
+type PrivacySetting = RouterInputs["user"]["updatePrivacySetting"]["privacy"];
 
 const Privacy = () => {
   const router = useRouter();
 
   const utils = api.useUtils();
 
-  const { data: privacySetting } = api.user.getPrivacySetting.useQuery(
-    undefined,
-    {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const { data: privacySetting, isLoading: isLoadingPrivacySetting } =
+    api.user.getPrivacySetting.useQuery(undefined, {
       initialData: "public",
-    },
-  );
+    });
 
   const updatePrivacySetting = api.user.updatePrivacySetting.useMutation({
     onMutate: async (newPrivacySettings) => {
@@ -50,10 +56,33 @@ const Privacy = () => {
     },
   });
 
-  const onSubmit = async (checked: boolean) => {
+  const [privacySettingState, setPrivacySettingState] =
+    useState<PrivacySetting>(privacySetting);
+
+  useEffect(() => {
+    if (!isLoadingPrivacySetting) {
+      setPrivacySettingState(privacySetting);
+    }
+  }, [isLoadingPrivacySetting, privacySetting]);
+
+  const handlePrivacySettingUpdate = async (
+    newPrivacySetting: PrivacySetting,
+  ) => {
     await updatePrivacySetting.mutateAsync({
-      privacy: checked ? "private" : "public",
+      privacy: newPrivacySetting,
     });
+  };
+
+  const onSubmit = async (checked: boolean) => {
+    const newPrivacySetting = (
+      checked ? "private" : "public"
+    ) satisfies PrivacySetting;
+
+    setPrivacySettingState(newPrivacySetting);
+
+    newPrivacySetting === "private"
+      ? setIsModalVisible(true)
+      : await handlePrivacySettingUpdate("public");
   };
 
   const settingsGroups = [
@@ -64,11 +93,12 @@ const Privacy = () => {
           title: "Private Account",
           icon: <BookLock />,
           iconAfter: (
-            <Switch size="$3" onCheckedChange={onSubmit}>
-              <Switch.Thumb
-                animation="quick"
-                checked={privacySetting === "private"}
-              />
+            <Switch
+              size="$3"
+              onCheckedChange={onSubmit}
+              checked={privacySettingState === "private"}
+            >
+              <Switch.Thumb animation="quick" />
             </Switch>
           ),
           hoverTheme: false,
@@ -84,9 +114,32 @@ const Privacy = () => {
     },
   ] satisfies SettingsGroupInput[];
 
+  const title = "Switch to private account?";
+  const subtitle =
+    "Only your followers will be able to see your photos and videos.";
+  const buttonOptions = [
+    {
+      text: "Switch to private",
+      onPress: () => {
+        void handlePrivacySettingUpdate("private");
+        setIsModalVisible(false);
+      },
+    },
+  ] satisfies ButtonOption[];
+
   return (
     <ScreenBaseView scrollable>
       <YStack gap="$4">{settingsGroups.map(renderSettingsGroup)}</YStack>
+      <ActionSheet
+        title={title}
+        subtitle={subtitle}
+        buttonOptions={buttonOptions}
+        isVisible={isModalVisible}
+        onClose={() => {
+          setIsModalVisible(false);
+          setPrivacySettingState("public");
+        }}
+      />
     </ScreenBaseView>
   );
 };
