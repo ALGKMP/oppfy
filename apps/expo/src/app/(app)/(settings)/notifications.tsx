@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { MessageCircle, StickyNote, UsersRound } from "@tamagui/lucide-icons";
+import {
+  AtSign,
+  MessageCircle,
+  StickyNote,
+  ThumbsUp,
+  UserRoundPlus,
+} from "@tamagui/lucide-icons";
 import { Button, Spinner, Switch, YStack } from "tamagui";
 
 import type { SettingsGroupInput } from "~/components/Settings";
@@ -97,6 +103,21 @@ const Notifications = () => {
           pressTheme: false,
         },
         {
+          title: "Likes",
+          icon: <ThumbsUp />,
+          iconAfter: (
+            <Switch
+              size="$3"
+              checked={switchState.likes}
+              onCheckedChange={(value) => updateSwitchState("likes", value)}
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+          ),
+          hoverTheme: false,
+          pressTheme: false,
+        },
+        {
           title: "Comments",
           icon: <MessageCircle />,
           iconAfter: (
@@ -112,8 +133,40 @@ const Notifications = () => {
           pressTheme: false,
         },
         {
+          title: "Mentions",
+          icon: <AtSign />,
+          iconAfter: (
+            <Switch
+              size="$3"
+              checked={switchState.mentions}
+              onCheckedChange={(value) => updateSwitchState("mentions", value)}
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+          ),
+          hoverTheme: false,
+          pressTheme: false,
+        },
+        {
+          title: "Follow Requests",
+          icon: <UserRoundPlus />,
+          iconAfter: (
+            <Switch
+              size="$3"
+              checked={switchState.followRequests}
+              onCheckedChange={(value) =>
+                updateSwitchState("followRequests", value)
+              }
+            >
+              <Switch.Thumb animation="quick" />
+            </Switch>
+          ),
+          hoverTheme: false,
+          pressTheme: false,
+        },
+        {
           title: "Friend Requests",
-          icon: <UsersRound />,
+          icon: <UserRoundPlus />,
           iconAfter: (
             <Switch
               size="$3"
