@@ -30,12 +30,10 @@ export const userRouter = createTRPCRouter({
       await ctx.services.user.updateUsername(ctx.session.uid, input.username);
     }),
 
-  // TODO: Needs to be tested
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
     return await ctx.services.user.getUserNotificationSettings(ctx.session.uid);
   }),
 
-  // TODO: Needs to be tested
   updateNotificationSettings: protectedProcedure
     .input(trpcValidators.user.updateNotificationSettings)
     .mutation(async ({ input, ctx }) => {
@@ -73,7 +71,7 @@ export const userRouter = createTRPCRouter({
       );
     }),
 
-  // TODO: Loading...
+  // TODO: Test this
   getFriends: protectedProcedure
     .input(trpcValidators.user.getFriends)
     .mutation(async ({ input, ctx }) => {
@@ -81,7 +79,7 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFriends(input.userId);
     }),
 
-  // TODO: Loading
+  // TODO: Test this
   getFollowers: protectedProcedure
     .input(trpcValidators.user.getFollowers)
     .mutation(async ({ input, ctx }) => {
@@ -89,7 +87,7 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFollowers(input.userId);
     }),
 
-  // TODO: Loading...
+  // TODO: Test this
   getFollowing: protectedProcedure
     .input(trpcValidators.user.getFollowing)
     .mutation(async ({ input, ctx }) => {
@@ -97,24 +95,24 @@ export const userRouter = createTRPCRouter({
       return await ctx.services.user.getFollowing(input.userId);
     }),
 
-  // TODO: TESTING THIS RN
   getBlockedUsers: protectedProcedure
     .input(trpcValidators.user.paginate)
     .query(async ({ ctx, input }) => {
       return await ctx.services.user.getBlockedUsers(ctx.session.uid, input.cursor, input.pageSize);
     }),
 
-  // TODO: Loading...
+  // TODO: Test this
   getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
     return await ctx.services.user.getFriendRequests(ctx.session.uid);
   }),
 
-  // TODO: Loading...
+  // TODO: Test this
   getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
     return await ctx.services.user.getFollowRequests(ctx.session.uid);
   }),
 
-  // TODO: Needs to be tested
+
+  // TODO: Test this
   blockUser: protectedProcedure
     .input(trpcValidators.user.blockUser)
     .mutation(async ({ input, ctx }) => {
@@ -248,8 +246,4 @@ export const userRouter = createTRPCRouter({
         input.recipientId,
       );
     }),
-
-  // TODO: paginate follow and friend requests
-
-  // TODO: paginate blocked users
 });

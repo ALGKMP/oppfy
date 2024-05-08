@@ -126,12 +126,15 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
     }
 
-    let profilePictureUrl = null;
+    let profilePictureUrl;
     if (profile.profilePictureId) {
       profilePictureUrl = await this.getProfilePicture(userId);
       if (!profilePictureUrl) {
         throw new DomainError(ErrorCode.PROFILE_PICTURE_NOT_FOUND);
       }
+    }
+    else {
+      profilePictureUrl = await this.getProfilePicture("profile-pictures/default.jpg");
     }
 
     return sharedValidators.user.fullProfile.parse({
