@@ -150,6 +150,11 @@ export class ProfileService {
     });
   }
 
+  async paginateUserPosts(userId: string, cursor: { createdAt: Date, postId: number }, pageSize: number) {
+    const posts = await this.postRepository.getPaginatedUserPosts(userId, cursor, pageSize);
+    return posts;
+  }
+
   async removeProfilePicture(userId: string) {
     const user = await this.userRepository.getUser(userId);
 

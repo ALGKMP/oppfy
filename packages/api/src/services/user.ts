@@ -1,5 +1,3 @@
-import { Primitive } from "firebase-admin/firestore";
-
 import { DomainError, ErrorCode } from "../errors";
 import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";

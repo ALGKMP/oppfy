@@ -53,8 +53,9 @@ export const postRouter = createTRPCRouter({
       await ctx.services.post.deletePost(input.postId);
     }),
     
-  userPosts: protectedProcedure.query(async ({ ctx }) => {
-    await ctx.services.post.getUserPosts(ctx.session.uid);
+  getUserPosts: protectedProcedure
+  .query(async ({ ctx }) => {
+    return await ctx.services.post.getUserPosts(ctx.session.uid);
   }),
 
   otherUserPosts: protectedProcedure
