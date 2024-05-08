@@ -203,7 +203,7 @@ export class UserService {
         } else {
           const presignedUrl = await this.awsService.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: "profilePictures/default.jpg",
+            Key: "profile-pictures/default.jpg",
           });
           item.profilePictureUrl = presignedUrl;
         }
