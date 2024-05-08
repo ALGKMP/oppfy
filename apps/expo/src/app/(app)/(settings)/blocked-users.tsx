@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
@@ -6,10 +6,7 @@ import {
   Avatar,
   Button,
   ListItem,
-  Paragraph,
   SizableText,
-  Text,
-  useTheme,
   View,
   XStack,
   YStack,
@@ -24,28 +21,26 @@ import { api } from "~/utils/api";
 const BlockedUsers = () => {
   const headerHeight = useHeaderHeight();
 
-  const { deleteAccount } = useSession();
-
-  const {
-    data,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    isError,
-    error,
-  } = api.user.getBlockedUsers.useInfiniteQuery(
-    {
-      pageSize: 10,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
-  );
+  const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    api.user.getBlockedUsers.useInfiniteQuery(
+      {
+        pageSize: 10,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
 
   const itemCount = useMemo(() => {
     if (data === undefined) return 0;
     return data.pages.reduce((total, page) => total + page.items.length, 0);
   }, [data]);
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
 
   return (
     <ScreenBaseView>
@@ -55,11 +50,11 @@ const BlockedUsers = () => {
             data={data.pages.flatMap((page) => page.items)}
             ListHeaderComponent={
               <SizableText size="$2" theme="alt1" marginBottom="$2">
-                BLOCKED USERS ({itemCount})
+                BLOCKED USERS
               </SizableText>
             }
             estimatedItemSize={75}
-            onEndReached={fetchNextPage}
+            onEndReached={handleOnEndReached}
             renderItem={({ item, index }) => {
               const isFirstInGroup = index === 0;
               const isLastInGroup = index === itemCount - 1;
@@ -88,9 +83,10 @@ const BlockedUsers = () => {
                       <Avatar circular size="$5">
                         <Avatar.Image
                           accessibilityLabel="Cam"
-                          src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+                          {...(item.profilePictureUrl && {
+                            src: item.profilePictureUrl,
+                          })}
                         />
-                        <Avatar.Fallback backgroundColor="$blue10" />
                       </Avatar>
 
                       <YStack>
@@ -104,7 +100,7 @@ const BlockedUsers = () => {
                       title={`Unblock ${item.name}`}
                       description={`Are you sure you want to unblock ${item.name}?`}
                       trigger={
-                        <Button size={"$3"} icon={<UserRoundX size="$1" />}>
+                        <Button size="$3" icon={<UserRoundX size="$1" />}>
                           Unblock
                         </Button>
                       }
