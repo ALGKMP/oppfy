@@ -21,23 +21,19 @@ const RootLayout = () => {
     return null;
   }
 
-  const queryClient = new QueryClient();
-
   return (
     <TRPCProvider>
-      <QueryClientProvider client={queryClient}>
-        <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-          <SessionProvider>
-            <PermissionsProvider>
-              <ActionSheetProvider>
-                <SafeAreaProvider>
-                  <Slot />
-                </SafeAreaProvider>
-              </ActionSheetProvider>
-            </PermissionsProvider>
-          </SessionProvider>
-        </TamaguiProvider>
-      </QueryClientProvider>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+        <SessionProvider>
+          <PermissionsProvider>
+            <ActionSheetProvider>
+              <SafeAreaProvider>
+                <Slot />
+              </SafeAreaProvider>
+            </ActionSheetProvider>
+          </PermissionsProvider>
+        </SessionProvider>
+      </TamaguiProvider>
     </TRPCProvider>
   );
 };
