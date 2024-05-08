@@ -16,7 +16,16 @@ const Notifications = () => {
   const {
     data: notificationSettings,
     isLoading: isLoadingNotificationSettings,
-  } = api.user.getNotificationSettings.useQuery();
+  } = api.user.getNotificationSettings.useQuery(undefined, {
+    initialData: {
+      likes: false,
+      posts: false,
+      comments: false,
+      mentions: false,
+      friendRequests: false,
+      followRequests: false,
+    },
+  });
 
   const {
     isLoading: isUpdatingNotficationSettings,
@@ -51,24 +60,18 @@ const Notifications = () => {
     },
   });
 
-  const [switchState, setSwitchState] = useState<SwitchState>({
-    likes: false,
-    posts: false,
-    comments: false,
-    mentions: false,
-    friendRequests: false,
-    followRequests: false,
-  });
+  const [switchState, setSwitchState] =
+    useState<SwitchState>(notificationSettings);
 
   const updateSwitchState = (key: keyof SwitchState, value: boolean) => {
     setSwitchState({ ...switchState, [key]: value });
   };
 
   useEffect(() => {
-    if (!isLoadingNotificationSettings && notificationSettings) {
+    if (!isLoadingNotificationSettings) {
       setSwitchState(notificationSettings);
     }
-  }, [notificationSettings, isLoadingNotificationSettings]);
+  }, [isLoadingNotificationSettings, notificationSettings]);
 
   const onSubmit = async () => {
     await updateNotificationSettings.mutateAsync(switchState);
