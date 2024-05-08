@@ -44,8 +44,10 @@ const trpcPostSchema = {
     postId,
   }),
 
-  getPost: z.object({
-    key: postKey,
+  getPosts: z.object({
+    postId,
+    createdAt: z.date(),
+
   }),
 
   getUserPosts: z.object({

@@ -52,16 +52,38 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.services.post.deletePost(input.postId);
     }),
-    
-  getUserPosts: protectedProcedure
-  .query(async ({ ctx }) => {
-    return await ctx.services.post.getUserPosts(ctx.session.uid);
-  }),
 
-  otherUserPosts: protectedProcedure
-    .input(trpcValidators.post.getUserPosts)
+  getPosts: protectedProcedure
+    .input(trpcValidators.post.getPosts)
+    .output(
+      z.object({
+        items: z.array(
+          z.object({
+            postId: z.number(),
+            authorId: z.string(),
+            recipientId: z.string(),
+            caption: z.string(),
+            imageUrl: z.string(),
+            createdAt: z.date(),
+            profileId: z.string(),
+            commentsCount: z.number(),
+            likesCount: z.number(),
+          }),
+        ),
+        nextCursor: z
+          .object({
+            createdAt: z.date(),
+            postId: z.number(),
+          })
+          .nullable(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      await ctx.services.post.getUserPosts(input.userId);
+      return await ctx.services.post.getPaginatedPosts(
+        input.postId,
+        input.createdAt,
+        input.pageSize,
+      );
     }),
 });
 
