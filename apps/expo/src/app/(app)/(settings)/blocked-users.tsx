@@ -109,6 +109,7 @@ const BlockedUsers = () => {
                   <XStack flex={1} alignItems="center">
                     <XStack flex={1} alignItems="center" gap="$2">
                       <Avatar circular size="$5">
+                      {item.profilePictureUrl && (
                         <Avatar.Image
                           accessibilityLabel="Cam"
                           {...(item.profilePictureUrl && {
