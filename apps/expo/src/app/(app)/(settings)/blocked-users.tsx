@@ -23,24 +23,37 @@ const BlockedUsers = () => {
   const headerHeight = useHeaderHeight();
 
   const unblockUser = api.user.unblockUser.useMutation({
-    // onMutate: async (newData) => {
-    //   // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-    //   await utils.user.getBlockedUsers.cancel();
-    //   // Get the data from the queryCache
-    //   const prevData = utils.user.getBlockedUsers.getData();
-    //   if (prevData === undefined) return;
-    //   // prevData// Optimistically update the data
-    //   utils.user.getBlockedUsers.setData(
-    //     {},
-    //     {
-    //       ...prevData,
-    //       items: prevData.items.filter(
-    //         (item) => item.userId !== newData.blockedUserId,
-    //       ),
-    //       // items: prevData.items.map(item => item.userId === newData.blockedUserId ? {
-    //     },
-    //   );
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.user.getBlockedUsers.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.user.getBlockedUsers.getData();
+      if (prevData === undefined) return;
+
+      // prevData// Optimistically update the data
+      utils.user.getBlockedUsers.setData(
+        {},
+        {
+          ...prevData,
+          items: prevData.items.filter(
+            (item) => item.userId !== newData.blockedUserId,
+          ),
+        },
+      );
+
+      return { prevData };
+    },
+    // onError: (_err, _newData, ctx) => {
+    //   if (ctx === undefined) return;
+
+    //   // If the mutation fails, use the context-value from onMutate
+    //   utils.user.getBlockedUsers.setData(ctx.prevData);
     // },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.user.getBlockedUsers.invalidate();
+    },
   });
 
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
@@ -109,13 +122,14 @@ const BlockedUsers = () => {
                   <XStack flex={1} alignItems="center">
                     <XStack flex={1} alignItems="center" gap="$2">
                       <Avatar circular size="$5">
-                      {item.profilePictureUrl && (
-                        <Avatar.Image
-                          accessibilityLabel="Cam"
-                          {...(item.profilePictureUrl && {
-                            src: item.profilePictureUrl,
-                          })}
-                        />
+                        {item.profilePictureUrl && (
+                          <Avatar.Image
+                            accessibilityLabel="Cam"
+                            {...(item.profilePictureUrl && {
+                              src: item.profilePictureUrl,
+                            })}
+                          />
+                        )}
                       </Avatar>
 
                       <YStack>
