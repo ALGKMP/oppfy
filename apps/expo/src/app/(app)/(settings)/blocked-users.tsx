@@ -86,10 +86,12 @@ const BlockedUsers = () => {
                   <XStack flex={1} alignItems="center">
                     <XStack flex={1} alignItems="center" gap="$2">
                       <Avatar circular size="$5">
+                      {item.profilePictureUrl && (
                         <Avatar.Image
                           accessibilityLabel="Cam"
-                          src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+                          src={item.profilePictureUrl}
                         />
+                      )}                         
                         <Avatar.Fallback backgroundColor="$blue10" />
                       </Avatar>
 
@@ -104,7 +106,7 @@ const BlockedUsers = () => {
                       title={`Unblock ${item.name}`}
                       description={`Are you sure you want to unblock ${item.name}?`}
                       trigger={
-                        <Button size={"$3"} icon={<UserRoundX size="$1" />}>
+                        <Button size="$3" icon={<UserRoundX size="$1" />}>
                           Unblock
                         </Button>
                       }
