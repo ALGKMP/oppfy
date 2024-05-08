@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Constants from "expo-constants";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -57,8 +57,8 @@ const getBaseUrl = () => {
  */
 
 export function TRPCProvider(props: { children: React.ReactNode }) {
-  const [queryClient] = React.useState(() => new QueryClient());
-  const [trpcClient] = React.useState(() =>
+  const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() =>
     api.createClient({
       transformer: superjson,
       links: [
