@@ -68,7 +68,7 @@ const Notifications = () => {
     if (!isLoadingNotificationSettings && notificationSettings) {
       setSwitchState(notificationSettings);
     }
-  }, [notificationSettings, isLoadingNotificationSettings]);
+  }, [isLoadingNotificationSettings, notificationSettings]);
 
   const onSubmit = async () => {
     await updateNotificationSettings.mutateAsync(switchState);
