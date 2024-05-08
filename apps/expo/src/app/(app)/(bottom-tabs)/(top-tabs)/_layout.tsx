@@ -1,4 +1,4 @@
-import { useTheme, View } from "tamagui";
+import { View } from "tamagui";
 
 import { TopTabs } from "~/layouts";
 

@@ -52,7 +52,6 @@ const trpcUserSchema = {
     blockedUserId: userId,
   }),
   unblockUser: z.object({
-    userId,
     blockedUserId: userId,
   }),
   follow: z.object({

@@ -19,7 +19,29 @@ import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
 const BlockedUsers = () => {
+  const utils = api.useUtils();
   const headerHeight = useHeaderHeight();
+
+  const unblockUser = api.user.unblockUser.useMutation({
+    // onMutate: async (newData) => {
+    //   // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+    //   await utils.user.getBlockedUsers.cancel();
+    //   // Get the data from the queryCache
+    //   const prevData = utils.user.getBlockedUsers.getData();
+    //   if (prevData === undefined) return;
+    //   // prevData// Optimistically update the data
+    //   utils.user.getBlockedUsers.setData(
+    //     {},
+    //     {
+    //       ...prevData,
+    //       items: prevData.items.filter(
+    //         (item) => item.userId !== newData.blockedUserId,
+    //       ),
+    //       // items: prevData.items.map(item => item.userId === newData.blockedUserId ? {
+    //     },
+    //   );
+    // },
+  });
 
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     api.user.getBlockedUsers.useInfiniteQuery(
@@ -30,6 +52,12 @@ const BlockedUsers = () => {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
     );
+
+  const handleUnblock = async (blockedUserId: string) => {
+    await unblockUser.mutateAsync({
+      blockedUserId,
+    });
+  };
 
   const itemCount = useMemo(() => {
     if (data === undefined) return 0;
@@ -100,7 +128,11 @@ const BlockedUsers = () => {
                       title={`Unblock ${item.name}`}
                       description={`Are you sure you want to unblock ${item.name}?`}
                       trigger={
-                        <Button size="$3" icon={<UserRoundX size="$1" />}>
+                        <Button
+                          size="$3"
+                          icon={<UserRoundX size="$1" />}
+                          onPress={() => handleUnblock(item.userId)}
+                        >
                           Unblock
                         </Button>
                       }
