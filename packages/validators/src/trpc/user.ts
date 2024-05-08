@@ -28,7 +28,10 @@ const trpcUserSchema = {
   }),
 
   paginate: z.object({
-    cursor: z.string().optional(),
+    cursor: z.object({
+      createdAt: z.date(),
+      profileId: z.number(),
+    }).optional(),
     pageSize: z.number().optional(),
   }),
 

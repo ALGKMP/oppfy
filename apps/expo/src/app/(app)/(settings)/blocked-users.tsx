@@ -35,7 +35,7 @@ const BlockedUsers = () => {
     error,
   } = api.user.getBlockedUsers.useInfiniteQuery(
     {
-      pageSize: 2,
+      pageSize: 10,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
