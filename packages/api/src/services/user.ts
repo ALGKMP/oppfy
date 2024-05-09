@@ -21,7 +21,7 @@ interface UserProfile {
   userId: string;
   username: string | null;
   name: string | null;
-  profilePictureUrl: string | null;
+  profilePictureUrl: string;
   createdAt: Date;
   profileId: number;
 }

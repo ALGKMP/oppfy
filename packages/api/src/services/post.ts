@@ -19,14 +19,14 @@ interface Post {
   postId: number;
   authorId: string;
   authorUsername: string | null;
-  authorProfilePicture: string | null;
+  authorProfilePicture: string;
   recipientId: string;
   recipientUsername: string | null;
-  recipientProfilePicture: string | null;
+  recipientProfilePicture: string;
   imageUrl: string;
   caption: string | null;
-  likesCount: number | null;
-  commentsCount: number | null;
+  likesCount: number;
+  commentsCount: number;
   createdAt: Date;
 }
 
@@ -81,7 +81,7 @@ export class PostService {
     };
   }
 
-  async getPosts(userId: string, cursor: Cursor | null = null, pageSize?: number) {
+  async getPosts(userId: string, cursor: Cursor | null = null, pageSize?: number): Promise<PaginatedResponse<Post>> {
     const data = await this.postRepository.getPaginatedPosts(userId, cursor);
 
     return this._updateProfilePictureUrls(data, pageSize);

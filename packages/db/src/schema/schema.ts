@@ -84,7 +84,7 @@ export const profileRelations = relations(profile, ({ one }) => ({
 
 export const profilePicture = mySqlTable("ProfilePicture", {
   id: serial("id").primaryKey().notNull(),
-  key: varchar("url", { length: 255 }),
+  key: varchar("url", { length: 255 }).default("profile-pictures/default.jpg").notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`).onUpdateNow()
     .notNull(),
