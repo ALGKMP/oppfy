@@ -43,7 +43,43 @@ const EditProfile = () => {
     resolver: zodResolver(profileSchema),
   });
 
-  const updateProfile = api.profile.updateProfile.useMutation();
+  const utils = api.useUtils();
+
+  const updateProfile = api.profile.updateProfile.useMutation({
+    onMutate: async (newPartialProfileData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getFullProfile.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getFullProfile.getData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.profile.getFullProfile.setData(
+        { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
+        {
+          ...prevData,
+          ...newPartialProfileData,
+        },
+      );
+
+      // Return the previous data so we can revert if something goes wrong
+      return { prevData };
+    },
+    onError: (_err, _newPartialProfileData, ctx) => {
+      if (ctx === undefined) return;
+
+      // If the mutation fails, use the context-value from onMutate
+      utils.profile.getFullProfile.setData(
+        { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.profile.getFullProfile.invalidate();
+    },
+  });
 
   const onSubmit = handleSubmit(async (data) => {
     await updateProfile.mutateAsync(data, {
@@ -52,7 +88,7 @@ const EditProfile = () => {
           case "CONFLICT": {
             setError("username", {
               type: "manual",
-              message: "This username is already taken.",
+              message: "Username already taken.",
             });
           }
         }
