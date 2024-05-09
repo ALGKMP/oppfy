@@ -35,6 +35,7 @@ const EditProfile = () => {
 
   const {
     control,
+    setError,
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
@@ -45,7 +46,18 @@ const EditProfile = () => {
   const updateProfile = api.profile.updateProfile.useMutation();
 
   const onSubmit = handleSubmit(async (data) => {
-    await updateProfile.mutateAsync(data);
+    await updateProfile.mutateAsync(data, {
+      onError(error) {
+        switch (error.data?.code) {
+          case "CONFLICT": {
+            setError("username", {
+              type: "manual",
+              message: "This username is already taken.",
+            });
+          }
+        }
+      },
+    });
   });
 
   return (
