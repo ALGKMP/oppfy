@@ -77,21 +77,9 @@ const BottomTabsLayout = () => {
           name="(profile)"
           options={{
             title: "Profile",
+            header: () => null,
             tabBarIcon: ({ focused }) => (
               <User2 strokeWidth={focused ? 2 : 1.5} />
-            ),
-            headerLeft: () => null,
-            headerRight: () => (
-              <View>
-                <Pressable onPress={() => router.push("/(app)/(settings)")}>
-                  {({ pressed }) => (
-                    <MoreHorizontal
-                      size="$1"
-                      style={{ opacity: pressed ? 0.5 : 1 }}
-                    />
-                  )}
-                </Pressable>
-              </View>
             ),
           }}
         />
