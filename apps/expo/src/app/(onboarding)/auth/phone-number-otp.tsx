@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
@@ -9,7 +9,6 @@ import { sharedValidators } from "@acme/validators";
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
-import useParams from "~/hooks/useParams";
 import { api } from "~/utils/api";
 
 enum Error {
@@ -18,14 +17,9 @@ enum Error {
   UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
 }
 
-export interface SignUpFlowParams {
-  [key: string]: string;
-  phoneNumber: string;
-}
-
 const PhoneNumberOTP = () => {
   const router = useRouter();
-  const signUpFlowParams = useParams<SignUpFlowParams>();
+  const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
 
   const { verifyPhoneNumberOTP } = useSession();
 
@@ -105,9 +99,7 @@ const PhoneNumberOTP = () => {
           {error ? (
             <Text color="$red9">{error}</Text>
           ) : (
-            <Text color="$gray9">
-              Verification code sent to {signUpFlowParams.phoneNumber}
-            </Text>
+            <Text color="$gray9">Verification code sent to {phoneNumber}</Text>
           )}
         </YStack>
 
