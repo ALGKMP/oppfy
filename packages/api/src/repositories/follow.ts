@@ -53,10 +53,11 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async countFollowers(userId: string) {
+  async countFollowers(userId: string): Promise<number> {
     const followers = await this.db.query.follower.findMany({
       where: eq(schema.follower.recipientId, userId),
     });
+    console.log(followers)
     return followers.length;
   }
 
