@@ -1,7 +1,13 @@
 import { Text } from "tamagui";
 
+import { ScreenBaseView } from "~/components/Views";
+
 const MediaOfYou = () => {
-  return <Text>TESTING</Text>;
+  return (
+    <ScreenBaseView>
+      <Text>Media of you</Text>
+    </ScreenBaseView>
+  );
 };
 
 export default MediaOfYou;

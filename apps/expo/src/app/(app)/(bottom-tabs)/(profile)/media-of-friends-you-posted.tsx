@@ -1,7 +1,13 @@
 import { Text } from "tamagui";
 
+import { ScreenBaseView } from "~/components/Views";
+
 const MediaOfFriendsYouPosted = () => {
-  return <Text>TESTING</Text>;
+  return (
+    <ScreenBaseView>
+      <Text>Media of friends you posted</Text>
+    </ScreenBaseView>
+  );
 };
 
 export default MediaOfFriendsYouPosted;
