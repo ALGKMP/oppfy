@@ -58,7 +58,7 @@ export class ProfileService {
   }
 
   async getProfilePicture(userId: string) {
-    const bucket = process.env.S3_POST_BUCKET!;
+    const bucket = process.env.S3_PROFILE_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
     const pfp = await this.profilePictureRepository.getProfilePictureByKey(key);
     if (pfp) {

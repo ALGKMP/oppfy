@@ -197,6 +197,7 @@ export class UserService {
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: item.profilePictureUrl,
           });
+          console.log("presignedUrl: ", presignedUrl);
           item.profilePictureUrl = presignedUrl;
         } else {
           const presignedUrl = await this.awsService.getObjectPresignedUrl({
