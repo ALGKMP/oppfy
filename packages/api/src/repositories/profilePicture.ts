@@ -15,6 +15,13 @@ export class ProfilePictureRepository {
   }
 
   @handleDatabaseErrors
+  async getProfilePictureByKey(key: string) {
+    return await this.db.query.profilePicture.findFirst({
+      where: eq(schema.profilePicture.key, key),
+    });
+  }
+
+  @handleDatabaseErrors
   async updateProfilePicture(profilePictureId: number, newKey: string) {
     await this.db
       .update(schema.profilePicture)
@@ -26,7 +33,7 @@ export class ProfilePictureRepository {
   async removeProfilePicture(profilePictureId: number) {
     await this.db
       .update(schema.profilePicture)
-      .set({ key: null })
+      .set({ key: "profile-pictures/default.jpg" })
       .where(eq(schema.profilePicture.id, profilePictureId));
   }
 }

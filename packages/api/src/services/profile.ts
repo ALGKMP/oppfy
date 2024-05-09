@@ -60,11 +60,19 @@ export class ProfileService {
   async getProfilePicture(userId: string) {
     const bucket = process.env.S3_POST_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
-
-    return await this.awsRepository.putObjectPresignedUrl({
-      Bucket: bucket,
-      Key: key,
-    });
+    const pfp = await this.profilePictureRepository.getProfilePictureByKey(key);
+    if (pfp) {
+      return await this.awsRepository.getObjectPresignedUrl({
+        Bucket: bucket,
+        Key: key,
+      });
+    }
+    else {
+      return await this.awsRepository.getObjectPresignedUrl({
+        Bucket: bucket,
+        Key: "profile-pictures/default.jpg",
+      });
+    }
   }
 
   async getBasicProfile(userId: string) {
@@ -122,7 +130,7 @@ export class ProfileService {
       ? await this.getProfilePicture(userId)
       : "profile-pictures/default.jpg";
 
-    return sharedValidators.user.fullProfile.parse({
+    const profileData = {
       userId: user.id,
       privacy: user.privacySetting,
       username: user.username,
@@ -132,7 +140,9 @@ export class ProfileService {
       followingCount,
       friendCount,
       profilePictureUrl,
-    });
+    };
+
+    return sharedValidators.user.fullProfile.parse(profileData);
   }
 
   async paginateUserPosts(

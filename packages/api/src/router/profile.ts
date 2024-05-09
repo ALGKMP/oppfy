@@ -67,6 +67,6 @@ export const profileRouter = createTRPCRouter({
     )
     .output(sharedValidators.user.fullProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.getFullProfile(input.userId);
+        return await ctx.services.profile.getFullProfile(input.userId);
     }),
 });
