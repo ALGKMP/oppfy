@@ -70,7 +70,10 @@ const Notifications = () => {
     useState<SwitchState>(notificationSettings);
 
   const updateSwitchState = (key: keyof SwitchState, value: boolean) => {
-    setSwitchState({ ...switchState, [key]: value });
+    setSwitchState((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   useEffect(() => {
