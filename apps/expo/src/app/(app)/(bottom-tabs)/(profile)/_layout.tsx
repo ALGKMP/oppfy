@@ -13,6 +13,8 @@ import {
   YStack,
 } from "tamagui";
 
+import { abbreviateNumber } from "@acme/utils";
+
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
@@ -164,15 +166,19 @@ const Profile = (props: ProfileProps) => {
       <XStack gap="$7">
         <Stat
           label="Friends"
-          value={props.loading ? "" : props.data.friendCount}
+          value={props.loading ? "" : abbreviateNumber(props.data.friendCount)}
         />
         <Stat
           label="Followers"
-          value={props.loading ? "" : props.data.followerCount}
+          value={
+            props.loading ? "" : abbreviateNumber(props.data.followerCount)
+          }
         />
         <Stat
           label="Following"
-          value={props.loading ? "" : props.data.followingCount}
+          value={
+            props.loading ? "" : abbreviateNumber(props.data.followingCount)
+          }
         />
       </XStack>
     </YStack>
