@@ -74,6 +74,11 @@ export class ProfileService {
     }
   }
 
+  async updateBio(userId: string, bio: string) {
+    const profile = await this.getUserProfile(userId);
+    await this.profileRepository.updateBio(profile.id, bio);
+  }
+
   async getBasicProfile(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
