@@ -33,9 +33,9 @@ export class CommentRepository {
     return await db
       .select({
         commentId: schema.comment.id,
-        authorId: schema.comment.user,
-        authorUsername: schema.user.username,
-        authorProfilePicture: schema.profile.profilePictureId,
+        userId: schema.comment.user,
+        username: schema.user.username,
+        profilePictureUrl: schema.profilePicture.key,
         body: schema.comment.body,
         createdAt: schema.comment.createdAt,
       })
