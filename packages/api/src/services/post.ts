@@ -1,4 +1,5 @@
 import { DomainError, ErrorCode } from "../errors";
+import { CommentRepository } from "../repositories/comment";
 import { PostRepository } from "../repositories/post";
 import { PostStatsRepository } from "../repositories/postStats";
 import { UserRepository } from "../repositories/user";
@@ -6,13 +7,26 @@ import { AwsService } from "./aws";
 
 interface PaginatedResponse<T> {
   items: T[];
-  nextCursor: Cursor | undefined;
+  nextCursor: PostCursor | CommentCursor | undefined;
 }
 
-interface Cursor {
+interface PostCursor {
   createdAt: Date;
   postId: number;
-  pageSize?: number;
+}
+
+interface CommentCursor {
+  createdAt: Date;
+  commentId: number;
+}
+
+interface CommentProfile {
+  commentId: number;
+  userId: string;
+  username: string | null;
+  body: string;
+  profilePictureUrl: string;
+  createdAt: Date;
 }
 
 interface Post {
@@ -33,6 +47,7 @@ interface Post {
 export class PostService {
   private awsService = new AwsService();
   private userRepository = new UserRepository();
+  private commentRepository = new CommentRepository();
   private postRepository = new PostRepository();
   private postStatsRepository = new PostStatsRepository();
 
@@ -66,7 +81,7 @@ export class PostService {
       }),
     );
 
-    let nextCursor: Cursor | undefined = undefined;
+    let nextCursor: PostCursor | undefined = undefined;
     if (items.length > pageSize) {
       const nextItem = items.pop();
       nextCursor = {
@@ -81,10 +96,62 @@ export class PostService {
     };
   }
 
-  async getPosts(userId: string, cursor: Cursor | null = null, pageSize?: number): Promise<PaginatedResponse<Post>> {
+  private async _updateProfilePictureUrls2(
+    data: CommentProfile[],
+    pageSize: number,
+  ): Promise<PaginatedResponse<CommentProfile>> {
+    const items = await Promise.all(
+      data.map(async (item) => {
+        const presignedUrl = item.profilePictureUrl
+          ? await this.awsService.getObjectPresignedUrl({
+              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Key: item.profilePictureUrl,
+            })
+          : await this.awsService.getObjectPresignedUrl({
+              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Key: "profile-pictures/default.jpg",
+            });
+        item.profilePictureUrl = presignedUrl;
+        return item;
+      }),
+    );
+
+    let nextCursor: CommentCursor | undefined = undefined;
+    if (items.length > pageSize) {
+      const nextItem = items.pop();
+      nextCursor = {
+        createdAt: nextItem!.createdAt,
+        commentId: nextItem!.commentId,
+      };
+      console.log("server: next cursor:", nextCursor);
+    }
+    return {
+      items,
+      nextCursor,
+    };
+  }
+
+  async getPosts(
+    userId: string,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ): Promise<PaginatedResponse<Post>> {
     const data = await this.postRepository.getPaginatedPosts(userId, cursor);
 
     return this._updateProfilePictureUrls(data, pageSize);
+  }
+
+  async getPaginatedComments(
+    postId: number,
+    cursor: CommentCursor | null = null,
+    pageSize: number,
+  ): Promise<PaginatedResponse<CommentProfile>> {
+    const data = await this.commentRepository.getPaginatedComments(
+      postId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls2(data, pageSize);
   }
 
   async createPost(
