@@ -39,7 +39,7 @@ export const basicProfile = z.object({
   privacy: z.enum(["public", "private"]),
   username: z.string(),
   name: z.string(),
-  profilePictureUrl: profilePicture,
+  profilePictureUrl: z.string(),
 })
 
 export const fullProfile = z.object({
@@ -51,5 +51,5 @@ export const fullProfile = z.object({
   followerCount: z.number(),
   followingCount: z.number(),
   friendCount: z.number(),
-  profilePictureUrl: profilePicture,
+  profilePictureUrl: z.string(),
 })

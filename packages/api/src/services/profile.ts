@@ -80,13 +80,9 @@ export class ProfileService {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
-    let profilePictureUrl = null;
-    if (profile.profilePictureId) {
-      profilePictureUrl = await this.getProfilePicture(userId);
-      if (!profilePictureUrl) {
-        throw new DomainError(ErrorCode.PROFILE_PICTURE_NOT_FOUND);
-      }
-    }
+    const profilePictureUrl = profile.profilePictureId
+      ? await this.getProfilePicture(userId)
+      : "profile-pictures/default.jpg";
 
     return sharedValidators.user.basicProfile.parse({
       userId: user.id,
@@ -126,16 +122,9 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
     }
 
-    let profilePictureUrl;
-    if (profile.profilePictureId) {
-      profilePictureUrl = await this.getProfilePicture(userId);
-      if (!profilePictureUrl) {
-        throw new DomainError(ErrorCode.PROFILE_PICTURE_NOT_FOUND);
-      }
-    }
-    else {
-      profilePictureUrl = await this.getProfilePicture("profile-pictures/default.jpg");
-    }
+    const profilePictureUrl = profile.profilePictureId
+      ? await this.getProfilePicture(userId)
+      : "profile-pictures/default.jpg";
 
     return sharedValidators.user.fullProfile.parse({
       userId: user.id,
@@ -150,8 +139,16 @@ export class ProfileService {
     });
   }
 
-  async paginateUserPosts(userId: string, cursor: { createdAt: Date, postId: number }, pageSize: number) {
-    const posts = await this.postRepository.getPaginatedUserPosts(userId, cursor, pageSize);
+  async paginateUserPosts(
+    userId: string,
+    cursor: { createdAt: Date; postId: number },
+    pageSize: number,
+  ) {
+    const posts = await this.postRepository.getPaginatedPosts(
+      userId,
+      cursor,
+      pageSize,
+    );
     return posts;
   }
 

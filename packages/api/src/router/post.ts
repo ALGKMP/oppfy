@@ -3,7 +3,6 @@ import { z } from "zod";
 import { trpcValidators } from "@acme/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { caption } from "@acme/validators/src/shared/media";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
