@@ -12,7 +12,7 @@ import { Text, useTheme } from "tamagui";
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
-const ProfileLayout = () => {
+const SettingsLayout = () => {
   const theme = useTheme();
 
   return (
@@ -104,4 +104,4 @@ const Header = ({ navigation, options }: HeaderProps) => (
   />
 );
 
-export default ProfileLayout;
+export default SettingsLayout;
