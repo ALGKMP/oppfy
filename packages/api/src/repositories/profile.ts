@@ -29,4 +29,12 @@ export class ProfileRepository {
       .set({ dateOfBirth: newDateOfBirth })
       .where(eq(schema.profile.id, profileId));
   }
+
+  @handleDatabaseErrors
+  updateBio(profileId: number, newBio: string) {
+    return this.db
+      .update(schema.profile)
+      .set({ bio: newBio })
+      .where(eq(schema.profile.id, profileId));
+  }
 }
