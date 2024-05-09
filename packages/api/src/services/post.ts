@@ -1,8 +1,8 @@
 import { DomainError, ErrorCode } from "../errors";
 import { CommentRepository } from "../repositories/comment";
+import { LikeRepository } from "../repositories/like";
 import { PostRepository } from "../repositories/post";
 import { PostStatsRepository } from "../repositories/postStats";
-import { UserRepository } from "../repositories/user";
 import { AwsService } from "./aws";
 
 interface PaginatedResponse<T> {
@@ -46,7 +46,7 @@ interface Post {
 
 export class PostService {
   private awsService = new AwsService();
-  private userRepository = new UserRepository();
+  private likeRepository = new LikeRepository();
   private commentRepository = new CommentRepository();
   private postRepository = new PostRepository();
   private postStatsRepository = new PostStatsRepository();
@@ -141,19 +141,6 @@ export class PostService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async getPaginatedComments(
-    postId: number,
-    cursor: CommentCursor | null = null,
-    pageSize: number,
-  ): Promise<PaginatedResponse<CommentProfile>> {
-    const data = await this.commentRepository.getPaginatedComments(
-      postId,
-      cursor,
-      pageSize,
-    );
-    return this._updateProfilePictureUrls2(data, pageSize);
-  }
-
   async createPost(
     postedBy: string,
     postedFor: string,
@@ -187,5 +174,37 @@ export class PostService {
 
   async deletePost(postId: number) {
     await this.postRepository.deletePost(postId);
+  }
+
+   async likePost(userId: string, postId: number) {
+    const likeExists = await this.likeRepository.hasUserLiked(postId, userId);
+    if (!likeExists) {
+      await this.likeRepository.addLike(postId, userId);
+    }
+  }
+
+  async unlikePost(userId: string, postId: number) {
+    await this.likeRepository.removeLike(postId, userId);
+  }
+
+  async addCommentToPost(userId: string, postId: number, commentText: string) {
+    await this.commentRepository.addComment(postId, userId, commentText);
+  }
+
+  async deleteComment(commentId: number) {
+    await this.commentRepository.removeComment(commentId);
+  }
+
+  async getPaginatedComments(
+    postId: number,
+    cursor: CommentCursor | null = null,
+    pageSize: number,
+  ): Promise<PaginatedResponse<CommentProfile>> {
+    const data = await this.commentRepository.getPaginatedComments(
+      postId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls2(data, pageSize);
   }
 }
