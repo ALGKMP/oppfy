@@ -11,12 +11,6 @@ import { ProfilePictureRepository } from "../repositories/profilePicture";
 import { UserRepository } from "../repositories/user";
 import { UserService } from "./user";
 
-interface ProfileUpdates {
-  username?: string;
-  fullName?: string;
-  bio?: string;
-}
-
 export class ProfileService {
   private userService = new UserService();
   private userRepository = new UserRepository();

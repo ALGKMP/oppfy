@@ -1,33 +1,30 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, count } from "drizzle-orm";
 
-import { db, schema } from "@acme/db";
+import { db, schema} from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
 
-export class LikesRepository {
+export class LikeRepository {
   private db = db;
 
   @handleDatabaseErrors
   async addLike(postId: number, userId: string) {
-    return await this.db
-      .insert(schema.like)
-      .values({ postId, user: userId })
-      .execute();
+    return await this.db.insert(schema.like).values({
+      postId: postId,
+      user: userId,
+      createdAt: new Date(), // Assuming current time is set by default
+    });
   }
 
   @handleDatabaseErrors
   async removeLike(postId: number, userId: string) {
-    await this.db
-      .delete(schema.like)
-      .where(and(eq(schema.like.postId, postId), eq(schema.like.user, userId)));
+    return await this.db.delete(schema.like)
+    .where(and(eq(schema.like.postId, postId), eq(schema.like.user, userId)));
   }
 
   @handleDatabaseErrors
   async countLikes(postId: number) {
-    const like = await this.db.query.like.findMany({
-      where: eq(schema.like.postId, postId),
-    });
-    return like.length;
+    return await this.db.select({count: count()}).from(schema.like).where(eq(schema.like.postId, postId)).execute();
   }
 
   @handleDatabaseErrors
