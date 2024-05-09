@@ -30,22 +30,19 @@ const ProfileLayout = () => {
       <TopTabs
         tabBar={(props) => (
           <YStack>
-            <>
-              <Header
-                title={profileData?.username}
-                HeaderRight={
-                  <Pressable onPress={() => router.push("/(app)/(settings)")}>
-                    {({ pressed }) => (
-                      <MoreHorizontal
-                        size="$1"
-                        style={{ opacity: pressed ? 0.5 : 1 }}
-                      />
-                    )}
-                  </Pressable>
-                }
-              />
-              <TopTabBar {...props} />
-            </>
+            <Header
+              title={profileData?.username}
+              HeaderRight={
+                <Pressable onPress={() => router.push("/(app)/(settings)")}>
+                  {({ pressed }) => (
+                    <MoreHorizontal
+                      size="$1"
+                      style={{ opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              }
+            />
 
             <YStack
               padding="$4"
@@ -60,6 +57,8 @@ const ProfileLayout = () => {
                 <Avatar.Fallback backgroundColor="$blue10" />
               </Avatar>
             </YStack>
+
+            <TopTabBar {...props} />
           </YStack>
         )}
       >
