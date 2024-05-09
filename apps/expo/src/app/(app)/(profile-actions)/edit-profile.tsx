@@ -1,19 +1,132 @@
 import React from "react";
 import { useLocalSearchParams } from "expo-router";
-import { Text } from "tamagui";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Button,
+  Input,
+  SizableText,
+  Spinner,
+  Text,
+  TextArea,
+  XStack,
+  YStack,
+} from "tamagui";
+import { z } from "zod";
 
+import { sharedValidators } from "@acme/validators";
+
+import { KeyboardSafeView } from "~/components/SafeViews";
 import { ScreenBaseView } from "~/components/Views";
+import { api } from "~/utils/api";
+
+const profileSchema = z.object({
+  name: sharedValidators.user.fullName,
+  username: sharedValidators.user.username,
+  bio: sharedValidators.user.bio,
+});
 
 const EditProfile = () => {
-  const { name, bio } = useLocalSearchParams<{
+  const defaultValues = useLocalSearchParams<{
     name: string;
+    username: string;
     bio: string;
   }>();
 
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting, isDirty },
+  } = useForm({
+    defaultValues,
+    resolver: zodResolver(profileSchema),
+  });
+
+  const updateProfile = api.profile.updateProfile.useMutation();
+
+  const onSubmit = handleSubmit(async (data) => {
+    await updateProfile.mutateAsync(data);
+  });
+
   return (
-    <ScreenBaseView>
-      <Text>EditProfile</Text>
-    </ScreenBaseView>
+    <KeyboardSafeView>
+      <ScreenBaseView>
+        <YStack flex={1} gap="$4">
+          <XStack alignItems="flex-start" gap="$4">
+            <SizableText width="$7">Name</SizableText>
+            <YStack flex={1} gap="$2">
+              <Controller
+                control={control}
+                name="name"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="Name"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    borderColor={errors.name ? "$red9" : undefined}
+                  />
+                )}
+              />
+              {errors.name && <Text color="$red9">{errors.name.message}</Text>}
+            </YStack>
+          </XStack>
+
+          <XStack alignItems="flex-start" gap="$4">
+            <SizableText width="$7">Username</SizableText>
+            <YStack flex={1} gap="$2">
+              <Controller
+                control={control}
+                name="username"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="Username"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    borderColor={errors.username ? "$red9" : undefined}
+                  />
+                )}
+              />
+              {errors.username && (
+                <Text color="$red9">{errors.username.message}</Text>
+              )}
+            </YStack>
+          </XStack>
+
+          <XStack alignItems="flex-start" gap="$2">
+            <SizableText width="$4">Bio</SizableText>
+            <YStack flex={1} gap="$2">
+              <Controller
+                control={control}
+                name="bio"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextArea
+                    placeholder="Bio"
+                    minHeight="$8"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    borderColor={errors.bio ? "$red9" : undefined}
+                  />
+                )}
+              />
+              {errors.bio && <Text color="$red9">{errors.bio.message}</Text>}
+            </YStack>
+          </XStack>
+        </YStack>
+
+        <Button
+          onPress={onSubmit}
+          disabled={!isDirty}
+          disabledStyle={{
+            opacity: 0.5,
+          }}
+        >
+          {isSubmitting ? <Spinner /> : "Save"}
+        </Button>
+      </ScreenBaseView>
+    </KeyboardSafeView>
   );
 };
 
