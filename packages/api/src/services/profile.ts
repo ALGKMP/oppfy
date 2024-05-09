@@ -1,5 +1,6 @@
+import { z } from "zod";
+
 import { sharedValidators } from "@acme/validators";
-import {z} from "zod";
 
 import { DomainError, ErrorCode } from "../errors";
 import { AwsRepository } from "../repositories/aws";
@@ -10,6 +11,8 @@ import { ProfileRepository } from "../repositories/profile";
 import { ProfilePictureRepository } from "../repositories/profilePicture";
 import { UserRepository } from "../repositories/user";
 import { UserService } from "./user";
+
+type UpdateProfile = z.infer<typeof sharedValidators.user.updateProfile>;
 
 export class ProfileService {
   private userService = new UserService();
@@ -36,7 +39,7 @@ export class ProfileService {
     await this.profileRepository.updateBio(profile.id, bio);
   }
 
-  async updateProfile(userId: string, updates: z.infer<typeof sharedValidators.user.updateProfile>): Promise<void> {
+  async updateProfile(userId: string, updates: UpdateProfile): Promise<void> {
     const profile = await this.getUserProfile(userId);
 
     // Build an update object dynamically based on what's provided
@@ -47,8 +50,7 @@ export class ProfileService {
       await this.profileRepository.updateBio(profile.id, updates.bio);
     }
     if (updates.username !== undefined) {
-      const user = await this.userService.getUser(userId);
-      return this.userService.updateUsername(user.id, updates.username);
+      await this.userService.updateUsername(userId, updates.username);
     }
   }
 
