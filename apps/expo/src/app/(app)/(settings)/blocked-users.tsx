@@ -201,11 +201,7 @@ const BlockedUserListItem = (props: BlockedUserListItemProps) => {
             <Skeleton radius={100}>
               <Avatar circular size="$5">
                 <Avatar.Image
-                  src={
-                    props.loading
-                      ? undefined
-                      : props.item.profilePictureUrl ?? undefined
-                  }
+                  src={props.loading ? undefined : props.item.profilePictureUrl}
                 />
               </Avatar>
             </Skeleton>
