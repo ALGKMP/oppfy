@@ -4,7 +4,6 @@ import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { Modak_400Regular } from "@expo-google-fonts/modak";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TamaguiProvider } from "tamagui";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
