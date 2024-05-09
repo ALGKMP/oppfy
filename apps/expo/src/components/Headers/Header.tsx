@@ -28,15 +28,13 @@ const StackHeader = ({
       backgroundColor="$background"
       {...containerProps}
     >
-      <View flex={1} alignItems="flex-start">
+      <View minWidth="$2" alignItems="flex-start">
         {HeaderLeft}
       </View>
 
-      <View flex={2} alignItems="center">
-        {HeaderTitle}
-      </View>
+      <View alignItems="center">{HeaderTitle}</View>
 
-      <View flex={1} alignItems="flex-end">
+      <View minWidth="$2" alignItems="flex-end">
         {HeaderRight}
       </View>
     </XStack>
