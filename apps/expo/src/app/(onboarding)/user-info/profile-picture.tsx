@@ -57,7 +57,7 @@ const ProfilePicture = () => {
             putMutation.mutate(url, {
               onSuccess: () => {
                 console.log("Image successfully uploaded");
-                router.replace("/(app)/(bottom-tabs)/profile");
+                router.replace("/(app)/(bottom-tabs)/(profile)/media-of-you");
               },
               onError: (error) => {
                 console.error("Error uploading image:", error);
@@ -75,7 +75,7 @@ const ProfilePicture = () => {
   };
 
   const onSkip = () => {
-    router.replace("/(app)/(bottom-tabs)/profile");
+    router.replace("/(app)/(bottom-tabs)/(profile)/media-of-you");
   };
 
   const handleImagePicking = async () => {

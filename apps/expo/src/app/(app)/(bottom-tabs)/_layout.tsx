@@ -1,8 +1,10 @@
 import { Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs/src/types";
+import type {
+  BottomTabBarProps,
+  BottomTabHeaderProps,
+} from "@react-navigation/bottom-tabs";
 import {
   Camera,
   Home,
@@ -74,7 +76,7 @@ const BottomTabsLayout = () => {
         />
 
         <BottomTabs.Screen
-          name="profile"
+          name="(profile)"
           options={{
             title: "Profile",
             tabBarIcon: ({ focused }) => (
