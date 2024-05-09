@@ -47,7 +47,7 @@ const ProfileLayout = () => {
               }
             />
 
-            {profileDataIsLoading && profileData === undefined ? (
+            {profileData === undefined ? (
               <Profile loading />
             ) : (
               <Profile loading={false} data={profileData} />
