@@ -12,7 +12,7 @@ import { Text, useTheme } from "tamagui";
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
-const SettingsLayout = () => {
+const ProfileActionsLayout = () => {
   const theme = useTheme();
 
   return (
@@ -29,24 +29,16 @@ const SettingsLayout = () => {
         }}
       >
         <Stack.Screen
-          name="index"
+          name="edit-profile"
           options={{
-            title: "Settings",
+            title: "Edit Profile",
           }}
         />
 
         <Stack.Screen
-          name="notifications"
-          options={{ title: "Notifications" }}
+          name="share-profile"
+          options={{ title: "Share Profile" }}
         />
-
-        <Stack.Screen name="privacy" options={{ title: "Privacy" }} />
-        <Stack.Screen
-          name="blocked-users"
-          options={{ title: "Blocked Users" }}
-        />
-
-        <Stack.Screen name="other" options={{ title: "Other" }} />
       </Stack>
     </SafeAreaView>
   );
@@ -104,4 +96,4 @@ const Header = ({ navigation, options }: HeaderProps) => (
   />
 );
 
-export default SettingsLayout;
+export default ProfileActionsLayout;

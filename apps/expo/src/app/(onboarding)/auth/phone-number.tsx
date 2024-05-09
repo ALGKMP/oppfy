@@ -11,7 +11,6 @@ import {
   ListItem,
   SizableText,
   Text,
-  useTheme,
   View,
   XStack,
   YStack,
@@ -25,7 +24,6 @@ import { ScreenBaseView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
-import type { SignUpFlowParams } from "./phone-number-otp";
 
 const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
@@ -62,7 +60,7 @@ const PhoneNumber = () => {
     router.push({
       params: {
         phoneNumber: e164PhoneNumber,
-      } satisfies SignUpFlowParams,
+      },
       pathname: "/auth/phone-number-otp",
     });
   };
