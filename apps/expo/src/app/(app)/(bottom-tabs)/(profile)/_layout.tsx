@@ -104,11 +104,12 @@ const Profile = (props: ProfileProps) => {
   const editProfileRedirect = () => {
     if (props.loading) return;
 
-    const { name, bio } = props.data;
+    const { name, username, bio } = props.data;
 
     router.push({
       params: {
         name,
+        username,
         bio: bio ?? "",
       },
       pathname: "/edit-profile",
