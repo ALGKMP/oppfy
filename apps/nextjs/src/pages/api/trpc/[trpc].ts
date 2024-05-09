@@ -13,6 +13,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   return createNextApiHandler({
     router: appRouter,
     createContext: createTRPCContext,
+    onError({ error }) {
+      console.error("Error:", error);
+
+      if (error.code === "INTERNAL_SERVER_ERROR") {
+        // send to bug reporting
+      }
+    },
   })(req, res);
 };
 
