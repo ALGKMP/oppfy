@@ -1,5 +1,6 @@
 import { View } from "tamagui";
 
+import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
 
 const TopTabsLayout = () => {
@@ -10,23 +11,7 @@ const TopTabsLayout = () => {
         backgroundColor: "$background",
       }}
     >
-      <TopTabs
-        screenOptions={{
-          tabBarStyle: {
-            backgroundColor: "black",
-            borderTopColor: "transparent",
-            elevation: 0,
-          },
-          tabBarLabelStyle: {
-            color: "white",
-            fontWeight: "bold",
-          },
-          tabBarIndicatorStyle: {
-            backgroundColor: "white",
-            height: 2,
-          },
-        }}
-      >
+      <TopTabs tabBar={(props) => <TopTabBar {...props} />}>
         <TopTabs.Screen name="following" />
         <TopTabs.Screen name="for-you-page" />
       </TopTabs>

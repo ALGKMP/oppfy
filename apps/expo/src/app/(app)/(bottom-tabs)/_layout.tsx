@@ -1,10 +1,7 @@
-import { Pressable, TouchableOpacity } from "react-native";
+import { Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import type {
-  BottomTabBarProps,
-  BottomTabHeaderProps,
-} from "@react-navigation/bottom-tabs";
+import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import {
   Camera,
   Home,
@@ -13,9 +10,10 @@ import {
   Search,
   User2,
 } from "@tamagui/lucide-icons";
-import { Text, useTheme, View, XStack } from "tamagui";
+import { Text, useTheme, View } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
+import { BottomTabBar } from "~/components/TabBars";
 import { BottomTabs } from "~/layouts";
 
 const BottomTabsLayout = () => {
@@ -30,7 +28,7 @@ const BottomTabsLayout = () => {
       }}
     >
       <BottomTabs
-        tabBar={(props) => <TabBar {...props} />}
+        tabBar={(props) => <BottomTabBar {...props} />}
         screenOptions={{
           header: (props) => <Header {...props} />,
         }}
@@ -140,51 +138,5 @@ const Header = ({ options }: HeaderProps) => (
     }
   />
 );
-
-const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
-  return (
-    <XStack paddingTop="$4" paddingBottom="$2">
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key]!;
-        const isFocused = state.index === index;
-
-        const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
-          }
-        };
-
-        const onLongPress = () => {
-          navigation.emit({
-            type: "tabLongPress",
-            target: route.key,
-          });
-        };
-
-        const TabBarIcon = options.tabBarIcon;
-        const iconElement = TabBarIcon ? (
-          <TabBarIcon focused={isFocused} color="white" size={24} />
-        ) : null;
-
-        return (
-          <TouchableOpacity
-            key={route.key}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
-            {iconElement}
-          </TouchableOpacity>
-        );
-      })}
-    </XStack>
-  );
-};
 
 export default BottomTabsLayout;
