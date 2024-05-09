@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "expo-router";
 import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
 import { Switch, YStack } from "tamagui";
@@ -20,10 +20,12 @@ const Privacy = () => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const { data: privacySetting, isLoading: isLoadingPrivacySetting } =
-    api.user.getPrivacySetting.useQuery(undefined, {
+  const { data: privacySetting } = api.user.getPrivacySetting.useQuery(
+    undefined,
+    {
       initialData: "public",
-    });
+    },
+  );
 
   const updatePrivacySetting = api.user.updatePrivacySetting.useMutation({
     onMutate: async (newPrivacySettings) => {
@@ -56,15 +58,6 @@ const Privacy = () => {
     },
   });
 
-  const [privacySettingState, setPrivacySettingState] =
-    useState<PrivacySetting>(privacySetting);
-
-  useEffect(() => {
-    if (!isLoadingPrivacySetting) {
-      setPrivacySettingState(privacySetting);
-    }
-  }, [isLoadingPrivacySetting, privacySetting]);
-
   const handlePrivacySettingUpdate = async (
     newPrivacySetting: PrivacySetting,
   ) => {
@@ -77,8 +70,6 @@ const Privacy = () => {
     const newPrivacySetting = (
       checked ? "private" : "public"
     ) satisfies PrivacySetting;
-
-    setPrivacySettingState(newPrivacySetting);
 
     newPrivacySetting === "private"
       ? setIsModalVisible(true)
@@ -96,7 +87,7 @@ const Privacy = () => {
             <Switch
               size="$3"
               onCheckedChange={onSubmit}
-              checked={privacySettingState === "private"}
+              checked={privacySetting === "private"}
             >
               <Switch.Thumb animation="quick" />
             </Switch>
@@ -137,7 +128,6 @@ const Privacy = () => {
         isVisible={isModalVisible}
         onClose={() => {
           setIsModalVisible(false);
-          setPrivacySettingState("public");
         }}
       />
     </ScreenBaseView>
