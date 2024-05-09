@@ -49,11 +49,11 @@ export const profileRouter = createTRPCRouter({
     await ctx.services.profile.removeProfilePicture(ctx.session.uid);
   }),
 
-  // updateProfile: protectedProcedure
-  //   .input(trpcValidators.profile.updateProfile)
-  //   .mutation(async ({ ctx, input }) => {
-  //     await ctx.services.profile.updateProfile(ctx.session.uid, input);
-  //   }),
+  updateProfile: protectedProcedure
+    .input(trpcValidators.profile.updateProfile)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.profile.updateProfile(ctx.session.uid, input);
+    }),
 
   getBasicProfile: publicProcedure
     .input(

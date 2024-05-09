@@ -1,4 +1,5 @@
 import { sharedValidators } from "@acme/validators";
+import {z} from "zod";
 
 import { DomainError, ErrorCode } from "../errors";
 import { AwsRepository } from "../repositories/aws";
@@ -8,8 +9,16 @@ import { PostRepository } from "../repositories/post";
 import { ProfileRepository } from "../repositories/profile";
 import { ProfilePictureRepository } from "../repositories/profilePicture";
 import { UserRepository } from "../repositories/user";
+import { UserService } from "./user";
+
+interface ProfileUpdates {
+  username?: string;
+  fullName?: string;
+  bio?: string;
+}
 
 export class ProfileService {
+  private userService = new UserService();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private profilePictureRepository = new ProfilePictureRepository();
@@ -28,12 +37,29 @@ export class ProfileService {
     await this.profileRepository.updateDateOfBirth(profile.id, dateOfBirth);
   }
 
-  async updateProfilePicture(userId: string, key: string) {
+  async updateBio(userId: string, bio: string) {
+    const profile = await this.getUserProfile(userId);
+    await this.profileRepository.updateBio(profile.id, bio);
+  }
+
+  async updateProfile(userId: string, updates: z.infer<typeof sharedValidators.user.updateProfile>): Promise<void> {
     const profile = await this.getUserProfile(userId);
 
-    if (profile === undefined) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    // Build an update object dynamically based on what's provided
+    if (updates.name !== undefined) {
+      await this.profileRepository.updateFullName(profile.id, updates.name);
     }
+    if (updates.bio !== undefined) {
+      await this.profileRepository.updateBio(profile.id, updates.bio);
+    }
+    if (updates.username !== undefined) {
+      const user = await this.userService.getUser(userId);
+      return this.userService.updateUsername(user.id, updates.username);
+    }
+  }
+
+  async updateProfilePicture(userId: string, key: string) {
+    const profile = await this.getUserProfile(userId);
 
     await this.profilePictureRepository.updateProfilePicture(
       profile.profilePictureId,
@@ -74,11 +100,6 @@ export class ProfileService {
     }
   }
 
-  async updateBio(userId: string, bio: string) {
-    const profile = await this.getUserProfile(userId);
-    await this.profileRepository.updateBio(profile.id, bio);
-  }
-
   async getBasicProfile(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
@@ -116,7 +137,8 @@ export class ProfileService {
 
     const followerCount = await this.followersRepository.countFollowers(userId);
 
-    const followingCount = await this.followersRepository.countFollowing(userId);
+    const followingCount =
+      await this.followersRepository.countFollowing(userId);
 
     const friendCount = await this.friendsRepository.friendsCount(userId);
 

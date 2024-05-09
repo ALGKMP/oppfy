@@ -50,6 +50,12 @@ export const paginatedBlockedUsers = z.object({
   }).nullable()
 });
 
+export const updateProfile = z.object({
+  username: z.string().optional(),
+  name: z.string().optional(),
+  bio: z.string().optional()
+})
+
 // Use this for displaying profile header
 export const basicProfile = z.object({
   userId: z.string(),

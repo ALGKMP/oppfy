@@ -31,8 +31,8 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  updateBio(profileId: number, newBio: string) {
-    return this.db
+  async updateBio(profileId: number, newBio: string) {
+    return await this.db
       .update(schema.profile)
       .set({ bio: newBio })
       .where(eq(schema.profile.id, profileId));
