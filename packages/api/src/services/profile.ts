@@ -66,8 +66,7 @@ export class ProfileService {
         Bucket: bucket,
         Key: key,
       });
-    }
-    else {
+    } else {
       return await this.awsRepository.getObjectPresignedUrl({
         Bucket: bucket,
         Key: "profile-pictures/default.jpg",
@@ -111,20 +110,10 @@ export class ProfileService {
     }
 
     const followerCount = await this.followersRepository.countFollowers(userId);
-    if (!followerCount) {
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS);
-    }
 
-    const followingCount =
-      await this.followersRepository.countFollowing(userId);
-    if (!followingCount) {
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
-    }
+    const followingCount = await this.followersRepository.countFollowing(userId);
 
     const friendCount = await this.friendsRepository.friendsCount(userId);
-    if (!friendCount) {
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
-    }
 
     const profilePictureUrl = profile.profilePictureId
       ? await this.getProfilePicture(userId)
