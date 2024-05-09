@@ -208,13 +208,13 @@ const BlockedUserListItem = (props: BlockedUserListItemProps) => {
 
             <YStack>
               <Skeleton width={100}>
-                <SizableText size="$3" theme="alt1">
-                  {props.loading ? "" : props.item.name}
+                <SizableText size="$3">
+                  {props.loading ? "" : props.item.username}
                 </SizableText>
               </Skeleton>
               <Skeleton width={100}>
                 <SizableText size="$3" theme="alt1">
-                  {props.loading ? "" : props.item.username}
+                  {props.loading ? "" : props.item.name}
                 </SizableText>
               </Skeleton>
             </YStack>
