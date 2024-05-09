@@ -1,12 +1,21 @@
 import { withLayoutContext } from "expo-router";
+import type {
+  ParamListBase,
+  StackNavigationState,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import type { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-
-const NativeStackNavigator = createNativeStackNavigator().Navigator;
-
-export const Stack = withLayoutContext<
+import type {
+  NativeStackNavigationEventMap,
   NativeStackNavigationOptions,
-  typeof NativeStackNavigator
->(NativeStackNavigator);
+} from "@react-navigation/native-stack";
+
+const { Navigator } = createNativeStackNavigator();
+
+const Stack = withLayoutContext<
+  NativeStackNavigationOptions,
+  typeof Navigator,
+  StackNavigationState<ParamListBase>,
+  NativeStackNavigationEventMap
+>(Navigator);
 
 export default Stack;
