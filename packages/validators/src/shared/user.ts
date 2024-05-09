@@ -33,6 +33,23 @@ export const phoneNumber = z
 
 export const phoneNumberOTP = z.string().length(6);
 
+export const blockedUser = z.object({
+  userId: z.string(),
+  username: z.string().nullable(),
+  name: z.string().nullable(),
+  profilePictureUrl: z.string(),
+  createdAt: z.date(),
+  profileId: z.number(),
+});
+
+export const paginatedBlockedUsers = z.object({
+  items:z.array(blockedUser),
+  nextCursor : z.object({
+    createdAt: z.date(),
+    profileId: z.number(),
+  }).nullable()
+});
+
 // Use this for displaying profile header
 export const basicProfile = z.object({
   userId: z.string(),
@@ -40,7 +57,7 @@ export const basicProfile = z.object({
   username: z.string(),
   name: z.string(),
   profilePictureUrl: z.string(),
-})
+});
 
 export const fullProfile = z.object({
   userId: z.string(),
@@ -52,4 +69,4 @@ export const fullProfile = z.object({
   followingCount: z.number(),
   friendCount: z.number(),
   profilePictureUrl: z.string(),
-})
+});

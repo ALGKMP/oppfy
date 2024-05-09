@@ -69,6 +69,4 @@ export const profileRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return await ctx.services.profile.getFullProfile(input.userId);
     }),
-
-  // TODO: paginate getting posts
 });

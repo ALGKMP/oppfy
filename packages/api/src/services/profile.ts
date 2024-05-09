@@ -67,9 +67,7 @@ export class ProfileService {
     });
   }
 
-  // TODO: Make a second one for other users - pass in cur userId and otherUserId because you'll need to look for friend/follow status
   async getBasicProfile(userId: string) {
-    // TODO: Fuck this might use joins here
     const user = await this.userRepository.getUser(userId);
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
@@ -93,9 +91,7 @@ export class ProfileService {
     });
   }
 
-  // TODO: Make a second one for other users - pass in cur userId and otherUserId because you'll need to look for friend/follow status
   async getFullProfile(userId: string) {
-    // TODO: Fuck this, using joins later
     const user = await this.userRepository.getUser(userId);
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
