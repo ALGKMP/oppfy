@@ -2,7 +2,16 @@ import { useEffect } from "react";
 import { Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
-import { Avatar, View, YStack } from "tamagui";
+import {
+  Avatar,
+  Button,
+  Paragraph,
+  SizableText,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
@@ -84,20 +93,59 @@ interface LoadedProps {
   data: ProfileData;
 }
 
-type Profile = LoadingProps | LoadedProps;
+type ProfileProps = LoadingProps | LoadedProps;
 
-const Profile = (props: Profile) => (
+const Profile = (props: ProfileProps) => (
   <YStack padding="$4" alignItems="center" backgroundColor="$background">
     <Avatar circular size="$10">
       <Avatar.Image
         accessibilityLabel="Cam"
-        src={
-          props.loading ? undefined : props.data.profilePictureUrl ?? undefined
-        }
+        src={props.loading ? undefined : props.data.profilePictureUrl}
       />
       <Avatar.Fallback backgroundColor="$blue10" />
     </Avatar>
+
+    <YStack width="80%" gap="$2">
+      <SizableText size="$4">
+        {props.loading ? "" : props.data.name}
+      </SizableText>
+      <Paragraph theme="alt1">
+        {props.loading ? "" : `@${props.data.username}`}
+      </Paragraph>
+
+      <XStack gap="$4">
+        <Button>Edit Profile</Button>
+        <Button>Share Profile</Button>
+      </XStack>
+
+      <XStack justifyContent="space-between">
+        <Stat
+          label="Friends"
+          value={props.loading ? "" : props.data.friendCount}
+        />
+        <Stat
+          label="Followers"
+          value={props.loading ? "" : props.data.followerCount}
+        />
+        <Stat
+          label="Following"
+          value={props.loading ? "" : props.data.followingCount}
+        />
+      </XStack>
+    </YStack>
   </YStack>
+);
+
+interface StatProps {
+  label: string;
+  value: string | number;
+}
+
+const Stat = (props: StatProps) => (
+  <XStack gap="$1">
+    <Text>{props.label}</Text>
+    <Text>{props.value}</Text>
+  </XStack>
 );
 
 export default ProfileLayout;
