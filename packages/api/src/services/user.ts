@@ -1,4 +1,3 @@
-import { sharedValidators, } from "@acme/validators";
 import { DomainError, ErrorCode } from "../errors";
 import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
@@ -294,13 +293,13 @@ export class UserService {
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ) {
+  ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.userRepository.getPaginatedBlockedUsers(
       userId,
       cursor,
       pageSize,
     );
-    return sharedValidators.user.paginatedBlockedUsers.parse(this._updateProfilePictureUrls(data, pageSize));
+    return this._updateProfilePictureUrls(data, pageSize);
   }
 
   async blockUser(userId: string, blockUserId: string) {
