@@ -7,14 +7,17 @@ import { Avatar, View, YStack } from "tamagui";
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
-import { api } from "~/utils/api";
+import { api, RouterOutputs } from "~/utils/api";
+
+type ProfileData = RouterOutputs["profile"]["getFullProfile"];
 
 const ProfileLayout = () => {
   const router = useRouter();
 
-  const { data: profileData } = api.profile.getBasicProfile.useQuery({
-    userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1",
-  });
+  const { data: profileData, isLoading: profileDataIsLoading } =
+    api.profile.getFullProfile.useQuery({
+      userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1",
+    });
 
   useEffect(() => {
     console.log(profileData);
@@ -31,7 +34,7 @@ const ProfileLayout = () => {
         tabBar={(props) => (
           <YStack>
             <Header
-              title={profileData?.username}
+              title={`@${profileData?.username}`}
               HeaderRight={
                 <Pressable onPress={() => router.push("/(app)/(settings)")}>
                   {({ pressed }) => (
@@ -44,19 +47,11 @@ const ProfileLayout = () => {
               }
             />
 
-            <YStack
-              padding="$4"
-              alignItems="center"
-              backgroundColor="$background"
-            >
-              <Avatar circular size="$10">
-                <Avatar.Image
-                  accessibilityLabel="Cam"
-                  src={profileData?.profilePictureUrl}
-                />
-                <Avatar.Fallback backgroundColor="$blue10" />
-              </Avatar>
-            </YStack>
+            {profileDataIsLoading && profileData === undefined ? (
+              <Profile loading />
+            ) : (
+              <Profile loading={false} data={profileData} />
+            )}
 
             <TopTabBar {...props} />
           </YStack>
@@ -79,5 +74,30 @@ const ProfileLayout = () => {
     </View>
   );
 };
+
+interface LoadingProps {
+  loading: true;
+}
+
+interface LoadedProps {
+  loading: false;
+  data: ProfileData;
+}
+
+type Profile = LoadingProps | LoadedProps;
+
+const Profile = (props: Profile) => (
+  <YStack padding="$4" alignItems="center" backgroundColor="$background">
+    <Avatar circular size="$10">
+      <Avatar.Image
+        accessibilityLabel="Cam"
+        src={
+          props.loading ? undefined : props.data.profilePictureUrl ?? undefined
+        }
+      />
+      <Avatar.Fallback backgroundColor="$blue10" />
+    </Avatar>
+  </YStack>
+);
 
 export default ProfileLayout;
