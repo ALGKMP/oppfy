@@ -13,18 +13,21 @@ import {
   YStack,
 } from "tamagui";
 
+import { SignUpFlowParams } from "~/app/(onboarding)/auth/phone-number-otp";
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
+import type { EditProfileParams } from "../../(profile-actions)/edit-profile";
 
 type ProfileData = RouterOutputs["profile"]["getFullProfile"];
 
 const ProfileLayout = () => {
   const router = useRouter();
 
-  const { data: profileData, isLoading: profileDataIsLoading } =
-    api.profile.getFullProfile.useQuery({
+  const { data: profileData, isLoading: _profileDataIsLoading } =
+    api.profile.getBasicProfile.useQuery({
       userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1",
     });
 
@@ -95,46 +98,74 @@ interface LoadedProps {
 
 type ProfileProps = LoadingProps | LoadedProps;
 
-const Profile = (props: ProfileProps) => (
-  <YStack padding="$4" alignItems="center" backgroundColor="$background">
-    <Avatar circular size="$10">
-      <Avatar.Image
-        accessibilityLabel="Cam"
-        src={props.loading ? undefined : props.data.profilePictureUrl}
-      />
-      <Avatar.Fallback backgroundColor="$blue10" />
-    </Avatar>
+const Profile = (props: ProfileProps) => {
+  const router = useRouter();
 
-    <YStack width="80%" gap="$2">
-      <SizableText size="$4">
-        {props.loading ? "" : props.data.name}
-      </SizableText>
-      <Paragraph theme="alt1">
-        {props.loading ? "" : `@${props.data.username}`}
-      </Paragraph>
+  const editProfileRedirect = () => {
+    if (props.loading) return;
 
-      <XStack gap="$4">
-        <Button>Edit Profile</Button>
-        <Button>Share Profile</Button>
-      </XStack>
+    const { name, bio } = props.data;
 
-      <XStack justifyContent="space-between">
-        <Stat
-          label="Friends"
-          value={props.loading ? "" : props.data.friendCount}
+    router.push({
+      params: {
+        name,
+        bio: bio ?? "",
+      },
+      pathname: "/edit-profile",
+    });
+  };
+
+  const shareProfileRedirect = () => {
+    if (props.loading) return;
+
+    router.push("/share-profile");
+  };
+
+  return (
+    <YStack padding="$4" alignItems="center" backgroundColor="$background">
+      <Avatar circular size="$10">
+        <Avatar.Image
+          accessibilityLabel="Cam"
+          src={props.loading ? undefined : props.data.profilePictureUrl}
         />
-        <Stat
-          label="Followers"
-          value={props.loading ? "" : props.data.followerCount}
-        />
-        <Stat
-          label="Following"
-          value={props.loading ? "" : props.data.followingCount}
-        />
-      </XStack>
+        <Avatar.Fallback backgroundColor="$blue10" />
+      </Avatar>
+
+      <YStack width="80%" gap="$2">
+        <SizableText size="$4">
+          {props.loading ? "" : props.data.name}
+        </SizableText>
+        <Paragraph theme="alt1">
+          {props.loading ? "" : `@${props.data.username}`}
+        </Paragraph>
+
+        <XStack gap="$4">
+          <Button disabled={props.loading} onPress={editProfileRedirect}>
+            Edit Profile
+          </Button>
+          <Button onPress={() => router.push("/share-profile")}>
+            Share Profile
+          </Button>
+        </XStack>
+
+        <XStack justifyContent="space-between">
+          <Stat
+            label="Friends"
+            value={props.loading ? "" : props.data.friendCount}
+          />
+          <Stat
+            label="Followers"
+            value={props.loading ? "" : props.data.followerCount}
+          />
+          <Stat
+            label="Following"
+            value={props.loading ? "" : props.data.followingCount}
+          />
+        </XStack>
+      </YStack>
     </YStack>
-  </YStack>
-);
+  );
+};
 
 interface StatProps {
   label: string;
