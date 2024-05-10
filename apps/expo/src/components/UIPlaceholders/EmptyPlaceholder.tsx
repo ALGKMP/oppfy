@@ -1,7 +1,6 @@
 import { cloneElement } from "react";
 import type { IconProps } from "@tamagui/helpers-icon";
-import { UserRoundX } from "@tamagui/lucide-icons";
-import { Button, Paragraph, SizableText, View, YStack } from "tamagui";
+import { Paragraph, SizableText, YStack } from "tamagui";
 
 type Icon = JSX.Element;
 

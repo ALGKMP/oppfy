@@ -9,9 +9,6 @@ const trpcAuthSchema = {
   getUser: z.object({
     userId,
   }),
-  deleteUser: z.object({
-    userId,
-  }),
   updateUser: z.object({
     userId,
     username,

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { Button, Input, Text, View, XStack, YStack } from "tamagui";
+import { Button, Input, Text, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@acme/validators";
 

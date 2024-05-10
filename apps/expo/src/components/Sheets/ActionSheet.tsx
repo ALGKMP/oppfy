@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { GestureResponderEvent } from "react-native";
 import { Animated, Easing, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
