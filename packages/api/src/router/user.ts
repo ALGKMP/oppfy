@@ -76,7 +76,22 @@ export const userRouter = createTRPCRouter({
     }),
 
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.services.user.getUserNotificationSettings(ctx.session.uid);
+    try{
+      return await ctx.services.user.getUserNotificationSettings(ctx.session.uid);
+    } catch (err) {
+      if (err instanceof DomainError) {
+        switch (err.code) {
+          case ErrorCode.USER_NOT_FOUND:
+            throw new TRPCError({
+              code: "PRECONDITION_FAILED",
+            });
+        }
+      }
+
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
   }),
 
   updateNotificationSettings: protectedProcedure
