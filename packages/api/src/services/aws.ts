@@ -4,25 +4,22 @@ import type { trpcValidators } from "@acme/validators";
 
 import { AwsRepository } from "../repositories/aws";
 
+type ContentType = "image/jpeg" | "image/png";
+
 type PostMetadata = z.infer<typeof trpcValidators.post.metadata>;
 type ProfilePictureMetadata = z.infer<
   typeof trpcValidators.post.profilePictureMetadata
 >;
 
-interface BasePutObjectPresignedUrlInput {
-  Bucket: string;
+interface PutObjectPresignedUrlInput {
   Key: string;
+  Bucket: string;
   ContentLength: number;
-  ContentType: string;
+  ContentType: ContentType;
 }
 
-type PutObjectPresignedUrlInput = BasePutObjectPresignedUrlInput;
-
-interface BasePutObjectPresignedUrlWithMetadataInput {
-  Bucket: string;
-  Key: string;
-  ContentLength: number;
-  ContentType: string;
+interface BasePutObjectPresignedUrlWithMetadataInput
+  extends PutObjectPresignedUrlInput {
   Metadata: Record<string, string>;
 }
 
@@ -37,8 +34,8 @@ interface PutObjectPresignedUrlWithProfilePictureMetadataInput
 }
 
 interface GetObjectPresignedUrlInput {
-  Bucket: string;
   Key: string;
+  Bucket: string;
 }
 
 export class AwsService {
