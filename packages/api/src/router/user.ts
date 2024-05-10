@@ -328,7 +328,7 @@ export const userRouter = createTRPCRouter({
           switch (err.code) {
             case ErrorCode.FAILED_TO_CHECK_RELATIONSHIP:
               throw new TRPCError({
-                code: "NOT_FOUND",
+                code: "PRECONDITION_FAILED",
               });
           }
         }
@@ -366,10 +366,24 @@ export const userRouter = createTRPCRouter({
   followUser: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.followUser(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.followUser(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.FAILED_TO_FOLLOW_USER:
+              throw new TRPCError({
+                code: "UNPROCESSABLE_CONTENT",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Unfollow user
