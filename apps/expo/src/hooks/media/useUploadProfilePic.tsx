@@ -93,24 +93,18 @@ const useUploadProfilePic = ({
     // Reduce image resolution
     const { uri } = await ImageManipulator.manipulateAsync(
       result.assets[0].uri,
-      [
-        {
-          resize: {
-            width: 500,
-            height: 500,
-          },
-        },
-      ],
-      { format: ImageManipulator.SaveFormat.JPEG },
+      undefined,
+      { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG },
     );
 
     setImageUri(uri);
 
-    const presignedUrl =
-      await createPresignedUrlForProfilePicture.mutateAsync();
-
     const profilePictureResponse = await fetch(uri);
     const profilePictureBlob = await profilePictureResponse.blob();
+
+    const presignedUrl = await createPresignedUrlForProfilePicture.mutateAsync({
+      contentLength: profilePictureBlob.size,
+    });
 
     await putToPresignedUrl.mutateAsync({
       presignedUrl,
