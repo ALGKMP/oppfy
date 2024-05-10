@@ -142,10 +142,25 @@ export const userRouter = createTRPCRouter({
   updatePrivacySetting: protectedProcedure
     .input(trpcValidators.user.updatePrivacySetting)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.updatePrivacySetting(
-        ctx.session.uid,
-        input.privacy,
-      );
+      try{
+        await ctx.services.user.updatePrivacySetting(
+          ctx.session.uid,
+          input.privacy,
+        );
+      } catch(err) {
+        if(err instanceof DomainError) {
+          switch(err.code) {
+            case ErrorCode.USER_NOT_FOUND:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+              });
+          }
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Test this
