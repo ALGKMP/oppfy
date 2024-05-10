@@ -100,31 +100,6 @@ export const profileRouter = createTRPCRouter({
                 code: "NOT_FOUND",
                 message: "User not found",
               });
-            case ErrorCode.PROFILE_NOT_FOUND:
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Profile not found",
-              });
-            case ErrorCode.FAILED_TO_COUNT_FOLLOWERS:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-                message: "Failed to count followers",
-              });
-            case ErrorCode.FAILED_TO_COUNT_FOLLOWING:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-                message: "Failed to count following",
-              });
-            case ErrorCode.FAILED_TO_COUNT_FRIENDS:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-                message: "Failed to count friends",
-              });
-            default:
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "An unexpected domain error occurred",
-              });
           }
         }
         throw new TRPCError({
@@ -152,31 +127,6 @@ export const profileRouter = createTRPCRouter({
               throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "User not found",
-              });
-            case ErrorCode.PROFILE_NOT_FOUND:
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "Profile not found",
-              });
-            case ErrorCode.FAILED_TO_COUNT_FOLLOWERS:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-                message: "Failed to count followers",
-              });
-            case ErrorCode.FAILED_TO_COUNT_FOLLOWING:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-                message: "Failed to count following",
-              });
-            case ErrorCode.FAILED_TO_COUNT_FRIENDS:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-                message: "Failed to count friends",
-              });
-            default:
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "An unexpected domain error occurred",
               });
           }
         }
