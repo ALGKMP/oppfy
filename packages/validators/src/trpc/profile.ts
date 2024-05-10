@@ -17,7 +17,7 @@ const trpcProfileSchema = {
   }),
 
   userProfilePicture: z.object({
-    userId,
+    contentLength: contentLength.refine((size) => size < 5 * 1024 * 1024),
   }),
 
   batchProfilePictures: z.object({ userIds: z.array(userId) }),

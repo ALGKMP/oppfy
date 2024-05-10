@@ -7,8 +7,9 @@ import { DomainError, ErrorCode } from "../errors";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const profileRouter = createTRPCRouter({
-  createPresignedUrlForProfilePicture: protectedProcedure.mutation(
-    async ({ ctx }) => {
+  createPresignedUrlForProfilePicture: protectedProcedure
+    .input(trpcValidators.profile.userProfilePicture)
+    .mutation(async ({ input, ctx }) => {
       const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
 
@@ -16,15 +17,14 @@ export const profileRouter = createTRPCRouter({
         {
           Key: key,
           Bucket: bucket,
-          ContentLength: 5242880,
+          ContentLength: input.contentLength,
           ContentType: "image/jpeg",
           Metadata: {
             user: ctx.session.uid,
           },
         },
       );
-    },
-  ),
+    }),
 
   // OpenAPI endponit for Lambda
   uploadProfilePicture: publicProcedure
