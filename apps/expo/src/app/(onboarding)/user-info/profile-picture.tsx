@@ -6,12 +6,14 @@ import { Avatar, Button, Spinner, Text, XStack, YStack } from "tamagui";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { ScreenBaseView } from "~/components/Views";
-import useUploadProfilePic from "~/hooks/media/useUploadProfilePic";
+import { useUploadProfilePic } from "~/hooks/media";
 
 const ProfilePicture = () => {
   const router = useRouter();
-  const { imageUri, pickAndUploadImage, uploadStatus, error } =
-    useUploadProfilePic({ optimisticallyUpdate: true });
+
+  const { imageUri, pickAndUploadImage, uploadStatus } = useUploadProfilePic({
+    optimisticallyUpdate: true,
+  });
 
   const onSubmit = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/media-of-you");

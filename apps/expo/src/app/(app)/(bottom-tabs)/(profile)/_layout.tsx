@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Pressable } from "react-native";
+import { Pressable, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
 import {
@@ -17,6 +17,7 @@ import { abbreviateNumber } from "@acme/utils";
 
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
+import { useUploadProfilePic } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -101,17 +102,20 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
+  const { imageUri, pickAndUploadImage } = useUploadProfilePic({
+    optimisticallyUpdate: true,
+  });
+
   const editProfileRedirect = () => {
     if (props.loading) return;
 
-    const { name, username, bio, profilePictureUrl } = props.data;
+    const { name, username, bio } = props.data;
 
     router.push({
       params: {
         name,
         username,
         bio: bio ?? "",
-        profilePictureUrl,
       },
       pathname: "/edit-profile",
     });
@@ -130,20 +134,26 @@ const Profile = (props: ProfileProps) => {
       backgroundColor="$background"
       gap="$4"
     >
-      <Avatar circular size="$10">
-        <Avatar.Image
-          accessibilityLabel="Cam"
-          src={props.loading ? undefined : props.data.profilePictureUrl}
-        />
-        <Avatar.Fallback backgroundColor="$blue10" />
-      </Avatar>
+      <TouchableOpacity
+        style={{ alignItems: "center" }}
+        onPress={pickAndUploadImage}
+      >
+        <Avatar circular size="$10" bordered>
+          <Avatar.Image
+            {...(props.loading
+              ? {}
+              : { src: imageUri ?? props.data.profilePictureUrl })}
+          />
+          <Avatar.Fallback />
+        </Avatar>
+      </TouchableOpacity>
 
       <YStack alignItems="center">
         <SizableText size="$4">
           {props.loading ? "" : props.data.name}
         </SizableText>
         <Paragraph theme="alt1">
-          {props.loading ? "" : `@${props.data.username}`}
+          {props.loading ? "" : props.data.bio}
         </Paragraph>
       </YStack>
 
@@ -158,7 +168,7 @@ const Profile = (props: ProfileProps) => {
         <Button
           size="$3"
           disabled={props.loading}
-          onPress={() => router.push("/share-profile")}
+          onPress={shareProfileRedirect}
         >
           Share Profile
         </Button>

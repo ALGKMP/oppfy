@@ -1,10 +1,8 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
-  Avatar,
   Button,
   Input,
   SizableText,
@@ -29,11 +27,10 @@ const profileSchema = z.object({
 });
 
 const EditProfile = () => {
-  const { profilePictureUrl, ...defaultValues } = useLocalSearchParams<{
+  const defaultValues = useLocalSearchParams<{
     name: string;
     username: string;
     bio: string;
-    profilePictureUrl: string;
   }>();
 
   const {
@@ -103,16 +100,6 @@ const EditProfile = () => {
     <KeyboardSafeView>
       <ScreenBaseView>
         <YStack flex={1} gap="$4">
-          <TouchableOpacity
-            style={{ alignItems: "center" }}
-            // onPress={handleImagePicking}
-          >
-            <Avatar circular size="$14">
-              <Avatar.Image src={profilePictureUrl} />
-              <Avatar.Fallback backgroundColor="$blue10" />
-            </Avatar>
-          </TouchableOpacity>
-
           <XStack alignItems="flex-start" gap="$4">
             <SizableText width="$7">Name</SizableText>
             <YStack flex={1} gap="$2">

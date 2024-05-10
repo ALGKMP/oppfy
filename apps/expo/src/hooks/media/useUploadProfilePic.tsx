@@ -9,11 +9,6 @@ interface UseUploadProfilePicInput {
   optimisticallyUpdate: boolean;
 }
 
-interface PutToPresignedUrlInput {
-  presignedUrl: string;
-  body?: BodyInit | null | undefined;
-}
-
 const useUploadProfilePic = ({
   optimisticallyUpdate,
 }: UseUploadProfilePicInput) => {
@@ -24,57 +19,65 @@ const useUploadProfilePic = ({
   const createPresignedUrlForProfilePicture =
     api.profile.createPresignedUrlForProfilePicture.useMutation();
 
-  const putToPresignedUrl = useMutation(
-    async ({ presignedUrl, body }: PutToPresignedUrlInput) => {
+  const uploadProfilePicture = useMutation(
+    async (uri: string) => {
+      const profilePictureResponse = await fetch(uri);
+      const profilePictureBlob = await profilePictureResponse.blob();
+
+      const presignedUrl =
+        await createPresignedUrlForProfilePicture.mutateAsync({
+          contentLength: profilePictureBlob.size,
+        });
+
       const response = await fetch(presignedUrl, {
         method: "PUT",
-        body,
+        body: profilePictureBlob,
       });
 
       if (!response.ok) {
         throw new Error("Failed to upload profile picture");
       }
     },
-    // {
-    //   onMutate: async (newProfilePictureUrl) => {
-    //     if (!optimisticallyUpdate) return;
+    {
+      onMutate: async (newProfilePictureUrl) => {
+        if (!optimisticallyUpdate) return;
 
-    //     // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-    //     await utils.profile.getFullProfile.cancel();
+        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+        await utils.profile.getFullProfile.cancel();
 
-    //     // Get the data from the queryCache
-    //     const prevData = utils.profile.getFullProfile.getData();
-    //     if (prevData === undefined) return;
+        // Get the data from the queryCache
+        const prevData = utils.profile.getFullProfile.getData();
+        if (prevData === undefined) return;
 
-    //     // Optimistically update the data
-    //     utils.profile.getFullProfile.setData(
-    //       { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
-    //       {
-    //         ...prevData,
-    //         profilePictureUrl: newProfilePictureUrl,
-    //       },
-    //     );
+        // Optimistically update the data
+        utils.profile.getFullProfile.setData(
+          { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
+          {
+            ...prevData,
+            profilePictureUrl: newProfilePictureUrl,
+          },
+        );
 
-    //     // Return the previous data so we can revert if something goes wrong
-    //     return { prevData };
-    //   },
-    //   onError: (_err, _newProfilePictureUrl, ctx) => {
-    //     if (!optimisticallyUpdate) return;
-    //     if (ctx === undefined) return;
+        // Return the previous data so we can revert if something goes wrong
+        return { prevData };
+      },
+      onError: (_err, _newProfilePictureUrl, ctx) => {
+        if (!optimisticallyUpdate) return;
+        if (ctx === undefined) return;
 
-    //     // If the mutation fails, use the context-value from onMutate
-    //     utils.profile.getFullProfile.setData(
-    //       { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
-    //       ctx.prevData,
-    //     );
-    //   },
-    //   onSettled: async () => {
-    //     if (!optimisticallyUpdate) return;
+        // If the mutation fails, use the context-value from onMutate
+        utils.profile.getFullProfile.setData(
+          { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
+          ctx.prevData,
+        );
+      },
+      onSettled: async () => {
+        if (!optimisticallyUpdate) return;
 
-    //     // Sync with server once mutation has settled
-    //     await utils.profile.getFullProfile.invalidate();
-    //   },
-    // },
+        // Sync with server once mutation has settled
+        await utils.profile.getFullProfile.invalidate();
+      },
+    },
   );
 
   const pickAndUploadImage = async () => {
@@ -99,24 +102,14 @@ const useUploadProfilePic = ({
 
     setImageUri(uri);
 
-    const profilePictureResponse = await fetch(uri);
-    const profilePictureBlob = await profilePictureResponse.blob();
-
-    const presignedUrl = await createPresignedUrlForProfilePicture.mutateAsync({
-      contentLength: profilePictureBlob.size,
-    });
-
-    await putToPresignedUrl.mutateAsync({
-      presignedUrl,
-      body: profilePictureBlob,
-    });
+    await uploadProfilePicture.mutateAsync(uri);
   };
 
   return {
     imageUri,
     pickAndUploadImage,
-    uploadStatus: putToPresignedUrl.status,
-    error: putToPresignedUrl.error,
+    uploadStatus: uploadProfilePicture.status,
+    error: uploadProfilePicture.error,
   };
 };
 
