@@ -269,84 +269,140 @@ export const userRouter = createTRPCRouter({
   acceptFollowRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.acceptFollowRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.acceptFollowRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Reject follow request - delete the request
   rejectFollowRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.rejectFollowRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.rejectFollowRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   sendFriendRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.sendFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.sendFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: accept friend request - delete request (or change status) and add a new graph connection
   acceptFriendRequest: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.acceptFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.acceptFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: reject friend request - delete the request
   rejectFriendRequest: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.rejectFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.rejectFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: remove friend - delete the friend graph connection
   removeFriend: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.removeFriend(ctx.session.uid, input.recipientId);
+      try {
+        await ctx.services.user.removeFriend(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: remove follower - delete the follow network connection
   removeFollower: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.removeFollower(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.removeFollower(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
-  // TODO: Cancel follow/friend request
   cancelFollowRequest: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.cancelFollowRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.cancelFollowRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   cancelFriendRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.cancelFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.cancelFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 });
