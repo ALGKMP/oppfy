@@ -142,7 +142,7 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
     }
 
-    const friendCount = await this.friendsRepository.friendsCount(userId);
+    const friendCount = await this.friendsRepository.countFriends(userId);
 
     const profilePictureUrl = profile.profilePictureId
       ? await this.getProfilePicture(userId)
