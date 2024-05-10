@@ -7,33 +7,24 @@ import { DomainError, ErrorCode } from "../errors";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const profileRouter = createTRPCRouter({
-  createPresignedUrlForProfilePicture: protectedProcedure
-    .input(trpcValidators.profile.createPresignedUrl)
-    .mutation(async ({ ctx, input }) => {
+  createPresignedUrlForProfilePicture: protectedProcedure.mutation(
+    async ({ ctx }) => {
       const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
-      const metadata = sharedValidators.user.userId.safeParse(ctx.session.uid);
-
-      if (!metadata.success) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Failed to generate presigned URL for profile picture upload.",
-        });
-      }
 
       return await ctx.services.aws.putObjectPresignedUrlWithProfilePictureMetadata(
         {
           Key: key,
           Bucket: bucket,
-          ContentType: input.contentType,
-          ContentLength: input.contentLength,
+          ContentLength: 5242880,
+          ContentType: "image/jpeg",
           Metadata: {
-            user: metadata.data,
+            user: ctx.session.uid,
           },
         },
       );
-    }),
+    },
+  ),
 
   // OpenAPI endponit for Lambda
   uploadProfilePicture: publicProcedure
