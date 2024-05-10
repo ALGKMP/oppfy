@@ -68,14 +68,7 @@ const ProfilePicture = () => {
     if (!result.canceled && result.assets[0]) {
       const { uri } = await ImageManipulator.manipulateAsync(
         result.assets[0].uri,
-        [
-          {
-            resize: {
-              width: 500,
-              height: 500,
-            },
-          },
-        ],
+        undefined,
         { format: ImageManipulator.SaveFormat.JPEG },
       );
 
