@@ -52,7 +52,22 @@ export const profileRouter = createTRPCRouter({
   updateProfile: protectedProcedure
     .input(trpcValidators.profile.updateProfile)
     .mutation(async ({ ctx, input }) => {
-      await ctx.services.profile.updateProfile(ctx.session.uid, input);
+      try {
+        await ctx.services.profile.updateProfile(ctx.session.uid, input);
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USERNAME_ALREADY_EXISTS:
+              throw new TRPCError({
+                code: "CONFLICT",
+              });
+          }
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   getCurrentUserBasicProfile: protectedProcedure

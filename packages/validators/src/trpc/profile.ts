@@ -29,7 +29,6 @@ const trpcProfileSchema = {
   }),
 
   updateProfile: z.object({
-    userId,
     name: z.string().max(50),
     username: z.string().max(50),
     bio: z.string().max(160),

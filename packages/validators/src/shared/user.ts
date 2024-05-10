@@ -10,11 +10,18 @@ export const profilePicture = z.union([z.string(), z.null()]);
 
 export const fullName = z
   .string()
-  .min(3)
-  .max(50)
-  .regex(/^[a-zA-Z]+([ '-][a-zA-Z]+)*$/);
+  .min(3, { message: "Name is too short" })
+  .max(50, { message: "Name is too long" })
+  .regex(/^[a-zA-Z]+([ '-][a-zA-Z]+)*$/, {
+    message: "Name contains invalid characters",
+  });
 
-export const username = z.string().min(1);
+export const username = z
+  .string()
+  .min(1, { message: "Username is too short" })
+  .max(20, { message: "Username is too long" });
+
+export const bio = z.string().max(160, { message: "Bio is too long" });
 
 export const dateOfBirth = z
   .date()
@@ -43,18 +50,20 @@ export const blockedUser = z.object({
 });
 
 export const paginatedBlockedUsers = z.object({
-  items:z.array(blockedUser),
-  nextCursor : z.object({
-    createdAt: z.date(),
-    profileId: z.number(),
-  }).nullable()
+  items: z.array(blockedUser),
+  nextCursor: z
+    .object({
+      createdAt: z.date(),
+      profileId: z.number(),
+    })
+    .nullable(),
 });
 
 export const updateProfile = z.object({
   username: z.string().optional(),
   name: z.string().optional(),
-  bio: z.string().optional()
-})
+  bio: z.string().optional(),
+});
 
 // Use this for displaying profile header
 export const basicProfile = z.object({
