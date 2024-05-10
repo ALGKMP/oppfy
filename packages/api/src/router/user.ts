@@ -164,14 +164,6 @@ export const userRouter = createTRPCRouter({
     }),
 
   // TODO: Test this
-  getFriends: protectedProcedure
-    .input(trpcValidators.user.getFriends)
-    .mutation(async ({ input, ctx }) => {
-      // Could make this a query
-      return await ctx.services.user.getFriends(input.userId);
-    }),
-
-  // TODO: Test this
   getFollowers: protectedProcedure
     .input(trpcValidators.user.getFollowers)
     .mutation(async ({ input, ctx }) => {
