@@ -61,6 +61,12 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
+  getCurrentUserBasicProfile: protectedProcedure
+    .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
+    .query(async ({ ctx }) => {
+      return await ctx.services.profile.getBasicProfile(ctx.session.uid);
+    }),
+
   getBasicProfile: publicProcedure
     .input(
       z.object({
@@ -72,8 +78,55 @@ export const profileRouter = createTRPCRouter({
       return await ctx.services.profile.getBasicProfile(input.userId);
     }),
 
+  getCurrentUsersFullProfile: protectedProcedure
+    .output(sharedValidators.user.fullProfile)
+    .query(async ({ ctx }) => {
+      try {
+        return await ctx.services.profile.getFullProfile(ctx.session.uid);
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USER_NOT_FOUND:
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found",
+              });
+            case ErrorCode.PROFILE_NOT_FOUND:
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Profile not found",
+              });
+            case ErrorCode.FAILED_TO_COUNT_FOLLOWERS:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+                message: "Failed to count followers",
+              });
+            case ErrorCode.FAILED_TO_COUNT_FOLLOWING:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+                message: "Failed to count following",
+              });
+            case ErrorCode.FAILED_TO_COUNT_FRIENDS:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+                message: "Failed to count friends",
+              });
+            default:
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "An unexpected domain error occurred",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "A non-domain error occurred",
+        });
+      }
+    }),
+
   // TRPC Procedure for getting a full user profile
-  getFullProfile: protectedProcedure
+  getFullProfile: publicProcedure
     .input(
       z.object({
         userId: z.string(),
