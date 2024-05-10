@@ -9,7 +9,7 @@ export const userRouter = createTRPCRouter({
   updateFullName: protectedProcedure
     .input(trpcValidators.user.updateName)
     .mutation(async ({ input, ctx }) => {
-      try{
+      try {
         return await ctx.services.profile.updateFullName(
           ctx.session.uid,
           input.fullName,
@@ -33,10 +33,25 @@ export const userRouter = createTRPCRouter({
   updateDateOfBirth: protectedProcedure
     .input(trpcValidators.user.updateDateOfBirth)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.profile.updateDateOfBirth(
-        ctx.session.uid,
-        input.dateOfBirth,
-      );
+      try {
+        await ctx.services.profile.updateDateOfBirth(
+          ctx.session.uid,
+          input.dateOfBirth,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USER_NOT_FOUND:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+              });
+          }
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   updateUsername: protectedProcedure
