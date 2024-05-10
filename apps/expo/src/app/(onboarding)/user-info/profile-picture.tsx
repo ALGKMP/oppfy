@@ -1,80 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 import { TouchableOpacity } from "react-native";
-import * as ImageManipulator from "expo-image-manipulator";
-import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
-import { useMutation } from "@tanstack/react-query";
-import { Avatar, Button, Text, View, XStack, YStack } from "tamagui";
+import { Avatar, Button, Spinner, Text, XStack, YStack } from "tamagui";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
 import { ScreenBaseView } from "~/components/Views";
-import { api } from "~/utils/api";
-
-interface PutToPresignedUrlInput {
-  presignedUrl: string;
-  body?: BodyInit | null | undefined;
-}
+import useUploadProfilePic from "~/hooks/media/useUploadProfilePic";
 
 const ProfilePicture = () => {
   const router = useRouter();
+  const { imageUri, pickAndUploadImage, uploadStatus, error } =
+    useUploadProfilePic({ optimisticallyUpdate: true });
 
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
-
-  const createPresignedUrlForProfilePicture =
-    api.profile.createPresignedUrlForProfilePicture.useMutation();
-
-  const putToPresignedUrl = useMutation(
-    async ({ presignedUrl, body }: PutToPresignedUrlInput) => {
-      const response = await fetch(presignedUrl, {
-        method: "PUT",
-        body,
-      });
-
-      if (!response.ok) {
-        console.error("Failed to upload profile picture", response);
-        return;
-      }
-    },
-  );
-
-  const onSubmit = async () => {
-    const presignedUrl =
-      await createPresignedUrlForProfilePicture.mutateAsync();
-
-    const profilePictureResponse = await fetch(profilePicture);
-    const blob = await profilePictureResponse.blob();
-
-    await putToPresignedUrl.mutateAsync({
-      presignedUrl,
-      body: blob,
-    });
-
+  const onSubmit = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/media-of-you");
-  };
 
-  const onSkip = () => {
+  const onSkip = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/media-of-you");
-  };
-
-  const handleImagePicking = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      const { uri } = await ImageManipulator.manipulateAsync(
-        result.assets[0].uri,
-        undefined,
-        { format: ImageManipulator.SaveFormat.JPEG },
-      );
-
-      setProfilePicture(uri);
-    }
-  };
 
   return (
     <KeyboardSafeView>
@@ -87,22 +30,31 @@ const ProfilePicture = () => {
           <XStack height="70%" alignItems="center" gap="$2">
             <TouchableOpacity
               style={{ flex: 1, alignItems: "center" }}
-              onPress={handleImagePicking}
+              onPress={pickAndUploadImage}
             >
-              <Avatar circular size="$14">
+              <Avatar circular size="$14" bordered>
                 <Avatar.Image
-                  {...(profilePicture
-                    ? { src: profilePicture }
+                  {...(imageUri
+                    ? { src: imageUri }
                     : { source: defaultProfilePicture })}
                 />
-                <Avatar.Fallback backgroundColor="$blue10" />
+                <Avatar.Fallback />
               </Avatar>
             </TouchableOpacity>
           </XStack>
         </YStack>
 
-        <Button onPress={profilePicture ? onSubmit : onSkip}>
-          {profilePicture ? "Continue" : "Skip"}
+        <Button
+          disabled={uploadStatus === "loading"}
+          onPress={imageUri ? onSubmit : onSkip}
+        >
+          {uploadStatus === "loading" ? (
+            <Spinner />
+          ) : imageUri ? (
+            "Continue"
+          ) : (
+            "Skip"
+          )}
         </Button>
       </ScreenBaseView>
     </KeyboardSafeView>
