@@ -52,7 +52,14 @@ export const profileRouter = createTRPCRouter({
     }),
 
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.services.profile.removeProfilePicture(ctx.session.uid);
+    try {
+      await ctx.services.profile.removeProfilePicture(ctx.session.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "A non-domain error occurred",
+      });
+    }
   }),
 
   updateProfile: protectedProcedure
