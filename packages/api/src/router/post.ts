@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { trpcValidators } from "@acme/validators";
@@ -29,7 +30,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   uploadPost: publicProcedure
-    .meta({ openapi: { method: "POST", path: "/uploadPost" } })
+    .meta({ /* 👉 */ openapi: { method: "POST", path: "/uploadPost" } })
     .input(trpcValidators.post.uploadPost)
     .output(z.void())
     .mutation(async ({ ctx, input }) => {
@@ -44,23 +45,44 @@ export const postRouter = createTRPCRouter({
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
     .mutation(async ({ ctx, input }) => {
-      await ctx.services.post.editPost(input.postId, input.caption);
+      try {
+        await ctx.services.post.editPost(input.postId, input.caption);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "A non-domain error occurred when editing post",
+        });
+      }
     }),
 
   deletePost: protectedProcedure
     .input(trpcValidators.post.deletePost)
     .mutation(async ({ ctx, input }) => {
-      await ctx.services.post.deletePost(input.postId);
+      try {
+        await ctx.services.post.deletePost(input.postId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "A non-domain error occurred when deleting post",
+        });
+      }
     }),
 
   getPosts: protectedProcedure
     .input(trpcValidators.post.getPosts)
     .query(async ({ ctx, input }) => {
-      return await ctx.services.post.getPosts(
-        ctx.session.uid,
-        input.cursor,
-        input.pageSize,
-      );
+      try {
+        return await ctx.services.post.getPosts(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "A non-domain error occurred when getting posts",
+        });
+      }
     }),
 });
 
