@@ -333,12 +333,18 @@ export class UserService {
   }
 
   async isUserBlocked(userId: string, blockedUserId: string) {
-    return !!(await this.userRepository.getBlockedUser(userId, blockedUserId));
+    const result = await this.userRepository.getBlockedUser(
+      userId,
+      blockedUserId,
+    );
+    if (result === undefined) {
+      throw new DomainError(ErrorCode.FAILED_TO_CHECK_RELATIONSHIP);
+    }
+    return !!result;
   }
 
   async unblockUser(userId: string, blockedUserId: string) {
     const result = await this.userRepository.unblockUser(userId, blockedUserId);
-    // TODO: There should be a delete marker, not sure why I'm not getting it with autocomplete!?!?!?
     if (!result) {
       throw new DomainError(ErrorCode.FAILED_TO_UNBLOCK_USER);
     }

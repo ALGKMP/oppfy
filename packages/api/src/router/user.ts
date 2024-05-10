@@ -142,14 +142,14 @@ export const userRouter = createTRPCRouter({
   updatePrivacySetting: protectedProcedure
     .input(trpcValidators.user.updatePrivacySetting)
     .mutation(async ({ input, ctx }) => {
-      try{
+      try {
         await ctx.services.user.updatePrivacySetting(
           ctx.session.uid,
           input.privacy,
         );
-      } catch(err) {
-        if(err instanceof DomainError) {
-          switch(err.code) {
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
             case ErrorCode.USER_NOT_FOUND:
               throw new TRPCError({
                 code: "PRECONDITION_FAILED",
@@ -167,11 +167,11 @@ export const userRouter = createTRPCRouter({
   getFriends: protectedProcedure
     .input(trpcValidators.user.getFriends)
     .query(async ({ input, ctx }) => {
-      try{
+      try {
         return await ctx.services.user.getFriends(input.userId);
-      } catch(err) {
-        if(err instanceof DomainError) {
-          switch(err.code) {
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
             case ErrorCode.USER_NOT_FOUND:
               throw new TRPCError({
                 code: "PRECONDITION_FAILED",
@@ -189,11 +189,11 @@ export const userRouter = createTRPCRouter({
   getFollowers: protectedProcedure
     .input(trpcValidators.user.getFollowers)
     .query(async ({ input, ctx }) => {
-      try{
+      try {
         return await ctx.services.user.getFollowers(input.userId);
       } catch (error) {
-        if(error instanceof DomainError) {
-          switch(error.code) {
+        if (error instanceof DomainError) {
+          switch (error.code) {
             case ErrorCode.USER_NOT_FOUND:
               throw new TRPCError({
                 code: "PRECONDITION_FAILED",
@@ -211,11 +211,11 @@ export const userRouter = createTRPCRouter({
   getFollowing: protectedProcedure
     .input(trpcValidators.user.getFollowing)
     .mutation(async ({ input, ctx }) => {
-      try{
+      try {
         return await ctx.services.user.getFollowing(input.userId);
       } catch (err) {
-        if(err instanceof DomainError) {
-          switch(err.code) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
             case ErrorCode.USER_NOT_FOUND:
               throw new TRPCError({
                 code: "PRECONDITION_FAILED",
@@ -232,15 +232,15 @@ export const userRouter = createTRPCRouter({
   getBlockedUsers: protectedProcedure
     .input(trpcValidators.user.paginate)
     .query(async ({ ctx, input }) => {
-      try{
+      try {
         return await ctx.services.user.getBlockedUsers(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
       } catch (err) {
-        if(err instanceof DomainError) {
-          switch(err.code) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
             case ErrorCode.USER_NOT_FOUND:
               throw new TRPCError({
                 code: "PRECONDITION_FAILED",
@@ -257,8 +257,8 @@ export const userRouter = createTRPCRouter({
     try {
       return await ctx.services.user.getFriendRequests(ctx.session.uid);
     } catch (err) {
-      if(err instanceof DomainError) {
-        switch(err.code) {
+      if (err instanceof DomainError) {
+        switch (err.code) {
           case ErrorCode.USER_NOT_FOUND:
             throw new TRPCError({
               code: "PRECONDITION_FAILED",
@@ -276,8 +276,8 @@ export const userRouter = createTRPCRouter({
     try {
       return await ctx.services.user.getFollowRequests(ctx.session.uid);
     } catch (err) {
-      if(err instanceof DomainError) {
-        switch(err.code) {
+      if (err instanceof DomainError) {
+        switch (err.code) {
           case ErrorCode.USER_NOT_FOUND:
             throw new TRPCError({
               code: "PRECONDITION_FAILED",
@@ -294,30 +294,72 @@ export const userRouter = createTRPCRouter({
   blockUser: protectedProcedure
     .input(trpcValidators.user.blockUser)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.blockUser(
-        ctx.session.uid,
-        input.blockedUserId,
-      );
+      try {
+        return await ctx.services.user.blockUser(
+          ctx.session.uid,
+          input.blockedUserId,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USER_NOT_FOUND:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Test this
   isUserBlocked: protectedProcedure
     .input(trpcValidators.user.isUserBlocked)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.isUserBlocked(
-        ctx.session.uid,
-        input.blockedUserId,
-      );
+      try {
+        return await ctx.services.user.isUserBlocked(
+          ctx.session.uid,
+          input.blockedUserId,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.FAILED_TO_CHECK_RELATIONSHIP:
+              throw new TRPCError({
+                code: "NOT_FOUND",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Test this
   unblockUser: protectedProcedure
     .input(trpcValidators.user.unblockUser)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.unblockUser(
-        ctx.session.uid,
-        input.blockedUserId,
-      );
+      try {
+        return await ctx.services.user.unblockUser(
+          ctx.session.uid,
+          input.blockedUserId,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.FAILED_TO_UNBLOCK_USER:
+              throw new TRPCError({
+                code: "UNPROCESSABLE_CONTENT",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Test this
