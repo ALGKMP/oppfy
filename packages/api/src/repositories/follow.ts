@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
@@ -17,16 +17,14 @@ export class FollowRepository {
 
   @handleDatabaseErrors
   async removeFollower(senderId: string, recipientId: string) {
-    const result = await this.db
-      .delete(schema.follower)
-      .where(
-        // Sender is removing the recipient from their followers
-        and(
-          eq(schema.follower.senderId, recipientId), 
-          eq(schema.follower.recipientId, senderId),
-        ),
-      );
-    return result[0]; 
+    const result = await this.db.delete(schema.follower).where(
+      // Sender is removing the recipient from their followers
+      and(
+        eq(schema.follower.senderId, recipientId),
+        eq(schema.follower.recipientId, senderId),
+      ),
+    );
+    return result[0];
   }
 
   @handleDatabaseErrors
@@ -53,12 +51,13 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async countFollowers(userId: string): Promise<number> {
-    const followers = await this.db.query.follower.findMany({
-      where: eq(schema.follower.recipientId, userId),
-    });
-    console.log(followers)
-    return followers.length;
+  async countFollowers(userId: string): Promise<number | undefined > {
+    const result = await this.db
+      .select({ count: count()})
+      .from(schema.follower)
+      .where(eq(schema.follower.recipientId, userId));
+    
+      return result[0]?.count;
   }
 
   @handleDatabaseErrors
@@ -80,8 +79,8 @@ export class FollowRepository {
   async createFollowRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .insert(schema.followRequest)
-      .values({ senderId, recipientId});
-      return result[0];
+      .values({ senderId, recipientId });
+    return result[0];
   }
 
   @handleDatabaseErrors
