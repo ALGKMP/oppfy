@@ -57,7 +57,22 @@ export const userRouter = createTRPCRouter({
   updateUsername: protectedProcedure
     .input(trpcValidators.user.updateUsername)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.updateUsername(ctx.session.uid, input.username);
+      try {
+        await ctx.services.user.updateUsername(ctx.session.uid, input.username);
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USERNAME_ALREADY_EXISTS:
+              throw new TRPCError({
+                code: "CONFLICT",
+              });
+          }
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
