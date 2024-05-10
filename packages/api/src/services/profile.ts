@@ -26,7 +26,7 @@ export class ProfileService {
 
   async updateFullName(userId: string, fullName: string) {
     const profile = await this.getUserProfile(userId);
-    await this.profileRepository.updateFullName(profile.id, fullName);
+    return await this.profileRepository.updateFullName(profile.id, fullName);
   }
 
   async updateDateOfBirth(userId: string, dateOfBirth: Date) {

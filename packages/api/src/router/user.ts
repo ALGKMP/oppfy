@@ -9,10 +9,25 @@ export const userRouter = createTRPCRouter({
   updateFullName: protectedProcedure
     .input(trpcValidators.user.updateName)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.profile.updateFullName(
-        ctx.session.uid,
-        input.fullName,
-      );
+      try{
+        return await ctx.services.profile.updateFullName(
+          ctx.session.uid,
+          input.fullName,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USER_NOT_FOUND:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+              });
+          }
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   updateDateOfBirth: protectedProcedure
@@ -98,7 +113,11 @@ export const userRouter = createTRPCRouter({
   getBlockedUsers: protectedProcedure
     .input(trpcValidators.user.paginate)
     .query(async ({ ctx, input }) => {
-      return await ctx.services.user.getBlockedUsers(ctx.session.uid, input.cursor, input.pageSize);
+      return await ctx.services.user.getBlockedUsers(
+        ctx.session.uid,
+        input.cursor,
+        input.pageSize,
+      );
     }),
 
   // TODO: Test this
@@ -110,7 +129,6 @@ export const userRouter = createTRPCRouter({
   getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
     return await ctx.services.user.getFollowRequests(ctx.session.uid);
   }),
-
 
   // TODO: Test this
   blockUser: protectedProcedure
