@@ -390,10 +390,24 @@ export const userRouter = createTRPCRouter({
   unfollowUser: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.unfollowUser(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.unfollowUser(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.FAILED_TO_FOLLOW_USER:
+              throw new TRPCError({
+                code: "UNPROCESSABLE_CONTENT",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Accept follow request - delete request (or change status) and create a new graph connection
