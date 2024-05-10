@@ -76,8 +76,10 @@ export const userRouter = createTRPCRouter({
     }),
 
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
-    try{
-      return await ctx.services.user.getUserNotificationSettings(ctx.session.uid);
+    try {
+      return await ctx.services.user.getUserNotificationSettings(
+        ctx.session.uid,
+      );
     } catch (err) {
       if (err instanceof DomainError) {
         switch (err.code) {
@@ -97,10 +99,25 @@ export const userRouter = createTRPCRouter({
   updateNotificationSettings: protectedProcedure
     .input(trpcValidators.user.updateNotificationSettings)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.updateNotificationSettings(
-        ctx.session.uid,
-        input,
-      );
+      try {
+        await ctx.services.user.updateNotificationSettings(
+          ctx.session.uid,
+          input,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USER_NOT_FOUND:
+              throw new TRPCError({
+                code: "PRECONDITION_FAILED",
+              });
+          }
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
