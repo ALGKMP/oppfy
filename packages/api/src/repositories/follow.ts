@@ -51,21 +51,22 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async countFollowers(userId: string): Promise<number | undefined > {
+  async countFollowers(userId: string): Promise<number | undefined> {
     const result = await this.db
-      .select({ count: count()})
+      .select({ count: count() })
       .from(schema.follower)
       .where(eq(schema.follower.recipientId, userId));
-    
-      return result[0]?.count;
+
+    return result[0]?.count;
   }
 
   @handleDatabaseErrors
-  async countFollowing(userId: string) {
-    const following = await this.db.query.follower.findMany({
-      where: eq(schema.follower.senderId, userId),
-    });
-    return following.length;
+  async countFollowing(userId: string): Promise<number | undefined>{
+    const result = await this.db
+      .select({ count: count() })
+      .from(schema.follower)
+      .where(eq(schema.follower.senderId, userId));
+    return result[0]?.count;
   }
 
   @handleDatabaseErrors

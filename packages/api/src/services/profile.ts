@@ -138,6 +138,9 @@ export class ProfileService {
 
     const followingCount =
       await this.followersRepository.countFollowing(userId);
+    if (followingCount === undefined) {
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
+    }
 
     const friendCount = await this.friendsRepository.friendsCount(userId);
 
