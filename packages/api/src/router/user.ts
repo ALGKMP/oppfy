@@ -15,15 +15,6 @@ export const userRouter = createTRPCRouter({
           input.fullName,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -39,15 +30,6 @@ export const userRouter = createTRPCRouter({
           input.dateOfBirth,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -65,6 +47,7 @@ export const userRouter = createTRPCRouter({
             case ErrorCode.USERNAME_ALREADY_EXISTS:
               throw new TRPCError({
                 code: "CONFLICT",
+                message: "Username already exists"
               });
           }
         }
@@ -81,15 +64,6 @@ export const userRouter = createTRPCRouter({
         ctx.session.uid,
       );
     } catch (err) {
-      if (err instanceof DomainError) {
-        switch (err.code) {
-          case ErrorCode.USER_NOT_FOUND:
-            throw new TRPCError({
-              code: "PRECONDITION_FAILED",
-            });
-        }
-      }
-
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
       });
@@ -105,15 +79,6 @@ export const userRouter = createTRPCRouter({
           input,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -124,15 +89,6 @@ export const userRouter = createTRPCRouter({
     try {
       return await ctx.services.user.getUserPrivacySetting(ctx.session.uid);
     } catch (err) {
-      if (err instanceof DomainError) {
-        switch (err.code) {
-          case ErrorCode.USER_NOT_FOUND:
-            throw new TRPCError({
-              code: "PRECONDITION_FAILED",
-            });
-        }
-      }
-
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
       });
@@ -148,15 +104,6 @@ export const userRouter = createTRPCRouter({
           input.privacy,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -170,15 +117,6 @@ export const userRouter = createTRPCRouter({
       try {
         return await ctx.services.user.getFriends(input.userId);
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -192,15 +130,6 @@ export const userRouter = createTRPCRouter({
       try {
         return await ctx.services.user.getFollowers(input.userId);
       } catch (error) {
-        if (error instanceof DomainError) {
-          switch (error.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -214,15 +143,6 @@ export const userRouter = createTRPCRouter({
       try {
         return await ctx.services.user.getFollowing(input.userId);
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -239,14 +159,6 @@ export const userRouter = createTRPCRouter({
           input.pageSize,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -257,14 +169,6 @@ export const userRouter = createTRPCRouter({
     try {
       return await ctx.services.user.getFriendRequests(ctx.session.uid);
     } catch (err) {
-      if (err instanceof DomainError) {
-        switch (err.code) {
-          case ErrorCode.USER_NOT_FOUND:
-            throw new TRPCError({
-              code: "PRECONDITION_FAILED",
-            });
-        }
-      }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
       });
@@ -276,14 +180,6 @@ export const userRouter = createTRPCRouter({
     try {
       return await ctx.services.user.getFollowRequests(ctx.session.uid);
     } catch (err) {
-      if (err instanceof DomainError) {
-        switch (err.code) {
-          case ErrorCode.USER_NOT_FOUND:
-            throw new TRPCError({
-              code: "PRECONDITION_FAILED",
-            });
-        }
-      }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
       });
@@ -300,14 +196,6 @@ export const userRouter = createTRPCRouter({
           input.blockedUserId,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -324,14 +212,6 @@ export const userRouter = createTRPCRouter({
           input.blockedUserId,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.FAILED_TO_CHECK_RELATIONSHIP:
-              throw new TRPCError({
-                code: "PRECONDITION_FAILED",
-              });
-          }
-        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -348,14 +228,6 @@ export const userRouter = createTRPCRouter({
           input.blockedUserId,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.FAILED_TO_UNBLOCK_USER:
-              throw new TRPCError({
-                code: "UNPROCESSABLE_CONTENT",
-              });
-          }
-        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -372,14 +244,6 @@ export const userRouter = createTRPCRouter({
           input.recipientId,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.FAILED_TO_FOLLOW_USER:
-              throw new TRPCError({
-                code: "UNPROCESSABLE_CONTENT",
-              });
-          }
-        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -396,14 +260,6 @@ export const userRouter = createTRPCRouter({
           input.recipientId,
         );
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.FAILED_TO_FOLLOW_USER:
-              throw new TRPCError({
-                code: "UNPROCESSABLE_CONTENT",
-              });
-          }
-        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -414,84 +270,140 @@ export const userRouter = createTRPCRouter({
   acceptFollowRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.acceptFollowRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.acceptFollowRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: Reject follow request - delete the request
   rejectFollowRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.rejectFollowRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.rejectFollowRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   sendFriendRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      return await ctx.services.user.sendFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        return await ctx.services.user.sendFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: accept friend request - delete request (or change status) and add a new graph connection
   acceptFriendRequest: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.acceptFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.acceptFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: reject friend request - delete the request
   rejectFriendRequest: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.rejectFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.rejectFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: remove friend - delete the friend graph connection
   removeFriend: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.removeFriend(ctx.session.uid, input.recipientId);
+      try {
+        await ctx.services.user.removeFriend(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   // TODO: remove follower - delete the follow network connection
   removeFollower: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.removeFollower(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.removeFollower(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
-  // TODO: Cancel follow/friend request
   cancelFollowRequest: protectedProcedure
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.cancelFollowRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.cancelFollowRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   cancelFriendRequest: protectedProcedure
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
-      await ctx.services.user.cancelFriendRequest(
-        ctx.session.uid,
-        input.recipientId,
-      );
+      try {
+        await ctx.services.user.cancelFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 });
