@@ -22,8 +22,8 @@ export const postRouter = createTRPCRouter({
       return await ctx.services.aws.putObjectPresignedUrlWithPostMetadata({
         Bucket: bucket,
         Key: objectKey,
-        ContentType: input.contentType,
-        ContentLength: input.contentLength,
+        ContentLength: 5242880,
+        ContentType: "image/jpeg",
         Metadata: metadata,
       });
     }),

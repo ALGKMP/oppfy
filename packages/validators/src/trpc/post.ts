@@ -10,23 +10,10 @@ import {
 import { userId } from "../shared/user";
 
 const trpcPostSchema = {
-  createPresignedUrl: z
-    .object({
-      friend: userId,
-      caption,
-      contentLength,
-      contentType,
-    })
-    .refine(
-      (data) =>
-        ["image/jpeg", "image/png", "image/gif", "image"].includes(
-          data.contentType,
-        ),
-      {
-        // Validates file type
-        message: "Invalid file type",
-      },
-    ),
+  createPresignedUrl: z.object({
+    friend: userId,
+    caption,
+  }),
 
   uploadPost: z.object({
     author: userId,

@@ -11,67 +11,46 @@ import { KeyboardSafeView } from "~/components/SafeViews";
 import { ScreenBaseView } from "~/components/Views";
 import { api } from "~/utils/api";
 
+interface PutToPresignedUrlInput {
+  presignedUrl: string;
+  body?: BodyInit | null | undefined;
+}
+
 const ProfilePicture = () => {
   const router = useRouter();
 
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [size, setSize] = useState<number | null>(null);
-  const [type, setType] = useState<string | null>(null);
 
-  const pfpMutation =
+  const createPresignedUrlForProfilePicture =
     api.profile.createPresignedUrlForProfilePicture.useMutation();
 
-  const putMutation = useMutation(async (url: string) => {
-    if (!profilePicture) {
-      console.log("blyat wtf");
-      return;
-    }
+  const putToPresignedUrl = useMutation(
+    async ({ presignedUrl, body }: PutToPresignedUrlInput) => {
+      const response = await fetch(presignedUrl, {
+        method: "PUT",
+        body,
+      });
 
-    const response = await fetch(url, {
-      method: "PUT",
-      body: await (await fetch(profilePicture)).blob(),
-    });
-    console.log("hitting presigned: ", response.status);
-
-    if (!response.ok) {
-      console.log(response);
-      return;
-    }
-
-    console.log("status: ", response.status);
-  });
+      if (!response.ok) {
+        console.error("Failed to upload profile picture", response);
+        return;
+      }
+    },
+  );
 
   const onSubmit = async () => {
-    if (!size || !type) {
-      console.log("Error: Size or type of the image is missing");
-      return;
-    }
+    const presignedUrl =
+      await createPresignedUrlForProfilePicture.mutateAsync();
 
-    console.log("Submitting mutation with size:", size, "and type:", type);
-    try {
-      await pfpMutation.mutateAsync(
-        { contentLength: size, contentType: type },
-        {
-          onSuccess: (url) => {
-            console.log("Mutation successful, URL received:", url);
-            putMutation.mutate(url, {
-              onSuccess: () => {
-                console.log("Image successfully uploaded");
-                router.replace("/(app)/(bottom-tabs)/(profile)/media-of-you");
-              },
-              onError: (error) => {
-                console.error("Error uploading image:", error);
-              },
-            });
-          },
-          onError: (error) => {
-            console.error("Error during presigned URL mutation:", error);
-          },
-        },
-      );
-    } catch (error) {
-      console.error("Unexpected error during mutation:", error);
-    }
+    const profilePictureResponse = await fetch(profilePicture);
+    const blob = await profilePictureResponse.blob();
+
+    await putToPresignedUrl.mutateAsync({
+      presignedUrl,
+      body: blob,
+    });
+
+    router.replace("/(app)/(bottom-tabs)/(profile)/media-of-you");
   };
 
   const onSkip = () => {
@@ -89,17 +68,18 @@ const ProfilePicture = () => {
     if (!result.canceled && result.assets[0]) {
       const { uri } = await ImageManipulator.manipulateAsync(
         result.assets[0].uri,
-        undefined, // No operations needed, just format conversion
+        [
+          {
+            resize: {
+              width: 500,
+              height: 500,
+            },
+          },
+        ],
         { format: ImageManipulator.SaveFormat.JPEG },
       );
 
-      if (result.assets[0]?.uri && result.assets[0]?.mimeType) {
-        setType(result.assets[0].mimeType);
-        setSize(await (await fetch(uri)).blob().then((blob) => blob.size));
-        setProfilePicture(uri);
-      } else {
-        console.log("ffs missing size and type");
-      }
+      setProfilePicture(uri);
     }
   };
 
