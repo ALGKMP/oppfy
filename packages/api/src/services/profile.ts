@@ -198,13 +198,4 @@ export class ProfileService {
       profile.profilePictureId,
     );
   }
-
-  async getUserStats(userId: string) {
-    const followerCount = await this.followersRepository.countFollowers(userId);
-    const followingCount =
-      await this.followersRepository.countFollowing(userId);
-    const friendCount = await this.friendsRepository.friendsCount(userId);
-
-    return { followerCount, followingCount, friendCount };
-  }
 }
