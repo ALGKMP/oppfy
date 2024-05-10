@@ -47,6 +47,7 @@ export const userRouter = createTRPCRouter({
             case ErrorCode.USERNAME_ALREADY_EXISTS:
               throw new TRPCError({
                 code: "CONFLICT",
+                message: "Username already exists"
               });
           }
         }

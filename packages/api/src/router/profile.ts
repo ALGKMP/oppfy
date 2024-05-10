@@ -32,8 +32,23 @@ export const profileRouter = createTRPCRouter({
     .input(trpcValidators.profile.uploadProfilePictureOpenApi)
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
-      console.log("uploadProfilePicture", input);
-      await ctx.services.profile.updateProfilePicture(input.user, input.key);
+      try {
+        await ctx.services.profile.updateProfilePicture(input.user, input.key);
+      } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case ErrorCode.USER_NOT_FOUND:
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found",
+              });
+          }
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "A non-domain error occurred",
+        });
+      }
     }),
 
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
@@ -51,10 +66,10 @@ export const profileRouter = createTRPCRouter({
             case ErrorCode.USERNAME_ALREADY_EXISTS:
               throw new TRPCError({
                 code: "CONFLICT",
+                message: "Username already exists",
               });
           }
         }
-
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
@@ -64,7 +79,13 @@ export const profileRouter = createTRPCRouter({
   getCurrentUserBasicProfile: protectedProcedure
     .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx }) => {
-      return await ctx.services.profile.getBasicProfile(ctx.session.uid);
+      try {
+        return await ctx.services.profile.getBasicProfile(ctx.session.uid);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
     }),
 
   getBasicProfile: publicProcedure
