@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -15,10 +16,15 @@ import { Text, useTheme, View } from "tamagui";
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
 import { BottomTabs } from "~/layouts";
+import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
-  const theme = useTheme();
   const router = useRouter();
+  const utils = api.useUtils();
+
+  const username = useMemo(() => {
+    return utils.profile.getCurrentUsersFullProfile.getData()?.username;
+  }, [utils.profile.getCurrentUsersFullProfile]);
 
   return (
     <BottomTabs
@@ -68,7 +74,7 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(profile)"
         options={{
-          title: "Profile",
+          title: `#${username}`,
           tabBarIcon: ({ focused }) => (
             <User2 strokeWidth={focused ? 2 : 1.5} />
           ),
