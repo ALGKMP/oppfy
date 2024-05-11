@@ -32,7 +32,7 @@
     "@acme/prettier-config": "workspace:^",
     "@acme/tsconfig": "workspace:^",
     "dotenv-cli": "^7.4.1",
-    "drizzle-kit": "^0.20.17",
+    "drizzle-kit": "^0.21.1",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   },

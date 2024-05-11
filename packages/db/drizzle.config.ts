@@ -5,7 +5,8 @@ import type { Config } from "drizzle-kit";
 export default {
   schema: "./src/schema",
   tablesFilter: ["t3turbo_*"],
-  driver: "mysql2",
+  dialect: "mysql",
+  // driver: "mysql2",
   out: "./drizzle",
   dbCredentials: {
     host: process.env.DATABASE_ENDPOINT!,
