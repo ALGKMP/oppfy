@@ -15,7 +15,7 @@ import {
 
 import { AlertDialog } from "~/components/Dialogs";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -104,7 +104,7 @@ const BlockedUsers = () => {
   };
 
   return (
-    <ScreenBaseView>
+    <BaseScreenView>
       {isLoading || itemCount ? (
         <YStack flex={1} gap="$2">
           <FlashList
@@ -152,7 +152,7 @@ const BlockedUsers = () => {
           />
         </View>
       )}
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

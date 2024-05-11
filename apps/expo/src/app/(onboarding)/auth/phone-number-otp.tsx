@@ -7,7 +7,7 @@ import { Button, Input, Text, XStack, YStack } from "tamagui";
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
@@ -79,7 +79,7 @@ const PhoneNumberOTP = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             Please enter your code.
@@ -110,7 +110,7 @@ const PhoneNumberOTP = () => {
         >
           Continue
         </Button>
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };

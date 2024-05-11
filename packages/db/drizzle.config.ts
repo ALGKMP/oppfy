@@ -1,11 +1,12 @@
 import type { Config } from "drizzle-kit";
+
 // import * as dotenv from "dotenv";
 // dotenv.config({ path: "../../.env" });
 
 export default {
   schema: "./src/schema",
   tablesFilter: ["t3turbo_*"],
-  driver: "mysql2",
+  dialect: "mysql",
   out: "./drizzle",
   dbCredentials: {
     host: process.env.DATABASE_ENDPOINT!,

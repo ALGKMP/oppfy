@@ -16,31 +16,24 @@ const ProfileActionsLayout = () => {
   const theme = useTheme();
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: theme.background.val,
+    <Stack
+      screenOptions={{
+        headerLeft: (props) => <HeaderLeft {...props} />,
+        header: (props) => <Header {...props} />,
+        contentStyle: {
+          backgroundColor: theme.background.val,
+        },
       }}
     >
-      <Stack
-        screenOptions={{
-          headerLeft: (props) => <HeaderLeft {...props} />,
-          header: (props) => <Header {...props} />,
+      <Stack.Screen
+        name="edit-profile"
+        options={{
+          title: "Edit Profile",
         }}
-      >
-        <Stack.Screen
-          name="edit-profile"
-          options={{
-            title: "Edit Profile",
-          }}
-        />
+      />
 
-        <Stack.Screen
-          name="share-profile"
-          options={{ title: "Share Profile" }}
-        />
-      </Stack>
-    </SafeAreaView>
+      <Stack.Screen name="share-profile" options={{ title: "Share Profile" }} />
+    </Stack>
   );
 };
 

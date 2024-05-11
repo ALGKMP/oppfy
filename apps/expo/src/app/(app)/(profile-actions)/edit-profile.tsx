@@ -17,7 +17,7 @@ import { z } from "zod";
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const profileSchema = z.object({
@@ -98,7 +98,7 @@ const EditProfile = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView>
         <YStack flex={1} gap="$4">
           <XStack alignItems="flex-start" gap="$4">
             <SizableText width="$7">Name</SizableText>
@@ -173,7 +173,7 @@ const EditProfile = () => {
         >
           {isSubmitting ? <Spinner /> : "Save"}
         </Button>
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };

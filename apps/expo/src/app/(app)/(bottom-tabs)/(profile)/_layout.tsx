@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Pressable, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
 import {
@@ -37,54 +38,34 @@ const ProfileLayout = () => {
   }, [profileData]);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "$background",
-      }}
+    <TopTabs
+      tabBar={(props) => (
+        <YStack>
+          {profileData === undefined ? (
+            <Profile loading />
+          ) : (
+            <Profile loading={false} data={profileData} />
+          )}
+
+          <TopTabBar {...props} />
+        </YStack>
+      )}
+      screenOptions={{}}
     >
-      <TopTabs
-        tabBar={(props) => (
-          <YStack>
-            <Header
-              title={`@${profileData?.username}`}
-              HeaderRight={
-                <Pressable onPress={() => router.push("/(app)/(settings)")}>
-                  {({ pressed }) => (
-                    <MoreHorizontal
-                      size="$1"
-                      style={{ opacity: pressed ? 0.5 : 1 }}
-                    />
-                  )}
-                </Pressable>
-              }
-            />
-
-            {profileData === undefined ? (
-              <Profile loading />
-            ) : (
-              <Profile loading={false} data={profileData} />
-            )}
-
-            <TopTabBar {...props} />
-          </YStack>
-        )}
-      >
-        <TopTabs.Screen
-          name="media-of-you"
-          options={{
-            tabBarLabel: () => <Grid3x3 />,
-          }}
-        />
-        <TopTabs.Screen
-          name="media-of-friends-you-posted"
-          options={{
-            title: "Test",
-            tabBarLabel: () => <Camera />,
-          }}
-        />
-      </TopTabs>
-    </View>
+      <TopTabs.Screen
+        name="media-of-you"
+        options={{
+          tabBarLabel: () => <Grid3x3 />,
+        }}
+      />
+      <TopTabs.Screen
+        name="media-of-friends-you-posted"
+        options={{
+          title: "Test",
+          tabBarLabel: () => <Camera />,
+        }}
+      />
+    </TopTabs>
   );
 };
 
@@ -136,6 +117,7 @@ const Profile = (props: ProfileProps) => {
     >
       <TouchableOpacity
         style={{ alignItems: "center" }}
+        disabled={props.loading}
         onPress={pickAndUploadImage}
       >
         <Avatar circular size="$10" bordered>

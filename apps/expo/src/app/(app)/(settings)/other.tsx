@@ -7,7 +7,7 @@ import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 
 const Other = () => {
@@ -72,7 +72,7 @@ const Other = () => {
   ] satisfies SettingsGroupInput[];
 
   return (
-    <ScreenBaseView scrollable>
+    <BaseScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
         <Button
@@ -98,7 +98,7 @@ const Other = () => {
         isVisible={isDeleteAccountModalVisible}
         onClose={() => setIsDeleteAccountModalVisible(false)}
       />
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

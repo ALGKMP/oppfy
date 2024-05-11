@@ -1,11 +1,13 @@
 import { Redirect } from "expo-router";
-import { View } from "tamagui";
+import { useTheme, View } from "tamagui";
 
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 import { Stack } from "~/layouts";
 
 const AppLayout = () => {
+  const theme = useTheme();
+
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
 
@@ -21,9 +23,14 @@ const AppLayout = () => {
   }
 
   return (
-    <View flex={1} backgroundColor="black">
-      <Stack screenOptions={{ header: () => null }} />
-    </View>
+    <Stack
+      screenOptions={{
+        header: () => null,
+        contentStyle: {
+          backgroundColor: theme.background.val,
+        },
+      }}
+    />
   );
 };
 

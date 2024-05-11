@@ -5,7 +5,7 @@ import defaultProfilePicture from "@assets/default-profile-picture.png";
 import { Avatar, Button, Spinner, Text, XStack, YStack } from "tamagui";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { useUploadProfilePic } from "~/hooks/media";
 
 const ProfilePicture = () => {
@@ -23,7 +23,7 @@ const ProfilePicture = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             Upload your profile pic.
@@ -58,7 +58,7 @@ const ProfilePicture = () => {
             "Skip"
           )}
         </Button>
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };

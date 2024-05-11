@@ -19,7 +19,7 @@ import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 
 enum WEBSITE_URL {
@@ -116,7 +116,7 @@ const Settings = () => {
   ] satisfies SettingsGroupInput[];
 
   return (
-    <ScreenBaseView scrollable>
+    <BaseScreenView>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
         <Button
@@ -135,7 +135,7 @@ const Settings = () => {
         isVisible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
       />
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

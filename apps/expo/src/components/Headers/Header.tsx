@@ -1,6 +1,11 @@
 import React from "react";
+import { StyleSheet } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import type { StackProps } from "tamagui";
-import { Text, View, XStack } from "tamagui";
+import { getToken, getTokens, Text, useTheme, View, XStack } from "tamagui";
 
 interface HeaderProps {
   title?: string;
@@ -19,25 +24,32 @@ const StackHeader = ({
 
   containerProps,
 }: HeaderProps) => {
+  const theme = useTheme();
+
   return (
-    <XStack
-      alignItems="center"
-      justifyContent="space-between"
-      height="$4"
-      paddingHorizontal="$4"
-      backgroundColor="$background"
-      {...containerProps}
+    <SafeAreaView
+      edges={["top"]}
+      style={{ backgroundColor: theme.background.val }}
     >
-      <View minWidth="$2" alignItems="flex-start">
-        {HeaderLeft}
-      </View>
+      <XStack
+        paddingVertical="$2"
+        paddingHorizontal="$4"
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor="$background"
+        {...containerProps}
+      >
+        <View minWidth="$2" alignItems="flex-start">
+          {HeaderLeft}
+        </View>
 
-      <View alignItems="center">{HeaderTitle}</View>
+        <View alignItems="center">{HeaderTitle}</View>
 
-      <View minWidth="$2" alignItems="flex-end">
-        {HeaderRight}
-      </View>
-    </XStack>
+        <View minWidth="$2" alignItems="flex-end">
+          {HeaderRight}
+        </View>
+      </XStack>
+    </SafeAreaView>
   );
 };
 

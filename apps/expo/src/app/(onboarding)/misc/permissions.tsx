@@ -16,7 +16,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 
@@ -75,7 +75,7 @@ const Permissions = () => {
   };
 
   return (
-    <ScreenBaseView>
+    <BaseScreenView>
       <YStack flex={1} gap="$8">
         <Text
           alignSelf="center"
@@ -156,7 +156,7 @@ const Permissions = () => {
       <Button onPress={onPress} disabled={!requiredPermissions}>
         Continue
       </Button>
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

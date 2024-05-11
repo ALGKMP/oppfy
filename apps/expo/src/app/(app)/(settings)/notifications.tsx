@@ -10,7 +10,7 @@ import { Button, Spinner, Switch, YStack } from "tamagui";
 
 import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -189,14 +189,14 @@ const Notifications = () => {
   ] satisfies SettingsGroupInput[];
 
   return (
-    <ScreenBaseView scrollable>
+    <BaseScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
         <Button size="$4.5" onPress={onSubmit}>
           {isUpdatingNotficationSettings ? <Spinner /> : "Save"}
         </Button>
       </YStack>
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

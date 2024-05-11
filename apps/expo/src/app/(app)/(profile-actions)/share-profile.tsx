@@ -1,13 +1,13 @@
 import React from "react";
 import { Text } from "tamagui";
 
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 
 const ShareProfile = () => {
   return (
-    <ScreenBaseView>
+    <BaseScreenView>
       <Text>ShareProfile</Text>
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 
