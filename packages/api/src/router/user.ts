@@ -47,7 +47,7 @@ export const userRouter = createTRPCRouter({
             case ErrorCode.USERNAME_ALREADY_EXISTS:
               throw new TRPCError({
                 code: "CONFLICT",
-                message: "Username already exists"
+                message: "Username already exists",
               });
           }
         }
@@ -110,12 +110,15 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  // TODO: Test this
-  getFriends: protectedProcedure
-    .input(trpcValidators.user.getFriends)
+  getCurrentUserFriends: protectedProcedure
+    .input(trpcValidators.user.paginate)
     .query(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.getFriends(input.userId);
+        return await ctx.services.user.getFriends(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -123,12 +126,15 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  // TODO: Test this
-  getFollowers: protectedProcedure
-    .input(trpcValidators.user.getFollowers)
+  getCurrentUserFollowers: protectedProcedure
+    .input(trpcValidators.user.paginate)
     .query(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.getFollowers(input.userId);
+        return await ctx.services.user.getFollowers(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -136,12 +142,15 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  // TODO: Test this
-  getFollowing: protectedProcedure
-    .input(trpcValidators.user.getFollowing)
-    .mutation(async ({ input, ctx }) => {
+  getCurrentUserFollowing: protectedProcedure
+    .input(trpcValidators.user.paginate)
+    .query(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.getFollowing(input.userId);
+        return await ctx.services.user.getFollowing(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -149,7 +158,7 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  getBlockedUsers: protectedProcedure
+  getCurrentUserBlockedUsers: protectedProcedure
     .input(trpcValidators.user.paginate)
     .query(async ({ ctx, input }) => {
       try {
@@ -165,26 +174,27 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
-  getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
-    try {
-      return await ctx.services.user.getFriendRequests(ctx.session.uid);
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-      });
-    }
-  }),
+/* These two blocks of code are defining TRPC procedures for fetching friend requests and follower
+requests respectively. */
+  // getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
+  //   try {
+  //     return await ctx.services.user.getFriendRequests(ctx.session.uid);
+  //   } catch (err) {
+  //     throw new TRPCError({
+  //       code: "INTERNAL_SERVER_ERROR",
+  //     });
+  //   }
+  // }),
 
-  // TODO: Test this
-  getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
-    try {
-      return await ctx.services.user.getFollowRequests(ctx.session.uid);
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-      });
-    }
-  }),
+  // getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
+  //   try {
+  //     return await ctx.services.user.getFollowRequests(ctx.session.uid);
+  //   } catch (err) {
+  //     throw new TRPCError({
+  //       code: "INTERNAL_SERVER_ERROR",
+  //     });
+  //   }
+  // }),
 
   // TODO: Test this
   blockUser: protectedProcedure
