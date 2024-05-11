@@ -1,12 +1,14 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from "react";
+import { Text } from "react-native";
+
+import { BaseScreenView } from "~/components/Views";
 
 const Following = () => {
   return (
-    <View>
+    <BaseScreenView>
       <Text>Following</Text>
-    </View>
-  )
-}
+    </BaseScreenView>
+  );
+};
 
-export default Following
+export default Following;

@@ -1,12 +1,206 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React, { useMemo } from "react";
+import { FlashList } from "@shopify/flash-list";
+import { UserRoundX } from "@tamagui/lucide-icons";
+import { Skeleton } from "moti/skeleton";
+import {
+  Avatar,
+  Button,
+  ButtonProps,
+  ListItem,
+  SizableText,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
+
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import { BaseScreenView } from "~/components/Views";
+import { api } from "~/utils/api";
 
 const Friends = () => {
+  // const friends = api.user.getFriends.useQuery();
+  const {
+    data: friendsData,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = api.user.getCurrentUserFriends.useInfiniteQuery(
+    {
+      pageSize: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  const itemCount = useMemo(() => {
+    if (friendsData === undefined) return 0;
+
+    return friendsData.pages.reduce(
+      (total, page) => total + page.items.length,
+      0,
+    );
+  }, [friendsData]);
+
+  const placeholderData = useMemo(() => {
+    return Array.from({ length: 10 }, () => null);
+  }, []);
+
+  const friendsItems = useMemo(() => {
+    return friendsData?.pages.flatMap((page) => page.items);
+  }, [friendsData]);
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
+
   return (
-    <View>
-      <Text>Friends</Text>
-    </View>
-  )
+    <BaseScreenView paddingBottom={0}>
+      {isLoading || itemCount ? (
+        <FlashList
+          data={isLoading ? placeholderData : friendsItems}
+          estimatedItemSize={75}
+          onEndReached={handleOnEndReached}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <SizableText size="$2" theme="alt1" marginBottom="$2">
+              FRIENDS
+            </SizableText>
+          }
+          renderItem={({ item, index }) => {
+            const isFirstInGroup = index === 0;
+            const isLastInGroup = index === itemCount - 1;
+
+            return (
+              <View>
+                {item === null ? (
+                  <VirtualizedListItem
+                    loading
+                    isFirstInGroup={isFirstInGroup}
+                    isLastInGroup={isLastInGroup}
+                  />
+                ) : (
+                  <VirtualizedListItem
+                    loading={false}
+                    isFirstInGroup={isFirstInGroup}
+                    isLastInGroup={isLastInGroup}
+                    title="John Doe"
+                  />
+                )}
+              </View>
+            );
+          }}
+        />
+      ) : (
+        <View
+          flex={1}
+          justifyContent="center"
+          // bottom={headerHeight}
+        >
+          <EmptyPlaceholder
+            title="Blocked Users"
+            subtitle="If you block someone, you'll be able to manage them here."
+            icon={<UserRoundX />}
+          />
+        </View>
+      )}
+    </BaseScreenView>
+  );
+};
+
+type Icon = JSX.Element;
+
+interface BaseProps {
+  isFirstInGroup: boolean;
+  isLastInGroup: boolean;
 }
 
-export default Friends
+interface LoadingProps extends BaseProps {
+  loading: true;
+}
+
+interface LoadedProps extends BaseProps {
+  loading: false;
+  imageUrl?: string;
+  title?: string;
+  subtitle?: string;
+  subtitle2?: string;
+  buttons?: {
+    title: string;
+    onPress: () => void;
+    icon?: Icon;
+    iconAfter?: Icon;
+  }[];
+}
+
+type VirtualizedListItemProps = LoadingProps | LoadedProps;
+
+const VirtualizedListItem = (props: VirtualizedListItemProps) => (
+  <Skeleton.Group show={props.loading}>
+    <ListItem
+      size="$4.5"
+      hoverTheme={false}
+      pressTheme={false}
+      padding={12}
+      borderColor="$gray4"
+      borderWidth={1}
+      borderBottomWidth={0}
+      {...(props.isFirstInGroup && {
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+      })}
+      {...(props.isLastInGroup && {
+        borderBottomWidth: 1,
+        borderBottomLeftRadius: 10,
+        borderBottomRightRadius: 10,
+      })}
+    >
+      <XStack flex={1} alignItems="center">
+        <XStack flex={1} alignItems="center" gap="$2">
+          {!props.loading &&
+            props.imageUrl(
+              <Skeleton radius={100}>
+                <Avatar circular size="$5">
+                  <Avatar.Image src={props.imageUrl} />
+                </Avatar>
+              </Skeleton>,
+            )}
+
+          <YStack>
+            {!props.loading && props.title && (
+              <Skeleton>
+                <SizableText>{props.title}</SizableText>
+              </Skeleton>
+            )}
+
+            {!props.loading && props.subtitle && (
+              <Skeleton>
+                <SizableText>{props.subtitle}</SizableText>
+              </Skeleton>
+            )}
+
+            {!props.loading && props.subtitle2 && (
+              <Skeleton>
+                <SizableText>{props.subtitle2}</SizableText>
+              </Skeleton>
+            )}
+          </YStack>
+        </XStack>
+
+        <XStack gap="$2">
+          {!props.loading &&
+            props.buttons?.map((button, index) => (
+              <Skeleton key={index}>
+                <Button {...button}>{button.title}</Button>
+              </Skeleton>
+            ))}
+        </XStack>
+      </XStack>
+    </ListItem>
+  </Skeleton.Group>
+);
+
+export default Friends;
