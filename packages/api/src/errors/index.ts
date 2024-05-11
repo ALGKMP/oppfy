@@ -94,7 +94,7 @@ export const handleAwsErrors = handleError(
   ErrorCode.AWS_ERROR,
 );
 
-export const handleMuxError = handleError(
+export const handleMuxErrors = handleError(
   "MuxError",
   "Mux error occurred",
   ErrorCode.MUX_ERROR,

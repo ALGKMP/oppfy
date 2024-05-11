@@ -112,6 +112,7 @@ export const userRouter = createTRPCRouter({
 
   getCurrentUserFriends: protectedProcedure
     .input(trpcValidators.user.paginate)
+    .output(trpcValidators.user.userHeader)
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.user.getFriends(
@@ -128,6 +129,7 @@ export const userRouter = createTRPCRouter({
 
   getCurrentUserFollowers: protectedProcedure
     .input(trpcValidators.user.paginate)
+    .output(trpcValidators.user.userHeader)
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.user.getFollowers(
@@ -144,6 +146,7 @@ export const userRouter = createTRPCRouter({
 
   getCurrentUserFollowing: protectedProcedure
     .input(trpcValidators.user.paginate)
+    .output(trpcValidators.user.)
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.user.getFollowing(
