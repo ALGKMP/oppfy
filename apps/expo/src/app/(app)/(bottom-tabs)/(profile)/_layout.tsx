@@ -85,26 +85,13 @@ const Profile = (props: ProfileProps) => {
     optimisticallyUpdate: true,
   });
 
-  const editProfileRedirect = () => {
-    if (props.loading) return;
+  // const editProfileRedirect = () => {
+  //   router.push("/edit-profile");
+  // };
 
-    const { name, username, bio } = props.data;
-
-    router.push({
-      params: {
-        name,
-        username,
-        bio: bio ?? "",
-      },
-      pathname: "/edit-profile",
-    });
-  };
-
-  const shareProfileRedirect = () => {
-    if (props.loading) return;
-
-    router.push("/share-profile");
-  };
+  // const shareProfileRedirect = () => {
+  //   router.push("/share-profile");
+  // };
 
   return (
     <YStack
@@ -141,36 +128,54 @@ const Profile = (props: ProfileProps) => {
         <Button
           size="$3"
           disabled={props.loading}
-          onPress={editProfileRedirect}
+          onPress={() => router.push("/edit-profile")}
         >
           Edit Profile
         </Button>
         <Button
           size="$3"
           disabled={props.loading}
-          onPress={shareProfileRedirect}
+          onPress={() => router.push("/share-profile")}
         >
           Share Profile
         </Button>
       </XStack>
 
       <XStack gap="$7">
-        <Stat
-          label="Friends"
-          value={props.loading ? "" : abbreviateNumber(props.data.friendCount)}
-        />
-        <Stat
-          label="Followers"
-          value={
-            props.loading ? "" : abbreviateNumber(props.data.followerCount)
-          }
-        />
-        <Stat
-          label="Following"
-          value={
-            props.loading ? "" : abbreviateNumber(props.data.followingCount)
-          }
-        />
+        <TouchableOpacity
+          disabled={props.loading}
+          onPress={() => router.push("/friends")}
+        >
+          <Stat
+            label="Friends"
+            value={
+              props.loading ? "" : abbreviateNumber(props.data.friendCount)
+            }
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          disabled={props.loading}
+          onPress={() => router.push("/followers")}
+        >
+          <Stat
+            label="Followers"
+            value={
+              props.loading ? "" : abbreviateNumber(props.data.followerCount)
+            }
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          disabled={props.loading}
+          onPress={() => router.push("/following")}
+        >
+          <Stat
+            label="Following"
+            value={
+              props.loading ? "" : abbreviateNumber(props.data.followingCount)
+            }
+          />
+        </TouchableOpacity>
       </XStack>
     </YStack>
   );

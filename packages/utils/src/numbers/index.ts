@@ -1,12 +1,28 @@
-export const abbreviateNumber = (number: number): string => {
-  const abbreviations = ["", "k", "M", "B", "T"];
-  const tier = (Math.log10(Math.abs(number)) / 3) | 0;
+type Abbreviation = "K" | "M" | "B";
 
-  if (tier === 0) return number.toString();
+export const abbreviateNumber = (value: number): string => {
+  let newValue = value;
+  const suffixes: Abbreviation[] = ["K", "M", "B"];
+  let suffixIndex = 0;
+  let roundedValue: number;
 
-  const suffix = abbreviations[tier];
-  const scale = Math.pow(10, tier * 3);
-  const scaled = number / scale;
+  while (newValue >= 1000 && suffixIndex < suffixes.length) {
+    suffixIndex++;
+    newValue /= 1000;
+  }
 
-  return scaled.toFixed(1) + suffix;
+  if (suffixIndex === 0) {
+    return value.toString(); // Return the original number if less than 1000
+  }
+
+  // Determine if decimal part is needed
+  const isInt = newValue % 1 === 0;
+  if (isInt) {
+    roundedValue = Math.floor(newValue);
+  } else {
+    // Show one decimal place if needed, but remove trailing zeros
+    roundedValue = Math.floor(newValue * 10) / 10;
+  }
+
+  return `${roundedValue}${suffixes[suffixIndex - 1]}`;
 };

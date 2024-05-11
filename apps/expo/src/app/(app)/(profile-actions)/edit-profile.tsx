@@ -1,5 +1,4 @@
 import React from "react";
-import { useLocalSearchParams } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -27,11 +26,9 @@ const profileSchema = z.object({
 });
 
 const EditProfile = () => {
-  const defaultValues = useLocalSearchParams<{
-    name: string;
-    username: string;
-    bio: string;
-  }>();
+  const utils = api.useUtils();
+
+  const defaultValues = utils.profile.getCurrentUsersFullProfile.getData();
 
   const {
     control,
@@ -39,11 +36,13 @@ const EditProfile = () => {
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
-    defaultValues,
+    defaultValues: {
+      name: defaultValues?.name ?? "",
+      username: defaultValues?.username ?? "",
+      bio: defaultValues?.bio ?? "",
+    },
     resolver: zodResolver(profileSchema),
   });
-
-  const utils = api.useUtils();
 
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newPartialProfileData) => {
