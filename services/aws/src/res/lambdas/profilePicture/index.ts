@@ -47,7 +47,7 @@ export const handler = async (
     console.log(body);
 
     const serverEndpoint =
-      "https://5bdc-74-12-66-138.ngrok-free.app/api/profilePicture";
+      "https://9f16-2607-fea8-4cc0-7170-4d83-e12d-1e92-3c84.ngrok-free.app/api/profilePicture";
 
     const response = await fetch(serverEndpoint, {
       method: "POST",

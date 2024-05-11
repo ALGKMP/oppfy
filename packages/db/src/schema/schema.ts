@@ -264,7 +264,7 @@ export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
   }),
 }));
 
-export const followRequest = mySqlTable("FriendRequest", {
+export const followRequest = mySqlTable("FollowRequest", {
   id: serial("id").primaryKey(),
   senderId: varchar("senderId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
