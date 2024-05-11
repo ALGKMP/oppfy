@@ -415,6 +415,9 @@ importers:
       '@aws-sdk/credential-providers':
         specifier: ^3.564.0
         version: 3.564.0
+      '@mux/mux-node':
+        specifier: ^8.5.1
+        version: 8.5.1
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.21.0
         version: 6.21.0(@typescript-eslint/parser@6.21.0)(eslint@8.57.0)(typescript@5.4.5)
