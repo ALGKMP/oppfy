@@ -43,20 +43,17 @@ const useUploadProfilePic = ({
         if (!optimisticallyUpdate) return;
 
         // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.profile.getFullProfile.cancel();
+        await utils.profile.getCurrentUsersFullProfile.cancel();
 
         // Get the data from the queryCache
-        const prevData = utils.profile.getFullProfile.getData();
+        const prevData = utils.profile.getCurrentUsersFullProfile.getData();
         if (prevData === undefined) return;
 
         // Optimistically update the data
-        utils.profile.getFullProfile.setData(
-          { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
-          {
-            ...prevData,
-            profilePictureUrl: newProfilePictureUrl,
-          },
-        );
+        utils.profile.getCurrentUsersFullProfile.setData(undefined, {
+          ...prevData,
+          profilePictureUrl: newProfilePictureUrl,
+        });
 
         // Return the previous data so we can revert if something goes wrong
         return { prevData };
@@ -66,8 +63,8 @@ const useUploadProfilePic = ({
         if (ctx === undefined) return;
 
         // If the mutation fails, use the context-value from onMutate
-        utils.profile.getFullProfile.setData(
-          { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
+        utils.profile.getCurrentUsersFullProfile.setData(
+          undefined,
           ctx.prevData,
         );
       },
@@ -75,7 +72,7 @@ const useUploadProfilePic = ({
         if (!optimisticallyUpdate) return;
 
         // Sync with server once mutation has settled
-        await utils.profile.getFullProfile.invalidate();
+        await utils.profile.getCurrentUsersFullProfile.invalidate();
       },
     },
   );
