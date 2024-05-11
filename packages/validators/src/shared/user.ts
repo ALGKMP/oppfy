@@ -49,16 +49,6 @@ export const blockedUser = z.object({
   profileId: z.number(),
 });
 
-export const paginatedBlockedUsers = z.object({
-  items: z.array(blockedUser),
-  nextCursor: z
-    .object({
-      createdAt: z.date(),
-      profileId: z.number(),
-    })
-    .nullable(),
-});
-
 export const updateProfile = z.object({
   username: z.string().optional(),
   name: z.string().optional(),
@@ -85,3 +75,26 @@ export const fullProfile = z.object({
   friendCount: z.number(),
   profilePictureUrl: z.string(),
 });
+
+// Define a schema for a single user profile
+const userHeaderSchema = z.object({
+  userId: z.string(),
+  username: z.string().nullable(),
+  name: z.string().nullable(),
+  profilePictureUrl: z.string(),
+});
+
+// Define a schema for the cursor used in pagination
+const cursorSchema = z.object({
+  createdAt: z.date(),
+  profileId: z.number(),
+});
+
+// Define a schema for the paginated response
+export const paginatedUserResponseSchema = z.object({
+  items: z.array(userHeaderSchema),
+  nextCursor: cursorSchema.nullable(),
+});
+
+
+
