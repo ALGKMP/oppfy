@@ -33,13 +33,13 @@ export const authRouter = createTRPCRouter({
     }
   }),
 
-  deleteUser: protectedProcedure.mutation(async ({ ctx, input }) => {
+  deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await ctx.services.user.deleteUser(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `Failed to delete user with ID ${input.userId}. Ensure the user exists and you have the necessary permissions.`,
+        message: `Failed to delete user with ID ${ctx.session.uid}. Ensure the user exists and you have the necessary permissions.`,
       });
     }
   }),
