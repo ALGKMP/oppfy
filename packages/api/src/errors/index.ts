@@ -72,6 +72,7 @@ export function handleError(
       try {
         return await originalMethod.apply(this, args);
       } catch (error) {
+        console.error(error);
         throw new DomainError(code, message, error);
       }
     };
