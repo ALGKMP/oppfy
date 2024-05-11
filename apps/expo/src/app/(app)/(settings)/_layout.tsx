@@ -16,39 +16,29 @@ const SettingsLayout = () => {
   const theme = useTheme();
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: theme.background.val,
+    <Stack
+      screenOptions={{
+        headerLeft: (props) => <HeaderLeft {...props} />,
+        header: (props) => <Header {...props} />,
+        headerStyle: {
+          backgroundColor: theme.background.val,
+        },
       }}
     >
-      <Stack
-        screenOptions={{
-          headerLeft: (props) => <HeaderLeft {...props} />,
-          header: (props) => <Header {...props} />,
+      <Stack.Screen
+        name="index"
+        options={{
+          title: "Settings",
         }}
-      >
-        <Stack.Screen
-          name="index"
-          options={{
-            title: "Settings",
-          }}
-        />
+      />
 
-        <Stack.Screen
-          name="notifications"
-          options={{ title: "Notifications" }}
-        />
+      <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
 
-        <Stack.Screen name="privacy" options={{ title: "Privacy" }} />
-        <Stack.Screen
-          name="blocked-users"
-          options={{ title: "Blocked Users" }}
-        />
+      <Stack.Screen name="privacy" options={{ title: "Privacy" }} />
+      <Stack.Screen name="blocked-users" options={{ title: "Blocked Users" }} />
 
-        <Stack.Screen name="other" options={{ title: "Other" }} />
-      </Stack>
-    </SafeAreaView>
+      <Stack.Screen name="other" options={{ title: "Other" }} />
+    </Stack>
   );
 };
 

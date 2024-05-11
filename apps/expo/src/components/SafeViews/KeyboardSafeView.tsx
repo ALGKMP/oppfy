@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { KeyboardAvoidingViewProps } from "react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,21 +11,18 @@ interface KeyboardSafeViewProps extends KeyboardAvoidingViewProps {
 
 const KeyboardSafeView = ({ children, ...props }: KeyboardSafeViewProps) => {
   const theme = useTheme();
-
   const insets = useSafeAreaInsets();
-  const headerHeight = useHeaderHeight();
 
-  const verticalOffset = React.useMemo(
-    () => headerHeight + insets.top,
-    [headerHeight, insets.top],
-  );
+  const verticalOffset = useMemo(() => {
+    return insets.top + insets.bottom;
+  }, [insets]);
 
   return (
     <KeyboardAvoidingView
-      style={[{ flex: 1, backgroundColor: theme.background.val }, props.style]} // Merge style from props with default style
+      style={[{ flex: 1, backgroundColor: theme.background.val }, props.style]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={verticalOffset}
-      {...props} // Spread the rest of the props to the KeyboardAvoidingView
+      {...props}
     >
       {children}
     </KeyboardAvoidingView>

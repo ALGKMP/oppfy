@@ -2,7 +2,6 @@ import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import type {
   HeaderBackButtonProps,
   HeaderButtonProps,
@@ -20,63 +19,52 @@ const OnboardingLayout = () => {
   const theme = useTheme();
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: theme.background.val,
+    <Stack
+      screenOptions={{
+        headerTitle: (props) => <HeaderTitle {...props} />,
+        headerLeft: (props) => <HeaderLeft {...props} />,
+        headerRight: (props) => <HeaderRight {...props} />,
+        header: (props) => <Header {...props} />,
+        contentStyle: {
+          backgroundColor: theme.background.val,
+        },
       }}
     >
-      <Stack
-        screenOptions={{
-          headerTitle: (props) => <HeaderTitle {...props} />,
-          headerLeft: (props) => <HeaderLeft {...props} />,
-          headerRight: (props) => <HeaderRight {...props} />,
-          header: (props) => <Header {...props} />,
+      <Stack.Screen
+        name="index"
+        options={{ animation: "fade", header: () => null }}
+      />
+
+      <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
+
+      <Stack.Screen name="auth/phone-number" options={{ animation: "fade" }} />
+      <Stack.Screen
+        name="auth/phone-number-otp"
+        options={{ animation: "fade" }}
+      />
+
+      <Stack.Screen
+        name="user-info/welcome"
+        options={{
+          animation: "fade",
+          headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
         }}
-      >
-        <Stack.Screen
-          name="index"
-          options={{ animation: "fade", header: () => null }}
-        />
+      />
+      <Stack.Screen
+        name="user-info/full-name"
+        options={{ animation: "fade" }}
+      />
+      <Stack.Screen
+        name="user-info/date-of-birth"
+        options={{ animation: "fade" }}
+      />
 
-        <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
-
-        <Stack.Screen
-          name="auth/phone-number"
-          options={{ animation: "fade" }}
-        />
-        <Stack.Screen
-          name="auth/phone-number-otp"
-          options={{ animation: "fade" }}
-        />
-
-        <Stack.Screen
-          name="user-info/welcome"
-          options={{
-            animation: "fade",
-            headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
-          }}
-        />
-        <Stack.Screen
-          name="user-info/full-name"
-          options={{ animation: "fade" }}
-        />
-        <Stack.Screen
-          name="user-info/date-of-birth"
-          options={{ animation: "fade" }}
-        />
-
-        <Stack.Screen
-          name="user-info/username"
-          options={{ animation: "fade" }}
-        />
-        <Stack.Screen
-          name="user-info/profile-picture"
-          options={{ animation: "fade" }}
-        />
-      </Stack>
-      <StatusBar />
-    </SafeAreaView>
+      <Stack.Screen name="user-info/username" options={{ animation: "fade" }} />
+      <Stack.Screen
+        name="user-info/profile-picture"
+        options={{ animation: "fade" }}
+      />
+    </Stack>
   );
 };
 
@@ -98,13 +86,10 @@ const HeaderTitle = (_: HeaderTitleProps) => (
 const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
   const router = useRouter();
 
+  if (!canGoBack) return null;
+
   return (
-    <TouchableOpacity
-      hitSlop={10}
-      onPress={() => {
-        canGoBack ? void router.back() : null;
-      }}
-    >
+    <TouchableOpacity hitSlop={10} onPress={() => router.back()}>
       <ChevronLeft />
     </TouchableOpacity>
   );

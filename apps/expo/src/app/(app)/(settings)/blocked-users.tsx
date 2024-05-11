@@ -15,7 +15,7 @@ import {
 
 import { AlertDialog } from "~/components/Dialogs";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -24,10 +24,6 @@ type UserProfile = RouterOutputs["user"]["getBlockedUsers"]["items"][0];
 const BlockedUsers = () => {
   const utils = api.useUtils();
   const headerHeight = useHeaderHeight();
-
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 10 }, () => null);
-  }, []);
 
   const unblockUser = api.user.unblockUser.useMutation({
     onMutate: async (newData) => {
@@ -93,6 +89,10 @@ const BlockedUsers = () => {
     );
   }, [blockedUsersData]);
 
+  const placeholderData = useMemo(() => {
+    return Array.from({ length: 10 }, () => null);
+  }, []);
+
   const blockedUsersItems = useMemo(() => {
     return blockedUsersData?.pages.flatMap((page) => page.items);
   }, [blockedUsersData]);
@@ -104,45 +104,43 @@ const BlockedUsers = () => {
   };
 
   return (
-    <ScreenBaseView>
+    <BaseScreenView paddingBottom={0}>
       {isLoading || itemCount ? (
-        <YStack flex={1} gap="$2">
-          <FlashList
-            data={isLoading ? placeholderData : blockedUsersItems}
-            estimatedItemSize={75}
-            onEndReached={handleOnEndReached}
-            showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              <SizableText size="$2" theme="alt1" marginBottom="$2">
-                BLOCKED USERS
-              </SizableText>
-            }
-            renderItem={({ item, index }) => {
-              const isFirstInGroup = index === 0;
-              const isLastInGroup = index === itemCount - 1;
+        <FlashList
+          data={isLoading ? placeholderData : blockedUsersItems}
+          estimatedItemSize={75}
+          onEndReached={handleOnEndReached}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <SizableText size="$2" theme="alt1" marginBottom="$2">
+              BLOCKED USERS
+            </SizableText>
+          }
+          renderItem={({ item, index }) => {
+            const isFirstInGroup = index === 0;
+            const isLastInGroup = index === itemCount - 1;
 
-              return (
-                <View>
-                  {item === null ? (
-                    <BlockedUserListItem
-                      loading
-                      isFirstInGroup={isFirstInGroup}
-                      isLastInGroup={isLastInGroup}
-                    />
-                  ) : (
-                    <BlockedUserListItem
-                      item={item}
-                      loading={false}
-                      onUnblock={handleUnblock}
-                      isFirstInGroup={isFirstInGroup}
-                      isLastInGroup={isLastInGroup}
-                    />
-                  )}
-                </View>
-              );
-            }}
-          />
-        </YStack>
+            return (
+              <View>
+                {item === null ? (
+                  <BlockedUserListItem
+                    loading
+                    isFirstInGroup={isFirstInGroup}
+                    isLastInGroup={isLastInGroup}
+                  />
+                ) : (
+                  <BlockedUserListItem
+                    item={item}
+                    loading={false}
+                    onUnblock={handleUnblock}
+                    isFirstInGroup={isFirstInGroup}
+                    isLastInGroup={isLastInGroup}
+                  />
+                )}
+              </View>
+            );
+          }}
+        />
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
@@ -152,7 +150,7 @@ const BlockedUsers = () => {
           />
         </View>
       )}
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

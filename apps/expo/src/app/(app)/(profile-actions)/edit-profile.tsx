@@ -1,5 +1,4 @@
 import React from "react";
-import { useLocalSearchParams } from "expo-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -17,7 +16,7 @@ import { z } from "zod";
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const profileSchema = z.object({
@@ -27,11 +26,9 @@ const profileSchema = z.object({
 });
 
 const EditProfile = () => {
-  const defaultValues = useLocalSearchParams<{
-    name: string;
-    username: string;
-    bio: string;
-  }>();
+  const utils = api.useUtils();
+
+  const defaultValues = utils.profile.getCurrentUsersFullProfile.getData();
 
   const {
     control,
@@ -39,29 +36,28 @@ const EditProfile = () => {
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
-    defaultValues,
+    defaultValues: {
+      name: defaultValues?.name ?? "",
+      username: defaultValues?.username ?? "",
+      bio: defaultValues?.bio ?? "",
+    },
     resolver: zodResolver(profileSchema),
   });
-
-  const utils = api.useUtils();
 
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newPartialProfileData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getFullProfile.cancel();
+      await utils.profile.getCurrentUsersFullProfile.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getFullProfile.getData();
+      const prevData = utils.profile.getCurrentUsersFullProfile.getData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.profile.getFullProfile.setData(
-        { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
-        {
-          ...prevData,
-          ...newPartialProfileData,
-        },
-      );
+      utils.profile.getCurrentUsersFullProfile.setData(undefined, {
+        ...prevData,
+        ...newPartialProfileData,
+      });
 
       // Return the previous data so we can revert if something goes wrong
       return { prevData };
@@ -70,14 +66,11 @@ const EditProfile = () => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.profile.getFullProfile.setData(
-        { userId: "OZK0Mq45uIY75FaZdI2OdUkg5Cx1" },
-        ctx.prevData,
-      );
+      utils.profile.getCurrentUsersFullProfile.setData(undefined, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.profile.getFullProfile.invalidate();
+      await utils.profile.getCurrentUsersFullProfile.invalidate();
     },
   });
 
@@ -98,7 +91,7 @@ const EditProfile = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView>
         <YStack flex={1} gap="$4">
           <XStack alignItems="flex-start" gap="$4">
             <SizableText width="$7">Name</SizableText>
@@ -173,7 +166,7 @@ const EditProfile = () => {
         >
           {isSubmitting ? <Spinner /> : "Save"}
         </Button>
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };

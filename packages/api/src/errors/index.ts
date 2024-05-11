@@ -40,8 +40,9 @@ export enum ErrorCode {
   FAILED_TO_UPDATE_PRIVACY_SETTING = "FAILED_TO_UPDATE_PRIVACY_SETTING",
 
 
-  AWS_ERROR = "AWS_ERROR",
   DATABASE_ERROR = "DATABASE_ERROR",
+  AWS_ERROR = "AWS_ERROR",
+  MUX_ERROR = "MUX_ERROR",
 }
 
 type ErrorCodes = keyof typeof ErrorCode;
@@ -72,6 +73,7 @@ export function handleError(
       try {
         return await originalMethod.apply(this, args);
       } catch (error) {
+        console.error(error);
         throw new DomainError(code, message, error);
       }
     };
@@ -91,3 +93,9 @@ export const handleAwsErrors = handleError(
   "AWS error occurred",
   ErrorCode.AWS_ERROR,
 );
+
+export const handleMuxErrors = handleError(
+  "MuxError",
+  "Mux error occurred",
+  ErrorCode.MUX_ERROR,
+)

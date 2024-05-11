@@ -1,12 +1,12 @@
 import { Text } from "tamagui";
 
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 
 const MediaOfFriendsYouPosted = () => {
   return (
-    <ScreenBaseView>
+    <BaseScreenView>
       <Text>Media of friends you posted</Text>
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

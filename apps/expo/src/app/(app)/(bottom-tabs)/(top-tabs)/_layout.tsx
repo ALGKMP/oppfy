@@ -5,17 +5,10 @@ import { TopTabs } from "~/layouts";
 
 const TopTabsLayout = () => {
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "$background",
-      }}
-    >
-      <TopTabs tabBar={(props) => <TopTabBar {...props} />}>
-        <TopTabs.Screen name="following" />
-        <TopTabs.Screen name="for-you-page" />
-      </TopTabs>
-    </View>
+    <TopTabs tabBar={(props) => <TopTabBar {...props} />} screenOptions={{}}>
+      <TopTabs.Screen name="following" />
+      <TopTabs.Screen name="for-you-page" />
+    </TopTabs>
   );
 };
 

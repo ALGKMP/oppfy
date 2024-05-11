@@ -1,14 +1,14 @@
 import React from "react";
-import { Text } from "tamagui";
+import { Text } from "react-native";
 
 import { BaseScreenView } from "~/components/Views";
 
-const ShareProfile = () => {
+const Following = () => {
   return (
     <BaseScreenView>
-      <Text>ShareProfile</Text>
+      <Text>Following</Text>
     </BaseScreenView>
   );
 };
 
-export default ShareProfile;
+export default Following;

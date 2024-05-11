@@ -20,7 +20,7 @@ import { sharedValidators } from "@acme/validators";
 
 import { Header } from "~/components/Headers";
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
@@ -67,7 +67,7 @@ const PhoneNumber = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             What&apos;s your phone number?
@@ -108,7 +108,7 @@ const PhoneNumber = () => {
         >
           Continue
         </Button>
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };
@@ -165,7 +165,7 @@ const CountryPicker = ({
               </TouchableOpacity>
             }
           />
-          <View flex={1} paddingHorizontal="$4" backgroundColor="$background">
+          <View flex={1} paddingHorizontal="$4">
             <YStack flex={1} gap="$4">
               <Input
                 placeholder="Search"

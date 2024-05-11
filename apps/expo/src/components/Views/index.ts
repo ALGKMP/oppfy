@@ -1,1 +1,1 @@
-export { default as ScreenBaseView } from "./ScreenBaseView";
+export { default as BaseScreenView } from "./BaseScreenView";

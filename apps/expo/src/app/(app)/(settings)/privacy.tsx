@@ -7,7 +7,7 @@ import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import type { RouterInputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -119,7 +119,7 @@ const Privacy = () => {
   ] satisfies ButtonOption[];
 
   return (
-    <ScreenBaseView scrollable>
+    <BaseScreenView scrollable>
       <YStack gap="$4">{settingsGroups.map(renderSettingsGroup)}</YStack>
       <ActionSheet
         title={title}
@@ -130,7 +130,7 @@ const Privacy = () => {
           setIsModalVisible(false);
         }}
       />
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

@@ -2,7 +2,7 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { Button, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 
 const Welcome = () => {
   const router = useRouter();
@@ -12,7 +12,7 @@ const Welcome = () => {
   };
 
   return (
-    <ScreenBaseView>
+    <BaseScreenView safeAreaEdges={["bottom"]}>
       <YStack flex={1} gap="$8">
         <Text
           alignSelf="center"
@@ -75,7 +75,7 @@ const Welcome = () => {
       </YStack>
 
       <Button onPress={onSubmit}>Continue</Button>
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 

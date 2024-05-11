@@ -7,7 +7,7 @@ import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const DateOfBirth = () => {
@@ -33,7 +33,7 @@ const DateOfBirth = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             When&apos;s your birthday?
@@ -73,7 +73,7 @@ const DateOfBirth = () => {
             setOpen(false);
           }}
         />
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };

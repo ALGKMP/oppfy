@@ -5,7 +5,7 @@ import { Button, Input, Text, XStack, YStack } from "tamagui";
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { api, isTRPCClientError } from "~/utils/api";
 
 enum Error {
@@ -43,7 +43,7 @@ const Username = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             Pick a username?
@@ -68,7 +68,7 @@ const Username = () => {
         >
           Continue
         </Button>
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };

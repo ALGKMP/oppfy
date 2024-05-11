@@ -5,7 +5,7 @@ import { Button, Input, Text, XStack, YStack } from "tamagui";
 import { sharedValidators } from "@acme/validators";
 
 import { KeyboardSafeView } from "~/components/SafeViews";
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const FullName = () => {
@@ -28,7 +28,7 @@ const FullName = () => {
 
   return (
     <KeyboardSafeView>
-      <ScreenBaseView>
+      <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <Text fontSize="$8" fontWeight="bold">
             What&apos;s your name?
@@ -52,7 +52,7 @@ const FullName = () => {
         >
           Continue
         </Button>
-      </ScreenBaseView>
+      </BaseScreenView>
     </KeyboardSafeView>
   );
 };

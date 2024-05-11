@@ -2,7 +2,7 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { Button, Text, YStack } from "tamagui";
 
-import { ScreenBaseView } from "~/components/Views";
+import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
 
 const Start = () => {
@@ -18,7 +18,7 @@ const Start = () => {
   };
 
   return (
-    <ScreenBaseView>
+    <BaseScreenView safeAreaEdges={["bottom"]}>
       <YStack flex={1} alignItems="center" justifyContent="center">
         <Text fontFamily="$modak" fontSize={64} margin={-24}>
           OPPFY
@@ -29,7 +29,7 @@ const Start = () => {
       </YStack>
 
       <Button onPress={onSubmit}>Welcome</Button>
-    </ScreenBaseView>
+    </BaseScreenView>
   );
 };
 
