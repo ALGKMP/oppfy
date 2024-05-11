@@ -1,4 +1,4 @@
-import { and, eq, or } from "drizzle-orm";
+import { and, count, eq, or } from "drizzle-orm";
 
 import { db, schema } from "@acme/db";
 
@@ -51,9 +51,12 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async friendsCount(userId: string) {
-    const friends = await this._getFriends(userId);
-    return friends.length;
+  async countFriends(userId: string): Promise<number | undefined> {
+    const result = await this.db
+      .select({ count: count() })
+      .from(schema.friend)
+      .where(eq(schema.friend.userId1, userId));
+    return result[0]?.count;
   }
 
   @handleDatabaseErrors
@@ -103,10 +106,6 @@ export class FriendRepository {
     return await this.db
       .select()
       .from(schema.friendRequest)
-      .where(
-        and(
-          eq(schema.friendRequest.senderId, senderId),
-        ),
-      );
+      .where(and(eq(schema.friendRequest.senderId, senderId)));
   }
 }
