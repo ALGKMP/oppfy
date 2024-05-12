@@ -153,6 +153,28 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
+  getOtherUserFollowers: protectedProcedure
+    .input(trpcValidators.user.paginateOtherUser)
+    .output(sharedValidators.user.paginatedUserResponseSchema)
+    .query(async ({ input, ctx }) => {
+      try {
+        const result = await ctx.services.user.getFollowers(
+          input.userId,
+          input.cursor,
+          input.pageSize,
+        );
+        const d =
+          sharedValidators.user.paginatedUserResponseSchema.parse(result);
+        console.log("DATA PARSED PARSED", d);
+        return d;
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          cause: err,
+        });
+      }
+    }),
+
   // Procedure to get current user's following
   getCurrentUserFollowing: protectedProcedure
     .input(trpcValidators.user.paginate)
