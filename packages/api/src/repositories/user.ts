@@ -208,12 +208,12 @@ export class UserRepository {
         createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
       })
-      .from(schema.user)
+      .from(schema.friend)
       .innerJoin(
         schema.friend,
         or(
-          eq(schema.user.id, schema.friend.userId1),
-          eq(schema.user.id, schema.friend.userId2),
+          eq(schema.friend.userId1, schema.user.id),
+          eq(schema.friend.userId2, schema.user.id),
         ),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
