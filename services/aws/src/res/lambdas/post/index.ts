@@ -60,7 +60,7 @@ export const handler = async (
 
     const body = trpcValidators.post.uploadPost.parse({
         author: metadata.author,
-        friend: metadata.friend,
+        recipient: metadata.recipient,
         caption: metadata.caption,
         key: objectKey,
     });

@@ -16,7 +16,7 @@ export const postRouter = createTRPCRouter({
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
         const metadata = {
           author: ctx.session.uid,
-          friend: input.friend,
+          recipient: input.recipient,
           caption: input.caption,
         };
 
@@ -51,7 +51,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.services.post.createPost(
         input.author,
-        input.friend,
+        input.recipient,
         input.caption,
         input.key,
       );
