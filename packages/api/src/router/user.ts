@@ -130,6 +130,26 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
+  // Procedure to get current user's friends
+  getOtherUserFriends: protectedProcedure
+    .input(trpcValidators.user.paginateOtherUser)
+    .output(sharedValidators.user.paginatedUserResponseSchema)
+    .query(async ({ input, ctx }) => {
+      try {
+        const result = await ctx.services.user.getFriends(
+          input.userId,
+          input.cursor,
+          input.pageSize,
+        );
+        return sharedValidators.user.paginatedUserResponseSchema.parse(result);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          cause: err,
+        });
+      }
+    }),
+
   // Procedure to get current user's followers
   getCurrentUserFollowers: protectedProcedure
     .input(trpcValidators.user.paginate)
