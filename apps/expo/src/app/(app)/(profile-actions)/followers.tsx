@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
@@ -90,9 +90,9 @@ const Followers = () => {
                     title={item.username}
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
-                    buttons={
-                        
-                    }
+                    // buttons={
+
+                    // }
                   />
                 )}
               </View>

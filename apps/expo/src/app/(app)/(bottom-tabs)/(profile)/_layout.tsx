@@ -85,14 +85,6 @@ const Profile = (props: ProfileProps) => {
     optimisticallyUpdate: true,
   });
 
-  // const editProfileRedirect = () => {
-  //   router.push("/edit-profile");
-  // };
-
-  // const shareProfileRedirect = () => {
-  //   router.push("/share-profile");
-  // };
-
   return (
     <YStack
       padding="$4"

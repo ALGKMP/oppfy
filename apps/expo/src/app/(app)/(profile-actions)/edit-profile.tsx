@@ -91,7 +91,7 @@ const EditProfile = () => {
 
   return (
     <KeyboardSafeView>
-      <BaseScreenView>
+      <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <XStack alignItems="flex-start" gap="$4">
             <SizableText width="$7">Name</SizableText>
