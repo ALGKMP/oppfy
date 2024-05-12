@@ -22,9 +22,7 @@ const BottomTabsLayout = () => {
   const router = useRouter();
   const utils = api.useUtils();
 
-  const username = useMemo(() => {
-    return utils.profile.getCurrentUsersFullProfile.getData()?.username;
-  }, [utils.profile.getCurrentUsersFullProfile]);
+  const username = utils.profile.getCurrentUsersFullProfile.getData()?.username;
 
   return (
     <BottomTabs

@@ -79,8 +79,8 @@ export const fullProfile = z.object({
 // Define a schema for a single user profile
 const userHeaderSchema = z.object({
   userId: z.string(),
-  username: z.string().nullable(),
-  name: z.string().nullable(),
+  username: z.string(),
+  name: z.string(),
   profilePictureUrl: z.string(),
 });
 

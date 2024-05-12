@@ -12,10 +12,11 @@ interface KeyboardSafeViewProps extends KeyboardAvoidingViewProps {
 const KeyboardSafeView = ({ children, ...props }: KeyboardSafeViewProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
 
   const verticalOffset = useMemo(() => {
-    return insets.top + insets.bottom;
-  }, [insets]);
+    return headerHeight - insets.bottom;
+  }, [headerHeight, insets.bottom]);
 
   return (
     <KeyboardAvoidingView

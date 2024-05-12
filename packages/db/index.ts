@@ -1,7 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
+import Mux from "@mux/mux-node";
 import { drizzle } from "drizzle-orm/mysql2";
 import * as mysql from "mysql2/promise";
-import Mux from "@mux/mux-node";
 
 // import * as migration from "@acme/db/src/schema/migration";
 import * as migration from "./src/schema/schema";
