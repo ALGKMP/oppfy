@@ -46,7 +46,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     s3,
     db,
-    // mux,
+    mux,
     auth,
     services,
     session: opts.session,
