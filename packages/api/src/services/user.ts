@@ -190,6 +190,7 @@ export class UserService {
     data: UserProfile[],
     pageSize: number,
   ): Promise<PaginatedResponse<UserProfile>> {
+    try{
     const items = await Promise.all(
       data.map(async (item) => {
         if (item.profilePictureUrl) {
@@ -197,7 +198,6 @@ export class UserService {
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: item.profilePictureUrl,
           });
-          console.log("presignedUrl: ", presignedUrl);
           item.profilePictureUrl = presignedUrl;
         } else {
           const presignedUrl = await this.awsService.getObjectPresignedUrl({
@@ -217,12 +217,15 @@ export class UserService {
         createdAt: nextItem!.createdAt,
         profileId: nextItem!.profileId,
       };
-      console.log("server: ", nextCursor);
     }
     return {
       items,
       nextCursor,
     };
+    } catch (err) {
+      console.log(err);
+      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
+    }
   }
 
   async getFollowers(
@@ -264,6 +267,19 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
+  async getBlockedUsers(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedBlockedUsers(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
   async getFriendRequests(
     userId: string,
     cursor: Cursor | null = null,
@@ -283,19 +299,6 @@ export class UserService {
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.userRepository.getPaginatedFollowRequests(
-      userId,
-      cursor,
-      pageSize,
-    );
-    return this._updateProfilePictureUrls(data, pageSize);
-  }
-
-  async getBlockedUsers(
-    userId: string,
-    cursor: Cursor | null = null,
-    pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedBlockedUsers(
       userId,
       cursor,
       pageSize,

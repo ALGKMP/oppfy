@@ -68,11 +68,13 @@ const BlockedUsers = () => {
     hasNextPage,
   } = api.user.getBlockedUsers.useInfiniteQuery(
     {
-      pageSize: 10,
+      pageSize: 20,
     },
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+      getNextPageParam: (lastPage) => {
+        // console.log("Last page received:", lastPage);
+        return lastPage.nextCursor;
+      },    },
   );
 
   const handleUnblock = async (blockedUserId: string) => {
@@ -98,7 +100,9 @@ const BlockedUsers = () => {
   }, [blockedUsersData]);
 
   const handleOnEndReached = async () => {
+    console.log("End reached, isFetchingNextPage:", isFetchingNextPage, "hasNextPage:", hasNextPage);
     if (!isFetchingNextPage && hasNextPage) {
+      console.log("Fetching next page");
       await fetchNextPage();
     }
   };

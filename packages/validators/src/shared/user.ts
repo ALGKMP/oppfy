@@ -93,7 +93,7 @@ const cursorSchema = z.object({
 // Define a schema for the paginated response
 export const paginatedUserResponseSchema = z.object({
   items: z.array(userHeaderSchema),
-  nextCursor: cursorSchema.nullable(),
+  nextCursor: cursorSchema.optional(),
 });
 
 
