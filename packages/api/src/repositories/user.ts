@@ -125,10 +125,10 @@ export class UserRepository {
         createdAt: schema.follower.createdAt,
         profileId: schema.profile.id,
       })
-      .from(schema.user)
+      .from(schema.follower)
       .innerJoin(
-        schema.follower,
-        eq(schema.user.id, schema.follower.recipientId),
+        schema.user,
+        eq(schema.follower.senderId, schema.user.id),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .innerJoin(
@@ -168,8 +168,8 @@ export class UserRepository {
         createdAt: schema.follower.createdAt,
         profileId: schema.profile.id,
       })
-      .from(schema.user)
-      .innerJoin(schema.follower, eq(schema.user.id, schema.follower.senderId))
+      .from(schema.follower)
+      .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .innerJoin(
         schema.profilePicture,
@@ -239,6 +239,50 @@ export class UserRepository {
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
   }
+
+  @handleDatabaseErrors
+  async getPaginatedBlockedUsers(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+        createdAt: schema.block.createdAt, // Assuming block has a createdAt column
+        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
+      })
+      .from(schema.user)
+      .innerJoin(schema.block, eq(schema.user.id, schema.block.blockedUserId))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
+      .where(
+        and(
+          eq(schema.block.userId, forUserId), // Filtering for the specific user who blocked others
+          cursor
+            ? or(
+                gt(schema.block.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.block.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(schema.block.createdAt), // Primary order by the creation date
+        asc(schema.profile.id), // Tiebreaker order by profile ID
+      )
+      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
+  }
+
 
   @handleDatabaseErrors
   async getPaginatedFollowRequests(
@@ -331,50 +375,6 @@ export class UserRepository {
       )
       .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
-
-  @handleDatabaseErrors
-  async getPaginatedBlockedUsers(
-    forUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
-    pageSize = 10,
-  ) {
-    return await this.db
-      .select({
-        userId: schema.user.id,
-        username: schema.user.username,
-        name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
-        createdAt: schema.block.createdAt, // Assuming block has a createdAt column
-        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
-      })
-      .from(schema.user)
-      .innerJoin(schema.block, eq(schema.user.id, schema.block.blockedUserId))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
-      .where(
-        and(
-          eq(schema.block.userId, forUserId), // Filtering for the specific user who blocked others
-          cursor
-            ? or(
-                gt(schema.block.createdAt, cursor.createdAt),
-                and(
-                  eq(schema.block.createdAt, cursor.createdAt),
-                  gt(schema.profile.id, cursor.profileId),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(
-        asc(schema.block.createdAt), // Primary order by the creation date
-        asc(schema.profile.id), // Tiebreaker order by profile ID
-      )
-      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
-  }
-
   // Use this to check if a user is blocked (gonna need to use this a lot)
   @handleDatabaseErrors
   async getBlockedUser(userId: string, blockedUserId: string) {
