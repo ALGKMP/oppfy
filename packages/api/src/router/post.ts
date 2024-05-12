@@ -36,6 +36,14 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+    // createMuxVideoPresignedUrl: protectedProcedure
+    // .input(trpcValidators.post.createMuxVideoPresignedUrl)
+    // .output(z.string())
+    // .mutation(async ({ ctx, input }) => {
+
+    // }
+
+
   uploadPost: publicProcedure
     .meta({ /* 👉 */ openapi: { method: "POST", path: "/uploadPost" } })
     .input(trpcValidators.post.uploadPost)
