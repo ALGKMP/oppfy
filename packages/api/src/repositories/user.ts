@@ -299,10 +299,10 @@ export class UserRepository {
         createdAt: schema.followRequest.createdAt, // Assuming followRequest has a createdAt column
         profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
       })
-      .from(schema.user)
+      .from(schema.followRequest)
       .innerJoin(
-        schema.followRequest,
-        eq(schema.user.id, schema.followRequest.recipientId),
+        schema.user,
+        eq(schema.followRequest.recipientId, schema.user.id),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .innerJoin(
@@ -345,10 +345,10 @@ export class UserRepository {
         createdAt: schema.friendRequest.createdAt, // Assuming friendRequest has a createdAt column
         profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
       })
-      .from(schema.user)
+      .from(schema.friendRequest)
       .innerJoin(
-        schema.friendRequest,
-        eq(schema.user.id, schema.friendRequest.recipientId),
+        schema.user,
+        eq(schema.friendRequest.recipientId, schema.user.id),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .innerJoin(

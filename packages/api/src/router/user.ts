@@ -260,25 +260,27 @@ export const userRouter = createTRPCRouter({
 
   /* These two blocks of code are defining TRPC procedures for fetching friend requests and follower
 requests respectively. */
-  // getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
-  //   try {
-  //     return await ctx.services.user.getFriendRequests(ctx.session.uid);
-  //   } catch (err) {
-  //     throw new TRPCError({
-  //       code: "INTERNAL_SERVER_ERROR",
-  //     });
-  //   }
-  // }),
+  getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
+      return await ctx.services.user.getFriendRequests(ctx.session.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        cause: err,
+      });
+    }
+  }),
 
-  // getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
-  //   try {
-  //     return await ctx.services.user.getFollowRequests(ctx.session.uid);
-  //   } catch (err) {
-  //     throw new TRPCError({
-  //       code: "INTERNAL_SERVER_ERROR",
-  //     });
-  //   }
-  // }),
+  getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
+      return await ctx.services.user.getFollowRequests(ctx.session.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        cause: err,
+      });
+    }
+  }),
 
   // TODO: Test this
   blockUser: protectedProcedure
