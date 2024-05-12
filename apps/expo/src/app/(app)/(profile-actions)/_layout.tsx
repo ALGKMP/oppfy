@@ -31,8 +31,26 @@ const ProfileActionsLayout = () => {
           title: "Edit Profile",
         }}
       />
-
       <Stack.Screen name="share-profile" options={{ title: "Share Profile" }} />
+
+      <Stack.Screen
+        name="friends-list"
+        options={{
+          title: "Friends",
+        }}
+      />
+      <Stack.Screen
+        name="followers-list"
+        options={{
+          title: "Followers",
+        }}
+      />
+      <Stack.Screen
+        name="following-list"
+        options={{
+          title: "Following",
+        }}
+      />
     </Stack>
   );
 };

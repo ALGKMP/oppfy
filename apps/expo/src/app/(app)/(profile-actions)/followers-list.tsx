@@ -18,13 +18,6 @@ import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const Followers = () => {
-  const [unfollowed, setUnfollowed] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    console.log(unfollowed);
-    console.log(unfollowed["OZK0Mq45uIY75FaZdI2OdUkg5Cx1"]);
-  }, [unfollowed]);
-
   const {
     data: followersData,
     isLoading,
@@ -40,6 +33,14 @@ const Followers = () => {
     },
   );
 
+  const placeholderData = useMemo(() => {
+    return Array.from({ length: 10 }, () => null);
+  }, []);
+
+  const friendsItems = useMemo(() => {
+    return followersData?.pages.flatMap((page) => page.items);
+  }, [followersData]);
+
   const itemCount = useMemo(() => {
     if (followersData === undefined) return 0;
 
@@ -49,24 +50,18 @@ const Followers = () => {
     );
   }, [followersData]);
 
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 10 }, () => null);
-  }, []);
-
-  const friendsItems = useMemo(() => {
-    return followersData?.pages.flatMap((page) => page.items);
-  }, [followersData]);
-
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
   };
 
+  const [unfollowed, setUnfollowed] = useState<Record<string, boolean>>({});
+
   const toggleUnfollow = (id: string) => {
     setUnfollowed((prev) => ({
       ...prev,
-      [id]: !prev[id], // Toggle the state between true and false directly
+      [id]: !prev[id],
     }));
   };
 
