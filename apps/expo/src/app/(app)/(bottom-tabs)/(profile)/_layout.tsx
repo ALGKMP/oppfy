@@ -48,7 +48,6 @@ const ProfileLayout = () => {
           <TopTabBar {...props} />
         </YStack>
       )}
-      screenOptions={{}}
     >
       <TopTabs.Screen
         name="media-of-you"
@@ -136,7 +135,7 @@ const Profile = (props: ProfileProps) => {
       <XStack gap="$7">
         <TouchableOpacity
           disabled={props.loading}
-          onPress={() => router.push("/friends")}
+          onPress={() => router.push("/friends-list")}
         >
           <Stat
             label="Friends"
@@ -148,7 +147,7 @@ const Profile = (props: ProfileProps) => {
 
         <TouchableOpacity
           disabled={props.loading}
-          onPress={() => router.push("/followers")}
+          onPress={() => router.push("/followers-list")}
         >
           <Stat
             label="Followers"
@@ -159,7 +158,7 @@ const Profile = (props: ProfileProps) => {
         </TouchableOpacity>
         <TouchableOpacity
           disabled={props.loading}
-          onPress={() => router.push("/following")}
+          onPress={() => router.push("/following-list")}
         >
           <Stat
             label="Following"
