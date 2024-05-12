@@ -174,6 +174,26 @@ export const userRouter = createTRPCRouter({
       }
     }),
 
+  getOtherUserFollowing: protectedProcedure
+    .input(trpcValidators.user.paginateOtherUser)
+    .output(sharedValidators.user.paginatedUserResponseSchema)
+    .query(async ({ input, ctx }) => {
+      try {
+        const result = await ctx.services.user.getFollowing(
+          input.userId,
+          input.cursor,
+          input.pageSize,
+        );
+        console.log("RESULT :", result);
+        return sharedValidators.user.paginatedUserResponseSchema.parse(result);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          cause: err,
+        });
+      }
+    }),
+
   // Procedure to get blocked users
   getBlockedUsers: protectedProcedure
     .input(trpcValidators.user.paginate)
@@ -195,6 +215,7 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
+
   /* These two blocks of code are defining TRPC procedures for fetching friend requests and follower
 requests respectively. */
   // getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
