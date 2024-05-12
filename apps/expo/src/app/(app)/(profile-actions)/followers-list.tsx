@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
@@ -7,6 +8,7 @@ import {
   Button,
   ButtonProps,
   ListItem,
+  Separator,
   SizableText,
   View,
   XStack,
@@ -18,6 +20,8 @@ import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const Followers = () => {
+  const headerHeight = useHeaderHeight();
+
   const {
     data: followersData,
     isLoading,
@@ -70,6 +74,7 @@ const Followers = () => {
       {isLoading || itemCount ? (
         <FlashList
           extraData={unfollowed}
+          ItemSeparatorComponent={Separator}
           data={isLoading ? placeholderData : friendsItems}
           estimatedItemSize={75}
           onEndReached={handleOnEndReached}
@@ -80,23 +85,14 @@ const Followers = () => {
             </SizableText>
           }
           renderItem={({ item, index }) => {
-            const isFirstInGroup = index === 0;
-            const isLastInGroup = index === itemCount - 1;
-
             return (
               <View>
                 {item === null ? (
-                  <VirtualizedListItem
-                    loading
-                    isFirstInGroup={isFirstInGroup}
-                    isLastInGroup={isLastInGroup}
-                  />
+                  <VirtualizedListItem key={index} loading />
                 ) : (
                   <VirtualizedListItem
+                    key={index}
                     loading={false}
-                    isFirstInGroup={isFirstInGroup}
-                    isLastInGroup={isLastInGroup}
-                    // ! ignore typeerrors, we'll be null checking on the backend soon
                     title={item.username}
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
@@ -113,11 +109,7 @@ const Followers = () => {
           }}
         />
       ) : (
-        <View
-          flex={1}
-          justifyContent="center"
-          // bottom={headerHeight}
-        >
+        <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
             title="Blocked Users"
             subtitle="If you block someone, you'll be able to manage them here."
@@ -131,16 +123,11 @@ const Followers = () => {
 
 type Icon = JSX.Element;
 
-interface BaseProps {
-  isFirstInGroup: boolean;
-  isLastInGroup: boolean;
-}
-
-interface LoadingProps extends BaseProps {
+interface LoadingProps {
   loading: true;
 }
 
-interface LoadedProps extends BaseProps {
+interface LoadedProps {
   loading: false;
   imageUrl?: string;
   title?: string;
@@ -158,65 +145,48 @@ type VirtualizedListItemProps = LoadingProps | LoadedProps;
 
 const VirtualizedListItem = (props: VirtualizedListItemProps) => (
   <Skeleton.Group show={props.loading}>
-    <ListItem
-      size="$4.5"
-      hoverTheme={false}
-      pressTheme={false}
-      padding={12}
-      borderColor="$gray4"
-      borderWidth={1}
-      borderBottomWidth={0}
-      {...(props.isFirstInGroup && {
-        borderTopLeftRadius: 10,
-        borderTopRightRadius: 10,
-      })}
-      {...(props.isLastInGroup && {
-        borderBottomWidth: 1,
-        borderBottomLeftRadius: 10,
-        borderBottomRightRadius: 10,
-      })}
-    >
-      <XStack flex={1} alignItems="center">
-        <XStack flex={1} alignItems="center" gap="$2">
-          {!props.loading && props.imageUrl && (
-            <Skeleton radius={100}>
-              <Avatar circular size="$5">
-                <Avatar.Image src={props.imageUrl} />
-              </Avatar>
+    <XStack flex={1} alignItems="center" paddingVertical="$2">
+      <XStack flex={1} alignItems="center" gap="$3">
+        {!props.loading && props.imageUrl && (
+          <Skeleton radius={100}>
+            <Avatar circular size="$5">
+              <Avatar.Image src={props.imageUrl} />
+            </Avatar>
+          </Skeleton>
+        )}
+
+        <YStack>
+          {!props.loading && props.title && (
+            <Skeleton>
+              <SizableText>{props.title}</SizableText>
             </Skeleton>
           )}
 
-          <YStack>
-            {!props.loading && props.title && (
-              <Skeleton>
-                <SizableText>{props.title}</SizableText>
-              </Skeleton>
-            )}
+          {!props.loading && props.subtitle && (
+            <Skeleton>
+              <SizableText>{props.subtitle}</SizableText>
+            </Skeleton>
+          )}
 
-            {!props.loading && props.subtitle && (
-              <Skeleton>
-                <SizableText>{props.subtitle}</SizableText>
-              </Skeleton>
-            )}
-
-            {!props.loading && props.subtitle2 && (
-              <Skeleton>
-                <SizableText>{props.subtitle2}</SizableText>
-              </Skeleton>
-            )}
-          </YStack>
-        </XStack>
-
-        <XStack gap="$2">
-          {!props.loading &&
-            props.buttons?.map((button, index) => (
-              <Skeleton key={index}>
-                <Button {...button}>{button.title}</Button>
-              </Skeleton>
-            ))}
-        </XStack>
+          {!props.loading && props.subtitle2 && (
+            <Skeleton>
+              <SizableText>{props.subtitle2}</SizableText>
+            </Skeleton>
+          )}
+        </YStack>
       </XStack>
-    </ListItem>
+
+      <XStack gap="$2">
+        {!props.loading &&
+          props.buttons?.map((button, index) => (
+            <Skeleton key={index}>
+              <Button size="$3" {...button}>
+                {button.title}
+              </Button>
+            </Skeleton>
+          ))}
+      </XStack>
+    </XStack>
   </Skeleton.Group>
 );
 

@@ -32,7 +32,7 @@ const BottomTabsLayout = () => {
       }}
     >
       <BottomTabs.Screen
-        name="(top-tabs)"
+        name="(home)"
         options={{
           title: "Home",
           tabBarIcon: ({ focused }) => <Home strokeWidth={focused ? 2 : 1.5} />,
