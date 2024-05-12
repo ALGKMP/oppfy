@@ -5,10 +5,7 @@ import { TopTabs } from "~/layouts";
 
 const ConnectionsLayout = () => {
   return (
-    <TopTabs
-      tabBar={(props) => <TopTabBar {...props} />}
-      backBehavior="initialRoute"
-    >
+    <TopTabs tabBar={(props) => <TopTabBar {...props} />} backBehavior="none">
       <TopTabs.Screen
         name="friends-list"
         options={{
