@@ -217,7 +217,6 @@ export class UserService {
         createdAt: nextItem!.createdAt,
         profileId: nextItem!.profileId,
       };
-      console.log("server: ", nextCursor);
     }
     return {
       items,
@@ -264,6 +263,19 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
+  async getBlockedUsers(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.userRepository.getPaginatedBlockedUsers(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
   async getFriendRequests(
     userId: string,
     cursor: Cursor | null = null,
@@ -283,19 +295,6 @@ export class UserService {
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.userRepository.getPaginatedFollowRequests(
-      userId,
-      cursor,
-      pageSize,
-    );
-    return this._updateProfilePictureUrls(data, pageSize);
-  }
-
-  async getBlockedUsers(
-    userId: string,
-    cursor: Cursor | null = null,
-    pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedBlockedUsers(
       userId,
       cursor,
       pageSize,
