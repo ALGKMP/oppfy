@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
@@ -18,6 +18,13 @@ import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const Followers = () => {
+  const [unfollowed, setUnfollowed] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    console.log(unfollowed);
+    console.log(unfollowed["OZK0Mq45uIY75FaZdI2OdUkg5Cx1"]);
+  }, [unfollowed]);
+
   const {
     data: followersData,
     isLoading,
@@ -56,10 +63,18 @@ const Followers = () => {
     }
   };
 
+  const toggleUnfollow = (id: string) => {
+    setUnfollowed((prev) => ({
+      ...prev,
+      [id]: !prev[id], // Toggle the state between true and false directly
+    }));
+  };
+
   return (
     <BaseScreenView paddingBottom={0}>
       {isLoading || itemCount ? (
         <FlashList
+          extraData={unfollowed}
           data={isLoading ? placeholderData : friendsItems}
           estimatedItemSize={75}
           onEndReached={handleOnEndReached}
@@ -90,9 +105,12 @@ const Followers = () => {
                     title={item.username}
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
-                    // buttons={
-
-                    // }
+                    buttons={[
+                      {
+                        title: unfollowed[item.userId] ? "Follow" : "Unfollow",
+                        onPress: () => toggleUnfollow(item.userId),
+                      },
+                    ]}
                   />
                 )}
               </View>
