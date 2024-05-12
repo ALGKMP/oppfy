@@ -20,7 +20,6 @@ export class UserRepository {
       const profilePicture = await tx
         .insert(schema.profilePicture)
         .values({})
-        .execute();
 
       // Create an empty profile for the user, ready to be updated later
       const profile = await tx
@@ -29,13 +28,11 @@ export class UserRepository {
           profilePictureId: profilePicture[0].insertId, // Attach the profile picture ID
           // Other fields are left empty and to be filled later
         })
-        .execute();
 
       // Create default notification settings for the user
       const notificationSetting = await tx
         .insert(schema.notificationSettings)
         .values({})
-        .execute();
 
       // Create the user with the profileId and notificationSettingId
       await tx
@@ -45,7 +42,6 @@ export class UserRepository {
           profileId: profile[0].insertId,
           notificationSettingsId: notificationSetting[0].insertId,
         })
-        .execute();
     });
   }
 
@@ -103,12 +99,6 @@ export class UserRepository {
       .set({ privacySetting: newPrivacySetting })
       .where(eq(schema.user.id, userId));
   }
-
-  /*
-   * TODO: Use dynamic queries here - no acces to docs while on a plan.
-   * 1. dynamic query for the cursor pagination.
-   * 2. table as a parameter solves duplicated code for joins.
-   */
 
   @handleDatabaseErrors
   async getPaginatedFollowers(

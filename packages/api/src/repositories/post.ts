@@ -22,7 +22,7 @@ export class PostRepository {
         recipient,
         caption,
       })
-      .execute();
+      ;
   }
 
   @handleDatabaseErrors

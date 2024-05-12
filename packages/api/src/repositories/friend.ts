@@ -12,7 +12,7 @@ export class FriendRepository {
     return await this.db
       .insert(schema.friend)
       .values({ userId1, userId2 })
-      .execute();
+      ;
   }
 
   @handleDatabaseErrors
@@ -74,7 +74,7 @@ export class FriendRepository {
     const result = await this.db
       .insert(schema.friendRequest)
       .values({ senderId, recipientId })
-      .execute();
+      ;
     return result[0];
   }
 
