@@ -64,8 +64,8 @@ const Followers = () => {
       {isLoading || itemCount ? (
         <FlashList
           extraData={unfollowed}
-          ItemSeparatorComponent={Separator}
           data={isLoading ? placeholderData : friendsItems}
+          ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           onEndReached={handleOnEndReached}
           showsVerticalScrollIndicator={false}
