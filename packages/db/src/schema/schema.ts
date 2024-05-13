@@ -122,6 +122,7 @@ export const post = mySqlTable("Post", {
     .notNull(),
   caption: text("body").notNull(),
   key: varchar("url", { length: 255 }).notNull(),
+  mediaType: mysqlEnum("mediaType", ["image", "video"]).notNull().default("image"),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()

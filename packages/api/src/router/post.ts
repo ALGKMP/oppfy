@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { Webhooks } from "@mux/mux-node/src/resources/webhooks.js";
 
 import { trpcValidators } from "@acme/validators";
 
@@ -16,7 +17,7 @@ export const postRouter = createTRPCRouter({
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
         const metadata = {
           author: ctx.session.uid,
-          friend: input.friend,
+          recipient: input.recipient,
           caption: input.caption,
         };
 
@@ -36,18 +37,20 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  uploadPost: publicProcedure
-    .meta({ /* 👉 */ openapi: { method: "POST", path: "/uploadPost" } })
-    .input(trpcValidators.post.uploadPost)
-    .output(z.void())
-    .mutation(async ({ ctx, input }) => {
-      await ctx.services.post.createPost(
-        input.author,
-        input.friend,
-        input.caption,
-        input.key,
-      );
+    createMuxVideoPresignedUrl: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const result = await ctx.services.mux.createDirectUpload();
+      return result.url;
     }),
+
+  // muxWebhook: publicProcedure
+  //   .meta({ /* 👉 */ openapi: { method: "POST", path: "/upload-video" } })
+  //   // .input(z.any())
+  //   .output(z.void())
+  //   .mutation(({ input }) => {
+  //     console.log("muxWebhook hit");
+  //     console.log(input);
+  //   }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
@@ -60,6 +63,21 @@ export const postRouter = createTRPCRouter({
           message: `Failed to edit post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
         });
       }
+    }),
+
+
+
+  uploadPost: publicProcedure
+    .meta({ /* 👉 */ openapi: { method: "POST", path: "/uploadPost" } })
+    .input(trpcValidators.post.uploadPost)
+    .output(z.void())
+    .mutation(async ({ ctx, input }) => {
+      await ctx.services.post.createPost(
+        input.author,
+        input.recipient,
+        input.caption,
+        input.key,
+      );
     }),
 
   deletePost: protectedProcedure

@@ -20,8 +20,8 @@ export class FollowRepository {
     const result = await this.db.delete(schema.follower).where(
       // Sender is removing the recipient from their followers
       and(
-        eq(schema.follower.senderId, recipientId),
-        eq(schema.follower.recipientId, senderId),
+        eq(schema.follower.senderId, senderId),
+        eq(schema.follower.recipientId, recipientId),
       ),
     );
     return result[0];
