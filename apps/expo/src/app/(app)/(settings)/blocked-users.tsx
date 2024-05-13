@@ -16,7 +16,6 @@ import {
 
 import { AlertDialog } from "~/components/Dialogs";
 import { VirtualizedListItem } from "~/components/ListItems";
-import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -75,7 +74,6 @@ const BlockedUsers = () => {
     },
     {
       getNextPageParam: (lastPage) => {
-        // console.log("Last page received:", lastPage);
         return lastPage.nextCursor;
       },
     },
@@ -104,12 +102,6 @@ const BlockedUsers = () => {
   }, [blockedUsersData]);
 
   const handleOnEndReached = async () => {
-    console.log(
-      "End reached, isFetchingNextPage:",
-      isFetchingNextPage,
-      "hasNextPage:",
-      hasNextPage,
-    );
     if (!isFetchingNextPage && hasNextPage) {
       console.log("Fetching next page");
       await fetchNextPage();
