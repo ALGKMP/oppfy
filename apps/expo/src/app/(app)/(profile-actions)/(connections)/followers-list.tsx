@@ -15,6 +15,7 @@ import {
   YStack,
 } from "tamagui";
 
+import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
@@ -30,7 +31,7 @@ const Followers = () => {
     hasNextPage,
   } = api.user.getCurrentUserFollowers.useInfiniteQuery(
     {
-      pageSize: 10,
+      pageSize: 20,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -38,7 +39,7 @@ const Followers = () => {
   );
 
   const placeholderData = useMemo(() => {
-    return Array.from({ length: 10 }, () => null);
+    return Array.from({ length: 20 }, () => null);
   }, []);
 
   const friendsItems = useMemo(() => {
@@ -88,7 +89,16 @@ const Followers = () => {
             return (
               <View>
                 {item === null ? (
-                  <VirtualizedListItem key={index} loading />
+                  <VirtualizedListItem
+                    key={index}
+                    loading
+                    showSkeletons={{
+                      imageUrl: true,
+                      title: true,
+                      subtitle: true,
+                      button: true,
+                    }}
+                  />
                 ) : (
                   <VirtualizedListItem
                     key={index}
@@ -96,12 +106,10 @@ const Followers = () => {
                     title={item.username}
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
-                    buttons={[
-                      {
-                        title: unfollowed[item.userId] ? "Follow" : "Unfollow",
-                        onPress: () => toggleUnfollow(item.userId),
-                      },
-                    ]}
+                    button={{
+                      title: unfollowed[item.userId] ? "Follow" : "Unfollow",
+                      onPress: () => toggleUnfollow(item.userId),
+                    }}
                   />
                 )}
               </View>
@@ -120,74 +128,5 @@ const Followers = () => {
     </BaseScreenView>
   );
 };
-
-type Icon = JSX.Element;
-
-interface LoadingProps {
-  loading: true;
-}
-
-interface LoadedProps {
-  loading: false;
-  imageUrl?: string;
-  title?: string;
-  subtitle?: string;
-  subtitle2?: string;
-  buttons?: {
-    title: string;
-    onPress?: () => void;
-    icon?: Icon;
-    iconAfter?: Icon;
-  }[];
-}
-
-type VirtualizedListItemProps = LoadingProps | LoadedProps;
-
-const VirtualizedListItem = (props: VirtualizedListItemProps) => (
-  <Skeleton.Group show={props.loading}>
-    <XStack flex={1} alignItems="center" paddingVertical="$2">
-      <XStack flex={1} alignItems="center" gap="$3">
-        {!props.loading && props.imageUrl && (
-          <Skeleton radius={100}>
-            <Avatar circular size="$5">
-              <Avatar.Image src={props.imageUrl} />
-            </Avatar>
-          </Skeleton>
-        )}
-
-        <YStack>
-          {!props.loading && props.title && (
-            <Skeleton>
-              <SizableText>{props.title}</SizableText>
-            </Skeleton>
-          )}
-
-          {!props.loading && props.subtitle && (
-            <Skeleton>
-              <SizableText>{props.subtitle}</SizableText>
-            </Skeleton>
-          )}
-
-          {!props.loading && props.subtitle2 && (
-            <Skeleton>
-              <SizableText>{props.subtitle2}</SizableText>
-            </Skeleton>
-          )}
-        </YStack>
-      </XStack>
-
-      <XStack gap="$2">
-        {!props.loading &&
-          props.buttons?.map((button, index) => (
-            <Skeleton key={index}>
-              <Button size="$3" {...button}>
-                {button.title}
-              </Button>
-            </Skeleton>
-          ))}
-      </XStack>
-    </XStack>
-  </Skeleton.Group>
-);
 
 export default Followers;
