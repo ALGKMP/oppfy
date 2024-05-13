@@ -1,24 +1,55 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundX } from "@tamagui/lucide-icons";
-import { Skeleton } from "moti/skeleton";
-import {
-  Avatar,
-  Button,
-  ButtonProps,
-  ListItem,
-  SizableText,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { UserRoundMinus, UserRoundX } from "@tamagui/lucide-icons";
+import { Button, Separator, SizableText, View } from "tamagui";
 
+import { VirtualizedListItem } from "~/components/ListItems";
+import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const Friends = () => {
-  // const friends = api.user.getFriends.useQuery();
+  const headerHeight = useHeaderHeight();
+
+  const utils = api.useUtils();
+
+  const removeFriend = api.user.removeFriend.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.user.getCurrentUserFriends.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.user.getCurrentUserFollowers.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.user.getCurrentUserFriends.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (item) => item.userId !== newData.recipientId,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.user.getCurrentUserFriends.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.user.getCurrentUserFriends.invalidate();
+    },
+  });
+
   const {
     data: friendsData,
     isLoading,
@@ -27,12 +58,20 @@ const Friends = () => {
     hasNextPage,
   } = api.user.getCurrentUserFriends.useInfiniteQuery(
     {
-      pageSize: 10,
+      pageSize: 20,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  const placeholderData = useMemo(() => {
+    return Array.from({ length: 20 }, () => null);
+  }, []);
+
+  const friendsItems = useMemo(() => {
+    return friendsData?.pages.flatMap((page) => page.items);
+  }, [friendsData]);
 
   const itemCount = useMemo(() => {
     if (friendsData === undefined) return 0;
@@ -41,14 +80,6 @@ const Friends = () => {
       (total, page) => total + page.items.length,
       0,
     );
-  }, [friendsData]);
-
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 10 }, () => null);
-  }, []);
-
-  const friendsItems = useMemo(() => {
-    return friendsData?.pages.flatMap((page) => page.items);
   }, [friendsData]);
 
   const handleOnEndReached = async () => {
@@ -62,6 +93,7 @@ const Friends = () => {
       {isLoading || itemCount ? (
         <FlashList
           data={isLoading ? placeholderData : friendsItems}
+          ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           onEndReached={handleOnEndReached}
           showsVerticalScrollIndicator={false}
@@ -70,24 +102,47 @@ const Friends = () => {
               FRIENDS
             </SizableText>
           }
-          renderItem={({ item, index }) => {
-            const isFirstInGroup = index === 0;
-            const isLastInGroup = index === itemCount - 1;
-
+          renderItem={({ item }) => {
             return (
               <View>
                 {item === null ? (
                   <VirtualizedListItem
                     loading
-                    isFirstInGroup={isFirstInGroup}
-                    isLastInGroup={isLastInGroup}
+                    showSkeletons={{
+                      imageUrl: true,
+                      title: true,
+                      subtitle: true,
+                      button: true,
+                    }}
                   />
                 ) : (
                   <VirtualizedListItem
                     loading={false}
-                    isFirstInGroup={isFirstInGroup}
-                    isLastInGroup={isLastInGroup}
-                    title="John Doe"
+                    title={item.username}
+                    subtitle={item.name}
+                    imageUrl={item.profilePictureUrl}
+                    button={
+                      <ActionSheet
+                        title="Remove Friend"
+                        subtitle={`Are you sure you want to remove ${item.username} from your friends?`}
+                        imageUrl={item.profilePictureUrl}
+                        trigger={
+                          <Button size="$3" icon={<UserRoundMinus size="$1" />}>
+                            Remove
+                          </Button>
+                        }
+                        buttonOptions={[
+                          {
+                            text: "Unblock",
+                            textProps: { color: "$red9" },
+                            onPress: () =>
+                              removeFriend.mutate({
+                                recipientId: item.userId,
+                              }),
+                          },
+                        ]}
+                      />
+                    }
                   />
                 )}
               </View>
@@ -95,14 +150,10 @@ const Friends = () => {
           }}
         />
       ) : (
-        <View
-          flex={1}
-          justifyContent="center"
-          // bottom={headerHeight}
-        >
+        <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
-            title="Blocked Users"
-            subtitle="If you block someone, you'll be able to manage them here."
+            title="Followers"
+            subtitle="You'll see all the people who follow you here."
             icon={<UserRoundX />}
           />
         </View>
@@ -110,97 +161,5 @@ const Friends = () => {
     </BaseScreenView>
   );
 };
-
-type Icon = JSX.Element;
-
-interface BaseProps {
-  isFirstInGroup: boolean;
-  isLastInGroup: boolean;
-}
-
-interface LoadingProps extends BaseProps {
-  loading: true;
-}
-
-interface LoadedProps extends BaseProps {
-  loading: false;
-  imageUrl?: string;
-  title?: string;
-  subtitle?: string;
-  subtitle2?: string;
-  buttons?: {
-    title: string;
-    onPress: () => void;
-    icon?: Icon;
-    iconAfter?: Icon;
-  }[];
-}
-
-type VirtualizedListItemProps = LoadingProps | LoadedProps;
-
-const VirtualizedListItem = (props: VirtualizedListItemProps) => (
-  <Skeleton.Group show={props.loading}>
-    <ListItem
-      size="$4.5"
-      hoverTheme={false}
-      pressTheme={false}
-      padding={12}
-      borderColor="$gray4"
-      borderWidth={1}
-      borderBottomWidth={0}
-      {...(props.isFirstInGroup && {
-        borderTopLeftRadius: 10,
-        borderTopRightRadius: 10,
-      })}
-      {...(props.isLastInGroup && {
-        borderBottomWidth: 1,
-        borderBottomLeftRadius: 10,
-        borderBottomRightRadius: 10,
-      })}
-    >
-      <XStack flex={1} alignItems="center">
-        <XStack flex={1} alignItems="center" gap="$2">
-          {!props.loading &&
-            props.imageUrl(
-              <Skeleton radius={100}>
-                <Avatar circular size="$5">
-                  <Avatar.Image src={props.imageUrl} />
-                </Avatar>
-              </Skeleton>,
-            )}
-
-          <YStack>
-            {!props.loading && props.title && (
-              <Skeleton>
-                <SizableText>{props.title}</SizableText>
-              </Skeleton>
-            )}
-
-            {!props.loading && props.subtitle && (
-              <Skeleton>
-                <SizableText>{props.subtitle}</SizableText>
-              </Skeleton>
-            )}
-
-            {!props.loading && props.subtitle2 && (
-              <Skeleton>
-                <SizableText>{props.subtitle2}</SizableText>
-              </Skeleton>
-            )}
-          </YStack>
-        </XStack>
-
-        <XStack gap="$2">
-          {!props.loading &&
-            props.buttons?.map((button, index) => (
-              <Skeleton key={index}>
-                <Button {...button}>{button.title}</Button>
-              </Skeleton>
-            ))}
-        </XStack>
-      </XStack>
-    </ListItem>
-  </Skeleton.Group>
-);
 
 export default Friends;
