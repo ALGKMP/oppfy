@@ -1,14 +1,11 @@
-import React, { ReactElement, useCallback, useEffect, useState } from "react";
-import {
-  Animated,
-  ButtonProps,
-  Easing,
-  Modal,
-  TouchableOpacityProps,
-} from "react-native";
+import type { ReactElement } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import type { ButtonProps } from "react-native";
+import { Animated, Easing, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
 import {
+  Avatar,
   Button,
   Paragraph,
   Separator,
@@ -24,6 +21,8 @@ export interface ButtonOption {
 }
 
 export interface ActionSheetProps {
+  imageUrl?: string;
+
   title: string;
   titleProps?: SizableTextProps;
 
@@ -32,21 +31,26 @@ export interface ActionSheetProps {
 
   buttonOptions: ButtonOption[];
 
-  trigger?: ReactElement<ButtonProps>;
   isVisible?: boolean;
-  onClose?: () => void;
+  trigger?: ReactElement<ButtonProps>;
+
+  onCancel?: () => void;
 }
 
 const ActionSheet = ({
+  imageUrl,
+
   title,
   titleProps,
+
   subtitle,
   subtitleProps,
+
   buttonOptions,
 
   trigger,
   isVisible,
-  onClose,
+  onCancel,
 }: ActionSheetProps) => {
   const insets = useSafeAreaInsets();
 
@@ -54,7 +58,7 @@ const ActionSheet = ({
   const [slideAnimation] = useState(new Animated.Value(300));
   const [backgroundOpacity] = useState(new Animated.Value(0));
 
-  const closeModal = useCallback(() => {
+  const openModal = useCallback(() => {
     setShowModal(true);
     Animated.parallel([
       Animated.timing(backgroundOpacity, {
@@ -70,7 +74,7 @@ const ActionSheet = ({
     ]).start();
   }, [backgroundOpacity, slideAnimation]);
 
-  const openModal = useCallback(() => {
+  const closeModal = useCallback(() => {
     Animated.parallel([
       Animated.timing(backgroundOpacity, {
         toValue: 0,
@@ -86,16 +90,17 @@ const ActionSheet = ({
       }),
     ]).start(() => {
       setShowModal(false);
+      onCancel?.(); // Call onCancel callback if provided
     });
-  }, [backgroundOpacity, slideAnimation]);
+  }, [backgroundOpacity, slideAnimation, onCancel]);
 
   useEffect(() => {
-    isVisible ? closeModal() : openModal();
-  }, [isVisible, backgroundOpacity, slideAnimation, closeModal, openModal]);
+    isVisible ? openModal() : closeModal();
+  }, [isVisible, openModal, closeModal]);
 
   const TriggerElement = trigger
     ? React.cloneElement(trigger, {
-        onPress: () => openModal,
+        onPress: openModal,
       })
     : null;
 
@@ -106,7 +111,7 @@ const ActionSheet = ({
         animationType="none"
         transparent={true}
         visible={showModal}
-        onRequestClose={onClose}
+        onRequestClose={closeModal} // Use closeModal directly
       >
         <Animated.View
           style={{
@@ -122,9 +127,9 @@ const ActionSheet = ({
             }}
           >
             <YStack
-              gap="$3"
               paddingHorizontal="$4"
               paddingBottom={insets.bottom}
+              gap="$3"
             >
               <YStack>
                 <YStack
@@ -133,20 +138,29 @@ const ActionSheet = ({
                   backgroundColor="$color4"
                   borderTopLeftRadius={9}
                   borderTopRightRadius={9}
+                  gap="$2"
                 >
-                  <SizableText size="$5" fontWeight="bold" {...titleProps}>
-                    {title}
-                  </SizableText>
-
-                  {subtitle && (
-                    <Paragraph
-                      textAlign="center"
-                      theme="alt2"
-                      {...subtitleProps}
-                    >
-                      {subtitle}
-                    </Paragraph>
+                  {imageUrl && (
+                    <Avatar circular bordered size="$6">
+                      <Avatar.Image src={imageUrl} />
+                    </Avatar>
                   )}
+
+                  <YStack alignItems="center">
+                    <SizableText size="$5" fontWeight="bold" {...titleProps}>
+                      {title}
+                    </SizableText>
+
+                    {subtitle && (
+                      <Paragraph
+                        textAlign="center"
+                        theme="alt2"
+                        {...subtitleProps}
+                      >
+                        {subtitle}
+                      </Paragraph>
+                    )}
+                  </YStack>
                 </YStack>
 
                 {buttonOptions.map((option, index) => (
@@ -162,7 +176,10 @@ const ActionSheet = ({
                       borderBottomRightRadius={
                         index === buttonOptions.length - 1 ? 9 : 0
                       }
-                      onPress={option.onPress}
+                      onPress={() => {
+                        option.onPress?.();
+                        closeModal();
+                      }}
                     >
                       <SizableText size="$5" {...option.textProps}>
                         {option.text}
@@ -171,7 +188,7 @@ const ActionSheet = ({
                   </View>
                 ))}
               </YStack>
-              <Button size="$5" color="$blue9" onPress={onClose}>
+              <Button size="$5" color="$blue9" onPress={closeModal}>
                 Cancel
               </Button>
             </YStack>
