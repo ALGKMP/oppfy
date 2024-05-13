@@ -10,7 +10,7 @@
     "dev": "pnpm with-env tsc --watch",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint .",
-    "push": "pnpm with-env drizzle-kit push:mysql",
+    "push": "pnpm with-env drizzle-kit push",
     "generate": "pnpm with-env drizzle-kit generate:mysql",
     "migrate": "pnpm tsx src/migrate.ts",
     "studio": "pnpm with-env drizzle-kit studio --config drizzle.config.ts",
