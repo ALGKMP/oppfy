@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundMinus, UserRoundX } from "@tamagui/lucide-icons";
+import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Button, Separator, SizableText, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -133,7 +133,7 @@ const Friends = () => {
                         }
                         buttonOptions={[
                           {
-                            text: "Unblock",
+                            text: "Unfriend",
                             textProps: { color: "$red9" },
                             onPress: () =>
                               removeFriend.mutate({
@@ -152,9 +152,9 @@ const Friends = () => {
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
-            title="Followers"
-            subtitle="You'll see all the people who follow you here."
-            icon={<UserRoundX />}
+            title="Friends"
+            subtitle="Once you friend someone, you'll see them here."
+            icon={<UserRoundPlus />}
           />
         </View>
       )}
