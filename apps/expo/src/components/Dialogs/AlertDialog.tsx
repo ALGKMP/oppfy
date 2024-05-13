@@ -1,7 +1,6 @@
 import {
   AlertDialog as BaseAlertDialog,
   Button,
-  View,
   XStack,
   YStack,
 } from "tamagui";
@@ -15,8 +14,6 @@ interface AlertDialogProps {
 
   trigger: JSX.Element;
 
-  isVisible?: boolean;
-
   onAccept?: () => void;
   onCancel?: () => void;
 }
@@ -27,15 +24,12 @@ const AlertDialog = ({
   acceptText,
   cancelText,
   trigger,
-  isVisible,
-  onAccept,
   onCancel,
+  onAccept,
 }: AlertDialogProps) => {
   return (
-    <BaseAlertDialog open={isVisible} native>
-      <BaseAlertDialog.Trigger>
-        <View>{trigger}</View>
-      </BaseAlertDialog.Trigger>
+    <BaseAlertDialog native>
+      <BaseAlertDialog.Trigger asChild>{trigger}</BaseAlertDialog.Trigger>
 
       <BaseAlertDialog.Portal>
         <BaseAlertDialog.Overlay
@@ -79,7 +73,12 @@ const AlertDialog = ({
                   {cancelText ?? "Cancel"}
                 </Button>
               </BaseAlertDialog.Cancel>
-              <BaseAlertDialog.Action onPress={onAccept} asChild>
+              <BaseAlertDialog.Action
+                alignItems="center"
+                justifyContent="center"
+                onPress={onAccept}
+                asChild
+              >
                 <Button flex={1} theme="active">
                   {acceptText ?? "Accept"}
                 </Button>
