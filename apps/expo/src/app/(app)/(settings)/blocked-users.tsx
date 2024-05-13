@@ -110,7 +110,7 @@ const BlockedUsers = () => {
                 BLOCKED USERS
               </SizableText>
             }
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
               <View>
                 {item === null ? (
                   <VirtualizedListItem

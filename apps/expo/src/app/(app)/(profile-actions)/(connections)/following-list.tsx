@@ -74,7 +74,7 @@ const Following = () => {
               FOLLOWERS
             </SizableText>
           }
-          renderItem={({ item, index }) => {
+          renderItem={({ item }) => {
             return (
               <View>
                 {item === null ? (
