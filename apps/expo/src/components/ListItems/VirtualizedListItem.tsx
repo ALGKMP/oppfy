@@ -1,8 +1,10 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { Skeleton } from "moti/skeleton";
 import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
 
-type Icon = JSX.Element;
+// type Icon = JSX.Element;
+
+type Icon = JSX.Element | FunctionComponent;
 
 interface ButtonProps {
   text: string;
