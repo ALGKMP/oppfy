@@ -6,6 +6,7 @@ import { Button, Separator, SizableText, View } from "tamagui";
 
 import { AlertDialog } from "~/components/Dialogs";
 import { VirtualizedListItem } from "~/components/ListItems";
+import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
@@ -129,15 +130,22 @@ const BlockedUsers = () => {
                     title={item.username}
                     subtitle={item.name}
                     button={
-                      <AlertDialog
-                        title={`Unblock ${item.name}`}
-                        description={`Are you sure you want to unblock ${item.name}?`}
+                      <ActionSheet
+                        title={`Unblock ${item.username}`}
+                        subtitle={`Are you sure you want to unblock ${item.username}?`}
+                        imageUrl={item.profilePictureUrl}
                         trigger={
                           <Button size="$3" icon={<UserRoundX size="$1" />}>
                             Unblock
                           </Button>
                         }
-                        onAccept={() => handleUnblock(item.userId)}
+                        buttonOptions={[
+                          {
+                            text: "Unblock",
+                            textProps: { color: "$red9" },
+                            onPress: () => void handleUnblock(item.userId),
+                          },
+                        ]}
                       />
                     }
                   />
