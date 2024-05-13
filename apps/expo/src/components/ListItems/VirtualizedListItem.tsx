@@ -5,11 +5,15 @@ import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
 type Icon = JSX.Element;
 
 interface ButtonProps {
-  title: string;
+  text: string;
   onPress?: () => void;
   icon?: Icon;
   iconAfter?: Icon;
 }
+
+const isButtonProps = (obj: unknown): obj is ButtonProps => {
+  return typeof obj === "object" && (obj as ButtonProps).text !== undefined;
+};
 
 interface LoadingProps {
   loading: true;
@@ -82,12 +86,12 @@ const VirtualizedListItem: React.FC<VirtualizedListItemProps> = (props) => (
             <Button size="$3">Loading...</Button>
           </Skeleton>
         ) : !props.loading && props.button ? (
-          React.isValidElement(props.button) ? (
-            props.button
-          ) : (
-            <Button size="$3" {...(props.button2 as ButtonProps)}>
-              {props.button}
+          isButtonProps(props.button) ? (
+            <Button size="$3" {...props.button}>
+              {props.button.text}
             </Button>
+          ) : (
+            props.button
           )
         ) : null}
 
@@ -96,12 +100,12 @@ const VirtualizedListItem: React.FC<VirtualizedListItemProps> = (props) => (
             <Button size="$3">Loading...</Button>
           </Skeleton>
         ) : !props.loading && props.button2 ? (
-          React.isValidElement(props.button2) ? (
-            props.button2
-          ) : (
-            <Button size="$3" {...(props.button2 as ButtonProps)}>
-              {props.button2}
+          isButtonProps(props.button2) ? (
+            <Button size="$3" {...props.button2}>
+              {props.button2.text}
             </Button>
+          ) : (
+            props.button
           )
         ) : null}
       </XStack>
