@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundX } from "@tamagui/lucide-icons";
+import {
+  UserRoundMinus,
+  UserRoundPlus,
+  UserRoundX,
+} from "@tamagui/lucide-icons";
 import { Separator, SizableText, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -94,8 +98,10 @@ const Following = () => {
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
                     button={{
-                      text: unfollowed[item.userId] ? "Follow" : "Unfollow",
                       onPress: () => toggleUnfollow(item.userId),
+                      ...(unfollowed[item.userId]
+                        ? { text: "Follow", icon: UserRoundPlus }
+                        : { text: "Unfollow", icon: UserRoundMinus }),
                     }}
                   />
                 )}
