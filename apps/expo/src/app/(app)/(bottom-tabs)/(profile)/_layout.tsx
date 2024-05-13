@@ -29,10 +29,6 @@ const ProfileLayout = () => {
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getCurrentUsersFullProfile.useQuery();
 
-  useEffect(() => {
-    console.log(profileData);
-  }, [profileData]);
-
   return (
     <TopTabs
       tabBar={(props) => (
