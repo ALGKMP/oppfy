@@ -29,8 +29,8 @@ interface LoadedProps {
   title?: string;
   subtitle?: string;
   subtitle2?: string;
-  button?: ButtonProps;
-  button2?: ButtonProps;
+  button?: ButtonProps | React.ReactNode;
+  button2?: ButtonProps | React.ReactNode;
 }
 
 type VirtualizedListItemProps = LoadingProps | LoadedProps;
@@ -82,9 +82,13 @@ const VirtualizedListItem: React.FC<VirtualizedListItemProps> = (props) => (
             <Button size="$3">Loading...</Button>
           </Skeleton>
         ) : !props.loading && props.button ? (
-          <Button size="$3" {...props.button}>
-            {props.button.title}
-          </Button>
+          React.isValidElement(props.button) ? (
+            props.button
+          ) : (
+            <Button size="$3" {...(props.button2 as ButtonProps)}>
+              {props.button}
+            </Button>
+          )
         ) : null}
 
         {props.loading && props.showSkeletons?.button2 ? (
@@ -92,9 +96,13 @@ const VirtualizedListItem: React.FC<VirtualizedListItemProps> = (props) => (
             <Button size="$3">Loading...</Button>
           </Skeleton>
         ) : !props.loading && props.button2 ? (
-          <Button size="$3" {...props.button2}>
-            {props.button2.title}
-          </Button>
+          React.isValidElement(props.button2) ? (
+            props.button2
+          ) : (
+            <Button size="$3" {...(props.button2 as ButtonProps)}>
+              {props.button2}
+            </Button>
+          )
         ) : null}
       </XStack>
     </XStack>
