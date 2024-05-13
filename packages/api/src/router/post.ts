@@ -36,12 +36,12 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    // createMuxVideoPresignedUrl: protectedProcedure
-    // .input(trpcValidators.post.createMuxVideoPresignedUrl)
-    // .output(z.string())
-    // .mutation(async ({ ctx, input }) => {
+    createMuxVideoPresignedUrl: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      ctx.services.mux.createDirectUpload();
 
-    // }
+    }),
+
 
 
   uploadPost: publicProcedure

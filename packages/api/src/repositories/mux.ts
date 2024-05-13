@@ -7,9 +7,10 @@ export class MuxRepository {
   @handleMuxErrors
   async createDirectUpload() {
     return await mux.video.uploads.create({
-      new_asset_settings: { playback_policy: ["public"], encoding_tier: "baseline"},
+      new_asset_settings: { playback_policy: ["public"], encoding_tier: "baseline", passthrough: "some data", test: true},
       cors_origin: '*',
-    });
+    },
+  );
   }
 
   @handleMuxErrors
