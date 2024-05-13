@@ -1,11 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import {
-  UserRoundMinus,
-  UserRoundPlus,
-  UserRoundX,
-} from "@tamagui/lucide-icons";
+import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Separator, SizableText, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -132,7 +128,7 @@ const Following = () => {
           <EmptyPlaceholder
             title="Following"
             subtitle="Once you follow people you'll see them here."
-            icon={<UserRoundX />}
+            icon={<UserRoundPlus />}
           />
         </View>
       )}

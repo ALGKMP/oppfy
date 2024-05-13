@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundMinus, UserRoundX } from "@tamagui/lucide-icons";
+import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Button, Separator, SizableText, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -31,7 +31,9 @@ const Followers = () => {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter((item) => item.userId !== newData.userId),
+            items: page.items.filter(
+              (item) => item.userId !== newData.recipientId,
+            ),
           })),
         },
       );
@@ -152,7 +154,7 @@ const Followers = () => {
           <EmptyPlaceholder
             title="Followers"
             subtitle="You'll see all the people who follow you here."
-            icon={<UserRoundX />}
+            icon={<UserRoundPlus />}
           />
         </View>
       )}
