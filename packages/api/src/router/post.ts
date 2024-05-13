@@ -38,8 +38,28 @@ export const postRouter = createTRPCRouter({
 
     createMuxVideoPresignedUrl: protectedProcedure
     .mutation(async ({ ctx }) => {
-      ctx.services.mux.createDirectUpload();
+      return await ctx.services.mux.createDirectUpload();
+    }),
 
+  muxWebhook: publicProcedure
+    .meta({ /* 👉 */ openapi: { method: "POST", path: "/upload-video" } })
+    // .input(trpcValidators.post.uploadPost)
+    .output(z.void())
+    .mutation(async ({ ctx }) => {
+      console.log("muxWebhook hit");
+    }),
+
+  editPost: protectedProcedure
+    .input(trpcValidators.post.updatePost)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.editPost(input.postId, input.caption);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to edit post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
+        });
+      }
     }),
 
 
