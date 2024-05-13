@@ -16,6 +16,24 @@ import { api } from "~/utils/api";
 const Following = () => {
   const headerHeight = useHeaderHeight();
 
+  const unfollow = api.user.unfollowUser.useMutation({
+    onSuccess: (_data, variables) => {
+      setUnfollowed((prev) => ({
+        ...prev,
+        [variables.recipientId]: true,
+      }));
+    },
+  });
+
+  const follow = api.user.followUser.useMutation({
+    onSuccess: (_data, variables) => {
+      setUnfollowed((prev) => ({
+        ...prev,
+        [variables.recipientId]: false,
+      }));
+    },
+  });
+
   const {
     data: followingData,
     isLoading,
@@ -56,11 +74,11 @@ const Following = () => {
 
   const [unfollowed, setUnfollowed] = useState<Record<string, boolean>>({});
 
-  const toggleUnfollow = (id: string) => {
-    setUnfollowed((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  const toggleFollowStatus = (recipientId: string) => {
+    const isFollowing = !unfollowed[recipientId];
+    isFollowing
+      ? unfollow.mutate({ recipientId })
+      : follow.mutate({ recipientId });
   };
 
   return (
@@ -98,7 +116,7 @@ const Following = () => {
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
                     button={{
-                      onPress: () => toggleUnfollow(item.userId),
+                      onPress: () => toggleFollowStatus(item.userId),
                       ...(unfollowed[item.userId]
                         ? { text: "Follow", icon: UserRoundPlus }
                         : { text: "Unfollow", icon: UserRoundMinus }),
