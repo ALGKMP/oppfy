@@ -114,7 +114,6 @@ const BlockedUsers = () => {
               <View>
                 {item === null ? (
                   <VirtualizedListItem
-                    key={index}
                     loading
                     showSkeletons={{
                       imageUrl: true,
@@ -125,7 +124,6 @@ const BlockedUsers = () => {
                   />
                 ) : (
                   <VirtualizedListItem
-                    key={index}
                     loading={false}
                     imageUrl={item.profilePictureUrl}
                     title={item.username}

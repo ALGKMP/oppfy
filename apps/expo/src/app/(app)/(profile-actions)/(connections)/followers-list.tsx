@@ -79,7 +79,6 @@ const Followers = () => {
               <View>
                 {item === null ? (
                   <VirtualizedListItem
-                    key={index}
                     loading
                     showSkeletons={{
                       imageUrl: true,
@@ -90,7 +89,6 @@ const Followers = () => {
                   />
                 ) : (
                   <VirtualizedListItem
-                    key={index}
                     loading={false}
                     title={item.username}
                     subtitle={item.name}
