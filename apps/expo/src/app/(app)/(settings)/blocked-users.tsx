@@ -7,6 +7,7 @@ import {
   Avatar,
   Button,
   ListItem,
+  Separator,
   SizableText,
   View,
   XStack,
@@ -14,6 +15,8 @@ import {
 } from "tamagui";
 
 import { AlertDialog } from "~/components/Dialogs";
+import { VirtualizedListItem } from "~/components/ListItems";
+import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -74,7 +77,8 @@ const BlockedUsers = () => {
       getNextPageParam: (lastPage) => {
         // console.log("Last page received:", lastPage);
         return lastPage.nextCursor;
-      },    },
+      },
+    },
   );
 
   const handleUnblock = async (blockedUserId: string) => {
@@ -92,7 +96,7 @@ const BlockedUsers = () => {
   }, [blockedUsersData]);
 
   const placeholderData = useMemo(() => {
-    return Array.from({ length: 10 }, () => null);
+    return Array.from({ length: 20 }, () => null);
   }, []);
 
   const blockedUsersItems = useMemo(() => {
@@ -100,7 +104,12 @@ const BlockedUsers = () => {
   }, [blockedUsersData]);
 
   const handleOnEndReached = async () => {
-    console.log("End reached, isFetchingNextPage:", isFetchingNextPage, "hasNextPage:", hasNextPage);
+    console.log(
+      "End reached, isFetchingNextPage:",
+      isFetchingNextPage,
+      "hasNextPage:",
+      hasNextPage,
+    );
     if (!isFetchingNextPage && hasNextPage) {
       console.log("Fetching next page");
       await fetchNextPage();
@@ -110,41 +119,56 @@ const BlockedUsers = () => {
   return (
     <BaseScreenView paddingBottom={0}>
       {isLoading || itemCount ? (
-        <FlashList
-          data={isLoading ? placeholderData : blockedUsersItems}
-          estimatedItemSize={75}
-          onEndReached={handleOnEndReached}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <SizableText size="$2" theme="alt1" marginBottom="$2">
-              BLOCKED USERS
-            </SizableText>
-          }
-          renderItem={({ item, index }) => {
-            const isFirstInGroup = index === 0;
-            const isLastInGroup = index === itemCount - 1;
-
-            return (
+        <>
+          <FlashList
+            data={isLoading ? placeholderData : blockedUsersItems}
+            ItemSeparatorComponent={Separator}
+            estimatedItemSize={75}
+            onEndReached={handleOnEndReached}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={
+              <SizableText size="$2" theme="alt1" marginBottom="$2">
+                BLOCKED USERS
+              </SizableText>
+            }
+            renderItem={({ item, index }) => (
               <View>
                 {item === null ? (
-                  <BlockedUserListItem
+                  <VirtualizedListItem
+                    key={index}
                     loading
-                    isFirstInGroup={isFirstInGroup}
-                    isLastInGroup={isLastInGroup}
+                    showSkeletons={{
+                      imageUrl: true,
+                      title: true,
+                      subtitle: true,
+                      button: true,
+                    }}
                   />
                 ) : (
-                  <BlockedUserListItem
-                    item={item}
+                  <VirtualizedListItem
+                    key={index}
                     loading={false}
-                    onUnblock={handleUnblock}
-                    isFirstInGroup={isFirstInGroup}
-                    isLastInGroup={isLastInGroup}
+                    imageUrl={item.profilePictureUrl}
+                    title={item.username}
+                    subtitle={item.name}
+                    button={
+                      <AlertDialog
+                        title={`Unblock ${item.name}`}
+                        description={`Are you sure you want to unblock ${item.name}?`}
+                        trigger={
+                          <Button size="$3" icon={<UserRoundX size="$1" />}>
+                            Unblock
+                          </Button>
+                        }
+                        onAccept={() => handleUnblock(item.userId)}
+                      />
+                    }
                   />
                 )}
               </View>
-            );
-          }}
-        />
+            )}
+          />
+        </>
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
