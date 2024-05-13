@@ -7,7 +7,7 @@ export class MuxRepository {
   @handleMuxErrors
   async createDirectUpload() {
     return await mux.video.uploads.create({
-      new_asset_settings: { playback_policy: ["public"], encoding_tier: "baseline", passthrough: "some data", test: true},
+      new_asset_settings: { playback_policy: ["public"], encoding_tier: "smart", passthrough: "some data", test: true, mp4_support: "standard"},
       cors_origin: '*',
     },
   );

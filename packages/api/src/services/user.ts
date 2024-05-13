@@ -491,20 +491,22 @@ export class UserService {
     }
   }
 
-  async removeFollower(followerId: string, followedId: string) {
+  async removeFollower(senderId: string, recipientId: string) {
     const followerExists = await this.followRepository.getFollower(
-      followerId,
-      followedId,
+      senderId,
+      recipientId,
     );
     if (!followerExists) {
+      console.error("Follower not found")
       throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND);
     }
 
     const removeResult = await this.followRepository.removeFollower(
-      followerId,
-      followedId,
+      senderId,
+      recipientId,
     );
     if (!removeResult) {
+      console.error("Failed to remove follower")
       throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
     }
   }
