@@ -3,7 +3,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { Modak_400Regular } from "@expo-google-fonts/modak";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { TamaguiProvider } from "tamagui";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
@@ -25,11 +24,9 @@ const RootLayout = () => {
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <SessionProvider>
           <PermissionsProvider>
-            <ActionSheetProvider>
-              <SafeAreaProvider>
-                <Slot />
-              </SafeAreaProvider>
-            </ActionSheetProvider>
+            <SafeAreaProvider>
+              <Slot />
+            </SafeAreaProvider>
           </PermissionsProvider>
         </SessionProvider>
       </TamaguiProvider>

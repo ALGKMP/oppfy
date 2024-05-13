@@ -26,14 +26,8 @@ import { api } from "~/utils/api";
 type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
 
 const ProfileLayout = () => {
-  const router = useRouter();
-
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getCurrentUsersFullProfile.useQuery();
-
-  useEffect(() => {
-    console.log(profileData);
-  }, [profileData]);
 
   return (
     <TopTabs

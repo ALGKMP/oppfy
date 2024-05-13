@@ -20,7 +20,9 @@ const TopTabBar = ({
   const indicatorWidth = screenWidth / state.routes.length;
 
   // Create a local animated value
-  const [translateX] = useState(new Animated.Value(0));
+  const [translateX] = useState(
+    new Animated.Value(state.index * indicatorWidth),
+  );
 
   // Set up local animation based on external position changes
   useEffect(() => {
