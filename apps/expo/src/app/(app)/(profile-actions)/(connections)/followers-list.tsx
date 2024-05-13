@@ -1,16 +1,52 @@
 import React, { useMemo, useState } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundX } from "@tamagui/lucide-icons";
-import { Separator, SizableText, View } from "tamagui";
+import { UserRoundMinus, UserRoundX } from "@tamagui/lucide-icons";
+import { Button, Separator, SizableText, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
+import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const Followers = () => {
   const headerHeight = useHeaderHeight();
+
+  const utils = api.useUtils();
+
+  const removeFollower = api.user.removeFollower.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.user.getCurrentUserFollowers.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.user.getCurrentUserFollowers.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.user.getCurrentUserFollowers.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter((item) => item.userId !== newData.userId),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.user.getCurrentUserFollowers.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.user.getCurrentUserFollowers.invalidate();
+    },
+  });
 
   const {
     data: followersData,
@@ -50,20 +86,10 @@ const Followers = () => {
     }
   };
 
-  const [unfollowed, setUnfollowed] = useState<Record<string, boolean>>({});
-
-  const toggleUnfollow = (id: string) => {
-    setUnfollowed((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
   return (
     <BaseScreenView paddingBottom={0}>
       {isLoading || itemCount ? (
         <FlashList
-          extraData={unfollowed}
           data={isLoading ? placeholderData : friendsItems}
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
@@ -93,10 +119,28 @@ const Followers = () => {
                     title={item.username}
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
-                    button={{
-                      text: unfollowed[item.userId] ? "Follow" : "Unfollow",
-                      onPress: () => toggleUnfollow(item.userId),
-                    }}
+                    button={
+                      <ActionSheet
+                        title={`Remove ${item.username}`}
+                        subtitle={`Are you sure you want to remove ${item.username} from your followers?`}
+                        imageUrl={item.profilePictureUrl}
+                        trigger={
+                          <Button size="$3" icon={<UserRoundMinus size="$1" />}>
+                            Remove
+                          </Button>
+                        }
+                        buttonOptions={[
+                          {
+                            text: "Unblock",
+                            textProps: { color: "$red9" },
+                            onPress: () =>
+                              removeFollower.mutate({
+                                recipientId: item.userId,
+                              }),
+                          },
+                        ]}
+                      />
+                    }
                   />
                 )}
               </View>
