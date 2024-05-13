@@ -1,19 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Skeleton } from "moti/skeleton";
-import {
-  Avatar,
-  Button,
-  ButtonProps,
-  ListItem,
-  Separator,
-  SizableText,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Separator, SizableText, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
