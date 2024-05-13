@@ -210,7 +210,7 @@ export class UserRepository {
       })
       .from(schema.friend)
       .innerJoin(
-        schema.friend,
+        schema.user,
         or(
           eq(schema.friend.userId1, schema.user.id),
           eq(schema.friend.userId2, schema.user.id),

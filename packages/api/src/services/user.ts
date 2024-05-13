@@ -190,38 +190,44 @@ export class UserService {
     data: UserProfile[],
     pageSize: number,
   ): Promise<PaginatedResponse<UserProfile>> {
-    try{
-    const items = await Promise.all(
-      data.map(async (item) => {
-        if (item.profilePictureUrl) {
-          const presignedUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: item.profilePictureUrl,
-          });
-          item.profilePictureUrl = presignedUrl;
-        } else {
-          const presignedUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: "profile-pictures/default.jpg",
-          });
-          item.profilePictureUrl = presignedUrl;
-        }
-        return item;
-      }),
-    );
+    try {
+      if (data.length === 0) {
+        return {
+          items: [],
+          nextCursor: undefined,
+        };
+      }
+      const items = await Promise.all(
+        data.map(async (item) => {
+          if (item.profilePictureUrl) {
+            const presignedUrl = await this.awsService.getObjectPresignedUrl({
+              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Key: item.profilePictureUrl,
+            });
+            item.profilePictureUrl = presignedUrl;
+          } else {
+            const presignedUrl = await this.awsService.getObjectPresignedUrl({
+              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Key: "profile-pictures/default.jpg",
+            });
+            item.profilePictureUrl = presignedUrl;
+          }
+          return item;
+        }),
+      );
 
-    let nextCursor: Cursor | undefined = undefined;
-    if (items.length > pageSize) {
-      const nextItem = items.pop();
-      nextCursor = {
-        createdAt: nextItem!.createdAt,
-        profileId: nextItem!.profileId,
+      let nextCursor: Cursor | undefined = undefined;
+      if (items.length > pageSize) {
+        const nextItem = items.pop();
+        nextCursor = {
+          createdAt: nextItem!.createdAt,
+          profileId: nextItem!.profileId,
+        };
+      }
+      return {
+        items,
+        nextCursor,
       };
-    }
-    return {
-      items,
-      nextCursor,
-    };
     } catch (err) {
       console.log(err);
       throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
@@ -497,7 +503,7 @@ export class UserService {
       userId,
     );
     if (!followerExists) {
-      console.error("Follower not found")
+      console.error("Follower not found");
       throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND);
     }
 
@@ -506,7 +512,7 @@ export class UserService {
       userId,
     );
     if (!removeResult) {
-      console.error("Failed to remove follower")
+      console.error("Failed to remove follower");
       throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
     }
   }

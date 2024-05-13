@@ -70,13 +70,6 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  private async _getFollowers(userId: string) {
-    return await this.db.query.follower.findMany({
-      where: eq(schema.follower.recipientId, userId),
-    });
-  }
-
-  @handleDatabaseErrors
   async createFollowRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .insert(schema.followRequest)

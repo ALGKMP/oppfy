@@ -60,16 +60,6 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  private async _getFriends(userId: string) {
-    return await this.db.query.friend.findMany({
-      where: or(
-        eq(schema.friend.userId1, userId),
-        eq(schema.friend.userId2, userId),
-      ),
-    });
-  }
-
-  @handleDatabaseErrors
   async createFriendRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .insert(schema.friendRequest)
