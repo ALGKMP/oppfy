@@ -131,7 +131,7 @@ const Followers = () => {
                         }
                         buttonOptions={[
                           {
-                            text: "Unblock",
+                            text: "Remove",
                             textProps: { color: "$red9" },
                             onPress: () =>
                               removeFollower.mutate({

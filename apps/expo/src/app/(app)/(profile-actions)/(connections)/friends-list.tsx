@@ -133,7 +133,7 @@ const Friends = () => {
                         }
                         buttonOptions={[
                           {
-                            text: "Unblock",
+                            text: "Unfriend",
                             textProps: { color: "$red9" },
                             onPress: () =>
                               removeFriend.mutate({
