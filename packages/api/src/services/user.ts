@@ -491,10 +491,10 @@ export class UserService {
     }
   }
 
-  async removeFollower(senderId: string, recipientId: string) {
+  async removeFollower(userId: string, followerToRemove: string) {
     const followerExists = await this.followRepository.getFollower(
-      senderId,
-      recipientId,
+      followerToRemove,
+      userId,
     );
     if (!followerExists) {
       console.error("Follower not found")
@@ -502,8 +502,8 @@ export class UserService {
     }
 
     const removeResult = await this.followRepository.removeFollower(
-      senderId,
-      recipientId,
+      followerToRemove,
+      userId,
     );
     if (!removeResult) {
       console.error("Failed to remove follower")
