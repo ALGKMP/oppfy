@@ -4,7 +4,6 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
 import { Button, Separator, SizableText, View } from "tamagui";
 
-import { AlertDialog } from "~/components/Dialogs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -24,7 +23,7 @@ const BlockedUsers = () => {
       const prevData = utils.user.getBlockedUsers.getInfiniteData();
       if (prevData === undefined) return;
 
-      // prevData// Optimistically update the data
+      // Optimistically update the data
       utils.user.getBlockedUsers.setInfiniteData(
         {},
         {
