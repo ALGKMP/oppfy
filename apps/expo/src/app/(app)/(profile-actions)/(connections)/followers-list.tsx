@@ -96,7 +96,7 @@ const Followers = () => {
                     subtitle={item.name}
                     imageUrl={item.profilePictureUrl}
                     button={{
-                      title: unfollowed[item.userId] ? "Follow" : "Unfollow",
+                      text: unfollowed[item.userId] ? "Follow" : "Unfollow",
                       onPress: () => toggleUnfollow(item.userId),
                     }}
                   />
