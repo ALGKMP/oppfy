@@ -67,7 +67,7 @@ const Followers = () => {
     return Array.from({ length: 20 }, () => null);
   }, []);
 
-  const friendsItems = useMemo(() => {
+  const followersItems = useMemo(() => {
     return followersData?.pages.flatMap((page) => page.items);
   }, [followersData]);
 
@@ -90,7 +90,7 @@ const Followers = () => {
     <BaseScreenView paddingBottom={0}>
       {isLoading || itemCount ? (
         <FlashList
-          data={isLoading ? placeholderData : friendsItems}
+          data={isLoading ? placeholderData : followersItems}
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           onEndReached={handleOnEndReached}
@@ -121,7 +121,7 @@ const Followers = () => {
                     imageUrl={item.profilePictureUrl}
                     button={
                       <ActionSheet
-                        title={`Remove ${item.username}`}
+                        title="Remove Follower"
                         subtitle={`Are you sure you want to remove ${item.username} from your followers?`}
                         imageUrl={item.profilePictureUrl}
                         trigger={
