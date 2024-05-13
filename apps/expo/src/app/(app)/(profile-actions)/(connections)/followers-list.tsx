@@ -108,8 +108,8 @@ const Followers = () => {
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
-            title="Blocked Users"
-            subtitle="If you block someone, you'll be able to manage them here."
+            title="Followers"
+            subtitle="You'll see all the people who follow you here."
             icon={<UserRoundX />}
           />
         </View>
