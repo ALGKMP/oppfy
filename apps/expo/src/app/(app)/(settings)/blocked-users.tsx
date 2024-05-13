@@ -1,27 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Skeleton } from "moti/skeleton";
-import {
-  Avatar,
-  Button,
-  ListItem,
-  Separator,
-  SizableText,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Button, Separator, SizableText, View } from "tamagui";
 
 import { AlertDialog } from "~/components/Dialogs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
-import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-
-type UserProfile = RouterOutputs["user"]["getBlockedUsers"]["items"][0];
 
 const BlockedUsers = () => {
   const utils = api.useUtils();
