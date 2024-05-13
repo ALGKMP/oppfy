@@ -152,8 +152,8 @@ const Friends = () => {
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
-            title="Followers"
-            subtitle="You'll see all the people who follow you here."
+            title="Friends"
+            subtitle="Once you friend someone, you'll see them here."
             icon={<UserRoundPlus />}
           />
         </View>

@@ -127,7 +127,7 @@ const Following = () => {
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
             title="Following"
-            subtitle="Once you follow people you'll see them here."
+            subtitle="Once you follow someone, you'll see them here."
             icon={<UserRoundPlus />}
           />
         </View>
