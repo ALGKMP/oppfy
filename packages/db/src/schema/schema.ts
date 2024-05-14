@@ -17,6 +17,8 @@ import { mySqlTable } from "./_table";
 
 // check if the current username is the same as the new username
 
+// TODO: Fix inconsistent naming of the tables
+
 export const verificationToken = mySqlTable("VerificationToken", {
   id: serial("id").primaryKey(),
   token: varchar("token", { length: 255 }).unique().notNull(),
