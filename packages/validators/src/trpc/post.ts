@@ -12,7 +12,7 @@ import { userId } from "../shared/user";
 const trpcPostSchema = {
   createPresignedUrl: z
     .object({
-      friend: userId,
+      recipient: userId,
       caption,
       contentLength,
       contentType,
@@ -30,7 +30,7 @@ const trpcPostSchema = {
 
   uploadPost: z.object({
     author: userId,
-    friend: userId,
+    recipient: userId,
     caption,
     key: postKey,
   }),
@@ -63,7 +63,7 @@ const trpcPostSchema = {
 
   metadata: z.object({
     author: userId,
-    friend: userId,
+    recipient: userId,
     caption,
   }),
   profilePictureMetadata: z.object({

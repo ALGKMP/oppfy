@@ -11,9 +11,13 @@ import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
+import { api } from "~/utils/api";
 
 const ProfileActionsLayout = () => {
   const theme = useTheme();
+
+  const utils = api.useUtils();
+  const username = utils.profile.getCurrentUsersFullProfile.getData()?.username;
 
   return (
     <Stack
@@ -31,8 +35,14 @@ const ProfileActionsLayout = () => {
           title: "Edit Profile",
         }}
       />
-
       <Stack.Screen name="share-profile" options={{ title: "Share Profile" }} />
+
+      <Stack.Screen
+        name="(connections)"
+        options={{
+          title: username,
+        }}
+      />
     </Stack>
   );
 };

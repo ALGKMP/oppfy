@@ -35,6 +35,15 @@ const trpcUserSchema = {
     pageSize: z.number().optional(),
   }),
 
+  paginateOtherUser: z.object({
+    userId: z.string(),
+    cursor: z.object({
+      createdAt: z.date(),
+      profileId: z.number(),
+    }).optional(),
+    pageSize: z.number().optional(),
+  }),
+
   getFriends: z.object({
     userId,
   }),

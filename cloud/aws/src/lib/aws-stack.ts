@@ -22,13 +22,16 @@ function createBucket(scope: Construct, name: string) {
     cors: [
       {
         allowedHeaders: ["*"],
-        allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.POST, s3.HttpMethods.DELETE],
+        allowedMethods: [
+          s3.HttpMethods.PUT,
+          s3.HttpMethods.POST,
+          s3.HttpMethods.DELETE,
+        ],
         allowedOrigins: ["*"],
         exposedHeaders: [],
-        maxAge: 600 // Set to a practical value for caching preflight responses
-
+        maxAge: 600, // Set to a practical value for caching preflight responses
       },
-    ]
+    ],
   });
 }
 
@@ -37,7 +40,7 @@ function createLambdaFunction(scope, name, entryPath) {
     runtime: lambda.Runtime.NODEJS_20_X,
     entry: entryPath,
     handler: "handler",
-    timeout: cdk.Duration.minutes(3),  // Set timeout to 5 minutes
+    timeout: cdk.Duration.minutes(3), // Set timeout to 5 minutes
     bundling: {
       format: lambdaNodeJs.OutputFormat.ESM,
       mainFields: ["module", "main"],
@@ -179,11 +182,11 @@ export class AwsStack extends cdk.Stack {
       "profileLambda",
       "src/res/lambdas/profilePicture/index.ts",
     );
-    const processProfilePictureLambda = createLambdaFunction(
-      this,
-      "processProfilePictureLambda",
-      "src/res/lambdas/processProfilePicture/index.ts",
-    );
+    // const processProfilePictureLambda = createLambdaFunction(
+    //   this,
+    //   "processProfilePictureLambda",
+    //   "src/res/lambdas/processProfilePicture/index.ts",
+    // );
 
     // Setup integrations
     setupBucketLambdaIntegration(
@@ -196,11 +199,11 @@ export class AwsStack extends cdk.Stack {
       profileLambda,
       "AllowProfileS3Invocation",
     );
-    setupBucketLambdaIntegration(
-      profileBucket,
-      processProfilePictureLambda,
-      "AllowProcessProfilePictureS3Invocation",
-    );
+    // setupBucketLambdaIntegration(
+    //   profileBucket,
+    //   processProfilePictureLambda,
+    //   "AllowProcessProfilePictureS3Invocation",
+    // );
 
     // ! do not delete, this is used for testing
     // const bastionSecurityGroup = new ec2.SecurityGroup(
@@ -251,9 +254,7 @@ export class AwsStack extends cdk.Stack {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["es:*"],
-        resources: [
-          `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
-        ],
+        resources: [`arn:aws:es:${this.region}:${this.account}:domain/test/*`],
       }),
     );
 
@@ -274,7 +275,7 @@ export class AwsStack extends cdk.Stack {
     );
 
     const openSearchDomain = new opensearch.Domain(this, "MyOpenSearchDomain", {
-      domainName: "testing",
+      domainName: "test",
       version: opensearch.EngineVersion.OPENSEARCH_1_0,
       capacity: {
         masterNodes: 0,
@@ -298,7 +299,7 @@ export class AwsStack extends cdk.Stack {
           principals: [new iam.ArnPrincipal(openSearchRole.roleArn)],
           actions: ["es:*"],
           resources: [
-            `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
+            `arn:aws:es:${this.region}:${this.account}:domain/test/*`,
           ],
         }),
       ],
@@ -326,6 +327,12 @@ export class AwsStack extends cdk.Stack {
       ],
     });
 
+    // ! IF YOU RUN INTO A dms-vpc-role DOESNT EXIST ERROR:
+    // ! 1. COMMENT ALL CODE BELOW
+    // ! 2. RUN cdk deploy
+    // ! 3. UNCOMMENT ALL CODE BELOW
+    // ! 4. RUN cdk deploy
+
     // Create the IAM role for DMS CloudWatch Logs
     const _dmsCloudWatchLogsRole = new iam.Role(this, "DmsCloudWatchLogsRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
@@ -338,30 +345,23 @@ export class AwsStack extends cdk.Stack {
     });
 
     // Define the replication subnet group using the VPC's private subnets
-    const _dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
+    const dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
       this,
       "DmsSubnetGroup",
       {
         replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
         replicationSubnetGroupDescription:
           "Subnet group for DMS replication instances",
-        // subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
-        subnetIds: vpc.selectSubnets({
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        }).subnetIds, // Use private subnets if publiclyAccessible is false
+        subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
       },
     );
 
     // Define a security group for the RDS instance within the VPC
-    const _dmsSecurityGroup = new ec2.SecurityGroup(
-      this,
-      "MyDmsSecurityGroup",
-      {
-        vpc,
-        allowAllOutbound: true,
-        description: "Security group for DMS replication instance",
-      },
-    );
+    const dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
+      vpc,
+      allowAllOutbound: true,
+      description: "Security group for DMS replication instance",
+    });
 
     // Create the DMS replication instance
     const dmsReplicationInstance = new dms.CfnReplicationInstance(
@@ -371,18 +371,12 @@ export class AwsStack extends cdk.Stack {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
         publiclyAccessible: true,
-        replicationInstanceIdentifier: _dmsVpcRole.roleId,
         // vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
         // replicationSubnetGroupIdentifier:
         //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
-        vpcSecurityGroupIds: [_dmsSecurityGroup.securityGroupId], // Make sure to assign the correct Security Group
-        replicationSubnetGroupIdentifier:
-          _dmsSubnetGroup.replicationSubnetGroupIdentifier, // Assign the Replication Subnet Group
         multiAz: false,
       },
     );
-
-    // dmsReplicationInstance.node.addDependency(_dmsVpcRole)
 
     const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
       endpointType: "source",

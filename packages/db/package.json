@@ -10,7 +10,7 @@
     "dev": "pnpm with-env tsc --watch",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint .",
-    "push": "pnpm with-env drizzle-kit push:mysql",
+    "push": "pnpm with-env drizzle-kit push",
     "generate": "pnpm with-env drizzle-kit generate:mysql",
     "migrate": "pnpm tsx src/migrate.ts",
     "studio": "pnpm with-env drizzle-kit studio --config drizzle.config.ts",
@@ -22,10 +22,12 @@
     "@aws-sdk/client-s3": "^3.564.0",
     "@aws-sdk/credential-providers": "^3.564.0",
     "@mux/mux-node": "^8.5.1",
+    "@opensearch-project/opensearch": "^2.8.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "drizzle-orm": "^0.30.10",
     "eslint-plugin-drizzle": "^0.2.3",
+    "install": "^0.13.0",
     "mysql2": "^3.9.7"
   },
   "devDependencies": {

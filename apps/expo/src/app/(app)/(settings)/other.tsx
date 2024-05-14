@@ -72,7 +72,7 @@ const Other = () => {
   ] satisfies SettingsGroupInput[];
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
         <Button

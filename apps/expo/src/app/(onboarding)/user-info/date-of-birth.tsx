@@ -6,7 +6,7 @@ import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@acme/validators";
 
-import { KeyboardSafeView } from "~/components/SafeViews";
+import { KeyboardSafeView } from "~/components/Views";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 

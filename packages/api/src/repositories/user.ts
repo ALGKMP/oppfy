@@ -115,10 +115,10 @@ export class UserRepository {
         createdAt: schema.follower.createdAt,
         profileId: schema.profile.id,
       })
-      .from(schema.user)
+      .from(schema.follower)
       .innerJoin(
-        schema.follower,
-        eq(schema.user.id, schema.follower.recipientId),
+        schema.user,
+        eq(schema.follower.senderId, schema.user.id),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .innerJoin(
@@ -158,8 +158,8 @@ export class UserRepository {
         createdAt: schema.follower.createdAt,
         profileId: schema.profile.id,
       })
-      .from(schema.user)
-      .innerJoin(schema.follower, eq(schema.user.id, schema.follower.senderId))
+      .from(schema.follower)
+      .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .innerJoin(
         schema.profilePicture,
@@ -198,12 +198,12 @@ export class UserRepository {
         createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
       })
-      .from(schema.user)
+      .from(schema.friend)
       .innerJoin(
-        schema.friend,
+        schema.user,
         or(
-          eq(schema.user.id, schema.friend.userId1),
-          eq(schema.user.id, schema.friend.userId2),
+          eq(schema.friend.userId1, schema.user.id),
+          eq(schema.friend.userId2, schema.user.id),
         ),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
@@ -228,98 +228,6 @@ export class UserRepository {
       )
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
-  }
-
-  @handleDatabaseErrors
-  async getPaginatedFollowRequests(
-    forUserId: string, // Assuming you need this to identify the recipient of follow requests
-    cursor: { createdAt: Date; profileId: number } | null = null,
-    pageSize = 10,
-  ) {
-    return await this.db
-      .select({
-        userId: schema.user.id,
-        username: schema.user.username,
-        name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
-        createdAt: schema.followRequest.createdAt, // Assuming followRequest has a createdAt column
-        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
-      })
-      .from(schema.user)
-      .innerJoin(
-        schema.followRequest,
-        eq(schema.user.id, schema.followRequest.recipientId),
-      )
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
-      .where(
-        and(
-          eq(schema.followRequest.recipientId, forUserId), // Filtering for the specific user receiving follow requests
-          cursor
-            ? or(
-                gt(schema.followRequest.createdAt, cursor.createdAt),
-                and(
-                  eq(schema.followRequest.createdAt, cursor.createdAt),
-                  gt(schema.profile.id, cursor.profileId),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(
-        asc(schema.followRequest.createdAt), // Primary order by the creation date of the follow request
-        asc(schema.profile.id), // Tiebreaker order by profile ID
-      )
-      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
-  }
-
-  @handleDatabaseErrors
-  async getPaginatedFriendRequests(
-    forUserId: string, // Assuming you need this to identify the recipient of friend requests
-    cursor: { createdAt: Date; profileId: number } | null = null,
-    pageSize = 10,
-  ) {
-    return await this.db
-      .select({
-        userId: schema.user.id,
-        username: schema.user.username,
-        name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
-        createdAt: schema.friendRequest.createdAt, // Assuming friendRequest has a createdAt column
-        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
-      })
-      .from(schema.user)
-      .innerJoin(
-        schema.friendRequest,
-        eq(schema.user.id, schema.friendRequest.recipientId),
-      )
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
-      .where(
-        and(
-          eq(schema.friendRequest.recipientId, forUserId), // Filtering for the specific user receiving friend requests
-          cursor
-            ? or(
-                gt(schema.friendRequest.createdAt, cursor.createdAt),
-                and(
-                  eq(schema.friendRequest.createdAt, cursor.createdAt),
-                  gt(schema.profile.id, cursor.profileId),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(
-        asc(schema.friendRequest.createdAt), // Primary order by the creation date of the friend request
-        asc(schema.profile.id), // Tiebreaker order by profile ID
-      )
-      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
 
   @handleDatabaseErrors
@@ -365,6 +273,98 @@ export class UserRepository {
       .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
 
+
+  @handleDatabaseErrors
+  async getPaginatedFollowRequests(
+    forUserId: string, // Assuming you need this to identify the recipient of follow requests
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+        createdAt: schema.followRequest.createdAt, // Assuming followRequest has a createdAt column
+        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
+      })
+      .from(schema.followRequest)
+      .innerJoin(
+        schema.user,
+        eq(schema.followRequest.recipientId, schema.user.id),
+      )
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
+      .where(
+        and(
+          eq(schema.followRequest.recipientId, forUserId), // Filtering for the specific user receiving follow requests
+          cursor
+            ? or(
+                gt(schema.followRequest.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.followRequest.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(schema.followRequest.createdAt), // Primary order by the creation date of the follow request
+        asc(schema.profile.id), // Tiebreaker order by profile ID
+      )
+      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
+  }
+
+  @handleDatabaseErrors
+  async getPaginatedFriendRequests(
+    forUserId: string, // Assuming you need this to identify the recipient of friend requests
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.user.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profilePicture.key,
+        createdAt: schema.friendRequest.createdAt, // Assuming friendRequest has a createdAt column
+        profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
+      })
+      .from(schema.friendRequest)
+      .innerJoin(
+        schema.user,
+        eq(schema.friendRequest.recipientId, schema.user.id),
+      )
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(
+        schema.profilePicture,
+        eq(schema.profile.profilePictureId, schema.profilePicture.id),
+      )
+      .where(
+        and(
+          eq(schema.friendRequest.recipientId, forUserId), // Filtering for the specific user receiving friend requests
+          cursor
+            ? or(
+                gt(schema.friendRequest.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.friendRequest.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(schema.friendRequest.createdAt), // Primary order by the creation date of the friend request
+        asc(schema.profile.id), // Tiebreaker order by profile ID
+      )
+      .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
+  }
   // Use this to check if a user is blocked (gonna need to use this a lot)
   @handleDatabaseErrors
   async getBlockedUser(userId: string, blockedUserId: string) {

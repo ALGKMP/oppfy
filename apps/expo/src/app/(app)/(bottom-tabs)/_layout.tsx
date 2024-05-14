@@ -20,9 +20,9 @@ import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
   const router = useRouter();
-  const utils = api.useUtils();
 
-  const username = utils.profile.getCurrentUsersFullProfile.getData()?.username;
+  const { data: profileData } =
+    api.profile.getCurrentUsersFullProfile.useQuery();
 
   return (
     <BottomTabs
@@ -32,7 +32,7 @@ const BottomTabsLayout = () => {
       }}
     >
       <BottomTabs.Screen
-        name="(top-tabs)"
+        name="(home)"
         options={{
           title: "Home",
           tabBarIcon: ({ focused }) => <Home strokeWidth={focused ? 2 : 1.5} />,
@@ -72,7 +72,7 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(profile)"
         options={{
-          title: `#${username}`,
+          title: profileData?.username,
           tabBarIcon: ({ focused }) => (
             <User2 strokeWidth={focused ? 2 : 1.5} />
           ),

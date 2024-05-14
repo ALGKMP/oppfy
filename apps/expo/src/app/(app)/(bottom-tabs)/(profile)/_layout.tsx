@@ -26,14 +26,8 @@ import { api } from "~/utils/api";
 type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
 
 const ProfileLayout = () => {
-  const router = useRouter();
-
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getCurrentUsersFullProfile.useQuery();
-
-  useEffect(() => {
-    console.log(profileData);
-  }, [profileData]);
 
   return (
     <TopTabs
@@ -48,7 +42,6 @@ const ProfileLayout = () => {
           <TopTabBar {...props} />
         </YStack>
       )}
-      screenOptions={{}}
     >
       <TopTabs.Screen
         name="media-of-you"
@@ -136,7 +129,7 @@ const Profile = (props: ProfileProps) => {
       <XStack gap="$7">
         <TouchableOpacity
           disabled={props.loading}
-          onPress={() => router.push("/friends")}
+          onPress={() => router.push("/friends-list")}
         >
           <Stat
             label="Friends"
@@ -148,7 +141,7 @@ const Profile = (props: ProfileProps) => {
 
         <TouchableOpacity
           disabled={props.loading}
-          onPress={() => router.push("/followers")}
+          onPress={() => router.push("/followers-list")}
         >
           <Stat
             label="Followers"
@@ -159,7 +152,7 @@ const Profile = (props: ProfileProps) => {
         </TouchableOpacity>
         <TouchableOpacity
           disabled={props.loading}
-          onPress={() => router.push("/following")}
+          onPress={() => router.push("/following-list")}
         >
           <Stat
             label="Following"

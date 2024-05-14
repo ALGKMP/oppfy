@@ -72,6 +72,7 @@ interface HeaderTitleProps {
   children: string;
   tintColor?: string | undefined;
 }
+
 type HeaderLeftProps = HeaderBackButtonProps;
 type HeaderRightProps = HeaderButtonProps;
 

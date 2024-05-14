@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
 import { Avatar, Button, Spinner, Text, XStack, YStack } from "tamagui";
 
-import { KeyboardSafeView } from "~/components/SafeViews";
+import { KeyboardSafeView } from "~/components/Views";
 import { BaseScreenView } from "~/components/Views";
 import { useUploadProfilePic } from "~/hooks/media";
 

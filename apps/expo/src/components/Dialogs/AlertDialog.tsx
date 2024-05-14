@@ -1,94 +1,133 @@
-import {
-  AlertDialog as BaseAlertDialog,
-  Button,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import React, { useCallback, useEffect, useState } from "react";
+import { Animated, Modal } from "react-native";
+import type { ParagraphProps, SizableTextProps } from "tamagui";
+import { Button, Paragraph, SizableText, XStack, YStack } from "tamagui";
 
-interface AlertDialogProps {
+export interface AlertDialogProps {
   title: string;
-  description?: string;
+  titleProps?: SizableTextProps;
 
-  acceptText?: string;
-  cancelText?: string;
-
-  trigger: JSX.Element;
+  subtitle?: string;
+  subtitleProps?: ParagraphProps;
 
   isVisible?: boolean;
+  trigger?: React.ReactElement;
 
-  onAccept?: () => void;
   onCancel?: () => void;
+  onAccept?: () => void;
 }
 
 const AlertDialog = ({
   title,
-  description,
-  acceptText,
-  cancelText,
+  titleProps,
+  subtitle,
+  subtitleProps,
+
   trigger,
   isVisible,
-  onAccept,
   onCancel,
+  onAccept,
 }: AlertDialogProps) => {
-  return (
-    <BaseAlertDialog open={isVisible} native>
-      <BaseAlertDialog.Trigger>
-        <View>{trigger}</View>
-      </BaseAlertDialog.Trigger>
+  const [showModal, setShowModal] = useState(false);
+  const [opacityAnimation] = useState(new Animated.Value(0));
 
-      <BaseAlertDialog.Portal>
-        <BaseAlertDialog.Overlay
-          key="overlay"
-          animation="quick"
-          opacity={0.5}
-          enterStyle={{ opacity: 0 }}
-          exitStyle={{ opacity: 0 }}
-        />
-        <BaseAlertDialog.Content
-          width="75%"
-          bordered
-          elevate
-          key="content"
-          animation={[
-            "quick",
-            {
-              opacity: {
-                overshootClamping: true,
-              },
-            },
-          ]}
-          enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
-          exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
-          x={0}
-          scale={1}
-          opacity={1}
-          y={0}
+  const openModal = useCallback(() => {
+    setShowModal(true);
+    Animated.timing(opacityAnimation, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [opacityAnimation]);
+
+  const closeModal = useCallback(() => {
+    Animated.timing(opacityAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowModal(false);
+    });
+  }, [opacityAnimation]);
+
+  useEffect(() => {
+    if (isVisible) {
+      openModal();
+    } else {
+      closeModal();
+    }
+  }, [isVisible, openModal, closeModal]);
+
+  const TriggerElement = trigger
+    ? React.cloneElement(trigger, { onPress: openModal })
+    : null;
+
+  return (
+    <>
+      {TriggerElement}
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={showModal}
+        onRequestClose={closeModal}
+      >
+        <Animated.View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            opacity: opacityAnimation,
+          }}
         >
-          <YStack alignItems="center" gap="$3">
-            <BaseAlertDialog.Title>{title}</BaseAlertDialog.Title>
-            {description && (
-              <BaseAlertDialog.Description textAlign="center">
-                {description}
-              </BaseAlertDialog.Description>
+          <YStack
+            width={300}
+            alignItems="center"
+            paddingHorizontal="$4"
+            paddingVertical="$6"
+            backgroundColor="$color4"
+            borderRadius={9}
+            gap="$2"
+          >
+            <SizableText size="$5" fontWeight="bold" {...titleProps}>
+              {title}
+            </SizableText>
+
+            {subtitle && (
+              <Paragraph textAlign="center" theme="alt2" {...subtitleProps}>
+                {subtitle}
+              </Paragraph>
             )}
 
-            <XStack justifyContent="flex-end" gap="$3">
-              <BaseAlertDialog.Cancel asChild>
-                <Button size="$4" flex={1} onPress={onCancel}>
-                  {cancelText ?? "Cancel"}
-                </Button>
-              </BaseAlertDialog.Cancel>
-              <BaseAlertDialog.Action onPress={onAccept} asChild>
-                <Button flex={1} theme="active">
-                  {acceptText ?? "Accept"}
-                </Button>
-              </BaseAlertDialog.Action>
+            <XStack gap="$4">
+              <Button
+                size="$5"
+                color="$blue9"
+                theme="alt1"
+                onPress={() => {
+                  onCancel?.();
+                  closeModal();
+                }}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                size="$5"
+                color="$red9"
+                theme="alt2"
+                onPress={() => {
+                  onAccept?.();
+                  closeModal();
+                }}
+              >
+                Accept
+              </Button>
             </XStack>
           </YStack>
-        </BaseAlertDialog.Content>
-      </BaseAlertDialog.Portal>
-    </BaseAlertDialog>
+        </Animated.View>
+      </Modal>
+    </>
   );
 };
 

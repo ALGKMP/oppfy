@@ -19,7 +19,7 @@ import {
 import { sharedValidators } from "@acme/validators";
 
 import { Header } from "~/components/Headers";
-import { KeyboardSafeView } from "~/components/SafeViews";
+import { KeyboardSafeView } from "~/components/Views";
 import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";

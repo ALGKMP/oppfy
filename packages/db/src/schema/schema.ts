@@ -17,6 +17,8 @@ import { mySqlTable } from "./_table";
 
 // check if the current username is the same as the new username
 
+// TODO: Fix inconsistent naming of the tables
+
 export const verificationToken = mySqlTable("VerificationToken", {
   id: serial("id").primaryKey(),
   token: varchar("token", { length: 255 }).unique().notNull(),
@@ -122,6 +124,7 @@ export const post = mySqlTable("Post", {
     .notNull(),
   caption: text("body").notNull(),
   key: varchar("url", { length: 255 }).notNull(),
+  mediaType: mysqlEnum("mediaType", ["image", "video"]).notNull().default("image"),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()

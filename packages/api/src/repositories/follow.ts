@@ -20,8 +20,8 @@ export class FollowRepository {
     const result = await this.db.delete(schema.follower).where(
       // Sender is removing the recipient from their followers
       and(
-        eq(schema.follower.senderId, recipientId),
-        eq(schema.follower.recipientId, senderId),
+        eq(schema.follower.senderId, senderId),
+        eq(schema.follower.recipientId, recipientId),
       ),
     );
     return result[0];
@@ -67,13 +67,6 @@ export class FollowRepository {
       .from(schema.follower)
       .where(eq(schema.follower.senderId, userId));
     return result[0]?.count;
-  }
-
-  @handleDatabaseErrors
-  private async _getFollowers(userId: string) {
-    return await this.db.query.follower.findMany({
-      where: eq(schema.follower.recipientId, userId),
-    });
   }
 
   @handleDatabaseErrors

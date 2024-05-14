@@ -1,44 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { Input, Text, useDebounce, View } from "tamagui";
+import React, { useEffect, useMemo, useState } from "react";
+import { debounce } from "lodash";
+import { Input, Text, View } from "tamagui";
 
-import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
-const SEARCH_REFRESH_DELAY = 500;
+const SEARCH_REFRESH_DELAY = 200;
 
 const Search = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<
-    RouterOutputs["users"]["search"]
+    RouterOutputs["search"]["search"]
   >([]);
-  const [loading, setLoading] = useState(false);
 
-  const search = api.users.search.useMutation();
+  const search = api.search.search.useMutation();
 
-  // Debounced search function
-  const debouncedSearch = useDebounce((value: string) => {
-    if (value) {
-      setLoading(true);
-      search.mutate(
-        { username: value },
-        {
-          onSuccess: (data) => {
-            setSearchResults(data);
-            setLoading(false);
-          },
-          onError: () => {
-            setLoading(false);
-          },
-        },
-      );
-    } else {
-      setSearchResults([]); // Clear results if search term is empty
-    }
-  }, SEARCH_REFRESH_DELAY); // 500ms delay
+  const debouncedSearch = debounce(async (partialUsername: string) => {
+    if (!partialUsername) return;
 
-  useEffect(() => {
-    debouncedSearch(searchTerm);
-  }, [searchTerm, debouncedSearch]);
+    const data = await search.mutateAsync({ username: partialUsername });
+    setSearchResults(data);
+  }, SEARCH_REFRESH_DELAY);
 
   return (
     <View flex={1} backgroundColor="black" paddingHorizontal="$4">
@@ -47,17 +28,12 @@ const Search = () => {
         placeholder="Search by username"
         placeholderTextColor="#888"
         color="white"
-        value={searchTerm}
-        onChangeText={setSearchTerm}
+        onChangeText={debouncedSearch}
       />
       <View>
-        {loading ? (
-          <Text>Loading...</Text>
-        ) : (
-          searchResults.map((user) => (
-            <Text key={user.id}>{user.username}</Text>
-          ))
-        )}
+        {searchResults.map((user) => (
+          <Text key={user.id}>{user.username}</Text>
+        ))}
       </View>
     </View>
   );

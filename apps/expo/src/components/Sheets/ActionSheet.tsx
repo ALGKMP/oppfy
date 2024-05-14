@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import type { ReactElement } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import type { ButtonProps } from "react-native";
 import { Animated, Easing, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
 import {
+  Avatar,
   Button,
   Paragraph,
   Separator,
@@ -18,6 +21,8 @@ export interface ButtonOption {
 }
 
 export interface ActionSheetProps {
+  imageUrl?: string;
+
   title: string;
   titleProps?: SizableTextProps;
 
@@ -27,17 +32,25 @@ export interface ActionSheetProps {
   buttonOptions: ButtonOption[];
 
   isVisible?: boolean;
-  onClose?: () => void;
+  trigger?: ReactElement<ButtonProps>;
+
+  onCancel?: () => void;
 }
 
 const ActionSheet = ({
-  isVisible,
-  onClose,
+  imageUrl,
+
   title,
   titleProps,
+
   subtitle,
   subtitleProps,
+
   buttonOptions,
+
+  trigger,
+  isVisible,
+  onCancel,
 }: ActionSheetProps) => {
   const insets = useSafeAreaInsets();
 
@@ -45,114 +58,144 @@ const ActionSheet = ({
   const [slideAnimation] = useState(new Animated.Value(300));
   const [backgroundOpacity] = useState(new Animated.Value(0));
 
+  const openModal = useCallback(() => {
+    setShowModal(true);
+    Animated.parallel([
+      Animated.timing(backgroundOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [backgroundOpacity, slideAnimation]);
+
+  const closeModal = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(backgroundOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }),
+      Animated.timing(slideAnimation, {
+        toValue: 300,
+        duration: 300,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease),
+      }),
+    ]).start(() => {
+      setShowModal(false);
+      onCancel?.(); // Call onCancel callback if provided
+    });
+  }, [backgroundOpacity, slideAnimation, onCancel]);
+
   useEffect(() => {
-    const closeModal = () => {
-      setShowModal(true);
-      Animated.parallel([
-        Animated.timing(backgroundOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnimation, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    };
+    isVisible ? openModal() : closeModal();
+  }, [isVisible, openModal, closeModal]);
 
-    const openModal = () => {
-      Animated.parallel([
-        Animated.timing(backgroundOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-          easing: Easing.in(Easing.ease),
-        }),
-        Animated.timing(slideAnimation, {
-          toValue: 300,
-          duration: 300,
-          useNativeDriver: true,
-          easing: Easing.in(Easing.ease),
-        }),
-      ]).start(() => {
-        setShowModal(false);
-      });
-    };
-
-    isVisible ? closeModal() : openModal();
-  }, [isVisible, backgroundOpacity, slideAnimation]);
+  const TriggerElement = trigger
+    ? React.cloneElement(trigger, {
+        onPress: openModal,
+      })
+    : null;
 
   return (
-    <Modal
-      animationType="none"
-      transparent={true}
-      visible={showModal}
-      onRequestClose={onClose}
-    >
-      <Animated.View
-        style={{
-          flex: 1,
-          justifyContent: "flex-end",
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          opacity: backgroundOpacity,
-        }}
+    <>
+      {TriggerElement}
+      <Modal
+        animationType="none"
+        transparent={true}
+        visible={showModal}
+        onRequestClose={closeModal} // Use closeModal directly
       >
         <Animated.View
           style={{
-            transform: [{ translateY: slideAnimation }],
+            flex: 1,
+            justifyContent: "flex-end",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            opacity: backgroundOpacity,
           }}
         >
-          <YStack gap="$3" paddingHorizontal="$4" paddingBottom={insets.bottom}>
-            <YStack>
-              <YStack
-                padding="$4"
-                alignItems="center"
-                backgroundColor="$color4"
-                borderTopLeftRadius={9}
-                borderTopRightRadius={9}
-              >
-                <SizableText size="$5" fontWeight="bold" {...titleProps}>
-                  {title}
-                </SizableText>
+          <Animated.View
+            style={{
+              transform: [{ translateY: slideAnimation }],
+            }}
+          >
+            <YStack
+              paddingHorizontal="$4"
+              paddingBottom={insets.bottom}
+              gap="$3"
+            >
+              <YStack>
+                <YStack
+                  padding="$4"
+                  alignItems="center"
+                  backgroundColor="$color4"
+                  borderTopLeftRadius={9}
+                  borderTopRightRadius={9}
+                  gap="$2"
+                >
+                  {imageUrl && (
+                    <Avatar circular bordered size="$6">
+                      <Avatar.Image src={imageUrl} />
+                    </Avatar>
+                  )}
 
-                {subtitle && (
-                  <Paragraph textAlign="center" theme="alt2" {...subtitleProps}>
-                    {subtitle}
-                  </Paragraph>
-                )}
-              </YStack>
-
-              {buttonOptions.map((option, index) => (
-                <View key={index}>
-                  <Separator theme="alt1" />
-                  <Button
-                    size="$5"
-                    borderTopLeftRadius={0}
-                    borderTopRightRadius={0}
-                    borderBottomLeftRadius={
-                      index === buttonOptions.length - 1 ? 9 : 0
-                    }
-                    borderBottomRightRadius={
-                      index === buttonOptions.length - 1 ? 9 : 0
-                    }
-                    onPress={option.onPress}
-                  >
-                    <SizableText size="$5" {...option.textProps}>
-                      {option.text}
+                  <YStack alignItems="center">
+                    <SizableText size="$5" fontWeight="bold" {...titleProps}>
+                      {title}
                     </SizableText>
-                  </Button>
-                </View>
-              ))}
+
+                    {subtitle && (
+                      <Paragraph
+                        textAlign="center"
+                        theme="alt2"
+                        {...subtitleProps}
+                      >
+                        {subtitle}
+                      </Paragraph>
+                    )}
+                  </YStack>
+                </YStack>
+
+                {buttonOptions.map((option, index) => (
+                  <View key={index}>
+                    <Separator theme="alt1" />
+                    <Button
+                      size="$5"
+                      borderTopLeftRadius={0}
+                      borderTopRightRadius={0}
+                      borderBottomLeftRadius={
+                        index === buttonOptions.length - 1 ? 9 : 0
+                      }
+                      borderBottomRightRadius={
+                        index === buttonOptions.length - 1 ? 9 : 0
+                      }
+                      onPress={() => {
+                        option.onPress?.();
+                        closeModal();
+                      }}
+                    >
+                      <SizableText size="$5" {...option.textProps}>
+                        {option.text}
+                      </SizableText>
+                    </Button>
+                  </View>
+                ))}
+              </YStack>
+              <Button size="$5" color="$blue9" onPress={closeModal}>
+                Cancel
+              </Button>
             </YStack>
-            <Button size="$5" color="$blue9" onPress={onClose}>
-              Cancel
-            </Button>
-          </YStack>
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
-    </Modal>
+      </Modal>
+    </>
   );
 };
 
