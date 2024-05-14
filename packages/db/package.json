@@ -28,7 +28,7 @@
     "drizzle-orm": "^0.30.10",
     "eslint-plugin-drizzle": "^0.2.3",
     "install": "^0.13.0",
-    "mysql2": "^3.9.7",
+    "mysql2": "^3.9.7"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:^",
