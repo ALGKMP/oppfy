@@ -23,7 +23,7 @@ interface OpenSearchResponse {
   };
 }
 
-export const usersRouter = createTRPCRouter({
+export const searchRouter = createTRPCRouter({
   search: protectedProcedure
     .input(
       z.object({
