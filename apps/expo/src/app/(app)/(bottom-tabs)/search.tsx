@@ -9,11 +9,11 @@ const SEARCH_REFRESH_DELAY = 500;
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<
-    RouterOutputs["users"]["search"]
+    RouterOutputs["search"]["search"]
   >([]);
   const [loading, setLoading] = useState(false);
 
-  const search = api.users.search.useMutation();
+  const search = api.search.search.useMutation();
 
   // Debounced search function
   const debouncedSearch = useDebounce((value: string) => {
