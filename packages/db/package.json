@@ -26,7 +26,8 @@
     "@typescript-eslint/parser": "^6.21.0",
     "drizzle-orm": "^0.30.10",
     "eslint-plugin-drizzle": "^0.2.3",
-    "mysql2": "^3.9.7"
+    "install": "^0.13.0",
+    "mysql2": "^3.9.7",
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:^",
