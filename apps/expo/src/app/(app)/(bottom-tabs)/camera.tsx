@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Alert, Button, Image, StyleSheet, View } from "react-native";
-import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 
 import { api } from "~/utils/api";
@@ -27,11 +26,12 @@ export default function ImagePickerExample() {
 
       try {
         const uploadUrl = await uploadVideo.mutateAsync();
-        console.log(uploadUrl)
-        if (!uploadUrl || !image) { //   Alert.alert("Error", "Failed to get presigned URL");
+        console.log(uploadUrl);
+        if (!uploadUrl || !image) {
+          Alert.alert("Error", "Failed to get presigned URL");
           return;
         }
-        const response = await uploadToMux(image, uploadUrl);
+        const response = await uploadToMux(uri, uploadUrl);
 
         if (response.ok) {
           Alert.alert("Success", "Video uploaded successfully");
@@ -46,17 +46,24 @@ export default function ImagePickerExample() {
   };
 
   const uploadToMux = async (uri: string, uploadUrl: string) => {
+    const blob = await getImageBlob(uri);
+    console.log(image);
     const response = await fetch(uploadUrl, {
       method: "PUT",
       headers: {
-        "Content-Type": "video/mp4", // Adjust the MIME type if necessary
+        "Content-Type": blob.type, // Adjust the MIME type if necessary
       },
-      body: await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      }),
+      body: blob,
     });
 
     return response;
+  };
+
+  const getImageBlob = async (uri: string) => {
+    // Fetch the image data
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return blob;
   };
 
   return (

@@ -121,7 +121,9 @@ export const userRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        return sharedValidators.user.paginatedUserResponseSchema.parse(result);
+        const d = sharedValidators.user.paginatedUserResponseSchema.parse(result);
+        console.log(d.nextCursor)
+        return d;
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

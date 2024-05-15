@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { Webhooks } from "@mux/mux-node/src/resources/webhooks.js";
+// import { Webhooks } from "@mux/mux-node/src/resources/webhooks.js";
 
 import { trpcValidators } from "@acme/validators";
 
