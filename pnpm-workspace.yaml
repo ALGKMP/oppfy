@@ -1,5 +1,6 @@
 packages:
   - apps/*
   - cloud/*
+  - cloud/aws/src/res/lambdas/kinesis
   - packages/*
   - tooling/*
