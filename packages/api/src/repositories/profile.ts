@@ -81,7 +81,7 @@ export class ProfileRepository {
 
   @handleDatabaseErrors
   async usernameExists(username: string) {
-    return await this.db.query.user.findFirst({
+    return await this.db.query.profile.findFirst({
       where: eq(schema.profile.username, username),
     });
   }

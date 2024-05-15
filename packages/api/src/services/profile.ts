@@ -145,10 +145,14 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
     }
 
-    const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
+    const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
       Bucket: process.env.S3_PROFILE_BUCKET!,
       Key: profile.profilePictureKey,
     }) 
+    if (!profilePictureUrl) {
+      console.log("SERVICE ERROR: failed to get profile picture")
+      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
+    }
 
 
     const profileData = {

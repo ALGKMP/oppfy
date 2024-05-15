@@ -43,18 +43,14 @@ export class CommentRepository {
       .select({
         commentId: schema.comment.id,
         userId: schema.comment.user,
-        username: schema.user.username,
-        profilePictureUrl: schema.profilePicture.key,
+        username: schema.profile.username,
+        profilePictureUrl: schema.profile.profilePictureKey,
         body: schema.comment.body,
         createdAt: schema.comment.createdAt,
       })
       .from(schema.comment)
       .innerJoin(schema.user, eq(schema.comment.user, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         and(
           eq(schema.like.postId, postId),
