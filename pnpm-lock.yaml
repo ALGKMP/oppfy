@@ -434,164 +434,9 @@ importers:
       '@acme/validators':
         specifier: workspace:^
         version: link:../../../../../../packages/validators
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.564.0
-        version: 3.564.0
-      '@mux/mux-node':
-        specifier: ^8.5.1
-        version: 8.5.1
       '@opensearch-project/opensearch':
         specifier: ^2.8.0
         version: 2.8.0
-      '@trpc/client':
-        specifier: ^10.45.2
-        version: 10.45.2(@trpc/server@10.45.2)
-      '@trpc/server':
-        specifier: ^10.45.2
-        version: 10.45.2
-      crypto:
-        specifier: ^1.0.1
-        version: 1.0.1
-      firebase-admin:
-        specifier: ^11.11.1
-        version: 11.11.1
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.2
-      superjson:
-        specifier: 2.2.0
-        version: 2.2.0
-      trpc-openapi:
-        specifier: ^1.2.0
-        version: 1.2.0(@trpc/server@10.45.2)(zod@3.23.4)
-      zod:
-        specifier: ^3.23.4
-        version: 3.23.4
-    devDependencies:
-      '@acme/eslint-config':
-        specifier: workspace:^
-        version: link:../../../../../../tooling/eslint
-      '@acme/prettier-config':
-        specifier: workspace:^
-        version: link:../../../../../../tooling/prettier
-      '@acme/tsconfig':
-        specifier: workspace:^
-        version: link:../../../../../../tooling/typescript
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.0
-      prettier:
-        specifier: ^3.2.5
-        version: 3.2.5
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
-
-  cloud/aws/src/res/lambdas/post:
-    dependencies:
-      '@acme/db':
-        specifier: workspace:^
-        version: link:../../../../../../packages/db
-      '@acme/utils':
-        specifier: workspace:^
-        version: link:../../../../../../packages/utils
-      '@acme/validators':
-        specifier: workspace:^
-        version: link:../../../../../../packages/validators
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.564.0
-        version: 3.564.0
-      '@mux/mux-node':
-        specifier: ^8.5.1
-        version: 8.5.1
-      '@opensearch-project/opensearch':
-        specifier: ^2.8.0
-        version: 2.8.0
-      '@trpc/client':
-        specifier: ^10.45.2
-        version: 10.45.2(@trpc/server@10.45.2)
-      '@trpc/server':
-        specifier: ^10.45.2
-        version: 10.45.2
-      crypto:
-        specifier: ^1.0.1
-        version: 1.0.1
-      firebase-admin:
-        specifier: ^11.11.1
-        version: 11.11.1
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.2
-      superjson:
-        specifier: 2.2.0
-        version: 2.2.0
-      trpc-openapi:
-        specifier: ^1.2.0
-        version: 1.2.0(@trpc/server@10.45.2)(zod@3.23.4)
-      zod:
-        specifier: ^3.23.4
-        version: 3.23.4
-    devDependencies:
-      '@acme/eslint-config':
-        specifier: workspace:^
-        version: link:../../../../../../tooling/eslint
-      '@acme/prettier-config':
-        specifier: workspace:^
-        version: link:../../../../../../tooling/prettier
-      '@acme/tsconfig':
-        specifier: workspace:^
-        version: link:../../../../../../tooling/typescript
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.0
-      prettier:
-        specifier: ^3.2.5
-        version: 3.2.5
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
-
-  cloud/aws/src/res/lambdas/processProfilePicture:
-    dependencies:
-      '@acme/db':
-        specifier: workspace:^
-        version: link:../../../../../../packages/db
-      '@acme/utils':
-        specifier: workspace:^
-        version: link:../../../../../../packages/utils
-      '@acme/validators':
-        specifier: workspace:^
-        version: link:../../../../../../packages/validators
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.564.0
-        version: 3.564.0
-      '@mux/mux-node':
-        specifier: ^8.5.1
-        version: 8.5.1
-      '@opensearch-project/opensearch':
-        specifier: ^2.8.0
-        version: 2.8.0
-      '@trpc/client':
-        specifier: ^10.45.2
-        version: 10.45.2(@trpc/server@10.45.2)
-      '@trpc/server':
-        specifier: ^10.45.2
-        version: 10.45.2
-      crypto:
-        specifier: ^1.0.1
-        version: 1.0.1
-      firebase-admin:
-        specifier: ^11.11.1
-        version: 11.11.1
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.2
-      superjson:
-        specifier: 2.2.0
-        version: 2.2.0
-      trpc-openapi:
-        specifier: ^1.2.0
-        version: 1.2.0(@trpc/server@10.45.2)(zod@3.23.4)
       zod:
         specifier: ^3.23.4
         version: 3.23.4
@@ -684,9 +529,6 @@ importers:
       '@aws-sdk/client-rds-data':
         specifier: ^3.564.0
         version: 3.564.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.564.0
-        version: 3.564.0
       '@aws-sdk/credential-providers':
         specifier: ^3.564.0
         version: 3.564.0
@@ -708,9 +550,6 @@ importers:
       eslint-plugin-drizzle:
         specifier: ^0.2.3
         version: 0.2.3(eslint@8.57.0)
-      install:
-        specifier: ^0.13.0
-        version: 0.13.0
       mysql2:
         specifier: ^3.9.7
         version: 3.9.7
@@ -724,15 +563,34 @@ importers:
       '@acme/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
-      dotenv-cli:
-        specifier: ^7.4.1
-        version: 7.4.1
       drizzle-kit:
         specifier: ^0.21.1
         version: 0.21.1
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+
+  packages/s3:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.564.0
+        version: 3.564.0
+    devDependencies:
+      '@acme/eslint-config':
+        specifier: workspace:^0.2.0
+        version: link:../../tooling/eslint
+      '@acme/prettier-config':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/prettier
+      '@acme/tsconfig':
+        specifier: workspace:^0.1.0
+        version: link:../../tooling/typescript
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -12895,11 +12753,6 @@ packages:
       through: 2.3.8
       wrap-ansi: 6.2.0
     dev: true
-
-  /install@0.13.0:
-    resolution: {integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA==}
-    engines: {node: '>= 0.10'}
-    dev: false
 
   /internal-ip@4.3.0:
     resolution: {integrity: sha512-S1zBo1D6zcsyuC6PMmY5+55YMILQ9av8lotMx447Bq6SAgo/sDK6y6uUKmuYhW7eacnIhFfsPmCNYdDzsnnDCg==}
