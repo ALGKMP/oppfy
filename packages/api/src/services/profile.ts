@@ -8,7 +8,6 @@ import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
 import { PostRepository } from "../repositories/post";
 import { ProfileRepository } from "../repositories/profile";
-import { ProfilePictureRepository } from "../repositories/profilePicture";
 import { UserRepository } from "../repositories/user";
 import { UserService } from "./user";
 
@@ -18,29 +17,44 @@ export class ProfileService {
   private userService = new UserService();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private profilePictureRepository = new ProfilePictureRepository();
   private awsRepository = new AwsRepository();
   private postRepository = new PostRepository();
   private followersRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
 
+  async _getUserProfile(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const profile = await this.userRepository.getProfile(user.profileId);
+
+    if (!profile) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+
+    return profile;
+  }
+
   async updateFullName(userId: string, fullName: string) {
-    const profile = await this.getUserProfile(userId);
+    const profile = await this._getUserProfile(userId);
     return await this.profileRepository.updateFullName(profile.id, fullName);
   }
 
   async updateDateOfBirth(userId: string, dateOfBirth: Date) {
-    const profile = await this.getUserProfile(userId);
+    const profile = await this._getUserProfile(userId);
     await this.profileRepository.updateDateOfBirth(profile.id, dateOfBirth);
   }
 
   async updateBio(userId: string, bio: string) {
-    const profile = await this.getUserProfile(userId);
+    const profile = await this._getUserProfile(userId);
     await this.profileRepository.updateBio(profile.id, bio);
   }
 
   async updateProfile(userId: string, updates: UpdateProfile): Promise<void> {
-    const profile = await this.getUserProfile(userId);
+    const profile = await this._getUserProfile(userId);
 
     // Build an update object dynamically based on what's provided
     if (updates.name !== undefined) {
@@ -55,45 +69,11 @@ export class ProfileService {
   }
 
   async updateProfilePicture(userId: string, key: string) {
-    const profile = await this.getUserProfile(userId);
-
-    await this.profilePictureRepository.updateProfilePicture(
-      profile.profilePictureId,
+    const profile = await this._getUserProfile(userId);
+    await this.profileRepository.updateProfilePicture(
+      profile.id,
       key,
     );
-  }
-
-  async getUserProfile(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
-    const profile = await this.userRepository.getProfile(user.profileId);
-
-    if (profile === undefined) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
-    }
-
-    return profile;
-  }
-
-  async getProfilePicture(userId: string) {
-    const bucket = process.env.S3_PROFILE_BUCKET!;
-    const key = `profile-pictures/${userId}.jpg`;
-    const pfp = await this.profilePictureRepository.getProfilePictureByKey(key);
-    if (pfp) {
-      return await this.awsRepository.getObjectPresignedUrl({
-        Bucket: bucket,
-        Key: key,
-      });
-    } else {
-      return await this.awsRepository.getObjectPresignedUrl({
-        Bucket: bucket,
-        Key: "profile-pictures/default.jpg",
-      });
-    }
   }
 
   async getBasicProfile(userId: string) {
@@ -107,14 +87,15 @@ export class ProfileService {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
-    const profilePictureUrl = profile.profilePictureId
-      ? await this.getProfilePicture(userId)
-      : "profile-pictures/default.jpg";
+    const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
+      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Key: profile.profilePictureKey,
+    }) 
 
     return sharedValidators.user.basicProfile.parse({
       userId: user.id,
       privacy: user.privacySetting,
-      username: user.username,
+      username: profile.username,
       name: profile.fullName,
       profilePictureUrl,
     });
@@ -151,14 +132,16 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
     }
 
-    const profilePictureUrl = profile.profilePictureId
-      ? await this.getProfilePicture(userId)
-      : "profile-pictures/default.jpg";
+    const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
+      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Key: profile.profilePictureKey,
+    }) 
+
 
     const profileData = {
       userId: user.id,
       privacy: user.privacySetting,
-      username: user.username,
+      username: profile.username,
       name: profile.fullName,
       bio: profile.bio,
       followerCount,
@@ -184,17 +167,7 @@ export class ProfileService {
   }
 
   async removeProfilePicture(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
-    const profile = await this.profileRepository.getProfile(user.profileId);
-
-    if (profile === undefined) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
-    }
+    const profile = await this._getUserProfile(userId);
 
     const bucket = process.env.S3_POST_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
@@ -204,8 +177,8 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_DELETE);
     }
 
-    await this.profilePictureRepository.removeProfilePicture(
-      profile.profilePictureId,
+    await this.profileRepository.removeProfilePicture(
+      profile.id
     );
   }
 }

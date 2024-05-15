@@ -3,7 +3,6 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
-import { profilePicture } from "@acme/validators/src/shared/user";
 
 export class ProfileRepository {
   private db = db;
