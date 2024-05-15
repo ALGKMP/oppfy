@@ -524,6 +524,15 @@ importers:
       '@acme/db':
         specifier: workspace:^
         version: link:../db
+      '@acme/mux':
+        specifier: workspace:^
+        version: link:../mux
+      '@acme/opensearch':
+        specifier: workspace:^
+        version: link:../opensearch
+      '@acme/s3':
+        specifier: workspace:^
+        version: link:../s3
       '@acme/utils':
         specifier: workspace:^
         version: link:../utils
