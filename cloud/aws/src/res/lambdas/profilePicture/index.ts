@@ -1,6 +1,7 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 
+import { db, eq, schema } from "@acme/db";
 import { trpcValidators } from "@acme/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
@@ -29,7 +30,7 @@ export const handler = async (
   });
 
   try {
-    const s3Response = await s3Client.send(command).catch(err => {
+    const s3Response = await s3Client.send(command).catch((err) => {
       console.error("Failed to retrieve S3 object metadata:", err);
       throw err; // Rethrow to handle it in the outer try-catch block
     });
@@ -46,22 +47,20 @@ export const handler = async (
     console.log(metadata);
     console.log(body);
 
-    const serverEndpoint =
-      "https://f753-2607-fea8-4cc0-7170-541f-28f6-c2ed-dab2.ngrok-free.app/api/profile-picture";
-
-    const response = await fetch(serverEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
+    const user = await db.query.user.findFirst({
+      where: eq(schema.user.id, body.user),
     });
 
-    if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
+    if (!user) {
+      throw new Error("User not found");
     }
-    console.log("after response.ok")
 
+    await db
+      .update(schema.profile)
+      .set({
+        profilePictureKey: objectKey,
+      })
+      .where(eq(schema.profile.id, user.profileId));
 
     return {
       statusCode: 200,
