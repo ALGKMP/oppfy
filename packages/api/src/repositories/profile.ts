@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
+import { profilePicture } from "@acme/validators/src/shared/user";
 
 export class ProfileRepository {
   private db = db;
@@ -35,6 +36,39 @@ export class ProfileRepository {
     return await this.db
       .update(schema.profile)
       .set({ bio: newBio })
+      .where(eq(schema.profile.id, profileId));
+  }
+
+  @handleDatabaseErrors
+  async getProfilePicture(profileId: number) {
+    return await this.db.query.profile.findFirst({
+      where: eq(schema.profile.id, profileId),
+      with: {
+        profilePicture: true,
+      }
+    });
+  }
+
+  @handleDatabaseErrors
+  async getProfilePictureByKey(key: string) {
+    return await this.db.query.profile.findFirst({
+      where: eq(schema.profile.profilePictureKey, key),
+    });
+  }
+
+  @handleDatabaseErrors
+  async updateProfilePicture(profileId: number, newKey: string) {
+    await this.db
+      .update(schema.profile)
+      .set({ profilePictureKey: newKey })
+      .where(eq(schema.profile.id, profileId));
+  }
+
+  @handleDatabaseErrors
+  async removeProfilePicture(profileId: number) {
+    await this.db
+      .update(schema.profile)
+      .set({ profilePictureKey: "profile-pictures/default.jpg" })
       .where(eq(schema.profile.id, profileId));
   }
 }
