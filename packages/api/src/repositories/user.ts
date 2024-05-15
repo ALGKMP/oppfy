@@ -68,21 +68,6 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async updateUsername(userId: string, username: string) {
-    return await this.db
-      .update(schema.user)
-      .set({ username })
-      .where(eq(schema.user.id, userId));
-  }
-
-  @handleDatabaseErrors
-  async usernameExists(username: string) {
-    return await this.db.query.user.findFirst({
-      where: eq(schema.user.username, username),
-    });
-  }
-
-  @handleDatabaseErrors
   async deleteUser(userId: string) {
     // TODO: This needs to handle failed states
     await this.db.delete(schema.user).where(eq(schema.user.id, userId));

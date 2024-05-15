@@ -71,4 +71,19 @@ export class ProfileRepository {
       .set({ profilePictureKey: "profile-pictures/default.jpg" })
       .where(eq(schema.profile.id, profileId));
   }
+
+  @handleDatabaseErrors
+  async updateUsername(profileId: string, username: string) {
+    return await this.db
+      .update(schema.profile)
+      .set({ username })
+      .where(eq(schema.user.id, profileId));
+  }
+
+  @handleDatabaseErrors
+  async usernameExists(username: string) {
+    return await this.db.query.user.findFirst({
+      where: eq(schema.profile.username, username),
+    });
+  }
 }
