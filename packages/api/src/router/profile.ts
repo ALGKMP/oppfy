@@ -92,7 +92,7 @@ export const profileRouter = createTRPCRouter({
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get current users basic profile"
+          message: "Failed to get current users basic profile",
         });
       }
     }),
@@ -121,11 +121,16 @@ export const profileRouter = createTRPCRouter({
                 code: "NOT_FOUND",
                 message: "User not found",
               });
+            default:
+              throw new TRPCError({
+                code: "UNPROCESSABLE_CONTENT",
+                message: err.message,
+              });
           }
         }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get current users full profile",
+          message: "err.",
         });
       }
     }),

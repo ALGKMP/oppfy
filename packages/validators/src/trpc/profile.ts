@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // import { contentLength, contentType, key, userId } from "../shared";
-import { contentLength, contentType, profilePictureKey } from "../shared/media";
+import { contentLength, profilePictureKey } from "../shared/media";
 import { userId } from "../shared/user";
 
 const trpcProfileSchema = {
