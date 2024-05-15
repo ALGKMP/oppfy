@@ -1,6 +1,6 @@
 {
   "extends": "@acme/tsconfig/aws-cdk.json",
   "include": [
-    "src/res/lambdas"
+    "."
   ],
 }
