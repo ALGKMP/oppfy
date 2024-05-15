@@ -40,7 +40,7 @@ export const userRouter = createTRPCRouter({
     .input(trpcValidators.user.updateUsername)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.updateUsername(ctx.session.uid, input.username);
+        await ctx.services.profile.updateUsername(ctx.session.uid, input.username);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {

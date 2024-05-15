@@ -72,11 +72,11 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  async updateUsername(profileId: string, username: string) {
+  async updateUsername(profileId: number, username: string) {
     return await this.db
       .update(schema.profile)
       .set({ username })
-      .where(eq(schema.user.id, profileId));
+      .where(eq(schema.profile.id, profileId));
   }
 
   @handleDatabaseErrors

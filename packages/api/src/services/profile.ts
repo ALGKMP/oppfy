@@ -53,6 +53,19 @@ export class ProfileService {
     await this.profileRepository.updateBio(profile.id, bio);
   }
 
+  async updateUsername(userId: string, newUsername: string) {
+    const profile = await this._getUserProfile(userId);
+
+    const usernameExists =
+      await this.profileRepository.usernameExists(newUsername);
+
+    if (usernameExists) {
+      throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
+    }
+
+    await this.profileRepository.updateUsername(profile.id, newUsername);
+  }
+
   async updateProfile(userId: string, updates: UpdateProfile): Promise<void> {
     const profile = await this._getUserProfile(userId);
 
@@ -64,7 +77,7 @@ export class ProfileService {
       await this.profileRepository.updateBio(profile.id, updates.bio);
     }
     if (updates.username !== undefined) {
-      await this.userService.updateUsername(userId, updates.username);
+      await this.profileRepository.updateUsername(profile.id, updates.username);
     }
   }
 
