@@ -491,9 +491,35 @@ export class AwsStack extends cdk.Stack {
       "KinesisLambdaFunction",
       {
         runtime: lambda.Runtime.NODEJS_LATEST,
-        entry: "src/res/lambdas/kinesisHandler/index.ts",
+        entry: "src/res/lambdas/kinesis/index.ts",
         handler: "handler",
+        bundling: {
+          format: lambdaNodeJs.OutputFormat.ESM, // Use ESM format for bundling
+          mainFields: ["module", "main"],
+          esbuildArgs: {
+            "--platform": "node",
+            "--target": "esnext", // Ensure es2020 or higher to support top-level await
+            "--format": "esm", // Bundle as ESM
+            "--banner:js":
+              "import { createRequire } from 'module'; const require = createRequire(import.meta.url);", // Inject require shim
+          },
+        },
         environment: {
+          S3_POST_BUCKET: postBucket.bucketName,
+          S3_PROFILE_BUCKET: profileBucket.bucketName,
+
+          MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
+          MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
+          MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
+
+          DATABASE_PORT: process.env.DATABASE_PORT!,
+          DATABASE_ENDPOINT: process.env.DATABASE_ENDPOINT!,
+          DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
+          DATABASE_NAME: process.env.DATABASE_NAME!,
+          DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
+
+          // OPENSEARCH_URL: openSearchDomain.domainEndpoint,
+
           REGION: this.region,
           DOMAIN_ENDPOINT: `https://${openSearchDomain.domainEndpoint}`,
           INDEX_NAME: "users",
