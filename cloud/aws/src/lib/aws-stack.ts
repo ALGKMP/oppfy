@@ -369,7 +369,7 @@ export class AwsStack extends cdk.Stack {
         {
           "rule-type": "selection",
           "rule-id": "1",
-          "rule-name": "SelectTable",
+          "rule-name": "SelectUserTable",
           "object-locator": {
             "schema-name": "mydatabase",
             "table-name": "User",
@@ -377,9 +377,29 @@ export class AwsStack extends cdk.Stack {
           "rule-action": "include",
         },
         {
-          "rule-type": "transformation",
+          "rule-type": "selection",
           "rule-id": "2",
-          "rule-name": "IncludeIdColumn",
+          "rule-name": "SelectProfileTable",
+          "object-locator": {
+            "schema-name": "mydatabase",
+            "table-name": "Profile",
+          },
+          "rule-action": "include",
+        },
+        {
+          "rule-type": "selection",
+          "rule-id": "3",
+          "rule-name": "SelectProfilePictureTable",
+          "object-locator": {
+            "schema-name": "mydatabase",
+            "table-name": "ProfilePicture",
+          },
+          "rule-action": "include",
+        },
+        {
+          "rule-type": "transformation",
+          "rule-id": "4",
+          "rule-name": "IncludeUserIdColumn",
           "rule-action": "include-column",
           "rule-target": "column",
           "object-locator": {
@@ -390,7 +410,7 @@ export class AwsStack extends cdk.Stack {
         },
         {
           "rule-type": "transformation",
-          "rule-id": "3",
+          "rule-id": "5",
           "rule-name": "IncludeUsernameColumn",
           "rule-action": "include-column",
           "rule-target": "column",
@@ -398,6 +418,42 @@ export class AwsStack extends cdk.Stack {
             "schema-name": "mydatabase",
             "table-name": "User",
             "column-name": "username",
+          },
+        },
+        {
+          "rule-type": "transformation",
+          "rule-id": "6",
+          "rule-name": "IncludeProfileIdColumn",
+          "rule-action": "include-column",
+          "rule-target": "column",
+          "object-locator": {
+            "schema-name": "mydatabase",
+            "table-name": "User",
+            "column-name": "profileId",
+          },
+        },
+        {
+          "rule-type": "transformation",
+          "rule-id": "7",
+          "rule-name": "IncludeFullNameColumn",
+          "rule-action": "include-column",
+          "rule-target": "column",
+          "object-locator": {
+            "schema-name": "mydatabase",
+            "table-name": "Profile",
+            "column-name": "fullName",
+          },
+        },
+        {
+          "rule-type": "transformation",
+          "rule-id": "8",
+          "rule-name": "IncludeProfilePictureIdColumn",
+          "rule-action": "include-column",
+          "rule-target": "column",
+          "object-locator": {
+            "schema-name": "mydatabase",
+            "table-name": "Profile",
+            "column-name": "profilePictureId",
           },
         },
       ],
