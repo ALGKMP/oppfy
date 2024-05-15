@@ -1,8 +1,3 @@
-import { S3Client } from "@aws-sdk/client-s3";
-import { defaultProvider } from "@aws-sdk/credential-provider-node";
-import Mux from "@mux/mux-node";
-import { Client as OpenSearchClient } from "@opensearch-project/opensearch";
-import { AwsSigv4Signer } from "@opensearch-project/opensearch/aws";
 import { drizzle } from "drizzle-orm/mysql2";
 import * as mysql from "mysql2/promise";
 
@@ -30,21 +25,3 @@ export const db = drizzle(connection, {
   mode: "default",
 });
 
-
-
-// export const openSearch = new OpenSearchClient({
-//   ...AwsSigv4Signer({
-//     region: process.env.AWS_REGION!,
-//     service: "es",
-//     getCredentials: () => {
-//       const credentialsProvider = defaultProvider();
-//       return credentialsProvider();
-//     },
-//   }),
-//   node: process.env.OPENSEARCH_URL!,
-// });
-
-// export const mux = new Mux({
-//   tokenId: process.env.MUX_TOKEN_ID!, // This is the default and can be omitted
-//   tokenSecret: process.env.MUX_TOKEN_SECRET!, // This is the default and can be omitted
-// });

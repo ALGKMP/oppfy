@@ -20,8 +20,6 @@
   "dependencies": {
     "@aws-sdk/client-rds-data": "^3.564.0",
     "@aws-sdk/credential-providers": "^3.564.0",
-    "@mux/mux-node": "^8.5.1",
-    "@opensearch-project/opensearch": "^2.8.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "drizzle-orm": "^0.30.10",
