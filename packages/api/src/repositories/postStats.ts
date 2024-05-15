@@ -19,7 +19,7 @@ export class PostStatsRepository {
     const result = await this.db
       .insert(schema.postStats)
       .values({ postId })
-      .execute();
+      ;
     return result;
   }
 
