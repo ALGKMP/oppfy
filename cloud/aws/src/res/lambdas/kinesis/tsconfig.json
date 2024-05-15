@@ -1,0 +1,10 @@
+{
+  "extends": "@acme/tsconfig/aws-cdk.json",
+  "include": [
+    "index.ts"
+  ],
+  "compilerOptions": {
+    "target": "esnext", // Updated to enable top-level await
+    "module": "esnext", // Keep or update to esnext for compatibility
+  }
+}

@@ -30,27 +30,27 @@ export const db = drizzle(connection, {
   mode: "default",
 });
 
-export const s3 = new S3Client({
-  region: "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+// export const s3 = new S3Client({
+//   region: "us-east-1",
+//   credentials: {
+//     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+//   },
+// });
 
-export const openSearch = new OpenSearchClient({
-  ...AwsSigv4Signer({
-    region: process.env.AWS_REGION!,
-    service: "es",
-    getCredentials: () => {
-      const credentialsProvider = defaultProvider();
-      return credentialsProvider();
-    },
-  }),
-  node: process.env.OPENSEARCH_URL!,
-});
+// export const openSearch = new OpenSearchClient({
+//   ...AwsSigv4Signer({
+//     region: process.env.AWS_REGION!,
+//     service: "es",
+//     getCredentials: () => {
+//       const credentialsProvider = defaultProvider();
+//       return credentialsProvider();
+//     },
+//   }),
+//   node: process.env.OPENSEARCH_URL!,
+// });
 
-export const mux = new Mux({
-  tokenId: process.env.MUX_TOKEN_ID!, // This is the default and can be omitted
-  tokenSecret: process.env.MUX_TOKEN_SECRET!, // This is the default and can be omitted
-});
+// export const mux = new Mux({
+//   tokenId: process.env.MUX_TOKEN_ID!, // This is the default and can be omitted
+//   tokenSecret: process.env.MUX_TOKEN_SECRET!, // This is the default and can be omitted
+// });
