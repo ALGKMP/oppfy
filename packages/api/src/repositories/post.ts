@@ -43,23 +43,15 @@ export class PostRepository {
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
     const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
-    const authorProfilePicture = aliasedTable(
-      schema.profilePicture,
-      "authorProfilePicture",
-    );
-    const recipientProfilePicture = aliasedTable(
-      schema.profilePicture,
-      "recipientProfilePicture",
-    );
     return await this.db
       .select({
         postId: schema.post.id,
         authorId: schema.post.author,
-        authorUsername: author.username,
-        authorProfilePicture: authorProfilePicture.key,
+        authorUsername: authorProfile.username,
+        authorProfilePicture: authorProfile.profilePictureKey,
         recipientId: schema.post.recipient,
-        recipientUsername: recipient.username,
-        recipientProfilePicture: recipientProfilePicture.key,
+        recipientUsername: authorProfile.username,
+        recipientProfilePicture: recipientProfile.profilePictureKey,
         caption: schema.post.caption,
         imageUrl: schema.post.key,
         commentsCount: schema.postStats.comments,
@@ -70,16 +62,8 @@ export class PostRepository {
       .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))
       .innerJoin(author, eq(schema.post.author, schema.user.id))
       .innerJoin(authorProfile, eq(author.profileId, schema.profile.id))
-      .innerJoin(
-        authorProfilePicture,
-        eq(authorProfile.profilePictureId, schema.profilePicture.id),
-      )
       .innerJoin(recipient, eq(schema.post.recipient, schema.user.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, schema.profile.id))
-      .innerJoin(
-        recipientProfilePicture,
-        eq(recipientProfile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         and(
           eq(schema.user.id, userId),
