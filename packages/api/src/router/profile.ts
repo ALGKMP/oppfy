@@ -28,7 +28,7 @@ export const profileRouter = createTRPCRouter({
 
   // OpenAPI endponit for Lambda
   uploadProfilePicture: publicProcedure
-    .meta({ /* 👉 */ openapi: { method: "POST", path: "/profilePicture" } })
+    .meta({ /* 👉 */ openapi: { method: "POST", path: "/profile-picture" } })
     .input(trpcValidators.profile.uploadProfilePictureOpenApi)
     .output(z.void())
     .mutation(async ({ input, ctx }) => {
@@ -46,7 +46,7 @@ export const profileRouter = createTRPCRouter({
         }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "A non-domain error occurred",
+          message: "Failed to update profile picture",
         });
       }
     }),
@@ -57,7 +57,7 @@ export const profileRouter = createTRPCRouter({
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "A non-domain error occurred",
+        message: "Failed to remove profile picture",
       });
     }
   }),
@@ -79,6 +79,7 @@ export const profileRouter = createTRPCRouter({
         }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update profile",
         });
       }
     }),
@@ -91,6 +92,7 @@ export const profileRouter = createTRPCRouter({
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get current users basic profile"
         });
       }
     }),
@@ -123,7 +125,7 @@ export const profileRouter = createTRPCRouter({
         }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "A non-domain error occurred",
+          message: "Failed to get current users full profile",
         });
       }
     }),
@@ -151,7 +153,7 @@ export const profileRouter = createTRPCRouter({
         }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "A non-domain error occurred",
+          message: `Failed to get full profile for ${input.userId}`,
         });
       }
     }),

@@ -16,32 +16,20 @@ export class UserRepository {
   @handleDatabaseErrors
   async createUser(userId: string) {
     await this.db.transaction(async (tx) => {
-      // Create an empty profile picture entry for the user
-      const profilePicture = await tx
-        .insert(schema.profilePicture)
-        .values({})
-
       // Create an empty profile for the user, ready to be updated later
-      const profile = await tx
-        .insert(schema.profile)
-        .values({
-          profilePictureId: profilePicture[0].insertId, // Attach the profile picture ID
-          // Other fields are left empty and to be filled later
-        })
+      const profile = await tx.insert(schema.profile).values({});
 
       // Create default notification settings for the user
       const notificationSetting = await tx
         .insert(schema.notificationSettings)
-        .values({})
+        .values({});
 
       // Create the user with the profileId and notificationSettingId
-      await tx
-        .insert(schema.user)
-        .values({
-          id: userId,
-          profileId: profile[0].insertId,
-          notificationSettingsId: notificationSetting[0].insertId,
-        })
+      await tx.insert(schema.user).values({
+        id: userId,
+        profileId: profile[0].insertId,
+        notificationSettingsId: notificationSetting[0].insertId,
+      });
     });
   }
 
@@ -65,21 +53,6 @@ export class UserRepository {
       .update(schema.user)
       .set({ profileId })
       .where(eq(schema.user.id, userId));
-  }
-
-  @handleDatabaseErrors
-  async updateUsername(userId: string, username: string) {
-    return await this.db
-      .update(schema.user)
-      .set({ username })
-      .where(eq(schema.user.id, userId));
-  }
-
-  @handleDatabaseErrors
-  async usernameExists(username: string) {
-    return await this.db.query.user.findFirst({
-      where: eq(schema.user.username, username),
-    });
   }
 
   @handleDatabaseErrors
@@ -109,22 +82,15 @@ export class UserRepository {
     return await this.db
       .select({
         userId: schema.user.id,
-        username: schema.user.username,
+        username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
+        profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
         profileId: schema.profile.id,
       })
       .from(schema.follower)
-      .innerJoin(
-        schema.user,
-        eq(schema.follower.senderId, schema.user.id),
-      )
+      .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         and(
           eq(schema.follower.recipientId, forUserId),
@@ -152,19 +118,15 @@ export class UserRepository {
     return await this.db
       .select({
         userId: schema.user.id,
-        username: schema.user.username,
+        username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
+        profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
         profileId: schema.profile.id,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         and(
           eq(schema.follower.senderId, forUserId),
@@ -192,9 +154,9 @@ export class UserRepository {
     return await this.db
       .select({
         userId: schema.user.id,
-        username: schema.user.username,
+        username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
+        profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
       })
@@ -207,10 +169,6 @@ export class UserRepository {
         ),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         or(
           eq(schema.friend.userId1, forUserId),
@@ -239,19 +197,15 @@ export class UserRepository {
     return await this.db
       .select({
         userId: schema.user.id,
-        username: schema.user.username,
+        username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
+        profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.block.createdAt, // Assuming block has a createdAt column
         profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
       })
       .from(schema.user)
       .innerJoin(schema.block, eq(schema.user.id, schema.block.blockedUserId))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         and(
           eq(schema.block.userId, forUserId), // Filtering for the specific user who blocked others
@@ -273,7 +227,6 @@ export class UserRepository {
       .limit(pageSize + 1); // Get an extra item at the end which we'll use as next cursor
   }
 
-
   @handleDatabaseErrors
   async getPaginatedFollowRequests(
     forUserId: string, // Assuming you need this to identify the recipient of follow requests
@@ -283,9 +236,9 @@ export class UserRepository {
     return await this.db
       .select({
         userId: schema.user.id,
-        username: schema.user.username,
+        username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
+        profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.followRequest.createdAt, // Assuming followRequest has a createdAt column
         profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
       })
@@ -295,10 +248,6 @@ export class UserRepository {
         eq(schema.followRequest.recipientId, schema.user.id),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         and(
           eq(schema.followRequest.recipientId, forUserId), // Filtering for the specific user receiving follow requests
@@ -329,9 +278,9 @@ export class UserRepository {
     return await this.db
       .select({
         userId: schema.user.id,
-        username: schema.user.username,
+        username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profilePicture.key,
+        profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.friendRequest.createdAt, // Assuming friendRequest has a createdAt column
         profileId: schema.profile.id, // Ensuring we select this for the cursor and tie-breaking
       })
@@ -341,10 +290,6 @@ export class UserRepository {
         eq(schema.friendRequest.recipientId, schema.user.id),
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .innerJoin(
-        schema.profilePicture,
-        eq(schema.profile.profilePictureId, schema.profilePicture.id),
-      )
       .where(
         and(
           eq(schema.friendRequest.recipientId, forUserId), // Filtering for the specific user receiving friend requests

@@ -34,7 +34,6 @@ export const user = mySqlTable("User", {
   profileId: bigint("profile", { mode: "number", unsigned: true })
     .references(() => profile.id)
     .notNull(),
-  username: varchar("username", { length: 255 }).unique(),
   notificationSettingsId: bigint("notificationSettingsId", {
     mode: "number",
     unsigned: true,
@@ -64,32 +63,11 @@ export const userRelations = relations(user, ({ one }) => ({
 
 export const profile = mySqlTable("Profile", {
   id: serial("id").primaryKey(),
+  username: varchar("username", { length: 255 }).unique(),
   fullName: varchar("fullName", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
   bio: text("bio"),
-  profilePictureId: bigint("profilePicture", {
-    mode: "number",
-    unsigned: true,
-  })
-    .references(() => profilePicture.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
-
-export const profileRelations = relations(profile, ({ one }) => ({
-  profilePicture: one(profilePicture, {
-    fields: [profile.profilePictureId],
-    references: [profilePicture.id],
-  }),
-}));
-
-export const profilePicture = mySqlTable("ProfilePicture", {
-  id: serial("id").primaryKey().notNull(),
-  key: varchar("url", { length: 255 })
+  profilePictureKey: varchar("url", { length: 255 })
     .default("profile-pictures/default.jpg")
     .notNull(),
   createdAt: timestamp("createdAt")

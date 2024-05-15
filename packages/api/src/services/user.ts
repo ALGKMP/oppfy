@@ -63,31 +63,9 @@ export class UserService {
     await this.userRepository.deleteUser(userId);
   }
 
-  async updateUsername(userId: string, newUsername: string) {
-    const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
-    if (user.username === newUsername) {
-      return;
-    }
-
-    const usernameExists =
-      await this.userRepository.usernameExists(newUsername);
-
-    if (usernameExists) {
-      throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
-    }
-
-    await this.userRepository.updateUsername(userId, newUsername);
-  }
-
   async userOnboardingCompleted(userId: string) {
     const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
+    if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
@@ -97,7 +75,7 @@ export class UserService {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
-    return !!profile.dateOfBirth && !!profile.fullName && !!user.username;
+    return !!profile.dateOfBirth && !!profile.fullName && !!profile.username;
   }
 
   async getUserPrivacySetting(userId: string) {
