@@ -8,7 +8,6 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
-import { CfnDomain } from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
@@ -36,7 +35,11 @@ function createBucket(scope: Construct, name: string) {
 }
 
 // Helper function to create a Lambda function
-function createLambdaFunction(scope, name, entryPath) {
+function createLambdaFunction(
+  scope: Construct,
+  name: string,
+  entryPath: string,
+) {
   return new lambdaNodeJs.NodejsFunction(scope, name, {
     runtime: lambda.Runtime.NODEJS_20_X,
     entry: entryPath,
@@ -53,7 +56,11 @@ function createLambdaFunction(scope, name, entryPath) {
 }
 
 // Helper function to set up bucket and Lambda integration
-function setupBucketLambdaIntegration(bucket, lambdaFunction, permissionId) {
+function setupBucketLambdaIntegration(
+  bucket: s3.Bucket,
+  lambdaFunction: lambdaNodeJs.NodejsFunction,
+  permissionId: string,
+) {
   bucket.grantRead(lambdaFunction);
   lambdaFunction.addPermission(permissionId, {
     action: "lambda:InvokeFunction",
