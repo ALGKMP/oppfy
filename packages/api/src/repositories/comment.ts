@@ -1,4 +1,4 @@
-import { and, asc, gt, count } from "drizzle-orm";
+import { and, asc, count, gt } from "drizzle-orm";
 
 import { db, eq, or, schema } from "@acme/db";
 
@@ -27,10 +27,10 @@ export class CommentRepository {
   @handleDatabaseErrors
   async countComments(postId: number) {
     const result = await this.db
-      .select({count: count()})
+      .select({ count: count() })
       .from(schema.comment)
-      .where(eq(schema.comment.post, postId))
-    return result
+      .where(eq(schema.comment.post, postId));
+    return result;
   }
 
   @handleDatabaseErrors

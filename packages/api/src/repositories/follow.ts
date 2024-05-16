@@ -61,7 +61,7 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async countFollowing(userId: string): Promise<number | undefined>{
+  async countFollowing(userId: string): Promise<number | undefined> {
     const result = await this.db
       .select({ count: count() })
       .from(schema.follower)

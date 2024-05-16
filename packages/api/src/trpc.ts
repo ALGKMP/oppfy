@@ -15,8 +15,8 @@ import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
 import { db } from "@acme/db";
-import { s3 } from "@acme/s3";
 import { mux } from "@acme/mux";
+import { s3 } from "@acme/s3";
 
 import { services } from "./services";
 import { auth } from "./utils/firebase";

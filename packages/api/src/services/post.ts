@@ -176,7 +176,7 @@ export class PostService {
     await this.postRepository.deletePost(postId);
   }
 
-   async likePost(userId: string, postId: number) {
+  async likePost(userId: string, postId: number) {
     const likeExists = await this.likeRepository.hasUserLiked(postId, userId);
     if (!likeExists) {
       await this.likeRepository.addLike(postId, userId);

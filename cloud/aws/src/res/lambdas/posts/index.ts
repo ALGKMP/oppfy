@@ -1,7 +1,7 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
-import { db, schema } from "@acme/db";
 
+import { db, schema } from "@acme/db";
 import { trpcValidators } from "@acme/validators";
 
 export const s3Client = new S3Client({

@@ -43,12 +43,8 @@
           "name": "Blocked_userId_User_id_fk",
           "tableFrom": "Blocked",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -56,12 +52,8 @@
           "name": "Blocked_blockedUserId_User_id_fk",
           "tableFrom": "Blocked",
           "tableTo": "User",
-          "columnsFrom": [
-            "blockedUserId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["blockedUserId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -69,9 +61,7 @@
       "compositePrimaryKeys": {
         "Blocked_id": {
           "name": "Blocked_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -130,12 +120,8 @@
           "name": "Comment_user_User_id_fk",
           "tableFrom": "Comment",
           "tableTo": "User",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -143,12 +129,8 @@
           "name": "Comment_postId_Post_id_fk",
           "tableFrom": "Comment",
           "tableTo": "Post",
-          "columnsFrom": [
-            "postId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["postId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -156,9 +138,7 @@
       "compositePrimaryKeys": {
         "Comment_id": {
           "name": "Comment_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -217,12 +197,8 @@
           "name": "FriendRequest_requesterId_User_id_fk",
           "tableFrom": "FriendRequest",
           "tableTo": "User",
-          "columnsFrom": [
-            "requesterId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requesterId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -230,12 +206,8 @@
           "name": "FriendRequest_requestedId_User_id_fk",
           "tableFrom": "FriendRequest",
           "tableTo": "User",
-          "columnsFrom": [
-            "requestedId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requestedId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -243,9 +215,7 @@
       "compositePrimaryKeys": {
         "FriendRequest_id": {
           "name": "FriendRequest_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -289,12 +259,8 @@
           "name": "Follower_followerId_User_id_fk",
           "tableFrom": "Follower",
           "tableTo": "User",
-          "columnsFrom": [
-            "followerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["followerId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -302,12 +268,8 @@
           "name": "Follower_followedId_User_id_fk",
           "tableFrom": "Follower",
           "tableTo": "User",
-          "columnsFrom": [
-            "followedId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["followedId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -315,9 +277,7 @@
       "compositePrimaryKeys": {
         "Follower_id": {
           "name": "Follower_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -361,12 +321,8 @@
           "name": "Friend_userId1_User_id_fk",
           "tableFrom": "Friend",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId1"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId1"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -374,12 +330,8 @@
           "name": "Friend_userId2_User_id_fk",
           "tableFrom": "Friend",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId2"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId2"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -387,9 +339,7 @@
       "compositePrimaryKeys": {
         "Friend_id": {
           "name": "Friend_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -433,12 +383,8 @@
           "name": "Like_postId_Post_id_fk",
           "tableFrom": "Like",
           "tableTo": "Post",
-          "columnsFrom": [
-            "postId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["postId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -446,12 +392,8 @@
           "name": "Like_user_User_id_fk",
           "tableFrom": "Like",
           "tableTo": "User",
-          "columnsFrom": [
-            "user"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -459,9 +401,7 @@
       "compositePrimaryKeys": {
         "Like_id": {
           "name": "Like_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -538,9 +478,7 @@
       "compositePrimaryKeys": {
         "NotificationSettings_id": {
           "name": "NotificationSettings_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -606,12 +544,8 @@
           "name": "Post_author_User_id_fk",
           "tableFrom": "Post",
           "tableTo": "User",
-          "columnsFrom": [
-            "author"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -619,12 +553,8 @@
           "name": "Post_recipient_User_id_fk",
           "tableFrom": "Post",
           "tableTo": "User",
-          "columnsFrom": [
-            "recipient"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["recipient"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -632,9 +562,7 @@
       "compositePrimaryKeys": {
         "Post_id": {
           "name": "Post_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -703,12 +631,8 @@
           "name": "PostStats_postId_Post_id_fk",
           "tableFrom": "PostStats",
           "tableTo": "Post",
-          "columnsFrom": [
-            "postId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["postId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -716,9 +640,7 @@
       "compositePrimaryKeys": {
         "PostStats_id": {
           "name": "PostStats_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -784,12 +706,8 @@
           "name": "Profile_profilePicture_ProfilePicture_id_fk",
           "tableFrom": "Profile",
           "tableTo": "ProfilePicture",
-          "columnsFrom": [
-            "profilePicture"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["profilePicture"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -797,9 +715,7 @@
       "compositePrimaryKeys": {
         "Profile_id": {
           "name": "Profile_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -843,9 +759,7 @@
       "compositePrimaryKeys": {
         "ProfilePicture_id": {
           "name": "ProfilePicture_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -912,12 +826,8 @@
           "name": "User_profile_Profile_id_fk",
           "tableFrom": "User",
           "tableTo": "Profile",
-          "columnsFrom": [
-            "profile"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["profile"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -925,12 +835,8 @@
           "name": "User_notificationSettingsId_NotificationSettings_id_fk",
           "tableFrom": "User",
           "tableTo": "NotificationSettings",
-          "columnsFrom": [
-            "notificationSettingsId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["notificationSettingsId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -938,17 +844,13 @@
       "compositePrimaryKeys": {
         "User_id": {
           "name": "User_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "User_username_unique": {
           "name": "User_username_unique",
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       }
     },
@@ -990,17 +892,13 @@
       "compositePrimaryKeys": {
         "VerificationToken_id": {
           "name": "VerificationToken_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "VerificationToken_token_unique": {
           "name": "VerificationToken_token_unique",
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       }
     }
