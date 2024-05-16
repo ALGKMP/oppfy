@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import { sharedValidators } from "@acme/validators";
 
@@ -83,10 +83,7 @@ export class ProfileService {
 
   async updateProfilePicture(userId: string, key: string) {
     const profile = await this._getUserProfile(userId);
-    await this.profileRepository.updateProfilePicture(
-      profile.id,
-      key,
-    );
+    await this.profileRepository.updateProfilePicture(profile.id, key);
   }
 
   async getBasicProfile(userId: string) {
@@ -103,7 +100,7 @@ export class ProfileService {
     const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
       Bucket: process.env.S3_PROFILE_BUCKET!,
       Key: profile.profilePictureKey,
-    }) 
+    });
 
     return sharedValidators.user.basicProfile.parse({
       userId: user.id,
@@ -122,38 +119,37 @@ export class ProfileService {
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      console.log("SERVICE ERROR: profile not found")
+      console.log("SERVICE ERROR: profile not found");
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
     const followerCount = await this.followersRepository.countFollowers(userId);
     if (followerCount === undefined) {
-      console.log("SERVICE ERROR: failed to count followers")
+      console.log("SERVICE ERROR: failed to count followers");
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS);
     }
 
     const followingCount =
       await this.followersRepository.countFollowing(userId);
     if (followingCount === undefined) {
-      console.log("SERVICE ERROR: failed to count following")
+      console.log("SERVICE ERROR: failed to count following");
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
     }
 
     const friendCount = await this.friendsRepository.countFriends(userId);
     if (friendCount === undefined) {
-      console.log("SERVICE ERROR: failed to count friends")
+      console.log("SERVICE ERROR: failed to count friends");
       throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
     }
 
     const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
       Bucket: process.env.S3_PROFILE_BUCKET!,
       Key: profile.profilePictureKey,
-    }) 
+    });
     if (!profilePictureUrl) {
-      console.log("SERVICE ERROR: failed to get profile picture")
+      console.log("SERVICE ERROR: failed to get profile picture");
       throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
     }
-
 
     const profileData = {
       userId: user.id,
@@ -194,8 +190,6 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_DELETE);
     }
 
-    await this.profileRepository.removeProfilePicture(
-      profile.id
-    );
+    await this.profileRepository.removeProfilePicture(profile.id);
   }
 }

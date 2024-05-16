@@ -44,7 +44,7 @@ export class ProfileRepository {
       where: eq(schema.profile.id, profileId),
       with: {
         profilePicture: true,
-      }
+      },
     });
   }
 

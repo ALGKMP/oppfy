@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 
-import { db, schema} from "@acme/db";
+import { db, schema } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
 
@@ -18,8 +18,9 @@ export class LikeRepository {
 
   @handleDatabaseErrors
   async removeLike(postId: number, userId: string) {
-    return await this.db.delete(schema.like)
-    .where(and(eq(schema.like.postId, postId), eq(schema.like.user, userId)));
+    return await this.db
+      .delete(schema.like)
+      .where(and(eq(schema.like.postId, postId), eq(schema.like.user, userId)));
   }
 
   @handleDatabaseErrors

@@ -67,7 +67,7 @@ export const profile = mySqlTable("Profile", {
   fullName: varchar("fullName", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
   bio: text("bio"),
-  profilePictureKey: varchar("url", { length: 255 })
+  profilePictureKey: varchar("profilePictureKey", { length: 255 })
     .default("profile-pictures/default.jpg")
     .notNull(),
   createdAt: timestamp("createdAt")
@@ -102,7 +102,9 @@ export const post = mySqlTable("Post", {
     .notNull(),
   caption: text("body").notNull(),
   key: varchar("url", { length: 255 }).notNull(),
-  mediaType: mysqlEnum("mediaType", ["image", "video"]).notNull().default("image"),
+  mediaType: mysqlEnum("mediaType", ["image", "video"])
+    .notNull()
+    .default("image"),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()

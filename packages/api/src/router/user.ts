@@ -40,7 +40,10 @@ export const userRouter = createTRPCRouter({
     .input(trpcValidators.user.updateUsername)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.profile.updateUsername(ctx.session.uid, input.username);
+        await ctx.services.profile.updateUsername(
+          ctx.session.uid,
+          input.username,
+        );
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
@@ -121,8 +124,9 @@ export const userRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        const d = sharedValidators.user.paginatedUserResponseSchema.parse(result);
-        console.log(d.nextCursor)
+        const d =
+          sharedValidators.user.paginatedUserResponseSchema.parse(result);
+        console.log(d.nextCursor);
         return d;
       } catch (err) {
         throw new TRPCError({
@@ -249,7 +253,8 @@ export const userRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        const d = sharedValidators.user.paginatedUserResponseSchema.parse(result);
+        const d =
+          sharedValidators.user.paginatedUserResponseSchema.parse(result);
         console.log("DATA PARSED PARSED", d);
         return d;
       } catch (err) {

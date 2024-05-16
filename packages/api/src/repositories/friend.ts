@@ -9,10 +9,7 @@ export class FriendRepository {
 
   @handleDatabaseErrors
   async addFriend(userId1: string, userId2: string) {
-    return await this.db
-      .insert(schema.friend)
-      .values({ userId1, userId2 })
-      ;
+    return await this.db.insert(schema.friend).values({ userId1, userId2 });
   }
 
   @handleDatabaseErrors
@@ -63,8 +60,7 @@ export class FriendRepository {
   async createFriendRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .insert(schema.friendRequest)
-      .values({ senderId, recipientId })
-      ;
+      .values({ senderId, recipientId });
     return result[0];
   }
 

@@ -16,10 +16,7 @@ export class PostStatsRepository {
 
   @handleDatabaseErrors
   async createPostStats(postId: number) {
-    const result = await this.db
-      .insert(schema.postStats)
-      .values({ postId })
-      ;
+    const result = await this.db.insert(schema.postStats).values({ postId });
     return result;
   }
 
