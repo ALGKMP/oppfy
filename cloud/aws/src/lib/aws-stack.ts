@@ -189,13 +189,13 @@ export class AwsStack extends cdk.Stack {
       this,
       postBucket,
       "postLambda",
-      "src/res/lambdas/post/index.ts",
+      "src/res/lambdas/posts/index.ts",
     );
     const profileLambda = createLambdaFunction(
       this,
       profileBucket,
       "profileLambda",
-      "src/res/lambdas/profilePicture/index.ts",
+      "src/res/lambdas/profile-picture/index.ts",
     );
 
     setupBucketLambdaIntegration(
