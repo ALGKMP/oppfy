@@ -1,8 +1,8 @@
 import { DomainError, ErrorCode } from "../errors";
 import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
-import type { NotificationSettings } from "../repositories/notificationSettings";
-import { NotificationSettingsRepository } from "../repositories/notificationSettings";
+import type { NotificationSettings } from "../repositories/notification-settings";
+import { NotificationSettingsRepository } from "../repositories/notification-settings";
 import type { PrivacySetting } from "../repositories/user";
 import { UserRepository } from "../repositories/user";
 import { AwsService } from "./aws";

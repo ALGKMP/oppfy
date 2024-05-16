@@ -40,7 +40,6 @@ export enum ErrorCode {
   FAILED_TO_UPDATE_PRIVACY_SETTING = "FAILED_TO_UPDATE_PRIVACY_SETTING",
   FAILED_TO_GET_PROFILE_PICTURE = "FAILED_TO_GET_PROFILE_PICTURE",
 
-
   DATABASE_ERROR = "DATABASE_ERROR",
   AWS_ERROR = "AWS_ERROR",
   MUX_ERROR = "MUX_ERROR",
@@ -99,4 +98,10 @@ export const handleMuxErrors = handleError(
   "MuxError",
   "Mux error occurred",
   ErrorCode.MUX_ERROR,
-)
+);
+
+export const handleOpensearchErrors = handleError(
+  "OpensearchError",
+  "Opensearch error occurred",
+  ErrorCode.MUX_ERROR,
+);

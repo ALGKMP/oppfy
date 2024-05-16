@@ -2,7 +2,7 @@ import { DomainError, ErrorCode } from "../errors";
 import { CommentRepository } from "../repositories/comment";
 import { LikeRepository } from "../repositories/like";
 import { PostRepository } from "../repositories/post";
-import { PostStatsRepository } from "../repositories/postStats";
+import { PostStatsRepository } from "../repositories/post-stats";
 import { AwsService } from "./aws";
 
 interface PaginatedResponse<T> {
