@@ -3,7 +3,7 @@ import { generateOpenApiDocument } from "trpc-openapi";
 import { authRouter } from "./router/auth";
 import { postRouter } from "./router/post";
 import { profileRouter } from "./router/profile";
-import { searchRouter } from "./router/search";
+// import { searchRouter } from "./router/search";
 import { userRouter } from "./router/user";
 import { createTRPCRouter } from "./trpc";
 
@@ -12,7 +12,7 @@ export const appRouter = createTRPCRouter({
   profile: profileRouter,
   post: postRouter,
   user: userRouter,
-  search: searchRouter,
+  // search: searchRouter,
 });
 
 export const openApiDocument = generateOpenApiDocument(appRouter, {

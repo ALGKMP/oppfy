@@ -1,11 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { Webhooks } from "@mux/mux-node/src/resources/webhooks.js";
 
 import { trpcValidators } from "@acme/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { mux } from "@acme/mux";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -38,23 +36,39 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    createMuxVideoPresignedUrl: protectedProcedure
-    .mutation(async ({ ctx }) => {
+  createMuxVideoPresignedUrl: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
       const result = await ctx.services.mux.createDirectUpload();
       return result.url;
-    }),
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message:
+          "Failed to create presigned URL for video upload. Please check your network connection and try again.",
+      });
+    }
+  }),
 
   muxWebhook: publicProcedure
-    .meta({ /* 👉 */ openapi: { method: "POST", path: "/upload-video" } })
-    .input(z.string())
+    .meta({
+      /* 👉 */ openapi: {
+        method: "POST",
+        path: "/upload-video",
+        protect: true,
+      },
+    })
+    .input(z.object({}))
     .output(z.void())
-    .mutation(({ input }) => {
+    .query(({ ctx, input }) => {
+      if (!ctx.isMuxSignatureVerified) {
+        console.error("Invalid Mux Webhook Signature");
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid Mux Webhook Signature",
+        });
+      }
       console.log("muxWebhook hit");
       console.log(input);
-      const c = mux.webhooks.verifySignature(
-        input,
-        process.env.MUX_WEBHOOK_SECRET!,
-      );
     }),
 
   editPost: protectedProcedure
