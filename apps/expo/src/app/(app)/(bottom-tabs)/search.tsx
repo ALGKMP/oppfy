@@ -9,10 +9,10 @@ const SEARCH_REFRESH_DELAY = 200;
 
 const Search = () => {
   const [searchResults, setSearchResults] = useState<
-    RouterOutputs["search"]["search"]
+    RouterOutputs["search"]["profilesByUsername"]
   >([]);
 
-  const search = api.search.search.useMutation();
+  const search = api.search.profilesByUsername.useMutation();
 
   const debouncedSearch = debounce(async (partialUsername: string) => {
     if (!partialUsername) return;
