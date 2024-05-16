@@ -14,7 +14,9 @@ import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
-import { db, s3, mux } from "@acme/db";
+import { db } from "@acme/db";
+import { s3 } from "@acme/s3";
+import { mux } from "@acme/mux";
 
 import { services } from "./services";
 import { auth } from "./utils/firebase";
@@ -46,7 +48,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     s3,
     db,
-    // mux,
+    mux,
     auth,
     services,
     session: opts.session,
