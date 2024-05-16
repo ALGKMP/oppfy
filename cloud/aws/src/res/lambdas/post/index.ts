@@ -1,5 +1,6 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
+import { db, schema } from "@acme/db";
 
 import { trpcValidators } from "@acme/validators";
 
@@ -32,10 +33,10 @@ export const handler = async (
     Bucket: objectBucket,
     Key: objectKey,
   });
-  console.log(command)
+  console.log(command);
 
   try {
-    const res = await s3Client.send(command).catch(err => {
+    const res = await s3Client.send(command).catch((err) => {
       console.error("Failed to retrieve S3 object metadata:", err);
       throw err; // Rethrow to handle it in the outer try-catch block
     });
@@ -48,42 +49,21 @@ export const handler = async (
       console.log("No metadata present for the object:", objectKey);
       return {
         statusCode: 404,
-        body: JSON.stringify({ message: "Metadata for the object not found." })
+        body: JSON.stringify({ message: "Metadata for the object not found." }),
       };
-    };
+    }
 
     const metadata = trpcValidators.post.metadata.parse(Metadata);
 
-    // Temporarily hardcoding the server endpoint
-    const serverEndpoint =
-      "https://f753-2607-fea8-4cc0-7170-541f-28f6-c2ed-dab2.ngrok-free.app/api/uploadPost";
-
     const body = trpcValidators.post.uploadPost.parse({
-        author: metadata.author,
-        recipient: metadata.recipient,
-        caption: metadata.caption,
-        key: objectKey,
+      author: metadata.author,
+      recipient: metadata.recipient,
+      caption: metadata.caption,
+      key: objectKey,
     });
 
-    if (!body) {
-      console.log("Failed to parse metadata:", Metadata);
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Failed to parse metadata" }),
-      };
-    }
-
-    const response = await fetch(serverEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
-    }
+    // This might be broken
+    await db.insert(schema.post).values(body);
 
     return {
       statusCode: 200,

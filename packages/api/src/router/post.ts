@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-// import { Webhooks } from "@mux/mux-node/src/resources/webhooks.js";
+import { Webhooks } from "@mux/mux-node/src/resources/webhooks.js";
 
 import { trpcValidators } from "@acme/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { mux } from "@acme/mux";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -43,14 +44,18 @@ export const postRouter = createTRPCRouter({
       return result.url;
     }),
 
-  // muxWebhook: publicProcedure
-  //   .meta({ /* 👉 */ openapi: { method: "POST", path: "/upload-video" } })
-  //   // .input(z.any())
-  //   .output(z.void())
-  //   .mutation(({ input }) => {
-  //     console.log("muxWebhook hit");
-  //     console.log(input);
-  //   }),
+  muxWebhook: publicProcedure
+    .meta({ /* 👉 */ openapi: { method: "POST", path: "/upload-video" } })
+    .input(z.string())
+    .output(z.void())
+    .mutation(({ input }) => {
+      console.log("muxWebhook hit");
+      console.log(input);
+      const c = mux.webhooks.verifySignature(
+        input,
+        process.env.MUX_WEBHOOK_SECRET!,
+      );
+    }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
@@ -63,21 +68,6 @@ export const postRouter = createTRPCRouter({
           message: `Failed to edit post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
         });
       }
-    }),
-
-
-
-  uploadPost: publicProcedure
-    .meta({ /* 👉 */ openapi: { method: "POST", path: "/uploadPost" } })
-    .input(trpcValidators.post.uploadPost)
-    .output(z.void())
-    .mutation(async ({ ctx, input }) => {
-      await ctx.services.post.createPost(
-        input.author,
-        input.recipient,
-        input.caption,
-        input.key,
-      );
     }),
 
   deletePost: protectedProcedure
