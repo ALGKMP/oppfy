@@ -67,7 +67,7 @@ export const profile = mySqlTable("Profile", {
   fullName: varchar("fullName", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
   bio: text("bio"),
-  profilePictureKey: varchar("url", { length: 255 })
+  profilePictureKey: varchar("profilePictureKey", { length: 255 })
     .default("profile-pictures/default.jpg")
     .notNull(),
   createdAt: timestamp("createdAt")
