@@ -27,30 +27,6 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // OpenAPI endponit for Lambda
-  uploadProfilePicture: publicProcedure
-    .meta({ /* 👉 */ openapi: { method: "POST", path: "/profile-picture" } })
-    .input(trpcValidators.profile.uploadProfilePictureOpenApi)
-    .output(z.void())
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await ctx.services.profile.updateProfilePicture(input.user, input.key);
-      } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "User not found",
-              });
-          }
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update profile picture",
-        });
-      }
-    }),
-
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await ctx.services.profile.removeProfilePicture(ctx.session.uid);
