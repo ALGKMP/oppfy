@@ -43,18 +43,18 @@ export const postRouter = createTRPCRouter({
     return result.url;
   }),
 
-  muxWebhook: publicProcedure
-    .meta({ /* 👉 */ openapi: { method: "POST", path: "/upload-video" } })
-    .input(z.string())
-    .output(z.void())
-    .mutation(({ input }) => {
-      console.log("muxWebhook hit");
-      console.log(input);
-      const c = mux.webhooks.verifySignature(
-        input,
-        process.env.MUX_WEBHOOK_SECRET!,
-      );
-    }),
+  // muxWebhook: publicProcedure
+  //   .meta({ /* 👉 */ openapi: { method: "POST", path: "/upload-video" } })
+  //   .input(z.string())
+  //   .output(z.void())
+  //   .mutation(({ input }) => {
+  //     console.log("muxWebhook hit");
+  //     console.log(input);
+  //     const c = mux.webhooks.verifySignature(
+  //       input,
+  //       process.env.MUX_WEBHOOK_SECRET!,
+  //     );
+  //   }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
