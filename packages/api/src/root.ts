@@ -12,7 +12,7 @@ export const appRouter = createTRPCRouter({
   profile: profileRouter,
   post: postRouter,
   user: userRouter,
-  search: searchRouter,
+  // search: searchRouter,
 });
 
 export const openApiDocument = generateOpenApiDocument(appRouter, {

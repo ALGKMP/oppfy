@@ -9,7 +9,7 @@ import type {
 } from "@aws-sdk/client-s3/dist-types/commands";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import { s3 } from "@acme/db";
+import { s3 } from "@acme/s3";
 
 import { handleAwsErrors } from "../errors";
 

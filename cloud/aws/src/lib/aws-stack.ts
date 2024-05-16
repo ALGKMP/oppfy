@@ -37,6 +37,7 @@ function createBucket(scope: Construct, name: string) {
 // Helper function to create a Lambda function
 function createLambdaFunction(
   scope: Construct,
+  bucket: s3.Bucket,
   name: string,
   entryPath: string,
 ) {
@@ -46,11 +47,22 @@ function createLambdaFunction(
     handler: "handler",
     timeout: cdk.Duration.minutes(3),
     bundling: {
-      format: lambdaNodeJs.OutputFormat.ESM,
+      format: lambdaNodeJs.OutputFormat.ESM, // Use ESM format for bundling
       mainFields: ["module", "main"],
       esbuildArgs: {
-        "--conditions": "module",
+        "--platform": "node",
+        "--target": "esnext", // Ensure es2020 or higher to support top-level await
+        "--format": "esm", // Bundle as ESM
+        "--banner:js":
+          "import { createRequire } from 'module'; const require = createRequire(import.meta.url);", // Inject require shim
       },
+    },
+    environment: {
+      DATABASE_PORT: process.env.DATABASE_PORT!,
+      DATABASE_ENDPOINT: process.env.DATABASE_ENDPOINT!,
+      DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
+      DATABASE_NAME: process.env.DATABASE_NAME!,
+      DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
     },
   });
 }
@@ -175,11 +187,13 @@ export class AwsStack extends cdk.Stack {
 
     const postLambda = createLambdaFunction(
       this,
+      postBucket,
       "postLambda",
       "src/res/lambdas/post/index.ts",
     );
     const profileLambda = createLambdaFunction(
       this,
+      profileBucket,
       "profileLambda",
       "src/res/lambdas/profilePicture/index.ts",
     );

@@ -1,4 +1,4 @@
-import { mux } from "@acme/db";
+import { mux } from "@acme/mux";
 
 import { handleMuxErrors } from "../errors";
 

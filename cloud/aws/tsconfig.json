@@ -23,5 +23,5 @@
     "strictPropertyInitialization": false,
     "esModuleInterop": true
   },
-  "exclude": ["cdk.out", "node_modules"]
+  "exclude": ["node_modules"]
 }
