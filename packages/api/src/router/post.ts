@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { trpcValidators } from "@acme/validators";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -63,21 +63,6 @@ export const postRouter = createTRPCRouter({
           message: `Failed to edit post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
         });
       }
-    }),
-
-
-
-  uploadPost: publicProcedure
-    .meta({ /* 👉 */ openapi: { method: "POST", path: "/uploadPost" } })
-    .input(trpcValidators.post.uploadPost)
-    .output(z.void())
-    .mutation(async ({ ctx, input }) => {
-      await ctx.services.post.createPost(
-        input.author,
-        input.recipient,
-        input.caption,
-        input.key,
-      );
     }),
 
   deletePost: protectedProcedure
