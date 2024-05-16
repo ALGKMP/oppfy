@@ -80,7 +80,7 @@ const Search = () => {
                         loading={false}
                         title={item.username}
                         subtitle={item.fullName}
-                        // imageUrl={item.profilePictureUrl}
+                        imageUrl={item.profilePictureUrl}
                       />
                     )}
                   </View>

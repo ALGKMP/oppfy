@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "push": "pnpm with-env drizzle-kit push",
     "generate": "pnpm with-env drizzle-kit generate:mysql",
-    "migrate": "pnpm tsx src/migrate.ts",
+    "migrate": "pnpm tsx src/migrate.mts",
     "studio": "pnpm with-env drizzle-kit studio --config drizzle.config.ts",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
