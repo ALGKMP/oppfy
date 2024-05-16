@@ -97,7 +97,7 @@ export class AwsStack extends cdk.Stack {
 
     const vpc = new ec2.Vpc(this, "MyVpc", {
       maxAzs: 2,
-      natGateways: 1,
+      natGateways: 0,
       subnetConfiguration: [
         {
           subnetType: ec2.SubnetType.PUBLIC,
@@ -209,7 +209,8 @@ export class AwsStack extends cdk.Stack {
       "AllowProfileS3Invocation",
     );
 
-    const openSearchRole = new iam.Role(this, "OpenSearchRole", {
+    // Define a security group for OpenSearch access
+    const openSearchRole = new iam.Role(this, "DMSAccessRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
       description: "Role for OpenSearch Service access",
     });
@@ -218,16 +219,18 @@ export class AwsStack extends cdk.Stack {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["es:*"],
-        resources: [`arn:aws:es:${this.region}:${this.account}:domain/test/*`],
+        resources: [
+          `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
+        ],
       }),
     );
 
     const openSearchSecurityGroup = new ec2.SecurityGroup(
       this,
-      "OpenSearchSecurityGroup",
+      "MyOpenSearchSecurityGroup",
       {
         vpc,
-        description: "Security group for OpenSearch Service",
+        description: "Security group for Open Search Service",
         allowAllOutbound: true,
       },
     );
@@ -239,7 +242,7 @@ export class AwsStack extends cdk.Stack {
     );
 
     const openSearchDomain = new opensearch.Domain(this, "MyOpenSearchDomain", {
-      domainName: "test",
+      domainName: "testing",
       version: opensearch.EngineVersion.OPENSEARCH_1_0,
       capacity: {
         masterNodes: 0,
@@ -255,6 +258,7 @@ export class AwsStack extends cdk.Stack {
       zoneAwareness: {
         enabled: false,
       },
+      // Removed VPC and Subnet configurations
       securityGroups: [openSearchSecurityGroup],
       accessPolicies: [
         new iam.PolicyStatement({
@@ -262,7 +266,7 @@ export class AwsStack extends cdk.Stack {
           principals: [new iam.ArnPrincipal(openSearchRole.roleArn)],
           actions: ["es:*"],
           resources: [
-            `arn:aws:es:${this.region}:${this.account}:domain/test/*`,
+            `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
           ],
         }),
       ],
@@ -273,12 +277,16 @@ export class AwsStack extends cdk.Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    // Output the OpenSearch domain endpoint
     new cdk.CfnOutput(this, "OpenSearchDomainEndpoint", {
       value: openSearchDomain.domainEndpoint,
     });
 
-    const dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
+    // TODO: dms depends on this task - we need to wait for it to be created
+    // Create the IAM role for DMS VPC management
+    const _dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
+      roleName: "dms-vpc-role",
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName(
           "service-role/AmazonDMSVPCManagementRole",
@@ -286,8 +294,16 @@ export class AwsStack extends cdk.Stack {
       ],
     });
 
-    const dmsCloudWatchLogsRole = new iam.Role(this, "DmsCloudWatchLogsRole", {
+    // ! IF YOU RUN INTO A dms-vpc-role DOESNT EXIST ERROR:
+    // ! 1. COMMENT ALL CODE BELOW
+    // ! 2. RUN cdk deploy
+    // ! 3. UNCOMMENT ALL CODE BELOW
+    // ! 4. RUN cdk deploy
+
+    // Create the IAM role for DMS CloudWatch Logs
+    const _dmsCloudWatchLogsRole = new iam.Role(this, "DmsCloudWatchLogsRole", {
       assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
+      roleName: "dms-cloudwatch-logs-role",
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName(
           "service-role/AmazonDMSCloudWatchLogsRole",
@@ -295,43 +311,41 @@ export class AwsStack extends cdk.Stack {
       ],
     });
 
+    // Define the replication subnet group using the VPC's private subnets
     const dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
       this,
       "DmsSubnetGroup",
       {
-        replicationSubnetGroupIdentifier: "dms-subnet-group",
+        replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
         replicationSubnetGroupDescription:
           "Subnet group for DMS replication instances",
-        subnetIds: vpc.privateSubnets.map((subnet) => subnet.subnetId),
+        subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
       },
     );
 
-    const dmsSecurityGroup = new ec2.SecurityGroup(this, "DmsSecurityGroup", {
+    // Define a security group for the RDS instance within the VPC
+    const dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
       vpc,
       allowAllOutbound: true,
       description: "Security group for DMS replication instance",
     });
 
-    dmsSecurityGroup.addEgressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(443), // Allow HTTPS outbound traffic
-      "Allow HTTPS outbound traffic for Kinesis",
-    );
-
+    // Create the DMS replication instance
     const dmsReplicationInstance = new dms.CfnReplicationInstance(
       this,
-      "DmsReplicationInstance",
+      "MyDmsReplicationInstance",
       {
         replicationInstanceClass: "dms.t2.micro",
         allocatedStorage: 50,
-        publiclyAccessible: true, // Ensure the instance is publicly accessible
-        vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
-        replicationSubnetGroupIdentifier: dmsSubnetGroup.ref,
+        publiclyAccessible: true,
+        // vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
+        // replicationSubnetGroupIdentifier:
+        //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
         multiAz: false,
       },
     );
 
-    const dmsSourceEndpoint = new dms.CfnEndpoint(this, "DmsSourceEndpoint", {
+    const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
       endpointType: "source",
       engineName: "mysql",
       username: cdk.Fn.sub(
@@ -347,59 +361,27 @@ export class AwsStack extends cdk.Stack {
         },
       ),
       serverName: rdsInstance.dbInstanceEndpointAddress,
-      port: 3306,
+      port: 3306, // MySQL's default port
       databaseName: "mydatabase",
       sslMode: "none",
     });
 
-    const kinesisStream = new kinesis.Stream(this, "DmsKinesisStream", {
-      shardCount: 1,
-    });
-
-    const dmsKinesisRole = new iam.Role(this, "DmsKinesisRole", {
-      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
-      inlinePolicies: {
-        KinesisAccessPolicy: new iam.PolicyDocument({
-          statements: [
-            new iam.PolicyStatement({
-              actions: [
-                "kinesis:DescribeStream",
-                "kinesis:PutRecord",
-                "kinesis:PutRecords",
-              ],
-              resources: [kinesisStream.streamArn],
-            }),
-          ],
-        }),
-      },
-    });
-
-    const dmsTargetEndpoint = new dms.CfnEndpoint(this, "DmsTargetEndpoint", {
-      endpointIdentifier: "DmsKinesisEndpoint",
+    // DMS Target Endpoint for OpenSearch
+    const dmsTargetEndpoint = new dms.CfnEndpoint(this, "MyDmsTargetEndpoint", {
       endpointType: "target",
-      engineName: "kinesis",
-      kinesisSettings: {
-        messageFormat: "json-unformatted", // Ensure correct message format
-        serviceAccessRoleArn: dmsKinesisRole.roleArn,
-        streamArn: kinesisStream.streamArn,
+      engineName: "opensearch",
+      elasticsearchSettings: {
+        serviceAccessRoleArn: openSearchRole.roleArn,
+        endpointUri: openSearchDomain.domainEndpoint,
       },
     });
 
     const tableMappings = JSON.stringify({
       rules: [
+        // Rule to select the Profile table
         {
           "rule-type": "selection",
           "rule-id": "1",
-          "rule-name": "SelectUserTable",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "User",
-          },
-          "rule-action": "include",
-        },
-        {
-          "rule-type": "selection",
-          "rule-id": "2",
           "rule-name": "SelectProfileTable",
           "object-locator": {
             "schema-name": "mydatabase",
@@ -407,172 +389,46 @@ export class AwsStack extends cdk.Stack {
           },
           "rule-action": "include",
         },
-        {
-          "rule-type": "selection",
-          "rule-id": "3",
-          "rule-name": "SelectProfilePictureTable",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "ProfilePicture",
-          },
-          "rule-action": "include",
-        },
-        {
-          "rule-type": "transformation",
-          "rule-id": "4",
-          "rule-name": "IncludeUserIdColumn",
-          "rule-action": "include-column",
-          "rule-target": "column",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "User",
-            "column-name": "id",
-          },
-        },
-        {
-          "rule-type": "transformation",
-          "rule-id": "5",
-          "rule-name": "IncludeUsernameColumn",
-          "rule-action": "include-column",
-          "rule-target": "column",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "User",
-            "column-name": "username",
-          },
-        },
-        {
-          "rule-type": "transformation",
-          "rule-id": "6",
-          "rule-name": "IncludeProfileIdColumn",
-          "rule-action": "include-column",
-          "rule-target": "column",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "User",
-            "column-name": "profileId",
-          },
-        },
-        {
-          "rule-type": "transformation",
-          "rule-id": "7",
-          "rule-name": "IncludeFullNameColumn",
-          "rule-action": "include-column",
-          "rule-target": "column",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "Profile",
-            "column-name": "fullName",
-          },
-        },
-        {
-          "rule-type": "transformation",
-          "rule-id": "8",
-          "rule-name": "IncludeProfilePictureIdColumn",
-          "rule-action": "include-column",
-          "rule-target": "column",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "Profile",
-            "column-name": "profilePictureId",
-          },
-        },
       ],
     });
 
-    const taskSettings = JSON.stringify({
-      FullLoadSettings: {
-        MaxFullLoadSubTasks: 8,
-      },
-      TargetMetadata: {
-        ParallelLoadQueuesPerThread: 0,
-        ParallelLoadThreads: 0,
-        ParallelLoadBufferSize: 0,
-        ParallelApplyBufferSize: 1000,
-        ParallelApplyQueuesPerThread: 16,
-        ParallelApplyThreads: 8,
-      },
-    });
-
+    // Create the DMS replication task
     const dmsReplicationTask = new dms.CfnReplicationTask(
       this,
-      "DmsReplicationTask",
+      "MyDmsReplicationTask",
       {
-        replicationInstanceArn: dmsReplicationInstance.ref,
-        sourceEndpointArn: dmsSourceEndpoint.ref,
-        targetEndpointArn: dmsTargetEndpoint.ref,
-        migrationType: "full-load-and-cdc",
-        tableMappings: tableMappings,
-        replicationTaskSettings: taskSettings,
-      },
-    );
-
-    const kinesisLambda = new lambdaNodeJs.NodejsFunction(
-      this,
-      "KinesisLambdaFunction",
-      {
-        runtime: lambda.Runtime.NODEJS_LATEST,
-        entry: "src/res/lambdas/kinesis/index.ts",
-        handler: "handler",
-        bundling: {
-          format: lambdaNodeJs.OutputFormat.ESM, // Use ESM format for bundling
-          mainFields: ["module", "main"],
-          esbuildArgs: {
-            "--platform": "node",
-            "--target": "esnext", // Ensure es2020 or higher to support top-level await
-            "--format": "esm", // Bundle as ESM
-            "--banner:js":
-              "import { createRequire } from 'module'; const require = createRequire(import.meta.url);", // Inject require shim
+        replicationInstanceArn: dmsReplicationInstance.ref, // ARN of the replication instance
+        sourceEndpointArn: dmsSourceEndpoint.ref, // ARN of the source endpoint
+        targetEndpointArn: dmsTargetEndpoint.ref, // ARN of the target endpoint
+        migrationType: "full-load-and-cdc", // Perform full load and then replicate ongoing changes
+        tableMappings: tableMappings, // Use the table mappings defined above
+        replicationTaskSettings: JSON.stringify({
+          TargetMetadata: {
+            TargetSchema: "",
+            SupportLobs: true, // Enable LOB support
+            FullLobMode: true, // Set to true to include entire LOB in the migration
+            LobChunkSize: 64, // Size in KB of LOB chunks
+            LimitedSizeLobMode: false, // Set to false if FullLobMode is true
+            LobMaxSize: 32, // Maximum size in KB for LOB columns (if LimitedSizeLobMode is true)
+            InlineLobMaxSize: 0,
+            LoadMaxFileSize: 0,
+            ParallelLoadThreads: 0,
+            BatchApplyEnabled: false,
           },
-        },
-        environment: {
-          S3_POST_BUCKET: postBucket.bucketName,
-          S3_PROFILE_BUCKET: profileBucket.bucketName,
-
-          MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
-          MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
-          MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
-
-          DATABASE_PORT: process.env.DATABASE_PORT!,
-          DATABASE_ENDPOINT: process.env.DATABASE_ENDPOINT!,
-          DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
-          DATABASE_NAME: process.env.DATABASE_NAME!,
-          DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
-
-          // OPENSEARCH_URL: openSearchDomain.domainEndpoint,
-
-          REGION: this.region,
-          DOMAIN_ENDPOINT: `https://${openSearchDomain.domainEndpoint}`,
-          INDEX_NAME: "users",
-        },
+          FullLoadSettings: {
+            FullLoadEnabled: true,
+            ApplyChangesEnabled: true,
+          },
+          Logging: {
+            EnableLogging: true,
+          },
+        }),
       },
     );
 
-    kinesisLambda.addEventSource(
-      new lambdaEventSources.KinesisEventSource(kinesisStream, {
-        startingPosition: lambda.StartingPosition.TRIM_HORIZON,
-        batchSize: 100,
-      }),
-    );
-
-    kinesisStream.grantRead(kinesisLambda);
-    kinesisLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["es:ESHttpPost", "es:ESHttpPut", "es:ESHttpDelete"],
-        resources: [`arn:aws:es:${this.region}:${this.account}:domain/test/*`],
-      }),
-    );
-
+    // Output the replication task ARN
     new cdk.CfnOutput(this, "ReplicationTaskArn", {
       value: dmsReplicationTask.ref,
-    });
-
-    new cdk.CfnOutput(this, "KinesisStreamArn", {
-      value: kinesisStream.streamArn,
-    });
-
-    new cdk.CfnOutput(this, "LambdaFunctionArn", {
-      value: kinesisLambda.functionArn,
     });
   }
 }
