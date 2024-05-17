@@ -1,5 +1,5 @@
 {
-  "name": "@oppfy/eslint-config",
+  "name": "@acme/eslint-config",
   "private": true,
   "version": "0.2.0",
   "type": "module",
@@ -27,8 +27,8 @@
     "eslint-plugin-react-hooks": "^4.6.2"
   },
   "devDependencies": {
-    "@oppfy/prettier-config": "workspace:^",
-    "@oppfy/tsconfig": "workspace:^",
+    "@acme/prettier-config": "workspace:^",
+    "@acme/tsconfig": "workspace:^",
     "@types/eslint": "^8.56.10",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
@@ -43,5 +43,5 @@
       "plugin:drizzle/all"
     ]
   },
-  "prettier": "@oppfy/prettier-config"
+  "prettier": "@acme/prettier-config"
 }

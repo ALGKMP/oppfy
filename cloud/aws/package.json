@@ -1,5 +1,5 @@
 {
-  "name": "@oppfy/aws",
+  "name": "@acme/aws",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -24,10 +24,10 @@
     "constructs": "^10.3.0"
   },
   "devDependencies": {
-    "@oppfy/eslint-config": "workspace:^",
-    "@oppfy/prettier-config": "workspace:^",
-    "@oppfy/tailwind-config": "workspace:^",
-    "@oppfy/tsconfig": "workspace:^",
+    "@acme/eslint-config": "workspace:^",
+    "@acme/prettier-config": "workspace:^",
+    "@acme/tailwind-config": "workspace:^",
+    "@acme/tsconfig": "workspace:^",
     "@types/aws-lambda": "^8.10.137",
     "@types/jest": "^29.5.12",
     "@types/node": "^18.19.31",
@@ -41,8 +41,8 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@oppfy/eslint-config/base"
+      "@acme/eslint-config/base"
     ]
   },
-  "prettier": "@oppfy/prettier-config"
+  "prettier": "@acme/prettier-config"
 }

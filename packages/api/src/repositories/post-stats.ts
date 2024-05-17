@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 
-import { db, schema } from "@oppfy/db";
+import { db, schema } from "@acme/db";
 
 import { handleDatabaseErrors } from "../errors";
 

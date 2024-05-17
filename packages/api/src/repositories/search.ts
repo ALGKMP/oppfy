@@ -4,7 +4,7 @@ import type {
 } from "@aws-sdk/client-s3/dist-types/commands";
 import type { ApiResponse } from "@opensearch-project/opensearch"; // Import ApiResponse type
 
-import { openSearch } from "@oppfy/opensearch";
+import { openSearch } from "@acme/opensearch";
 
 import { handleOpensearchErrors } from "../errors";
 

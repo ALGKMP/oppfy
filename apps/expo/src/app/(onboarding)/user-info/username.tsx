@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
-import { sharedValidators } from "@oppfy/validators";
+import { sharedValidators } from "@acme/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { api, isTRPCClientError } from "~/utils/api";

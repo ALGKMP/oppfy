@@ -6,13 +6,13 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
 
-import { AppRouter } from "@oppfy/api";
+import { AppRouter } from "@acme/api";
 
 /**
  * A set of typesafe hooks for consuming your API.
  */
 export const api = createTRPCReact<AppRouter>();
-export { type RouterInputs, type RouterOutputs } from "@oppfy/api";
+export { type RouterInputs, type RouterOutputs } from "@acme/api";
 
 /**
  * Check if an error is a `TRPCClientError`

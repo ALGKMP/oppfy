@@ -12,7 +12,7 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 
-// import { mySqlTable } from "@oppfy/db/src/schema/_table";
+// import { mySqlTable } from "@acme/db/src/schema/_table";
 import { mySqlTable } from "./_table";
 
 // check if the current username is the same as the new username

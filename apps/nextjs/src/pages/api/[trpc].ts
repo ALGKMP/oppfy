@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import cors from "nextjs-cors";
 import { createOpenApiNextHandler } from "trpc-openapi";
 
-import { appRouter, createTRPCContext } from "@oppfy/api";
+import { appRouter, createTRPCContext } from "@acme/api";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // Setup CORS

@@ -1,5 +1,5 @@
 {
-  "name": "@oppfy/profile-picture-lambda",
+  "name": "@acme/profile-picture-lambda",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,17 +13,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@oppfy/db": "workspace:^",
-    "@oppfy/utils": "workspace:^",
-    "@oppfy/validators": "workspace:^",
+    "@acme/db": "workspace:^",
+    "@acme/utils": "workspace:^",
+    "@acme/validators": "workspace:^",
     "@opensearch-project/opensearch": "^2.8.0",
     "zod": "^3.23.4",
     "@aws-sdk/client-s3": "^3.564.0"
   },
   "devDependencies": {
-    "@oppfy/eslint-config": "workspace:^",
-    "@oppfy/prettier-config": "workspace:^",
-    "@oppfy/tsconfig": "workspace:^",
+    "@acme/eslint-config": "workspace:^",
+    "@acme/prettier-config": "workspace:^",
+    "@acme/tsconfig": "workspace:^",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
@@ -31,8 +31,8 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@oppfy/eslint-config/base"
+      "@acme/eslint-config/base"
     ]
   },
-  "prettier": "@oppfy/prettier-config"
+  "prettier": "@acme/prettier-config"
 }

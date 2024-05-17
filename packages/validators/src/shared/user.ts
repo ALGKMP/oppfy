@@ -2,7 +2,7 @@ import type { CountryCode } from "libphonenumber-js";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { z } from "zod";
 
-import { AgeChecker } from "@oppfy/utils";
+import { AgeChecker } from "@acme/utils";
 
 export const userId = z.string();
 export const profileId = z.string();

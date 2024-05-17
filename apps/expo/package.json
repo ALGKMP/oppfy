@@ -1,5 +1,5 @@
 {
-  "name": "@oppfy/expo",
+  "name": "@acme/expo",
   "version": "0.1.0",
   "private": true,
   "main": "index.tsx",
@@ -19,8 +19,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@oppfy/utils": "workspace:^",
-    "@oppfy/validators": "workspace:^",
+    "@acme/utils": "workspace:^",
+    "@acme/validators": "workspace:^",
     "@expo-google-fonts/modak": "^0.2.3",
     "@expo/metro-config": "^0.17.7",
     "@expo/react-native-action-sheet": "^4.0.1",
@@ -84,11 +84,11 @@
     "zod": "^3.23.4"
   },
   "devDependencies": {
-    "@oppfy/api": "workspace:^",
-    "@oppfy/eslint-config": "workspace:^",
-    "@oppfy/prettier-config": "workspace:^",
-    "@oppfy/tsconfig": "workspace:^",
-    "@oppfy/types": "workspace:^",
+    "@acme/api": "workspace:^",
+    "@acme/eslint-config": "workspace:^",
+    "@acme/prettier-config": "workspace:^",
+    "@acme/tsconfig": "workspace:^",
+    "@acme/types": "workspace:^",
     "@babel/core": "^7.24.4",
     "@babel/preset-env": "^7.24.4",
     "@babel/runtime": "^7.24.4",
@@ -103,12 +103,12 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@oppfy/eslint-config/base",
-      "@oppfy/eslint-config/react"
+      "@acme/eslint-config/base",
+      "@acme/eslint-config/react"
     ],
     "ignorePatterns": [
       "expo-plugins/**"
     ]
   },
-  "prettier": "@oppfy/prettier-config"
+  "prettier": "@acme/prettier-config"
 }

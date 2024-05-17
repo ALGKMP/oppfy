@@ -1,4 +1,4 @@
-import { mux } from "@oppfy/mux";
+import { mux } from "@acme/mux";
 
 import { handleMuxErrors } from "../errors";
 

@@ -1,33 +1,27 @@
 {
-  "name": "@oppfy/mux",
+  "name": "@acme/mux",
   "private": true,
   "version": "0.1.0",
-<<<<<<< HEAD
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
-=======
   "type": "module",
   "exports": {
     ".": "./index.ts"
   },
->>>>>>> 201ac07d10b78a9f4b9d4ad21054f89970ba7923
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "@oppfyheck": "tsc --noEmit"
-  },@oppfy
-  "de@oppfyncies": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
     "@mux/mux-node": "^8.5.1"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:^0.2.0",
     "@acme/prettier-config": "workspace:^0.1.0",
-    "@a@oppfysconfig": "workspace:^0.1.0",
+    "@acme/tsconfig": "workspace:^0.1.0",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
-  },@oppfy
+  },
   "eslintConfig": {
     "extends": [
       "@acme/eslint-config/base"

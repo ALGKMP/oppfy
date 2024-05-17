@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@oppfy/"],
+      "matchPackagePatterns": ["^@acme/"],
       "enabled": false
     }
   ],
