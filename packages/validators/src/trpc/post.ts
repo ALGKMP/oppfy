@@ -49,7 +49,7 @@ const trpcPostSchema = {
       postId,
       createdAt: z.date(),
       pageSize: z.number().optional(),
-    }),
+    }).optional(),
     pageSize: z.number().optional(),
   }),
 

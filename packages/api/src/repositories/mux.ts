@@ -14,7 +14,8 @@ export class MuxRepository {
         mp4_support: "standard",
       },
       cors_origin: "*",
-    });
+    },
+  );
   }
 
   @handleMuxErrors
