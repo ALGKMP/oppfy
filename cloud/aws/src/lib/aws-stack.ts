@@ -37,7 +37,6 @@ function createBucket(scope: Construct, name: string) {
 // Helper function to create a Lambda function
 function createLambdaFunction(
   scope: Construct,
-  bucket: s3.Bucket,
   name: string,
   entryPath: string,
 ) {
@@ -187,16 +186,28 @@ export class AwsStack extends cdk.Stack {
 
     const postLambda = createLambdaFunction(
       this,
-      postBucket,
       "postLambda",
       "src/res/lambdas/posts/index.ts",
     );
     const profileLambda = createLambdaFunction(
       this,
-      profileBucket,
       "profileLambda",
       "src/res/lambdas/profile-picture/index.ts",
     );
+    const muxWebhookLambda = createLambdaFunction(
+      this,
+      "muxLambda",
+      "src/res/lambdas/mux/index.ts",
+    );
+
+    const muxWebhookUrl = muxWebhookLambda.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE, // We'll have our own auth
+    });
+
+        // Output the Lambda function URL
+    new cdk.CfnOutput(this, 'MuxWebhookUrl', {
+      value: muxWebhookUrl.url,
+    });
 
     setupBucketLambdaIntegration(
       postBucket,

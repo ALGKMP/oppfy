@@ -2,11 +2,11 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "es2020",
-    "module": "es2022",
+    "module": "ES2022",
     "lib": ["ES2020"],
     "declaration": false,
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "strictNullChecks": true,
     "strict": true,
     "noEmit": true,

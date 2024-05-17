@@ -69,11 +69,9 @@ export const createTRPCContext = async ({
 }: CreateNextContextOptions) => {
   const requestId = crypto.randomUUID();
   res.setHeader("x-request-id", requestId);
+  console.log("headers: ", req.headers);
   const token = req.headers.authorization?.split("Bearer ")[1];
-  // const muxSignatureHeader = req.headers["mux-signature"] as Record<string, string | string[]> | undefined;
-  console.log('Request Headers', req.headers)
-  console.log('Request Body', req.body)
-  const muxSignatureHeader = req.headers["mux-signature"] as string | undefined;
+  const muxSignatureHeader = req.headers["mux-signature"];
   const rawBody = req.body as string;
 
   let session: DecodedIdToken | null = null;
@@ -89,13 +87,13 @@ export const createTRPCContext = async ({
       });
     }
   }
-  console.log("Mux Signature Header", muxSignatureHeader)
-  console.log("Raw Body", rawBody)
   
   if (rawBody && muxSignatureHeader) {
     console.log('Verifying Mux Webhook Signature')
+    console.log("Mux Signature Header", muxSignatureHeader)
+    // console.log("Raw Body", rawBody)
     try {
-      // mux.webhooks.verifySignature(rawBody, muxSignatureHeader, process.env.MUX_WEBHOOK_SECRET);
+      mux.webhooks.verifySignature(rawBody, {"mux-signature": muxSignatureHeader}, process.env.MUX_WEBHOOK_SECRET);
       verifiedMuxSignature = true;
     } catch (error) {
       console.error('Error verifying Mux webhook signature:', error);

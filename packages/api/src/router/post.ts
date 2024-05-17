@@ -1,11 +1,9 @@
-import { Webhooks } from "@mux/mux-node/src/resources/webhooks.js";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { mux } from "@acme/mux";
 import { trpcValidators } from "@acme/validators";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -50,28 +48,6 @@ export const postRouter = createTRPCRouter({
       });
     }
   }),
-
-  muxWebhook: publicProcedure
-    .meta({
-      /* 👉 */ openapi: {
-        method: "POST",
-        path: "/upload-video",
-        protect: true,
-      },
-    })
-    .input(z.object({}))
-    .output(z.void())
-    .query(({ ctx, input }) => {
-      if (!ctx.isMuxSignatureVerified) {
-        console.error("Invalid Mux Webhook Signature");
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Invalid Mux Webhook Signature",
-        });
-      }
-      console.log("muxWebhook hit");
-      console.log(input);
-    }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
