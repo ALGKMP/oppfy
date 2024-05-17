@@ -73,15 +73,15 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getBasicProfile: publicProcedure
+  getOtherUserBasicProfile: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        profileId: z.string(),
       }),
     )
     .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.getBasicProfile(input.userId);
+      return await ctx.services.profile.getBasicProfile(input.profileId);
     }),
 
   getCurrentUsersFullProfile: protectedProcedure

@@ -111,6 +111,31 @@ export class ProfileService {
     });
   }
 
+  async getOtherUserBasicProfileICantComeUpWithNames(profileId: number) {
+    const user = await this.userRepository.getUserByProfileId(profileId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const profile = await this.profileRepository.getProfile(user.profileId);
+    if (!profile) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+
+    const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
+      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Key: profile.profilePictureKey,
+    });
+
+    return sharedValidators.user.basicProfile.parse({
+      userId: user.id,
+      privacy: user.privacySetting,
+      username: profile.username,
+      name: profile.fullName,
+      profilePictureUrl,
+    });
+  }
+
   async getFullOtherPersonCantNameForTheLifeOfMeProfile(profileId: number) {
     const user = await this.userRepository.getUserByProfileId(profileId);
     if (!user) {
