@@ -25,6 +25,11 @@ const BottomTabBar = ({
           const { options } = descriptors[route.key]!;
           const isFocused = state.index === index;
 
+          // Skip rendering the tab if tabBarButton is null
+          if (options.tabBarButton && options.tabBarButton({}) === null) {
+            return null;
+          }
+
           const onPress = () => {
             const event = navigation.emit({
               type: "tabPress",

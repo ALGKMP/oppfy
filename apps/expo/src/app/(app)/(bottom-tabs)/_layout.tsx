@@ -70,7 +70,7 @@ const BottomTabsLayout = () => {
       />
 
       <BottomTabs.Screen
-        name="(profile)"
+        name="(self-profile)"
         options={{
           title: profileData?.username,
           tabBarIcon: ({ focused }) => (
@@ -89,6 +89,15 @@ const BottomTabsLayout = () => {
               </Pressable>
             </View>
           ),
+        }}
+      />
+
+      <BottomTabs.Screen
+        name="(other-profile)"
+        options={{
+          title: "TEST",
+          tabBarButton: (props) => null
+          // tabBarStyle
         }}
       />
     </BottomTabs>

@@ -1,5 +1,6 @@
 import type { FunctionComponent } from "react";
 import React from "react";
+import { TouchableOpacity } from "react-native";
 import { Skeleton } from "moti/skeleton";
 import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
 
@@ -40,80 +41,92 @@ interface LoadedProps {
   button2?: ButtonProps | React.ReactNode;
 }
 
-type VirtualizedListItemProps = LoadingProps | LoadedProps;
+type VirtualizedListItemProps = (LoadingProps | LoadedProps) & {
+  onPress?: () => void;
+};
 
-const VirtualizedListItem: React.FC<VirtualizedListItemProps> = (props) => (
-  <Skeleton.Group show={props.loading}>
-    <XStack flex={1} alignItems="center" paddingVertical="$2">
-      <XStack flex={1} alignItems="center" gap="$3">
-        {props.loading && props.showSkeletons?.imageUrl ? (
-          <Skeleton radius={100}>
-            <Avatar circular size="$5" />
-          </Skeleton>
-        ) : !props.loading && props.imageUrl ? (
-          <Avatar circular size="$5">
-            <Avatar.Image src={props.imageUrl} />
-          </Avatar>
-        ) : null}
-
-        <YStack>
-          {props.loading && props.showSkeletons?.title ? (
-            <Skeleton width={75}>
-              <SizableText>Loading...</SizableText>
+const VirtualizedListItem: React.FC<VirtualizedListItemProps> = (props) => {
+  const content = (
+    <Skeleton.Group show={props.loading}>
+      <XStack flex={1} alignItems="center" paddingVertical="$2">
+        <XStack flex={1} alignItems="center" gap="$3">
+          {props.loading && props.showSkeletons?.imageUrl ? (
+            <Skeleton radius={100}>
+              <Avatar circular size="$5" />
             </Skeleton>
-          ) : !props.loading && props.title ? (
-            <SizableText>{props.title}</SizableText>
+          ) : !props.loading && props.imageUrl ? (
+            <Avatar circular size="$5">
+              <Avatar.Image src={props.imageUrl} />
+            </Avatar>
           ) : null}
 
-          {props.loading && props.showSkeletons?.subtitle ? (
-            <Skeleton width={100}>
-              <SizableText>Loading...</SizableText>
+          <YStack>
+            {props.loading && props.showSkeletons?.title ? (
+              <Skeleton width={75}>
+                <SizableText>Loading...</SizableText>
+              </Skeleton>
+            ) : !props.loading && props.title ? (
+              <SizableText>{props.title}</SizableText>
+            ) : null}
+
+            {props.loading && props.showSkeletons?.subtitle ? (
+              <Skeleton width={100}>
+                <SizableText>Loading...</SizableText>
+              </Skeleton>
+            ) : !props.loading && props.subtitle ? (
+              <SizableText>{props.subtitle}</SizableText>
+            ) : null}
+
+            {props.loading && props.showSkeletons?.subtitle2 ? (
+              <Skeleton width={100}>
+                <SizableText>Loading...</SizableText>
+              </Skeleton>
+            ) : !props.loading && props.subtitle2 ? (
+              <SizableText>{props.subtitle2}</SizableText>
+            ) : null}
+          </YStack>
+        </XStack>
+
+        <XStack gap="$2">
+          {props.loading && props.showSkeletons?.button ? (
+            <Skeleton>
+              <Button size="$3">Loading...</Button>
             </Skeleton>
-          ) : !props.loading && props.subtitle ? (
-            <SizableText>{props.subtitle}</SizableText>
+          ) : !props.loading && props.button ? (
+            isButtonProps(props.button) ? (
+              <Button size="$3" {...props.button}>
+                {props.button.text}
+              </Button>
+            ) : (
+              props.button
+            )
           ) : null}
 
-          {props.loading && props.showSkeletons?.subtitle2 ? (
-            <Skeleton width={100}>
-              <SizableText>Loading...</SizableText>
+          {props.loading && props.showSkeletons?.button2 ? (
+            <Skeleton>
+              <Button size="$3">Loading...</Button>
             </Skeleton>
-          ) : !props.loading && props.subtitle2 ? (
-            <SizableText>{props.subtitle2}</SizableText>
+          ) : !props.loading && props.button2 ? (
+            isButtonProps(props.button2) ? (
+              <Button size="$3" {...props.button2}>
+                {props.button2.text}
+              </Button>
+            ) : (
+              props.button2
+            )
           ) : null}
-        </YStack>
+        </XStack>
       </XStack>
+    </Skeleton.Group>
+  );
 
-      <XStack gap="$2">
-        {props.loading && props.showSkeletons?.button ? (
-          <Skeleton>
-            <Button size="$3">Loading...</Button>
-          </Skeleton>
-        ) : !props.loading && props.button ? (
-          isButtonProps(props.button) ? (
-            <Button size="$3" {...props.button}>
-              {props.button.text}
-            </Button>
-          ) : (
-            props.button
-          )
-        ) : null}
-
-        {props.loading && props.showSkeletons?.button2 ? (
-          <Skeleton>
-            <Button size="$3">Loading...</Button>
-          </Skeleton>
-        ) : !props.loading && props.button2 ? (
-          isButtonProps(props.button2) ? (
-            <Button size="$3" {...props.button2}>
-              {props.button2.text}
-            </Button>
-          ) : (
-            props.button
-          )
-        ) : null}
-      </XStack>
-    </XStack>
-  </Skeleton.Group>
-);
+  return props.onPress ? (
+    <TouchableOpacity onPress={props.onPress} disabled={props.loading}>
+      {content}
+    </TouchableOpacity>
+  ) : (
+    content
+  );
+};
 
 export default VirtualizedListItem;

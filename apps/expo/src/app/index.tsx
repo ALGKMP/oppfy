@@ -22,7 +22,7 @@ const Index = () => {
   }
 
   return isSignedIn ? (
-    <Redirect href="/(app)/(bottom-tabs)/(profile)/media-of-you" />
+    <Redirect href="/(app)/(bottom-tabs)/(self-profile)/media-of-you" />
   ) : (
     <Redirect href="/(onboarding)" />
   );
