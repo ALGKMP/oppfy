@@ -11,6 +11,7 @@ import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
+import { router } from "expo-router";
 
 const SEARCH_REFRESH_DELAY = 200;
 
@@ -78,10 +79,19 @@ const Search = () => {
                     ) : (
                       <VirtualizedListItem
                         loading={false}
-                        title={item.username}
-                        subtitle={item.fullName}
+                        title={item.username ?? undefined}
+                        subtitle={item.fullName ?? undefined}
                         imageUrl={item.profilePictureUrl}
-                        onPress={() => console.log("Pressed")}
+                        onPress={() => router.navigate({
+                          pathname: "/(app)/(other-profile)",
+                          params: {
+                            profileId: item.id,
+                            fullName: item.fullName ?? "",
+                            username: item.username ?? "",
+                            bio: item.bio ?? "",
+                            profilePictureUrl: item.profilePictureUrl,
+                          }
+                        })}
                       />
                     )}
                   </View>
