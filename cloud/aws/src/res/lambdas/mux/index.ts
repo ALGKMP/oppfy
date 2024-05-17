@@ -41,10 +41,10 @@ export const handler = async (
       mux.webhooks.verifySignature(rawBody, {"mux-signature": muxSignatureHeader}, muxWebhookSecret);
       console.log('Mux signature verified');
       await db.insert(schema.post).values({
-        author: 'j8liUllmz5aEFt157qfe1ptSWgZ2',
+        recipient: 'j8liUllmz5aEFt157qfe1ptSWgZ2',
         caption: 'New video uploaded',
         key: data.object.id,
-        recipient: 'kYJQhA9vTLdUynlItU3y907c0Vs1',
+        author: 'kYJQhA9vTLdUynlItU3y907c0Vs1',
         mediaType: "image",
       })
     } catch (error) {

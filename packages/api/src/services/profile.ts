@@ -247,19 +247,6 @@ export class ProfileService {
     return sharedValidators.user.fullProfile.parse(profileData);
   }
 
-  async paginateUserPosts(
-    userId: string,
-    cursor: { createdAt: Date; postId: number },
-    pageSize: number,
-  ) {
-    const posts = await this.postRepository.getPaginatedPosts(
-      userId,
-      cursor,
-      pageSize,
-    );
-    return posts;
-  }
-
   async removeProfilePicture(userId: string) {
     const profile = await this._getUserProfile(userId);
 
