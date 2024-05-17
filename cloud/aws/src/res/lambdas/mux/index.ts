@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { mux } from "@oppfy/mux";
 import { db, schema } from '@oppfy/db';
+import { z } from 'zod';
 
 // Your Mux signing secret
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
@@ -9,11 +10,9 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    // Log the incoming event for debugging
-    console.log('Event:', JSON.stringify(event));
 
     // Extract the raw body and headers
-    const rawBody = event.body;
+    const rawBody = event.body; // need this to verify mux signature
     const muxSignatureHeader = event.headers['mux-signature'];
 
     if (!rawBody || !muxSignatureHeader) {
@@ -23,16 +22,30 @@ export const handler = async (
       };
     }
 
+    const jsonBody = JSON.parse(rawBody)
+
+    const muxBodySchema = z.object({
+      type: z.string(), 
+      object: z.object({
+        id: z.string(),
+        type: z.string(),
+        error: z.string().optional(),
+      }),
+    }).passthrough();
+
+    const data = muxBodySchema.parse(jsonBody);
+
     // Verify the Mux webhook signature
     try {
-      mux.webhooks.verifySignature(rawBody, {"mux-signature" : muxSignatureHeader}, muxWebhookSecret);
+      console.log(`Verifying Mux signature: ${muxSignatureHeader}`)
+      mux.webhooks.verifySignature(rawBody, {"mux-signature": muxSignatureHeader}, muxWebhookSecret);
       console.log('Mux signature verified');
       await db.insert(schema.post).values({
-        author: 'Mux',
+        author: 'j8liUllmz5aEFt157qfe1ptSWgZ2',
         caption: 'New video uploaded',
-        key: 'mux-webhook',
-        recipient: 'acme',
-        mediaType: 'video',
+        key: data.object.id,
+        recipient: 'kYJQhA9vTLdUynlItU3y907c0Vs1',
+        mediaType: "image",
       })
     } catch (error) {
       console.error('Error verifying Mux webhook signature:', error);
