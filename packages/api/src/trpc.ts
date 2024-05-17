@@ -32,7 +32,6 @@ import { auth } from "./utils/firebase";
 // type CreateContextOptions = Record<string, never>;
 interface CreateContextOptions {
   session: DecodedIdToken | null;
-  verifiedMuxSignature: boolean;
 }
 
 /**
@@ -53,7 +52,6 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
     auth,
     services,
     session: opts.session,
-    isMuxSignatureVerified: opts.verifiedMuxSignature,
   };
 };
 
@@ -71,11 +69,7 @@ export const createTRPCContext = async ({
   res.setHeader("x-request-id", requestId);
   console.log("headers: ", req.headers);
   const token = req.headers.authorization?.split("Bearer ")[1];
-  const muxSignatureHeader = req.headers["mux-signature"];
-  const rawBody = req.body as string;
-
   let session: DecodedIdToken | null = null;
-  let verifiedMuxSignature = false;
 
   if (token) {
     try {
@@ -87,26 +81,9 @@ export const createTRPCContext = async ({
       });
     }
   }
-  
-  if (rawBody && muxSignatureHeader) {
-    console.log('Verifying Mux Webhook Signature')
-    console.log("Mux Signature Header", muxSignatureHeader)
-    // console.log("Raw Body", rawBody)
-    try {
-      mux.webhooks.verifySignature(rawBody, {"mux-signature": muxSignatureHeader}, process.env.MUX_WEBHOOK_SECRET);
-      verifiedMuxSignature = true;
-    } catch (error) {
-      console.error('Error verifying Mux webhook signature:', error);
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        cause: "Invalid Mux Webhook Signature",
-      });
-    }
-  }
 
   return createInnerTRPCContext({
     session,
-    verifiedMuxSignature
   });
 };
 
