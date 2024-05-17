@@ -7,7 +7,7 @@ import type { PrivacySetting } from "../repositories/user";
 import { UserRepository } from "../repositories/user";
 import { AwsService } from "./aws";
 
-interface PaginatedResponse<T> {
+export interface PaginatedResponse<T> {
   items: T[];
   nextCursor: Cursor | undefined;
 }
@@ -17,7 +17,7 @@ interface Cursor {
   profileId: number;
 }
 
-interface UserProfile {
+export interface UserProfile {
   userId: string;
   username: string | null;
   name: string | null;

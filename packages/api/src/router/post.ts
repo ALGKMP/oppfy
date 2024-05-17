@@ -24,14 +24,14 @@ export const postRouter = createTRPCRouter({
           Bucket: bucket,
           Key: objectKey,
           ContentLength: input.contentLength,
-          ContentType: "image/jpeg",
+          ContentType: 'image/jpeg',
           Metadata: metadata,
         });
       } catch (err) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: 'INTERNAL_SERVER_ERROR',
           message:
-            "Failed to create presigned URL for post upload. Please check your network connection and try again.",
+            'Failed to create presigned URL for post upload. Please check your network connection and try again.',
         });
       }
     }),
@@ -48,6 +48,7 @@ export const postRouter = createTRPCRouter({
       });
     }
   }),
+  }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
@@ -56,7 +57,7 @@ export const postRouter = createTRPCRouter({
         await ctx.services.post.editPost(input.postId, input.caption);
       } catch (err) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: 'INTERNAL_SERVER_ERROR',
           message: `Failed to edit post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
         });
       }
@@ -69,7 +70,7 @@ export const postRouter = createTRPCRouter({
         await ctx.services.post.deletePost(input.postId);
       } catch (err) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
+          code: 'INTERNAL_SERVER_ERROR',
           message: `Failed to delete post with ID ${input.postId}. Ensure the post exists and that you have the necessary permissions.`,
         });
       }
@@ -86,8 +87,8 @@ export const postRouter = createTRPCRouter({
         );
       } catch (err) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Error retrieving posts. Please try again later.",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Error retrieving posts. Please try again later.',
         });
       }
     }),

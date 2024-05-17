@@ -1,21 +1,23 @@
 {
   "name": "@acme/validators",
-  "version": "0.1.0",
   "private": true,
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
-    "dev": "echo 'Add dev script here'",
-    "build": "echo 'Add build script here'",
-    "test": "echo 'Add test script here'",
-    "lint": "echo 'Add lint script here'"
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@acme/eslint-config": "workspace:*",
     "@acme/prettier-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
     "@acme/utils": "workspace:*",
+    "zod": "^3.23.4",
     "libphonenumber-js": "^1.10.61"
   },
   "peerDependencies": {

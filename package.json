@@ -2,30 +2,25 @@
   "name": "oppfy",
   "private": true,
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "pnpm@9.1.0",
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
-    "postinstall": "pnpm lint:ws",
+    "aws:cdk": "pnpm -F aws cdk",
     "db:push": "pnpm -F db push",
-    "db:studio": "pnpm -F db studio",
     "db:generate": "pnpm -F db generate",
     "db:migrate": "pnpm -F db migrate",
-    "aws:cdk": "pnpm -F aws cdk",
+    "db:studio": "pnpm -F db studio",
     "dev": "turbo dev --parallel",
-    "test": "turbo run test",
-    "test:watch": "turbo run test:watch",
-    "package": "turbo run package",
-    "deploy:staging": "turbo run deploy:staging --parallel",
-    "deploy:production": "turbo run deploy:production --parallel",
     "format": "turbo format --continue -- --cache --cache-location node_modules/.cache/.prettiercache",
     "format:fix": "turbo format --continue -- --write --cache --cache-location node_modules/.cache/.prettiercache",
     "lint": "turbo lint --continue -- --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:fix": "turbo lint --continue -- --fix --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:ws": "pnpm dlx sherif@latest",
+    "postinstall": "pnpm lint:ws",
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {

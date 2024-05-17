@@ -2,9 +2,16 @@
   "name": "@acme/mux",
   "private": true,
   "version": "0.1.0",
+<<<<<<< HEAD
   "main": "./index.ts",
   "types": "./index.ts",
   "license": "MIT",
+=======
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+>>>>>>> 201ac07d10b78a9f4b9d4ad21054f89970ba7923
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",

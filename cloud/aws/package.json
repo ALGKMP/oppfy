@@ -1,11 +1,11 @@
 {
   "name": "@acme/aws",
+  "private": true,
   "version": "0.1.0",
+  "type": "module",
   "bin": {
     "aws": "dist/bin/aws.js"
   },
-  "private": true,
-  "type": "module",
   "scripts": {
     "build": "rimraf dist && tsc",
     "test": "jest",

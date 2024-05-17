@@ -2,9 +2,10 @@
   "name": "@acme/api",
   "version": "0.1.0",
   "private": true,
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
@@ -19,7 +20,6 @@
     "@acme/mux": "workspace:^",
     "@acme/opensearch": "workspace:^",
     "@aws-sdk/s3-request-presigner": "^3.564.0",
-    "@mux/mux-node": "^8.5.1",
     "@opensearch-project/opensearch": "^2.8.0",
     "@trpc/client": "^10.45.2",
     "@trpc/server": "^10.45.2",

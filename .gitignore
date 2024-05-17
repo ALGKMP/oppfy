@@ -21,8 +21,8 @@ next-env.d.ts
 .expo/
 expo-env.d.ts
 apps/expo/.gitignore
-ios/
-android/
+apps/expo/ios
+apps/expo/android
 
 # production
 build
@@ -50,12 +50,6 @@ dist/
 
 # turbo
 .turbo
-
-# build outputs
-dist/
-
-# aws cdk
-cdk.out/
 
 # CDK asset staging directory
 .cdk.staging
