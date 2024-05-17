@@ -48,7 +48,6 @@ export const postRouter = createTRPCRouter({
       });
     }
   }),
-  }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
