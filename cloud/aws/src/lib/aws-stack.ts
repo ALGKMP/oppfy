@@ -62,6 +62,10 @@ function createLambdaFunction(
       DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
       DATABASE_NAME: process.env.DATABASE_NAME!,
       DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
+
+      MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
+      MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
+      MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
     },
   });
 }

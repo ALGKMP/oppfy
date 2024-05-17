@@ -115,7 +115,7 @@ export const profileRouter = createTRPCRouter({
   getFullProfile: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        profileId: z.number(),
       }),
     )
     .output(sharedValidators.user.fullProfile)

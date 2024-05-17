@@ -111,6 +111,62 @@ export class ProfileService {
     });
   }
 
+  async getFullOtherPersonCantNameForTheLifeOfMeProfile(profileId: number) {
+    const user = await this.userRepository.getUserByProfileId(profileId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
+    const userId = user.id;
+
+    const profile = await this.profileRepository.getProfile(user.profileId);
+    if (!profile) {
+      console.log("SERVICE ERROR: profile not found");
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+
+    const followerCount = await this.followersRepository.countFollowers(userId);
+    if (followerCount === undefined) {
+      console.log("SERVICE ERROR: failed to count followers");
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS);
+    }
+
+    const followingCount =
+      await this.followersRepository.countFollowing(userId);
+    if (followingCount === undefined) {
+      console.log("SERVICE ERROR: failed to count following");
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
+    }
+
+    const friendCount = await this.friendsRepository.countFriends(userId);
+    if (friendCount === undefined) {
+      console.log("SERVICE ERROR: failed to count friends");
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
+    }
+
+    const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
+      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Key: profile.profilePictureKey,
+    });
+    if (!profilePictureUrl) {
+      console.log("SERVICE ERROR: failed to get profile picture");
+      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
+    }
+
+    const profileData = {
+      userId: user.id,
+      privacy: user.privacySetting,
+      username: profile.username,
+      name: profile.fullName,
+      bio: profile.bio,
+      followerCount,
+      followingCount,
+      friendCount,
+      profilePictureUrl,
+    };
+
+    return sharedValidators.user.fullProfile.parse(profileData);
+  }
+
   async getFullProfile(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
