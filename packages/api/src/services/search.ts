@@ -14,7 +14,7 @@ export class SearchService {
         const profilePictureUrl =
           await this.awsRepository.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: profile.url,
+            Key: profile.profilePictureKey,
           });
 
         return {

@@ -15,7 +15,7 @@ interface OpenSearchProfile {
   username: string;
   fullName: string;
   dateOfBirth: string;
-  url: string;
+  profilePictureKey: string;
   createdAt: string;
   updatedAt: string;
 }
