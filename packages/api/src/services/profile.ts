@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { sharedValidators } from "@acme/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../errors";
 import { AwsRepository } from "../repositories/aws";

@@ -1,5 +1,5 @@
 {
-  "name": "@acme/s3",
+  "name": "@oppfy/s3",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -16,16 +16,16 @@
     "@aws-sdk/client-s3": "^3.564.0"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:^0.2.0",
-    "@acme/prettier-config": "workspace:^0.1.0",
-    "@acme/tsconfig": "workspace:^0.1.0",
+    "@oppfy/eslint-config": "workspace:^0.2.0",
+    "@oppfy/prettier-config": "workspace:^0.1.0",
+    "@oppfy/tsconfig": "workspace:^0.1.0",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
   },
   "eslintConfig": {
     "extends": [
-      "@acme/eslint-config/base"
+      "@oppfy/eslint-config/base"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@oppfy/prettier-config"
 }

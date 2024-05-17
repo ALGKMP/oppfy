@@ -1,5 +1,5 @@
 {
-  "name": "@acme/validators",
+  "name": "@oppfy/validators",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -13,23 +13,23 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/eslint-config": "workspace:*",
-    "@acme/prettier-config": "workspace:*",
-    "@acme/tsconfig": "workspace:*",
-    "@acme/utils": "workspace:*",
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
+    "@oppfy/utils": "workspace:*",
     "zod": "^3.23.4",
     "libphonenumber-js": "^1.10.61"
   },
   "peerDependencies": {
-    "@acme/eslint-config": "workspace:*",
-    "@acme/prettier-config": "workspace:*",
-    "@acme/tsconfig": "workspace:*"
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*"
   },
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@acme/eslint-config/base"
+      "@oppfy/eslint-config/base"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@oppfy/prettier-config"
 }

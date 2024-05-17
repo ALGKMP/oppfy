@@ -1,6 +1,6 @@
 import { aliasedTable, and, asc, eq, gt, or } from "drizzle-orm";
 
-import { db, schema } from "@acme/db";
+import { db, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../errors";
 

@@ -1,5 +1,5 @@
 {
-  "name": "@acme/mux-lambda",
+  "name": "@oppfy/mux-lambda",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,18 +13,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/db": "workspace:^",
-    "@acme/utils": "workspace:^",
-    "@acme/validators": "workspace:^",
-    "@acme/mux": "workspace:^",
+    "@oppfy/db": "workspace:^",
+    "@oppfy/utils": "workspace:^",
+    "@oppfy/validators": "workspace:^",
+    "@oppfy/mux": "workspace:^",
     "@opensearch-project/opensearch": "^2.8.0",
     "zod": "^3.23.4",
     "@aws-sdk/client-s3": "^3.564.0"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:^",
-    "@acme/prettier-config": "workspace:^",
-    "@acme/tsconfig": "workspace:^",
+    "@oppfy/eslint-config": "workspace:^",
+    "@oppfy/prettier-config": "workspace:^",
+    "@oppfy/tsconfig": "workspace:^",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
@@ -32,8 +32,8 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@acme/eslint-config/base"
+      "@oppfy/eslint-config/base"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@oppfy/prettier-config"
 }

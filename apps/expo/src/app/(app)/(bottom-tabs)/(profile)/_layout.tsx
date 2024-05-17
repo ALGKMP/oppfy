@@ -14,7 +14,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { abbreviateNumber } from "@acme/utils";
+import { abbreviateNumber } from "@oppfy/utils";
 
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";

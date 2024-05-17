@@ -8,7 +8,7 @@ importers:
 
   .:
     devDependencies:
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:tooling/prettier
       '@turbo/gen':
@@ -26,10 +26,10 @@ importers:
 
   apps/expo:
     dependencies:
-      '@acme/utils':
+      '@oppfy/utils':
         specifier: workspace:^
         version: link:../../packages/utils
-      '@acme/validators':
+      '@oppfy/validators':
         specifier: workspace:^
         version: link:../../packages/validators
       '@expo-google-fonts/modak':
@@ -216,19 +216,19 @@ importers:
         specifier: ^3.23.4
         version: 3.23.4
     devDependencies:
-      '@acme/api':
+      '@oppfy/api':
         specifier: workspace:^
         version: link:../../packages/api
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
-      '@acme/types':
+      '@oppfy/types':
         specifier: workspace:^
         version: link:../../packages/types
       '@babel/core':
@@ -264,10 +264,10 @@ importers:
 
   apps/nextjs:
     dependencies:
-      '@acme/api':
+      '@oppfy/api':
         specifier: workspace:^
         version: link:../../packages/api
-      '@acme/db':
+      '@oppfy/db':
         specifier: workspace:^
         version: link:../../packages/db
       '@t3-oss/env-nextjs':
@@ -310,16 +310,16 @@ importers:
         specifier: ^3.23.4
         version: 3.23.4
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../tooling/prettier
-      '@acme/tailwind-config':
+      '@oppfy/tailwind-config':
         specifier: workspace:^
         version: link:../../tooling/tailwind
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
       '@types/node':
@@ -365,16 +365,16 @@ importers:
         specifier: ^10.3.0
         version: 10.3.0
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../tooling/prettier
-      '@acme/tailwind-config':
+      '@oppfy/tailwind-config':
         specifier: workspace:^
         version: link:../../tooling/tailwind
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
       '@types/aws-lambda':
@@ -407,16 +407,16 @@ importers:
 
   cloud/aws/src/res/lambdas/mux:
     dependencies:
-      '@acme/db':
+      '@oppfy/db':
         specifier: workspace:^
         version: link:../../../../../../packages/db
-      '@acme/mux':
+      '@oppfy/mux':
         specifier: workspace:^
         version: link:../../../../../../packages/mux
-      '@acme/utils':
+      '@oppfy/utils':
         specifier: workspace:^
         version: link:../../../../../../packages/utils
-      '@acme/validators':
+      '@oppfy/validators':
         specifier: workspace:^
         version: link:../../../../../../packages/validators
       '@aws-sdk/client-s3':
@@ -429,13 +429,13 @@ importers:
         specifier: ^3.23.4
         version: 3.23.4
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../../../../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../../../../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../../../../../tooling/typescript
       eslint:
@@ -450,13 +450,13 @@ importers:
 
   cloud/aws/src/res/lambdas/posts:
     dependencies:
-      '@acme/db':
+      '@oppfy/db':
         specifier: workspace:^
         version: link:../../../../../../packages/db
-      '@acme/utils':
+      '@oppfy/utils':
         specifier: workspace:^
         version: link:../../../../../../packages/utils
-      '@acme/validators':
+      '@oppfy/validators':
         specifier: workspace:^
         version: link:../../../../../../packages/validators
       '@aws-sdk/client-s3':
@@ -469,13 +469,13 @@ importers:
         specifier: ^3.23.4
         version: 3.23.4
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../../../../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../../../../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../../../../../tooling/typescript
       eslint:
@@ -490,13 +490,13 @@ importers:
 
   cloud/aws/src/res/lambdas/profile-picture:
     dependencies:
-      '@acme/db':
+      '@oppfy/db':
         specifier: workspace:^
         version: link:../../../../../../packages/db
-      '@acme/utils':
+      '@oppfy/utils':
         specifier: workspace:^
         version: link:../../../../../../packages/utils
-      '@acme/validators':
+      '@oppfy/validators':
         specifier: workspace:^
         version: link:../../../../../../packages/validators
       '@aws-sdk/client-s3':
@@ -509,13 +509,13 @@ importers:
         specifier: ^3.23.4
         version: 3.23.4
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../../../../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../../../../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../../../../../tooling/typescript
       eslint:
@@ -530,22 +530,22 @@ importers:
 
   packages/api:
     dependencies:
-      '@acme/db':
+      '@oppfy/db':
         specifier: workspace:^
         version: link:../db
-      '@acme/mux':
+      '@oppfy/mux':
         specifier: workspace:^
         version: link:../mux
-      '@acme/opensearch':
+      '@oppfy/opensearch':
         specifier: workspace:^
         version: link:../opensearch
-      '@acme/s3':
+      '@oppfy/s3':
         specifier: workspace:^
         version: link:../s3
-      '@acme/utils':
+      '@oppfy/utils':
         specifier: workspace:^
         version: link:../utils
-      '@acme/validators':
+      '@oppfy/validators':
         specifier: workspace:^
         version: link:../validators
       '@aws-sdk/s3-request-presigner':
@@ -579,13 +579,13 @@ importers:
         specifier: ^3.23.4
         version: 3.23.4
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
       eslint:
@@ -622,13 +622,13 @@ importers:
         specifier: ^3.9.7
         version: 3.9.7
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
       drizzle-kit:
@@ -647,13 +647,13 @@ importers:
         specifier: ^8.5.1
         version: 8.5.1
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^0.2.0
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^0.1.0
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^0.1.0
         version: link:../../tooling/typescript
       eslint:
@@ -672,13 +672,13 @@ importers:
         specifier: ^2.8.0
         version: 2.8.0
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^0.2.0
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^0.1.0
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^0.1.0
         version: link:../../tooling/typescript
       eslint:
@@ -694,13 +694,13 @@ importers:
         specifier: ^3.564.0
         version: 3.564.0
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^0.2.0
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^0.1.0
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^0.1.0
         version: link:../../tooling/typescript
       eslint:
@@ -712,13 +712,13 @@ importers:
 
   packages/types:
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
       eslint:
@@ -734,13 +734,13 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../../tooling/typescript
       eslint:
@@ -752,16 +752,16 @@ importers:
 
   packages/validators:
     dependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:*
         version: link:../../tooling/prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@acme/utils':
+      '@oppfy/utils':
         specifier: workspace:*
         version: link:../utils
       libphonenumber-js:
@@ -804,10 +804,10 @@ importers:
         specifier: ^4.6.2
         version: 4.6.2(eslint@8.57.0)
     devDependencies:
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../typescript
       '@types/eslint':
@@ -834,7 +834,7 @@ importers:
         specifier: ^0.5.14
         version: 0.5.14(@ianvs/prettier-plugin-sort-imports@4.2.1)(prettier@3.2.5)
     devDependencies:
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../typescript
       typescript:
@@ -850,13 +850,13 @@ importers:
         specifier: 3.3.5
         version: 3.3.5
     devDependencies:
-      '@acme/eslint-config':
+      '@oppfy/eslint-config':
         specifier: workspace:^
         version: link:../eslint
-      '@acme/prettier-config':
+      '@oppfy/prettier-config':
         specifier: workspace:^
         version: link:../prettier
-      '@acme/tsconfig':
+      '@oppfy/tsconfig':
         specifier: workspace:^
         version: link:../typescript
       eslint:

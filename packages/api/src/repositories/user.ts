@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 
-import { asc, db, gt, or, schema } from "@acme/db";
-import type { InferInsertModel } from "@acme/db/";
+import { asc, db, gt, or, schema } from "@oppfy/db";
+import type { InferInsertModel } from "@oppfy/db/";
 
 import { handleDatabaseErrors } from "../errors";
 import { auth } from "../utils/firebase";

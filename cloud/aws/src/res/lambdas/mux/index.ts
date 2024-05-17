@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { mux } from "@acme/mux";
-import { db, schema } from '@acme/db';
+import { mux } from "@oppfy/mux";
+import { db, schema } from '@oppfy/db';
 
 // Your Mux signing secret
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import { trpcValidators } from "@acme/validators";
+import { trpcValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
