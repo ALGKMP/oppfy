@@ -52,7 +52,6 @@ const ProfileLayout = () => {
       <TopTabs.Screen
         name="media-of-friends-you-posted"
         options={{
-          title: "Test",
           tabBarLabel: () => <Camera />,
         }}
       />

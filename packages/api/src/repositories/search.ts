@@ -7,20 +7,12 @@ import type { ApiResponse } from "@opensearch-project/opensearch"; // Import Api
 import { openSearch } from "@oppfy/opensearch";
 
 import { handleOpensearchErrors } from "../errors";
+import { InferInsertModel, schema } from "@oppfy/db";
 
 export type { GetObjectCommandInput, PutObjectCommandInput };
 
-interface OpenSearchProfile {
-  id: number;
-  username: string;
-  fullName: string;
-  dateOfBirth: string;
-  profilePictureKey: string;
-  createdAt: string;
-  updatedAt: string;
-}
+type OpenSearchProfile = InferInsertModel<typeof schema.profile>
 
-// Define the OpenSearch response structure
 interface OpenSearchResponse<T> {
   hits: {
     total: {
