@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
-import { db, schema } from "@acme/db";
-import type { trpcValidators } from "@acme/validators";
+import { db, schema } from "@oppfy/db";
+import type { trpcValidators } from "@oppfy/validators";
 
 import { handleDatabaseErrors } from "../errors";
 

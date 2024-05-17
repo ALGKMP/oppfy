@@ -1,5 +1,5 @@
 {
-  "name": "@acme/utils",
+  "name": "@oppfy/utils",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -16,16 +16,16 @@
     "date-fns": "^3.6.0"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:^",
-    "@acme/prettier-config": "workspace:^",
-    "@acme/tsconfig": "workspace:^",
+    "@oppfy/eslint-config": "workspace:^",
+    "@oppfy/prettier-config": "workspace:^",
+    "@oppfy/tsconfig": "workspace:^",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
   },
   "eslintConfig": {
     "extends": [
-      "@acme/eslint-config/base"
+      "@oppfy/eslint-config/base"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@oppfy/prettier-config"
 }

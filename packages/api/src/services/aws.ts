@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import type { trpcValidators } from "@acme/validators";
+import type { trpcValidators } from "@oppfy/validators";
 
 import { AwsRepository } from "../repositories/aws";
 

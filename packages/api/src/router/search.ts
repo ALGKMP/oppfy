@@ -1,4 +1,4 @@
-import { trpcValidators } from "@acme/validators";
+import { trpcValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc"; // Import TRPC utilities
 

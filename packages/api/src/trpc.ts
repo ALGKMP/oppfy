@@ -14,9 +14,9 @@ import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
-import { db } from "@acme/db";
-import { mux } from "@acme/mux";
-import { s3 } from "@acme/s3";
+import { db } from "@oppfy/db";
+import { mux } from "@oppfy/mux";
+import { s3 } from "@oppfy/s3";
 
 import { services } from "./services";
 import { auth } from "./utils/firebase";

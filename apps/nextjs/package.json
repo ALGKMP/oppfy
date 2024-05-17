@@ -1,5 +1,5 @@
 {
-  "name": "@acme/nextjs",
+  "name": "@oppfy/nextjs",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,8 +13,8 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@acme/api": "workspace:^",
-    "@acme/db": "workspace:^",
+    "@oppfy/api": "workspace:^",
+    "@oppfy/db": "workspace:^",
     "@t3-oss/env-nextjs": "^0.6.1",
     "@tanstack/react-query": "^4.36.1",
     "@trpc/client": "^10.45.2",
@@ -30,10 +30,10 @@
     "zod": "^3.23.4"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:^",
-    "@acme/prettier-config": "workspace:^",
-    "@acme/tailwind-config": "workspace:^",
-    "@acme/tsconfig": "workspace:^",
+    "@oppfy/eslint-config": "workspace:^",
+    "@oppfy/prettier-config": "workspace:^",
+    "@oppfy/tailwind-config": "workspace:^",
+    "@oppfy/tsconfig": "workspace:^",
     "@types/node": "^18.19.31",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
@@ -48,10 +48,10 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@acme/eslint-config/base",
-      "@acme/eslint-config/nextjs",
-      "@acme/eslint-config/react"
+      "@oppfy/eslint-config/base",
+      "@oppfy/eslint-config/nextjs",
+      "@oppfy/eslint-config/react"
     ]
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@oppfy/prettier-config"
 }
