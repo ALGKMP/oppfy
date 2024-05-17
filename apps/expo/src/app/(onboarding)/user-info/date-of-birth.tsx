@@ -4,7 +4,7 @@ import DatePicker from "react-native-date-picker";
 import { useRouter } from "expo-router";
 import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 
-import { sharedValidators } from "@acme/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { api } from "~/utils/api";

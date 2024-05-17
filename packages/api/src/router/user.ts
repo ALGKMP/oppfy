@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import { sharedValidators, trpcValidators } from "@acme/validators";
+import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../errors";
 import { createTRPCRouter, protectedProcedure } from "../trpc";

@@ -4,7 +4,7 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
-import { sharedValidators } from "@acme/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";

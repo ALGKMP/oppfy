@@ -16,7 +16,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { sharedValidators } from "@acme/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { Header } from "~/components/Headers";
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";

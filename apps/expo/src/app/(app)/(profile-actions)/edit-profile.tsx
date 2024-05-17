@@ -13,7 +13,7 @@ import {
 } from "tamagui";
 import { z } from "zod";
 
-import { sharedValidators } from "@acme/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { api } from "~/utils/api";
