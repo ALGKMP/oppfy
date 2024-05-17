@@ -112,7 +112,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // TRPC Procedure for getting a full user profile
-  getFullProfile: publicProcedure
+  getOtherUserFullProfile: publicProcedure
     .input(
       z.object({
         profileId: z.number(),
@@ -121,7 +121,7 @@ export const profileRouter = createTRPCRouter({
     .output(sharedValidators.user.fullProfile)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullProfile(input.userId);
+        return await ctx.services.profile.getFullProfile(input.profileId);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
