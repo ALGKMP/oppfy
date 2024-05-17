@@ -36,7 +36,7 @@ const ProfileLayout = () => {
 
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getOtherUserFullProfile.useQuery({
-      profileId: 
+      profileId: 1
     });
 
   return (

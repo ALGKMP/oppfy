@@ -1,8 +1,11 @@
 import { TRPCError } from "@trpc/server";
+import { aliasedTable, and, asc, eq, gt, or } from "drizzle-orm";
 import { z } from "zod";
 
-import { trpcValidators } from "@oppfy/validators";
+import { db, schema } from "@oppfy/db";
+import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
+import { DomainError } from "../errors";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
@@ -24,14 +27,14 @@ export const postRouter = createTRPCRouter({
           Bucket: bucket,
           Key: objectKey,
           ContentLength: input.contentLength,
-          ContentType: 'image/jpeg',
+          ContentType: "image/jpeg",
           Metadata: metadata,
         });
       } catch (err) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
+          code: "INTERNAL_SERVER_ERROR",
           message:
-            'Failed to create presigned URL for post upload. Please check your network connection and try again.',
+            "Failed to create presigned URL for post upload. Please check your network connection and try again.",
         });
       }
     }),
@@ -56,7 +59,7 @@ export const postRouter = createTRPCRouter({
         await ctx.services.post.editPost(input.postId, input.caption);
       } catch (err) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
+          code: "INTERNAL_SERVER_ERROR",
           message: `Failed to edit post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
         });
       }
@@ -69,25 +72,39 @@ export const postRouter = createTRPCRouter({
         await ctx.services.post.deletePost(input.postId);
       } catch (err) {
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
+          code: "INTERNAL_SERVER_ERROR",
           message: `Failed to delete post with ID ${input.postId}. Ensure the post exists and that you have the necessary permissions.`,
         });
       }
     }),
-
+    
   getPosts: protectedProcedure
     .input(trpcValidators.post.getPosts)
+    .output(sharedValidators.media.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.getPosts(
+        console.log("TRPC getPosts input: ", input);
+        const result = await ctx.services.post.getPosts(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
+        console.log("TRPC getPosts result before validation: ", result);
+        const parsedResult =
+          sharedValidators.media.paginatedPosts.parse(result);
+        console.log("TRPC getPosts result after validation: ", parsedResult);
+        return parsedResult;
       } catch (err) {
+        console.error("TRPC getPosts error: ", err);
+        if (err instanceof DomainError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
         throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Error retrieving posts. Please try again later.',
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate posts.",
         });
       }
     }),
