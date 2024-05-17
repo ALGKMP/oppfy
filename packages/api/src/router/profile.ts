@@ -121,7 +121,7 @@ export const profileRouter = createTRPCRouter({
     .output(sharedValidators.user.fullProfile)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullProfile(input.profileId);
+        return await ctx.services.profile.getFullOtherPersonCantNameForTheLifeOfMeProfile(input.profileId);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
@@ -134,7 +134,7 @@ export const profileRouter = createTRPCRouter({
         }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to get full profile for ${input.userId}`,
+          message: `Failed to get full profile for ${input.profileId}`,
         });
       }
     }),
