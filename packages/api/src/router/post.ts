@@ -35,8 +35,16 @@ export const postRouter = createTRPCRouter({
     }),
 
   createMuxVideoPresignedUrl: protectedProcedure.mutation(async ({ ctx }) => {
-    const result = await ctx.services.mux.createDirectUpload();
-    return result.url;
+    try {
+      const result = await ctx.services.mux.createDirectUpload();
+      return result.url;
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message:
+          "Failed to create presigned URL for video upload. Please check your network connection and try again.",
+      });
+    }
   }),
 
   editPost: protectedProcedure

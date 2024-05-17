@@ -11,21 +11,17 @@ SET @profilePictureKey = CONCAT('profile-pictures/', @username, '.jpg');
 -- Set the example user ID
 SET @exampleUserId = 'ORzS7idbUdPf44KV9XDHK95uenv2';
 
--- Insert into ProfilePicture
-INSERT INTO `ProfilePicture` (`id`, `url`, `createdAt`, `updatedAt`)
-VALUES (@newProfilePictureId, @profilePictureKey, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 -- Insert into NotificationSettings
 INSERT INTO `NotificationSettings` (`id`, `posts`, `likes`, `mentions`, `comments`, `followRequests`, `friendRequests`, `createdAt`, `updatedAt`)
 VALUES (@newNotificationSettingsId, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert into Profile
-INSERT INTO `Profile` (`id`, `fullName`, `dateOfBirth`, `bio`, `profilePicture`, `createdAt`, `updatedAt`)
-VALUES (@newProfileId, @fullName, '1990-01-01', @bio, @newProfilePictureId, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO `Profile` (`id`, `fullName`, `username`, `dateOfBirth`, `bio`, `profilePicture`, `createdAt`, `updatedAt`)
+VALUES (@newProfileId, @fullName, @username, '1990-01-01', @bio, @profilePictureKey, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert into User
-INSERT INTO `User` (`id`, `profile`, `username`, `notificationSettingsId`, `privacySetting`, `createdAt`, `updatedAt`)
-VALUES (@newUserId, @newProfileId, @username, @newNotificationSettingsId, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO `User` (`id`, `profile`, `notificationSettingsId`, `privacySetting`, `createdAt`, `updatedAt`)
+VALUES (@newUserId, @newProfileId, @newNotificationSettingsId, 'public', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Make the new user a follower of example_user_id
 INSERT INTO `Follower` (`senderId`, `recipientId`, `createdAt`)

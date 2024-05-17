@@ -47,7 +47,6 @@ export default function ImagePickerExample() {
 
   const uploadToMux = async (uri: string, uploadUrl: string) => {
     const blob = await getImageBlob(uri);
-    console.log(image);
     const response = await fetch(uploadUrl, {
       method: "PUT",
       headers: {

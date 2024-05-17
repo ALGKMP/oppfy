@@ -32,6 +32,7 @@ import { auth } from "./utils/firebase";
 // type CreateContextOptions = Record<string, never>;
 interface CreateContextOptions {
   session: DecodedIdToken | null;
+  verifiedMuxSignature: boolean;
 }
 
 /**
@@ -52,6 +53,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
     auth,
     services,
     session: opts.session,
+    isMuxSignatureVerified: opts.verifiedMuxSignature,
   };
 };
 
@@ -67,10 +69,15 @@ export const createTRPCContext = async ({
 }: CreateNextContextOptions) => {
   const requestId = crypto.randomUUID();
   res.setHeader("x-request-id", requestId);
-
   const token = req.headers.authorization?.split("Bearer ")[1];
+  // const muxSignatureHeader = req.headers["mux-signature"] as Record<string, string | string[]> | undefined;
+  console.log('Request Headers', req.headers)
+  console.log('Request Body', req.body)
+  const muxSignatureHeader = req.headers["mux-signature"] as string | undefined;
+  const rawBody = req.body as string;
 
   let session: DecodedIdToken | null = null;
+  let verifiedMuxSignature = false;
 
   if (token) {
     try {
@@ -82,9 +89,26 @@ export const createTRPCContext = async ({
       });
     }
   }
+  console.log("Mux Signature Header", muxSignatureHeader)
+  console.log("Raw Body", rawBody)
+  
+  if (rawBody && muxSignatureHeader) {
+    console.log('Verifying Mux Webhook Signature')
+    try {
+      // mux.webhooks.verifySignature(rawBody, muxSignatureHeader, process.env.MUX_WEBHOOK_SECRET);
+      verifiedMuxSignature = true;
+    } catch (error) {
+      console.error('Error verifying Mux webhook signature:', error);
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        cause: "Invalid Mux Webhook Signature",
+      });
+    }
+  }
 
   return createInnerTRPCContext({
     session,
+    verifiedMuxSignature
   });
 };
 
@@ -95,18 +119,6 @@ export const createTRPCContext = async ({
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
-
-// const t = initTRPC
-//   .context<Context>()
-//   .meta<OpenApiMeta>()
-//   .create({
-//     errorFormatter: ({ error, shape }) => {
-//       if (error.code === 'INTERNAL_SERVER_ERROR' && process.env.NODE_ENV === 'production') {
-//         return { ...shape, message: 'Internal server error' };
-//       }
-//       return shape;
-//     },
-//   });
 
 const t = initTRPC
   .context<typeof createTRPCContext>()
