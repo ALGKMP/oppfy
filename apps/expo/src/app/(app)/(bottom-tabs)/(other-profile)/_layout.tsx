@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
 import {
   Avatar,
@@ -26,8 +26,18 @@ import { api } from "~/utils/api";
 type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
 
 const ProfileLayout = () => {
+  const initialData = useLocalSearchParams<{
+    profileId: string;
+    fullName: string;
+    username: string;
+    bio: string;
+    profilePictureUrl: string;
+  }>();
+
   const { data: profileData, isLoading: _profileDataIsLoading } =
-    api.profile.getCurrentUsersFullProfile.useQuery();
+    api.profile.getOtherUserFullProfile.useQuery({
+      profileId: 
+    });
 
   return (
     <TopTabs
@@ -44,15 +54,14 @@ const ProfileLayout = () => {
       )}
     >
       <TopTabs.Screen
-        name="media-of-you"
+        name="media-of-them"
         options={{
           tabBarLabel: () => <Grid3x3 />,
         }}
       />
       <TopTabs.Screen
-        name="media-of-friends-you-posted"
+        name="media-of-friends-they-posted"
         options={{
-          title: "Test",
           tabBarLabel: () => <Camera />,
         }}
       />
