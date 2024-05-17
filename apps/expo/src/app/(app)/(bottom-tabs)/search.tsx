@@ -41,9 +41,8 @@ const Search = () => {
   }, SEARCH_REFRESH_DELAY);
 
   return (
-    // <View flex={1} backgroundColor="black" paddingHorizontal="$4">
     <BaseScreenView paddingBottom={0}>
-      <YStack flex={1}>
+      <YStack flex={1} gap="$2">
         <Input
           placeholder="Search by username"
           placeholderTextColor="#888"
@@ -57,6 +56,7 @@ const Search = () => {
               ItemSeparatorComponent={Separator}
               estimatedItemSize={75}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
               ListHeaderComponent={
                 <SizableText size="$2" theme="alt1" marginBottom="$2">
                   SEARCH RESULTS
@@ -81,6 +81,7 @@ const Search = () => {
                         title={item.username}
                         subtitle={item.fullName}
                         imageUrl={item.profilePictureUrl}
+                        onPress={() => console.log("Pressed")}
                       />
                     )}
                   </View>
