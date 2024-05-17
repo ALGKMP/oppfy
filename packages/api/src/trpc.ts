@@ -15,8 +15,8 @@ import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
 
 import { db } from "@oppfy/db";
-import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
+import { mux } from "@oppfy/mux";
 
 import { services } from "./services";
 import { auth } from "./utils/firebase";
@@ -67,8 +67,9 @@ export const createTRPCContext = async ({
 }: CreateNextContextOptions) => {
   const requestId = crypto.randomUUID();
   res.setHeader("x-request-id", requestId);
-  console.log("headers: ", req.headers);
+
   const token = req.headers.authorization?.split("Bearer ")[1];
+
   let session: DecodedIdToken | null = null;
 
   if (token) {
@@ -94,6 +95,18 @@ export const createTRPCContext = async ({
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
+
+// const t = initTRPC
+//   .context<Context>()
+//   .meta<OpenApiMeta>()
+//   .create({
+//     errorFormatter: ({ error, shape }) => {
+//       if (error.code === 'INTERNAL_SERVER_ERROR' && process.env.NODE_ENV === 'production') {
+//         return { ...shape, message: 'Internal server error' };
+//       }
+//       return shape;
+//     },
+//   });
 
 const t = initTRPC
   .context<typeof createTRPCContext>()
