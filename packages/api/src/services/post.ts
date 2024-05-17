@@ -5,7 +5,7 @@ import { PostRepository } from "../repositories/post";
 import { PostStatsRepository } from "../repositories/post-stats";
 import { AwsService } from "./aws";
 
-interface PaginatedResponse<T> {
+export interface PaginatedResponse<T> {
   items: T[];
   nextCursor: PostCursor | CommentCursor | undefined;
 }
@@ -29,7 +29,7 @@ interface CommentProfile {
   createdAt: Date;
 }
 
-interface Post {
+export interface Post {
   postId: number;
   authorId: string;
   authorUsername: string | null;

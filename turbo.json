@@ -1,5 +1,6 @@
 {
   "$schema": "https://turborepo.org/schema.json",
+  "experimentalUI": true,
   "globalDependencies": ["**/.env"],
   "pipeline": {
     "topo": {
@@ -12,7 +13,6 @@
         "!.next/cache/**",
         "next-env.d.ts",
         ".expo/**",
-        "dist/**",
         ".output/**",
         ".vercel/output/**"
       ]
@@ -21,37 +21,16 @@
       "persistent": true,
       "cache": false
     },
-    "test": {},
-    "test:watch": {
-      "cache": false
-    },
-    "package": {
-      "dependsOn": [
-      ],
-      "cache": false
-    },
-    "deploy-staging": {
-      "dependsOn": [
-        "package"
-      ],
-      "cache": false
-    },
-    "deploy-production": {
-      "dependsOn": [
-        "package"
-      ],
-      "cache": false
-    },
     "format": {
       "outputs": ["node_modules/.cache/.prettiercache"],
       "outputMode": "new-only"
     },
     "lint": {
-      "dependsOn": ["^topo"],
+      "dependsOn": ["^topo", "^build"],
       "outputs": ["node_modules/.cache/.eslintcache"]
     },
     "typecheck": {
-      "dependsOn": ["^topo"],
+      "dependsOn": ["^topo", "^build"],
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     },
     "clean": {
@@ -61,6 +40,5 @@
       "cache": false
     }
   },
-  "globalEnv": [
-  ]
+  "globalEnv": []
 }

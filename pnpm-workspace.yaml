@@ -1,6 +1,6 @@
 packages:
   - apps/*
+  - packages/*
   - cloud/*
   - cloud/aws/src/res/lambdas/*
-  - packages/*
   - tooling/*
