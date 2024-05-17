@@ -73,15 +73,15 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getBasicProfile: publicProcedure
+  getOtherUserBasicProfile: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        profileId: z.string(),
       }),
     )
     .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.getBasicProfile(input.userId);
+      return await ctx.services.profile.getBasicProfile(input.profileId);
     }),
 
   getCurrentUsersFullProfile: protectedProcedure
@@ -112,16 +112,16 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // TRPC Procedure for getting a full user profile
-  getFullProfile: publicProcedure
+  getOtherUserFullProfile: publicProcedure
     .input(
       z.object({
-        userId: z.string(),
+        profileId: z.number(),
       }),
     )
     .output(sharedValidators.user.fullProfile)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullProfile(input.userId);
+        return await ctx.services.profile.getFullOtherPersonCantNameForTheLifeOfMeProfile(input.profileId);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
@@ -134,7 +134,7 @@ export const profileRouter = createTRPCRouter({
         }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to get full profile for ${input.userId}`,
+          message: `Failed to get full profile for ${input.profileId}`,
         });
       }
     }),
