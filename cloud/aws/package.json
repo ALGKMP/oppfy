@@ -7,11 +7,9 @@
     "aws": "dist/bin/aws.js"
   },
   "scripts": {
-    "build": "rimraf dist && tsc",
     "test": "jest",
     "test:watch": "jest --watch",
     "cdk": "pnpm with-env cdk",
-    "dev": "tsc -w",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check . --ignore-path ../../.gitignore",
