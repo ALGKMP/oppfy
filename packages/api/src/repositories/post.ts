@@ -64,7 +64,7 @@ export class PostRepository {
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(
         and(
-          eq(recipient.id, userId),
+          eq(schema.post.recipient, userId),
           cursor
             ? or(
                 gt(schema.post.createdAt, cursor.createdAt),

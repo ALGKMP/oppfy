@@ -136,9 +136,18 @@ export class PostService {
     cursor: PostCursor | null = null,
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
-    const data = await this.postRepository.getPaginatedPosts(userId, cursor);
-    
-    return this._updateProfilePictureUrls(data, pageSize);
+    try {
+      const data = await this.postRepository.getPaginatedPosts(userId, cursor);
+      console.log("Data fetched from getPaginatedPosts: ", data);
+
+      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      console.log("Data after updating profile picture URLs: ", updatedData);
+
+      return updatedData;
+    } catch (error) {
+      console.error("Error in getPosts: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_POSTS);
+    }
   }
 
   async createPost(
