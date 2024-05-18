@@ -1,6 +1,6 @@
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository } from "../../repositories/user";
-import { AwsService } from "../aws/aws";
+import { S3Service } from "../aws/s3";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -23,7 +23,7 @@ export interface UserProfile {
 
 export class PaginationService {
   private userRepository = new UserRepository();
-  private awsService = new AwsService();
+  private awsService = new S3Service();
 
   async paginateFollowers(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.userRepository.getPaginatedFollowers(userId, cursor, pageSize);

@@ -38,7 +38,7 @@ interface GetObjectPresignedUrlInput {
   Bucket: string;
 }
 
-export class AwsService {
+export class S3Service {
   private awsRepository = new AwsRepository();
 
   async putObjectPresignedUrl(

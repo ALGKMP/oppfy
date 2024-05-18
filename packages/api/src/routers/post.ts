@@ -23,7 +23,7 @@ export const postRouter = createTRPCRouter({
           caption: input.caption,
         };
 
-        return await ctx.services.aws.putObjectPresignedUrlWithPostMetadata({
+        return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
           Bucket: bucket,
           Key: objectKey,
           ContentLength: input.contentLength,

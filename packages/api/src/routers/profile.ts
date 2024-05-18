@@ -13,7 +13,7 @@ export const profileRouter = createTRPCRouter({
       const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
 
-      return await ctx.services.aws.putObjectPresignedUrlWithProfilePictureMetadata(
+      return await ctx.services.s3.putObjectPresignedUrlWithProfilePictureMetadata(
         {
           Key: key,
           Bucket: bucket,

@@ -1,4 +1,4 @@
-import { AwsService } from "./aws/aws";
+import { S3Service } from "./aws/s3";
 import { MuxService } from "./mux/mux";
 import { PostService } from "./media/post";
 import { ProfileService } from "./profile/profile";
@@ -19,7 +19,7 @@ export const services = {
   follow: new FollowService(),
   friend: new FriendService(),
   profile: new ProfileService(),
-  aws: new AwsService(),
+  s3: new S3Service(),
   search: new SearchService(),
   mux: new MuxService(),
   post: new PostService(),

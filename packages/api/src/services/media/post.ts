@@ -3,7 +3,7 @@ import { CommentRepository } from "../../repositories/comment";
 import { LikeRepository } from "../../repositories/like";
 import { PostRepository } from "../../repositories/post";
 import { PostStatsRepository } from "../../repositories/post-stats";
-import { AwsService } from "../aws/aws";
+import { S3Service } from "../aws/s3";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -45,7 +45,7 @@ export interface Post {
 }
 
 export class PostService {
-  private awsService = new AwsService();
+  private awsService = new S3Service();
   private likeRepository = new LikeRepository();
   private commentRepository = new CommentRepository();
   private postRepository = new PostRepository();
