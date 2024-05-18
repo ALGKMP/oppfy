@@ -21,29 +21,23 @@ export class ProfileService {
   async updateFullName(userId: string, fullName: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
-    return await this.profileRepository.updateFullName(
-      user.profile.id,
-      fullName,
-    );
+    return await this.profileRepository.updateFullName(user.profile.id, fullName);
   }
 
   async updateDateOfBirth(userId: string, dateOfBirth: Date) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
-    await this.profileRepository.updateDateOfBirth(
-      user.profile.id,
-      dateOfBirth,
-    );
+    await this.profileRepository.updateDateOfBirth(user.profile.id, dateOfBirth);
   }
 
   async updateBio(userId: string, bio: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
     await this.profileRepository.updateBio(user.profile.id, bio);
   }
@@ -51,25 +45,23 @@ export class ProfileService {
   async updateUsername(userId: string, newUsername: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
 
-    const usernameExists =
-      await this.profileRepository.usernameExists(newUsername);
-
+    const usernameExists = await this.profileRepository.usernameExists(newUsername);
     if (usernameExists) {
-      throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
+      throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS, 'The provided username already exists.');
     }
 
     await this.profileRepository.updateUsername(user.profile.id, newUsername);
   }
 
   async updateProfile(userId: string, updates: UpdateProfile): Promise<void> {
-    const user = await this.userRepository.getUserProfile(userId);
-    if (!user) {
+    const profile = await this.userRepository.getUserProfile(userId);
+    if (!profile) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
-  
+
     const updateData: Partial<UpdateProfile> = {};
     if (updates.fullName !== undefined) {
       updateData.fullName = updates.fullName;
@@ -84,15 +76,14 @@ export class ProfileService {
       }
       updateData.username = updates.username;
     }
-  
-    await this.profileRepository.updateProfile(user.profile.id, updateData);
+
+    await this.profileRepository.updateProfile(profile.profile.id, updateData);
   }
-  
 
   async updateProfilePicture(userId: string, key: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
     await this.profileRepository.updateProfilePicture(user.profile.id, key);
   }
@@ -100,12 +91,12 @@ export class ProfileService {
   async getBasicProfileByUserId(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided user ID.');
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
 
     const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
@@ -125,12 +116,12 @@ export class ProfileService {
   async getBasicProfileByProfileId(profileId: number) {
     const user = await this.userRepository.getUserByProfileId(profileId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided profile ID.');
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided profile ID.');
     }
 
     const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
@@ -150,32 +141,31 @@ export class ProfileService {
   async getFullProfileByUserId(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided user ID.');
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
       console.log("SERVICE ERROR: profile not found");
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
     }
 
     const followerCount = await this.followersRepository.countFollowers(userId);
     if (followerCount === undefined) {
       console.log("SERVICE ERROR: failed to count followers");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS, 'Failed to count followers for the user.');
     }
 
-    const followingCount =
-      await this.followersRepository.countFollowing(userId);
+    const followingCount = await this.followersRepository.countFollowing(userId);
     if (followingCount === undefined) {
       console.log("SERVICE ERROR: failed to count following");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING, 'Failed to count following for the user.');
     }
 
     const friendCount = await this.friendsRepository.countFriends(userId);
     if (friendCount === undefined) {
       console.log("SERVICE ERROR: failed to count friends");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS, 'Failed to count friends for the user.');
     }
 
     const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
@@ -184,7 +174,7 @@ export class ProfileService {
     });
     if (!profilePictureUrl) {
       console.log("SERVICE ERROR: failed to get profile picture");
-      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
+      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, 'Failed to get profile picture URL.');
     }
 
     const profileData = {
@@ -205,33 +195,31 @@ export class ProfileService {
   async getFullProfileByProfileId(profileId: number) {
     const user = await this.userRepository.getUserByProfileId(profileId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided profile ID.');
     }
-    const userId = user.id;
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
       console.log("SERVICE ERROR: profile not found");
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided profile ID.');
     }
 
-    const followerCount = await this.followersRepository.countFollowers(userId);
+    const followerCount = await this.followersRepository.countFollowers(user.id);
     if (followerCount === undefined) {
       console.log("SERVICE ERROR: failed to count followers");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS, 'Failed to count followers for the user.');
     }
 
-    const followingCount =
-      await this.followersRepository.countFollowing(userId);
+    const followingCount = await this.followersRepository.countFollowing(user.id);
     if (followingCount === undefined) {
       console.log("SERVICE ERROR: failed to count following");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING, 'Failed to count following for the user.');
     }
 
-    const friendCount = await this.friendsRepository.countFriends(userId);
+    const friendCount = await this.friendsRepository.countFriends(user.id);
     if (friendCount === undefined) {
       console.log("SERVICE ERROR: failed to count friends");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS);
+      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS, 'Failed to count friends for the user.');
     }
 
     const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
@@ -240,7 +228,7 @@ export class ProfileService {
     });
     if (!profilePictureUrl) {
       console.log("SERVICE ERROR: failed to get profile picture");
-      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
+      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, 'Failed to get profile picture URL.');
     }
 
     const profileData = {
@@ -258,11 +246,10 @@ export class ProfileService {
     return sharedValidators.user.fullProfile.parse(profileData);
   }
 
-
   async removeProfilePicture(userId: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided user ID.');
     }
 
     const bucket = process.env.S3_POST_BUCKET!;
@@ -270,7 +257,7 @@ export class ProfileService {
     const deleteObject = await this.awsRepository.deleteObject(bucket, key);
 
     if (!deleteObject.DeleteMarker) {
-      throw new DomainError(ErrorCode.FAILED_TO_DELETE);
+      throw new DomainError(ErrorCode.FAILED_TO_DELETE, 'Failed to delete the profile picture.');
     }
 
     await this.profileRepository.removeProfilePicture(user.profile.id);
