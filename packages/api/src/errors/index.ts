@@ -44,6 +44,7 @@ export enum ErrorCode {
   DATABASE_ERROR = "DATABASE_ERROR",
   AWS_ERROR = "AWS_ERROR",
   MUX_ERROR = "MUX_ERROR",
+  OPENSEARCH_ERROR = "OPENSEARCH_ERROR",
 }
 
 type ErrorCodes = keyof typeof ErrorCode;
@@ -65,7 +66,7 @@ export function handleError(
 ) {
   return function (
     _target: any,
-    _propertyKey: string,
+    propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
@@ -74,11 +75,15 @@ export function handleError(
       try {
         return await originalMethod.apply(this, args);
       } catch (error) {
-        console.error(error);
+        console.error("Error in method:", propertyKey);
+        console.error("Arguments:", args);
+        if (error instanceof Error) {
+          console.error("Error message:", error.message);
+          console.error("Error stack:", error.stack);
+        }
         throw new DomainError(code, message, error);
       }
     };
-
     return descriptor;
   };
 }
@@ -104,5 +109,5 @@ export const handleMuxErrors = handleError(
 export const handleOpensearchErrors = handleError(
   "OpensearchError",
   "Opensearch error occurred",
-  ErrorCode.MUX_ERROR,
+  ErrorCode.OPENSEARCH_ERROR,
 );
