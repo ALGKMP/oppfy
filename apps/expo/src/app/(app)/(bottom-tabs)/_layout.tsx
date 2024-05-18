@@ -20,6 +20,7 @@ import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
   const theme = useTheme();
+  const router = useRouter();
 
   const { data: profileData } =
     api.profile.getCurrentUsersFullProfile.useQuery();
