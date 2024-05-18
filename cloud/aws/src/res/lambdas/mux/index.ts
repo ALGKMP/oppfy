@@ -23,7 +23,7 @@ export const handler = async (
     }
 
     const jsonBody = JSON.parse(rawBody);
-    console.log("Received Mux webhook event:", jsonBody)
+    console.log("Received Mux webhook event:", jsonBody);
 
     const muxBodySchema = z
       .object({
@@ -35,7 +35,7 @@ export const handler = async (
         }),
         data: z.object({
           passthrough: z.string().optional(),
-        })
+        }),
       })
       .passthrough();
 
@@ -46,6 +46,14 @@ export const handler = async (
     });
 
     const data = muxBodySchema.parse(jsonBody);
+
+    if (data.type != "video.asset.ready") {
+      console.log("Ignoring Mux webhook event:", data.type);
+      return {
+        statusCode: 200,
+        body: "Webhook received and ignored",
+      };
+    }
 
     const jsonMetadata = data.data.passthrough
       ? JSON.parse(data.data.passthrough)
@@ -63,13 +71,30 @@ export const handler = async (
       );
       console.log("Mux signature verified");
 
-      await db.insert(schema.post).values({
+      const post = await db.insert(schema.post).values({
         recipient: metadata.recipientId,
         caption: metadata.caption,
         key: data.object.id,
         author: metadata.authorId,
         mediaType: "video",
       });
+      if (!post) {
+        return {
+          statusCode: 500,
+          body: "Failed to create post",
+        };
+      }
+      const postStats = await db.insert(schema.postStats).values({ postId: post[0].insertId})
+      if (!postStats) {
+        return {
+          statusCode: 500,
+          body: "Failed to create post stats",
+        };
+      }
+      return {
+        statusCode: 200,
+        body: "Webhook received and processed",
+      };
     } catch (error) {
       console.error("Error verifying Mux webhook signature:", error);
       return {
