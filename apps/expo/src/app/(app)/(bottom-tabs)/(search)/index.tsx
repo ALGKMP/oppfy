@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { router } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { debounce } from "lodash";
@@ -11,12 +13,12 @@ import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
-import { router } from "expo-router";
 
 const SEARCH_REFRESH_DELAY = 200;
 
 const Search = () => {
   const headerHeight = useHeaderHeight();
+  const navigation = useNavigation();
 
   const [searchResults, setSearchResults] = useState<
     RouterOutputs["search"]["profilesByUsername"]
@@ -82,16 +84,19 @@ const Search = () => {
                         title={item.username ?? undefined}
                         subtitle={item.fullName ?? undefined}
                         imageUrl={item.profilePictureUrl}
-                        onPress={() => router.navigate({
-                          pathname: "/(app)/(other-profile)",
-                          params: {
-                            profileId: item.id,
-                            fullName: item.fullName ?? "",
-                            username: item.username ?? "",
-                            bio: item.bio ?? "",
-                            profilePictureUrl: item.profilePictureUrl,
-                          }
-                        })}
+                        onPress={() =>
+                          router.push("/(app)/(bottom-tabs)/(home)")
+                          // router.navigate({
+                          //   pathname: "/(app)/(bottom-tabs)/(other-profile)",
+                          //   params: {
+                          //     profileId: String(item.id),
+                          //     fullName: item.fullName ?? "",
+                          //     username: item.username ?? "",
+                          //     bio: item.bio ?? "",
+                          //     profilePictureUrl: item.profilePictureUrl,
+                          //   },
+                          // })
+                        }
                       />
                     )}
                   </View>
