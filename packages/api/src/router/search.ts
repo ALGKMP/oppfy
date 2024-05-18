@@ -6,6 +6,9 @@ export const searchRouter = createTRPCRouter({
   profilesByUsername: protectedProcedure
     .input(trpcValidators.search.profilesByUsername)
     .mutation(async ({ ctx, input }) => {
-      return ctx.services.search.profilesByUsername(input.username);
+      return ctx.services.search.profilesByUsername(
+        input.username,
+        ctx.session.uid,
+      );
     }),
 });

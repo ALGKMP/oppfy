@@ -4,14 +4,24 @@ import type {
 } from "@aws-sdk/client-s3/dist-types/commands";
 import type { ApiResponse } from "@opensearch-project/opensearch";
 
+import { InferInsertModel, schema } from "@oppfy/db";
 import { openSearch } from "@oppfy/opensearch";
 
 import { handleOpensearchErrors } from "../errors";
-import { InferInsertModel, schema } from "@oppfy/db";
 
 export type { GetObjectCommandInput, PutObjectCommandInput };
 
-type OpenSearchProfile = InferInsertModel<typeof schema.profile>
+enum OpenSearchIndex {
+  PROFILE = "profile",
+}
+
+interface OpenSearchResult {
+  id: number;
+  username: string;
+  fullName: string;
+  bio: string;
+  profilePictureKey: string;
+}
 
 interface OpenSearchResponse<T> {
   hits: {
@@ -32,18 +42,34 @@ export class SearchRepository {
   private openSearch = openSearch;
 
   @handleOpensearchErrors
-  async profilesByUsername(username: string, limit = 15) {
-    const response = (await this.openSearch.search({
-      index: "profile",
+  async profilesByUsername(
+    username: string,
+    currentProfileId: number,
+    limit = 15,
+  ) {
+    const response = await this.openSearch.search<
+      OpenSearchResponse<OpenSearchResult>
+    >({
+      index: OpenSearchIndex.PROFILE,
       body: {
         query: {
-          wildcard: {
-            username: `*${username}*`,
+          bool: {
+            must: {
+              wildcard: {
+                username: `*${username}*`,
+              },
+            },
+            must_not: {
+              term: {
+                id: currentProfileId,
+              },
+            },
           },
         },
+        _source: ["id", "username", "fullName", "bio", "profilePictureKey"],
         size: limit,
       },
-    })) satisfies ApiResponse<OpenSearchResponse<OpenSearchProfile>>;
+    });
 
     return response.body.hits.hits.map((hit) => hit._source);
   }
