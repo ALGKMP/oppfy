@@ -29,7 +29,7 @@ export class ProfileService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
-    const profile = await this.userRepository.getProfile(user.profileId);
+    const profile = await this.profileRepository.getProfile(user.profileId);
 
     if (!profile) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);

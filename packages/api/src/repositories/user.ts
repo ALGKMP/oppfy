@@ -15,7 +15,7 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async createUser(userId: string) {
-    await this.db.transaction(async (tx) => {
+    return await this.db.transaction(async (tx) => {
       // Create an empty profile for the user, ready to be updated later
       const profile = await tx.insert(schema.profile).values({});
 
@@ -41,16 +41,20 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getUserByProfileId(profileId: number) {
+  async getUserProfile(userId: string) {
     return await this.db.query.user.findFirst({
-      where: eq(schema.user.profileId, profileId),
+      where: eq(schema.user.id, userId),
+      with: {
+        profile: true,
+      },
     });
   }
 
+
   @handleDatabaseErrors
-  async getProfile(profileId: number) {
-    return await this.db.query.profile.findFirst({
-      where: eq(schema.profile.id, profileId),
+  async getUserByProfileId(profileId: number) {
+    return await this.db.query.user.findFirst({
+      where: eq(schema.user.profileId, profileId),
     });
   }
 
