@@ -40,9 +40,10 @@ const BottomTabsLayout = () => {
       />
 
       <BottomTabs.Screen
-        name="search"
+        name="(search)"
         options={{
           title: "Search",
+          header: () => null,
           tabBarIcon: ({ focused }) => (
             <Search strokeWidth={focused ? 2 : 1.5} />
           ),
@@ -89,13 +90,6 @@ const BottomTabsLayout = () => {
               </Pressable>
             </View>
           ),
-        }}
-      />
-
-      <BottomTabs.Screen
-        name="(other-profile)"
-        options={{
-          tabBarButton: () => null,
         }}
       />
     </BottomTabs>

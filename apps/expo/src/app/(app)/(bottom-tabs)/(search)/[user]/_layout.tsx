@@ -27,16 +27,20 @@ type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
 
 const ProfileLayout = () => {
   const initialData = useLocalSearchParams<{
-    profileId: string;
-    fullName: string;
+    // profileId: string;
+    // fullName: string;
     username: string;
-    bio: string;
-    profilePictureUrl: string;
+    // bio: string;
+    // profilePictureUrl: string;
   }>();
+
+  useEffect(() => {
+    console.log("LAYOUT", initialData.username);
+  }, [initialData.username]);
 
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getOtherUserFullProfile.useQuery({
-      profileId: 1
+      profileId: 1,
     });
 
   return (
@@ -54,7 +58,7 @@ const ProfileLayout = () => {
       )}
     >
       <TopTabs.Screen
-        name="media-of-them"
+        name="index"
         options={{
           tabBarLabel: () => <Grid3x3 />,
         }}

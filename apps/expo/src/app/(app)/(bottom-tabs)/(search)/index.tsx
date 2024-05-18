@@ -85,17 +85,17 @@ const Search = () => {
                         subtitle={item.fullName ?? undefined}
                         imageUrl={item.profilePictureUrl}
                         onPress={() =>
-                          router.push("/(app)/(bottom-tabs)/(home)")
-                          // router.navigate({
-                          //   pathname: "/(app)/(bottom-tabs)/(other-profile)",
-                          //   params: {
-                          //     profileId: String(item.id),
-                          //     fullName: item.fullName ?? "",
-                          //     username: item.username ?? "",
-                          //     bio: item.bio ?? "",
-                          //     profilePictureUrl: item.profilePictureUrl,
-                          //   },
-                          // })
+                          router.navigate({
+                            pathname: "/test",
+                            params: {
+                              // profileId: String(item.id),
+                              // fullName: item.fullName ?? "",
+                              // username: item.username ?? "",
+                              // bio: item.bio ?? "",
+                              // profilePictureUrl: item.profilePictureUrl,
+                              username: item.username ?? "",
+                            },
+                          })
                         }
                       />
                     )}
