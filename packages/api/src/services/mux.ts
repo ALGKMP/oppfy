@@ -3,7 +3,7 @@ import { MuxRepository } from "../repositories/mux";
 export class MuxService {
   private muxRepository = new MuxRepository();
 
-  async createDirectUpload() {
-    return await this.muxRepository.createDirectUpload();
+  async createDirectUpload(authorId: string, recipientId: string, caption: string | null = null) {
+    return await this.muxRepository.createDirectUpload(authorId, recipientId, caption);
   }
 }

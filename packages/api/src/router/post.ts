@@ -39,18 +39,29 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  createMuxVideoPresignedUrl: protectedProcedure.mutation(async ({ ctx }) => {
-    try {
-      const result = await ctx.services.mux.createDirectUpload();
-      return result.url;
-    } catch (err) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message:
-          "Failed to create presigned URL for video upload. Please check your network connection and try again.",
-      });
-    }
-  }),
+  createMuxVideoPresignedUrl: protectedProcedure
+    .input(
+      z.object({
+        recipientId: z.string(),
+        caption: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.services.mux.createDirectUpload(
+          ctx.session.uid,
+          input.recipientId,
+          input.caption,
+        );
+        return result.url;
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Failed to create presigned URL for video upload. Please check your network connection and try again.",
+        });
+      }
+    }),
 
   editPost: protectedProcedure
     .input(trpcValidators.post.updatePost)
@@ -77,7 +88,7 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
-    
+
   getPosts: protectedProcedure
     .input(trpcValidators.post.getPosts)
     .output(sharedValidators.media.paginatedPosts)
