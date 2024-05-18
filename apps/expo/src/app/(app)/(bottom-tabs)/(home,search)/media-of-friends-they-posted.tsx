@@ -2,12 +2,12 @@ import { Text } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 
-const MediaOfYou = () => {
+const MediaOfFriendsTheyPosted = () => {
   return (
     <BaseScreenView>
-      <Text>Media of you</Text>
+      <Text>Media of friends they posted</Text>
     </BaseScreenView>
   );
 };
 
-export default MediaOfYou;
+export default MediaOfFriendsTheyPosted;

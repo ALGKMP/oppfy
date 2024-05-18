@@ -137,7 +137,7 @@ export class PostService {
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     const data = await this.postRepository.getPaginatedPosts(userId, cursor);
-
+    
     return this._updateProfilePictureUrls(data, pageSize);
   }
 

@@ -2,7 +2,7 @@ import type {
   GetObjectCommandInput,
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3/dist-types/commands";
-import type { ApiResponse } from "@opensearch-project/opensearch"; // Import ApiResponse type
+import type { ApiResponse } from "@opensearch-project/opensearch";
 
 import { openSearch } from "@oppfy/opensearch";
 

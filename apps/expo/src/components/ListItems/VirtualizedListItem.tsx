@@ -45,7 +45,7 @@ type VirtualizedListItemProps = (LoadingProps | LoadedProps) & {
   onPress?: () => void;
 };
 
-const VirtualizedListItem: React.FC<VirtualizedListItemProps> = (props) => {
+const VirtualizedListItem = (props: VirtualizedListItemProps) => {
   const content = (
     <Skeleton.Group show={props.loading}>
       <XStack flex={1} alignItems="center" paddingVertical="$2">

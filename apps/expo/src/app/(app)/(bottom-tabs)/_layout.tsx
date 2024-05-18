@@ -95,9 +95,7 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(other-profile)"
         options={{
-          title: "TEST",
-          tabBarButton: (props) => null
-          // tabBarStyle
+          tabBarButton: () => null,
         }}
       />
     </BottomTabs>
