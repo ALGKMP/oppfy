@@ -3,6 +3,7 @@ import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
 import type { NotificationSettings } from "../repositories/notification-settings";
 import { NotificationSettingsRepository } from "../repositories/notification-settings";
+import { ProfileRepository } from "../repositories/profile";
 import type { PrivacySetting } from "../repositories/user";
 import { UserRepository } from "../repositories/user";
 import { AwsService } from "./aws";
@@ -32,6 +33,7 @@ export class UserService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private awsService = new AwsService();
+  private profileRepository = new ProfileRepository();
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
@@ -50,7 +52,7 @@ export class UserService {
       throw new DomainError(ErrorCode.USER_ALREADY_EXISTS);
     }
 
-    await this.userRepository.createUser(userId);
+    return await this.userRepository.createUser(userId);
   }
 
   async deleteUser(userId: string) {
@@ -63,22 +65,21 @@ export class UserService {
     await this.userRepository.deleteUser(userId);
   }
 
-  async userOnboardingCompleted(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
+  async checkOnboardingComplete(userId: string) {
+    const user = await this.userRepository.getUserProfile(userId);
 
-    const profile = await this.userRepository.getProfile(user.profileId);
-
-    if (profile === undefined) {
+    if (user?.profile === undefined) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
-    return !!profile.dateOfBirth && !!profile.fullName && !!profile.username;
+    return (
+      !!user.profile.dateOfBirth &&
+      !!user.profile.fullName &&
+      !!user.profile.username
+    );
   }
 
-  async getUserPrivacySetting(userId: string) {
+  async getPrivacySettings(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
@@ -88,13 +89,13 @@ export class UserService {
     return user.privacySetting;
   }
 
-  async updatePrivacySetting(
+  async updatePrivacySettings(
     userId: string,
     newPrivacySetting: PrivacySetting,
   ) {
-    const userExists = await this._userExists(userId);
+    const exists = await this._userExists(userId);
 
-    if (!userExists) {
+    if (!exists) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
@@ -151,68 +152,29 @@ export class UserService {
     );
   }
 
-  private async _userExists(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-    return user !== undefined;
-  }
-
   async isFriends(userId1: string, userId2: string) {
     return !!(await this.friendRepository.getFriend(userId1, userId2));
   }
 
-  async isFollowing(followerId: string, followedId: string) {
-    return !!(await this.followRepository.getFollower(followerId, followedId));
+  async isFollowing(userId: string, recipientId: string) {
+    return !!(await this.followRepository.getFollower(userId, recipientId));
   }
 
-  private async _updateProfilePictureUrls(
-    data: UserProfile[],
-    pageSize: number,
-  ): Promise<PaginatedResponse<UserProfile>> {
-    try {
-      if (data.length === 0) {
-        return {
-          items: [],
-          nextCursor: undefined,
-        };
-      }
-      const items = await Promise.all(
-        data.map(async (item) => {
-          if (item.profilePictureUrl) {
-            const presignedUrl = await this.awsService.getObjectPresignedUrl({
-              Bucket: process.env.S3_PROFILE_BUCKET!,
-              Key: item.profilePictureUrl,
-            });
-            item.profilePictureUrl = presignedUrl;
-          } else {
-            const presignedUrl = await this.awsService.getObjectPresignedUrl({
-              Bucket: process.env.S3_PROFILE_BUCKET!,
-              Key: "profile-pictures/default.jpg",
-            });
-            item.profilePictureUrl = presignedUrl;
-          }
-          return item;
-        }),
-      );
+  async getNetworkStatus(userId1: string, userId2: string) {
+    const isFriends = await this.isFriends(userId1, userId2);
+    const isFollowing = await this.isFollowing(userId1, userId2);
+    const isFollowedBy = await this.isFollowing(userId2, userId1);
+    const isBlocked = await this.isUserBlocked(userId1, userId2);
 
-      let nextCursor: Cursor | undefined = undefined;
-      if (items.length > pageSize) {
-        const nextItem = items.pop();
-        nextCursor = {
-          createdAt: nextItem!.createdAt,
-          profileId: nextItem!.profileId,
-        };
-      }
-      return {
-        items,
-        nextCursor,
-      };
-    } catch (err) {
-      console.log(err);
-      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
-    }
+    return {
+      isFriends,
+      isFollowing,
+      isFollowedBy,
+      isBlocked,
+    };
   }
 
-  async getFollowers(
+  async paginateFollowers(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -225,7 +187,7 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async getFriends(
+  async paginateFriends(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -238,7 +200,7 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async getFollowing(
+  async paginateFollowing(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -251,7 +213,7 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async getBlockedUsers(
+  async paginateBlocked(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -264,7 +226,7 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async getFriendRequests(
+  async paginateFriendRequests(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -277,7 +239,7 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async getFollowRequests(
+  async paginateFollowRequests(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -290,49 +252,73 @@ export class UserService {
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async blockUser(userId: string, blockUserId: string) {
-    if (await this.isFollowing(userId, blockUserId)) {
-      const a = await this.followRepository.removeFollower(userId, blockUserId);
-      if (!a) {
+  async blockUser(userId: string, userIdBeingBlocked: string) {
+    const followingUserBeingBlocked = await this.isFollowing(
+      userId,
+      userIdBeingBlocked,
+    );
+    const followedByUserBeingBlocked = await this.isFollowing(
+      userIdBeingBlocked,
+      userId,
+    );
+    const isFriends = await this.isFriends(userId, userIdBeingBlocked);
+    if (followingUserBeingBlocked) {
+      const unfollow = await this.followRepository.removeFollower(
+        userId,
+        userIdBeingBlocked,
+      );
+      if (!unfollow) {
         // giving up on variable names
         throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
       }
     }
 
-    if (await this.isFollowing(blockUserId, userId)) {
-      const b = await this.followRepository.removeFollower(blockUserId, userId);
-      if (!b) {
+    if (followedByUserBeingBlocked) {
+      const removeFollower = await this.followRepository.removeFollower(
+        userIdBeingBlocked,
+        userId,
+      );
+      if (!removeFollower) {
         throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
       }
     }
 
-    if (await this.isFriends(userId, blockUserId)) {
-      const c = await this.friendRepository.removeFriend(userId, blockUserId);
-      if (!c) {
+    if (isFriends) {
+      const unfriend = await this.friendRepository.removeFriend(
+        userId,
+        userIdBeingBlocked,
+      );
+      if (!unfriend) {
         throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FRIEND);
       }
     }
 
-    const result = await this.userRepository.blockUser(userId, blockUserId);
+    const result = await this.userRepository.blockUser(
+      userId,
+      userIdBeingBlocked,
+    );
     if (!result) {
       throw new DomainError(ErrorCode.FAILED_TO_BLOCK_USER);
     }
   }
 
   async isUserBlocked(userId: string, blockedUserId: string) {
-    const result = await this.userRepository.getBlockedUser(
+    const blockedUser = await this.userRepository.getBlockedUser(
       userId,
       blockedUserId,
     );
-    if (result === undefined) {
+    if (!blockedUser) {
       throw new DomainError(ErrorCode.FAILED_TO_CHECK_RELATIONSHIP);
     }
-    return !!result;
+    return !!blockedUser;
   }
 
   async unblockUser(userId: string, blockedUserId: string) {
-    const result = await this.userRepository.unblockUser(userId, blockedUserId);
-    if (!result) {
+    const unblock = await this.userRepository.unblockUser(
+      userId,
+      blockedUserId,
+    );
+    if (!unblock) {
       throw new DomainError(ErrorCode.FAILED_TO_UNBLOCK_USER);
     }
   }
@@ -343,12 +329,13 @@ export class UserService {
       throw new DomainError(ErrorCode.USER_ALREADY_FOLLOWED);
     }
 
-    const user = await this.userRepository.getUser(recipientId);
-    if (user === undefined) {
+    const sender = await this.userRepository.getUser(senderId);
+    const recipient = await this.userRepository.getUser(recipientId);
+    if (!recipient || !sender) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
-    if (user.privacySetting === "private") {
+    if (recipient.privacySetting === "private") {
       const result = await this.followRepository.createFollowRequest(
         senderId,
         recipientId,
@@ -368,6 +355,10 @@ export class UserService {
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
+    const isFollowing = await this.isFollowing(senderId, recipientId);
+    if (!isFollowing) {
+      throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND);
+    }
     const result = await this.followRepository.removeFollower(
       senderId,
       recipientId,
@@ -378,6 +369,13 @@ export class UserService {
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
+    const followRequestExists = await this.followRepository.getFollowRequest(
+      senderId,
+      recipientId,
+    );
+    if (!followRequestExists) {
+      throw new DomainError(ErrorCode.FOLLOW_REQUEST_NOT_FOUND);
+    }
     const result = await this.followRepository.removeFollowRequest(
       senderId,
       recipientId,
@@ -396,6 +394,13 @@ export class UserService {
   }
 
   async rejectFollowRequest(senderId: string, recipientId: string) {
+    const followRequestExists = await this.followRepository.getFollowRequest(
+      senderId,
+      recipientId,
+    );
+    if (!followRequestExists) {
+      throw new DomainError(ErrorCode.FOLLOW_REQUEST_NOT_FOUND);
+    }
     const result = await this.followRepository.removeFollowRequest(
       senderId,
       recipientId,
@@ -428,8 +433,8 @@ export class UserService {
     if (!requestExists) {
       throw new DomainError(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
     }
-
     await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
+ 
     const addFriendResult = await this.friendRepository.addFriend(
       requesterId,
       requestedId,
@@ -448,13 +453,10 @@ export class UserService {
       throw new DomainError(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
     }
 
-    const deleteResult = await this.friendRepository.deleteFriendRequest(
+    await this.friendRepository.deleteFriendRequest(
       requesterId,
       requestedId,
     );
-    if (!deleteResult) {
-      throw new DomainError(ErrorCode.FAILED_TO_DELETE_FRIEND_REQUEST);
-    }
   }
 
   async removeFriend(userId1: string, userId2: string) {
@@ -462,16 +464,31 @@ export class UserService {
       userId1,
       userId2,
     );
-    if (!friendshipExists) {
+    const friendshipExists2 = await this.friendRepository.getFriend(
+      userId2,
+      userId1,
+    );
+    if (!friendshipExists && !friendshipExists2) {
       throw new DomainError(ErrorCode.FRIENDSHIP_NOT_FOUND);
     }
 
-    const removeResult = await this.friendRepository.removeFriend(
-      userId1,
-      userId2,
-    );
-    if (!removeResult) {
-      throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FRIEND);
+    if (friendshipExists) {
+      const removeResult = await this.friendRepository.removeFriend(
+        userId1,
+        userId2,
+      );
+      if (!removeResult) {
+        throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FRIEND);
+      }
+    }
+    else {
+      const removeResult = await this.friendRepository.removeFriend(
+        userId2,
+        userId1,
+      );
+      if (!removeResult) {
+        throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FRIEND);
+      }
     }
   }
 
@@ -481,7 +498,6 @@ export class UserService {
       userId,
     );
     if (!followerExists) {
-      console.error("Follower not found");
       throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND);
     }
 
@@ -490,7 +506,6 @@ export class UserService {
       userId,
     );
     if (!removeResult) {
-      console.error("Failed to remove follower");
       throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
     }
   }
@@ -528,6 +543,51 @@ export class UserService {
     );
     if (!deleteResult) {
       throw new DomainError(ErrorCode.FAILED_TO_CANCEL_FRIEND_REQUEST);
+    }
+  }
+
+  private async _userExists(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+    return user !== undefined;
+  }
+
+  private async _updateProfilePictureUrls(
+    data: UserProfile[],
+    pageSize: number,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    try {
+      if (data.length === 0) {
+        return {
+          items: [],
+          nextCursor: undefined,
+        };
+      }
+      const items = await Promise.all(
+        data.map(async (item) => {
+          const presignedUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Key: item.profilePictureUrl,
+          });
+          item.profilePictureUrl = presignedUrl;
+          return item;
+        }),
+      );
+
+      let nextCursor: Cursor | undefined = undefined;
+      if (items.length > pageSize) {
+        const nextItem = items.pop();
+        nextCursor = {
+          createdAt: nextItem!.createdAt,
+          profileId: nextItem!.profileId,
+        };
+      }
+      return {
+        items,
+        nextCursor,
+      };
+    } catch (err) {
+      console.log(err);
+      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
     }
   }
 }

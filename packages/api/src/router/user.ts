@@ -90,7 +90,7 @@ export const userRouter = createTRPCRouter({
 
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.user.getUserPrivacySetting(ctx.session.uid);
+      return await ctx.services.user.getPrivacySettings(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -102,7 +102,7 @@ export const userRouter = createTRPCRouter({
     .input(trpcValidators.user.updatePrivacySetting)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.updatePrivacySetting(
+        await ctx.services.user.updatePrivacySettings(
           ctx.session.uid,
           input.privacy,
         );
@@ -119,7 +119,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.getFriends(
+        const result = await ctx.services.user.paginateFriends(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -142,7 +142,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.getFriends(
+        const result = await ctx.services.user.paginateFriends(
           input.userId,
           input.cursor,
           input.pageSize,
@@ -162,7 +162,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.getFollowers(
+        const result = await ctx.services.user.paginateFollowers(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -184,7 +184,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.getFollowers(
+        const result = await ctx.services.user.paginateFollowers(
           input.userId,
           input.cursor,
           input.pageSize,
@@ -207,7 +207,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.getFollowing(
+        const result = await ctx.services.user.paginateFollowing(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -227,7 +227,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.getFollowing(
+        const result = await ctx.services.user.paginateFollowing(
           input.userId,
           input.cursor,
           input.pageSize,
@@ -248,7 +248,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema) // Apply appropriate output schema if needed
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.user.getBlockedUsers(
+        const result = await ctx.services.user.paginateBlocked(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -269,7 +269,7 @@ export const userRouter = createTRPCRouter({
 requests respectively. */
   getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      return await ctx.services.user.getFriendRequests(ctx.session.uid);
+      return await ctx.services.user.paginateFriendRequests(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -280,7 +280,7 @@ requests respectively. */
 
   getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      return await ctx.services.user.getFollowRequests(ctx.session.uid);
+      return await ctx.services.user.paginateFollowRequests(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

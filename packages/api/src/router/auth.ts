@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import { trpcValidators } from "@oppfy/validators";
+import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -14,24 +15,11 @@ export const authRouter = createTRPCRouter({
         // Example error handling for when creating a user fails
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Failed to create a new user. Please ensure the data is correct and try again.",
+          message: "Failed to create a new user",
+          cause: err,
         });
       }
     }),
-
-  getUser: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await ctx.services.user.getUser(ctx.session.uid);
-    } catch (err) {
-      // Error handling for fetching user data
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message:
-          "Failed to retrieve user data. User may not exist or there may be a server error.",
-      });
-    }
-  }),
 
   deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     try {
@@ -39,23 +27,44 @@ export const authRouter = createTRPCRouter({
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `Failed to delete user with ID ${ctx.session.uid}. Ensure the user exists and you have the necessary permissions.`,
+        message: `Failed to delete user with ID ${ctx.session.uid}`,
+        cause: err
       });
     }
   }),
 
-  userOnboardingCompleted: protectedProcedure
+  markOnboardingComplete: protectedProcedure
     .input(trpcValidators.user.userComplete)
     .mutation(async ({ ctx }) => {
       try {
-        return await ctx.services.user.userOnboardingCompleted(ctx.session.uid);
+        return await ctx.services.user.checkOnboardingComplete(ctx.session.uid);
       } catch (err) {
         // Error handling for onboarding completion
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
-            "Failed to mark onboarding as completed. Please retry or contact support if the issue persists.",
+            "Failed to check if user has completed the onboarding process",
+          cause: err,
         });
       }
     }),
+
+    getNetworkStatus: protectedProcedure
+    .input(z.object({
+      userId1: z.string(),
+      userId2: z.string(),
+    })).mutation(async ({ ctx, input }) => {
+      try {
+        return await ctx.services.user.getNetworkStatus(input.userId1, input.userId2);
+      } catch (err) {
+        // Error handling for network status
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Failed to get network status",
+          cause: err,
+        });
+      }
+    }),
+    
 });

@@ -138,11 +138,7 @@ export class PostService {
   ): Promise<PaginatedResponse<Post>> {
     try {
       const data = await this.postRepository.getPaginatedPosts(userId, cursor);
-      console.log("Data fetched from getPaginatedPosts: ", data);
-
       const updatedData = await this._updateProfilePictureUrls(data, pageSize);
-      console.log("Data after updating profile picture URLs: ", updatedData);
-
       return updatedData;
     } catch (error) {
       console.error("Error in getPosts: ", error);
