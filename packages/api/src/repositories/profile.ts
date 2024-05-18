@@ -4,6 +4,8 @@ import { db, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../errors";
 
+
+
 export class ProfileRepository {
   private db = db;
 

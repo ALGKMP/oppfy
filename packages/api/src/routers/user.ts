@@ -63,7 +63,7 @@ export const userRouter = createTRPCRouter({
 
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.user.getUserNotificationSettings(
+      return await ctx.services.notifications.getUserNotificationSettings(
         ctx.session.uid,
       );
     } catch (err) {
@@ -77,7 +77,7 @@ export const userRouter = createTRPCRouter({
     .input(trpcValidators.user.updateNotificationSettings)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.updateNotificationSettings(
+        await ctx.services.notifications.updateNotificationSettings(
           ctx.session.uid,
           input,
         );
@@ -90,7 +90,7 @@ export const userRouter = createTRPCRouter({
 
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.user.getPrivacySettings(ctx.session.uid);
+      return await ctx.services.privacy.getPrivacySettings(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -102,7 +102,7 @@ export const userRouter = createTRPCRouter({
     .input(trpcValidators.user.updatePrivacySetting)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.updatePrivacySettings(
+        await ctx.services.privacy.updatePrivacySettings(
           ctx.session.uid,
           input.privacy,
         );
@@ -119,7 +119,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.paginateFriends(
+        const result = await ctx.services.paginate.paginateFriends(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -142,7 +142,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.paginateFriends(
+        const result = await ctx.services.paginate.paginateFriends(
           input.userId,
           input.cursor,
           input.pageSize,
@@ -162,7 +162,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.paginateFollowers(
+        const result = await ctx.services.paginate.paginateFollowers(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -184,7 +184,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.paginateFollowers(
+        const result = await ctx.services.paginate.paginateFollowers(
           input.userId,
           input.cursor,
           input.pageSize,
@@ -207,7 +207,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.paginateFollowing(
+        const result = await ctx.services.paginate.paginateFollowing(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -227,7 +227,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.user.paginateFollowing(
+        const result = await ctx.services.paginate.paginateFollowing(
           input.userId,
           input.cursor,
           input.pageSize,
@@ -248,7 +248,7 @@ export const userRouter = createTRPCRouter({
     .output(sharedValidators.user.paginatedUserResponseSchema) // Apply appropriate output schema if needed
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.user.paginateBlocked(
+        const result = await ctx.services.paginate.paginateBlocked(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -269,7 +269,7 @@ export const userRouter = createTRPCRouter({
 requests respectively. */
   getFriendRequests: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      return await ctx.services.user.paginateFriendRequests(ctx.session.uid);
+      return await ctx.services.paginate.paginateFriendRequests(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -280,7 +280,7 @@ requests respectively. */
 
   getFollowerRequests: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      return await ctx.services.user.paginateFollowRequests(ctx.session.uid);
+      return await ctx.services.paginate.paginateFollowRequests(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -294,7 +294,7 @@ requests respectively. */
     .input(trpcValidators.user.blockUser)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.blockUser(
+        return await ctx.services.block.blockUser(
           ctx.session.uid,
           input.blockedUserId,
         );
@@ -310,7 +310,7 @@ requests respectively. */
     .input(trpcValidators.user.isUserBlocked)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.isUserBlocked(
+        return await ctx.services.block.isUserBlocked(
           ctx.session.uid,
           input.blockedUserId,
         );
@@ -326,7 +326,7 @@ requests respectively. */
     .input(trpcValidators.user.unblockUser)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.unblockUser(
+        return await ctx.services.block.unblockUser(
           ctx.session.uid,
           input.blockedUserId,
         );
@@ -342,7 +342,7 @@ requests respectively. */
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.followUser(
+        return await ctx.services.follow.followUser(
           ctx.session.uid,
           input.recipientId,
         );
@@ -358,7 +358,7 @@ requests respectively. */
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.unfollowUser(
+        return await ctx.services.follow.unfollowUser(
           ctx.session.uid,
           input.recipientId,
         );
@@ -374,7 +374,7 @@ requests respectively. */
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.acceptFollowRequest(
+        return await ctx.services.follow.acceptFollowRequest(
           ctx.session.uid,
           input.recipientId,
         );
@@ -390,7 +390,7 @@ requests respectively. */
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.rejectFollowRequest(
+        return await ctx.services.follow.rejectFollowRequest(
           ctx.session.uid,
           input.recipientId,
         );
@@ -405,7 +405,7 @@ requests respectively. */
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.user.sendFriendRequest(
+        return await ctx.services.friend.sendFriendRequest(
           ctx.session.uid,
           input.recipientId,
         );
@@ -421,7 +421,7 @@ requests respectively. */
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.acceptFriendRequest(
+        await ctx.services.friend.acceptFriendRequest(
           ctx.session.uid,
           input.recipientId,
         );
@@ -437,7 +437,7 @@ requests respectively. */
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.rejectFriendRequest(
+        await ctx.services.friend.rejectFriendRequest(
           ctx.session.uid,
           input.recipientId,
         );
@@ -453,7 +453,7 @@ requests respectively. */
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.removeFriend(
+        await ctx.services.friend.removeFriend(
           ctx.session.uid,
           input.recipientId,
         );
@@ -469,7 +469,7 @@ requests respectively. */
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.removeFollower(
+        await ctx.services.follow.removeFollower(
           ctx.session.uid,
           input.recipientId,
         );
@@ -484,7 +484,7 @@ requests respectively. */
     .input(trpcValidators.user.friendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.cancelFollowRequest(
+        await ctx.services.follow.cancelFollowRequest(
           ctx.session.uid,
           input.recipientId,
         );
@@ -499,7 +499,7 @@ requests respectively. */
     .input(trpcValidators.user.follow)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.user.cancelFriendRequest(
+        await ctx.services.friend.rejectFriendRequest(
           ctx.session.uid,
           input.recipientId,
         );

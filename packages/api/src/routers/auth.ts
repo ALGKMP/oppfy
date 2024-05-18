@@ -48,23 +48,4 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
-
-    getNetworkStatus: protectedProcedure
-    .input(z.object({
-      userId1: z.string(),
-      userId2: z.string(),
-    })).mutation(async ({ ctx, input }) => {
-      try {
-        return await ctx.services.user.getNetworkStatus(input.userId1, input.userId2);
-      } catch (err) {
-        // Error handling for network status
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Failed to get network status",
-          cause: err,
-        });
-      }
-    }),
-    
 });

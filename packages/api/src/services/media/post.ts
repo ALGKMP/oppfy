@@ -1,9 +1,9 @@
-import { DomainError, ErrorCode } from "../errors";
-import { CommentRepository } from "../repositories/comment";
-import { LikeRepository } from "../repositories/like";
-import { PostRepository } from "../repositories/post";
-import { PostStatsRepository } from "../repositories/post-stats";
-import { AwsService } from "./aws";
+import { DomainError, ErrorCode } from "../../errors";
+import { CommentRepository } from "../../repositories/comment";
+import { LikeRepository } from "../../repositories/like";
+import { PostRepository } from "../../repositories/post";
+import { PostStatsRepository } from "../../repositories/post-stats";
+import { AwsService } from "../aws/aws";
 
 export interface PaginatedResponse<T> {
   items: T[];

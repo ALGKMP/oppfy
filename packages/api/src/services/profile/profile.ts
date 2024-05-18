@@ -2,23 +2,19 @@ import type { z } from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { DomainError, ErrorCode } from "../errors";
-import { AwsRepository } from "../repositories/aws";
-import { FollowRepository } from "../repositories/follow";
-import { FriendRepository } from "../repositories/friend";
-import { PostRepository } from "../repositories/post";
-import { ProfileRepository } from "../repositories/profile";
-import { UserRepository } from "../repositories/user";
-import { UserService } from "./user";
+import { DomainError, ErrorCode } from "../../errors";
+import { AwsRepository } from "../../repositories/aws";
+import { FollowRepository } from "../../repositories/follow";
+import { FriendRepository } from "../../repositories/friend";
+import { ProfileRepository } from "../../repositories/profile";
+import { UserRepository } from "../../repositories/user";
 
 type UpdateProfile = z.infer<typeof sharedValidators.user.updateProfile>;
 
 export class ProfileService {
-  private userService = new UserService();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private awsRepository = new AwsRepository();
-  private postRepository = new PostRepository();
   private followersRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
 

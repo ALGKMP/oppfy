@@ -2,7 +2,7 @@ import type { z } from "zod";
 
 import type { trpcValidators } from "@oppfy/validators";
 
-import { AwsRepository } from "../repositories/aws";
+import { AwsRepository } from "../../repositories/aws";
 
 type ContentType = "image/jpeg" | "image/png";
 

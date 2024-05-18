@@ -3,12 +3,12 @@ import { and, eq } from "drizzle-orm";
 import { asc, db, gt, or, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 
-import { handleDatabaseErrors } from "../errors";
-import { auth } from "../utils/firebase";
-
-export type PrivacySetting = NonNullable<
+export type PrivacySettings = NonNullable<
   InferInsertModel<typeof schema.user>["privacySetting"]
 >;
+
+import { handleDatabaseErrors } from "../errors";
+import { auth } from "../utils/firebase";
 export class UserRepository {
   private db = db;
   private auth = auth;
@@ -76,7 +76,7 @@ export class UserRepository {
   @handleDatabaseErrors
   async updatePrivacySetting(
     userId: string,
-    newPrivacySetting: PrivacySetting,
+    newPrivacySetting: PrivacySettings,
   ) {
     return await this.db
       .update(schema.user)

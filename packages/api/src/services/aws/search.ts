@@ -1,7 +1,7 @@
-import { DomainError, ErrorCode } from "../errors";
-import { AwsRepository } from "../repositories/aws";
-import { SearchRepository } from "../repositories/search";
-import { UserRepository } from "../repositories/user";
+import { DomainError, ErrorCode } from "../../errors";
+import { AwsRepository } from "../../repositories/aws";
+import { SearchRepository } from "../../repositories/search";
+import { UserRepository } from "../../repositories/user";
 
 export class SearchService {
   private searchRepository = new SearchRepository();
