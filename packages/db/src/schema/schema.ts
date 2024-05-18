@@ -100,7 +100,7 @@ export const post = mySqlTable("Post", {
   recipient: varchar("recipient", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  caption: text("caption"),
+  caption: text("caption").default("").notNull(),
   key: varchar("url", { length: 255 }).notNull(),
   mediaType: mysqlEnum("mediaType", ["image", "video"])
     .notNull()

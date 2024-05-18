@@ -42,7 +42,7 @@ export const handler = async (
     const metadataSchema = z.object({
       authorId: z.string(),
       recipientId: z.string(),
-      caption: z.string().nullable(),
+      caption: z.string(),
     });
 
     const data = muxBodySchema.parse(jsonBody);
