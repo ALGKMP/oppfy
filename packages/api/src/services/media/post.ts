@@ -57,26 +57,30 @@ export class PostService {
   ): Promise<PaginatedResponse<Post>> {
     const items = await Promise.all(
       data.map(async (item) => {
-        // Update author profile picture URL
-        const authorPresignedUrl = await this.awsService.getObjectPresignedUrl({
-          Bucket: process.env.S3_PROFILE_BUCKET!,
-          Key: item.authorProfilePicture ?? "profile-pictures/default.jpg",
-        });
-        item.authorProfilePicture = authorPresignedUrl;
+        try {
+          // Update author profile picture URL
+          const authorPresignedUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Key: item.authorProfilePicture ?? "profile-pictures/default.jpg",
+          });
+          item.authorProfilePicture = authorPresignedUrl;
 
-        // Update recipient profile picture URL
-        const recipientPresignedUrl =
-          await this.awsService.getObjectPresignedUrl({
+          // Update recipient profile picture URL
+          const recipientPresignedUrl = await this.awsService.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: item.recipientProfilePicture ?? "profile-pictures/default.jpg",
           });
-        item.recipientProfilePicture = recipientPresignedUrl;
+          item.recipientProfilePicture = recipientPresignedUrl;
 
-        const imageUrl = await this.awsService.getObjectPresignedUrl({
-          Bucket: process.env.S3_POST_BUCKET!,
-          Key: item.imageUrl,
-        });
-        item.imageUrl = imageUrl;
+          const imageUrl = await this.awsService.getObjectPresignedUrl({
+            Bucket: process.env.S3_POST_BUCKET!,
+            Key: item.imageUrl,
+          });
+          item.imageUrl = imageUrl;
+        } catch (error) {
+          console.error("Error updating profile picture URLs: ", error);
+          throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, "Failed to get profile picture URL.");
+        }
         return item;
       }),
     );
@@ -102,16 +106,21 @@ export class PostService {
   ): Promise<PaginatedResponse<CommentProfile>> {
     const items = await Promise.all(
       data.map(async (item) => {
-        const presignedUrl = item.profilePictureUrl
-          ? await this.awsService.getObjectPresignedUrl({
-              Bucket: process.env.S3_PROFILE_BUCKET!,
-              Key: item.profilePictureUrl,
-            })
-          : await this.awsService.getObjectPresignedUrl({
-              Bucket: process.env.S3_PROFILE_BUCKET!,
-              Key: "profile-pictures/default.jpg",
-            });
-        item.profilePictureUrl = presignedUrl;
+        try {
+          const presignedUrl = item.profilePictureUrl
+            ? await this.awsService.getObjectPresignedUrl({
+                Bucket: process.env.S3_PROFILE_BUCKET!,
+                Key: item.profilePictureUrl,
+              })
+            : await this.awsService.getObjectPresignedUrl({
+                Bucket: process.env.S3_PROFILE_BUCKET!,
+                Key: "profile-pictures/default.jpg",
+              });
+          item.profilePictureUrl = presignedUrl;
+        } catch (error) {
+          console.error("Error updating comment profile picture URLs: ", error);
+          throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, "Failed to get comment profile picture URL.");
+        }
         return item;
       }),
     );
@@ -142,7 +151,7 @@ export class PostService {
       return updatedData;
     } catch (error) {
       console.error("Error in getPosts: ", error);
-      throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_POSTS);
+      throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_POSTS, "Failed to paginate posts.");
     }
   }
 
@@ -152,52 +161,77 @@ export class PostService {
     caption: string,
     objectKey: string,
   ) {
-    const result = await this.postRepository.createPost(
-      postedBy,
-      postedFor,
-      caption,
-      objectKey,
-    );
+    try {
+      const result = await this.postRepository.createPost(
+        postedBy,
+        postedFor,
+        caption,
+        objectKey,
+      );
 
-    const postId = result[0].insertId;
-    await this.postStatsRepository.createPostStats(postId);
+      const postId = result[0].insertId;
+      await this.postStatsRepository.createPostStats(postId);
+    } catch (error) {
+      console.error("Error in createPost: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_CREATE_POST, "Failed to create post.");
+    }
   }
 
   async editPost(postId: number, newCaption: string) {
-    await this.postRepository.updatePost(postId, newCaption);
-  }
-
-  async getPost(postId: number) {
-    const post = await this.postRepository.getPost(postId);
-
-    if (post === undefined) {
-      throw new DomainError(ErrorCode.POST_NOT_FOUND);
+    try {
+      await this.postRepository.updatePost(postId, newCaption);
+    } catch (error) {
+      console.error("Error in editPost: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_EDIT_POST, "Failed to edit post.");
     }
-
-    return post;
   }
 
   async deletePost(postId: number) {
-    await this.postRepository.deletePost(postId);
+    try {
+      await this.postRepository.deletePost(postId);
+    } catch (error) {
+      console.error("Error in deletePost: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_DELETE_POST, "Failed to delete post.");
+    }
   }
 
   async likePost(userId: string, postId: number) {
-    const likeExists = await this.likeRepository.hasUserLiked(postId, userId);
-    if (!likeExists) {
-      await this.likeRepository.addLike(postId, userId);
+    try {
+      const likeExists = await this.likeRepository.hasUserLiked(postId, userId);
+      if (!likeExists) {
+        await this.likeRepository.addLike(postId, userId);
+      }
+    } catch (error) {
+      console.error("Error in likePost: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_LIKE_POST, "Failed to like post.");
     }
   }
 
   async unlikePost(userId: string, postId: number) {
-    await this.likeRepository.removeLike(postId, userId);
+    try {
+      await this.likeRepository.removeLike(postId, userId);
+    } catch (error) {
+      console.error("Error in unlikePost: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_UNLIKE_POST, "Failed to unlike post.");
+    }
   }
 
   async addCommentToPost(userId: string, postId: number, commentText: string) {
-    await this.commentRepository.addComment(postId, userId, commentText);
+    try {
+      await this.commentRepository.addComment(postId, userId, commentText);
+    } catch (error) {
+      console.error("Error in addCommentToPost: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_ADD_COMMENT, "Failed to add comment to post.");
+    }
   }
 
   async deleteComment(commentId: number) {
-    await this.commentRepository.removeComment(commentId);
+    try {
+      await this.commentRepository.removeComment(commentId);
+    } catch (error) {
+      console.error("Error in deleteComment: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_DELETE_COMMENT, "Failed to delete comment.");
+    }
   }
 
   async getPaginatedComments(
@@ -205,11 +239,13 @@ export class PostService {
     cursor: CommentCursor | null = null,
     pageSize: number,
   ): Promise<PaginatedResponse<CommentProfile>> {
-    const data = await this.commentRepository.getPaginatedComments(
-      postId,
-      cursor,
-      pageSize,
-    );
-    return this._updateProfilePictureUrls2(data, pageSize);
+    try {
+      const data = await this.commentRepository.getPaginatedComments(postId, cursor, pageSize);
+      const updatedData = await this._updateProfilePictureUrls2(data, pageSize);
+      return updatedData;
+    } catch (error) {
+      console.error("Error in getPaginatedComments: ", error);
+      throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_COMMENTS, "Failed to paginate comments.");
+    }
   }
 }

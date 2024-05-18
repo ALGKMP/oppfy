@@ -1,4 +1,4 @@
-import { MuxRepository } from "../repositories/mux";
+import { MuxRepository } from "../../repositories/mux";
 
 export class MuxService {
   private muxRepository = new MuxRepository();
