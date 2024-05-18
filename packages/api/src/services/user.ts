@@ -3,7 +3,6 @@ import { FollowRepository } from "../repositories/follow";
 import { FriendRepository } from "../repositories/friend";
 import type { NotificationSettings } from "../repositories/notification-settings";
 import { NotificationSettingsRepository } from "../repositories/notification-settings";
-import { ProfileRepository } from "../repositories/profile";
 import type { PrivacySetting } from "../repositories/user";
 import { UserRepository } from "../repositories/user";
 import { AwsService } from "./aws";
@@ -33,13 +32,12 @@ export class UserService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private awsService = new AwsService();
-  private profileRepository = new ProfileRepository();
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     return user;
@@ -49,7 +47,10 @@ export class UserService {
     const userExists = await this._userExists(userId);
 
     if (userExists) {
-      throw new DomainError(ErrorCode.USER_ALREADY_EXISTS);
+      throw new DomainError(
+        ErrorCode.USER_ALREADY_EXISTS,
+        "User already exists",
+      );
     }
 
     return await this.userRepository.createUser(userId);
@@ -59,7 +60,7 @@ export class UserService {
     const userExists = await this._userExists(userId);
 
     if (!userExists) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     await this.userRepository.deleteUser(userId);
@@ -69,7 +70,7 @@ export class UserService {
     const user = await this.userRepository.getUserProfile(userId);
 
     if (user?.profile === undefined) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, "Profile not found");
     }
 
     return (
@@ -83,7 +84,7 @@ export class UserService {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     return user.privacySetting;
@@ -96,7 +97,7 @@ export class UserService {
     const exists = await this._userExists(userId);
 
     if (!exists) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     const updatedPrivacy = await this.userRepository.updatePrivacySetting(
@@ -104,7 +105,10 @@ export class UserService {
       newPrivacySetting,
     );
     if (!updatedPrivacy) {
-      throw new DomainError(ErrorCode.FAILED_TO_UPDATE_PRIVACY_SETTING);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_UPDATE_PRIVACY_SETTING,
+        "Failed to update privacy settings",
+      );
     }
   }
 
@@ -112,7 +116,7 @@ export class UserService {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     const notificationSettings =
@@ -121,7 +125,10 @@ export class UserService {
       );
 
     if (notificationSettings === undefined) {
-      throw new DomainError(ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND,
+        "Notification settings not found",
+      );
     }
 
     return notificationSettings;
@@ -134,7 +141,7 @@ export class UserService {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     const notificationSettings =
@@ -143,7 +150,10 @@ export class UserService {
       );
 
     if (notificationSettings === undefined) {
-      throw new DomainError(ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND,
+        "Notification settings not found",
+      );
     }
 
     await this.notificationSettingsRepository.updateNotificationSettings(
@@ -269,7 +279,10 @@ export class UserService {
       );
       if (!unfollow) {
         // giving up on variable names
-        throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
+        throw new DomainError(
+          ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
+          "Failed to remove follower",
+        );
       }
     }
 
@@ -279,7 +292,10 @@ export class UserService {
         userId,
       );
       if (!removeFollower) {
-        throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
+        throw new DomainError(
+          ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
+          "Failed to remove follower",
+        );
       }
     }
 
@@ -289,7 +305,10 @@ export class UserService {
         userIdBeingBlocked,
       );
       if (!unfriend) {
-        throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FRIEND);
+        throw new DomainError(
+          ErrorCode.FAILED_TO_REMOVE_FRIEND,
+          "Failed to remove friend",
+        );
       }
     }
 
@@ -298,7 +317,10 @@ export class UserService {
       userIdBeingBlocked,
     );
     if (!result) {
-      throw new DomainError(ErrorCode.FAILED_TO_BLOCK_USER);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_BLOCK_USER,
+        "Failed to block user",
+      );
     }
   }
 
@@ -308,7 +330,10 @@ export class UserService {
       blockedUserId,
     );
     if (!blockedUser) {
-      throw new DomainError(ErrorCode.FAILED_TO_CHECK_RELATIONSHIP);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CHECK_RELATIONSHIP,
+        "Failed to check relationship",
+      );
     }
     return !!blockedUser;
   }
@@ -319,20 +344,26 @@ export class UserService {
       blockedUserId,
     );
     if (!unblock) {
-      throw new DomainError(ErrorCode.FAILED_TO_UNBLOCK_USER);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_UNBLOCK_USER,
+        "Failed to unblock user",
+      );
     }
   }
 
   async followUser(senderId: string, recipientId: string) {
     const alreadyFollowing = await this.isFollowing(senderId, recipientId);
     if (alreadyFollowing) {
-      throw new DomainError(ErrorCode.USER_ALREADY_FOLLOWED);
+      throw new DomainError(
+        ErrorCode.USER_ALREADY_FOLLOWED,
+        "User already followed",
+      );
     }
 
     const sender = await this.userRepository.getUser(senderId);
     const recipient = await this.userRepository.getUser(recipientId);
     if (!recipient || !sender) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     if (recipient.privacySetting === "private") {
@@ -341,7 +372,10 @@ export class UserService {
         recipientId,
       );
       if (!result) {
-        throw new DomainError(ErrorCode.FAILED_TO_REQUEST_FOLLOW);
+        throw new DomainError(
+          ErrorCode.FAILED_TO_REQUEST_FOLLOW,
+          "Failed to request follow",
+        );
       }
     }
 
@@ -350,21 +384,27 @@ export class UserService {
       recipientId,
     );
     if (!result) {
-      throw new DomainError(ErrorCode.FAILED_TO_FOLLOW_USER);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_FOLLOW_USER,
+        "Failed to follow user",
+      );
     }
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
     const isFollowing = await this.isFollowing(senderId, recipientId);
     if (!isFollowing) {
-      throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND);
+      throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND, "Follow not found");
     }
     const result = await this.followRepository.removeFollower(
       senderId,
       recipientId,
     );
     if (!result.insertId) {
-      throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
+        "Failed to remove follower",
+      );
     }
   }
 
@@ -374,14 +414,20 @@ export class UserService {
       recipientId,
     );
     if (!followRequestExists) {
-      throw new DomainError(ErrorCode.FOLLOW_REQUEST_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
+        "Follow request not found",
+      );
     }
     const result = await this.followRepository.removeFollowRequest(
       senderId,
       recipientId,
     );
     if (!result.insertId) {
-      throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST,
+        "Failed to remove follow request",
+      );
     }
 
     const result2 = await this.followRepository.addFollower(
@@ -389,7 +435,10 @@ export class UserService {
       recipientId,
     );
     if (!result2) {
-      throw new DomainError(ErrorCode.FAILED_TO_FOLLOW_USER);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_FOLLOW_USER,
+        "Failed to follow user",
+      );
     }
   }
 
@@ -399,21 +448,30 @@ export class UserService {
       recipientId,
     );
     if (!followRequestExists) {
-      throw new DomainError(ErrorCode.FOLLOW_REQUEST_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
+        "Follow request not found",
+      );
     }
     const result = await this.followRepository.removeFollowRequest(
       senderId,
       recipientId,
     );
     if (!result.insertId) {
-      throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST,
+        "Failed to remove follow request",
+      );
     }
   }
 
   async sendFriendRequest(senderId: string, recipientId: string) {
     const alreadyFriends = await this.isFriends(senderId, recipientId);
     if (alreadyFriends) {
-      throw new DomainError(ErrorCode.USER_ALREADY_FRIENDS);
+      throw new DomainError(
+        ErrorCode.USER_ALREADY_FRIENDS,
+        "User already friends",
+      );
     }
 
     const result = await this.friendRepository.createFriendRequest(
@@ -421,7 +479,10 @@ export class UserService {
       recipientId,
     );
     if (!result) {
-      throw new DomainError(ErrorCode.FAILED_TO_REQUEST_FOLLOW);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_REQUEST_FOLLOW,
+        "Failed to request follow",
+      );
     }
   }
 
@@ -431,16 +492,22 @@ export class UserService {
       requestedId,
     );
     if (!requestExists) {
-      throw new DomainError(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
+        "Friend request not found",
+      );
     }
     await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
- 
+
     const addFriendResult = await this.friendRepository.addFriend(
       requesterId,
       requestedId,
     );
     if (!addFriendResult) {
-      throw new DomainError(ErrorCode.FAILED_TO_ADD_FRIEND);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_ADD_FRIEND,
+        "Failed to add friend",
+      );
     }
   }
 
@@ -450,13 +517,13 @@ export class UserService {
       requestedId,
     );
     if (!requestExists) {
-      throw new DomainError(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
+        "Friend request not found",
+      );
     }
 
-    await this.friendRepository.deleteFriendRequest(
-      requesterId,
-      requestedId,
-    );
+    await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
   }
 
   async removeFriend(userId1: string, userId2: string) {
@@ -469,7 +536,10 @@ export class UserService {
       userId1,
     );
     if (!friendshipExists && !friendshipExists2) {
-      throw new DomainError(ErrorCode.FRIENDSHIP_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.FRIENDSHIP_NOT_FOUND,
+        "Friendship not found",
+      );
     }
 
     if (friendshipExists) {
@@ -478,16 +548,21 @@ export class UserService {
         userId2,
       );
       if (!removeResult) {
-        throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FRIEND);
+        throw new DomainError(
+          ErrorCode.FAILED_TO_REMOVE_FRIEND,
+          "Failed to remove friend",
+        );
       }
-    }
-    else {
+    } else {
       const removeResult = await this.friendRepository.removeFriend(
         userId2,
         userId1,
       );
       if (!removeResult) {
-        throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FRIEND);
+        throw new DomainError(
+          ErrorCode.FAILED_TO_REMOVE_FRIEND,
+          "Failed to remove friend",
+        );
       }
     }
   }
@@ -498,7 +573,7 @@ export class UserService {
       userId,
     );
     if (!followerExists) {
-      throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND);
+      throw new DomainError(ErrorCode.FOLLOW_NOT_FOUND, "Follow not found");
     }
 
     const removeResult = await this.followRepository.removeFollower(
@@ -506,7 +581,10 @@ export class UserService {
       userId,
     );
     if (!removeResult) {
-      throw new DomainError(ErrorCode.FAILED_TO_REMOVE_FOLLOWER);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
+        "Failed to remove follower",
+      );
     }
   }
 
@@ -516,7 +594,10 @@ export class UserService {
       recipientId,
     );
     if (!followRequestExists) {
-      throw new DomainError(ErrorCode.FOLLOW_REQUEST_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
+        "Follow request not found",
+      );
     }
 
     const deleteResult = await this.followRepository.removeFollowRequest(
@@ -524,7 +605,10 @@ export class UserService {
       recipientId,
     );
     if (!deleteResult) {
-      throw new DomainError(ErrorCode.FAILED_TO_CANCEL_FOLLOW_REQUEST);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CANCEL_FOLLOW_REQUEST,
+        "Failed to cancel follow request",
+      );
     }
   }
 
@@ -534,7 +618,10 @@ export class UserService {
       requestedId,
     );
     if (!friendRequestExists) {
-      throw new DomainError(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
+      throw new DomainError(
+        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
+        "Friend request not found",
+      );
     }
 
     const deleteResult = await this.friendRepository.deleteFriendRequest(
@@ -542,7 +629,10 @@ export class UserService {
       requestedId,
     );
     if (!deleteResult) {
-      throw new DomainError(ErrorCode.FAILED_TO_CANCEL_FRIEND_REQUEST);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CANCEL_FRIEND_REQUEST,
+        "Failed to cancel friend request",
+      );
     }
   }
 
@@ -587,7 +677,10 @@ export class UserService {
       };
     } catch (err) {
       console.log(err);
-      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URLs",
+      );
     }
   }
 }
