@@ -9,6 +9,7 @@ import {
   Paragraph,
   SizableText,
   Text,
+  useTheme,
   View,
   XStack,
   YStack,
@@ -18,6 +19,7 @@ import { abbreviateNumber } from "@oppfy/utils";
 
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
+import { useProfileContext } from "~/contexts/ProfileContext";
 import { useUploadProfilePic } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
@@ -26,21 +28,13 @@ import { api } from "~/utils/api";
 type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
 
 const ProfileLayout = () => {
-  const initialData = useLocalSearchParams<{
-    // profileId: string;
-    // fullName: string;
-    username: string;
-    // bio: string;
-    // profilePictureUrl: string;
-  }>();
+  const theme = useTheme();
 
-  useEffect(() => {
-    console.log("LAYOUT", initialData.username);
-  }, [initialData.username]);
+  const { profile } = useProfileContext();
 
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getOtherUserFullProfile.useQuery({
-      profileId: 1,
+      profileId: profile?.id as number, // This can't be null
     });
 
   return (
@@ -56,9 +50,14 @@ const ProfileLayout = () => {
           <TopTabBar {...props} />
         </YStack>
       )}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.background.val,
+        },
+      }}
     >
       <TopTabs.Screen
-        name="index"
+        name="media-of-them"
         options={{
           tabBarLabel: () => <Grid3x3 />,
         }}

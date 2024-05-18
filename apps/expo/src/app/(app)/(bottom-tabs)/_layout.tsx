@@ -19,7 +19,7 @@ import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
-  const router = useRouter();
+  const theme = useTheme();
 
   const { data: profileData } =
     api.profile.getCurrentUsersFullProfile.useQuery();
@@ -29,6 +29,9 @@ const BottomTabsLayout = () => {
       tabBar={(props) => <BottomTabBar {...props} />}
       screenOptions={{
         header: (props) => <Header {...props} />,
+        headerStyle: {
+          backgroundColor: theme.background.val,
+        },
       }}
     >
       <BottomTabs.Screen
@@ -82,10 +85,7 @@ const BottomTabsLayout = () => {
             <View>
               <Pressable onPress={() => router.push("/(app)/(settings)")}>
                 {({ pressed }) => (
-                  <MoreHorizontal
-                    size="$1"
-                    style={{ opacity: pressed ? 0.5 : 1 }}
-                  />
+                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
                 )}
               </Pressable>
             </View>

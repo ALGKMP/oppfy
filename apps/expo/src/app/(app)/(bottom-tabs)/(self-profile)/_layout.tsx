@@ -9,6 +9,7 @@ import {
   Paragraph,
   SizableText,
   Text,
+  useTheme,
   View,
   XStack,
   YStack,
@@ -26,6 +27,8 @@ import { api } from "~/utils/api";
 type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
 
 const ProfileLayout = () => {
+  const theme = useTheme();
+
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getCurrentUsersFullProfile.useQuery();
 
@@ -42,6 +45,11 @@ const ProfileLayout = () => {
           <TopTabBar {...props} />
         </YStack>
       )}
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.background.val,
+        },
+      }}
     >
       <TopTabs.Screen
         name="media-of-you"
