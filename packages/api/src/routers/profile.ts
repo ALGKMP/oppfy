@@ -64,7 +64,7 @@ export const profileRouter = createTRPCRouter({
     .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx }) => {
       try {
-        return await ctx.services.profile.getBasicProfile(ctx.session.uid);
+        return await ctx.services.profile.getBasicProfileByUserId(ctx.session.uid);
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -81,14 +81,14 @@ export const profileRouter = createTRPCRouter({
     )
     .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.getBasicProfile(input.profileId);
+      return await ctx.services.profile.getBasicProfileByUserId(input.profileId);
     }),
 
   getCurrentUsersFullProfile: protectedProcedure
     .output(sharedValidators.user.fullProfile)
     .query(async ({ ctx }) => {
       try {
-        return await ctx.services.profile.getFullProfile(ctx.session.uid);
+        return await ctx.services.profile.getFullProfileByUserId(ctx.session.uid);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
@@ -121,7 +121,7 @@ export const profileRouter = createTRPCRouter({
     .output(sharedValidators.user.fullProfile)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullOtherPersonCantNameForTheLifeOfMeProfile(input.profileId);
+        return await ctx.services.profile.getFullProfileByProfileId(input.profileId);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {

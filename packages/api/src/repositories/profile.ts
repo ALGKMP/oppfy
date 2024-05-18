@@ -41,6 +41,14 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
+  async updateProfile(profileId: number, update: Partial<typeof schema.profile.$inferInsert>) {
+    return await this.db
+      .update(schema.profile)
+      .set(update)
+      .where(eq(schema.profile.id, profileId));
+  }
+
+  @handleDatabaseErrors
   async getProfilePicture(profileId: number) {
     return await this.db.query.profile.findFirst({
       where: eq(schema.profile.id, profileId),

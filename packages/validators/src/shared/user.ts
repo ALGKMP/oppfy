@@ -51,7 +51,7 @@ export const blockedUser = z.object({
 
 export const updateProfile = z.object({
   username: z.string().optional(),
-  name: z.string().optional(),
+  fullName: z.string().optional(),
   bio: z.string().optional(),
 });
 
