@@ -13,7 +13,7 @@ export class PrivacyService {
 
   async getPrivacySettings(userId: string) {
     const user = await this.userRepository.getUser(userId);
-    if (user === undefined) {
+    if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found');
     }
     return user.privacySetting;

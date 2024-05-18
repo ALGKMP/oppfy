@@ -18,39 +18,41 @@ export class ProfileService {
   private followersRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
 
-  async _getUserProfile(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-
+  async updateFullName(userId: string, fullName: string) {
+    const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
-    const profile = await this.profileRepository.getProfile(user.profileId);
-
-    if (!profile) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
-
-    return profile;
-  }
-
-  async updateFullName(userId: string, fullName: string) {
-    const profile = await this._getUserProfile(userId);
-    return await this.profileRepository.updateFullName(profile.id, fullName);
+    return await this.profileRepository.updateFullName(
+      user.profile.id,
+      fullName,
+    );
   }
 
   async updateDateOfBirth(userId: string, dateOfBirth: Date) {
-    const profile = await this._getUserProfile(userId);
-    await this.profileRepository.updateDateOfBirth(profile.id, dateOfBirth);
+    const user = await this.userRepository.getUserProfile(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+    await this.profileRepository.updateDateOfBirth(
+      user.profile.id,
+      dateOfBirth,
+    );
   }
 
   async updateBio(userId: string, bio: string) {
-    const profile = await this._getUserProfile(userId);
-    await this.profileRepository.updateBio(profile.id, bio);
+    const user = await this.userRepository.getUserProfile(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+    await this.profileRepository.updateBio(user.profile.id, bio);
   }
 
   async updateUsername(userId: string, newUsername: string) {
-    const profile = await this._getUserProfile(userId);
+    const user = await this.userRepository.getUserProfile(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
 
     const usernameExists =
       await this.profileRepository.usernameExists(newUsername);
@@ -59,27 +61,39 @@ export class ProfileService {
       throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
     }
 
-    await this.profileRepository.updateUsername(profile.id, newUsername);
+    await this.profileRepository.updateUsername(user.profile.id, newUsername);
   }
 
   async updateProfile(userId: string, updates: UpdateProfile): Promise<void> {
-    const profile = await this._getUserProfile(userId);
+    const user = await this.userRepository.getUserProfile(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
 
     // Build an update object dynamically based on what's provided
     if (updates.name !== undefined) {
-      await this.profileRepository.updateFullName(profile.id, updates.name);
+      await this.profileRepository.updateFullName(
+        user.profile.id,
+        updates.name,
+      );
     }
     if (updates.bio !== undefined) {
-      await this.profileRepository.updateBio(profile.id, updates.bio);
+      await this.profileRepository.updateBio(user.profile.id, updates.bio);
     }
     if (updates.username !== undefined) {
-      await this.profileRepository.updateUsername(profile.id, updates.username);
+      await this.profileRepository.updateUsername(
+        user.profile.id,
+        updates.username,
+      );
     }
   }
 
   async updateProfilePicture(userId: string, key: string) {
-    const profile = await this._getUserProfile(userId);
-    await this.profileRepository.updateProfilePicture(profile.id, key);
+    const user = await this.userRepository.getUserProfile(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
+    }
+    await this.profileRepository.updateProfilePicture(user.profile.id, key);
   }
 
   async getBasicProfile(userId: string) {
@@ -244,7 +258,10 @@ export class ProfileService {
   }
 
   async removeProfilePicture(userId: string) {
-    const profile = await this._getUserProfile(userId);
+    const user = await this.userRepository.getUserProfile(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
 
     const bucket = process.env.S3_POST_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
@@ -254,6 +271,6 @@ export class ProfileService {
       throw new DomainError(ErrorCode.FAILED_TO_DELETE);
     }
 
-    await this.profileRepository.removeProfilePicture(profile.id);
+    await this.profileRepository.removeProfilePicture(user.profile.id);
   }
 }
