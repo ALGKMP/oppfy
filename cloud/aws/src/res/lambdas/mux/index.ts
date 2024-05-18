@@ -1,57 +1,80 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { z } from "zod";
+
+import { db, schema } from "@oppfy/db";
 import { mux } from "@oppfy/mux";
-import { db, schema } from '@oppfy/db';
-import { z } from 'zod';
 
 // Your Mux signing secret
 const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
 
 export const handler = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
-
     // Extract the raw body and headers
     const rawBody = event.body; // need this to verify mux signature
-    const muxSignatureHeader = event.headers['mux-signature'];
+    const muxSignatureHeader = event.headers["mux-signature"];
 
     if (!rawBody || !muxSignatureHeader) {
       return {
         statusCode: 400,
-        body: 'Missing raw body or mux-signature header',
+        body: "Missing raw body or mux-signature header",
       };
     }
 
-    const jsonBody = JSON.parse(rawBody)
+    const jsonBody = JSON.parse(rawBody);
+    console.log("Received Mux webhook event:", jsonBody)
 
-    const muxBodySchema = z.object({
-      type: z.string(), 
-      object: z.object({
-        id: z.string(),
+    const muxBodySchema = z
+      .object({
         type: z.string(),
-        error: z.string().optional(),
-      }),
-    }).passthrough();
+        object: z.object({
+          id: z.string(),
+          type: z.string(),
+          error: z.string().optional(),
+        }),
+        data: z.object({
+          passthrough: z.string().optional(),
+        })
+      })
+      .passthrough();
+
+    const metadataSchema = z.object({
+      authorId: z.string(),
+      recipientId: z.string(),
+      caption: z.string().nullable(),
+    });
 
     const data = muxBodySchema.parse(jsonBody);
 
+    const jsonMetadata = data.data.passthrough
+      ? JSON.parse(data.data.passthrough)
+      : {};
+
+    const metadata = metadataSchema.parse(jsonMetadata);
+
     // Verify the Mux webhook signature
     try {
-      console.log(`Verifying Mux signature: ${muxSignatureHeader}`)
-      mux.webhooks.verifySignature(rawBody, {"mux-signature": muxSignatureHeader}, muxWebhookSecret);
-      console.log('Mux signature verified');
+      console.log(`Verifying Mux signature: ${muxSignatureHeader}`);
+      mux.webhooks.verifySignature(
+        rawBody,
+        { "mux-signature": muxSignatureHeader },
+        muxWebhookSecret,
+      );
+      console.log("Mux signature verified");
+
       await db.insert(schema.post).values({
-        recipient: 'j8liUllmz5aEFt157qfe1ptSWgZ2',
-        caption: 'New video uploaded',
+        recipient: metadata.recipientId,
+        caption: metadata.caption,
         key: data.object.id,
-        author: 'kYJQhA9vTLdUynlItU3y907c0Vs1',
-        mediaType: "image",
-      })
+        author: metadata.authorId,
+        mediaType: "video",
+      });
     } catch (error) {
-      console.error('Error verifying Mux webhook signature:', error);
+      console.error("Error verifying Mux webhook signature:", error);
       return {
         statusCode: 401,
-        body: 'Invalid Mux Webhook Signature',
+        body: "Invalid Mux Webhook Signature",
       };
     }
 
@@ -60,13 +83,13 @@ export const handler = async (
 
     return {
       statusCode: 200,
-      body: 'Webhook received and processed',
+      body: "Webhook received and processed",
     };
   } catch (error) {
-    console.error('Error processing webhook:', error);
+    console.error("Error processing webhook:", error);
     return {
       statusCode: 500,
-      body: 'Internal Server Error',
+      body: "Internal Server Error",
     };
   }
 };
