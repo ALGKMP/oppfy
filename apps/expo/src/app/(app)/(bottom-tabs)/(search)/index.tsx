@@ -105,11 +105,7 @@ const Search = () => {
             />
           ) : (
             <View flex={1} justifyContent="center">
-              <EmptyPlaceholder
-                title="Followers"
-                subtitle="You'll see all the people who follow you here."
-                icon={<UserRoundPlus />}
-              />
+              {/* TODO: We'll need to add user recommendations */}
             </View>
           )}
         </View>
