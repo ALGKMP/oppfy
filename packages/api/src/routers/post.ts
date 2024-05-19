@@ -119,6 +119,22 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
+    
+    likePost: protectedProcedure
+    .input(z.object({
+      userId: z.string(),
+      postId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.likePost(ctx.session.uid, input.postId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to like post.",
+        });
+      }
+    }),
 });
 
 export default postRouter;
