@@ -30,16 +30,12 @@ import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
+type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
 
 const ProfileLayout = () => {
   const theme = useTheme();
 
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
-
-  useEffect(() => {
-    console.log("PROFILE LAYOUT:", profileId);
-  }, [profileId]);
 
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getOtherUserFullProfile.useQuery({
@@ -148,7 +144,7 @@ const Profile = (props: ProfileProps) => {
               router.navigate({
                 pathname: "/[connections]/",
                 params: {
-                  userId: props.loading ? "" : props.data.userId,
+                  userId: props.loading ? "" : props.data.userid,
                 },
               })
             }
@@ -160,7 +156,16 @@ const Profile = (props: ProfileProps) => {
         <XStack gap="$7">
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/friends-list")}
+            // onPress={() => router.push("/friends-list")}
+            onPress={() =>
+              router.navigate({
+                pathname: "/[connections]/",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                  initialRouteName: "friends-list",
+                },
+              })
+            }
           >
             <Stat
               label="Friends"
@@ -172,7 +177,16 @@ const Profile = (props: ProfileProps) => {
 
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/followers-list")}
+            // onPress={() => router.push("/followers-list")}
+            onPress={() =>
+              router.navigate({
+                pathname: "/[connections]/",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                  initialRouteName: "followers-list",
+                },
+              })
+            }
           >
             <Stat
               label="Followers"

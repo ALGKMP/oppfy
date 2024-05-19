@@ -6,14 +6,21 @@ import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
 
 const ConnectionsLayout = () => {
-  const { userId } = useLocalSearchParams<{ userId: string }>();
+  const { userId, initialRouteName } = useLocalSearchParams<{
+    userId: string;
+    initialRouteName: string;
+  }>();
 
   useEffect(() => {
     console.log("ConnectionsLayout", userId);
   }, [userId]);
 
   return (
-    <TopTabs tabBar={(props) => <TopTabBar {...props} />} backBehavior="none">
+    <TopTabs
+      tabBar={(props) => <TopTabBar {...props} />}
+      backBehavior="none"
+      initialRouteName={initialRouteName}
+    >
       <TopTabs.Screen
         name="friends-list"
         options={{
@@ -27,6 +34,7 @@ const ConnectionsLayout = () => {
           title: "Test",
           tabBarLabel: "Followers",
         }}
+        initialParams={{ userId }}
       />
       <TopTabs.Screen
         name="following-list"
@@ -34,6 +42,7 @@ const ConnectionsLayout = () => {
           title: "Test",
           tabBarLabel: "Following",
         }}
+        initialParams={{ userId }}
       />
     </TopTabs>
   );
