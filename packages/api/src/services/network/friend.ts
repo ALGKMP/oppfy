@@ -11,9 +11,10 @@ export class FriendService {
   async sendFriendRequest(senderId: string, recipientId: string) {
     const alreadyFriends = await this.isFriends(senderId, recipientId);
     if (alreadyFriends) {
+      console.error(`SERVICE ERROR: Users "${senderId}" and "${recipientId}" are already friends`);
       throw new DomainError(
         ErrorCode.USER_ALREADY_FRIENDS,
-        "User already friends",
+        "Users are already friends",
       );
     }
     const result = await this.friendRepository.createFriendRequest(
@@ -21,9 +22,10 @@ export class FriendService {
       recipientId,
     );
     if (!result) {
+      console.error(`SERVICE ERROR: Failed to create friend request from "${senderId}" to "${recipientId}"`);
       throw new DomainError(
         ErrorCode.FAILED_TO_REQUEST_FRIEND,
-        "Failed to request friend",
+        "Failed to create friend request",
       );
     }
   }
@@ -34,6 +36,7 @@ export class FriendService {
       requestedId,
     );
     if (!requestExists) {
+      console.error(`SERVICE ERROR: Friend request from "${requesterId}" to "${requestedId}" not found`);
       throw new DomainError(
         ErrorCode.FRIEND_REQUEST_NOT_FOUND,
         "Friend request not found",
@@ -45,6 +48,7 @@ export class FriendService {
       requestedId,
     );
     if (!addFriendResult) {
+      console.error(`SERVICE ERROR: Failed to add friend for requester "${requesterId}" and requested "${requestedId}"`);
       throw new DomainError(
         ErrorCode.FAILED_TO_ADD_FRIEND,
         "Failed to add friend",
@@ -58,6 +62,7 @@ export class FriendService {
       requestedId,
     );
     if (!requestExists) {
+      console.error(`SERVICE ERROR: Friend request from "${requesterId}" to "${requestedId}" not found`);
       throw new DomainError(
         ErrorCode.FRIEND_REQUEST_NOT_FOUND,
         "Friend request not found",
@@ -72,7 +77,11 @@ export class FriendService {
       requestedId,
     );
     if (!friendRequestExists) {
-      throw new DomainError(ErrorCode.FRIEND_REQUEST_NOT_FOUND);
+      console.error(`SERVICE ERROR: Friend request from "${requesterId}" to "${requestedId}" not found`);
+      throw new DomainError(
+        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
+        "Friend request not found",
+      );
     }
 
     const deleteResult = await this.friendRepository.deleteFriendRequest(
@@ -80,7 +89,11 @@ export class FriendService {
       requestedId,
     );
     if (!deleteResult) {
-      throw new DomainError(ErrorCode.FAILED_TO_CANCEL_FRIEND_REQUEST);
+      console.error(`SERVICE ERROR: Failed to cancel friend request from "${requesterId}" to "${requestedId}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CANCEL_FRIEND_REQUEST,
+        "Failed to cancel friend request",
+      );
     }
   }
 
@@ -90,6 +103,7 @@ export class FriendService {
       userId2,
     );
     if (!friendshipExists) {
+      console.error(`SERVICE ERROR: Friendship between "${userId1}" and "${userId2}" not found`);
       throw new DomainError(
         ErrorCode.FRIENDSHIP_NOT_FOUND,
         "Friendship not found",
@@ -100,6 +114,7 @@ export class FriendService {
       userId2,
     );
     if (!removeResult) {
+      console.error(`SERVICE ERROR: Failed to remove friendship between "${userId1}" and "${userId2}"`);
       throw new DomainError(
         ErrorCode.FAILED_TO_REMOVE_FRIEND,
         "Failed to remove friend",
