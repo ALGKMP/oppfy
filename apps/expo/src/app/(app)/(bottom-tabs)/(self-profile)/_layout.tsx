@@ -3,6 +3,7 @@ import { Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
+import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
   Button,
@@ -37,6 +38,7 @@ const ProfileLayout = () => {
       tabBar={(props) => (
         <YStack>
           {profileData === undefined ? (
+            // {true ? (
             <Profile loading />
           ) : (
             <Profile loading={false} data={profileData} />
@@ -82,90 +84,105 @@ const Profile = (props: ProfileProps) => {
   });
 
   return (
-    <YStack
-      padding="$4"
-      alignItems="center"
-      backgroundColor="$background"
-      gap="$4"
-    >
-      <TouchableOpacity
-        style={{ alignItems: "center" }}
-        disabled={props.loading}
-        onPress={pickAndUploadImage}
+    <Skeleton.Group show={props.loading}>
+      <YStack
+        padding="$4"
+        alignItems="center"
+        backgroundColor="$background"
+        gap="$4"
       >
-        <Avatar circular size="$10" bordered>
-          <Avatar.Image
-            {...(props.loading
-              ? {}
-              : { src: imageUri ?? props.data.profilePictureUrl })}
-          />
-          <Avatar.Fallback />
-        </Avatar>
-      </TouchableOpacity>
+        <Skeleton radius={100} width={105}>
+          <TouchableOpacity
+            style={{ alignItems: "center" }}
+            disabled={props.loading}
+            onPress={pickAndUploadImage}
+          >
+            <Avatar circular size="$10" bordered>
+              <Avatar.Image
+                {...(props.loading
+                  ? {}
+                  : { src: imageUri ?? props.data.profilePictureUrl })}
+              />
+              <Avatar.Fallback />
+            </Avatar>
+          </TouchableOpacity>
+        </Skeleton>
 
-      <YStack alignItems="center">
-        <SizableText size="$4">
-          {props.loading ? "" : props.data.name}
-        </SizableText>
-        <Paragraph theme="alt1">
-          {props.loading ? "" : props.data.bio}
-        </Paragraph>
+        <YStack alignItems="center" gap="$2">
+          <Skeleton width={100} height={25}>
+            <SizableText size="$4" textAlign="center">
+              {props.loading ? "" : props.data.name}
+            </SizableText>
+          </Skeleton>
+
+          {!props.loading && props.data.bio && (
+            <Skeleton width={250} height={50}>
+              <Paragraph theme="alt1" textAlign="center">
+                {props.loading ? "" : props.data.bio}
+              </Paragraph>
+            </Skeleton>
+          )}
+        </YStack>
+
+        <XStack width={250} gap="$4">
+          <Button
+            size="$3"
+            flex={1}
+            disabled={props.loading}
+            onPress={() => router.push("/edit-profile")}
+          >
+            Edit Profile
+          </Button>
+          <Button
+            size="$3"
+            flex={1}
+            disabled={props.loading}
+            onPress={() => router.push("/share-profile")}
+          >
+            Share Profile
+          </Button>
+        </XStack>
+
+        <XStack gap="$7">
+          <TouchableOpacity
+            disabled={props.loading}
+            onPress={() => router.push("/friends-list")}
+          >
+            <Stat
+              label="Friends"
+              value={
+                props.loading ? "0" : abbreviateNumber(props.data.friendCount)
+              }
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            disabled={props.loading}
+            onPress={() => router.push("/followers-list")}
+          >
+            <Stat
+              label="Followers"
+              value={
+                props.loading ? "0" : abbreviateNumber(props.data.followerCount)
+              }
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={props.loading}
+            onPress={() => router.push("/following-list")}
+          >
+            <Stat
+              label="Following"
+              value={
+                props.loading
+                  ? "0"
+                  : abbreviateNumber(props.data.followingCount)
+              }
+            />
+          </TouchableOpacity>
+        </XStack>
       </YStack>
-
-      <XStack gap="$4">
-        <Button
-          size="$3"
-          disabled={props.loading}
-          onPress={() => router.push("/edit-profile")}
-        >
-          Edit Profile
-        </Button>
-        <Button
-          size="$3"
-          disabled={props.loading}
-          onPress={() => router.push("/share-profile")}
-        >
-          Share Profile
-        </Button>
-      </XStack>
-
-      <XStack gap="$7">
-        <TouchableOpacity
-          disabled={props.loading}
-          onPress={() => router.push("/friends-list")}
-        >
-          <Stat
-            label="Friends"
-            value={
-              props.loading ? "" : abbreviateNumber(props.data.friendCount)
-            }
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          disabled={props.loading}
-          onPress={() => router.push("/followers-list")}
-        >
-          <Stat
-            label="Followers"
-            value={
-              props.loading ? "" : abbreviateNumber(props.data.followerCount)
-            }
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          disabled={props.loading}
-          onPress={() => router.push("/following-list")}
-        >
-          <Stat
-            label="Following"
-            value={
-              props.loading ? "" : abbreviateNumber(props.data.followingCount)
-            }
-          />
-        </TouchableOpacity>
-      </XStack>
-    </YStack>
+    </Skeleton.Group>
   );
 };
 
