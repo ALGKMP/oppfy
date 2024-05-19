@@ -11,7 +11,7 @@ export class FriendRepository {
   async addFriend(userId1: string, userId2: string) {
     // Insert both directions to make it easier to retrieve later
     await this.db.insert(schema.friend).values({ userId1, userId2 });
-    await this.db.insert(schema.friend).values({userId2, userId1});
+    return await this.db.insert(schema.friend).values({userId2, userId1});
   }
 
   @handleDatabaseErrors
