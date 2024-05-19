@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -13,6 +13,7 @@ import { api } from "~/utils/api";
 const Following = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
 
+  const router = useRouter();
   const headerHeight = useHeaderHeight();
 
   const unfollow = api.user.unfollowUser.useMutation({
@@ -121,6 +122,12 @@ const Following = () => {
                         ? { text: "Follow", icon: UserRoundPlus }
                         : { text: "Unfollow", icon: UserRoundMinus }),
                     }}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/profile/[profile-id]",
+                        params: { profileId: String(3401) },
+                      })
+                    }
                   />
                 )}
               </View>

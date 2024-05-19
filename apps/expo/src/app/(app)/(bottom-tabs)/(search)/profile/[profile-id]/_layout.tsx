@@ -144,7 +144,7 @@ const Profile = (props: ProfileProps) => {
               router.navigate({
                 pathname: "/[connections]/",
                 params: {
-                  userId: props.loading ? "" : props.data.userid,
+                  userId: props.loading ? "" : props.data.userId,
                 },
               })
             }
@@ -158,7 +158,10 @@ const Profile = (props: ProfileProps) => {
             disabled={props.loading}
             // onPress={() => router.push("/friends-list")}
             onPress={() =>
-              router.navigate({
+              router.push<{
+                userId: string;
+                initialRouteName: string;
+              }>({
                 pathname: "/[connections]/",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
@@ -179,7 +182,7 @@ const Profile = (props: ProfileProps) => {
             disabled={props.loading}
             // onPress={() => router.push("/followers-list")}
             onPress={() =>
-              router.navigate({
+              router.push({
                 pathname: "/[connections]/",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
@@ -197,7 +200,15 @@ const Profile = (props: ProfileProps) => {
           </TouchableOpacity>
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/following-list")}
+            onPress={() =>
+              router.push({
+                pathname: "/[connections]/",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                  initialRouteName: "following-list",
+                },
+              })
+            }
           >
             <Stat
               label="Following"

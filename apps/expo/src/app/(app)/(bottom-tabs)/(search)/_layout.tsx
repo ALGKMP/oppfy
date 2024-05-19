@@ -61,8 +61,7 @@ const SearchLayout = () => {
         <Stack.Screen
           name="[connections]"
           options={{
-            headerLeft: () => null,
-            title: "Search",
+            title: "Connections",
           }}
         />
       </Stack>
