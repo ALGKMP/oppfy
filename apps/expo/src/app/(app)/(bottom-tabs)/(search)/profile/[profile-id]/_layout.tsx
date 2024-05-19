@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useGlobalSearchParams,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
@@ -31,11 +35,15 @@ type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
 const ProfileLayout = () => {
   const theme = useTheme();
 
-  const { profile } = useProfileContext();
+  const { profileId } = useLocalSearchParams<{ profileId: string }>();
+
+  useEffect(() => {
+    console.log("PROFILE LAYOUT:", profileId);
+  }, [profileId]);
 
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getOtherUserFullProfile.useQuery({
-      profileId: profile?.id as number, // Impossible for this to be null
+      profileId: Number(profileId),
     });
 
   return (
@@ -136,7 +144,14 @@ const Profile = (props: ProfileProps) => {
             size="$3"
             flex={1}
             disabled={props.loading}
-            onPress={() => router.push("/share-profile")}
+            onPress={() =>
+              router.navigate({
+                pathname: "/[connections]/",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                },
+              })
+            }
           >
             Share Profile
           </Button>

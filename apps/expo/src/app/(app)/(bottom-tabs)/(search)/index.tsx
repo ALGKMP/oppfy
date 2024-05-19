@@ -95,7 +95,10 @@ const Search = () => {
                             profilePictureUrl: item.profilePictureUrl,
                           });
 
-                          router.push("/media-of-them");
+                          router.navigate({
+                            pathname: "/profile/[profile-id]/",
+                            params: { profileId: String(item.id) },
+                          });
                         }}
                       />
                     )}

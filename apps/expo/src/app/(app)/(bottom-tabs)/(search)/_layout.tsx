@@ -35,8 +35,9 @@ const SearchLayout = () => {
             title: "Search",
           }}
         />
+
         <Stack.Screen
-          name="(profile)"
+          name="profile/[profile-id]"
           options={{
             headerTitle: () => {
               const { profile } = useProfileContext();
@@ -55,6 +56,13 @@ const SearchLayout = () => {
                 </Pressable>
               </View>
             ),
+          }}
+        />
+        <Stack.Screen
+          name="[connections]"
+          options={{
+            headerLeft: () => null,
+            title: "Search",
           }}
         />
       </Stack>
