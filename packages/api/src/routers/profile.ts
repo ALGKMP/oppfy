@@ -85,7 +85,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   getCurrentUsersFullProfile: protectedProcedure
-    .output(sharedValidators.user.fullProfile)
+    .output(sharedValidators.user.currentUserFullProfile)
     .query(async ({ ctx }) => {
       try {
         return await ctx.services.profile.getFullProfileByUserId(ctx.session.uid);
@@ -112,16 +112,16 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // TRPC Procedure for getting a full user profile
-  getOtherUserFullProfile: publicProcedure
+  getOtherUserFullProfile: protectedProcedure
     .input(
       z.object({
         profileId: z.number(),
       }),
     )
-    .output(sharedValidators.user.fullProfile)
+    .output(sharedValidators.user.otherUserFullProfile)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullProfileByProfileId(input.profileId);
+        return await ctx.services.profile.getFullProfileByProfileId(ctx.session.uid, input.profileId);
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
