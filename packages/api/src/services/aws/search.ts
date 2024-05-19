@@ -1,11 +1,11 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { AwsRepository } from "../../repositories/aws";
+import { S3Repository } from "../../repositories/s3";
 import { SearchRepository } from "../../repositories/search";
 import { UserRepository } from "../../repositories/user";
 
 export class SearchService {
   private searchRepository = new SearchRepository();
-  private awsRepository = new AwsRepository();
+  private s3Repository = new S3Repository();
   private userRepository = new UserRepository();
 
   async profilesByUsername(username: string, currentUserId: string) {
@@ -24,7 +24,7 @@ export class SearchService {
     const profilesWithUrls = await Promise.all(
       profiles.map(async ({ profilePictureKey, ...restProfile }) => {
         const profilePictureUrl =
-          await this.awsRepository.getObjectPresignedUrl({
+          await this.s3Repository.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: profilePictureKey,
           });

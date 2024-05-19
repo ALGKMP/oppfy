@@ -17,7 +17,7 @@ export type { GetObjectCommandInput, PutObjectCommandInput };
 
 const FIVE_MINUTES = 300;
 
-export class AwsRepository {
+export class S3Repository {
   @handleAwsErrors
   async putObjectPresignedUrl(putObjectCommandInput: PutObjectCommandInput) {
     const command = new PutObjectCommand(putObjectCommandInput);

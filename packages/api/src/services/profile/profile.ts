@@ -3,7 +3,7 @@ import type { z } from "zod";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { AwsRepository } from "../../repositories/aws";
+import { S3Repository } from "../../repositories/s3";
 import { FollowRepository } from "../../repositories/follow";
 import { FriendRepository } from "../../repositories/friend";
 import { ProfileRepository } from "../../repositories/profile";
@@ -14,7 +14,7 @@ type UpdateProfile = z.infer<typeof sharedValidators.user.updateProfile>;
 export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
-  private awsRepository = new AwsRepository();
+  private s3Repository = new S3Repository();
   private followersRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
 
@@ -102,7 +102,7 @@ export class ProfileService {
       );
     }
 
-    const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
+    const profilePictureUrl = this.s3Repository.getObjectPresignedUrl({
       Bucket: process.env.S3_PROFILE_BUCKET!,
       Key: profile.profilePictureKey,
     });
@@ -135,7 +135,7 @@ export class ProfileService {
       );
     }
 
-    const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
+    const profilePictureUrl = this.s3Repository.getObjectPresignedUrl({
       Bucket: process.env.S3_PROFILE_BUCKET!,
       Key: profile.profilePictureKey,
     });
@@ -187,7 +187,7 @@ export class ProfileService {
       );
     }
 
-    const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
+    const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
       Bucket: process.env.S3_PROFILE_BUCKET!,
       Key: profile.profilePictureKey,
     });
@@ -260,7 +260,7 @@ export class ProfileService {
       );
     }
 
-    const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
+    const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
       Bucket: process.env.S3_PROFILE_BUCKET!,
       Key: profile.profilePictureKey,
     });
@@ -299,7 +299,7 @@ export class ProfileService {
 
     const bucket = process.env.S3_POST_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
-    const deleteObject = await this.awsRepository.deleteObject(bucket, key);
+    const deleteObject = await this.s3Repository.deleteObject(bucket, key);
 
     if (!deleteObject.DeleteMarker) {
       console.error(`SERVICE ERROR: Failed to delete profile picture for user ID "${userId}"`);

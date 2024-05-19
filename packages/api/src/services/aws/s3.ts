@@ -2,7 +2,7 @@ import type { z } from "zod";
 
 import type { trpcValidators } from "@oppfy/validators";
 
-import { AwsRepository } from "../../repositories/aws";
+import { S3Repository } from "../../repositories/s3";
 
 type ContentType = "image/jpeg" | "image/png";
 
@@ -39,12 +39,12 @@ interface GetObjectPresignedUrlInput {
 }
 
 export class S3Service {
-  private awsRepository = new AwsRepository();
+  private s3Repository = new S3Repository();
 
   async putObjectPresignedUrl(
     putObjectCommandInput: PutObjectPresignedUrlInput,
   ) {
-    return await this.awsRepository.putObjectPresignedUrl(
+    return await this.s3Repository.putObjectPresignedUrl(
       putObjectCommandInput,
     );
   }
@@ -52,7 +52,7 @@ export class S3Service {
   async putObjectPresignedUrlWithPostMetadata(
     putObjectCommandInput: PutObjectPresignedUrlWithPostMetadataInput,
   ) {
-    return await this.awsRepository.putObjectPresignedUrl(
+    return await this.s3Repository.putObjectPresignedUrl(
       putObjectCommandInput,
     );
   }
@@ -60,7 +60,7 @@ export class S3Service {
   async putObjectPresignedUrlWithProfilePictureMetadata(
     putObjectCommandInput: PutObjectPresignedUrlWithProfilePictureMetadataInput,
   ) {
-    return await this.awsRepository.putObjectPresignedUrl(
+    return await this.s3Repository.putObjectPresignedUrl(
       putObjectCommandInput,
     );
   }
@@ -68,12 +68,12 @@ export class S3Service {
   async getObjectPresignedUrl(
     getObjectCommandInput: GetObjectPresignedUrlInput,
   ) {
-    return await this.awsRepository.getObjectPresignedUrl(
+    return await this.s3Repository.getObjectPresignedUrl(
       getObjectCommandInput,
     );
   }
 
   async deleteObject(bucket: string, key: string) {
-    return await this.awsRepository.deleteObject(bucket, key);
+    return await this.s3Repository.deleteObject(bucket, key);
   }
 }
