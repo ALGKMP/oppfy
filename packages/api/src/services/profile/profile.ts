@@ -73,6 +73,7 @@ export class ProfileService {
     const profile = await this._getUserProfile(userId);
     if (profile.username === newUsername) {
       return;
+      
     }
     const usernameExists =
       await this.profileRepository.usernameExists(newUsername);
