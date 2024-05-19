@@ -165,6 +165,7 @@ const Profile = (props: ProfileProps) => {
                 pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
+                  username: props.loading ? "" : props.data.username,
                   initialRouteName: "friends-list",
                 },
               })
@@ -186,6 +187,7 @@ const Profile = (props: ProfileProps) => {
                 pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
+                  username: props.loading ? "" : props.data.username,
                   initialRouteName: "followers-list",
                 },
               })
@@ -205,6 +207,7 @@ const Profile = (props: ProfileProps) => {
                 pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
+                  username: props.loading ? "" : props.data.username,
                   initialRouteName: "following-list",
                 },
               })

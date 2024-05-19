@@ -1,15 +1,23 @@
-import { useEffect } from "react";
-import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
-import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
+import React, { useLayoutEffect } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 
 import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
 
 const ConnectionsLayout = () => {
-  const { userId, initialRouteName } = useLocalSearchParams<{
+  const { userId, username, initialRouteName } = useLocalSearchParams<{
     userId: string;
     initialRouteName: string;
   }>();
+
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: username,
+    });
+  }, [navigation, initialRouteName]);
 
   return (
     <TopTabs

@@ -58,12 +58,7 @@ const SearchLayout = () => {
             ),
           }}
         />
-        <Stack.Screen
-          name="connections/[user-id]"
-          options={{
-            title: "Connections",
-          }}
-        />
+        <Stack.Screen name="connections/[user-id]" />
       </Stack>
     </ProfileProvider>
   );
