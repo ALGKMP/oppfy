@@ -5,7 +5,9 @@ export class FriendService {
   private friendRepository = new FriendRepository();
 
   async isFriends(userId1: string, userId2: string) {
-    return !!(await this.friendRepository.getFriend(userId1, userId2));
+    const friendshipExists = await this.friendRepository.getFriend(userId1, userId2);
+    const reverseFriendshipExists = await this.friendRepository.getFriend(userId2, userId1);
+    return !!friendshipExists || !!reverseFriendshipExists;
   }
 
   async sendFriendRequest(senderId: string, recipientId: string) {
