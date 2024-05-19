@@ -87,6 +87,207 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
+  const handleFollow = () => {
+    // Handle follow logic
+    console.log("Follow");
+  };
+
+  const handleUnfollow = () => {
+    // Handle unfollow logic
+    console.log("Unfollow");
+  };
+
+  const handleAddFriend = () => {
+    // Handle add friend logic
+    console.log("Add Friend");
+  };
+
+  const handleRemoveFriend = () => {
+    // Handle remove friend logic
+    console.log("Remove Friend");
+  };
+
+  const handleCancelFollowRequest = () => {
+    // Handle cancel follow request logic
+    console.log("Cancel Follow Request");
+  };
+
+  const handleCancelFriendRequest = () => {
+    // Handle cancel friend request logic
+    console.log("Cancel Friend Request");
+  };
+
+  const renderActionButton = () => {
+    if (props.loading) return null;
+
+    const { privacy, currentUserFollowState, currentUserFriendState } =
+      props.data.networkStatus;
+
+    if (privacy === "public") {
+      if (
+        currentUserFollowState === "NotFollowing" &&
+        currentUserFriendState === "NotFriends"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleFollow}>
+              Follow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleAddFriend}>
+              Add Friend
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Following" &&
+        currentUserFriendState === "NotFriends"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleUnfollow}>
+              Unfollow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleAddFriend}>
+              Add Friend
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Following" &&
+        currentUserFriendState === "Requested"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleUnfollow}>
+              Unfollow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
+              Cancel Friend Request
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Following" &&
+        currentUserFriendState === "Friends"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleUnfollow}>
+              Unfollow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleRemoveFriend}>
+              Remove Friend
+            </Button>
+          </>
+        );
+      }
+    } else {
+      if (
+        currentUserFollowState === "NotFollowing" &&
+        currentUserFriendState === "NotFriends"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
+              Request Follow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleAddFriend}>
+              Add Friend
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Requested" &&
+        currentUserFriendState === "NotFriends"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
+              Cancel Follow Request
+            </Button>
+            <Button size="$3" flex={1} onPress={handleAddFriend}>
+              Add Friend
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Following" &&
+        currentUserFriendState === "NotFriends"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleUnfollow}>
+              Unfollow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleAddFriend}>
+              Add Friend
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Requested" &&
+        currentUserFriendState === "Requested"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
+              Cancel Follow Request
+            </Button>
+            <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
+              Cancel Friend Request
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Following" &&
+        currentUserFriendState === "Requested"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleUnfollow}>
+              Unfollow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
+              Cancel Friend Request
+            </Button>
+          </>
+        );
+      }
+
+      if (
+        currentUserFollowState === "Following" &&
+        currentUserFriendState === "Friends"
+      ) {
+        return (
+          <>
+            <Button size="$3" flex={1} onPress={handleUnfollow}>
+              Unfollow
+            </Button>
+            <Button size="$3" flex={1} onPress={handleRemoveFriend}>
+              Remove Friend
+            </Button>
+          </>
+        );
+      }
+    }
+
+    return null;
+  };
+
   return (
     <Skeleton.Group show={props.loading}>
       <YStack
@@ -128,40 +329,14 @@ const Profile = (props: ProfileProps) => {
         </YStack>
 
         <XStack width={250} gap="$4">
-          <Button
-            size="$3"
-            flex={1}
-            disabled={props.loading}
-            onPress={() => router.push("/edit-profile")}
-          >
-            Edit Profile
-          </Button>
-          <Button
-            size="$3"
-            flex={1}
-            disabled={props.loading}
-            onPress={() =>
-              router.navigate({
-                pathname: "connections/[user-id]",
-                params: {
-                  userId: props.loading ? "" : props.data.userId,
-                },
-              })
-            }
-          >
-            Share Profile
-          </Button>
+          {renderActionButton()}
         </XStack>
 
         <XStack gap="$7">
           <TouchableOpacity
             disabled={props.loading}
-            // onPress={() => router.push("/friends-list")}
             onPress={() =>
-              router.push<{
-                userId: string;
-                initialRouteName: string;
-              }>({
+              router.push({
                 pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
@@ -181,7 +356,6 @@ const Profile = (props: ProfileProps) => {
 
           <TouchableOpacity
             disabled={props.loading}
-            // onPress={() => router.push("/followers-list")}
             onPress={() =>
               router.push({
                 pathname: "connections/[user-id]",
