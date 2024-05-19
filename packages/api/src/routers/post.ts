@@ -7,6 +7,7 @@ import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError } from "../errors";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { comment } from "../../../db/src/schema/schema";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
@@ -148,6 +149,23 @@ export const postRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to remove like from post.",
+        });
+      }
+    }),
+
+    commentOnPost: protectedProcedure
+    .input(z.object({
+      userId: z.string(),
+      postId: z.number(),
+      content: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.commentOnPost(ctx.session.uid, input.postId, input.content);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to comment on post.",
         });
       }
     }),
