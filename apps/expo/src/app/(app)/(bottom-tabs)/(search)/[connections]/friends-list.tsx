@@ -14,10 +14,6 @@ import { api } from "~/utils/api";
 const Friends = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
 
-  useEffect(() => {
-    console.log("FRIENDS LIST", userId);
-  }, [userId]);
-
   const headerHeight = useHeaderHeight();
 
   const utils = api.useUtils();

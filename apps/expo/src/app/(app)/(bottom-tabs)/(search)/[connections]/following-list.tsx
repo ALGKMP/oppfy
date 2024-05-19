@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -10,6 +11,8 @@ import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const Following = () => {
+  const { userId } = useLocalSearchParams<{ userId: string }>();
+
   const headerHeight = useHeaderHeight();
 
   const unfollow = api.user.unfollowUser.useMutation({
@@ -36,8 +39,9 @@ const Following = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = api.user.getCurrentUserFollowing.useInfiniteQuery(
+  } = api.user.getOtherUserFollowing.useInfiniteQuery(
     {
+      userId,
       pageSize: 20,
     },
     {

@@ -11,10 +11,6 @@ const ConnectionsLayout = () => {
     initialRouteName: string;
   }>();
 
-  useEffect(() => {
-    console.log("ConnectionsLayout", userId);
-  }, [userId]);
-
   return (
     <TopTabs
       tabBar={(props) => <TopTabBar {...props} />}
@@ -31,7 +27,6 @@ const ConnectionsLayout = () => {
       <TopTabs.Screen
         name="followers-list"
         options={{
-          title: "Test",
           tabBarLabel: "Followers",
         }}
         initialParams={{ userId }}
@@ -39,7 +34,6 @@ const ConnectionsLayout = () => {
       <TopTabs.Screen
         name="following-list"
         options={{
-          title: "Test",
           tabBarLabel: "Following",
         }}
         initialParams={{ userId }}
