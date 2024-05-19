@@ -1,1 +1,1 @@
-export { default as useUploadProfilePic } from "./useUploadProfilePic";
+export { default as useUploadProfilePicture } from "./useUploadProfilePicture";

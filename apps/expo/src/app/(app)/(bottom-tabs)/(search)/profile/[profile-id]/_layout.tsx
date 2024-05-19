@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useGlobalSearchParams,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
@@ -21,21 +25,21 @@ import { abbreviateNumber } from "@oppfy/utils";
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
 import { useProfileContext } from "~/contexts/ProfileContext";
-import { useUploadProfilePic } from "~/hooks/media";
+import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
+type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
 
 const ProfileLayout = () => {
   const theme = useTheme();
 
-  const { profile } = useProfileContext();
+  const { profileId } = useLocalSearchParams<{ profileId: string }>();
 
   const { data: profileData, isLoading: _profileDataIsLoading } =
     api.profile.getOtherUserFullProfile.useQuery({
-      profileId: profile?.id as number, // Impossible for this to be null
+      profileId: Number(profileId),
     });
 
   return (
@@ -136,7 +140,14 @@ const Profile = (props: ProfileProps) => {
             size="$3"
             flex={1}
             disabled={props.loading}
-            onPress={() => router.push("/share-profile")}
+            onPress={() =>
+              router.navigate({
+                pathname: "connections/[user-id]",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                },
+              })
+            }
           >
             Share Profile
           </Button>
@@ -145,7 +156,19 @@ const Profile = (props: ProfileProps) => {
         <XStack gap="$7">
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/friends-list")}
+            // onPress={() => router.push("/friends-list")}
+            onPress={() =>
+              router.push<{
+                userId: string;
+                initialRouteName: string;
+              }>({
+                pathname: "connections/[user-id]",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                  initialRouteName: "friends-list",
+                },
+              })
+            }
           >
             <Stat
               label="Friends"
@@ -157,7 +180,16 @@ const Profile = (props: ProfileProps) => {
 
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/followers-list")}
+            // onPress={() => router.push("/followers-list")}
+            onPress={() =>
+              router.push({
+                pathname: "connections/[user-id]",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                  initialRouteName: "followers-list",
+                },
+              })
+            }
           >
             <Stat
               label="Followers"
@@ -168,7 +200,15 @@ const Profile = (props: ProfileProps) => {
           </TouchableOpacity>
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/following-list")}
+            onPress={() =>
+              router.push({
+                pathname: "connections/[user-id]",
+                params: {
+                  userId: props.loading ? "" : props.data.userId,
+                  initialRouteName: "following-list",
+                },
+              })
+            }
           >
             <Stat
               label="Following"

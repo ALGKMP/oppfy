@@ -5,12 +5,12 @@ import defaultProfilePicture from "@assets/default-profile-picture.png";
 import { Avatar, Button, Spinner, Text, XStack, YStack } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
-import { useUploadProfilePic } from "~/hooks/media";
+import { useUploadProfilePicture } from "~/hooks/media";
 
 const ProfilePicture = () => {
   const router = useRouter();
 
-  const { imageUri, pickAndUploadImage, uploadStatus } = useUploadProfilePic({
+  const { imageUri, pickAndUploadImage, uploadStatus } = useUploadProfilePicture({
     optimisticallyUpdate: true,
   });
 

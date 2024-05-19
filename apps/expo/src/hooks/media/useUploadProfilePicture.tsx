@@ -5,13 +5,13 @@ import { useMutation } from "@tanstack/react-query";
 
 import { api } from "~/utils/api";
 
-interface UseUploadProfilePicInput {
+interface UseUploadProfilePictureInput {
   optimisticallyUpdate: boolean;
 }
 
-const useUploadProfilePic = ({
+const useUploadProfilePicture = ({
   optimisticallyUpdate,
-}: UseUploadProfilePicInput) => {
+}: UseUploadProfilePictureInput) => {
   const [imageUri, setImageUri] = useState<string | null>(null);
 
   const utils = api.useUtils();
@@ -110,4 +110,4 @@ const useUploadProfilePic = ({
   };
 };
 
-export default useUploadProfilePic;
+export default useUploadProfilePicture;
