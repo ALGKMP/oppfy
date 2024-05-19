@@ -71,6 +71,9 @@ export class ProfileService {
 
   async updateUsername(userId: string, newUsername: string) {
     const profile = await this._getUserProfile(userId);
+    if (profile.username === newUsername) {
+      return;
+    }
     const usernameExists =
       await this.profileRepository.usernameExists(newUsername);
     if (usernameExists) {
@@ -373,6 +376,239 @@ export class ProfileService {
       otherUserFriendState: "NotFriends",
     };
 
+    const blocked = await this.blockRepository.getBlockedUser(
+      otherUser.id,
+      currentUserId,
+    );
+
+    // Check if the privacy setting is public
+    if (otherUser.privacySetting === "public") {
+      // Retrieve the current user's follow status towards the other user
+      const currentUserFollowState = await this.followRepository.getFollower(
+        currentUserId,
+        otherUser.id,
+      );
+      // Retrieve the other user's follow status towards the current user
+      const otherUserFollowState = await this.followRepository.getFollower(
+        otherUser.id,
+        currentUserId,
+      );
+
+      // Update networkStatus with the follow states
+      networkStatus.currentUserFollowState = currentUserFollowState
+        ? "Following"
+        : "NotFollowing";
+      networkStatus.otherUserFollowState = otherUserFollowState
+        ? "Following"
+        : "NotFollowing";
+
+      // Retrieve the current user's friend status towards the other user
+      const currentUserFriendState = await this.friendsRepository.getFriend(
+        currentUserId,
+        otherUser.id,
+      );
+      // Retrieve the other user's friend status towards the current user
+      const otherUserFriendState = await this.friendsRepository.getFriend(
+        otherUser.id,
+        currentUserId,
+      );
+
+      // Check if either user is friends with the other (a little redundant, but will help catch logic errors)
+      if (currentUserFriendState && otherUserFriendState) {
+        networkStatus.currentUserFriendState = "Friends";
+        networkStatus.otherUserFriendState = "Friends";
+      } else {
+        // Retrieve any friend requests made by the current user to the other user
+        const currentUserFriendRequest =
+          await this.friendsRepository.getFriendRequest(
+            currentUserId,
+            otherUser.id,
+          );
+        // Retrieve any friend requests made by the other user to the current user
+        const otherUserFriendRequest =
+          await this.friendsRepository.getFriendRequest(
+            otherUser.id,
+            currentUserId,
+          );
+
+        // If current user has sent a friend request to the other user
+        if (currentUserFriendRequest) {
+          networkStatus.currentUserFriendState = "Requested";
+          networkStatus.otherUserFriendState = "IncomingRequest";
+        }
+        // If other user has sent a friend request to the current user
+        else if (otherUserFriendRequest) {
+          networkStatus.otherUserFriendState = "Requested";
+          networkStatus.currentUserFriendState = "IncomingRequest";
+        }
+        // If there are no friend requests or friendships, set the states to NotFriends
+        else {
+          networkStatus.currentUserFriendState = "NotFriends";
+          networkStatus.otherUserFriendState = "NotFriends";
+        }
+      }
+    } else if (otherUser.privacySetting === "private") {
+      // For private accounts, follow states can be "Requested" or "Following"
+      const currentUserFollowState = await this.followRepository.getFollower(
+        currentUserId,
+        otherUser.id,
+      );
+      const otherUserFollowState = await this.followRepository.getFollower(
+        otherUser.id,
+        currentUserId,
+      );
+
+      networkStatus.currentUserFollowState = currentUserFollowState
+        ? "Following"
+        : "NotFollowing";
+      networkStatus.otherUserFollowState = otherUserFollowState
+        ? "Following"
+        : "NotFollowing";
+
+      // Check if there is a follow request from current user to other user
+      if (!currentUserFollowState) {
+        const currentUserFollowRequest =
+          await this.followRepository.getFollowRequest(
+            currentUserId,
+            otherUser.id,
+          );
+        networkStatus.currentUserFollowState = currentUserFollowRequest
+          ? "Requested"
+          : "NotFollowing";
+        // If there is a follow requested, the other user's follow state is IncomingRequest
+        if (currentUserFollowRequest) {
+          networkStatus.otherUserFollowState = "IncomingRequest";
+        }
+      }
+
+      // Check if there is a follow request from other user to current user
+      if (!otherUserFollowState) {
+        const otherUserFollowRequest =
+          await this.followRepository.getFollowRequest(
+            otherUser.id,
+            currentUserId,
+          );
+        networkStatus.otherUserFollowState = otherUserFollowRequest
+          ? "Requested"
+          : "NotFollowing";
+        // If there is a follow requested, the current user's follow state is IncomingRequest
+        if (otherUserFollowRequest) {
+          networkStatus.currentUserFollowState = "IncomingRequest";
+        }
+      }
+
+      // Retrieve the current user's friend status towards the other user
+      const currentUserFriendState = await this.friendsRepository.getFriend(
+        currentUserId,
+        otherUser.id,
+      );
+      // Retrieve the other user's friend status towards the current user
+      const otherUserFriendState = await this.friendsRepository.getFriend(
+        otherUser.id,
+        currentUserId,
+      );
+
+      // Check if either user is friends with the other
+      if (currentUserFriendState || otherUserFriendState) {
+        networkStatus.currentUserFriendState = "Friends";
+        networkStatus.otherUserFriendState = "Friends";
+      } else {
+        // Retrieve any friend requests made by the current user to the other user
+        const currentUserFriendRequest =
+          await this.friendsRepository.getFriendRequest(
+            currentUserId,
+            otherUser.id,
+          );
+        // Retrieve any friend requests made by the other user to the current user
+        const otherUserFriendRequest =
+          await this.friendsRepository.getFriendRequest(
+            otherUser.id,
+            currentUserId,
+          );
+
+        // If current user has sent a friend request
+        if (currentUserFriendRequest) {
+          networkStatus.currentUserFriendState = "Requested";
+          networkStatus.otherUserFriendState = "IncomingRequest";
+        }
+        // If other user has sent a friend request
+        else if (otherUserFriendRequest) {
+          networkStatus.otherUserFriendState = "Requested";
+          networkStatus.currentUserFriendState = "IncomingRequest";
+        }
+        // If there are no friend requests or friendships, set the states to NotFriends
+        else {
+          networkStatus.currentUserFriendState = "NotFriends";
+          networkStatus.otherUserFriendState = "NotFriends";
+        }
+      }
+    }
+
+    const profileData: z.infer<
+      typeof sharedValidators.user.otherUserFullProfile
+    > = {
+      userId: otherUser.id,
+      username: username,
+      name: fullName,
+      bio: profile.bio,
+      followerCount,
+      followingCount,
+      friendCount,
+      profilePictureUrl,
+      blocked: !!blocked,
+      networkStatus: networkStatus,
+    };
+
+    return sharedValidators.user.otherUserFullProfile.parse(profileData);
+  }
+
+  async removeProfilePicture(userId: string) {
+    const user = await this.profileRepository.getProfileByUserId(userId);
+    if (!user) {
+      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided user ID.",
+      );
+    }
+
+    const bucket = process.env.S3_POST_BUCKET!;
+    const key = `profile-pictures/${userId}.jpg`;
+    const deleteObject = await this.s3Repository.deleteObject(bucket, key);
+
+    if (!deleteObject.DeleteMarker) {
+      console.error(
+        `SERVICE ERROR: Failed to delete profile picture for user ID "${userId}"`,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_DELETE,
+        "Failed to delete the profile picture.",
+      );
+    }
+
+    await this.profileRepository.removeProfilePicture(user.profile.id);
+  }
+
+  async _getNetworkStatus(currentUserId: string, otherUserId: string ) {
+
+    const otherUser = await this.userRepository.getUser(otherUserId);
+    if (!otherUser) {
+      console.error(`SERVICE ERROR: User not found for user ID "${otherUserId}"`);
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided user ID.",
+      );
+    }
+
+    let networkStatus: z.infer<
+      typeof sharedValidators.user.otherUserFullProfile
+    >["networkStatus"] = {
+      privacy: otherUser.privacySetting,
+      currentUserFollowState: "NotFollowing",
+      otherUserFollowState: "NotFollowing",
+      currentUserFriendState: "NotFriends",
+      otherUserFriendState: "NotFriends",
+    };
 
     const blocked = await this.blockRepository.getBlockedUser(
       otherUser.id,
@@ -542,47 +778,7 @@ export class ProfileService {
       }
     }
 
-    const profileData: z.infer<typeof sharedValidators.user.otherUserFullProfile> = {
-      userId: otherUser.id,
-      username: username,
-      name: fullName,
-      bio: profile.bio,
-      followerCount,
-      followingCount,
-      friendCount,
-      profilePictureUrl,
-      blocked : !!blocked,
-      networkStatus: networkStatus,
-    };
-
-    return sharedValidators.user.otherUserFullProfile.parse(profileData);
-  }
-
-  async removeProfilePicture(userId: string) {
-    const user = await this.profileRepository.getProfileByUserId(userId);
-    if (!user) {
-      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
-      throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        "User not found for the provided user ID.",
-      );
-    }
-
-    const bucket = process.env.S3_POST_BUCKET!;
-    const key = `profile-pictures/${userId}.jpg`;
-    const deleteObject = await this.s3Repository.deleteObject(bucket, key);
-
-    if (!deleteObject.DeleteMarker) {
-      console.error(
-        `SERVICE ERROR: Failed to delete profile picture for user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_DELETE,
-        "Failed to delete the profile picture.",
-      );
-    }
-
-    await this.profileRepository.removeProfilePicture(user.profile.id);
+    return networkStatus;
   }
 
   async _getUserProfile(userId: string) {
