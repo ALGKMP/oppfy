@@ -87,7 +87,7 @@ export class PaginationService {
         nextCursor,
       };
     } catch (err) {
-      console.log(err);
+      console.error(`Error updating profile picture URLs: `, err);
       throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, 'Failed to get profile picture URLs');
     }
   }
