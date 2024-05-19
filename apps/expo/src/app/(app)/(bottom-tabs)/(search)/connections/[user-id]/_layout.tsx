@@ -8,6 +8,7 @@ import { TopTabs } from "~/layouts";
 const ConnectionsLayout = () => {
   const { userId, username, initialRouteName } = useLocalSearchParams<{
     userId: string;
+    username: string;
     initialRouteName: string;
   }>();
 
