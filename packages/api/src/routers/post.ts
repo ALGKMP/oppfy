@@ -135,6 +135,22 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
+
+    unlikePost: protectedProcedure
+    .input(z.object({
+      userId: z.string(),
+      postId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.unlikePost(ctx.session.uid, input.postId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to remove like from post.",
+        });
+      }
+    }),
 });
 
 export default postRouter;
