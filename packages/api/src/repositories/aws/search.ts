@@ -59,11 +59,11 @@ export class SearchRepository {
                 username: `*${username}*`,
               },
             },
-            must_not: {
-              term: {
-                id: currentProfileId,
-              },
-            },
+            // must_not: {
+            //   term: {
+            //     id: currentProfileId,
+            //   },
+            // },
           },
         },
         _source: ["id", "username", "fullName", "bio", "profilePictureKey"],

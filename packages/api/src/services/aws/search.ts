@@ -23,11 +23,12 @@ export class SearchService {
     // Use Promise.all to get presigned URLs and return profiles with URLs
     const profilesWithUrls = await Promise.all(
       profiles.map(async ({ profilePictureKey, ...restProfile }) => {
-        const profilePictureUrl =
-          await this.s3Repository.getObjectPresignedUrl({
+        const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl(
+          {
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: profilePictureKey,
-          });
+          },
+        );
 
         return {
           ...restProfile,
