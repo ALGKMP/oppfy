@@ -169,6 +169,21 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
+
+    deleteComment: protectedProcedure
+    .input(z.object({
+      commentId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.deleteComment(input.commentId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete comment.",
+        });
+      }
+    }),
 });
 
 export default postRouter;
