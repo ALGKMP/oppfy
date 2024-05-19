@@ -86,6 +86,7 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
+  // TODO: @77zv
   const handleFollow = () => console.log("Follow");
   const handleUnfollow = () => console.log("Unfollow");
   const handleAddFriend = () => console.log("Add Friend");
