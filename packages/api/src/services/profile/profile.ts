@@ -37,8 +37,11 @@ export class ProfileService {
     const profile = await this._getUserProfile(userId);
     const usernameExists = await this.profileRepository.usernameExists(newUsername);
     if (usernameExists) {
-      console.error(`SERVICE ERROR: username "${newUsername}" already exists`)
-      throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS, 'The provided username already exists.');
+      console.error(`SERVICE ERROR: username "${newUsername}" already exists`);
+      throw new DomainError(
+        ErrorCode.USERNAME_ALREADY_EXISTS,
+        "The provided username already exists.",
+      );
     }
     await this.profileRepository.updateUsername(profile.id, newUsername);
   }
@@ -56,8 +59,11 @@ export class ProfileService {
     if (updates.username !== undefined) {
       const usernameExists = await this.profileRepository.usernameExists(updates.username);
       if (usernameExists) {
-        console.error(`SERVICE ERROR: username "${updates.username}" already exists`)
-        throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS, 'The provided username already exists.');
+        console.error(`SERVICE ERROR: username "${updates.username}" already exists`);
+        throw new DomainError(
+          ErrorCode.USERNAME_ALREADY_EXISTS,
+          "The provided username already exists.",
+        );
       }
       updateData.username = updates.username;
     }
@@ -68,7 +74,11 @@ export class ProfileService {
   async updateProfilePicture(userId: string, key: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
+      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+      );
     }
     await this.profileRepository.updateProfilePicture(user.profile.id, key);
   }
@@ -76,12 +86,20 @@ export class ProfileService {
   async getBasicProfileByUserId(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided user ID.');
+      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided user ID.",
+      );
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
+      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+      );
     }
 
     const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
@@ -101,12 +119,20 @@ export class ProfileService {
   async getBasicProfileByProfileId(profileId: number) {
     const user = await this.userRepository.getUserByProfileId(profileId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided profile ID.');
+      console.error(`SERVICE ERROR: User not found for profile ID "${profileId}"`);
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided profile ID.",
+      );
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided profile ID.');
+      console.error(`SERVICE ERROR: Profile not found for profile ID "${profileId}"`);
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided profile ID.",
+      );
     }
 
     const profilePictureUrl = this.awsRepository.getObjectPresignedUrl({
@@ -126,31 +152,39 @@ export class ProfileService {
   async getFullProfileByUserId(userId: string) {
     const user = await this.userRepository.getUser(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided user ID.');
+      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided user ID.",
+      );
     }
-
-    const profile = await this.profileRepository.getProfile(user.profileId);
-    if (!profile) {
-      console.log("SERVICE ERROR: profile not found");
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
-    }
+    const profile = await this._getUserProfile(userId);
 
     const followerCount = await this.followersRepository.countFollowers(userId);
     if (followerCount === undefined) {
-      console.log("SERVICE ERROR: failed to count followers");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS, 'Failed to count followers for the user.');
+      console.error(`SERVICE ERROR: Failed to count followers for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_COUNT_FOLLOWERS,
+        "Failed to count followers for the user.",
+      );
     }
 
     const followingCount = await this.followersRepository.countFollowing(userId);
     if (followingCount === undefined) {
-      console.log("SERVICE ERROR: failed to count following");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING, 'Failed to count following for the user.');
+      console.error(`SERVICE ERROR: Failed to count following for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_COUNT_FOLLOWING,
+        "Failed to count following for the user.",
+      );
     }
 
     const friendCount = await this.friendsRepository.countFriends(userId);
     if (friendCount === undefined) {
-      console.log("SERVICE ERROR: failed to count friends");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS, 'Failed to count friends for the user.');
+      console.error(`SERVICE ERROR: Failed to count friends for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_COUNT_FRIENDS,
+        "Failed to count friends for the user.",
+      );
     }
 
     const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
@@ -158,8 +192,11 @@ export class ProfileService {
       Key: profile.profilePictureKey,
     });
     if (!profilePictureUrl) {
-      console.log("SERVICE ERROR: failed to get profile picture");
-      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, 'Failed to get profile picture URL.');
+      console.error(`SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
+      );
     }
 
     const profileData = {
@@ -180,31 +217,47 @@ export class ProfileService {
   async getFullProfileByProfileId(profileId: number) {
     const user = await this.userRepository.getUserByProfileId(profileId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided profile ID.');
+      console.error(`SERVICE ERROR: User not found for profile ID "${profileId}"`);
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided profile ID.",
+      );
     }
 
     const profile = await this.profileRepository.getProfile(user.profileId);
     if (!profile) {
-      console.log("SERVICE ERROR: profile not found");
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided profile ID.');
+      console.error(`SERVICE ERROR: Profile not found for profile ID "${profileId}"`);
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided profile ID.",
+      );
     }
 
     const followerCount = await this.followersRepository.countFollowers(user.id);
     if (followerCount === undefined) {
-      console.log("SERVICE ERROR: failed to count followers");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWERS, 'Failed to count followers for the user.');
+      console.error(`SERVICE ERROR: Failed to count followers for user ID "${user.id}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_COUNT_FOLLOWERS,
+        "Failed to count followers for the user.",
+      );
     }
 
     const followingCount = await this.followersRepository.countFollowing(user.id);
     if (followingCount === undefined) {
-      console.log("SERVICE ERROR: failed to count following");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FOLLOWING, 'Failed to count following for the user.');
+      console.error(`SERVICE ERROR: Failed to count following for user ID "${user.id}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_COUNT_FOLLOWING,
+        "Failed to count following for the user.",
+      );
     }
 
     const friendCount = await this.friendsRepository.countFriends(user.id);
     if (friendCount === undefined) {
-      console.log("SERVICE ERROR: failed to count friends");
-      throw new DomainError(ErrorCode.FAILED_TO_COUNT_FRIENDS, 'Failed to count friends for the user.');
+      console.error(`SERVICE ERROR: Failed to count friends for user ID "${user.id}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_COUNT_FRIENDS,
+        "Failed to count friends for the user.",
+      );
     }
 
     const profilePictureUrl = await this.awsRepository.getObjectPresignedUrl({
@@ -212,8 +265,11 @@ export class ProfileService {
       Key: profile.profilePictureKey,
     });
     if (!profilePictureUrl) {
-      console.log("SERVICE ERROR: failed to get profile picture");
-      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, 'Failed to get profile picture URL.');
+      console.error(`SERVICE ERROR: Failed to get profile picture for user ID "${user.id}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
+      );
     }
 
     const profileData = {
@@ -234,7 +290,11 @@ export class ProfileService {
   async removeProfilePicture(userId: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, 'User not found for the provided user ID.');
+      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided user ID.",
+      );
     }
 
     const bucket = process.env.S3_POST_BUCKET!;
@@ -242,7 +302,11 @@ export class ProfileService {
     const deleteObject = await this.awsRepository.deleteObject(bucket, key);
 
     if (!deleteObject.DeleteMarker) {
-      throw new DomainError(ErrorCode.FAILED_TO_DELETE, 'Failed to delete the profile picture.');
+      console.error(`SERVICE ERROR: Failed to delete profile picture for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_DELETE,
+        "Failed to delete the profile picture.",
+      );
     }
 
     await this.profileRepository.removeProfilePicture(user.profile.id);
@@ -251,11 +315,19 @@ export class ProfileService {
   async _getUserProfile(userId: string) {
     const user = await this.userRepository.getUserProfile(userId);
     if (!user) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
+      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+      );
     }
-    
+
     if (!user.profile) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found for the provided user ID.');
+      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+      );
     }
 
     return user.profile;
