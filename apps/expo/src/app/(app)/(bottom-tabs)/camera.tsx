@@ -25,8 +25,10 @@ export default function ImagePickerExample() {
       setImage(uri);
 
       try {
-        const uploadUrl = await uploadVideo.mutateAsync({recipientId: "kYJQhA9vTLdUynlItU3y907c0Vs1"});
-        console.log(uploadUrl);
+        const uploadUrl = await uploadVideo.mutateAsync({
+          recipientId: "kYJQhA9vTLdUynlItU3y907c0Vs1",
+        });
+        // console.log(uploadUrl);
         if (!uploadUrl || !image) {
           Alert.alert("Error", "Failed to get presigned URL");
           return;

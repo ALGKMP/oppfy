@@ -25,7 +25,7 @@ import { abbreviateNumber } from "@oppfy/utils";
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
 import { useProfileContext } from "~/contexts/ProfileContext";
-import { useUploadProfilePic } from "~/hooks/media";
+import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -142,7 +142,7 @@ const Profile = (props: ProfileProps) => {
             disabled={props.loading}
             onPress={() =>
               router.navigate({
-                pathname: "/[connections]/",
+                pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                 },
@@ -162,7 +162,7 @@ const Profile = (props: ProfileProps) => {
                 userId: string;
                 initialRouteName: string;
               }>({
-                pathname: "/[connections]/",
+                pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   initialRouteName: "friends-list",
@@ -183,7 +183,7 @@ const Profile = (props: ProfileProps) => {
             // onPress={() => router.push("/followers-list")}
             onPress={() =>
               router.push({
-                pathname: "/[connections]/",
+                pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   initialRouteName: "followers-list",
@@ -202,7 +202,7 @@ const Profile = (props: ProfileProps) => {
             disabled={props.loading}
             onPress={() =>
               router.push({
-                pathname: "/[connections]/",
+                pathname: "connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   initialRouteName: "following-list",

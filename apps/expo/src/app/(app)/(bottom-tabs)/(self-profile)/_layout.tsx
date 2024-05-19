@@ -20,7 +20,7 @@ import { abbreviateNumber } from "@oppfy/utils";
 
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
-import { useUploadProfilePic } from "~/hooks/media";
+import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -79,7 +79,7 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
-  const { imageUri, pickAndUploadImage } = useUploadProfilePic({
+  const { imageUri, pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
   });
 

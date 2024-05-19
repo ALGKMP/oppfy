@@ -59,7 +59,7 @@ const SearchLayout = () => {
           }}
         />
         <Stack.Screen
-          name="[connections]"
+          name="connections/[user-id]"
           options={{
             title: "Connections",
           }}
