@@ -1,8 +1,10 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { UserRepository } from "../../repositories/user";
+import { ProfileRepository } from "../../repositories";
+import { UserRepository } from "../../repositories/user/user";
 
 export class UserService {
   private userRepository = new UserRepository();
+  private profileRepository = new ProfileRepository();
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
@@ -29,7 +31,7 @@ export class UserService {
   }
 
   async checkOnboardingComplete(userId: string) {
-    const user = await this.userRepository.getUserProfile(userId);
+    const user = await this.profileRepository.getProfileByUserId(userId);
     if (user?.profile === undefined) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, 'Profile not found');
     }

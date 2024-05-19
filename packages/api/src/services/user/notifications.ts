@@ -1,7 +1,7 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { NotificationSettingsRepository } from "../../repositories/notification-settings";
-import type { NotificationSettings } from "../../repositories/notification-settings";
-import { UserRepository } from "../../repositories/user";
+import { NotificationSettingsRepository } from "../../repositories/user/notification-settings";
+import type { NotificationSettings } from "../../repositories/user/notification-settings";
+import { UserRepository } from "../../repositories/user/user";
 
 export class NotificationService {
   private userRepository = new UserRepository();

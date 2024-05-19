@@ -4,7 +4,7 @@ import type { z } from "zod";
 import { db, schema } from "@oppfy/db";
 import type { trpcValidators } from "@oppfy/validators";
 
-import { handleDatabaseErrors } from "../errors";
+import { handleDatabaseErrors } from "../../errors";
 
 export type NotificationSettings = z.infer<
   typeof trpcValidators.user.updateNotificationSettings

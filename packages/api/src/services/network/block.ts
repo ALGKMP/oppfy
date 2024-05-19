@@ -1,7 +1,8 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { FollowRepository } from "../../repositories/follow";
-import { FriendRepository } from "../../repositories/friend";
-import { UserRepository } from "../../repositories/user";
+import { FollowRepository } from "../../repositories/network/follow";
+import { FriendRepository } from "../../repositories/network/friend";
+import { BlockRepository } from "../../repositories/user/block";
+import { UserRepository } from "../../repositories/user/user";
 import { FollowService } from "./follow";
 import { FriendService } from "./friend";
 
@@ -9,6 +10,7 @@ export class BlockService {
   private userRepository = new UserRepository();
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
+  private blockRepository = new BlockRepository();
 
   private followService = new FollowService();
   private friendService = new FriendService();
@@ -42,7 +44,7 @@ export class BlockService {
       }
     }
 
-    const result = await this.userRepository.blockUser(userId, userIdBeingBlocked);
+    const result = await this.blockRepository.blockUser(userId, userIdBeingBlocked);
     if (!result) {
       console.error(`SERVICE ERROR: Failed to block user "${userIdBeingBlocked}" for user "${userId}"`);
       throw new DomainError(ErrorCode.FAILED_TO_BLOCK_USER, 'Failed to block user');
@@ -50,7 +52,7 @@ export class BlockService {
   }
 
   async unblockUser(userId: string, blockedUserId: string) {
-    const unblock = await this.userRepository.unblockUser(userId, blockedUserId);
+    const unblock = await this.blockRepository.unblockUser(userId, blockedUserId);
     if (!unblock) {
       console.error(`SERVICE ERROR: Failed to unblock user "${blockedUserId}" for user "${userId}"`);
       throw new DomainError(ErrorCode.FAILED_TO_UNBLOCK_USER, 'Failed to unblock user');
@@ -58,7 +60,7 @@ export class BlockService {
   }
 
   async isUserBlocked(userId: string, blockedUserId: string) {
-    const blockedUser = await this.userRepository.getBlockedUser(userId, blockedUserId);
+    const blockedUser = await this.blockRepository.getBlockedUser(userId, blockedUserId);
     if (!blockedUser) {
       console.error(`SERVICE ERROR: Failed to check relationship between user "${userId}" and blocked user "${blockedUserId}"`);
       throw new DomainError(ErrorCode.FAILED_TO_CHECK_RELATIONSHIP, 'Failed to check relationship');

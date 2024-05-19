@@ -1,5 +1,7 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { UserRepository } from "../../repositories/user";
+import { FollowRepository, FriendRepository } from "../../repositories";
+import { BlockRepository } from "../../repositories/user/block";
+import { UserRepository } from "../../repositories/user/user";
 import { S3Service } from "../aws/s3";
 
 export interface PaginatedResponse<T> {
@@ -24,34 +26,37 @@ export interface UserProfile {
 export class PaginationService {
   private userRepository = new UserRepository();
   private awsService = new S3Service();
+  private followRepository = new FollowRepository();
+  private friendRepository = new FriendRepository();
+  private blockRepository = new BlockRepository();
 
   async paginateFollowers(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedFollowers(userId, cursor, pageSize);
-    return this._updateProfilePictureUrls(data, pageSize);
-  }
-
-  async paginateFriends(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedFriends(userId, cursor, pageSize);
+    const data = await this.followRepository.paginateFollowers(userId, cursor, pageSize);
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
   async paginateFollowing(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedFollowing(userId, cursor, pageSize);
+    const data = await this.followRepository.paginateFollowing(userId, cursor, pageSize);
+    return this._updateProfilePictureUrls(data, pageSize);
+  }
+
+  async paginateFriends(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.friendRepository.paginateFriends(userId, cursor, pageSize);
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
   async paginateBlocked(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedBlockedUsers(userId, cursor, pageSize);
+    const data = await this.blockRepository.getPaginatedBlockedUsers(userId, cursor, pageSize);
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
   async paginateFriendRequests(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedFriendRequests(userId, cursor, pageSize);
+    const data = await this.friendRepository.getPaginatedFriendRequests(userId, cursor, pageSize);
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
   async paginateFollowRequests(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.userRepository.getPaginatedFollowRequests(userId, cursor, pageSize);
+    const data = await this.followRepository.getPaginatedFollowRequests(userId, cursor, pageSize);
     return this._updateProfilePictureUrls(data, pageSize);
   }
 

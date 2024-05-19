@@ -7,7 +7,7 @@ import type { ApiResponse } from "@opensearch-project/opensearch";
 import { InferInsertModel, schema } from "@oppfy/db";
 import { openSearch } from "@oppfy/opensearch";
 
-import { handleOpensearchErrors } from "../errors";
+import { handleOpensearchErrors } from "../../errors";
 
 export type { GetObjectCommandInput, PutObjectCommandInput };
 

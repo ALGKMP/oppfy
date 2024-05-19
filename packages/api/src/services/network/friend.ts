@@ -1,5 +1,5 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { FriendRepository } from "../../repositories/friend";
+import { FriendRepository } from "../../repositories/network/friend";
 
 export class FriendService {
   private friendRepository = new FriendRepository();
@@ -121,4 +121,5 @@ export class FriendService {
       );
     }
   }
+  
 }

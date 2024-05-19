@@ -1,5 +1,5 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { UserRepository } from "../../repositories/user";
+import { UserRepository } from "../../repositories/user/user";
 
 import {  schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";

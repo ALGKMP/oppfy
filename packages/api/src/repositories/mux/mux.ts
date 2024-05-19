@@ -1,6 +1,6 @@
 import { mux } from "@oppfy/mux";
 
-import { handleMuxErrors } from "../errors";
+import { handleMuxErrors } from "../../errors";
 
 export class MuxRepository {
   @handleMuxErrors

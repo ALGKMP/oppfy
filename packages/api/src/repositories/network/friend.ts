@@ -1,8 +1,8 @@
-import { and, count, eq, or } from "drizzle-orm";
+import { and, eq, gt, or, asc, count } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
-import { handleDatabaseErrors } from "../errors";
+import { handleDatabaseErrors } from "../../errors";
 
 export class FriendRepository {
   private db = db;
@@ -88,10 +88,51 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async getPendingRequests(senderId: string) {
+  async paginateFriends(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
     return await this.db
-      .select()
+      .select({
+        userId: schema.user.id,
+        username: schema.profile.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profile.profilePictureKey,
+        createdAt: schema.friend.createdAt,
+        profileId: schema.profile.id,
+      })
+      .from(schema.friend)
+      .innerJoin(schema.user, or(eq(schema.friend.userId1, schema.user.id), eq(schema.friend.userId2, schema.user.id)))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .where(
+        or(
+          eq(schema.friend.userId1, forUserId),
+          eq(schema.friend.userId2, forUserId),
+          cursor ? or(gt(schema.friend.createdAt, cursor.createdAt), and(eq(schema.friend.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+        ),
+      )
+      .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
+  }
+
+    @handleDatabaseErrors
+  async getPaginatedFriendRequests(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.profile.username,
+        name: schema.profile.fullName,
+        profilePictureUrl: schema.profile.profilePictureKey,
+        createdAt: schema.friendRequest.createdAt,
+        profileId: schema.profile.id,
+      })
       .from(schema.friendRequest)
-      .where(and(eq(schema.friendRequest.senderId, senderId)));
+      .innerJoin(schema.user, eq(schema.friendRequest.recipientId, schema.user.id))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .where(
+        and(
+          eq(schema.friendRequest.recipientId, forUserId),
+          cursor ? or(gt(schema.friendRequest.createdAt, cursor.createdAt), and(eq(schema.friendRequest.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+        ),
+      )
+      .orderBy(asc(schema.friendRequest.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
   }
 }

@@ -2,7 +2,7 @@ import { aliasedTable, and, asc, eq, gt, or } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
-import { handleDatabaseErrors } from "../errors";
+import { handleDatabaseErrors } from "../../errors";
 
 export class PostRepository {
   private db = db;

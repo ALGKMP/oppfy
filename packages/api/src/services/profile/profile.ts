@@ -3,11 +3,11 @@ import type { z } from "zod";
 import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { S3Repository } from "../../repositories/s3";
-import { FollowRepository } from "../../repositories/follow";
-import { FriendRepository } from "../../repositories/friend";
-import { ProfileRepository } from "../../repositories/profile";
-import { UserRepository } from "../../repositories/user";
+import { S3Repository } from "../../repositories/aws/s3";
+import { FollowRepository } from "../../repositories/network/follow";
+import { FriendRepository } from "../../repositories/network/friend";
+import { ProfileRepository } from "../../repositories/profile/profile";
+import { UserRepository } from "../../repositories/user/user";
 
 type UpdateProfile = z.infer<typeof sharedValidators.user.updateProfile>;
 
@@ -72,7 +72,7 @@ export class ProfileService {
   }
 
   async updateProfilePicture(userId: string, key: string) {
-    const user = await this.userRepository.getUserProfile(userId);
+    const user = await this.profileRepository.getProfileByUserId(userId);
     if (!user) {
       console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
       throw new DomainError(
@@ -93,7 +93,7 @@ export class ProfileService {
       );
     }
 
-    const profile = await this.profileRepository.getProfile(user.profileId);
+    const profile = await this.profileRepository.getProfileByProfileId(user.profileId);
     if (!profile) {
       console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
       throw new DomainError(
@@ -126,7 +126,7 @@ export class ProfileService {
       );
     }
 
-    const profile = await this.profileRepository.getProfile(user.profileId);
+    const profile = await this.profileRepository.getProfileByProfileId(user.profileId);
     if (!profile) {
       console.error(`SERVICE ERROR: Profile not found for profile ID "${profileId}"`);
       throw new DomainError(
@@ -224,7 +224,7 @@ export class ProfileService {
       );
     }
 
-    const profile = await this.profileRepository.getProfile(user.profileId);
+    const profile = await this.profileRepository.getProfileByProfileId(user.profileId);
     if (!profile) {
       console.error(`SERVICE ERROR: Profile not found for profile ID "${profileId}"`);
       throw new DomainError(
@@ -288,7 +288,7 @@ export class ProfileService {
   }
 
   async removeProfilePicture(userId: string) {
-    const user = await this.userRepository.getUserProfile(userId);
+    const user = await this.profileRepository.getProfileByUserId(userId);
     if (!user) {
       console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
       throw new DomainError(
@@ -313,7 +313,7 @@ export class ProfileService {
   }
 
   async _getUserProfile(userId: string) {
-    const user = await this.userRepository.getUserProfile(userId);
+    const user = await this.profileRepository.getProfileByUserId(userId);
     if (!user) {
       console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
       throw new DomainError(

@@ -11,7 +11,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { s3 } from "@oppfy/s3";
 
-import { handleAwsErrors } from "../errors";
+import { handleAwsErrors } from "../../errors";
 
 export type { GetObjectCommandInput, PutObjectCommandInput };
 

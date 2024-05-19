@@ -1,8 +1,8 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { CommentRepository } from "../../repositories/comment";
-import { LikeRepository } from "../../repositories/like";
-import { PostRepository } from "../../repositories/post";
-import { PostStatsRepository } from "../../repositories/post-stats";
+import { CommentRepository } from "../../repositories/media/comment";
+import { LikeRepository } from "../../repositories/media/like";
+import { PostRepository } from "../../repositories/media/post";
+import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { S3Service } from "../aws/s3";
 
 export interface PaginatedResponse<T> {

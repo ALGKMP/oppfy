@@ -2,7 +2,7 @@ import { and, asc, count, gt } from "drizzle-orm";
 
 import { db, eq, or, schema } from "@oppfy/db";
 
-import { handleDatabaseErrors } from "../errors";
+import { handleDatabaseErrors } from "../../errors";
 
 export class CommentRepository {
   private db = db;

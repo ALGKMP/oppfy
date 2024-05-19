@@ -1,6 +1,6 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { FollowRepository } from "../../repositories/follow";
-import { UserRepository } from "../../repositories/user";
+import { FollowRepository } from "../../repositories/network/follow";
+import { UserRepository } from "../../repositories/user/user";
 
 export class FollowService {
   private followRepository = new FollowRepository();
