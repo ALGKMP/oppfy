@@ -92,7 +92,6 @@ export class PostService {
         createdAt: nextItem!.createdAt,
         postId: nextItem!.postId,
       };
-      console.log("server: ", nextCursor);
     }
     return {
       items,

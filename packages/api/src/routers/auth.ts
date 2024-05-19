@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 
 import { trpcValidators } from "@oppfy/validators";
-import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+
+import { DomainError } from "../errors";
 
 export const authRouter = createTRPCRouter({
   createUser: publicProcedure
@@ -33,13 +34,12 @@ export const authRouter = createTRPCRouter({
     }
   }),
 
-  markOnboardingComplete: protectedProcedure
+  checkOnboardingComplete: protectedProcedure
     .input(trpcValidators.user.userComplete)
     .mutation(async ({ ctx }) => {
       try {
         return await ctx.services.user.checkOnboardingComplete(ctx.session.uid);
       } catch (err) {
-        // Error handling for onboarding completion
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:
