@@ -9,7 +9,9 @@ export class FriendRepository {
 
   @handleDatabaseErrors
   async addFriend(userId1: string, userId2: string) {
-    return await this.db.insert(schema.friend).values({ userId1, userId2 });
+    // Insert both directions to make it easier to retrieve later
+    await this.db.insert(schema.friend).values({ userId1, userId2 });
+    return await this.db.insert(schema.friend).values({userId2, userId1});
   }
 
   @handleDatabaseErrors
@@ -17,7 +19,7 @@ export class FriendRepository {
     const result = await this.db
       .delete(schema.friend)
       .where(
-        or(
+        and(
           and(
             eq(schema.friend.userId1, userId1),
             eq(schema.friend.userId2, userId2),

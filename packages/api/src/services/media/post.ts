@@ -215,11 +215,11 @@ export class PostService {
     }
   }
 
-  async addCommentToPost(userId: string, postId: number, commentText: string) {
+  async commentOnPost(userId: string, postId: number, commentBody: string) {
     try {
-      await this.commentRepository.addComment(postId, userId, commentText);
+      await this.commentRepository.addComment(postId, userId, commentBody);
     } catch (error) {
-      console.error(`Error in addCommentToPost for userId: ${userId}, postId: ${postId}, commentText: ${commentText}: `, error);
+      console.error(`Error in addCommentToPost for userId: ${userId}, postId: ${postId}, commentText: ${commentBody}: `, error);
       throw new DomainError(ErrorCode.FAILED_TO_ADD_COMMENT, "Failed to add comment to post.");
     }
   }
