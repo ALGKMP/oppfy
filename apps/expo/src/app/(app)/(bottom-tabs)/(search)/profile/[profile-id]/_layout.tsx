@@ -27,8 +27,8 @@ import { TopTabBar } from "~/components/TabBars";
 import { useProfileContext } from "~/contexts/ProfileContext";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
-import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
 
@@ -51,7 +51,6 @@ const ProfileLayout = () => {
           ) : (
             <Profile loading={false} data={profileData} />
           )}
-
           <TopTabBar {...props} />
         </YStack>
       )}
@@ -87,205 +86,124 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
-  const handleFollow = () => {
-    // Handle follow logic
-    console.log("Follow");
-  };
+  const handleFollow = () => console.log("Follow");
+  const handleUnfollow = () => console.log("Unfollow");
+  const handleAddFriend = () => console.log("Add Friend");
+  const handleRemoveFriend = () => console.log("Remove Friend");
+  const handleCancelFollowRequest = () => console.log("Cancel Follow Request");
+  const handleCancelFriendRequest = () => console.log("Cancel Friend Request");
 
-  const handleUnfollow = () => {
-    // Handle unfollow logic
-    console.log("Unfollow");
-  };
-
-  const handleAddFriend = () => {
-    // Handle add friend logic
-    console.log("Add Friend");
-  };
-
-  const handleRemoveFriend = () => {
-    // Handle remove friend logic
-    console.log("Remove Friend");
-  };
-
-  const handleCancelFollowRequest = () => {
-    // Handle cancel follow request logic
-    console.log("Cancel Follow Request");
-  };
-
-  const handleCancelFriendRequest = () => {
-    // Handle cancel friend request logic
-    console.log("Cancel Friend Request");
-  };
-
-  const renderActionButton = () => {
+  const renderActionButtons = () => {
     if (props.loading) return null;
 
     const { privacy, currentUserFollowState, currentUserFriendState } =
       props.data.networkStatus;
 
-    if (privacy === "public") {
-      if (
-        currentUserFollowState === "NotFollowing" &&
-        currentUserFriendState === "NotFriends"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleFollow}>
-              Follow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleAddFriend}>
-              Add Friend
-            </Button>
-          </>
-        );
-      }
+    const buttonCombinations: Record<string, JSX.Element> = {
+      public_NotFollowing_NotFriends: (
+        <>
+          <Button size="$3" flex={1} onPress={handleFollow}>
+            Follow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleAddFriend}>
+            Add Friend
+          </Button>
+        </>
+      ),
+      public_Following_NotFriends: (
+        <>
+          <Button size="$3" flex={1} onPress={handleUnfollow}>
+            Unfollow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleAddFriend}>
+            Add Friend
+          </Button>
+        </>
+      ),
+      public_Following_Requested: (
+        <>
+          <Button size="$3" flex={1} onPress={handleUnfollow}>
+            Unfollow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
+            Cancel Friend Request
+          </Button>
+        </>
+      ),
+      public_Following_Friends: (
+        <>
+          <Button size="$3" flex={1} onPress={handleUnfollow}>
+            Unfollow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleRemoveFriend}>
+            Remove Friend
+          </Button>
+        </>
+      ),
+      private_NotFollowing_NotFriends: (
+        <>
+          <Button size="$3" flex={1} onPress={handleFollow}>
+            Request Follow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleAddFriend}>
+            Add Friend
+          </Button>
+        </>
+      ),
+      private_Requested_NotFriends: (
+        <>
+          <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
+            Cancel Follow Request
+          </Button>
+          <Button size="$3" flex={1} onPress={handleAddFriend}>
+            Add Friend
+          </Button>
+        </>
+      ),
+      private_Following_NotFriends: (
+        <>
+          <Button size="$3" flex={1} onPress={handleUnfollow}>
+            Unfollow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleAddFriend}>
+            Add Friend
+          </Button>
+        </>
+      ),
+      private_Requested_Requested: (
+        <>
+          <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
+            Cancel Follow Request
+          </Button>
+          <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
+            Cancel Friend Request
+          </Button>
+        </>
+      ),
+      private_Following_Requested: (
+        <>
+          <Button size="$3" flex={1} onPress={handleUnfollow}>
+            Unfollow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
+            Cancel Friend Request
+          </Button>
+        </>
+      ),
+      private_Following_Friends: (
+        <>
+          <Button size="$3" flex={1} onPress={handleUnfollow}>
+            Unfollow
+          </Button>
+          <Button size="$3" flex={1} onPress={handleRemoveFriend}>
+            Remove Friend
+          </Button>
+        </>
+      ),
+    };
 
-      if (
-        currentUserFollowState === "Following" &&
-        currentUserFriendState === "NotFriends"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleUnfollow}>
-              Unfollow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleAddFriend}>
-              Add Friend
-            </Button>
-          </>
-        );
-      }
-
-      if (
-        currentUserFollowState === "Following" &&
-        currentUserFriendState === "Requested"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleUnfollow}>
-              Unfollow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
-              Cancel Friend Request
-            </Button>
-          </>
-        );
-      }
-
-      if (
-        currentUserFollowState === "Following" &&
-        currentUserFriendState === "Friends"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleUnfollow}>
-              Unfollow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleRemoveFriend}>
-              Remove Friend
-            </Button>
-          </>
-        );
-      }
-    } else {
-      if (
-        currentUserFollowState === "NotFollowing" &&
-        currentUserFriendState === "NotFriends"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
-              Request Follow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleAddFriend}>
-              Add Friend
-            </Button>
-          </>
-        );
-      }
-
-      if (
-        currentUserFollowState === "Requested" &&
-        currentUserFriendState === "NotFriends"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
-              Cancel Follow Request
-            </Button>
-            <Button size="$3" flex={1} onPress={handleAddFriend}>
-              Add Friend
-            </Button>
-          </>
-        );
-      }
-
-      if (
-        currentUserFollowState === "Following" &&
-        currentUserFriendState === "NotFriends"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleUnfollow}>
-              Unfollow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleAddFriend}>
-              Add Friend
-            </Button>
-          </>
-        );
-      }
-
-      if (
-        currentUserFollowState === "Requested" &&
-        currentUserFriendState === "Requested"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
-              Cancel Follow Request
-            </Button>
-            <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
-              Cancel Friend Request
-            </Button>
-          </>
-        );
-      }
-
-      if (
-        currentUserFollowState === "Following" &&
-        currentUserFriendState === "Requested"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleUnfollow}>
-              Unfollow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleCancelFriendRequest}>
-              Cancel Friend Request
-            </Button>
-          </>
-        );
-      }
-
-      if (
-        currentUserFollowState === "Following" &&
-        currentUserFriendState === "Friends"
-      ) {
-        return (
-          <>
-            <Button size="$3" flex={1} onPress={handleUnfollow}>
-              Unfollow
-            </Button>
-            <Button size="$3" flex={1} onPress={handleRemoveFriend}>
-              Remove Friend
-            </Button>
-          </>
-        );
-      }
-    }
-
-    return null;
+    const key = `${privacy}_${currentUserFollowState}_${currentUserFriendState}`;
+    return buttonCombinations[key] || null;
   };
 
   return (
@@ -329,7 +247,7 @@ const Profile = (props: ProfileProps) => {
         </YStack>
 
         <XStack width={250} gap="$4">
-          {renderActionButton()}
+          {renderActionButtons()}
         </XStack>
 
         <XStack gap="$7">
