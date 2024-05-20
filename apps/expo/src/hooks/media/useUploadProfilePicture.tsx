@@ -16,8 +16,8 @@ const useUploadProfilePicture = ({
 
   const utils = api.useUtils();
 
-  const createPresignedUrlForProfilePicture =
-    api.profile.createPresignedUrlForProfilePicture.useMutation();
+  const generatePresignedUrlForProfilePicture =
+    api.profile.generatePresignedUrlForProfilePicture.useMutation();
 
   const uploadProfilePicture = useMutation(
     async (uri: string) => {
@@ -25,7 +25,7 @@ const useUploadProfilePicture = ({
       const profilePictureBlob = await profilePictureResponse.blob();
 
       const presignedUrl =
-        await createPresignedUrlForProfilePicture.mutateAsync({
+        await generatePresignedUrlForProfilePicture.mutateAsync({
           contentLength: profilePictureBlob.size,
         });
 
@@ -43,14 +43,14 @@ const useUploadProfilePicture = ({
         if (!optimisticallyUpdate) return;
 
         // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.profile.getCurrentUsersFullProfile.cancel();
+        await utils.profile.getFullProfileSelf.cancel();
 
         // Get the data from the queryCache
-        const prevData = utils.profile.getCurrentUsersFullProfile.getData();
+        const prevData = utils.profile.getFullProfileSelf.getData();
         if (prevData === undefined) return;
 
         // Optimistically update the data
-        utils.profile.getCurrentUsersFullProfile.setData(undefined, {
+        utils.profile.getFullProfileSelf.setData(undefined, {
           ...prevData,
           profilePictureUrl: newProfilePictureUrl,
         });
@@ -63,7 +63,7 @@ const useUploadProfilePicture = ({
         if (ctx === undefined) return;
 
         // If the mutation fails, use the context-value from onMutate
-        utils.profile.getCurrentUsersFullProfile.setData(
+        utils.profile.getFullProfileSelf.setData(
           undefined,
           ctx.prevData,
         );
@@ -72,7 +72,7 @@ const useUploadProfilePicture = ({
         if (!optimisticallyUpdate) return;
 
         // Sync with server once mutation has settled
-        await utils.profile.getCurrentUsersFullProfile.invalidate();
+        await utils.profile.getFullProfileSelf.invalidate();
       },
     },
   );
