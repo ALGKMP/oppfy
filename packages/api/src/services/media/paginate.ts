@@ -31,7 +31,7 @@ export class PaginationService {
   private blockRepository = new BlockRepository();
 
   async paginateFollowers(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowers(userId, cursor, pageSize);
+    const data = await this.followRepository.paginateCurrentUserFollowers(userId, cursor, pageSize);
     return this._updateProfilePictureUrls(data, pageSize);
   }
 

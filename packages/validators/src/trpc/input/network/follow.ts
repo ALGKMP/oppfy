@@ -1,0 +1,64 @@
+import { z } from "zod";
+
+const followInputSchema = {
+  followUser: z.object({
+    recipientId: z.string(),
+  }),
+
+  unfollowUser: z.object({
+    userId: z.string(),
+  }),
+
+  acceptFollowRequest: z.object({
+    userId: z.string(),
+  }),
+
+  rejectFollowRequest: z.object({
+    userId: z.string(),
+  }),
+
+  cancelFollowRequest: z.object({
+    userId: z.string(),
+  }),
+
+  removeFollower: z.object({
+    userId: z.string(),
+  }),
+
+  paginateFollowersSelf: z.object({
+    cursor: z.object({
+      createdAt: z.date(),
+      profileId: z.number(),
+    }).optional(),
+    pageSize: z.number().optional(),
+  }),  
+
+  paginateFollowersOthers: z.object({
+    userId: z.string(),
+    cursor: z.object({
+      createdAt: z.date(),
+      profileId: z.number(),
+    }).optional(),
+    pageSize: z.number().optional(),
+  }),  
+
+  paginateFollowingSelf: z.object({
+    cursor: z.object({
+      createdAt: z.date(),
+      profileId: z.number(),
+    }).optional(),
+    pageSize: z.number().optional(),
+  }),  
+
+  paginateFollowingOthers: z.object({
+    userId: z.string(),
+    cursor: z.object({
+      createdAt: z.date(),
+      profileId: z.number(),
+    }).optional(),
+    pageSize: z.number().optional(),
+  }),  
+
+};
+
+export default followInputSchema;

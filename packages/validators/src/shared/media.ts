@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-export const profilePictureKey = z.string().regex(/^(profile-pictures\/).*/);
-export const postKey = z.string().regex(/^(posts\/).*/);
-// TODO: Inherrit type from trpc route instead of defining it here
 export const paginatedPosts = z.object({
   items: z.array(
     z.object({
@@ -12,12 +9,12 @@ export const paginatedPosts = z.object({
       authorProfilePicture: z.string(),
       recipientId: z.string(),
       recipientUsername: z.string(),
-      recipientProfilePicture: z.string(), // Corrected typo
+      recipientProfilePicture: z.string(), 
       caption: z.string().nullable(),
       imageUrl: z.string(),
       commentsCount: z.number(),
       likesCount: z.number(),
-      createdAt: z.date(), // Added missing field
+      createdAt: z.date(),
     }).optional(),
   ),
   nextCursor: z
@@ -27,8 +24,3 @@ export const paginatedPosts = z.object({
     })
     .optional(),
 });
-
-export const postId = z.number();
-export const contentType = z.string();
-export const contentLength = z.number();
-export const caption = z.string();

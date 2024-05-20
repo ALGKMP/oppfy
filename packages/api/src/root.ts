@@ -1,17 +1,25 @@
 import { generateOpenApiDocument } from "trpc-openapi";
+import {
+  userRouter,
+  profileRouter,
+  searchRouter,
+  postRouter,
+  followRouter,
+  friendRouter,
+  blockRouter,
+  notificationsRouter,
+} from './routers';
 
-import { authRouter } from "./routers/auth";
-import { postRouter } from "./routers/post";
-import { profileRouter } from "./routers/profile";
-import { searchRouter } from "./routers/search";
-import { userRouter } from "./routers/user";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
-  auth: authRouter,
+  user: userRouter,
   profile: profileRouter,
   post: postRouter,
-  user: userRouter,
+  follow: followRouter,
+  friend: friendRouter,
+  block: blockRouter,
+  notifications: notificationsRouter,
   search: searchRouter,
 });
 

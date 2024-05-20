@@ -3,12 +3,63 @@ import { z } from "zod";
 
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
-import { DomainError, ErrorCode } from "../errors";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { DomainError, ErrorCode } from "../../errors";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
-  createPresignedUrlForProfilePicture: protectedProcedure
-    .input(trpcValidators.profile.userProfilePicture)
+  updateFullName: protectedProcedure
+    .input(trpcValidators.input.profile.updateFullName)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.profile.updateFullName(
+          ctx.session.uid,
+          input.fullName,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  updateDateOfBirth: protectedProcedure
+    .input(trpcValidators.input.profile.updateDateOfBirth)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await ctx.services.profile.updateDateOfBirth(
+          ctx.session.uid,
+          input.dateOfBirth,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  updateUsername: protectedProcedure
+    .input(trpcValidators.input.profile.updateUsername)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await ctx.services.profile.updateUsername(
+          ctx.session.uid,
+          input.username,
+        );
+      } catch (err) {
+        if (err instanceof DomainError) {
+          if (err.code === ErrorCode.USERNAME_ALREADY_EXISTS) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Username already exists",
+            });
+          }
+        }
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  generatePresignedUrlForProfilePicture: protectedProcedure
+    .input(trpcValidators.input.profile.generatePresignedUrlForProfilePicture)
     .mutation(async ({ input, ctx }) => {
       const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
@@ -26,7 +77,6 @@ export const profileRouter = createTRPCRouter({
       );
     }),
 
-  // OpenAPI endponit for Lambda
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await ctx.services.profile.removeProfilePicture(ctx.session.uid);
@@ -39,7 +89,7 @@ export const profileRouter = createTRPCRouter({
   }),
 
   updateProfile: protectedProcedure
-    .input(trpcValidators.profile.updateProfile)
+    .input(trpcValidators.input.profile.updateProfile)
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.profile.updateProfile(ctx.session.uid, input);
@@ -60,11 +110,13 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getCurrentUserBasicProfile: protectedProcedure
-    .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
+  getCompactProfileSelf: protectedProcedure
+    .output(trpcValidators.output.profile.compactProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx }) => {
       try {
-        return await ctx.services.profile.getBasicProfileByUserId(ctx.session.uid);
+        return await ctx.services.profile.getBasicProfileByUserId(
+          ctx.session.uid,
+        );
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -73,22 +125,20 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getOtherUserBasicProfile: publicProcedure
-    .input(
-      z.object({
-        profileId: z.string(),
-      }),
-    )
-    .output(sharedValidators.user.basicProfile) // Make sure this shit doesn't return more than necessary
+  getCompactProfileOther: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .output(trpcValidators.output.profile.compactProfile) // Make sure this shit doesn't return more than necessary
     .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.getBasicProfileByUserId(input.profileId);
+      return await ctx.services.profile.getBasicProfileByUserId(input.userId);
     }),
 
-  getCurrentUsersFullProfile: protectedProcedure
-    .output(sharedValidators.user.currentUserFullProfile)
+  getFullProfileSelf: protectedProcedure
+    .output(trpcValidators.output.profile.fullProfileSelf)
     .query(async ({ ctx }) => {
       try {
-        return await ctx.services.profile.getFullProfileByUserId(ctx.session.uid);
+        return await ctx.services.profile.getFullProfileByUserId(
+          ctx.session.uid,
+        );
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {
@@ -113,15 +163,14 @@ export const profileRouter = createTRPCRouter({
 
   // TRPC Procedure for getting a full user profile
   getOtherUserFullProfile: protectedProcedure
-    .input(
-      z.object({
-        profileId: z.number(),
-      }),
-    )
-    .output(sharedValidators.user.otherUserFullProfile)
+    .input(trpcValidators.input.profile.getCompactProfileOther)
+    .output(trpcValidators.output.profile.fullProfileOther)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullProfileByProfileId(ctx.session.uid, input.profileId);
+        return await ctx.services.profile.getFullProfileByProfileId(
+          ctx.session.uid,
+          input.profileId,
+        );
       } catch (err) {
         if (err instanceof DomainError) {
           switch (err.code) {

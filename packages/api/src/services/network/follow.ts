@@ -13,7 +13,9 @@ export class FollowService {
   async followUser(senderId: string, recipientId: string) {
     const alreadyFollowing = await this.isFollowing(senderId, recipientId);
     if (alreadyFollowing) {
-      console.error(`SERVICE ERROR: User "${senderId}" is already following "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: User "${senderId}" is already following "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.USER_ALREADY_FOLLOWED,
         "User is already following the recipient.",
@@ -23,7 +25,9 @@ export class FollowService {
     const sender = await this.userRepository.getUser(senderId);
     const recipient = await this.userRepository.getUser(recipientId);
     if (!recipient || !sender) {
-      console.error(`SERVICE ERROR: User not found for sender ID "${senderId}" or recipient ID "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: User not found for sender ID "${senderId}" or recipient ID "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
         "Sender or recipient user not found.",
@@ -36,7 +40,9 @@ export class FollowService {
         recipientId,
       );
       if (!result) {
-        console.error(`SERVICE ERROR: Failed to create follow request from "${senderId}" to "${recipientId}"`);
+        console.error(
+          `SERVICE ERROR: Failed to create follow request from "${senderId}" to "${recipientId}"`,
+        );
         throw new DomainError(
           ErrorCode.FAILED_TO_REQUEST_FOLLOW,
           "Failed to create follow request.",
@@ -49,7 +55,9 @@ export class FollowService {
       recipientId,
     );
     if (!result) {
-      console.error(`SERVICE ERROR: Failed to follow user "${recipientId}" by "${senderId}"`);
+      console.error(
+        `SERVICE ERROR: Failed to follow user "${recipientId}" by "${senderId}"`,
+      );
       throw new DomainError(
         ErrorCode.FAILED_TO_FOLLOW_USER,
         "Failed to follow user.",
@@ -60,7 +68,9 @@ export class FollowService {
   async unfollowUser(senderId: string, recipientId: string) {
     const isFollowing = await this.isFollowing(senderId, recipientId);
     if (!isFollowing) {
-      console.error(`SERVICE ERROR: Follow relationship not found for sender ID "${senderId}" and recipient ID "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Follow relationship not found for sender ID "${senderId}" and recipient ID "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.FOLLOW_NOT_FOUND,
         "Follow relationship not found.",
@@ -72,7 +82,9 @@ export class FollowService {
       recipientId,
     );
     if (!result) {
-      console.error(`SERVICE ERROR: Failed to remove follow relationship for sender ID "${senderId}" and recipient ID "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Failed to remove follow relationship for sender ID "${senderId}" and recipient ID "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
         "Failed to remove follower.",
@@ -86,7 +98,9 @@ export class FollowService {
       recipientId,
     );
     if (!followRequestExists) {
-      console.error(`SERVICE ERROR: Follow request not found from "${senderId}" to "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Follow request not found from "${senderId}" to "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
         "Follow request not found.",
@@ -98,7 +112,9 @@ export class FollowService {
       recipientId,
     );
     if (!result) {
-      console.error(`SERVICE ERROR: Failed to remove follow request from "${senderId}" to "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Failed to remove follow request from "${senderId}" to "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST,
         "Failed to remove follow request.",
@@ -110,7 +126,9 @@ export class FollowService {
       recipientId,
     );
     if (!result2) {
-      console.error(`SERVICE ERROR: Failed to add follower "${recipientId}" for sender ID "${senderId}"`);
+      console.error(
+        `SERVICE ERROR: Failed to add follower "${recipientId}" for sender ID "${senderId}"`,
+      );
       throw new DomainError(
         ErrorCode.FAILED_TO_FOLLOW_USER,
         "Failed to add follower.",
@@ -118,13 +136,15 @@ export class FollowService {
     }
   }
 
-  async rejectFollowRequest(senderId: string, recipientId: string) {
+  async rejectFollowRequest(userIdBeingRejected: string, userIdRejecting: string) {
     const followRequestExists = await this.followRepository.getFollowRequest(
-      senderId,
-      recipientId,
+      userIdBeingRejected,
+      userIdRejecting,
     );
     if (!followRequestExists) {
-      console.error(`SERVICE ERROR: Follow request not found from "${senderId}" to "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Follow request not found from "${userIdBeingRejected}" to "${userIdRejecting}"`,
+      );
       throw new DomainError(
         ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
         "Follow request not found.",
@@ -132,11 +152,13 @@ export class FollowService {
     }
 
     const result = await this.followRepository.removeFollowRequest(
-      senderId,
-      recipientId,
+      userIdBeingRejected,
+      userIdRejecting,
     );
     if (!result) {
-      console.error(`SERVICE ERROR: Failed to remove follow request from "${senderId}" to "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Failed to remove follow request from "${userIdBeingRejected}" to "${userIdRejecting}"`,
+      );
       throw new DomainError(
         ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST,
         "Failed to remove follow request.",
@@ -150,7 +172,9 @@ export class FollowService {
       recipientId,
     );
     if (!followRequestExists) {
-      console.error(`SERVICE ERROR: Follow request not found from "${senderId}" to "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Follow request not found from "${senderId}" to "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
         "Follow request not found.",
@@ -162,7 +186,9 @@ export class FollowService {
       recipientId,
     );
     if (!deleteResult) {
-      console.error(`SERVICE ERROR: Failed to cancel follow request from "${senderId}" to "${recipientId}"`);
+      console.error(
+        `SERVICE ERROR: Failed to cancel follow request from "${senderId}" to "${recipientId}"`,
+      );
       throw new DomainError(
         ErrorCode.FAILED_TO_CANCEL_FOLLOW_REQUEST,
         "Failed to cancel follow request.",
@@ -176,7 +202,9 @@ export class FollowService {
       userId,
     );
     if (!followerExists) {
-      console.error(`SERVICE ERROR: Follow relationship not found for follower "${followerToRemove}" and user ID "${userId}"`);
+      console.error(
+        `SERVICE ERROR: Follow relationship not found for follower "${followerToRemove}" and user ID "${userId}"`,
+      );
       throw new DomainError(
         ErrorCode.FOLLOW_NOT_FOUND,
         "Follow relationship not found.",
@@ -188,7 +216,9 @@ export class FollowService {
       userId,
     );
     if (!removeResult) {
-      console.error(`SERVICE ERROR: Failed to remove follower "${followerToRemove}" from user ID "${userId}"`);
+      console.error(
+        `SERVICE ERROR: Failed to remove follower "${followerToRemove}" from user ID "${userId}"`,
+      );
       throw new DomainError(
         ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
         "Failed to remove follower.",

@@ -2,13 +2,11 @@ import { TRPCError } from "@trpc/server";
 
 import { trpcValidators } from "@oppfy/validators";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
 
-import { DomainError } from "../errors";
-
-export const authRouter = createTRPCRouter({
+export const userRouter = createTRPCRouter({
   createUser: publicProcedure
-    .input(trpcValidators.auth.createUser)
+    .input(trpcValidators.input.user.createUser)
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.user.createUser(input.userId);
@@ -35,7 +33,6 @@ export const authRouter = createTRPCRouter({
   }),
 
   checkOnboardingComplete: protectedProcedure
-    .input(trpcValidators.user.userComplete)
     .mutation(async ({ ctx }) => {
       try {
         return await ctx.services.user.checkOnboardingComplete(ctx.session.uid);
@@ -48,4 +45,31 @@ export const authRouter = createTRPCRouter({
         });
       }
     }),
+    
+  getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.privacy.getPrivacySettings(ctx.session.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  }),
+
+  updatePrivacySetting: protectedProcedure
+    .input(trpcValidators.input.user.updatePrivacySetting)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await ctx.services.privacy.updatePrivacySettings(
+          ctx.session.uid,
+          input.privacy,
+        );
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }),
+
+
 });

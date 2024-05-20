@@ -1,17 +1,14 @@
 import { TRPCError } from "@trpc/server";
-import { aliasedTable, and, asc, eq, gt, or } from "drizzle-orm";
 import { z } from "zod";
 
-import { db, schema } from "@oppfy/db";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
-import { DomainError } from "../errors";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { comment } from "../../../db/src/schema/schema";
+import { DomainError } from "../../errors";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForPost: protectedProcedure
-    .input(trpcValidators.post.createPresignedUrl)
+    .input(trpcValidators.input.post.createS3PresignedUrl)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
       try {
@@ -42,10 +39,7 @@ export const postRouter = createTRPCRouter({
 
   createMuxVideoPresignedUrl: protectedProcedure
     .input(
-      z.object({
-        recipientId: z.string(),
-        caption: z.string().optional(),
-      }),
+      trpcValidators.input.post.createMuxPresignedUrl
     )
     .mutation(async ({ ctx, input }) => {
       try {
@@ -65,7 +59,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   editPost: protectedProcedure
-    .input(trpcValidators.post.updatePost)
+    .input(trpcValidators.input.post.updatePost)
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.editPost(input.postId, input.caption);
@@ -78,7 +72,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   deletePost: protectedProcedure
-    .input(trpcValidators.post.deletePost)
+    .input(trpcValidators.input.post.deletePost)
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.deletePost(input.postId);
@@ -91,7 +85,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   getPosts: protectedProcedure
-    .input(trpcValidators.post.getPosts)
+    .input(trpcValidators.input.post.paginatePosts)
     .output(sharedValidators.media.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {

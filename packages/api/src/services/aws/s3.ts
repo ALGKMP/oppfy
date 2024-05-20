@@ -6,11 +6,14 @@ import { S3Repository } from "../../repositories/aws/s3";
 
 type ContentType = "image/jpeg" | "image/png";
 
-type PostMetadata = z.infer<typeof trpcValidators.post.metadata>;
-type ProfilePictureMetadata = z.infer<
-  typeof trpcValidators.post.profilePictureMetadata
->;
-
+type PostMetadata = {
+  author: string;
+  recipient: string;
+  caption: string;
+};
+type ProfilePictureMetadata = {
+  user: string;
+}
 interface PutObjectPresignedUrlInput {
   Key: string;
   Bucket: string;

@@ -40,29 +40,6 @@ export const phoneNumber = z
 
 export const phoneNumberOTP = z.string().length(6);
 
-export const blockedUser = z.object({
-  userId: z.string(),
-  username: z.string().nullable(),
-  name: z.string().nullable(),
-  profilePictureUrl: z.string(),
-  createdAt: z.date(),
-  profileId: z.number(),
-});
-
-export const updateProfile = z.object({
-  username: z.string().optional(),
-  fullName: z.string().optional(),
-  bio: z.string().optional(),
-});
-
-// Use this for displaying profile header
-export const basicProfile = z.object({
-  userId: z.string(),
-  privacy: z.enum(["public", "private"]),
-  username: z.string(),
-  name: z.string(),
-  profilePictureUrl: z.string(),
-});
 
 export const PublicFollowState = z.enum(["NotFollowing", "Following"]);
 export const PrivateFollowState = z.enum(["NotFollowing", "Requested", "Following", "IncomingRequest"]);
@@ -99,18 +76,6 @@ export const otherUserFullProfile = z.object({
   blocked: z.boolean(),
 });
 
-export const currentUserFullProfile = z.object({
-  userId: z.string(),
-  privacy: z.enum(["public", "private"]),
-  username: z.string(),
-  name: z.string(),
-  bio: z.union([z.string(), z.null()]),
-  followerCount: z.number(),
-  followingCount: z.number(),
-  friendCount: z.number(),
-  profilePictureUrl: z.string(),
-});
-
 // Define a schema for a single user profile
 const userHeaderSchema = z.object({
   userId: z.string(),
@@ -129,6 +94,7 @@ const cursorSchema = z.object({
 export const paginatedUserResponseSchema = z.object({
   items: z.array(userHeaderSchema),
   nextCursor: cursorSchema.optional(),
+  
 });
 
 
