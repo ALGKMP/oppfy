@@ -12,20 +12,20 @@ import { api } from "~/utils/api";
 const Following = () => {
   const headerHeight = useHeaderHeight();
 
-  const unfollow = api.user.unfollowUser.useMutation({
+  const unfollow = api.follow.unfollowUser.useMutation({
     onSuccess: (_data, variables) => {
       setUnfollowed((prev) => ({
         ...prev,
-        [variables.recipientId]: true,
+        [variables.userId]: true,
       }));
     },
   });
 
-  const follow = api.user.followUser.useMutation({
+  const follow = api.follow.followUser.useMutation({
     onSuccess: (_data, variables) => {
       setUnfollowed((prev) => ({
         ...prev,
-        [variables.recipientId]: false,
+        [variables.userId]: false,
       }));
     },
   });
@@ -36,7 +36,7 @@ const Following = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = api.user.getCurrentUserFollowing.useInfiniteQuery(
+  } = api.follow.paginateFollowingSelf.useInfiniteQuery(
     {
       pageSize: 20,
     },
@@ -70,11 +70,11 @@ const Following = () => {
 
   const [unfollowed, setUnfollowed] = useState<Record<string, boolean>>({});
 
-  const toggleFollowStatus = (recipientId: string) => {
-    const isFollowing = !unfollowed[recipientId];
+  const toggleFollowStatus = (userId: string) => {
+    const isFollowing = !unfollowed[userId];
     isFollowing
-      ? unfollow.mutate({ recipientId })
-      : follow.mutate({ recipientId });
+      ? unfollow.mutate({ userId })
+      : follow.mutate({ userId });
   };
 
   return (
