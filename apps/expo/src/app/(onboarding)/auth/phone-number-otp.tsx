@@ -25,9 +25,9 @@ const PhoneNumberOTP = () => {
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
 
-  const createUser = api.auth.createUser.useMutation();
+  const createUser = api.user.createUser.useMutation();
   const userOnboardingCompletedMutation =
-    api.auth.checkOnboardingComplete.useMutation();
+    api.user.checkOnboardingComplete.useMutation();
 
   const isValidPhoneNumberOTP =
     sharedValidators.user.phoneNumberOTP.safeParse(phoneNumberOTP).success;
