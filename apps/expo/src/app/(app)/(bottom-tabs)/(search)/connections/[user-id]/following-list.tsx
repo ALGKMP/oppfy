@@ -16,20 +16,20 @@ const Following = () => {
   const router = useRouter();
   const headerHeight = useHeaderHeight();
 
-  const unfollow = api.user.unfollowUser.useMutation({
+  const unfollow = api.follow.unfollowUser.useMutation({
     onSuccess: (_data, variables) => {
       setUnfollowed((prev) => ({
         ...prev,
-        [variables.recipientId]: true,
+        [variables.userId]: true,
       }));
     },
   });
 
-  const follow = api.user.followUser.useMutation({
+  const follow = api.follow.followUser.useMutation({
     onSuccess: (_data, variables) => {
       setUnfollowed((prev) => ({
         ...prev,
-        [variables.recipientId]: false,
+        [variables.userId]: false,
       }));
     },
   });
@@ -41,7 +41,7 @@ const Following = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.user.getOtherUserFollowing.useInfiniteQuery(
+  } = api.follow.paginateFollowersOthers.useInfiniteQuery(
     {
       userId,
       pageSize: 20,
@@ -79,8 +79,8 @@ const Following = () => {
   const toggleFollowStatus = (recipientId: string) => {
     const isFollowing = !unfollowed[recipientId];
     isFollowing
-      ? unfollow.mutate({ recipientId })
-      : follow.mutate({ recipientId });
+      ? unfollow.mutate({ userId })
+      : follow.mutate({ userId: recipientId });
   };
 
   return (
