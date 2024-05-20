@@ -6,7 +6,7 @@ const trpcProfileInputSchema = {
   }),
 
   updateProfile: z.object({
-    name: z.string().max(50),
+    fullName: z.string().max(50),
     username: z.string().max(50),
     bio: z.string().max(160),
   }),
