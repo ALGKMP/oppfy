@@ -40,6 +40,7 @@ const Following = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    refetch,
   } = api.user.getOtherUserFollowing.useInfiniteQuery(
     {
       userId,
@@ -86,6 +87,8 @@ const Following = () => {
     <BaseScreenView paddingBottom={0}>
       {isLoading || itemCount ? (
         <FlashList
+          onRefresh={refetch}
+          refreshing={isLoading}
           extraData={unfollowed}
           data={isLoading ? placeholderData : friendsItems}
           ItemSeparatorComponent={Separator}

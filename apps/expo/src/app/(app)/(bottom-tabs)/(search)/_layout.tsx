@@ -23,9 +23,6 @@ const SearchLayout = () => {
         screenOptions={{
           headerLeft: (props) => <HeaderLeft {...props} />,
           header: (props) => <Header {...props} />,
-          headerStyle: {
-            backgroundColor: theme.background.val,
-          },
         }}
       >
         <Stack.Screen
@@ -58,12 +55,7 @@ const SearchLayout = () => {
             ),
           }}
         />
-        <Stack.Screen
-          name="connections/[user-id]"
-          options={{
-            title: "Connections",
-          }}
-        />
+        <Stack.Screen name="connections/[user-id]" />
       </Stack>
     </ProfileProvider>
   );

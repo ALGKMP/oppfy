@@ -26,9 +26,6 @@ const AppLayout = () => {
     <Stack
       screenOptions={{
         header: () => null,
-        contentStyle: {
-          backgroundColor: theme.background.val,
-        },
       }}
     />
   );

@@ -20,9 +20,6 @@ const SettingsLayout = () => {
       screenOptions={{
         headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
-        headerStyle: {
-          backgroundColor: theme.background.val,
-        },
       }}
     >
       <Stack.Screen
