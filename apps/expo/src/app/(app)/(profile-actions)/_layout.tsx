@@ -17,7 +17,7 @@ const ProfileActionsLayout = () => {
   const theme = useTheme();
 
   const utils = api.useUtils();
-  const username = utils.profile.getCurrentUsersFullProfile.getData()?.username;
+  const username = utils.profile.getFullProfileSelf.getData()?.username;
 
   return (
     <Stack

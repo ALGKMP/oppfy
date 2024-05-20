@@ -25,13 +25,13 @@ import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type ProfileData = RouterOutputs["profile"]["getCurrentUsersFullProfile"];
+type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 
 const ProfileLayout = () => {
   const theme = useTheme();
 
   const { data: profileData, isLoading: _profileDataIsLoading } =
-    api.profile.getCurrentUsersFullProfile.useQuery();
+    api.profile.getFullProfileSelf.useQuery();
 
   return (
     <TopTabs
