@@ -12,7 +12,7 @@ const FullName = () => {
 
   const [fullName, setFullName] = useState("");
 
-  const updateName = api.user.updateFullName.useMutation();
+  const updateName = api.profile.updateFullName.useMutation();
 
   const isValidFullName =
     sharedValidators.user.fullName.safeParse(fullName).success;
