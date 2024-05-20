@@ -27,7 +27,7 @@ const profileSchema = z.object({
 const EditProfile = () => {
   const utils = api.useUtils();
 
-  const defaultValues = utils.profile.getCurrentUsersFullProfile.getData();
+  const defaultValues = utils.profile.getFullProfileSelf.getData();
 
   const {
     control,
@@ -46,14 +46,14 @@ const EditProfile = () => {
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newPartialProfileData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getCurrentUsersFullProfile.cancel();
+      await utils.profile.getFullProfileSelf.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getCurrentUsersFullProfile.getData();
+      const prevData = utils.profile.getFullProfileSelf.getData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.profile.getCurrentUsersFullProfile.setData(undefined, {
+      utils.profile.getFullProfileSelf.setData(undefined, {
         ...prevData,
         ...newPartialProfileData,
       });
@@ -65,11 +65,11 @@ const EditProfile = () => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.profile.getCurrentUsersFullProfile.setData(undefined, ctx.prevData);
+      utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.profile.getCurrentUsersFullProfile.invalidate();
+      await utils.profile.getFullProfileSelf.invalidate();
     },
   });
 
