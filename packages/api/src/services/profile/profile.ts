@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { sharedValidators } from "@oppfy/validators";
+import { trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { S3Repository } from "../../repositories/aws/s3";
@@ -11,7 +11,7 @@ import { BlockRepository } from "../../repositories/user/block";
 import { UserRepository } from "../../repositories/user/user";
 import { FriendService } from "../network/friend";
 
-type UpdateProfile = z.infer<typeof sharedValidators.user.updateProfile>;
+type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
 type PublicFollowState = "NotFollowing" | "Following";
 type PrivateFollowState = "NotFollowing" | "Requested" | "Following";
@@ -153,7 +153,7 @@ export class ProfileService {
       Key: profile.profilePictureKey,
     });
 
-    return sharedValidators.user.basicProfile.parse({
+    return trpcValidators.output.profile.compactProfile.parse({
       userId: user.id,
       privacy: user.privacySetting,
       username: profile.username,
@@ -192,7 +192,7 @@ export class ProfileService {
       Key: profile.profilePictureKey,
     });
 
-    return sharedValidators.user.basicProfile.parse({
+    return trpcValidators.output.profile.compactProfile.parse({
       userId: user.id,
       privacy: user.privacySetting,
       username: profile.username,
@@ -271,13 +271,13 @@ export class ProfileService {
       profilePictureUrl,
     };
 
-    return sharedValidators.user.currentUserFullProfile.parse(profileData);
+    return trpcValidators.output.profile.fullProfileSelf.parse(profileData);
   }
 
   async getFullProfileByProfileId(
     currentUserId: string,
     profileId: number,
-  ): Promise<z.infer<typeof sharedValidators.user.otherUserFullProfile>> {
+  ): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileSelf>> {
     const otherUser = await this.userRepository.getUserByProfileId(profileId);
     if (!otherUser) {
       console.error(
@@ -367,7 +367,7 @@ export class ProfileService {
     }
     // Initialize networkStatus with default values
     let networkStatus: z.infer<
-      typeof sharedValidators.user.otherUserFullProfile
+      typeof trpcValidators.output.profile.fullProfileOther
     >["networkStatus"] = {
       privacy: otherUser.privacySetting,
       currentUserFollowState: "NotFollowing",
@@ -545,7 +545,7 @@ export class ProfileService {
     }
 
     const profileData: z.infer<
-      typeof sharedValidators.user.otherUserFullProfile
+      typeof trpcValidators.output.profile.fullProfileOther
     > = {
       userId: otherUser.id,
       username: username,
@@ -559,7 +559,7 @@ export class ProfileService {
       networkStatus: networkStatus,
     };
 
-    return sharedValidators.user.otherUserFullProfile.parse(profileData);
+    return trpcValidators.output.profile.fullProfileOther.parse(profileData);
   }
 
   async removeProfilePicture(userId: string) {
@@ -601,7 +601,7 @@ export class ProfileService {
     }
 
     let networkStatus: z.infer<
-      typeof sharedValidators.user.otherUserFullProfile
+      typeof trpcValidators.output.profile.fullProfileOther
     >["networkStatus"] = {
       privacy: otherUser.privacySetting,
       currentUserFollowState: "NotFollowing",
