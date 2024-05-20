@@ -109,18 +109,24 @@ const Profile = (props: ProfileProps) => {
         </Skeleton>
 
         <YStack alignItems="center" gap="$2">
-          <Skeleton width={100} height={25}>
-            <SizableText size="$4" textAlign="center">
-              {props.loading ? "" : props.data.name}
-            </SizableText>
-          </Skeleton>
-
-          {!props.loading && props.data.bio && (
-            <Skeleton width={250} height={50}>
-              <Paragraph theme="alt1" textAlign="center">
-                {props.loading ? "" : props.data.bio}
-              </Paragraph>
+          {props.loading ? (
+            <Skeleton width={100} height={25}>
+              <SizableText size="$4" textAlign="center" />
             </Skeleton>
+          ) : (
+            <SizableText size="$4" textAlign="center">
+              {props.data.name}
+            </SizableText>
+          )}
+
+          {props.loading ? (
+            <Skeleton width={250} height={50}>
+              <Paragraph theme="alt1" textAlign="center" />
+            </Skeleton>
+          ) : (
+            <Paragraph theme="alt1" textAlign="center">
+              {props.data.bio}
+            </Paragraph>
           )}
         </YStack>
 
