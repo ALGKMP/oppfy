@@ -14,17 +14,17 @@ const BlockedUsers = () => {
   const utils = api.useUtils();
   const headerHeight = useHeaderHeight();
 
-  const unblockUser = api.user.unblockUser.useMutation({
+  const unblockUser = api.block.unblockUser.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.user.getBlockedUsers.cancel();
+      await utils.block.paginateBlockedUsers.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.user.getBlockedUsers.getInfiniteData();
+      const prevData = utils.block.paginateBlockedUsers.getInfiniteData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.user.getBlockedUsers.setInfiniteData(
+      utils.block.paginateBlockedUsers.setInfiniteData(
         {},
         {
           ...prevData,
@@ -41,11 +41,11 @@ const BlockedUsers = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.user.getBlockedUsers.setInfiniteData({}, ctx.prevData);
+      utils.block.paginateBlockedUsers.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.user.getBlockedUsers.invalidate();
+      await utils.block.paginateBlockedUsers.invalidate();
     },
   });
 
@@ -55,7 +55,7 @@ const BlockedUsers = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = api.user.getBlockedUsers.useInfiniteQuery(
+  } = api.block.paginateBlockedUsers.useInfiniteQuery(
     {
       pageSize: 20,
     },
