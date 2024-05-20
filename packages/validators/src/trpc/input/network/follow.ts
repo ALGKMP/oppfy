@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const followInputSchema = {
   followUser: z.object({
-    recipientId: z.string(),
+    userId: z.string(),
   }),
 
   unfollowUser: z.object({

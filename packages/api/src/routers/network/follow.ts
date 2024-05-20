@@ -2,8 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { trpcValidators } from "@oppfy/validators";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
-// TODO: Go through the flow for everything again and rename service method paramters to be more descriptive
-
 export const followRouter = createTRPCRouter({
   paginateFollowersSelf: protectedProcedure
     .input(trpcValidators.input.follow.paginateFollowersSelf)
@@ -75,7 +73,7 @@ export const followRouter = createTRPCRouter({
       try {
         return await ctx.services.follow.followUser(
           ctx.session.uid,
-          input.recipientId,
+          input.userId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
