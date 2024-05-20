@@ -17,7 +17,7 @@ const Username = () => {
   const [username, setUsername] = useState("");
   const [error, setError] = useState<Error | null>(null);
 
-  const updateUsername = api.user.updateUsername.useMutation();
+  const updateUsername = api.profile.updateUsername.useMutation();
 
   const isValidUsername =
     sharedValidators.user.username.safeParse(username).success;
