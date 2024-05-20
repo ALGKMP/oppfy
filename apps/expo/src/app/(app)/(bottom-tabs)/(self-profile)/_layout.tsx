@@ -124,11 +124,11 @@ const Profile = (props: ProfileProps) => {
             <Skeleton width={250} height={50}>
               <Paragraph theme="alt1" textAlign="center" />
             </Skeleton>
-          ) : (
+          ) : props.data.bio ? (
             <Paragraph theme="alt1" textAlign="center">
               {props.data.bio}
             </Paragraph>
-          )}
+          ) : null}
         </YStack>
 
         <XStack width={250} gap="$4">
