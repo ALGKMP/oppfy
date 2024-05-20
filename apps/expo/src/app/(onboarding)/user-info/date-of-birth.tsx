@@ -15,7 +15,7 @@ const DateOfBirth = () => {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [open, setOpen] = useState(false);
 
-  const updateDateOfBirth = api.user.updateDateOfBirth.useMutation();
+  const updateDateOfBirth = api.profile.updateDateOfBirth.useMutation();
 
   const isValidDateOfBirth =
     sharedValidators.user.dateOfBirth.safeParse(dateOfBirth).success;
