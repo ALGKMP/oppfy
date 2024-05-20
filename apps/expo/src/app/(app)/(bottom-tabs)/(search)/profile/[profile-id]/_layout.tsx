@@ -54,7 +54,9 @@ const ProfileLayout = () => {
           <TopTabBar {...props} />
         </YStack>
       )}
-      sceneContainerStyle={{ backgroundColor: theme.background.val }}
+      style={{
+        backgroundColor: theme.background.val,
+      }}
     >
       <TopTabs.Screen
         name="media-of-them"

@@ -10,7 +10,7 @@ const TopTabsLayout = () => {
     <TopTabs
       tabBar={(props) => <TopTabBar {...props} />}
       screenOptions={{
-        headerStyle: {
+        tabBarContentContainerStyle: {
           backgroundColor: theme.background.val,
         },
       }}

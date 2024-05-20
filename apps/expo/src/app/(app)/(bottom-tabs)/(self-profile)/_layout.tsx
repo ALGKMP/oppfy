@@ -38,7 +38,6 @@ const ProfileLayout = () => {
       tabBar={(props) => (
         <YStack>
           {profileData === undefined ? (
-            // {true ? (
             <Profile loading />
           ) : (
             <Profile loading={false} data={profileData} />
@@ -47,7 +46,9 @@ const ProfileLayout = () => {
           <TopTabBar {...props} />
         </YStack>
       )}
-      sceneContainerStyle={{ backgroundColor: theme.background.val }}
+      style={{
+        backgroundColor: theme.background.val,
+      }}
     >
       <TopTabs.Screen
         name="media-of-you"

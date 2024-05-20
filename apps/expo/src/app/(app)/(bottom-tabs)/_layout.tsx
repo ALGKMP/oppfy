@@ -30,7 +30,7 @@ const BottomTabsLayout = () => {
       tabBar={(props) => <BottomTabBar {...props} />}
       screenOptions={{
         header: (props) => <Header {...props} />,
-        headerStyle: {
+        contentStyle: {
           backgroundColor: theme.background.val,
         },
       }}

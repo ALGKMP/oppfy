@@ -126,7 +126,7 @@ const Privacy = () => {
         subtitle={subtitle}
         buttonOptions={buttonOptions}
         isVisible={isModalVisible}
-        onClose={() => {
+        onCancel={() => {
           setIsModalVisible(false);
         }}
       />
