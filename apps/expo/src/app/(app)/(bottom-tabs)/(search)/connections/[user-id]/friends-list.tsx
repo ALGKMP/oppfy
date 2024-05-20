@@ -18,17 +18,17 @@ const Friends = () => {
 
   const utils = api.useUtils();
 
-  const removeFriend = api.user.removeFriend.useMutation({
+  const removeFriend = api.friend.removeFriend.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.user.getCurrentUserFriends.cancel();
+      await utils.friend.paginateFriendsSelf.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.user.getCurrentUserFollowers.getInfiniteData();
+      const prevData = utils.friend.paginateFriendsSelf.getInfiniteData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.user.getCurrentUserFriends.setInfiniteData(
+      utils.friend.paginateFriendsSelf.setInfiniteData(
         {},
         {
           ...prevData,
@@ -45,11 +45,11 @@ const Friends = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.user.getCurrentUserFriends.setInfiniteData({}, ctx.prevData);
+      utils.friend.paginateFriendsSelf.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.user.getCurrentUserFriends.invalidate();
+      await utils.friend.paginateFriendsSelf.invalidate();
     },
   });
 
@@ -59,7 +59,7 @@ const Friends = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = api.user.getCurrentUserFriends.useInfiniteQuery(
+  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
     {
       pageSize: 20,
     },
