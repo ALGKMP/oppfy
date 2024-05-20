@@ -15,24 +15,24 @@ const Followers = () => {
 
   const utils = api.useUtils();
 
-  const removeFollower = api.user.removeFollower.useMutation({
+  const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.user.getCurrentUserFollowers.cancel();
+      await utils.follow.paginateFollowersSelf.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.user.getCurrentUserFollowers.getInfiniteData();
+      const prevData = utils.follow.paginateFollowersSelf.getInfiniteData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.user.getCurrentUserFollowers.setInfiniteData(
+      utils.follow.paginateFollowersSelf.setInfiniteData(
         {},
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
-              (item) => item.userId !== newData.recipientId,
+              (item) => item.userId !== newData.userId,
             ),
           })),
         },
@@ -42,11 +42,11 @@ const Followers = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.user.getCurrentUserFollowers.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowersSelf.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.user.getCurrentUserFollowers.invalidate();
+      await utils.follow.paginateFollowersSelf.invalidate();
     },
   });
 
@@ -56,7 +56,7 @@ const Followers = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = api.user.getCurrentUserFollowers.useInfiniteQuery(
+  } = api.follow.paginateFollowersSelf.useInfiniteQuery(
     {
       pageSize: 20,
     },
@@ -137,7 +137,7 @@ const Followers = () => {
                             textProps: { color: "$red9" },
                             onPress: () =>
                               removeFollower.mutate({
-                                recipientId: item.userId,
+                                userId: item.userId,
                               }),
                           },
                         ]}
