@@ -14,7 +14,7 @@ import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-type SwitchState = RouterOutputs["user"]["getNotificationSettings"];
+type SwitchState = RouterOutputs["notifications"]["getNotificationSettings"];
 
 const Notifications = () => {
   const utils = api.useUtils();
@@ -22,7 +22,7 @@ const Notifications = () => {
   const {
     data: notificationSettings,
     isLoading: isLoadingNotificationSettings,
-  } = api.user.getNotificationSettings.useQuery(undefined, {
+  } = api.notifications.getNotificationSettings.useQuery(undefined, {
     initialData: {
       likes: false,
       posts: false,
@@ -36,17 +36,17 @@ const Notifications = () => {
   const {
     isLoading: isUpdatingNotficationSettings,
     ...updateNotificationSettings
-  } = api.user.updateNotificationSettings.useMutation({
+  } = api.notifications.updateNotificationSettings.useMutation({
     onMutate: async (newNotificationSettings) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.user.getNotificationSettings.cancel();
+      await utils.notifications.getNotificationSettings.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.user.getNotificationSettings.getData();
+      const prevData = utils.notifications.getNotificationSettings.getData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.user.getNotificationSettings.setData(undefined, {
+      utils.notifications.getNotificationSettings.setData(undefined, {
         ...prevData,
         ...newNotificationSettings,
       });
@@ -58,11 +58,11 @@ const Notifications = () => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.user.getNotificationSettings.setData(undefined, ctx.prevData);
+      utils.notifications.getNotificationSettings.setData(undefined, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.user.getNotificationSettings.invalidate();
+      await utils.notifications.getNotificationSettings.invalidate();
     },
   });
 
