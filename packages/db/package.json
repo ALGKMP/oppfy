@@ -27,18 +27,12 @@
     "mysql2": "^3.9.7"
   },
   "devDependencies": {
-    "@oppfy/eslint-config": "workspace:^",
-    "@oppfy/prettier-config": "workspace:^",
-    "@oppfy/tsconfig": "workspace:^",
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
     "drizzle-kit": "^0.21.1",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@oppfy/eslint-config/base"
-    ]
   },
   "prettier": "@oppfy/prettier-config"
 }

@@ -13,16 +13,11 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@oppfy/eslint-config": "workspace:^",
-    "@oppfy/prettier-config": "workspace:^",
-    "@oppfy/tsconfig": "workspace:^",
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@oppfy/eslint-config/base"
-    ]
   },
   "prettier": "@oppfy/prettier-config"
 }

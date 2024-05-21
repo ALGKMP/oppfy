@@ -23,8 +23,8 @@
     "@expo/metro-config": "^0.17.7",
     "@expo/react-native-action-sheet": "^4.0.1",
     "@hookform/resolvers": "^3.3.4",
-    "@oppfy/utils": "workspace:^",
-    "@oppfy/validators": "workspace:^",
+    "@oppfy/utils": "workspace:*",
+    "@oppfy/validators": "workspace:*",
     "@react-native-firebase/app": "^18.9.0",
     "@react-native-firebase/auth": "^18.9.0",
     "@react-native-firebase/crashlytics": "^18.9.0",
@@ -88,27 +88,17 @@
     "@babel/preset-env": "^7.24.4",
     "@babel/runtime": "^7.24.4",
     "@expo/config-plugins": "^7.9.1",
-    "@oppfy/api": "workspace:^",
-    "@oppfy/eslint-config": "workspace:^",
-    "@oppfy/prettier-config": "workspace:^",
-    "@oppfy/tsconfig": "workspace:^",
-    "@oppfy/types": "workspace:^",
+    "@oppfy/api": "workspace:*",
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
+    "@oppfy/types": "workspace:*",
     "@types/babel__core": "^7.20.5",
     "@types/lodash": "^4.17.1",
     "@types/react": "^18.3.1",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@oppfy/eslint-config/base",
-      "@oppfy/eslint-config/react"
-    ],
-    "ignorePatterns": [
-      "expo-plugins/**"
-    ]
   },
   "prettier": "@oppfy/prettier-config"
 }

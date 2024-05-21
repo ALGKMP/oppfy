@@ -25,11 +25,5 @@
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@oppfy/eslint-config/base"
-    ]
-  },
   "prettier": "@oppfy/prettier-config"
 }
