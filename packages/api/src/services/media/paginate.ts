@@ -1,8 +1,12 @@
+import { PrivacyStatus } from "@oppfy/validators";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository, FriendRepository } from "../../repositories";
 import { BlockRepository } from "../../repositories/user/block";
 import { UserRepository } from "../../repositories/user/user";
 import { S3Service } from "../aws/s3";
+import { FollowService } from "../network/follow";
+import { FriendService } from "../network/friend";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -25,10 +29,13 @@ export interface UserProfile {
 
 export class PaginationService {
   private userRepository = new UserRepository();
-  private awsService = new S3Service();
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
+
+  private awsService = new S3Service();
+  private followService = new FollowService();
+  private friendService = new FriendService();
 
   async paginateFollowers(
     userId: string,
@@ -149,5 +156,40 @@ export class PaginationService {
         "Failed to get profile picture URLs",
       );
     }
+  }
+
+  async getProfileStatus(currentUserId: string, otherUserId: string) {
+    const otherUser = await this.userRepository.getUser(otherUserId);
+    if (!otherUser) {
+      console.error(`SERVICE ERROR: User not found for ID "${otherUserId}"`);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    const currentUserFollowState =
+      await this.followService.determineFollowState(
+        currentUserId,
+        otherUserId,
+        otherUser.privacySetting,
+      );
+    const otherUserFollowState = await this.followService.determineFollowState(
+      otherUserId,
+      currentUserId,
+      otherUser.privacySetting,
+    );
+    const currentUserFriendState =
+      await this.friendService.determineFriendState(currentUserId, otherUserId);
+    const otherUserFriendState = await this.friendService.determineFriendState(
+      otherUserId,
+      currentUserId,
+    );
+
+    const profileStatus = {
+      privacy: otherUser.privacySetting,
+      currentUserFollowState,
+      otherUserFollowState,
+      currentUserFriendState,
+      otherUserFriendState,
+    };
+
+    return PrivacyStatus.parse(profileStatus);
   }
 }

@@ -24,7 +24,7 @@ export class BlockService {
       userIdBeingBlocked,
       userId,
     );
-    const isFriends = await this.friendService.isFriends(
+    const isFriends = await this.friendService.areFriends(
       userId,
       userIdBeingBlocked,
     );
