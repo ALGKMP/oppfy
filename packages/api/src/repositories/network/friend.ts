@@ -80,11 +80,11 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async getFriendRequest(senderId: string, recipientId: string) {
+  async getFriendRequest(senderId: string, targetUserId: string) {
     return await this.db.query.friendRequest.findFirst({
       where: and(
         eq(schema.friendRequest.senderId, senderId),
-        eq(schema.friendRequest.recipientId, recipientId),
+        eq(schema.friendRequest.recipientId, targetUserId),
       ),
     });
   }
