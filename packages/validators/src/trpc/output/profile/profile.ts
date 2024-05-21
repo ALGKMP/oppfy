@@ -9,25 +9,25 @@ export const PrivateFollowState = z.enum([
 ]);
 export const FriendState = z.enum([
   "NotFriends",
+  "OutboundRequest",
   "Friends",
-  "PendingIncoming",
-  "PendingOutbound",
+  "IncomingRequest",
 ]);
 
 export const PublicProfileStatus = z.object({
   privacy: z.literal("public"),
-  currentUserFollowState: PublicFollowState,
+  targetUserFollowState: PublicFollowState,
+  targetUserFriendState: FriendState,
   otherUserFollowState: PublicFollowState,
   otherUserFriendState: FriendState,
-  currentUserFriendState: FriendState,
 });
 
 export const PrivateProfileStatus = z.object({
   privacy: z.literal("private"),
+  targetUserFollowState: PrivateFollowState,
+  targetUserFriendState: FriendState,
   otherUserFollowState: PrivateFollowState,
-  currentUserFollowState: PrivateFollowState,
   otherUserFriendState: FriendState,
-  currentUserFriendState: FriendState,
 });
 
 export const PrivacyStatus = z.union([PublicProfileStatus, PrivateProfileStatus]);

@@ -134,14 +134,14 @@ export class FriendService {
     return friendRequests;
   }
 
-  async removeFriend(userId1: string, userId2: string) {
+  async removeFriend(targetUserId: string, otherUserId: string) {
     const friendshipExists = await this.friendRepository.getFriend(
-      userId1,
-      userId2,
+      targetUserId,
+      otherUserId,
     );
     if (!friendshipExists) {
       console.error(
-        `SERVICE ERROR: Friendship between "${userId1}" and "${userId2}" not found`,
+        `SERVICE ERROR: Friendship between "${targetUserId}" and "${otherUserId}" not found`,
       );
       throw new DomainError(
         ErrorCode.FRIENDSHIP_NOT_FOUND,
@@ -149,12 +149,12 @@ export class FriendService {
       );
     }
     const removeResult = await this.friendRepository.removeFriend(
-      userId1,
-      userId2,
+      targetUserId,
+      otherUserId,
     );
     if (!removeResult) {
       console.error(
-        `SERVICE ERROR: Failed to remove friendship between "${userId1}" and "${userId2}"`,
+        `SERVICE ERROR: Failed to remove friendship between "${targetUserId}" and "${otherUserId}"`,
       );
       throw new DomainError(
         ErrorCode.FAILED_TO_REMOVE_FRIEND,
@@ -170,9 +170,9 @@ export class FriendService {
     if (areFriends) {
       return FriendState.Enum.Friends;
     } else if (friendRequest) {
-      return FriendState.Enum.PendingOutbound;
+      return FriendState.Enum.OutboundRequest;
     } else if (incomingRequest) {
-      return FriendState.Enum.PendingIncoming;
+      return FriendState.Enum.IncomingRequest;
     } else {
       return FriendState.Enum.NotFriends;
     }

@@ -9,6 +9,7 @@ import { FriendRepository } from "../../repositories/network/friend";
 import { ProfileRepository } from "../../repositories/profile/profile";
 import { BlockRepository } from "../../repositories/user/block";
 import { UserRepository } from "../../repositories/user/user";
+import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
@@ -53,6 +54,7 @@ export class ProfileService {
   private blockRepository = new BlockRepository();
 
   private friendService = new FriendService();
+  private followService = new FollowService();
 
   async updateFullName(userId: string, fullName: string) {
     const profile = await this._getUserProfile(userId);
@@ -370,9 +372,9 @@ export class ProfileService {
       typeof trpcValidators.output.profile.fullProfileOther
     >["networkStatus"] = {
       privacy: otherUser.privacySetting,
-      currentUserFollowState: "NotFollowing",
-      otherUserFollowState: "NotFollowing",
-      currentUserFriendState: "NotFriends",
+      targetUserFriendOtherUser: "NotFollowing",
+      otherUserFriendState: "NotFollowing",
+      targetUserFriendOtherUser: "NotFriends",
       otherUserFriendState: "NotFriends",
     };
 
@@ -395,10 +397,10 @@ export class ProfileService {
       );
 
       // Update networkStatus with the follow states
-      networkStatus.currentUserFollowState = currentUserFollowState
+      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
         ? "Following"
         : "NotFollowing";
-      networkStatus.otherUserFollowState = otherUserFollowState
+      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
         ? "Following"
         : "NotFollowing";
 
@@ -415,8 +417,8 @@ export class ProfileService {
 
       // Check if either user is friends with the other (a little redundant, but will help catch logic errors)
       if (currentUserFriendState && otherUserFriendState) {
-        networkStatus.currentUserFriendState = "Friends";
-        networkStatus.otherUserFriendState = "Friends";
+        networkStatus.targetUserFollowsOtherUser = "Friends";
+        networkStatus.otherUserFollowsTargetUser = "Friends";
       } else {
         // Retrieve any friend requests made by the current user to the other user
         const currentUserFriendRequest =
@@ -433,18 +435,18 @@ export class ProfileService {
 
         // If current user has sent a friend request to the other user
         if (currentUserFriendRequest) {
-          networkStatus.currentUserFriendState = "Requested";
-          networkStatus.otherUserFriendState = "IncomingRequest";
+          networkStatus.targetUserFollowsOtherUser = "Requested";
+          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
         }
         // If other user has sent a friend request to the current user
         else if (otherUserFriendRequest) {
-          networkStatus.otherUserFriendState = "Requested";
-          networkStatus.currentUserFriendState = "IncomingRequest";
+          networkStatus.otherUserFollowsTargetUser = "Requested";
+          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
         }
         // If there are no friend requests or friendships, set the states to NotFriends
         else {
-          networkStatus.currentUserFriendState = "NotFriends";
-          networkStatus.otherUserFriendState = "NotFriends";
+          networkStatus.targetUserFollowsOtherUser = "NotFriends";
+          networkStatus.otherUserFollowsTargetUser = "NotFriends";
         }
       }
     } else if (otherUser.privacySetting === "private") {
@@ -458,10 +460,10 @@ export class ProfileService {
         currentUserId,
       );
 
-      networkStatus.currentUserFollowState = currentUserFollowState
+      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
         ? "Following"
         : "NotFollowing";
-      networkStatus.otherUserFollowState = otherUserFollowState
+      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
         ? "Following"
         : "NotFollowing";
 
@@ -472,12 +474,12 @@ export class ProfileService {
             currentUserId,
             otherUser.id,
           );
-        networkStatus.currentUserFollowState = currentUserFollowRequest
+        networkStatus.targetUserFollowsOtherUser = currentUserFollowRequest
           ? "Requested"
           : "NotFollowing";
         // If there is a follow requested, the other user's follow state is IncomingRequest
         if (currentUserFollowRequest) {
-          networkStatus.otherUserFollowState = "IncomingRequest";
+          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
         }
       }
 
@@ -488,12 +490,12 @@ export class ProfileService {
             otherUser.id,
             currentUserId,
           );
-        networkStatus.otherUserFollowState = otherUserFollowRequest
+        networkStatus.otherUserFollowsTargetUser = otherUserFollowRequest
           ? "Requested"
           : "NotFollowing";
         // If there is a follow requested, the current user's follow state is IncomingRequest
         if (otherUserFollowRequest) {
-          networkStatus.currentUserFollowState = "IncomingRequest";
+          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
         }
       }
 
@@ -510,8 +512,8 @@ export class ProfileService {
 
       // Check if either user is friends with the other
       if (currentUserFriendState || otherUserFriendState) {
-        networkStatus.currentUserFriendState = "Friends";
-        networkStatus.otherUserFriendState = "Friends";
+        networkStatus.targetUserFollowsOtherUser = "Friends";
+        networkStatus.otherUserFollowsTargetUser = "Friends";
       } else {
         // Retrieve any friend requests made by the current user to the other user
         const currentUserFriendRequest =
@@ -528,18 +530,18 @@ export class ProfileService {
 
         // If current user has sent a friend request
         if (currentUserFriendRequest) {
-          networkStatus.currentUserFriendState = "Requested";
-          networkStatus.otherUserFriendState = "IncomingRequest";
+          networkStatus.targetUserFollowsOtherUser = "Requested";
+          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
         }
         // If other user has sent a friend request
         else if (otherUserFriendRequest) {
-          networkStatus.otherUserFriendState = "Requested";
-          networkStatus.currentUserFriendState = "IncomingRequest";
+          networkStatus.otherUserFollowsTargetUser = "Requested";
+          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
         }
         // If there are no friend requests or friendships, set the states to NotFriends
         else {
-          networkStatus.currentUserFriendState = "NotFriends";
-          networkStatus.otherUserFriendState = "NotFriends";
+          networkStatus.targetUserFollowsOtherUser = "NotFriends";
+          networkStatus.otherUserFollowsTargetUser = "NotFriends";
         }
       }
     }
@@ -605,9 +607,9 @@ export class ProfileService {
       typeof trpcValidators.output.profile.fullProfileOther
     >["networkStatus"] = {
       privacy: otherUser.privacySetting,
-      currentUserFollowState: "NotFollowing",
-      otherUserFollowState: "NotFollowing",
-      currentUserFriendState: "NotFriends",
+      targetUserFriendOtherUser: "NotFollowing",
+      otherUserFriendState: "NotFollowing",
+      targetUserFriendOtherUser: "NotFriends",
       otherUserFriendState: "NotFriends",
     };
 
@@ -630,10 +632,10 @@ export class ProfileService {
       );
 
       // Update networkStatus with the follow states
-      networkStatus.currentUserFollowState = currentUserFollowState
+      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
         ? "Following"
         : "NotFollowing";
-      networkStatus.otherUserFollowState = otherUserFollowState
+      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
         ? "Following"
         : "NotFollowing";
 
@@ -650,8 +652,8 @@ export class ProfileService {
 
       // Check if either user is friends with the other (a little redundant, but will help catch logic errors)
       if (currentUserFriendState && otherUserFriendState) {
-        networkStatus.currentUserFriendState = "Friends";
-        networkStatus.otherUserFriendState = "Friends";
+        networkStatus.targetUserFollowsOtherUser = "Friends";
+        networkStatus.otherUserFollowsTargetUser = "Friends";
       } else {
         // Retrieve any friend requests made by the current user to the other user
         const currentUserFriendRequest =
@@ -668,18 +670,18 @@ export class ProfileService {
 
         // If current user has sent a friend request to the other user
         if (currentUserFriendRequest) {
-          networkStatus.currentUserFriendState = "Requested";
-          networkStatus.otherUserFriendState = "IncomingRequest";
+          networkStatus.targetUserFollowsOtherUser = "Requested";
+          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
         }
         // If other user has sent a friend request to the current user
         else if (otherUserFriendRequest) {
-          networkStatus.otherUserFriendState = "Requested";
-          networkStatus.currentUserFriendState = "IncomingRequest";
+          networkStatus.otherUserFollowsTargetUser = "Requested";
+          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
         }
         // If there are no friend requests or friendships, set the states to NotFriends
         else {
-          networkStatus.currentUserFriendState = "NotFriends";
-          networkStatus.otherUserFriendState = "NotFriends";
+          networkStatus.targetUserFollowsOtherUser = "NotFriends";
+          networkStatus.otherUserFollowsTargetUser = "NotFriends";
         }
       }
     } else if (otherUser.privacySetting === "private") {
@@ -693,10 +695,10 @@ export class ProfileService {
         currentUserId,
       );
 
-      networkStatus.currentUserFollowState = currentUserFollowState
+      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
         ? "Following"
         : "NotFollowing";
-      networkStatus.otherUserFollowState = otherUserFollowState
+      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
         ? "Following"
         : "NotFollowing";
 
@@ -707,12 +709,12 @@ export class ProfileService {
             currentUserId,
             otherUser.id,
           );
-        networkStatus.currentUserFollowState = currentUserFollowRequest
+        networkStatus.targetUserFollowsOtherUser = currentUserFollowRequest
           ? "Requested"
           : "NotFollowing";
         // If there is a follow requested, the other user's follow state is IncomingRequest
         if (currentUserFollowRequest) {
-          networkStatus.otherUserFollowState = "IncomingRequest";
+          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
         }
       }
 
@@ -723,12 +725,12 @@ export class ProfileService {
             otherUser.id,
             currentUserId,
           );
-        networkStatus.otherUserFollowState = otherUserFollowRequest
+        networkStatus.otherUserFollowsTargetUser = otherUserFollowRequest
           ? "Requested"
           : "NotFollowing";
         // If there is a follow requested, the current user's follow state is IncomingRequest
         if (otherUserFollowRequest) {
-          networkStatus.currentUserFollowState = "IncomingRequest";
+          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
         }
       }
 
@@ -745,8 +747,8 @@ export class ProfileService {
 
       // Check if either user is friends with the other
       if (currentUserFriendState || otherUserFriendState) {
-        networkStatus.currentUserFriendState = "Friends";
-        networkStatus.otherUserFriendState = "Friends";
+        networkStatus.targetUserFollowsOtherUser = "Friends";
+        networkStatus.otherUserFollowsTargetUser = "Friends";
       } else {
         // Retrieve any friend requests made by the current user to the other user
         const currentUserFriendRequest =
@@ -763,18 +765,18 @@ export class ProfileService {
 
         // If current user has sent a friend request
         if (currentUserFriendRequest) {
-          networkStatus.currentUserFriendState = "Requested";
-          networkStatus.otherUserFriendState = "IncomingRequest";
+          networkStatus.targetUserFollowsOtherUser = "Requested";
+          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
         }
         // If other user has sent a friend request
         else if (otherUserFriendRequest) {
-          networkStatus.otherUserFriendState = "Requested";
-          networkStatus.currentUserFriendState = "IncomingRequest";
+          networkStatus.otherUserFollowsTargetUser = "Requested";
+          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
         }
         // If there are no friend requests or friendships, set the states to NotFriends
         else {
-          networkStatus.currentUserFriendState = "NotFriends";
-          networkStatus.otherUserFriendState = "NotFriends";
+          networkStatus.targetUserFollowsOtherUser = "NotFriends";
+          networkStatus.otherUserFollowsTargetUser = "NotFriends";
         }
       }
     }
@@ -801,5 +803,45 @@ export class ProfileService {
     }
 
     return user.profile;
+  }
+
+  async getNetworkConnectionStates(targetUserId: string, otherUserId: string) {
+    const targetUser = await this.userRepository.getUser(targetUserId);
+    if (!targetUser) {
+      console.error(`SERVICE ERROR: User not found for target user ID "${targetUserId}" in getNetworkConnectionStates`);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    const otherUser = await this.userRepository.getUser(otherUserId);
+    if (!otherUser) {
+      console.error(`SERVICE ERROR: User not found for other user ID "${otherUserId}" in getNetworkConnectionStates`);
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    const currentUserFollowState =
+      await this.followService.determineFollowState(
+        targetUserId,
+        otherUserId,
+        otherUser.privacySetting,
+      );
+    const otherUserFollowState = await this.followService.determineFollowState(
+      otherUserId,
+      targetUserId,
+      otherUser.privacySetting,
+    );
+    const currentUserFriendState =
+      await this.friendService.determineFriendState(targetUserId, otherUserId);
+    const otherUserFriendState = await this.friendService.determineFriendState(
+      otherUserId,
+      targetUserId,
+    );
+
+    const profileStatus = {
+      privacy: otherUser.privacySetting,
+      currentUserFollowState,
+      otherUserFollowState,
+      currentUserFriendState,
+      otherUserFriendState,
+    };
+
+    return PrivacyStatus.parse(profileStatus);
   }
 }
