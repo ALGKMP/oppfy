@@ -16,7 +16,7 @@
     "@oppfy/utils": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@opensearch-project/opensearch": "^2.8.0",
-    "zod": "^3.23.4",
+    "zod": "^3.23.8",
     "@aws-sdk/client-s3": "^3.564.0"
   },
   "devDependencies": {

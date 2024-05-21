@@ -28,7 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "superjson": "2.2.0",
     "trpc-openapi": "^1.2.0",
-    "zod": "^3.23.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
