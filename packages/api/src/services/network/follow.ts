@@ -136,7 +136,10 @@ export class FollowService {
     }
   }
 
-  async rejectFollowRequest(userIdBeingRejected: string, userIdRejecting: string) {
+  async rejectFollowRequest(
+    userIdBeingRejected: string,
+    userIdRejecting: string,
+  ) {
     const followRequestExists = await this.followRepository.getFollowRequest(
       userIdBeingRejected,
       userIdRejecting,

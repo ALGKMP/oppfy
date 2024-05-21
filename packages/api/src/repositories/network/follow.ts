@@ -1,4 +1,4 @@
-import { and, eq, gt, or, asc, count } from "drizzle-orm";
+import { and, asc, count, eq, gt, or } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -88,7 +88,11 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateCurrentUserFollowers(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
+  async paginateCurrentUserFollowers(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -104,7 +108,15 @@ export class FollowRepository {
       .where(
         and(
           eq(schema.follower.recipientId, forUserId),
-          cursor ? or(gt(schema.follower.createdAt, cursor.createdAt), and(eq(schema.follower.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+          cursor
+            ? or(
+                gt(schema.follower.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.follower.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
         ),
       )
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
@@ -112,7 +124,11 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateOtherUserFollowers(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
+  async paginateOtherUserFollowers(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -128,16 +144,27 @@ export class FollowRepository {
       .where(
         and(
           eq(schema.follower.recipientId, forUserId),
-          cursor ? or(gt(schema.follower.createdAt, cursor.createdAt), and(eq(schema.follower.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+          cursor
+            ? or(
+                gt(schema.follower.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.follower.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
         ),
       )
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
   }
 
-
   @handleDatabaseErrors
-  async paginateFollowing(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
+  async paginateFollowing(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -153,7 +180,15 @@ export class FollowRepository {
       .where(
         and(
           eq(schema.follower.senderId, forUserId),
-          cursor ? or(gt(schema.follower.createdAt, cursor.createdAt), and(eq(schema.follower.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+          cursor
+            ? or(
+                gt(schema.follower.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.follower.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
         ),
       )
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
@@ -161,7 +196,11 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedFollowRequests(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
+  async getPaginatedFollowRequests(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -172,12 +211,23 @@ export class FollowRepository {
         profileId: schema.profile.id,
       })
       .from(schema.followRequest)
-      .innerJoin(schema.user, eq(schema.followRequest.recipientId, schema.user.id))
+      .innerJoin(
+        schema.user,
+        eq(schema.followRequest.recipientId, schema.user.id),
+      )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         and(
           eq(schema.followRequest.recipientId, forUserId),
-          cursor ? or(gt(schema.followRequest.createdAt, cursor.createdAt), and(eq(schema.followRequest.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+          cursor
+            ? or(
+                gt(schema.followRequest.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.followRequest.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
         ),
       )
       .orderBy(asc(schema.followRequest.createdAt), asc(schema.profile.id))

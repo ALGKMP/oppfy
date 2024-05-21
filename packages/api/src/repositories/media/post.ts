@@ -40,7 +40,7 @@ export class PostRepository {
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
     const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
-  
+
     return await this.db
       .select({
         postId: schema.post.id,

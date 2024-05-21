@@ -59,17 +59,20 @@ export class PostService {
       data.map(async (item) => {
         try {
           // Update author profile picture URL
-          const authorPresignedUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: item.authorProfilePicture ?? "profile-pictures/default.jpg",
-          });
+          const authorPresignedUrl =
+            await this.awsService.getObjectPresignedUrl({
+              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Key: item.authorProfilePicture ?? "profile-pictures/default.jpg",
+            });
           item.authorProfilePicture = authorPresignedUrl;
 
           // Update recipient profile picture URL
-          const recipientPresignedUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: process.env.S3_PROFILE_BUCKET!,
-            Key: item.recipientProfilePicture ?? "profile-pictures/default.jpg",
-          });
+          const recipientPresignedUrl =
+            await this.awsService.getObjectPresignedUrl({
+              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Key:
+                item.recipientProfilePicture ?? "profile-pictures/default.jpg",
+            });
           item.recipientProfilePicture = recipientPresignedUrl;
 
           const imageUrl = await this.awsService.getObjectPresignedUrl({
@@ -78,8 +81,14 @@ export class PostService {
           });
           item.imageUrl = imageUrl;
         } catch (error) {
-          console.error(`Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `, error);
-          throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, "Failed to get profile picture URL.");
+          console.error(
+            `Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `,
+            error,
+          );
+          throw new DomainError(
+            ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+            "Failed to get profile picture URL.",
+          );
         }
         return item;
       }),
@@ -117,8 +126,14 @@ export class PostService {
               });
           item.profilePictureUrl = presignedUrl;
         } catch (error) {
-          console.error(`Error updating profile picture URL for commentId: ${item.commentId}, userId: ${item.userId}: `, error);
-          throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, "Failed to get comment profile picture URL.");
+          console.error(
+            `Error updating profile picture URL for commentId: ${item.commentId}, userId: ${item.userId}: `,
+            error,
+          );
+          throw new DomainError(
+            ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+            "Failed to get comment profile picture URL.",
+          );
         }
         return item;
       }),
@@ -150,7 +165,10 @@ export class PostService {
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_POSTS, "Failed to paginate posts.");
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_POSTS,
+        "Failed to paginate posts.",
+      );
     }
   }
 
@@ -171,8 +189,14 @@ export class PostService {
       const postId = result[0].insertId;
       await this.postStatsRepository.createPostStats(postId);
     } catch (error) {
-      console.error(`Error in createPost by user: ${postedBy} for user: ${postedFor}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_CREATE_POST, "Failed to create post.");
+      console.error(
+        `Error in createPost by user: ${postedBy} for user: ${postedFor}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CREATE_POST,
+        "Failed to create post.",
+      );
     }
   }
 
@@ -181,7 +205,10 @@ export class PostService {
       await this.postRepository.updatePost(postId, newCaption);
     } catch (error) {
       console.error(`Error in editPost for postId: ${postId}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_EDIT_POST, "Failed to edit post.");
+      throw new DomainError(
+        ErrorCode.FAILED_TO_EDIT_POST,
+        "Failed to edit post.",
+      );
     }
   }
 
@@ -190,7 +217,10 @@ export class PostService {
       await this.postRepository.deletePost(postId);
     } catch (error) {
       console.error(`Error in deletePost for postId: ${postId}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_DELETE_POST, "Failed to delete post.");
+      throw new DomainError(
+        ErrorCode.FAILED_TO_DELETE_POST,
+        "Failed to delete post.",
+      );
     }
   }
 
@@ -201,8 +231,14 @@ export class PostService {
         await this.likeRepository.addLike(postId, userId);
       }
     } catch (error) {
-      console.error(`Error in likePost for userId: ${userId}, postId: ${postId}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_LIKE_POST, "Failed to like post.");
+      console.error(
+        `Error in likePost for userId: ${userId}, postId: ${postId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_LIKE_POST,
+        "Failed to like post.",
+      );
     }
   }
 
@@ -210,8 +246,14 @@ export class PostService {
     try {
       await this.likeRepository.removeLike(postId, userId);
     } catch (error) {
-      console.error(`Error in unlikePost for userId: ${userId}, postId: ${postId}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_UNLIKE_POST, "Failed to unlike post.");
+      console.error(
+        `Error in unlikePost for userId: ${userId}, postId: ${postId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_UNLIKE_POST,
+        "Failed to unlike post.",
+      );
     }
   }
 
@@ -219,8 +261,14 @@ export class PostService {
     try {
       await this.commentRepository.addComment(postId, userId, commentBody);
     } catch (error) {
-      console.error(`Error in addCommentToPost for userId: ${userId}, postId: ${postId}, commentText: ${commentBody}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_ADD_COMMENT, "Failed to add comment to post.");
+      console.error(
+        `Error in addCommentToPost for userId: ${userId}, postId: ${postId}, commentText: ${commentBody}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_ADD_COMMENT,
+        "Failed to add comment to post.",
+      );
     }
   }
 
@@ -228,8 +276,14 @@ export class PostService {
     try {
       await this.commentRepository.removeComment(commentId);
     } catch (error) {
-      console.error(`Error in deleteComment for commentId: ${commentId}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_DELETE_COMMENT, "Failed to delete comment.");
+      console.error(
+        `Error in deleteComment for commentId: ${commentId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_DELETE_COMMENT,
+        "Failed to delete comment.",
+      );
     }
   }
 
@@ -239,12 +293,22 @@ export class PostService {
     pageSize: number,
   ): Promise<PaginatedResponse<CommentProfile>> {
     try {
-      const data = await this.commentRepository.getPaginatedComments(postId, cursor, pageSize);
+      const data = await this.commentRepository.getPaginatedComments(
+        postId,
+        cursor,
+        pageSize,
+      );
       const updatedData = await this._updateProfilePictureUrls2(data, pageSize);
       return updatedData;
     } catch (error) {
-      console.error(`Error in getPaginatedComments for postId: ${postId}: `, error);
-      throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_COMMENTS, "Failed to paginate comments.");
+      console.error(
+        `Error in getPaginatedComments for postId: ${postId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
+        "Failed to paginate comments.",
+      );
     }
   }
 }

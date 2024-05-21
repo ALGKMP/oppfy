@@ -5,7 +5,6 @@
   "type": "module",
   "main": "./index.ts",
   "types": "./index.ts",
-  
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",

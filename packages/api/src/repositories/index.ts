@@ -12,5 +12,3 @@ export { ProfileRepository } from "./profile/profile";
 export { PostRepository } from "./media/post";
 // export { PaginationRepository } from "./media/paginate";
 export { MuxRepository } from "./mux/mux";
-
-

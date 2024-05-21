@@ -1,5 +1,7 @@
 import { TRPCError } from "@trpc/server";
+
 import { trpcValidators } from "@oppfy/validators";
+
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const followRouter = createTRPCRouter({
@@ -29,7 +31,9 @@ export const followRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        return trpcValidators.output.follow.paginateFollowersOthers.parse(result);
+        return trpcValidators.output.follow.paginateFollowersOthers.parse(
+          result,
+        );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
@@ -61,7 +65,9 @@ export const followRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        return trpcValidators.output.follow.paginateFollowingOthers.parse(result);
+        return trpcValidators.output.follow.paginateFollowingOthers.parse(
+          result,
+        );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
@@ -125,7 +131,7 @@ export const followRouter = createTRPCRouter({
       try {
         await ctx.services.follow.cancelFollowRequest(
           ctx.session.uid,
-          input.userId, 
+          input.userId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -136,10 +142,7 @@ export const followRouter = createTRPCRouter({
     .input(trpcValidators.input.follow.removeFollower)
     .mutation(async ({ input, ctx }) => {
       try {
-        await ctx.services.follow.removeFollower(
-          ctx.session.uid,
-          input.userId,
-        );
+        await ctx.services.follow.removeFollower(ctx.session.uid, input.userId);
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }

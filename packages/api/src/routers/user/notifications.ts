@@ -1,5 +1,7 @@
 import { TRPCError } from "@trpc/server";
+
 import { trpcValidators } from "@oppfy/validators";
+
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const notificationsRouter = createTRPCRouter({

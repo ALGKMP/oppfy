@@ -1,9 +1,13 @@
 import { TRPCError } from "@trpc/server";
-
-import { trpcValidators } from "@oppfy/validators";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
+import { trpcValidators } from "@oppfy/validators";
+
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "../../trpc";
 
 export const userRouter = createTRPCRouter({
   createUser: publicProcedure
@@ -28,13 +32,13 @@ export const userRouter = createTRPCRouter({
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: `Failed to delete user with ID ${ctx.session.uid}`,
-        cause: err
+        cause: err,
       });
     }
   }),
 
   checkOnboardingComplete: protectedProcedure
-  .input(z.object({userId: z.string()}))
+    .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx }) => {
       try {
         return await ctx.services.user.checkOnboardingComplete(ctx.session.uid);
@@ -47,7 +51,7 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
-    
+
   getPrivacySetting: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.privacy.getPrivacySettings(ctx.session.uid);
@@ -72,6 +76,4 @@ export const userRouter = createTRPCRouter({
         });
       }
     }),
-
-
 });

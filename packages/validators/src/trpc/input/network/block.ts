@@ -13,16 +13,16 @@ const trpcBlockInputSchema = {
     userId: z.string(),
     blockedUserId: z.string(),
   }),
-  
+
   paginateBlockedUsers: z.object({
-    cursor: z.object({
-      createdAt: z.date(),
-      profileId: z.number(),
-    }).optional(),
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
     pageSize: z.number().optional(),
   }),
-
-
 };
 
 export default trpcBlockInputSchema;

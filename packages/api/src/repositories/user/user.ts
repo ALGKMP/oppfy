@@ -3,12 +3,13 @@ import { and, eq } from "drizzle-orm";
 import { asc, db, gt, or, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 
+import { handleDatabaseErrors } from "../../errors";
+import { auth } from "../../utils/firebase";
+
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof schema.user>["privacySetting"]
 >;
 
-import { handleDatabaseErrors } from "../../errors";
-import { auth } from "../../utils/firebase";
 export class UserRepository {
   private db = db;
   private auth = auth;
@@ -39,7 +40,6 @@ export class UserRepository {
       where: eq(schema.user.id, userId),
     });
   }
-
 
   @handleDatabaseErrors
   async getUserByProfileId(profileId: number) {

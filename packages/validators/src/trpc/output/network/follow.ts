@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 const trpcFollowOutputSchema = {
-
   paginateFollowersSelf: z.object({
     items: z.array(
       z.object({

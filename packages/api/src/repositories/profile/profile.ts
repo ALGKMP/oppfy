@@ -4,8 +4,6 @@ import { db, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../../errors";
 
-
-
 export class ProfileRepository {
   private db = db;
 
@@ -16,7 +14,7 @@ export class ProfileRepository {
     });
   }
 
-   @handleDatabaseErrors
+  @handleDatabaseErrors
   async getProfileByUserId(userId: string) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
@@ -49,7 +47,10 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  async updateProfile(profileId: number, update: Partial<typeof schema.profile.$inferInsert>) {
+  async updateProfile(
+    profileId: number,
+    update: Partial<typeof schema.profile.$inferInsert>,
+  ) {
     return await this.db
       .update(schema.profile)
       .set(update)

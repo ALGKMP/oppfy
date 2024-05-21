@@ -58,7 +58,10 @@ const Notifications = () => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
-      utils.notifications.getNotificationSettings.setData(undefined, ctx.prevData);
+      utils.notifications.getNotificationSettings.setData(
+        undefined,
+        ctx.prevData,
+      );
     },
     onSettled: async () => {
       // Sync with server once mutation has settled

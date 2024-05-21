@@ -38,9 +38,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   createMuxVideoPresignedUrl: protectedProcedure
-    .input(
-      trpcValidators.input.post.createMuxPresignedUrl
-    )
+    .input(trpcValidators.input.post.createMuxPresignedUrl)
     .mutation(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.mux.createDirectUpload(
@@ -114,12 +112,14 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
-    
-    likePost: protectedProcedure
-    .input(z.object({
-      userId: z.string(),
-      postId: z.number(),
-    }))
+
+  likePost: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        postId: z.number(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.likePost(ctx.session.uid, input.postId);
@@ -131,11 +131,13 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    unlikePost: protectedProcedure
-    .input(z.object({
-      userId: z.string(),
-      postId: z.number(),
-    }))
+  unlikePost: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        postId: z.number(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.unlikePost(ctx.session.uid, input.postId);
@@ -147,15 +149,21 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    commentOnPost: protectedProcedure
-    .input(z.object({
-      userId: z.string(),
-      postId: z.number(),
-      content: z.string(),
-    }))
+  commentOnPost: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        postId: z.number(),
+        content: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.post.commentOnPost(ctx.session.uid, input.postId, input.content);
+        await ctx.services.post.commentOnPost(
+          ctx.session.uid,
+          input.postId,
+          input.content,
+        );
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -164,10 +172,12 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    deleteComment: protectedProcedure
-    .input(z.object({
-      commentId: z.number(),
-    }))
+  deleteComment: protectedProcedure
+    .input(
+      z.object({
+        commentId: z.number(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.deleteComment(input.commentId);
