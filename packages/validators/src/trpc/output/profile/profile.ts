@@ -3,18 +3,18 @@ import { z } from "zod";
 export const PublicFollowState = z.enum(["NotFollowing", "Following"]);
 export const PrivateFollowState = z.enum([
   "NotFollowing",
-  "Requested",
+  "OutboundRequest",
   "Following",
   "IncomingRequest",
 ]);
 export const FriendState = z.enum([
   "NotFriends",
-  "Requested",
   "Friends",
-  "IncomingRequest",
+  "PendingIncoming",
+  "PendingOutbound",
 ]);
 
-const PublicProfileStatus = z.object({
+export const PublicProfileStatus = z.object({
   privacy: z.literal("public"),
   currentUserFollowState: PublicFollowState,
   otherUserFollowState: PublicFollowState,
@@ -22,7 +22,7 @@ const PublicProfileStatus = z.object({
   currentUserFriendState: FriendState,
 });
 
-const PrivateProfileStatus = z.object({
+export const PrivateProfileStatus = z.object({
   privacy: z.literal("private"),
   otherUserFollowState: PrivateFollowState,
   currentUserFollowState: PrivateFollowState,
@@ -30,7 +30,7 @@ const PrivateProfileStatus = z.object({
   currentUserFriendState: FriendState,
 });
 
-const PrivacyStatus = z.union([PublicProfileStatus, PrivateProfileStatus]);
+export const PrivacyStatus = z.union([PublicProfileStatus, PrivateProfileStatus]);
 
 const trpcProfileOutputSchema = {
   compactProfile: z.object({
