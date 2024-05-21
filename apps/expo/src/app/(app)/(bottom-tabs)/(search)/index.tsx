@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useNavigation } from "@react-navigation/native";
@@ -59,6 +60,7 @@ const Search = () => {
               ItemSeparatorComponent={Separator}
               estimatedItemSize={75}
               showsVerticalScrollIndicator={false}
+              onScrollBeginDrag={Keyboard.dismiss}
               keyboardShouldPersistTaps="handled"
               ListHeaderComponent={
                 <SizableText size="$2" theme="alt1" marginBottom="$2">

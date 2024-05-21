@@ -1,29 +1,25 @@
-/** @type {import('eslint').Linter.Config} */
-const config = {
-  extends: [
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:jsx-a11y/recommended",
-  ],
-  rules: {
-    "react/prop-types": "off",
-    "react/jsx-curly-brace-presence": [
-      "error",
-      { props: "never", children: "never" },
-    ],
-    "jsx-a11y/no-autofocus": "off",
-  },
-  globals: {
-    React: "writable",
-  },
-  settings: {
-    react: {
-      version: "detect",
+import reactPlugin from "eslint-plugin-react";
+import reactCompilerPlugin from "eslint-plugin-react-compiler";
+import hooksPlugin from "eslint-plugin-react-hooks";
+
+/** @type {Awaited<import('typescript-eslint').Config>} */
+export default [
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    plugins: {
+      react: reactPlugin,
+      "react-hooks": hooksPlugin,
+      "react-compiler": reactCompilerPlugin,
+    },
+    rules: {
+      ...reactPlugin.configs["jsx-runtime"].rules,
+      ...hooksPlugin.configs.recommended.rules,
+      ...reactCompilerPlugin.configs.recommended.rules,
+    },
+    languageOptions: {
+      globals: {
+        React: "writable",
+      },
     },
   },
-  env: {
-    browser: true,
-  },
-};
-
-module.exports = config;
+];

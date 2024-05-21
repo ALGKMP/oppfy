@@ -17,19 +17,16 @@
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
     "@oppfy/utils": "workspace:*",
-    "zod": "^3.23.4",
+    "zod": "^3.23.8",
     "libphonenumber-js": "^1.10.61"
   },
-  "peerDependencies": {
+  "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
     "@oppfy/prettier-config": "workspace:*",
-    "@oppfy/tsconfig": "workspace:*"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@oppfy/eslint-config/base"
-    ]
+    "@oppfy/tsconfig": "workspace:*",
+    "eslint": "^9.2.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "prettier": "@oppfy/prettier-config"
 }
