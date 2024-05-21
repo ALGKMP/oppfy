@@ -44,7 +44,7 @@ export const blockRouter = createTRPCRouter({
 
   paginateBlockedUsers: protectedProcedure
     .input(trpcValidators.input.block.paginateBlockedUsers)
-    .output(sharedValidators.user.paginatedUserResponseSchema)
+    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.paginate.paginateBlocked(
@@ -52,7 +52,7 @@ export const blockRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        return sharedValidators.user.paginatedUserResponseSchema.parse(result);
+        return trpcValidators.output.post.paginatedPosts.parse(result);
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }

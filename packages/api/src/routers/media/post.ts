@@ -86,7 +86,7 @@ export const postRouter = createTRPCRouter({
 
   getPosts: protectedProcedure
     .input(trpcValidators.input.post.paginatePosts)
-    .output(sharedValidators.media.paginatedPosts)
+    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
         console.log("TRPC getPosts input: ", input);
@@ -97,7 +97,7 @@ export const postRouter = createTRPCRouter({
         );
         console.log("TRPC getPosts result before validation: ", result);
         const parsedResult =
-          sharedValidators.media.paginatedPosts.parse(result);
+          trpcValidators.output.post.paginatedPosts.parse(result);
         console.log("TRPC getPosts result after validation: ", parsedResult);
         return parsedResult;
       } catch (err) {
