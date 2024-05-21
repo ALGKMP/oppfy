@@ -96,7 +96,7 @@ const BlockedUsers = () => {
   };
 
   return (
-    <BaseScreenView paddingBottom={0}>
+    <BaseScreenView paddingBottom={0} scrollable>
       {isLoading || itemCount ? (
         <>
           <FlashList

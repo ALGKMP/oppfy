@@ -72,7 +72,7 @@ const Other = () => {
   ] satisfies SettingsGroupInput[];
 
   return (
-    <BaseScreenView>
+    <BaseScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
         <Button
@@ -89,14 +89,14 @@ const Other = () => {
         subtitle={clearCacheSubtitle}
         buttonOptions={clearCacheButtonOptions}
         isVisible={isClearCacheModalVisible}
-        onClose={() => setIsClearCacheModalVisible(false)}
+        onCancel={() => setIsClearCacheModalVisible(false)}
       />
       <ActionSheet
         title={deleteAccounttitle}
         subtitle={deleteAccountSubtitle}
         buttonOptions={deleteAccountButtonOptions}
         isVisible={isDeleteAccountModalVisible}
-        onClose={() => setIsDeleteAccountModalVisible(false)}
+        onCancel={() => setIsDeleteAccountModalVisible(false)}
       />
     </BaseScreenView>
   );
