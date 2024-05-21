@@ -30,37 +30,88 @@ export class PaginationService {
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
 
-  async paginateFollowers(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateCurrentUserFollowers(userId, cursor, pageSize);
+  async paginateFollowers(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.followRepository.paginateCurrentUserFollowers(
+      userId,
+      cursor,
+      pageSize,
+    );
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async paginateFollowing(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowing(userId, cursor, pageSize);
+  async paginateFollowing(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.followRepository.paginateFollowing(
+      userId,
+      cursor,
+      pageSize,
+    );
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async paginateFriends(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.friendRepository.paginateFriends(userId, cursor, pageSize);
+  async paginateFriends(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.friendRepository.paginateFriends(
+      userId,
+      cursor,
+      pageSize,
+    );
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async paginateBlocked(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.blockRepository.getPaginatedBlockedUsers(userId, cursor, pageSize);
+  async paginateBlocked(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.blockRepository.getPaginatedBlockedUsers(
+      userId,
+      cursor,
+      pageSize,
+    );
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async paginateFriendRequests(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.friendRepository.getPaginatedFriendRequests(userId, cursor, pageSize);
+  async paginateFriendRequests(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.friendRepository.getPaginatedFriendRequests(
+      userId,
+      cursor,
+      pageSize,
+    );
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  async paginateFollowRequests(userId: string, cursor: Cursor | null = null, pageSize = 10): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.getPaginatedFollowRequests(userId, cursor, pageSize);
+  async paginateFollowRequests(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.followRepository.getPaginatedFollowRequests(
+      userId,
+      cursor,
+      pageSize,
+    );
     return this._updateProfilePictureUrls(data, pageSize);
   }
 
-  private async _updateProfilePictureUrls(data: UserProfile[], pageSize: number): Promise<PaginatedResponse<UserProfile>> {
+  private async _updateProfilePictureUrls(
+    data: UserProfile[],
+    pageSize: number,
+  ): Promise<PaginatedResponse<UserProfile>> {
     try {
       if (data.length === 0) {
         return {
@@ -93,7 +144,10 @@ export class PaginationService {
       };
     } catch (err) {
       console.error(`Error updating profile picture URLs: `, err);
-      throw new DomainError(ErrorCode.FAILED_TO_GET_PROFILE_PICTURE, 'Failed to get profile picture URLs');
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URLs",
+      );
     }
   }
 }

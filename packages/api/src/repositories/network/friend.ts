@@ -1,4 +1,4 @@
-import { and, eq, gt, or, asc, count } from "drizzle-orm";
+import { and, asc, count, eq, gt, or } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -11,7 +11,7 @@ export class FriendRepository {
   async addFriend(userId1: string, userId2: string) {
     // Insert both directions to make it easier to retrieve later
     await this.db.insert(schema.friend).values({ userId1, userId2 });
-    return await this.db.insert(schema.friend).values({userId2, userId1});
+    return await this.db.insert(schema.friend).values({ userId2, userId1 });
   }
 
   @handleDatabaseErrors
@@ -90,7 +90,11 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFriends(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
+  async paginateFriends(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -101,21 +105,39 @@ export class FriendRepository {
         profileId: schema.profile.id,
       })
       .from(schema.friend)
-      .innerJoin(schema.user, or(eq(schema.friend.userId1, schema.user.id), eq(schema.friend.userId2, schema.user.id)))
+      .innerJoin(
+        schema.user,
+        or(
+          eq(schema.friend.userId1, schema.user.id),
+          eq(schema.friend.userId2, schema.user.id),
+        ),
+      )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         or(
           eq(schema.friend.userId1, forUserId),
           eq(schema.friend.userId2, forUserId),
-          cursor ? or(gt(schema.friend.createdAt, cursor.createdAt), and(eq(schema.friend.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+          cursor
+            ? or(
+                gt(schema.friend.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.friend.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
         ),
       )
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
   }
 
-    @handleDatabaseErrors
-  async getPaginatedFriendRequests(forUserId: string, cursor: { createdAt: Date; profileId: number } | null = null, pageSize = 10) {
+  @handleDatabaseErrors
+  async getPaginatedFriendRequests(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
     return await this.db
       .select({
         userId: schema.user.id,
@@ -126,12 +148,23 @@ export class FriendRepository {
         profileId: schema.profile.id,
       })
       .from(schema.friendRequest)
-      .innerJoin(schema.user, eq(schema.friendRequest.recipientId, schema.user.id))
+      .innerJoin(
+        schema.user,
+        eq(schema.friendRequest.recipientId, schema.user.id),
+      )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         and(
           eq(schema.friendRequest.recipientId, forUserId),
-          cursor ? or(gt(schema.friendRequest.createdAt, cursor.createdAt), and(eq(schema.friendRequest.createdAt, cursor.createdAt), gt(schema.profile.id, cursor.profileId))) : undefined,
+          cursor
+            ? or(
+                gt(schema.friendRequest.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.friendRequest.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
         ),
       )
       .orderBy(asc(schema.friendRequest.createdAt), asc(schema.profile.id))

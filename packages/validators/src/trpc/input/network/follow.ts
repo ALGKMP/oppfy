@@ -26,39 +26,46 @@ const followInputSchema = {
   }),
 
   paginateFollowersSelf: z.object({
-    cursor: z.object({
-      createdAt: z.date(),
-      profileId: z.number(),
-    }).optional(),
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
     pageSize: z.number().optional(),
-  }),  
+  }),
 
   paginateFollowersOthers: z.object({
     userId: z.string(),
-    cursor: z.object({
-      createdAt: z.date(),
-      profileId: z.number(),
-    }).optional(),
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
     pageSize: z.number().optional(),
-  }),  
+  }),
 
   paginateFollowingSelf: z.object({
-    cursor: z.object({
-      createdAt: z.date(),
-      profileId: z.number(),
-    }).optional(),
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
     pageSize: z.number().optional(),
-  }),  
+  }),
 
   paginateFollowingOthers: z.object({
     userId: z.string(),
-    cursor: z.object({
-      createdAt: z.date(),
-      profileId: z.number(),
-    }).optional(),
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
     pageSize: z.number().optional(),
-  }),  
-
+  }),
 };
 
 export default followInputSchema;

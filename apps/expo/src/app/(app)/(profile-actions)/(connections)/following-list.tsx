@@ -72,9 +72,7 @@ const Following = () => {
 
   const toggleFollowStatus = (userId: string) => {
     const isFollowing = !unfollowed[userId];
-    isFollowing
-      ? unfollow.mutate({ userId })
-      : follow.mutate({ userId });
+    isFollowing ? unfollow.mutate({ userId }) : follow.mutate({ userId });
   };
 
   return (

@@ -10,9 +10,10 @@ import { useUploadProfilePicture } from "~/hooks/media";
 const ProfilePicture = () => {
   const router = useRouter();
 
-  const { imageUri, pickAndUploadImage, uploadStatus } = useUploadProfilePicture({
-    optimisticallyUpdate: true,
-  });
+  const { imageUri, pickAndUploadImage, uploadStatus } =
+    useUploadProfilePicture({
+      optimisticallyUpdate: true,
+    });
 
   const onSubmit = () =>
     router.replace("/(app)/(bottom-tabs)/(self-profile)/media-of-you");

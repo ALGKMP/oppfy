@@ -208,8 +208,8 @@ export class AwsStack extends cdk.Stack {
       authType: lambda.FunctionUrlAuthType.NONE, // We'll have our own auth
     });
 
-        // Output the Lambda function URL
-    new cdk.CfnOutput(this, 'MuxWebhookUrl', {
+    // Output the Lambda function URL
+    new cdk.CfnOutput(this, "MuxWebhookUrl", {
       value: muxWebhookUrl.url,
     });
 

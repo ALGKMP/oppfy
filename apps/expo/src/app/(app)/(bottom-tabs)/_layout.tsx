@@ -22,8 +22,7 @@ const BottomTabsLayout = () => {
   const theme = useTheme();
   const router = useRouter();
 
-  const { data: profileData } =
-    api.profile.getFullProfileSelf.useQuery();
+  const { data: profileData } = api.profile.getFullProfileSelf.useQuery();
 
   return (
     <BottomTabs

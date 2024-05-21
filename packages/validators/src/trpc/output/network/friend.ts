@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 const trpcFriendOutputSchema = {
-
   paginateFriendSelf: z.object({
     items: z.array(
       z.object({
@@ -35,7 +34,6 @@ const trpcFriendOutputSchema = {
       })
       .optional(),
   }),
-
 };
 
 export default trpcFriendOutputSchema;

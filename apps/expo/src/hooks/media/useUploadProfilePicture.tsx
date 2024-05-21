@@ -63,10 +63,7 @@ const useUploadProfilePicture = ({
         if (ctx === undefined) return;
 
         // If the mutation fails, use the context-value from onMutate
-        utils.profile.getFullProfileSelf.setData(
-          undefined,
-          ctx.prevData,
-        );
+        utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
       },
       onSettled: async () => {
         if (!optimisticallyUpdate) return;

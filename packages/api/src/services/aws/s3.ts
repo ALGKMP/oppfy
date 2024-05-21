@@ -13,7 +13,7 @@ type PostMetadata = {
 };
 type ProfilePictureMetadata = {
   user: string;
-}
+};
 interface PutObjectPresignedUrlInput {
   Key: string;
   Bucket: string;
@@ -47,33 +47,25 @@ export class S3Service {
   async putObjectPresignedUrl(
     putObjectCommandInput: PutObjectPresignedUrlInput,
   ) {
-    return await this.s3Repository.putObjectPresignedUrl(
-      putObjectCommandInput,
-    );
+    return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }
 
   async putObjectPresignedUrlWithPostMetadata(
     putObjectCommandInput: PutObjectPresignedUrlWithPostMetadataInput,
   ) {
-    return await this.s3Repository.putObjectPresignedUrl(
-      putObjectCommandInput,
-    );
+    return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }
 
   async putObjectPresignedUrlWithProfilePictureMetadata(
     putObjectCommandInput: PutObjectPresignedUrlWithProfilePictureMetadataInput,
   ) {
-    return await this.s3Repository.putObjectPresignedUrl(
-      putObjectCommandInput,
-    );
+    return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }
 
   async getObjectPresignedUrl(
     getObjectCommandInput: GetObjectPresignedUrlInput,
   ) {
-    return await this.s3Repository.getObjectPresignedUrl(
-      getObjectCommandInput,
-    );
+    return await this.s3Repository.getObjectPresignedUrl(getObjectCommandInput);
   }
 
   async deleteObject(bucket: string, key: string) {

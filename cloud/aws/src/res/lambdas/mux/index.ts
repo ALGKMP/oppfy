@@ -84,7 +84,9 @@ export const handler = async (
           body: "Failed to create post",
         };
       }
-      const postStats = await db.insert(schema.postStats).values({ postId: post[0].insertId})
+      const postStats = await db
+        .insert(schema.postStats)
+        .values({ postId: post[0].insertId });
       if (!postStats) {
         return {
           statusCode: 500,

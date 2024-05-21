@@ -589,11 +589,12 @@ export class ProfileService {
     await this.profileRepository.removeProfilePicture(user.profile.id);
   }
 
-  async _getNetworkStatus(currentUserId: string, otherUserId: string ) {
-
+  async _getNetworkStatus(currentUserId: string, otherUserId: string) {
     const otherUser = await this.userRepository.getUser(otherUserId);
     if (!otherUser) {
-      console.error(`SERVICE ERROR: User not found for user ID "${otherUserId}"`);
+      console.error(
+        `SERVICE ERROR: User not found for user ID "${otherUserId}"`,
+      );
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
         "User not found for the provided user ID.",

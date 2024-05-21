@@ -31,9 +31,7 @@ const Followers = () => {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter(
-              (item) => item.userId !== newData.userId,
-            ),
+            items: page.items.filter((item) => item.userId !== newData.userId),
           })),
         },
       );

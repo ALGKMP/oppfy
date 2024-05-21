@@ -1,12 +1,9 @@
 import * as sharedUserSchema from "./src/shared/user";
-
-import { input } from "./src/trpc";
-import { output } from "./src/trpc";
-
+import { input, output } from "./src/trpc";
 
 const trpcValidators = {
   input,
-  output
+  output,
 };
 
 const sharedValidators = {

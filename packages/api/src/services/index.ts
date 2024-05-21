@@ -1,15 +1,15 @@
 import { S3Service } from "./aws/s3";
-import { MuxService } from "./mux/mux";
-import { PostService } from "./media/post";
-import { ProfileService } from "./profile/profile";
 import { SearchService } from "./aws/search";
-import { UserService } from "./user/user";
+import { PaginationService } from "./media/paginate";
+import { PostService } from "./media/post";
+import { MuxService } from "./mux/mux";
 import { BlockService } from "./network/block";
 import { FollowService } from "./network/follow";
 import { FriendService } from "./network/friend";
+import { ProfileService } from "./profile/profile";
 import { NotificationService } from "./user/notifications";
 import { PrivacyService } from "./user/privacy";
-import { PaginationService } from "./media/paginate";
+import { UserService } from "./user/user";
 
 export const services = {
   user: new UserService(),

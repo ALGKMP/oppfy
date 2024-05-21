@@ -96,63 +96,61 @@ const BlockedUsers = () => {
   };
 
   return (
-    <BaseScreenView paddingBottom={0}>
+    <BaseScreenView paddingBottom={0} scrollable>
       {isLoading || itemCount ? (
-        <>
-          <FlashList
-            data={isLoading ? placeholderData : blockedUsersItems}
-            ItemSeparatorComponent={Separator}
-            estimatedItemSize={75}
-            onEndReached={handleOnEndReached}
-            showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              <SizableText size="$2" theme="alt1" marginBottom="$2">
-                BLOCKED USERS
-              </SizableText>
-            }
-            renderItem={({ item }) => (
-              <View>
-                {item === null ? (
-                  <VirtualizedListItem
-                    loading
-                    showSkeletons={{
-                      imageUrl: true,
-                      title: true,
-                      subtitle: true,
-                      button: true,
-                    }}
-                  />
-                ) : (
-                  <VirtualizedListItem
-                    loading={false}
-                    imageUrl={item.profilePictureUrl}
-                    title={item.username}
-                    subtitle={item.name}
-                    button={
-                      <ActionSheet
-                        title={`Unblock ${item.username}`}
-                        subtitle={`Are you sure you want to unblock ${item.username}?`}
-                        imageUrl={item.profilePictureUrl}
-                        trigger={
-                          <Button size="$3" icon={<UserRoundX size="$1" />}>
-                            Unblock
-                          </Button>
-                        }
-                        buttonOptions={[
-                          {
-                            text: "Unblock",
-                            textProps: { color: "$red9" },
-                            onPress: () => void handleUnblock(item.userId),
-                          },
-                        ]}
-                      />
-                    }
-                  />
-                )}
-              </View>
-            )}
-          />
-        </>
+        <FlashList
+          data={isLoading ? placeholderData : blockedUsersItems}
+          ItemSeparatorComponent={Separator}
+          estimatedItemSize={75}
+          onEndReached={handleOnEndReached}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <SizableText size="$2" theme="alt1" marginBottom="$2">
+              BLOCKED USERS
+            </SizableText>
+          }
+          renderItem={({ item }) => (
+            <View>
+              {item === null ? (
+                <VirtualizedListItem
+                  loading
+                  showSkeletons={{
+                    imageUrl: true,
+                    title: true,
+                    subtitle: true,
+                    button: true,
+                  }}
+                />
+              ) : (
+                <VirtualizedListItem
+                  loading={false}
+                  imageUrl={item.profilePictureUrl}
+                  title={item.username}
+                  subtitle={item.name}
+                  button={
+                    <ActionSheet
+                      title={`Unblock ${item.username}`}
+                      subtitle={`Are you sure you want to unblock ${item.username}?`}
+                      imageUrl={item.profilePictureUrl}
+                      trigger={
+                        <Button size="$3" icon={<UserRoundX size="$1" />}>
+                          Unblock
+                        </Button>
+                      }
+                      buttonOptions={[
+                        {
+                          text: "Unblock",
+                          textProps: { color: "$red9" },
+                          onPress: () => void handleUnblock(item.userId),
+                        },
+                      ]}
+                    />
+                  }
+                />
+              )}
+            </View>
+          )}
+        />
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
