@@ -26,12 +26,6 @@ importers:
 
   apps/expo:
     dependencies:
-      '@oppfy/utils':
-        specifier: workspace:^
-        version: link:../../packages/utils
-      '@oppfy/validators':
-        specifier: workspace:^
-        version: link:../../packages/validators
       '@expo-google-fonts/modak':
         specifier: ^0.2.3
         version: 0.2.3
@@ -44,6 +38,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.3.4(react-hook-form@7.51.3)
+      '@oppfy/utils':
+        specifier: workspace:^
+        version: link:../../packages/utils
+      '@oppfy/validators':
+        specifier: workspace:^
+        version: link:../../packages/validators
       '@react-native-firebase/app':
         specifier: ^18.9.0
         version: 18.9.0(expo@50.0.17)(react-native@0.73.6)(react@18.2.0)
@@ -95,6 +95,9 @@ importers:
       babel-preset-expo:
         specifier: ^10.0.2
         version: 10.0.2(@babel/core@7.24.4)
+      eslint-plugin-react-compiler:
+        specifier: 0.0.0-experimental-c8b3f72-20240517
+        version: 0.0.0-experimental-c8b3f72-20240517(eslint@8.57.0)
       expo:
         specifier: ^50.0.17
         version: 50.0.17(@babel/core@7.24.4)(@react-native/babel-preset@0.74.81)
@@ -216,6 +219,18 @@ importers:
         specifier: ^3.23.4
         version: 3.23.4
     devDependencies:
+      '@babel/core':
+        specifier: ^7.24.4
+        version: 7.24.4
+      '@babel/preset-env':
+        specifier: ^7.24.4
+        version: 7.24.4(@babel/core@7.24.4)
+      '@babel/runtime':
+        specifier: ^7.24.4
+        version: 7.24.4
+      '@expo/config-plugins':
+        specifier: ^7.9.1
+        version: 7.9.1
       '@oppfy/api':
         specifier: workspace:^
         version: link:../../packages/api
@@ -231,18 +246,6 @@ importers:
       '@oppfy/types':
         specifier: workspace:^
         version: link:../../packages/types
-      '@babel/core':
-        specifier: ^7.24.4
-        version: 7.24.4
-      '@babel/preset-env':
-        specifier: ^7.24.4
-        version: 7.24.4(@babel/core@7.24.4)
-      '@babel/runtime':
-        specifier: ^7.24.4
-        version: 7.24.4
-      '@expo/config-plugins':
-        specifier: ^7.9.1
-        version: 7.9.1
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -407,6 +410,12 @@ importers:
 
   cloud/aws/src/res/lambdas/mux:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.564.0
+        version: 3.564.0
+      '@opensearch-project/opensearch':
+        specifier: ^2.8.0
+        version: 2.8.0
       '@oppfy/db':
         specifier: workspace:^
         version: link:../../../../../../packages/db
@@ -419,12 +428,6 @@ importers:
       '@oppfy/validators':
         specifier: workspace:^
         version: link:../../../../../../packages/validators
-      '@aws-sdk/client-s3':
-        specifier: ^3.564.0
-        version: 3.564.0
-      '@opensearch-project/opensearch':
-        specifier: ^2.8.0
-        version: 2.8.0
       zod:
         specifier: ^3.23.4
         version: 3.23.4
@@ -450,6 +453,12 @@ importers:
 
   cloud/aws/src/res/lambdas/posts:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.564.0
+        version: 3.564.0
+      '@opensearch-project/opensearch':
+        specifier: ^2.8.0
+        version: 2.8.0
       '@oppfy/db':
         specifier: workspace:^
         version: link:../../../../../../packages/db
@@ -459,12 +468,6 @@ importers:
       '@oppfy/validators':
         specifier: workspace:^
         version: link:../../../../../../packages/validators
-      '@aws-sdk/client-s3':
-        specifier: ^3.564.0
-        version: 3.564.0
-      '@opensearch-project/opensearch':
-        specifier: ^2.8.0
-        version: 2.8.0
       zod:
         specifier: ^3.23.4
         version: 3.23.4
@@ -490,6 +493,12 @@ importers:
 
   cloud/aws/src/res/lambdas/profile-picture:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.564.0
+        version: 3.564.0
+      '@opensearch-project/opensearch':
+        specifier: ^2.8.0
+        version: 2.8.0
       '@oppfy/db':
         specifier: workspace:^
         version: link:../../../../../../packages/db
@@ -499,12 +508,6 @@ importers:
       '@oppfy/validators':
         specifier: workspace:^
         version: link:../../../../../../packages/validators
-      '@aws-sdk/client-s3':
-        specifier: ^3.564.0
-        version: 3.564.0
-      '@opensearch-project/opensearch':
-        specifier: ^2.8.0
-        version: 2.8.0
       zod:
         specifier: ^3.23.4
         version: 3.23.4
@@ -530,6 +533,12 @@ importers:
 
   packages/api:
     dependencies:
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.564.0
+        version: 3.564.0
+      '@opensearch-project/opensearch':
+        specifier: ^2.8.0
+        version: 2.8.0
       '@oppfy/db':
         specifier: workspace:^
         version: link:../db
@@ -548,12 +557,6 @@ importers:
       '@oppfy/validators':
         specifier: workspace:^
         version: link:../validators
-      '@aws-sdk/s3-request-presigner':
-        specifier: ^3.564.0
-        version: 3.564.0
-      '@opensearch-project/opensearch':
-        specifier: ^2.8.0
-        version: 2.8.0
       '@trpc/client':
         specifier: ^10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -2091,6 +2094,18 @@ packages:
       '@babel/helper-plugin-utils': 7.24.0
       '@babel/helper-skip-transparent-expression-wrappers': 7.22.5
       '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.24.4)
+    dev: false
+
+  /@babel/plugin-proposal-private-methods@7.18.6(@babel/core@7.24.4):
+    resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
+    engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.24.4
+      '@babel/helper-create-class-features-plugin': 7.24.4(@babel/core@7.24.4)
+      '@babel/helper-plugin-utils': 7.24.0
     dev: false
 
   /@babel/plugin-proposal-private-property-in-object@7.21.0-placeholder-for-preset-env.2(@babel/core@7.24.4):
@@ -10917,6 +10932,23 @@ packages:
       object.fromentries: 2.0.8
     dev: false
 
+  /eslint-plugin-react-compiler@0.0.0-experimental-c8b3f72-20240517(eslint@8.57.0):
+    resolution: {integrity: sha512-cxUTFNMEKiLX6uFaRfrr2GHnB7KUHDMYLjEGzDec82ka6WyBCHg906nGSf3JvVnQKHaBDfUk7Mmv/JMvdgQB8Q==}
+    engines: {node: ^14.17.0 || ^16.0.0 || >= 18.0.0}
+    peerDependencies:
+      eslint: '>=7'
+    dependencies:
+      '@babel/core': 7.24.4
+      '@babel/parser': 7.24.4
+      '@babel/plugin-proposal-private-methods': 7.18.6(@babel/core@7.24.4)
+      eslint: 8.57.0
+      hermes-parser: 0.20.1
+      zod: 3.23.4
+      zod-validation-error: 3.3.0(zod@3.23.4)
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /eslint-plugin-react-hooks@4.6.2(eslint@8.57.0):
     resolution: {integrity: sha512-QzliNJq4GinDBcD8gPB5v0wh6g8q3SUi6EFF0x8N/BL9PoVs0atuGc47ozMRyOWAKdwaZ5OnbOEa3WR+dSGKuQ==}
     engines: {node: '>=10'}
@@ -19370,6 +19402,15 @@ packages:
     resolution: {integrity: sha512-az0uJ243PxsRIa2x1WmNE/pnuA05gUq/JB8Lwe1EDCCL/Fz9MgjYQ0fPlyc2Tcv6aF2ZA7WM5TWaRZVEFaAIag==}
     peerDependencies:
       zod: ^3.23.3
+    dependencies:
+      zod: 3.23.4
+    dev: false
+
+  /zod-validation-error@3.3.0(zod@3.23.4):
+    resolution: {integrity: sha512-Syib9oumw1NTqEv4LT0e6U83Td9aVRk9iTXPUQr1otyV1PuXQKOvOwhMNqZIq5hluzHP2pMgnOmHEo7kPdI2mw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      zod: ^3.18.0
     dependencies:
       zod: 3.23.4
     dev: false
