@@ -12,6 +12,7 @@ const config = {
       { props: "never", children: "never" },
     ],
     "jsx-a11y/no-autofocus": "off",
+    "react-compiler/react-compiler": "error",
   },
   globals: {
     React: "writable",
@@ -24,6 +25,7 @@ const config = {
   env: {
     browser: true,
   },
+  plugins: ["eslint-plugin-react-compiler"],
 };
 
 module.exports = config;
