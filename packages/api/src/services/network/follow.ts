@@ -1,3 +1,5 @@
+import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories/network/follow";
 import { UserRepository } from "../../repositories/user/user";
@@ -226,6 +228,41 @@ export class FollowService {
         ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
         "Failed to remove follower.",
       );
+    }
+  }
+
+  public async determineFollowState(
+    userId: string,
+    targetUserId: string,
+    privacySetting: "public" | "private",
+  ) {
+    const isFollowing = await this.followRepository.getFollower(
+      userId,
+      targetUserId,
+    );
+    const followRequest = await this.followRepository.getFollowRequest(
+      userId,
+      targetUserId,
+    );
+
+    if (privacySetting === "public") {
+      return isFollowing
+        ? PublicFollowState.Enum.Following
+        : PublicFollowState.Enum.NotFollowing;
+    } else {
+      if (isFollowing) {
+        return PrivateFollowState.Enum.Following;
+      } else if (followRequest) {
+        return PrivateFollowState.Enum.OutboundRequest;
+      } else {
+        const incomingRequest = await this.followRepository.getFollowRequest(
+          targetUserId,
+          userId,
+        );
+        return incomingRequest
+          ? PrivateFollowState.Enum.IncomingRequest
+          : PrivateFollowState.Enum.NotFollowing;
+      }
     }
   }
 }
