@@ -126,6 +126,7 @@ const Following = () => {
                         : { text: "Unfollow", icon: UserRoundMinus }),
                     }}
                     onPress={() =>
+                      // @ts-ignore
                       router.push({
                         pathname: "/profile/[profile-id]",
                         params: { profileId: String(3401) },
