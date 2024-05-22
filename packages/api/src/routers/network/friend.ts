@@ -4,6 +4,7 @@ import { z } from "zod";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { createTRPCUntypedClient } from "@trpc/client";
 
 export const friendRouter = createTRPCRouter({
   paginateFriendsSelf: protectedProcedure
@@ -80,6 +81,19 @@ export const friendRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.friend.rejectFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+    cancelFriendRequest: protectedProcedure
+    .input(trpcValidators.input.friend.cancelFriendRequest)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await ctx.services.friend.cancelFriendRequest(
           ctx.session.uid,
           input.recipientId,
         );

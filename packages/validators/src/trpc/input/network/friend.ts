@@ -21,6 +21,10 @@ const friendInputSchema = {
     recipientId: z.string(),
   }),
 
+  cancelFriendRequest: z.object({
+    recipientId: z.string(),
+  }),
+
   paginateFriendsSelf: z.object({
     cursor: z
       .object({
