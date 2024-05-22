@@ -7,10 +7,13 @@ import { S3Repository } from "../../repositories/aws/s3";
 import { FollowRepository } from "../../repositories/network/follow";
 import { FriendRepository } from "../../repositories/network/friend";
 import { ProfileRepository } from "../../repositories/profile/profile";
-import { BlockRepository } from "../../repositories/user/block";
+import { BlockRepository } from "../../repositories/network/block";
 import { UserRepository } from "../../repositories/user/user";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
+
+import { PrivacyStatus } from "@oppfy/validators";
+import { BlockService } from "../network/block";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
@@ -51,10 +54,10 @@ export class ProfileService {
   private s3Repository = new S3Repository();
   private followRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
-  private blockRepository = new BlockRepository();
 
   private friendService = new FriendService();
   private followService = new FollowService();
+  private blockService = new BlockService();
 
   async updateFullName(userId: string, fullName: string) {
     const profile = await this._getUserProfile(userId);
@@ -279,7 +282,7 @@ export class ProfileService {
   async getFullProfileByProfileId(
     currentUserId: string,
     profileId: number,
-  ): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileSelf>> {
+  ): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileOther>> {
     const otherUser = await this.userRepository.getUserByProfileId(profileId);
     if (!otherUser) {
       console.error(
@@ -367,184 +370,12 @@ export class ProfileService {
         "Failed to get profile picture URL.",
       );
     }
-    // Initialize networkStatus with default values
-    let networkStatus: z.infer<
-      typeof trpcValidators.output.profile.fullProfileOther
-    >["networkStatus"] = {
-      privacy: otherUser.privacySetting,
-      targetUserFriendOtherUser: "NotFollowing",
-      otherUserFriendState: "NotFollowing",
-      targetUserFriendOtherUser: "NotFriends",
-      otherUserFriendState: "NotFriends",
-    };
 
-    const blocked = await this.blockRepository.getBlockedUser(
-      otherUser.id,
+    const networkStatus = await this.getNetworkConnectionStatesBetweenUsers(
       currentUserId,
+      otherUser.id,
     );
 
-    // Check if the privacy setting is public
-    if (otherUser.privacySetting === "public") {
-      // Retrieve the current user's follow status towards the other user
-      const currentUserFollowState = await this.followRepository.getFollower(
-        currentUserId,
-        otherUser.id,
-      );
-      // Retrieve the other user's follow status towards the current user
-      const otherUserFollowState = await this.followRepository.getFollower(
-        otherUser.id,
-        currentUserId,
-      );
-
-      // Update networkStatus with the follow states
-      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
-        ? "Following"
-        : "NotFollowing";
-      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
-        ? "Following"
-        : "NotFollowing";
-
-      // Retrieve the current user's friend status towards the other user
-      const currentUserFriendState = await this.friendsRepository.getFriend(
-        currentUserId,
-        otherUser.id,
-      );
-      // Retrieve the other user's friend status towards the current user
-      const otherUserFriendState = await this.friendsRepository.getFriend(
-        otherUser.id,
-        currentUserId,
-      );
-
-      // Check if either user is friends with the other (a little redundant, but will help catch logic errors)
-      if (currentUserFriendState && otherUserFriendState) {
-        networkStatus.targetUserFollowsOtherUser = "Friends";
-        networkStatus.otherUserFollowsTargetUser = "Friends";
-      } else {
-        // Retrieve any friend requests made by the current user to the other user
-        const currentUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            currentUserId,
-            otherUser.id,
-          );
-        // Retrieve any friend requests made by the other user to the current user
-        const otherUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            otherUser.id,
-            currentUserId,
-          );
-
-        // If current user has sent a friend request to the other user
-        if (currentUserFriendRequest) {
-          networkStatus.targetUserFollowsOtherUser = "Requested";
-          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
-        }
-        // If other user has sent a friend request to the current user
-        else if (otherUserFriendRequest) {
-          networkStatus.otherUserFollowsTargetUser = "Requested";
-          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
-        }
-        // If there are no friend requests or friendships, set the states to NotFriends
-        else {
-          networkStatus.targetUserFollowsOtherUser = "NotFriends";
-          networkStatus.otherUserFollowsTargetUser = "NotFriends";
-        }
-      }
-    } else if (otherUser.privacySetting === "private") {
-      // For private accounts, follow states can be "Requested" or "Following"
-      const currentUserFollowState = await this.followRepository.getFollower(
-        currentUserId,
-        otherUser.id,
-      );
-      const otherUserFollowState = await this.followRepository.getFollower(
-        otherUser.id,
-        currentUserId,
-      );
-
-      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
-        ? "Following"
-        : "NotFollowing";
-      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
-        ? "Following"
-        : "NotFollowing";
-
-      // Check if there is a follow request from current user to other user
-      if (!currentUserFollowState) {
-        const currentUserFollowRequest =
-          await this.followRepository.getFollowRequest(
-            currentUserId,
-            otherUser.id,
-          );
-        networkStatus.targetUserFollowsOtherUser = currentUserFollowRequest
-          ? "Requested"
-          : "NotFollowing";
-        // If there is a follow requested, the other user's follow state is IncomingRequest
-        if (currentUserFollowRequest) {
-          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
-        }
-      }
-
-      // Check if there is a follow request from other user to current user
-      if (!otherUserFollowState) {
-        const otherUserFollowRequest =
-          await this.followRepository.getFollowRequest(
-            otherUser.id,
-            currentUserId,
-          );
-        networkStatus.otherUserFollowsTargetUser = otherUserFollowRequest
-          ? "Requested"
-          : "NotFollowing";
-        // If there is a follow requested, the current user's follow state is IncomingRequest
-        if (otherUserFollowRequest) {
-          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
-        }
-      }
-
-      // Retrieve the current user's friend status towards the other user
-      const currentUserFriendState = await this.friendsRepository.getFriend(
-        currentUserId,
-        otherUser.id,
-      );
-      // Retrieve the other user's friend status towards the current user
-      const otherUserFriendState = await this.friendsRepository.getFriend(
-        otherUser.id,
-        currentUserId,
-      );
-
-      // Check if either user is friends with the other
-      if (currentUserFriendState || otherUserFriendState) {
-        networkStatus.targetUserFollowsOtherUser = "Friends";
-        networkStatus.otherUserFollowsTargetUser = "Friends";
-      } else {
-        // Retrieve any friend requests made by the current user to the other user
-        const currentUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            currentUserId,
-            otherUser.id,
-          );
-        // Retrieve any friend requests made by the other user to the current user
-        const otherUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            otherUser.id,
-            currentUserId,
-          );
-
-        // If current user has sent a friend request
-        if (currentUserFriendRequest) {
-          networkStatus.targetUserFollowsOtherUser = "Requested";
-          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
-        }
-        // If other user has sent a friend request
-        else if (otherUserFriendRequest) {
-          networkStatus.otherUserFollowsTargetUser = "Requested";
-          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
-        }
-        // If there are no friend requests or friendships, set the states to NotFriends
-        else {
-          networkStatus.targetUserFollowsOtherUser = "NotFriends";
-          networkStatus.otherUserFollowsTargetUser = "NotFriends";
-        }
-      }
-    }
 
     const profileData: z.infer<
       typeof trpcValidators.output.profile.fullProfileOther
@@ -557,7 +388,6 @@ export class ProfileService {
       followingCount,
       friendCount,
       profilePictureUrl,
-      blocked: !!blocked,
       networkStatus: networkStatus,
     };
 
@@ -591,199 +421,6 @@ export class ProfileService {
     await this.profileRepository.removeProfilePicture(user.profile.id);
   }
 
-  async _getNetworkStatus(currentUserId: string, otherUserId: string) {
-    const otherUser = await this.userRepository.getUser(otherUserId);
-    if (!otherUser) {
-      console.error(
-        `SERVICE ERROR: User not found for user ID "${otherUserId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        "User not found for the provided user ID.",
-      );
-    }
-
-    let networkStatus: z.infer<
-      typeof trpcValidators.output.profile.fullProfileOther
-    >["networkStatus"] = {
-      privacy: otherUser.privacySetting,
-      targetUserFriendOtherUser: "NotFollowing",
-      otherUserFriendState: "NotFollowing",
-      targetUserFriendOtherUser: "NotFriends",
-      otherUserFriendState: "NotFriends",
-    };
-
-    const blocked = await this.blockRepository.getBlockedUser(
-      otherUser.id,
-      currentUserId,
-    );
-
-    // Check if the privacy setting is public
-    if (otherUser.privacySetting === "public") {
-      // Retrieve the current user's follow status towards the other user
-      const currentUserFollowState = await this.followRepository.getFollower(
-        currentUserId,
-        otherUser.id,
-      );
-      // Retrieve the other user's follow status towards the current user
-      const otherUserFollowState = await this.followRepository.getFollower(
-        otherUser.id,
-        currentUserId,
-      );
-
-      // Update networkStatus with the follow states
-      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
-        ? "Following"
-        : "NotFollowing";
-      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
-        ? "Following"
-        : "NotFollowing";
-
-      // Retrieve the current user's friend status towards the other user
-      const currentUserFriendState = await this.friendsRepository.getFriend(
-        currentUserId,
-        otherUser.id,
-      );
-      // Retrieve the other user's friend status towards the current user
-      const otherUserFriendState = await this.friendsRepository.getFriend(
-        otherUser.id,
-        currentUserId,
-      );
-
-      // Check if either user is friends with the other (a little redundant, but will help catch logic errors)
-      if (currentUserFriendState && otherUserFriendState) {
-        networkStatus.targetUserFollowsOtherUser = "Friends";
-        networkStatus.otherUserFollowsTargetUser = "Friends";
-      } else {
-        // Retrieve any friend requests made by the current user to the other user
-        const currentUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            currentUserId,
-            otherUser.id,
-          );
-        // Retrieve any friend requests made by the other user to the current user
-        const otherUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            otherUser.id,
-            currentUserId,
-          );
-
-        // If current user has sent a friend request to the other user
-        if (currentUserFriendRequest) {
-          networkStatus.targetUserFollowsOtherUser = "Requested";
-          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
-        }
-        // If other user has sent a friend request to the current user
-        else if (otherUserFriendRequest) {
-          networkStatus.otherUserFollowsTargetUser = "Requested";
-          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
-        }
-        // If there are no friend requests or friendships, set the states to NotFriends
-        else {
-          networkStatus.targetUserFollowsOtherUser = "NotFriends";
-          networkStatus.otherUserFollowsTargetUser = "NotFriends";
-        }
-      }
-    } else if (otherUser.privacySetting === "private") {
-      // For private accounts, follow states can be "Requested" or "Following"
-      const currentUserFollowState = await this.followRepository.getFollower(
-        currentUserId,
-        otherUser.id,
-      );
-      const otherUserFollowState = await this.followRepository.getFollower(
-        otherUser.id,
-        currentUserId,
-      );
-
-      networkStatus.targetUserFollowsOtherUser = currentUserFollowState
-        ? "Following"
-        : "NotFollowing";
-      networkStatus.otherUserFollowsTargetUser = otherUserFollowState
-        ? "Following"
-        : "NotFollowing";
-
-      // Check if there is a follow request from current user to other user
-      if (!currentUserFollowState) {
-        const currentUserFollowRequest =
-          await this.followRepository.getFollowRequest(
-            currentUserId,
-            otherUser.id,
-          );
-        networkStatus.targetUserFollowsOtherUser = currentUserFollowRequest
-          ? "Requested"
-          : "NotFollowing";
-        // If there is a follow requested, the other user's follow state is IncomingRequest
-        if (currentUserFollowRequest) {
-          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
-        }
-      }
-
-      // Check if there is a follow request from other user to current user
-      if (!otherUserFollowState) {
-        const otherUserFollowRequest =
-          await this.followRepository.getFollowRequest(
-            otherUser.id,
-            currentUserId,
-          );
-        networkStatus.otherUserFollowsTargetUser = otherUserFollowRequest
-          ? "Requested"
-          : "NotFollowing";
-        // If there is a follow requested, the current user's follow state is IncomingRequest
-        if (otherUserFollowRequest) {
-          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
-        }
-      }
-
-      // Retrieve the current user's friend status towards the other user
-      const currentUserFriendState = await this.friendsRepository.getFriend(
-        currentUserId,
-        otherUser.id,
-      );
-      // Retrieve the other user's friend status towards the current user
-      const otherUserFriendState = await this.friendsRepository.getFriend(
-        otherUser.id,
-        currentUserId,
-      );
-
-      // Check if either user is friends with the other
-      if (currentUserFriendState || otherUserFriendState) {
-        networkStatus.targetUserFollowsOtherUser = "Friends";
-        networkStatus.otherUserFollowsTargetUser = "Friends";
-      } else {
-        // Retrieve any friend requests made by the current user to the other user
-        const currentUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            currentUserId,
-            otherUser.id,
-          );
-        // Retrieve any friend requests made by the other user to the current user
-        const otherUserFriendRequest =
-          await this.friendsRepository.getFriendRequest(
-            otherUser.id,
-            currentUserId,
-          );
-
-        // If current user has sent a friend request
-        if (currentUserFriendRequest) {
-          networkStatus.targetUserFollowsOtherUser = "Requested";
-          networkStatus.otherUserFollowsTargetUser = "IncomingRequest";
-        }
-        // If other user has sent a friend request
-        else if (otherUserFriendRequest) {
-          networkStatus.otherUserFollowsTargetUser = "Requested";
-          networkStatus.targetUserFollowsOtherUser = "IncomingRequest";
-        }
-        // If there are no friend requests or friendships, set the states to NotFriends
-        else {
-          networkStatus.targetUserFollowsOtherUser = "NotFriends";
-          networkStatus.otherUserFollowsTargetUser = "NotFriends";
-        }
-      }
-    }
-
-    return networkStatus;
-  }
-
   async _getUserProfile(userId: string) {
     const user = await this.profileRepository.getProfileByUserId(userId);
     if (!user) {
@@ -805,7 +442,7 @@ export class ProfileService {
     return user.profile;
   }
 
-  async getNetworkConnectionStates(targetUserId: string, otherUserId: string) {
+  async getNetworkConnectionStatesBetweenUsers(targetUserId: string, otherUserId: string) : Promise<z.infer<typeof PrivacyStatus>> {
     const targetUser = await this.userRepository.getUser(targetUserId);
     if (!targetUser) {
       console.error(`SERVICE ERROR: User not found for target user ID "${targetUserId}" in getNetworkConnectionStates`);
@@ -816,7 +453,13 @@ export class ProfileService {
       console.error(`SERVICE ERROR: User not found for other user ID "${otherUserId}" in getNetworkConnectionStates`);
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
-    const currentUserFollowState =
+
+    const blocked = await this.blockService.areEitherUsersBlocked(
+      targetUserId,
+      otherUserId,
+    );
+
+    const targetUserFollowState =
       await this.followService.determineFollowState(
         targetUserId,
         otherUserId,
@@ -827,7 +470,7 @@ export class ProfileService {
       targetUserId,
       otherUser.privacySetting,
     );
-    const currentUserFriendState =
+    const targetUserFriendState =
       await this.friendService.determineFriendState(targetUserId, otherUserId);
     const otherUserFriendState = await this.friendService.determineFriendState(
       otherUserId,
@@ -836,9 +479,10 @@ export class ProfileService {
 
     const profileStatus = {
       privacy: otherUser.privacySetting,
-      currentUserFollowState,
+      blocked,
+      targetUserFollowState,
       otherUserFollowState,
-      currentUserFriendState,
+      targetUserFriendState,
       otherUserFriendState,
     };
 

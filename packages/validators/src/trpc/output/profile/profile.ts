@@ -16,6 +16,7 @@ export const FriendState = z.enum([
 
 export const PublicProfileStatus = z.object({
   privacy: z.literal("public"),
+  blocked: z.boolean(),
   targetUserFollowState: PublicFollowState,
   targetUserFriendState: FriendState,
   otherUserFollowState: PublicFollowState,
@@ -24,6 +25,7 @@ export const PublicProfileStatus = z.object({
 
 export const PrivateProfileStatus = z.object({
   privacy: z.literal("private"),
+  blocked: z.boolean(),
   targetUserFollowState: PrivateFollowState,
   targetUserFriendState: FriendState,
   otherUserFollowState: PrivateFollowState,
@@ -63,7 +65,6 @@ const trpcProfileOutputSchema = {
     followingCount: z.number(),
     friendCount: z.number(),
     networkStatus: PrivacyStatus,
-    blocked: z.boolean(),
   }),
 };
 

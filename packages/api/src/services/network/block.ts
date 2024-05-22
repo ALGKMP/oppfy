@@ -1,13 +1,11 @@
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories/network/follow";
 import { FriendRepository } from "../../repositories/network/friend";
-import { BlockRepository } from "../../repositories/user/block";
-import { UserRepository } from "../../repositories/user/user";
+import { BlockRepository } from "../../repositories/network/block";
 import { FollowService } from "./follow";
 import { FriendService } from "./friend";
 
 export class BlockService {
-  private userRepository = new UserRepository();
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
@@ -123,5 +121,17 @@ export class BlockService {
       );
     }
     return !!blockedUser;
+  }
+
+  async areEitherUsersBlocked(userId: string, otherUserId: string) {
+    const userBlocked = await this.blockRepository.getBlockedUser(
+      userId,
+      otherUserId,
+    );
+    const otherUserBlocked = await this.blockRepository.getBlockedUser(
+      otherUserId,
+      userId,
+    );
+    return !!userBlocked || !!otherUserBlocked;
   }
 }

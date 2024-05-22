@@ -2,7 +2,7 @@ import { PrivacyStatus } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository, FriendRepository } from "../../repositories";
-import { BlockRepository } from "../../repositories/user/block";
+import { BlockRepository } from "../../repositories/network/block";
 import { S3Service } from "../aws/s3";
 
 
