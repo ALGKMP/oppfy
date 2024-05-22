@@ -341,3 +341,67 @@ export const blockRelation = relations(block, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const reportPost = mySqlTable("ReportPost", {
+  id: serial("id").primaryKey(),
+  postId: varchar("postId", { length: 255 })
+    .references(() => post.id, { onDelete: "cascade" })
+    .notNull(),
+  reporterId: varchar("reporterId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  reason: mysqlEnum("reason", [
+    "It offends me",
+    "Nudity or sexual activity",
+    "Hate speech or symbols",
+    "Bullying or harassment",
+  ]).notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .onUpdateNow()
+    .notNull(),
+});
+
+export const reportProfile = mySqlTable("ReportProfile", {
+  id: serial("id").primaryKey(),
+  profileId: varchar("profileId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  reporterId: varchar("reporterId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  reason: mysqlEnum("reason", [
+    "Posting explicit content",
+    "Under the age of 13",
+    "Catfish account",
+    "Scam/spam account",
+  ]).notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .onUpdateNow()
+    .notNull(),
+});
+
+export const reportPostRelations = relations(reportPost, ({ one }) => ({
+  post: one(post, {
+    fields: [reportPost.postId],
+    references: [post.id],
+  }),
+  reporter: one(user, {
+    fields: [reportPost.reporterId],
+    references: [user.id],
+  }),
+}));
+
+export const reportProfileRelations = relations(reportProfile, ({ one }) => ({
+  profile: one(user, {
+    fields: [reportProfile.profileId],
+    references: [user.id],
+  }),
+  reporter: one(user, {
+    fields: [reportProfile.reporterId],
+    references: [user.id],
+  }),
+}));

@@ -5,7 +5,6 @@ import { FollowRepository, FriendRepository } from "../../repositories";
 import { BlockRepository } from "../../repositories/network/block";
 import { S3Service } from "../aws/s3";
 
-
 export interface PaginatedResponse<T> {
   items: T[];
   nextCursor: Cursor | undefined;
@@ -152,5 +151,4 @@ export class PaginationService {
       );
     }
   }
-
 }
