@@ -11,6 +11,6 @@
     "types": ["nativewind/types"],
     "checkJs": false
   },
-  "include": ["src", "*.ts", "*.js", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "include": ["index.tsx", "src", "*.ts", "*.js", ".expo/types/**/*.ts", "expo-env.d.ts"],
   "exclude": ["node_modules"]
 }

@@ -56,6 +56,7 @@ const PhoneNumber = () => {
 
     await signInWithPhoneNumber(e164PhoneNumber);
 
+    // @ts-ignore
     router.push({
       params: {
         phoneNumber: e164PhoneNumber,

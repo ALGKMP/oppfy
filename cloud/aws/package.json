@@ -11,7 +11,7 @@
     "test:watch": "jest --watch",
     "cdk": "pnpm with-env cdk",
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
+    "lint": "eslint",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "with-env": "dotenv -e ../../.env --",
     "typecheck": "tsc --noEmit"

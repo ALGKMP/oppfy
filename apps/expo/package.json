@@ -14,7 +14,7 @@
     "prebuild:clean": "expo prebuild --clean",
     "open:ios": "open -a \"Xcode\" ios",
     "open:android": "open -a \"Android Studio\" android",
-    "lint": "eslint .",
+    "lint": "eslint",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit"
   },
