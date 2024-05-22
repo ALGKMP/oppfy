@@ -94,18 +94,45 @@ const Profile = (props: ProfileProps) => {
   const removeFriend = api.friend.removeFriend.useMutation();
 
   // TODO: @77zv
-  const handleFollow = () => console.log("Follow");
-  const handleUnfollow = () => console.log("Unfollow");
-  const handleAddFriend = () => console.log("Add Friend");
-  const handleRemoveFriend = () => console.log("Remove Friend");
+  const handleFollow = async () => {
+    if (props.loading) return;
+
+    await followUser.mutateAsync({
+      userId: props.data.userId,
+    });
+  };
+  const handleUnfollow = async () => {
+    if (props.loading) return;
+
+    await unfollowUser.mutateAsync({
+      userId: props.data.userId,
+    });
+  };
+
+  const handleAddFriend = async () => {
+    if (props.loading) return;
+
+    await addFriend.mutateAsync({
+      recipientId: props.data.userId,
+    });
+  };
+  const handleRemoveFriend = async () => {
+    if (props.loading) return;
+
+    await removeFriend.mutateAsync({
+      recipientId: props.data.userId,
+    });
+  };
   const handleCancelFollowRequest = () => console.log("Cancel Follow Request");
   const handleCancelFriendRequest = () => console.log("Cancel Friend Request");
 
   const renderActionButtons = () => {
     if (props.loading) return null;
 
-    const { privacy, currentUserFollowState, currentUserFriendState } =
+    const { privacy, targetUserFollowState, targetUserFriendState } =
       props.data.networkStatus;
+
+    console.log({ privacy, targetUserFollowState, targetUserFriendState });
 
     const buttonCombinations: Record<string, JSX.Element> = {
       public_NotFollowing_NotFriends: (
@@ -128,7 +155,7 @@ const Profile = (props: ProfileProps) => {
           </Button>
         </>
       ),
-      public_Following_Requested: (
+      public_Following_OutboundRequest: (
         <>
           <Button size="$3" flex={1} onPress={handleUnfollow}>
             Unfollow
@@ -158,7 +185,7 @@ const Profile = (props: ProfileProps) => {
           </Button>
         </>
       ),
-      private_Requested_NotFriends: (
+      private_OutboundRequest_NotFriends: (
         <>
           <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
             Cancel Follow Request
@@ -178,7 +205,7 @@ const Profile = (props: ProfileProps) => {
           </Button>
         </>
       ),
-      private_Requested_Requested: (
+      private_OutboundRequest_OutboundRequest: (
         <>
           <Button size="$3" flex={1} onPress={handleCancelFollowRequest}>
             Cancel Follow Request
@@ -188,7 +215,7 @@ const Profile = (props: ProfileProps) => {
           </Button>
         </>
       ),
-      private_Following_Requested: (
+      private_Following_OutboundRequest: (
         <>
           <Button size="$3" flex={1} onPress={handleUnfollow}>
             Unfollow
@@ -210,7 +237,7 @@ const Profile = (props: ProfileProps) => {
       ),
     };
 
-    const key = `${privacy}_${currentUserFollowState}_${currentUserFriendState}`;
+    const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
     return buttonCombinations[key] || null;
   };
 
