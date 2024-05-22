@@ -119,6 +119,7 @@ const Profile = (props: ProfileProps) => {
         },
         {
           ...prevData,
+          followerCount: prevData.followerCount + 1,
           networkStatus: {
             ...prevData.networkStatus,
             ...(prevData.networkStatus.privacy === "public"
@@ -174,6 +175,7 @@ const Profile = (props: ProfileProps) => {
         },
         {
           ...prevData,
+          followerCount: prevData.followerCount - 1,
           networkStatus: {
             ...prevData.networkStatus,
             ...(prevData.networkStatus.privacy === "public"
@@ -212,6 +214,9 @@ const Profile = (props: ProfileProps) => {
 
   const addFriend = api.friend.sendFriendRequest.useMutation();
   const removeFriend = api.friend.removeFriend.useMutation();
+  
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation();
+  const cancelFriendRequest = api.friend.cancelFriendRequest.useMutation();
 
   const handleFollow = async () => {
     if (props.loading) return;
@@ -242,8 +247,21 @@ const Profile = (props: ProfileProps) => {
       recipientId: props.data.userId,
     });
   };
-  const handleCancelFollowRequest = () => console.log("Cancel Follow Request");
-  const handleCancelFriendRequest = () => console.log("Cancel Friend Request");
+
+  const handleCancelFollowRequest = async () => {
+    if (props.loading) return;
+
+    await cancelFollowRequest.mutateAsync({
+      userId: props.data.userId,
+    });
+  };
+  const handleCancelFriendRequest = async () => {
+    if (props.loading) return;
+
+    cancelFriendRequest.mutateAsync({
+      recipientId: props.data.userId,
+    });
+  };
 
   const renderActionButtons = () => {
     if (props.loading) return null;
