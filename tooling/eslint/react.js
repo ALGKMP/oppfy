@@ -14,7 +14,7 @@ export default [
     rules: {
       ...reactPlugin.configs["jsx-runtime"].rules,
       ...hooksPlugin.configs.recommended.rules,
-      ...reactCompilerPlugin.configs.recommended.rules,
+      "react-compiler/react-compiler": "error",
     },
     languageOptions: {
       globals: {
