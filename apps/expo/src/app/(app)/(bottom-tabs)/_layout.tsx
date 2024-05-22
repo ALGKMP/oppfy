@@ -32,7 +32,7 @@ const BottomTabsLayout = () => {
       }}
     >
       <BottomTabs.Screen
-        name="(home)"
+        name="home"
         options={{
           title: "Home",
           tabBarIcon: ({ focused }) => <Home strokeWidth={focused ? 2 : 1.5} />,
@@ -40,7 +40,7 @@ const BottomTabsLayout = () => {
       />
 
       <BottomTabs.Screen
-        name="(search)"
+        name="search"
         options={{
           title: "Search",
           header: () => null,
@@ -71,7 +71,7 @@ const BottomTabsLayout = () => {
       />
 
       <BottomTabs.Screen
-        name="(self-profile)"
+        name="self-profile"
         options={{
           title: profileData?.username,
           tabBarIcon: ({ focused }) => (

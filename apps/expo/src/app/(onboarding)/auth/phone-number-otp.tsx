@@ -46,7 +46,7 @@ const PhoneNumberOTP = () => {
       });
 
     userOnboardingCompleted
-      ? router.replace("/(app)/(bottom-tabs)/(self-profile)/media-of-you")
+      ? router.replace("/(app)/(bottom-tabs)/self-profile/media-of-you")
       : router.replace("/user-info/welcome");
   };
 

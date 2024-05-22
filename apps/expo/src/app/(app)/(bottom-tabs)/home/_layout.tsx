@@ -14,6 +14,7 @@ const TopTabsLayout = () => {
           backgroundColor: theme.background.val,
         },
       }}
+      initialRouteName="for-you-page"
     >
       <TopTabs.Screen name="following" />
       <TopTabs.Screen name="for-you-page" />
