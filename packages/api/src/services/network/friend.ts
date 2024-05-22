@@ -2,9 +2,11 @@ import { FriendState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories/network/friend";
+import { FollowRepository } from "../../repositories";
 
 export class FriendService {
   private friendRepository = new FriendRepository();
+  private followRepository = new FollowRepository();
 
   async areFriends(userId1: string, userId2: string) {
     const friendshipExists = await this.friendRepository.getFriend(
@@ -58,11 +60,11 @@ export class FriendService {
         "Friend request not found",
       );
     }
-    await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
     const addFriendResult = await this.friendRepository.addFriend(
       requesterId,
       requestedId,
     );
+
     if (!addFriendResult) {
       console.error(
         `SERVICE ERROR: Failed to add friend for requester "${requesterId}" and requested "${requestedId}"`,
@@ -88,7 +90,7 @@ export class FriendService {
         "Friend request not found",
       );
     }
-    await this.friendRepository.deleteFriendRequest(requesterId, requestedId);
+    await this.friendRepository.cancelFriendRequest(requesterId, requestedId);
   }
 
   async cancelFriendRequest(requesterId: string, requestedId: string) {
@@ -106,7 +108,7 @@ export class FriendService {
       );
     }
 
-    const deleteResult = await this.friendRepository.deleteFriendRequest(
+    const deleteResult = await this.friendRepository.cancelFriendRequest(
       requesterId,
       requestedId,
     );

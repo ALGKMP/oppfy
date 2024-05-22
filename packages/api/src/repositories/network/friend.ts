@@ -9,9 +9,33 @@ export class FriendRepository {
 
   @handleDatabaseErrors
   async addFriend(userId1: string, userId2: string) {
-    // Insert both directions to make it easier to retrieve later
-    await this.db.insert(schema.friend).values({ userId1, userId2 });
-    return await this.db.insert(schema.friend).values({ userId2, userId1 });
+    return await this.db.transaction(async (tx) => {
+      // Make userId1 follow userId2
+      await tx
+        .insert(schema.follower)
+        .values({ senderId: userId1, recipientId: userId2 });
+
+      // Make userId2 follow userId1
+      await tx
+        .insert(schema.follower)
+        .values({ senderId: userId2, recipientId: userId1 });
+
+      // Add the two users as friends
+      await tx.insert(schema.friend).values({ userId1, userId2 });
+      await tx.insert(schema.friend).values({ userId2, userId1 });
+
+      // Delete the friend request from userId1 to userId2
+      await tx
+        .delete(schema.friendRequest)
+        .where(
+          and(
+            eq(schema.friendRequest.senderId, userId1),
+            eq(schema.friendRequest.recipientId, userId2),
+          ),
+        );
+
+      return true;
+    });
   }
 
   @handleDatabaseErrors
@@ -67,7 +91,7 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async deleteFriendRequest(senderId: string, recipientId: string) {
+  async cancelFriendRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .delete(schema.friendRequest)
       .where(
