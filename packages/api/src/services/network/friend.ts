@@ -1,10 +1,12 @@
+import { FriendState } from "@oppfy/validators";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories/network/friend";
 
 export class FriendService {
   private friendRepository = new FriendRepository();
 
-  async isFriends(userId1: string, userId2: string) {
+  async areFriends(userId1: string, userId2: string) {
     const friendshipExists = await this.friendRepository.getFriend(
       userId1,
       userId2,
@@ -17,7 +19,7 @@ export class FriendService {
   }
 
   async sendFriendRequest(senderId: string, recipientId: string) {
-    const alreadyFriends = await this.isFriends(senderId, recipientId);
+    const alreadyFriends = await this.areFriends(senderId, recipientId);
     if (alreadyFriends) {
       console.error(
         `SERVICE ERROR: Users "${senderId}" and "${recipientId}" are already friends`,
@@ -119,14 +121,27 @@ export class FriendService {
     }
   }
 
-  async removeFriend(userId1: string, userId2: string) {
+  async getFriendRequest(userId: string, targetUserId: string) {
+    const friendRequests = await this.friendRepository.getFriendRequest(
+      userId,
+      targetUserId,
+    );
+    if (!friendRequests) {
+      console.log(
+        `No friend request found between ${userId} and ${targetUserId}`,
+      );
+    }
+    return friendRequests;
+  }
+
+  async removeFriend(targetUserId: string, otherUserId: string) {
     const friendshipExists = await this.friendRepository.getFriend(
-      userId1,
-      userId2,
+      targetUserId,
+      otherUserId,
     );
     if (!friendshipExists) {
       console.error(
-        `SERVICE ERROR: Friendship between "${userId1}" and "${userId2}" not found`,
+        `SERVICE ERROR: Friendship between "${targetUserId}" and "${otherUserId}" not found`,
       );
       throw new DomainError(
         ErrorCode.FRIENDSHIP_NOT_FOUND,
@@ -134,17 +149,32 @@ export class FriendService {
       );
     }
     const removeResult = await this.friendRepository.removeFriend(
-      userId1,
-      userId2,
+      targetUserId,
+      otherUserId,
     );
     if (!removeResult) {
       console.error(
-        `SERVICE ERROR: Failed to remove friendship between "${userId1}" and "${userId2}"`,
+        `SERVICE ERROR: Failed to remove friendship between "${targetUserId}" and "${otherUserId}"`,
       );
       throw new DomainError(
         ErrorCode.FAILED_TO_REMOVE_FRIEND,
         "Failed to remove friend",
       );
+    }
+  }
+  public async determineFriendState(userId: string, targetUserId: string) {
+    const areFriends = await this.areFriends(userId, targetUserId);
+    const friendRequest = await this.getFriendRequest(userId, targetUserId);
+    const incomingRequest = await this.getFriendRequest(targetUserId, userId);
+
+    if (areFriends) {
+      return FriendState.Enum.Friends;
+    } else if (friendRequest) {
+      return FriendState.Enum.OutboundRequest;
+    } else if (incomingRequest) {
+      return FriendState.Enum.IncomingRequest;
+    } else {
+      return FriendState.Enum.NotFriends;
     }
   }
 }

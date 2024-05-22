@@ -1,8 +1,10 @@
+import { PrivacyStatus } from "@oppfy/validators";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository, FriendRepository } from "../../repositories";
-import { BlockRepository } from "../../repositories/user/block";
-import { UserRepository } from "../../repositories/user/user";
+import { BlockRepository } from "../../repositories/network/block";
 import { S3Service } from "../aws/s3";
+
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -24,11 +26,11 @@ export interface UserProfile {
 }
 
 export class PaginationService {
-  private userRepository = new UserRepository();
-  private awsService = new S3Service();
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
+
+  private awsService = new S3Service();
 
   async paginateFollowers(
     userId: string,
@@ -150,4 +152,5 @@ export class PaginationService {
       );
     }
   }
+
 }

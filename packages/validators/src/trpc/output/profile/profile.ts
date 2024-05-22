@@ -3,34 +3,36 @@ import { z } from "zod";
 export const PublicFollowState = z.enum(["NotFollowing", "Following"]);
 export const PrivateFollowState = z.enum([
   "NotFollowing",
-  "Requested",
+  "OutboundRequest",
   "Following",
   "IncomingRequest",
 ]);
 export const FriendState = z.enum([
   "NotFriends",
-  "Requested",
+  "OutboundRequest",
   "Friends",
   "IncomingRequest",
 ]);
 
-const PublicProfileStatus = z.object({
+export const PublicProfileStatus = z.object({
   privacy: z.literal("public"),
-  currentUserFollowState: PublicFollowState,
+  blocked: z.boolean(),
+  targetUserFollowState: PublicFollowState,
+  targetUserFriendState: FriendState,
   otherUserFollowState: PublicFollowState,
   otherUserFriendState: FriendState,
-  currentUserFriendState: FriendState,
 });
 
-const PrivateProfileStatus = z.object({
+export const PrivateProfileStatus = z.object({
   privacy: z.literal("private"),
+  blocked: z.boolean(),
+  targetUserFollowState: PrivateFollowState,
+  targetUserFriendState: FriendState,
   otherUserFollowState: PrivateFollowState,
-  currentUserFollowState: PrivateFollowState,
   otherUserFriendState: FriendState,
-  currentUserFriendState: FriendState,
 });
 
-const PrivacyStatus = z.union([PublicProfileStatus, PrivateProfileStatus]);
+export const PrivacyStatus = z.union([PublicProfileStatus, PrivateProfileStatus]);
 
 const trpcProfileOutputSchema = {
   compactProfile: z.object({
@@ -63,7 +65,6 @@ const trpcProfileOutputSchema = {
     followingCount: z.number(),
     friendCount: z.number(),
     networkStatus: PrivacyStatus,
-    blocked: z.boolean(),
   }),
 };
 

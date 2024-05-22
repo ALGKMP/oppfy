@@ -22,7 +22,7 @@ export const blockRouter = createTRPCRouter({
     .input(trpcValidators.input.block.isUserBlocked)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.block.isUserBlocked(
+        return await ctx.services.block.isBlocked(
           ctx.session.uid,
           input.blockedUserId,
         );
