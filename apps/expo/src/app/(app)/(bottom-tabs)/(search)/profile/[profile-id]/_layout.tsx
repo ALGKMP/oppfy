@@ -88,6 +88,11 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
+  const followUser = api.follow.followUser.useMutation();
+  const unfollowUser = api.follow.unfollowUser.useMutation();
+  const addFriend = api.friend.sendFriendRequest.useMutation();
+  const removeFriend = api.friend.removeFriend.useMutation();
+
   // TODO: @77zv
   const handleFollow = () => console.log("Follow");
   const handleUnfollow = () => console.log("Unfollow");
@@ -263,6 +268,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
+              // @ts-ignore
               router.push({
                 pathname: "connections/[user-id]",
                 params: {
@@ -284,6 +290,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
+              // @ts-ignore
               router.push({
                 pathname: "connections/[user-id]",
                 params: {
@@ -304,6 +311,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
+              // @ts-ignore
               router.push({
                 pathname: "connections/[user-id]",
                 params: {
