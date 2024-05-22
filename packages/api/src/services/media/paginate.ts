@@ -37,7 +37,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateCurrentUserFollowers(
+    const data = await this.followRepository.paginateFollowers(
       userId,
       cursor,
       pageSize,
@@ -102,7 +102,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.getPaginatedFollowRequests(
+    const data = await this.followRepository.paginateFollowers(
       userId,
       cursor,
       pageSize,

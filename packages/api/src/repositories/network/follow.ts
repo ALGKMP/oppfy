@@ -88,43 +88,20 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateCurrentUserFollowers(
-    forUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
-    pageSize = 10,
-  ) {
-    return await this.db
-      .select({
-        userId: schema.user.id,
-        username: schema.profile.username,
-        name: schema.profile.fullName,
-        profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.follower.createdAt,
-        profileId: schema.profile.id,
-      })
-      .from(schema.follower)
-      .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .where(
-        and(
-          eq(schema.follower.recipientId, forUserId),
-          cursor
-            ? or(
-                gt(schema.follower.createdAt, cursor.createdAt),
-                and(
-                  eq(schema.follower.createdAt, cursor.createdAt),
-                  gt(schema.profile.id, cursor.profileId),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
-      .limit(pageSize + 1);
+  async acceptFollowRequest(senderId: string, recipientId: string) {
+    return await this.db.transaction(async (tx) => {
+      // Make sender follow recipient
+      await tx.insert(schema.follower).values({ senderId, recipientId });
+
+      // Delete the follow request from sender to recipient
+      await tx.delete(schema.followRequest).where(and(eq(schema.followRequest.senderId, senderId), eq(schema.followRequest.recipientId, recipientId)));
+
+      return true;
+    });
   }
 
   @handleDatabaseErrors
-  async paginateOtherUserFollowers(
+  async paginateFollowers(
     forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
@@ -196,7 +173,7 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedFollowRequests(
+  async paginateFollowRequests(
     forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
