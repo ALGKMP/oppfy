@@ -49,7 +49,6 @@ const ProfileLayout = () => {
       style={{
         backgroundColor: theme.background.val,
       }}
-      initialRouteName="media-of-you"
     >
       <TopTabs.Screen
         name="media-of-you"
