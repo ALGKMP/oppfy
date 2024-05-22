@@ -19,7 +19,7 @@ import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const profileSchema = z.object({
-  name: sharedValidators.user.fullName,
+  fullName: sharedValidators.user.fullName,
   username: sharedValidators.user.username,
   bio: sharedValidators.user.bio,
 });
@@ -36,7 +36,7 @@ const EditProfile = () => {
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
     defaultValues: {
-      name: defaultValues?.name ?? "",
+      fullName: defaultValues?.name ?? "",
       username: defaultValues?.username ?? "",
       bio: defaultValues?.bio ?? "",
     },
@@ -93,22 +93,22 @@ const EditProfile = () => {
       <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
           <XStack alignItems="flex-start" gap="$4">
-            <SizableText width="$7">Name</SizableText>
+            <SizableText width="$7">Full Name</SizableText>
             <YStack flex={1} gap="$2">
               <Controller
                 control={control}
-                name="name"
+                name="fullName"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
-                    placeholder="Name"
+                    placeholder="Full Name"
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
-                    borderColor={errors.name ? "$red9" : undefined}
+                    borderColor={errors.fullName ? "$red9" : undefined}
                   />
                 )}
               />
-              {errors.name && <Text color="$red9">{errors.name.message}</Text>}
+              {errors.name && <Text color="$red9">{errors.fullName.message}</Text>}
             </YStack>
           </XStack>
 
