@@ -387,7 +387,7 @@ importers:
         specifier: ^18.19.31
         version: 18.19.31
       aws-cdk:
-        specifier: 2.116.1
+        specifier: ^2.116.1
         version: 2.116.1
       eslint:
         specifier: ^9.2.0
