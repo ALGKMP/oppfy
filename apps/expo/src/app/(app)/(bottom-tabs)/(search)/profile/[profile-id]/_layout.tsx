@@ -7,6 +7,7 @@ import {
   useRouter,
 } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
+import { throttle } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
@@ -97,6 +98,8 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
+  const utils = api.useUtils();
+
   const followUser = api.follow.followUser.useMutation({
     onMutate: async (_newData) => {
       if (props.loading) return;
@@ -105,7 +108,9 @@ const Profile = (props: ProfileProps) => {
       await utils.profile.getOtherUserFullProfile.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getOtherUserFullProfile.getData();
+      const prevData = utils.profile.getOtherUserFullProfile.getData({
+        profileId: props.data.profileId,
+      });
       if (prevData === undefined) return;
 
       utils.profile.getOtherUserFullProfile.setData(
@@ -149,11 +154,64 @@ const Profile = (props: ProfileProps) => {
       await utils.profile.getOtherUserFullProfile.invalidate();
     },
   });
-  const unfollowUser = api.follow.unfollowUser.useMutation();
+
+  const unfollowUser = api.follow.unfollowUser.useMutation({
+    onMutate: async (_newData) => {
+      if (props.loading) return;
+
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getOtherUserFullProfile.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getOtherUserFullProfile.getData({
+        profileId: props.data.profileId,
+      });
+      if (prevData === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        {
+          profileId: props.data.profileId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            ...(prevData.networkStatus.privacy === "public"
+              ? {
+                  ...prevData.networkStatus,
+                  privacy: "public",
+                  targetUserFollowState: "NotFollowing",
+                }
+              : {
+                  ...prevData.networkStatus,
+                  privacy: "private",
+                  targetUserFollowState: "NotFollowing",
+                }),
+          },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (props.loading) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        { profileId: props.data.profileId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (props.loading) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getOtherUserFullProfile.invalidate();
+    },
+  });
+
   const addFriend = api.friend.sendFriendRequest.useMutation();
   const removeFriend = api.friend.removeFriend.useMutation();
-
-  const utils = api.useUtils();
 
   const handleFollow = async () => {
     if (props.loading) return;
