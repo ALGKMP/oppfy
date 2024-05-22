@@ -31,6 +31,9 @@ import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
+interface ProfileDataWithProfileId extends ProfileData {
+  profileId: number;
+}
 
 const ProfileLayout = () => {
   const theme = useTheme();
@@ -49,7 +52,13 @@ const ProfileLayout = () => {
           {profileData === undefined ? (
             <Profile loading />
           ) : (
-            <Profile loading={false} data={profileData} />
+            <Profile
+              loading={false}
+              data={{
+                profileId: Number(profileId),
+                ...profileData,
+              }}
+            />
           )}
           <TopTabBar {...props} />
         </YStack>
@@ -80,7 +89,7 @@ interface LoadingProps {
 
 interface LoadedProps {
   loading: false;
-  data: ProfileData;
+  data: ProfileDataWithProfileId;
 }
 
 type ProfileProps = LoadingProps | LoadedProps;
@@ -88,12 +97,64 @@ type ProfileProps = LoadingProps | LoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
-  const followUser = api.follow.followUser.useMutation();
+  const followUser = api.follow.followUser.useMutation({
+    onMutate: async (_newData) => {
+      if (props.loading) return;
+
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getOtherUserFullProfile.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getOtherUserFullProfile.getData();
+      if (prevData === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        {
+          profileId: props.data.profileId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            ...(prevData.networkStatus.privacy === "public"
+              ? {
+                  ...prevData.networkStatus,
+                  privacy: "public",
+                  targetUserFollowState: "Following",
+                }
+              : {
+                  ...prevData.networkStatus,
+                  privacy: "private",
+                  targetUserFollowState: "OutboundRequest",
+                }),
+          },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (props.loading) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        { profileId: props.data.profileId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (props.loading) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getOtherUserFullProfile.invalidate();
+    },
+  });
   const unfollowUser = api.follow.unfollowUser.useMutation();
   const addFriend = api.friend.sendFriendRequest.useMutation();
   const removeFriend = api.friend.removeFriend.useMutation();
 
-  // TODO: @77zv
+  const utils = api.useUtils();
+
   const handleFollow = async () => {
     if (props.loading) return;
 
