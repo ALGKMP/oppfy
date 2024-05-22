@@ -96,20 +96,6 @@ interface LoadedProps {
 
 type ProfileProps = LoadingProps | LoadedProps;
 
-interface UpdateNetworkStatusFollowPublic {
-  privacy: ProfileData["networkStatus"]["privacy"];
-  targetUserFollowState: ProfileData["networkStatus"]["targetUserFollowState"];
-}
-
-interface UpdateNetworkStatusFriend {
-  privacy: ProfileData["networkStatus"]["privacy"];
-  targetUserFriendState: ProfileData["networkStatus"]["targetUserFriendState"];
-}
-
-type UpdateNetworkStatus =
-  | UpdateNetworkStatusFollowPublic
-  | UpdateNetworkStatusFriend;
-
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
@@ -263,6 +249,7 @@ const Profile = (props: ProfileProps) => {
       await utils.profile.getOtherUserFullProfile.invalidate();
     },
   });
+
   const removeFriend = api.friend.removeFriend.useMutation({
     onMutate: async (_newData) => {
       if (props.loading) return;
@@ -352,6 +339,7 @@ const Profile = (props: ProfileProps) => {
       await utils.profile.getOtherUserFullProfile.invalidate();
     },
   });
+
   const cancelFriendRequest = api.friend.cancelFriendRequest.useMutation({
     onMutate: async (_newData) => {
       if (props.loading) return;
