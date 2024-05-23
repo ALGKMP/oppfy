@@ -88,7 +88,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         console.log("TRPC getPosts input: ", input);
-        const result = await ctx.services.post.paginatePostsOfUser(
+        const result = await ctx.services.post.paginatePostsOfUserSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -119,8 +119,8 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         console.log("TRPC getPosts input: ", input);
-        const result = await ctx.services.post.paginatePostsOfUser(
-          input.userId,
+        const result = await ctx.services.post.paginatePostsOfUserOther(
+          input.profileId,
           input.cursor,
           input.pageSize,
         );
@@ -150,7 +150,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         console.log("TRPC getPosts input: ", input);
-        const result = await ctx.services.post.paginatePostsOfUser(
+        const result = await ctx.services.post.paginatePostsOfUserSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -181,8 +181,8 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         console.log("TRPC getPosts input: ", input);
-        const result = await ctx.services.post.paginatePostsOfUser(
-          input.userId,
+        const result = await ctx.services.post.paginatePostsOfUserOther(
+          input.profileId,
           input.cursor,
           input.pageSize,
         );
