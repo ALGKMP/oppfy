@@ -46,7 +46,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize, currentUserId);
   }
 
   async paginateFollowing(
@@ -60,7 +60,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize, currentUserId);
   }
 
   async paginateFriends(
@@ -74,7 +74,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize, currentUserId);
   }
 
   async paginateBlocked(
