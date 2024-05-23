@@ -28,7 +28,7 @@ export const friendRouter = createTRPCRouter({
     .output(trpcValidators.output.friend.paginateFriendsOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFriends(
+        const result = await ctx.services.paginate.paginateFriendsOther(
           input.userId,
           input.cursor,
           input.pageSize,

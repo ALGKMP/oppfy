@@ -1,11 +1,14 @@
 import { PrivacyStatus } from "@oppfy/validators";
-import { ProfileService } from "../../services/profile/profile";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { FollowRepository, FriendRepository, BlockRepository } from "../../repositories";
+import {
+  BlockRepository,
+  FollowRepository,
+  FriendRepository,
+} from "../../repositories";
+import { ProfileService } from "../../services/profile/profile";
 import { S3Service } from "../aws/s3";
 import { FollowService } from "../network/follow";
-
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -34,9 +37,8 @@ export class PaginationService {
   private blockRepository = new BlockRepository();
 
   private awsService = new S3Service();
-  private followService = new FollowService();
 
-  async paginateFollowers(
+  async paginateFollowersSelf(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -47,37 +49,78 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize, currentUserId);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
-  async paginateFollowing(
+  async paginateFollowersOthers(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
     currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowing(
+    const data = await this.followRepository.paginateFollowers(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize, currentUserId);
+    return this._processPaginatedUserData(data, pageSize);
+  }
+
+  async paginateFollowingSelf(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.followRepository.paginateFollowingSelf(
+      userId,
+      cursor,
+      pageSize,
+    );
+    return this._processPaginatedUserData(data, pageSize);
+  }
+
+  async paginateFollowingOthers(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+    currentUserId: string,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.followRepository.paginateFollowingOther(
+      userId,
+      currentUserId,
+      cursor,
+      pageSize,
+    );
+    return this._processPaginatedUserData(data, pageSize);
   }
 
   async paginateFriends(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.friendRepository.paginateFriends(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize, currentUserId);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
+  async paginateFriendsOther(
+    userId: string,
+    cursor: Cursor | null = null,
+    pageSize = 10,
+    currentUserId: string,
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const data = await this.friendRepository.paginateFriendsOther(
+      userId,
+      currentUserId,
+      cursor,
+      pageSize,
+    );
+    return this._processPaginatedUserData(data, pageSize);
+  }
   async paginateBlocked(
     userId: string,
     cursor: Cursor | null = null,
@@ -117,11 +160,9 @@ export class PaginationService {
     return this._processPaginatedUserData(data, pageSize);
   }
 
-
   private async _processPaginatedUserData(
     data: UserProfile[],
     pageSize: number,
-    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     try {
       if (data.length === 0) {
@@ -132,12 +173,6 @@ export class PaginationService {
       }
       const items = await Promise.all(
         data.map(async (item) => {
-          if (currentUserId) {
-            item.isFollowing = await this.followService.isFollowing(
-              currentUserId,
-              item.userId,
-            )
-          }
           const presignedUrl = await this.awsService.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: item.profilePictureUrl,
