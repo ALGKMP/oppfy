@@ -1,8 +1,11 @@
 import { PrivacyStatus } from "@oppfy/validators";
+import { ProfileService } from "../../services/profile/profile";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository, FriendRepository, BlockRepository } from "../../repositories";
 import { S3Service } from "../aws/s3";
+
+import { z } from "zod";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -21,6 +24,7 @@ export interface UserProfile {
   profilePictureUrl: string;
   createdAt: Date;
   profileId: number;
+  networkStatus?: z.infer<typeof PrivacyStatus>| null;
 }
 
 export class PaginationService {
@@ -29,44 +33,48 @@ export class PaginationService {
   private blockRepository = new BlockRepository();
 
   private awsService = new S3Service();
+  private profileService = new ProfileService();
 
   async paginateFollowers(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
+    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.followRepository.paginateFollowers(
       userId,
       cursor,
       pageSize,
     );
-    return this._updateProfilePictureUrls(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
   async paginateFollowing(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
+    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.followRepository.paginateFollowing(
       userId,
       cursor,
       pageSize,
     );
-    return this._updateProfilePictureUrls(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
   async paginateFriends(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
+    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.friendRepository.paginateFriends(
       userId,
       cursor,
       pageSize,
     );
-    return this._updateProfilePictureUrls(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
   async paginateBlocked(
@@ -79,7 +87,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._updateProfilePictureUrls(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
   async paginateFriendRequests(
@@ -92,7 +100,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._updateProfilePictureUrls(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
   async paginateFollowRequests(
@@ -105,12 +113,14 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._updateProfilePictureUrls(data, pageSize);
+    return this._processPaginatedUserData(data, pageSize);
   }
 
-  private async _updateProfilePictureUrls(
+
+  private async _processPaginatedUserData(
     data: UserProfile[],
     pageSize: number,
+    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     try {
       if (data.length === 0) {
@@ -121,6 +131,12 @@ export class PaginationService {
       }
       const items = await Promise.all(
         data.map(async (item) => {
+          if (currentUserId) {
+            item.networkStatus = await this.profileService.getNetworkConnectionStatesBetweenUsers(
+              currentUserId,
+              item.userId,
+            )
+          }
           const presignedUrl = await this.awsService.getObjectPresignedUrl({
             Bucket: process.env.S3_PROFILE_BUCKET!,
             Key: item.profilePictureUrl,
