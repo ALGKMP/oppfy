@@ -1,12 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {
-  GestureResponderEvent,
-  PanResponder,
-  PanResponderGestureState,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+  GestureEvent,
+  GestureHandlerRootView,
+  PinchGestureHandler,
+  PinchGestureHandlerEventPayload,
+  State,
+  TapGestureHandler,
+} from "react-native-gesture-handler";
 import { CameraType, CameraView, FlashMode } from "expo-camera/next";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -15,41 +16,18 @@ import { XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 
-const DOUBLE_TAP_DELAY = 300;
-const DOUBLE_TAP_RADIUS = 50;
-
 const Camera = () => {
   const router = useRouter();
 
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [isRecording, setIsRecording] = useState(false);
+  const [zoom, setZoom] = useState(0);
+  const [lastScale, setLastScale] = useState(1);
 
-  const lastTapRef = useRef<{ x: number; y: number; time: number } | null>(
-    null,
-  );
-
-  function handleDoubleTap(event: GestureResponderEvent) {
-    const { locationX, locationY } = event.nativeEvent;
-    const now = Date.now();
-
-    if (lastTapRef.current) {
-      const { x, y, time } = lastTapRef.current;
-
-      const timeDiff = now - time;
-      const distance = Math.sqrt(
-        Math.pow(locationX - x, 2) + Math.pow(locationY - y, 2),
-      );
-
-      if (timeDiff < DOUBLE_TAP_DELAY && distance < DOUBLE_TAP_RADIUS) {
-        toggleCameraFacing();
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-        return;
-      }
-    }
-
-    lastTapRef.current = { x: locationX, y: locationY, time: now };
+  function handleDoubleTap() {
+    toggleCameraFacing();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   }
 
   function toggleCameraFacing() {
@@ -70,47 +48,87 @@ const Camera = () => {
     // Stop recording logic here
   }
 
-  return (
-    <CameraView style={{ flex: 1 }} facing={facing} flash={flash}>
-      <BaseScreenView
-        paddingVertical={0}
-        safeAreaEdges={["top", "bottom"]}
-        justifyContent="space-between"
-        backgroundColor={"$backgroundTransparent"}
-      >
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          activeOpacity={1}
-          onPress={handleDoubleTap}
-          delayLongPress={300}
-        >
-          <XStack
-            alignItems="center"
-            justifyContent="space-between"
-            padding={10}
-          >
-            <TouchableOpacity hitSlop={10} onPress={() => router.back()}>
-              <X />
-            </TouchableOpacity>
-            <TouchableOpacity hitSlop={10} onPress={toggleFlashlight}>
-              {flash === "on" ? <Zap fill={"white"} /> : <ZapOff />}
-            </TouchableOpacity>
-          </XStack>
-        </TouchableOpacity>
+  const handlePinchEvent = (
+    event: GestureEvent<PinchGestureHandlerEventPayload>,
+  ) => {
+    const scale = event.nativeEvent.scale;
+    const newZoom = Math.min(Math.max(zoom + (scale - lastScale) * 0.2, 0), 1);
+    setZoom(newZoom);
+    setLastScale(scale);
+  };
 
-        <XStack justifyContent="center">
-          <TouchableOpacity
-            style={styles.cameraButton}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-          >
-            <View
-              style={isRecording ? styles.recording : styles.notRecording}
-            />
-          </TouchableOpacity>
-        </XStack>
-      </BaseScreenView>
-    </CameraView>
+  const handlePinchStateChange = (
+    event: GestureEvent<PinchGestureHandlerEventPayload>,
+  ) => {
+    if (
+      event.nativeEvent.state === State.END ||
+      event.nativeEvent.state === State.CANCELLED
+    ) {
+      setLastScale(1);
+    }
+  };
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PinchGestureHandler
+        onGestureEvent={handlePinchEvent}
+        onHandlerStateChange={handlePinchStateChange}
+      >
+        <TapGestureHandler
+          onActivated={handleDoubleTap}
+          numberOfTaps={2}
+          maxDist={20}
+        >
+          <View style={{ flex: 1 }}>
+            <CameraView
+              style={{ flex: 1 }}
+              facing={facing}
+              flash={flash}
+              zoom={zoom}
+            >
+              <BaseScreenView
+                paddingVertical={0}
+                safeAreaEdges={["top", "bottom"]}
+                justifyContent="space-between"
+                backgroundColor={"$backgroundTransparent"}
+              >
+                <TouchableOpacity style={{ flex: 1 }} activeOpacity={1}>
+                  <XStack
+                    alignItems="center"
+                    justifyContent="space-between"
+                    padding={10}
+                  >
+                    <TouchableOpacity
+                      hitSlop={10}
+                      onPress={() => router.back()}
+                    >
+                      <X />
+                    </TouchableOpacity>
+                    <TouchableOpacity hitSlop={10} onPress={toggleFlashlight}>
+                      {flash === "on" ? <Zap fill={"white"} /> : <ZapOff />}
+                    </TouchableOpacity>
+                  </XStack>
+                </TouchableOpacity>
+
+                <XStack justifyContent="center">
+                  <TouchableOpacity
+                    style={styles.cameraButton}
+                    onPressIn={handlePressIn}
+                    onPressOut={handlePressOut}
+                  >
+                    <View
+                      style={
+                        isRecording ? styles.recording : styles.notRecording
+                      }
+                    />
+                  </TouchableOpacity>
+                </XStack>
+              </BaseScreenView>
+            </CameraView>
+          </View>
+        </TapGestureHandler>
+      </PinchGestureHandler>
+    </GestureHandlerRootView>
   );
 };
 
