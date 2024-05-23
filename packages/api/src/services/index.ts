@@ -6,6 +6,7 @@ import { MuxService } from "./mux/mux";
 import { BlockService } from "./network/block";
 import { FollowService } from "./network/follow";
 import { FriendService } from "./network/friend";
+import { ReportService } from "./network/report";
 import { ProfileService } from "./profile/profile";
 import { NotificationService } from "./user/notifications";
 import { PrivacyService } from "./user/privacy";
@@ -24,4 +25,5 @@ export const services = {
   mux: new MuxService(),
   post: new PostService(),
   paginate: new PaginationService(),
+  report : new ReportService()
 };
