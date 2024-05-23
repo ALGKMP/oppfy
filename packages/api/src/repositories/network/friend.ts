@@ -124,6 +124,7 @@ export class FriendRepository {
         userId: schema.user.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
+        privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,

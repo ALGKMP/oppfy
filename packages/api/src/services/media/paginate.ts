@@ -4,8 +4,8 @@ import { ProfileService } from "../../services/profile/profile";
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository, FriendRepository, BlockRepository } from "../../repositories";
 import { S3Service } from "../aws/s3";
+import { FollowService } from "../network/follow";
 
-import { z } from "zod";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -20,11 +20,12 @@ interface Cursor {
 export interface UserProfile {
   userId: string;
   username: string | null;
+  privacy?: "public" | "private";
   name: string | null;
   profilePictureUrl: string;
   createdAt: Date;
   profileId: number;
-  networkStatus?: z.infer<typeof PrivacyStatus>| null;
+  isFollowing?: boolean;
 }
 
 export class PaginationService {
@@ -33,7 +34,7 @@ export class PaginationService {
   private blockRepository = new BlockRepository();
 
   private awsService = new S3Service();
-  private profileService = new ProfileService();
+  private followService = new FollowService();
 
   async paginateFollowers(
     userId: string,
@@ -132,7 +133,7 @@ export class PaginationService {
       const items = await Promise.all(
         data.map(async (item) => {
           if (currentUserId) {
-            item.networkStatus = await this.profileService.getNetworkConnectionStatesBetweenUsers(
+            item.isFollowing = await this.followService.isFollowing(
               currentUserId,
               item.userId,
             )

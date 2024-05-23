@@ -25,9 +25,10 @@ const trpcFollowOutputSchema = {
       z.object({
         userId: z.string(),
         username: z.string(),
+        privacy: z.enum(["public", "private"]),
         name: z.string(),
         profilePictureUrl: z.string(),
-        networkStatus: PrivacyStatus,
+        isFollowing: z.boolean().optional(),
       }),
     ),
     nextCursor: z
@@ -60,9 +61,10 @@ const trpcFollowOutputSchema = {
       z.object({
         userId: z.string(),
         username: z.string(),
+        privacy: z.enum(["public", "private"]),
         name: z.string(),
         profilePictureUrl: z.string(),
-        networkStatus: PrivacyStatus,
+        isFollowing: z.boolean().optional(),
       }),
     ),
     nextCursor: z
