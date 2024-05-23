@@ -344,10 +344,10 @@ export const blockRelation = relations(block, ({ one }) => ({
 
 export const reportPost = mySqlTable("ReportPost", {
   id: serial("id").primaryKey(),
-  postId: varchar("postId", { length: 255 })
+  postId: bigint("postId", { mode: "number", unsigned: true })
     .references(() => post.id, { onDelete: "cascade" })
     .notNull(),
-  reporterId: varchar("reporterId", { length: 255 })
+  reporterUserId: varchar("reporterUserId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   reason: mysqlEnum("reason", [
@@ -356,7 +356,6 @@ export const reportPost = mySqlTable("ReportPost", {
     "Hate speech or symbols",
     "Bullying or harassment",
   ]).notNull(),
-  description: text("description"),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()
@@ -365,10 +364,10 @@ export const reportPost = mySqlTable("ReportPost", {
 
 export const reportProfile = mySqlTable("ReportProfile", {
   id: serial("id").primaryKey(),
-  profileId: varchar("profileId", { length: 255 })
+  targetUserId: varchar("targetUserId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
-  reporterId: varchar("reporterId", { length: 255 })
+  reporterUserId: varchar("reporterUsdId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   reason: mysqlEnum("reason", [
@@ -377,7 +376,6 @@ export const reportProfile = mySqlTable("ReportProfile", {
     "Catfish account",
     "Scam/spam account",
   ]).notNull(),
-  description: text("description"),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()
@@ -390,18 +388,18 @@ export const reportPostRelations = relations(reportPost, ({ one }) => ({
     references: [post.id],
   }),
   reporter: one(user, {
-    fields: [reportPost.reporterId],
+    fields: [reportPost.reporterUserId],
     references: [user.id],
   }),
 }));
 
 export const reportProfileRelations = relations(reportProfile, ({ one }) => ({
   profile: one(user, {
-    fields: [reportProfile.profileId],
+    fields: [reportProfile.targetUserId],
     references: [user.id],
   }),
   reporter: one(user, {
-    fields: [reportProfile.reporterId],
+    fields: [reportProfile.reporterUserId],
     references: [user.id],
   }),
 }));

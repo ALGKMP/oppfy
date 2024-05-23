@@ -6,6 +6,7 @@ import trpcProfileInputSchema from "./profile/profile";
 import trpcNotificationsInputSchema from "./user/notifications";
 import trpcSearchInputSchema from "./user/search";
 import trpcUserInputSchema from "./user/user";
+import trpcReportInputSchema from "./network/report";
 
 export const input = {
   user: trpcUserInputSchema,
@@ -16,4 +17,5 @@ export const input = {
   follow: trpcFollowInputSchema,
   friend: trpcFriendInputSchema,
   notifications: trpcNotificationsInputSchema,
+  report: trpcReportInputSchema,
 };
