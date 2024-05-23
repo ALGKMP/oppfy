@@ -28,9 +28,6 @@ const Camera = () => {
   const lastTapRef = useRef<{ x: number; y: number; time: number } | null>(
     null,
   );
-  const doubleTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
 
   function handleDoubleTap(event: GestureResponderEvent) {
     const { locationX, locationY } = event.nativeEvent;
@@ -48,23 +45,11 @@ const Camera = () => {
         toggleCameraFacing();
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-        lastTapRef.current = null;
-
-        if (doubleTapTimeoutRef.current) {
-          clearTimeout(doubleTapTimeoutRef.current);
-        }
-
         return;
       }
     }
 
     lastTapRef.current = { x: locationX, y: locationY, time: now };
-    if (doubleTapTimeoutRef.current) {
-      clearTimeout(doubleTapTimeoutRef.current);
-    }
-    doubleTapTimeoutRef.current = setTimeout(() => {
-      lastTapRef.current = null;
-    }, 300);
   }
 
   function toggleCameraFacing() {
