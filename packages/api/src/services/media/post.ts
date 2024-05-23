@@ -154,13 +154,31 @@ export class PostService {
     };
   }
 
-  async getPosts(
+  async paginatePostsOfUser(
     userId: string,
     cursor: PostCursor | null = null,
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      const data = await this.postRepository.getPaginatedPosts(userId, cursor);
+      const data = await this.postRepository.paginatePostsOfUser(userId, cursor);
+      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      return updatedData;
+    } catch (error) {
+      console.error(`Error in getPosts for userId: ${userId}: `, error);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_POSTS,
+        "Failed to paginate posts.",
+      );
+    }
+  }
+
+  async paginatePostsByUser(
+    userId: string,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ): Promise<PaginatedResponse<Post>> {
+    try {
+      const data = await this.postRepository.paginatePostsByUser(userId, cursor);
       const updatedData = await this._updateProfilePictureUrls(data, pageSize);
       return updatedData;
     } catch (error) {

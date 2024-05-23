@@ -1,14 +1,10 @@
-import { PrivacyStatus } from "@oppfy/validators";
-
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
   FollowRepository,
   FriendRepository,
 } from "../../repositories";
-import { ProfileService } from "../../services/profile/profile";
 import { S3Service } from "../aws/s3";
-import { FollowService } from "../network/follow";
 
 export interface PaginatedResponse<T> {
   items: T[];
