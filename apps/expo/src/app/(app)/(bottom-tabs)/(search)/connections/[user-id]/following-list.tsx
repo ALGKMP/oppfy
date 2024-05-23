@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
@@ -34,6 +34,7 @@ const Following = () => {
     },
   });
 
+
   const {
     data: followingData,
     isLoading,
@@ -50,6 +51,12 @@ const Following = () => {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  useEffect(() => {
+    // log the follow data
+    console.log(followingData?.pages.flatMap((page) => page.items));
+  }
+  , [followingData]);
 
   const placeholderData = useMemo(() => {
     return Array.from({ length: 20 }, () => null);

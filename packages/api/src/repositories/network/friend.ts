@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, or } from "drizzle-orm";
+import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -155,6 +155,63 @@ export class FriendRepository {
       )
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
+  }
+
+  @handleDatabaseErrors
+  async paginateFriendsOther(
+    forUserId: string,
+    currentUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
+    const friends = await this.db
+      .select({
+        userId: schema.user.id,
+        username: schema.profile.username,
+        name: schema.profile.fullName,
+        privacy: schema.user.privacySetting,
+        profilePictureUrl: schema.profile.profilePictureKey,
+        createdAt: schema.friend.createdAt,
+        profileId: schema.profile.id,
+        isFollowing: sql<number>`EXISTS (
+        SELECT 1 FROM ${schema.follower}
+        WHERE ${schema.follower.senderId} = ${currentUserId}
+          AND ${schema.follower.recipientId} = ${schema.user.id}
+      )`.as("isFollowing"),
+      })
+      .from(schema.friend)
+      .innerJoin(
+        schema.user,
+        or(
+          eq(schema.friend.userId1, schema.user.id),
+          eq(schema.friend.userId2, schema.user.id),
+        ),
+      )
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .where(
+        or(
+          eq(schema.friend.userId1, forUserId),
+          eq(schema.friend.userId2, forUserId),
+          cursor
+            ? or(
+                gt(schema.friend.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.friend.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
+    // Convert the numeric isFollowing result to boolean
+    const friendsWithBooleanIsFollowing = friends.map((friend) => ({
+      ...friend,
+      isFollowing: Boolean(friend.isFollowing),
+    }));
+
+    return friendsWithBooleanIsFollowing;
   }
 
   @handleDatabaseErrors

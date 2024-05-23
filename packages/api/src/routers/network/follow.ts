@@ -11,7 +11,7 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowersSelf)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowers(
+        const result = await ctx.services.paginate.paginateFollowersSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -27,7 +27,7 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowersOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowers(
+        const result = await ctx.services.paginate.paginateFollowersSelf(
           input.userId,
           input.cursor,
           input.pageSize,
@@ -46,7 +46,7 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowingSelf)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowing(
+        const result = await ctx.services.paginate.paginateFollowingSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -62,7 +62,7 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowingOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowing(
+        const result = await ctx.services.paginate.paginateFollowingOthers(
           input.userId,
           input.cursor,
           input.pageSize,
