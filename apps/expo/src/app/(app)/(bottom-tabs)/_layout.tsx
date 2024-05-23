@@ -30,6 +30,9 @@ const BottomTabsLayout = () => {
       screenOptions={{
         header: (props) => <Header {...props} />,
       }}
+      sceneContainerStyle={{
+        backgroundColor: theme.background.val,
+      }}
     >
       <BottomTabs.Screen
         name="(home)"
