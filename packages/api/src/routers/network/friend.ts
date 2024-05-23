@@ -1,10 +1,10 @@
+import { createTRPCUntypedClient } from "@trpc/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
-import { createTRPCUntypedClient } from "@trpc/client";
 
 export const friendRouter = createTRPCRouter({
   paginateFriendsSelf: protectedProcedure
@@ -32,6 +32,7 @@ export const friendRouter = createTRPCRouter({
           input.userId,
           input.cursor,
           input.pageSize,
+          ctx.session.uid,
         );
         return trpcValidators.output.friend.paginateFriendsOthers.parse(result);
       } catch (err) {
@@ -89,7 +90,7 @@ export const friendRouter = createTRPCRouter({
       }
     }),
 
-    cancelFriendRequest: protectedProcedure
+  cancelFriendRequest: protectedProcedure
     .input(trpcValidators.input.friend.cancelFriendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
