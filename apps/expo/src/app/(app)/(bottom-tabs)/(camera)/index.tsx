@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { CameraType, CameraView, FlashMode } from "expo-camera/next";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { X, Zap, ZapOff } from "@tamagui/lucide-icons";
 import { XStack } from "tamagui";
@@ -22,7 +23,6 @@ const Camera = () => {
 
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
-  const [zoom, setZoom] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
 
   const lastTapRef = useRef<{ x: number; y: number; time: number } | null>(
@@ -38,6 +38,7 @@ const Camera = () => {
 
     if (lastTapRef.current) {
       const { x, y, time } = lastTapRef.current;
+
       const timeDiff = now - time;
       const distance = Math.sqrt(
         Math.pow(locationX - x, 2) + Math.pow(locationY - y, 2),
@@ -45,10 +46,14 @@ const Camera = () => {
 
       if (timeDiff < DOUBLE_TAP_DELAY && distance < DOUBLE_TAP_RADIUS) {
         toggleCameraFacing();
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
         lastTapRef.current = null;
+
         if (doubleTapTimeoutRef.current) {
           clearTimeout(doubleTapTimeoutRef.current);
         }
+
         return;
       }
     }
@@ -70,22 +75,6 @@ const Camera = () => {
     setFlash((current) => (current === "off" ? "on" : "off"));
   }
 
-  function handleZoom(
-    event: GestureResponderEvent,
-    gestureState: PanResponderGestureState,
-  ) {
-    if (gestureState.dy > 0) {
-      setZoom((prevZoom) => Math.max(prevZoom - 0.1, 0));
-    } else {
-      setZoom((prevZoom) => Math.min(prevZoom + 0.1, 1));
-    }
-  }
-
-  const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: handleZoom,
-  });
-
   function handlePressIn() {
     setIsRecording(true);
     // Start recording logic here
@@ -97,13 +86,7 @@ const Camera = () => {
   }
 
   return (
-    <CameraView
-      style={{ flex: 1 }}
-      facing={facing}
-      flash={flash}
-      zoom={zoom}
-      {...panResponder.panHandlers}
-    >
+    <CameraView style={{ flex: 1 }} facing={facing} flash={flash}>
       <BaseScreenView
         paddingVertical={0}
         safeAreaEdges={["top", "bottom"]}
@@ -128,41 +111,25 @@ const Camera = () => {
               {flash === "on" ? <Zap fill={"white"} /> : <ZapOff />}
             </TouchableOpacity>
           </XStack>
-
-          <View style={styles.zoomContainer}>
-            {/* This view is for handling the zoom gestures */}
-          </View>
-
-          <XStack justifyContent="center" style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-            >
-              <View
-                style={isRecording ? styles.recording : styles.notRecording}
-              />
-            </TouchableOpacity>
-          </XStack>
         </TouchableOpacity>
+
+        <XStack justifyContent="center">
+          <TouchableOpacity
+            style={styles.cameraButton}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+          >
+            <View
+              style={isRecording ? styles.recording : styles.notRecording}
+            />
+          </TouchableOpacity>
+        </XStack>
       </BaseScreenView>
     </CameraView>
   );
 };
 
 const styles = StyleSheet.create({
-  zoomContainer: {
-    flex: 1,
-    backgroundColor: "transparent", // Ensure this doesn't take up visible space
-  },
-  buttonContainer: {
-    position: "absolute",
-    bottom: 30, // Adjust as needed for the desired distance from the bottom
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   cameraButton: {
     height: 80,
     width: 80,
