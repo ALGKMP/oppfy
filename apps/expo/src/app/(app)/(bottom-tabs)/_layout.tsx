@@ -42,7 +42,6 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(search)"
         options={{
-          title: "Search",
           header: () => null,
           tabBarIcon: ({ focused }) => (
             <Search strokeWidth={focused ? 2 : 1.5} />
@@ -51,12 +50,15 @@ const BottomTabsLayout = () => {
       />
 
       <BottomTabs.Screen
-        name="camera"
+        name="(camera)"
         options={{
-          title: "Camera",
+          header: () => null,
           tabBarIcon: ({ focused }) => (
             <Camera strokeWidth={focused ? 2 : 1.5} />
           ),
+          tabBarStyle: {
+            display: "none",
+          },
         }}
       />
 

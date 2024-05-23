@@ -1,10 +1,7 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { StyleSheet, TouchableOpacity, ViewStyle } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { getTokens, useTheme, XStack } from "tamagui";
+import { useTheme, XStack } from "tamagui";
 
 const BottomTabBar = ({
   state,
@@ -12,6 +9,18 @@ const BottomTabBar = ({
   navigation,
 }: BottomTabBarProps) => {
   const theme = useTheme();
+
+  // Determine if the current screen should hide the tab bar
+  const shouldHideTabBar = state.routes[state.index]
+    ? (
+        descriptors[state.routes[state.index]!.key]?.options
+          ?.tabBarStyle as ViewStyle
+      )?.display === "none"
+    : false;
+
+  if (shouldHideTabBar) {
+    return null;
+  }
 
   return (
     <SafeAreaView
@@ -24,11 +33,6 @@ const BottomTabBar = ({
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key]!;
           const isFocused = state.index === index;
-
-          // Skip rendering the tab if tabBarButton is null
-          if (options.tabBarButton && options.tabBarButton({}) === null) {
-            return null;
-          }
 
           const onPress = () => {
             const event = navigation.emit({
