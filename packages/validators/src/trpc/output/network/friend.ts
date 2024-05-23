@@ -25,10 +25,10 @@ const trpcFriendOutputSchema = {
       z.object({
         userId: z.string(),
         username: z.string(),
-        privacy: z.enum(["public", "private"]).optional(),
+        privacy: z.enum(["public", "private"]),
         name: z.string(),
         profilePictureUrl: z.string(),
-        isFollowing: z.boolean().optional(),
+        isFollowing: z.boolean(),
       }),
     ),
     nextCursor: z
