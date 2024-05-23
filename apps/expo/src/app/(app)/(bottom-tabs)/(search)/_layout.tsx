@@ -10,7 +10,6 @@ import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
-import { ProfileProvider, useProfileContext } from "~/contexts/ProfileContext";
 import { Stack } from "~/layouts";
 import { api } from "~/utils/api";
 
@@ -18,46 +17,36 @@ const SearchLayout = () => {
   const theme = useTheme();
 
   return (
-    <ProfileProvider>
-      <Stack
-        screenOptions={{
-          headerLeft: (props) => <HeaderLeft {...props} />,
-          header: (props) => <Header {...props} />,
+    <Stack
+      screenOptions={{
+        headerLeft: (props) => <HeaderLeft {...props} />,
+        header: (props) => <Header {...props} />,
+      }}
+    >
+      <Stack.Screen
+        name="index"
+        options={{
+          headerLeft: () => null,
+          title: "Search",
         }}
-      >
-        <Stack.Screen
-          name="index"
-          options={{
-            headerLeft: () => null,
-            title: "Search",
-          }}
-        />
+      />
 
-        <Stack.Screen
-          name="profile/[profile-id]"
-          options={{
-            headerTitle: () => {
-              const { profile } = useProfileContext();
-              return (
-                <Text fontSize="$5" fontWeight="bold">
-                  {profile?.username}
-                </Text>
-              );
-            },
-            headerRight: () => (
-              <View>
-                <Pressable onPress={() => console.log("THING CLICKED")}>
-                  {({ pressed }) => (
-                    <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
-                  )}
-                </Pressable>
-              </View>
-            ),
-          }}
-        />
-        <Stack.Screen name="connections/[user-id]" />
-      </Stack>
-    </ProfileProvider>
+      <Stack.Screen
+        name="profile/[profile-id]"
+        options={{
+          headerRight: () => (
+            <View>
+              <Pressable onPress={() => console.log("THING CLICKED")}>
+                {({ pressed }) => (
+                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
+                )}
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <Stack.Screen name="connections/[user-id]" />
+    </Stack>
   );
 };
 

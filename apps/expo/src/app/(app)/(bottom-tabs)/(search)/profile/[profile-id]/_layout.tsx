@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { Pressable, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   useGlobalSearchParams,
   useLocalSearchParams,
+  useNavigation,
   useRouter,
 } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
@@ -25,7 +26,6 @@ import { abbreviateNumber } from "@oppfy/utils";
 
 import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
-import { useProfileContext } from "~/contexts/ProfileContext";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import { api } from "~/utils/api";
@@ -46,6 +46,14 @@ const ProfileLayout = () => {
     api.profile.getOtherUserFullProfile.useQuery({
       profileId: Number(profileId),
     });
+
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: profileData?.username,
+    });
+  }, [navigation]);
 
   return (
     <TopTabs

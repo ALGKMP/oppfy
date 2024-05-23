@@ -12,15 +12,12 @@ import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
-import { useProfileContext } from "~/contexts/ProfileContext";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 const SEARCH_REFRESH_DELAY = 200;
 
 const Search = () => {
-  const { setProfile } = useProfileContext();
-
   const [searchResults, setSearchResults] = useState<
     RouterOutputs["search"]["profilesByUsername"]
   >([]);
@@ -88,15 +85,6 @@ const Search = () => {
                         imageUrl={item.profilePictureUrl}
                         onPress={() => {
                           if (!item.id) return;
-
-                          setProfile({
-                            id: item.id,
-                            username: item.username,
-                            fullName: item.fullName,
-                            bio: item.bio,
-                            profilePictureUrl: item.profilePictureUrl,
-                          });
-
                           router.navigate({
                             pathname: "/profile/[profile-id]/",
                             params: { profileId: String(item.id) },
