@@ -29,9 +29,10 @@ import { useProfileContext } from "~/contexts/ProfileContext";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
+import type { RouterInputs, RouterOutputs } from "~/utils/api";
 
 type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
+
 interface ProfileDataWithProfileId extends ProfileData {
   profileId: number;
 }
@@ -119,20 +120,17 @@ const Profile = (props: ProfileProps) => {
         },
         {
           ...prevData,
-          networkStatus: {
-            ...prevData.networkStatus,
-            ...(prevData.networkStatus.privacy === "public"
+          followerCount: prevData.followerCount + 1,
+          networkStatus:
+            prevData.networkStatus.privacy === "public"
               ? {
                   ...prevData.networkStatus,
-                  privacy: "public",
                   targetUserFollowState: "Following",
                 }
               : {
                   ...prevData.networkStatus,
-                  privacy: "private",
                   targetUserFollowState: "OutboundRequest",
-                }),
-          },
+                },
         },
       );
 
@@ -174,19 +172,10 @@ const Profile = (props: ProfileProps) => {
         },
         {
           ...prevData,
+          followerCount: prevData.followerCount - 1,
           networkStatus: {
             ...prevData.networkStatus,
-            ...(prevData.networkStatus.privacy === "public"
-              ? {
-                  ...prevData.networkStatus,
-                  privacy: "public",
-                  targetUserFollowState: "NotFollowing",
-                }
-              : {
-                  ...prevData.networkStatus,
-                  privacy: "private",
-                  targetUserFollowState: "NotFollowing",
-                }),
+            targetUserFollowState: "NotFollowing",
           },
         },
       );
@@ -210,8 +199,191 @@ const Profile = (props: ProfileProps) => {
     },
   });
 
-  const addFriend = api.friend.sendFriendRequest.useMutation();
-  const removeFriend = api.friend.removeFriend.useMutation();
+  const addFriend = api.friend.sendFriendRequest.useMutation({
+    onMutate: async (_newData) => {
+      if (props.loading) return;
+
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getOtherUserFullProfile.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getOtherUserFullProfile.getData({
+        profileId: props.data.profileId,
+      });
+      if (prevData === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        {
+          profileId: props.data.profileId,
+        },
+        {
+          ...prevData,
+          networkStatus:
+            prevData.networkStatus.targetUserFriendState === "IncomingRequest"
+              ? {
+                  ...prevData.networkStatus,
+                  targetUserFriendState: "Friends",
+                }
+              : {
+                  ...prevData.networkStatus,
+                  targetUserFriendState: "OutboundRequest",
+                },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (props.loading) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        { profileId: props.data.profileId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (props.loading) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getOtherUserFullProfile.invalidate();
+    },
+  });
+
+  const removeFriend = api.friend.removeFriend.useMutation({
+    onMutate: async (_newData) => {
+      if (props.loading) return;
+
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getOtherUserFullProfile.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getOtherUserFullProfile.getData({
+        profileId: props.data.profileId,
+      });
+      if (prevData === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        {
+          profileId: props.data.profileId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            targetUserFriendState: "NotFriends",
+          },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (props.loading) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        { profileId: props.data.profileId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (props.loading) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getOtherUserFullProfile.invalidate();
+    },
+  });
+
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
+    onMutate: async (_newData) => {
+      if (props.loading) return;
+
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getOtherUserFullProfile.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getOtherUserFullProfile.getData({
+        profileId: props.data.profileId,
+      });
+      if (prevData === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        {
+          profileId: props.data.profileId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            targetUserFollowState: "NotFollowing",
+          },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (props.loading) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        { profileId: props.data.profileId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (props.loading) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getOtherUserFullProfile.invalidate();
+    },
+  });
+
+  const cancelFriendRequest = api.friend.cancelFriendRequest.useMutation({
+    onMutate: async (_newData) => {
+      if (props.loading) return;
+
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getOtherUserFullProfile.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getOtherUserFullProfile.getData({
+        profileId: props.data.profileId,
+      });
+      if (prevData === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        {
+          profileId: props.data.profileId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            targetUserFriendState: "NotFriends",
+          },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (props.loading) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getOtherUserFullProfile.setData(
+        { profileId: props.data.profileId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (props.loading) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getOtherUserFullProfile.invalidate();
+    },
+  });
 
   const handleFollow = async () => {
     if (props.loading) return;
@@ -242,8 +414,21 @@ const Profile = (props: ProfileProps) => {
       recipientId: props.data.userId,
     });
   };
-  const handleCancelFollowRequest = () => console.log("Cancel Follow Request");
-  const handleCancelFriendRequest = () => console.log("Cancel Friend Request");
+
+  const handleCancelFollowRequest = async () => {
+    if (props.loading) return;
+
+    await cancelFollowRequest.mutateAsync({
+      userId: props.data.userId,
+    });
+  };
+  const handleCancelFriendRequest = async () => {
+    if (props.loading) return;
+
+    cancelFriendRequest.mutateAsync({
+      recipientId: props.data.userId,
+    });
+  };
 
   const renderActionButtons = () => {
     if (props.loading) return null;
