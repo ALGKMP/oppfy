@@ -41,7 +41,7 @@ const Following = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.follow.paginateFollowersOthers.useInfiniteQuery(
+  } = api.follow.paginateFollowingOthers.useInfiniteQuery(
     {
       userId,
       pageSize: 20,
