@@ -1,7 +1,9 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { FollowRepository } from "../../repositories/network/follow";
-import { FriendRepository } from "../../repositories/network/friend";
-import { BlockRepository } from "../../repositories/network/block";
+import {
+  BlockRepository,
+  FollowRepository,
+  FriendRepository,
+} from "../../repositories";
 import { FollowService } from "./follow";
 import { FriendService } from "./friend";
 

@@ -1,19 +1,18 @@
 import type { z } from "zod";
 
-import { trpcValidators } from "@oppfy/validators";
+import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { S3Repository } from "../../repositories/aws/s3";
-import { FollowRepository } from "../../repositories/network/follow";
-import { FriendRepository } from "../../repositories/network/friend";
-import { ProfileRepository } from "../../repositories/profile/profile";
-import { BlockRepository } from "../../repositories/network/block";
-import { UserRepository } from "../../repositories/user/user";
+import {
+  FollowRepository,
+  FriendRepository,
+  ProfileRepository,
+  S3Repository,
+  UserRepository,
+} from "../../repositories";
+import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
-
-import { PrivacyStatus } from "@oppfy/validators";
-import { BlockService } from "../network/block";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
@@ -376,7 +375,6 @@ export class ProfileService {
       otherUser.id,
     );
 
-
     const profileData: z.infer<
       typeof trpcValidators.output.profile.fullProfileOther
     > = {
@@ -442,15 +440,22 @@ export class ProfileService {
     return user.profile;
   }
 
-  async getNetworkConnectionStatesBetweenUsers(targetUserId: string, otherUserId: string) : Promise<z.infer<typeof PrivacyStatus>> {
+  async getNetworkConnectionStatesBetweenUsers(
+    targetUserId: string,
+    otherUserId: string,
+  ): Promise<z.infer<typeof PrivacyStatus>> {
     const targetUser = await this.userRepository.getUser(targetUserId);
     if (!targetUser) {
-      console.error(`SERVICE ERROR: User not found for target user ID "${targetUserId}" in getNetworkConnectionStates`);
+      console.error(
+        `SERVICE ERROR: User not found for target user ID "${targetUserId}" in getNetworkConnectionStates`,
+      );
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
     const otherUser = await this.userRepository.getUser(otherUserId);
     if (!otherUser) {
-      console.error(`SERVICE ERROR: User not found for other user ID "${otherUserId}" in getNetworkConnectionStates`);
+      console.error(
+        `SERVICE ERROR: User not found for other user ID "${otherUserId}" in getNetworkConnectionStates`,
+      );
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
@@ -459,19 +464,20 @@ export class ProfileService {
       otherUserId,
     );
 
-    const targetUserFollowState =
-      await this.followService.determineFollowState(
-        targetUserId,
-        otherUserId,
-        otherUser.privacySetting,
-      );
+    const targetUserFollowState = await this.followService.determineFollowState(
+      targetUserId,
+      otherUserId,
+      otherUser.privacySetting,
+    );
     const otherUserFollowState = await this.followService.determineFollowState(
       otherUserId,
       targetUserId,
       otherUser.privacySetting,
     );
-    const targetUserFriendState =
-      await this.friendService.determineFriendState(targetUserId, otherUserId);
+    const targetUserFriendState = await this.friendService.determineFriendState(
+      targetUserId,
+      otherUserId,
+    );
     const otherUserFriendState = await this.friendService.determineFriendState(
       otherUserId,
       targetUserId,

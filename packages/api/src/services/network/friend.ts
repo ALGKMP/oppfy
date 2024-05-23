@@ -2,11 +2,9 @@ import { FriendState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories/network/friend";
-import { FollowRepository } from "../../repositories";
 
 export class FriendService {
   private friendRepository = new FriendRepository();
-  private followRepository = new FollowRepository();
 
   async areFriends(userId1: string, userId2: string) {
     const friendshipExists = await this.friendRepository.getFriend(
