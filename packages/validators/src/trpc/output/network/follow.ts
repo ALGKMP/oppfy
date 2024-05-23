@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { PrivacyStatus } from "../profile/profile";
+
 const trpcFollowOutputSchema = {
   paginateFollowersSelf: z.object({
     items: z.array(
@@ -25,6 +27,7 @@ const trpcFollowOutputSchema = {
         username: z.string(),
         name: z.string(),
         profilePictureUrl: z.string(),
+        networkStatus: PrivacyStatus,
       }),
     ),
     nextCursor: z
@@ -59,6 +62,7 @@ const trpcFollowOutputSchema = {
         username: z.string(),
         name: z.string(),
         profilePictureUrl: z.string(),
+        networkStatus: PrivacyStatus,
       }),
     ),
     nextCursor: z

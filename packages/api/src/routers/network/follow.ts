@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import { trpcValidators } from "@oppfy/validators";
 
+
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const followRouter = createTRPCRouter({
@@ -30,6 +31,7 @@ export const followRouter = createTRPCRouter({
           input.userId,
           input.cursor,
           input.pageSize,
+          ctx.session.uid,
         );
         return trpcValidators.output.follow.paginateFollowersOthers.parse(
           result,
@@ -64,6 +66,7 @@ export const followRouter = createTRPCRouter({
           input.userId,
           input.cursor,
           input.pageSize,
+          ctx.session.uid,
         );
         return trpcValidators.output.follow.paginateFollowingOthers.parse(
           result,
