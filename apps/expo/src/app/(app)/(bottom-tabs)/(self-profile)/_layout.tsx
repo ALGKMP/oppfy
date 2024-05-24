@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Pressable, TouchableOpacity } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Pressable, RefreshControl, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
@@ -8,17 +8,16 @@ import {
   Avatar,
   Button,
   Paragraph,
+  ScrollView,
   SizableText,
   Text,
   useTheme,
-  View,
   XStack,
   YStack,
 } from "tamagui";
 
 import { abbreviateNumber } from "@oppfy/utils";
 
-import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
@@ -30,39 +29,59 @@ type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 const ProfileLayout = () => {
   const theme = useTheme();
 
-  const { data: profileData, isLoading: _profileDataIsLoading } =
-    api.profile.getFullProfileSelf.useQuery();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const {
+    data: profileData,
+    isLoading,
+    isRefetching,
+    refetch,
+  } = api.profile.getFullProfileSelf.useQuery();
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   return (
-    <TopTabs
-      tabBar={(props) => (
-        <YStack>
-          {profileData === undefined ? (
-            <Profile loading />
-          ) : (
-            <Profile loading={false} data={profileData} />
-          )}
-
-          <TopTabBar {...props} />
-        </YStack>
-      )}
-      style={{
-        backgroundColor: theme.background.val,
-      }}
+    <ScrollView
+      contentContainerStyle={{ flex: 1 }}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
-      <TopTabs.Screen
-        name="media-of-you"
-        options={{
-          tabBarLabel: () => <Grid3x3 />,
+      <TopTabs
+        tabBar={(props) => (
+          <YStack>
+            {isLoading || isRefetching || profileData === undefined ? (
+              <Profile loading />
+            ) : (
+              <Profile loading={false} data={profileData} />
+            )}
+
+            <TopTabBar {...props} />
+          </YStack>
+        )}
+        style={{
+          backgroundColor: theme.background.val,
         }}
-      />
-      <TopTabs.Screen
-        name="media-of-friends-you-posted"
-        options={{
-          tabBarLabel: () => <Camera />,
-        }}
-      />
-    </TopTabs>
+      >
+        <TopTabs.Screen
+          name="media-of-you"
+          options={{
+            tabBarLabel: () => <Grid3x3 />,
+          }}
+        />
+        <TopTabs.Screen
+          name="media-of-friends-you-posted"
+          options={{
+            tabBarLabel: () => <Camera />,
+          }}
+        />
+      </TopTabs>
+    </ScrollView>
   );
 };
 
