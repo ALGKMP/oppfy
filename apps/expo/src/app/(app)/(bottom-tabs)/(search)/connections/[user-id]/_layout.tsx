@@ -18,7 +18,7 @@ const ConnectionsLayout = () => {
     navigation.setOptions({
       title: username,
     });
-  }, [navigation, initialRouteName]);
+  }, [navigation, username]);
 
   return (
     <TopTabs

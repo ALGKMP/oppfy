@@ -1,14 +1,7 @@
-import { useEffect, useLayoutEffect } from "react";
-import { Pressable, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  useGlobalSearchParams,
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-} from "expo-router";
-import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
-import { throttle } from "lodash";
+import { useLayoutEffect } from "react";
+import { TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
@@ -17,19 +10,16 @@ import {
   SizableText,
   Text,
   useTheme,
-  View,
   XStack,
   YStack,
 } from "tamagui";
 
 import { abbreviateNumber } from "@oppfy/utils";
 
-import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
-import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import { api } from "~/utils/api";
-import type { RouterInputs, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
 
@@ -53,7 +43,7 @@ const ProfileLayout = () => {
     navigation.setOptions({
       title: profileData?.username,
     });
-  }, [navigation]);
+  }, [navigation, profileData?.username]);
 
   return (
     <TopTabs
@@ -433,7 +423,7 @@ const Profile = (props: ProfileProps) => {
   const handleCancelFriendRequest = async () => {
     if (props.loading) return;
 
-    cancelFriendRequest.mutateAsync({
+    await cancelFriendRequest.mutateAsync({
       recipientId: props.data.userId,
     });
   };
@@ -550,7 +540,7 @@ const Profile = (props: ProfileProps) => {
     };
 
     const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
-    return buttonCombinations[key] || null;
+    return buttonCombinations[key] ?? null;
   };
 
   return (
@@ -607,7 +597,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
-              // @ts-ignore
+              // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
                 pathname: "connections/[user-id]",
                 params: {
@@ -629,7 +619,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
-              // @ts-ignore
+              // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
                 pathname: "connections/[user-id]",
                 params: {
@@ -650,7 +640,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
-              // @ts-ignore
+              // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
                 pathname: "connections/[user-id]",
                 params: {

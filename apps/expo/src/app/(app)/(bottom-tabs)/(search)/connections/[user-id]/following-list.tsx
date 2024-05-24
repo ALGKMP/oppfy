@@ -133,7 +133,7 @@ const Following = () => {
                         : { text: "Unfollow", icon: UserRoundMinus }),
                     }}
                     onPress={() =>
-                      // @ts-ignore
+                      // @ts-expect-error: Experimental typed routes dont support layouts yet
                       router.push({
                         pathname: "/profile/[profile-id]",
                         params: { profileId: String(3401) },

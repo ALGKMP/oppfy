@@ -1,21 +1,17 @@
 import React from "react";
 import { Pressable, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
 import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { Text, useTheme } from "tamagui";
+import { Text } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
-import { api } from "~/utils/api";
 
 const SearchLayout = () => {
-  const theme = useTheme();
-
   return (
     <Stack
       screenOptions={{
@@ -50,19 +46,9 @@ const SearchLayout = () => {
   );
 };
 
-interface HeaderTitleProps {
-  children: string;
-  tintColor?: string | undefined;
-}
 type HeaderLeftProps = HeaderBackButtonProps;
 
 type HeaderProps = NativeStackHeaderProps;
-
-const HeaderTitle = ({ children }: HeaderTitleProps) => (
-  <Text fontSize="$5" fontWeight="bold">
-    {children}
-  </Text>
-);
 
 const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
   const router = useRouter();

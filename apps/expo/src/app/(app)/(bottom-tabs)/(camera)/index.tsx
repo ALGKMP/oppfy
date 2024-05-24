@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import {
+import type {
   GestureEvent,
+  PinchGestureHandlerEventPayload,
+} from "react-native-gesture-handler";
+import {
   GestureHandlerRootView,
   PinchGestureHandler,
-  PinchGestureHandlerEventPayload,
   State,
   TapGestureHandler,
 } from "react-native-gesture-handler";
-import { CameraType, CameraView, FlashMode } from "expo-camera/next";
+import type { CameraType, FlashMode } from "expo-camera/next";
+import { CameraView } from "expo-camera/next";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { X, Zap, ZapOff } from "@tamagui/lucide-icons";
@@ -25,28 +28,28 @@ const Camera = () => {
   const [zoom, setZoom] = useState(0);
   const [lastScale, setLastScale] = useState(1);
 
-  function handleDoubleTap() {
+  const handleDoubleTap = async () => {
     toggleCameraFacing();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
 
-  function toggleCameraFacing() {
+  const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
-  }
+  };
 
-  function toggleFlashlight() {
+  const toggleFlashlight = () => {
     setFlash((current) => (current === "off" ? "on" : "off"));
-  }
+  };
 
-  function handlePressIn() {
+  const handlePressIn = () => {
     setIsRecording(true);
     // Start recording logic here
-  }
+  };
 
-  function handlePressOut() {
+  const handlePressOut = () => {
     setIsRecording(false);
     // Stop recording logic here
-  }
+  };
 
   const handlePinchEvent = (
     event: GestureEvent<PinchGestureHandlerEventPayload>,
