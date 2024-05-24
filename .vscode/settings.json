@@ -8,6 +8,7 @@
   "eslint.experimental.useFlatConfig": true,
   "eslint.workingDirectories": [
     { "pattern": "apps/*/" },
+    { "pattern": "cloud/*/"},
     { "pattern": "packages/*/" },
     { "pattern": "tooling/*/" }
   ],
