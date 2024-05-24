@@ -33,7 +33,39 @@ const trpcPostInputSchema = {
     postId: z.number(),
   }),
 
-  paginatePosts: z.object({
+  paginatePostsOfUserSelf: z.object({
+    cursor: z
+      .object({
+        postId: z.number(),
+        createdAt: z.date(),
+      })
+      .optional(),
+    pageSize: z.number().nonnegative().optional(),
+  }),
+
+  paginatePostsOfUserOther: z.object({
+    profileId: z.number(),
+    cursor: z
+      .object({
+        postId: z.number(),
+        createdAt: z.date(),
+      })
+      .optional(),
+    pageSize: z.number().nonnegative().optional(),
+  }),
+
+  paginatePostsByUserSelf: z.object({
+    cursor: z
+      .object({
+        postId: z.number(),
+        createdAt: z.date(),
+      })
+      .optional(),
+    pageSize: z.number().nonnegative().optional(),
+  }),
+
+  paginatePostsByUserOther: z.object({
+    profileId: z.number(),
     cursor: z
       .object({
         postId: z.number(),

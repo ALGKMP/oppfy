@@ -1,4 +1,5 @@
 import { DomainError, ErrorCode } from "../../errors";
+import { UserRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
@@ -50,6 +51,7 @@ export class PostService {
   private commentRepository = new CommentRepository();
   private postRepository = new PostRepository();
   private postStatsRepository = new PostStatsRepository();
+  private userRepository = new UserRepository();
 
   private async _updateProfilePictureUrls(
     data: Post[],
@@ -154,17 +156,85 @@ export class PostService {
     };
   }
 
-  async getPosts(
+  async paginatePostsOfUserSelf(
     userId: string,
     cursor: PostCursor | null = null,
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      const data = await this.postRepository.getPaginatedPosts(userId, cursor);
+      const data = await this.postRepository.paginatePostsOfUser(userId, cursor);
       const updatedData = await this._updateProfilePictureUrls(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_POSTS,
+        "Failed to paginate posts.",
+      );
+    }
+  }
+
+  async paginatePostsOfUserOther(
+    profileId: number,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ): Promise<PaginatedResponse<Post>> {
+    try {
+      const user = await this.userRepository.getUserByProfileId(profileId);
+      if (!user) {
+        throw new DomainError(
+          ErrorCode.USER_NOT_FOUND,
+          "User not found.",
+        );
+      }
+      const data = await this.postRepository.paginatePostsOfUser(user.id, cursor);
+      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      return updatedData;
+    } catch (error) {
+      console.error(`Error in getPosts for profile: ${profileId}: `, error);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_POSTS,
+        "Failed to paginate posts.",
+      );
+    }
+  }
+
+  async paginatePostsByUserSelf(
+    userId: string,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ): Promise<PaginatedResponse<Post>> {
+    try {
+      const data = await this.postRepository.paginatePostsByUser(userId, cursor);
+      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      return updatedData;
+    } catch (error) {
+      console.error(`Error in getPosts for userId: ${userId}: `, error);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_POSTS,
+        "Failed to paginate posts.",
+      );
+    }
+  }
+
+  async paginatePostsByUserOther(
+    profileId: number,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ): Promise<PaginatedResponse<Post>> {
+    try {
+      const user = await this.userRepository.getUserByProfileId(profileId);
+      if (!user) {
+        throw new DomainError(
+          ErrorCode.USER_NOT_FOUND,
+          "User not found.",
+        );
+      }
+      const data = await this.postRepository.paginatePostsByUser(user.id, cursor);
+      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      return updatedData;
+    } catch (error) {
+      console.error(`Error in getPosts for profile: ${profileId}: `, error);
       throw new DomainError(
         ErrorCode.FAILED_TO_PAGINATE_POSTS,
         "Failed to paginate posts.",
