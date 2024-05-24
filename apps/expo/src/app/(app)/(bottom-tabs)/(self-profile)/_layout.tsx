@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { Pressable, RefreshControl, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useCallback, useState } from "react";
+import { RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
+import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
