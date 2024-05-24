@@ -1,5 +1,5 @@
-import { useLayoutEffect } from "react";
-import { TouchableOpacity } from "react-native";
+import { useCallback, useLayoutEffect, useState } from "react";
+import { RefreshControl, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
@@ -7,6 +7,7 @@ import {
   Avatar,
   Button,
   Paragraph,
+  ScrollView,
   SizableText,
   Text,
   useTheme,
@@ -32,10 +33,16 @@ const ProfileLayout = () => {
 
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
 
-  const { data: profileData, isLoading: _profileDataIsLoading } =
-    api.profile.getOtherUserFullProfile.useQuery({
-      profileId: Number(profileId),
-    });
+  const [refreshing, setRefreshing] = useState(false);
+
+  const {
+    data: profileData,
+    isLoading,
+    isRefetching,
+    refetch,
+  } = api.profile.getOtherUserFullProfile.useQuery({
+    profileId: Number(profileId),
+  });
 
   const navigation = useNavigation();
 
@@ -45,41 +52,55 @@ const ProfileLayout = () => {
     });
   }, [navigation, profileData?.username]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
+
   return (
-    <TopTabs
-      tabBar={(props) => (
-        <YStack>
-          {profileData === undefined ? (
-            <Profile loading />
-          ) : (
-            <Profile
-              loading={false}
-              data={{
-                profileId: Number(profileId),
-                ...profileData,
-              }}
-            />
-          )}
-          <TopTabBar {...props} />
-        </YStack>
-      )}
-      style={{
-        backgroundColor: theme.background.val,
-      }}
+    <ScrollView
+      contentContainerStyle={{ flex: 1 }}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
-      <TopTabs.Screen
-        name="media-of-them"
-        options={{
-          tabBarLabel: () => <Grid3x3 />,
+      <TopTabs
+        tabBar={(props) => (
+          <YStack>
+            {isLoading || isRefetching || profileData === undefined ? (
+              <Profile loading />
+            ) : (
+              <Profile
+                loading={false}
+                data={{
+                  profileId: Number(profileId),
+                  ...profileData,
+                }}
+              />
+            )}
+            <TopTabBar {...props} />
+          </YStack>
+        )}
+        style={{
+          backgroundColor: theme.background.val,
         }}
-      />
-      <TopTabs.Screen
-        name="media-of-friends-they-posted"
-        options={{
-          tabBarLabel: () => <Camera />,
-        }}
-      />
-    </TopTabs>
+      >
+        <TopTabs.Screen
+          name="media-of-them"
+          options={{
+            tabBarLabel: () => <Grid3x3 />,
+          }}
+        />
+        <TopTabs.Screen
+          name="media-of-friends-they-posted"
+          options={{
+            tabBarLabel: () => <Camera />,
+          }}
+        />
+      </TopTabs>
+    </ScrollView>
   );
 };
 
