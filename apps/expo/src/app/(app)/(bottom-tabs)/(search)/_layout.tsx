@@ -6,17 +6,20 @@ import type {
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
 import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { Text } from "tamagui";
+import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
 const SearchLayout = () => {
+  const theme = useTheme();
+
   return (
     <Stack
       screenOptions={{
         headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
+        contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
