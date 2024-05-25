@@ -1,6 +1,5 @@
 import React from "react";
 import { Pressable, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
@@ -11,7 +10,6 @@ import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
-import { api } from "~/utils/api";
 
 const SearchLayout = () => {
   const theme = useTheme();
@@ -21,6 +19,7 @@ const SearchLayout = () => {
       screenOptions={{
         headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
+        contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
@@ -50,19 +49,9 @@ const SearchLayout = () => {
   );
 };
 
-interface HeaderTitleProps {
-  children: string;
-  tintColor?: string | undefined;
-}
 type HeaderLeftProps = HeaderBackButtonProps;
 
 type HeaderProps = NativeStackHeaderProps;
-
-const HeaderTitle = ({ children }: HeaderTitleProps) => (
-  <Text fontSize="$5" fontWeight="bold">
-    {children}
-  </Text>
-);
 
 const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
   const router = useRouter();

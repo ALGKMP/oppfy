@@ -133,7 +133,7 @@ const Settings = () => {
         subtitle={subtitle}
         buttonOptions={buttonOptions}
         isVisible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
+        onCancel={() => setIsModalVisible(false)}
       />
     </BaseScreenView>
   );

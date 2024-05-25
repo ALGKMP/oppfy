@@ -1,16 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { debounce } from "lodash";
-import { Input, Separator, SizableText, Text, View, YStack } from "tamagui";
+import { Input, Separator, SizableText, View, YStack } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
-import { ActionSheet } from "~/components/Sheets";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -80,8 +75,8 @@ const Search = () => {
                     ) : (
                       <VirtualizedListItem
                         loading={false}
-                        title={item.username ?? undefined}
-                        subtitle={item.fullName ?? undefined}
+                        title={item.username}
+                        subtitle={item.fullName}
                         imageUrl={item.profilePictureUrl}
                         onPress={() => {
                           if (!item.id) return;
