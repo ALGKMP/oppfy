@@ -53,7 +53,7 @@ export class PostService {
   private postStatsRepository = new PostStatsRepository();
   private userRepository = new UserRepository();
 
-  private async _updateProfilePictureUrls(
+  private async _processPaginatedPostData(
     data: Post[],
     pageSize = 20,
   ): Promise<PaginatedResponse<Post>> {
@@ -163,7 +163,7 @@ export class PostService {
   ): Promise<PaginatedResponse<Post>> {
     try {
       const data = await this.postRepository.paginatePostsOfUser(userId, cursor);
-      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -188,7 +188,7 @@ export class PostService {
         );
       }
       const data = await this.postRepository.paginatePostsOfUser(user.id, cursor);
-      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for profile: ${profileId}: `, error);
@@ -206,7 +206,7 @@ export class PostService {
   ): Promise<PaginatedResponse<Post>> {
     try {
       const data = await this.postRepository.paginatePostsByUser(userId, cursor);
-      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -231,7 +231,7 @@ export class PostService {
         );
       }
       const data = await this.postRepository.paginatePostsByUser(user.id, cursor);
-      const updatedData = await this._updateProfilePictureUrls(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for profile: ${profileId}: `, error);
