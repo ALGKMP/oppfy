@@ -31,7 +31,6 @@ const Following = () => {
       const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
         userId: newData.userId,
       });
-      console.log("FOLLOW: " + prevData);
       if (prevData === undefined) return;
 
       // Optimistically update the data

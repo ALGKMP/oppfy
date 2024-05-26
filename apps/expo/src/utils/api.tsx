@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { DevToolsBubble } from "react-native-react-query-devtools";
 import Constants from "expo-constants";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -85,7 +84,6 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
     <api.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {props.children}
-        <DevToolsBubble />
       </QueryClientProvider>
     </api.Provider>
   );
