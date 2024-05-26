@@ -1,6 +1,5 @@
 const MediaOfFriendsLayout = () => {
-  return (
-  );
+  return <></>;
 };
 
 export default MediaOfFriendsLayout;
