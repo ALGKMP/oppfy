@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
@@ -11,7 +11,7 @@ import { BaseScreenView } from "~/components/Views";
 import {
   ListHeader,
   ListItem,
-  useFollowMutations,
+  useFollowHandlers,
 } from "~/features/connections";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
@@ -20,7 +20,7 @@ const FollowingList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const headerHeight = useHeaderHeight();
 
-  const { follow, unfollow, cancelFollowRequest } = useFollowMutations(userId);
+  const { follow, unfollow, cancelFollowRequest } = useFollowHandlers(userId);
 
   const {
     data: followingData,
@@ -51,18 +51,6 @@ const FollowingList = () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  };
-
-  const handleFollow = async (userId: string) => {
-    await follow.mutateAsync({ userId });
-  };
-
-  const handleUnfollow = async (userId: string) => {
-    await unfollow.mutateAsync({ userId });
-  };
-
-  const handleCancelFollowRequest = async (userId: string) => {
-    await cancelFollowRequest.mutateAsync({ userId });
   };
 
   if (isLoading) {
@@ -118,9 +106,9 @@ const FollowingList = () => {
         renderItem={({ item }) => (
           <ListItem
             item={item}
-            handleFollow={handleFollow}
-            handleUnfollow={handleUnfollow}
-            handleCancelFollowRequest={handleCancelFollowRequest}
+            handleFollow={follow}
+            handleUnfollow={unfollow}
+            handleCancelFollowRequest={cancelFollowRequest}
           />
         )}
       />
