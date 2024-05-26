@@ -94,7 +94,7 @@ const Following = () => {
 
       return { prevData };
     },
-    onError: (_err, newData, ctx) => {
+    onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       utils.follow.paginateFollowingOthers.setInfiniteData(
         { userId },
@@ -114,13 +114,13 @@ const Following = () => {
 
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
-        userId: newData.userId,
+        userId,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId: newData.userId },
+        { userId },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -152,6 +152,7 @@ const Following = () => {
   const {
     data: followingData,
     isLoading,
+    isRefetching,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
@@ -182,12 +183,10 @@ const Following = () => {
   };
 
   const handleFollow = async (userId: string) => {
-    console.log("Following this user: ", userId);
     await follow.mutateAsync({ userId });
   };
 
   const handleUnfollow = async (userId: string) => {
-    console.log("Unfollowing this user: ", userId);
     await unfollow.mutateAsync({ userId });
   };
 
@@ -229,20 +228,26 @@ const Following = () => {
           // @ts-expect-error: Experimental typed routes dont support layouts yet
           router.push({
             pathname: "/profile/[profile-id]",
-            params: { profileId: String(item.userId) },
+            params: { profileId: String(item.profileId) },
           })
         }
       />
     </View>
   );
 
-  if (isLoading) {
+  if (isLoading || isRefetching) {
     return (
       <BaseScreenView paddingBottom={0}>
         <FlashList
           data={PLACEHOLDER_DATA}
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <SizableText size="$2" theme="alt1" marginBottom="$2">
+              FOLLOWERS
+            </SizableText>
+          }
           renderItem={() => (
             <VirtualizedListItem
               loading
