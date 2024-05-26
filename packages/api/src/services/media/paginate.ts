@@ -18,12 +18,12 @@ interface Cursor {
 
 export interface UserProfile {
   userId: string;
+  profileId: number;
   username: string | null;
   privacy?: "public" | "private";
   name: string | null;
   profilePictureUrl: string;
   createdAt: Date;
-  profileId: number;
   isFollowing?: boolean;
 }
 
@@ -38,7 +38,6 @@ export class PaginationService {
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.followRepository.paginateFollowers(
       userId,
@@ -52,7 +51,6 @@ export class PaginationService {
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-    currentUserId: string | null = null,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.followRepository.paginateFollowers(
       userId,

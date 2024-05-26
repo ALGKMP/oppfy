@@ -31,6 +31,7 @@ const Following = () => {
       const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
         userId,
       });
+
       if (prevData === undefined) return;
 
       // Optimistically update the data
@@ -181,10 +182,12 @@ const Following = () => {
   };
 
   const handleFollow = async (userId: string) => {
+    console.log("Following this user: ", userId);
     await follow.mutateAsync({ userId });
   };
 
   const handleUnfollow = async (userId: string) => {
+    console.log("Unfollowing this user: ", userId);
     await unfollow.mutateAsync({ userId });
   };
 

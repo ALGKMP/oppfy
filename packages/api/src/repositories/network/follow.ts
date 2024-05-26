@@ -116,12 +116,12 @@ export class FollowRepository {
     return await this.db
       .select({
         userId: schema.user.id,
+        profileId: schema.profile.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
-        profileId: schema.profile.id,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
@@ -203,12 +203,12 @@ export class FollowRepository {
     return await this.db
       .select({
         userId: schema.user.id,
+        profileId: schema.profile.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
-        profileId: schema.profile.id,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
@@ -241,12 +241,12 @@ export class FollowRepository {
     const followers = await this.db
       .select({
         userId: schema.user.id,
+        profileId: schema.profile.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
-        profileId: schema.profile.id,
         isFollowing: sql<number>`EXISTS (
         SELECT 1 FROM ${schema.follower}
         WHERE ${schema.follower.senderId} = ${currentUserId}

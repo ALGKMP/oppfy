@@ -31,7 +31,6 @@ export const followRouter = createTRPCRouter({
           input.userId,
           input.cursor,
           input.pageSize,
-          ctx.session.uid,
         );
         return trpcValidators.output.follow.paginateFollowersOthers.parse(
           result,

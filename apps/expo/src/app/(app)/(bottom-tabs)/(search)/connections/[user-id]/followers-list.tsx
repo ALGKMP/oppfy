@@ -17,6 +17,7 @@ const Followers = () => {
 
   const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
+
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.follow.paginateFollowersSelf.cancel();
 
