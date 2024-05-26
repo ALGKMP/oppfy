@@ -8,7 +8,7 @@ import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
 
 type Icon = JSX.Element | FunctionComponent;
 
-interface ButtonProps {
+export interface ButtonProps {
   text: string;
   onPress?: () => void;
   icon?: Icon;
