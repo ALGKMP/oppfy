@@ -1,4 +1,4 @@
-export { default as BottomTabs } from "./bottom-tabs";
-export { default as Drawer } from "./drawer";
-export { default as Stack } from "./stack";
-export { default as TopTabs } from "./top-tabs";
+export { default as BottomTabs } from "./BottomTabs";
+export { default as Drawer } from "./Drawer";
+export { default as Stack } from "./Stack";
+export { default as TopTabs } from "./TopTabs";
