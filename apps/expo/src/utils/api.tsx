@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { DevToolsBubble } from "react-native-react-query-devtools";
 import Constants from "expo-constants";
 import auth from "@react-native-firebase/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import superjson from "superjson";
 
-import { AppRouter } from "@oppfy/api";
+import type { AppRouter } from "@oppfy/api";
 
 /**
  * A set of typesafe hooks for consuming your API.
@@ -84,6 +85,7 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
     <api.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {props.children}
+        <DevToolsBubble />
       </QueryClientProvider>
     </api.Provider>
   );
