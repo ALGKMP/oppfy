@@ -6,20 +6,14 @@ import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Separator, SizableText, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
-import { ButtonProps } from "~/components/ListItems/VirtualizedListItem";
+import type { ButtonProps } from "~/components/ListItems/VirtualizedListItem";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-interface UserItem {
-  userId: string;
-  username: string;
-  name: string;
-  profilePictureUrl: string;
-  isFollowing: boolean;
-  privacy: "public" | "private";
-}
+type UserItem = RouterOutputs["follow"]["paginateFollowingOthers"]["items"][0];
 
 const Following = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
