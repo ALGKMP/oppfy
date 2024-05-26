@@ -41,7 +41,7 @@ export class FollowService {
         senderId,
         recipientId,
       );
-      if (!result) {
+      if (!result.insertId) {
         console.error(
           `SERVICE ERROR: Failed to create follow request from "${senderId}" to "${recipientId}"`,
         );
@@ -56,7 +56,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!result) {
+    if (!result.insertId) {
       console.error(
         `SERVICE ERROR: Failed to follow user "${recipientId}" by "${senderId}"`,
       );
@@ -83,7 +83,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!result) {
+    if (!result.insertId) {
       console.error(
         `SERVICE ERROR: Failed to remove follow relationship for sender ID "${senderId}" and recipient ID "${recipientId}"`,
       );
@@ -113,7 +113,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!result) {
+    if (!result.insertId) {
       console.error(
         `SERVICE ERROR: Failed to remove follow request from "${senderId}" to "${recipientId}"`,
       );
@@ -127,7 +127,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!result2) {
+    if (!result2.insertId) {
       console.error(
         `SERVICE ERROR: Failed to add follower "${recipientId}" for sender ID "${senderId}"`,
       );
@@ -160,7 +160,7 @@ export class FollowService {
       userIdBeingRejected,
       userIdRejecting,
     );
-    if (!result) {
+    if (!result.insertId) {
       console.error(
         `SERVICE ERROR: Failed to remove follow request from "${userIdBeingRejected}" to "${userIdRejecting}"`,
       );
@@ -190,7 +190,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!deleteResult) {
+    if (!deleteResult.insertId) {
       console.error(
         `SERVICE ERROR: Failed to cancel follow request from "${senderId}" to "${recipientId}"`,
       );
@@ -220,7 +220,7 @@ export class FollowService {
       followerToRemove,
       userId,
     );
-    if (!removeResult) {
+    if (!removeResult.insertId) {
       console.error(
         `SERVICE ERROR: Failed to remove follower "${followerToRemove}" from user ID "${userId}"`,
       );
