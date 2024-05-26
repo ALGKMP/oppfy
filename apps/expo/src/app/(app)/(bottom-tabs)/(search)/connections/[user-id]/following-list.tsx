@@ -29,13 +29,13 @@ const Following = () => {
 
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
-        userId: newData.userId,
+        userId,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId: newData.userId },
+        { userId },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -51,10 +51,10 @@ const Following = () => {
 
       return { prevData };
     },
-    onError: (_err, newData, ctx) => {
+    onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId: newData.userId },
+        { userId },
         ctx.prevData,
       );
     },
@@ -71,13 +71,13 @@ const Following = () => {
 
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
-        userId: newData.userId,
+        userId,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId: newData.userId },
+        { userId },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -96,7 +96,7 @@ const Following = () => {
     onError: (_err, newData, ctx) => {
       if (ctx === undefined) return;
       utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId: newData.userId },
+        { userId },
         ctx.prevData,
       );
     },
