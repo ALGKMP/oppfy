@@ -66,6 +66,7 @@ const TopTabBar = ({
   return (
     <View style={styles.tabBar}>
       {state.routes.map((route, index) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const { options } = descriptors[route.key]!;
         const label = options.tabBarLabel ?? options.title ?? route.name;
 
