@@ -455,8 +455,6 @@ const Profile = (props: ProfileProps) => {
     const { privacy, targetUserFollowState, targetUserFriendState } =
       props.data.networkStatus;
 
-    console.log({ privacy, targetUserFollowState, targetUserFriendState });
-
     const buttonCombinations: Record<string, JSX.Element> = {
       public_NotFollowing_NotFriends: (
         <>
