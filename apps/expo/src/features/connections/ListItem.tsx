@@ -39,6 +39,7 @@ const ListItem = ({
       return {
         text: "Follow",
         icon: UserRoundPlus,
+        theme: "blue",
         onPress: () => void handleFollow(item.userId),
       };
     }

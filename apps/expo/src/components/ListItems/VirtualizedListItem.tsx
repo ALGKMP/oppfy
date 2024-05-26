@@ -2,17 +2,19 @@ import type { FunctionComponent } from "react";
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { Skeleton } from "moti/skeleton";
+import type { ThemeName } from "tamagui";
 import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
-
-// type Icon = JSX.Element;
 
 type Icon = JSX.Element | FunctionComponent;
 
 export interface ButtonProps {
   text: string;
-  onPress?: () => void;
   icon?: Icon;
   iconAfter?: Icon;
+
+  theme?: ThemeName | null;
+
+  onPress?: () => void;
 }
 
 const isButtonProps = (obj: unknown): obj is ButtonProps => {
