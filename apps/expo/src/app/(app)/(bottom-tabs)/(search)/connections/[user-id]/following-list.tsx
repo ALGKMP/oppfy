@@ -2,23 +2,22 @@ import React, { useMemo } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Separator, SizableText, View } from "tamagui";
+import { UserRoundPlus } from "@tamagui/lucide-icons";
+import { Separator, View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
-import type { ButtonProps } from "~/components/ListItems/VirtualizedListItem";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
-import { useFollowMutations } from "~/hooks/connections";
-import type { RouterOutputs } from "~/utils/api";
+import {
+  ListHeader,
+  ListItem,
+  useFollowMutations,
+} from "~/features/connections";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-type UserItem = RouterOutputs["follow"]["paginateFollowingOthers"]["items"][0];
-
-const Following = () => {
+const FollowingList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const router = useRouter();
   const headerHeight = useHeaderHeight();
 
   const { follow, unfollow, cancelFollowRequest } = useFollowMutations(userId);
@@ -39,7 +38,6 @@ const Following = () => {
     () => followingData?.pages.flatMap((page) => page.items) ?? [],
     [followingData],
   );
-
   const itemCount = useMemo(
     () =>
       followingData?.pages.reduce(
@@ -67,47 +65,6 @@ const Following = () => {
     await cancelFollowRequest.mutateAsync({ userId });
   };
 
-  const renderButton = (item: UserItem): ButtonProps => {
-    if (item.privacy === "private" && !item.isFollowing) {
-      return {
-        text: "Sent",
-        icon: Send,
-        onPress: () => void handleCancelFollowRequest(item.userId),
-      };
-    } else if (item.isFollowing) {
-      return {
-        text: "Unfollow",
-        icon: UserRoundMinus,
-        onPress: () => void handleUnfollow(item.userId),
-      };
-    } else {
-      return {
-        text: "Follow",
-        icon: UserRoundPlus,
-        onPress: () => void handleFollow(item.userId),
-      };
-    }
-  };
-
-  const renderListItem = ({ item }: { item: UserItem }) => (
-    <View>
-      <VirtualizedListItem
-        loading={false}
-        title={item.username}
-        subtitle={item.name}
-        imageUrl={item.profilePictureUrl}
-        button={renderButton(item)}
-        onPress={() =>
-          // @ts-expect-error: Experimental typed routes dont support layouts yet
-          router.push({
-            pathname: "/profile/[profile-id]",
-            params: { profileId: String(item.profileId) },
-          })
-        }
-      />
-    </View>
-  );
-
   if (isLoading) {
     return (
       <BaseScreenView paddingBottom={0}>
@@ -116,11 +73,7 @@ const Following = () => {
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <SizableText size="$2" theme="alt1" marginBottom="$2">
-              FOLLOWERS
-            </SizableText>
-          }
+          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
           renderItem={() => (
             <VirtualizedListItem
               loading
@@ -161,15 +114,18 @@ const Following = () => {
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <SizableText size="$2" theme="alt1" marginBottom="$2">
-            FOLLOWERS
-          </SizableText>
-        }
-        renderItem={renderListItem}
+        ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
+        renderItem={({ item }) => (
+          <ListItem
+            item={item}
+            handleFollow={handleFollow}
+            handleUnfollow={handleUnfollow}
+            handleCancelFollowRequest={handleCancelFollowRequest}
+          />
+        )}
       />
     </BaseScreenView>
   );
 };
 
-export default Following;
+export default FollowingList;
