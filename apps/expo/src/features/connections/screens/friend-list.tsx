@@ -8,21 +8,18 @@ import { Separator, View } from "tamagui";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
-import {
-  ListHeader,
-  ListItem,
-  useFollowHandlers,
-} from "~/features/connections";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import { ListHeader, ListItem } from "../components";
+import { useFollowHandlers } from "../hooks";
 
-const FollowingList = () => {
+const FriendList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const headerHeight = useHeaderHeight();
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
     userId,
-    queryToOptimisticallyUpdate: "follow.paginateFollowingOthers",
+    queryToOptimisticallyUpdate: "friend.paginateFriendsOthers",
     queriesToInvalidate: [
       "follow.paginateFollowingOthers",
       "follow.paginateFollowersOthers",
@@ -31,28 +28,26 @@ const FollowingList = () => {
   });
 
   const {
-    data: followingData,
+    data: friendData,
     isLoading,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.follow.paginateFollowingOthers.useInfiniteQuery(
+  } = api.friend.paginateFriendsOthers.useInfiniteQuery(
     { userId, pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const followingItems = useMemo(
-    () => followingData?.pages.flatMap((page) => page.items) ?? [],
-    [followingData],
+  const friendItems = useMemo(
+    () => friendData?.pages.flatMap((page) => page.items) ?? [],
+    [friendData],
   );
   const itemCount = useMemo(
     () =>
-      followingData?.pages.reduce(
-        (total, page) => total + page.items.length,
-        0,
-      ) ?? 0,
-    [followingData],
+      friendData?.pages.reduce((total, page) => total + page.items.length, 0) ??
+      0,
+    [friendData],
   );
 
   const handleOnEndReached = async () => {
@@ -69,7 +64,7 @@ const FollowingList = () => {
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
+          ListHeaderComponent={<ListHeader title="FRIENDS" />}
           renderItem={() => (
             <VirtualizedListItem
               loading
@@ -91,7 +86,7 @@ const FollowingList = () => {
       <BaseScreenView>
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
-            title="Following"
+            title="Friends"
             subtitle="Once you follow someone, you'll see them here."
             icon={<UserRoundPlus />}
           />
@@ -105,12 +100,12 @@ const FollowingList = () => {
       <FlashList
         onRefresh={refetch}
         refreshing={isLoading}
-        data={followingItems}
+        data={friendItems}
         ItemSeparatorComponent={Separator}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
+        ListHeaderComponent={<ListHeader title="Friends" />}
         renderItem={({ item }) => (
           <ListItem
             item={item}
@@ -124,4 +119,4 @@ const FollowingList = () => {
   );
 };
 
-export default FollowingList;
+export default FriendList;

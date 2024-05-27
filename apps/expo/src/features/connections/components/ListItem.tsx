@@ -5,7 +5,7 @@ import { View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import type { ButtonProps } from "~/components/ListItems/VirtualizedListItem";
-import type { UserItem } from "./types";
+import type { UserItem } from "../types";
 
 interface ListItemProps {
   item: UserItem;

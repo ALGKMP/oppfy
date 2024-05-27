@@ -8,13 +8,10 @@ import { Separator, View } from "tamagui";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
-import {
-  ListHeader,
-  ListItem,
-  useFollowHandlers,
-} from "~/features/connections";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import { ListHeader, ListItem } from "../components";
+import { useFollowHandlers } from "../hooks";
 
 const FollowingList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
