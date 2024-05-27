@@ -28,7 +28,7 @@ const useFollowHandlers = (
       const query = getQueryByKey(queryToOptimisticallyUpdate);
 
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingOthers.cancel();
+      await query.cancel();
 
       // Get the data from the queryCache
       const prevData = query.getInfiniteData({
@@ -57,7 +57,7 @@ const useFollowHandlers = (
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      ctx.query.setInfiniteData({ userId }, ctx.prevData);
+      ctx.query.setInfiniteData({ userId, pageSize: 20 }, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
@@ -69,18 +69,21 @@ const useFollowHandlers = (
 
   const unfollowMutation = api.follow.unfollowUser.useMutation({
     onMutate: async (newData) => {
+      const query = getQueryByKey(queryToOptimisticallyUpdate);
+
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingOthers.cancel();
+      await query.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+      const prevData = query.getInfiniteData({
         userId,
+        pageSize: 20,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId },
+      query.setInfiniteData(
+        { userId, pageSize: 20 },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -94,36 +97,38 @@ const useFollowHandlers = (
         },
       );
 
-      return { prevData };
+      return { query, prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId },
-        ctx.prevData,
-      );
+      ctx.query.setInfiniteData({ userId, pageSize: 20 }, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.follow.paginateFollowingOthers.invalidate();
+      await Promise.all(
+        queriesToInvalidate.map((key) => getQueryByKey(key).invalidate()),
+      );
     },
   });
 
   const cancelFollowRequestMutation =
     api.follow.cancelFollowRequest.useMutation({
       onMutate: async (newData) => {
+        const query = getQueryByKey(queryToOptimisticallyUpdate);
+
         // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.follow.paginateFollowingOthers.cancel();
+        await query.cancel();
 
         // Get the data from the queryCache
-        const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+        const prevData = query.getInfiniteData({
           userId,
+          pageSize: 20,
         });
         if (prevData === undefined) return;
 
         // Optimistically update the data
-        utils.follow.paginateFollowingOthers.setInfiniteData(
-          { userId },
+        query.setInfiniteData(
+          { userId, pageSize: 20 },
           {
             ...prevData,
             pages: prevData.pages.map((page) => ({
@@ -137,18 +142,20 @@ const useFollowHandlers = (
           },
         );
 
-        return { prevData };
+        return { query, prevData };
       },
       onError: (_err, newData, ctx) => {
         if (ctx === undefined) return;
-        utils.follow.paginateFollowingOthers.setInfiniteData(
-          { userId: newData.userId },
+        ctx.query.setInfiniteData(
+          { userId: newData.userId, pageSize: 20 },
           ctx.prevData,
         );
       },
       onSettled: async () => {
         // Sync with server once mutation has settled
-        await utils.follow.paginateFollowingOthers.invalidate();
+        await Promise.all(
+          queriesToInvalidate.map((key) => getQueryByKey(key).invalidate()),
+        );
       },
     });
 
