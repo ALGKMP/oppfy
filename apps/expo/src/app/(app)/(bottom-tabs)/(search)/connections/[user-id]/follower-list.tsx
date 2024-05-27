@@ -32,6 +32,7 @@ const FollowerList = () => {
 
   const {
     data: followersData,
+    isRefetching,
     isLoading,
     isFetchingNextPage,
     fetchNextPage,
@@ -103,9 +104,9 @@ const FollowerList = () => {
   return (
     <BaseScreenView paddingBottom={0}>
       <FlashList
-        onRefresh={refetch}
-        refreshing={isLoading}
         data={followerItems}
+        onRefresh={refetch}
+        refreshing={isRefetching}
         ItemSeparatorComponent={Separator}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}

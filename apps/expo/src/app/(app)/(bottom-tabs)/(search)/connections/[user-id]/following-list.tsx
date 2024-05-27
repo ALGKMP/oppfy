@@ -33,6 +33,7 @@ const FollowingList = () => {
   const {
     data: followingData,
     isLoading,
+    isRefetching,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
@@ -104,7 +105,7 @@ const FollowingList = () => {
     <BaseScreenView paddingBottom={0}>
       <FlashList
         onRefresh={refetch}
-        refreshing={isLoading}
+        refreshing={isRefetching}
         data={followingItems}
         ItemSeparatorComponent={Separator}
         estimatedItemSize={75}
