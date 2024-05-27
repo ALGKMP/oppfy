@@ -33,7 +33,6 @@ const ProfileLayout = () => {
   const {
     data: profileData,
     isLoading,
-    isRefetching,
     refetch,
   } = api.profile.getFullProfileSelf.useQuery();
 
@@ -54,7 +53,7 @@ const ProfileLayout = () => {
       <TopTabs
         tabBar={(props) => (
           <YStack>
-            {isLoading || isRefetching || profileData === undefined ? (
+            {isLoading || profileData === undefined ? (
               <Profile loading />
             ) : (
               <Profile loading={false} data={profileData} />
