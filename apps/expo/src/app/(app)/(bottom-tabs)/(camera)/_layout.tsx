@@ -30,6 +30,12 @@ const CameraLayout = () => {
           header: () => null,
         }}
       />
+      <Stack.Screen
+        name="preview"
+        options={{
+          header: () => null,
+        }}
+      />
     </Stack>
   );
 };
