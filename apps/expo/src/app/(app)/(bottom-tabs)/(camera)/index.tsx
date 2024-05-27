@@ -28,9 +28,9 @@ const Camera = () => {
   const [zoom, setZoom] = useState(0);
   const [lastScale, setLastScale] = useState(1);
 
-  const handleDoubleTap = async () => {
+  const handleDoubleTap = () => {
     toggleCameraFacing();
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const toggleCameraFacing = () => {
