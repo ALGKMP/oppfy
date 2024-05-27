@@ -23,18 +23,21 @@ const ConnectionsLayout = () => {
     <TopTabs
       tabBar={(props) => <TopTabBar {...props} />}
       backBehavior="none"
-      style={{
+      screenOptions={{
+        lazy: true,
+      }}
+      sceneContainerStyle={{
         backgroundColor: theme.background.val,
       }}
     >
       <TopTabs.Screen
-        name="friends-list"
+        name="friend-list"
         options={{
           tabBarLabel: "Friends",
         }}
       />
       <TopTabs.Screen
-        name="followers-list"
+        name="follower-list"
         options={{
           title: "Test",
           tabBarLabel: "Followers",
