@@ -1,4 +1,6 @@
 import React from "react";
+import { View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
@@ -25,7 +27,9 @@ const RootLayout = () => {
         <SessionProvider>
           <PermissionsProvider>
             <SafeAreaProvider>
-              <Slot />
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <Slot />
+              </GestureHandlerRootView>
             </SafeAreaProvider>
           </PermissionsProvider>
         </SessionProvider>
