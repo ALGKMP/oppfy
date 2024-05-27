@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
-import { Redirect } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
+import { Redirect, SplashScreen } from "expo-router";
 
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
