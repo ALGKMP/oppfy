@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -9,8 +10,10 @@ import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
-const Following = () => {
+const FollowingList = () => {
   const headerHeight = useHeaderHeight();
+
+  const router = useRouter();
 
   const unfollow = api.follow.unfollowUser.useMutation({
     onSuccess: (_data, variables) => {
@@ -115,6 +118,13 @@ const Following = () => {
                         ? { text: "Follow", icon: UserRoundPlus }
                         : { text: "Unfollow", icon: UserRoundMinus }),
                     }}
+                    onPress={() =>
+                      // @ts-expect-error: Experimental typed routes dont support layouts yet
+                      router.push({
+                        pathname: "/profile/[profile-id]",
+                        params: { profileId: String(item.profileId) },
+                      })
+                    }
                   />
                 )}
               </View>
@@ -134,4 +144,4 @@ const Following = () => {
   );
 };
 
-export default Following;
+export default FollowingList;
