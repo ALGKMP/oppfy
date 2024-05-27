@@ -5,11 +5,17 @@ type QueryKeys =
   | "follow.paginateFollowersOthers"
   | "friend.paginateFriendsOthers";
 
-const useFollowHandlers = (
-  userId: string,
-  queryToOptimisticallyUpdate: QueryKeys,
-  queriesToInvalidate: QueryKeys[],
-) => {
+interface FollowHandlerParams {
+  userId: string;
+  queryToOptimisticallyUpdate: QueryKeys;
+  queriesToInvalidate: QueryKeys[];
+}
+
+const useFollowHandlers = ({
+  userId,
+  queryToOptimisticallyUpdate,
+  queriesToInvalidate,
+}: FollowHandlerParams) => {
   const utils = api.useUtils();
 
   const getQueryByKey = (key: QueryKeys) => {
