@@ -177,7 +177,7 @@ const Profile = (props: ProfileProps) => {
         <XStack gap="$7">
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/self-connections/friends-list")}
+            onPress={() => router.push("/self-connections/friend-list")}
           >
             <Stat
               label="Friends"

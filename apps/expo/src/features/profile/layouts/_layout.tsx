@@ -617,7 +617,7 @@ const Profile = (props: ProfileProps) => {
             onPress={() =>
               // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
-                pathname: "connections/[user-id]",
+                pathname: "/(search)/connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,
@@ -639,7 +639,7 @@ const Profile = (props: ProfileProps) => {
             onPress={() =>
               // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
-                pathname: "connections/[user-id]",
+                pathname: "/(search)/connections/[user-id]",
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,

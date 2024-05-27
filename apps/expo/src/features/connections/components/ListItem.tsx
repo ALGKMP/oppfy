@@ -1,5 +1,5 @@
-import React from "react";
-import { useRouter } from "expo-router";
+import React, { useEffect } from "react";
+import { useRouter, useSegments } from "expo-router";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
@@ -21,6 +21,7 @@ const ListItem = ({
   handleCancelFollowRequest,
 }: ListItemProps) => {
   const router = useRouter();
+  const segments = useSegments();
 
   const renderButton = (item: UserItem): ButtonProps => {
     if (item.privacy === "private" && !item.isFollowing) {
@@ -56,7 +57,7 @@ const ListItem = ({
         onPress={() =>
           // @ts-expect-error: Experimental typed routes dont support layouts yet
           router.push({
-            pathname: "/profile/[profile-id]",
+            pathname: `/${segments[2]}/profile/[profile-id]`,
             params: { profileId: String(item.profileId) },
           })
         }
