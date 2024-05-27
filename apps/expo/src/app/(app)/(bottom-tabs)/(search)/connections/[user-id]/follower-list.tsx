@@ -16,13 +16,13 @@ import {
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-const FriendsList = () => {
+const FollowerList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const headerHeight = useHeaderHeight();
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
     userId,
-    queryToOptimisticallyUpdate: "friend.paginateFriendsOthers",
+    queryToOptimisticallyUpdate: "follow.paginateFollowersOthers",
     queriesToInvalidate: [
       "follow.paginateFollowingOthers",
       "follow.paginateFollowersOthers",
@@ -31,26 +31,28 @@ const FriendsList = () => {
   });
 
   const {
-    data: friendData,
+    data: followersData,
     isLoading,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.friend.paginateFriendsOthers.useInfiniteQuery(
+  } = api.follow.paginateFollowersOthers.useInfiniteQuery(
     { userId, pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const friendItems = useMemo(
-    () => friendData?.pages.flatMap((page) => page.items) ?? [],
-    [friendData],
+  const followerItems = useMemo(
+    () => followersData?.pages.flatMap((page) => page.items) ?? [],
+    [followersData],
   );
   const itemCount = useMemo(
     () =>
-      friendData?.pages.reduce((total, page) => total + page.items.length, 0) ??
-      0,
-    [friendData],
+      followersData?.pages.reduce(
+        (total, page) => total + page.items.length,
+        0,
+      ) ?? 0,
+    [followersData],
   );
 
   const handleOnEndReached = async () => {
@@ -67,7 +69,7 @@ const FriendsList = () => {
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ListHeader title="FRIENDS" />}
+          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
           renderItem={() => (
             <VirtualizedListItem
               loading
@@ -89,7 +91,7 @@ const FriendsList = () => {
       <BaseScreenView>
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
-            title="Friends"
+            title="FOLLOWERS"
             subtitle="Once you follow someone, you'll see them here."
             icon={<UserRoundPlus />}
           />
@@ -103,7 +105,7 @@ const FriendsList = () => {
       <FlashList
         onRefresh={refetch}
         refreshing={isLoading}
-        data={friendItems}
+        data={followerItems}
         ItemSeparatorComponent={Separator}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
@@ -122,4 +124,4 @@ const FriendsList = () => {
   );
 };
 
-export default FriendsList;
+export default FollowerList;

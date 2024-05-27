@@ -1,6 +1,6 @@
 import type { FunctionComponent } from "react";
 import React from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native";
 import { Skeleton } from "moti/skeleton";
 import type { ThemeName } from "tamagui";
 import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
