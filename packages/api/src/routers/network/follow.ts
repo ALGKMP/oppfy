@@ -27,7 +27,7 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowersOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowersSelf(
+        const result = await ctx.services.paginate.paginateFollowersOthers(
           input.userId,
           input.cursor,
           input.pageSize,

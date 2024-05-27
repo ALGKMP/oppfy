@@ -39,7 +39,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowers(
+    const data = await this.followRepository.paginateFollowersSelf(
       userId,
       cursor,
       pageSize,
@@ -49,11 +49,13 @@ export class PaginationService {
 
   async paginateFollowersOthers(
     userId: string,
+    currentUserId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowers(
+    const data = await this.followRepository.paginateFollowersOthers(
       userId,
+      currentUserId,
       cursor,
       pageSize,
     );
@@ -79,7 +81,7 @@ export class PaginationService {
     pageSize = 10,
     currentUserId: string,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowingOther(
+    const data = await this.followRepository.paginateFollowingOthers(
       userId,
       currentUserId,
       cursor,
@@ -146,7 +148,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowers(
+    const data = await this.followRepository.paginateFollowersSelf(
       userId,
       cursor,
       pageSize,
