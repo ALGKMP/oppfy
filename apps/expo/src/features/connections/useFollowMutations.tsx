@@ -1,23 +1,45 @@
 import { api } from "~/utils/api";
 
-const useFollowHandlers = (userId: string) => {
+type QueryKeys =
+  | "follow.paginateFollowingOthers"
+  | "follow.paginateFollowersOthers"
+  | "friend.paginateFriendsOthers";
+
+const useFollowHandlers = (
+  userId: string,
+  queryToOptimisticallyUpdate: QueryKeys,
+  queriesToInvalidate: QueryKeys[],
+) => {
   const utils = api.useUtils();
+
+  const getQueryByKey = (key: QueryKeys) => {
+    switch (key) {
+      case "follow.paginateFollowingOthers":
+        return utils.follow.paginateFollowingOthers;
+      case "follow.paginateFollowersOthers":
+        return utils.follow.paginateFollowersOthers;
+      case "friend.paginateFriendsOthers":
+        return utils.friend.paginateFriendsOthers;
+    }
+  };
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
+      const query = getQueryByKey(queryToOptimisticallyUpdate);
+
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.follow.paginateFollowingOthers.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+      const prevData = query.getInfiniteData({
         userId,
+        pageSize: 20,
       });
-
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId },
+      query.setInfiniteData(
+        { userId, pageSize: 20 },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -31,18 +53,17 @@ const useFollowHandlers = (userId: string) => {
         },
       );
 
-      return { prevData };
+      return { query, prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingOthers.setInfiniteData(
-        { userId },
-        ctx.prevData,
-      );
+      ctx.query.setInfiniteData({ userId }, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.follow.paginateFollowingOthers.invalidate();
+      await Promise.all(
+        queriesToInvalidate.map((key) => getQueryByKey(key).invalidate()),
+      );
     },
   });
 
