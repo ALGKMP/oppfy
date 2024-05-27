@@ -46,6 +46,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "@react-native-firebase/auth",
     "@react-native-firebase/perf",
     "@react-native-firebase/crashlytics",
+    "expo-video",
     [
       "expo-camera",
       {
