@@ -1,12 +1,11 @@
 import { z } from "zod";
 
-import { PrivacyStatus } from "../profile/profile";
-
 const trpcFriendOutputSchema = {
   paginateFriendSelf: z.object({
     items: z.array(
       z.object({
         userId: z.string(),
+        profileId: z.number(),
         username: z.string(),
         name: z.string(),
         profilePictureUrl: z.string(),
@@ -24,11 +23,12 @@ const trpcFriendOutputSchema = {
     items: z.array(
       z.object({
         userId: z.string(),
+        profileId: z.number(),
         username: z.string(),
-        privacy: z.enum(["public", "private"]).optional(),
+        privacy: z.enum(["public", "private"]),
         name: z.string(),
         profilePictureUrl: z.string(),
-        isFollowing: z.boolean().optional(),
+        isFollowing: z.boolean(),
       }),
     ),
     nextCursor: z

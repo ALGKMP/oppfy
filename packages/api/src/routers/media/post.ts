@@ -82,13 +82,13 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  getPosts: protectedProcedure
-    .input(trpcValidators.input.post.paginatePosts)
+  paginatePostsOfUserSelf: protectedProcedure
+    .input(trpcValidators.input.post.paginatePostsOfUserSelf)
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
         console.log("TRPC getPosts input: ", input);
-        const result = await ctx.services.post.getPosts(
+        const result = await ctx.services.post.paginatePostsOfUserSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -113,7 +113,100 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  likePost: protectedProcedure
+  paginatePostsOfUserOther: protectedProcedure
+    .input(trpcValidators.input.post.paginatePostsOfUserOther)
+    .output(trpcValidators.output.post.paginatedPosts)
+    .query(async ({ ctx, input }) => {
+      try {
+        console.log("TRPC getPosts input: ", input);
+        const result = await ctx.services.post.paginatePostsOfUserOther(
+          input.profileId,
+          input.cursor,
+          input.pageSize,
+        );
+        console.log("TRPC getPosts result before validation: ", result);
+        const parsedResult =
+          trpcValidators.output.post.paginatedPosts.parse(result);
+        console.log("TRPC getPosts result after validation: ", parsedResult);
+        return parsedResult;
+      } catch (err) {
+        console.error("TRPC getPosts error: ", err);
+        if (err instanceof DomainError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate posts.",
+        });
+      }
+    }),
+
+  paginatePostsByUserSelf: protectedProcedure
+    .input(trpcValidators.input.post.paginatePostsByUserSelf)
+    .output(trpcValidators.output.post.paginatedPosts)
+    .query(async ({ ctx, input }) => {
+      try {
+        console.log("TRPC getPosts input: ", input);
+        const result = await ctx.services.post.paginatePostsOfUserSelf(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
+        console.log("TRPC getPosts result before validation: ", result);
+        const parsedResult =
+          trpcValidators.output.post.paginatedPosts.parse(result);
+        console.log("TRPC getPosts result after validation: ", parsedResult);
+        return parsedResult;
+      } catch (err) {
+        console.error("TRPC getPosts error: ", err);
+        if (err instanceof DomainError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate posts.",
+        });
+      }
+    }),
+
+  paginatePostsByUserOther: protectedProcedure
+    .input(trpcValidators.input.post.paginatePostsByUserOther)
+    .output(trpcValidators.output.post.paginatedPosts)
+    .query(async ({ ctx, input }) => {
+      try {
+        console.log("TRPC getPosts input: ", input);
+        const result = await ctx.services.post.paginatePostsOfUserOther(
+          input.profileId,
+          input.cursor,
+          input.pageSize,
+        );
+        console.log("TRPC getPosts result before validation: ", result);
+        const parsedResult =
+          trpcValidators.output.post.paginatedPosts.parse(result);
+        console.log("TRPC getPosts result after validation: ", parsedResult);
+        return parsedResult;
+      } catch (err) {
+        console.error("TRPC getPosts error: ", err);
+        if (err instanceof DomainError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate posts.",
+        });
+      }
+    }),
+
+  like: protectedProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -131,7 +224,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  unlikePost: protectedProcedure
+  unlike: protectedProcedure
     .input(
       z.object({
         userId: z.string(),
@@ -149,7 +242,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  commentOnPost: protectedProcedure
+  comment: protectedProcedure
     .input(
       z.object({
         userId: z.string(),

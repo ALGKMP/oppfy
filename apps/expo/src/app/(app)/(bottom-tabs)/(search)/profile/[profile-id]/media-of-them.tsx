@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
+import { useGlobalSearchParams } from "expo-router";
 import { Text } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";

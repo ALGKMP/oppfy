@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, or } from "drizzle-orm";
+import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -94,7 +94,14 @@ export class FollowRepository {
       await tx.insert(schema.follower).values({ senderId, recipientId });
 
       // Delete the follow request from sender to recipient
-      await tx.delete(schema.followRequest).where(and(eq(schema.followRequest.senderId, senderId), eq(schema.followRequest.recipientId, recipientId)));
+      await tx
+        .delete(schema.followRequest)
+        .where(
+          and(
+            eq(schema.followRequest.senderId, senderId),
+            eq(schema.followRequest.recipientId, recipientId),
+          ),
+        );
 
       return true;
     });
@@ -109,12 +116,12 @@ export class FollowRepository {
     return await this.db
       .select({
         userId: schema.user.id,
+        profileId: schema.profile.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
-        profileId: schema.profile.id,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
@@ -138,12 +145,13 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFollowing(
+  async paginateFollowersOthers(
     forUserId: string,
+    currentUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
   ) {
-    return await this.db
+    const followers = await this.db
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
@@ -152,6 +160,55 @@ export class FollowRepository {
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
         profileId: schema.profile.id,
+        isFollowing: sql<number>`EXISTS (
+        SELECT 1 FROM ${schema.follower}
+        WHERE ${schema.follower.senderId} = ${currentUserId}
+          AND ${schema.follower.recipientId} = ${schema.user.id}
+      )`.as("isFollowing"),
+      })
+      .from(schema.follower)
+      .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .where(
+        and(
+          eq(schema.follower.recipientId, forUserId),
+          cursor
+            ? or(
+                gt(schema.follower.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.follower.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
+    // Convert the numeric isFollowing result to boolean
+    const followersWithBooleanIsFollowing = followers.map((follower) => ({
+      ...follower,
+      isFollowing: Boolean(follower.isFollowing),
+    }));
+
+    return followersWithBooleanIsFollowing;
+  }
+
+  @handleDatabaseErrors
+  async paginateFollowingSelf(
+    forUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
+    return await this.db
+      .select({
+        userId: schema.user.id,
+        profileId: schema.profile.id,
+        username: schema.profile.username,
+        name: schema.profile.fullName,
+        privacy: schema.user.privacySetting,
+        profilePictureUrl: schema.profile.profilePictureKey,
+        createdAt: schema.follower.createdAt,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
@@ -172,6 +229,57 @@ export class FollowRepository {
       )
       .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
+  }
+
+  @handleDatabaseErrors
+  async paginateFollowingOther(
+    forUserId: string,
+    currentUserId: string,
+    cursor: { createdAt: Date; profileId: number } | null = null,
+    pageSize = 10,
+  ) {
+    const followers = await this.db
+      .select({
+        userId: schema.user.id,
+        profileId: schema.profile.id,
+        username: schema.profile.username,
+        name: schema.profile.fullName,
+        privacy: schema.user.privacySetting,
+        profilePictureUrl: schema.profile.profilePictureKey,
+        createdAt: schema.follower.createdAt,
+        isFollowing: sql<number>`EXISTS (
+        SELECT 1 FROM ${schema.follower}
+        WHERE ${schema.follower.senderId} = ${currentUserId}
+          AND ${schema.follower.recipientId} = ${schema.user.id}
+      )`.as("isFollowing"),
+      })
+      .from(schema.follower)
+      .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .where(
+        and(
+          eq(schema.follower.senderId, forUserId),
+          cursor
+            ? or(
+                gt(schema.follower.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.follower.createdAt, cursor.createdAt),
+                  gt(schema.profile.id, cursor.profileId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(schema.follower.createdAt), asc(schema.profile.id))
+      .limit(pageSize + 1);
+
+    // Convert the numeric isFollowing result to boolean
+    const followersWithBooleanIsFollowing = followers.map((follower) => ({
+      ...follower,
+      isFollowing: Boolean(follower.isFollowing),
+    }));
+
+    return followersWithBooleanIsFollowing;
   }
 
   @handleDatabaseErrors

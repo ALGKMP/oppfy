@@ -19,19 +19,17 @@ type SwitchState = RouterOutputs["notifications"]["getNotificationSettings"];
 const Notifications = () => {
   const utils = api.useUtils();
 
-  const {
-    data: notificationSettings,
-    isLoading: isLoadingNotificationSettings,
-  } = api.notifications.getNotificationSettings.useQuery(undefined, {
-    initialData: {
-      likes: false,
-      posts: false,
-      comments: false,
-      mentions: false,
-      friendRequests: false,
-      followRequests: false,
-    },
-  });
+  const { data: notificationSettings } =
+    api.notifications.getNotificationSettings.useQuery(undefined, {
+      initialData: {
+        likes: false,
+        posts: false,
+        comments: false,
+        mentions: false,
+        friendRequests: false,
+        followRequests: false,
+      },
+    });
 
   const {
     isLoading: isUpdatingNotficationSettings,
@@ -80,10 +78,8 @@ const Notifications = () => {
   };
 
   useEffect(() => {
-    if (!isLoadingNotificationSettings) {
-      setSwitchState(notificationSettings);
-    }
-  }, [isLoadingNotificationSettings, notificationSettings]);
+    setSwitchState(notificationSettings);
+  }, [notificationSettings]);
 
   const onSubmit = async () => {
     await updateNotificationSettings.mutateAsync(switchState);

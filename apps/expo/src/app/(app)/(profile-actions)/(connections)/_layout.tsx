@@ -1,4 +1,3 @@
-import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { useTheme } from "tamagui";
 
 import { TopTabBar } from "~/components/TabBars";

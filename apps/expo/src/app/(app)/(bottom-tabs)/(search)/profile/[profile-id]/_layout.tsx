@@ -1,35 +1,26 @@
-import { useEffect, useLayoutEffect } from "react";
-import { Pressable, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  useGlobalSearchParams,
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-} from "expo-router";
-import { Camera, Grid3x3, MoreHorizontal } from "@tamagui/lucide-icons";
-import { throttle } from "lodash";
+import { useCallback, useLayoutEffect, useState } from "react";
+import { RefreshControl, TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
   Button,
   Paragraph,
+  ScrollView,
   SizableText,
   Text,
   useTheme,
-  View,
   XStack,
   YStack,
 } from "tamagui";
 
 import { abbreviateNumber } from "@oppfy/utils";
 
-import { Header } from "~/components/Headers";
 import { TopTabBar } from "~/components/TabBars";
-import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import { api } from "~/utils/api";
-import type { RouterInputs, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
 
@@ -42,10 +33,15 @@ const ProfileLayout = () => {
 
   const { profileId } = useLocalSearchParams<{ profileId: string }>();
 
-  const { data: profileData, isLoading: _profileDataIsLoading } =
-    api.profile.getOtherUserFullProfile.useQuery({
-      profileId: Number(profileId),
-    });
+  const [refreshing, setRefreshing] = useState(false);
+
+  const {
+    data: profileData,
+    isLoading,
+    refetch,
+  } = api.profile.getOtherUserFullProfile.useQuery({
+    profileId: Number(profileId),
+  });
 
   const navigation = useNavigation();
 
@@ -53,43 +49,57 @@ const ProfileLayout = () => {
     navigation.setOptions({
       title: profileData?.username,
     });
-  }, [navigation]);
+  }, [navigation, profileData?.username]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   return (
-    <TopTabs
-      tabBar={(props) => (
-        <YStack>
-          {profileData === undefined ? (
-            <Profile loading />
-          ) : (
-            <Profile
-              loading={false}
-              data={{
-                profileId: Number(profileId),
-                ...profileData,
-              }}
-            />
-          )}
-          <TopTabBar {...props} />
-        </YStack>
-      )}
-      style={{
-        backgroundColor: theme.background.val,
-      }}
+    <ScrollView
+      contentContainerStyle={{ flex: 1 }}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
-      <TopTabs.Screen
-        name="media-of-them"
-        options={{
-          tabBarLabel: () => <Grid3x3 />,
+      <TopTabs
+        tabBar={(props) => (
+          <YStack>
+            {isLoading || profileData === undefined ? (
+              <Profile loading />
+            ) : (
+              <Profile
+                loading={false}
+                data={{
+                  profileId: Number(profileId),
+                  ...profileData,
+                }}
+              />
+            )}
+            <TopTabBar {...props} />
+          </YStack>
+        )}
+        style={{
+          backgroundColor: theme.background.val,
         }}
-      />
-      <TopTabs.Screen
-        name="media-of-friends-they-posted"
-        options={{
-          tabBarLabel: () => <Camera />,
-        }}
-      />
-    </TopTabs>
+      >
+        <TopTabs.Screen
+          name="media-of-them"
+          options={{
+            tabBarLabel: () => <Grid3x3 />,
+          }}
+        />
+        <TopTabs.Screen
+          name="media-of-friends-they-posted"
+          options={{
+            tabBarLabel: () => <Camera />,
+          }}
+        />
+      </TopTabs>
+    </ScrollView>
   );
 };
 
@@ -433,7 +443,7 @@ const Profile = (props: ProfileProps) => {
   const handleCancelFriendRequest = async () => {
     if (props.loading) return;
 
-    cancelFriendRequest.mutateAsync({
+    await cancelFriendRequest.mutateAsync({
       recipientId: props.data.userId,
     });
   };
@@ -443,8 +453,6 @@ const Profile = (props: ProfileProps) => {
 
     const { privacy, targetUserFollowState, targetUserFriendState } =
       props.data.networkStatus;
-
-    console.log({ privacy, targetUserFollowState, targetUserFriendState });
 
     const buttonCombinations: Record<string, JSX.Element> = {
       public_NotFollowing_NotFriends: (
@@ -550,7 +558,7 @@ const Profile = (props: ProfileProps) => {
     };
 
     const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
-    return buttonCombinations[key] || null;
+    return buttonCombinations[key] ?? null;
   };
 
   return (
@@ -607,7 +615,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
-              // @ts-ignore
+              // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
                 pathname: "connections/[user-id]",
                 params: {
@@ -629,7 +637,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
-              // @ts-ignore
+              // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
                 pathname: "connections/[user-id]",
                 params: {
@@ -650,7 +658,7 @@ const Profile = (props: ProfileProps) => {
           <TouchableOpacity
             disabled={props.loading}
             onPress={() =>
-              // @ts-ignore
+              // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
                 pathname: "connections/[user-id]",
                 params: {

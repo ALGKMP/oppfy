@@ -1,11 +1,25 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
+  "eslint.experimental.useFlatConfig": true,
   "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
+    { "pattern": "apps/*/" },
+    { "pattern": "cloud/*/"},
+    { "pattern": "packages/*/" },
+    { "pattern": "tooling/*/" }
   ],
-  "eslint.lintTask.enable": true,
-  "github-actions.workflows.pinned.workflows": [
-    ".github/workflows/sam-pipeline.yml"
-  ]
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "next/router.d.ts",
+    "next/dist/client/router.d.ts"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

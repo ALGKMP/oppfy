@@ -41,7 +41,7 @@ export class FollowService {
         senderId,
         recipientId,
       );
-      if (!result) {
+      if (!result.insertId) {
         console.error(
           `SERVICE ERROR: Failed to create follow request from "${senderId}" to "${recipientId}"`,
         );
@@ -56,7 +56,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!result) {
+    if (!result.insertId) {
       console.error(
         `SERVICE ERROR: Failed to follow user "${recipientId}" by "${senderId}"`,
       );
@@ -79,19 +79,10 @@ export class FollowService {
       );
     }
 
-    const result = await this.followRepository.removeFollower(
+    return await this.followRepository.removeFollower(
       senderId,
       recipientId,
     );
-    if (!result) {
-      console.error(
-        `SERVICE ERROR: Failed to remove follow relationship for sender ID "${senderId}" and recipient ID "${recipientId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
-        "Failed to remove follower.",
-      );
-    }
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
@@ -113,7 +104,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!result) {
+    if (!result.insertId) {
       console.error(
         `SERVICE ERROR: Failed to remove follow request from "${senderId}" to "${recipientId}"`,
       );
@@ -127,7 +118,7 @@ export class FollowService {
       senderId,
       recipientId,
     );
-    if (!result2) {
+    if (!result2.insertId) {
       console.error(
         `SERVICE ERROR: Failed to add follower "${recipientId}" for sender ID "${senderId}"`,
       );
@@ -156,19 +147,10 @@ export class FollowService {
       );
     }
 
-    const result = await this.followRepository.removeFollowRequest(
+    return await this.followRepository.removeFollowRequest(
       userIdBeingRejected,
       userIdRejecting,
     );
-    if (!result) {
-      console.error(
-        `SERVICE ERROR: Failed to remove follow request from "${userIdBeingRejected}" to "${userIdRejecting}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST,
-        "Failed to remove follow request.",
-      );
-    }
   }
 
   async cancelFollowRequest(senderId: string, recipientId: string) {
@@ -186,19 +168,10 @@ export class FollowService {
       );
     }
 
-    const deleteResult = await this.followRepository.removeFollowRequest(
+    return await this.followRepository.removeFollowRequest(
       senderId,
       recipientId,
     );
-    if (!deleteResult) {
-      console.error(
-        `SERVICE ERROR: Failed to cancel follow request from "${senderId}" to "${recipientId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_CANCEL_FOLLOW_REQUEST,
-        "Failed to cancel follow request.",
-      );
-    }
   }
 
   async removeFollower(userId: string, followerToRemove: string) {
@@ -216,19 +189,11 @@ export class FollowService {
       );
     }
 
-    const removeResult = await this.followRepository.removeFollower(
+    return await this.followRepository.removeFollower(
       followerToRemove,
       userId,
     );
-    if (!removeResult) {
-      console.error(
-        `SERVICE ERROR: Failed to remove follower "${followerToRemove}" from user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
-        "Failed to remove follower.",
-      );
-    }
+    
   }
 
   public async determineFollowState(

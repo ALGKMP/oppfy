@@ -1,21 +1,18 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
 import { ChevronLeft } from "@tamagui/lucide-icons";
-import { Text, useTheme } from "tamagui";
+import { Text } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 import { api } from "~/utils/api";
 
 const ProfileActionsLayout = () => {
-  const theme = useTheme();
-
   const utils = api.useUtils();
   const username = utils.profile.getFullProfileSelf.getData()?.username;
 

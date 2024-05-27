@@ -1,6 +1,5 @@
 import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
@@ -28,6 +27,7 @@ const OnboardingLayout = () => {
         contentStyle: {
           backgroundColor: theme.background.val,
         },
+    
       }}
     >
       <Stack.Screen
