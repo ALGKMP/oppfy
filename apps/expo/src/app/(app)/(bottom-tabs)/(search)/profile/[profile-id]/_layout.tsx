@@ -621,7 +621,7 @@ const Profile = (props: ProfileProps) => {
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,
-                  initialRouteName: "friends-list",
+                  initialRouteName: "friend-list",
                 },
               })
             }
@@ -643,7 +643,7 @@ const Profile = (props: ProfileProps) => {
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,
-                  initialRouteName: "followers-list",
+                  initialRouteName: "follower-list",
                 },
               })
             }

@@ -33,7 +33,6 @@ const FriendList = () => {
   const {
     data: friendData,
     isLoading,
-    isRefetching,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
@@ -103,7 +102,7 @@ const FriendList = () => {
     <BaseScreenView paddingBottom={0}>
       <FlashList
         onRefresh={refetch}
-        refreshing={isRefetching}
+        refreshing={isLoading}
         data={friendItems}
         ItemSeparatorComponent={Separator}
         estimatedItemSize={75}
