@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
+import { and, asc, count, eq, gt, or, not, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -149,6 +149,7 @@ export class FriendRepository {
             eq(schema.friend.userId1, forUserId),
             eq(schema.friend.userId2, forUserId),
           ),
+          not(eq(schema.user.id, forUserId)), // Exclude the current user
           cursor
             ? or(
                 gt(schema.friend.createdAt, cursor.createdAt),
@@ -181,10 +182,10 @@ export class FriendRepository {
         createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
         isFollowing: sql<number>`EXISTS (
-        SELECT 1 FROM ${schema.follower}
-        WHERE ${schema.follower.senderId} = ${currentUserId}
-          AND ${schema.follower.recipientId} = ${schema.user.id}
-      )`.as("isFollowing"),
+          SELECT 1 FROM ${schema.follower}
+          WHERE ${schema.follower.senderId} = ${currentUserId}
+            AND ${schema.follower.recipientId} = ${schema.user.id}
+        )`.as("isFollowing"),
       })
       .from(schema.friend)
       .innerJoin(
@@ -201,6 +202,7 @@ export class FriendRepository {
             eq(schema.friend.userId1, forUserId),
             eq(schema.friend.userId2, forUserId),
           ),
+          not(eq(schema.user.id, forUserId)), // Exclude the current user
           cursor
             ? or(
                 gt(schema.friend.createdAt, cursor.createdAt),
