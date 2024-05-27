@@ -20,7 +20,15 @@ const FriendsList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const headerHeight = useHeaderHeight();
 
-  const { follow, unfollow, cancelFollowRequest } = useFollowHandlers(userId);
+  const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
+    userId,
+    queryToOptimisticallyUpdate: "friend.paginateFriendsOthers",
+    queriesToInvalidate: [
+      "follow.paginateFollowingOthers",
+      "follow.paginateFollowersOthers",
+      "friend.paginateFriendsOthers",
+    ],
+  });
 
   const {
     data: friendData,
