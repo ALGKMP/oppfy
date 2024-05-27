@@ -77,9 +77,9 @@ export class PaginationService {
 
   async paginateFollowingOthers(
     userId: string,
+    currentUserId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-    currentUserId: string,
   ): Promise<PaginatedResponse<UserProfile>> {
     const data = await this.followRepository.paginateFollowingOthers(
       userId,
