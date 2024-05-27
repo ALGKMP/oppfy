@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useTheme } from "tamagui";
 
 import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
@@ -11,6 +11,8 @@ const ConnectionsLayout = () => {
     username: string;
     initialRouteName: string;
   }>();
+
+  const theme = useTheme();
 
   const navigation = useNavigation();
 
@@ -25,6 +27,12 @@ const ConnectionsLayout = () => {
       tabBar={(props) => <TopTabBar {...props} />}
       backBehavior="none"
       initialRouteName={initialRouteName}
+      screenOptions={{
+        lazy: true,
+      }}
+      sceneContainerStyle={{
+        backgroundColor: theme.background.val,
+      }}
     >
       <TopTabs.Screen
         name="friends-list"
