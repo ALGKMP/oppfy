@@ -1,4 +1,3 @@
-import { createTRPCUntypedClient } from "@trpc/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
