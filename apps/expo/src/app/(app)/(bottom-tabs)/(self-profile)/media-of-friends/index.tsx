@@ -1,31 +1,19 @@
-import React, { useEffect, useMemo } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { api } from '~/utils/api';
-import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useEffect, useMemo } from "react";
+import { Touchable, TouchableOpacity } from "react-native";
+import Animated from "react-native-reanimated";
+import { useRouter } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
+import { Text, View } from "tamagui";
+import type { z } from "zod";
 
-export type MediaOfFriendsParamList = {
-  'media-of-friends': undefined;
-  'media-of-friends-detail': {
-    item: {
-      createdAt: Date;
-      caption: string | null;
-      postId: number;
-      recipientId: string;
-      authorId: string;
-      authorUsername: string;
-      authorProfilePicture: string;
-      recipientUsername: string;
-      recipientProfilePicture: string;
-      imageUrl: string;
-      commentsCount: number;
-      likesCount: number;
-    };
-  };
-};
+import type { post } from "@oppfy/validators";
 
-const MediaOfFriends = () => {
+import { BaseScreenView } from "~/components/Views";
+import { api } from "~/utils/api";
+
+const MediaOfFriendsYouPosted = () => {
   const utils = api.useUtils();
-  const navigation = useNavigation<StackNavigationProp<MediaOfFriendsParamList>>();
+  const router = useRouter();
 
   const myQuery = api.post.paginatePostsByUserSelf.useInfiniteQuery(
     {
@@ -38,7 +26,7 @@ const MediaOfFriends = () => {
 
   useEffect(() => {
     console.log(
-      'MEDIA OF FRIENDS THEY POSTED FILE:',
+      "MEDIA OF FRIENDS THEY POSTED FILE:",
       myQuery.data?.pages[0]?.items,
     );
   });
@@ -47,9 +35,48 @@ const MediaOfFriends = () => {
     return myQuery.data?.pages.flatMap((page) => page.items) || [];
   }, [myQuery.data]);
 
+  const renderItem = ({ item }: { item: z.infer<typeof post> | undefined }) => (
+    <View flex={1} margin={5} aspectRatio={1}>
+      <TouchableOpacity
+        onPress={() =>
+          router.push(
+            "/(app)/(bottom-tabs)/(self-profile)/media-of-friends/preview",
+          )
+        }
+      >
+        <Animated.Image
+          // source={{ uri: item?.imageUrl }}
+          source={{
+            uri: "https://media.discordapp.net/attachments/923957630878220298/1244685812373782679/IMG_4341.png?ex=6656037e&is=6654b1fe&hm=5976b732ca6e8f3233d092293fbc9beeebf771947a01f800dd4f3f8902e12d7f&=&format=webp&quality=lossless&width=786&height=676",
+          }}
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 10,
+          }}
+          sharedTransitionTag={"test"}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <>  </>
+    <BaseScreenView>
+      <Text>Media of friends you posted</Text>
+      <FlashList
+        data={mediaItems}
+        renderItem={renderItem}
+        numColumns={2}
+        estimatedItemSize={200} // Adjust based on your image size
+        onEndReached={async () => {
+          if (!myQuery.isFetchingNextPage && myQuery.hasNextPage) {
+            await myQuery.fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.5}
+      />
+    </BaseScreenView>
   );
 };
 
-export default MediaOfFriends;
+export default MediaOfFriendsYouPosted;
