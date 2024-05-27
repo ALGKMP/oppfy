@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { RemovalPolicy } from "aws-cdk-lib";
+import { aws_logs, RemovalPolicy } from "aws-cdk-lib";
 import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -10,6 +10,7 @@ import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as neptune from "@aws-cdk/aws-neptune-alpha";
 import type { Construct } from "constructs";
 
 // Helper function to create an S3 bucket
@@ -201,6 +202,11 @@ export class AwsStack extends cdk.Stack {
       "muxLambda",
       "src/res/lambdas/mux/index.ts",
     );
+    const neptuneProxyLambda = createLambdaFunction(
+      this,
+      "neptuneLambda",
+      "src/res/lambdas/neptune/index.ts",
+    );
 
     const muxWebhookUrl = muxWebhookLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // We'll have our own auth
@@ -293,6 +299,38 @@ export class AwsStack extends cdk.Stack {
     // Output the OpenSearch domain endpoint
     new cdk.CfnOutput(this, "OpenSearchDomainEndpoint", {
       value: openSearchDomain.domainEndpoint,
+    });
+
+    const neptuneSecurityGroup = new ec2.SecurityGroup(
+      this,
+      "MyNeptuneSecurityGroup",
+      {
+        vpc,
+        description: "Security group for Neptune Service",
+        allowAllOutbound: true,
+      },
+    );
+
+    neptuneSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(8182),
+      "Allow Gremlin access from any IPv4 address",
+    );
+
+    let cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
+      vpc,
+      instanceType: neptune.InstanceType.T3_MEDIUM,
+      cloudwatchLogsRetention: aws_logs.RetentionDays.ONE_MONTH,
+      removalPolicy: RemovalPolicy.DESTROY,
+      engineVersion: neptune.EngineVersion.V1_3_0_0,
+      autoMinorVersionUpgrade: true,
+      backupRetention: cdk.Duration.days(14),
+      securityGroups: [neptuneSecurityGroup],
+    });
+
+    // Output the Neptune cluster endpoint
+    new cdk.CfnOutput(this, "NeptuneClusterEndpoint", {
+      value: cluster.clusterEndpoint.hostname,
     });
 
     // TODO: dms depends on this task - we need to wait for it to be created
