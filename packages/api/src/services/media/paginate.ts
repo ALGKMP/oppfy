@@ -90,12 +90,12 @@ export class PaginationService {
     return this._processPaginatedUserData(data, pageSize);
   }
 
-  async paginateFriends(
+  async paginateFriendsSelf(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.friendRepository.paginateFriends(
+    const data = await this.friendRepository.paginateFriendsSelf(
       userId,
       cursor,
       pageSize,
@@ -103,7 +103,7 @@ export class PaginationService {
     return this._processPaginatedUserData(data, pageSize);
   }
 
-  async paginateFriendsOther(
+  async paginateFriendsOthers(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,

@@ -78,7 +78,12 @@ export class FriendRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.friend)
-      .where(or(eq(schema.friend.userId1, userId), eq(schema.friend.userId2, userId)));
+      .where(
+        or(
+          eq(schema.friend.userId1, userId),
+          eq(schema.friend.userId2, userId),
+        ),
+      );
     return result[0]?.count;
   }
 
@@ -114,7 +119,7 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFriends(
+  async paginateFriendsSelf(
     forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
@@ -139,9 +144,11 @@ export class FriendRepository {
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
-        or(
-          eq(schema.friend.userId1, forUserId),
-          eq(schema.friend.userId2, forUserId),
+        and(
+          or(
+            eq(schema.friend.userId1, forUserId),
+            eq(schema.friend.userId2, forUserId),
+          ),
           cursor
             ? or(
                 gt(schema.friend.createdAt, cursor.createdAt),
@@ -189,9 +196,11 @@ export class FriendRepository {
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
-        or(
-          eq(schema.friend.userId1, forUserId),
-          eq(schema.friend.userId2, forUserId),
+        and(
+          or(
+            eq(schema.friend.userId1, forUserId),
+            eq(schema.friend.userId2, forUserId),
+          ),
           cursor
             ? or(
                 gt(schema.friend.createdAt, cursor.createdAt),
@@ -205,6 +214,7 @@ export class FriendRepository {
       )
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
+
     // Convert the numeric isFollowing result to boolean
     const friendsWithBooleanIsFollowing = friends.map((friend) => ({
       ...friend,
