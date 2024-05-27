@@ -1,35 +1,66 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { Pressable, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft } from "@tamagui/lucide-icons";
-import { Text } from "tamagui";
+import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
+import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
-import { api } from "~/utils/api";
 
-const ProfileActionsLayout = () => {
-  const utils = api.useUtils();
-  const username = utils.profile.getFullProfileSelf.getData()?.username;
+const SearchLayout = () => {
+  const theme = useTheme();
+  const router = useRouter();
 
   return (
     <Stack
       screenOptions={{
         headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
+        contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
-        name="edit-profile"
+        name="self-profile"
         options={{
-          title: "Edit Profile",
+          title: "TEST",
+          headerLeft: () => null,
+          headerRight: () => (
+            <View>
+              <Pressable onPress={() => router.push("/(app)/(settings)")}>
+                {({ pressed }) => (
+                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
+                )}
+              </Pressable>
+            </View>
+          ),
         }}
       />
-      <Stack.Screen name="share-profile" options={{ title: "Share Profile" }} />
+      <Stack.Screen
+        name="self-connections"
+        options={{
+          title: "TEST",
+        }}
+      />
+
+      <Stack.Screen
+        name="profile/[profile-id]"
+        options={{
+          headerRight: () => (
+            <View>
+              <Pressable onPress={() => console.log("THING CLICKED")}>
+                {({ pressed }) => (
+                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
+                )}
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <Stack.Screen name="connections/[user-id]" />
     </Stack>
   );
 };
@@ -86,4 +117,4 @@ const Header = ({ navigation, options }: HeaderProps) => (
   />
 );
 
-export default ProfileActionsLayout;
+export default SearchLayout;

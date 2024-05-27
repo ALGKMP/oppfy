@@ -40,7 +40,7 @@ const MediaOfFriendsYouPosted = () => {
       <TouchableOpacity
         onPress={() =>
           router.push(
-            "/(app)/(bottom-tabs)/(self-profile)/media-of-friends/preview",
+            "/(app)/(bottom-tabs)/(profile)/self-profile/media-of-friends/preview",
           )
         }
       >

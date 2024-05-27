@@ -170,7 +170,7 @@ const Profile = (props: ProfileProps) => {
         <XStack gap="$7">
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/friends-list")}
+            onPress={() => router.push("/self-connections/friends-list")}
           >
             <Stat
               label="Friends"
@@ -182,7 +182,7 @@ const Profile = (props: ProfileProps) => {
 
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/followers-list")}
+            onPress={() => router.push("/self-connections/following-list")}
           >
             <Stat
               label="Followers"
@@ -193,7 +193,7 @@ const Profile = (props: ProfileProps) => {
           </TouchableOpacity>
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/following-list")}
+            onPress={() => router.push("/self-connections/following-list")}
           >
             <Stat
               label="Following"

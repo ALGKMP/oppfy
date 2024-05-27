@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -12,6 +13,8 @@ import { api } from "~/utils/api";
 
 const Followers = () => {
   const headerHeight = useHeaderHeight();
+
+  const router = useRouter();
 
   const utils = api.useUtils();
 
@@ -140,6 +143,13 @@ const Followers = () => {
                           },
                         ]}
                       />
+                    }
+                    onPress={() =>
+                      // @ts-expect-error: Experimental typed routes dont support layouts yet
+                      router.push({
+                        pathname: "/profile/[profile-id]",
+                        params: { profileId: String(item.profileId) },
+                      })
                     }
                   />
                 )}
