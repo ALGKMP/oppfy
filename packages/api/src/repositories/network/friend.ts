@@ -78,7 +78,7 @@ export class FriendRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.friend)
-      .where(eq(schema.friend.userId1, userId));
+      .where(or(eq(schema.friend.userId1, userId), eq(schema.friend.userId2, userId)));
     return result[0]?.count;
   }
 
