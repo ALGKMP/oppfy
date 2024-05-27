@@ -26,7 +26,6 @@ const SearchLayout = () => {
       <Stack.Screen
         name="self-profile"
         options={{
-          title: "TEST",
           headerLeft: () => null,
           headerRight: () => (
             <View>
@@ -39,12 +38,7 @@ const SearchLayout = () => {
           ),
         }}
       />
-      <Stack.Screen
-        name="self-connections"
-        options={{
-          title: "TEST",
-        }}
-      />
+      <Stack.Screen name="self-connections" />
 
       <Stack.Screen
         name="profile/[profile-id]"

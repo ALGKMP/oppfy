@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
@@ -27,6 +27,7 @@ type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 
 const ProfileLayout = () => {
   const theme = useTheme();
+  const navigation = useNavigation();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -35,6 +36,12 @@ const ProfileLayout = () => {
     isLoading,
     refetch,
   } = api.profile.getFullProfileSelf.useQuery();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: profileData?.username,
+    });
+  }, [navigation, profileData?.username]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
