@@ -1,12 +1,5 @@
 import React, { useRef, useState } from "react";
-import {
-  Animated,
-  Button,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, StyleSheet, TouchableOpacity } from "react-native";
 import type {
   GestureEvent,
   PinchGestureHandlerEventPayload,
@@ -17,17 +10,18 @@ import {
   State,
   TapGestureHandler,
 } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { CameraType, FlashMode } from "expo-camera/next";
 import { CameraView, useCameraPermissions } from "expo-camera/next";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { X, Zap, ZapOff } from "@tamagui/lucide-icons";
-import { XStack } from "tamagui";
-
-import { BaseScreenView } from "~/components/Views";
+import { Button, Text, View, XStack } from "tamagui";
 
 const CameraScreen = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const cameraRef = useRef<CameraView>(null);
   const animation = useRef(new Animated.Value(0)).current;
 
@@ -57,7 +51,6 @@ const CameraScreen = () => {
   const handleTakePicture = async () => {
     if (cameraRef.current) {
       const options = {
-        quality: 0.7,
         base64: true,
         exif: true,
       };
@@ -147,7 +140,7 @@ const CameraScreen = () => {
         <Text style={styles.permissionText}>
           We need your permission to show the camera
         </Text>
-        <Button title="Grant permission" onPress={requestPermission} />
+        <Button onPress={requestPermission}>Grant Permission</Button>
       </View>
     );
   }
@@ -183,18 +176,16 @@ const CameraScreen = () => {
               zoom={zoom}
               mode={mode}
             >
-              <BaseScreenView
-                paddingVertical={0}
-                safeAreaEdges={["top", "bottom"]}
+              <View
+                flex={1}
+                paddingTop={insets.top}
+                paddingBottom={insets.bottom}
+                paddingHorizontal="$5"
+                backgroundColor="transparent"
                 justifyContent="space-between"
-                backgroundColor={"$backgroundTransparent"}
               >
                 <TouchableOpacity style={{ flex: 1 }} activeOpacity={1}>
-                  <XStack
-                    alignItems="center"
-                    justifyContent="space-between"
-                    padding={10}
-                  >
+                  <XStack alignItems="center" justifyContent="space-between">
                     <TouchableOpacity
                       hitSlop={10}
                       onPress={() => router.back()}
@@ -218,7 +209,7 @@ const CameraScreen = () => {
                     />
                   </TouchableOpacity>
                 </XStack>
-              </BaseScreenView>
+              </View>
             </CameraView>
           </View>
         </TapGestureHandler>
