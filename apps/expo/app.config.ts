@@ -41,6 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
   },
   plugins: [
+    "expo-font",
     "expo-router",
     "@react-native-firebase/app",
     "@react-native-firebase/auth",
