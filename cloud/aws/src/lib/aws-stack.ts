@@ -202,22 +202,9 @@ export class AwsStack extends cdk.Stack {
       "muxLambda",
       "src/res/lambdas/mux/index.ts",
     );
-    const neptuneProxyLambda = createLambdaFunction(
-      this,
-      "neptuneLambda",
-      "src/res/lambdas/neptune/index.ts",
-    );
-
-    const neptuneProxyLambdaUrl = neptuneProxyLambda.addFunctionUrl({
-      authType: lambda.FunctionUrlAuthType.NONE, // We'll have our own auth
-    });
 
     const muxWebhookUrl = muxWebhookLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // We'll have our own auth
-    });
-
-    new cdk.CfnOutput(this, "NeptuneProxyLambdaUrl", {
-      value: neptuneProxyLambdaUrl.url,
     });
 
     // Output the Lambda function URL
@@ -346,7 +333,32 @@ export class AwsStack extends cdk.Stack {
       value: cluster.clusterEndpoint.hostname,
     });
 
+    // Don't need the stuff on my lambdas for neptune
+    const neptuneProxyLambda = new lambdaNodeJs.NodejsFunction(this, 'neptuneLambda', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: 'src/res/lambdas/neptune/index.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.minutes(3),
+      environment: {
+        NEPTUNE_ENDPOINT: cluster.clusterEndpoint.hostname,
+      },
+      vpc,
+      securityGroups: [neptuneSecurityGroup],
+    });
+    
+
+    // Out own auth or some shit
+    const neptuneProxyLambdaUrl = neptuneProxyLambda.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE,
+    });
+
     cluster.grantConnect(neptuneProxyLambda);
+
+    // Gimme the url bitch
+    new cdk.CfnOutput(this, "NeptuneProxyLambdaUrl", {
+      value: neptuneProxyLambdaUrl.url,
+    });
+
 
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management

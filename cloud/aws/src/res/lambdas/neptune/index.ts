@@ -2,28 +2,54 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { z } from "zod";
 import gremlin from "gremlin";
 
+// TODO: So many type "any" it's starting to look like a JavaScript project
+
+const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
+const Graph = gremlin.structure.Graph;
+
+const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
+const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
+
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  console.log("caLled");
-  const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
-  const Graph = gremlin.structure.Graph;
+  console.log("Lambda invoked");
 
-  const dc = new DriverRemoteConnection(
-    `wss://neptunedbcluster-gddnnc9yrqan.cluster-ch4ias0oqqnx.us-east-1.neptune.amazonaws.com:8192/gremlin`,
-    {},
-  );
-  console.log("here1");
-  const graph = new Graph();
-  const g = graph.traversal().withRemote(dc);
-  console.log("here2");
+  let dc: any;
+  let g: any;
 
-  const result = await g.V().toList();
+  try {
+    dc = new DriverRemoteConnection(
+      `wss://${NEPTUNE_ENDPOINT}:${NEPTUNE_PORT}/gremlin`,
+      {},
+    );
+    console.log("Remote connection established");
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: result.toString(),
-    }),
-  };
+    const graph = new Graph();
+    g = graph.traversal().withRemote(dc);
+    console.log("Graph traversal initialized");
+
+    const result = await g.V().toList();
+    console.log("Query executed", result);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: result.toString(),
+      }),
+    };
+  } catch (error) {
+    console.error("Error during execution", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: "Internal server error",
+      }),
+    };
+  } finally {
+    if (dc) {
+      dc.close();
+      console.log("Remote connection closed");
+    }
+  }
 };
