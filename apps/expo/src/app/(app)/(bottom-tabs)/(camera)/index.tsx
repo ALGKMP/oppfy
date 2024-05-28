@@ -92,7 +92,7 @@ const CameraScreen = () => {
   const handlePressIn = () => {
     setPressTimeout(
       setTimeout(() => {
-        handleStartRecording();
+        void handleStartRecording();
         Animated.timing(animation, {
           toValue: 1,
           duration: 200,
@@ -102,14 +102,14 @@ const CameraScreen = () => {
     );
   };
 
-  const handlePressOut = async () => {
+  const handlePressOut = () => {
     if (pressTimeout) {
       clearTimeout(pressTimeout);
       setPressTimeout(null);
     }
 
     if (isRecording) {
-      cameraRef.current.stopRecording();
+      cameraRef.current?.stopRecording();
       setIsRecording(false);
       Animated.timing(animation, {
         toValue: 0,
@@ -117,7 +117,7 @@ const CameraScreen = () => {
         useNativeDriver: false,
       }).start();
     } else {
-      handleTakePicture();
+      void handleTakePicture();
     }
   };
 
