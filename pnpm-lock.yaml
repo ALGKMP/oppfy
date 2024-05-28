@@ -123,8 +123,8 @@ importers:
         specifier: ^12.8.1
         version: 12.8.1(expo@50.0.17)
       expo-image:
-        specifier: ^1.12.9
-        version: 1.12.9(expo@50.0.17)
+        specifier: 1.10.6
+        version: 1.10.6(expo@50.0.17)
       expo-image-manipulator:
         specifier: ~11.8.0
         version: 11.8.0(expo@50.0.17)
@@ -5198,11 +5198,6 @@ packages:
 
   /@react-native/assets-registry@0.73.1:
     resolution: {integrity: sha512-2FgAbU7uKM5SbbW9QptPPZx8N9Ke2L7bsHb+EhAanZjFZunA9PaYtyjUQ1s7HD+zDVqOQIvjkpXSv7Kejd2tqg==}
-    engines: {node: '>=18'}
-    dev: false
-
-  /@react-native/assets-registry@0.74.83:
-    resolution: {integrity: sha512-2vkLMVnp+YTZYTNSDIBZojSsjz8sl5PscP3j4GcV6idD8V978SZfwFlk8K0ti0BzRs11mzL0Pj17km597S/eTQ==}
     engines: {node: '>=18'}
     dev: false
 
@@ -11410,12 +11405,12 @@ packages:
       expo-image-loader: 4.6.0(expo@50.0.17)
     dev: false
 
-  /expo-image@1.12.9(expo@50.0.17):
-    resolution: {integrity: sha512-WnC3Z3vsOTJLWE9FGB0a0GANmkpfBCqTf9bSLXXl50hEYiRcfwrAYZ/87oswAhggMGbJqOuLKZxt5rtuij1xcQ==}
+  /expo-image@1.10.6(expo@50.0.17):
+    resolution: {integrity: sha512-vcnAIym1eU8vQgV1re1E7rVQZStJimBa4aPDhjFfzMzbddAF7heJuagyewiUkTzbZUwYzPaZAie6VJPyWx9Ueg==}
     peerDependencies:
       expo: '*'
     dependencies:
-      '@react-native/assets-registry': 0.74.83
+      '@react-native/assets-registry': 0.73.1
       expo: 50.0.17(@babel/core@7.24.4)(@react-native/babel-preset@0.74.81)
     dev: false
 
