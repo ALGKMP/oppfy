@@ -208,8 +208,16 @@ export class AwsStack extends cdk.Stack {
       "src/res/lambdas/neptune/index.ts",
     );
 
+    const neptuneProxyLambdaUrl = neptuneProxyLambda.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE, // We'll have our own auth
+    });
+
     const muxWebhookUrl = muxWebhookLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // We'll have our own auth
+    });
+
+    new cdk.CfnOutput(this, "NeptuneProxyLambdaUrl", {
+      value: neptuneProxyLambdaUrl.url,
     });
 
     // Output the Lambda function URL
@@ -329,9 +337,16 @@ export class AwsStack extends cdk.Stack {
     });
 
     // Output the Neptune cluster endpoint
-    new cdk.CfnOutput(this, "NeptuneClusterEndpoint", {
+    new cdk.CfnOutput(this, "NeptuneClusterReadEndpoint", {
+      value: cluster.clusterReadEndpoint.hostname,
+    });
+
+    // Output the Neptune cluster endpoint
+    new cdk.CfnOutput(this, "NeptuneClusterWriteEndpoint", {
       value: cluster.clusterEndpoint.hostname,
     });
+
+    cluster.grantConnect(neptuneProxyLambda);
 
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management
