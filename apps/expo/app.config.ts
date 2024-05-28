@@ -46,7 +46,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "@react-native-firebase/auth",
     "@react-native-firebase/perf",
     "@react-native-firebase/crashlytics",
-    "expo-video",
     [
       "expo-camera",
       {
@@ -81,6 +80,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         photosPermission:
           "The app accesses your photos to let you share them with your friends.",
+      },
+    ],
+    [
+      "expo-av",
+      {
+        microphonePermission:
+          "Allow $(PRODUCT_NAME) to access your microphone.",
       },
     ],
     [
