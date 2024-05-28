@@ -108,7 +108,7 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFollowers(
+  async paginateFollowersSelf(
     forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
@@ -232,7 +232,7 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFollowingOther(
+  async paginateFollowingOthers(
     forUserId: string,
     currentUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,

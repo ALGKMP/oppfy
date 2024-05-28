@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -10,30 +11,30 @@ import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
-const Friends = () => {
+const FollowerList = () => {
   const headerHeight = useHeaderHeight();
+
+  const router = useRouter();
 
   const utils = api.useUtils();
 
-  const removeFriend = api.friend.removeFriend.useMutation({
+  const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.friend.paginateFriendsSelf.cancel();
+      await utils.follow.paginateFollowersSelf.cancel();
 
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowersSelf.getInfiniteData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.friend.paginateFriendsSelf.setInfiniteData(
+      utils.follow.paginateFollowersSelf.setInfiniteData(
         {},
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter(
-              (item) => item.userId !== newData.recipientId,
-            ),
+            items: page.items.filter((item) => item.userId !== newData.userId),
           })),
         },
       );
@@ -42,21 +43,21 @@ const Friends = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.friend.paginateFriendsSelf.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowersSelf.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.friend.paginateFriendsSelf.invalidate();
+      await utils.follow.paginateFollowersSelf.invalidate();
     },
   });
 
   const {
-    data: friendsData,
+    data: followersData,
     isLoading,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
+  } = api.follow.paginateFollowersSelf.useInfiniteQuery(
     {
       pageSize: 20,
     },
@@ -69,18 +70,18 @@ const Friends = () => {
     return Array.from({ length: 20 }, () => null);
   }, []);
 
-  const friendsItems = useMemo(() => {
-    return friendsData?.pages.flatMap((page) => page.items);
-  }, [friendsData]);
+  const followersItems = useMemo(() => {
+    return followersData?.pages.flatMap((page) => page.items);
+  }, [followersData]);
 
   const itemCount = useMemo(() => {
-    if (friendsData === undefined) return 0;
+    if (followersData === undefined) return 0;
 
-    return friendsData.pages.reduce(
+    return followersData.pages.reduce(
       (total, page) => total + page.items.length,
       0,
     );
-  }, [friendsData]);
+  }, [followersData]);
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -92,14 +93,14 @@ const Friends = () => {
     <BaseScreenView paddingBottom={0}>
       {isLoading || itemCount ? (
         <FlashList
-          data={isLoading ? placeholderData : friendsItems}
+          data={isLoading ? placeholderData : followersItems}
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           onEndReached={handleOnEndReached}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <SizableText size="$2" theme="alt1" marginBottom="$2">
-              FRIENDS
+              FOLLOWERS
             </SizableText>
           }
           renderItem={({ item }) => {
@@ -123,8 +124,8 @@ const Friends = () => {
                     imageUrl={item.profilePictureUrl}
                     button={
                       <ActionSheet
-                        title="Remove Friend"
-                        subtitle={`Are you sure you want to remove ${item.username} from your friends?`}
+                        title="Remove Follower"
+                        subtitle={`Are you sure you want to remove ${item.username} from your followers?`}
                         imageUrl={item.profilePictureUrl}
                         trigger={
                           <Button size="$3" icon={<UserRoundMinus size="$1" />}>
@@ -133,15 +134,22 @@ const Friends = () => {
                         }
                         buttonOptions={[
                           {
-                            text: "Unfriend",
+                            text: "Remove",
                             textProps: { color: "$red9" },
                             onPress: () =>
-                              removeFriend.mutate({
-                                recipientId: item.userId,
+                              removeFollower.mutate({
+                                userId: item.userId,
                               }),
                           },
                         ]}
                       />
+                    }
+                    onPress={() =>
+                      // @ts-expect-error: Experimental typed routes dont support layouts yet
+                      router.push({
+                        pathname: "/(profile)/profile/[profile-id]",
+                        params: { profileId: String(item.profileId) },
+                      })
                     }
                   />
                 )}
@@ -152,8 +160,8 @@ const Friends = () => {
       ) : (
         <View flex={1} justifyContent="center" bottom={headerHeight}>
           <EmptyPlaceholder
-            title="Friends"
-            subtitle="Once you friend someone, you'll see them here."
+            title="Followers"
+            subtitle="You'll see all the people who follow you here."
             icon={<UserRoundPlus />}
           />
         </View>
@@ -162,4 +170,4 @@ const Friends = () => {
   );
 };
 
-export default Friends;
+export default FollowerList;

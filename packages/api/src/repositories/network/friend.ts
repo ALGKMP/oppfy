@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
+import { and, asc, count, eq, gt, or, not, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -78,7 +78,12 @@ export class FriendRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.friend)
-      .where(eq(schema.friend.userId1, userId));
+      .where(
+        or(
+          eq(schema.friend.userId1, userId),
+          eq(schema.friend.userId2, userId),
+        ),
+      );
     return result[0]?.count;
   }
 
@@ -114,7 +119,7 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async paginateFriends(
+  async paginateFriendsSelf(
     forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
@@ -139,9 +144,12 @@ export class FriendRepository {
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
-        or(
-          eq(schema.friend.userId1, forUserId),
-          eq(schema.friend.userId2, forUserId),
+        and(
+          or(
+            eq(schema.friend.userId1, forUserId),
+            eq(schema.friend.userId2, forUserId),
+          ),
+          not(eq(schema.user.id, forUserId)), // Exclude the current user
           cursor
             ? or(
                 gt(schema.friend.createdAt, cursor.createdAt),
@@ -174,10 +182,10 @@ export class FriendRepository {
         createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
         isFollowing: sql<number>`EXISTS (
-        SELECT 1 FROM ${schema.follower}
-        WHERE ${schema.follower.senderId} = ${currentUserId}
-          AND ${schema.follower.recipientId} = ${schema.user.id}
-      )`.as("isFollowing"),
+          SELECT 1 FROM ${schema.follower}
+          WHERE ${schema.follower.senderId} = ${currentUserId}
+            AND ${schema.follower.recipientId} = ${schema.user.id}
+        )`.as("isFollowing"),
       })
       .from(schema.friend)
       .innerJoin(
@@ -189,9 +197,12 @@ export class FriendRepository {
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
-        or(
-          eq(schema.friend.userId1, forUserId),
-          eq(schema.friend.userId2, forUserId),
+        and(
+          or(
+            eq(schema.friend.userId1, forUserId),
+            eq(schema.friend.userId2, forUserId),
+          ),
+          not(eq(schema.user.id, forUserId)), // Exclude the current user
           cursor
             ? or(
                 gt(schema.friend.createdAt, cursor.createdAt),
@@ -205,6 +216,7 @@ export class FriendRepository {
       )
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
+
     // Convert the numeric isFollowing result to boolean
     const friendsWithBooleanIsFollowing = friends.map((friend) => ({
       ...friend,

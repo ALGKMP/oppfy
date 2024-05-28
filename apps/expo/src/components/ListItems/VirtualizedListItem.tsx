@@ -1,6 +1,7 @@
 import type { FunctionComponent } from "react";
-import React from "react";
+import React, { useMemo } from "react";
 import { TouchableOpacity } from "react-native";
+import debounce from "lodash/debounce";
 import { Skeleton } from "moti/skeleton";
 import type { ThemeName } from "tamagui";
 import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
@@ -48,6 +49,11 @@ type VirtualizedListItemProps = (LoadingProps | LoadedProps) & {
 };
 
 const VirtualizedListItem = (props: VirtualizedListItemProps) => {
+  const debouncedOnPress = useMemo(
+    () => (props.onPress ? debounce(props.onPress, 300) : undefined),
+    [props.onPress],
+  );
+
   const content = (
     <Skeleton.Group show={props.loading}>
       <XStack flex={1} alignItems="center" paddingVertical="$2">
@@ -96,7 +102,11 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
             </Skeleton>
           ) : !props.loading && props.button ? (
             isButtonProps(props.button) ? (
-              <Button size="$3" {...props.button}>
+              <Button
+                size="$3"
+                {...props.button}
+                onPress={debounce(props.button.onPress, 300)}
+              >
                 {props.button.text}
               </Button>
             ) : (
@@ -110,7 +120,11 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
             </Skeleton>
           ) : !props.loading && props.button2 ? (
             isButtonProps(props.button2) ? (
-              <Button size="$3" {...props.button2}>
+              <Button
+                size="$3"
+                {...props.button2}
+                onPress={debounce(props.button2.onPress, 300)}
+              >
                 {props.button2.text}
               </Button>
             ) : (
@@ -123,7 +137,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
   );
 
   return props.onPress ? (
-    <TouchableOpacity onPress={props.onPress} disabled={props.loading}>
+    <TouchableOpacity onPress={debouncedOnPress} disabled={props.loading}>
       {content}
     </TouchableOpacity>
   ) : (

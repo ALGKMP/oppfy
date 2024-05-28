@@ -1,41 +1,60 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { Pressable, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft } from "@tamagui/lucide-icons";
+import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
-const CameraLayout = () => {
+const SearchLayout = () => {
   const theme = useTheme();
+  const router = useRouter();
 
   return (
     <Stack
       screenOptions={{
         headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
-        contentStyle: {
-          backgroundColor: theme.background.val,
-        },
+        contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
-        name="index"
+        name="self-profile"
         options={{
-          header: () => null,
+          headerLeft: () => null,
+          headerRight: () => (
+            <View>
+              <Pressable onPress={() => router.push("/(app)/(settings)")}>
+                {({ pressed }) => (
+                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
+                )}
+              </Pressable>
+            </View>
+          ),
         }}
       />
+      <Stack.Screen name="self-connections" />
+
       <Stack.Screen
-        name="preview"
+        name="profile/[profile-id]"
         options={{
-          header: () => null,
+          headerRight: () => (
+            <View>
+              <Pressable onPress={() => console.log("THING CLICKED")}>
+                {({ pressed }) => (
+                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
+                )}
+              </Pressable>
+            </View>
+          ),
         }}
       />
+      <Stack.Screen name="connections/[user-id]" />
     </Stack>
   );
 };
@@ -92,4 +111,4 @@ const Header = ({ navigation, options }: HeaderProps) => (
   />
 );
 
-export default CameraLayout;
+export default SearchLayout;

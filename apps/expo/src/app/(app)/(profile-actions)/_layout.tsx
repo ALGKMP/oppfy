@@ -30,13 +30,6 @@ const ProfileActionsLayout = () => {
         }}
       />
       <Stack.Screen name="share-profile" options={{ title: "Share Profile" }} />
-
-      <Stack.Screen
-        name="(connections)"
-        options={{
-          title: username,
-        }}
-      />
     </Stack>
   );
 };

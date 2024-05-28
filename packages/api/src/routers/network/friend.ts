@@ -1,4 +1,3 @@
-import { createTRPCUntypedClient } from "@trpc/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -12,7 +11,7 @@ export const friendRouter = createTRPCRouter({
     .output(trpcValidators.output.friend.paginateFriendSelf)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFriends(
+        const result = await ctx.services.paginate.paginateFriendsSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
@@ -28,7 +27,7 @@ export const friendRouter = createTRPCRouter({
     .output(trpcValidators.output.friend.paginateFriendsOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFriendsOther(
+        const result = await ctx.services.paginate.paginateFriendsOthers(
           input.userId,
           input.cursor,
           input.pageSize,

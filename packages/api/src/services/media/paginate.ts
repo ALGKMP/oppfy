@@ -39,7 +39,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowers(
+    const data = await this.followRepository.paginateFollowersSelf(
       userId,
       cursor,
       pageSize,
@@ -49,11 +49,13 @@ export class PaginationService {
 
   async paginateFollowersOthers(
     userId: string,
+    currentUserId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowers(
+    const data = await this.followRepository.paginateFollowersOthers(
       userId,
+      currentUserId,
       cursor,
       pageSize,
     );
@@ -75,11 +77,11 @@ export class PaginationService {
 
   async paginateFollowingOthers(
     userId: string,
+    currentUserId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-    currentUserId: string,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowingOther(
+    const data = await this.followRepository.paginateFollowingOthers(
       userId,
       currentUserId,
       cursor,
@@ -88,12 +90,12 @@ export class PaginationService {
     return this._processPaginatedUserData(data, pageSize);
   }
 
-  async paginateFriends(
+  async paginateFriendsSelf(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.friendRepository.paginateFriends(
+    const data = await this.friendRepository.paginateFriendsSelf(
       userId,
       cursor,
       pageSize,
@@ -101,7 +103,7 @@ export class PaginationService {
     return this._processPaginatedUserData(data, pageSize);
   }
 
-  async paginateFriendsOther(
+  async paginateFriendsOthers(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
@@ -146,7 +148,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowers(
+    const data = await this.followRepository.paginateFollowersSelf(
       userId,
       cursor,
       pageSize,
