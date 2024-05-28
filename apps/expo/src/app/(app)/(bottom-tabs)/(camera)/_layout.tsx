@@ -34,6 +34,7 @@ const CameraLayout = () => {
         name="preview"
         options={{
           header: () => null,
+          animation: "none",
         }}
       />
     </Stack>
