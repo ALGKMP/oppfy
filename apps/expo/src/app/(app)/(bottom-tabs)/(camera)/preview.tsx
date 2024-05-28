@@ -1,18 +1,19 @@
 // src/features/connections/screens/PreviewScreen.tsx
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useRef, useState } from "react";
+import { Button, StyleSheet, View } from "react-native";
+import { ResizeMode, Video } from "expo-av";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useVideoPlayer, VideoView } from "expo-video";
-import { Button, XStack } from "tamagui";
+import { XStack } from "tamagui";
 
 const PreviewScreen = () => {
+  const router = useRouter();
   const { uri, type } = useLocalSearchParams<{
     uri: string;
     type: "image" | "video";
   }>();
-
-  const router = useRouter();
+  const videoRef = useRef(null);
+  const [_status, setStatus] = useState({});
 
   return (
     <View style={styles.container}>
@@ -20,16 +21,18 @@ const PreviewScreen = () => {
         <Image source={{ uri }} style={styles.media} />
       ) : (
         <Video
-          source={{ uri }}
+          ref={videoRef}
           style={styles.media}
+          source={{ uri }}
           useNativeControls
-          resizeMode="contain"
+          resizeMode={ResizeMode.CONTAIN}
           isLooping
+          onPlaybackStatusUpdate={(status) => setStatus(() => status)}
         />
       )}
       <XStack justifyContent="space-between" padding={10}>
-        <Button onPress={() => router.back()}>Retake</Button>
-        <Button onPress={() => null}>Next</Button>
+        <Button title="Retake" onPress={() => router.back()} />
+        <Button title="Next" onPress={() => null} />
       </XStack>
     </View>
   );

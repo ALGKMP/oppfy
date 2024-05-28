@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useRef, useState } from "react";
+import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import type {
   GestureEvent,
   PinchGestureHandlerEventPayload,
@@ -10,8 +10,13 @@ import {
   State,
   TapGestureHandler,
 } from "react-native-gesture-handler";
-import type { CameraType, FlashMode } from "expo-camera/next";
-import { CameraView } from "expo-camera/next";
+import type {
+  CameraPictureOptions,
+  CameraRecordingOptions,
+  CameraType,
+  FlashMode,
+} from "expo-camera/next";
+import { CameraView, useCameraPermissions } from "expo-camera/next";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { X, Zap, ZapOff } from "@tamagui/lucide-icons";
@@ -19,14 +24,17 @@ import { XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 
-const Camera = () => {
+const CameraScreen = () => {
   const router = useRouter();
+  const cameraRef = useRef<CameraView>(null);
 
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [isRecording, setIsRecording] = useState(false);
   const [zoom, setZoom] = useState(0);
   const [lastScale, setLastScale] = useState(1);
+
+  const [permission, requestPermission] = useCameraPermissions();
 
   const handleDoubleTap = () => {
     toggleCameraFacing();
@@ -41,14 +49,51 @@ const Camera = () => {
     setFlash((current) => (current === "off" ? "on" : "off"));
   };
 
-  const handlePressIn = () => {
+  const handlePressIn = async () => {
     setIsRecording(true);
-    // Start recording logic here
+    if (cameraRef.current) {
+      const options: CameraRecordingOptions = {
+        maxDuration: 60,
+      };
+      const video = await cameraRef.current.recordAsync(options);
+      setIsRecording(false);
+
+      if (video === undefined) {
+        return;
+      }
+
+      router.push({
+        pathname: "/preview",
+        params: { uri: video.uri, type: "video" },
+      });
+    }
   };
 
   const handlePressOut = () => {
     setIsRecording(false);
-    // Stop recording logic here
+    if (cameraRef.current) {
+      cameraRef.current.stopRecording();
+    }
+  };
+
+  const handleTakePicture = async () => {
+    if (cameraRef.current) {
+      const options: CameraPictureOptions = {
+        quality: 0.7,
+        base64: true,
+        exif: true,
+      };
+      const picture = await cameraRef.current.takePictureAsync(options);
+
+      if (picture === undefined) {
+        return;
+      }
+
+      router.push({
+        pathname: "/preview",
+        params: { uri: picture.uri, type: "image" },
+      });
+    }
   };
 
   const handlePinchEvent = (
@@ -71,6 +116,17 @@ const Camera = () => {
     }
   };
 
+  if (!permission?.granted) {
+    return (
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>
+          We need your permission to show the camera
+        </Text>
+        <Button title="Grant permission" onPress={requestPermission} />
+      </View>
+    );
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PinchGestureHandler
@@ -84,6 +140,7 @@ const Camera = () => {
         >
           <View style={{ flex: 1 }}>
             <CameraView
+              ref={cameraRef}
               style={{ flex: 1 }}
               facing={facing}
               flash={flash}
@@ -125,6 +182,12 @@ const Camera = () => {
                       }
                     />
                   </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.cameraButton}
+                    onPress={handleTakePicture}
+                  >
+                    <View style={styles.takePictureButton} />
+                  </TouchableOpacity>
                 </XStack>
               </BaseScreenView>
             </CameraView>
@@ -136,6 +199,15 @@ const Camera = () => {
 };
 
 const styles = StyleSheet.create({
+  permissionContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  permissionText: {
+    textAlign: "center",
+    marginBottom: 20,
+  },
   cameraButton: {
     height: 80,
     width: 80,
@@ -143,6 +215,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
+    margin: 10,
   },
   recording: {
     height: 70,
@@ -158,6 +231,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "red",
   },
+  takePictureButton: {
+    height: 70,
+    width: 70,
+    borderRadius: 35,
+    backgroundColor: "blue",
+  },
 });
 
-export default Camera;
+export default CameraScreen;
