@@ -1,28 +1,14 @@
-import { useMemo } from "react";
-import { Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import {
-  Camera,
-  Home,
-  Inbox,
-  MoreHorizontal,
-  Search,
-  User2,
-} from "@tamagui/lucide-icons";
-import { Text, useTheme, View } from "tamagui";
+import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
+import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
 import { BottomTabs } from "~/layouts";
-import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
   const theme = useTheme();
-  const router = useRouter();
-
-  const { data: profileData } = api.profile.getFullProfileSelf.useQuery();
 
   return (
     <BottomTabs
@@ -32,6 +18,10 @@ const BottomTabsLayout = () => {
       }}
       sceneContainerStyle={{
         backgroundColor: theme.background.val,
+      }}
+      screenListeners={{
+        tabPress: () =>
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
       }}
     >
       <BottomTabs.Screen

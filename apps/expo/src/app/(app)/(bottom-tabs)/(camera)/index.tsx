@@ -1,5 +1,12 @@
 import React, { useRef, useState } from "react";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import type {
   GestureEvent,
   PinchGestureHandlerEventPayload,
@@ -10,12 +17,7 @@ import {
   State,
   TapGestureHandler,
 } from "react-native-gesture-handler";
-import type {
-  CameraPictureOptions,
-  CameraRecordingOptions,
-  CameraType,
-  FlashMode,
-} from "expo-camera/next";
+import type { CameraType, FlashMode } from "expo-camera/next";
 import { CameraView, useCameraPermissions } from "expo-camera/next";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -27,14 +29,17 @@ import { BaseScreenView } from "~/components/Views";
 const CameraScreen = () => {
   const router = useRouter();
   const cameraRef = useRef<CameraView>(null);
+  const animation = useRef(new Animated.Value(0)).current;
 
   const [facing, setFacing] = useState<CameraType>("back");
   const [flash, setFlash] = useState<FlashMode>("off");
   const [isRecording, setIsRecording] = useState(false);
   const [zoom, setZoom] = useState(0);
   const [lastScale, setLastScale] = useState(1);
+  const [mode, setMode] = useState<"picture" | "video">("picture");
 
   const [permission, requestPermission] = useCameraPermissions();
+  const [pressTimeout, setPressTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const handleDoubleTap = () => {
     toggleCameraFacing();
@@ -49,50 +54,70 @@ const CameraScreen = () => {
     setFlash((current) => (current === "off" ? "on" : "off"));
   };
 
-  const handlePressIn = async () => {
-    setIsRecording(true);
-    if (cameraRef.current) {
-      const options: CameraRecordingOptions = {
-        maxDuration: 60,
-      };
-      const video = await cameraRef.current.recordAsync(options);
-      setIsRecording(false);
-
-      if (video === undefined) {
-        return;
-      }
-
-      router.push({
-        pathname: "/preview",
-        params: { uri: video.uri, type: "video" },
-      });
-    }
-  };
-
-  const handlePressOut = () => {
-    setIsRecording(false);
-    if (cameraRef.current) {
-      cameraRef.current.stopRecording();
-    }
-  };
-
   const handleTakePicture = async () => {
     if (cameraRef.current) {
-      const options: CameraPictureOptions = {
+      const options = {
         quality: 0.7,
         base64: true,
         exif: true,
       };
       const picture = await cameraRef.current.takePictureAsync(options);
 
-      if (picture === undefined) {
-        return;
+      if (picture !== undefined) {
+        router.push({
+          pathname: "/preview",
+          params: { uri: picture.uri, type: "image" },
+        });
       }
+    }
+  };
 
-      router.push({
-        pathname: "/preview",
-        params: { uri: picture.uri, type: "image" },
-      });
+  const handleStartRecording = async () => {
+    if (cameraRef.current) {
+      setMode("video");
+      setIsRecording(true);
+      const options = {
+        maxDuration: 60,
+      };
+      const video = await cameraRef.current.recordAsync(options);
+      if (video?.uri) {
+        router.push({
+          pathname: "/preview",
+          params: { uri: video.uri, type: "video" },
+        });
+      }
+    }
+  };
+
+  const handlePressIn = () => {
+    setPressTimeout(
+      setTimeout(() => {
+        void handleStartRecording();
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: false,
+        }).start();
+      }, 200),
+    );
+  };
+
+  const handlePressOut = () => {
+    if (pressTimeout) {
+      clearTimeout(pressTimeout);
+      setPressTimeout(null);
+    }
+
+    if (isRecording) {
+      cameraRef.current?.stopRecording();
+      setIsRecording(false);
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      void handleTakePicture();
     }
   };
 
@@ -127,6 +152,17 @@ const CameraScreen = () => {
     );
   }
 
+  const animatedButtonStyle = {
+    backgroundColor: animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["white", "red"],
+    }),
+    borderColor: animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["red", "white"],
+    }),
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PinchGestureHandler
@@ -145,6 +181,7 @@ const CameraScreen = () => {
               facing={facing}
               flash={flash}
               zoom={zoom}
+              mode={mode}
             >
               <BaseScreenView
                 paddingVertical={0}
@@ -176,17 +213,9 @@ const CameraScreen = () => {
                     onPressIn={handlePressIn}
                     onPressOut={handlePressOut}
                   >
-                    <View
-                      style={
-                        isRecording ? styles.recording : styles.notRecording
-                      }
+                    <Animated.View
+                      style={[styles.innerButton, animatedButtonStyle]}
                     />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.cameraButton}
-                    onPress={handleTakePicture}
-                  >
-                    <View style={styles.takePictureButton} />
                   </TouchableOpacity>
                 </XStack>
               </BaseScreenView>
@@ -217,25 +246,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 10,
   },
-  recording: {
-    height: 70,
-    width: 70,
-    borderRadius: 35,
-    backgroundColor: "red",
-  },
-  notRecording: {
+  innerButton: {
     height: 70,
     width: 70,
     borderRadius: 35,
     backgroundColor: "transparent",
     borderWidth: 2,
-    borderColor: "red",
   },
-  takePictureButton: {
-    height: 70,
-    width: 70,
-    borderRadius: 35,
-    backgroundColor: "blue",
+  recording: {
+    backgroundColor: "red",
+    borderColor: "white",
+  },
+  notRecording: {
+    backgroundColor: "transparent",
+    borderColor: "red",
   },
 });
 
