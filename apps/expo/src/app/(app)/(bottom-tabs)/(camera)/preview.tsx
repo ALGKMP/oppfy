@@ -1,29 +1,29 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { AVPlaybackStatus, ResizeMode, Video } from "expo-av";
+import { Animated, StyleSheet, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { AVPlaybackStatus } from "expo-av";
+import { ResizeMode, Video } from "expo-av";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { XStack } from "tamagui";
+import { ArrowBigRight, Download, X } from "@tamagui/lucide-icons";
+import { Button, View, XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 
 const PreviewScreen = () => {
-  const router = useRouter();
   const { uri, type } = useLocalSearchParams<{
     uri: string;
     type: "image" | "video";
   }>();
+
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const videoRef = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
-  const controlFadeAnim = useRef(new Animated.Value(1)).current;
+  const controlFadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (showControls) {
@@ -33,7 +33,7 @@ const PreviewScreen = () => {
           duration: 300,
           useNativeDriver: true,
         }).start(() => setShowControls(false));
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timeout);
     }
@@ -57,61 +57,91 @@ const PreviewScreen = () => {
 
   return (
     <BaseScreenView
-      paddingVertical={0}
-      safeAreaEdges={["top", "bottom"]}
+      padding={0}
+      safeAreaEdges={["bottom"]}
       justifyContent="space-between"
       backgroundColor={"$backgroundTransparent"}
       style={styles.container}
     >
+      <Header />
       {type === "image" ? (
-        <Image source={{ uri }} style={styles.media} />
+        <Image
+          source={{ uri }}
+          style={{
+            flex: 1,
+          }}
+        />
       ) : (
-        <View style={styles.videoContainer}>
-          <TouchableOpacity
-            style={styles.videoTouchArea}
-            onPress={handleVideoPress}
-            activeOpacity={1}
-          >
-            <Video
-              ref={videoRef}
-              style={styles.media}
-              source={{ uri }}
-              resizeMode={ResizeMode.CONTAIN}
-              isLooping
-              onPlaybackStatusUpdate={(status) => setStatus(status)}
-            />
-            {showControls && (
-              <Animated.View
-                style={[styles.playButton, { opacity: controlFadeAnim }]}
-              >
-                <Ionicons
-                  name={status?.isLoaded && status.isPlaying ? "pause" : "play"}
-                  size={48}
-                  color="white"
-                />
-              </Animated.View>
-            )}
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.videoTouchArea}
+          onPress={handleVideoPress}
+          activeOpacity={1}
+        >
+          <Video
+            ref={videoRef}
+            style={styles.media}
+            source={{ uri }}
+            resizeMode={ResizeMode.COVER}
+            isLooping
+            shouldPlay
+            onPlaybackStatusUpdate={(status) => setStatus(status)}
+          />
+          {showControls && (
+            <Animated.View
+              style={[styles.playButton, { opacity: controlFadeAnim }]}
+            >
+              <Ionicons
+                name={status?.isLoaded && status.isPlaying ? "pause" : "play"}
+                size={48}
+                color="white"
+              />
+            </Animated.View>
+          )}
+        </TouchableOpacity>
       )}
       <XStack
-        justifyContent="space-between"
-        padding={20}
-        style={styles.buttonContainer}
+        justifyContent="space-evenly"
+        paddingTop="$4"
+        paddingHorizontal="$6"
+        backgroundColor={"$background"}
+        gap="$6"
       >
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => router.back()}
+        <Button flex={1} size={"$5"} borderRadius="$8" iconAfter={Download}>
+          Save
+        </Button>
+        <Button
+          flex={2}
+          size={"$5"}
+          borderRadius="$8"
+          iconAfter={ArrowBigRight}
         >
-          <Ionicons name="arrow-back" size={24} color="white" />
-          <Text style={styles.buttonText}>Retake</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => null}>
-          <Ionicons name="arrow-forward" size={24} color="white" />
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
+          Continue
+        </Button>
       </XStack>
     </BaseScreenView>
+  );
+};
+
+const Header = () => {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  return (
+    <View
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        paddingTop: insets.top + 16,
+        paddingHorizontal: 16,
+        zIndex: 1,
+      }}
+    >
+      <TouchableOpacity hitSlop={10} onPress={() => router.back()}>
+        <X size={24} color="white" />
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -122,13 +152,7 @@ const styles = StyleSheet.create({
   },
   media: {
     width: "100%",
-    height: "80%",
-    borderRadius: 10,
-  },
-  videoContainer: {
-    position: "relative",
-    width: "100%",
-    height: "80%",
+    height: "100%",
   },
   videoTouchArea: {
     flex: 1,
@@ -141,25 +165,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 48,
     padding: 10,
-  },
-  buttonContainer: {
-    width: "100%",
-    paddingHorizontal: 20,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    paddingVertical: 15,
-    marginHorizontal: 5,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    marginLeft: 10,
   },
 });
 
