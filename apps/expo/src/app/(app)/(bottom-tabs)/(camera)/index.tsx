@@ -25,51 +25,52 @@ Reanimated.addWhitelistedNativeProps({
   zoom: true,
 });
 
+const MIN_ZOOM = 0;
+const MAX_ZOOM = 0.25;
+
 const SCALE_FULL_ZOOM = 3;
 
 const Camera = () => {
   const camera = useRef<CameraView>(null);
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
+
   const zoom = useSharedValue(0);
+  const startZoom = useSharedValue(0);
   const isPressingButton = useSharedValue(false);
 
   const [flash, setFlash] = useState<FlashMode>("off");
   const [facing, setCameraPosition] = useState<CameraType>("back");
 
-  const minZoom = 0;
-  const maxZoom = 0.25;
-
-  const onFlipCameraPressed = useCallback(() => {
-    setCameraPosition((p) => (p === "back" ? "front" : "back"));
+  const onInitialized = useCallback(() => {
+    setIsCameraInitialized(true);
   }, []);
+
   const onFlashPressed = useCallback(() => {
     setFlash((f) => (f === "off" ? "on" : "off"));
   }, []);
 
-  const onInitialized = useCallback(() => {
-    console.log("Camera initialized!");
-    setIsCameraInitialized(true);
+  const onFlipCameraPressed = useCallback(() => {
+    setCameraPosition((p) => (p === "back" ? "front" : "back"));
   }, []);
 
-  const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
-    const z = Math.max(Math.min(zoom.value, maxZoom), minZoom);
-    return {
-      zoom: z,
-    };
-  }, [maxZoom, minZoom, zoom]);
-
   const setIsPressingButton = useCallback(
-    (_isPressingButton: boolean) => {
-      isPressingButton.value = _isPressingButton;
+    (newIsPressingButton: boolean) => {
+      isPressingButton.value = newIsPressingButton;
     },
     [isPressingButton],
   );
 
+  const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
+    const z = Math.max(Math.min(zoom.value, MAX_ZOOM), MIN_ZOOM);
+    return {
+      zoom: z,
+    };
+  }, [MAX_ZOOM, MIN_ZOOM, zoom]);
+
   const onMediaCaptured = useCallback(
     (url: string, type: "picture" | "video") => {
-      console.log(`Media captured! ${JSON.stringify(url)}`);
       // TODO: HANDLE ROUTING
-      console.log("Media captured!", url, type);
+      console.log(`${type} captured! ${JSON.stringify(url)}`);
     },
     [],
   );
@@ -83,8 +84,6 @@ const Camera = () => {
         }),
     [onFlipCameraPressed],
   );
-
-  const startZoom = useSharedValue(0);
 
   const pinchGesture = React.useMemo(
     () =>
@@ -103,7 +102,7 @@ const Camera = () => {
           zoom.value = interpolate(
             scale,
             [-1, 0, 1],
-            [minZoom, startZoom.value, maxZoom],
+            [MIN_ZOOM, startZoom.value, MAX_ZOOM],
             Extrapolation.CLAMP,
           );
         }),
@@ -136,8 +135,8 @@ const Camera = () => {
         camera={camera}
         onMediaCaptured={onMediaCaptured}
         cameraZoom={zoom}
-        minZoom={minZoom}
-        maxZoom={maxZoom}
+        minZoom={MIN_ZOOM}
+        maxZoom={MAX_ZOOM}
         enabled={isCameraInitialized}
         setIsPressingButton={setIsPressingButton}
       />
