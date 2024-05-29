@@ -2,19 +2,28 @@ import React, { useCallback, useRef } from "react";
 import type { ViewProps } from "react-native";
 import { StyleSheet, View } from "react-native";
 import type {
+  GestureStateChangeEvent,
+  GestureUpdateEvent,
+  PanGestureHandlerEventPayload,
   PanGestureHandlerGestureEvent,
+  TapGestureHandlerEventPayload,
   TapGestureHandlerStateChangeEvent,
 } from "react-native-gesture-handler";
 import {
+  Gesture,
+  GestureDetector,
   PanGestureHandler,
   State,
   TapGestureHandler,
 } from "react-native-gesture-handler";
+import type { SharedValue } from "react-native-reanimated";
 import Reanimated, {
   cancelAnimation,
   Easing,
   Extrapolate,
+  Extrapolation,
   interpolate,
+  runOnJS,
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -42,7 +51,7 @@ interface Props extends ViewProps {
 
   minZoom: number;
   maxZoom: number;
-  cameraZoom: Reanimated.SharedValue<number>;
+  cameraZoom: SharedValue<number>;
 
   enabled: boolean;
 
@@ -60,10 +69,12 @@ const CaptureButton: React.FC<Props> = ({
   style,
   ...props
 }): React.ReactElement => {
-  const pressDownDate = useRef<Date | undefined>(undefined);
   const isRecording = useRef(false);
+  const pressDownDate = useRef<Date | undefined>(undefined);
+
   const recordingProgress = useSharedValue(0);
   const isPressingButton = useSharedValue(false);
+  const context = useSharedValue<{ offsetY?: number; startY?: number }>({});
 
   const takePicture = useCallback(async () => {
     try {
@@ -119,105 +130,95 @@ const CaptureButton: React.FC<Props> = ({
     }
   }, [camera, onMediaCaptured, onStoppedRecording]);
 
-  const tapHandler = useRef<TapGestureHandler>();
-  const onHandlerStateChanged = useCallback(
-    async ({ nativeEvent: event }: TapGestureHandlerStateChangeEvent) => {
-      // This is the gesture handler for the circular "shutter" button.
-      // Once the finger touches the button (State.BEGAN), a photo is being taken and "capture mode" is entered. (disabled tab bar)
-      // Also, we set `pressDownDate` to the time of the press down event, and start a 200ms timeout. If the `pressDownDate` hasn't changed
-      // after the 200ms, the user is still holding down the "shutter" button. In that case, we start recording.
-      //
-      // Once the finger releases the button (State.END/FAILED/CANCELLED), we leave "capture mode" (enable tab bar) and check the `pressDownDate`,
-      // if `pressDownDate` was less than 200ms ago, we know that the intention of the user is to take a photo. We check the `takePhotoPromise` if
-      // there already is an ongoing (or already resolved) takePhoto() call (remember that we called takePhoto() when the user pressed down), and
-      // if yes, use that. If no, we just try calling takePhoto() again
-      console.debug(`state: ${Object.keys(State)[event.state]}`);
-      switch (event.state) {
-        case State.BEGAN: {
-          // enter "recording mode"
-          recordingProgress.value = 0;
-          isPressingButton.value = true;
-          const now = new Date();
-          pressDownDate.current = now;
-          setTimeout(() => {
-            if (pressDownDate.current === now) {
-              // user is still pressing down after 200ms, so his intention is to create a video
-              void startRecording();
-            }
-          }, START_RECORDING_DELAY);
-          setIsPressingButton(true);
-          return;
+  const handleTapOnStart = useCallback(
+    (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
+      recordingProgress.value = 0;
+      isPressingButton.value = true;
+
+      const now = new Date();
+      pressDownDate.current = now;
+
+      setTimeout(() => {
+        if (pressDownDate.current === now) {
+          void startRecording();
         }
-        case State.END:
-        case State.FAILED:
-        case State.CANCELLED: {
-          // exit "recording mode"
-          try {
-            if (pressDownDate.current == null)
-              throw new Error("PressDownDate ref .current was null!");
-            const now = new Date();
-            const diff = now.getTime() - pressDownDate.current.getTime();
-            pressDownDate.current = undefined;
-            if (diff < START_RECORDING_DELAY) {
-              // user has released the button within 200ms, so his intention is to take a single picture.
-              await takePicture();
-            } else {
-              // user has held the button for more than 200ms, so he has been recording this entire time.
-              stopRecording();
-            }
-          } finally {
-            setTimeout(() => {
-              isPressingButton.value = false;
-              setIsPressingButton(false);
-            }, 500);
-          }
-          return;
-        }
-        default:
-          break;
-      }
+      }, START_RECORDING_DELAY);
+      setIsPressingButton(true);
     },
-    [
-      isPressingButton,
-      recordingProgress,
-      setIsPressingButton,
-      startRecording,
-      stopRecording,
-      takePicture,
-    ],
+    [isPressingButton, recordingProgress, setIsPressingButton, startRecording],
   );
 
-  const panHandler = useRef<PanGestureHandler>();
-  const onPanGestureEvent = useAnimatedGestureHandler<
-    PanGestureHandlerGestureEvent,
-    { offsetY?: number; startY?: number }
-  >({
-    onStart: (event, context) => {
-      context.startY = event.absoluteY;
-      const yForFullZoom = context.startY * 0.7;
-      const offsetYForFullZoom = context.startY - yForFullZoom;
+  const handleTapOnEnd = useCallback(
+    async (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
+      if (pressDownDate.current === undefined) {
+        throw new Error("PressDownDate ref.current was null!");
+      }
+
+      const now = new Date();
+      const diff = now.getTime() - pressDownDate.current.getTime();
+      pressDownDate.current = undefined;
+
+      diff < START_RECORDING_DELAY ? await takePicture() : stopRecording();
+
+      setTimeout(() => {
+        isPressingButton.value = false;
+        setIsPressingButton(false);
+      }, 500);
+    },
+    [isPressingButton, setIsPressingButton, stopRecording, takePicture],
+  );
+
+  const tapGesture = Gesture.Tap()
+    .onStart((event) => {
+      runOnJS(handleTapOnStart)(event);
+    })
+    .onEnd((event) => {
+      runOnJS(handleTapOnEnd)(event);
+    });
+
+  const handlePanOnStart = useCallback(
+    (event: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
+      context.value.startY = event.absoluteY;
+
+      const yForFullZoom = context.value.startY ?? 0 * 0.7;
+      const offsetYForFullZoom = context.value.startY ?? 0 - yForFullZoom;
 
       // extrapolate [0 ... 1] zoom -> [0 ... Y_FOR_FULL_ZOOM] finger position
-      context.offsetY = interpolate(
+      context.value.offsetY = interpolate(
         cameraZoom.value,
         [minZoom, maxZoom],
         [0, offsetYForFullZoom],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
     },
-    onActive: (event, context) => {
-      const offset = context.offsetY ?? 0;
-      const startY = context.startY ?? SCREEN_HEIGHT;
+    [cameraZoom.value, context.value, maxZoom, minZoom],
+  );
+
+  const handlePanOnUpdate = useCallback(
+    (event: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
+      const offset = context.value.offsetY ?? 0;
+      const startY = context.value.startY ?? SCREEN_HEIGHT;
       const yForFullZoom = startY * 0.7;
 
       cameraZoom.value = interpolate(
         event.absoluteY - offset,
         [yForFullZoom, startY],
         [maxZoom, minZoom],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
     },
-  });
+    [cameraZoom, context.value.offsetY, context.value.startY, maxZoom, minZoom],
+  );
+
+  const panGesture = Gesture.Pan()
+    .failOffsetX(PAN_GESTURE_HANDLER_FAIL_X)
+    .activeOffsetY(PAN_GESTURE_HANDLER_ACTIVE_Y)
+    .onStart((event) => {
+      runOnJS(handlePanOnStart)(event);
+    })
+    .onUpdate((event) => {
+      runOnJS(handlePanOnUpdate)(event);
+    });
 
   const shadowStyle = useAnimatedStyle(
     () => ({
@@ -272,30 +273,14 @@ const CaptureButton: React.FC<Props> = ({
   }, [enabled, isPressingButton]);
 
   return (
-    <TapGestureHandler
-      enabled={enabled}
-      ref={tapHandler}
-      onHandlerStateChange={onHandlerStateChanged}
-      shouldCancelWhenOutside={false}
-      maxDurationMs={99999999} // <-- this prevents the TapGestureHandler from going to State.FAILED when the user moves his finger outside of the child view (to zoom)
-      simultaneousHandlers={panHandler}
-    >
+    <GestureDetector gesture={Gesture.Simultaneous(tapGesture, panGesture)}>
       <Reanimated.View {...props} style={[buttonStyle, style]}>
-        <PanGestureHandler
-          enabled={enabled}
-          ref={panHandler}
-          failOffsetX={PAN_GESTURE_HANDLER_FAIL_X}
-          activeOffsetY={PAN_GESTURE_HANDLER_ACTIVE_Y}
-          onGestureEvent={onPanGestureEvent}
-          simultaneousHandlers={tapHandler}
-        >
-          <Reanimated.View style={styles.flex}>
-            <Reanimated.View style={[styles.shadow, shadowStyle]} />
-            <View style={styles.button} />
-          </Reanimated.View>
-        </PanGestureHandler>
+        <Reanimated.View style={styles.flex}>
+          <Reanimated.View style={[styles.shadow, shadowStyle]} />
+          <View style={styles.button} />
+        </Reanimated.View>
       </Reanimated.View>
-    </TapGestureHandler>
+    </GestureDetector>
   );
 };
 
