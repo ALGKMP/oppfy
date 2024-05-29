@@ -1,15 +1,11 @@
 import * as React from "react";
 import { useCallback, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import type { PinchGestureHandlerGestureEvent } from "react-native-gesture-handler";
-import {
-  PinchGestureHandler,
-  TapGestureHandler,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
-  Extrapolate,
+  Extrapolation,
   interpolate,
-  useAnimatedGestureHandler,
+  runOnJS,
   useAnimatedProps,
   useSharedValue,
 } from "react-native-reanimated";
@@ -21,10 +17,7 @@ import { CaptureButton, StatusBarBlurBackground } from "~/components/camera";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
-  MAX_ZOOM_FACTOR,
   SAFE_AREA_PADDING,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
 } from "~/constants/camera";
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(CameraView);
@@ -44,7 +37,7 @@ const Camera = () => {
   const [facing, setCameraPosition] = useState<CameraType>("back");
 
   const minZoom = 0;
-  const maxZoom = 1;
+  const maxZoom = 0.25;
 
   const onFlipCameraPressed = useCallback(() => {
     setCameraPosition((p) => (p === "back" ? "front" : "back"));
@@ -81,64 +74,62 @@ const Camera = () => {
     [],
   );
 
-  const onDoubleTap = useCallback(() => {
-    onFlipCameraPressed();
-  }, [onFlipCameraPressed]);
+  const doubleTapGesture = React.useMemo(
+    () =>
+      Gesture.Tap()
+        .numberOfTaps(2)
+        .onEnd(() => {
+          runOnJS(onFlipCameraPressed)();
+        }),
+    [onFlipCameraPressed],
+  );
 
-  // The gesture handler maps the linear pinch gesture (0 - 1) to an exponential curve since a camera's zoom
-  // function does not appear linear to the user. (aka zoom 0.1 -> 0.2 does not look equal in difference as 0.8 -> 0.9)
-  const onPinchGesture = useAnimatedGestureHandler<
-    PinchGestureHandlerGestureEvent,
-    { startZoom?: number }
-  >({
-    onStart: (_, context) => {
-      context.startZoom = zoom.value;
-    },
-    onActive: (event, context) => {
-      // we're trying to map the scale gesture to a linear zoom here
-      const startZoom = context.startZoom ?? 0;
-      console.log("startZoom", startZoom);
-      const scale = interpolate(
-        event.scale,
-        [1 - 1 / SCALE_FULL_ZOOM, 1, SCALE_FULL_ZOOM],
-        [-1, 0, 1],
-        Extrapolate.CLAMP,
-      );
-      zoom.value = interpolate(
-        scale,
-        [-1, 0, 1],
-        [minZoom, startZoom, maxZoom],
-        Extrapolate.CLAMP,
-      );
-    },
-  });
+  const startZoom = useSharedValue(0);
+
+  const pinchGesture = React.useMemo(
+    () =>
+      Gesture.Pinch()
+        .onStart(() => {
+          startZoom.value = zoom.value;
+        })
+        .onUpdate((event) => {
+          "worklet";
+          const scale = interpolate(
+            event.scale,
+            [1 - 1 / SCALE_FULL_ZOOM, 1, SCALE_FULL_ZOOM],
+            [-1, 0, 1],
+            Extrapolation.CLAMP,
+          );
+          zoom.value = interpolate(
+            scale,
+            [-1, 0, 1],
+            [minZoom, startZoom.value, maxZoom],
+            Extrapolation.CLAMP,
+          );
+        }),
+    [startZoom, zoom],
+  );
 
   return (
     <View style={styles.container}>
-      <PinchGestureHandler
-        onGestureEvent={onPinchGesture}
-        enabled={isCameraInitialized}
+      <GestureDetector
+        gesture={Gesture.Simultaneous(pinchGesture, doubleTapGesture)}
       >
-        <Reanimated.View
-          // onTouchEnd={onFocusTap}
-          style={StyleSheet.absoluteFill}
-        >
-          <TapGestureHandler onEnded={onDoubleTap} numberOfTaps={2}>
-            <View style={StyleSheet.absoluteFill}>
-              <ReanimatedCamera
-                ref={camera}
-                style={StyleSheet.absoluteFill}
-                flash={flash}
-                facing={facing}
-                mode="picture"
-                pointerEvents={"none"}
-                onCameraReady={onInitialized}
-                animatedProps={cameraAnimatedProps}
-              />
-            </View>
-          </TapGestureHandler>
+        <Reanimated.View style={StyleSheet.absoluteFill}>
+          <Reanimated.View style={styles.cameraContainer}>
+            <ReanimatedCamera
+              ref={camera}
+              style={styles.camera}
+              flash={flash}
+              facing={facing}
+              mode="picture"
+              pointerEvents={"none"}
+              onCameraReady={onInitialized}
+              animatedProps={cameraAnimatedProps}
+            />
+          </Reanimated.View>
         </Reanimated.View>
-      </PinchGestureHandler>
+      </GestureDetector>
 
       <CaptureButton
         style={styles.captureButton}
@@ -166,14 +157,12 @@ const Camera = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          // onPress={() => navigation.navigate("Devices")}
           onPress={() => console.log("Devices")}
         >
           <Ionicons name="settings-outline" color="white" size={24} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          // onPress={() => navigation.navigate("CodeScannerPage")}
           onPress={() => console.log("CodeScannerPage")}
         >
           <Ionicons name="qr-code-outline" color="white" size={24} />
@@ -189,6 +178,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "black",
+  },
+  cameraContainer: {
+    flex: 1,
+    // marginBottom: 20,
+    // borderBottomLeftRadius: 30,
+    // borderBottomRightRadius: 30,
+    // overflow: "hidden", // Ensures the camera content is clipped to the rounded border
+  },
+  camera: {
+    flex: 1,
+    borderRadius: 20, // Match the border radius to the container
   },
   captureButton: {
     position: "absolute",
