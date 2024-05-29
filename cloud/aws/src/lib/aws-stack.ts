@@ -10,6 +10,7 @@ import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as neptune from "@aws-cdk/aws-neptune-alpha";
 import type { Construct } from "constructs";
 
@@ -314,12 +315,9 @@ export class AwsStack extends cdk.Stack {
 
     let cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
       vpc,
+      iamAuthentication: false,
       instanceType: neptune.InstanceType.T3_MEDIUM,
-      cloudwatchLogsRetention: aws_logs.RetentionDays.ONE_MONTH,
-      removalPolicy: RemovalPolicy.DESTROY,
       engineVersion: neptune.EngineVersion.V1_3_0_0,
-      autoMinorVersionUpgrade: true,
-      backupRetention: cdk.Duration.days(14),
       securityGroups: [neptuneSecurityGroup],
     });
 
@@ -334,31 +332,31 @@ export class AwsStack extends cdk.Stack {
     });
 
     // Don't need the stuff on my lambdas for neptune
-    const neptuneProxyLambda = new lambdaNodeJs.NodejsFunction(this, 'neptuneLambda', {
-      runtime: lambda.Runtime.NODEJS_20_X,
-      entry: 'src/res/lambdas/neptune/index.ts',
-      handler: 'handler',
-      timeout: cdk.Duration.minutes(3),
-      environment: {
-        NEPTUNE_ENDPOINT: cluster.clusterEndpoint.hostname,
+    const neptuneProxyLambda = new lambdaNodeJs.NodejsFunction(
+      this,
+      "neptuneLambda",
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: "src/res/lambdas/neptune/index.ts",
+        handler: "handler",
+        timeout: cdk.Duration.minutes(3),
+        environment: {
+          NEPTUNE_ENDPOINT: cluster.clusterEndpoint.socketAddress,
+        },
+        vpc,
+        securityGroups: [neptuneSecurityGroup],
       },
-      vpc,
-      securityGroups: [neptuneSecurityGroup],
-    });
-    
+    );
 
     // Out own auth or some shit
     const neptuneProxyLambdaUrl = neptuneProxyLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,
     });
 
-    cluster.grantConnect(neptuneProxyLambda);
-
     // Gimme the url bitch
     new cdk.CfnOutput(this, "NeptuneProxyLambdaUrl", {
       value: neptuneProxyLambdaUrl.url,
     });
-
 
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management

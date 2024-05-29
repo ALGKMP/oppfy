@@ -18,9 +18,18 @@ export const handler = async (
   let dc: any;
   let g: any;
 
+  console.log("Connecting to Neptune", NEPTUNE_ENDPOINT, NEPTUNE_PORT);
+
   try {
+    console.log("checking status");
+    // checkling status of lambda
+    const resp = await fetch(`https://${NEPTUNE_ENDPOINT}/status`);
+
+    console.log(resp.status);
+    console.log(await resp.text());
+
     dc = new DriverRemoteConnection(
-      `wss://${NEPTUNE_ENDPOINT}:${NEPTUNE_PORT}/gremlin`,
+      `wss://${NEPTUNE_ENDPOINT}/gremlin`,
       {},
     );
     console.log("Remote connection established");
@@ -35,7 +44,7 @@ export const handler = async (
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: result.toString(),
+        message: "queried the graph",
       }),
     };
   } catch (error) {
