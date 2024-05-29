@@ -203,8 +203,8 @@ const styles = StyleSheet.create({
   },
   rightButtonRow: {
     position: "absolute",
+    top: SAFE_AREA_PADDING.paddingTop + 12,
     right: SAFE_AREA_PADDING.paddingRight + 12,
-    top: SAFE_AREA_PADDING.paddingTop,
   },
   text: {
     color: "white",
