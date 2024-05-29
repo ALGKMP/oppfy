@@ -11,8 +11,8 @@ import {
   TapGestureHandler,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { CameraType, FlashMode } from "expo-camera/next";
-import { CameraView, useCameraPermissions } from "expo-camera/next";
+import type { CameraType, FlashMode } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { X, Zap, ZapOff } from "@tamagui/lucide-icons";
