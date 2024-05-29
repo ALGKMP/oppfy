@@ -79,6 +79,7 @@ const Camera = () => {
     () =>
       Gesture.Tap()
         .numberOfTaps(2)
+        .maxDistance(20)
         .onEnd(() => {
           runOnJS(onFlipCameraPressed)();
         }),
