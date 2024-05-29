@@ -168,6 +168,7 @@ const CaptureButton: React.FC<Props> = ({
   );
 
   const tapGesture = Gesture.Tap()
+    .maxDuration(Number.MAX_SAFE_INTEGER) // <-- this prevents the TapGestureHandler from going to State.FAILED when the user moves his finger outside of the child view (to zoom)
     .onBegin((event) => {
       runOnJS(handleTapOnStart)(event);
     })
