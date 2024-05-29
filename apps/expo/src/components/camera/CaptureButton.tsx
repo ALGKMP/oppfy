@@ -3,6 +3,7 @@ import type { ViewProps } from "react-native";
 import { StyleSheet, View } from "react-native";
 import type {
   GestureStateChangeEvent,
+  GestureTouchEvent,
   GestureUpdateEvent,
   PanGestureHandlerEventPayload,
   TapGestureHandlerEventPayload,
@@ -129,9 +130,13 @@ const CaptureButton: React.FC<Props> = ({
       pressDownDate.current = now;
 
       setTimeout(() => {
-        if (pressDownDate.current === now) {
-          void startRecording();
-        }
+        const fn = async () => {
+          if (pressDownDate.current === now) {
+            await startRecording();
+          }
+        };
+
+        void fn();
       }, START_RECORDING_DELAY);
       setIsPressingButton(true);
     },
@@ -139,7 +144,11 @@ const CaptureButton: React.FC<Props> = ({
   );
 
   const handleTapOnEnd = useCallback(
-    async (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
+    async (
+      _event:
+        | GestureStateChangeEvent<TapGestureHandlerEventPayload>
+        | GestureTouchEvent,
+    ) => {
       if (pressDownDate.current === undefined) {
         throw new Error("PressDownDate ref.current was null!");
       }
@@ -159,7 +168,7 @@ const CaptureButton: React.FC<Props> = ({
   );
 
   const tapGesture = Gesture.Tap()
-    .onStart((event) => {
+    .onBegin((event) => {
       runOnJS(handleTapOnStart)(event);
     })
     .onEnd((event) => {
