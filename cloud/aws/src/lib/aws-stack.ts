@@ -358,6 +358,37 @@ export class AwsStack extends cdk.Stack {
       value: neptuneProxyLambdaUrl.url,
     });
 
+    // user for debug notebook if someone wants to use that shit
+    let neptuneNotebookRole = new iam.Role(this, "NeptuneNotebookRole", {
+      assumedBy: new iam.ServicePrincipal("sagemaker.amazonaws.com"),
+      description: "Role for neptune notebook",
+    });
+
+    neptuneNotebookRole.addToPolicy(
+      new iam.PolicyStatement(
+        {
+          effect: iam.Effect.ALLOW,
+          actions: ["s3:GetObject", "s3:ListBucket"],
+          resources: [
+            `arn:aws:s3:::aws-neptune-notebook-${this.region}`,
+            `arn:aws:s3:::aws-neptune-notebook-${this.region}/*`,
+          ],
+        },
+      ),
+    );
+
+    neptuneNotebookRole.addToPolicy(
+      new iam.PolicyStatement(
+        {
+          effect: iam.Effect.ALLOW,
+          actions: ["neptune-db:*"],
+          resources: [
+            `arn:aws:neptune-db:${this.region}:${this.account}:${cluster.clusterResourceIdentifier}/*`,
+          ],
+        },
+      ),
+    );
+
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management
     const _dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
