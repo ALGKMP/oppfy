@@ -125,13 +125,13 @@ const Camera = () => {
         >
           <TapGestureHandler onEnded={onDoubleTap} numberOfTaps={2}>
             <ReanimatedCamera
-              style={StyleSheet.absoluteFill}
               ref={camera}
-              animatedProps={cameraAnimatedProps}
-              mode={"picture"}
-              onCameraReady={onInitialized}
+              style={StyleSheet.absoluteFill}
               flash={flash}
               facing={facing}
+              mode="picture"
+              onCameraReady={onInitialized}
+              animatedProps={cameraAnimatedProps}
             />
           </TapGestureHandler>
         </Reanimated.View>

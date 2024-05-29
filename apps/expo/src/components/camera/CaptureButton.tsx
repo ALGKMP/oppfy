@@ -65,7 +65,6 @@ const CaptureButton: React.FC<Props> = ({
   const recordingProgress = useSharedValue(0);
   const isPressingButton = useSharedValue(false);
 
-  //#region Camera Capture
   const takePicture = useCallback(async () => {
     try {
       if (camera.current == null) throw new Error("Camera ref is null!");
@@ -119,9 +118,7 @@ const CaptureButton: React.FC<Props> = ({
       console.error("failed to start recording!", e, "camera");
     }
   }, [camera, onMediaCaptured, onStoppedRecording]);
-  //#endregion
 
-  //#region Tap handler
   const tapHandler = useRef<TapGestureHandler>();
   const onHandlerStateChanged = useCallback(
     async ({ nativeEvent: event }: TapGestureHandlerStateChangeEvent) => {
@@ -189,8 +186,7 @@ const CaptureButton: React.FC<Props> = ({
       takePicture,
     ],
   );
-  //#endregion
-  //#region Pan handler
+
   const panHandler = useRef<PanGestureHandler>();
   const onPanGestureEvent = useAnimatedGestureHandler<
     PanGestureHandlerGestureEvent,
@@ -222,7 +218,6 @@ const CaptureButton: React.FC<Props> = ({
       );
     },
   });
-  //#endregion
 
   const shadowStyle = useAnimatedStyle(
     () => ({
