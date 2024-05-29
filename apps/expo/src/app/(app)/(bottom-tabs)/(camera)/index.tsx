@@ -82,8 +82,8 @@ const Camera = () => {
   );
 
   const onDoubleTap = useCallback(() => {
-    console.log("Double tap");
-  }, []);
+    onFlipCameraPressed();
+  }, [onFlipCameraPressed]);
 
   // The gesture handler maps the linear pinch gesture (0 - 1) to an exponential curve since a camera's zoom
   // function does not appear linear to the user. (aka zoom 0.1 -> 0.2 does not look equal in difference as 0.8 -> 0.9)
@@ -124,15 +124,18 @@ const Camera = () => {
           style={StyleSheet.absoluteFill}
         >
           <TapGestureHandler onEnded={onDoubleTap} numberOfTaps={2}>
-            <ReanimatedCamera
-              ref={camera}
-              style={StyleSheet.absoluteFill}
-              flash={flash}
-              facing={facing}
-              mode="picture"
-              onCameraReady={onInitialized}
-              animatedProps={cameraAnimatedProps}
-            />
+            <View style={StyleSheet.absoluteFill}>
+              <ReanimatedCamera
+                ref={camera}
+                style={StyleSheet.absoluteFill}
+                flash={flash}
+                facing={facing}
+                mode="picture"
+                pointerEvents={"none"}
+                onCameraReady={onInitialized}
+                animatedProps={cameraAnimatedProps}
+              />
+            </View>
           </TapGestureHandler>
         </Reanimated.View>
       </PinchGestureHandler>
