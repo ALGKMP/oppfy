@@ -5,26 +5,16 @@ import type {
   GestureStateChangeEvent,
   GestureUpdateEvent,
   PanGestureHandlerEventPayload,
-  PanGestureHandlerGestureEvent,
   TapGestureHandlerEventPayload,
-  TapGestureHandlerStateChangeEvent,
 } from "react-native-gesture-handler";
-import {
-  Gesture,
-  GestureDetector,
-  PanGestureHandler,
-  State,
-  TapGestureHandler,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import type { SharedValue } from "react-native-reanimated";
 import Reanimated, {
   cancelAnimation,
   Easing,
-  Extrapolate,
   Extrapolation,
   interpolate,
   runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
