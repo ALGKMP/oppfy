@@ -79,12 +79,6 @@ const ProfileLayout = () => {
             tabBarLabel: () => <Grid3x3 />,
           }}
         />
-        <TopTabs.Screen
-          name="media-of-friends"
-          options={{
-            tabBarLabel: () => <Camera />,
-          }}
-        />
       </TopTabs>
     </ScrollView>
   );
