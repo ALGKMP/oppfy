@@ -22,7 +22,7 @@ import Reanimated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import type { CameraView } from "expo-camera/next";
+import type { CameraMode, CameraView } from "expo-camera/next";
 
 import {
   CAPTURE_BUTTON_SIZE,
@@ -36,9 +36,14 @@ const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2];
 const START_RECORDING_DELAY = 200;
 const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.1;
 
+interface Context {
+  offsetY?: number;
+  startY?: number;
+}
+
 interface Props extends ViewProps {
   camera: React.RefObject<CameraView>;
-  onMediaCaptured: (url: string, type: "picture" | "video") => void;
+  onMediaCaptured: (url: string, type: CameraMode) => void;
 
   minZoom: number;
   maxZoom: number;
@@ -46,6 +51,7 @@ interface Props extends ViewProps {
 
   enabled: boolean;
 
+  setMode: (mode: CameraMode) => void;
   setIsPressingButton: (isPressingButton: boolean) => void;
 }
 
@@ -57,6 +63,7 @@ const CaptureButton: React.FC<Props> = ({
   cameraZoom,
   enabled,
   setIsPressingButton,
+  setMode,
   style,
   ...props
 }): React.ReactElement => {
@@ -65,61 +72,45 @@ const CaptureButton: React.FC<Props> = ({
 
   const recordingProgress = useSharedValue(0);
   const isPressingButton = useSharedValue(false);
-  const context = useSharedValue<{ offsetY?: number; startY?: number }>({});
+
+  const context = useSharedValue<Context>({});
 
   const takePicture = useCallback(async () => {
-    try {
-      if (camera.current == null) throw new Error("Camera ref is null!");
+    if (camera.current === null) throw new Error("Camera ref is null");
 
-      console.log("Taking photo...");
-      const picture = await camera.current.takePictureAsync();
-      if (picture === undefined) throw new Error("Failed to take photo!");
+    setMode("picture");
 
-      onMediaCaptured(picture.uri, "picture");
-    } catch (e) {
-      console.error("Failed to take photo!", e);
-    }
-  }, [camera, onMediaCaptured]);
+    const picture = await camera.current.takePictureAsync();
+    if (picture === undefined) throw new Error("Failed to take picture");
+
+    onMediaCaptured(picture.uri, "picture");
+  }, [camera, onMediaCaptured, setMode]);
 
   const onStoppedRecording = useCallback(() => {
     isRecording.current = false;
     cancelAnimation(recordingProgress);
-    console.log("stopped recording video!");
   }, [recordingProgress]);
+
   const stopRecording = useCallback(() => {
-    try {
-      if (camera.current == null) throw new Error("Camera ref is null!");
-
-      console.log("calling stopRecording()...");
-      camera.current.stopRecording();
-      console.log("called stopRecording()!");
-    } catch (e) {
-      console.error("failed to stop recording!", e);
-    }
+    camera.current?.stopRecording();
   }, [camera]);
+
   const startRecording = useCallback(async () => {
-    try {
-      if (camera.current == null) throw new Error("Camera ref is null!");
+    if (camera.current === null) throw new Error("Camera ref is null");
 
-      console.log("calling startRecording()...");
-      const recording = await camera.current.recordAsync();
-      if (recording === undefined) {
-        console.error("Recording failed!");
-        onStoppedRecording();
-        throw new Error("Failed to record video!");
-      }
+    setMode("video");
 
-      console.log(`Recording successfully finished! ${recording.uri}`);
-      onMediaCaptured(recording.uri, "video");
+    const recording = await camera.current.recordAsync();
+    if (recording === undefined) {
       onStoppedRecording();
-
-      // TODO: wait until startRecording returns to actually find out if the recording has successfully started
-      console.log("called startRecording()!");
-      isRecording.current = true;
-    } catch (e) {
-      console.error("failed to start recording!", e, "camera");
+      throw new Error("Failed to record video");
     }
-  }, [camera, onMediaCaptured, onStoppedRecording]);
+
+    onMediaCaptured(recording.uri, "video");
+    onStoppedRecording();
+
+    isRecording.current = true;
+  }, [camera, onMediaCaptured, onStoppedRecording, setMode]);
 
   const handleTapOnStart = useCallback(
     (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
@@ -150,7 +141,7 @@ const CaptureButton: React.FC<Props> = ({
         | GestureTouchEvent,
     ) => {
       if (pressDownDate.current === undefined) {
-        throw new Error("PressDownDate ref.current was null!");
+        throw new Error("PressDownDate ref.current was null");
       }
 
       const now = new Date();

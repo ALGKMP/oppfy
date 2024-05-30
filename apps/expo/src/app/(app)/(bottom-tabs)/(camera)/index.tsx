@@ -9,7 +9,12 @@ import Reanimated, {
   useAnimatedProps,
   useSharedValue,
 } from "react-native-reanimated";
-import type { CameraProps, CameraType, FlashMode } from "expo-camera/next";
+import type {
+  CameraMode,
+  CameraProps,
+  CameraType,
+  FlashMode,
+} from "expo-camera/next";
 import { CameraView } from "expo-camera/next";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -37,6 +42,7 @@ const Camera = () => {
   const zoom = useSharedValue(0);
   const startZoom = useSharedValue(0);
   const isPressingButton = useSharedValue(false);
+  const mode = useSharedValue<CameraMode>("picture");
 
   const [flash, setFlash] = useState<FlashMode>("off");
   const [facing, setCameraPosition] = useState<CameraType>("back");
@@ -52,6 +58,13 @@ const Camera = () => {
   const onFlipCameraPressed = useCallback(() => {
     setCameraPosition((p) => (p === "back" ? "front" : "back"));
   }, []);
+
+  const setMode = useCallback(
+    (newMode: CameraMode) => {
+      mode.value = newMode;
+    },
+    [mode],
+  );
 
   const setIsPressingButton = useCallback(
     (newIsPressingButton: boolean) => {
@@ -119,13 +132,13 @@ const Camera = () => {
           <Reanimated.View style={styles.cameraContainer}>
             <ReanimatedCamera
               ref={camera}
-              style={styles.camera}
+              mode={mode}
               flash={flash}
               facing={facing}
-              mode="picture"
               pointerEvents={"none"}
               onCameraReady={onInitialized}
               animatedProps={cameraAnimatedProps}
+              style={styles.camera}
             />
           </Reanimated.View>
         </Reanimated.View>
@@ -139,6 +152,7 @@ const Camera = () => {
         minZoom={MIN_ZOOM}
         maxZoom={MAX_ZOOM}
         enabled={isCameraInitialized}
+        setMode={setMode}
         setIsPressingButton={setIsPressingButton}
       />
 
