@@ -5,12 +5,16 @@ import type { GestureResponderEvent } from "react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import type { PinchGestureHandlerGestureEvent } from "react-native-gesture-handler";
 import {
+  Gesture,
+  GestureDetector,
   PinchGestureHandler,
   TapGestureHandler,
 } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolate,
+  Extrapolation,
   interpolate,
+  runOnJS,
   useAnimatedGestureHandler,
   useAnimatedProps,
   useSharedValue,
@@ -19,6 +23,7 @@ import type {
   CameraProps,
   CameraRuntimeError,
   PhotoFile,
+  Point,
   VideoFile,
 } from "react-native-vision-camera";
 import {
@@ -28,6 +33,7 @@ import {
   useLocationPermission,
   useMicrophonePermission,
 } from "react-native-vision-camera";
+import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 
@@ -49,7 +55,9 @@ Reanimated.addWhitelistedNativeProps({
 
 const SCALE_FULL_ZOOM = 3;
 
-export function CameraPage() {
+const CameraPage = () => {
+  const router = useRouter();
+
   const camera = useRef<Camera>(null);
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
   const microphone = useMicrophonePermission();
@@ -69,14 +77,7 @@ export function CameraPage() {
   const [flash, setFlash] = useState<"off" | "on">("off");
   const [enableNightMode, setEnableNightMode] = useState(false);
 
-  // camera device settings
-  // const [preferredDevice] = usePreferredCameraDevice();
   const device = useCameraDevice(cameraPosition);
-
-  // if (preferredDevice != null && preferredDevice.position === cameraPosition) {
-  //   // override default device with the one selected by the user in settings
-  //   device = preferredDevice;
-  // }
 
   const [targetFps, setTargetFps] = useState(60);
 
@@ -94,7 +95,7 @@ export function CameraPage() {
   const supportsFlash = device?.hasFlash ?? false;
   const supportsHdr = format?.supportsPhotoHdr;
   const supports60Fps = useMemo(
-    () => device?.formats.some((f) => f.maxFps >= 60),
+    () => device?.formats.some((format) => format.maxFps >= 60),
     [device?.formats],
   );
   const canToggleNightMode = device?.supportsLowLightBoost ?? false;
@@ -110,15 +111,11 @@ export function CameraPage() {
   }, [maxZoom, minZoom, zoom]);
 
   const setIsPressingButton = useCallback(
-    (_isPressingButton: boolean) => {
-      isPressingButton.value = _isPressingButton;
+    (newIsPressingButton: boolean) => {
+      isPressingButton.value = newIsPressingButton;
     },
     [isPressingButton],
   );
-
-  const onError = useCallback((error: CameraRuntimeError) => {
-    console.error(error);
-  }, []);
 
   const onInitialized = useCallback(() => {
     console.log("Camera initialized!");
@@ -126,14 +123,16 @@ export function CameraPage() {
   }, []);
 
   const onMediaCaptured = useCallback(
-    (media: PhotoFile | VideoFile, _type: "photo" | "video") => {
-      console.log(`Media captured! ${JSON.stringify(media)}`);
-      // navigation.navigate("MediaPage", {
-      //   path: media.path,
-      //   type: type,
-      // });
+    (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+      router.push({
+        pathname: "/preview",
+        params: {
+          type,
+          uri: media.path,
+        },
+      });
     },
-    [],
+    [router],
   );
 
   const onFlipCameraPressed = useCallback(() => {
@@ -144,92 +143,86 @@ export function CameraPage() {
     setFlash((f) => (f === "off" ? "on" : "off"));
   }, []);
 
-  const onFocusTap = useCallback(
-    ({ nativeEvent: event }: GestureResponderEvent) => {
-      if (!device?.supportsFocus) return;
-      void camera.current?.focus({
-        x: event.locationX,
-        y: event.locationY,
-      });
-    },
-    [device?.supportsFocus],
+  const flipCameraGesture = React.useMemo(
+    () =>
+      Gesture.Tap()
+        .numberOfTaps(2)
+        .maxDistance(20)
+        .onEnd(() => {
+          runOnJS(onFlipCameraPressed)();
+        }),
+    [onFlipCameraPressed],
   );
-
-  const onDoubleTap = useCallback(() => {
-    onFlipCameraPressed();
-  }, [onFlipCameraPressed]);
 
   useEffect(() => {
     // Reset zoom to it's default everytime the `device` changes.
     zoom.value = device?.neutralZoom ?? 1;
   }, [zoom, device]);
 
-  const onPinchGesture = useAnimatedGestureHandler<
-    PinchGestureHandlerGestureEvent,
-    { startZoom?: number }
-  >({
-    onStart: (_, context) => {
-      context.startZoom = zoom.value;
-    },
-    onActive: (event, context) => {
-      // we're trying to map the scale gesture to a linear zoom here
-      const startZoom = context.startZoom ?? 0;
+  const startZoom = useSharedValue(0);
+  const zoomGesture = Gesture.Pinch()
+    .onStart(() => {
+      startZoom.value = zoom.value;
+    })
+    .onUpdate((event) => {
       const scale = interpolate(
         event.scale,
         [1 - 1 / SCALE_FULL_ZOOM, 1, SCALE_FULL_ZOOM],
         [-1, 0, 1],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       zoom.value = interpolate(
         scale,
         [-1, 0, 1],
-        [minZoom, startZoom, maxZoom],
-        Extrapolate.CLAMP,
+        [minZoom, startZoom.value, maxZoom],
+        Extrapolation.CLAMP,
       );
-    },
+    });
+
+  const focus = useCallback((point: Point) => {
+    if (camera.current == null) return;
+    void camera.current.focus(point);
+  }, []);
+
+  const focusGesture = Gesture.Tap().onEnd(({ x, y }) => {
+    runOnJS(focus)({ x, y });
   });
 
   const videoHdr = format?.supportsVideoHdr && enableHdr;
   const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr;
 
+  if (device === undefined) return <NoCameraDeviceError />;
+
   return (
     <View style={styles.container}>
-      {device != null && (
-        <PinchGestureHandler onGestureEvent={onPinchGesture} enabled={isActive}>
-          <Reanimated.View
-            onTouchEnd={onFocusTap}
-            style={StyleSheet.absoluteFill}
-          >
-            <TapGestureHandler onEnded={onDoubleTap} numberOfTaps={2}>
-              <ReanimatedCamera
-                style={StyleSheet.absoluteFill}
-                device={device}
-                isActive={isActive}
-                ref={camera}
-                onInitialized={onInitialized}
-                onError={onError}
-                onStarted={() => "Camera started!"}
-                onStopped={() => "Camera stopped!"}
-                format={format}
-                fps={fps}
-                photoHdr={photoHdr}
-                videoHdr={videoHdr}
-                photoQualityBalance="quality"
-                lowLightBoost={device.supportsLowLightBoost && enableNightMode}
-                enableZoomGesture={false}
-                animatedProps={cameraAnimatedProps}
-                exposure={0}
-                enableFpsGraph={true}
-                orientation="portrait"
-                photo={true}
-                video={true}
-                audio={microphone.hasPermission}
-                enableLocation={location.hasPermission}
-              />
-            </TapGestureHandler>
-          </Reanimated.View>
-        </PinchGestureHandler>
-      )}
+      <GestureDetector
+        gesture={Gesture.Simultaneous(
+          zoomGesture,
+          flipCameraGesture,
+          focusGesture,
+        )}
+      >
+        <ReanimatedCamera
+          ref={camera}
+          device={device}
+          isActive={isActive}
+          onInitialized={onInitialized}
+          format={format}
+          fps={fps}
+          photoHdr={photoHdr}
+          videoHdr={videoHdr}
+          photoQualityBalance="quality"
+          lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+          enableZoomGesture={false}
+          animatedProps={cameraAnimatedProps}
+          orientation="portrait"
+          photo={true}
+          video={true}
+          audio={microphone.hasPermission}
+          enableLocation={location.hasPermission}
+          style={StyleSheet.absoluteFill}
+        />
+      </GestureDetector>
 
       <CaptureButton
         style={styles.captureButton}
@@ -307,7 +300,17 @@ export function CameraPage() {
       </View>
     </View>
   );
-}
+};
+
+const NoCameraDeviceError = () => {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ color: "white" }}>No camera device found</Text>
+    </View>
+  );
+};
+
+export default CameraPage;
 
 const styles = StyleSheet.create({
   container: {
