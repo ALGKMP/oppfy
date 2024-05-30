@@ -102,7 +102,7 @@ const CaptureButton = ({
 
     console.log("start recording");
     camera.current.startRecording({
-      flash: flash,
+      flash,
       onRecordingError: (error) => {
         console.error("Recording failed!", error);
         onStoppedRecording();
