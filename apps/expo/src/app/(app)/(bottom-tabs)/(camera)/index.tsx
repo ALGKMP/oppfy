@@ -1,27 +1,17 @@
 import * as React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEffect } from "react";
-import type { GestureResponderEvent } from "react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import type { PinchGestureHandlerGestureEvent } from "react-native-gesture-handler";
-import {
-  Gesture,
-  GestureDetector,
-  PinchGestureHandler,
-  TapGestureHandler,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
-  Extrapolate,
   Extrapolation,
   interpolate,
   runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedProps,
   useSharedValue,
 } from "react-native-reanimated";
 import type {
   CameraProps,
-  CameraRuntimeError,
   PhotoFile,
   Point,
   VideoFile,
@@ -59,27 +49,38 @@ const CameraPage = () => {
   const router = useRouter();
 
   const camera = useRef<Camera>(null);
-  const [isCameraInitialized, setIsCameraInitialized] = useState(false);
-  const microphone = useMicrophonePermission();
+
   const location = useLocationPermission();
+  const microphone = useMicrophonePermission();
+
+  const [isCameraInitialized, setIsCameraInitialized] = useState(false);
+
   const zoom = useSharedValue(1);
+  const startZoom = useSharedValue(zoom.value);
+
   const isPressingButton = useSharedValue(false);
+
+  const setIsPressingButton = useCallback(
+    (newIsPressingButton: boolean) => {
+      isPressingButton.value = newIsPressingButton;
+    },
+    [isPressingButton],
+  );
 
   // check if camera page is active
   const isFocussed = useIsFocused();
   const isForeground = useIsForeground();
   const isActive = isFocussed && isForeground;
 
-  const [cameraPosition, setCameraPosition] = useState<"front" | "back">(
-    "back",
-  );
+  const [targetFps, setTargetFps] = useState(60);
+
   const [enableHdr, setEnableHdr] = useState(false);
-  const [flash, setFlash] = useState<"off" | "on">("off");
   const [enableNightMode, setEnableNightMode] = useState(false);
 
-  const device = useCameraDevice(cameraPosition);
+  const [flash, setFlash] = useState<"off" | "on">("off");
+  const [position, setPosition] = useState<"front" | "back">("back");
 
-  const [targetFps, setTargetFps] = useState(60);
+  const device = useCameraDevice(position);
 
   const screenAspectRatio = SCREEN_HEIGHT / SCREEN_WIDTH;
   const format = useCameraFormat(device, [
@@ -92,33 +93,21 @@ const CameraPage = () => {
 
   const fps = Math.min(format?.maxFps ?? 1, targetFps);
 
-  const supportsFlash = device?.hasFlash ?? false;
+  const minZoom = device?.minZoom ?? 1;
+  const maxZoom = Math.min(device?.maxZoom ?? 1, MAX_ZOOM_FACTOR);
+
+  const videoHdr = format?.supportsVideoHdr && enableHdr;
+  const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr;
+
   const supportsHdr = format?.supportsPhotoHdr;
+  const supportsFlash = device?.hasFlash ?? false;
+  const supportsNightMode = device?.supportsLowLightBoost ?? false;
   const supports60Fps = useMemo(
     () => device?.formats.some((format) => format.maxFps >= 60),
     [device?.formats],
   );
-  const canToggleNightMode = device?.supportsLowLightBoost ?? false;
-
-  const minZoom = device?.minZoom ?? 1;
-  const maxZoom = Math.min(device?.maxZoom ?? 1, MAX_ZOOM_FACTOR);
-
-  const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
-    const z = Math.max(Math.min(zoom.value, maxZoom), minZoom);
-    return {
-      zoom: z,
-    };
-  }, [maxZoom, minZoom, zoom]);
-
-  const setIsPressingButton = useCallback(
-    (newIsPressingButton: boolean) => {
-      isPressingButton.value = newIsPressingButton;
-    },
-    [isPressingButton],
-  );
 
   const onInitialized = useCallback(() => {
-    console.log("Camera initialized!");
     setIsCameraInitialized(true);
   }, []);
 
@@ -136,11 +125,15 @@ const CameraPage = () => {
   );
 
   const onFlipCameraPressed = useCallback(() => {
-    setCameraPosition((p) => (p === "back" ? "front" : "back"));
+    setPosition((p) => (p === "back" ? "front" : "back"));
   }, []);
 
   const onFlashPressed = useCallback(() => {
     setFlash((f) => (f === "off" ? "on" : "off"));
+  }, []);
+
+  const onFocus = useCallback((point: Point) => {
+    void camera.current?.focus(point);
   }, []);
 
   const flipCameraGesture = React.useMemo(
@@ -154,12 +147,6 @@ const CameraPage = () => {
     [onFlipCameraPressed],
   );
 
-  useEffect(() => {
-    // Reset zoom to it's default everytime the `device` changes.
-    zoom.value = device?.neutralZoom ?? 1;
-  }, [zoom, device]);
-
-  const startZoom = useSharedValue(0);
   const zoomGesture = Gesture.Pinch()
     .onStart(() => {
       startZoom.value = zoom.value;
@@ -179,17 +166,21 @@ const CameraPage = () => {
       );
     });
 
-  const focus = useCallback((point: Point) => {
-    if (camera.current == null) return;
-    void camera.current.focus(point);
-  }, []);
-
   const focusGesture = Gesture.Tap().onEnd(({ x, y }) => {
-    runOnJS(focus)({ x, y });
+    runOnJS(onFocus)({ x, y });
   });
 
-  const videoHdr = format?.supportsVideoHdr && enableHdr;
-  const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr;
+  const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
+    const z = Math.max(Math.min(zoom.value, maxZoom), minZoom);
+    return {
+      zoom: z,
+    };
+  }, [maxZoom, minZoom, zoom]);
+
+  useEffect(() => {
+    // Reset zoom to it's default everytime the `device` changes.
+    zoom.value = device?.neutralZoom ?? 1;
+  }, [zoom, device]);
 
   if (device === undefined) return <NoCameraDeviceError />;
 
@@ -271,7 +262,7 @@ const CameraPage = () => {
             />
           </TouchableOpacity>
         )}
-        {canToggleNightMode && (
+        {supportsNightMode && (
           <TouchableOpacity
             style={styles.button}
             onPress={() => setEnableNightMode(!enableNightMode)}
@@ -285,15 +276,7 @@ const CameraPage = () => {
         )}
         <TouchableOpacity
           style={styles.button}
-          // onPress={() => navigation.navigate("Devices")}
-          onPress={() => console.log("Devices")}
-        >
-          <Ionicons name="settings-outline" color="white" size={24} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          // onPress={() => navigation.navigate("CodeScannerPage")}
-          onPress={() => console.log("CodeScannerPage")}
+          onPress={() => router.navigate("/scanner")}
         >
           <Ionicons name="qr-code-outline" color="white" size={24} />
         </TouchableOpacity>
