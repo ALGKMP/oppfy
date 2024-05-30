@@ -3,6 +3,7 @@ import { Animated, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { AVPlaybackStatus } from "expo-av";
 import { ResizeMode, Video } from "expo-av";
+import type { CameraMode } from "expo-camera/next";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,11 +15,10 @@ import { BaseScreenView } from "~/components/Views";
 const PreviewScreen = () => {
   const { uri, type } = useLocalSearchParams<{
     uri: string;
-    type: "image" | "video";
+    type: CameraMode;
   }>();
 
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   const videoRef = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
@@ -64,7 +64,7 @@ const PreviewScreen = () => {
       style={styles.container}
     >
       <Header />
-      {type === "image" ? (
+      {type === "picture" ? (
         <Image
           source={{ uri }}
           style={{

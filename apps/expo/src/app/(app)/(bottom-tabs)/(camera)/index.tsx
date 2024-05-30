@@ -16,7 +16,9 @@ import type {
   FlashMode,
 } from "expo-camera/next";
 import { CameraView } from "expo-camera/next";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { ChevronLeft, X } from "@tamagui/lucide-icons";
 
 import { CaptureButton, StatusBarBlurBackground } from "~/components/camera";
 import {
@@ -36,6 +38,8 @@ const MAX_ZOOM = 0.25;
 const SCALE_FULL_ZOOM = 3;
 
 const Camera = () => {
+  const router = useRouter();
+
   const camera = useRef<CameraView>(null);
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
 
@@ -81,11 +85,18 @@ const Camera = () => {
   }, [MAX_ZOOM, MIN_ZOOM, zoom]);
 
   const onMediaCaptured = useCallback(
-    (url: string, type: "picture" | "video") => {
-      // TODO: HANDLE ROUTING
-      console.log(`${type} captured! ${JSON.stringify(url)}`);
+    (uri: string, type: CameraMode) => {
+      // // TODO: HANDLE ROUTING
+      console.log(`${type} captured! ${JSON.stringify(uri)}`);
+      router.push({
+        pathname: "/preview",
+        params: {
+          uri,
+          type,
+        },
+      });
     },
-    [],
+    [router],
   );
 
   const doubleTapGesture = React.useMemo(
@@ -158,6 +169,14 @@ const Camera = () => {
 
       <StatusBarBlurBackground />
 
+      <View style={styles.leftButtonRow}>
+        <TouchableOpacity
+          onPress={() => router.navigate("/self-profile/media-of-you/")}
+        >
+          <X />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.rightButtonRow}>
         <TouchableOpacity style={styles.button} onPress={onFlipCameraPressed}>
           <Ionicons name="camera-reverse" color="white" size={24} />
@@ -217,6 +236,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(140, 140, 140, 0.3)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  leftButtonRow: {
+    position: "absolute",
+    top: SAFE_AREA_PADDING.paddingTop + 12,
+    left: SAFE_AREA_PADDING.paddingLeft + 12,
   },
   rightButtonRow: {
     position: "absolute",
