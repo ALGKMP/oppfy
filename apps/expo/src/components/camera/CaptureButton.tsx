@@ -158,14 +158,19 @@ const CaptureButton: React.FC<Props> = ({
     [isPressingButton, setIsPressingButton, stopRecording, takePicture],
   );
 
-  const tapGesture = Gesture.Tap()
-    .maxDuration(Number.MAX_SAFE_INTEGER) // <-- this prevents the TapGestureHandler from going to State.FAILED when the user moves his finger outside of the child view (to zoom)
-    .onBegin((event) => {
-      runOnJS(handleTapOnStart)(event);
-    })
-    .onEnd((event) => {
-      runOnJS(handleTapOnEnd)(event);
-    });
+  const tapGesture = React.useMemo(
+    () =>
+      Gesture.Tap()
+        .shouldCancelWhenOutside(false)
+        .maxDuration(Number.MAX_SAFE_INTEGER) // <-- this prevents the TapGestureHandler from going to State.FAILED when the user moves his finger outside of the child view (to zoom)
+        .onBegin((event) => {
+          runOnJS(handleTapOnStart)(event);
+        })
+        .onEnd((event) => {
+          runOnJS(handleTapOnEnd)(event);
+        }),
+    [handleTapOnEnd, handleTapOnStart],
+  );
 
   const handlePanOnStart = useCallback(
     (event: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
@@ -201,15 +206,19 @@ const CaptureButton: React.FC<Props> = ({
     [cameraZoom, context.value.offsetY, context.value.startY, maxZoom, minZoom],
   );
 
-  const panGesture = Gesture.Pan()
-    .failOffsetX(PAN_GESTURE_HANDLER_FAIL_X)
-    .activeOffsetY(PAN_GESTURE_HANDLER_ACTIVE_Y)
-    .onStart((event) => {
-      runOnJS(handlePanOnStart)(event);
-    })
-    .onUpdate((event) => {
-      runOnJS(handlePanOnUpdate)(event);
-    });
+  const panGesture = React.useMemo(
+    () =>
+      Gesture.Pan()
+        .failOffsetX(PAN_GESTURE_HANDLER_FAIL_X)
+        .activeOffsetY(PAN_GESTURE_HANDLER_ACTIVE_Y)
+        .onStart((event) => {
+          runOnJS(handlePanOnStart)(event);
+        })
+        .onUpdate((event) => {
+          runOnJS(handlePanOnUpdate)(event);
+        }),
+    [handlePanOnStart, handlePanOnUpdate],
+  );
 
   const shadowStyle = useAnimatedStyle(
     () => ({
@@ -225,6 +234,7 @@ const CaptureButton: React.FC<Props> = ({
     }),
     [isPressingButton],
   );
+
   const buttonStyle = useAnimatedStyle(() => {
     let scale: number;
     if (enabled) {
