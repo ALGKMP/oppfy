@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download, X } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
+import { string } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
 
