@@ -146,10 +146,9 @@ const Camera = () => {
               mode={mode}
               flash={flash}
               facing={facing}
-              pointerEvents={"none"}
+              style={styles.camera}
               onCameraReady={onInitialized}
               animatedProps={cameraAnimatedProps}
-              style={styles.camera}
             />
           </Reanimated.View>
         </Reanimated.View>
@@ -222,6 +221,7 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
     borderRadius: 20, // Match the border radius to the container
+    pointerEvents: "none", // To allow gestures to pass through the camera view
   },
   captureButton: {
     position: "absolute",
