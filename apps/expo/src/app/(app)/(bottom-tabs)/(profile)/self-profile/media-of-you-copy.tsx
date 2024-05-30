@@ -7,8 +7,11 @@ import { Text } from 'tamagui';
 import { BaseScreenView } from '~/components/Views';
 
 const images: string[] = [
-  'https://example.com/image1.jpg',
-  'https://example.com/image2.jpg',
+  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
+  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
+  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
+  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
+  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
   // More images...
 ];
 
@@ -32,7 +35,7 @@ const MediaOfYou: React.FC = () => {
   });
 
   return (
-    <BaseScreenView>
+    <BaseScreenView flex={1}>
       <Text>Media of you</Text>
       <GestureDetector gesture={pinchGesture}>
         <Animated.View style={animatedStyle}>

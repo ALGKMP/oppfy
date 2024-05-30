@@ -79,6 +79,13 @@ const ProfileLayout = () => {
             tabBarLabel: () => <Grid3x3 />,
           }}
         />
+        <TopTabs.Screen
+          name="media-of-you-copy"
+          options={{
+            tabBarLabel: () => <Grid3x3 />,
+          }}
+        />
+
       </TopTabs>
     </ScrollView>
   );
