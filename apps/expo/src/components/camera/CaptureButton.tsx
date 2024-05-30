@@ -97,18 +97,16 @@ const CaptureButton = ({
     await camera.current.stopRecording();
   }, [camera]);
 
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(() => {
     if (camera.current === null) throw new Error("Camera ref is null");
 
     console.log("start recording");
     camera.current.startRecording({
       flash,
-      onRecordingError: (error) => {
-        console.error("Recording failed!", error);
+      onRecordingError: () => {
         onStoppedRecording();
       },
       onRecordingFinished: (video) => {
-        console.log(`Recording successfully finished! ${video.path}`);
         onMediaCaptured(video, "video");
         onStoppedRecording();
       },
