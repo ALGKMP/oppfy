@@ -3,7 +3,6 @@ import type { ViewProps } from "react-native";
 import { StyleSheet, View } from "react-native";
 import type {
   GestureStateChangeEvent,
-  GestureTouchEvent,
   GestureUpdateEvent,
   PanGestureHandlerEventPayload,
   TapGestureHandlerEventPayload,
@@ -43,7 +42,7 @@ interface Context {
 
 interface Props extends ViewProps {
   camera: React.RefObject<CameraView>;
-  onMediaCaptured: (url: string, type: CameraMode) => void;
+  onMediaCaptured: (uri: string, type: CameraMode) => void;
 
   minZoom: number;
   maxZoom: number;
@@ -70,10 +69,9 @@ const CaptureButton: React.FC<Props> = ({
   const isRecording = useRef(false);
   const pressDownDate = useRef<Date | undefined>(undefined);
 
+  const context = useSharedValue<Context>({});
   const recordingProgress = useSharedValue(0);
   const isPressingButton = useSharedValue(false);
-
-  const context = useSharedValue<Context>({});
 
   const takePicture = useCallback(async () => {
     if (camera.current === null) throw new Error("Camera ref is null");
@@ -92,7 +90,9 @@ const CaptureButton: React.FC<Props> = ({
   }, [recordingProgress]);
 
   const stopRecording = useCallback(() => {
-    camera.current?.stopRecording();
+    if (camera.current === null) throw new Error("Camera ref is null");
+    console.log("stop recording");
+    camera.current.stopRecording();
   }, [camera]);
 
   const startRecording = useCallback(async () => {
@@ -100,11 +100,16 @@ const CaptureButton: React.FC<Props> = ({
 
     setMode("video");
 
+    console.log("start recording");
     const recording = await camera.current.recordAsync();
+    console.log("recording", recording);
     if (recording === undefined) {
+      console.log("recording is undefined");
       onStoppedRecording();
       throw new Error("Failed to record video");
     }
+
+    console.log("recording.uri", recording.uri);
 
     onMediaCaptured(recording.uri, "video");
     onStoppedRecording();
@@ -112,34 +117,8 @@ const CaptureButton: React.FC<Props> = ({
     isRecording.current = true;
   }, [camera, onMediaCaptured, onStoppedRecording, setMode]);
 
-  const handleTapOnStart = useCallback(
-    (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
-      recordingProgress.value = 0;
-      isPressingButton.value = true;
-
-      const now = new Date();
-      pressDownDate.current = now;
-
-      setTimeout(() => {
-        const fn = async () => {
-          if (pressDownDate.current === now) {
-            await startRecording();
-          }
-        };
-
-        void fn();
-      }, START_RECORDING_DELAY);
-      setIsPressingButton(true);
-    },
-    [isPressingButton, recordingProgress, setIsPressingButton, startRecording],
-  );
-
   const handleTapOnEnd = useCallback(
-    async (
-      _event:
-        | GestureStateChangeEvent<TapGestureHandlerEventPayload>
-        | GestureTouchEvent,
-    ) => {
+    async (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
       if (pressDownDate.current === undefined) {
         throw new Error("PressDownDate ref.current was null");
       }
@@ -150,27 +129,40 @@ const CaptureButton: React.FC<Props> = ({
 
       diff < START_RECORDING_DELAY ? await takePicture() : stopRecording();
 
-      setTimeout(() => {
-        isPressingButton.value = false;
-        setIsPressingButton(false);
-      }, 500);
+      isPressingButton.value = false;
+      setIsPressingButton(false);
     },
     [isPressingButton, setIsPressingButton, stopRecording, takePicture],
   );
 
-  const tapGesture = React.useMemo(
-    () =>
-      Gesture.Tap()
-        .shouldCancelWhenOutside(false)
-        .maxDuration(Number.MAX_SAFE_INTEGER) // <-- this prevents the TapGestureHandler from going to State.FAILED when the user moves his finger outside of the child view (to zoom)
-        .onBegin((event) => {
-          runOnJS(handleTapOnStart)(event);
-        })
-        .onEnd((event) => {
-          runOnJS(handleTapOnEnd)(event);
-        }),
-    [handleTapOnEnd, handleTapOnStart],
+  const handleTapOnStart = useCallback(
+    (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
+      recordingProgress.value = 0;
+      isPressingButton.value = true;
+
+      const now = new Date();
+      pressDownDate.current = now;
+
+      setTimeout(() => {
+        if (pressDownDate.current === now) {
+          console.log("calling start recording");
+          void startRecording();
+        }
+      }, START_RECORDING_DELAY);
+      setIsPressingButton(true);
+    },
+    [isPressingButton, recordingProgress, setIsPressingButton, startRecording],
   );
+
+  const tapGesture = Gesture.Tap()
+    .shouldCancelWhenOutside(false)
+    .maxDuration(Number.MAX_SAFE_INTEGER) // <-- this prevents the TapGestureHandler from going to State.FAILED when the user moves his finger outside of the child view (to zoom)
+    .onBegin((event) => {
+      runOnJS(handleTapOnStart)(event);
+    })
+    .onEnd((event) => {
+      runOnJS(handleTapOnEnd)(event);
+    });
 
   const handlePanOnStart = useCallback(
     (event: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
@@ -206,19 +198,15 @@ const CaptureButton: React.FC<Props> = ({
     [cameraZoom, context.value.offsetY, context.value.startY, maxZoom, minZoom],
   );
 
-  const panGesture = React.useMemo(
-    () =>
-      Gesture.Pan()
-        .failOffsetX(PAN_GESTURE_HANDLER_FAIL_X)
-        .activeOffsetY(PAN_GESTURE_HANDLER_ACTIVE_Y)
-        .onStart((event) => {
-          runOnJS(handlePanOnStart)(event);
-        })
-        .onUpdate((event) => {
-          runOnJS(handlePanOnUpdate)(event);
-        }),
-    [handlePanOnStart, handlePanOnUpdate],
-  );
+  const panGesture = Gesture.Pan()
+    .failOffsetX(PAN_GESTURE_HANDLER_FAIL_X)
+    .activeOffsetY(PAN_GESTURE_HANDLER_ACTIVE_Y)
+    .onStart((event) => {
+      runOnJS(handlePanOnStart)(event);
+    })
+    .onUpdate((event) => {
+      runOnJS(handlePanOnUpdate)(event);
+    });
 
   const shadowStyle = useAnimatedStyle(
     () => ({

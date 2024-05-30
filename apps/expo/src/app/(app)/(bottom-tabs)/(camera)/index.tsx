@@ -18,7 +18,7 @@ import type {
 import { CameraView } from "expo-camera/next";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { ChevronLeft, X } from "@tamagui/lucide-icons";
+import { X } from "@tamagui/lucide-icons";
 
 import { CaptureButton, StatusBarBlurBackground } from "~/components/camera";
 import {
@@ -53,6 +53,7 @@ const Camera = () => {
 
   const onInitialized = useCallback(() => {
     setIsCameraInitialized(true);
+    console.log("Camera initialized");
   }, []);
 
   const onFlashPressed = useCallback(() => {
@@ -86,8 +87,7 @@ const Camera = () => {
 
   const onMediaCaptured = useCallback(
     (uri: string, type: CameraMode) => {
-      // // TODO: HANDLE ROUTING
-      console.log(`${type} captured! ${JSON.stringify(uri)}`);
+      console.log("Media captured", uri, type);
       router.push({
         pathname: "/preview",
         params: {
@@ -117,7 +117,6 @@ const Camera = () => {
           startZoom.value = zoom.value;
         })
         .onUpdate((event) => {
-          "worklet";
           const scale = interpolate(
             event.scale,
             [1 - 1 / SCALE_FULL_ZOOM, 1, SCALE_FULL_ZOOM],
