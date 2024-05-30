@@ -16,7 +16,7 @@ import { BaseScreenView } from "~/components/Views";
 const PreviewScreen = () => {
   const { uri, type } = useLocalSearchParams<{
     uri: string;
-    type: CameraMode;
+    type: "photo" | "video";
   }>();
 
   const router = useRouter();
@@ -65,7 +65,7 @@ const PreviewScreen = () => {
       style={styles.container}
     >
       <Header />
-      {type === "picture" ? (
+      {type === "photo" ? (
         <Image
           source={{ uri }}
           style={{
