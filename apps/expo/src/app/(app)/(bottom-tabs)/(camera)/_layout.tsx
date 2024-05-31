@@ -37,6 +37,12 @@ const CameraLayout = () => {
           animation: "fade",
         }}
       />
+      <Stack.Screen
+        name="post-to"
+        options={{
+          title: "Post To",
+        }}
+      />
     </Stack>
   );
 };
