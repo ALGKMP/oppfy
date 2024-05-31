@@ -1,17 +1,26 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { AVPlaybackStatus } from "expo-av";
 import { ResizeMode, Video } from "expo-av";
-import type { CameraMode } from "expo-camera/next";
 import { Image } from "expo-image";
+import * as MediaLibrary from "expo-media-library";
+import { PermissionStatus } from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download, X } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
-import { string } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
+
+type SaveState = "idle" | "saving" | "saved";
 
 const PreviewScreen = () => {
   const { uri, type } = useLocalSearchParams<{
@@ -24,6 +33,7 @@ const PreviewScreen = () => {
   const videoRef = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
   const controlFadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -40,12 +50,35 @@ const PreviewScreen = () => {
     }
   }, [controlFadeAnim, showControls]);
 
-  const togglePlayback = () => {
-    if (status?.isLoaded && status.isPlaying) {
-      void videoRef.current?.pauseAsync();
-    } else {
-      void videoRef.current?.playAsync();
+  const openSettings = async () => {
+    await Linking.openSettings();
+  };
+
+  const requestMediaLibraryPermission = async () => {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status === PermissionStatus.GRANTED) {
+      return true;
     }
+
+    Alert.alert(
+      "Media Library Permission",
+      "Media library permission is required for this app. Please enable it in your device settings.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Open Settings", onPress: void openSettings },
+      ],
+    );
+
+    return false;
+  };
+
+  const togglePlayback = () => {
+    if (!status?.isLoaded) return;
+
+    status.isPlaying
+      ? videoRef.current?.pauseAsync()
+      : videoRef.current?.playAsync();
+
     setShowControls(true);
     controlFadeAnim.setValue(1);
   };
@@ -54,6 +87,20 @@ const PreviewScreen = () => {
     setShowControls(true);
     controlFadeAnim.setValue(1);
     togglePlayback();
+  };
+
+  const saveToCameraRoll = async () => {
+    setSaveState("saving");
+
+    const hasPermission = await requestMediaLibraryPermission();
+
+    if (!hasPermission) {
+      setSaveState("idle");
+      return;
+    }
+
+    await MediaLibrary.createAssetAsync(uri);
+    setSaveState("saved");
   };
 
   return (
@@ -107,8 +154,22 @@ const PreviewScreen = () => {
         backgroundColor={"$background"}
         gap="$6"
       >
-        <Button flex={1} size={"$5"} borderRadius="$8" iconAfter={Download}>
-          Save
+        <Button
+          flex={1}
+          size={"$5"}
+          borderRadius="$8"
+          iconAfter={Download}
+          onPress={saveToCameraRoll}
+          disabled={saveState === "saving" || saveState === "saved"}
+          disabledStyle={{
+            opacity: 0.5,
+          }}
+        >
+          {saveState === "saving" ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            "Save"
+          )}
         </Button>
         <Button
           flex={2}
