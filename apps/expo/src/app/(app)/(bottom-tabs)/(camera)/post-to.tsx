@@ -55,6 +55,16 @@ const PostTo = () => {
     }
   };
 
+  const onContinue = () => {
+    router.navigate({
+      pathname: "/post-to",
+      params: {
+        uri,
+        type,
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <BaseScreenView paddingBottom={0}>
@@ -110,7 +120,7 @@ const PostTo = () => {
             title={item.username}
             subtitle={item.name}
             imageUrl={item.profilePictureUrl}
-            onPress={() => void }
+            onPress={onContinue}
           />
         )}
       />
