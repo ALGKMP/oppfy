@@ -100,7 +100,6 @@ const CaptureButton = ({
   const startRecording = useCallback(() => {
     if (camera.current === null) throw new Error("Camera ref is null");
 
-    console.log("start recording");
     camera.current.startRecording({
       flash,
       onRecordingError: () => {
@@ -111,8 +110,6 @@ const CaptureButton = ({
         onStoppedRecording();
       },
     });
-    // TODO: wait until startRecording returns to actually find out if the recording has successfully started
-    console.log("called startRecording()!");
     isRecording.current = true;
   }, [camera, flash, onMediaCaptured, onStoppedRecording]);
 
