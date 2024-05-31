@@ -10,16 +10,16 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { AVPlaybackStatus } from "expo-av";
 import { ResizeMode, Video } from "expo-av";
+import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { ArrowBigRight, Download, X } from "@tamagui/lucide-icons";
+import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
 import { StatusBarBlurBackground } from "~/components/camera";
-import { BaseScreenView } from "~/components/Views";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
@@ -35,6 +35,7 @@ const PreviewScreen = () => {
   }>();
 
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
@@ -74,8 +75,18 @@ const PreviewScreen = () => {
     setSaveState("saved");
   };
 
+  const onContinue = () => {
+    router.navigate({
+      pathname: "/post-to",
+      params: {
+        uri,
+        type,
+      },
+    });
+  };
+
   return (
-    <BaseScreenView padding={0} safeAreaEdges={["bottom"]}>
+    <View style={styles.container}>
       {type === "photo" ? (
         <PreviewImage uri={uri} />
       ) : (
@@ -84,61 +95,64 @@ const PreviewScreen = () => {
 
       <StatusBarBlurBackground />
 
+      <View style={styles.bottomContainer}>
+        <View style={styles.clipBlurView}>
+          <BlurView
+            tint="light"
+            intensity={25}
+            style={{ backgroundColor: "transparent" }}
+          >
+            <XStack
+              paddingTop="$4"
+              paddingHorizontal="$6"
+              justifyContent="space-evenly"
+              paddingBottom={insets.bottom}
+              gap="$6"
+            >
+              <Button
+                flex={1}
+                size={"$5"}
+                borderRadius="$8"
+                iconAfter={saveState === "idle" ? Download : undefined}
+                onPress={saveToCameraRoll}
+                disabled={saveState === "saving" || saveState === "saved"}
+                disabledStyle={{
+                  opacity: 0.5,
+                }}
+              >
+                {saveState === "saving" ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : saveState === "saved" ? (
+                  "Saved"
+                ) : (
+                  "Save"
+                )}
+              </Button>
+              <Button
+                flex={2}
+                size={"$5"}
+                borderRadius="$8"
+                iconAfter={ArrowBigRight}
+                onPress={onContinue}
+              >
+                Continue
+              </Button>
+            </XStack>
+          </BlurView>
+        </View>
+      </View>
+
       <View style={styles.leftButtonRow}>
         <TouchableOpacity style={styles.button} onPress={() => router.back()}>
           <Ionicons name="close" color="white" size={24} />
         </TouchableOpacity>
       </View>
-
-      <XStack
-        paddingTop="$4"
-        paddingHorizontal="$6"
-        borderTopLeftRadius={"$10"}
-        borderTopRightRadius={"$10"}
-        justifyContent="space-evenly"
-        backgroundColor={"red"}
-        gap="$6"
-      >
-        <Button
-          flex={1}
-          size={"$5"}
-          borderRadius="$8"
-          iconAfter={saveState === "idle" ? Download : undefined}
-          onPress={saveToCameraRoll}
-          disabled={saveState === "saving" || saveState === "saved"}
-          disabledStyle={{
-            opacity: 0.5,
-          }}
-        >
-          {saveState === "saving" ? (
-            <ActivityIndicator size="small" color="#ffffff" />
-          ) : saveState === "saved" ? (
-            "Saved"
-          ) : (
-            "Save"
-          )}
-        </Button>
-        <Button
-          flex={2}
-          size={"$5"}
-          borderRadius="$8"
-          iconAfter={ArrowBigRight}
-          onPress={() => router.push("/post-to")}
-        >
-          Continue
-        </Button>
-      </XStack>
-    </BaseScreenView>
+    </View>
   );
 };
 
 const PreviewImage = ({ uri }: { uri: string }) => (
-  <Image
-    source={{ uri }}
-    style={{
-      flex: 1,
-    }}
-  />
+  <Image source={{ uri }} style={StyleSheet.absoluteFill} />
 );
 
 const PreviewVideo = ({ uri }: { uri: string }) => {
@@ -180,7 +194,7 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
 
   return (
     <TouchableOpacity
-      style={styles.videoTouchArea}
+      style={StyleSheet.absoluteFill}
       onPress={handleVideoPress}
       activeOpacity={1}
     >
@@ -209,11 +223,10 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
 };
 
 const styles = StyleSheet.create({
-  media: {
-    width: "100%",
-    height: "100%",
+  container: {
+    flex: 1,
   },
-  videoTouchArea: {
+  media: {
     flex: 1,
   },
   playButton: {
@@ -238,6 +251,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: SAFE_AREA_PADDING.paddingTop + 12,
     left: SAFE_AREA_PADDING.paddingLeft + 12,
+  },
+  clipBlurView: {
+    overflow: "hidden",
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+  },
+  bottomContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
   },
 });
 
