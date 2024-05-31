@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEffect } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolation,
@@ -26,8 +26,10 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
+import { SizableText, Text, View } from "tamagui";
 
 import { CaptureButton, StatusBarBlurBackground } from "~/components/camera";
+import { BaseScreenView } from "~/components/Views";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
@@ -229,6 +231,15 @@ const CameraPage = () => {
 
       <StatusBarBlurBackground />
 
+      <View style={styles.leftButtonRow}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.navigate("/self-profile/media-of-you/")}
+        >
+          <Ionicons name="close" color="white" size={24} />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.rightButtonRow}>
         <TouchableOpacity style={styles.button} onPress={onFlipCameraPressed}>
           <Ionicons name="camera-reverse" color="white" size={24} />
@@ -247,7 +258,9 @@ const CameraPage = () => {
             style={styles.button}
             onPress={() => setTargetFps((t) => (t === 30 ? 60 : 30))}
           >
-            <Text style={styles.text}>{`${targetFps}\nFPS`}</Text>
+            <SizableText size="$1" textAlign="center">
+              {`${targetFps}\nFPS`}
+            </SizableText>
           </TouchableOpacity>
         )}
         {supportsHdr && (
@@ -287,9 +300,9 @@ const CameraPage = () => {
 
 const NoCameraDeviceError = () => {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ color: "white" }}>No camera device found</Text>
-    </View>
+    <BaseScreenView justifyContent="center" alignItems="center">
+      <Text>No camera device found</Text>
+    </BaseScreenView>
   );
 };
 
@@ -298,7 +311,6 @@ export default CameraPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
   },
   captureButton: {
     position: "absolute",
@@ -314,15 +326,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  leftButtonRow: {
+    position: "absolute",
+    top: SAFE_AREA_PADDING.paddingTop + 12,
+    left: SAFE_AREA_PADDING.paddingLeft + 12,
+  },
   rightButtonRow: {
     position: "absolute",
     top: SAFE_AREA_PADDING.paddingTop + 12,
     right: SAFE_AREA_PADDING.paddingRight + 12,
-  },
-  text: {
-    color: "white",
-    fontSize: 11,
-    fontWeight: "bold",
-    textAlign: "center",
   },
 });
