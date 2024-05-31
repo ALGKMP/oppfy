@@ -18,7 +18,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download, X } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
+import { StatusBarBlurBackground } from "~/components/camera";
 import { BaseScreenView } from "~/components/Views";
+import {
+  CONTENT_SPACING,
+  CONTROL_BUTTON_SIZE,
+  SAFE_AREA_PADDING,
+} from "~/constants/camera";
 
 type SaveState = "idle" | "saving" | "saved";
 
@@ -30,25 +36,7 @@ const PreviewScreen = () => {
 
   const router = useRouter();
 
-  const videoRef = useRef<Video>(null);
-  const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
-  const [showControls, setShowControls] = useState(true);
   const [saveState, setSaveState] = useState<SaveState>("idle");
-  const controlFadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (showControls) {
-      const timeout = setTimeout(() => {
-        Animated.timing(controlFadeAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => setShowControls(false));
-      }, 2000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [controlFadeAnim, showControls]);
 
   const openSettings = async () => {
     await Linking.openSettings();
@@ -70,23 +58,6 @@ const PreviewScreen = () => {
     );
 
     return false;
-  };
-
-  const togglePlayback = () => {
-    if (!status?.isLoaded) return;
-
-    status.isPlaying
-      ? videoRef.current?.pauseAsync()
-      : videoRef.current?.playAsync();
-
-    setShowControls(true);
-    controlFadeAnim.setValue(1);
-  };
-
-  const handleVideoPress = () => {
-    setShowControls(true);
-    controlFadeAnim.setValue(1);
-    togglePlayback();
   };
 
   const saveToCameraRoll = async () => {
@@ -111,42 +82,20 @@ const PreviewScreen = () => {
       backgroundColor={"$backgroundTransparent"}
       style={styles.container}
     >
-      <Header />
       {type === "photo" ? (
-        <Image
-          source={{ uri }}
-          style={{
-            flex: 1,
-          }}
-        />
+        <PreviewImage uri={uri} />
       ) : (
-        <TouchableOpacity
-          style={styles.videoTouchArea}
-          onPress={handleVideoPress}
-          activeOpacity={1}
-        >
-          <Video
-            ref={videoRef}
-            style={styles.media}
-            source={{ uri }}
-            resizeMode={ResizeMode.COVER}
-            isLooping
-            shouldPlay
-            onPlaybackStatusUpdate={(status) => setStatus(status)}
-          />
-          {showControls && (
-            <Animated.View
-              style={[styles.playButton, { opacity: controlFadeAnim }]}
-            >
-              <Ionicons
-                name={status?.isLoaded && status.isPlaying ? "pause" : "play"}
-                size={48}
-                color="white"
-              />
-            </Animated.View>
-          )}
-        </TouchableOpacity>
+        <PreviewVideo uri={uri} />
       )}
+
+      <StatusBarBlurBackground />
+
+      <View style={styles.leftButtonRow}>
+        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+          <Ionicons name="close" color="white" size={24} />
+        </TouchableOpacity>
+      </View>
+
       <XStack
         justifyContent="space-evenly"
         paddingTop="$4"
@@ -158,7 +107,7 @@ const PreviewScreen = () => {
           flex={1}
           size={"$5"}
           borderRadius="$8"
-          iconAfter={Download}
+          iconAfter={saveState === "saved" ? Download : undefined}
           onPress={saveToCameraRoll}
           disabled={saveState === "saving" || saveState === "saved"}
           disabledStyle={{
@@ -176,6 +125,7 @@ const PreviewScreen = () => {
           size={"$5"}
           borderRadius="$8"
           iconAfter={ArrowBigRight}
+          onPress={() => router.push("/post-to")}
         >
           Continue
         </Button>
@@ -184,26 +134,79 @@ const PreviewScreen = () => {
   );
 };
 
-const Header = () => {
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
+const PreviewImage = ({ uri }: { uri: string }) => (
+  <Image
+    source={{ uri }}
+    style={{
+      flex: 1,
+    }}
+  />
+);
+
+const PreviewVideo = ({ uri }: { uri: string }) => {
+  const videoRef = useRef<Video>(null);
+  const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
+  const [showControls, setShowControls] = useState(true);
+  const controlFadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (showControls) {
+      const timeout = setTimeout(() => {
+        Animated.timing(controlFadeAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => setShowControls(false));
+      }, 2000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [controlFadeAnim, showControls]);
+
+  const togglePlayback = () => {
+    if (!status?.isLoaded) return;
+
+    status.isPlaying
+      ? videoRef.current?.pauseAsync()
+      : videoRef.current?.playAsync();
+
+    setShowControls(true);
+    controlFadeAnim.setValue(1);
+  };
+
+  const handleVideoPress = () => {
+    setShowControls(true);
+    controlFadeAnim.setValue(1);
+    togglePlayback();
+  };
 
   return (
-    <View
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        paddingTop: insets.top + 16,
-        paddingHorizontal: 16,
-        zIndex: 1,
-      }}
+    <TouchableOpacity
+      style={styles.videoTouchArea}
+      onPress={handleVideoPress}
+      activeOpacity={1}
     >
-      <TouchableOpacity hitSlop={10} onPress={() => router.back()}>
-        <X size={24} color="white" />
-      </TouchableOpacity>
-    </View>
+      <Video
+        ref={videoRef}
+        style={styles.media}
+        source={{ uri }}
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        shouldPlay
+        onPlaybackStatusUpdate={(status) => setStatus(status)}
+      />
+      {showControls && (
+        <Animated.View
+          style={[styles.playButton, { opacity: controlFadeAnim }]}
+        >
+          <Ionicons
+            name={status?.isLoaded && status.isPlaying ? "pause" : "play"}
+            size={48}
+            color="white"
+          />
+        </Animated.View>
+      )}
+    </TouchableOpacity>
   );
 };
 
@@ -227,6 +230,20 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 48,
     padding: 10,
+  },
+  button: {
+    marginBottom: CONTENT_SPACING,
+    width: CONTROL_BUTTON_SIZE,
+    height: CONTROL_BUTTON_SIZE,
+    borderRadius: CONTROL_BUTTON_SIZE / 2,
+    backgroundColor: "rgba(140, 140, 140, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  leftButtonRow: {
+    position: "absolute",
+    top: SAFE_AREA_PADDING.paddingTop + 12,
+    left: SAFE_AREA_PADDING.paddingLeft + 12,
   },
 });
 
