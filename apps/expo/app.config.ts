@@ -17,7 +17,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   updates: {
     fallbackToCacheTimeout: 0,
   },
-  assetBundlePatterns: ["**/*"],
   ios: {
     googleServicesFile: "./GoogleService-Info.plist",
     supportsTablet: true,
@@ -99,5 +98,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    ["expo-asset", { assetBundlePatterns: ["**/*"] }],
   ],
 });
