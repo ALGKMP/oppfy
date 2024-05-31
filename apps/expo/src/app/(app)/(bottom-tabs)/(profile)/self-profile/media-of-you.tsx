@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image } from 'react-native';
+import { Image, View, Dimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { styled } from 'tamagui';
@@ -29,8 +29,22 @@ const MediaOfYou: React.FC = () => {
     });
 
   const animatedStyle = useAnimatedStyle(() => {
+    const baseSize = 100;
+    const scaledSize = baseSize * scale.value;
+    const screenWidth = Dimensions.get('window').width;
+    const columns = Math.floor(screenWidth / scaledSize);
+    const adjustedSize = screenWidth / columns;
+
     return {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      width: '100%',
       transform: [{ scale: scale.value }],
+      children: {
+        width: adjustedSize,
+        height: adjustedSize,
+      },
     };
   });
 
@@ -38,10 +52,10 @@ const MediaOfYou: React.FC = () => {
     <BaseScreenView>
       <Text>Media of you</Text>
       <GestureDetector gesture={pinchGesture}>
-        <Animated.View style={animatedStyle}>
-            {images.map((image, index) => (
-              <StyledImage key={index} source={{ uri: image }} />
-            ))}
+        <Animated.View style={[animatedStyle, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }]}>
+          {images.map((image, index) => (
+            <StyledImage key={index} source={{ uri: image }} style={{ width: animatedStyle.children.width, height: animatedStyle.children.height }} />
+          ))}
         </Animated.View>
       </GestureDetector>
     </BaseScreenView>
@@ -50,8 +64,6 @@ const MediaOfYou: React.FC = () => {
 
 export default MediaOfYou;
 
-const StyledImage = styled(Image, {
-  width: 100,
-  height: 100,
+const StyledImage = styled(Animated.Image, {
   margin: 5,
 });
