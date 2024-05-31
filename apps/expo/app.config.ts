@@ -98,6 +98,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
-    ["expo-asset", { assetBundlePatterns: ["**/*"] }],
   ],
 });

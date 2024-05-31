@@ -43,7 +43,6 @@
     "@trpc/server": "^10.45.2",
     "babel-preset-expo": "^11.0.6",
     "expo": "^51.0.9",
-    "expo-asset": "~10.0.6",
     "expo-av": "~14.0.5",
     "expo-build-properties": "~0.12.1",
     "expo-camera": "^15.0.10",
@@ -100,7 +99,7 @@
     "@types/react": "^18.2.79",
     "eslint": "^9.2.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   },
   "prettier": "@oppfy/prettier-config"
 }
