@@ -1,257 +1,328 @@
-import React, { useRef, useState } from "react";
-import { Animated, StyleSheet, TouchableOpacity } from "react-native";
+import * as React from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useEffect } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Reanimated, {
+  Extrapolation,
+  interpolate,
+  runOnJS,
+  useAnimatedProps,
+  useSharedValue,
+} from "react-native-reanimated";
 import type {
-  GestureEvent,
-  PinchGestureHandlerEventPayload,
-} from "react-native-gesture-handler";
+  CameraProps,
+  PhotoFile,
+  Point,
+  VideoFile,
+} from "react-native-vision-camera";
 import {
-  GestureHandlerRootView,
-  PinchGestureHandler,
-  State,
-  TapGestureHandler,
-} from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { CameraType, FlashMode } from "expo-camera/next";
-import { CameraView, useCameraPermissions } from "expo-camera/next";
-import * as Haptics from "expo-haptics";
+  Camera,
+  useCameraDevice,
+  useCameraFormat,
+  useLocationPermission,
+  useMicrophonePermission,
+} from "react-native-vision-camera";
 import { useRouter } from "expo-router";
-import { X, Zap, ZapOff } from "@tamagui/lucide-icons";
-import { Button, Text, View, XStack } from "tamagui";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/core";
 
-const CameraScreen = () => {
+import { CaptureButton, StatusBarBlurBackground } from "~/components/camera";
+import {
+  CONTENT_SPACING,
+  CONTROL_BUTTON_SIZE,
+  MAX_ZOOM_FACTOR,
+  SAFE_AREA_PADDING,
+  SCREEN_HEIGHT,
+  SCREEN_WIDTH,
+} from "~/constants/camera";
+import useIsForeground from "~/hooks/useIsForeground";
+
+const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
+Reanimated.addWhitelistedNativeProps({
+  zoom: true,
+});
+
+const SCALE_FULL_ZOOM = 3;
+
+const CameraPage = () => {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
-  const cameraRef = useRef<CameraView>(null);
-  const animation = useRef(new Animated.Value(0)).current;
+  const camera = useRef<Camera>(null);
 
-  const [facing, setFacing] = useState<CameraType>("back");
-  const [flash, setFlash] = useState<FlashMode>("off");
-  const [isRecording, setIsRecording] = useState(false);
-  const [zoom, setZoom] = useState(0);
-  const [lastScale, setLastScale] = useState(1);
-  const [mode, setMode] = useState<"picture" | "video">("picture");
+  const location = useLocationPermission();
+  const microphone = useMicrophonePermission();
 
-  const [permission, requestPermission] = useCameraPermissions();
-  const [pressTimeout, setPressTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isCameraInitialized, setIsCameraInitialized] = useState(false);
 
-  const handleDoubleTap = () => {
-    toggleCameraFacing();
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
+  const zoom = useSharedValue(1);
+  const startZoom = useSharedValue(zoom.value);
 
-  const toggleCameraFacing = () => {
-    setFacing((current) => (current === "back" ? "front" : "back"));
-  };
+  const isPressingButton = useSharedValue(false);
 
-  const toggleFlashlight = () => {
-    setFlash((current) => (current === "off" ? "on" : "off"));
-  };
+  const setIsPressingButton = useCallback(
+    (newIsPressingButton: boolean) => {
+      isPressingButton.value = newIsPressingButton;
+    },
+    [isPressingButton],
+  );
 
-  const handleTakePicture = async () => {
-    if (cameraRef.current) {
-      const options = {
-        base64: true,
-        exif: true,
-      };
-      const picture = await cameraRef.current.takePictureAsync(options);
+  // check if camera page is active
+  const isFocussed = useIsFocused();
+  const isForeground = useIsForeground();
+  const isActive = isFocussed && isForeground;
 
-      if (picture !== undefined) {
-        router.push({
-          pathname: "/preview",
-          params: { uri: picture.uri, type: "image" },
-        });
-      }
-    }
-  };
+  const [targetFps, setTargetFps] = useState(60);
 
-  const handleStartRecording = async () => {
-    if (cameraRef.current) {
-      setMode("video");
-      setIsRecording(true);
-      const options = {
-        maxDuration: 60,
-      };
-      const video = await cameraRef.current.recordAsync(options);
-      if (video?.uri) {
-        router.push({
-          pathname: "/preview",
-          params: { uri: video.uri, type: "video" },
-        });
-      }
-    }
-  };
+  const [enableHdr, setEnableHdr] = useState(false);
+  const [enableNightMode, setEnableNightMode] = useState(false);
 
-  const handlePressIn = () => {
-    setPressTimeout(
-      setTimeout(() => {
-        void handleStartRecording();
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-      }, 200),
-    );
-  };
+  const [flash, setFlash] = useState<"off" | "on">("off");
+  const [position, setPosition] = useState<"front" | "back">("back");
 
-  const handlePressOut = () => {
-    if (pressTimeout) {
-      clearTimeout(pressTimeout);
-      setPressTimeout(null);
-    }
+  const device = useCameraDevice(position);
 
-    if (isRecording) {
-      cameraRef.current?.stopRecording();
-      setIsRecording(false);
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-    } else {
-      void handleTakePicture();
-    }
-  };
+  const screenAspectRatio = SCREEN_HEIGHT / SCREEN_WIDTH;
+  const format = useCameraFormat(device, [
+    { fps: targetFps },
+    { videoAspectRatio: screenAspectRatio },
+    { videoResolution: "max" },
+    { photoAspectRatio: screenAspectRatio },
+    { photoResolution: "max" },
+  ]);
 
-  const handlePinchEvent = (
-    event: GestureEvent<PinchGestureHandlerEventPayload>,
-  ) => {
-    const scale = event.nativeEvent.scale;
-    const newZoom = Math.min(Math.max(zoom + (scale - lastScale) * 0.2, 0), 1);
-    setZoom(newZoom);
-    setLastScale(scale);
-  };
+  const fps = Math.min(format?.maxFps ?? 1, targetFps);
 
-  const handlePinchStateChange = (
-    event: GestureEvent<PinchGestureHandlerEventPayload>,
-  ) => {
-    if (
-      event.nativeEvent.state === State.END ||
-      event.nativeEvent.state === State.CANCELLED
-    ) {
-      setLastScale(1);
-    }
-  };
+  const minZoom = device?.minZoom ?? 1;
+  const maxZoom = Math.min(device?.maxZoom ?? 1, MAX_ZOOM_FACTOR);
 
-  if (!permission?.granted) {
-    return (
-      <View style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission}>Grant Permission</Button>
-      </View>
-    );
-  }
+  const videoHdr = format?.supportsVideoHdr && enableHdr;
+  const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr;
 
-  const animatedButtonStyle = {
-    backgroundColor: animation.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["white", "red"],
-    }),
-    borderColor: animation.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["red", "white"],
-    }),
-  };
+  const supportsHdr = format?.supportsPhotoHdr;
+  const supportsFlash = device?.hasFlash ?? false;
+  const supportsNightMode = device?.supportsLowLightBoost ?? false;
+  const supports60Fps = useMemo(
+    () => device?.formats.some((format) => format.maxFps >= 60),
+    [device?.formats],
+  );
+
+  const onInitialized = useCallback(() => {
+    setIsCameraInitialized(true);
+  }, []);
+
+  const onMediaCaptured = useCallback(
+    (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+      router.push({
+        pathname: "/preview",
+        params: {
+          type,
+          uri: media.path,
+        },
+      });
+    },
+    [router],
+  );
+
+  const onFlipCameraPressed = useCallback(() => {
+    setPosition((p) => (p === "back" ? "front" : "back"));
+  }, []);
+
+  const onFlashPressed = useCallback(() => {
+    setFlash((f) => (f === "off" ? "on" : "off"));
+  }, []);
+
+  const onFocus = useCallback((point: Point) => {
+    void camera.current?.focus(point);
+  }, []);
+
+  const flipCameraGesture = React.useMemo(
+    () =>
+      Gesture.Tap()
+        .numberOfTaps(2)
+        .maxDistance(20)
+        .onEnd(() => {
+          runOnJS(onFlipCameraPressed)();
+        }),
+    [onFlipCameraPressed],
+  );
+
+  const zoomGesture = Gesture.Pinch()
+    .onStart(() => {
+      startZoom.value = zoom.value;
+    })
+    .onUpdate((event) => {
+      const scale = interpolate(
+        event.scale,
+        [1 - 1 / SCALE_FULL_ZOOM, 1, SCALE_FULL_ZOOM],
+        [-1, 0, 1],
+        Extrapolation.CLAMP,
+      );
+      zoom.value = interpolate(
+        scale,
+        [-1, 0, 1],
+        [minZoom, startZoom.value, maxZoom],
+        Extrapolation.CLAMP,
+      );
+    });
+
+  const focusGesture = Gesture.Tap().onEnd(({ x, y }) => {
+    runOnJS(onFocus)({ x, y });
+  });
+
+  const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
+    const z = Math.max(Math.min(zoom.value, maxZoom), minZoom);
+    return {
+      zoom: z,
+    };
+  }, [maxZoom, minZoom, zoom]);
+
+  useEffect(() => {
+    // Reset zoom to it's default everytime the `device` changes.
+    zoom.value = device?.neutralZoom ?? 1;
+  }, [zoom, device]);
+
+  if (device === undefined) return <NoCameraDeviceError />;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <PinchGestureHandler
-        onGestureEvent={handlePinchEvent}
-        onHandlerStateChange={handlePinchStateChange}
+    <View style={styles.container}>
+      <GestureDetector
+        gesture={Gesture.Simultaneous(
+          zoomGesture,
+          flipCameraGesture,
+          focusGesture,
+        )}
       >
-        <TapGestureHandler
-          onActivated={handleDoubleTap}
-          numberOfTaps={2}
-          maxDist={20}
-        >
-          <View style={{ flex: 1 }}>
-            <CameraView
-              ref={cameraRef}
-              style={{ flex: 1 }}
-              facing={facing}
-              flash={flash}
-              zoom={zoom}
-              mode={mode}
-            >
-              <View
-                flex={1}
-                paddingTop={insets.top}
-                paddingBottom={insets.bottom}
-                paddingHorizontal="$5"
-                backgroundColor="transparent"
-                justifyContent="space-between"
-              >
-                <TouchableOpacity style={{ flex: 1 }} activeOpacity={1}>
-                  <XStack alignItems="center" justifyContent="space-between">
-                    <TouchableOpacity
-                      hitSlop={10}
-                      onPress={() => router.back()}
-                    >
-                      <X />
-                    </TouchableOpacity>
-                    <TouchableOpacity hitSlop={10} onPress={toggleFlashlight}>
-                      {flash === "on" ? <Zap fill={"white"} /> : <ZapOff />}
-                    </TouchableOpacity>
-                  </XStack>
-                </TouchableOpacity>
+        <ReanimatedCamera
+          ref={camera}
+          device={device}
+          isActive={isActive}
+          onInitialized={onInitialized}
+          format={format}
+          fps={fps}
+          photoHdr={photoHdr}
+          videoHdr={videoHdr}
+          photoQualityBalance="quality"
+          lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+          enableZoomGesture={false}
+          animatedProps={cameraAnimatedProps}
+          orientation="portrait"
+          photo={true}
+          video={true}
+          audio={microphone.hasPermission}
+          enableLocation={location.hasPermission}
+          style={StyleSheet.absoluteFill}
+        />
+      </GestureDetector>
 
-                <XStack justifyContent="center">
-                  <TouchableOpacity
-                    style={styles.cameraButton}
-                    onPressIn={handlePressIn}
-                    onPressOut={handlePressOut}
-                  >
-                    <Animated.View
-                      style={[styles.innerButton, animatedButtonStyle]}
-                    />
-                  </TouchableOpacity>
-                </XStack>
-              </View>
-            </CameraView>
-          </View>
-        </TapGestureHandler>
-      </PinchGestureHandler>
-    </GestureHandlerRootView>
+      <CaptureButton
+        style={styles.captureButton}
+        camera={camera}
+        onMediaCaptured={onMediaCaptured}
+        cameraZoom={zoom}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+        flash={supportsFlash ? flash : "off"}
+        enabled={isCameraInitialized && isActive}
+        setIsPressingButton={setIsPressingButton}
+      />
+
+      <StatusBarBlurBackground />
+
+      <View style={styles.rightButtonRow}>
+        <TouchableOpacity style={styles.button} onPress={onFlipCameraPressed}>
+          <Ionicons name="camera-reverse" color="white" size={24} />
+        </TouchableOpacity>
+        {supportsFlash && (
+          <TouchableOpacity style={styles.button} onPress={onFlashPressed}>
+            <Ionicons
+              name={flash === "on" ? "flash" : "flash-off"}
+              color="white"
+              size={24}
+            />
+          </TouchableOpacity>
+        )}
+        {supports60Fps && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setTargetFps((t) => (t === 30 ? 60 : 30))}
+          >
+            <Text style={styles.text}>{`${targetFps}\nFPS`}</Text>
+          </TouchableOpacity>
+        )}
+        {supportsHdr && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setEnableHdr((h) => !h)}
+          >
+            <MaterialIcons
+              name={enableHdr ? "hdr-on" : "hdr-off"}
+              color="white"
+              size={24}
+            />
+          </TouchableOpacity>
+        )}
+        {supportsNightMode && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setEnableNightMode(!enableNightMode)}
+          >
+            <Ionicons
+              name={enableNightMode ? "moon" : "moon-outline"}
+              color="white"
+              size={24}
+            />
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.navigate("/scanner")}
+        >
+          <Ionicons name="qr-code-outline" color="white" size={24} />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
+const NoCameraDeviceError = () => {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ color: "white" }}>No camera device found</Text>
+    </View>
+  );
+};
+
+export default CameraPage;
+
 const styles = StyleSheet.create({
-  permissionContainer: {
+  container: {
     flex: 1,
+    backgroundColor: "black",
+  },
+  captureButton: {
+    position: "absolute",
+    alignSelf: "center",
+    bottom: SAFE_AREA_PADDING.paddingBottom,
+  },
+  button: {
+    marginBottom: CONTENT_SPACING,
+    width: CONTROL_BUTTON_SIZE,
+    height: CONTROL_BUTTON_SIZE,
+    borderRadius: CONTROL_BUTTON_SIZE / 2,
+    backgroundColor: "rgba(140, 140, 140, 0.3)",
     justifyContent: "center",
     alignItems: "center",
   },
-  permissionText: {
+  rightButtonRow: {
+    position: "absolute",
+    right: SAFE_AREA_PADDING.paddingRight,
+    top: SAFE_AREA_PADDING.paddingTop,
+  },
+  text: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
-  },
-  cameraButton: {
-    height: 80,
-    width: 80,
-    borderRadius: 40,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 10,
-  },
-  innerButton: {
-    height: 70,
-    width: 70,
-    borderRadius: 35,
-    backgroundColor: "transparent",
-    borderWidth: 2,
-  },
-  recording: {
-    backgroundColor: "red",
-    borderColor: "white",
-  },
-  notRecording: {
-    backgroundColor: "transparent",
-    borderColor: "red",
   },
 });
-
-export default CameraScreen;
