@@ -42,6 +42,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     "expo-router",
+    "expo-font",
     "@react-native-firebase/app",
     "@react-native-firebase/auth",
     "@react-native-firebase/perf",
@@ -96,6 +97,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ios: {
           useFrameworks: "static",
         },
+      },
+    ],
+    [
+      "expo-asset",
+      {
+        assets: ["./assets"],
       },
     ],
   ],
