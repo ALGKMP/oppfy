@@ -22,6 +22,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile: "./GoogleService-Info.plist",
     supportsTablet: true,
     bundleIdentifier: "com.algkmp.oppfy",
+    entitlements: {
+      "aps-environment": "development",
+    },
   },
   android: {
     googleServicesFile: "./google-services.json",
@@ -41,6 +44,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
   },
   plugins: [
+    "expo-font",
     "expo-router",
     "@react-native-firebase/app",
     "@react-native-firebase/auth",

@@ -80,11 +80,12 @@ const ProfileLayout = () => {
           }}
         />
         <TopTabs.Screen
-          name="media-of-friends"
+          name="media-of-you-copy"
           options={{
-            tabBarLabel: () => <Camera />,
+            tabBarLabel: () => <Grid3x3 />,
           }}
         />
+
       </TopTabs>
     </ScrollView>
   );

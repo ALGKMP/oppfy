@@ -19,7 +19,7 @@
     "@opensearch-project/opensearch": "^2.8.0",
     "zod": "^3.23.8",
     "@aws-sdk/client-s3": "^3.564.0",
-    "gremlin" : "^3.7.2"
+    "gremlin": "^3.7.2"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
@@ -28,7 +28,7 @@
     "eslint": "^9.2.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5",
-    "@types/gremlin" : "^3.6.7"
+    "@types/gremlin": "^3.6.7"
   },
   "prettier": "@oppfy/prettier-config"
 }
