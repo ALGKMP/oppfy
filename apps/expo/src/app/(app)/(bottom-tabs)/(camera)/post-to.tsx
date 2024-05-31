@@ -3,7 +3,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ArrowBigLeft, UserRoundX } from "@tamagui/lucide-icons";
-import { Button, Separator, SizableText, Text, View, XStack } from "tamagui";
+import {
+  Button,
+  Separator,
+  SizableText,
+  Text,
+  useTheme,
+  View,
+  XStack,
+} from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -16,6 +24,8 @@ const PostTo = () => {
     uri: string;
     type: "photo" | "video";
   }>();
+
+  const theme = useTheme();
 
   const router = useRouter();
   const headerHeight = useHeaderHeight();
@@ -104,32 +114,43 @@ const PostTo = () => {
   }
 
   return (
-    <BaseScreenView paddingBottom={0} safeAreaEdges={["bottom"]}>
-      <FlashList
-        data={friendItems}
-        onRefresh={refetch}
-        refreshing={isLoading}
-        ItemSeparatorComponent={Separator}
-        estimatedItemSize={75}
-        onEndReached={handleOnEndReached}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader title="Friends" />}
-        renderItem={({ item }) => (
-          <VirtualizedListItem
-            loading={false}
-            title={item.username}
-            subtitle={item.name}
-            imageUrl={item.profilePictureUrl}
-            onPress={onContinue}
-          />
-        )}
-      />
+    <BaseScreenView
+      paddingBottom={0}
+      paddingHorizontal={0}
+      safeAreaEdges={["bottom"]}
+      bottomSafeAreaStyle={{
+        backgroundColor: theme.gray2.val,
+      }}
+    >
+      <View flex={1} paddingHorizontal="$4">
+        <FlashList
+          data={friendItems}
+          onRefresh={refetch}
+          refreshing={isLoading}
+          ItemSeparatorComponent={Separator}
+          estimatedItemSize={75}
+          onEndReached={handleOnEndReached}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={<ListHeader title="Friends" />}
+          renderItem={({ item }) => (
+            <VirtualizedListItem
+              loading={false}
+              title={item.username}
+              subtitle={item.name}
+              imageUrl={item.profilePictureUrl}
+              onPress={onContinue}
+            />
+          )}
+        />
+      </View>
 
       <XStack
         paddingTop="$4"
         paddingHorizontal="$4"
         justifyContent="space-evenly"
-        backgroundColor={"$background"}
+        backgroundColor={"$gray2"}
+        borderTopLeftRadius={36}
+        borderTopRightRadius={36}
         gap="$6"
       >
         <Button
