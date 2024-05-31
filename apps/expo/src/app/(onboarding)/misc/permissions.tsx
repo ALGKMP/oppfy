@@ -44,7 +44,10 @@ const Permissions = () => {
       Alert.alert(
         "Camera Permission",
         "Camera permission is required for this app. Please enable it in your device settings.",
-        [{ text: "Open Settings", onPress: void openSettings }],
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: void openSettings },
+        ],
       );
     }
     await checkPermissions();
@@ -56,7 +59,10 @@ const Permissions = () => {
       Alert.alert(
         "Contacts Permission",
         "Contacts permission is required for this app. Please enable it in your device settings.",
-        [{ text: "Open Settings", onPress: void openSettings }],
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: void openSettings },
+        ],
       );
     }
     await checkPermissions();
@@ -68,7 +74,10 @@ const Permissions = () => {
       Alert.alert(
         "Notifications Permission",
         "Notifications permission is required for this app. Please enable it in your device settings.",
-        [{ text: "Open Settings", onPress: void openSettings }],
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: void openSettings },
+        ],
       );
     }
     await checkPermissions();
