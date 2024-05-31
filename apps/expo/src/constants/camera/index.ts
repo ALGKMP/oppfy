@@ -4,7 +4,7 @@ import { initialWindowMetrics } from "react-native-safe-area-context";
 
 export const CONTENT_SPACING = 15;
 
-const SAFE_BOTTOM =
+export const SAFE_BOTTOM =
   Platform.select({
     ios: initialWindowMetrics?.insets.bottom,
   }) ?? 0;
