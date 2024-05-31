@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Image as RNImage, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import * as VideoThumbnails from "expo-video-thumbnails";
 
 import { BaseScreenView } from "~/components/Views";
-
-const { width: windowWidth } = Dimensions.get("window");
 
 const CreatePost = () => {
   const { uri, type } = useLocalSearchParams<{
@@ -15,7 +13,6 @@ const CreatePost = () => {
   }>();
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
 
   useEffect(() => {
     const generateThumbnail = async () => {
@@ -29,28 +26,24 @@ const CreatePost = () => {
     }
   }, [type, uri]);
 
-  useEffect(() => {
-    RNImage.getSize(uri, (width, height) => {
-      setAspectRatio(width / height);
-    });
-  }, [uri]);
-
   return (
     <BaseScreenView>
-      <Image
-        source={{ uri: thumbnail ?? uri }}
-        style={[styles.media, aspectRatio ? { aspectRatio } : {}]}
-        contentFit="contain"
-      />
+      <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
     </BaseScreenView>
   );
 };
 
 const styles = StyleSheet.create({
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 20,
+  },
   media: {
-    width: windowWidth - 40, // to give some padding
-    maxHeight: 250,
-    borderRadius: 10,
+    flex: 1,
+    maxWidth: 140,
+    maxHeight: 200,
+    borderRadius: 24,
   },
 });
 
