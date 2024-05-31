@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ArrowBigLeft, UserRoundX } from "@tamagui/lucide-icons";
@@ -12,6 +12,11 @@ import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const PostTo = () => {
+  const { uri, type } = useLocalSearchParams<{
+    uri: string;
+    type: "photo" | "video";
+  }>();
+
   const router = useRouter();
   const headerHeight = useHeaderHeight();
 
@@ -66,7 +71,6 @@ const PostTo = () => {
                 imageUrl: true,
                 title: true,
                 subtitle: true,
-                button: true,
               }}
             />
           )}
@@ -106,13 +110,14 @@ const PostTo = () => {
             title={item.username}
             subtitle={item.name}
             imageUrl={item.profilePictureUrl}
+            onPress={() => void }
           />
         )}
       />
 
       <XStack
         paddingTop="$4"
-        paddingHorizontal="$6"
+        paddingHorizontal="$4"
         justifyContent="space-evenly"
         backgroundColor={"$background"}
         gap="$6"
