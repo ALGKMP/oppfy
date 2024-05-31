@@ -161,6 +161,9 @@ importers:
       expo-store-review:
         specifier: ^6.8.3
         version: 6.8.3(expo@50.0.17)
+      expo-video-thumbnails:
+        specifier: ~7.9.0
+        version: 7.9.0(expo@50.0.17)
       expo-web-browser:
         specifier: ^12.8.2
         version: 12.8.2(expo@50.0.17)
@@ -11627,6 +11630,14 @@ packages:
 
   /expo-updates-interface@0.15.3(expo@50.0.17):
     resolution: {integrity: sha512-uLvsbaCmUsXgJqeen8rYH/jPr874ZUCXEvWpKHxrCv5/XATPlYEaDuecbNSGQ+cu78i6MdtB4BHOwZmoH2d47A==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 50.0.17(@babel/core@7.24.4)(@react-native/babel-preset@0.74.81)
+    dev: false
+
+  /expo-video-thumbnails@7.9.0(expo@50.0.17):
+    resolution: {integrity: sha512-KP7ZlIu83xXXIFx24bzjScwLns6b93f3eHPDUOnT5UtOScbIV3guXA6P9pRBnyxJe0K5+NhR11wX1wf+QCk9+g==}
     peerDependencies:
       expo: '*'
     dependencies:
