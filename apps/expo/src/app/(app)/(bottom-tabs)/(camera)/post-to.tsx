@@ -7,7 +7,6 @@ import {
   Button,
   Separator,
   SizableText,
-  Text,
   useTheme,
   View,
   XStack,
@@ -67,7 +66,7 @@ const PostTo = () => {
 
   const onContinue = () => {
     router.navigate({
-      pathname: "/post-to",
+      pathname: "/create-post",
       params: {
         uri,
         type,
