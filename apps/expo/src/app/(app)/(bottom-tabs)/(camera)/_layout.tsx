@@ -43,6 +43,12 @@ const CameraLayout = () => {
           title: "Post To",
         }}
       />
+      <Stack.Screen
+        name="create-post"
+        options={{
+          title: "Create Post",
+        }}
+      />
     </Stack>
   );
 };
