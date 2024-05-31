@@ -1,7 +1,8 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { Edges } from "react-native-safe-area-context";
-import { ScrollView, View, ViewProps } from "tamagui";
+import type { ViewProps } from "tamagui";
+import { ScrollView, View } from "tamagui";
 
 interface BaseScreenViewProps extends ViewProps {
   children: React.ReactNode;

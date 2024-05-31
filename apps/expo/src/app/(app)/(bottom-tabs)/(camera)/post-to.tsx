@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
+import { useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ArrowBigLeft, UserRoundX } from "@tamagui/lucide-icons";
-import { Separator, SizableText, Text, View, XStack } from "tamagui";
+import { Button, Separator, SizableText, Text, View, XStack } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -89,7 +90,7 @@ const PostTo = () => {
   }
 
   return (
-    <BaseScreenView paddingBottom={0}>
+    <BaseScreenView paddingBottom={0} safeAreaEdges={["bottom"]}>
       <FlashList
         data={friendItems}
         onRefresh={refetch}
@@ -110,9 +111,9 @@ const PostTo = () => {
       />
 
       <XStack
-        justifyContent="space-evenly"
         paddingTop="$4"
         paddingHorizontal="$6"
+        justifyContent="space-evenly"
         backgroundColor={"$background"}
         gap="$6"
       >
@@ -121,7 +122,7 @@ const PostTo = () => {
           size={"$5"}
           borderRadius="$8"
           icon={ArrowBigLeft}
-          onPress={() => router.push("/post-to")}
+          onPress={() => router.back()}
         >
           Back
         </Button>

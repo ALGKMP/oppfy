@@ -75,12 +75,7 @@ const PreviewScreen = () => {
   };
 
   return (
-    <BaseScreenView
-      padding={0}
-      safeAreaEdges={["bottom"]}
-      justifyContent="space-between"
-      backgroundColor={"$backgroundTransparent"}
-    >
+    <BaseScreenView padding={0} safeAreaEdges={["bottom"]}>
       {type === "photo" ? (
         <PreviewImage uri={uri} />
       ) : (
@@ -96,10 +91,12 @@ const PreviewScreen = () => {
       </View>
 
       <XStack
-        justifyContent="space-evenly"
         paddingTop="$4"
         paddingHorizontal="$6"
-        backgroundColor={"$background"}
+        borderTopLeftRadius={"$10"}
+        borderTopRightRadius={"$10"}
+        justifyContent="space-evenly"
+        backgroundColor={"red"}
         gap="$6"
       >
         <Button
