@@ -80,7 +80,6 @@ const PreviewScreen = () => {
       safeAreaEdges={["bottom"]}
       justifyContent="space-between"
       backgroundColor={"$backgroundTransparent"}
-      style={styles.container}
     >
       {type === "photo" ? (
         <PreviewImage uri={uri} />
@@ -107,7 +106,7 @@ const PreviewScreen = () => {
           flex={1}
           size={"$5"}
           borderRadius="$8"
-          iconAfter={saveState === "saved" ? Download : undefined}
+          iconAfter={saveState === "idle" ? Download : undefined}
           onPress={saveToCameraRoll}
           disabled={saveState === "saving" || saveState === "saved"}
           disabledStyle={{
@@ -116,6 +115,8 @@ const PreviewScreen = () => {
         >
           {saveState === "saving" ? (
             <ActivityIndicator size="small" color="#ffffff" />
+          ) : saveState === "saved" ? (
+            "Saved"
           ) : (
             "Save"
           )}
@@ -211,10 +212,6 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
   media: {
     width: "100%",
     height: "100%",
