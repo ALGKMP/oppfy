@@ -26,8 +26,9 @@ const Permissions = () => {
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
 
-  const requiredPermissions = permissions.camera && permissions.contacts;
+  // const requiredPermissions = permissions.camera && permissions.contacts;
 
+  const requiredPermissions = permissions.contacts;
   const openSettings = async () => {
     await Linking.openSettings();
   };
@@ -38,20 +39,20 @@ const Permissions = () => {
       : router.push("/auth/phone-number");
   };
 
-  const requestCameraPermission = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    if (status !== PermissionStatus.GRANTED) {
-      Alert.alert(
-        "Camera Permission",
-        "Camera permission is required for this app. Please enable it in your device settings.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Open Settings", onPress: void openSettings },
-        ],
-      );
-    }
-    await checkPermissions();
-  };
+  // const requestCameraPermission = async () => {
+    // const { status } = await Camera.requestCameraPermissionsAsync();
+  //   if (status !== PermissionStatus.GRANTED) {
+  //     Alert.alert(
+  //       "Camera Permission",
+  //       "Camera permission is required for this app. Please enable it in your device settings.",
+  //       [
+  //         { text: "Cancel", style: "cancel" },
+  //         { text: "Open Settings", onPress: void openSettings },
+  //       ],
+  //     );
+  //   }
+  //   await checkPermissions();
+  // };
 
   const requestContactsPermission = async () => {
     const { status } = await Contacts.requestPermissionsAsync();
@@ -96,8 +97,8 @@ const Permissions = () => {
         </Text>
 
         <YGroup gap="$4">
-          <YGroup.Item>
-            <ListItem
+          {/* <YGroup.Item> */}
+            {/* <ListItem
               emoji="📸"
               title="Camera"
               subTitle="So you can take and upload photos of your friends"
@@ -113,8 +114,8 @@ const Permissions = () => {
                   </Checkbox.Indicator>
                 </Checkbox>
               }
-            />
-          </YGroup.Item>
+            /> */}
+          {/* </YGroup.Item> */}
 
           <Separator />
 
