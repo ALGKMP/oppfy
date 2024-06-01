@@ -18,46 +18,46 @@ const images: string[] = [
 const MediaOfYou: React.FC = () => {
   const scale = useSharedValue(1);
 
-  const pinchGesture = Gesture.Pinch()
-    .onUpdate((event) => {
-      scale.value = event.scale;
-    })
-    .onEnd(() => {
-      if (scale.value < 1) {
-        scale.value = 1;
-      }
-    });
+  // const pinchGesture = Gesture.Pinch()
+  //   .onUpdate((event) => {
+  //     scale.value = event.scale;
+  //   })
+  //   .onEnd(() => {
+  //     if (scale.value < 1) {
+  //       scale.value = 1;
+  //     }
+  //   });
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const baseSize = 100;
-    const scaledSize = baseSize * scale.value;
-    const screenWidth = Dimensions.get('window').width;
-    const columns = Math.floor(screenWidth / scaledSize);
-    const adjustedSize = screenWidth / columns;
+  // const animatedStyle = useAnimatedStyle(() => {
+  //   const baseSize = 100;
+  //   const scaledSize = baseSize * scale.value;
+  //   const screenWidth = Dimensions.get('window').width;
+  //   const columns = Math.floor(screenWidth / scaledSize);
+  //   const adjustedSize = screenWidth / columns;
 
-    return {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      width: '100%',
-      transform: [{ scale: scale.value }],
-      children: {
-        width: adjustedSize,
-        height: adjustedSize,
-      },
-    };
-  });
+  //   return {
+  //     flexDirection: 'row',
+  //     flexWrap: 'wrap',
+  //     justifyContent: 'center',
+  //     width: '100%',
+  //     transform: [{ scale: scale.value }],
+  //     children: {
+  //       width: adjustedSize,
+  //       height: adjustedSize,
+  //     },
+  //   };
+  // });
 
   return (
     <BaseScreenView>
       <Text>Media of you</Text>
-      <GestureDetector gesture={pinchGesture}>
-        <Animated.View style={[animatedStyle, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }]}>
+      {/* <GestureDetector gesture={pinchGesture}> */}
+        {/* <Animated.View style={[animatedStyle, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }]}>
           {images.map((image, index) => (
             <StyledImage key={index} source={{ uri: image }} style={{ width: animatedStyle.children.width, height: animatedStyle.children.height }} />
           ))}
         </Animated.View>
-      </GestureDetector>
+      </GestureDetector> */}
     </BaseScreenView>
   );
 };

@@ -22,6 +22,7 @@ import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import MediaOfYou from "./media-of-you";
 
 type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 
@@ -57,36 +58,14 @@ const ProfileLayout = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <TopTabs
-        tabBar={(props) => (
-          <YStack>
-            {isLoading || profileData === undefined ? (
-              <Profile loading />
-            ) : (
-              <Profile loading={false} data={profileData} />
-            )}
-
-            <TopTabBar {...props} />
-          </YStack>
-        )}
-        style={{
-          backgroundColor: theme.background.val,
-        }}
-      >
-        <TopTabs.Screen
-          name="media-of-you"
-          options={{
-            tabBarLabel: () => <Grid3x3 />,
-          }}
-        />
-        <TopTabs.Screen
-          name="media-of-you-copy"
-          options={{
-            tabBarLabel: () => <Grid3x3 />,
-          }}
-        />
-
-      </TopTabs>
+      {isLoading || profileData === undefined ? (
+        <Profile loading />
+      ) : (
+        <>
+          <Profile loading={false} data={profileData} />
+          <MediaOfYou />
+        </>
+      )}
     </ScrollView>
   );
 };
