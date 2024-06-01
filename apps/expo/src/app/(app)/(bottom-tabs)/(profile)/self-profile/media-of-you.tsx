@@ -1,53 +1,78 @@
-import React from "react";
-import { Dimensions } from "react-native";
-import { Image, styled, Text, View, XStack, YStack } from "tamagui";
+import React, { useState } from "react";
+import { StyleSheet } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, useDerivedValue } from "react-native-reanimated";
 import { FlashList } from "@shopify/flash-list";
+import { Button, Text, View } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 
-const images: string[] = [
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
-  // More images...
+const data = [
+  { key: "1" },
+  { key: "2" },
+  { key: "3" },
+  { key: "4" },
+  { key: "5" },
+  { key: "6" },
+  { key: "7" },
+  { key: "8" },
+  { key: "9" },
 ];
 
-const numColumns = 3;
-const screenWidth = Dimensions.get("window").width;
-const imageSize = screenWidth / numColumns;
-
 const MediaOfYou: React.FC = () => {
+  const [numColumns, setNumColumns] = useState(2);
+  const columnCount = useSharedValue(numColumns);
+
+  const handlePress = () => {
+    setNumColumns(1);
+    columnCount.value = 1;
+  };
+
+  // Derived value to animate grid column transition
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: withSpring(columnCount.value) }],
+    };
+  });
+
   return (
     <BaseScreenView>
-      <FlashList
-        data={images}
-        keyExtractor={(item, index) => index.toString()}
-        numColumns={numColumns}
-        renderItem={({ item }) => (
-          <Image
-            source={{ uri: item }}
-            style={{
-              width: imageSize,
-              height: imageSize,
+      <Button flex={1} onPress={handlePress}>Click me</Button>
+      <GestureDetector gesture={Gesture.Tap()}>
+        <Animated.View style={[styles.container, animatedStyle]}>
+          <FlashList
+            data={data}
+            numColumns={numColumns}
+            renderItem={({ item }) => {
+              return (
+                <View style={styles.item}>
+                  <Text style={styles.itemText}>{item.key}</Text>
+                </View>
+              );
             }}
-            resizeMode="cover"
+            estimatedItemSize={100}
           />
-        )}
-        estimatedItemSize={imageSize}
-      />
+        </Animated.View>
+      </GestureDetector>
     </BaseScreenView>
   );
 };
-
-const styles = {
-  image: {
-    aspectRatio: 1,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    },
+  item: {
+    backgroundColor: "#A1A1A1",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 1,
+    flex: 1,
+    height: 90,
+    width: 90,
   },
-};
+  itemText: {
+    color: "#fff",
+  },
+});
 
 export default MediaOfYou;
