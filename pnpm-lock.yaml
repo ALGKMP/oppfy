@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 importers:
 
   .:
@@ -101,6 +97,9 @@ importers:
       expo-av:
         specifier: ~14.0.5
         version: 14.0.5(expo@51.0.9)
+      expo-blur:
+        specifier: ~13.0.2
+        version: 13.0.2(expo@51.0.9)
       expo-build-properties:
         specifier: ~0.12.1
         version: 0.12.1(expo@51.0.9)
@@ -158,6 +157,9 @@ importers:
       expo-store-review:
         specifier: ^7.0.2
         version: 7.0.2(expo@51.0.9)
+      expo-video-thumbnails:
+        specifier: ~8.0.0
+        version: 8.0.0(expo@51.0.9)
       expo-web-browser:
         specifier: ^13.0.3
         version: 13.0.3(expo@51.0.9)
@@ -209,6 +211,9 @@ importers:
       react-native-tab-view:
         specifier: ^3.5.2
         version: 3.5.2(react-native-pager-view@6.3.0)(react-native@0.74.1)(react@18.2.0)
+      react-native-vision-camera:
+        specifier: ^4.0.5
+        version: 4.0.5(react-native-reanimated@3.10.1)(react-native@0.74.1)(react@18.2.0)
       superjson:
         specifier: 2.2.0
         version: 2.2.0
@@ -11240,6 +11245,14 @@ packages:
       expo: 51.0.9(@babel/core@7.24.6)(@babel/preset-env@7.24.6)
     dev: false
 
+  /expo-blur@13.0.2(expo@51.0.9):
+    resolution: {integrity: sha512-t2p7BChO3Reykued++QJRMZ/og6J3aXtSQ+bU31YcBeXhZLkHwjWEhiPKPnJka7J2/yTs4+jOCNDY0kCZmcE3w==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.9(@babel/core@7.24.6)(@babel/preset-env@7.24.6)
+    dev: false
+
   /expo-build-properties@0.12.1(expo@51.0.9):
     resolution: {integrity: sha512-gn8sngNmOHkbJ5Kt3mKcKg+Wl6+d0m70gg9OllRIVeDkvZqCObKfnSM4tAQWiJhm62sHnL8udfYnuArnKhQd/g==}
     peerDependencies:
@@ -11554,6 +11567,14 @@ packages:
 
   /expo-updates-interface@0.16.2(expo@51.0.9):
     resolution: {integrity: sha512-929XBU70q5ELxkKADj1xL0UIm3HvhYhNAOZv5DSk7rrKvLo7QDdPyl+JVnwZm9LrkNbH4wuE2rLoKu1KMgZ+9A==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.9(@babel/core@7.24.6)(@babel/preset-env@7.24.6)
+    dev: false
+
+  /expo-video-thumbnails@8.0.0(expo@51.0.9):
+    resolution: {integrity: sha512-VWVkBjn8DRodRVCDDaFxnQrOaPNzTeEcGBvPWcAv9WQ4D+TY0KCl36x4gUf9HUfhhH8uwZdmP1g1rSFtqCTGLg==}
     peerDependencies:
       expo: '*'
     dependencies:
@@ -16530,6 +16551,27 @@ packages:
       yargs: 16.2.0
     dev: false
 
+  /react-native-vision-camera@4.0.5(react-native-reanimated@3.10.1)(react-native@0.74.1)(react@18.2.0):
+    resolution: {integrity: sha512-MaNQPnRLf6RfWOvhrPb+qiwhOAQIhtWhXJck6UU5Xj0ehoC3SsZjbdPZ39V5BD1KifK1n2YnuS0tzGw/zfrBzg==}
+    peerDependencies:
+      '@shopify/react-native-skia': '*'
+      react: '*'
+      react-native: '*'
+      react-native-reanimated: '*'
+      react-native-worklets-core: '*'
+    peerDependenciesMeta:
+      '@shopify/react-native-skia':
+        optional: true
+      react-native-reanimated:
+        optional: true
+      react-native-worklets-core:
+        optional: true
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.1(@babel/core@7.24.6)(@babel/preset-env@7.24.6)(@types/react@18.2.79)(react@18.2.0)
+      react-native-reanimated: 3.10.1(@babel/core@7.24.6)(react-native@0.74.1)(react@18.2.0)
+    dev: false
+
   /react-native@0.74.1(@babel/core@7.24.6)(@babel/preset-env@7.24.6)(@types/react@18.2.79)(react@18.2.0):
     resolution: {integrity: sha512-0H2XpmghwOtfPpM2LKqHIN7gxy+7G/r1hwJHKLV6uoyXGC/gCojRtoo5NqyKrWpFC8cqyT6wTYCLuG7CxEKilg==}
     engines: {node: '>=18'}
@@ -19361,3 +19403,7 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
