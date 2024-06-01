@@ -8,10 +8,7 @@ const AppLayout = () => {
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
 
-  // const requiredPermissions =
-  //   permissions.camera && permissions.contacts && permissions.notifications;
-  const requiredPermissions =
-    permissions.contacts && permissions.notifications;
+  const requiredPermissions = permissions.camera && permissions.contacts;
 
   if (!isSignedIn) {
     return <Redirect href="/(onboarding)" />;

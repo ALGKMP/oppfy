@@ -27,9 +27,8 @@ const Permissions = () => {
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
 
-  // const requiredPermissions = permissions.camera && permissions.contacts;
+  const requiredPermissions = permissions.camera && permissions.contacts;
 
-  const requiredPermissions = permissions.contacts;
   const openSettings = async () => {
     await Linking.openSettings();
   };
