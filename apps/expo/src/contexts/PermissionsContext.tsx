@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { AppState } from "react-native";
-import * as Camera from "expo-camera";
 import * as Contacts from "expo-contacts";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -10,7 +9,7 @@ import * as Notifications from "expo-notifications";
 
 interface PermissionsStatus {
   media: boolean;
-  // camera: boolean;
+  camera: boolean;
   location: boolean;
   contacts: boolean;
   notifications: boolean;
@@ -33,7 +32,7 @@ const PermissionsContext = createContext<PermissionsContextType | undefined>(
 export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
   const [permissions, setPermissions] = useState<PermissionsStatus>({
     media: false,
-    // camera: false,
+    camera: false,
     location: false,
     contacts: false,
     notifications: false,
@@ -44,7 +43,8 @@ export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
     setIsLoading(true);
 
     const { status: contactsStatus } = await Contacts.getPermissionsAsync();
-    // const { status: cameraStatus } = await Camera.getCameraPermissionsAsync();
+    const { status: cameraStatus } =
+      await ImagePicker.getCameraPermissionsAsync();
     const { status: mediaStatus } =
       await ImagePicker.getMediaLibraryPermissionsAsync();
     const { status: locationStatus } =
@@ -53,7 +53,7 @@ export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
       await Notifications.getPermissionsAsync();
 
     setPermissions({
-      // camera: cameraStatus === PermissionStatus.GRANTED,
+      camera: cameraStatus === PermissionStatus.GRANTED,
       media: mediaStatus === PermissionStatus.GRANTED,
       location: locationStatus === PermissionStatus.GRANTED,
       contacts: contactsStatus === PermissionStatus.GRANTED,
