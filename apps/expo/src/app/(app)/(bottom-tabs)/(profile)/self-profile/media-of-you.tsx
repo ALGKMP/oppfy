@@ -1,69 +1,53 @@
-import React from 'react';
-import { Image, View, Dimensions } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { styled } from 'tamagui';
-import { Text } from 'tamagui';
-import { BaseScreenView } from '~/components/Views';
+import React from "react";
+import { Dimensions } from "react-native";
+import { Image, styled, Text, View, XStack, YStack } from "tamagui";
+import { FlashList } from "@shopify/flash-list";
+
+import { BaseScreenView } from "~/components/Views";
 
 const images: string[] = [
-  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
-  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
-  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
-  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
-  'https://media.discordapp.net/attachments/1187121594582175928/1244701739039461486/image.png?ex=6658b554&is=665763d4&hm=1a93340c257d2b205df79b8a7e442234f7fe515d53dd9dcd5fe28ede480c6cce&=&format=webp&quality=lossless&width=844&height=534',
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
+  "https://media.discordapp.net/attachments/923957630878220298/1246237315798667264/image.png?ex=665ba872&is=665a56f2&hm=8b7470c5322afe563f26df4513c4b0ba1c722dda3a1d5a73fdc975e8bba1f04f&=&format=webp&quality=lossless&width=426&height=588",
   // More images...
 ];
 
+const numColumns = 3;
+const screenWidth = Dimensions.get("window").width;
+const imageSize = screenWidth / numColumns;
+
 const MediaOfYou: React.FC = () => {
-  const scale = useSharedValue(1);
-
-  // const pinchGesture = Gesture.Pinch()
-  //   .onUpdate((event) => {
-  //     scale.value = event.scale;
-  //   })
-  //   .onEnd(() => {
-  //     if (scale.value < 1) {
-  //       scale.value = 1;
-  //     }
-  //   });
-
-  // const animatedStyle = useAnimatedStyle(() => {
-  //   const baseSize = 100;
-  //   const scaledSize = baseSize * scale.value;
-  //   const screenWidth = Dimensions.get('window').width;
-  //   const columns = Math.floor(screenWidth / scaledSize);
-  //   const adjustedSize = screenWidth / columns;
-
-  //   return {
-  //     flexDirection: 'row',
-  //     flexWrap: 'wrap',
-  //     justifyContent: 'center',
-  //     width: '100%',
-  //     transform: [{ scale: scale.value }],
-  //     children: {
-  //       width: adjustedSize,
-  //       height: adjustedSize,
-  //     },
-  //   };
-  // });
-
   return (
     <BaseScreenView>
-      <Text>Media of you</Text>
-      {/* <GestureDetector gesture={pinchGesture}> */}
-        {/* <Animated.View style={[animatedStyle, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }]}>
-          {images.map((image, index) => (
-            <StyledImage key={index} source={{ uri: image }} style={{ width: animatedStyle.children.width, height: animatedStyle.children.height }} />
-          ))}
-        </Animated.View>
-      </GestureDetector> */}
+      <FlashList
+        data={images}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={numColumns}
+        renderItem={({ item }) => (
+          <Image
+            source={{ uri: item }}
+            style={{
+              width: imageSize,
+              height: imageSize,
+            }}
+            resizeMode="cover"
+          />
+        )}
+        estimatedItemSize={imageSize}
+      />
     </BaseScreenView>
   );
 };
 
-export default MediaOfYou;
+const styles = {
+  image: {
+    aspectRatio: 1,
+  },
+};
 
-const StyledImage = styled(Animated.Image, {
-  margin: 5,
-});
+export default MediaOfYou;
