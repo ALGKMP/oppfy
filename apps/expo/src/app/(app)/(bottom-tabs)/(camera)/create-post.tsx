@@ -19,19 +19,25 @@ import {
 import { z } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
+import { useUploadMedia } from "~/hooks/media";
 
 const postSchema = z.object({
   caption: z.string().max(1000),
 });
 
+type FieldTypes = z.infer<typeof postSchema>;
+
 const CreatePost = () => {
-  const { uri, type } = useLocalSearchParams<{
+  const { uri, type, recipientId } = useLocalSearchParams<{
     uri: string;
     type: "photo" | "video";
+    recipientId: string;
   }>();
 
   const theme = useTheme();
   const router = useRouter();
+
+  const { uploadVideoMutation } = useUploadMedia();
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
 
@@ -53,12 +59,16 @@ const CreatePost = () => {
     setError,
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
-  } = useForm({
+  } = useForm<FieldTypes>({
     resolver: zodResolver(postSchema),
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
+    uploadVideoMutation.mutateAsync({
+      uri: uri ?? "",
+      recipientId: recipientId ?? "",
+      caption: data.caption,
+    });
   });
 
   return (
@@ -81,9 +91,9 @@ const CreatePost = () => {
                 name="caption"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <TextArea
-                    placeholder="Caption"
                     minHeight="$10"
-                    onSubmitEditing={onBlur}
+                    placeholder="Caption"
+                    keyboardType="twitter"
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
