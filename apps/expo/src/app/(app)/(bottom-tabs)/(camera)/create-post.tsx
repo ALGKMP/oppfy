@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as VideoThumbnails from "expo-video-thumbnails";
+import { ArrowBigLeft, ArrowBigRight } from "@tamagui/lucide-icons";
+import { Button, useTheme, View, XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 
@@ -11,6 +13,9 @@ const CreatePost = () => {
     uri: string;
     type: "photo" | "video";
   }>();
+
+  const theme = useTheme();
+  const router = useRouter();
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
 
@@ -28,8 +33,47 @@ const CreatePost = () => {
   }, [type, uri]);
 
   return (
-    <BaseScreenView>
-      <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
+    <BaseScreenView
+      paddingBottom={0}
+      paddingHorizontal={0}
+      safeAreaEdges={["bottom"]}
+      bottomSafeAreaStyle={{
+        backgroundColor: theme.gray2.val,
+      }}
+    >
+      <View flex={1}>
+        <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
+      </View>
+
+      <XStack
+        paddingTop="$4"
+        paddingHorizontal="$4"
+        justifyContent="space-evenly"
+        backgroundColor={"$gray2"}
+        borderTopLeftRadius={36}
+        borderTopRightRadius={36}
+        gap="$4"
+      >
+        <Button
+          flex={1}
+          size={"$5"}
+          borderRadius="$8"
+          icon={ArrowBigLeft}
+          onPress={() => router.back()}
+        >
+          Back
+        </Button>
+
+        <Button
+          flex={2}
+          size={"$5"}
+          borderRadius="$8"
+          iconAfter={ArrowBigRight}
+          onPress={() => null}
+        >
+          Continue
+        </Button>
+      </XStack>
     </BaseScreenView>
   );
 };

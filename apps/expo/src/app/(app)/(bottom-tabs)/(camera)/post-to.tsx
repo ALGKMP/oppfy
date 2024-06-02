@@ -150,7 +150,7 @@ const PostTo = () => {
         backgroundColor={"$gray2"}
         borderTopLeftRadius={36}
         borderTopRightRadius={36}
-        gap="$6"
+        gap="$4"
       >
         <Button
           flex={2}

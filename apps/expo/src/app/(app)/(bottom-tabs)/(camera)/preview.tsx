@@ -104,39 +104,53 @@ const PreviewScreen = () => {
           >
             <XStack
               paddingTop="$4"
-              paddingHorizontal="$6"
+              paddingHorizontal="$4"
               justifyContent="space-evenly"
               paddingBottom={insets.bottom}
-              gap="$6"
+              gap="$4"
             >
-              <Button
-                flex={1}
-                size={"$5"}
-                borderRadius="$8"
-                iconAfter={saveState === "idle" ? Download : undefined}
-                onPress={saveToCameraRoll}
-                disabled={saveState === "saving" || saveState === "saved"}
-                disabledStyle={{
-                  opacity: 0.5,
-                }}
+              <BlurView
+                tint="light"
+                intensity={50}
+                style={[styles.glassyButton, { flex: 1 }]}
               >
-                {saveState === "saving" ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
-                ) : saveState === "saved" ? (
-                  "Saved"
-                ) : (
-                  "Save"
-                )}
-              </Button>
-              <Button
-                flex={2}
-                size={"$5"}
-                borderRadius="$8"
-                iconAfter={ArrowBigRight}
-                onPress={onContinue}
+                <Button
+                  style={{
+                    backgroundColor: ""
+                  }}
+                  size={"$5"}
+                  borderRadius="$8"
+                  iconAfter={saveState === "idle" ? Download : undefined}
+                  onPress={saveToCameraRoll}
+                  disabled={saveState === "saving" || saveState === "saved"}
+                  disabledStyle={{
+                    opacity: 0.5,
+                  }}
+                >
+                  {saveState === "saving" ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : saveState === "saved" ? (
+                    "Saved"
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </BlurView>
+              <BlurView
+                tint="light"
+                intensity={50}
+                style={[styles.glassyButton, { flex: 2 }]}
               >
-                Continue
-              </Button>
+                <Button
+                  style={styles.innerButton}
+                  size={"$5"}
+                  borderRadius="$8"
+                  iconAfter={ArrowBigRight}
+                  onPress={onContinue}
+                >
+                  Continue
+                </Button>
+              </BlurView>
             </XStack>
           </BlurView>
         </View>
@@ -260,6 +274,14 @@ const styles = StyleSheet.create({
   bottomContainer: {
     flex: 1,
     justifyContent: "flex-end",
+  },
+  glassyButton: {
+    backgroundColor: "rgba(173, 216, 230, 0.5)", // semi-transparent blue
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  innerButton: {
+    backgroundColor: "transparent", // keep the inner button transparent to show the glassy effect
   },
 });
 
