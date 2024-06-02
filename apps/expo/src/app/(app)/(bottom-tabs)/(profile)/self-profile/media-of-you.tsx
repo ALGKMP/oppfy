@@ -9,9 +9,17 @@ import Animated, {
 } from "react-native-reanimated";
 import { Image } from "expo-image";
 import { FlashList } from "@shopify/flash-list";
-import { Text, View } from "tamagui";
+import { Text, YStack, XStack, Stack } from "tamagui";
 
 const { width: screenWidth } = Dimensions.get("window");
+
+type DataItem = {
+  key: string;
+  image: string;
+  caption: string;
+};
+
+type DataArray = DataItem[];
 
 const data = [
   {
@@ -69,6 +77,7 @@ const data = [
     caption: "Night out with friends.",
   },
 ];
+
 
 const MediaOfYou: React.FC = () => {
   const [numColumns, setNumColumns] = useState(1);
@@ -143,32 +152,35 @@ const MediaOfYou: React.FC = () => {
         ]}
         contentFit={numColumns === 1 ? "contain" : "cover"}
       />
-      {numColumns === 1 && <Text style={styles.caption}>{item.caption}</Text>}
+      {numColumns === 1 && (
+        <YStack position="absolute" bottom={0} width="100%" backgroundColor="rgba(0, 0, 0, 0.5)" padding="$2" borderBottomLeftRadius="$2" borderBottomRightRadius="$2">
+          <Text color="#fff" textAlign="center">
+            {item.caption}
+          </Text>
+        </YStack>
+      )}
     </Animated.View>
   );
 
   return (
-    <View style={styles.container}>
+    <YStack flex={1} margin="$1">
       <GestureDetector gesture={pinchGesture}>
         <Animated.View style={styles.content}>
           <FlashList
             data={data}
             numColumns={numColumns}
             renderItem={renderItem}
-            estimatedItemSize={100}
-            key={numColumns} // Important to help FlashList re-render correctly on column change
+            estimatedItemSize={screenWidth / numColumns} // Update to estimated item size
+            key={numColumns}
+            // keyExtractor={(item) => item.key}
           />
         </Animated.View>
       </GestureDetector>
-    </View>
+    </YStack>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    margin: 1,
-  },
   content: {
     flex: 1,
   },
@@ -185,14 +197,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     borderRadius: 10,
-  },
-  caption: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#333",
-  },
-  itemText: {
-    color: "#fff",
   },
 });
 
