@@ -20,9 +20,10 @@ import { z } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
 import { useUploadMedia } from "~/hooks/media";
+import type { UploadMediaInput } from "~/hooks/media";
 
 const postSchema = z.object({
-  caption: z.string().max(1000),
+  caption: z.optional(z.string().max(1000)),
 });
 
 type FieldTypes = z.infer<typeof postSchema>;
@@ -37,7 +38,7 @@ const CreatePost = () => {
   const theme = useTheme();
   const router = useRouter();
 
-  const { uploadVideoMutation } = useUploadMedia();
+  const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
 
@@ -64,11 +65,18 @@ const CreatePost = () => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    uploadVideoMutation.mutateAsync({
+    const input = {
       uri: uri ?? "",
       recipientId: recipientId ?? "",
       caption: data.caption,
-    });
+    } satisfies UploadMediaInput;
+
+    type === "photo"
+      ? uploadPhotoMutation.mutateAsync(input)
+      : uploadVideoMutation.mutateAsync(input);
+
+    router.dismissAll();
+    router.navigate("/(profile)/self-profile");
   });
 
   return (

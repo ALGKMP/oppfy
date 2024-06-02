@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 
+import { sharedValidators } from "@oppfy/validators";
+
 import { api } from "~/utils/api";
 
-interface UploadToMuxMutationInput {
+export interface UploadMediaInput {
   uri: string;
   recipientId: string;
   caption?: string;
@@ -22,7 +24,7 @@ const useUploadMedia = () => {
   };
 
   const uploadVideoMutation = useMutation(
-    async ({ uri, caption, recipientId }: UploadToMuxMutationInput) => {
+    async ({ uri, caption, recipientId }: UploadMediaInput) => {
       const videoBlob = await getMediaBlob(uri);
 
       const presignedUrl = await createMuxVideoPresignedUrl.mutateAsync({
@@ -44,8 +46,39 @@ const useUploadMedia = () => {
     },
   );
 
+  const uploadPhotoMutation = useMutation(
+    async ({ uri, caption, recipientId }: UploadMediaInput) => {
+      const photoBlob = await getMediaBlob(uri);
+
+      const parsedMediaType = sharedValidators.media.postContentType.safeParse(
+        photoBlob.type,
+      );
+
+      if (!parsedMediaType.success) {
+        throw new Error("Invalid media type");
+      }
+
+      const presignedUrl = await createPresignedUrlForPost.mutateAsync({
+        caption,
+        recipient: recipientId,
+        contentLength: photoBlob.size,
+        contentType: parsedMediaType.data,
+      });
+
+      const response = await fetch(presignedUrl, {
+        method: "PUT",
+        body: photoBlob,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload photo");
+      }
+    },
+  );
+
   return {
     uploadVideoMutation,
+    uploadPhotoMutation,
   };
 };
 
