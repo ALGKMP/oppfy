@@ -3,10 +3,27 @@ import { StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as VideoThumbnails from "expo-video-thumbnails";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigLeft, ArrowBigRight } from "@tamagui/lucide-icons";
-import { Button, useTheme, View, XStack } from "tamagui";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Button,
+  Input,
+  SizableText,
+  Text,
+  TextArea,
+  useTheme,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
+import { z } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
+
+const postSchema = z.object({
+  caption: z.string().max(1000),
+});
 
 const CreatePost = () => {
   const { uri, type } = useLocalSearchParams<{
@@ -32,6 +49,19 @@ const CreatePost = () => {
     }
   }, [type, uri]);
 
+  const {
+    control,
+    setError,
+    handleSubmit,
+    formState: { errors, isSubmitting, isDirty },
+  } = useForm({
+    resolver: zodResolver(postSchema),
+  });
+
+  const onSubmit = handleSubmit(async (data) => {
+    console.log(data);
+  });
+
   return (
     <BaseScreenView
       paddingBottom={0}
@@ -41,8 +71,55 @@ const CreatePost = () => {
         backgroundColor: theme.gray2.val,
       }}
     >
-      <View flex={1}>
-        <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
+      <View flex={1} paddingHorizontal="$4">
+        <YStack flex={1} gap="$4">
+          <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
+
+          <XStack alignItems="flex-start" gap="$4">
+            <SizableText width="$7">Caption</SizableText>
+            <YStack flex={1} gap="$2">
+              <Controller
+                control={control}
+                name="caption"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextArea
+                    placeholder="Caption"
+                    minHeight="$8"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    borderColor={errors.caption ? "$red9" : undefined}
+                  />
+                )}
+              />
+              {errors.caption && (
+                <Text color="$red9">{errors.caption?.message}</Text>
+              )}
+            </YStack>
+          </XStack>
+
+          {/* <XStack alignItems="flex-start" gap="$4">
+            <SizableText width="$7">Username</SizableText>
+            <YStack flex={1} gap="$2">
+              <Controller
+                control={control}
+                name="username"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    placeholder="Username"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    borderColor={errors.username ? "$red9" : undefined}
+                  />
+                )}
+              />
+              {errors.username && (
+                <Text color="$red9">{errors.username.message}</Text>
+              )}
+            </YStack>
+          </XStack> */}
+        </YStack>
       </View>
 
       <XStack
@@ -69,7 +146,7 @@ const CreatePost = () => {
           size={"$5"}
           borderRadius="$8"
           iconAfter={ArrowBigRight}
-          onPress={() => null}
+          onPress={onSubmit}
         >
           Continue
         </Button>
