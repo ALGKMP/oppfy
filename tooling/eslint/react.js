@@ -15,6 +15,10 @@ export default [
       ...reactPlugin.configs["jsx-runtime"].rules,
       ...hooksPlugin.configs.recommended.rules,
       "react-compiler/react-compiler": "error",
+      "react/jsx-curly-brace-presence": [
+        "error",
+        { props: "never", children: "never" },
+      ],
     },
     languageOptions: {
       globals: {
