@@ -8,8 +8,7 @@ import { ArrowBigLeft, ArrowBigRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import {
   Button,
-  Input,
-  SizableText,
+  ScrollView,
   Text,
   TextArea,
   useTheme,
@@ -72,11 +71,10 @@ const CreatePost = () => {
       }}
     >
       <View flex={1} paddingHorizontal="$4">
-        <YStack flex={1} gap="$4">
-          <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
+        <ScrollView flex={1} keyboardDismissMode="interactive">
+          <YStack flex={1} gap="$4">
+            <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
 
-          <XStack alignItems="flex-start" gap="$4">
-            <SizableText width="$7">Caption</SizableText>
             <YStack flex={1} gap="$2">
               <Controller
                 control={control}
@@ -84,7 +82,8 @@ const CreatePost = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <TextArea
                     placeholder="Caption"
-                    minHeight="$8"
+                    minHeight="$10"
+                    onSubmitEditing={onBlur}
                     onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
@@ -96,30 +95,8 @@ const CreatePost = () => {
                 <Text color="$red9">{errors.caption?.message}</Text>
               )}
             </YStack>
-          </XStack>
-
-          {/* <XStack alignItems="flex-start" gap="$4">
-            <SizableText width="$7">Username</SizableText>
-            <YStack flex={1} gap="$2">
-              <Controller
-                control={control}
-                name="username"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    placeholder="Username"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    borderColor={errors.username ? "$red9" : undefined}
-                  />
-                )}
-              />
-              {errors.username && (
-                <Text color="$red9">{errors.username.message}</Text>
-              )}
-            </YStack>
-          </XStack> */}
-        </YStack>
+          </YStack>
+        </ScrollView>
       </View>
 
       <XStack
@@ -156,13 +133,10 @@ const CreatePost = () => {
 };
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginVertical: 20,
-  },
   media: {
     flex: 1,
+    minWidth: 140,
+    minHeight: 200,
     maxWidth: 140,
     maxHeight: 200,
     borderRadius: 24,
