@@ -118,17 +118,19 @@ const MediaOfYou: React.FC = () => {
   };
 
   const onSetScene1Ref = (ref: View | null) => {
-    // const node = nodeFromRef(ref);
-    // if (node !== scene1Ancestor) {
-    //   setScene1Ancestor(node);
-    // }
+    const node = nodeFromRef(ref);
+    if (node !== scene1Ancestor) {
+      setScene1Ancestor(node);
+    }
+    return;
   };
 
   const onSetScene2Ref = (ref: View | null) => {
-    // const node = nodeFromRef(ref);
-    // if (node !== scene2Ancestor) {
-    //   setScene2Ancestor(node);
-    // }
+    const node = nodeFromRef(ref);
+    if (node !== scene2Ancestor) {
+      setScene2Ancestor(node);
+    }
+    return;
   };
 
   return (
@@ -145,7 +147,7 @@ const MediaOfYou: React.FC = () => {
             transform: [{ translateX: Animated.multiply(-200, progress) }],
           }}
         >
-          <View style={styles.scene} ref={onSetScene1Ref}>
+          <View style={styles.scene} ref={() => onSetScene1Ref}>
             <SharedElement onNode={(node) => setScene1Node(node)}>
               <Image
                 style={styles.image1}
@@ -172,7 +174,7 @@ const MediaOfYou: React.FC = () => {
               ],
             }}
           >
-            <View style={styles.scene2} ref={onSetScene2Ref}>
+            <View style={styles.scene2} ref={() => onSetScene2Ref}>
               <SharedElement onNode={(node) => setScene2Node(node)}>
                 <Image
                   style={styles.image2}
