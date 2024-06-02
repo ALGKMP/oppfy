@@ -108,7 +108,9 @@ const EditProfile = () => {
                   />
                 )}
               />
-              {errors.fullName && <Text color="$red9">{errors.fullName.message}</Text>}
+              {errors.fullName && (
+                <Text color="$red9">{errors.fullName.message}</Text>
+              )}
             </YStack>
           </XStack>
 
