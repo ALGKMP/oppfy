@@ -92,70 +92,63 @@ const EditProfile = () => {
     <KeyboardSafeView>
       <BaseScreenView safeAreaEdges={["bottom"]}>
         <YStack flex={1} gap="$4">
-          <XStack alignItems="flex-start" gap="$4">
-            <SizableText width="$7">Full Name</SizableText>
-            <YStack flex={1} gap="$2">
-              <Controller
-                control={control}
-                name="fullName"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    placeholder="Full Name"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    borderColor={errors.fullName ? "$red9" : undefined}
-                  />
-                )}
-              />
-              {errors.fullName && (
-                <Text color="$red9">{errors.fullName.message}</Text>
+          <YStack gap="$2">
+            <Controller
+              control={control}
+              name="fullName"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  width={"50%"}
+                  placeholder="Full Name"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  borderColor={errors.fullName ? "$red9" : undefined}
+                />
               )}
-            </YStack>
-          </XStack>
+            />
+            {errors.fullName && (
+              <Text color="$red9">{errors.fullName.message}</Text>
+            )}
+          </YStack>
 
-          <XStack alignItems="flex-start" gap="$4">
-            <SizableText width="$7">Username</SizableText>
-            <YStack flex={1} gap="$2">
-              <Controller
-                control={control}
-                name="username"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    placeholder="Username"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    borderColor={errors.username ? "$red9" : undefined}
-                  />
-                )}
-              />
-              {errors.username && (
-                <Text color="$red9">{errors.username.message}</Text>
+          <YStack gap="$2">
+            <Controller
+              control={control}
+              name="username"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  width={"50%"}
+                  placeholder="Username"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  borderColor={errors.username ? "$red9" : undefined}
+                />
               )}
-            </YStack>
-          </XStack>
+            />
+            {errors.username && (
+              <Text color="$red9">{errors.username.message}</Text>
+            )}
+          </YStack>
 
-          <XStack alignItems="flex-start" gap="$2">
-            <SizableText width="$4">Bio</SizableText>
-            <YStack flex={1} gap="$2">
-              <Controller
-                control={control}
-                name="bio"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextArea
-                    placeholder="Bio"
-                    minHeight="$8"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    borderColor={errors.bio ? "$red9" : undefined}
-                  />
-                )}
-              />
-              {errors.bio && <Text color="$red9">{errors.bio.message}</Text>}
-            </YStack>
-          </XStack>
+          <YStack flex={1} gap="$2">
+            <Controller
+              control={control}
+              name="bio"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextArea
+                  placeholder="Bio"
+                  minHeight="$10"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  borderColor={errors.bio ? "$red9" : undefined}
+                />
+              )}
+            />
+            {errors.bio && <Text color="$red9">{errors.bio.message}</Text>}
+          </YStack>
         </YStack>
 
         <Button
