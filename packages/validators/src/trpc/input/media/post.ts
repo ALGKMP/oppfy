@@ -1,11 +1,13 @@
 import { z } from "zod";
 
+import { postContentType } from "../../../shared/media";
+
 const trpcPostInputSchema = {
   createS3PresignedUrl: z.object({
     recipient: z.string(),
     caption: z.string().max(2000).default(""),
     contentLength: z.number(),
-    contentType: z.enum(["image/jpeg", "image/png", "image/gif"]),
+    contentType: postContentType,
   }),
 
   createMuxPresignedUrl: z.object({
