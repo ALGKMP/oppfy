@@ -64,12 +64,13 @@ const PostTo = () => {
     }
   };
 
-  const onContinue = () => {
+  const onUserSelected = (recipientId: string) => {
     router.navigate({
       pathname: "/create-post",
       params: {
         uri,
         type,
+        recipientId,
       },
     });
   };
@@ -137,7 +138,7 @@ const PostTo = () => {
               title={item.username}
               subtitle={item.name}
               imageUrl={item.profilePictureUrl}
-              onPress={onContinue}
+              onPress={() => onUserSelected(item.userId)}
             />
           )}
         />
