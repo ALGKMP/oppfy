@@ -16,8 +16,9 @@ const CreatePost = () => {
 
   useEffect(() => {
     const generateThumbnail = async () => {
-      const { uri: thumbnailUri } =
-        await VideoThumbnails.getThumbnailAsync(uri);
+      const { uri: thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
+        uri ?? "",
+      );
       setThumbnail(thumbnailUri);
     };
 

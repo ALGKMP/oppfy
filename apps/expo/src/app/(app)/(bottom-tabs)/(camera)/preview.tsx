@@ -71,7 +71,7 @@ const PreviewScreen = () => {
       return;
     }
 
-    await MediaLibrary.createAssetAsync(uri);
+    await MediaLibrary.createAssetAsync(uri ?? "");
     setSaveState("saved");
   };
 
@@ -88,9 +88,9 @@ const PreviewScreen = () => {
   return (
     <View style={styles.container}>
       {type === "photo" ? (
-        <PreviewImage uri={uri} />
+        <PreviewImage uri={uri ?? ""} />
       ) : (
-        <PreviewVideo uri={uri} />
+        <PreviewVideo uri={uri ?? ""} />
       )}
 
       <StatusBarBlurBackground />
