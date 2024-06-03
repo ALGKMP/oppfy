@@ -56,7 +56,7 @@ const BottomTabsLayout = () => {
       />
 
       <BottomTabs.Screen
-        name="inbox"
+        name="(inbox)"
         options={{
           title: "Inbox",
           tabBarIcon: ({ focused }) => (
