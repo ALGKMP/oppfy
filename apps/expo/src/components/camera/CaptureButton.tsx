@@ -16,6 +16,7 @@ import Reanimated, {
   Extrapolation,
   interpolate,
   runOnJS,
+  runOnUI,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -167,6 +168,7 @@ const CaptureButton = ({
 
   const handlePanOnStart = useCallback(
     (event: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
+      "worklet";
       context.value.startY = event.absoluteY;
 
       const yForFullZoom = context.value.startY ?? 0 * 0.7;
@@ -185,6 +187,7 @@ const CaptureButton = ({
 
   const handlePanOnUpdate = useCallback(
     (event: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
+      "worklet";
       const offset = context.value.offsetY ?? 0;
       const startY = context.value.startY ?? SCREEN_HEIGHT;
       const yForFullZoom = startY * 0.7;
@@ -203,10 +206,10 @@ const CaptureButton = ({
     .failOffsetX(PAN_GESTURE_HANDLER_FAIL_X)
     .activeOffsetY(PAN_GESTURE_HANDLER_ACTIVE_Y)
     .onStart((event) => {
-      runOnJS(handlePanOnStart)(event);
+      handlePanOnStart(event);
     })
     .onUpdate((event) => {
-      runOnJS(handlePanOnUpdate)(event);
+      handlePanOnUpdate(event);
     });
 
   const shadowStyle = useAnimatedStyle(
