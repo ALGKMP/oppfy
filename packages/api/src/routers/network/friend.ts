@@ -51,7 +51,7 @@ export const friendRouter = createTRPCRouter({
   }),
 
   sendFriendRequest: protectedProcedure
-    .input(trpcValidators.input.friend.sendFriendRequest)
+    .input(trpcValidators.input.request.sendFriendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.sendFriendRequest(
@@ -66,7 +66,7 @@ export const friendRouter = createTRPCRouter({
 
 
   cancelFriendRequest: protectedProcedure
-    .input(trpcValidators.input.friend.cancelFriendRequest)
+    .input(trpcValidators.input.request.cancelFriendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.friend.cancelFriendRequest(

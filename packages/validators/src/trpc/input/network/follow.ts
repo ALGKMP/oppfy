@@ -9,17 +9,6 @@ const followInputSchema = {
     userId: z.string(),
   }),
 
-  acceptFollowRequest: z.object({
-    userId: z.string(),
-  }),
-
-  rejectFollowRequest: z.object({
-    userId: z.string(),
-  }),
-
-  cancelFollowRequest: z.object({
-    userId: z.string(),
-  }),
 
   removeFollower: z.object({
     userId: z.string(),

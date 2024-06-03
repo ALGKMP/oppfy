@@ -102,45 +102,6 @@ export const followRouter = createTRPCRouter({
       }
     }),
 
-  acceptFollowRequest: protectedProcedure
-    .input(trpcValidators.input.follow.acceptFollowRequest)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.follow.acceptFollowRequest(
-          input.userId,
-          ctx.session.uid,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
-  rejectFollowRequest: protectedProcedure
-    .input(trpcValidators.input.follow.rejectFollowRequest)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.follow.rejectFollowRequest(
-          ctx.session.uid,
-          input.userId,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
-  cancelFollowRequest: protectedProcedure
-    .input(trpcValidators.input.follow.cancelFollowRequest)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await ctx.services.follow.cancelFollowRequest(
-          ctx.session.uid,
-          input.userId,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
   removeFollower: protectedProcedure
     .input(trpcValidators.input.follow.removeFollower)
     .mutation(async ({ input, ctx }) => {

@@ -9,22 +9,6 @@ const friendInputSchema = {
     recipientId: z.string(),
   }),
 
-  sendFriendRequest: z.object({
-    recipientId: z.string(),
-  }),
-
-  acceptFriendRequest: z.object({
-    senderId: z.string(),
-  }),
-
-  rejectFriendRequest: z.object({
-    senderId: z.string(),
-  }),
-
-  cancelFriendRequest: z.object({
-    recipientId: z.string(),
-  }),
-
   paginateFriendsSelf: z.object({
     cursor: z
       .object({
