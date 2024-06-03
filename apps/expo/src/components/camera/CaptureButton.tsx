@@ -30,8 +30,13 @@ import {
   SCREEN_WIDTH,
 } from "~/constants/camera";
 
-const PAN_GESTURE_HANDLER_FAIL_X = [-SCREEN_WIDTH, SCREEN_WIDTH];
-const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2];
+type FailOffset = [failOffsetXStart: number, failOffsetXEnd: number];
+
+const PAN_GESTURE_HANDLER_FAIL_X = [
+  -SCREEN_WIDTH,
+  SCREEN_WIDTH,
+] satisfies FailOffset;
+const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2] satisfies FailOffset;
 
 const START_RECORDING_DELAY = 200;
 const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.1;
