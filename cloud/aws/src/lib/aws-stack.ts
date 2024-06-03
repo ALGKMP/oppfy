@@ -370,23 +370,54 @@ export class AwsStack extends cdk.Stack {
           effect: iam.Effect.ALLOW,
           actions: ["s3:GetObject", "s3:ListBucket"],
           resources: [
-            `arn:aws:s3:::aws-neptune-notebook-${this.region}`,
-            `arn:aws:s3:::aws-neptune-notebook-${this.region}/*`,
+            `*`,
           ],
         },
       ),
     );
 
-    neptuneNotebookRole.addToPolicy(
-      new iam.PolicyStatement(
-        {
-          effect: iam.Effect.ALLOW,
-          actions: ["neptune-db:*"],
-          resources: [
-            `arn:aws:neptune-db:${this.region}:${this.account}:${cluster.clusterResourceIdentifier}/*`,
-          ],
-        },
-      ),
+    const lifeCycleScript = `#!/bin/bash
+sudo -u ec2-user -i <<'EOF'
+echo "export GRAPH_NOTEBOOK_AUTH_MODE=DEFAULT" >> ~/.bashrc
+echo "export GRAPH_NOTEBOOK_HOST=${cluster.clusterEndpoint.hostname}" >> ~/.bashrc
+echo "export GRAPH_NOTEBOOK_PORT=8182" >> ~/.bashrc
+echo "export NEPTUNE_LOAD_FROM_S3_ROLE_ARN=" >> ~/.bashrc
+echo "export AWS_REGION=${this.region}" >> ~/.bashrc
+aws s3 cp s3://aws-neptune-notebook/graph_notebook.tar.gz /tmp/graph_notebook.tar.gz
+rm -rf /tmp/graph_notebook
+tar -zxvf /tmp/graph_notebook.tar.gz -C /tmp
+/tmp/graph_notebook/install.sh
+EOF`;
+
+    const notebookLifecycleConfig = new sagemaker
+      .CfnNotebookInstanceLifecycleConfig(
+      this,
+      "NotebookLifecycleConfig",
+      {
+        notebookInstanceLifecycleConfigName:
+          "neptune-notebook-lifecycle-config",
+        onStart: [
+          {
+            content: cdk.Fn.base64(lifeCycleScript),
+          },
+        ],
+      },
+    );
+
+    const notebookInstance = new sagemaker.CfnNotebookInstance(
+      this,
+      "NeptuneNotebookInstance",
+      {
+        notebookInstanceName: "neptune-notebook-test",
+        subnetId:
+          vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS })
+            .subnetIds[0],
+        securityGroupIds: [neptuneSecurityGroup.securityGroupId],
+        instanceType: "ml.t3.medium",
+        roleArn: neptuneNotebookRole.roleArn,
+        lifecycleConfigName:
+          notebookLifecycleConfig.notebookInstanceLifecycleConfigName,
+      },
     );
 
     // TODO: dms depends on this task - we need to wait for it to be created

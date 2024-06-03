@@ -44,7 +44,7 @@ export const handler = async (
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: "queried the graph",
+        message: result.toString(),
       }),
     };
   } catch (error) {
