@@ -268,10 +268,8 @@ const CaptureButton = ({
   return (
     <GestureDetector gesture={Gesture.Simultaneous(tapGesture, panGesture)}>
       <Reanimated.View {...props} style={[buttonStyle, style]}>
-        <Reanimated.View style={styles.flex}>
-          <Reanimated.View style={[styles.shadow, shadowStyle]} />
-          <View style={styles.button} />
-        </Reanimated.View>
+        <Reanimated.View style={[styles.shadow, shadowStyle]} />
+        <View style={styles.button} />
       </Reanimated.View>
     </GestureDetector>
   );
@@ -280,9 +278,6 @@ const CaptureButton = ({
 export default React.memo(CaptureButton);
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
   shadow: {
     position: "absolute",
     width: CAPTURE_BUTTON_SIZE,
