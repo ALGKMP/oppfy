@@ -44,4 +44,17 @@ export const requestRouter = createTRPCRouter({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
     }),
+
+  cancelFriendRequest: protectedProcedure
+    .input(trpcValidators.input.friend.cancelFriendRequest)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.friend.cancelFriendRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
 });
