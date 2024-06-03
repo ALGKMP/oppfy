@@ -14,11 +14,11 @@ const friendInputSchema = {
   }),
 
   acceptFriendRequest: z.object({
-    recipientId: z.string(),
+    senderId: z.string(),
   }),
 
   rejectFriendRequest: z.object({
-    recipientId: z.string(),
+    senderId: z.string(),
   }),
 
   cancelFriendRequest: z.object({

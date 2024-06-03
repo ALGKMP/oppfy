@@ -63,31 +63,7 @@ export const friendRouter = createTRPCRouter({
       }
     }),
 
-  acceptFriendRequest: protectedProcedure
-    .input(trpcValidators.input.friend.acceptFriendRequest)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await ctx.services.friend.acceptFriendRequest(
-          ctx.session.uid,
-          input.recipientId,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
 
-  rejectFriendRequest: protectedProcedure
-    .input(trpcValidators.input.friend.rejectFriendRequest)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await ctx.services.friend.rejectFriendRequest(
-          ctx.session.uid,
-          input.recipientId,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
 
   cancelFriendRequest: protectedProcedure
     .input(trpcValidators.input.friend.cancelFriendRequest)
