@@ -1,249 +1,215 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  nodeFromRef,
-  SharedElement,
-  SharedElementNode,
-  SharedElementTransition,
-} from "react-native-shared-element";
+import React, { useState } from "react";
+import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
+import { FontAwesome } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { Text, YStack } from "tamagui";
+import { Heart, MessageCircle } from "@tamagui/lucide-icons";
+import { Stack, Text, View, XStack, YStack } from "tamagui";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 type DataItem = {
+  author: string;
+  authorProfilePicture: string;
+  recipient: string;
+  recipientProfilePicture: string;
+
+  isFollowing: boolean;
+  hasLiked: boolean;
+
   key: string;
+  comments: number;
+  likes: number;
   image: string;
   caption: string;
 };
 
-const data: DataItem[] = [
+const data = [
   {
+    author: "JohnDoe",
+    authorProfilePicture: "https://example.com/author1.jpg",
+    recipient: "JaneSmith",
+    recipientProfilePicture: "https://example.com/recipient1.jpg",
+    isFollowing: true,
+    hasLiked: false,
     key: "1",
-    image:
-      "https://media.discordapp.net/attachments/753611523917742172/1246219424902549607/VUREN5d.png?ex=665d9208&is=665c4088&hm=51c623e4cd5492d8f0774acc9abcf3c923e7e28198cd3cc2bf92be61cd258102&=&format=webp&quality=lossless&width=567&height=548",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246669290761879633/image.png?ex=665de380&is=665c9200&hm=f8ad544db1e2d90cf69f85f2927e20ed81594757d6cc89679ff52e881a44b95f&=&format=webp&quality=lossless&width=496&height=638",
     caption: "Enjoying the sunset!",
   },
   {
+    author: "JaneSmith",
+    authorProfilePicture: "https://example.com/author2.jpg",
+    recipient: "JohnDoe",
+    recipientProfilePicture: "https://example.com/recipient2.jpg",
+    isFollowing: false,
+    hasLiked: true,
     key: "2",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "Delicious breakfast.",
   },
   {
+    author: "AliceWang",
+    authorProfilePicture: "https://example.com/author3.jpg",
+    recipient: "BobJones",
+    recipientProfilePicture: "https://example.com/recipient3.jpg",
+    isFollowing: true,
+    hasLiked: true,
     key: "3",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "Hiking adventures.",
   },
   {
+    author: "BobJones",
+    authorProfilePicture: "https://example.com/author4.jpg",
+    recipient: "AliceWang",
+    recipientProfilePicture: "https://example.com/recipient4.jpg",
+    isFollowing: false,
+    hasLiked: false,
     key: "4",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "Family time.",
   },
   {
+    author: "CharlieBrown",
+    authorProfilePicture: "https://example.com/author5.jpg",
+    recipient: "LucyVanPelt",
+    recipientProfilePicture: "https://example.com/recipient5.jpg",
+    isFollowing: true,
+    hasLiked: true,
     key: "5",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "City lights.",
   },
   {
+    author: "LucyVanPelt",
+    authorProfilePicture: "https://example.com/author6.jpg",
+    recipient: "CharlieBrown",
+    recipientProfilePicture: "https://example.com/recipient6.jpg",
+    isFollowing: false,
+    hasLiked: false,
     key: "6",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "At the beach.",
   },
   {
+    author: "EmilyClark",
+    authorProfilePicture: "https://example.com/author7.jpg",
+    recipient: "DavidSmith",
+    recipientProfilePicture: "https://example.com/recipient7.jpg",
+    isFollowing: true,
+    hasLiked: false,
     key: "7",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "Mountain views.",
   },
   {
+    author: "DavidSmith",
+    authorProfilePicture: "https://example.com/author8.jpg",
+    recipient: "EmilyClark",
+    recipientProfilePicture: "https://example.com/recipient8.jpg",
+    isFollowing: false,
+    hasLiked: true,
     key: "8",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "Birthday celebrations.",
   },
   {
+    author: "GraceLee",
+    authorProfilePicture: "https://example.com/author9.jpg",
+    recipient: "HenryMiller",
+    recipientProfilePicture: "https://example.com/recipient9.jpg",
+    isFollowing: true,
+    hasLiked: false,
     key: "9",
-    image:
-      "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
+    comments: 100,
+    likes: 50,
+    image: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
     caption: "Night out with friends.",
   },
 ];
 
-const MediaOfYou: React.FC = () => {
-  const [showSingleColumn, setShowSingleColumn] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<DataItem | null>(null);
+const MediaOfYou = () => {
+  const handleLike = (key: string) => {};
 
-  const [progress] = useState(new Animated.Value(0));
-  const [isScene2Visible, setIsScene2Visible] = useState(false);
-  const [isInProgress, setIsInProgress] = useState(false);
-  const [scene1Ancestor, setScene1Ancestor] =
-    useState<null | SharedElementNode>(null);
-  const [scene1Node, setScene1Node] = useState<null | SharedElementNode>(null);
-  const [scene2Ancestor, setScene2Ancestor] =
-    useState<null | SharedElementNode>(null);
-  const [scene2Node, setScene2Node] = useState<null | SharedElementNode>(null);
+  const handleComment = (key: string) => {};
 
-  const { width } = Dimensions.get("window");
-
-  const onPressNavigate = () => {
-    setIsScene2Visible(true);
-    setIsInProgress(true);
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start(() => setIsInProgress(false));
-  };
-
-  const onPressBack = () => {
-    setIsInProgress(true);
-    Animated.timing(progress, {
-      toValue: 0,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start(() => {
-      setIsScene2Visible(false);
-      setIsInProgress(false);
-    });
-  };
-
-  const onSetScene1Ref = (ref: View | null) => {
-    const node = nodeFromRef(ref);
-    if (node !== scene1Ancestor) {
-      setScene1Ancestor(node);
-    }
-    return;
-  };
-
-  const onSetScene2Ref = (ref: View | null) => {
-    const node = nodeFromRef(ref);
-    if (node !== scene2Ancestor) {
-      setScene2Ancestor(node);
-    }
-    return;
-  };
+  const renderItem = ({ item }: { item: DataItem }) => (
+    <YStack flex={1}>
+      <View
+        flex={1}
+        alignItems="center"
+        justifyContent="center"
+        borderRadius={10}
+        margin={1}
+      >
+        <Image
+          source={{ uri: item.image }}
+          style={[styles.image]}
+          contentFit="contain"
+        />
+        <YStack gap="$2" position="absolute" bottom={20} right={20}>
+          <View>
+            <TouchableOpacity onPress={() => handleLike(item.key)}>
+              <Heart size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <Text color="#fff">{item.likes}</Text>
+          <TouchableOpacity onPress={() => handleComment(item.key)}>
+            <MessageCircle size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text color="#fff">{item.comments}</Text>
+        </YStack>
+        <Text color="#fff" textAlign="center">
+          {item.caption}
+        </Text>
+        <YStack
+          position="absolute"
+          bottom={0}
+          width="100%"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          padding="$2"
+          borderBottomLeftRadius="$2"
+          borderBottomRightRadius="$2"
+        ></YStack>
+      </View>
+    </YStack>
+  );
 
   return (
-    <>
-      <TouchableOpacity
-        style={styles.container}
-        activeOpacity={0.5}
-        onPress={isScene2Visible ? onPressBack : onPressNavigate}
-      >
-        {/* Scene 1 */}
-        <Animated.View
-          style={{
-            ...StyleSheet.absoluteFillObject,
-            transform: [{ translateX: Animated.multiply(-200, progress) }],
-          }}
-        >
-          <View style={styles.scene} ref={() => onSetScene1Ref}>
-            <SharedElement onNode={(node) => setScene1Node(node)}>
-              <Image
-                style={styles.image1}
-                source={{
-                  uri: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
-                }}
-              />
-            </SharedElement>
-          </View>
-        </Animated.View>
-
-        {/* Scene 2 */}
-        {isScene2Visible ? (
-          <Animated.View
-            style={{
-              ...StyleSheet.absoluteFillObject,
-              transform: [
-                {
-                  translateX: Animated.multiply(
-                    -width,
-                    Animated.add(progress, -1),
-                  ),
-                },
-              ],
-            }}
-          >
-            <View style={styles.scene2} ref={() => onSetScene2Ref}>
-              <SharedElement onNode={(node) => setScene2Node(node)}>
-                <Image
-                  style={styles.image2}
-                  source={{
-                    uri: "https://media.discordapp.net/attachments/1246536535382167663/1246588862705438750/IMG_2127.jpg?ex=665cefd9&is=665b9e59&hm=03d95787f0509b92983eb1d626f134508cac0a4ffc18fc7610ffad13548173b5&=&format=webp&width=507&height=676",
-                  }}
-                />
-              </SharedElement>
-            </View>
-          </Animated.View>
-        ) : null}
-      </TouchableOpacity>
-
-      {/* Transition overlay */}
-      {isInProgress ? (
-        <View style={styles.sharedElementOverlay} pointerEvents="none">
-          <SharedElementTransition
-            start={{
-              node: scene1Node,
-              ancestor: scene1Ancestor,
-            }}
-            end={{
-              node: scene2Node,
-              ancestor: scene2Ancestor,
-            }}
-            position={progress}
-            animation="move"
-            resize="auto"
-            align="auto"
-          />
-        </View>
-      ) : null}
-    </>
+    <View flex={1}>
+      <FlashList
+        data={data}
+        numColumns={1}
+        renderItem={renderItem}
+        estimatedItemSize={screenWidth}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ecf0f1",
-  },
-  scene: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scene2: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#00d8ff",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image1: {
-    resizeMode: "cover",
-    width: 160,
-    height: 160,
-    // Images & border-radius have quirks in Expo SDK 35/36
-    // Uncomment the next line when SDK 37 has been released
-    //borderRadius: 80
-  },
-  image2: {
-    resizeMode: "cover",
-    width: 300,
-    height: 300,
-    borderRadius: 0,
-  },
-  sharedElementOverlay: {
-    ...StyleSheet.absoluteFillObject,
+  image: {
+    alignSelf: "center",
+    width: "100%",
+    padding: 10,
+    height: 500,
+    borderRadius: 10,
   },
 });
 
