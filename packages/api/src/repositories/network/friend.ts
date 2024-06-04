@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, or, not, sql } from "drizzle-orm";
+import { and, asc, count, eq, gt, not, or, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -227,7 +227,7 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedFriendRequests(
+  async paginateFriendRequests(
     forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
@@ -244,7 +244,7 @@ export class FriendRepository {
       .from(schema.friendRequest)
       .innerJoin(
         schema.user,
-        eq(schema.friendRequest.recipientId, schema.user.id),
+        eq(schema.friendRequest.senderId, schema.user.id), // Changed to senderId
       )
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
