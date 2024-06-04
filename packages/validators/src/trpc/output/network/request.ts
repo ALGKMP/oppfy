@@ -31,8 +31,8 @@ const trpcRequestOutputSchema = {
   }),
 
   countRequests: z.object({
-    followRequests: z.number(),
-    friendRequests: z.number(),
+    followRequestCount: z.number(),
+    friendRequestCount: z.number(),
   }),
 };
 
