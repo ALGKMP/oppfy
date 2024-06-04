@@ -51,12 +51,12 @@ export const requestRouter = createTRPCRouter({
     .output(trpcValidators.output.request.countRequests)
     .query(async ({ ctx }) => {
       try {
-        const followerRequestCount =
+        const followRequestCount =
           await ctx.services.follow.countFollowRequests(ctx.session.uid);
         const friendRequestCount =
           await ctx.services.friend.countFriendRequests(ctx.session.uid);
         return trpcValidators.output.request.countRequests.parse({
-          followerRequestCount,
+          followRequestCount,
           friendRequestCount,
         });
       } catch (err) {

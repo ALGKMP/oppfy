@@ -94,7 +94,7 @@ export class FriendRepository {
       .from(schema.friendRequest)
       .where(eq(schema.friendRequest.recipientId, userId));
     
-      return result[0]?.count;
+      return result[0]?.count ?? 0;
   }
 
   @handleDatabaseErrors
