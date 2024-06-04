@@ -54,6 +54,15 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
     [props.onPress],
   );
 
+  const isTwoButtons =
+    (props.loading &&
+      props.showSkeletons?.button &&
+      props.showSkeletons?.button2) ||
+    (!props.loading && props.button && props.button2);
+
+  const buttonSize = isTwoButtons ? "$2.5" : "$3";
+  const buttonWidth = isTwoButtons ? 100 : 200;
+
   const content = (
     <Skeleton.Group show={props.loading}>
       <XStack alignItems="center" paddingVertical="$2">
@@ -98,17 +107,23 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
         <XStack gap="$2">
           {props.loading && props.showSkeletons?.button ? (
             <Skeleton>
-              <Button size="$3">Loading...</Button>
+              <Button
+                size={isTwoButtons ? "$2.5" : "$3"}
+                width={isTwoButtons ? 75 : undefined}
+              >
+                Loading...
+              </Button>
             </Skeleton>
           ) : !props.loading && props.button ? (
             isButtonProps(props.button) ? (
               <Button
-                size="$3"
-                {...(props.button.onPress
-                  ? {
-                      onPress: debounce(props.button.onPress, 300),
-                    }
-                  : {})}
+                size={isTwoButtons ? "$2.5" : "$3"}
+                width={isTwoButtons ? 75 : undefined}
+                onPress={
+                  props.button.onPress
+                    ? debounce(props.button.onPress, 300)
+                    : undefined
+                }
                 {...props.button}
               >
                 {props.button.text}
@@ -120,17 +135,23 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
 
           {props.loading && props.showSkeletons?.button2 ? (
             <Skeleton>
-              <Button size="$3">Loading...</Button>
+              <Button
+                size={isTwoButtons ? "$2.5" : "$3"}
+                width={isTwoButtons ? 75 : undefined}
+              >
+                Loading...
+              </Button>
             </Skeleton>
           ) : !props.loading && props.button2 ? (
             isButtonProps(props.button2) ? (
               <Button
-                size="$3"
-                {...(props.button2.onPress
-                  ? {
-                      onPress: debounce(props.button2.onPress, 300),
-                    }
-                  : {})}
+                size={isTwoButtons ? "$2.5" : "$3"}
+                width={isTwoButtons ? 75 : undefined}
+                onPress={
+                  props.button2.onPress
+                    ? debounce(props.button2.onPress, 300)
+                    : undefined
+                }
                 {...props.button2}
               >
                 {props.button2.text}
