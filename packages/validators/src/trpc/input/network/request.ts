@@ -1,6 +1,16 @@
 import { z } from "zod";
 
 const trpcRequestInputSchema = {
+  paginateRequests: z.object({
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
+    pageSize: z.number().optional(),
+  }),
+
   sendFriendRequest: z.object({
     recipientId: z.string(),
   }),
