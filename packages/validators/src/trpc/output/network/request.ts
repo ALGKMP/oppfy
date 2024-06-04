@@ -1,27 +1,38 @@
 import { z } from "zod";
 
 const trpcRequestOutputSchema = {
-  paginateFriendSelf: z.object({
-    items: z.object({
-      followRequests: z.array(
-        z.object({
-          userId: z.string(),
-          profileId: z.number(),
-          username: z.string(),
-          name: z.string(),
-          profilePictureUrl: z.string(),
-        }),
-      ),
-      friendRequests: z.array(
-        z.object({
-          userId: z.string(),
-          profileId: z.number(),
-          username: z.string(),
-          name: z.string(),
-          profilePictureUrl: z.string(),
-        }),
-      ),
-    }),
+  paginateFriendRequests: z.object({
+    items: z.array(
+      z.object({
+        userId: z.string(),
+        username: z.string(),
+        name: z.string(),
+        profileId: z.number(),
+        profilePictureUrl: z.string(),
+        friendRequestId: z.number(),
+        createdAt: z.date(),
+      }),
+    ),
+    nextCursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
+  }),
+
+  paginateFollowRequests: z.object({
+    items: z.array(
+      z.object({
+        userId: z.string(),
+        username: z.string(),
+        name: z.string(),
+        profileId: z.number(),
+        profilePictureUrl: z.string(),
+        followRequestId: z.number(),
+        createdAt: z.date(),
+      }),
+    ),
     nextCursor: z
       .object({
         createdAt: z.date(),
