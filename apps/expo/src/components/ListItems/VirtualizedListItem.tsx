@@ -104,8 +104,12 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
             isButtonProps(props.button) ? (
               <Button
                 size="$3"
+                {...(props.button.onPress
+                  ? {
+                      onPress: debounce(props.button.onPress, 300),
+                    }
+                  : {})}
                 {...props.button}
-                onPress={debounce(props.button.onPress, 300)}
               >
                 {props.button.text}
               </Button>
@@ -122,8 +126,12 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
             isButtonProps(props.button2) ? (
               <Button
                 size="$3"
+                {...(props.button2.onPress
+                  ? {
+                      onPress: debounce(props.button2.onPress, 300),
+                    }
+                  : {})}
                 {...props.button2}
-                onPress={debounce(props.button2.onPress, 300)}
               >
                 {props.button2.text}
               </Button>
