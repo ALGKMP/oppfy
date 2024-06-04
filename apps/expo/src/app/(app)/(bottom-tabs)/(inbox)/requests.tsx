@@ -1,6 +1,6 @@
 import React from "react";
 import { FlashList } from "@shopify/flash-list";
-import { Separator, Text, View, YStack } from "tamagui";
+import { Button, Separator, Text, View, YStack } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
@@ -32,69 +32,42 @@ const Requests = () => {
   const isLoading = isLoadingFollowRequests || isLoadingFriendRequests;
 
   if (true) {
+    const skeletonProps = {
+      loading: true,
+      showSkeletons: {
+        title: true,
+        subtitle: true,
+        button: true,
+        button2: true,
+        imageUrl: true,
+      },
+    };
+
     return (
-      <BaseScreenView paddingBottom={0}>
+      <BaseScreenView scrollable paddingBottom={0}>
         <YStack flex={1} gap="$4">
           <View
-            flex={1}
+            paddingVertical="$2"
+            paddingHorizontal="$3"
             borderRadius="$6"
-            paddingHorizontal="$4"
             backgroundColor="$gray2"
           >
-            <FlashList
-              data={PLACEHOLDER_DATA}
-              ItemSeparatorComponent={Separator}
-              estimatedItemSize={75}
-              showsVerticalScrollIndicator={false}
-              ListHeaderComponent={
-                <View marginTop="$3">
-                  <ListHeader title="FRIEND REQUESTS" />
-                </View>
-              }
-              renderItem={() => (
-                <VirtualizedListItem
-                  loading
-                  showSkeletons={{
-                    imageUrl: true,
-                    title: true,
-                    subtitle: true,
-                    button: true,
-                    button2: true,
-                  }}
-                />
-              )}
-            />
+            <ListHeader title="FRIEND REQUESTS" />
+            {[...Array(5)].map((_, index) => (
+              <VirtualizedListItem key={index} {...skeletonProps} />
+            ))}
           </View>
 
           <View
-            flex={1}
+            paddingVertical="$2"
+            paddingHorizontal="$3"
             borderRadius="$6"
-            paddingHorizontal="$4"
             backgroundColor="$gray2"
           >
-            <FlashList
-              data={PLACEHOLDER_DATA}
-              ItemSeparatorComponent={Separator}
-              estimatedItemSize={75}
-              showsVerticalScrollIndicator={false}
-              ListHeaderComponent={
-                <View marginTop="$3">
-                  <ListHeader title="FRIEND REQUESTS" />
-                </View>
-              }
-              renderItem={() => (
-                <VirtualizedListItem
-                  loading
-                  showSkeletons={{
-                    imageUrl: true,
-                    title: true,
-                    subtitle: true,
-                    button: true,
-                    button2: true,
-                  }}
-                />
-              )}
-            />
+            <ListHeader title="FOLLOW REQUESTS" />
+            {[...Array(5)].map((_, index) => (
+              <VirtualizedListItem key={index} {...skeletonProps} />
+            ))}
           </View>
         </YStack>
       </BaseScreenView>
