@@ -7,6 +7,7 @@ import {
   notificationsRouter,
   postRouter,
   profileRouter,
+  requestRouter,
   searchRouter,
   userRouter,
 } from "./routers";
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   post: postRouter,
   follow: followRouter,
   friend: friendRouter,
+  request: requestRouter,
   block: blockRouter,
   notifications: notificationsRouter,
   search: searchRouter,
