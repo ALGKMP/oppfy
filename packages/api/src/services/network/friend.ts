@@ -29,19 +29,10 @@ export class FriendService {
         "Users are already friends",
       );
     }
-    const result = await this.friendRepository.createFriendRequest(
+    return await this.friendRepository.createFriendRequest(
       senderId,
       recipientId,
     );
-    if (!result) {
-      console.error(
-        `SERVICE ERROR: Failed to create friend request from "${senderId}" to "${recipientId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_REQUEST_FRIEND,
-        "Failed to create friend request",
-      );
-    }
   }
 
   async acceptFriendRequest(senderId: string, recipientId: string) {
@@ -106,19 +97,10 @@ export class FriendService {
       );
     }
 
-    const deleteResult = await this.friendRepository.cancelFriendRequest(
+    return await this.friendRepository.cancelFriendRequest(
       senderId,
       recipientId,
     );
-    if (!deleteResult) {
-      console.error(
-        `SERVICE ERROR: Failed to cancel friend request from "${senderId}" to "${recipientId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_CANCEL_FRIEND_REQUEST,
-        "Failed to cancel friend request",
-      );
-    }
   }
 
   async getFriendRequest(userId: string, targetUserId: string) {
@@ -148,20 +130,12 @@ export class FriendService {
         "Friendship not found",
       );
     }
-    const removeResult = await this.friendRepository.removeFriend(
+    return await this.friendRepository.removeFriend(
       targetUserId,
       otherUserId,
     );
-    if (!removeResult) {
-      console.error(
-        `SERVICE ERROR: Failed to remove friendship between "${targetUserId}" and "${otherUserId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_REMOVE_FRIEND,
-        "Failed to remove friend",
-      );
-    }
   }
+
   public async determineFriendState(userId: string, targetUserId: string) {
     const areFriends = await this.areFriends(userId, targetUserId);
     const friendRequest = await this.getFriendRequest(userId, targetUserId);
