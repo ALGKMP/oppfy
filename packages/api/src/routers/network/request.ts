@@ -55,6 +55,8 @@ export const requestRouter = createTRPCRouter({
           await ctx.services.follow.countFollowRequests(ctx.session.uid);
         const friendRequestCount =
           await ctx.services.friend.countFriendRequests(ctx.session.uid);
+
+        return trpcValidators.output.request.countRequests.parse({
         return {
           followRequestCount,
           friendRequestCount,
