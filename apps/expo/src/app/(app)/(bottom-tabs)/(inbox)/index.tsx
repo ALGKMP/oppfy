@@ -43,7 +43,7 @@ const Inbox = () => {
               </Paragraph>
             </YStack>
             <Circle
-              size={totalRequestCount > 99 ? "$2" : "$2.5"}
+              size={totalRequestCount > 99 ? "$2.5" : "$2"}
               backgroundColor="$red9"
               style={styles.countContainer}
             >
