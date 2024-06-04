@@ -23,6 +23,7 @@ const BottomTabsLayout = () => {
         tabPress: () =>
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
       }}
+      backBehavior="history"
     >
       <BottomTabs.Screen
         name="(home)"
