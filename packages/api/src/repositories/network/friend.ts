@@ -87,6 +87,15 @@ export class FriendRepository {
     return result[0]?.count;
   }
 
+  async countFriendRequests(userId: string) {
+    const result = await this.db
+      .select({ count: count() })
+      .from(schema.friendRequest)
+      .where(eq(schema.friendRequest.recipientId, userId));
+    
+      return result[0]?.count;
+  }
+
   @handleDatabaseErrors
   async createFriendRequest(senderId: string, recipientId: string) {
     const result = await this.db
