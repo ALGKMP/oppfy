@@ -148,7 +148,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.followRepository.paginateFollowersSelf(
+    const data = await this.followRepository.paginateFollowRequests(
       userId,
       cursor,
       pageSize,
@@ -199,3 +199,4 @@ export class PaginationService {
     }
   }
 }
+
