@@ -298,10 +298,7 @@ export class FollowRepository {
         profileId: schema.profile.id,
       })
       .from(schema.followRequest)
-      .innerJoin(
-        schema.user,
-        eq(schema.followRequest.recipientId, schema.user.id),
-      )
+      .innerJoin(schema.user, eq(schema.followRequest.senderId, schema.user.id)) // Changed to senderId
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
       .where(
         and(
