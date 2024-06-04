@@ -301,9 +301,10 @@ export class FollowRepository {
         userId: schema.user.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.followRequest.createdAt,
         profileId: schema.profile.id,
+        profilePictureUrl: schema.profile.profilePictureKey,
+        followRequestId: schema.followRequest.id,
+        createdAt: schema.followRequest.createdAt,
       })
       .from(schema.followRequest)
       .innerJoin(schema.user, eq(schema.followRequest.senderId, schema.user.id)) // Changed to senderId

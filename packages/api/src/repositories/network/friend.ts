@@ -3,6 +3,7 @@ import { and, asc, count, eq, gt, not, or, sql } from "drizzle-orm";
 import { db, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../../errors";
+import { friendRequest } from "../../../../db/src/schema/schema";
 
 export class FriendRepository {
   private db = db;
@@ -246,9 +247,10 @@ export class FriendRepository {
         userId: schema.user.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
-        profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.friendRequest.createdAt,
         profileId: schema.profile.id,
+        profilePictureUrl: schema.profile.profilePictureKey,
+        friendRequestId: schema.friendRequest.id,
+        createdAt: schema.friendRequest.createdAt,
       })
       .from(schema.friendRequest)
       .innerJoin(
