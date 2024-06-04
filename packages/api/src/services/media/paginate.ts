@@ -135,7 +135,7 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ): Promise<PaginatedResponse<UserProfile>> {
-    const data = await this.friendRepository.getPaginatedFriendRequests(
+    const data = await this.friendRepository.paginateFriendRequests(
       userId,
       cursor,
       pageSize,
