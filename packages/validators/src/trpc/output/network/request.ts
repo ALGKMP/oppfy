@@ -29,6 +29,11 @@ const trpcRequestOutputSchema = {
       })
       .optional(),
   }),
+
+  countRequests: z.object({
+    followRequests: z.number(),
+    friendRequests: z.number(),
+  }),
 };
 
 export default trpcRequestOutputSchema;

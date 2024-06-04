@@ -11,6 +11,10 @@ const trpcRequestInputSchema = {
     pageSize: z.number().optional(),
   }),
 
+  countRequests: z.object({
+    userId: z.string(),
+  }),
+
   sendFriendRequest: z.object({
     recipientId: z.string(),
   }),
