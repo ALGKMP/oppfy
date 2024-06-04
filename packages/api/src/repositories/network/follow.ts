@@ -69,6 +69,14 @@ export class FollowRepository {
     return result[0]?.count;
   }
 
+  async countFollowRequests(userId: string): Promise<number | undefined> {
+    const result = await this.db
+      .select({ count: count() })
+      .from(schema.followRequest)
+      .where(eq(schema.followRequest.recipientId, userId));
+    return result[0]?.count;
+  }
+
   @handleDatabaseErrors
   async createFollowRequest(senderId: string, recipientId: string) {
     const result = await this.db
