@@ -56,7 +56,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
 
   const content = (
     <Skeleton.Group show={props.loading}>
-      <XStack flex={1} alignItems="center" paddingVertical="$2">
+      <XStack alignItems="center" paddingVertical="$2">
         <XStack flex={1} alignItems="center" gap="$3">
           {props.loading && props.showSkeletons?.imageUrl ? (
             <Skeleton radius={100}>
