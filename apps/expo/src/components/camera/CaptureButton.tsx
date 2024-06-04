@@ -16,6 +16,7 @@ import Reanimated, {
   Extrapolation,
   interpolate,
   runOnJS,
+  runOnUI,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -30,8 +31,13 @@ import {
   SCREEN_WIDTH,
 } from "~/constants/camera";
 
-const PAN_GESTURE_HANDLER_FAIL_X = [-SCREEN_WIDTH, SCREEN_WIDTH];
-const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2];
+type FailOffset = [failOffsetXStart: number, failOffsetXEnd: number];
+
+const PAN_GESTURE_HANDLER_FAIL_X = [
+  -SCREEN_WIDTH,
+  SCREEN_WIDTH,
+] satisfies FailOffset;
+const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2] satisfies FailOffset;
 
 const START_RECORDING_DELAY = 200;
 const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.1;
@@ -162,6 +168,7 @@ const CaptureButton = ({
 
   const handlePanOnStart = useCallback(
     (event: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
+      "worklet";
       context.value.startY = event.absoluteY;
 
       const yForFullZoom = context.value.startY ?? 0 * 0.7;
@@ -180,6 +187,7 @@ const CaptureButton = ({
 
   const handlePanOnUpdate = useCallback(
     (event: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
+      "worklet";
       const offset = context.value.offsetY ?? 0;
       const startY = context.value.startY ?? SCREEN_HEIGHT;
       const yForFullZoom = startY * 0.7;
@@ -198,10 +206,10 @@ const CaptureButton = ({
     .failOffsetX(PAN_GESTURE_HANDLER_FAIL_X)
     .activeOffsetY(PAN_GESTURE_HANDLER_ACTIVE_Y)
     .onStart((event) => {
-      runOnJS(handlePanOnStart)(event);
+      handlePanOnStart(event);
     })
     .onUpdate((event) => {
-      runOnJS(handlePanOnUpdate)(event);
+      handlePanOnUpdate(event);
     });
 
   const shadowStyle = useAnimatedStyle(
@@ -260,10 +268,8 @@ const CaptureButton = ({
   return (
     <GestureDetector gesture={Gesture.Simultaneous(tapGesture, panGesture)}>
       <Reanimated.View {...props} style={[buttonStyle, style]}>
-        <Reanimated.View style={styles.flex}>
-          <Reanimated.View style={[styles.shadow, shadowStyle]} />
-          <View style={styles.button} />
-        </Reanimated.View>
+        <Reanimated.View style={[styles.shadow, shadowStyle]} />
+        <View style={styles.button} />
       </Reanimated.View>
     </GestureDetector>
   );
@@ -272,9 +278,6 @@ const CaptureButton = ({
 export default React.memo(CaptureButton);
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
   shadow: {
     position: "absolute",
     width: CAPTURE_BUTTON_SIZE,

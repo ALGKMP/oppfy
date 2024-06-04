@@ -19,10 +19,14 @@ const useUploadProfilePicture = ({
   const generatePresignedUrlForProfilePicture =
     api.profile.generatePresignedUrlForProfilePicture.useMutation();
 
+  const getMediaBlob = async (uri: string) => {
+    const response = await fetch(uri);
+    return await response.blob();
+  };
+
   const uploadProfilePicture = useMutation(
     async (uri: string) => {
-      const profilePictureResponse = await fetch(uri);
-      const profilePictureBlob = await profilePictureResponse.blob();
+      const profilePictureBlob = await getMediaBlob(uri);
 
       const presignedUrl =
         await generatePresignedUrlForProfilePicture.mutateAsync({

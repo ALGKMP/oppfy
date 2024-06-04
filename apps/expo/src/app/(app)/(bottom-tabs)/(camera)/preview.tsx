@@ -71,7 +71,7 @@ const PreviewScreen = () => {
       return;
     }
 
-    await MediaLibrary.createAssetAsync(uri);
+    await MediaLibrary.createAssetAsync(uri ?? "");
     setSaveState("saved");
   };
 
@@ -88,9 +88,9 @@ const PreviewScreen = () => {
   return (
     <View style={styles.container}>
       {type === "photo" ? (
-        <PreviewImage uri={uri} />
+        <PreviewImage uri={uri ?? ""} />
       ) : (
-        <PreviewVideo uri={uri} />
+        <PreviewVideo uri={uri ?? ""} />
       )}
 
       <StatusBarBlurBackground />
@@ -103,40 +103,68 @@ const PreviewScreen = () => {
             style={{ backgroundColor: "transparent" }}
           >
             <XStack
+              height={105}
               paddingTop="$4"
-              paddingHorizontal="$6"
+              paddingHorizontal="$4"
               justifyContent="space-evenly"
               paddingBottom={insets.bottom}
-              gap="$6"
+              gap="$4"
             >
-              <Button
-                flex={1}
-                size={"$5"}
-                borderRadius="$8"
-                iconAfter={saveState === "idle" ? Download : undefined}
+              <TouchableOpacity
+                activeOpacity={0.6}
+                style={[
+                  styles.glassyButton,
+                  { flex: 1 },
+                  saveState === "saving" || saveState === "saved"
+                    ? { opacity: 0.5 }
+                    : {},
+                ]}
                 onPress={saveToCameraRoll}
                 disabled={saveState === "saving" || saveState === "saved"}
-                disabledStyle={{
-                  opacity: 0.5,
-                }}
               >
-                {saveState === "saving" ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
-                ) : saveState === "saved" ? (
-                  "Saved"
-                ) : (
-                  "Save"
-                )}
-              </Button>
-              <Button
-                flex={2}
-                size={"$5"}
-                borderRadius="$8"
-                iconAfter={ArrowBigRight}
+                <BlurView
+                  tint="light"
+                  intensity={40}
+                  style={[styles.glassyButton]}
+                >
+                  <Button
+                    size={"$5"}
+                    borderRadius="$8"
+                    backgroundColor="transparent"
+                    iconAfter={saveState === "idle" ? Download : undefined}
+                    disabled={true}
+                  >
+                    {saveState === "saving" ? (
+                      <ActivityIndicator size="small" color="#ffffff" />
+                    ) : saveState === "saved" ? (
+                      "Saved"
+                    ) : (
+                      "Save"
+                    )}
+                  </Button>
+                </BlurView>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.6}
+                style={[styles.glassyButton, { flex: 2 }]}
                 onPress={onContinue}
               >
-                Continue
-              </Button>
+                <BlurView
+                  tint="light"
+                  intensity={40}
+                  style={[styles.glassyButton]}
+                >
+                  <Button
+                    size={"$5"}
+                    borderRadius="$8"
+                    backgroundColor="transparent"
+                    iconAfter={ArrowBigRight}
+                    disabled={true}
+                  >
+                    Continue
+                  </Button>
+                </BlurView>
+              </TouchableOpacity>
             </XStack>
           </BlurView>
         </View>
@@ -260,6 +288,10 @@ const styles = StyleSheet.create({
   bottomContainer: {
     flex: 1,
     justifyContent: "flex-end",
+  },
+  glassyButton: {
+    borderRadius: 16,
+    overflow: "hidden",
   },
 });
 
