@@ -7,37 +7,62 @@ import { friend } from "../../../../db/src/schema/schema";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const requestRouter = createTRPCRouter({
-  // TODO: Paginate requests
-//   paginateRequests: protectedProcedure
-//     .input(trpcValidators.input.request.paginateRequests)
-//     .query(async ({ input, ctx }) => {
-//       try {
-//         const friendRequests 
-//         const followRequests 
-//         const data = {
-//             friendRequests,
-//             followRequests
-//         }
-//       } catch (err) {
-//         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
-//       }
-//     }),
+  paginateFriendRequests: protectedProcedure
+    .input(trpcValidators.input.request.paginateFriendRequests)
+    .output(trpcValidators.output.request.paginateFriendRequests)
+    .query(async ({ input, ctx }) => {
+      try {
+        const { items, nextCursor } =
+          await ctx.services.paginate.paginateFriendRequests(
+            ctx.session.uid,
+            input.cursor,
+            input.pageSize,
+          );
+        return trpcValidators.output.request.paginateFriendRequests.parse({
+          items,
+          nextCursor,
+        });
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
 
-  countRequests: protectedProcedure.output(trpcValidators.output.request.countRequests).query(async ({ ctx }) => {
-    try {
-      const followerRequestCount =
-        await ctx.services.follow.countFollowRequests(ctx.session.uid);
-      const friendRequestCount = await ctx.services.friend.countFriendRequests(
-        ctx.session.uid,
-      );
-      return trpcValidators.output.request.countRequests.parse({
-        followerRequestCount,
-        friendRequestCount,
-      })
-    } catch (err) {
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
-    }
-  }),
+  paginateFollowRequests: protectedProcedure
+    .input(trpcValidators.input.request.paginateFollowRequests)
+    .output(trpcValidators.output.request.paginateFollowRequests)
+    .query(async ({ input, ctx }) => {
+      try {
+        const { items, nextCursor } =
+          await ctx.services.paginate.paginateFollowRequests(
+            ctx.session.uid,
+            input.cursor,
+            input.pageSize,
+          );
+        return trpcValidators.output.request.paginateFollowRequests.parse({
+          items,
+          nextCursor,
+        });
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
+
+  countRequests: protectedProcedure
+    .output(trpcValidators.output.request.countRequests)
+    .query(async ({ ctx }) => {
+      try {
+        const followerRequestCount =
+          await ctx.services.follow.countFollowRequests(ctx.session.uid);
+        const friendRequestCount =
+          await ctx.services.friend.countFriendRequests(ctx.session.uid);
+        return trpcValidators.output.request.countRequests.parse({
+          followerRequestCount,
+          friendRequestCount,
+        });
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
 
   sendFriendRequest: protectedProcedure
     .input(trpcValidators.input.request.sendFriendRequest)
