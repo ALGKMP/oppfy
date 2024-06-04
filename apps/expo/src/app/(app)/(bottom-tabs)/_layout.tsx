@@ -58,7 +58,7 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(inbox)"
         options={{
-          title: "Inbox",
+          header: () => null,
           tabBarIcon: ({ focused }) => (
             <Inbox strokeWidth={focused ? 2 : 1.5} />
           ),
