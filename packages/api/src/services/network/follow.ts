@@ -79,10 +79,7 @@ export class FollowService {
       );
     }
 
-    return await this.followRepository.removeFollower(
-      senderId,
-      recipientId,
-    );
+    return await this.followRepository.removeFollower(senderId, recipientId);
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
@@ -189,11 +186,7 @@ export class FollowService {
       );
     }
 
-    return await this.followRepository.removeFollower(
-      followerToRemove,
-      userId,
-    );
-    
+    return await this.followRepository.removeFollower(followerToRemove, userId);
   }
 
   public async determineFollowState(
@@ -229,5 +222,19 @@ export class FollowService {
           : PrivateFollowState.Enum.NotFollowing;
       }
     }
+  }
+
+  public async countFollowRequests(userId: string) {
+    const count = await this.followRepository.countFollowRequests(userId);
+    if (count === undefined) {
+      console.error(
+        `SERVICE ERROR: Failed to count follow requests for user ID "${userId}"`,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_COUNT_FOLLOW_REQUESTS,
+        "Failed to count follow requests.",
+      );
+    }
+    return count;
   }
 }
