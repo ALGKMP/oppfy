@@ -35,6 +35,8 @@ const BaseScreenView = ({
         flex={1}
         padding="$4"
         backgroundColor="$background"
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         {...(props as ScrollViewProps)}
       >
         {children}

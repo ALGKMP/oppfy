@@ -169,7 +169,7 @@ const Profile = (props: ProfileProps) => {
 
           <TouchableOpacity
             disabled={props.loading}
-            onPress={() => router.push("/self-connections/following-list")}
+            onPress={() => router.push("/self-connections/follower-list")}
           >
             <Stat
               label="Followers"
