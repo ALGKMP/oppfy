@@ -3,58 +3,78 @@ import type { StyleProp, ViewStyle } from "react-native";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { Edge } from "react-native-safe-area-context";
-import type { ViewProps } from "tamagui";
+import type { ScrollViewProps, ViewProps } from "tamagui";
 import { ScrollView, View } from "tamagui";
 
-interface BaseScreenViewProps extends ViewProps {
+type BaseScreenViewProps =
+  | ({
+      scrollable: true;
+    } & ScrollViewProps)
+  | ({
+      scrollable?: false;
+    } & ViewProps);
+
+interface CommonProps {
   children: React.ReactNode;
   safeAreaEdges?: Edge[];
-  scrollable?: boolean;
   topSafeAreaStyle?: StyleProp<ViewStyle>;
   bottomSafeAreaStyle?: StyleProp<ViewStyle>;
 }
 
 const BaseScreenView = ({
   children,
-  scrollable,
   safeAreaEdges,
   topSafeAreaStyle,
   bottomSafeAreaStyle,
+  scrollable,
   ...props
-}: BaseScreenViewProps) => {
+}: CommonProps & BaseScreenViewProps) => {
+  const renderContent = () =>
+    scrollable ? (
+      <ScrollView
+        flex={1}
+        padding="$4"
+        backgroundColor="$background"
+        {...(props as ScrollViewProps)}
+      >
+        {children}
+      </ScrollView>
+    ) : (
+      <View
+        flex={1}
+        padding="$4"
+        backgroundColor="$background"
+        {...(props as ViewProps)}
+      >
+        {children}
+      </View>
+    );
+
   const renderTopSafeArea = () => {
-    if (topSafeAreaStyle ?? safeAreaEdges?.includes("top")) {
-      return (
-        <SafeAreaView
-          style={[styles.topSafeArea, topSafeAreaStyle]}
-          edges={safeAreaEdges?.includes("top") ? ["top"] : undefined}
-        />
-      );
+    if (!safeAreaEdges?.includes("top")) {
+      return null;
     }
-    return null;
+
+    return (
+      <SafeAreaView
+        style={[styles.topSafeArea, topSafeAreaStyle]}
+        edges={safeAreaEdges?.includes("top") ? ["top"] : undefined}
+      />
+    );
   };
 
   const renderBottomSafeArea = () => {
-    if (bottomSafeAreaStyle ?? safeAreaEdges?.includes("bottom")) {
-      return (
-        <SafeAreaView
-          style={[styles.bottomSafeArea, bottomSafeAreaStyle]}
-          edges={safeAreaEdges?.includes("bottom") ? ["bottom"] : undefined}
-        >
-          <View flex={1} padding="$4" backgroundColor="$background" {...props}>
-            {scrollable ? (
-              <ScrollView flex={1}>{children}</ScrollView>
-            ) : (
-              children
-            )}
-          </View>
-        </SafeAreaView>
-      );
+    if (!safeAreaEdges?.includes("bottom")) {
+      return renderContent();
     }
+
     return (
-      <View flex={1} padding="$4" backgroundColor="$background" {...props}>
-        {scrollable ? <ScrollView flex={1}>{children}</ScrollView> : children}
-      </View>
+      <SafeAreaView
+        style={[styles.bottomSafeArea, bottomSafeAreaStyle]}
+        edges={safeAreaEdges?.includes("bottom") ? ["bottom"] : undefined}
+      >
+        {renderContent()}
+      </SafeAreaView>
     );
   };
 
