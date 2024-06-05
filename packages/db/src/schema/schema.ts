@@ -1,11 +1,14 @@
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
+  binary,
   boolean,
   date,
   datetime,
   int,
   mysqlEnum,
+  mysqlTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -48,6 +51,32 @@ export const user = mySqlTable("User", {
     .onUpdateNow()
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const contact = mysqlTable("Contact", {
+  id: binary("id", { length: 512 }).primaryKey(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .onUpdateNow()
+    .notNull(),
+});
+
+export const userContact = mysqlTable("UserContact", {
+  userId: varchar("userId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  contactId: binary("contactId", { length: 512 })
+    .references(() => contact.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .onUpdateNow()
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+}, (table) => {
+  return {
+    pk: primaryKey({ columns: [table.userId, table.contactId] }),
+  };
 });
 
 export const userRelations = relations(user, ({ one }) => ({
