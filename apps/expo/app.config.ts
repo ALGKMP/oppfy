@@ -21,14 +21,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     googleServicesFile: "./GoogleService-Info.plist",
     supportsTablet: true,
-    bundleIdentifier: "com.algkmp.oppfy",
+    bundleIdentifier: "app.algkmp.oppfy",
     entitlements: {
       "aps-environment": "development",
     },
   },
   android: {
     googleServicesFile: "./google-services.json",
-    package: "com.algkmp.oppfy",
+    package: "app.algkmp.oppfy",
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
       backgroundColor: "#1F104A",
