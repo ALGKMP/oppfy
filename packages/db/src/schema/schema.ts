@@ -46,6 +46,7 @@ export const user = mySqlTable("User", {
   privacySetting: mysqlEnum("privacySetting", ["public", "private"])
     .default("public")
     .notNull(),
+  pushToken: varchar("pushToken", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()
@@ -61,25 +62,29 @@ export const contact = mysqlTable("Contact", {
     .notNull(),
 });
 
-export const userContact = mysqlTable("UserContact", {
-  userId: varchar("userId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  contactId: binary("contactId", { length: 512 })
-    .references(() => contact.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-}, (table) => {
-  return {
-    pk: primaryKey({ columns: [table.userId, table.contactId] }),
-  };
-});
+export const userContact = mysqlTable(
+  "UserContact",
+  {
+    userId: varchar("userId", { length: 255 })
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+    contactId: binary("contactId", { length: 512 })
+      .references(() => contact.id, { onDelete: "cascade" })
+      .notNull(),
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .onUpdateNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.userId, table.contactId] }),
+    };
+  },
+);
 
-export const userRelations = relations(user, ({ one }) => ({
+export const userRelations = relations(user, ({ one, many }) => ({
   profile: one(profile, {
     fields: [user.profileId],
     references: [profile.id],
@@ -88,6 +93,7 @@ export const userRelations = relations(user, ({ one }) => ({
     fields: [user.notificationSettingsId],
     references: [notificationSettings.id],
   }),
+  notifications: many(notifications),
 }));
 
 export const profile = mySqlTable("Profile", {
@@ -105,6 +111,42 @@ export const profile = mySqlTable("Profile", {
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
+
+export const notifications = mySqlTable("Notifications", {
+  id: serial("id").primaryKey(),
+  recipientId: varchar("recipientId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+
+  type: mysqlEnum("type", [
+    "post",
+    "like",
+    "comment",
+    "mention",
+    "follow",
+    "friend",
+    "followRequest",
+    "friendRequest",
+  ]),
+
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+
+  read: boolean("read").default(false).notNull(),
+
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .onUpdateNow()
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  recipient: one(user, {
+    fields: [notifications.recipientId],
+    references: [user.id],
+  }),
+}));
 
 export const notificationSettings = mySqlTable("NotificationSettings", {
   id: serial("id").primaryKey(),
