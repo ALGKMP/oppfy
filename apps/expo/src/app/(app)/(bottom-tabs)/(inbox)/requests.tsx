@@ -11,6 +11,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const PAGE_SIZE = 5;
 
 const Requests = () => {
+  const utils = api.useUtils();
+
   const {
     data: friendRequestsData,
     isLoading: friendRequestsIsLoading,
@@ -40,11 +42,143 @@ const Requests = () => {
     },
   );
 
-  const acceptFriendRequest = api.request.acceptFriendRequest.useMutation();
-  const acceptFollowRequest = api.request.acceptFollowRequest.useMutation();
+  const acceptFriendRequest = api.request.acceptFriendRequest.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.request.paginateFriendRequests.cancel();
 
-  const declineFriendRequest = api.request.declineFollowRequest.useMutation();
-  const declineFollowRequest = api.request.declineFollowRequest.useMutation();
+      // Get the data from the queryCache
+      const prevData = utils.request.paginateFriendRequests.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.request.paginateFriendRequests.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (item) => item.userId !== newData.senderId,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.request.paginateFriendRequests.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.request.paginateFriendRequests.invalidate();
+    },
+  });
+  const acceptFollowRequest = api.request.acceptFollowRequest.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.request.paginateFollowRequests.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.request.paginateFollowRequests.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.request.paginateFollowRequests.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (item) => item.userId !== newData.senderId,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.request.paginateFollowRequests.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.request.paginateFollowRequests.invalidate();
+    },
+  });
+
+  const declineFriendRequest = api.request.declineFollowRequest.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.request.paginateFriendRequests.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.request.paginateFriendRequests.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.request.paginateFriendRequests.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (item) => item.userId !== newData.senderId,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.request.paginateFriendRequests.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.request.paginateFriendRequests.invalidate();
+    },
+  });
+  const declineFollowRequest = api.request.declineFollowRequest.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.request.paginateFollowRequests.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.request.paginateFollowRequests.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.request.paginateFollowRequests.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (item) => item.userId !== newData.senderId,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.request.paginateFollowRequests.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.request.paginateFollowRequests.invalidate();
+    },
+  });
 
   const friendRequestItems = useMemo(
     () => friendRequestsData?.pages.flatMap((page) => page.items) ?? [],
