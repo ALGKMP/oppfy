@@ -5,7 +5,16 @@ import { Image } from "expo-image";
 import { FontAwesome } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, MessageCircle } from "@tamagui/lucide-icons";
-import { Avatar, Separator, Stack, Text, View, XStack, YStack } from "tamagui";
+import {
+  Avatar,
+  Separator,
+  SizableText,
+  Stack,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 // import { api } from "@oppfy/utils";
 
@@ -158,21 +167,59 @@ const MediaOfYou = () => {
       flex={1}
       alignItems="center"
       justifyContent="center"
-      // marginTop={25}
-      marginBottom={20}
-      // paddingBottom={20}
+      marginBottom={50}
       maxHeight={550}
-      position="relative"
       width={"100%"}
     >
       <Image source={{ uri: item.image }} style={styles.image}>
-        <Avatar circular size="$5" position="absolute" left={0} top={0}>
-          <Avatar.Image
-            accessibilityLabel="Cam"
-            src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
-          />
-          <Avatar.Fallback backgroundColor="$blue10" />
-        </Avatar>
+        <XStack
+          marginTop={"$3"}
+          marginLeft={"$3"}
+          justifyContent="flex-start"
+          alignContent="center"
+          gap={"$3"}
+        >
+          <Avatar circular size="$5">
+            <Avatar.Image
+              accessibilityLabel="Cam"
+              src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+            />
+            <Avatar.Fallback backgroundColor="$blue10" />
+          </Avatar>
+          <YStack paddingTop={"$2"}>
+            <SizableText
+              shadowRadius={3}
+              shadowOpacity={0.5}
+              size={"$3"}
+              fontWeight={"bold"}
+            >
+              @AuthorUsername
+            </SizableText>
+            <XStack flex={1} gap={"$1"} alignItems="center">
+              <SizableText height={35} lineHeight={"$2"}>
+                📸
+              </SizableText>
+              <SizableText
+                height={35}
+                size={"$2"}
+                // color={"grey"}
+                fontWeight={"bold"}
+                color={"$gray2"}
+                // shadowOpacity={100}
+              >
+                posted by:
+              </SizableText>
+              <SizableText
+                height={35}
+                size={"$2"}
+                fontWeight={"bold"}
+                color={"$blue9"}
+              >
+                @RecipientUsername
+              </SizableText>
+            </XStack>
+          </YStack>
+        </XStack>
         <YStack
           gap="$2"
           position="absolute"
@@ -214,26 +261,26 @@ const MediaOfYou = () => {
             </Text>
           </View>
         </YStack>
-        <Text
-          color="#fff"
-          textAlign="center"
-          borderBottomLeftRadius={10}
-          borderBottomRightRadius={10}
-          // marginTop={20}
-        >
-          {item.caption}
-        </Text>
       </Image>
+      {/* <Text
+        color="#fff"
+        textAlign="center"
+        borderBottomLeftRadius={10}
+        borderBottomRightRadius={10}
+        // marginTop={20}
+      >
+        {item.caption}
+      </Text> */}
     </View>
   );
 
   return (
     <View flex={1}>
-      <Separator
+      {/* <Separator
         // margin={10}
         borderColor={"white"}
         height={50}
-      />
+      /> */}
       <FlashList
         data={data}
         numColumns={1}
