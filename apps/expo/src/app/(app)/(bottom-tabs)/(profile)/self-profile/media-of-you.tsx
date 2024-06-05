@@ -120,19 +120,19 @@ const data = [
   //   image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
   //   caption: "Mountain views.",
   // },
-  // {
-  //   author: "DavidSmith",
-  //   authorProfilePicture: "https://example.com/author8.jpg",
-  //   recipient: "EmilyClark",
-  //   recipientProfilePicture: "https://example.com/recipient8.jpg",
-  //   isFollowing: false,
-  //   hasLiked: true,
-  //   key: "8",
-  //   comments: 100,
-  //   likes: 50,
-  //   image: "https://images.unsplash.com/photo-1552664730-d307ca884978",
-  //   caption: "Birthday celebrations.",
-  // },
+  {
+    author: "DavidSmith",
+    authorProfilePicture: "https://example.com/author8.jpg",
+    recipient: "EmilyClark",
+    recipientProfilePicture: "https://example.com/recipient8.jpg",
+    isFollowing: false,
+    hasLiked: true,
+    key: "8",
+    comments: 100,
+    likes: 50,
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978",
+    caption: "Birthday celebrations.",
+  },
   {
     author: "GraceLee",
     authorProfilePicture: "https://example.com/author9.jpg",
@@ -158,61 +158,82 @@ const MediaOfYou = () => {
       flex={1}
       alignItems="center"
       justifyContent="center"
-      marginTop={25}
-      paddingBottom={20}
+      // marginTop={25}
+      marginBottom={20}
+      // paddingBottom={20}
       maxHeight={550}
+      position="relative"
       width={"100%"}
     >
-      <Avatar circular size="$5"  position="absolute" left={25} top={25}>
-        <Avatar.Image
-          accessibilityLabel="Cam"
-          src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
-        />
-        <Avatar.Fallback backgroundColor="$blue10" />
-      </Avatar>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <YStack
-        gap="$2"
-        position="absolute"
-        bottom={20}
-        right={20}
-        paddingBottom={40}
-      >
-        <View flex={1} alignItems="center" marginBottom={8}>
-          <TouchableOpacity onPress={() => handleLike(item.key)} />
-          <Heart size={24} color="white" />
-          <Text marginTop={3} color="#fff">
-            {item.likes}
-          </Text>
-        </View>
-        <View flex={1} alignItems="center" marginBottom={8}>
-          <TouchableOpacity onPress={() => handleComment(item.key)} />
-          <MessageCircle
-            borderBlockWidth={1}
-            borderColor={"black"}
-            size={24}
-            color="white"
+      <Image source={{ uri: item.image }} style={styles.image}>
+        <Avatar circular size="$5" position="absolute" left={0} top={0}>
+          <Avatar.Image
+            accessibilityLabel="Cam"
+            src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
           />
-          <Text marginTop={3} color="#fff">
-            {item.comments}
-          </Text>
-        </View>
-      </YStack>
-      <Text
-        color="#fff"
-        textAlign="center"
-        borderBottomLeftRadius={10}
-        borderBottomRightRadius={10}
-        marginTop={20}
-      >
-        {item.caption}
-      </Text>
+          <Avatar.Fallback backgroundColor="$blue10" />
+        </Avatar>
+        <YStack
+          gap="$2"
+          position="absolute"
+          bottom={20}
+          right={20}
+          // paddingBottom={40}
+        >
+          <View
+            flex={1}
+            alignItems="center"
+            // marginBottom={8}
+          >
+            <TouchableOpacity onPress={() => handleLike(item.key)} />
+            <Heart size={24} color="white" />
+            <Text
+              // marginTop={5}
+              color="#fff"
+            >
+              {item.likes}
+            </Text>
+          </View>
+          <View
+            flex={1}
+            alignItems="center"
+            // marginBottom={8}
+          >
+            <TouchableOpacity onPress={() => handleComment(item.key)} />
+            <MessageCircle
+              borderBlockWidth={1}
+              borderColor={"black"}
+              size={24}
+              color="white"
+            />
+            <Text
+              // marginTop={3}
+              color="#fff"
+            >
+              {item.comments}
+            </Text>
+          </View>
+        </YStack>
+        <Text
+          color="#fff"
+          textAlign="center"
+          borderBottomLeftRadius={10}
+          borderBottomRightRadius={10}
+          // marginTop={20}
+        >
+          {item.caption}
+        </Text>
+      </Image>
     </View>
   );
 
   return (
     <View flex={1}>
-      <Separator margin={10} borderColor={"white"} height={50} />
+      <Separator
+        // margin={10}
+        borderColor={"white"}
+        height={50}
+      />
       <FlashList
         data={data}
         numColumns={1}
@@ -227,7 +248,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    // resizeMode: "cover",
     alignSelf: "center",
     borderRadius: 10,
   },
