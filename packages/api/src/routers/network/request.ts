@@ -91,11 +91,11 @@ export const requestRouter = createTRPCRouter({
       }
     }),
 
-  rejectFriendRequest: protectedProcedure
+  declineFriendRequest: protectedProcedure
     .input(trpcValidators.input.request.rejectFriendRequest)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.friend.rejectFriendRequest(
+        return await ctx.services.friend.declineFriendRequest(
           ctx.session.uid,
           input.senderId,
         );
@@ -122,7 +122,7 @@ export const requestRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.acceptFollowRequest(
-          input.userId,
+          input.senderId,
           ctx.session.uid,
         );
       } catch (err) {
@@ -130,13 +130,13 @@ export const requestRouter = createTRPCRouter({
       }
     }),
 
-  rejectFollowRequest: protectedProcedure
+  declineFollowRequest: protectedProcedure
     .input(trpcValidators.input.request.rejectFollowRequest)
     .mutation(async ({ input, ctx }) => {
       try {
-        return await ctx.services.follow.rejectFollowRequest(
+        return await ctx.services.follow.declineFollowRequest(
           ctx.session.uid,
-          input.userId,
+          input.senderId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -149,7 +149,7 @@ export const requestRouter = createTRPCRouter({
       try {
         await ctx.services.follow.cancelFollowRequest(
           ctx.session.uid,
-          input.userId,
+          input.senderId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
