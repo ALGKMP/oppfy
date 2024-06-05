@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { FlashList } from "@shopify/flash-list";
-import { Button, Separator, Text, View, YStack } from "tamagui";
+import { Button, Separator, Spacer, Text, View, YStack } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
@@ -8,11 +8,13 @@ import { ListHeader } from "~/features/connections/components";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
+const PAGE_SIZE = 5;
+
 const Requests = () => {
   const { data: followRequestsData, isLoading: isLoadingFollowRequests } =
     api.request.paginateFollowRequests.useInfiniteQuery(
       {
-        pageSize: 5,
+        pageSize: PAGE_SIZE,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -22,16 +24,26 @@ const Requests = () => {
   const { data: friendRequestsData, isLoading: isLoadingFriendRequests } =
     api.request.paginateFriendRequests.useInfiniteQuery(
       {
-        pageSize: 5,
+        pageSize: PAGE_SIZE,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
     );
 
+  const followRequestItems = useMemo(
+    () => followRequestsData?.pages.flatMap((page) => page.items) ?? [],
+    [followRequestsData],
+  );
+
+  const friendRequestItems = useMemo(
+    () => friendRequestsData?.pages.flatMap((page) => page.items) ?? [],
+    [friendRequestsData],
+  );
+
   const isLoading = isLoadingFollowRequests || isLoadingFriendRequests;
 
-  if (true) {
+  if (isLoading) {
     const skeletonProps = {
       loading: true,
       showSkeletons: {
@@ -75,12 +87,71 @@ const Requests = () => {
   }
 
   return (
-    <BaseScreenView>
-      <VirtualizedListItem
-        loading={false}
-        title="Christina"
-        subtitle="wants to be your friend"
-      />
+    <BaseScreenView scrollable paddingBottom={0}>
+      <YStack flex={1} gap="$4">
+        {followRequestItems.length > 0 && (
+          <View
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            borderRadius="$6"
+            backgroundColor="$gray2"
+          >
+            <ListHeader title="FRIEND REQUESTS" />
+            {followRequestItems.map((item, index) => (
+              <VirtualizedListItem
+                key={index}
+                loading={false}
+                title={item.username}
+                subtitle={item.name}
+                imageUrl={item.profilePictureUrl}
+                button={{
+                  text: "Accept",
+                  onPress: () => console.log("Accept"),
+                }}
+                button2={{
+                  text: "Decline",
+                  onPress: () => console.log("Decline"),
+                }}
+              />
+            ))}
+            <Button>Show more</Button>
+          </View>
+        )}
+
+        {friendRequestItems.length > 0 && (
+          <View
+            paddingVertical="$3"
+            paddingHorizontal="$3"
+            borderRadius="$6"
+            backgroundColor="$gray2"
+          >
+            <ListHeader title="FRIEND REQUESTS" />
+            {friendRequestItems.map((item, index) => (
+              <VirtualizedListItem
+                key={index}
+                loading={false}
+                title={item.username}
+                subtitle={item.name}
+                imageUrl={item.profilePictureUrl}
+                button={{
+                  text: "Accept",
+                  onPress: () => console.log("Accept"),
+                }}
+                button2={{
+                  text: "Decline",
+                  onPress: () => console.log("Decline"),
+                }}
+              />
+            ))}
+            {friendRequestItems.length > PAGE_SIZE && (
+              <>
+                <Spacer size="$2" />
+                <Button>Show more</Button>
+              </>
+            )}
+          </View>
+        )}
+      </YStack>
     </BaseScreenView>
   );
 };
