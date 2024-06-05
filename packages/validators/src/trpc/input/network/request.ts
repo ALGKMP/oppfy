@@ -21,8 +21,11 @@ const trpcRequestInputSchema = {
     pageSize: z.number().optional(),
   }),
 
-
   sendFriendRequest: z.object({
+    recipientId: z.string(),
+  }),
+
+  cancelFriendRequest: z.object({
     recipientId: z.string(),
   }),
 
@@ -34,20 +37,16 @@ const trpcRequestInputSchema = {
     senderId: z.string(),
   }),
 
-  cancelFriendRequest: z.object({
-    recipientId: z.string(),
-  }),
-
   acceptFollowRequest: z.object({
-    userId: z.string(),
+    senderId: z.string(),
   }),
 
   rejectFollowRequest: z.object({
-    userId: z.string(),
+    senderId: z.string(),
   }),
 
   cancelFollowRequest: z.object({
-    userId: z.string(),
+    senderId: z.string(),
   }),
 };
 
