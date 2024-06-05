@@ -12,6 +12,7 @@ import {
   serial,
   text,
   timestamp,
+  varbinary,
   varchar,
 } from "drizzle-orm/mysql-core";
 
@@ -55,7 +56,7 @@ export const user = mySqlTable("User", {
 });
 
 export const contact = mysqlTable("Contact", {
-  id: binary("id", { length: 512 }).primaryKey(),
+  id: varbinary("id", { length: 512 }).primaryKey(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()
@@ -68,7 +69,7 @@ export const userContact = mysqlTable(
     userId: varchar("userId", { length: 255 })
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
-    contactId: binary("contactId", { length: 512 })
+    contactId: varbinary("contactId", { length: 512 })
       .references(() => contact.id, { onDelete: "cascade" })
       .notNull(),
     createdAt: timestamp("createdAt")
