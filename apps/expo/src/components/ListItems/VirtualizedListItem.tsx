@@ -60,9 +60,6 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
       props.showSkeletons?.button2) ||
     (!props.loading && props.button && props.button2);
 
-  const buttonSize = isTwoButtons ? "$2.5" : "$3";
-  const buttonWidth = isTwoButtons ? 100 : 200;
-
   const content = (
     <Skeleton.Group show={props.loading}>
       <XStack alignItems="center" paddingVertical="$2">
@@ -108,8 +105,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           {props.loading && props.showSkeletons?.button ? (
             <Skeleton>
               <Button
-                size={isTwoButtons ? "$2.5" : "$3"}
-                width={isTwoButtons ? 75 : undefined}
+                size={isTwoButtons ? "$3" : "$4"}
+                width={isTwoButtons ? 80 : undefined}
               >
                 Loading...
               </Button>
@@ -117,8 +114,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           ) : !props.loading && props.button ? (
             isButtonProps(props.button) ? (
               <Button
-                size={isTwoButtons ? "$2.5" : "$3"}
-                width={isTwoButtons ? 75 : undefined}
+                size={isTwoButtons ? "$3" : "$4"}
+                width={isTwoButtons ? 80 : undefined}
                 onPress={
                   props.button.onPress
                     ? debounce(props.button.onPress, 300)
@@ -136,8 +133,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           {props.loading && props.showSkeletons?.button2 ? (
             <Skeleton>
               <Button
-                size={isTwoButtons ? "$2.5" : "$3"}
-                width={isTwoButtons ? 75 : undefined}
+                size={isTwoButtons ? "$3" : "$4"}
+                width={isTwoButtons ? 80 : undefined}
               >
                 Loading...
               </Button>
@@ -145,8 +142,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           ) : !props.loading && props.button2 ? (
             isButtonProps(props.button2) ? (
               <Button
-                size={isTwoButtons ? "$2.5" : "$3"}
-                width={isTwoButtons ? 75 : undefined}
+                size={isTwoButtons ? "$3" : "$4"}
+                width={isTwoButtons ? 80 : undefined}
                 onPress={
                   props.button2.onPress
                     ? debounce(props.button2.onPress, 300)

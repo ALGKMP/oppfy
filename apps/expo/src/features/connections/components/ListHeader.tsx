@@ -6,7 +6,7 @@ interface ListHeaderProps {
 }
 
 const ListHeader = ({ title }: ListHeaderProps) => (
-  <SizableText size="$2" theme="alt1" marginBottom="$2">
+  <SizableText size="$2" theme="alt1">
     {title}
   </SizableText>
 );
