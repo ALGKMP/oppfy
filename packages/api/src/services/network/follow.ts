@@ -126,7 +126,7 @@ export class FollowService {
     }
   }
 
-  async rejectFollowRequest(
+  async declineFollowRequest(
     userIdBeingRejected: string,
     userIdRejecting: string,
   ) {
@@ -237,5 +237,4 @@ export class FollowService {
     }
     return count;
   }
-
 }

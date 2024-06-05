@@ -65,7 +65,7 @@ export class FriendService {
     }
   }
 
-  async rejectFriendRequest(senderId: string, recipientId: string) {
+  async declineFriendRequest(senderId: string, recipientId: string) {
     const requestExists = await this.friendRepository.getFriendRequest(
       senderId,
       recipientId,
