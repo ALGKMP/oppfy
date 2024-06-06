@@ -8,13 +8,13 @@ import { FollowService } from "./network/follow";
 import { FriendService } from "./network/friend";
 import { ReportService } from "./network/report";
 import { ProfileService } from "./profile/profile";
-import { NotificationService } from "./user/notifications";
+import { NotificationsService } from "./user/notifications";
 import { PrivacyService } from "./user/privacy";
 import { UserService } from "./user/user";
 
 export const services = {
   user: new UserService(),
-  notifications: new NotificationService(),
+  notifications: new NotificationsService(),
   privacy: new PrivacyService(),
   block: new BlockService(),
   follow: new FollowService(),
@@ -25,5 +25,5 @@ export const services = {
   mux: new MuxService(),
   post: new PostService(),
   paginate: new PaginationService(),
-  report : new ReportService()
+  report: new ReportService(),
 };
