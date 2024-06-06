@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Dimensions, TouchableOpacity } from "react-native";
 import { SharedValue, withSpring } from "react-native-reanimated";
 import { Image } from "expo-image";
 import { FontAwesome } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { Heart, MessageCircle } from "@tamagui/lucide-icons";
+import { Heart, Send } from "@tamagui/lucide-icons";
 import {
   Avatar,
   Separator,
   SizableText,
-  Stack,
   Text,
   View,
   XStack,
@@ -20,11 +19,14 @@ import {
 
 const { width: screenWidth } = Dimensions.get("window");
 
-type DataItem = {
+interface DataItem {
   author: string;
   authorProfilePicture: string;
   recipient: string;
   recipientProfilePicture: string;
+
+  width: number;
+  height: number;
 
   isFollowing: boolean;
   hasLiked: boolean;
@@ -34,9 +36,9 @@ type DataItem = {
   likes: number;
   image: string;
   caption: string;
-};
+}
 
-const data = [
+const data: DataItem[] = [
   {
     author: "JohnDoe",
     authorProfilePicture:
@@ -46,6 +48,8 @@ const data = [
     isFollowing: true,
     hasLiked: false,
     key: "1",
+    height: 500,
+    width: 500,
     comments: 100,
     likes: 50,
     image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
@@ -132,6 +136,8 @@ const data = [
   {
     author: "DavidSmith",
     authorProfilePicture: "https://example.com/author8.jpg",
+    width: 500,
+    height: 500,
     recipient: "EmilyClark",
     recipientProfilePicture: "https://example.com/recipient8.jpg",
     isFollowing: false,
@@ -149,6 +155,8 @@ const data = [
     recipientProfilePicture: "https://example.com/recipient9.jpg",
     isFollowing: true,
     hasLiked: false,
+    width: 500,
+    height: 500,
     key: "9",
     comments: 100,
     likes: 50,
@@ -157,147 +165,189 @@ const data = [
   },
 ];
 
-const MediaOfYou = () => {
+const PostItem = ({ item }: { item: DataItem }) => {
   const handleLike = (key: string) => {};
-
   const handleComment = (key: string) => {};
+  const [status, setStatus] = useState<"success" | "loading" | "error">(
+    "success",
+  );
 
-  const renderItem = ({ item }: { item: DataItem }) => (
-    <View
-      flex={1}
-      alignItems="center"
-      justifyContent="center"
-      marginBottom={50}
-      maxHeight={550}
-      width={"100%"}
-    >
-      <Image source={{ uri: item.image }} style={styles.image}>
-        <XStack
-          marginTop={"$3"}
-          marginLeft={"$3"}
-          justifyContent="flex-start"
-          alignContent="center"
-          gap={"$3"}
-        >
-          <Avatar circular size="$5">
-            <Avatar.Image
-              accessibilityLabel="Cam"
-              src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
-            />
-            <Avatar.Fallback backgroundColor="$blue10" />
-          </Avatar>
-          <YStack paddingTop={"$2"}>
-            <SizableText
-              shadowRadius={3}
-              shadowOpacity={0.5}
-              size={"$3"}
-              fontWeight={"bold"}
-            >
-              @AuthorUsername
-            </SizableText>
-            <XStack flex={1} gap={"$1"} alignItems="center">
-              <SizableText height={35} lineHeight={"$2"}>
-                📸
-              </SizableText>
-              <SizableText
-                height={35}
-                size={"$2"}
-                // color={"grey"}
-                fontWeight={"bold"}
-                color={"$gray2"}
-                // shadowOpacity={100}
-              >
-                posted by:
-              </SizableText>
-              <SizableText
-                height={35}
-                size={"$2"}
-                fontWeight={"bold"}
-                color={"$blue9"}
-              >
-                @RecipientUsername
-              </SizableText>
-            </XStack>
-          </YStack>
-        </XStack>
-        <YStack
-          gap="$2"
-          position="absolute"
-          bottom={20}
-          right={20}
-          // paddingBottom={40}
-        >
-          <View
-            flex={1}
-            alignItems="center"
-            // marginBottom={8}
-          >
-            <TouchableOpacity onPress={() => handleLike(item.key)} />
-            <Heart size={24} color="white" />
-            <Text
-              // marginTop={5}
-              color="#fff"
-            >
-              {item.likes}
-            </Text>
-          </View>
-          <View
-            flex={1}
-            alignItems="center"
-            // marginBottom={8}
-          >
-            <TouchableOpacity onPress={() => handleComment(item.key)} />
-            <MessageCircle
-              borderBlockWidth={1}
-              borderColor={"black"}
-              size={24}
-              color="white"
-            />
-            <Text
-              // marginTop={3}
-              color="#fff"
-            >
-              {item.comments}
-            </Text>
-          </View>
-        </YStack>
-      </Image>
-      {/* <Text
-        color="#fff"
-        textAlign="center"
-        borderBottomLeftRadius={10}
-        borderBottomRightRadius={10}
-        // marginTop={20}
+  if (status === "loading") {
+    return (
+      <View flex={1} alignItems="center" justifyContent="center">
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View flex={1} alignItems="center" justifyContent="center">
+      <Image
+        source={{ uri: item.image }}
+        style={[
+          {
+            width: item.width,
+            height: item.height,
+            borderTopRightRadius: 10,
+            borderTopLeftRadius: 10,
+          },
+        ]}
+        // contentFit="contain"
+      />
+      <XStack
+        gap={"$2.5"}
+        position="absolute"
+        top={20}
+        left={20}
+        justifyContent="flex-start"
+        alignContent="center"
       >
-        {item.caption}
-      </Text> */}
+        <Avatar circular size="$5">
+          <Avatar.Image
+            accessibilityLabel="Cam"
+            src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+          />
+          <Avatar.Fallback backgroundColor="$blue10" />
+        </Avatar>
+        <YStack gap={"$1"} justifyContent="center">
+          <SizableText
+            size={"$3"}
+            lineHeight={14}
+            margin={0}
+            padding={0}
+            shadowRadius={3}
+            shadowOpacity={0.5}
+            fontWeight={"bold"}
+          >
+            @AuthorUsername
+          </SizableText>
+          <XStack gap={"$1"} alignItems="center">
+            <SizableText size={"$3"} lineHeight={15} marginTop={0} padding={0}>
+              📸
+            </SizableText>
+            <SizableText size={"$2"} lineHeight={15} color={"$gray2"}>
+              posted by:
+            </SizableText>
+            <SizableText
+              size={"$2"}
+              lineHeight={15}
+              fontWeight={"bold"}
+              color={"$blue9"}
+            >
+              @RecipientUsername
+            </SizableText>
+          </XStack>
+        </YStack>
+      </XStack>
+
+      {/* Under Post Shit */}
+      <View
+        flex={1}
+        alignSelf="stretch"
+        paddingTop={"$3"}
+        paddingLeft={"$2"}
+        paddingRight={"$2"}
+        paddingBottom={"$4"}
+        borderBottomRightRadius={"$6"}
+        borderBottomLeftRadius={"$6"}
+        backgroundColor={"$gray2"}
+        marginBottom={"$5"}
+      >
+        <XStack flex={1} gap={"$2"}>
+          <View
+            flex={4}
+            justifyContent="center"
+            alignItems="center"
+            borderRadius={"$7"}
+            backgroundColor={"$gray5"}
+          >
+            <TouchableOpacity>
+              <Text fontWeight={"bold"} padding={"$3"}>
+                Comment
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View
+            flex={1}
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor={"$gray5"}
+            borderRadius={"$7"}
+          >
+            <TouchableOpacity>
+              <Heart size={24} padding={"$3"} color="white" />
+            </TouchableOpacity>
+          </View>
+          <View
+            flex={1}
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor={"$gray5"}
+            borderRadius={"$7"}
+          >
+            <TouchableOpacity>
+              <Send size={24} padding={"$3"} color="white" />
+            </TouchableOpacity>
+          </View>
+        </XStack>
+
+        <XStack flex={1}>
+          <View flex={4} alignItems="flex-start">
+            <SizableText
+              size={"$2"}
+              fontWeight={"bold"}
+              color={"$gray11"}
+              opacity={0.8}
+            >
+              102 other comments
+            </SizableText>
+          </View>
+          <View flex={2} alignItems={"flex-start"}>
+            <SizableText
+              size={"$2"}
+              fontWeight={"bold"}
+              color={"$gray11"}
+              opacity={0.8}
+            >
+              1k likes
+            </SizableText>
+          </View>
+        </XStack>
+
+        <View flex={1} alignItems={"flex-start"}>
+          {/*TODO: Animation to extend this bitch*/}
+          <TouchableOpacity>
+            <Text
+              textAlign="center"
+              borderBottomLeftRadius={10}
+              borderBottomRightRadius={10}
+            >
+              {item.caption}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
+  );
+};
+
+const MediaOfYou = () => {
+  const [status, setStatus] = useState<"success" | "loading" | "error">(
+    "loading",
   );
 
   return (
     <View flex={1}>
-      {/* <Separator
-        // margin={10}
-        borderColor={"white"}
-        height={50}
-      /> */}
+      <Separator margin={10} borderColor={"white"} />
       <FlashList
         data={data}
         numColumns={1}
-        renderItem={renderItem}
+        renderItem={(data) => <PostItem item={data.item} />}
         estimatedItemSize={screenWidth}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  image: {
-    width: "100%",
-    height: "100%",
-    alignSelf: "center",
-    borderRadius: 10,
-  },
-});
 
 export default MediaOfYou;
