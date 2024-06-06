@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 const trpcNotificationsInputSchema = {
-  getNotifications: z.object({
-    limit: z.number().int().positive().default(10),
-    cursor: z.string().optional(),
+  storePushToken: z.object({
+    pushToken: z.string(),
   }),
 
   updateNotificationSettings: z.object({
