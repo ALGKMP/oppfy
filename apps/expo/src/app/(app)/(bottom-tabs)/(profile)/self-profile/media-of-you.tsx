@@ -6,10 +6,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Animated, {
-  SharedValue,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
@@ -25,8 +23,6 @@ import {
   YStack,
 } from "tamagui";
 
-// import { api } from "@oppfy/utils";
-
 const { width: screenWidth } = Dimensions.get("window");
 
 interface DataItem {
@@ -34,13 +30,10 @@ interface DataItem {
   authorProfilePicture: string;
   recipient: string;
   recipientProfilePicture: string;
-
   width: number;
   height: number;
-
   isFollowing: boolean;
   hasLiked: boolean;
-
   key: string;
   comments: number;
   likes: number;
@@ -79,7 +72,7 @@ const data: DataItem[] = [
     likes: 50,
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978",
     caption:
-      "Birthday celebrations. fjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak d",
+      "Birthday celebrations. fjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak dfjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak d",
   },
   {
     author: "GraceLee",
@@ -107,8 +100,10 @@ const PostItem = ({ item }: { item: DataItem }) => {
     "success",
   );
 
+  const [fullTextHeight, setFullTextHeight] = useState(0);
+
   const [isExpanded, setIsExpanded] = useState(false);
-  const maxHeight = useSharedValue(50); // This shits for the Animation: Max height for collapsed caption
+  const maxHeight = useSharedValue(50); // This sets the initial collapsed height
   const [showViewMore, setShowViewMore] = useState(item.caption.length > 100);
 
   const toggleExpanded = () => {
@@ -117,6 +112,20 @@ const PostItem = ({ item }: { item: DataItem }) => {
       duration: 300,
     });
   };
+
+  useEffect(() => {
+    if (isExpanded && fullTextHeight > 0) {
+      maxHeight.value = withTiming(100, {
+        duration: 300,
+      });
+    }
+  }, [fullTextHeight, isExpanded]);
+
+  const handleTextLayout = useCallback((event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    console.log(height);
+    setFullTextHeight(height);
+  }, []);
 
   const maskAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -204,12 +213,13 @@ const PostItem = ({ item }: { item: DataItem }) => {
         </YStack>
       </XStack>
 
-      {/* Under Post Shit */}
+      {/* Under Post */}
       <View
         flex={1}
         alignSelf="stretch"
         padding={"$2"}
         paddingTop={"$3"}
+        paddingBottom={"$0"}
         borderBottomRightRadius={"$8"}
         borderBottomLeftRadius={"$8"}
         backgroundColor={"$gray2"}
@@ -271,8 +281,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
               102 other comments
             </SizableText>
           </View>
-          {/* Like */}
-          {/* TODO: Animation */}
           <View flex={2} alignItems={"flex-start"}>
             <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
               1k likes
@@ -281,28 +289,26 @@ const PostItem = ({ item }: { item: DataItem }) => {
         </XStack>
 
         {/* Caption */}
-        <View flex={1} alignItems="flex-start">
+        <View flex={1} alignItems="flex-start" padding="$2">
           <TouchableOpacity onPress={toggleExpanded}>
-            <View
-              style={{
-                overflow: "hidden",
-                flexDirection: "row",
-              }}
-            >
-              <Animated.View
-                style={[maskAnimatedStyle, { backgroundColor: "white" }]}
-              />
-              <View>
-                <Text numberOfLines={isExpanded ? 0 : 2}>
-                  {renderCaption()}
-                  {showViewMore && !isExpanded ? (
-                    <Text color={"$gray10"}> more</Text>
-                  ) : (
-                    ""
-                  )}
-                </Text>
-              </View>
-            </View>
+            {/* <Animated.View
+              style={[
+                maskAnimatedStyle,
+                { overflow: "hidden", flexDirection: "row" },
+              ]}
+            > */}
+              <Text
+                numberOfLines={isExpanded ? 0 : 2}
+                onLayout={handleTextLayout}
+              >
+                {renderCaption()}
+                {showViewMore && !isExpanded ? (
+                  <Text color={"$gray10"}> more</Text>
+                ) : (
+                  ""
+                )}
+              </Text>
+            {/* </Animated.View> */}
           </TouchableOpacity>
         </View>
       </View>
@@ -327,12 +333,5 @@ const MediaOfYou = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "flex-start",
-  },
-});
 
 export default MediaOfYou;
