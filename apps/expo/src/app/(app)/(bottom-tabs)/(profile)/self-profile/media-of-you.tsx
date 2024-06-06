@@ -55,84 +55,6 @@ const data: DataItem[] = [
     image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
     caption: "Enjoying the sunset!",
   },
-  // {
-  //   author: "JaneSmith",
-  //   authorProfilePicture: "https://example.com/author2.jpg",
-  //   recipient: "JohnDoe",
-  //   recipientProfilePicture: "https://example.com/recipient2.jpg",
-  //   isFollowing: false,
-  //   hasLiked: true,
-  //   key: "2",
-  //   comments: 100,
-  //   likes: 50,
-  //   image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
-  //   caption: "Delicious breakfast.",
-  // },
-  // {
-  //   author: "AliceWang",
-  //   authorProfilePicture: "https://example.com/author3.jpg",
-  //   recipient: "BobJones",
-  //   recipientProfilePicture: "https://example.com/recipient3.jpg",
-  //   isFollowing: true,
-  //   hasLiked: true,
-  //   key: "3",
-  //   comments: 100,
-  //   likes: 50,
-  //   image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
-  //   caption: "Hiking adventures.",
-  // },
-  // {
-  //   author: "BobJones",
-  //   authorProfilePicture: "https://example.com/author4.jpg",
-  //   recipient: "AliceWang",
-  //   recipientProfilePicture: "https://example.com/recipient4.jpg",
-  //   isFollowing: false,
-  //   hasLiked: false,
-  //   key: "4",
-  //   comments: 100,
-  //   likes: 50,
-  //   image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29",
-  //   caption: "Family time.",
-  // },
-  // {
-  //   author: "CharlieBrown",
-  //   authorProfilePicture: "https://example.com/author5.jpg",
-  //   recipient: "LucyVanPelt",
-  //   recipientProfilePicture: "https://example.com/recipient5.jpg",
-  //   isFollowing: true,
-  //   hasLiked: true,
-  //   key: "5",
-  //   comments: 100,
-  //   likes: 50,
-  //   image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
-  //   caption: "City lights.",
-  // },
-  // {
-  //   author: "LucyVanPelt",
-  //   authorProfilePicture: "https://example.com/author6.jpg",
-  //   recipient: "CharlieBrown",
-  //   recipientProfilePicture: "https://example.com/recipient6.jpg",
-  //   isFollowing: false,
-  //   hasLiked: false,
-  //   key: "6",
-  //   comments: 100,
-  //   likes: 50,
-  //   image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-  //   caption: "At the beach.",
-  // },
-  // {
-  //   author: "EmilyClark",
-  //   authorProfilePicture: "https://example.com/author7.jpg",
-  //   recipient: "DavidSmith",
-  //   recipientProfilePicture: "https://example.com/recipient7.jpg",
-  //   isFollowing: true,
-  //   hasLiked: false,
-  //   key: "7",
-  //   comments: 100,
-  //   likes: 50,
-  //   image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
-  //   caption: "Mountain views.",
-  // },
   {
     author: "DavidSmith",
     authorProfilePicture: "https://example.com/author8.jpg",
@@ -258,40 +180,50 @@ const PostItem = ({ item }: { item: DataItem }) => {
         marginBottom={"$5"}
       >
         <XStack flex={1} gap={"$2"}>
-          <View
-            flex={4}
-            justifyContent="center"
-            alignItems="flex-start"
-            borderRadius={"$7"}
-            backgroundColor={"$gray5"}
-          >
+          {/* Comment Button */}
+          <View flex={4} justifyContent="center">
             <TouchableOpacity>
-              <Text fontWeight={"bold"} padding={"$3"} color={"$gray9"}>
-                Comment
-              </Text>
+              <View
+                justifyContent="center"
+                alignItems="flex-start"
+                backgroundColor={"$gray5"}
+                borderRadius={"$7"}
+              >
+                <Text fontWeight={"bold"} padding={"$3"} color={"$gray9"}>
+                  Comment
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
-          <View
-            flex={1}
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor={"$gray5"}
-            borderRadius={"$7"}
-          >
+          {/* Like Button */}
+          <View flex={1} justifyContent="center">
             <TouchableOpacity>
-              <Heart size={24} padding={"$3"} color="$gray12" />
+              <View
+                justifyContent="center"
+                alignItems="center"
+                borderRadius={"$7"}
+                padding={"$2"}
+                backgroundColor={"$gray5"}
+              >
+                <Heart size={24} padding={"$3"} color="$gray12" />
+              </View>
             </TouchableOpacity>
           </View>
-          <View
-            flex={1}
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor={"$gray5"}
-            borderRadius={"$7"}
-          >
+
+          {/* Share Button */}
+          <View flex={1} justifyContent="center">
             <TouchableOpacity>
-              <Send size={24} padding={"$3"} color="$gray12" />
+              <View
+                flex={1}
+                justifyContent="center"
+                alignItems="center"
+                padding="$2"
+                borderRadius={"$7"}
+                backgroundColor={"$gray5"}
+              >
+                <Send size={24} padding={"$3"} color="$gray12" />
+              </View>
             </TouchableOpacity>
           </View>
         </XStack>
