@@ -83,7 +83,7 @@ const data: DataItem[] = [
     comments: 100,
     likes: 50,
     image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
-    caption: "Night out with friends.",
+    caption: "Night out with friends fjsdklfjsdklfjsldk sdljkfsd jlksd jflksd jsldkj fsklsdj kwefjiosldjfwo0isjfoiw  fjsdklfjasdlk fsdalkjfasd fasldkf sdalkfsad lkfa jsadjf sdlakasdf hello world.",
   },
 ];
 
@@ -93,6 +93,17 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const toggleExpanded = () => setIsExpanded(!isExpanded);
+
+  const renderCaption = () => {
+    const maxLength = 100; // Set max length for the caption
+    if (item.caption.length <= maxLength || isExpanded) {
+      return item.caption;
+    }
+    return `${item.caption.substring(0, maxLength)}...`;
+  };
 
   if (status === "loading") {
     return (
@@ -228,6 +239,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
           </View>
         </XStack>
 
+        {/* Comments and Likes */}
         <XStack flex={1} gap="$2">
           <View flex={4} alignItems="flex-start" paddingLeft={"$2.5"}>
             <SizableText
@@ -239,6 +251,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
               102 other comments
             </SizableText>
           </View>
+          {/* Like */}
+          {/* TODO: Animation */}
           <View flex={2} alignItems={"flex-start"}>
             <SizableText
               size={"$2"}
@@ -252,15 +266,14 @@ const PostItem = ({ item }: { item: DataItem }) => {
         </XStack>
 
         <View flex={1} alignItems={"flex-start"}>
-          {/*TODO: Animation to extend this bitch*/}
-          <TouchableOpacity>
+          <TouchableOpacity onPress={toggleExpanded}>
             <Text
               paddingLeft={"$2"}
-              textAlign="center"
               borderBottomLeftRadius={10}
               borderBottomRightRadius={10}
             >
-              {item.caption}
+              {renderCaption()}
+              {item.caption.length > 100 && !isExpanded ? " view more..." : ""}
             </Text>
           </TouchableOpacity>
         </View>
