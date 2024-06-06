@@ -3,7 +3,6 @@ import { parser } from "@aws-lambda-powertools/parser/middleware";
 import middy from "@middy/core";
 import eventNormalizerMiddleware from "@middy/event-normalizer";
 import httpErrorHandler from "@middy/http-error-handler";
-import jsonBodyParser from "@middy/http-json-body-parser";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
@@ -38,7 +37,6 @@ const lambdaHandler = async (
 };
 
 export const handler = middy(lambdaHandler)
-  .use(jsonBodyParser())
   .use(eventNormalizerMiddleware())
   .use(httpErrorHandler())
   .use(parser({ schema: extendedSnsSchema }));
