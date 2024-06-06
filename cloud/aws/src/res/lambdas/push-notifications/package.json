@@ -1,0 +1,36 @@
+{
+  "name": "@oppfy/push-notifications-lambda",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/parser": "2.1.1-beta",
+    "@aws-sdk/client-s3": "^3.564.0",
+    "@middy/core": "^5.4.0",
+    "@middy/event-normalizer": "^5.4.0",
+    "@middy/http-error-handler": "^5.4.0",
+    "@middy/http-json-body-parser": "^5.4.0",
+    "@oppfy/db": "workspace:*",
+    "@oppfy/utils": "workspace:*",
+    "@oppfy/validators": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
+    "eslint": "^9.2.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "prettier": "@oppfy/prettier-config"
+}
