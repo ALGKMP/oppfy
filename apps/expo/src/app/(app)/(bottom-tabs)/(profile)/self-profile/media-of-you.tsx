@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Dimensions, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Dimensions,
+  LayoutChangeEvent,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -97,6 +102,7 @@ const data: DataItem[] = [
 const PostItem = ({ item }: { item: DataItem }) => {
   const handleLike = (key: string) => {};
   const handleComment = (key: string) => {};
+
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
@@ -107,10 +113,12 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
-    maxHeight.value = withTiming(isExpanded ? 50 : 200, { duration: 300 });
+    maxHeight.value = withTiming(isExpanded ? 50 : 100, {
+      duration: 300,
+    });
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const maskAnimatedStyle = useAnimatedStyle(() => {
     return {
       height: maxHeight.value,
     };
@@ -200,10 +208,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
       <View
         flex={1}
         alignSelf="stretch"
+        padding={"$2"}
         paddingTop={"$3"}
-        paddingLeft={"$2"}
-        paddingRight={"$2"}
-        paddingBottom={"$4"}
         borderBottomRightRadius={"$8"}
         borderBottomLeftRadius={"$8"}
         backgroundColor={"$gray2"}
@@ -261,41 +267,42 @@ const PostItem = ({ item }: { item: DataItem }) => {
         {/* Comments and Likes */}
         <XStack flex={1} gap="$2">
           <View flex={4} alignItems="flex-start" paddingLeft={"$2.5"}>
-            <SizableText
-              size={"$2"}
-              fontWeight={"bold"}
-              color={"$gray10"}
-            >
+            <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
               102 other comments
             </SizableText>
           </View>
           {/* Like */}
           {/* TODO: Animation */}
           <View flex={2} alignItems={"flex-start"}>
-            <SizableText
-              size={"$2"}
-              fontWeight={"bold"}
-              color={"$gray10"}
-            >
+            <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
               1k likes
             </SizableText>
           </View>
         </XStack>
 
         {/* Caption */}
-
-        <View flex={1} alignItems={"flex-start"}>
+        <View flex={1} alignItems="flex-start">
           <TouchableOpacity onPress={toggleExpanded}>
-            <Animated.View style={[animatedStyle]}>
-              <Text
-                borderBottomLeftRadius={10}
-                borderBottomRightRadius={10}
-                paddingLeft={"$2"}
-              >
-                {renderCaption()}
-                {showViewMore && !isExpanded ? (<Text color={"$gray10"}> more</Text>) : ""}
-              </Text>
-            </Animated.View>
+            <View
+              style={{
+                overflow: "hidden",
+                flexDirection: "row",
+              }}
+            >
+              <Animated.View
+                style={[maskAnimatedStyle, { backgroundColor: "white" }]}
+              />
+              <View>
+                <Text numberOfLines={isExpanded ? 0 : 2}>
+                  {renderCaption()}
+                  {showViewMore && !isExpanded ? (
+                    <Text color={"$gray10"}> more</Text>
+                  ) : (
+                    ""
+                  )}
+                </Text>
+              </View>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -320,5 +327,12 @@ const MediaOfYou = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+});
 
 export default MediaOfYou;
