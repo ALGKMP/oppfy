@@ -1,11 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Dimensions,
-  LayoutChangeEvent,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { Dimensions, LayoutChangeEvent, TouchableOpacity } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -21,6 +18,7 @@ import {
   View,
   XStack,
   YStack,
+  ZStack,
 } from "tamagui";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -93,18 +91,16 @@ const data: DataItem[] = [
 ];
 
 const PostItem = ({ item }: { item: DataItem }) => {
-  const handleLike = (key: string) => {};
-  const handleComment = (key: string) => {};
-
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
-
   const [fullTextHeight, setFullTextHeight] = useState(0);
-
   const [isExpanded, setIsExpanded] = useState(false);
-  const maxHeight = useSharedValue(50); // This sets the initial collapsed height
   const [showViewMore, setShowViewMore] = useState(item.caption.length > 100);
+  const [isLiked, setIsLiked] = useState(item.hasLiked);
+
+  // For the fuckin caption
+  const maxHeight = useSharedValue(50); // This sets the initial collapsed height
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
@@ -113,13 +109,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
     });
   };
 
-  useEffect(() => {
-    if (isExpanded && fullTextHeight > 0) {
-      maxHeight.value = withTiming(100, {
-        duration: 300,
-      });
-    }
-  }, [fullTextHeight, isExpanded]);
+  const handleLike = (key: string) => {};
+  const handleComment = (key: string) => {};
 
   const handleTextLayout = useCallback((event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
@@ -141,6 +132,34 @@ const PostItem = ({ item }: { item: DataItem }) => {
     return `${item.caption.substring(0, maxLength)}...`;
   };
 
+  // For the fuckin like button
+  const scale = useSharedValue(0);
+  const opacity = useSharedValue(1);
+
+  const handleLikeAnimation = () => {
+    scale.value = withTiming(1, { duration: 200 }, () => {
+      scale.value = withTiming(0, { duration: 200 });
+    });
+    opacity.value = withTiming(1, { duration: 200 }, () => {
+      opacity.value = withTiming(0, { duration: 200 });
+    });
+    setIsLiked(true); // Update the liked state
+  };
+
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .onEnd(() => {
+      console.log("tap");
+      runOnJS(handleLikeAnimation)();
+    });
+
+  const heartAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
+
   if (status === "loading") {
     return (
       <View flex={1} alignItems="center" justifyContent="center">
@@ -157,16 +176,26 @@ const PostItem = ({ item }: { item: DataItem }) => {
       overflow="hidden"
       borderRadius={20}
     >
-      <Image
-        source={{ uri: item.image }}
-        style={[
-          {
-            width: item.width,
-            height: item.height,
-          },
-        ]}
-        // contentFit="contain"
-      />
+      <GestureDetector gesture={doubleTap}>
+        <Animated.View>
+          <Image
+            source={{ uri: item.image }}
+            style={[
+              {
+                width: item.width,
+                height: item.height,
+                justifyContent: "center",
+                alignItems: "center",
+              },
+            ]}
+            // contentFit="contain"
+          >
+            <Animated.View style={[heartAnimatedStyle]}>
+              <Heart size={100} color={"red"} fill={"red"} />
+            </Animated.View>
+          </Image>
+        </Animated.View>
+      </GestureDetector>
       <XStack
         gap={"$2.5"}
         position="absolute"
@@ -297,17 +326,17 @@ const PostItem = ({ item }: { item: DataItem }) => {
                 { overflow: "hidden", flexDirection: "row" },
               ]}
             > */}
-              <Text
-                numberOfLines={isExpanded ? 0 : 2}
-                onLayout={handleTextLayout}
-              >
-                {renderCaption()}
-                {showViewMore && !isExpanded ? (
-                  <Text color={"$gray10"}> more</Text>
-                ) : (
-                  ""
-                )}
-              </Text>
+            <Text
+              numberOfLines={isExpanded ? 0 : 2}
+              onLayout={handleTextLayout}
+            >
+              {renderCaption()}
+              {showViewMore && !isExpanded ? (
+                <Text color={"$gray10"}> more</Text>
+              ) : (
+                ""
+              )}
+            </Text>
             {/* </Animated.View> */}
           </TouchableOpacity>
         </View>
