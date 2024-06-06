@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
-import { SharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { Image } from "expo-image";
-import { FontAwesome } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Send } from "@tamagui/lucide-icons";
 import {
@@ -68,7 +73,8 @@ const data: DataItem[] = [
     comments: 100,
     likes: 50,
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978",
-    caption: "Birthday celebrations.",
+    caption:
+      "Birthday celebrations. fjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak d",
   },
   {
     author: "GraceLee",
@@ -83,7 +89,8 @@ const data: DataItem[] = [
     comments: 100,
     likes: 50,
     image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
-    caption: "Night out with friends fjsdklfjsdklfjsldk sdljkfsd jlksd jflksd jsldkj fsklsdj kwefjiosldjfwo0isjfoiw  fjsdklfjasdlk fsdalkjfasd fasldkf sdalkfsad lkfa jsadjf sdlakasdf hello world.",
+    caption:
+      "Night out with friends fjsdklfjsdklfjsldk sdljkfsd jlksd jflksd jsldkj fsklsdj kwefjiosldjfwo0isjfoiw  fjsdklfjasdlk fsdalkjfasd fasldkf sdalkfsad lkfa jsadjf sdlakasdf hello world.",
   },
 ];
 
@@ -95,7 +102,19 @@ const PostItem = ({ item }: { item: DataItem }) => {
   );
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const toggleExpanded = () => setIsExpanded(!isExpanded);
+  const maxHeight = useSharedValue(50); // This shits for the Animation: Max height for collapsed caption
+  const [showViewMore, setShowViewMore] = useState(item.caption.length > 100);
+
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+    maxHeight.value = withTiming(isExpanded ? 50 : 200, { duration: 300 });
+  };
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      height: maxHeight.value,
+    };
+  });
 
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
@@ -245,8 +264,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
             <SizableText
               size={"$2"}
               fontWeight={"bold"}
-              color={"$gray11"}
-              opacity={0.8}
+              color={"$gray10"}
             >
               102 other comments
             </SizableText>
@@ -257,24 +275,27 @@ const PostItem = ({ item }: { item: DataItem }) => {
             <SizableText
               size={"$2"}
               fontWeight={"bold"}
-              color={"$gray11"}
-              opacity={0.8}
+              color={"$gray10"}
             >
               1k likes
             </SizableText>
           </View>
         </XStack>
 
+        {/* Caption */}
+
         <View flex={1} alignItems={"flex-start"}>
           <TouchableOpacity onPress={toggleExpanded}>
-            <Text
-              paddingLeft={"$2"}
-              borderBottomLeftRadius={10}
-              borderBottomRightRadius={10}
-            >
-              {renderCaption()}
-              {item.caption.length > 100 && !isExpanded ? " view more..." : ""}
-            </Text>
+            <Animated.View style={[animatedStyle]}>
+              <Text
+                borderBottomLeftRadius={10}
+                borderBottomRightRadius={10}
+                paddingLeft={"$2"}
+              >
+                {renderCaption()}
+                {showViewMore && !isExpanded ? (<Text color={"$gray10"}> more</Text>) : ""}
+              </Text>
+            </Animated.View>
           </TouchableOpacity>
         </View>
       </View>
