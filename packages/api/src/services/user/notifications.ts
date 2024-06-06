@@ -1,13 +1,13 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { NotificationSettingsRepository } from "../../repositories/user/notification-settings";
-import type { NotificationSettings } from "../../repositories/user/notification-settings";
+import { NotificationsRepository } from "../../repositories/user/notifications";
+import type { NotificationSettings } from "../../repositories/user/notifications";
 import { UserRepository } from "../../repositories/user/user";
 
-export class NotificationService {
+export class NotificationsService {
   private userRepository = new UserRepository();
-  private notificationSettingsRepository = new NotificationSettingsRepository();
+  private notificationsRepository = new NotificationsRepository();
 
-  async getUserNotificationSettings(userId: string) {
+  async getNotificationSettings(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
@@ -15,7 +15,7 @@ export class NotificationService {
     }
 
     const notificationSettings =
-      await this.notificationSettingsRepository.getNotificationSettings(
+      await this.notificationsRepository.getNotificationSettings(
         user.notificationSettingsId,
       );
 
@@ -37,16 +37,26 @@ export class NotificationService {
     }
 
     const notificationSettings =
-      await this.notificationSettingsRepository.getNotificationSettings(
+      await this.notificationsRepository.getNotificationSettings(
         user.notificationSettingsId,
       );
 
     if (notificationSettings === undefined) {
       throw new DomainError(ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND);
     }
-    await this.notificationSettingsRepository.updateNotificationSettings(
+    await this.notificationsRepository.updateNotificationSettings(
       user.notificationSettingsId,
       newNotificationSettings,
     );
+  }
+
+  async storePushToken(userId: string, pushToken: string) {
+    const user = await this.userRepository.getUser(userId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    }
+
+    await this.notificationsRepository.updatePushToken(userId, pushToken);
   }
 }
