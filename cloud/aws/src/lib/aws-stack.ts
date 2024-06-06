@@ -1,5 +1,6 @@
+import * as neptune from "@aws-cdk/aws-neptune-alpha";
 import * as cdk from "aws-cdk-lib";
-import { aws_logs, RemovalPolicy } from "aws-cdk-lib";
+import { RemovalPolicy } from "aws-cdk-lib";
 import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -9,9 +10,10 @@ import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
-import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
-import * as neptune from "@aws-cdk/aws-neptune-alpha";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as sns from "aws-cdk-lib/aws-sns";
+import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 import type { Construct } from "constructs";
 
 // Helper function to create an S3 bucket
@@ -365,15 +367,11 @@ export class AwsStack extends cdk.Stack {
     });
 
     neptuneNotebookRole.addToPolicy(
-      new iam.PolicyStatement(
-        {
-          effect: iam.Effect.ALLOW,
-          actions: ["s3:GetObject", "s3:ListBucket"],
-          resources: [
-            `*`,
-          ],
-        },
-      ),
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["s3:GetObject", "s3:ListBucket"],
+        resources: [`*`],
+      }),
     );
 
     const lifeCycleScript = `#!/bin/bash
@@ -389,29 +387,29 @@ tar -zxvf /tmp/graph_notebook.tar.gz -C /tmp
 /tmp/graph_notebook/install.sh
 EOF`;
 
-    const notebookLifecycleConfig = new sagemaker
-      .CfnNotebookInstanceLifecycleConfig(
-      this,
-      "NotebookLifecycleConfig",
-      {
-        notebookInstanceLifecycleConfigName:
-          "neptune-notebook-lifecycle-config",
-        onStart: [
-          {
-            content: cdk.Fn.base64(lifeCycleScript),
-          },
-        ],
-      },
-    );
+    const notebookLifecycleConfig =
+      new sagemaker.CfnNotebookInstanceLifecycleConfig(
+        this,
+        "NotebookLifecycleConfig",
+        {
+          notebookInstanceLifecycleConfigName:
+            "neptune-notebook-lifecycle-config",
+          onStart: [
+            {
+              content: cdk.Fn.base64(lifeCycleScript),
+            },
+          ],
+        },
+      );
 
     const notebookInstance = new sagemaker.CfnNotebookInstance(
       this,
       "NeptuneNotebookInstance",
       {
         notebookInstanceName: "neptune-notebook-test",
-        subnetId:
-          vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS })
-            .subnetIds[0],
+        subnetId: vpc.selectSubnets({
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        }).subnetIds[0],
         securityGroupIds: [neptuneSecurityGroup.securityGroupId],
         instanceType: "ml.t3.medium",
         roleArn: neptuneNotebookRole.roleArn,
@@ -567,6 +565,31 @@ EOF`;
     // Output the replication task ARN
     new cdk.CfnOutput(this, "ReplicationTaskArn", {
       value: dmsReplicationTask.ref,
+    });
+
+    const pushNotificationsLambda = createLambdaFunction(
+      this,
+      "pushNotificationsLambda",
+      "src/res/lambdas/push-notifications/index.ts",
+    );
+
+    // Create an SNS topic
+    const pushNotificationsTopic = new sns.Topic(
+      this,
+      "PushNotificationsTopic",
+      {
+        displayName: "Push Notifications Topic",
+      },
+    );
+
+    // Subscribe the Lambda function to the SNS topic
+    pushNotificationsTopic.addSubscription(
+      new subs.LambdaSubscription(pushNotificationsLambda),
+    );
+
+    // Output the SNS Topic ARN
+    new cdk.CfnOutput(this, "PushNotificationsTopicArn", {
+      value: pushNotificationsTopic.topicArn,
     });
   }
 }
