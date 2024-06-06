@@ -6,4 +6,4 @@ export { followRouter } from "./network/follow";
 export { friendRouter } from "./network/friend";
 export { blockRouter } from "./network/block";
 export { requestRouter } from "./network/request";
-export { notificationsRouter as notificationRouter } from "./user/notifications";
+export { notificationsRouter } from "./user/notifications";
