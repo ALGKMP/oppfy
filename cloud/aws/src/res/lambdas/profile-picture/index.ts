@@ -1,5 +1,6 @@
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
+import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
 import { trpcValidators } from "@oppfy/validators";
@@ -35,20 +36,16 @@ export const handler = async (
       throw err; // Rethrow to handle it in the outer try-catch block
     });
 
-    const metadata = trpcValidators.post.profilePictureMetadata.parse(
-      s3Response.Metadata,
-    );
-
-    const body = trpcValidators.profile.uploadProfilePictureOpenApi.parse({
-      user: metadata.user,
-      key: objectKey,
-    });
+    const metadata = z
+      .object({
+        user: z.string(),
+      })
+      .parse(s3Response.$metadata);
 
     console.log(metadata);
-    console.log(body);
 
     const user = await db.query.user.findFirst({
-      where: eq(schema.user.id, body.user),
+      where: eq(schema.user.id, metadata.user),
     });
 
     if (!user) {
