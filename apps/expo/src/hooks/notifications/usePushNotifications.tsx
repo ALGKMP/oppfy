@@ -29,10 +29,9 @@ const usePushNotifications = (): PushNotificationState => {
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
 
-  async function registerForPushNotificationsAsync() {
+  const registerForPushNotificationsAsync = async () => {
     if (!Device.isDevice) {
-      Alert.alert("Must be using a physical device for Push notifications");
-      return;
+      throw new Error("Must be using a physical device for Push notifications");
     }
 
     const { status: existingStatus } =
@@ -54,7 +53,7 @@ const usePushNotifications = (): PushNotificationState => {
     }
 
     return token;
-  }
+  };
 
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) => {
