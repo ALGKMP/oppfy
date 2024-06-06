@@ -7,7 +7,7 @@ import type { trpcValidators } from "@oppfy/validators";
 import { handleDatabaseErrors } from "../../errors";
 
 export type NotificationSettings = z.infer<
-  typeof trpcValidators.user.updateNotificationSettings
+  typeof trpcValidators.input.notifications.updateNotificationSettings
 >;
 
 export class NotificationSettingsRepository {
@@ -15,17 +15,20 @@ export class NotificationSettingsRepository {
 
   @handleDatabaseErrors
   async getNotificationSettings(notificationSettingId: number) {
-    return await this.db.query.notificationSettings.findFirst({
-      where: eq(schema.notificationSettings.id, notificationSettingId),
-      columns: {
-        posts: true,
-        likes: true,
-        comments: true,
-        mentions: true,
-        friendRequests: true,
-        followRequests: true,
-      },
-    });
+    const possibleNotificationSettings =
+      await this.db.query.notificationSettings.findFirst({
+        where: eq(schema.notificationSettings.id, notificationSettingId),
+        columns: {
+          posts: true,
+          likes: true,
+          comments: true,
+          mentions: true,
+          friendRequests: true,
+          followRequests: true,
+        },
+      });
+
+    return possibleNotificationSettings;
   }
 
   @handleDatabaseErrors

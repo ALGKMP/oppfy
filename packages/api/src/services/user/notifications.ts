@@ -9,19 +9,20 @@ export class NotificationService {
 
   async getUserNotificationSettings(userId: string) {
     const user = await this.userRepository.getUser(userId);
-    if (!user) {
+
+    if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
+
     const notificationSettings =
       await this.notificationSettingsRepository.getNotificationSettings(
         user.notificationSettingsId,
       );
+
     if (notificationSettings === undefined) {
-      throw new DomainError(
-        ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND,
-        "Notification settings not found",
-      );
+      throw new DomainError(ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND);
     }
+
     return notificationSettings;
   }
 
@@ -30,18 +31,18 @@ export class NotificationService {
     newNotificationSettings: NotificationSettings,
   ) {
     const user = await this.userRepository.getUser(userId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
+
     const notificationSettings =
       await this.notificationSettingsRepository.getNotificationSettings(
         user.notificationSettingsId,
       );
+
     if (notificationSettings === undefined) {
-      throw new DomainError(
-        ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND,
-        "Notification settings not found",
-      );
+      throw new DomainError(ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND);
     }
     await this.notificationSettingsRepository.updateNotificationSettings(
       user.notificationSettingsId,
