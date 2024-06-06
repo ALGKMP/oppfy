@@ -4,12 +4,16 @@ import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 
+import { api } from "~/utils/api";
+
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
   notification?: Notifications.Notification;
 }
 
 const usePushNotifications = (): PushNotificationState => {
+  const storePushToken = api.notifications.storePushToken.useMutation();
+
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: false,
@@ -42,6 +46,8 @@ const usePushNotifications = (): PushNotificationState => {
     const token = await Notifications.getExpoPushTokenAsync({
       projectId: Constants.expoConfig?.extra?.eas.projectId,
     });
+
+    await storePushToken.mutateAsync({ pushToken: token.data });
 
     if (Platform.OS === "android") {
       Notifications.setNotificationChannelAsync("default", {
