@@ -181,15 +181,19 @@ const PostItem = ({ item }: { item: DataItem }) => {
   }
 
   return (
-    <View flex={1} alignItems="center" justifyContent="center">
+    <View
+      flex={1}
+      alignItems="center"
+      justifyContent="center"
+      overflow="hidden"
+      borderRadius={20}
+    >
       <Image
         source={{ uri: item.image }}
         style={[
           {
             width: item.width,
             height: item.height,
-            borderTopRightRadius: 10,
-            borderTopLeftRadius: 10,
           },
         ]}
         // contentFit="contain"
@@ -197,8 +201,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
       <XStack
         gap={"$2.5"}
         position="absolute"
-        top={20}
-        left={20}
+        top={10}
+        left={10}
         justifyContent="flex-start"
         alignContent="center"
       >
@@ -248,8 +252,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
         paddingLeft={"$2"}
         paddingRight={"$2"}
         paddingBottom={"$4"}
-        borderBottomRightRadius={"$6"}
-        borderBottomLeftRadius={"$6"}
+        borderBottomRightRadius={"$8"}
+        borderBottomLeftRadius={"$8"}
         backgroundColor={"$gray2"}
         marginBottom={"$5"}
       >
@@ -257,12 +261,12 @@ const PostItem = ({ item }: { item: DataItem }) => {
           <View
             flex={4}
             justifyContent="center"
-            alignItems="center"
+            alignItems="flex-start"
             borderRadius={"$7"}
             backgroundColor={"$gray5"}
           >
             <TouchableOpacity>
-              <Text fontWeight={"bold"} padding={"$3"}>
+              <Text fontWeight={"bold"} padding={"$3"} color={"$gray9"}>
                 Comment
               </Text>
             </TouchableOpacity>
@@ -276,7 +280,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
             borderRadius={"$7"}
           >
             <TouchableOpacity>
-              <Heart size={24} padding={"$3"} color="white" />
+              <Heart size={24} padding={"$3"} color="$gray12" />
             </TouchableOpacity>
           </View>
           <View
@@ -287,13 +291,13 @@ const PostItem = ({ item }: { item: DataItem }) => {
             borderRadius={"$7"}
           >
             <TouchableOpacity>
-              <Send size={24} padding={"$3"} color="white" />
+              <Send size={24} padding={"$3"} color="$gray12" />
             </TouchableOpacity>
           </View>
         </XStack>
 
-        <XStack flex={1}>
-          <View flex={4} alignItems="flex-start">
+        <XStack flex={1} gap="$2">
+          <View flex={4} alignItems="flex-start" paddingLeft={"$2.5"}>
             <SizableText
               size={"$2"}
               fontWeight={"bold"}
@@ -319,6 +323,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
           {/*TODO: Animation to extend this bitch*/}
           <TouchableOpacity>
             <Text
+              paddingLeft={"$2"}
               textAlign="center"
               borderBottomLeftRadius={10}
               borderBottomRightRadius={10}
