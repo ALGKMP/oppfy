@@ -1,4 +1,4 @@
-import { SnsSchema } from "@aws-lambda-powertools/parser/lib/cjs/schemas/sns";
+import { SnsSchema } from "@aws-lambda-powertools/parser/lib/esm/schemas/sns";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import middy from "@middy/core";
 import eventNormalizerMiddleware from "@middy/event-normalizer";
