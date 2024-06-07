@@ -63,6 +63,7 @@
     "expo-notifications": "^0.28.4",
     "expo-router": "3.5.14",
     "expo-splash-screen": "~0.27.4",
+    "expo-crypto" : "~13.0.2",
     "expo-status-bar": "~1.12.1",
     "expo-store-review": "^7.0.2",
     "expo-video-thumbnails": "~8.0.0",
