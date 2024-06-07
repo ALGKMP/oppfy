@@ -153,7 +153,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
         reduceMotion: ReduceMotion.System,
       },
       () => {
-        scale.value = withDelay(200, withTiming(0, { duration: 200 }));
+        scale.value = withDelay(100, withTiming(0, { duration: 200 }));
       },
     );
     // opacity.value = withTiming(1, { duration: 200 }, () => {
