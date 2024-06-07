@@ -2,9 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Dimensions, LayoutChangeEvent, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  Easing,
+  ReduceMotion,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
@@ -134,29 +138,40 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   // For the fuckin like button
   const scale = useSharedValue(0);
-  const opacity = useSharedValue(1);
+  // const opacity = useSharedValue(1);
 
   const handleLikeAnimation = () => {
-    scale.value = withTiming(1, { duration: 200 }, () => {
-      scale.value = withTiming(0, { duration: 200 });
-    });
-    opacity.value = withTiming(1, { duration: 200 }, () => {
-      opacity.value = withTiming(0, { duration: 200 });
-    });
+    scale.value = withSpring(
+      1,
+      {
+        duration: 250,
+        dampingRatio: 0.5,
+        stiffness: 50,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+        reduceMotion: ReduceMotion.System,
+      },
+      () => {
+        scale.value = withDelay(200, withTiming(0, { duration: 200 }));
+      },
+    );
+    // opacity.value = withTiming(1, { duration: 200 }, () => {
+    // opacity.value = withTiming(0, { duration: 200 });
+    // });
     setIsLiked(true); // Update the liked state
   };
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd(() => {
-      console.log("tap");
       runOnJS(handleLikeAnimation)();
     });
 
   const heartAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
-      opacity: opacity.value,
+      // opacity: opacity.value,
     };
   });
 
