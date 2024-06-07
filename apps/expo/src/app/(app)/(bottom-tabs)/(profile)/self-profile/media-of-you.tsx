@@ -102,6 +102,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(item.caption.length > 100);
   const [isLiked, setIsLiked] = useState(item.hasLiked);
+  const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
+  const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
 
   // For the fuckin caption
   const maxHeight = useSharedValue(50); // This sets the initial collapsed height
@@ -113,7 +115,11 @@ const PostItem = ({ item }: { item: DataItem }) => {
     });
   };
 
-  const handleLike = (key: string) => {};
+  const handleLike = (key: string) => {
+    console.log("clicke");
+    runOnJS(handleButtonLikeAnimation)();
+  };
+
   const handleComment = (key: string) => {};
 
   const handleTextLayout = useCallback((event: LayoutChangeEvent) => {
@@ -137,14 +143,15 @@ const PostItem = ({ item }: { item: DataItem }) => {
   };
 
   // For the fuckin like button
-  const scale = useSharedValue(0);
+  const imageLikeScale = useSharedValue(0);
   // const opacity = useSharedValue(1);
+  const buttonLikeScale = useSharedValue(1);
 
-  const handleLikeAnimation = () => {
-    scale.value = withSpring(
+  const handleImageLikeAnimation = () => {
+    imageLikeScale.value = withSpring(
       1,
       {
-        duration: 250,
+        duration: 400,
         dampingRatio: 0.5,
         stiffness: 50,
         overshootClamping: false,
@@ -153,7 +160,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
         reduceMotion: ReduceMotion.System,
       },
       () => {
-        scale.value = withDelay(100, withTiming(0, { duration: 200 }));
+        imageLikeScale.value = withDelay(150, withTiming(0, { duration: 250 }));
       },
     );
     // opacity.value = withTiming(1, { duration: 200 }, () => {
@@ -165,15 +172,43 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd(() => {
-      runOnJS(handleLikeAnimation)();
+      runOnJS(handleImageLikeAnimation)();
     });
 
-  const heartAnimatedStyle = useAnimatedStyle(() => {
+  const heartImageAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: scale.value }],
+      transform: [{ scale: imageLikeScale.value }],
       // opacity: opacity.value,
     };
   });
+
+  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonLikeScale.value }],
+      // opacity: opacity.value,
+    };
+  });
+
+  const handleButtonLikeAnimation = () => {
+    buttonLikeScale.value = withSpring(
+      1.1,
+      {
+        duration: 100,
+        dampingRatio: 0.5,
+        stiffness: 50,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+        reduceMotion: ReduceMotion.System,
+      },
+      () => {
+        buttonLikeScale.value = withTiming(1, { duration: 200 });
+      },
+    );
+    setIsLiked(!isLiked);
+    setFillHeart(!fillHeart); // Toggle fill state
+    setHeartColor(heartColor === "$gray12" ? "red" : "$gray12"); // Toggle heart color
+  };
 
   if (status === "loading") {
     return (
@@ -192,24 +227,22 @@ const PostItem = ({ item }: { item: DataItem }) => {
       borderRadius={20}
     >
       <GestureDetector gesture={doubleTap}>
-        <Animated.View>
-          <Image
-            source={{ uri: item.image }}
-            style={[
-              {
-                width: item.width,
-                height: item.height,
-                justifyContent: "center",
-                alignItems: "center",
-              },
-            ]}
-            // contentFit="contain"
-          >
-            <Animated.View style={[heartAnimatedStyle]}>
-              <Heart size={100} color={"red"} fill={"red"} />
-            </Animated.View>
-          </Image>
-        </Animated.View>
+        <Image
+          source={{ uri: item.image }}
+          style={[
+            {
+              width: item.width,
+              height: item.height,
+              justifyContent: "center",
+              alignItems: "center",
+            },
+          ]}
+          // contentFit="contain"
+        >
+          <Animated.View style={[heartImageAnimatedStyle]}>
+            <Heart size={100} color={"red"} fill={"red"} />
+          </Animated.View>
+        </Image>
       </GestureDetector>
       <XStack
         gap={"$2.5"}
@@ -288,7 +321,10 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
           {/* Like Button */}
           <View flex={1} justifyContent="center">
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleButtonLikeAnimation}
+              // activeOpacity={1} // Uncomment this line to disable the opacity change on press
+            >
               <View
                 justifyContent="center"
                 alignItems="center"
@@ -296,7 +332,15 @@ const PostItem = ({ item }: { item: DataItem }) => {
                 padding={"$2"}
                 backgroundColor={"$gray5"}
               >
-                <Heart size={24} padding={"$3"} color="$gray12" />
+                <Animated.View style={[heartButtonAnimatedStyle]}>
+                  <Heart
+                    size={24}
+                    padding={"$3"}
+                    color={heartColor}
+                    fill={"red"}
+                    fillOpacity={fillHeart ? 1 : 0}
+                  />
+                </Animated.View>
               </View>
             </TouchableOpacity>
           </View>
