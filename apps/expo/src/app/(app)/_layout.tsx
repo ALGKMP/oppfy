@@ -7,16 +7,10 @@ import { usePushNotifications } from "~/hooks/notifications";
 import { Stack } from "~/layouts";
 
 const AppLayout = () => {
-  const { expoPushToken, notification } = usePushNotifications();
+  usePushNotifications();
 
-  useEffect(() => {
-    console.log("############################");
-    console.log(expoPushToken);
-    console.log("############################");
-  }, [expoPushToken]);
-
-  const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
+  const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
