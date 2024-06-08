@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 
 import { trpcValidators } from "@oppfy/validators";
 
-
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const followRouter = createTRPCRouter({
@@ -85,6 +84,7 @@ export const followRouter = createTRPCRouter({
           input.userId,
         );
       } catch (err) {
+        console.error(err);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),

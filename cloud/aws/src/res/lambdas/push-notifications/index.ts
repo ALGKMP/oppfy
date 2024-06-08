@@ -1,8 +1,6 @@
 import { SnsSchema } from "@aws-lambda-powertools/parser/lib/esm/schemas/sns";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import middy from "@middy/core";
-import eventNormalizerMiddleware from "@middy/event-normalizer";
-import httpErrorHandler from "@middy/http-error-handler";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
@@ -36,7 +34,6 @@ const lambdaHandler = async (
   }
 };
 
-export const handler = middy(lambdaHandler)
-  .use(eventNormalizerMiddleware())
-  .use(httpErrorHandler())
-  .use(parser({ schema: extendedSnsSchema }));
+export const handler = middy(lambdaHandler).use(
+  parser({ schema: extendedSnsSchema }),
+);
