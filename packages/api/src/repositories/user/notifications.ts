@@ -9,19 +9,18 @@ import { handleDatabaseErrors } from "../../errors";
 type Notifications = InferInsertModel<typeof schema.notifications>;
 type EntityTypes = Notifications["entityType"];
 
-interface Entity {
-  id: string;
-  type: EntityTypes;
-}
-
-interface Notification {
+interface BaseNotification {
   recipientId: string;
-
   title: string;
   body: string;
-
-  entity: Entity;
 }
+
+interface EntityNotification extends BaseNotification {
+  entityId: string;
+  entityType: EntityTypes;
+}
+
+type Notification = BaseNotification | EntityNotification;
 
 export type NotificationSettings = z.infer<
   typeof trpcValidators.input.notifications.updateNotificationSettings
@@ -70,22 +69,7 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async storeNotification({
-    recipientId,
-
-    title,
-    body,
-
-    entity,
-  }: Notification) {
-    await this.db.insert(schema.notifications).values({
-      recipientId,
-
-      title,
-      body,
-
-      entityId: entity.id,
-      entityType: entity.type,
-    });
+  async storeNotification(notification: Notification) {
+    await this.db.insert(schema.notifications).values(notification);
   }
 }
