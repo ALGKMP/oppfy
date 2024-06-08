@@ -19,10 +19,11 @@ import {
   Separator,
   SizableText,
   Text,
+  TextArea,
   View,
   XStack,
   YStack,
-  ZStack,
+  Sheet,
 } from "tamagui";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -101,9 +102,12 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const [fullTextHeight, setFullTextHeight] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(item.caption.length > 100);
+
   const [isLiked, setIsLiked] = useState(item.hasLiked);
   const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
   const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
+
+  const [open, setOpen] = useState(false)
 
   // For the fuckin caption
   const maxHeight = useSharedValue(50); // This sets the initial collapsed height
@@ -293,32 +297,39 @@ const PostItem = ({ item }: { item: DataItem }) => {
       {/* Under Post */}
       <View
         flex={1}
-        alignSelf="stretch"
+        alignSelf={"stretch"}
         padding={"$2"}
         paddingTop={"$3"}
-        paddingBottom={"$0"}
         borderBottomRightRadius={"$8"}
         borderBottomLeftRadius={"$8"}
         backgroundColor={"$gray2"}
         marginBottom={"$5"}
       >
-        <XStack flex={1} gap={"$2"}>
+        <XStack gap={"$2"} alignItems="flex-start">
           {/* Comment Button */}
           <View flex={4} justifyContent="center">
             <TouchableOpacity>
-              <View
+              <TextArea
+                flex={1}
+                alignSelf="stretch"
                 justifyContent="center"
+                lineHeight={0}
                 alignItems="flex-start"
-                backgroundColor={"$gray5"}
+                padding={"$2.5"}
                 borderRadius={"$7"}
-              >
-                <Text fontWeight={"bold"} padding={"$3"} color={"$gray9"}>
-                  Comment
-                </Text>
-              </View>
+                backgroundColor={"$gray5"}
+                placeholder="Comment"
+                placeholderTextColor={"$gray9"}
+                fontWeight={"bold"}
+                borderColor={"$gray5"}
+                selectionColor={"transparent"}
+                maxLength={100}
+                onScroll={() => {
+                  // TODO: hide keyboard
+                }}
+              />
             </TouchableOpacity>
           </View>
-
           {/* Like Button */}
           <View flex={1} justifyContent="center">
             <TouchableOpacity
@@ -344,7 +355,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
               </View>
             </TouchableOpacity>
           </View>
-
           {/* Share Button */}
           <View flex={1} justifyContent="center">
             <TouchableOpacity>
@@ -365,14 +375,18 @@ const PostItem = ({ item }: { item: DataItem }) => {
         {/* Comments and Likes */}
         <XStack flex={1} gap="$2">
           <View flex={4} alignItems="flex-start" paddingLeft={"$2.5"}>
-            <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
-              102 other comments
-            </SizableText>
+            <TouchableOpacity>
+              <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
+                102 other comments
+              </SizableText>
+            </TouchableOpacity>
           </View>
           <View flex={2} alignItems={"flex-start"}>
-            <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
-              1k likes
-            </SizableText>
+            <TouchableOpacity>
+              <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
+                1k likes
+              </SizableText>
+            </TouchableOpacity>
           </View>
         </XStack>
 
