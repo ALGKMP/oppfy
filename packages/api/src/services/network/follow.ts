@@ -3,6 +3,7 @@ import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 import { DomainError, ErrorCode } from "../../errors";
 import { ProfileRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
+import type { NotificationData } from "../../repositories/user/notifications";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import { UserRepository } from "../../repositories/user/user";
 
@@ -61,13 +62,43 @@ export class FollowService {
       );
     }
 
-    await this.notificationsRepository.storeNotification({
+    const notificationData = {
       recipientId,
       title: "New follower",
       body: `${recipientProfile.username} is now following you.`,
       entityId: senderId,
       entityType: "post",
-    });
+    } satisfies NotificationData;
+
+    await this.notificationsRepository.storeNotification(notificationData);
+
+    const pushToken =
+      await this.notificationsRepository.getPushToken(recipientId);
+
+    if (pushToken === undefined) {
+      throw new DomainError(
+        ErrorCode.PUSH_TOKEN_NOT_FOUND,
+        `Push token not found for user ID "${recipientId}"`,
+      );
+    }
+
+    const notificationSettings =
+      await this.notificationsRepository.getNotificationSettings(
+        recipient.notificationSettingsId,
+      );
+
+    if (notificationSettings === undefined) {
+      throw new DomainError(
+        ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND,
+        `Notification settings not found for user ID "${recipientId}"`,
+      );
+    }
+
+    if (!notificationSettings.followRequests) {
+      return;
+    }
+
+    await this.notificationsRepository.sendNotification(notificationData);
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
