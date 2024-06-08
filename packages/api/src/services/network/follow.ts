@@ -1,17 +1,20 @@
 import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { ProfileRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
 import type { NotificationData } from "../../repositories/user/notifications";
 import { NotificationsRepository } from "../../repositories/user/notifications";
-import { UserRepository } from "../../repositories/user/user";
+import { ProfileService } from "../profile/profile";
+import { NotificationsService } from "../user/notifications";
+import { UserService } from "../user/user";
 
 export class FollowService {
   private followRepository = new FollowRepository();
-  private profileRepository = new ProfileRepository();
-  private userRepository = new UserRepository();
   private notificationsRepository = new NotificationsRepository();
+
+  private userService = new UserService();
+  private profileService = new ProfileService();
+  private notificationsService = new NotificationsService();
 
   async isFollowing(userId: string, recipientId: string) {
     return !!(await this.followRepository.getFollower(userId, recipientId));
@@ -19,24 +22,16 @@ export class FollowService {
 
   // @tony: Example for noti handling
   async followUser(senderId: string, recipientId: string) {
-    const alreadyFollowing = await this.isFollowing(senderId, recipientId);
+    const isFollowing = await this.isFollowing(senderId, recipientId);
 
-    if (alreadyFollowing) {
+    if (isFollowing) {
       throw new DomainError(
         ErrorCode.USER_ALREADY_FOLLOWED,
         `User "${senderId}" is already following "${recipientId}"`,
       );
     }
 
-    const sender = await this.userRepository.getUser(senderId);
-    const recipient = await this.userRepository.getUser(recipientId);
-
-    if (recipient === undefined || sender === undefined) {
-      throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        `User not found for sender ID "${senderId}" or recipient ID "${recipientId}"`,
-      );
-    }
+    const recipient = await this.userService.getUser(recipientId);
 
     if (recipient.privacySetting === "private") {
       await this.followRepository.createFollowRequest(senderId, recipientId);
@@ -44,61 +39,33 @@ export class FollowService {
 
     await this.followRepository.addFollower(senderId, recipientId);
 
-    const recipientProfile = await this.profileRepository.getProfileByProfileId(
+    const { username } = await this.profileService.getBasicProfileByProfileId(
       recipient.profileId,
     );
 
-    if (recipientProfile === undefined) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        `Profile not found for user ID "${recipientId}"`,
-      );
-    }
-
-    if (recipientProfile.username === null) {
-      throw new DomainError(
-        ErrorCode.USERNAME_NOT_FOUND,
-        `Username not found for user ID "${recipientId}"`,
-      );
-    }
-
     const notificationData = {
-      recipientId,
       title: "New follower",
-      body: `${recipientProfile.username} is now following you.`,
+      body: `${username} is now following you.`,
       entityId: senderId,
       entityType: "post",
     } satisfies NotificationData;
 
-    await this.notificationsRepository.storeNotification(notificationData);
+    await this.notificationsService.storeNotification(
+      recipient.id,
+      notificationData,
+    );
 
-    const pushToken =
-      await this.notificationsRepository.getPushToken(recipientId);
+    const { followRequests } =
+      await this.notificationsService.getNotificationSettings(recipient.id);
 
-    if (pushToken === undefined) {
-      throw new DomainError(
-        ErrorCode.PUSH_TOKEN_NOT_FOUND,
-        `Push token not found for user ID "${recipientId}"`,
-      );
-    }
-
-    const notificationSettings =
-      await this.notificationsRepository.getNotificationSettings(
-        recipient.notificationSettingsId,
-      );
-
-    if (notificationSettings === undefined) {
-      throw new DomainError(
-        ErrorCode.NOTIFICATION_SETTINGS_NOT_FOUND,
-        `Notification settings not found for user ID "${recipientId}"`,
-      );
-    }
-
-    if (!notificationSettings.followRequests) {
+    if (!followRequests) {
       return;
     }
 
-    await this.notificationsRepository.sendNotification(notificationData);
+    await this.notificationsRepository.sendNotification(
+      recipient.id,
+      notificationData,
+    );
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
