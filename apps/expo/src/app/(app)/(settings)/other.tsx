@@ -18,9 +18,15 @@ import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
+import { api } from "~/utils/api";
 
 const Other = () => {
   const { deleteAccount } = useSession();
+
+  const {
+    isLoading: isSyncingContacts,
+    ...syncContacts
+  } = api.contacts.syncContacts.useMutation();
 
   const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
     useState(false);
@@ -77,7 +83,9 @@ const Other = () => {
       }),
     );
 
-    hashedNumbers.forEach((hashedNumber) => console.log(hashedNumber));
+    // hashedNumbers.forEach((hashedNumber) => console.log(hashedNumber));
+
+    void syncContacts.mutateAsync(hashedNumbers);
   };
 
   const handleDeleteContacts = async () => {};

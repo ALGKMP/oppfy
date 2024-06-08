@@ -13,5 +13,4 @@ export class ContactService {
 
         await this.userRepository.updateUserContacts(userId, contacts);
     };
-    
 }

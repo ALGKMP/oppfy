@@ -1,3 +1,4 @@
+import { contact } from "../../../db/src/schema/schema";
 import { S3Service } from "./aws/s3";
 import { SearchService } from "./aws/search";
 import { PaginationService } from "./media/paginate";
@@ -8,6 +9,7 @@ import { FollowService } from "./network/follow";
 import { FriendService } from "./network/friend";
 import { ReportService } from "./network/report";
 import { ProfileService } from "./profile/profile";
+import { ContactService } from "./user/contacts";
 import { NotificationsService } from "./user/notifications";
 import { PrivacyService } from "./user/privacy";
 import { UserService } from "./user/user";
@@ -15,6 +17,7 @@ import { UserService } from "./user/user";
 export const services = {
   user: new UserService(),
   notifications: new NotificationsService(),
+  contact: new ContactService(),
   privacy: new PrivacyService(),
   block: new BlockService(),
   follow: new FollowService(),

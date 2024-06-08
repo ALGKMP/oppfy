@@ -10,6 +10,7 @@ import {
   requestRouter,
   searchRouter,
   userRouter,
+  contactsRouter
 } from "./routers";
 import { createTRPCRouter } from "./trpc";
 
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   request: requestRouter,
   block: blockRouter,
   notifications: notificationsRouter,
+  contacts: contactsRouter,
   search: searchRouter,
 });
 

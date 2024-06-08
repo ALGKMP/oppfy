@@ -7,3 +7,4 @@ export { friendRouter } from "./network/friend";
 export { blockRouter } from "./network/block";
 export { requestRouter } from "./network/request";
 export { notificationsRouter } from "./user/notifications";
+export { contactsRouter } from "./user/contacts";
