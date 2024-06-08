@@ -1,10 +1,16 @@
 import { useState } from "react";
+import * as Contacts from "expo-contacts";
+import * as Crypto from "expo-crypto";
 import * as FileSystem from "expo-file-system";
-import * as Contacts from 'expo-contacts';
-import * as Crypto from 'expo-crypto';
-import { ChevronRight, XCircle, RefreshCcw, Trash } from "@tamagui/lucide-icons";
+import {
+  ChevronRight,
+  RefreshCcw,
+  Trash,
+  XCircle,
+} from "@tamagui/lucide-icons";
+import { parsePhoneNumber, type CountryCode } from "libphonenumber-js";
+import { has } from "lodash";
 import { Button, YStack } from "tamagui";
-import { parsePhoneNumber, type CountryCode } from 'libphonenumber-js'
 
 import type { SettingsGroupInput } from "~/components/Settings";
 import { renderSettingsGroup } from "~/components/Settings";
@@ -37,52 +43,44 @@ const Other = () => {
       fields: [Contacts.Fields.PhoneNumbers],
     });
 
-    const phoneNumbers = data.reduce<{ country: string, number: string }[]>((acc, contact) => {
-      if (contact.phoneNumbers) {
-        for (let phoneNumber of contact.phoneNumbers) {
-          if (!phoneNumber.countryCode || !phoneNumber.number) continue;
+    const phoneNumbers = data.reduce<{ country: string; number: string }[]>(
+      (acc, contact) => {
+        if (contact.phoneNumbers) {
+          for (let phoneNumber of contact.phoneNumbers) {
+            if (!phoneNumber.countryCode || !phoneNumber.number) continue;
 
-          acc.push({
-            country: phoneNumber.countryCode,
-            number: phoneNumber.number
-          });
+            acc.push({
+              country: phoneNumber.countryCode,
+              number: phoneNumber.number,
+            });
+          }
         }
-      }
-      return acc;
-    }, []);
-
-    let numbers = phoneNumbers.map(numberthing => {
-      // try {
-      const phoneNumber = parsePhoneNumber(numberthing.number, numberthing.country.toLocaleUpperCase() as CountryCode);
-      return phoneNumber;
-      /*       } catch (e) {
-              console.log(e);
-            } */
-    });
-
-
-    const array22 = new Uint8Array([1, 2, 3, 4, 5]);
-    const hashed = await Crypto.digest(
-      Crypto.CryptoDigestAlgorithm.SHA512,
-      array22
+        return acc;
+      },
+      [],
     );
 
-    console.log(hashed)
-    /* 1 */
+    let numbers = phoneNumbers.map((numberthing) => {
+      const phoneNumber = parsePhoneNumber(
+        numberthing.number,
+        numberthing.country.toLocaleUpperCase() as CountryCode,
+      );
+      return phoneNumber.formatInternational().replaceAll(" ", "");
+    });
 
-    /*         hashedNumbers.forEach(console.log);    const hashedNumbers = await Promise.all(numbers.map(async number => {
-              return await Crypto.digestStringAsync(
-                Crypto.CryptoDigestAlgorithm.SHA256,
-                number.number
-              );
-            }));
-         */
-    // hashedNumbers.forEach(console.log);
+    const hashedNumbers = await Promise.all(
+      numbers.map(async (number) => {
+        return await Crypto.digestStringAsync(
+          Crypto.CryptoDigestAlgorithm.SHA256,
+          number,
+        );
+      }),
+    );
 
+    hashedNumbers.forEach((hashedNumber) => console.log(hashedNumber));
   };
 
-  const handleDeleteContacts = async () => {
-  };
+  const handleDeleteContacts = async () => {};
 
   const clearCachetitle = "Clear Cache";
   const clearCacheSubtitle =
@@ -170,9 +168,9 @@ const Other = () => {
           icon: <Trash />,
           iconAfter: <ChevronRight />,
           onPress: () => setIsDeleteContactsModalVisible(true),
-        }
+        },
       ],
-    }
+    },
   ] satisfies SettingsGroupInput[];
 
   return (
