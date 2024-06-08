@@ -28,6 +28,12 @@ const Other = () => {
     ...syncContacts
   } = api.contacts.syncContacts.useMutation();
 
+  const {
+    isLoading: isDeletingContacts,
+    ...deleteContacts
+  } = api.contacts.deleteContacts.useMutation();
+  
+
   const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
     useState(false);
   const [isSyncContactsModalVisible, setIsSyncContactsModalVisible] =
@@ -88,7 +94,9 @@ const Other = () => {
     void syncContacts.mutateAsync(hashedNumbers);
   };
 
-  const handleDeleteContacts = async () => {};
+  const handleDeleteContacts = async () => {
+    void deleteContacts.mutateAsync();
+  };
 
   const clearCachetitle = "Clear Cache";
   const clearCacheSubtitle =
