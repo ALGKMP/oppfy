@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
-import { db, InferInsertModel, schema } from "@oppfy/db";
+import type { InferInsertModel } from "@oppfy/db";
+import { db, schema } from "@oppfy/db";
 import type { trpcValidators } from "@oppfy/validators";
 
 import { handleDatabaseErrors } from "../../errors";
@@ -9,18 +10,18 @@ import { handleDatabaseErrors } from "../../errors";
 type Notifications = InferInsertModel<typeof schema.notifications>;
 type EntityTypes = Notifications["entityType"];
 
-interface BaseNotification {
+interface BaseNotificationData {
   recipientId: string;
   title: string;
   body: string;
 }
 
-interface EntityNotification extends BaseNotification {
+interface EntityNotificationData extends BaseNotificationData {
   entityId: string;
   entityType: EntityTypes;
 }
 
-type Notification = BaseNotification | EntityNotification;
+export type NotificationData = BaseNotificationData | EntityNotificationData;
 
 export type NotificationSettings = z.infer<
   typeof trpcValidators.input.notifications.updateNotificationSettings
@@ -28,6 +29,18 @@ export type NotificationSettings = z.infer<
 
 export class NotificationsRepository {
   private db = db;
+
+  @handleDatabaseErrors
+  async getPushToken(userId: string) {
+    const user = await this.db.query.user.findFirst({
+      where: eq(schema.user.id, userId),
+      columns: {
+        pushToken: true,
+      },
+    });
+
+    return user?.pushToken;
+  }
 
   @handleDatabaseErrors
   async updatePushToken(userId: string, pushToken: string) {
@@ -69,7 +82,10 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async storeNotification(notification: Notification) {
+  async storeNotification(notification: NotificationData) {
     await this.db.insert(schema.notifications).values(notification);
   }
+
+  @handleDatabaseErrors
+  async sendNotification(notification: NotificationData) {}
 }
