@@ -47,7 +47,7 @@ export class FollowService {
       title: "New follower",
       body: `${username} is now following you.`,
       entityId: senderId,
-      entityType: "post",
+      entityType: "profile",
     } satisfies NotificationData;
 
     await this.notificationsService.storeNotification(
