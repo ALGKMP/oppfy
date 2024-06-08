@@ -1,70 +1,73 @@
 import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
+import { ProfileRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
+import { NotificationsRepository } from "../../repositories/user/notifications";
 import { UserRepository } from "../../repositories/user/user";
 
 export class FollowService {
   private followRepository = new FollowRepository();
+  private profileRepository = new ProfileRepository();
   private userRepository = new UserRepository();
+  private notificationsRepository = new NotificationsRepository();
 
   async isFollowing(userId: string, recipientId: string) {
     return !!(await this.followRepository.getFollower(userId, recipientId));
   }
 
+  // @tony: Example for noti handling
   async followUser(senderId: string, recipientId: string) {
     const alreadyFollowing = await this.isFollowing(senderId, recipientId);
+
     if (alreadyFollowing) {
-      console.error(
-        `SERVICE ERROR: User "${senderId}" is already following "${recipientId}"`,
-      );
       throw new DomainError(
         ErrorCode.USER_ALREADY_FOLLOWED,
-        "User is already following the recipient.",
+        `User "${senderId}" is already following "${recipientId}"`,
       );
     }
 
     const sender = await this.userRepository.getUser(senderId);
     const recipient = await this.userRepository.getUser(recipientId);
-    if (!recipient || !sender) {
-      console.error(
-        `SERVICE ERROR: User not found for sender ID "${senderId}" or recipient ID "${recipientId}"`,
-      );
+
+    if (recipient === undefined || sender === undefined) {
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
-        "Sender or recipient user not found.",
+        `User not found for sender ID "${senderId}" or recipient ID "${recipientId}"`,
       );
     }
 
     if (recipient.privacySetting === "private") {
-      const result = await this.followRepository.createFollowRequest(
-        senderId,
-        recipientId,
-      );
-      if (!result.insertId) {
-        console.error(
-          `SERVICE ERROR: Failed to create follow request from "${senderId}" to "${recipientId}"`,
-        );
-        throw new DomainError(
-          ErrorCode.FAILED_TO_REQUEST_FOLLOW,
-          "Failed to create follow request.",
-        );
-      }
+      await this.followRepository.createFollowRequest(senderId, recipientId);
     }
 
-    const result = await this.followRepository.addFollower(
-      senderId,
-      recipientId,
+    await this.followRepository.addFollower(senderId, recipientId);
+
+    const recipientProfile = await this.profileRepository.getProfileByProfileId(
+      recipient.profileId,
     );
-    if (!result.insertId) {
-      console.error(
-        `SERVICE ERROR: Failed to follow user "${recipientId}" by "${senderId}"`,
-      );
+
+    if (recipientProfile === undefined) {
       throw new DomainError(
-        ErrorCode.FAILED_TO_FOLLOW_USER,
-        "Failed to follow user.",
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${recipientId}"`,
       );
     }
+
+    if (recipientProfile.username === null) {
+      throw new DomainError(
+        ErrorCode.USERNAME_NOT_FOUND,
+        `Username not found for user ID "${recipientId}"`,
+      );
+    }
+
+    await this.notificationsRepository.storeNotification({
+      recipientId,
+      title: "New follower",
+      body: `${recipientProfile.username} is now following you.`,
+      entityId: senderId,
+      entityType: "post",
+    });
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
