@@ -17,13 +17,14 @@ import { Heart, Send } from "@tamagui/lucide-icons";
 import {
   Avatar,
   Separator,
+  Sheet,
+  SheetProps,
   SizableText,
   Text,
   TextArea,
   View,
   XStack,
   YStack,
-  Sheet,
 } from "tamagui";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -107,8 +108,16 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
   const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
 
-  const [open, setOpen] = useState(false)
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [sheetPosition, setSheetPosition] = useState(0);
 
+  const handleOpenSheet = () => {
+    setIsSheetOpen(true);
+  };
+
+  const handleCloseSheet = () => {
+    setIsSheetOpen(false);
+  };
   // For the fuckin caption
   const maxHeight = useSharedValue(50); // This sets the initial collapsed height
 
@@ -117,11 +126,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
     maxHeight.value = withTiming(isExpanded ? 50 : 100, {
       duration: 300,
     });
-  };
-
-  const handleLike = (key: string) => {
-    console.log("clicke");
-    runOnJS(handleButtonLikeAnimation)();
   };
 
   const handleComment = (key: string) => {};
@@ -308,26 +312,18 @@ const PostItem = ({ item }: { item: DataItem }) => {
         <XStack gap={"$2"} alignItems="flex-start">
           {/* Comment Button */}
           <View flex={4} justifyContent="center">
-            <TouchableOpacity>
-              <TextArea
+            <TouchableOpacity onPress={handleOpenSheet}>
+              <View
                 flex={1}
-                alignSelf="stretch"
-                justifyContent="center"
-                lineHeight={0}
-                alignItems="flex-start"
+                justifyContent="flex-start"
                 padding={"$2.5"}
                 borderRadius={"$7"}
                 backgroundColor={"$gray5"}
-                placeholder="Comment"
-                placeholderTextColor={"$gray9"}
-                fontWeight={"bold"}
-                borderColor={"$gray5"}
-                selectionColor={"transparent"}
-                maxLength={100}
-                onScroll={() => {
-                  // TODO: hide keyboard
-                }}
-              />
+              >
+                <Text fontWeight={"bold"} color={"$gray9"}>
+                  Comment
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
           {/* Like Button */}
@@ -414,6 +410,68 @@ const PostItem = ({ item }: { item: DataItem }) => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Sheet Component */}
+      <Sheet
+        open={isSheetOpen}
+        onOpenChange={handleCloseSheet}
+        animation="medium"
+        modal
+        snapPoints={[10]}
+        dismissOnSnapToBottom
+      >
+        <Sheet.Frame>
+          <TextArea
+            flex={1}
+            alignSelf="stretch"
+            justifyContent="center"
+            lineHeight={0}
+            alignItems="flex-start"
+            padding={"$2.5"}
+            borderRadius={"$7"}
+            backgroundColor={"$gray5"}
+            placeholder="Write your comment..."
+            placeholderTextColor={"$gray9"}
+            fontWeight={"bold"}
+            borderWidth={0}
+            selectionColor={"transparent"}
+            maxLength={100}
+            // Add any additional props here
+          />
+        </Sheet.Frame>
+      </Sheet>
+      <Sheet
+        open={isSheetOpen}
+        onOpenChange={handleCloseSheet}
+        onPositionChange={setSheetPosition}
+        position={sheetPosition}
+        forceRemoveScrollEnabled={isSheetOpen}
+        modal
+        dismissOnSnapToBottom
+        snapPointsMode="percent"
+        snapPoints={[80, 50]}
+      >
+        <Sheet.Overlay
+          animation="lazy"
+          enterStyle={{ opacity: 0 }}
+          exitStyle={{ opacity: 0 }}
+        />
+        <Sheet.Handle opacity={1} backgroundColor={"$gray5"} />
+        {/* <Sheet.ScrollView> */}
+        <Sheet.Frame
+          flex={4}
+          padding="$4"
+          justifyContent="center"
+          alignItems="center"
+          gap="$5"
+        >
+          <YStack flex={1} margin={"$3"} objectFit="fill">
+            <XStack flex={9}>
+              <Text>This area is for comments</Text>
+            </XStack>
+          </YStack>
+        </Sheet.Frame>
+      </Sheet>
     </View>
   );
 };
