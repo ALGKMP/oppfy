@@ -125,16 +125,7 @@ export const notifications = mySqlTable("Notifications", {
   body: text("body").notNull(),
 
   entityId: varchar("entityId", { length: 255 }),
-  entityType: mysqlEnum("type", [
-    "post",
-    "like",
-    "comment",
-    "mention",
-    "follow",
-    "friend",
-    "followRequest",
-    "friendRequest",
-  ]),
+  entityType: mysqlEnum("type", ["post", "profile", "comment", "mention"]),
 
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
