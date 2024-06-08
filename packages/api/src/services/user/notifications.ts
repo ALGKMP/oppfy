@@ -1,6 +1,9 @@
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
-import type { NotificationSettings } from "../../repositories/user/notifications";
+import type {
+  NotificationData,
+  NotificationSettings,
+} from "../../repositories/user/notifications";
 import { UserRepository } from "../../repositories/user/user";
 import { UserService } from "./user";
 
@@ -42,6 +45,22 @@ export class NotificationsService {
     await this.notificationsRepository.updateNotificationSettings(
       user.notificationSettingsId,
       newNotificationSettings,
+    );
+  }
+
+  async storeNotification(userId: string, notificationData: NotificationData) {
+    await this.notificationsRepository.storeNotification(
+      userId,
+      notificationData,
+    );
+  }
+
+  async sendNotification(userId: string, notificationData: NotificationData) {
+    const pushToken = await this.getPushToken(userId);
+
+    await this.notificationsRepository.sendNotification(
+      pushToken,
+      notificationData,
     );
   }
 
