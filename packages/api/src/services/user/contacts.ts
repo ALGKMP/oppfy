@@ -1,16 +1,27 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { UserRepository } from "../../repositories";
+import { ContactsRepository, UserRepository } from "../../repositories";
 
 export class ContactService {
-    private userRepository = new UserRepository();
+  private contactsRepository = new ContactsRepository();
+  private userRepository = new UserRepository();
 
-    async syncContacts(userId: string, contacts: string[]) {
-        const user = await this.userRepository.getUser(userId);
+  async syncContacts(userId: string, contacts: string[]) {
+    const user = await this.userRepository.getUser(userId);
 
-        if (user === undefined) {
-            throw new DomainError(ErrorCode.USER_NOT_FOUND);
-        }
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
 
-        await this.userRepository.updateUserContacts(userId, contacts);
-    };
+    await this.contactsRepository.updateUserContacts(userId, contacts);
+  }
+
+  async deleteContacts(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+
+    await this.contactsRepository.deleteContacts(userId);
+  }
 }

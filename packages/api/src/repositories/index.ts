@@ -10,4 +10,4 @@ export { ProfileRepository } from "./profile/profile";
 export { PostRepository } from "./media/post";
 export { ReportRepository } from "./network/report";
 export { MuxRepository } from "./mux/mux";
-
+export { ContactsRepository } from "./user/contacts";
