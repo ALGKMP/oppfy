@@ -8,10 +8,9 @@ import type { trpcValidators } from "@oppfy/validators";
 import { handleDatabaseErrors } from "../../errors";
 
 type Notifications = InferInsertModel<typeof schema.notifications>;
-type EntityTypes = Notifications["entityType"];
+type EntityTypes = NonNullable<Notifications["entityType"]>;
 
 interface BaseNotificationData {
-  recipientId: string;
   title: string;
   body: string;
 }
@@ -82,10 +81,12 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async storeNotification(notification: NotificationData) {
-    await this.db.insert(schema.notifications).values(notification);
+  async storeNotification(userId: string, notificationData: NotificationData) {
+    await this.db
+      .insert(schema.notifications)
+      .values({ recipientId: userId, ...notificationData });
   }
 
   @handleDatabaseErrors
-  async sendNotification(notification: NotificationData) {}
+  async sendNotification(userId: string, notificationData: NotificationData) {}
 }
