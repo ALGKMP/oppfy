@@ -2,17 +2,16 @@ import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type { NotificationSettings } from "../../repositories/user/notifications";
 import { UserRepository } from "../../repositories/user/user";
+import { UserService } from "./user";
 
 export class NotificationsService {
   private userRepository = new UserRepository();
   private notificationsRepository = new NotificationsRepository();
 
-  async getNotificationSettings(userId: string) {
-    const user = await this.userRepository.getUser(userId);
+  private userService = new UserService();
 
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
+  async getNotificationSettings(userId: string) {
+    const user = await this.userService.getUser(userId);
 
     const notificationSettings =
       await this.notificationsRepository.getNotificationSettings(
@@ -30,11 +29,7 @@ export class NotificationsService {
     userId: string,
     newNotificationSettings: NotificationSettings,
   ) {
-    const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
+    const user = await this.userService.getUser(userId);
 
     const notificationSettings =
       await this.notificationsRepository.getNotificationSettings(
@@ -50,13 +45,17 @@ export class NotificationsService {
     );
   }
 
-  async storePushToken(userId: string, pushToken: string) {
-    const user = await this.userRepository.getUser(userId);
+  async getPushToken(userId: string) {
+    const pushToken = await this.notificationsRepository.getPushToken(userId);
 
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    if (pushToken === undefined) {
+      throw new DomainError(ErrorCode.PUSH_TOKEN_NOT_FOUND);
     }
 
+    return pushToken;
+  }
+
+  async storePushToken(userId: string, pushToken: string) {
     await this.notificationsRepository.updatePushToken(userId, pushToken);
   }
 }
