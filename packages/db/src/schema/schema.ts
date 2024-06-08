@@ -119,7 +119,13 @@ export const notifications = mySqlTable("Notifications", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
 
-  type: mysqlEnum("type", [
+  read: boolean("read").default(false).notNull(),
+
+  title: varchar("title", { length: 255 }).notNull(),
+  body: text("body").notNull(),
+
+  entityId: varchar("entityId", { length: 255 }),
+  entityType: mysqlEnum("type", [
     "post",
     "like",
     "comment",
@@ -129,11 +135,6 @@ export const notifications = mySqlTable("Notifications", {
     "followRequest",
     "friendRequest",
   ]),
-
-  title: varchar("title", { length: 255 }).notNull(),
-  message: text("message").notNull(),
-
-  read: boolean("read").default(false).notNull(),
 
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
