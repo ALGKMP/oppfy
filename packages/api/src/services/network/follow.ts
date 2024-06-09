@@ -2,18 +2,18 @@ import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories/network/follow";
+import { ProfileRepository } from "../../repositories/profile/profile";
 import type { NotificationData } from "../../repositories/user/notifications";
 import { NotificationsRepository } from "../../repositories/user/notifications";
-import { ProfileService } from "../profile/profile";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
 export class FollowService {
   private followRepository = new FollowRepository();
   private notificationsRepository = new NotificationsRepository();
+  private profileRepository = new ProfileRepository();
 
   private userService = new UserService();
-  private profileService = new ProfileService();
   private notificationsService = new NotificationsService();
 
   async isFollowing(userId: string, recipientId: string) {
@@ -35,17 +35,32 @@ export class FollowService {
 
     if (recipient.privacySetting === "private") {
       await this.followRepository.createFollowRequest(senderId, recipientId);
+      return;
     }
 
     await this.followRepository.addFollower(senderId, recipientId);
 
-    const { username } = await this.profileService.getBasicProfileByProfileId(
+    const profile = await this.profileRepository.getProfileByProfileId(
       recipient.profileId,
     );
 
+    if (profile === undefined) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${recipientId}"`,
+      );
+    }
+
+    if (profile.username === null) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${recipientId}"`,
+      );
+    }
+
     const notificationData = {
       title: "New follower",
-      body: `${username} is now following you.`,
+      body: `${profile.username} is now following you.`,
       entityId: senderId,
       entityType: "profile",
     } satisfies NotificationData;
