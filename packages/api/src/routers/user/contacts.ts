@@ -9,8 +9,7 @@ export const contactsRouter = createTRPCRouter({
     .input(trpcValidators.input.contacts.syncContacts)
     .mutation(async ({ input, ctx }) => {
       try {
-        console.log(input);
-        // await ctx.services.contact.syncContacts(ctx.session.uid, input);
+        await ctx.services.contact.syncContacts(ctx.session.uid, input);
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -19,8 +18,7 @@ export const contactsRouter = createTRPCRouter({
     }),
   deleteContacts: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-      console.log("deleting contacts");
-      // await ctx.services.contact.deleteContacts(ctx.session.uid);
+      await ctx.services.contact.deleteContacts(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

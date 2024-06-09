@@ -23,16 +23,11 @@ import { api } from "~/utils/api";
 const Other = () => {
   const { deleteAccount } = useSession();
 
-  const {
-    isLoading: isSyncingContacts,
-    ...syncContacts
-  } = api.contacts.syncContacts.useMutation();
+  const { isLoading: isSyncingContacts, ...syncContacts } =
+    api.contacts.syncContacts.useMutation();
 
-  const {
-    isLoading: isDeletingContacts,
-    ...deleteContacts
-  } = api.contacts.deleteContacts.useMutation();
-  
+  const { isLoading: isDeletingContacts, ...deleteContacts } =
+    api.contacts.deleteContacts.useMutation();
 
   const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
     useState(false);
