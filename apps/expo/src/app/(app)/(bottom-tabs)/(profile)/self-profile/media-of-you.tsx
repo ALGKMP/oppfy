@@ -35,6 +35,13 @@ import {
 
 const { width: screenWidth } = Dimensions.get("window");
 
+interface Comment {
+  profilePicture: string;
+  username: string;
+  timeAgo: string;
+  text: string;
+}
+
 interface DataItem {
   author: string;
   authorProfilePicture: string;
@@ -49,15 +56,17 @@ interface DataItem {
   likes: number;
   image: string;
   caption: string;
+  commentList: Comment[];
 }
 
 const data: DataItem[] = [
   {
     author: "JohnDoe",
     authorProfilePicture:
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
+      "https://images.unsplash.com/photo-1603415526960-f7e0328ad5c7",
     recipient: "JaneSmith",
-    recipientProfilePicture: "https://example.com/recipient1.jpg",
+    recipientProfilePicture:
+      "https://images.unsplash.com/photo-1555685812-4b74353b4fb9",
     isFollowing: true,
     hasLiked: false,
     key: "1",
@@ -67,14 +76,34 @@ const data: DataItem[] = [
     likes: 50,
     image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
     caption: "Enjoying the sunset!",
+    commentList: [
+      {
+        profilePicture: "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!"
+      },
+      {
+        profilePicture: "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!"
+      },
+      {
+        profilePicture: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!"
+      }
+    ]
   },
   {
     author: "DavidSmith",
-    authorProfilePicture: "https://example.com/author8.jpg",
+    authorProfilePicture: "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
     width: 500,
     height: 500,
     recipient: "EmilyClark",
-    recipientProfilePicture: "https://example.com/recipient8.jpg",
+    recipientProfilePicture: "https://images.unsplash.com/photo-1552058544-f2b08422138a",
     isFollowing: false,
     hasLiked: true,
     key: "8",
@@ -83,12 +112,32 @@ const data: DataItem[] = [
     image: "https://images.unsplash.com/photo-1552664730-d307ca884978",
     caption:
       "Birthday celebrations. fjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak dfjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak d",
+    commentList: [
+      {
+        profilePicture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
+        username: "DanielleP",
+        timeAgo: "4 hours ago",
+        text: "Happy Birthday!"
+      },
+      {
+        profilePicture: "https://images.unsplash.com/photo-1517841905240-472988babdf9",
+        username: "EricB",
+        timeAgo: "5 hours ago",
+        text: "Looks like fun!"
+      },
+      {
+        profilePicture: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df",
+        username: "FionaG",
+        timeAgo: "6 hours ago",
+        text: "Amazing celebration!"
+      }
+    ]
   },
   {
     author: "GraceLee",
-    authorProfilePicture: "https://example.com/author9.jpg",
+    authorProfilePicture: "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7",
     recipient: "HenryMiller",
-    recipientProfilePicture: "https://example.com/recipient9.jpg",
+    recipientProfilePicture: "https://images.unsplash.com/photo-1520817700543-7db1298ee3b2",
     isFollowing: true,
     hasLiked: false,
     width: 500,
@@ -99,8 +148,29 @@ const data: DataItem[] = [
     image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
     caption:
       "Night out with friends fjsdklfjsdklfjsldk sdljkfsd jlksd jflksd jsldkj fsklsdj kwefjiosldjfwo0isjfoiw  fjsdklfjasdlk fsdalkjfasd fasldkf sdalkfsad lkfa jsadjf sdlakasdf hello world.",
-  },
+    commentList: [
+      {
+        profilePicture: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
+        username: "GeorgeH",
+        timeAgo: "1 hour ago",
+        text: "Great night!"
+      },
+      {
+        profilePicture: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+        username: "HannahI",
+        timeAgo: "2 hours ago",
+        text: "So much fun!"
+      },
+      {
+        profilePicture: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
+        username: "IsaacJ",
+        timeAgo: "3 hours ago",
+        text: "Miss hanging out with you all!"
+      }
+    ]
+  }
 ];
+
 
 const PostItem = ({ item }: { item: DataItem }) => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
