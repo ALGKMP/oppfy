@@ -1,8 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Dimensions, LayoutChangeEvent, TouchableOpacity } from "react-native";
+import {
+  Dimensions,
+  KeyboardAvoidingView,
+  LayoutChangeEvent,
+  TouchableOpacity,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  Easing,
   ReduceMotion,
   runOnJS,
   useAnimatedStyle,
@@ -26,6 +30,8 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+
+// import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -390,11 +396,11 @@ const PostItem = ({ item }: { item: DataItem }) => {
         <View flex={1} alignItems="flex-start" padding="$2">
           <TouchableOpacity onPress={toggleExpanded}>
             {/* <Animated.View
-              style={[
-                maskAnimatedStyle,
-                { overflow: "hidden", flexDirection: "row" },
-              ]}
-            > */}
+                style={[
+                  maskAnimatedStyle,
+                  { overflow: "hidden", flexDirection: "row" },
+                ]}
+              > */}
             <Text
               numberOfLines={isExpanded ? 0 : 2}
               onLayout={handleTextLayout}
@@ -412,34 +418,42 @@ const PostItem = ({ item }: { item: DataItem }) => {
       </View>
 
       {/* Sheet Component */}
-      <Sheet
-        open={isSheetOpen}
-        onOpenChange={handleCloseSheet}
-        animation="medium"
-        modal
-        snapPoints={[10]}
-        dismissOnSnapToBottom
+      <KeyboardAvoidingView
+        behavior="padding"
+        keyboardVerticalOffset={500}
+        style={{ flex: 1 }}
       >
-        <Sheet.Frame>
-          <TextArea
-            flex={1}
-            alignSelf="stretch"
-            justifyContent="center"
-            lineHeight={0}
-            alignItems="flex-start"
-            padding={"$2.5"}
-            borderRadius={"$7"}
-            backgroundColor={"$gray5"}
-            placeholder="Write your comment..."
-            placeholderTextColor={"$gray9"}
-            fontWeight={"bold"}
-            borderWidth={0}
-            selectionColor={"transparent"}
-            maxLength={100}
-            // Add any additional props here
-          />
-        </Sheet.Frame>
-      </Sheet>
+        <Sheet
+          open={isSheetOpen}
+          onOpenChange={handleCloseSheet}
+          animation="medium"
+          modal
+          snapPoints={[10, 100]}
+          dismissOnSnapToBottom
+          moveOnKeyboardChange
+        >
+          <Sheet.Frame>
+            <Text>Text</Text>
+            <TextArea
+              flex={1}
+              alignSelf="stretch"
+              justifyContent="center"
+              lineHeight={0}
+              alignItems="flex-start"
+              padding={"$2.5"}
+              borderRadius={"$7"}
+              backgroundColor={"$gray5"}
+              placeholder="Write your comment..."
+              placeholderTextColor={"$gray9"}
+              fontWeight={"bold"}
+              borderWidth={0}
+              selectionColor={"transparent"}
+              maxLength={100}
+              // Add any additional props here
+            />
+          </Sheet.Frame>
+        </Sheet>
+      </KeyboardAvoidingView>
       <Sheet
         open={isSheetOpen}
         onOpenChange={handleCloseSheet}
