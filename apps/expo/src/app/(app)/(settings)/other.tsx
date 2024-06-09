@@ -89,8 +89,6 @@ const Other = () => {
       }),
     );
 
-    // hashedNumbers.forEach((hashedNumber) => console.log(hashedNumber));
-
     void syncContacts.mutateAsync(hashedNumbers);
   };
 
@@ -137,6 +135,7 @@ const Other = () => {
         color: "$red9",
       },
       onPress: () => {
+        void handleDeleteContacts();
         setIsDeleteContactsModalVisible(false);
       },
     },
