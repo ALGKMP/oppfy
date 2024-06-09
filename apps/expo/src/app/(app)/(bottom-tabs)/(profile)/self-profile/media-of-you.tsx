@@ -78,32 +78,37 @@ const data: DataItem[] = [
     caption: "Enjoying the sunset!",
     commentList: [
       {
-        profilePicture: "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
         username: "AliceW",
         timeAgo: "2 hours ago",
-        text: "Beautiful view!"
+        text: "Beautiful view!",
       },
       {
-        profilePicture: "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
         username: "BobM",
         timeAgo: "3 hours ago",
-        text: "Looks amazing!"
+        text: "Looks amazing!",
       },
       {
-        profilePicture: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
         username: "CharlieK",
         timeAgo: "1 day ago",
-        text: "Wish I was there!"
-      }
-    ]
+        text: "Wish I was there!",
+      },
+    ],
   },
   {
     author: "DavidSmith",
-    authorProfilePicture: "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
+    authorProfilePicture:
+      "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
     width: 500,
     height: 500,
     recipient: "EmilyClark",
-    recipientProfilePicture: "https://images.unsplash.com/photo-1552058544-f2b08422138a",
+    recipientProfilePicture:
+      "https://images.unsplash.com/photo-1552058544-f2b08422138a",
     isFollowing: false,
     hasLiked: true,
     key: "8",
@@ -114,30 +119,35 @@ const data: DataItem[] = [
       "Birthday celebrations. fjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak dfjsdlkf flkj sdjlkas jlkads jklsdaj fsdlkf jsdlksda jlksd jflksdf slkgjweosdjsd  jlksdj lksdfjlsak d",
     commentList: [
       {
-        profilePicture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
+        profilePicture:
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
         username: "DanielleP",
         timeAgo: "4 hours ago",
-        text: "Happy Birthday!"
+        text: "Happy Birthday!",
       },
       {
-        profilePicture: "https://images.unsplash.com/photo-1517841905240-472988babdf9",
+        profilePicture:
+          "https://images.unsplash.com/photo-1517841905240-472988babdf9",
         username: "EricB",
         timeAgo: "5 hours ago",
-        text: "Looks like fun!"
+        text: "Looks like fun!",
       },
       {
-        profilePicture: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df",
+        profilePicture:
+          "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df",
         username: "FionaG",
         timeAgo: "6 hours ago",
-        text: "Amazing celebration!"
-      }
-    ]
+        text: "Amazing celebration!",
+      },
+    ],
   },
   {
     author: "GraceLee",
-    authorProfilePicture: "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7",
+    authorProfilePicture:
+      "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7",
     recipient: "HenryMiller",
-    recipientProfilePicture: "https://images.unsplash.com/photo-1520817700543-7db1298ee3b2",
+    recipientProfilePicture:
+      "https://images.unsplash.com/photo-1520817700543-7db1298ee3b2",
     isFollowing: true,
     hasLiked: false,
     width: 500,
@@ -150,27 +160,29 @@ const data: DataItem[] = [
       "Night out with friends fjsdklfjsdklfjsldk sdljkfsd jlksd jflksd jsldkj fsklsdj kwefjiosldjfwo0isjfoiw  fjsdklfjasdlk fsdalkjfasd fasldkf sdalkfsad lkfa jsadjf sdlakasdf hello world.",
     commentList: [
       {
-        profilePicture: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
+        profilePicture:
+          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
         username: "GeorgeH",
         timeAgo: "1 hour ago",
-        text: "Great night!"
+        text: "Great night!",
       },
       {
-        profilePicture: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+        profilePicture:
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
         username: "HannahI",
         timeAgo: "2 hours ago",
-        text: "So much fun!"
+        text: "So much fun!",
       },
       {
-        profilePicture: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
+        profilePicture:
+          "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
         username: "IsaacJ",
         timeAgo: "3 hours ago",
-        text: "Miss hanging out with you all!"
-      }
-    ]
-  }
+        text: "Miss hanging out with you all!",
+      },
+    ],
+  },
 ];
-
 
 const PostItem = ({ item }: { item: DataItem }) => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
@@ -488,68 +500,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
       </View>
 
       {/* Sheet Component */}
-        <Sheet
-          open={isSheetOpen}
-          onOpenChange={handleCloseSheet}
-          animation="medium"
-          modal
-          snapPoints={[10, 100]}
-          dismissOnSnapToBottom
-          moveOnKeyboardChange
-        >
-          <Sheet.Frame>
-            <Text>Text</Text>
-            <TextArea
-              flex={1}
-              alignSelf="stretch"
-              justifyContent="center"
-              lineHeight={0}
-              alignItems="flex-start"
-              padding={"$2.5"}
-              borderRadius={"$7"}
-              backgroundColor={"$gray5"}
-              placeholder="Write your comment..."
-              placeholderTextColor={"$gray9"}
-              fontWeight={"bold"}
-              borderWidth={0}
-              selectionColor={"transparent"}
-              maxLength={100}
-              // Add any additional props here
-            />
-          </Sheet.Frame>
-        </Sheet>
-      <Sheet
-        open={isSheetOpen}
-        onOpenChange={handleCloseSheet}
-        onPositionChange={setSheetPosition}
-        position={sheetPosition}
-        forceRemoveScrollEnabled={isSheetOpen}
-        modal
-        dismissOnSnapToBottom
-        snapPointsMode="percent"
-        snapPoints={[80, 50]}
-      >
-        <Sheet.Overlay
-          animation="lazy"
-          enterStyle={{ opacity: 0 }}
-          exitStyle={{ opacity: 0 }}
-        />
-        <Sheet.Handle opacity={1} backgroundColor={"$gray5"} />
-        {/* <Sheet.ScrollView> */}
-        <Sheet.Frame
-          flex={4}
-          padding="$4"
-          justifyContent="center"
-          alignItems="center"
-          gap="$5"
-        >
-          <YStack flex={1} margin={"$3"} objectFit="fill">
-            <XStack flex={9}>
-              <Text>This area is for comments</Text>
-            </XStack>
-          </YStack>
-        </Sheet.Frame>
-      </Sheet>
+
     </View>
   );
 };
