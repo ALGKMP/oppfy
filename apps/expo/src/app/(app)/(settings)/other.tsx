@@ -83,7 +83,7 @@ const Other = () => {
     const hashedNumbers = await Promise.all(
       numbers.map(async (number) => {
         return await Crypto.digestStringAsync(
-          Crypto.CryptoDigestAlgorithm.SHA256,
+          Crypto.CryptoDigestAlgorithm.SHA512,
           number,
         );
       }),
