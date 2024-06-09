@@ -1,4 +1,5 @@
 import * as sharedMediaSchema from "./src/shared/media";
+import * as sharedNotificationsSchema from "./src/shared/notifications";
 import * as sharedUserSchema from "./src/shared/user";
 import { input, output } from "./src/trpc";
 
@@ -21,6 +22,7 @@ const trpcValidators = {
 const sharedValidators = {
   user: sharedUserSchema,
   media: sharedMediaSchema,
+  notifications: sharedNotificationsSchema,
 };
 
 export { trpcValidators, sharedValidators };
