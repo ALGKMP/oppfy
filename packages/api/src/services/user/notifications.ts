@@ -4,11 +4,9 @@ import type {
   NotificationData,
   NotificationSettings,
 } from "../../repositories/user/notifications";
-import { UserRepository } from "../../repositories/user/user";
 import { UserService } from "./user";
 
 export class NotificationsService {
-  private userRepository = new UserRepository();
   private notificationsRepository = new NotificationsRepository();
 
   private userService = new UserService();
@@ -56,22 +54,10 @@ export class NotificationsService {
   }
 
   async sendNotification(userId: string, notificationData: NotificationData) {
-    const pushToken = await this.getPushToken(userId);
-
     await this.notificationsRepository.sendNotification(
-      pushToken,
+      userId,
       notificationData,
     );
-  }
-
-  async getPushToken(userId: string) {
-    const pushToken = await this.notificationsRepository.getPushToken(userId);
-
-    if (pushToken === undefined) {
-      throw new DomainError(ErrorCode.PUSH_TOKEN_NOT_FOUND);
-    }
-
-    return pushToken;
   }
 
   async storePushToken(userId: string, pushToken: string) {
