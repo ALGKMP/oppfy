@@ -20,21 +20,21 @@ type PublicFollowState = "NotFollowing" | "Following";
 type PrivateFollowState = "NotFollowing" | "Requested" | "Following";
 type FriendState = "NotFriends" | "Requested" | "Friends";
 
-type PublicProfileStatus = {
+interface PublicProfileStatus {
   privacy: "public";
   followState: PublicFollowState;
   friendState: FriendState;
-};
+}
 
-type PrivateProfileStatus = {
+interface PrivateProfileStatus {
   privacy: "private";
   followState: PrivateFollowState;
   friendState: FriendState;
-};
+}
 
 type ProfileStatus = PublicProfileStatus | PrivateProfileStatus;
 
-interface ProfileData {
+interface _ProfileData {
   name: string;
   username: string;
   bio: string | null;
