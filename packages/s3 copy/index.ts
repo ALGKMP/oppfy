@@ -1,5 +1,7 @@
 import { SNSClient } from "@aws-sdk/client-sns";
 
+export { PublishCommand } from "@aws-sdk/client-sns";
+
 export const sns = new SNSClient({
   region: "your-region",
   credentials: {

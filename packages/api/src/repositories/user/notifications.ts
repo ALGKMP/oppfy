@@ -3,6 +3,7 @@ import type { z } from "zod";
 
 import type { InferInsertModel } from "@oppfy/db";
 import { db, schema } from "@oppfy/db";
+import { PublishCommand, sns } from "@oppfy/sns";
 import type { trpcValidators } from "@oppfy/validators";
 
 import { handleDatabaseErrors } from "../../errors";
@@ -28,6 +29,7 @@ export type NotificationSettings = z.infer<
 
 export class NotificationsRepository {
   private db = db;
+  private sns = sns;
 
   @handleDatabaseErrors
   async getPushToken(userId: string) {
@@ -88,5 +90,13 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async sendNotification(userId: string, notificationData: NotificationData) {}
+  async sendNotification(userId: string, notificationData: NotificationData) {
+    const params = {
+      Message: JSON.stringify(notificationData),
+      TopicArn: process.env.PUSH_NOTIFICATIONS_TOPIC_ARN,
+    };
+
+    const data = await this.sns.send(new PublishCommand(params));
+    console.log("Notification sent", data); // ! Remove this log after testing
+  }
 }
