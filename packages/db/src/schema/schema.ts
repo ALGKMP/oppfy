@@ -76,7 +76,6 @@ export const userContact = mysqlTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .onUpdateNow()
       .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
   },
   (table) => {
     return {
