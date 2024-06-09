@@ -17,6 +17,7 @@
     "@oppfy/utils": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@oppfy/s3": "workspace:*",
+    "@oppfy/sns": "workspace:*",
     "@oppfy/mux": "workspace:*",
     "@oppfy/opensearch": "workspace:*",
     "@aws-sdk/s3-request-presigner": "^3.564.0",

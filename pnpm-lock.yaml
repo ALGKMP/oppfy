@@ -670,6 +670,9 @@ importers:
       '@oppfy/s3':
         specifier: workspace:*
         version: link:../s3
+      '@oppfy/sns':
+        specifier: workspace:*
+        version: link:../s3 copy
       '@oppfy/utils':
         specifier: workspace:*
         version: link:../utils
