@@ -4,24 +4,17 @@ import type { z } from "zod";
 import type { InferInsertModel } from "@oppfy/db";
 import { db, schema } from "@oppfy/db";
 import { PublishCommand, sns } from "@oppfy/sns";
-import type { trpcValidators } from "@oppfy/validators";
+import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { handleDatabaseErrors } from "../../errors";
 
-type Notifications = InferInsertModel<typeof schema.notifications>;
-type EntityTypes = NonNullable<Notifications["entityType"]>;
+export type NotificationData = z.infer<
+  typeof sharedValidators.notifications.notificationData
+>;
 
-interface BaseNotificationData {
-  title: string;
-  body: string;
-}
-
-interface EntityNotificationData extends BaseNotificationData {
-  entityId: string;
-  entityType: EntityTypes;
-}
-
-export type NotificationData = BaseNotificationData | EntityNotificationData;
+type SnsNotificationData = z.infer<
+  typeof sharedValidators.notifications.snsNotificationData
+>;
 
 export type NotificationSettings = z.infer<
   typeof trpcValidators.input.notifications.updateNotificationSettings
@@ -30,18 +23,6 @@ export type NotificationSettings = z.infer<
 export class NotificationsRepository {
   private db = db;
   private sns = sns;
-
-  @handleDatabaseErrors
-  async getPushToken(userId: string) {
-    const user = await this.db.query.user.findFirst({
-      where: eq(schema.user.id, userId),
-      columns: {
-        pushToken: true,
-      },
-    });
-
-    return user?.pushToken;
-  }
 
   @handleDatabaseErrors
   async updatePushToken(userId: string, pushToken: string) {
@@ -89,14 +70,35 @@ export class NotificationsRepository {
       .values({ recipientId: userId, ...notificationData });
   }
 
-  @handleDatabaseErrors
   async sendNotification(userId: string, notificationData: NotificationData) {
+    // get the pushToken
+    const pushToken = await this._getPushToken(userId);
+
+    if (pushToken === undefined) {
+      throw new Error("User has no push token");
+    }
+
     const params = {
-      Message: JSON.stringify(notificationData),
-      TopicArn: process.env.PUSH_NOTIFICATIONS_TOPIC_ARN,
+      Message: JSON.stringify({
+        pushToken,
+        ...notificationData,
+      } satisfies SnsNotificationData),
+      Subject: "New notification",
+      TopicArn: process.env.PUSH_NOTIFICATION_TOPIC_ARN,
     };
 
-    const data = await this.sns.send(new PublishCommand(params));
-    console.log("Notification sent", data); // ! Remove this log after testing
+    await this.sns.send(new PublishCommand(params));
+  }
+
+  @handleDatabaseErrors
+  private async _getPushToken(userId: string) {
+    const user = await this.db.query.user.findFirst({
+      where: eq(schema.user.id, userId),
+      columns: {
+        pushToken: true,
+      },
+    });
+
+    return user?.pushToken;
   }
 }

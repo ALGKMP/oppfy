@@ -1,39 +1,22 @@
-import { SnsSchema } from "@aws-lambda-powertools/parser/lib/esm/schemas/sns";
+import { SnsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import middy from "@middy/core";
 import type { Context } from "aws-lambda";
-import { z } from "zod";
+import type { z } from "zod";
 
-const notificationData = z.object({
-  userId: z.string(),
-  message: z.string().min(1, "Message is required"),
-  timestamp: z.string(),
-});
+import { sharedValidators } from "@oppfy/validators";
 
-const originalRecordsSchema = SnsSchema.shape.Records.element;
+const notificationData = sharedValidators.notifications.snsNotificationData;
 
-const extendedRecordsSchema = z.object({
-  ...originalRecordsSchema.shape,
-  Sns: originalRecordsSchema.shape.Sns.extend({
-    Message: notificationData,
-  }),
-});
-
-const extendedSnsSchema = SnsSchema.extend({
-  Records: z.array(extendedRecordsSchema),
-});
-
-type NotificationData = z.infer<typeof extendedSnsSchema>;
+type NotificationData = z.infer<typeof notificationData>;
 
 const lambdaHandler = async (
   event: NotificationData,
   _context: Context,
 ): Promise<void> => {
-  for (const record of event.Records) {
-    const {} = record.Sns.Message;
-  }
+  console.log("Received event:", JSON.stringify(event, null, 2));
 };
 
 export const handler = middy(lambdaHandler).use(
-  parser({ schema: extendedSnsSchema }),
+  parser({ schema: notificationData, envelope: SnsEnvelope }),
 );
