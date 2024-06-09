@@ -418,11 +418,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
       </View>
 
       {/* Sheet Component */}
-      <KeyboardAvoidingView
-        behavior="padding"
-        keyboardVerticalOffset={500}
-        style={{ flex: 1 }}
-      >
         <Sheet
           open={isSheetOpen}
           onOpenChange={handleCloseSheet}
@@ -453,7 +448,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
             />
           </Sheet.Frame>
         </Sheet>
-      </KeyboardAvoidingView>
       <Sheet
         open={isSheetOpen}
         onOpenChange={handleCloseSheet}
