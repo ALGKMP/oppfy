@@ -3,7 +3,7 @@ import { SNSClient } from "@aws-sdk/client-sns";
 export { PublishCommand } from "@aws-sdk/client-sns";
 
 export const sns = new SNSClient({
-  region: "your-region",
+  region: process.env.AWS_REGION!,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
