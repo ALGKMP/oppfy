@@ -196,16 +196,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
   const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
 
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [sheetPosition, setSheetPosition] = useState(0);
-
-  const handleOpenSheet = () => {
-    setIsSheetOpen(true);
-  };
-
-  const handleCloseSheet = () => {
-    setIsSheetOpen(false);
-  };
   // For the fuckin caption
   const maxHeight = useSharedValue(50); // This sets the initial collapsed height
 
@@ -400,7 +390,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
         <XStack gap={"$2"} alignItems="flex-start">
           {/* Comment Button */}
           <View flex={4} justifyContent="center">
-            <TouchableOpacity onPress={handleOpenSheet}>
+            <TouchableOpacity onPress={() => null}>
               <View
                 flex={1}
                 justifyContent="flex-start"
