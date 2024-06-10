@@ -106,6 +106,195 @@ const data: DataItem[] = [
         timeAgo: "1 day ago",
         text: "Wish I was there!",
       },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
+        username: "AliceW",
+        timeAgo: "2 hours ago",
+        text: "Beautiful view!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
+        username: "CharlieK",
+        timeAgo: "1 day ago",
+        text: "Wish I was there!",
+      },
     ],
   },
   {
@@ -223,10 +412,16 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const renderItem = useCallback(
     ({ item }: { item: Comment }) => (
-      <></>
-      // <View flex={1} padding={"$5"}>
-      //   <Text>{item.text}</Text>
-      // </View>
+      <View
+        style={{
+          padding: 6,
+          margin: 6,
+          backgroundColor: "#eee",
+        }}
+      >
+        <Text>Comment</Text>
+        <Text color={"black"}>{item.text}</Text>
+      </View>
     ),
     [],
   );
@@ -541,12 +736,11 @@ const PostItem = ({ item }: { item: DataItem }) => {
           >
             <BottomSheetFlatList
               data={data}
-              // keyExtractor={(i) => i}
+              keyExtractor={(i) => data.indexOf(i).toString()}
               renderItem={renderItem}
               contentContainerStyle={{
                 flex: 1,
                 padding: 10,
-                backgroundColor: "white",
               }}
             />
           </BottomSheet>
