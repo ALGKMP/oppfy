@@ -26,6 +26,7 @@ import { Image } from "expo-image";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Send } from "@tamagui/lucide-icons";
+import { set } from "lodash";
 import {
   Avatar,
   Button,
@@ -207,13 +208,16 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const sheetRef = useRef<BottomSheet>(null);
   // variables
   const data = useMemo(() => item.commentList, []);
-  const snapPoints = useMemo(() => ["75%", "90%"], []);
+  const snapPoints = useMemo(() => ["65%", "90%"], []);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const openBottomSheet = () => {
+    setModalVisible(true);
     sheetRef.current?.expand();
   };
 
   const closeBottomSheet = () => {
+    setModalVisible(false);
     sheetRef.current?.close();
   };
 
@@ -521,14 +525,19 @@ const PostItem = ({ item }: { item: DataItem }) => {
       </View>
 
       {/* Sheet Component */}
-      <Modal>
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={closeBottomSheet}
+      >
         <View flex={1} padding={200}>
           <BottomSheet
             ref={sheetRef}
-            $modal
             snapPoints={snapPoints}
-            index={-1} // initial state to hide the bottom sheet
+            index={0} // initial state to hide the bottom sheet
             enablePanDownToClose={true}
+            onClose={closeBottomSheet}
           >
             <BottomSheetFlatList
               data={data}
