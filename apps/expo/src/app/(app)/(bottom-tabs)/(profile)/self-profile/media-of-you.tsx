@@ -1,8 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Dimensions,
   KeyboardAvoidingView,
   LayoutChangeEvent,
+  Modal,
   TouchableOpacity,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -16,10 +23,12 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
+import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Send } from "@tamagui/lucide-icons";
 import {
   Avatar,
+  Button,
   Separator,
   Sheet,
   SheetProps,
@@ -30,8 +39,6 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-
-// import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -195,6 +202,30 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const [isLiked, setIsLiked] = useState(item.hasLiked);
   const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
   const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
+
+  // hooks
+  const sheetRef = useRef<BottomSheet>(null);
+  // variables
+  const data = useMemo(() => item.commentList, []);
+  const snapPoints = useMemo(() => ["75%", "90%"], []);
+
+  const openBottomSheet = () => {
+    sheetRef.current?.expand();
+  };
+
+  const closeBottomSheet = () => {
+    sheetRef.current?.close();
+  };
+
+  const renderItem = useCallback(
+    ({ item }: { item: Comment }) => (
+      <></>
+      // <View flex={1} padding={"$5"}>
+      //   <Text>{item.text}</Text>
+      // </View>
+    ),
+    [],
+  );
 
   // For the fuckin caption
   const maxHeight = useSharedValue(50); // This sets the initial collapsed height
@@ -390,7 +421,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
         <XStack gap={"$2"} alignItems="flex-start">
           {/* Comment Button */}
           <View flex={4} justifyContent="center">
-            <TouchableOpacity onPress={() => null}>
+            <TouchableOpacity onPress={openBottomSheet}>
               <View
                 flex={1}
                 justifyContent="flex-start"
@@ -490,7 +521,28 @@ const PostItem = ({ item }: { item: DataItem }) => {
       </View>
 
       {/* Sheet Component */}
-
+      <Modal>
+        <View flex={1} padding={200}>
+          <BottomSheet
+            ref={sheetRef}
+            $modal
+            snapPoints={snapPoints}
+            index={-1} // initial state to hide the bottom sheet
+            enablePanDownToClose={true}
+          >
+            <BottomSheetFlatList
+              data={data}
+              // keyExtractor={(i) => i}
+              renderItem={renderItem}
+              contentContainerStyle={{
+                flex: 1,
+                padding: 10,
+                backgroundColor: "white",
+              }}
+            />
+          </BottomSheet>
+        </View>
+      </Modal>
     </View>
   );
 };
