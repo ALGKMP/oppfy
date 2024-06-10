@@ -47,7 +47,7 @@ export const user = mySqlTable("User", {
   privacySetting: mysqlEnum("privacySetting", ["public", "private"])
     .default("public")
     .notNull(),
-  pushToken: varchar("pushToken", { length: 255 }).notNull(),
+  pushToken: varchar("pushToken", { length: 255 }),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()

@@ -15,15 +15,18 @@ export const notificationData = z.union([
   entityNotificationData,
 ]);
 
-const snsBaseNotificationData = baseNotificationData.extend({
+export const snsBaseNotificationData = baseNotificationData.extend({
   pushToken: z.string(),
 });
 
-const snsEntityNotificationData = entityNotificationData.extend({
+export const snsEntityNotificationData = entityNotificationData.extend({
   pushToken: z.string(),
 });
 
-export const snsNotificationData = z.union([
-  snsBaseNotificationData,
-  snsEntityNotificationData,
-]);
+export const snsNotificationEvent = z.object({
+  pushToken: z.string(),
+  title: z.string(),
+  body: z.string(),
+  entityId: z.string().optional(),
+  entityType: z.enum(["post", "profile", "comment"]).optional(),
+});

@@ -6,7 +6,7 @@ import type { z } from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
-const notificationData = sharedValidators.notifications.snsNotificationData;
+const notificationData = sharedValidators.notifications.snsNotificationEvent;
 
 type NotificationData = z.infer<typeof notificationData>;
 

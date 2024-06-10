@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89567291-832a-48ae-bc5f-89382e5d43ab" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cloud/aws/src/res/lambdas/push-notifications/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/cloud/aws/src/res/lambdas/push-notifications/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/src/services/network/follow.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/src/services/network/follow.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/api/src/services/profile/profile.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/api/src/services/profile/profile.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

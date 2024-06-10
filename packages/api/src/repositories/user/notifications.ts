@@ -1,12 +1,11 @@
 import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
-import type { InferInsertModel } from "@oppfy/db";
 import { db, schema } from "@oppfy/db";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
-import { handleDatabaseErrors } from "../../errors";
+import { DomainError, ErrorCode, handleDatabaseErrors } from "../../errors";
 
 export type NotificationData = z.infer<
   typeof sharedValidators.notifications.notificationData
@@ -74,11 +73,9 @@ export class NotificationsRepository {
     // get the pushToken
     const pushToken = await this._getPushToken(userId);
 
-    if (pushToken === undefined) {
-      throw new Error("User has no push token");
+    if (pushToken === null) {
+      throw new DomainError(ErrorCode.UNREGISTERED_PUSH_TOKEN);
     }
-
-    console.log("Sending notification to", pushToken, notificationData);
 
     const params = {
       Message: JSON.stringify({
@@ -101,6 +98,10 @@ export class NotificationsRepository {
       },
     });
 
-    return user?.pushToken;
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USERNAME_NOT_FOUND);
+    }
+
+    return user.pushToken;
   }
 }
