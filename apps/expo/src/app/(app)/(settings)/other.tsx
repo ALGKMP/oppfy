@@ -23,16 +23,11 @@ import { api } from "~/utils/api";
 const Other = () => {
   const { deleteAccount } = useSession();
 
-  const {
-    isLoading: isSyncingContacts,
-    ...syncContacts
-  } = api.contacts.syncContacts.useMutation();
+  const { isLoading: isSyncingContacts, ...syncContacts } =
+    api.contacts.syncContacts.useMutation();
 
-  const {
-    isLoading: isDeletingContacts,
-    ...deleteContacts
-  } = api.contacts.deleteContacts.useMutation();
-  
+  const { isLoading: isDeletingContacts, ...deleteContacts } =
+    api.contacts.deleteContacts.useMutation();
 
   const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
     useState(false);
@@ -83,13 +78,11 @@ const Other = () => {
     const hashedNumbers = await Promise.all(
       numbers.map(async (number) => {
         return await Crypto.digestStringAsync(
-          Crypto.CryptoDigestAlgorithm.SHA256,
+          Crypto.CryptoDigestAlgorithm.SHA512,
           number,
         );
       }),
     );
-
-    // hashedNumbers.forEach((hashedNumber) => console.log(hashedNumber));
 
     void syncContacts.mutateAsync(hashedNumbers);
   };
@@ -137,6 +130,7 @@ const Other = () => {
         color: "$red9",
       },
       onPress: () => {
+        void handleDeleteContacts();
         setIsDeleteContactsModalVisible(false);
       },
     },
