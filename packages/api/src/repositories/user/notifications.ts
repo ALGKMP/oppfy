@@ -78,6 +78,8 @@ export class NotificationsRepository {
       throw new Error("User has no push token");
     }
 
+    console.log("Sending notification to", pushToken, notificationData);
+
     const params = {
       Message: JSON.stringify({
         pushToken,
