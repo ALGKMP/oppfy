@@ -32,7 +32,7 @@ import BottomSheet, {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
-import { Heart, Send } from "@tamagui/lucide-icons";
+import { Heart, Minus, Send } from "@tamagui/lucide-icons";
 import { set } from "lodash";
 import {
   Avatar,
@@ -169,6 +169,27 @@ const data: DataItem[] = [
       },
       {
         profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
+      {
+        profilePicture:
           "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
         username: "CharlieK",
         timeAgo: "1 day ago",
@@ -261,7 +282,6 @@ const data: DataItem[] = [
 ];
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-
 const PostItem = ({ item }: { item: DataItem }) => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "success",
@@ -314,7 +334,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
       heightPercentage,
       [0.2, 0.5], // Range of positions in percentage
       [0.8, 0], // Range of opacity values
-      "clamp"
+      "clamp",
     );
 
     return {
@@ -380,6 +400,35 @@ const PostItem = ({ item }: { item: DataItem }) => {
     ),
     [],
   );
+
+  const renderHeader = useCallback(() => {
+    return (
+      <YStack
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+        position="relative"
+      >
+        <Minus size={"$4"} />
+        <View justifyContent="center" alignItems="center">
+          <SizableText
+            size={"$5"}
+            textAlign="center"
+            color={"$white"}
+            fontWeight={"bold"}
+          >
+            Comments
+          </SizableText>
+        </View>
+        <View
+          width={"95%"}
+          borderColor={"$gray8"}
+          borderWidth={"$0.25"}
+          marginTop={"$3"}
+        />
+      </YStack>
+    );
+  }, []);
 
   // For the fuckin caption
   const toggleExpanded = () => {
@@ -661,22 +710,19 @@ const PostItem = ({ item }: { item: DataItem }) => {
         visible={modalVisible}
         onRequestClose={closeBottomSheet}
       >
-        <Animated.View
-          style={[{ flex: 1}, animatedOverlayStyle]}
-        >
+        <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
           <BottomSheet
             keyboardBehavior="extend"
             ref={sheetRef}
-            snapPoints={["65%", "100%"]}
+            snapPoints={["80%", "100%"]}
             index={0} // initial state to hide the bottom sheet
             enablePanDownToClose={true}
             onClose={closeBottomSheet}
             onChange={handleSheetChanges}
             animatedPosition={animatedPosition}
             footerComponent={renderFooter}
-            containerStyle={{
-              backgroundColor: "$gray9",
-            }}
+            handleComponent={renderHeader}
+            backgroundStyle={{ backgroundColor: "#282828" }}
           >
             <BottomSheetFlatList
               scrollEnabled={true}
