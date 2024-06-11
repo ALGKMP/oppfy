@@ -13,9 +13,8 @@ import {
   varbinary,
   varchar,
 } from "drizzle-orm/mysql-core";
-import { mySqlTable } from "./_table";
 
-// check if the current username is the same as the new username
+import { mySqlTable } from "./_table";
 
 export const user = mySqlTable("User", {
   id: varchar("id", { length: 255 }).primaryKey(),
