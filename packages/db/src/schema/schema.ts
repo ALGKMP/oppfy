@@ -1,10 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import {
   bigint,
-  binary,
   boolean,
   date,
-  datetime,
   int,
   mysqlEnum,
   mysqlTable,
@@ -16,22 +14,9 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 
-// import { mySqlTable } from "@oppfy/db/src/schema/_table";
 import { mySqlTable } from "./_table";
 
-// check if the current username is the same as the new username
-
 // TODO: Fix inconsistent naming of the tables
-
-export const verificationToken = mySqlTable("VerificationToken", {
-  id: serial("id").primaryKey(),
-  token: varchar("token", { length: 255 }).unique().notNull(),
-  expires: datetime("expires").notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
-});
 
 export const user = mySqlTable("User", {
   id: varchar("id", { length: 255 }).primaryKey(),
