@@ -18,11 +18,11 @@ import Animated, {
   ReduceMotion,
   runOnJS,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withDelay,
   withSpring,
   withTiming,
-  useDerivedValue
 } from "react-native-reanimated";
 import { Image } from "expo-image";
 import BottomSheet, {
@@ -47,8 +47,6 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-
-const { width: screenWidth } = Dimensions.get("window");
 
 interface Comment {
   profilePicture: string;
@@ -261,6 +259,8 @@ const data: DataItem[] = [
     ],
   },
 ];
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
 
 const PostItem = ({ item }: { item: DataItem }) => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
@@ -304,6 +304,23 @@ const PostItem = ({ item }: { item: DataItem }) => {
   useDerivedValue(() => {
     runOnJS(logPosition)(animatedPosition.value);
   }, [animatedPosition.value]);
+
+  const animatedOverlayStyle = useAnimatedStyle(() => {
+    // Calculate the percentage height of the screen
+    const heightPercentage = animatedPosition.value / screenHeight;
+
+    // Interpolate opacity based on the height percentage
+    const opacity = interpolate(
+      heightPercentage,
+      [0.2, 0.5], // Range of positions in percentage
+      [0.8, 0], // Range of opacity values
+      "clamp"
+    );
+
+    return {
+      backgroundColor: `rgba(0, 0, 0, ${opacity})`,
+    };
+  });
 
   const renderItem = useCallback(
     ({ item }: { item: Comment }) => (
@@ -645,9 +662,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
         onRequestClose={closeBottomSheet}
       >
         <Animated.View
-          style={[
-            { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.5)" },
-          ]}
+          style={[{ flex: 1}, animatedOverlayStyle]}
         >
           <BottomSheet
             keyboardBehavior="extend"
