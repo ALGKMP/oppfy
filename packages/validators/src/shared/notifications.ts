@@ -13,8 +13,8 @@ export const baseNotificationData = z.object({
 export const entityNotificationData = baseNotificationData.merge(entityData);
 
 export const notificationData = z.union([
-  baseNotificationData,
   entityNotificationData,
+  baseNotificationData,
 ]);
 
 export const snsBaseNotificationData = baseNotificationData.extend({
@@ -26,6 +26,6 @@ export const snsEntityNotificationData = entityNotificationData.extend({
 });
 
 export const snsNotificationData = z.union([
-  snsBaseNotificationData,
   snsEntityNotificationData,
+  snsBaseNotificationData,
 ]);
