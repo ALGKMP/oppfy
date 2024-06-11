@@ -342,7 +342,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
     };
   });
 
-  const renderItem = useCallback(
+  const renderComment = useCallback(
     ({ item }: { item: Comment }) => (
       <View margin={"$1.5"} padding={"$2.5"}>
         <XStack gap="$3" alignItems="center">
@@ -365,37 +365,14 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const renderFooter = useCallback(
     (props: BottomSheetFooterProps) => (
-      <BottomSheetFooter {...props} bottomInset={24}>
-        <View
-          style={{
-            padding: 12,
-            margin: 12,
-            borderRadius: 12,
-            backgroundColor: "#80f",
-          }}
-        >
+      <BottomSheetFooter {...props}>
+        <XStack flex={1} justifyContent="center" alignItems="center">
           <BottomSheetTextInput
-            style={{
-              marginTop: 8,
-              marginBottom: 10,
-              borderRadius: 10,
-              fontSize: 16,
-              lineHeight: 20,
-              padding: 8,
-              backgroundColor: "rgba(151, 151, 151, 0.25)",
-            }}
+            placeholder="Add a comment..."
+            // onSubmitEditing={(text) => ()}
           />
-
-          <Text
-            style={{
-              textAlign: "center",
-              color: "white",
-              fontWeight: "800",
-            }}
-          >
-            Footer
-          </Text>
-        </View>
+          <Button onPress={() => {}}> Post</Button>
+        </XStack>
       </BottomSheetFooter>
     ),
     [],
@@ -728,7 +705,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
               scrollEnabled={true}
               data={data}
               keyExtractor={(i) => data.indexOf(i).toString()}
-              renderItem={renderItem}
+              renderItem={renderComment}
               contentContainerStyle={{
                 // DO NOT USE FLEX: 1 HERE
                 padding: 10,
