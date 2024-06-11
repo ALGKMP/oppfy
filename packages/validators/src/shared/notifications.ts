@@ -27,11 +27,3 @@ export const snsNotificationData = z.union([
   snsBaseNotificationData,
   snsEntityNotificationData,
 ]);
-
-// export const snsNotificationEvent = z.object({
-//   pushToken: z.string(),
-//   title: z.string(),
-//   body: z.string(),
-//   entityId: z.string().optional(),
-//   entityType: z.enum(["post", "profile", "comment"]).optional(),
-// });
