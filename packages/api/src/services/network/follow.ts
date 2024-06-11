@@ -31,6 +31,7 @@ export class FollowService {
       );
     }
 
+    const sender = await this.userService.getUser(senderId);
     const recipient = await this.userService.getUser(recipientId);
 
     if (recipient.privacySetting === "private") {
@@ -41,7 +42,7 @@ export class FollowService {
     await this.followRepository.addFollower(senderId, recipientId);
 
     const profile = await this.profileRepository.getProfileByProfileId(
-      recipient.profileId,
+      sender.profileId,
     );
 
     if (profile === undefined) {
@@ -61,7 +62,7 @@ export class FollowService {
     const notificationData = {
       title: "New follower",
       body: `${profile.username} is now following you.`,
-      entityId: senderId,
+      entityId: String(sender.profileId),
       entityType: "profile",
     } satisfies NotificationData;
 
