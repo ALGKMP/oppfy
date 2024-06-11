@@ -763,7 +763,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
             ref={sheetRef}
             snapPoints={["65%", "100%"]}
             index={0} // initial state to hide the bottom sheet
-            // enablePanDownToClose={true}
+            enablePanDownToClose={true}
             onClose={closeBottomSheet}
             footerComponent={renderFooter}
           >
