@@ -790,15 +790,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
                 padding: 10,
               }}
             />
-            {/* <BottomSheetView
-              style={{
-                backgroundColor: "$gray9",
-                flex: 1,
-                alignItems: "center",
-              }}
-            >
-              <Text>Awesome 🎉</Text>
-            </BottomSheetView> */}
           </BottomSheet>
         </View>
       </Modal>
