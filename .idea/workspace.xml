@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89567291-832a-48ae-bc5f-89382e5d43ab" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/cloud/aws/src/lib/aws-stack.ts" beforeDir="false" afterPath="$PROJECT_DIR$/cloud/aws/src/lib/aws-stack.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cloud/aws/src/res/lambdas/push-notifications/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/cloud/aws/src/res/lambdas/push-notifications/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cloud/aws/src/res/lambdas/push-notifications/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/cloud/aws/src/res/lambdas/push-notifications/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/validators/src/shared/notifications.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/validators/src/shared/notifications.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
