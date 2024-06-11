@@ -27,7 +27,7 @@ import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetFooter,
   BottomSheetFooterProps,
-  BottomSheetView,
+  BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Send } from "@tamagui/lucide-icons";
@@ -444,6 +444,18 @@ const PostItem = ({ item }: { item: DataItem }) => {
             backgroundColor: "#80f",
           }}
         >
+          <BottomSheetTextInput
+            style={{
+              marginTop: 8,
+              marginBottom: 10,
+              borderRadius: 10,
+              fontSize: 16,
+              lineHeight: 20,
+              padding: 8,
+              backgroundColor: "rgba(151, 151, 151, 0.25)",
+            }}
+          />
+
           <Text
             style={{
               textAlign: "center",
@@ -763,7 +775,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
           <BottomSheet
             keyboardBehavior="extend"
             ref={sheetRef}
-            snapPoints={["65%", "90%"]}
+            snapPoints={["65%", "100%"]}
             index={0} // initial state to hide the bottom sheet
             enablePanDownToClose={true}
             onClose={closeBottomSheet}
