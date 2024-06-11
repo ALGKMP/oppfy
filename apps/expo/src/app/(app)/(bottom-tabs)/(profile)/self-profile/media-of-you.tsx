@@ -425,15 +425,20 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const renderItem = useCallback(
     ({ item }: { item: Comment }) => (
-      <View
-        style={{
-          padding: 6,
-          margin: 6,
-          backgroundColor: "#eee",
-        }}
-      >
-        <Text>Comment</Text>
-        <Text color={"black"}>{item.text}</Text>
+      <View margin={"$1.5"} padding={"$2.5"}>
+        <XStack gap="$3" alignItems="center">
+          <Avatar circular size="$4">
+            <Avatar.Image accessibilityLabel="Cam" src={item.profilePicture} />
+            <Avatar.Fallback backgroundColor="$blue10" />
+          </Avatar>
+          <YStack gap={"$2"}>
+            <XStack gap={"$2"}>
+              <Text fontWeight={"bold"}>{item.username}</Text>
+              <Text color={"$gray10"}> {item.timeAgo}</Text>
+            </XStack>
+            <Text>{item.text}</Text>
+          </YStack>
+        </XStack>
       </View>
     ),
     [],
@@ -757,28 +762,30 @@ const PostItem = ({ item }: { item: DataItem }) => {
         visible={modalVisible}
         onRequestClose={closeBottomSheet}
       >
-        <View flex={1} padding={200}>
-          <BottomSheet
-            keyboardBehavior="extend"
-            ref={sheetRef}
-            snapPoints={["65%", "100%"]}
-            index={0} // initial state to hide the bottom sheet
-            enablePanDownToClose={true}
-            onClose={closeBottomSheet}
-            footerComponent={renderFooter}
-          >
-            <BottomSheetFlatList
-              scrollEnabled={true}
-              data={data}
-              keyExtractor={(i) => data.indexOf(i).toString()}
-              renderItem={renderItem}
-              contentContainerStyle={{
-                // DO NOT USE FLEX: 1 HERE
-                padding: 10,
-              }}
-            />
-          </BottomSheet>
-        </View>
+        <BottomSheet
+          keyboardBehavior="extend"
+          ref={sheetRef}
+          snapPoints={["65%", "100%"]}
+          index={0} // initial state to hide the bottom sheet
+          enablePanDownToClose={true}
+          onClose={closeBottomSheet}
+          footerComponent={renderFooter}
+          containerStyle={{
+            backgroundColor: "$gray9",
+          }}
+        >
+          <BottomSheetFlatList
+            scrollEnabled={true}
+            data={data}
+            keyExtractor={(i) => data.indexOf(i).toString()}
+            renderItem={renderItem}
+            contentContainerStyle={{
+              // DO NOT USE FLEX: 1 HERE
+              padding: 10,
+              backgroundColor: "#282828",
+            }}
+          />
+        </BottomSheet>
       </Modal>
     </View>
   );
