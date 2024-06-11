@@ -397,7 +397,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
-  const [fullTextHeight, setFullTextHeight] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(item.caption.length > 100);
 
@@ -479,28 +478,15 @@ const PostItem = ({ item }: { item: DataItem }) => {
   );
 
   // For the fuckin caption
-  const maxHeight = useSharedValue(50); // This sets the initial collapsed height
-
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
-    maxHeight.value = withTiming(isExpanded ? 50 : 100, {
-      duration: 300,
-    });
   };
 
   const handleComment = (key: string) => {};
 
   const handleTextLayout = useCallback((event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
-    console.log(height);
-    setFullTextHeight(height);
   }, []);
-
-  const maskAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      height: maxHeight.value,
-    };
-  });
 
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
@@ -749,12 +735,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
         {/* Caption */}
         <View flex={1} alignItems="flex-start" padding="$2">
           <TouchableOpacity onPress={toggleExpanded}>
-            {/* <Animated.View
-                style={[
-                  maskAnimatedStyle,
-                  { overflow: "hidden", flexDirection: "row" },
-                ]}
-              > */}
             <Text
               numberOfLines={isExpanded ? 0 : 2}
               onLayout={handleTextLayout}
@@ -766,7 +746,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
                 ""
               )}
             </Text>
-            {/* </Animated.View> */}
           </TouchableOpacity>
         </View>
       </View>
