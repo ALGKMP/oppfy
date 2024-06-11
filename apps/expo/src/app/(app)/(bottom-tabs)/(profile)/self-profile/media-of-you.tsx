@@ -23,7 +23,12 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
-import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetFooter,
+  BottomSheetFooterProps,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Send } from "@tamagui/lucide-icons";
 import { set } from "lodash";
@@ -395,19 +400,21 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   // hooks
   const sheetRef = useRef<BottomSheet>(null);
+  const innerSheetRef = useRef<BottomSheet>(null);
   // variables
   const data = useMemo(() => item.commentList, []);
-  const snapPoints = useMemo(() => ["65%", "90%"], []);
   const [modalVisible, setModalVisible] = useState(false);
 
   const openBottomSheet = () => {
     setModalVisible(true);
     sheetRef.current?.expand();
+    innerSheetRef.current?.expand();
   };
 
   const closeBottomSheet = () => {
     setModalVisible(false);
     sheetRef.current?.close();
+    innerSheetRef.current?.close();
   };
 
   const renderItem = useCallback(
@@ -422,6 +429,32 @@ const PostItem = ({ item }: { item: DataItem }) => {
         <Text>Comment</Text>
         <Text color={"black"}>{item.text}</Text>
       </View>
+    ),
+    [],
+  );
+
+  const renderFooter = useCallback(
+    (props: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...props} bottomInset={24}>
+        <View
+          style={{
+            padding: 12,
+            margin: 12,
+            borderRadius: 12,
+            backgroundColor: "#80f",
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              color: "white",
+              fontWeight: "800",
+            }}
+          >
+            Footer
+          </Text>
+        </View>
+      </BottomSheetFooter>
     ),
     [],
   );
@@ -728,11 +761,13 @@ const PostItem = ({ item }: { item: DataItem }) => {
       >
         <View flex={1} padding={200}>
           <BottomSheet
+            keyboardBehavior="extend"
             ref={sheetRef}
-            snapPoints={snapPoints}
+            snapPoints={["65%", "90%"]}
             index={0} // initial state to hide the bottom sheet
             enablePanDownToClose={true}
             onClose={closeBottomSheet}
+            footerComponent={renderFooter}
           >
             <BottomSheetFlatList
               data={data}
@@ -743,6 +778,15 @@ const PostItem = ({ item }: { item: DataItem }) => {
                 padding: 10,
               }}
             />
+            {/* <BottomSheetView
+              style={{
+                backgroundColor: "$gray9",
+                flex: 1,
+                alignItems: "center",
+              }}
+            >
+              <Text>Awesome 🎉</Text>
+            </BottomSheetView> */}
           </BottomSheet>
         </View>
       </Modal>
