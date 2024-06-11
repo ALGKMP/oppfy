@@ -59,15 +59,25 @@ function createLambdaFunction(
       },
     },
     environment: {
+      // TODO: These should be passed on a case by case basis
+      PUSH_NOTIFICATION_TOPIC_ARN: process.env.PUSH_NOTIFICATION_TOPIC_ARN!,
+
+      S3_POST_BUCKET: process.env.S3_POST_BUCKET!,
+      S3_PROFILE_BUCKET: process.env.S3_PROFILE_BUCKET!,
+
+      MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
+      MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
+      MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
+
       DATABASE_PORT: process.env.DATABASE_PORT!,
       DATABASE_ENDPOINT: process.env.DATABASE_ENDPOINT!,
       DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
       DATABASE_NAME: process.env.DATABASE_NAME!,
       DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
 
-      MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
-      MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
-      MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
+      OPENSEARCH_URL: process.env.OPENSEARCH_URL!,
+
+      EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN!,
     },
   });
 }
