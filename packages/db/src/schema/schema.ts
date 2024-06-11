@@ -13,10 +13,9 @@ import {
   varbinary,
   varchar,
 } from "drizzle-orm/mysql-core";
-
 import { mySqlTable } from "./_table";
 
-// TODO: Fix inconsistent naming of the tables
+// check if the current username is the same as the new username
 
 export const user = mySqlTable("User", {
   id: varchar("id", { length: 255 }).primaryKey(),
