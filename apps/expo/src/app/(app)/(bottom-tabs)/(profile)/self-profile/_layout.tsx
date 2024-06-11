@@ -18,7 +18,6 @@ import {
 import { abbreviateNumber } from "@oppfy/utils";
 
 import { TopTabBar } from "~/components/TabBars";
-import { BaseScreenView } from "~/components/Views";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { TopTabs } from "~/layouts";
 import type { RouterOutputs } from "~/utils/api";
@@ -52,7 +51,6 @@ const ProfileLayout = () => {
   }, [refetch]);
 
   return (
-    <BaseScreenView>
       <ScrollView
         // contentContainerStyle={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
@@ -69,7 +67,6 @@ const ProfileLayout = () => {
           </>
         )}
       </ScrollView>
-    </BaseScreenView>
   );
 };
 
