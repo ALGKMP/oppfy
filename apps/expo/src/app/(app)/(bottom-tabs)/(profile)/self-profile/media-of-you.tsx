@@ -300,6 +300,13 @@ const data: DataItem[] = [
         timeAgo: "1 day ago",
         text: "Wish I was there!",
       },
+      {
+        profilePicture:
+          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
+        username: "BobM",
+        timeAgo: "3 hours ago",
+        text: "Looks amazing!",
+      },
     ],
   },
   {
@@ -777,16 +784,17 @@ const PostItem = ({ item }: { item: DataItem }) => {
             ref={sheetRef}
             snapPoints={["65%", "100%"]}
             index={0} // initial state to hide the bottom sheet
-            enablePanDownToClose={true}
+            // enablePanDownToClose={true}
             onClose={closeBottomSheet}
             footerComponent={renderFooter}
           >
             <BottomSheetFlatList
+              scrollEnabled={true}
               data={data}
               keyExtractor={(i) => data.indexOf(i).toString()}
               renderItem={renderItem}
               contentContainerStyle={{
-                flex: 1,
+                // DO NOT USE FLEX: 1 HERE
                 padding: 10,
               }}
             />
