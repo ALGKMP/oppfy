@@ -21,6 +21,7 @@ const extendedSnsSchema = SnsSchema.extend({
   Records: z.array(extendedRecordsSchema),
 });
 
+type EntityData = z.infer<typeof sharedValidators.notifications.entityData>;
 type NotificationData = z.infer<typeof extendedSnsSchema>;
 
 const lambdaHandler = async (
@@ -46,11 +47,11 @@ const lambdaHandler = async (
 
     const entityData =
       "entityId" in result.data && "entityType" in result.data
-        ? {
+        ? ({
             entityId: result.data.entityId,
             entityType: result.data.entityType,
-          }
-        : {};
+          } satisfies EntityData)
+        : undefined;
 
     messages.push({
       to: pushToken,

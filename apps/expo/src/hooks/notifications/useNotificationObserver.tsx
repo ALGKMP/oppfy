@@ -1,16 +1,26 @@
 import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
 import { Notification } from "expo-notifications";
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
+import { z } from "zod";
+
+import { sharedValidators } from "@oppfy/validators";
+
+type EntityData = z.infer<typeof sharedValidators.notifications.entityData>;
 
 const useNotificationObserver = () => {
+  const router = useRouter();
+
   useEffect(() => {
     let isMounted = true;
 
     const redirect = (notification: Notification) => {
-      const url = notification.request.content.data?.url;
-      if (url) {
-        router.push(url);
+      const { entityId, entityType } = notification.request.content
+        .data as EntityData;
+
+      switch (entityType) {
+        case "profile":
+          router.push(`/profile/${entityId}`);
       }
     };
 

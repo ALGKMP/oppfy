@@ -1,14 +1,16 @@
 import { z } from "zod";
 
-const baseNotificationData = z.object({
+export const entityData = z.object({
+  entityId: z.string(),
+  entityType: z.enum(["post", "profile", "comment"]),
+});
+
+export const baseNotificationData = z.object({
   title: z.string(),
   body: z.string(),
 });
 
-const entityNotificationData = baseNotificationData.extend({
-  entityId: z.string(),
-  entityType: z.enum(["post", "profile", "comment"]),
-});
+export const entityNotificationData = baseNotificationData.merge(entityData);
 
 export const notificationData = z.union([
   baseNotificationData,
