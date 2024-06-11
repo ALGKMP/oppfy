@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  interpolate,
   ReduceMotion,
   runOnJS,
   useAnimatedStyle,
@@ -21,6 +22,7 @@ import Animated, {
   withDelay,
   withSpring,
   withTiming,
+  useDerivedValue
 } from "react-native-reanimated";
 import { Image } from "expo-image";
 import BottomSheet, {
@@ -174,139 +176,6 @@ const data: DataItem[] = [
         timeAgo: "1 day ago",
         text: "Wish I was there!",
       },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
-        username: "AliceW",
-        timeAgo: "2 hours ago",
-        text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
-        username: "AliceW",
-        timeAgo: "2 hours ago",
-        text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
-        username: "AliceW",
-        timeAgo: "2 hours ago",
-        text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
-        username: "AliceW",
-        timeAgo: "2 hours ago",
-        text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
-        username: "AliceW",
-        timeAgo: "2 hours ago",
-        text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
-        username: "AliceW",
-        timeAgo: "2 hours ago",
-        text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
     ],
   },
   {
@@ -419,9 +288,22 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const closeBottomSheet = () => {
     setModalVisible(false);
-    sheetRef.current?.close();
-    innerSheetRef.current?.close();
   };
+
+  const animatedPosition = useSharedValue(0);
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("value", animatedPosition.value);
+  }, []);
+
+  // Logging function for animated position
+  const logPosition = (position: number) => {
+    console.log("Animated position:", position);
+  };
+
+  // Derived value to monitor and log animatedPosition changes
+  useDerivedValue(() => {
+    runOnJS(logPosition)(animatedPosition.value);
+  }, [animatedPosition.value]);
 
   const renderItem = useCallback(
     ({ item }: { item: Comment }) => (
@@ -758,34 +640,42 @@ const PostItem = ({ item }: { item: DataItem }) => {
       {/* Sheet Component */}
       <Modal
         transparent={true}
-        animationType="slide"
+        // animationType="fade"
         visible={modalVisible}
         onRequestClose={closeBottomSheet}
       >
-        <BottomSheet
-          keyboardBehavior="extend"
-          ref={sheetRef}
-          snapPoints={["65%", "100%"]}
-          index={0} // initial state to hide the bottom sheet
-          enablePanDownToClose={true}
-          onClose={closeBottomSheet}
-          footerComponent={renderFooter}
-          containerStyle={{
-            backgroundColor: "$gray9",
-          }}
+        <Animated.View
+          style={[
+            { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.5)" },
+          ]}
         >
-          <BottomSheetFlatList
-            scrollEnabled={true}
-            data={data}
-            keyExtractor={(i) => data.indexOf(i).toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{
-              // DO NOT USE FLEX: 1 HERE
-              padding: 10,
-              backgroundColor: "#282828",
+          <BottomSheet
+            keyboardBehavior="extend"
+            ref={sheetRef}
+            snapPoints={["65%", "100%"]}
+            index={0} // initial state to hide the bottom sheet
+            enablePanDownToClose={true}
+            onClose={closeBottomSheet}
+            onChange={handleSheetChanges}
+            animatedPosition={animatedPosition}
+            footerComponent={renderFooter}
+            containerStyle={{
+              backgroundColor: "$gray9",
             }}
-          />
-        </BottomSheet>
+          >
+            <BottomSheetFlatList
+              scrollEnabled={true}
+              data={data}
+              keyExtractor={(i) => data.indexOf(i).toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{
+                // DO NOT USE FLEX: 1 HERE
+                padding: 10,
+                backgroundColor: "#282828",
+              }}
+            />
+          </BottomSheet>
+        </Animated.View>
       </Modal>
     </View>
   );
