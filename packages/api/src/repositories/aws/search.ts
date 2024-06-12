@@ -2,9 +2,7 @@ import type {
   GetObjectCommandInput,
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3/dist-types/commands";
-import type { ApiResponse } from "@opensearch-project/opensearch";
 
-import { InferInsertModel, schema } from "@oppfy/db";
 import { openSearch } from "@oppfy/opensearch";
 
 import { handleOpensearchErrors } from "../../errors";
