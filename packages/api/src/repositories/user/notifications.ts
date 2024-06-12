@@ -63,6 +63,9 @@ export class NotificationsRepository {
         profileId: schema.profile.id,
         username: schema.profile.username,
         profilePictureKey: schema.profile.profilePictureKey,
+        eventType: schema.notifications.eventType,
+        entityId: schema.notifications.entityId,
+        entityType: schema.notifications.entityType,
         createdAt: schema.notifications.createdAt,
       })
       .from(schema.notifications)
