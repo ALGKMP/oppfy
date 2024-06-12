@@ -29,10 +29,20 @@ export class NotificationsService {
     return notificationSettings;
   }
 
-  // async getNotifications(userId: string) {
-  //   const notifications =
-  //     await this.notificationsRepository.getNotifications(userId);
-  // }
+  async paginateNotifications(
+    userId: string,
+    cursor: { createdAt: Date } | null = null,
+    pageSize = 10,
+  ) {
+    const notifications =
+      await this.notificationsRepository.paginateNotifications(
+        userId,
+        cursor,
+        pageSize,
+      );
+
+    return notifications;
+  }
 
   async updateNotificationSettings(
     userId: string,

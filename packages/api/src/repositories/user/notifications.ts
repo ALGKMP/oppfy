@@ -1,7 +1,6 @@
-import { eq } from "drizzle-orm";
 import type { z } from "zod";
 
-import { db, schema } from "@oppfy/db";
+import { and, asc, db, eq, gt, or, schema } from "@oppfy/db";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
@@ -54,17 +53,44 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async getNotifications(notificationId: string) {
-    // const notifications = await this.db
-    //   .select({
-    //     userId: schema.user.id,
-    //     profileId: schema.profile.id,
-    //     username: schema.profile.username,
-    //     title: schema.notifications.title,
-    //     body: schema.notifications.body,
-    //   })
-    //   .from(schema.notifications)
-    //   .innerJoin(schema.user, eq(schema.notifications.recipientId));
+  async paginateNotifications(
+    userId: string,
+    cursor: { createdAt: Date } | null = null,
+    pageSize = 10,
+  ) {
+    const notifications = await this.db
+      .select({
+        profileId: schema.profile.id,
+        username: schema.profile.username,
+        profilePictureKey: schema.profile.profilePictureKey,
+        createdAt: schema.notifications.createdAt,
+      })
+      .from(schema.notifications)
+      .innerJoin(
+        schema.profile,
+        eq(schema.notifications.recipientId, schema.user.id),
+      )
+      .where(
+        and(
+          eq(schema.notifications.recipientId, userId),
+          cursor
+            ? or(
+                gt(schema.notifications.createdAt, cursor.createdAt),
+                // and(
+                //   eq(schema.notifications.createdAt, cursor.createdAt),
+                //   gt(schema.notifications.id, cursor.id),
+                // ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(schema.notifications.createdAt),
+        asc(schema.notifications.id),
+      )
+      .limit(pageSize);
+
+    return notifications;
   }
 
   @handleDatabaseErrors

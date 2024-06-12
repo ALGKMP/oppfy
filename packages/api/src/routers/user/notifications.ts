@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { trpcValidators } from "@oppfy/validators";
 
@@ -18,13 +19,28 @@ export const notificationsRouter = createTRPCRouter({
       }
     }),
 
-  getNotifications: protectedProcedure.query(async ({ ctx }) => {
-    // try {
-    //   return await ctx.services.notifications.getNotifications(ctx.session.uid);
-    // } catch (err) {
-    //   throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-    // }
-  }),
+  paginateNotifications: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        return await ctx.services.notifications.paginateNotifications(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
 
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
     try {
