@@ -47,7 +47,7 @@ export class NotificationsService {
         const { profilePictureKey, ...rest } = notification;
 
         const profilePictureUrl = await this.s3Service.getObjectPresignedUrl({
-          Bucket: process.env.AWS_S3_BUCKET_NAME!,
+          Bucket: process.env.S3_PROFILE_BUCKET!,
           Key: profilePictureKey,
         });
 
