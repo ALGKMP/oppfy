@@ -1,33 +1,63 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { Circle, Paragraph, SizableText, View, XStack, YStack } from "tamagui";
+import { FlashList } from "@shopify/flash-list";
+import {
+  Circle,
+  Paragraph,
+  Separator,
+  SizableText,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
+import { ListHeader } from "~/features/connections/components";
 import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const Inbox = () => {
   const router = useRouter();
 
-  const { data: requestsCount } = api.request.countRequests.useQuery();
+  const { data: requestsCount, isLoading: isCountRequestsLoading } =
+    api.request.countRequests.useQuery();
 
-  const { data } = api.notifications.paginateNotifications.useInfiniteQuery(
+  const totalRequestCount =
+    (requestsCount?.followRequestCount ?? 0) +
+    (requestsCount?.friendRequestCount ?? 0);
+
+  const {
+    data: notificationsData,
+    isLoading: isNotificationsLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.notifications.paginateNotifications.useInfiniteQuery(
     {
-      pageSize: 25,
+      pageSize: 20,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
 
-  useEffect(() => {
-    console.log(data?.pages.map((page) => page.data).flat());
-  }, [data]);
+  const notificationItems = useMemo(
+    () => notificationsData?.pages.flatMap((page) => page.items) ?? [],
+    [notificationsData],
+  );
 
-  const totalRequestCount =
-    (requestsCount?.followRequestCount ?? 0) +
-    (requestsCount?.friendRequestCount ?? 0);
+  const handleOnEndReached = () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const onUserSelected = (senderId: string) => {
+    // todo: implement routing
+  };
 
   const renderRequestCount = () =>
     totalRequestCount > 99 ? (
@@ -42,6 +72,30 @@ const Inbox = () => {
         {totalRequestCount}
       </SizableText>
     );
+
+  if (isCountRequestsLoading || isNotificationsLoading) {
+    return (
+      <BaseScreenView paddingBottom={0}>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          ItemSeparatorComponent={Separator}
+          estimatedItemSize={75}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
+          renderItem={() => (
+            <VirtualizedListItem
+              loading
+              showSkeletons={{
+                imageUrl: true,
+                title: true,
+                subtitle: true,
+              }}
+            />
+          )}
+        />
+      </BaseScreenView>
+    );
+  }
 
   return (
     <BaseScreenView scrollable>
@@ -69,12 +123,27 @@ const Inbox = () => {
         )}
 
         <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
-          <YStack>
-            <SizableText size="$6" fontWeight="bold">
-              This week
-            </SizableText>
-            <VirtualizedListItem loading={false} />
-          </YStack>
+          <FlashList
+            data={notificationItems}
+            onRefresh={refetch}
+            refreshing={isNotificationsLoading}
+            estimatedItemSize={75}
+            onEndReached={handleOnEndReached}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <VirtualizedListItem
+                loading={false}
+                title={item.username ?? ""}
+                subtitle={"joined oppfy 🎉" ?? ""}
+                subtitle2="1d ago"
+                button={{
+                  text: "Follow",
+                }}
+                imageUrl={item.profilePictureUrl}
+                // onPress={() => onUserSelected(item.userId)}
+              />
+            )}
+          />
         </View>
       </YStack>
     </BaseScreenView>
