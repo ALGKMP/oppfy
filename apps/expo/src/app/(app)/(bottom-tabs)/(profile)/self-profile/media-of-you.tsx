@@ -367,33 +367,51 @@ const PostItem = ({ item }: { item: DataItem }) => {
     (props: BottomSheetFooterProps) => (
       <BottomSheetFooter {...props}>
         <XStack
+          flex={1}
+          borderTopColor={"$gray5"}
+          borderTopWidth={"$0.25"}
           padding={"$3.5"}
           paddingBottom={"$10"}
-          flex={1}
-          gap="$2"
+          gap="$2.5"
           justifyContent="center"
           alignItems="center"
           backgroundColor={"$gray4"}
         >
-          <Avatar flex={1} circular size="$4">
+          {/* Avatar */}
+          <Avatar circular size="$4" flex={1}>
             <Avatar.Image
-              accessibilityLabel="Cam"
-              src={
-                "https://images.unsplash.com/photo-1517841905240-472988babdf9"
-              }
+              accessibilityLabel="User Avatar"
+              src="https://images.unsplash.com/photo-1517841905240-472988babdf9"
             />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
-          <BottomSheetTextInput
-            placeholder="Add a comment..."
-            // onSubmitEditing={(text) => ()}
-            style={{ flex: 1, backgroundColor: "red" }}
-          />
-          <Button
-            icon={SendHorizontal}
-            onPress={() => {}}
-            borderRadius={"$10"}
-          />
+
+          {/* Text Input */}
+          <View style={{ flex: 5 }}>
+            <BottomSheetTextInput
+              placeholder="comment"
+              maxLength={100}
+              style={{
+                justifyContent: "flex-start",
+                borderWidth: 10,
+                borderColor: "#2E2E2E",
+                borderRadius: 20,
+                backgroundColor: "#2E2E2E",
+                color: "#fff", // Text color
+                flex: 2,
+              }}
+            />
+          </View>
+
+          {/* Submit Button */}
+          <View style={{ marginLeft: 8, flex: 1 }}>
+            <Button
+              icon={<Send size={"$1"} color="#fff" />}
+              backgroundColor={"$blue9"}
+              onPress={() => console.log("Submit Comment")}
+              borderRadius={"$10"}
+            />
+          </View>
         </XStack>
       </BottomSheetFooter>
     ),
