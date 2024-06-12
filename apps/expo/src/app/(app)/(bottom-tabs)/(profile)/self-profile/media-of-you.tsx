@@ -490,10 +490,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const handleComment = (key: string) => {};
 
-  const handleTextLayout = useCallback((event: LayoutChangeEvent) => {
-    const { height } = event.nativeEvent.layout;
-  }, []);
-
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
     if (item.caption.length <= maxLength || isExpanded) {
@@ -741,10 +737,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
         {/* Caption */}
         <View flex={1} alignItems="flex-start" padding="$2">
           <TouchableOpacity onPress={toggleExpanded}>
-            <Text
-              numberOfLines={isExpanded ? 0 : 2}
-              onLayout={handleTextLayout}
-            >
+            <Text numberOfLines={isExpanded ? 0 : 2}>
               {renderCaption()}
               {showViewMore && !isExpanded ? (
                 <Text color={"$gray10"}> more</Text>
