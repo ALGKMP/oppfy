@@ -32,7 +32,7 @@ import BottomSheet, {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
-import { Heart, Minus, Send } from "@tamagui/lucide-icons";
+import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
 import { set } from "lodash";
 import {
   Avatar,
@@ -344,7 +344,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const renderComment = useCallback(
     ({ item }: { item: Comment }) => (
-      <View margin={"$1.5"} padding={"$2.5"}>
+      <View padding={"$3.5"}>
         <XStack gap="$3" alignItems="center">
           <Avatar circular size="$4">
             <Avatar.Image accessibilityLabel="Cam" src={item.profilePicture} />
@@ -366,12 +366,34 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const renderFooter = useCallback(
     (props: BottomSheetFooterProps) => (
       <BottomSheetFooter {...props}>
-        <XStack flex={1} justifyContent="center" alignItems="center">
+        <XStack
+          padding={"$3.5"}
+          paddingBottom={"$10"}
+          flex={1}
+          gap="$2"
+          justifyContent="center"
+          alignItems="center"
+          backgroundColor={"$gray4"}
+        >
+          <Avatar flex={1} circular size="$4">
+            <Avatar.Image
+              accessibilityLabel="Cam"
+              src={
+                "https://images.unsplash.com/photo-1517841905240-472988babdf9"
+              }
+            />
+            <Avatar.Fallback backgroundColor="$blue10" />
+          </Avatar>
           <BottomSheetTextInput
             placeholder="Add a comment..."
             // onSubmitEditing={(text) => ()}
+            style={{ flex: 1, backgroundColor: "red" }}
           />
-          <Button onPress={() => {}}> Post</Button>
+          <Button
+            icon={SendHorizontal}
+            onPress={() => {}}
+            borderRadius={"$10"}
+          />
         </XStack>
       </BottomSheetFooter>
     ),
@@ -708,7 +730,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
               renderItem={renderComment}
               contentContainerStyle={{
                 // DO NOT USE FLEX: 1 HERE
-                padding: 10,
                 backgroundColor: "#282828",
               }}
             />
