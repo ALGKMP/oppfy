@@ -97,14 +97,25 @@ export const profile = mySqlTable("Profile", {
 
 export const notifications = mySqlTable("Notifications", {
   id: serial("id").primaryKey(),
+
+  senderId: varchar("senderId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
   recipientId: varchar("recipientId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
 
   read: boolean("read").default(false).notNull(),
 
-  title: varchar("title", { length: 255 }).notNull(),
-  body: text("body").notNull(),
+  eventType: mysqlEnum("eventType", [
+    "like",
+    "post",
+    "comment",
+    "follow",
+    "friend",
+    "followRequest",
+    "friendRequest",
+  ]).notNull(),
 
   entityId: varchar("entityId", { length: 255 }),
   entityType: mysqlEnum("type", ["post", "profile", "comment"]),
