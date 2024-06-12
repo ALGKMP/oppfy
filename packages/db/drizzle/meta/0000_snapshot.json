@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "ad70db2f-0274-46aa-9957-79a225606b6c",
+  "id": "d7277962-c5d2-4262-9b66-3d47c834e253",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Blocked": {
@@ -34,6 +34,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         }
       },
@@ -43,8 +44,12 @@
           "name": "Blocked_userId_User_id_fk",
           "tableFrom": "Blocked",
           "tableTo": "User",
-          "columnsFrom": ["userId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -52,8 +57,12 @@
           "name": "Blocked_blockedUserId_User_id_fk",
           "tableFrom": "Blocked",
           "tableTo": "User",
-          "columnsFrom": ["blockedUserId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "blockedUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -61,7 +70,9 @@
       "compositePrimaryKeys": {
         "Blocked_id": {
           "name": "Blocked_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -103,6 +114,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
@@ -120,8 +132,12 @@
           "name": "Comment_user_User_id_fk",
           "tableFrom": "Comment",
           "tableTo": "User",
-          "columnsFrom": ["user"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -129,8 +145,12 @@
           "name": "Comment_postId_Post_id_fk",
           "tableFrom": "Comment",
           "tableTo": "Post",
-          "columnsFrom": ["postId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "postId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -138,38 +158,19 @@
       "compositePrimaryKeys": {
         "Comment_id": {
           "name": "Comment_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
     },
-    "FriendRequest": {
-      "name": "FriendRequest",
+    "Contact": {
+      "name": "Contact",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "requesterId": {
-          "name": "requesterId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "requestedId": {
-          "name": "requestedId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "enum('pending','accepted','declined')",
+          "type": "varbinary(512)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -180,6 +181,53 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "Contact_id": {
+          "name": "Contact_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "FollowRequest": {
+      "name": "FollowRequest",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "senderId": {
+          "name": "senderId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recipientId": {
+          "name": "recipientId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
@@ -193,29 +241,39 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "FriendRequest_requesterId_User_id_fk": {
-          "name": "FriendRequest_requesterId_User_id_fk",
-          "tableFrom": "FriendRequest",
+        "FollowRequest_senderId_User_id_fk": {
+          "name": "FollowRequest_senderId_User_id_fk",
+          "tableFrom": "FollowRequest",
           "tableTo": "User",
-          "columnsFrom": ["requesterId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "senderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "FriendRequest_requestedId_User_id_fk": {
-          "name": "FriendRequest_requestedId_User_id_fk",
-          "tableFrom": "FriendRequest",
+        "FollowRequest_recipientId_User_id_fk": {
+          "name": "FollowRequest_recipientId_User_id_fk",
+          "tableFrom": "FollowRequest",
           "tableTo": "User",
-          "columnsFrom": ["requestedId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "recipientId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "FriendRequest_id": {
-          "name": "FriendRequest_id",
-          "columns": ["id"]
+        "FollowRequest_id": {
+          "name": "FollowRequest_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -230,15 +288,15 @@
           "notNull": true,
           "autoincrement": true
         },
-        "followerId": {
-          "name": "followerId",
+        "senderId": {
+          "name": "senderId",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "followedId": {
-          "name": "followedId",
+        "recipientId": {
+          "name": "recipientId",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
@@ -250,26 +308,35 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "Follower_followerId_User_id_fk": {
-          "name": "Follower_followerId_User_id_fk",
+        "Follower_senderId_User_id_fk": {
+          "name": "Follower_senderId_User_id_fk",
           "tableFrom": "Follower",
           "tableTo": "User",
-          "columnsFrom": ["followerId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "senderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "Follower_followedId_User_id_fk": {
-          "name": "Follower_followedId_User_id_fk",
+        "Follower_recipientId_User_id_fk": {
+          "name": "Follower_recipientId_User_id_fk",
           "tableFrom": "Follower",
           "tableTo": "User",
-          "columnsFrom": ["followedId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "recipientId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -277,7 +344,9 @@
       "compositePrimaryKeys": {
         "Follower_id": {
           "name": "Follower_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -312,6 +381,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         }
       },
@@ -321,8 +391,12 @@
           "name": "Friend_userId1_User_id_fk",
           "tableFrom": "Friend",
           "tableTo": "User",
-          "columnsFrom": ["userId1"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "userId1"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -330,8 +404,12 @@
           "name": "Friend_userId2_User_id_fk",
           "tableFrom": "Friend",
           "tableTo": "User",
-          "columnsFrom": ["userId2"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "userId2"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -339,7 +417,90 @@
       "compositePrimaryKeys": {
         "Friend_id": {
           "name": "Friend_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "FriendRequest": {
+      "name": "FriendRequest",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "senderId": {
+          "name": "senderId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recipientId": {
+          "name": "recipientId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "FriendRequest_senderId_User_id_fk": {
+          "name": "FriendRequest_senderId_User_id_fk",
+          "tableFrom": "FriendRequest",
+          "tableTo": "User",
+          "columnsFrom": [
+            "senderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "FriendRequest_recipientId_User_id_fk": {
+          "name": "FriendRequest_recipientId_User_id_fk",
+          "tableFrom": "FriendRequest",
+          "tableTo": "User",
+          "columnsFrom": [
+            "recipientId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "FriendRequest_id": {
+          "name": "FriendRequest_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -374,6 +535,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         }
       },
@@ -383,8 +545,12 @@
           "name": "Like_postId_Post_id_fk",
           "tableFrom": "Like",
           "tableTo": "Post",
-          "columnsFrom": ["postId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "postId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -392,8 +558,12 @@
           "name": "Like_user_User_id_fk",
           "tableFrom": "Like",
           "tableTo": "User",
-          "columnsFrom": ["user"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -401,7 +571,9 @@
       "compositePrimaryKeys": {
         "Like_id": {
           "name": "Like_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -424,6 +596,14 @@
           "autoincrement": false,
           "default": true
         },
+        "likes": {
+          "name": "likes",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
         "mentions": {
           "name": "mentions",
           "type": "boolean",
@@ -440,8 +620,8 @@
           "autoincrement": false,
           "default": true
         },
-        "likes": {
-          "name": "likes",
+        "followRequests": {
+          "name": "followRequests",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -462,6 +642,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
@@ -478,7 +659,126 @@
       "compositePrimaryKeys": {
         "NotificationSettings_id": {
           "name": "NotificationSettings_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "Notifications": {
+      "name": "Notifications",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "senderId": {
+          "name": "senderId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "recipientId": {
+          "name": "recipientId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "read": {
+          "name": "read",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "eventType": {
+          "name": "eventType",
+          "type": "enum('like','post','comment','follow','friend','followRequest','friendRequest')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "test": {
+          "name": "test",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "entityId": {
+          "name": "entityId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "enum('post','profile','comment')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Notifications_senderId_User_id_fk": {
+          "name": "Notifications_senderId_User_id_fk",
+          "tableFrom": "Notifications",
+          "tableTo": "User",
+          "columnsFrom": [
+            "senderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "Notifications_recipientId_User_id_fk": {
+          "name": "Notifications_recipientId_User_id_fk",
+          "tableFrom": "Notifications",
+          "tableTo": "User",
+          "columnsFrom": [
+            "recipientId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "Notifications_id": {
+          "name": "Notifications_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -507,12 +807,13 @@
           "notNull": true,
           "autoincrement": false
         },
-        "body": {
-          "name": "body",
+        "caption": {
+          "name": "caption",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "('')"
         },
         "url": {
           "name": "url",
@@ -521,12 +822,21 @@
           "notNull": true,
           "autoincrement": false
         },
+        "mediaType": {
+          "name": "mediaType",
+          "type": "enum('image','video')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'image'"
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
@@ -544,8 +854,12 @@
           "name": "Post_author_User_id_fk",
           "tableFrom": "Post",
           "tableTo": "User",
-          "columnsFrom": ["author"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "author"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -553,8 +867,12 @@
           "name": "Post_recipient_User_id_fk",
           "tableFrom": "Post",
           "tableTo": "User",
-          "columnsFrom": ["recipient"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "recipient"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -562,7 +880,9 @@
       "compositePrimaryKeys": {
         "Post_id": {
           "name": "Post_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -614,6 +934,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
@@ -631,8 +952,12 @@
           "name": "PostStats_postId_Post_id_fk",
           "tableFrom": "PostStats",
           "tableTo": "Post",
-          "columnsFrom": ["postId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "postId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -640,7 +965,9 @@
       "compositePrimaryKeys": {
         "PostStats_id": {
           "name": "PostStats_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -654,6 +981,13 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": true
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "fullName": {
           "name": "fullName",
@@ -676,66 +1010,13 @@
           "notNull": false,
           "autoincrement": false
         },
-        "profilePicture": {
-          "name": "profilePicture",
-          "type": "bigint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "onUpdate": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "Profile_profilePicture_ProfilePicture_id_fk": {
-          "name": "Profile_profilePicture_ProfilePicture_id_fk",
-          "tableFrom": "Profile",
-          "tableTo": "ProfilePicture",
-          "columnsFrom": ["profilePicture"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "Profile_id": {
-          "name": "Profile_id",
-          "columns": ["id"]
-        }
-      },
-      "uniqueConstraints": {}
-    },
-    "ProfilePicture": {
-      "name": "ProfilePicture",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "url": {
-          "name": "url",
+        "profilePictureKey": {
+          "name": "profilePictureKey",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'profile-pictures/default.jpg'"
         },
         "createdAt": {
           "name": "createdAt",
@@ -743,6 +1024,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
@@ -757,9 +1039,178 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "ProfilePicture_id": {
-          "name": "ProfilePicture_id",
-          "columns": ["id"]
+        "Profile_id": {
+          "name": "Profile_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "Profile_username_unique": {
+          "name": "Profile_username_unique",
+          "columns": [
+            "username"
+          ]
+        }
+      }
+    },
+    "ReportPost": {
+      "name": "ReportPost",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "postId": {
+          "name": "postId",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reporterUserId": {
+          "name": "reporterUserId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "enum('It offends me','Nudity or sexual activity','Hate speech or symbols','Bullying or harassment')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ReportPost_postId_Post_id_fk": {
+          "name": "ReportPost_postId_Post_id_fk",
+          "tableFrom": "ReportPost",
+          "tableTo": "Post",
+          "columnsFrom": [
+            "postId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ReportPost_reporterUserId_User_id_fk": {
+          "name": "ReportPost_reporterUserId_User_id_fk",
+          "tableFrom": "ReportPost",
+          "tableTo": "User",
+          "columnsFrom": [
+            "reporterUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ReportPost_id": {
+          "name": "ReportPost_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "ReportProfile": {
+      "name": "ReportProfile",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "targetUserId": {
+          "name": "targetUserId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reporterUsdId": {
+          "name": "reporterUsdId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "enum('Posting explicit content','Under the age of 13','Catfish account','Scam/spam account')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ReportProfile_targetUserId_User_id_fk": {
+          "name": "ReportProfile_targetUserId_User_id_fk",
+          "tableFrom": "ReportProfile",
+          "tableTo": "User",
+          "columnsFrom": [
+            "targetUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "ReportProfile_reporterUsdId_User_id_fk": {
+          "name": "ReportProfile_reporterUsdId_User_id_fk",
+          "tableFrom": "ReportProfile",
+          "tableTo": "User",
+          "columnsFrom": [
+            "reporterUsdId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ReportProfile_id": {
+          "name": "ReportProfile_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "uniqueConstraints": {}
@@ -781,13 +1232,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "username": {
-          "name": "username",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "notificationSettingsId": {
           "name": "notificationSettingsId",
           "type": "bigint unsigned",
@@ -803,12 +1247,20 @@
           "autoincrement": false,
           "default": "'public'"
         },
+        "pushToken": {
+          "name": "pushToken",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
@@ -826,8 +1278,12 @@
           "name": "User_profile_Profile_id_fk",
           "tableFrom": "User",
           "tableTo": "Profile",
-          "columnsFrom": ["profile"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -835,8 +1291,12 @@
           "name": "User_notificationSettingsId_NotificationSettings_id_fk",
           "tableFrom": "User",
           "tableTo": "NotificationSettings",
-          "columnsFrom": ["notificationSettingsId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "notificationSettingsId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -844,36 +1304,26 @@
       "compositePrimaryKeys": {
         "User_id": {
           "name": "User_id",
-          "columns": ["id"]
+          "columns": [
+            "id"
+          ]
         }
       },
-      "uniqueConstraints": {
-        "User_username_unique": {
-          "name": "User_username_unique",
-          "columns": ["username"]
-        }
-      }
+      "uniqueConstraints": {}
     },
-    "VerificationToken": {
-      "name": "VerificationToken",
+    "UserContact": {
+      "name": "UserContact",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "token": {
-          "name": "token",
+        "userId": {
+          "name": "userId",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "expires": {
-          "name": "expires",
-          "type": "datetime",
+        "contactId": {
+          "name": "contactId",
+          "type": "varbinary(512)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -884,26 +1334,51 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+          "onUpdate": true,
           "default": "CURRENT_TIMESTAMP"
         }
       },
       "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "VerificationToken_id": {
-          "name": "VerificationToken_id",
-          "columns": ["id"]
+      "foreignKeys": {
+        "UserContact_userId_User_id_fk": {
+          "name": "UserContact_userId_User_id_fk",
+          "tableFrom": "UserContact",
+          "tableTo": "User",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "UserContact_contactId_Contact_id_fk": {
+          "name": "UserContact_contactId_Contact_id_fk",
+          "tableFrom": "UserContact",
+          "tableTo": "Contact",
+          "columnsFrom": [
+            "contactId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
-      "uniqueConstraints": {
-        "VerificationToken_token_unique": {
-          "name": "VerificationToken_token_unique",
-          "columns": ["token"]
+      "compositePrimaryKeys": {
+        "UserContact_userId_contactId_pk": {
+          "name": "UserContact_userId_contactId_pk",
+          "columns": [
+            "userId",
+            "contactId"
+          ]
         }
-      }
+      },
+      "uniqueConstraints": {}
     }
   },
-  "schemas": {},
   "_meta": {
     "schemas": {},
     "tables": {},

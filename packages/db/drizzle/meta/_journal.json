@@ -1,33 +1,19 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "mysql",
   "entries": [
     {
       "idx": 0,
       "version": "5",
-      "when": 1715020760021,
-      "tag": "0000_public_pyro",
+      "when": 1718158147739,
+      "tag": "0000_orange_whirlwind",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1715121686251,
-      "tag": "0001_bouncy_spacker_dave",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1715892740617,
-      "tag": "0002_wise_mattie_franklin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1716005098508,
-      "tag": "0003_funny_calypso",
+      "when": 1718158171345,
+      "tag": "0001_simple_cyclops",
       "breakpoints": true
     }
   ]
