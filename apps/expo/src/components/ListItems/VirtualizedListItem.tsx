@@ -1,6 +1,6 @@
 import type { FunctionComponent } from "react";
 import React, { useMemo } from "react";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import debounce from "lodash/debounce";
 import { Skeleton } from "moti/skeleton";
 import type { ThemeName } from "tamagui";
@@ -65,9 +65,11 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
       <XStack alignItems="center" paddingVertical="$2">
         <XStack flex={1} alignItems="center" gap="$3">
           {props.loading && props.showSkeletons?.imageUrl ? (
-            <Skeleton radius={100}>
-              <Avatar circular size="$5" />
-            </Skeleton>
+            <View>
+              <Skeleton radius={100}>
+                <Avatar circular size="$5" />
+              </Skeleton>
+            </View>
           ) : !props.loading && props.imageUrl ? (
             <Avatar circular size="$5">
               <Avatar.Image src={props.imageUrl} />
