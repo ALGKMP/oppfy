@@ -7,12 +7,14 @@ import type {
   SnsNotificationData,
   StoreNotificationData,
 } from "../../repositories/user/notifications";
+import { S3Service } from "../aws/s3";
 import { UserService } from "./user";
 
 export class NotificationsService {
   private notificationsRepository = new NotificationsRepository();
 
   private userService = new UserService();
+  private s3Service = new S3Service();
 
   async getNotificationSettings(userId: string) {
     const user = await this.userService.getUser(userId);
@@ -40,8 +42,24 @@ export class NotificationsService {
       pageSize,
     );
 
+    const dataWithProfilePictures = await Promise.all(
+      data.map(async (notification) => {
+        const { profilePictureKey, ...rest } = notification;
+
+        const profilePictureUrl = await this.s3Service.getObjectPresignedUrl({
+          Bucket: process.env.AWS_S3_BUCKET_NAME!,
+          Key: profilePictureKey,
+        });
+
+        return {
+          ...rest,
+          profilePictureUrl,
+        };
+      }),
+    );
+
     return {
-      data,
+      data: dataWithProfilePictures,
       nextCursor: data.length
         ? data[data.length - 1]?.createdAt.toISOString()
         : null,
