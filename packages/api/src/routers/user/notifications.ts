@@ -18,6 +18,14 @@ export const notificationsRouter = createTRPCRouter({
       }
     }),
 
+  getNotifications: protectedProcedure.query(async ({ ctx }) => {
+    // try {
+    //   return await ctx.services.notifications.getNotifications(ctx.session.uid);
+    // } catch (err) {
+    //   throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    // }
+  }),
+
   getNotificationSettings: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.notifications.getNotificationSettings(
