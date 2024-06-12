@@ -363,13 +363,43 @@ const PostItem = ({ item }: { item: DataItem }) => {
     [],
   );
 
-  const renderFooter = useCallback(
-    (props: BottomSheetFooterProps) => (
+  const emojiList = ["❤️", "🔥", "😂", "😭", "😢", "😲", "😍"];
+  const renderFooter = useCallback((props: BottomSheetFooterProps) => {
+    const [inputValue, setInputValue] = useState("");
+
+    const handleEmojiPress = (emoji: string) => {
+      setInputValue((prev) => prev + emoji);
+    };
+
+    return (
       <BottomSheetFooter {...props}>
+        {/* Emoji Picker */}
         <XStack
           flex={1}
+          flexGrow={1}
           borderTopColor={"$gray5"}
           borderTopWidth={"$0.25"}
+          justifyContent="space-evenly"
+          alignItems="center"
+          paddingHorizontal={16}
+          paddingTop={8}
+          paddingBottom={4}
+          backgroundColor={"$gray4"}
+        >
+          {emojiList.map((emoji) => (
+            <TouchableOpacity
+              key={emoji}
+              onPress={() => handleEmojiPress(emoji)}
+              // style={styles.emojiButton}
+            >
+              <SizableText size={"$8"}>{emoji}</SizableText>
+            </TouchableOpacity>
+          ))}
+        </XStack>
+
+        {/* Comment Input Section */}
+        <XStack
+          flex={1}
           padding={"$3.5"}
           paddingBottom={"$6"}
           gap="$2.5"
@@ -389,8 +419,10 @@ const PostItem = ({ item }: { item: DataItem }) => {
           {/* Text Input */}
           <View style={{ flex: 5 }}>
             <BottomSheetTextInput
-              placeholder="comment"
+              placeholder="Comment"
               maxLength={100}
+              value={inputValue}
+              onChangeText={setInputValue}
               style={{
                 fontWeight: "bold",
                 justifyContent: "flex-start",
@@ -421,9 +453,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
           </View>
         </XStack>
       </BottomSheetFooter>
-    ),
-    [],
-  );
+    );
+  }, []);
 
   const renderHeader = useCallback(() => {
     return (
