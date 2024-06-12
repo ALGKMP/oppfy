@@ -363,7 +363,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
     [],
   );
 
-  const emojiList = ["❤️", "🔥", "😂", "😭", "😢", "😲", "😍"];
+  const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
   const renderFooter = useCallback((props: BottomSheetFooterProps) => {
     const [inputValue, setInputValue] = useState("");
 
