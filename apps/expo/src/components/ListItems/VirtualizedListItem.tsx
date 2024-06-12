@@ -80,7 +80,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <SizableText>Loading...</SizableText>
               </Skeleton>
             ) : !props.loading && props.title ? (
-              <SizableText>{props.title}</SizableText>
+              <SizableText lineHeight={0}>{props.title}</SizableText>
             ) : null}
 
             {props.loading && props.showSkeletons?.subtitle ? (
@@ -88,7 +88,9 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <SizableText>Loading...</SizableText>
               </Skeleton>
             ) : !props.loading && props.subtitle ? (
-              <SizableText theme="alt1">{props.subtitle}</SizableText>
+              <SizableText theme="alt1" lineHeight={0}>
+                {props.subtitle}
+              </SizableText>
             ) : null}
 
             {props.loading && props.showSkeletons?.subtitle2 ? (
@@ -96,7 +98,9 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <SizableText>Loading...</SizableText>
               </Skeleton>
             ) : !props.loading && props.subtitle2 ? (
-              <SizableText theme="alt1">{props.subtitle2}</SizableText>
+              <SizableText theme="alt1" lineHeight={0}>
+                {props.subtitle2}
+              </SizableText>
             ) : null}
           </YStack>
         </XStack>
@@ -105,8 +109,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           {props.loading && props.showSkeletons?.button ? (
             <Skeleton>
               <Button
-                size={isTwoButtons ? "$3" : "$4"}
-                width={isTwoButtons ? 85 : undefined}
+                size={isTwoButtons ? "$3.5" : "$3.5"}
+                width={isTwoButtons ? 85 : 100}
               >
                 Loading...
               </Button>
@@ -114,8 +118,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           ) : !props.loading && props.button ? (
             isButtonProps(props.button) ? (
               <Button
-                size={isTwoButtons ? "$3.5" : "$4"}
-                width={isTwoButtons ? 85 : undefined}
+                size={isTwoButtons ? "$3.5" : "$3.5"}
+                width={isTwoButtons ? 85 : 100}
                 onPress={
                   props.button.onPress
                     ? debounce(props.button.onPress, 300)
@@ -133,8 +137,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           {props.loading && props.showSkeletons?.button2 ? (
             <Skeleton>
               <Button
-                size={isTwoButtons ? "$3" : "$4"}
-                width={isTwoButtons ? 85 : undefined}
+                size={isTwoButtons ? "$3.5" : "$3.5"}
+                width={isTwoButtons ? 85 : 100}
               >
                 Loading...
               </Button>
@@ -142,8 +146,8 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           ) : !props.loading && props.button2 ? (
             isButtonProps(props.button2) ? (
               <Button
-                size={isTwoButtons ? "$3.5" : "$4"}
-                width={isTwoButtons ? 85 : undefined}
+                size={isTwoButtons ? "$3.5" : "$3.5"}
+                width={isTwoButtons ? 85 : 100}
                 onPress={
                   props.button2.onPress
                     ? debounce(props.button2.onPress, 300)
