@@ -89,6 +89,8 @@ const Inbox = () => {
                 imageUrl: true,
                 title: true,
                 subtitle: true,
+                subtitle2: true,
+                button: true,
               }}
             />
           )}
@@ -122,7 +124,12 @@ const Inbox = () => {
           </TouchableOpacity>
         )}
 
-        <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
+        <View
+          paddingVertical="$2"
+          paddingHorizontal="$3"
+          borderRadius="$6"
+          backgroundColor="$gray2"
+        >
           <FlashList
             data={notificationItems}
             onRefresh={refetch}
