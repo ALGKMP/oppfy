@@ -371,7 +371,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
           borderTopColor={"$gray5"}
           borderTopWidth={"$0.25"}
           padding={"$3.5"}
-          paddingBottom={"$10"}
+          paddingBottom={"$6"}
           gap="$2.5"
           justifyContent="center"
           alignItems="center"
@@ -404,13 +404,27 @@ const PostItem = ({ item }: { item: DataItem }) => {
           </View>
 
           {/* Submit Button */}
-          <View style={{ marginLeft: 8, flex: 1 }}>
+          {/* <View style={{ marginLeft: 8, flex: 1 }}>
             <Button
               icon={<Send size={"$1"} color="#fff" />}
               backgroundColor={"$blue9"}
               onPress={() => console.log("Submit Comment")}
               borderRadius={"$10"}
             />
+          </View> */}
+          <View flex={1} justifyContent="center">
+            <TouchableOpacity>
+              <View
+                flex={1}
+                justifyContent="center"
+                alignItems="center"
+                padding="$2"
+                borderRadius={"$7"}
+                backgroundColor={"$blue9"}
+              >
+                <SendHorizontal size={24} padding={"$3"} color="$gray12" />
+              </View>
+            </TouchableOpacity>
           </View>
         </XStack>
       </BottomSheetFooter>
@@ -678,7 +692,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
                 borderRadius={"$7"}
                 backgroundColor={"$gray5"}
               >
-                <Send size={24} padding={"$3"} color="$gray12" />
+                <SendHorizontal size={24} padding={"$3"} color="$gray12" />
               </View>
             </TouchableOpacity>
           </View>
