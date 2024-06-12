@@ -232,10 +232,7 @@ const CameraPage = () => {
       <StatusBarBlurBackground />
 
       <View style={styles.leftButtonRow}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.navigate("/self-profile/media-of-you/")}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
           <Ionicons name="close" color="white" size={24} />
         </TouchableOpacity>
       </View>
