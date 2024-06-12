@@ -11,7 +11,7 @@ const eventType = z.enum([
   "friendRequest",
 ]);
 
-const entityData = z.object({
+export const entityData = z.object({
   entityId: z.string(),
   entityType,
 });
@@ -30,8 +30,6 @@ export const notificationData = z.union([
 const baseSendNotificationData = z.object({
   title: z.string(),
   body: z.string(),
-
-  eventType,
 });
 
 const entitySendNotificationData = baseSendNotificationData.extend({

@@ -75,7 +75,6 @@ export class FollowService {
       title: "New follower",
       body: `${profile.username} is now following you.`,
 
-      eventType: "follow",
       entityType: "profile",
       entityId: String(sender.profileId),
     });
