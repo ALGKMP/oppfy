@@ -7,11 +7,15 @@ import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode, handleDatabaseErrors } from "../../errors";
 
-export type NotificationData = z.infer<
+export type StoreNotificationData = z.infer<
   typeof sharedValidators.notifications.notificationData
 >;
 
-type SnsNotificationData = z.infer<
+export type SendNotificationData = z.infer<
+  typeof sharedValidators.notifications.sendNotificationData
+>;
+
+export type SnsNotificationData = z.infer<
   typeof sharedValidators.notifications.snsNotificationData
 >;
 
@@ -50,6 +54,20 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
+  async getNotifications(notificationId: string) {
+    // const notifications = await this.db
+    //   .select({
+    //     userId: schema.user.id,
+    //     profileId: schema.profile.id,
+    //     username: schema.profile.username,
+    //     title: schema.notifications.title,
+    //     body: schema.notifications.body,
+    //   })
+    //   .from(schema.notifications)
+    //   .innerJoin(schema.user, eq(schema.notifications.recipientId));
+  }
+
+  @handleDatabaseErrors
   async updateNotificationSettings(
     notificationSettingsId: number,
     notificationSettings: NotificationSettings,
@@ -63,34 +81,42 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async storeNotification(userId: string, notificationData: NotificationData) {
-    await this.db
-      .insert(schema.notifications)
-      .values({ recipientId: userId, ...notificationData });
+  async storeNotification(
+    senderId: string,
+    recipientId: string,
+    notificationData: StoreNotificationData,
+  ) {
+    await this.db.insert(schema.notifications).values({
+      senderId,
+      recipientId,
+      ...notificationData,
+    });
   }
 
-  async sendNotification(userId: string, notificationData: NotificationData) {
-    // get the pushToken
-    const pushToken = await this._getPushToken(userId);
-
-    if (pushToken === null) {
-      throw new DomainError(ErrorCode.UNREGISTERED_PUSH_TOKEN);
-    }
+  async sendNotification(
+    pushToken: string,
+    senderId: string,
+    recipientId: string,
+    notificationData: SendNotificationData,
+  ) {
+    const message = {
+      senderId,
+      recipientId,
+      pushToken,
+      ...notificationData,
+    } satisfies SnsNotificationData;
 
     const params = {
-      Message: JSON.stringify({
-        pushToken,
-        ...notificationData,
-      } satisfies SnsNotificationData),
       Subject: "New notification",
       TopicArn: process.env.PUSH_NOTIFICATION_TOPIC_ARN,
+      Message: JSON.stringify(message),
     };
 
     await this.sns.send(new PublishCommand(params));
   }
 
   @handleDatabaseErrors
-  private async _getPushToken(userId: string) {
+  async getPushToken(userId: string) {
     const user = await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
       columns: {
