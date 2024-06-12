@@ -1,6 +1,11 @@
 import { useCallback, useLayoutEffect, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import {
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
@@ -116,6 +121,7 @@ type ProfileProps = LoadingProps | LoadedProps;
 
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
+  const segments = useSegments();
 
   const utils = api.useUtils();
 
@@ -617,7 +623,7 @@ const Profile = (props: ProfileProps) => {
             onPress={() =>
               // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
-                pathname: "/(search)/connections/[user-id]",
+                pathname: `/${segments[2]}/connections/[user-id]`,
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,
@@ -639,7 +645,7 @@ const Profile = (props: ProfileProps) => {
             onPress={() =>
               // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
-                pathname: "/(search)/connections/[user-id]",
+                pathname: `/${segments[2]}/connections/[user-id]`,
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,
@@ -660,7 +666,7 @@ const Profile = (props: ProfileProps) => {
             onPress={() =>
               // @ts-expect-error: Experimental typed routes dont support layouts yet
               router.push({
-                pathname: "/(search)/connections/[user-id]",
+                pathname: `/${segments[2]}/connections/[user-id]`,
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,
