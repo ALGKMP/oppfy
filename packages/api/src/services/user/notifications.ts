@@ -34,14 +34,18 @@ export class NotificationsService {
     cursor: { createdAt: Date } | null = null,
     pageSize = 10,
   ) {
-    const notifications =
-      await this.notificationsRepository.paginateNotifications(
-        userId,
-        cursor,
-        pageSize,
-      );
+    const data = await this.notificationsRepository.paginateNotifications(
+      userId,
+      cursor,
+      pageSize,
+    );
 
-    return notifications;
+    return {
+      data,
+      nextCursor: data.length
+        ? data[data.length - 1]?.createdAt.toISOString()
+        : null,
+    };
   }
 
   async updateNotificationSettings(
