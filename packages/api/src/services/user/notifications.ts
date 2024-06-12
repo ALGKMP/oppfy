@@ -1,8 +1,11 @@
 import { DomainError, ErrorCode } from "../../errors";
+import { SnsRepository } from "../../repositories/aws/sns";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
-  NotificationData,
   NotificationSettings,
+  SendNotificationData,
+  SnsNotificationData,
+  StoreNotificationData,
 } from "../../repositories/user/notifications";
 import { UserService } from "./user";
 
@@ -26,6 +29,11 @@ export class NotificationsService {
     return notificationSettings;
   }
 
+  // async getNotifications(userId: string) {
+  //   const notifications =
+  //     await this.notificationsRepository.getNotifications(userId);
+  // }
+
   async updateNotificationSettings(
     userId: string,
     newNotificationSettings: NotificationSettings,
@@ -46,16 +54,34 @@ export class NotificationsService {
     );
   }
 
-  async storeNotification(userId: string, notificationData: NotificationData) {
+  async storeNotification(
+    senderId: string,
+    recipientId: string,
+    notificationData: StoreNotificationData,
+  ) {
     await this.notificationsRepository.storeNotification(
-      userId,
+      senderId,
+      recipientId,
       notificationData,
     );
   }
 
-  async sendNotification(userId: string, notificationData: NotificationData) {
+  async sendNotification(
+    senderId: string,
+    recipientId: string,
+    notificationData: SendNotificationData,
+  ) {
+    const pushToken =
+      await this.notificationsRepository.getPushToken(recipientId);
+
+    if (pushToken === null) {
+      throw new DomainError(ErrorCode.PUSH_TOKEN_NOT_FOUND);
+    }
+
     await this.notificationsRepository.sendNotification(
-      userId,
+      pushToken,
+      senderId,
+      recipientId,
       notificationData,
     );
   }
