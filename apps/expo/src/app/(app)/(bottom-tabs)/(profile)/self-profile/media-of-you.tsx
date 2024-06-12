@@ -381,9 +381,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
           borderTopWidth={"$0.25"}
           justifyContent="space-evenly"
           alignItems="center"
-          paddingHorizontal={16}
-          paddingTop={8}
-          paddingBottom={4}
+          paddingTop={"$3"}
           backgroundColor={"$gray4"}
         >
           {emojiList.map((emoji) => (
