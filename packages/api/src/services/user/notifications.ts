@@ -36,14 +36,14 @@ export class NotificationsService {
     cursor: { createdAt: Date } | null = null,
     pageSize = 10,
   ) {
-    const data = await this.notificationsRepository.paginateNotifications(
+    const items = await this.notificationsRepository.paginateNotifications(
       userId,
       cursor,
       pageSize,
     );
 
-    const dataWithProfilePictures = await Promise.all(
-      data.map(async (notification) => {
+    const itemsWithProfilePictureUrls = await Promise.all(
+      items.map(async (notification) => {
         const { profilePictureKey, ...rest } = notification;
 
         const profilePictureUrl = await this.s3Service.getObjectPresignedUrl({
@@ -59,9 +59,9 @@ export class NotificationsService {
     );
 
     return {
-      data: dataWithProfilePictures,
-      nextCursor: data.length
-        ? data[data.length - 1]?.createdAt.toISOString()
+      items: itemsWithProfilePictureUrls,
+      nextCursor: items.length
+        ? items[items.length - 1]?.createdAt.toISOString()
         : null,
     };
   }
