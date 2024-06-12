@@ -67,6 +67,10 @@ export class NotificationsRepository {
       })
       .from(schema.notifications)
       .innerJoin(
+        schema.user,
+        eq(schema.notifications.recipientId, schema.user.id),
+      )
+      .innerJoin(
         schema.profile,
         eq(schema.notifications.recipientId, schema.user.id),
       )
