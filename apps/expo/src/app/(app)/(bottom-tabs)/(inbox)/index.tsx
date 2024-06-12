@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Circle, Paragraph, SizableText, View, XStack, YStack } from "tamagui";
@@ -11,6 +11,19 @@ const Inbox = () => {
   const router = useRouter();
 
   const { data: requestsCount } = api.request.countRequests.useQuery();
+
+  const { data } = api.notifications.paginateNotifications.useInfiniteQuery(
+    {
+      pageSize: 25,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  useEffect(() => {
+    console.log(data?.pages.map((page) => page.data).flat());
+  }, [data]);
 
   const totalRequestCount =
     (requestsCount?.followRequestCount ?? 0) +
