@@ -392,6 +392,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
               placeholder="comment"
               maxLength={100}
               style={{
+                fontWeight: "bold",
                 justifyContent: "flex-start",
                 borderWidth: 10,
                 borderColor: "#2E2E2E",
@@ -404,14 +405,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
           </View>
 
           {/* Submit Button */}
-          {/* <View style={{ marginLeft: 8, flex: 1 }}>
-            <Button
-              icon={<Send size={"$1"} color="#fff" />}
-              backgroundColor={"$blue9"}
-              onPress={() => console.log("Submit Comment")}
-              borderRadius={"$10"}
-            />
-          </View> */}
           <View flex={1} justifyContent="center">
             <TouchableOpacity>
               <View
