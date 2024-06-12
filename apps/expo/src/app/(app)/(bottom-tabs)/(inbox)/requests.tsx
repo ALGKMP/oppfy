@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Button, Separator, Spacer, Text, View, YStack } from "tamagui";
 
@@ -6,11 +7,11 @@ import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
 import { ListHeader } from "~/features/connections/components";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const PAGE_SIZE = 5;
 
 const Requests = () => {
+  const router = useRouter();
   const utils = api.useUtils();
 
   const {
@@ -214,6 +215,13 @@ const Requests = () => {
     }
   };
 
+  const onUserSelected = (profileId: number) => {
+    router.navigate({
+      pathname: "/(inbox)/profile/[profile-id]/",
+      params: { profileId: String(profileId) },
+    });
+  };
+
   const isLoading = followRequestsIsLoading || friendRequestsIsLoading;
 
   if (isLoading) {
@@ -287,6 +295,7 @@ const Requests = () => {
                   text: "Decline",
                   onPress: () => onDeclineFriendRequest(item.userId),
                 }}
+                onPress={() => onUserSelected(item.profileId)}
               />
             ))}
 
@@ -328,6 +337,7 @@ const Requests = () => {
                   text: "Decline",
                   onPress: () => onDeclineFollowRequest(item.userId),
                 }}
+                onPress={() => onUserSelected(item.profileId)}
               />
             ))}
 
