@@ -3,14 +3,13 @@ import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories/network/follow";
 import { ProfileRepository } from "../../repositories/profile/profile";
-import type { NotificationData } from "../../repositories/user/notifications";
+import type { StoreNotificationData } from "../../repositories/user/notifications";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
 export class FollowService {
   private followRepository = new FollowRepository();
-  private notificationsRepository = new NotificationsRepository();
   private profileRepository = new ProfileRepository();
 
   private userService = new UserService();
@@ -59,17 +58,11 @@ export class FollowService {
       );
     }
 
-    const notificationData = {
-      title: "New follower",
-      body: `${profile.username} is now following you.`,
-      entityId: String(sender.profileId),
+    await this.notificationsService.storeNotification(sender.id, recipient.id, {
+      eventType: "follow",
       entityType: "profile",
-    } satisfies NotificationData;
-
-    await this.notificationsService.storeNotification(
-      recipient.id,
-      notificationData,
-    );
+      entityId: String(sender.profileId),
+    });
 
     const { followRequests } =
       await this.notificationsService.getNotificationSettings(recipient.id);
@@ -78,10 +71,14 @@ export class FollowService {
       return;
     }
 
-    await this.notificationsRepository.sendNotification(
-      recipient.id,
-      notificationData,
-    );
+    await this.notificationsService.sendNotification(sender.id, recipient.id, {
+      title: "New follower",
+      body: `${profile.username} is now following you.`,
+
+      eventType: "follow",
+      entityType: "profile",
+      entityId: String(sender.profileId),
+    });
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
