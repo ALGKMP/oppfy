@@ -7,9 +7,12 @@ import React, {
 } from "react";
 import {
   Dimensions,
+  Keyboard,
   KeyboardAvoidingView,
+  KeyboardEvent,
   LayoutChangeEvent,
   Modal,
+  Platform,
   TouchableOpacity,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -30,10 +33,10 @@ import BottomSheet, {
   BottomSheetFooter,
   BottomSheetFooterProps,
   BottomSheetTextInput,
+  useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
-import { set } from "lodash";
 import {
   Avatar,
   Button,
@@ -311,19 +314,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
   };
 
   const animatedPosition = useSharedValue(0);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("value", animatedPosition.value);
-  }, []);
-
-  // Logging function for animated position
-  const logPosition = (position: number) => {
-    console.log("Animated position:", position);
-  };
-
-  // Derived value to monitor and log animatedPosition changes
-  useDerivedValue(() => {
-    runOnJS(logPosition)(animatedPosition.value);
-  }, [animatedPosition.value]);
 
   const animatedOverlayStyle = useAnimatedStyle(() => {
     // Calculate the percentage height of the screen
@@ -375,8 +365,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
       <BottomSheetFooter {...props}>
         {/* Emoji Picker */}
         <XStack
-          flex={1}
-          flexGrow={1}
           borderTopColor={"$gray5"}
           borderTopWidth={"$0.25"}
           justifyContent="space-evenly"
@@ -388,7 +376,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
             <TouchableOpacity
               key={emoji}
               onPress={() => handleEmojiPress(emoji)}
-              // style={styles.emojiButton}
             >
               <SizableText size={"$8"}>{emoji}</SizableText>
             </TouchableOpacity>
@@ -397,7 +384,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
         {/* Comment Input Section */}
         <XStack
-          flex={1}
+          // flex={1}
           padding={"$3.5"}
           paddingBottom={"$6"}
           gap="$2.5"
@@ -756,32 +743,30 @@ const PostItem = ({ item }: { item: DataItem }) => {
         visible={modalVisible}
         onRequestClose={closeBottomSheet}
       >
-        <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
-          <BottomSheet
-            keyboardBehavior="extend"
-            ref={sheetRef}
-            snapPoints={["80%", "100%"]}
-            index={0} // initial state to hide the bottom sheet
-            enablePanDownToClose={true}
-            onClose={closeBottomSheet}
-            onChange={handleSheetChanges}
-            animatedPosition={animatedPosition}
-            footerComponent={renderFooter}
-            handleComponent={renderHeader}
-            backgroundStyle={{ backgroundColor: "#282828" }}
-          >
-            <BottomSheetFlatList
-              scrollEnabled={true}
-              data={data}
-              keyExtractor={(i) => data.indexOf(i).toString()}
-              renderItem={renderComment}
-              contentContainerStyle={{
-                // DO NOT USE FLEX: 1 HERE
-                backgroundColor: "#282828",
-              }}
-            />
-          </BottomSheet>
-        </Animated.View>
+        <BottomSheet
+          // animationConfigs={animationConfigs}
+          keyboardBehavior="extend"
+          ref={sheetRef}
+          snapPoints={["80%", "100%"]}
+          index={0} // initial state to hide the bottom sheet
+          enablePanDownToClose={true}
+          onClose={closeBottomSheet}
+          animatedPosition={animatedPosition}
+          handleComponent={renderHeader}
+          footerComponent={renderFooter}
+          backgroundStyle={{ backgroundColor: "#282828" }}
+        >
+          <BottomSheetFlatList
+            scrollEnabled={true}
+            data={data}
+            keyExtractor={(i) => data.indexOf(i).toString()}
+            renderItem={renderComment}
+            contentContainerStyle={{
+              // DO NOT USE FLEX: 1 HERE
+              backgroundColor: "#282828",
+            }}
+          />
+        </BottomSheet>
       </Modal>
     </View>
   );
