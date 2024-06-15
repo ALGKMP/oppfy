@@ -15,7 +15,11 @@ import {
   Platform,
   TouchableOpacity,
 } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  Gesture,
+  GestureDetector,
+  NativeViewGestureHandler,
+} from "react-native-gesture-handler";
 import Animated, {
   interpolate,
   ReduceMotion,
@@ -603,17 +607,19 @@ const PostItem = ({ item }: { item: DataItem }) => {
           <Avatar.Fallback backgroundColor="$blue10" />
         </Avatar>
         <YStack gap={"$1"} justifyContent="center">
-          <SizableText
-            size={"$3"}
-            lineHeight={14}
-            margin={0}
-            padding={0}
-            shadowRadius={3}
-            shadowOpacity={0.5}
-            fontWeight={"bold"}
-          >
-            @AuthorUsername
-          </SizableText>
+          <TouchableOpacity>
+            <SizableText
+              size={"$3"}
+              lineHeight={14}
+              margin={0}
+              padding={0}
+              shadowRadius={3}
+              shadowOpacity={0.5}
+              fontWeight={"bold"}
+            >
+              @AuthorUsername
+            </SizableText>
+          </TouchableOpacity>
           <XStack gap={"$1"} alignItems="center">
             <SizableText size={"$3"} lineHeight={15} marginTop={0} padding={0}>
               📸
@@ -621,14 +627,17 @@ const PostItem = ({ item }: { item: DataItem }) => {
             <SizableText size={"$2"} lineHeight={15} color={"$gray2"}>
               posted by:
             </SizableText>
-            <SizableText
-              size={"$2"}
-              lineHeight={15}
-              fontWeight={"bold"}
-              color={"$blue9"}
-            >
-              @RecipientUsername
-            </SizableText>
+
+            <TouchableOpacity>
+              <SizableText
+                size={"$2"}
+                lineHeight={15}
+                fontWeight={"bold"}
+                color={"$blue9"}
+              >
+                @RecipientUsername
+              </SizableText>
+            </TouchableOpacity>
           </XStack>
         </YStack>
       </XStack>
