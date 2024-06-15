@@ -358,7 +358,12 @@ const PostItem = ({ item }: { item: DataItem }) => {
   );
 
   const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
-  const renderFooter = useCallback((props: BottomSheetFooterProps) => {
+  const renderFooter = (props: BottomSheetFooterProps) => {
+    const { animatedFooterPosition } = props;
+    useEffect(() => {
+      console.log("animatedFooterPosition changed:", animatedFooterPosition);
+    }, []);
+
     const [inputValue, setInputValue] = useState("");
 
     const handleEmojiPress = (emoji: string) => {
@@ -443,7 +448,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
         </XStack>
       </BottomSheetFooter>
     );
-  }, []);
+  };
 
   const renderHeader = useCallback(() => {
     return (
@@ -748,34 +753,34 @@ const PostItem = ({ item }: { item: DataItem }) => {
       {/* Sheet Component */}
       <Modal
         transparent={true}
-        // animationType="fade"
         visible={modalVisible}
         onRequestClose={closeBottomSheet}
       >
-        <BottomSheet
-          // animationConfigs={animationConfigs}
-          keyboardBehavior="extend"
-          ref={sheetRef}
-          snapPoints={["80%", "100%"]}
-          index={0} // initial state to hide the bottom sheet
-          enablePanDownToClose={true}
-          onClose={closeBottomSheet}
-          animatedPosition={animatedPosition}
-          handleComponent={renderHeader}
-          footerComponent={renderFooter}
-          backgroundStyle={{ backgroundColor: "#282828" }}
-        >
-          <BottomSheetFlatList
-            scrollEnabled={true}
-            data={data}
-            keyExtractor={(i) => data.indexOf(i).toString()}
-            renderItem={renderComment}
-            contentContainerStyle={{
-              // DO NOT USE FLEX: 1 HERE
-              backgroundColor: "#282828",
-            }}
-          />
-        </BottomSheet>
+        <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
+          <BottomSheet
+            keyboardBehavior="extend"
+            ref={sheetRef}
+            snapPoints={["80%", "100%"]}
+            index={0} // initial state to hide the bottom sheet
+            enablePanDownToClose={true}
+            onClose={closeBottomSheet}
+            animatedPosition={animatedPosition}
+            handleComponent={renderHeader}
+            footerComponent={renderFooter}
+            backgroundStyle={{ backgroundColor: "#282828" }}
+          >
+            <BottomSheetFlatList
+              scrollEnabled={true}
+              data={data}
+              keyExtractor={(i) => data.indexOf(i).toString()}
+              renderItem={renderComment}
+              contentContainerStyle={{
+                // DO NOT USE FLEX: 1 HERE
+                backgroundColor: "#282828",
+              }}
+            />
+          </BottomSheet>
+        </Animated.View>
       </Modal>
     </View>
   );
