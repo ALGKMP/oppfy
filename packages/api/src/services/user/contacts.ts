@@ -10,7 +10,7 @@ export class ContactService {
 
   constructor() {
     this.producer = Producer.create({
-      queueUrl: process.env.SQS_CONTACT_QUEUE_URL!,
+      queueUrl: process.env.SQS_CONTACT_QUEUE!,
       sqs: new SQSClient({ region: process.env.AWS_REGION }),
     });
   }
