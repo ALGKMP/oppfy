@@ -366,98 +366,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
     [],
   );
 
-  const renderFooter = (props: BottomSheetFooterProps) => {
-    const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
-    const [inputValue, setInputValue] = useState("");
-
-    const handleEmojiPress = (emoji: string) => {
-      setInputValue((prev) => prev + emoji);
-    };
-
-    useEffect(() => {
-      console.log("animatedPosition", props.animatedFooterPosition.value);
-    }, [props.animatedFooterPosition]);
-
-    return (
-      <BottomSheetFooter {...props}>
-        {/* Emoji Picker */}
-        <XStack
-          borderTopColor={"$gray5"}
-          borderTopWidth={"$0.25"}
-          justifyContent="space-evenly"
-          alignItems="center"
-          paddingTop={"$3"}
-          backgroundColor={"$gray4"}
-        >
-          {emojiList.map((emoji) => (
-            <TouchableOpacity
-              key={emoji}
-              onPress={() => handleEmojiPress(emoji)}
-            >
-              <SizableText size={"$8"}>{emoji}</SizableText>
-            </TouchableOpacity>
-          ))}
-        </XStack>
-
-        {/* Comment Input Section */}
-        <XStack
-          padding={"$3.5"}
-          paddingBottom={"$6"}
-          gap="$2.5"
-          justifyContent="center"
-          alignItems="center"
-          backgroundColor={"$gray4"}
-        >
-          {/* Avatar */}
-          <Avatar circular size="$4" flex={1}>
-            <Avatar.Image
-              accessibilityLabel="User Avatar"
-              src="https://images.unsplash.com/photo-1517841905240-472988babdf9"
-            />
-            <Avatar.Fallback backgroundColor="$blue10" />
-          </Avatar>
-
-          {/* Text Input */}
-          <View style={{ flex: 5 }}>
-            <BottomSheetTextInput
-              placeholder="Comment"
-              maxLength={100}
-              value={inputValue}
-              focusable={true}
-              onChangeText={setInputValue}
-              style={{
-                fontWeight: "bold",
-                justifyContent: "flex-start",
-                borderWidth: 10,
-                borderColor: "#2E2E2E",
-                borderRadius: 20,
-                backgroundColor: "#2E2E2E",
-                color: "#fff", // Text color
-                flex: 2,
-              }}
-            />
-          </View>
-
-          {/* Submit Button */}
-          <View flex={1} justifyContent="center">
-            <TouchableOpacity>
-              <View
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                padding="$2"
-                borderRadius={"$7"}
-                backgroundColor={"$blue9"}
-              >
-                <SendHorizontal size={24} padding={"$3"} color="$gray12" />
-              </View>
-            </TouchableOpacity>
-          </View>
-        </XStack>
-      </BottomSheetFooter>
-    );
-  };
-
   const renderHeader = useCallback(() => {
     return (
       <YStack
@@ -492,21 +400,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const insets = useSafeAreaInsets();
 
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
-
-  // For the fuckin caption
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const handleComment = (key: string) => {};
-
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
     if (item.caption.length <= maxLength || isExpanded) {
@@ -517,7 +410,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   // For the fuckin like button
   const imageLikeScale = useSharedValue(0);
-  // const opacity = useSharedValue(1);
   const buttonLikeScale = useSharedValue(1);
 
   const handleImageLikeAnimation = () => {
@@ -536,9 +428,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
         imageLikeScale.value = withDelay(150, withTiming(0, { duration: 250 }));
       },
     );
-    // opacity.value = withTiming(1, { duration: 200 }, () => {
-    // opacity.value = withTiming(0, { duration: 200 });
-    // });
     setIsLiked(true); // Update the liked state
   };
 
@@ -551,14 +440,12 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const heartImageAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: imageLikeScale.value }],
-      // opacity: opacity.value,
     };
   });
 
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: buttonLikeScale.value }],
-      // opacity: opacity.value,
     };
   });
 
@@ -766,7 +653,12 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
         {/* Caption */}
         <View flex={1} alignItems="flex-start" padding="$2">
-          <TouchableOpacity onPress={toggleExpanded}>
+          <TouchableOpacity
+            onPress={() => {
+              setIsExpanded(!isExpanded);
+              setShowViewMore(false);
+            }}
+          >
             <Text numberOfLines={isExpanded ? 0 : 2}>
               {renderCaption()}
               {showViewMore && !isExpanded ? (
