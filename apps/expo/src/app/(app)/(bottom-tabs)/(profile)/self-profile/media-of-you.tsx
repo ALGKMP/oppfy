@@ -32,6 +32,10 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import BottomSheet, {
   BottomSheetFlatList,
@@ -306,7 +310,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
   // hooks
   const sheetRef = useRef<BottomSheet>(null);
   const innerSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["80%", "100%"], []);
+  const snapPoints = useMemo(() => ["100%"], []);
   // variables
   const data = useMemo(() => item.commentList, []);
   const [modalVisible, setModalVisible] = useState(false);
@@ -485,6 +489,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const insets = useSafeAreaInsets();
 
   // callbacks
   const handlePresentModalPress = useCallback(() => {
@@ -780,6 +786,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
       >
         <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
           <BottomSheet
+            topInset={insets.top}
             keyboardBehavior="interactive"
             ref={sheetRef}
             snapPoints={snapPoints}
