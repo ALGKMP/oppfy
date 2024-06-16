@@ -7,13 +7,7 @@ import React, {
 } from "react";
 import {
   Dimensions,
-  Keyboard,
-  KeyboardAvoidingView,
-  KeyboardEvent,
-  LayoutChangeEvent,
   Modal,
-  Platform,
-  StyleSheet,
   TouchableOpacity,
 } from "react-native";
 import {
@@ -26,37 +20,27 @@ import Animated, {
   ReduceMotion,
   runOnJS,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
   withDelay,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
 import {
-  SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import BottomSheet, {
   BottomSheetFlatList,
-  BottomSheetFooter,
-  BottomSheetFooterProps,
   BottomSheetModal,
-  BottomSheetModalProvider,
   BottomSheetTextInput,
-  BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
 import {
   Avatar,
-  Button,
   Separator,
-  Sheet,
-  SheetProps,
   SizableText,
   Text,
-  TextArea,
   View,
   XStack,
   YStack,
@@ -152,62 +136,6 @@ const data: DataItem[] = [
         username: "AliceW",
         timeAgo: "2 hours ago",
         text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1511367461989-f85a21fda167",
-        username: "AliceW",
-        timeAgo: "2 hours ago",
-        text: "Beautiful view!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1546456073-6712f79251bb",
-        username: "BobM",
-        timeAgo: "3 hours ago",
-        text: "Looks amazing!",
-      },
-      {
-        profilePicture:
-          "https://images.unsplash.com/photo-1531123897727-8f129e1688ce",
-        username: "CharlieK",
-        timeAgo: "1 day ago",
-        text: "Wish I was there!",
       },
     ],
   },
