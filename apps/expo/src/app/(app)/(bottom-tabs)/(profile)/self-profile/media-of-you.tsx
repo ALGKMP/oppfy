@@ -13,6 +13,7 @@ import {
   LayoutChangeEvent,
   Modal,
   Platform,
+  StyleSheet,
   TouchableOpacity,
 } from "react-native";
 import {
@@ -36,8 +37,10 @@ import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetFooter,
   BottomSheetFooterProps,
+  BottomSheetModal,
+  BottomSheetModalProvider,
   BottomSheetTextInput,
-  useBottomSheetSpringConfigs,
+  BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
@@ -303,11 +306,13 @@ const PostItem = ({ item }: { item: DataItem }) => {
   // hooks
   const sheetRef = useRef<BottomSheet>(null);
   const innerSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ["80%", "100%"], []);
   // variables
   const data = useMemo(() => item.commentList, []);
   const [modalVisible, setModalVisible] = useState(false);
 
   const openBottomSheet = () => {
+    bottomSheetModalRef.current?.present();
     setModalVisible(true);
     sheetRef.current?.expand();
     innerSheetRef.current?.expand();
@@ -357,18 +362,17 @@ const PostItem = ({ item }: { item: DataItem }) => {
     [],
   );
 
-  const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
   const renderFooter = (props: BottomSheetFooterProps) => {
-    const { animatedFooterPosition } = props;
-    useEffect(() => {
-      console.log("animatedFooterPosition changed:", animatedFooterPosition);
-    }, []);
-
+    const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
     const [inputValue, setInputValue] = useState("");
 
     const handleEmojiPress = (emoji: string) => {
       setInputValue((prev) => prev + emoji);
     };
+
+    useEffect(() => {
+      console.log("animatedPosition", props.animatedFooterPosition.value);
+    }, [props.animatedFooterPosition]);
 
     return (
       <BottomSheetFooter {...props}>
@@ -393,7 +397,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
         {/* Comment Input Section */}
         <XStack
-          // flex={1}
           padding={"$3.5"}
           paddingBottom={"$6"}
           gap="$2.5"
@@ -416,6 +419,7 @@ const PostItem = ({ item }: { item: DataItem }) => {
               placeholder="Comment"
               maxLength={100}
               value={inputValue}
+              focusable={true}
               onChangeText={setInputValue}
               style={{
                 fontWeight: "bold",
@@ -477,6 +481,17 @@ const PostItem = ({ item }: { item: DataItem }) => {
         />
       </YStack>
     );
+  }, []);
+
+  // ref
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("handleSheetChanges", index);
   }, []);
 
   // For the fuckin caption
@@ -569,6 +584,14 @@ const PostItem = ({ item }: { item: DataItem }) => {
       </View>
     );
   }
+
+  const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
+
+  const [inputValue, setInputValue] = useState("");
+
+  const handleEmojiPress = (emoji: string) => {
+    setInputValue((prev) => prev + emoji);
+  };
 
   return (
     <View
@@ -750,7 +773,6 @@ const PostItem = ({ item }: { item: DataItem }) => {
         </View>
       </View>
 
-      {/* Sheet Component */}
       <Modal
         transparent={true}
         visible={modalVisible}
@@ -758,15 +780,15 @@ const PostItem = ({ item }: { item: DataItem }) => {
       >
         <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
           <BottomSheet
-            keyboardBehavior="extend"
+            keyboardBehavior="interactive"
             ref={sheetRef}
-            snapPoints={["80%", "100%"]}
+            snapPoints={snapPoints}
             index={0} // initial state to hide the bottom sheet
             enablePanDownToClose={true}
             onClose={closeBottomSheet}
             animatedPosition={animatedPosition}
             handleComponent={renderHeader}
-            footerComponent={renderFooter}
+            // footerComponent={renderFooter}
             backgroundStyle={{ backgroundColor: "#282828" }}
           >
             <BottomSheetFlatList
@@ -779,6 +801,73 @@ const PostItem = ({ item }: { item: DataItem }) => {
                 backgroundColor: "#282828",
               }}
             />
+            <XStack
+              borderTopColor={"$gray5"}
+              borderTopWidth={"$0.25"}
+              justifyContent="space-evenly"
+              alignItems="center"
+              paddingTop={"$3"}
+              backgroundColor={"$gray4"}
+            >
+              {emojiList.map((emoji) => (
+                <TouchableOpacity
+                  key={emoji}
+                  onPress={() => handleEmojiPress(emoji)}
+                >
+                  <SizableText size={"$8"}>{emoji}</SizableText>
+                </TouchableOpacity>
+              ))}
+            </XStack>
+
+            <XStack
+              padding={"$3.5"}
+              paddingBottom={"$6"}
+              gap="$2.5"
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor={"$gray4"}
+            >
+              <Avatar circular size="$4" flex={1}>
+                <Avatar.Image
+                  accessibilityLabel="User Avatar"
+                  src="https://images.unsplash.com/photo-1517841905240-472988babdf9"
+                />
+                <Avatar.Fallback backgroundColor="$blue10" />
+              </Avatar>
+
+              <View style={{ flex: 5 }}>
+                <BottomSheetTextInput
+                  placeholder="Comment"
+                  maxLength={100}
+                  value={inputValue}
+                  focusable={true}
+                  onChangeText={setInputValue}
+                  style={{
+                    fontWeight: "bold",
+                    justifyContent: "flex-start",
+                    borderWidth: 10,
+                    borderColor: "#2E2E2E",
+                    borderRadius: 20,
+                    backgroundColor: "#2E2E2E",
+                    color: "#fff", // Text color
+                    flex: 2,
+                  }}
+                />
+              </View>
+
+              <View
+                flex={1}
+                justifyContent="center"
+                alignItems="center"
+                padding="$2"
+                borderRadius={"$7"}
+                backgroundColor={"$blue9"}
+              >
+                <TouchableOpacity>
+                  <SendHorizontal size={24} padding={"$3"} color="$gray12" />
+                </TouchableOpacity>
+              </View>
+            </XStack>
           </BottomSheet>
         </Animated.View>
       </Modal>
@@ -803,5 +892,4 @@ const MediaOfYou = () => {
     </View>
   );
 };
-
 export default MediaOfYou;
