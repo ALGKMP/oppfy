@@ -29,7 +29,9 @@
     "jsonwebtoken": "^9.0.2",
     "superjson": "2.2.0",
     "trpc-openapi": "^1.2.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "sqs-producer" : "^5.0.0",
+    "@aws-sdk/client-sqs" : "^3.598.0"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",

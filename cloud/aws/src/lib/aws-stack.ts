@@ -13,6 +13,8 @@ import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as sns from "aws-cdk-lib/aws-sns";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 import type { Construct } from "constructs";
 
@@ -360,14 +362,36 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    // Out own auth or some shit
-    const neptuneProxyLambdaUrl = neptuneProxyLambda.addFunctionUrl({
-      authType: lambda.FunctionUrlAuthType.NONE,
+    // setup sqs for neptune proxy lambda, good for one day for debugging
+    const contactSyncDLQ = new sqs.Queue(this, "ContactSyncDLQ", {
+      retentionPeriod: cdk.Duration.days(1),
     });
 
-    // Gimme the url bitch
-    new cdk.CfnOutput(this, "NeptuneProxyLambdaUrl", {
-      value: neptuneProxyLambdaUrl.url,
+    // real queue, 5 hours retention
+    const contactSyncQueue = new sqs.Queue(this, "ContactSyncQueue", {
+      queueName: "ContactSyncQueue",
+      retentionPeriod: cdk.Duration.hours(5),
+      visibilityTimeout: cdk.Duration.minutes(3),
+      deadLetterQueue: {
+        maxReceiveCount: 1,
+        queue: contactSyncDLQ,
+      },
+    });
+
+    // setup neptune proxy lambda to listen to sqs
+    contactSyncQueue.grantSendMessages(neptuneProxyLambda);
+    contactSyncDLQ.grantSendMessages(neptuneProxyLambda);
+
+    // setup neptune proxy lambda to write to sqs
+    neptuneProxyLambda.addEventSource(
+      new SqsEventSource(contactSyncQueue, {
+        batchSize: 1,
+      }),
+    );
+
+    // output sqs endpoint
+    new cdk.CfnOutput(this, "ContactSyncQueueEndpoint", {
+      value: contactSyncQueue.queueUrl,
     });
 
     // user for debug notebook if someone wants to use that shit
@@ -397,20 +421,20 @@ tar -zxvf /tmp/graph_notebook.tar.gz -C /tmp
 /tmp/graph_notebook/install.sh
 EOF`;
 
-    const notebookLifecycleConfig =
-      new sagemaker.CfnNotebookInstanceLifecycleConfig(
-        this,
-        "NotebookLifecycleConfig",
-        {
-          notebookInstanceLifecycleConfigName:
-            "neptune-notebook-lifecycle-config",
-          onStart: [
-            {
-              content: cdk.Fn.base64(lifeCycleScript),
-            },
-          ],
-        },
-      );
+    const notebookLifecycleConfig = new sagemaker
+      .CfnNotebookInstanceLifecycleConfig(
+      this,
+      "NotebookLifecycleConfig",
+      {
+        notebookInstanceLifecycleConfigName:
+          "neptune-notebook-lifecycle-config",
+        onStart: [
+          {
+            content: cdk.Fn.base64(lifeCycleScript),
+          },
+        ],
+      },
+    );
 
     const notebookInstance = new sagemaker.CfnNotebookInstance(
       this,
