@@ -51,22 +51,22 @@ const ProfileLayout = () => {
   }, [refetch]);
 
   return (
-    <ScrollView
-      contentContainerStyle={{ flex: 1 }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {isLoading || profileData === undefined ? (
-        <Profile loading />
-      ) : (
-        <>
-          <Profile loading={false} data={profileData} />
-          <MediaOfYou />
-        </>
-      )}
-    </ScrollView>
+      <ScrollView
+        // contentContainerStyle={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {isLoading || profileData === undefined ? (
+          <Profile loading />
+        ) : (
+          <>
+            <Profile loading={false} data={profileData} />
+            <MediaOfYou />
+          </>
+        )}
+      </ScrollView>
   );
 };
 

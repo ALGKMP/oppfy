@@ -35,6 +35,9 @@ importers:
       '@expo/react-native-action-sheet':
         specifier: ^4.0.1
         version: 4.1.0(react@18.2.0)
+      '@gorhom/bottom-sheet':
+        specifier: ^4
+        version: 4.6.3(@types/react@18.2.79)(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native@0.74.1)(react@18.2.0)
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.4.2(react-hook-form@7.51.5(react@18.2.0))
