@@ -353,7 +353,7 @@ export class AwsStack extends cdk.Stack {
         runtime: lambda.Runtime.NODEJS_20_X,
         entry: "src/res/lambdas/neptune/index.ts",
         handler: "handler",
-        timeout: cdk.Duration.minutes(3),
+        // timeout: cdk.Duration.minutes(3),
         environment: {
           NEPTUNE_ENDPOINT: cluster.clusterEndpoint.socketAddress,
         },
@@ -371,7 +371,7 @@ export class AwsStack extends cdk.Stack {
     const contactSyncQueue = new sqs.Queue(this, "ContactSyncQueue", {
       queueName: "ContactSyncQueue",
       retentionPeriod: cdk.Duration.hours(5),
-      visibilityTimeout: cdk.Duration.minutes(3),
+      // visibilityTimeout: cdk.Duration.minutes(3),
       deadLetterQueue: {
         maxReceiveCount: 1,
         queue: contactSyncDLQ,
