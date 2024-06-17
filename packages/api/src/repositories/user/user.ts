@@ -30,7 +30,6 @@ export class UserRepository {
         id: userId,
         profileId: profile[0].insertId,
         notificationSettingsId: notificationSetting[0].insertId,
-        pushToken: "",
         phoneNumber
       });
     });
