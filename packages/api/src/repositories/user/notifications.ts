@@ -66,6 +66,7 @@ export class NotificationsRepository {
 
     const notifications = await this.db
       .select({
+        userId: schema.user.id,
         profileId: schema.profile.id,
         username: schema.profile.username,
         profilePictureKey: schema.profile.profilePictureKey,

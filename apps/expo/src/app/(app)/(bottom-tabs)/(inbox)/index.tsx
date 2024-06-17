@@ -55,11 +55,17 @@ const Inbox = () => {
     }
   };
 
+  const followUser = api.follow.followUser.useMutation();
+
   const onUserSelected = (profileId: number) => {
     router.navigate({
       pathname: "/(inbox)/profile/[profile-id]/",
       params: { profileId: String(profileId) },
     });
+  };
+
+  const onFollowUser = async (userId: string) => {
+    await followUser.mutateAsync({ userId });
   };
 
   const renderRequestCount = () =>
@@ -165,7 +171,7 @@ const Inbox = () => {
                     button={{
                       text: buttonText,
                       disabled: buttonDisabled,
-                      onPress: () => null,
+                      onPress: () => onFollowUser(item.userId),
                     }}
                     imageUrl={item.profilePictureUrl}
                     onPress={() => onUserSelected(item.profileId)}
