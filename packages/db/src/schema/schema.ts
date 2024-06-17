@@ -19,7 +19,7 @@ import { mySqlTable } from "./_table";
 export const user = mySqlTable("User", {
   id: varchar("id", { length: 255 }).primaryKey(),
   profileId: bigint("profile", { mode: "number", unsigned: true })
-    .references(() => profile.id)
+    .references(() => profile.id, { onDelete: "cascade" })
     .notNull(),
   notificationSettingsId: bigint("notificationSettingsId", {
     mode: "number",
