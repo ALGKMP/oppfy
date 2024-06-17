@@ -17,6 +17,7 @@
     "@oppfy/utils": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@oppfy/s3": "workspace:*",
+    "@oppfy/sqs": "workspace:*",
     "@oppfy/sns": "workspace:*",
     "@oppfy/mux": "workspace:*",
     "@oppfy/opensearch": "workspace:*",
@@ -29,9 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "superjson": "2.2.0",
     "trpc-openapi": "^1.2.0",
-    "zod": "^3.23.8",
-    "sqs-producer" : "^5.0.0",
-    "@aws-sdk/client-sqs" : "^3.598.0"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",

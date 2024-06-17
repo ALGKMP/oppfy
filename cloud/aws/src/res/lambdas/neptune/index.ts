@@ -1,8 +1,9 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { z } from "zod";
+import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
+import { parser } from "@aws-lambda-powertools/parser/middleware";
+import middy from "@middy/core";
+import { APIGatewayProxyResult, Context } from "aws-lambda";
 import gremlin from "gremlin";
-
-// TODO: So many type "any" it's starting to look like a JavaScript project
+import { z } from "zod";
 
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 const Graph = gremlin.structure.Graph;
@@ -10,13 +11,25 @@ const Graph = gremlin.structure.Graph;
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
 
-export const handler = async (
-  event: APIGatewayProxyEvent,
+const contactSyncBody = z.object({
+  userId: z.string(),
+  contacts: z.array(z.string()),
+});
+
+// list bc of middy powertools thing
+// 1. Parses data using SqsSchema.
+// 2. Parses records in body key using your schema and return them in a list.
+type ContactSyncBodyType = z.infer<typeof contactSyncBody>[];
+
+const lambdaHandler = async (
+  event: ContactSyncBodyType,
+  _context: Context,
 ): Promise<APIGatewayProxyResult> => {
   console.log("Lambda invoked");
 
+  console.log(event[0].userId);
   let dc: any;
-  let g: any;
+  let g: gremlin.process.GraphTraversalSource;
 
   console.log("Connecting to Neptune", NEPTUNE_ENDPOINT, NEPTUNE_PORT);
 
@@ -28,10 +41,7 @@ export const handler = async (
     console.log(resp.status);
     console.log(await resp.text());
 
-    dc = new DriverRemoteConnection(
-      `wss://${NEPTUNE_ENDPOINT}/gremlin`,
-      {},
-    );
+    dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
     console.log("Remote connection established");
 
     const graph = new Graph();
@@ -40,6 +50,9 @@ export const handler = async (
 
     const result = await g.V().toList();
     console.log("Query executed", result);
+
+  
+    g.mergeV()
 
     return {
       statusCode: 200,
@@ -62,3 +75,7 @@ export const handler = async (
     }
   }
 };
+
+export const handler = middy(lambdaHandler).use(
+  parser({ schema: contactSyncBody, envelope: SqsEnvelope }),
+);
