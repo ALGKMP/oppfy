@@ -15,7 +15,7 @@ export class UserRepository {
   private auth = auth;
 
   @handleDatabaseErrors
-  async createUser(userId: string) {
+  async createUser(userId: string, phoneNumber: string) {
     return await this.db.transaction(async (tx) => {
       // Create an empty profile for the user, ready to be updated later
       const profile = await tx.insert(schema.profile).values({});
@@ -31,6 +31,7 @@ export class UserRepository {
         profileId: profile[0].insertId,
         notificationSettingsId: notificationSetting[0].insertId,
         pushToken: "",
+        phoneNumber
       });
     });
   }

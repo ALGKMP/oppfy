@@ -7,6 +7,9 @@ import { z } from "zod";
 
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 const Graph = gremlin.structure.Graph;
+const t = gremlin.process.t;
+const Direction = gremlin.process.direction;
+const { onCreate, onMatch } = gremlin.process.merge;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
@@ -41,8 +44,14 @@ const lambdaHandler = async (
         new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {}),
       );
 
-  
-    
+    const res = await g.mergeV(
+      new Map([[t.id, event[0].userId]]),
+    ).option(onCreate, new Map([["created", Date.now()]]))
+      .option(onMatch, new Map([["updated", Date.now()]])).elementMap()
+      .toList();
+
+      console.log(res);
+
     return {
       statusCode: 200,
       body: JSON.stringify({
