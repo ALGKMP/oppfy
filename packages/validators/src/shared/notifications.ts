@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-const entityType = z.enum(["post", "profile", "comment"]);
-const eventType = z.enum([
+export const entityType = z.enum(["post", "profile", "comment"]);
+export const eventType = z.enum([
   "like",
   "post",
   "comment",
