@@ -67,11 +67,11 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           {props.loading && props.showSkeletons?.imageUrl ? (
             <View>
               <Skeleton radius={100}>
-                <Avatar circular size="$5" />
+                <Avatar circular size={56} />
               </Skeleton>
             </View>
           ) : !props.loading && props.imageUrl ? (
-            <Avatar circular size="$5">
+            <Avatar circular size={56}>
               <Avatar.Image src={props.imageUrl} />
             </Avatar>
           ) : null}
@@ -82,7 +82,9 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <SizableText>Loading...</SizableText>
               </Skeleton>
             ) : !props.loading && props.title ? (
-              <SizableText lineHeight={0}>{props.title}</SizableText>
+              <SizableText fontWeight="bold" lineHeight={0}>
+                {props.title}
+              </SizableText>
             ) : null}
 
             {props.loading && props.showSkeletons?.subtitle ? (
