@@ -34,30 +34,19 @@ const lambdaHandler = async (
   console.log("Connecting to Neptune", NEPTUNE_ENDPOINT, NEPTUNE_PORT);
 
   try {
-    console.log("checking status");
-    // checkling status of lambda
-    const resp = await fetch(`https://${NEPTUNE_ENDPOINT}/status`);
-
-    console.log(resp.status);
-    console.log(await resp.text());
-
-    dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
-    console.log("Remote connection established");
-
     const graph = new Graph();
-    g = graph.traversal().withRemote(dc);
-    console.log("Graph traversal initialized");
-
-    const result = await g.V().toList();
-    console.log("Query executed", result);
+    g = graph
+      .traversal()
+      .withRemote(
+        new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {}),
+      );
 
   
-    g.mergeV()
-
+    
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: result.toString(),
+        message: "hi",
       }),
     };
   } catch (error) {
