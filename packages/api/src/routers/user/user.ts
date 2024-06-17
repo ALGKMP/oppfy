@@ -38,7 +38,6 @@ export const userRouter = createTRPCRouter({
   }),
 
   checkOnboardingComplete: protectedProcedure
-    .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx }) => {
       try {
         return await ctx.services.user.checkOnboardingComplete(ctx.session.uid);

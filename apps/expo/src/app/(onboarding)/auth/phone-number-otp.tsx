@@ -41,9 +41,7 @@ const PhoneNumberOTP = () => {
 
   const handleExistingUser = async (userId: string) => {
     const userOnboardingCompleted =
-      await userOnboardingCompletedMutation.mutateAsync({
-        userId,
-      });
+      await userOnboardingCompletedMutation.mutateAsync()
 
     userOnboardingCompleted
       ? router.replace("/(app)/(bottom-tabs)/(profile)/self-profile/media-of-you")

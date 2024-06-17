@@ -12,7 +12,8 @@ const AppLayout = () => {
 
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
-  const onBoardingComplete = api.user.checkOnboardingComplete;
+  const onBoardingComplete = api.user.checkOnboardingComplete.useMutation();
+  console.log(onBoardingComplete)
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -20,7 +21,7 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!onBoardingComplete) {
+  if (!onBoardingComplete.mutateAsync()) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 
