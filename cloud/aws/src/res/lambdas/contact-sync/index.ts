@@ -16,6 +16,7 @@ const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
 
 const contactSyncBody = z.object({
   userId: z.string(),
+  userPhoneNumberHash: z.string(),
   contacts: z.array(z.string()),
 });
 
@@ -50,7 +51,7 @@ const lambdaHandler = async (
       .option(onMatch, new Map([["updated", Date.now()]])).elementMap()
       .toList();
 
-      console.log(res);
+    console.log(res);
 
     return {
       statusCode: 200,
