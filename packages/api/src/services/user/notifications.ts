@@ -1,5 +1,4 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { SnsRepository } from "../../repositories/aws/sns";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
   NotificationSettings,
@@ -44,15 +43,41 @@ export class NotificationsService {
 
     const itemsWithProfilePictureUrls = await Promise.all(
       items.map(async (notification) => {
-        const { profilePictureKey, ...rest } = notification;
+        const { profilePictureKey, eventType, ...rest } = notification;
 
         const profilePictureUrl = await this.s3Service.getObjectPresignedUrl({
           Bucket: process.env.S3_PROFILE_BUCKET!,
           Key: profilePictureKey,
         });
 
+        const { username } = rest;
+
+        if (username === null) {
+          throw new DomainError(ErrorCode.USERNAME_NOT_FOUND);
+        }
+
+        const message = (() => {
+          switch (eventType) {
+            case "like":
+              return `Someone liked your post!`;
+            case "post":
+              return `New post from ${username}!`;
+            case "comment":
+              return `${username} commented on your post!`;
+            case "follow":
+              return `${username} started following you!`;
+            case "friend":
+              return `You and ${username} are now friends!`;
+            case "followRequest":
+              return `${username} wants to follow you!`;
+            case "friendRequest":
+              return `${username} sent you a friend request!`;
+          }
+        })();
+
         return {
           ...rest,
+          message,
           profilePictureUrl,
         };
       }),
