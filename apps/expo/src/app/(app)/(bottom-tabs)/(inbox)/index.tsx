@@ -84,7 +84,6 @@ const Inbox = () => {
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
           renderItem={() => (
             <VirtualizedListItem
               loading
@@ -127,34 +126,36 @@ const Inbox = () => {
           </TouchableOpacity>
         )}
 
-        <View
-          paddingVertical="$2"
-          paddingHorizontal="$3"
-          borderRadius="$6"
-          backgroundColor="$gray2"
-        >
-          <FlashList
-            data={notificationItems}
-            onRefresh={refetch}
-            refreshing={isNotificationsLoading}
-            estimatedItemSize={75}
-            onEndReached={handleOnEndReached}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <VirtualizedListItem
-                loading={false}
-                title={item.username ?? ""}
-                subtitle={"joined oppfy 🎉" ?? ""}
-                subtitle2="1d ago"
-                button={{
-                  text: "Follow",
-                }}
-                imageUrl={item.profilePictureUrl}
-                onPress={() => onUserSelected(item.profileId)}
-              />
-            )}
-          />
-        </View>
+        {notificationItems.length > 0 && (
+          <View
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            borderRadius="$6"
+            backgroundColor="$gray2"
+          >
+            <FlashList
+              data={notificationItems}
+              onRefresh={refetch}
+              refreshing={isNotificationsLoading}
+              estimatedItemSize={75}
+              onEndReached={handleOnEndReached}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <VirtualizedListItem
+                  loading={false}
+                  title={item.username ?? ""}
+                  subtitle={item.message ?? ""}
+                  subtitle2="1d ago"
+                  button={{
+                    text: "Follow",
+                  }}
+                  imageUrl={item.profilePictureUrl}
+                  onPress={() => onUserSelected(item.profileId)}
+                />
+              )}
+            />
+          </View>
+        )}
       </YStack>
     </BaseScreenView>
   );
