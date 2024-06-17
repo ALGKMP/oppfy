@@ -1,25 +1,20 @@
 {
-  "name": "@oppfy/neptune-lambda",
-  "version": "0.1.0",
+  "name": "@oppfy/sqs",
   "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@oppfy/db": "workspace:*",
-    "@oppfy/utils": "workspace:*",
-    "@oppfy/validators": "workspace:*",
-    "@opensearch-project/opensearch": "^2.8.0",
-    "zod": "^3.23.8",
-    "@aws-sdk/client-s3": "^3.564.0",
-    "gremlin": "^3.7.2"
+    "sqs-producer": "^5.0.0",
+    "@aws-sdk/client-sqs": "^3.598.0"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
@@ -27,8 +22,7 @@
     "@oppfy/tsconfig": "workspace:*",
     "eslint": "^9.2.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.5",
-    "@types/gremlin": "^3.6.7"
+    "typescript": "^5.4.5"
   },
   "prettier": "@oppfy/prettier-config"
 }
