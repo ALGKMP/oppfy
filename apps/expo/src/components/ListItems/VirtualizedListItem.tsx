@@ -64,19 +64,19 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
     <Skeleton.Group show={props.loading}>
       <XStack alignItems="center" paddingVertical="$2">
         <XStack flex={1} alignItems="center" gap="$3">
-          {props.loading && props.showSkeletons?.imageUrl ? (
-            <View>
+          <View>
+            {props.loading && props.showSkeletons?.imageUrl ? (
               <Skeleton radius={100}>
                 <Avatar circular size={56} />
               </Skeleton>
-            </View>
-          ) : !props.loading && props.imageUrl ? (
-            <Avatar circular size={56}>
-              <Avatar.Image src={props.imageUrl} />
-            </Avatar>
-          ) : null}
+            ) : !props.loading && props.imageUrl ? (
+              <Avatar circular size={56}>
+                <Avatar.Image src={props.imageUrl} />
+              </Avatar>
+            ) : null}
+          </View>
 
-          <YStack>
+          <YStack flex={1}>
             {props.loading && props.showSkeletons?.title ? (
               <Skeleton width={75}>
                 <SizableText>Loading...</SizableText>
@@ -92,7 +92,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <SizableText>Loading...</SizableText>
               </Skeleton>
             ) : !props.loading && props.subtitle ? (
-              <SizableText theme="alt1" lineHeight={0}>
+              <SizableText theme="alt1" size={"$3"} lineHeight={0}>
                 {props.subtitle}
               </SizableText>
             ) : null}
@@ -102,69 +102,69 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <SizableText>Loading...</SizableText>
               </Skeleton>
             ) : !props.loading && props.subtitle2 ? (
-              <SizableText theme="alt1" lineHeight={0}>
+              <SizableText theme="alt1" size={"$2"} lineHeight={0}>
                 {props.subtitle2}
               </SizableText>
             ) : null}
           </YStack>
-        </XStack>
 
-        <XStack gap="$2">
-          {props.loading && props.showSkeletons?.button ? (
-            <Skeleton>
-              <Button
-                size={isTwoButtons ? "$3.5" : "$3.5"}
-                width={isTwoButtons ? 85 : 100}
-              >
-                Loading...
-              </Button>
-            </Skeleton>
-          ) : !props.loading && props.button ? (
-            isButtonProps(props.button) ? (
-              <Button
-                size={isTwoButtons ? "$3.5" : "$3.5"}
-                width={isTwoButtons ? 85 : 100}
-                onPress={
-                  props.button.onPress
-                    ? debounce(props.button.onPress, 300)
-                    : undefined
-                }
-                {...props.button}
-              >
-                {props.button.text}
-              </Button>
-            ) : (
-              props.button
-            )
-          ) : null}
+          <XStack gap="$2">
+            {props.loading && props.showSkeletons?.button ? (
+              <Skeleton>
+                <Button
+                  size={isTwoButtons ? "$3.5" : "$3.5"}
+                  width={isTwoButtons ? 85 : 100}
+                >
+                  Loading...
+                </Button>
+              </Skeleton>
+            ) : !props.loading && props.button ? (
+              isButtonProps(props.button) ? (
+                <Button
+                  size={isTwoButtons ? "$3.5" : "$3.5"}
+                  width={isTwoButtons ? 85 : 100}
+                  onPress={
+                    props.button.onPress
+                      ? debounce(props.button.onPress, 300)
+                      : undefined
+                  }
+                  {...props.button}
+                >
+                  {props.button.text}
+                </Button>
+              ) : (
+                props.button
+              )
+            ) : null}
 
-          {props.loading && props.showSkeletons?.button2 ? (
-            <Skeleton>
-              <Button
-                size={isTwoButtons ? "$3.5" : "$3.5"}
-                width={isTwoButtons ? 85 : 100}
-              >
-                Loading...
-              </Button>
-            </Skeleton>
-          ) : !props.loading && props.button2 ? (
-            isButtonProps(props.button2) ? (
-              <Button
-                size={isTwoButtons ? "$3.5" : "$3.5"}
-                width={isTwoButtons ? 85 : 100}
-                onPress={
-                  props.button2.onPress
-                    ? debounce(props.button2.onPress, 300)
-                    : undefined
-                }
-                {...props.button2}
-              >
-                {props.button2.text}
-              </Button>
-            ) : (
-              props.button2
-            )
-          ) : null}
+            {props.loading && props.showSkeletons?.button2 ? (
+              <Skeleton>
+                <Button
+                  size={isTwoButtons ? "$3.5" : "$3.5"}
+                  width={isTwoButtons ? 85 : 100}
+                >
+                  Loading...
+                </Button>
+              </Skeleton>
+            ) : !props.loading && props.button2 ? (
+              isButtonProps(props.button2) ? (
+                <Button
+                  size={isTwoButtons ? "$3.5" : "$3.5"}
+                  width={isTwoButtons ? 85 : 100}
+                  onPress={
+                    props.button2.onPress
+                      ? debounce(props.button2.onPress, 300)
+                      : undefined
+                  }
+                  {...props.button2}
+                >
+                  {props.button2.text}
+                </Button>
+              ) : (
+                props.button2
+              )
+            ) : null}
+          </XStack>
         </XStack>
       </XStack>
     </Skeleton.Group>
