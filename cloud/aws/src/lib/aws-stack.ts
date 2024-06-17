@@ -346,10 +346,9 @@ export class AwsStack extends cdk.Stack {
       value: cluster.clusterEndpoint.hostname,
     });
 
-    // Don't need the stuff on my lambdas for neptune
-    const neptuneProxyLambda = new lambdaNodeJs.NodejsFunction(
+    const contactSyncLambda = new lambdaNodeJs.NodejsFunction(
       this,
-      "neptuneLambda",
+      "contactSyncLambda",
       {
         runtime: lambda.Runtime.NODEJS_20_X,
         entry: "src/res/lambdas/neptune/index.ts",
@@ -380,11 +379,11 @@ export class AwsStack extends cdk.Stack {
     });
 
     // setup neptune proxy lambda to listen to sqs
-    contactSyncQueue.grantSendMessages(neptuneProxyLambda);
-    contactSyncDLQ.grantSendMessages(neptuneProxyLambda);
+    contactSyncQueue.grantSendMessages(contactSyncLambda);
+    contactSyncDLQ.grantSendMessages(contactSyncLambda);
 
     // setup neptune proxy lambda to write to sqs
-    neptuneProxyLambda.addEventSource(
+    contactSyncLambda.addEventSource(
       new SqsEventSource(contactSyncQueue, {
         batchSize: 1,
       }),
