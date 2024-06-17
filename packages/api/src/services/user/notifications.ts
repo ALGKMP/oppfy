@@ -1,6 +1,7 @@
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
+  EventType,
   NotificationSettings,
   SendNotificationData,
   SnsNotificationData,
@@ -59,7 +60,7 @@ export class NotificationsService {
         const message = (() => {
           switch (eventType) {
             case "like":
-              return `Someone liked your post!`;
+              return `${username} liked your post!`;
             case "post":
               return `New post from ${username}!`;
             case "comment":
@@ -121,6 +122,13 @@ export class NotificationsService {
       recipientId,
       notificationData,
     );
+  }
+
+  async deleteNotification(
+    senderId: string,
+    eventType?: EventType | EventType[],
+  ) {
+    this.notificationsRepository.deleteNotification(senderId, eventType);
   }
 
   async sendNotification(
