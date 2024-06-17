@@ -92,7 +92,10 @@ export class FollowService {
       );
     }
 
-    return await this.followRepository.removeFollower(senderId, recipientId);
+    await this.followRepository.removeFollower(senderId, recipientId);
+
+    // @tony we also need to delete the stored event to avoid duplication
+    await this.notificationsService.deleteNotification(senderId, "follow");
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
