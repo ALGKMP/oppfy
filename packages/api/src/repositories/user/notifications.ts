@@ -74,6 +74,7 @@ export class NotificationsRepository {
         entityId: schema.notifications.entityId,
         entityType: schema.notifications.entityType,
         createdAt: schema.notifications.createdAt,
+        privacySetting: schema.user.privacySetting,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
