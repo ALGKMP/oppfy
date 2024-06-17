@@ -33,8 +33,15 @@ const PhoneNumberOTP = () => {
     sharedValidators.user.phoneNumberOTP.safeParse(phoneNumberOTP).success;
 
   const handleNewUser = async (userId: string) => {
+
+    if (!phoneNumber) {
+      setError(Error.UNKNOWN_ERROR);
+      return;
+    }
+
     await createUser.mutateAsync({
       userId,
+      phoneNumber
     });
     router.replace("/user-info/welcome");
   };

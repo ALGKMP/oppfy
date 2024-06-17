@@ -3,6 +3,7 @@ import { z } from "zod";
 const trpcUserInputSchemas = {
   createUser: z.object({
     userId: z.string(),
+    phoneNumber: z.string(),
   }),
   getUser: z.object({
     userId: z.string(),

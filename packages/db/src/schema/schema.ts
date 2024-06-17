@@ -31,6 +31,7 @@ export const user = mySqlTable("User", {
     .default("public")
     .notNull(),
   pushToken: varchar("pushToken", { length: 255 }),
+  phoneNumber: varchar("phoneNumber", { length: 128 }).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .onUpdateNow()

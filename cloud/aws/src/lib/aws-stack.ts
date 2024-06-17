@@ -351,7 +351,7 @@ export class AwsStack extends cdk.Stack {
       "contactSyncLambda",
       {
         runtime: lambda.Runtime.NODEJS_20_X,
-        entry: "src/res/lambdas/neptune/index.ts",
+        entry: "src/res/lambdas/contact-sync/index.ts",
         handler: "handler",
         // timeout: cdk.Duration.minutes(3),
         environment: {

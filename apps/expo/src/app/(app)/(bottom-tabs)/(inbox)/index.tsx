@@ -21,6 +21,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const Inbox = () => {
   const router = useRouter();
 
+  const utils = api.useUtils();
+
   const { data: requestsCount, isLoading: isCountRequestsLoading } =
     api.request.countRequests.useQuery();
 
@@ -55,11 +57,62 @@ const Inbox = () => {
     }
   };
 
+  const followUser = api.follow.followUser.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.notifications.paginateNotifications.cancel();
+
+      // Get the data from the queryCache
+      const prevData =
+        utils.notifications.paginateNotifications.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.notifications.paginateNotifications.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.userId === newData.userId
+                ? {
+                    ...item,
+                    relationshipState:
+                      item.privacySetting === "private"
+                        ? "followRequestSent"
+                        : "following",
+                  }
+                : item,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.notifications.paginateNotifications.setInfiniteData(
+        {},
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.notifications.paginateNotifications.invalidate();
+    },
+  });
+
   const onUserSelected = (profileId: number) => {
     router.navigate({
       pathname: "/(inbox)/profile/[profile-id]/",
       params: { profileId: String(profileId) },
     });
+  };
+
+  const onFollowUser = async (userId: string) => {
+    await followUser.mutateAsync({ userId });
   };
 
   const renderRequestCount = () =>
@@ -84,7 +137,6 @@ const Inbox = () => {
           ItemSeparatorComponent={Separator}
           estimatedItemSize={75}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
           renderItem={() => (
             <VirtualizedListItem
               loading
@@ -127,34 +179,56 @@ const Inbox = () => {
           </TouchableOpacity>
         )}
 
-        <View
-          paddingVertical="$2"
-          paddingHorizontal="$3"
-          borderRadius="$6"
-          backgroundColor="$gray2"
-        >
-          <FlashList
-            data={notificationItems}
-            onRefresh={refetch}
-            refreshing={isNotificationsLoading}
-            estimatedItemSize={75}
-            onEndReached={handleOnEndReached}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <VirtualizedListItem
-                loading={false}
-                title={item.username ?? ""}
-                subtitle={"joined oppfy 🎉" ?? ""}
-                subtitle2="1d ago"
-                button={{
-                  text: "Follow",
-                }}
-                imageUrl={item.profilePictureUrl}
-                onPress={() => onUserSelected(item.profileId)}
-              />
-            )}
-          />
-        </View>
+        {notificationItems.length > 0 && (
+          <View
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            borderRadius="$6"
+            backgroundColor="$gray2"
+          >
+            <FlashList
+              data={notificationItems}
+              onRefresh={refetch}
+              refreshing={isNotificationsLoading}
+              estimatedItemSize={75}
+              onEndReached={handleOnEndReached}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => {
+                const buttonText = (() => {
+                  switch (item.relationshipState) {
+                    case "notFollowing":
+                      return "Follow";
+                    case "following":
+                      return "Following";
+                    case "followRequestSent":
+                      return "Requested";
+                  }
+                })();
+
+                const buttonDisabled =
+                  item.relationshipState === "following" ||
+                  item.relationshipState === "followRequestSent";
+
+                return (
+                  <VirtualizedListItem
+                    loading={false}
+                    title={item.username ?? ""}
+                    subtitle={item.message ?? ""}
+                    subtitle2="1d ago"
+                    button={{
+                      text: buttonText,
+                      disabled: buttonDisabled,
+                      disabledStyle: { opacity: 0.5 },
+                      onPress: () => onFollowUser(item.userId),
+                    }}
+                    imageUrl={item.profilePictureUrl}
+                    onPress={() => onUserSelected(item.profileId)}
+                  />
+                );
+              }}
+            />
+          </View>
+        )}
       </YStack>
     </BaseScreenView>
   );

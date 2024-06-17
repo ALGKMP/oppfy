@@ -14,7 +14,7 @@ export class UserService {
     return user;
   }
 
-  async createUser(userId: string) {
+  async createUser(userId: string, phoneNumber: string) {
     const userExists = await this._userExists(userId);
     if (userExists) {
       throw new DomainError(
@@ -22,7 +22,7 @@ export class UserService {
         "User already exists",
       );
     }
-    return await this.userRepository.createUser(userId);
+    return await this.userRepository.createUser(userId, phoneNumber);
   }
 
   async deleteUser(userId: string) {

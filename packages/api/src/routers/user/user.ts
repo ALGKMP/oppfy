@@ -14,7 +14,7 @@ export const userRouter = createTRPCRouter({
     .input(trpcValidators.input.user.createUser)
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.user.createUser(input.userId);
+        await ctx.services.user.createUser(input.userId, input.phoneNumber);
       } catch (err) {
         // Example error handling for when creating a user fails
         throw new TRPCError({
