@@ -12,11 +12,16 @@ const AppLayout = () => {
 
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
+  const onBoardingComplete = api.user.checkOnboardingComplete;
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
   if (!isSignedIn) {
     return <Redirect href="/(onboarding)" />;
+  }
+
+  if (!onBoardingComplete) {
+    return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 
   if (!requiredPermissions) {
