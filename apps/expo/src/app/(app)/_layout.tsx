@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Redirect } from "expo-router";
 
 import { usePermissions } from "~/contexts/PermissionsContext";
@@ -12,8 +12,17 @@ const AppLayout = () => {
 
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
-  const onBoardingComplete = api.user.checkOnboardingComplete.useMutation();
-  console.log(onBoardingComplete)
+  const [onBoardingComplete, setOnBoardingComplete] = useState(false);
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      const onBoardingMutation = api.user.checkOnboardingComplete.useMutation();
+      const result = await onBoardingMutation.mutateAsync();
+      setOnBoardingComplete(result);
+    };
+
+    checkOnboarding();
+  }, []);
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -21,7 +30,7 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!onBoardingComplete.mutateAsync()) {
+  if (!onBoardingComplete) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 
