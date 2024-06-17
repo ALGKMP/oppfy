@@ -5,6 +5,7 @@ import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 import { usePushNotifications } from "~/hooks/notifications";
 import { Stack } from "~/layouts";
+import { api } from "~/utils/api";
 
 const AppLayout = () => {
   usePushNotifications();

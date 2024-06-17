@@ -141,7 +141,7 @@ export class NotificationsRepository {
 
     const params = {
       Subject: "New notification",
-      TopicArn: process.env.PUSH_NOTIFICATION_TOPIC_ARN,
+      TopicArn: process.env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
       Message: JSON.stringify(message),
     };
 
