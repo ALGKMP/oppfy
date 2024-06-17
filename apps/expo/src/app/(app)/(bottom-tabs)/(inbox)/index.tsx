@@ -140,19 +140,38 @@ const Inbox = () => {
               estimatedItemSize={75}
               onEndReached={handleOnEndReached}
               showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <VirtualizedListItem
-                  loading={false}
-                  title={item.username ?? ""}
-                  subtitle={item.message ?? ""}
-                  subtitle2="1d ago"
-                  button={{
-                    text: "Follow",
-                  }}
-                  imageUrl={item.profilePictureUrl}
-                  onPress={() => onUserSelected(item.profileId)}
-                />
-              )}
+              renderItem={({ item }) => {
+                const buttonText = (() => {
+                  switch (item.relationshipState) {
+                    case "notFollowing":
+                      return "Follow";
+                    case "following":
+                      return "Following";
+                    case "followRequestSent":
+                      return "Requested";
+                  }
+                })();
+
+                const buttonDisabled =
+                  item.relationshipState === "following" ||
+                  item.relationshipState === "followRequestSent";
+
+                return (
+                  <VirtualizedListItem
+                    loading={false}
+                    title={item.username ?? ""}
+                    subtitle={item.message ?? ""}
+                    subtitle2="1d ago"
+                    button={{
+                      text: buttonText,
+                      disabled: buttonDisabled,
+                      onPress: () => null,
+                    }}
+                    imageUrl={item.profilePictureUrl}
+                    onPress={() => onUserSelected(item.profileId)}
+                  />
+                );
+              }}
             />
           </View>
         )}

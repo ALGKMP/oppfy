@@ -15,6 +15,7 @@ export interface ButtonProps {
 
   theme?: ThemeName | null;
 
+  disabled?: boolean;
   onPress?: () => void;
 }
 
