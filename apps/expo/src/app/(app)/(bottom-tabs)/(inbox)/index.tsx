@@ -21,6 +21,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const Inbox = () => {
   const router = useRouter();
 
+  const utils = api.useUtils();
+
   const { data: requestsCount, isLoading: isCountRequestsLoading } =
     api.request.countRequests.useQuery();
 
@@ -55,7 +57,52 @@ const Inbox = () => {
     }
   };
 
-  const followUser = api.follow.followUser.useMutation();
+  const followUser = api.follow.followUser.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.notifications.paginateNotifications.cancel();
+
+      // Get the data from the queryCache
+      const prevData =
+        utils.notifications.paginateNotifications.getInfiniteData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.notifications.paginateNotifications.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.userId === newData.userId
+                ? {
+                    ...item,
+                    relationshipState:
+                      item.privacySetting === "private"
+                        ? "followRequestSent"
+                        : "following",
+                  }
+                : item,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.notifications.paginateNotifications.setInfiniteData(
+        {},
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.notifications.paginateNotifications.invalidate();
+    },
+  });
 
   const onUserSelected = (profileId: number) => {
     router.navigate({
@@ -171,6 +218,7 @@ const Inbox = () => {
                     button={{
                       text: buttonText,
                       disabled: buttonDisabled,
+                      disabledStyle: { opacity: 0.5 },
                       onPress: () => onFollowUser(item.userId),
                     }}
                     imageUrl={item.profilePictureUrl}
