@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { and, asc, db, eq, gt, or, schema } from "@oppfy/db";
+import { aliasedTable, and, asc, db, eq, gt, or, schema, sql } from "@oppfy/db";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
@@ -58,6 +58,12 @@ export class NotificationsRepository {
     cursor: { createdAt: Date } | null = null,
     pageSize = 10,
   ) {
+    const followerTable = aliasedTable(schema.follower, "followerTable");
+    const followRequestTable = aliasedTable(
+      schema.followRequest,
+      "followRequestTable",
+    );
+
     const notifications = await this.db
       .select({
         profileId: schema.profile.id,
@@ -67,27 +73,38 @@ export class NotificationsRepository {
         entityId: schema.notifications.entityId,
         entityType: schema.notifications.entityType,
         createdAt: schema.notifications.createdAt,
+        relationshipState: sql<
+          "following" | "followRequestSent" | "notFollowing"
+        >`
+      CASE
+          WHEN ${followerTable.id} IS NOT NULL THEN 'following'
+          WHEN ${followRequestTable.id} IS NOT NULL THEN 'followRequestSent'
+          ELSE 'notFollowing'
+        END
+      `,
       })
       .from(schema.notifications)
-      .innerJoin(
-        schema.user,
-        eq(schema.notifications.recipientId, schema.user.id),
+      .innerJoin(schema.user, eq(schema.notifications.senderId, schema.user.id))
+      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .leftJoin(
+        followerTable,
+        and(
+          eq(followerTable.senderId, userId),
+          eq(followerTable.recipientId, schema.user.id),
+        ),
       )
-      .innerJoin(
-        schema.profile,
-        eq(schema.notifications.recipientId, schema.user.id),
+      .leftJoin(
+        followRequestTable,
+        and(
+          eq(followRequestTable.senderId, userId),
+          eq(followRequestTable.recipientId, schema.user.id),
+        ),
       )
       .where(
         and(
           eq(schema.notifications.recipientId, userId),
           cursor
-            ? or(
-                gt(schema.notifications.createdAt, cursor.createdAt),
-                // and(
-                //   eq(schema.notifications.createdAt, cursor.createdAt),
-                //   gt(schema.notifications.id, cursor.id),
-                // ),
-              )
+            ? gt(schema.notifications.createdAt, cursor.createdAt)
             : undefined,
         ),
       )
