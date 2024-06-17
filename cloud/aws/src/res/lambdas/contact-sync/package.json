@@ -1,5 +1,5 @@
 {
-  "name": "@oppfy/neptune-lambda",
+  "name": "@oppfy/contact-sync-lambda",
   "version": "0.1.0",
   "private": true,
   "type": "module",
