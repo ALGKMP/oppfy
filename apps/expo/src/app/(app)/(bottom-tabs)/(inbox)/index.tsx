@@ -55,8 +55,11 @@ const Inbox = () => {
     }
   };
 
-  const onUserSelected = (senderId: string) => {
-    // todo: implement routing
+  const onUserSelected = (profileId: number) => {
+    router.navigate({
+      pathname: "/(inbox)/profile/[profile-id]/",
+      params: { profileId: String(profileId) },
+    });
   };
 
   const renderRequestCount = () =>
@@ -147,7 +150,7 @@ const Inbox = () => {
                   text: "Follow",
                 }}
                 imageUrl={item.profilePictureUrl}
-                // onPress={() => onUserSelected(item.userId)}
+                onPress={() => onUserSelected(item.profileId)}
               />
             )}
           />

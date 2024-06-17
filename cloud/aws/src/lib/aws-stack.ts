@@ -5,6 +5,7 @@ import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
@@ -13,9 +14,8 @@ import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as sns from "aws-cdk-lib/aws-sns";
-import * as sqs from "aws-cdk-lib/aws-sqs";
-import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 
 // Helper function to create an S3 bucket
@@ -62,7 +62,8 @@ function createLambdaFunction(
     },
     environment: {
       // TODO: These should be passed on a case by case basis
-      PUSH_NOTIFICATION_TOPIC_ARN: process.env.PUSH_NOTIFICATION_TOPIC_ARN!,
+      SNS_PUSH_NOTIFICATION_TOPIC_ARN:
+        process.env.SNS_PUSH_NOTIFICATION_TOPIC_ARN!,
 
       S3_POST_BUCKET: process.env.S3_POST_BUCKET!,
       S3_PROFILE_BUCKET: process.env.S3_PROFILE_BUCKET!,
@@ -421,20 +422,20 @@ tar -zxvf /tmp/graph_notebook.tar.gz -C /tmp
 /tmp/graph_notebook/install.sh
 EOF`;
 
-    const notebookLifecycleConfig = new sagemaker
-      .CfnNotebookInstanceLifecycleConfig(
-      this,
-      "NotebookLifecycleConfig",
-      {
-        notebookInstanceLifecycleConfigName:
-          "neptune-notebook-lifecycle-config",
-        onStart: [
-          {
-            content: cdk.Fn.base64(lifeCycleScript),
-          },
-        ],
-      },
-    );
+    const notebookLifecycleConfig =
+      new sagemaker.CfnNotebookInstanceLifecycleConfig(
+        this,
+        "NotebookLifecycleConfig",
+        {
+          notebookInstanceLifecycleConfigName:
+            "neptune-notebook-lifecycle-config",
+          onStart: [
+            {
+              content: cdk.Fn.base64(lifeCycleScript),
+            },
+          ],
+        },
+      );
 
     const notebookInstance = new sagemaker.CfnNotebookInstance(
       this,
