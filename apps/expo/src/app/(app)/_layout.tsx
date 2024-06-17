@@ -12,25 +12,21 @@ const AppLayout = () => {
 
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
-  const [onBoardingComplete, setOnBoardingComplete] = useState(false);
 
-  useEffect(() => {
-    const checkOnboarding = async () => {
-      const onBoardingMutation = api.user.checkOnboardingComplete.useMutation();
-      const result = await onBoardingMutation.mutateAsync();
-      setOnBoardingComplete(result);
-    };
-
-    checkOnboarding();
-  }, []);
+  const { isLoading: onboardingCompleteIsLoading, data: onboardingComplete } =
+    api.user.onboardingComplete.useQuery();
 
   const requiredPermissions = permissions.camera && permissions.contacts;
+
+  if (onboardingCompleteIsLoading) {
+    return null;
+  }
 
   if (!isSignedIn) {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!onBoardingComplete) {
+  if (!onboardingComplete) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 
