@@ -6,6 +6,8 @@ import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode, handleDatabaseErrors } from "../../errors";
 
+type EventType = z.infer<typeof sharedValidators.notifications.eventType>;
+
 export type StoreNotificationData = z.infer<
   typeof sharedValidators.notifications.notificationData
 >;
@@ -143,6 +145,31 @@ export class NotificationsRepository {
       recipientId,
       ...notificationData,
     });
+  }
+
+  @handleDatabaseErrors
+  async deleteNotification(
+    senderId: string,
+    eventType?: EventType | EventType[],
+  ) {
+    const eventTypes = Array.isArray(eventType)
+      ? eventType
+      : eventType
+        ? [eventType]
+        : [];
+
+    await this.db
+      .delete(schema.notifications)
+      .where(
+        and(
+          eq(schema.notifications.senderId, senderId),
+          or(
+            ...eventTypes.map((eventType) =>
+              eq(schema.notifications.eventType, eventType),
+            ),
+          ),
+        ),
+      );
   }
 
   async sendNotification(
