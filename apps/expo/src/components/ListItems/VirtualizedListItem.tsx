@@ -4,19 +4,19 @@ import { TouchableOpacity, View } from "react-native";
 import debounce from "lodash/debounce";
 import { Skeleton } from "moti/skeleton";
 import type { ThemeName } from "tamagui";
-import { Avatar, Button, SizableText, XStack, YStack } from "tamagui";
+import {
+  Avatar,
+  ButtonProps as BaseButtonProps,
+  Button,
+  SizableText,
+  XStack,
+  YStack,
+} from "tamagui";
 
 type Icon = JSX.Element | FunctionComponent;
 
-export interface ButtonProps {
+export interface ButtonProps extends BaseButtonProps {
   text: string;
-  icon?: Icon;
-  iconAfter?: Icon;
-
-  theme?: ThemeName | null;
-
-  disabled?: boolean;
-  onPress?: () => void;
 }
 
 const isButtonProps = (obj: unknown): obj is ButtonProps => {
