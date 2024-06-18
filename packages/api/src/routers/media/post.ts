@@ -211,7 +211,6 @@ export const postRouter = createTRPCRouter({
   like: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
         postId: z.number(),
       }),
     )
@@ -226,10 +225,27 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+  hasliked: protectedProcedure
+    .input(
+      z.object({
+        postId: z.number(),
+      }),
+    )
+    .output(z.boolean())
+    .query(async ({ ctx, input }) => {
+      try {
+        return !!ctx.services.post.hasLiked(ctx.session.uid, input.postId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to check if user has liked post.",
+        });
+      }
+    }),
+
   unlike: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
         postId: z.number(),
       }),
     )
