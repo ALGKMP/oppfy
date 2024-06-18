@@ -30,7 +30,6 @@ export const user = mySqlTable("User", {
   privacySetting: mysqlEnum("privacySetting", ["public", "private"])
     .default("public")
     .notNull(),
-  pushToken: varchar("pushToken", { length: 255 }),
   phoneNumber: varchar("phoneNumber", { length: 128 }).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
@@ -78,6 +77,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
     references: [notificationSettings.id],
   }),
   notifications: many(notifications),
+  pushTokens: many(pushToken),
 }));
 
 export const profile = mySqlTable("Profile", {
@@ -95,6 +95,25 @@ export const profile = mySqlTable("Profile", {
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
+
+export const pushToken = mySqlTable("PushToken", {
+  id: serial("id").primaryKey(),
+  userId: varchar("userId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  token: varchar("token", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .onUpdateNow()
+    .notNull(),
+});
+
+export const pushTokenRelations = relations(pushToken, ({ one }) => ({
+  user: one(user, {
+    fields: [pushToken.userId],
+    references: [user.id],
+  }),
+}));
 
 export const notifications = mySqlTable("Notifications", {
   id: serial("id").primaryKey(),
