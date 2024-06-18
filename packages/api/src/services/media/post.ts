@@ -1,3 +1,7 @@
+import { z } from "zod";
+
+import { sharedValidators } from "@oppfy/validators";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
@@ -21,14 +25,16 @@ interface CommentCursor {
   commentId: number;
 }
 
-interface CommentProfile {
-  commentId: number;
-  userId: string;
-  username: string | null;
-  body: string;
-  profilePictureUrl: string;
-  createdAt: Date;
-}
+type CommentProfile = z.infer<typeof sharedValidators.media.comment>;
+
+// interface CommentProfile {
+//   commentId: number;
+//   userId: string;
+//   username: string | null;
+//   profilePictureUrl: string;
+//   body: string;
+//   createdAt: Date;
+// }
 
 export interface Post {
   postId: number;

@@ -45,6 +45,7 @@ export class CommentRepository {
         userId: schema.comment.user,
         username: schema.profile.username,
         profilePictureUrl: schema.profile.profilePictureKey,
+        postId: schema.comment.post,
         body: schema.comment.body,
         createdAt: schema.comment.createdAt,
       })
