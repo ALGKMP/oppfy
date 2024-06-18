@@ -31,11 +31,17 @@ export class NotificationsRepository {
   private sns = sns;
 
   @handleDatabaseErrors
-  async updatePushToken(userId: string, pushToken: string) {
+  async storePushToken(userId: string, pushToken: string) {
     await this.db
-      .update(schema.user)
-      .set({ pushToken })
-      .where(eq(schema.user.id, userId));
+      .insert(schema.pushToken)
+      .values({ userId, token: pushToken })
+      .onDuplicateKeyUpdate({
+        
+        set: {
+          token: pushToken,
+          updatedAt: sql`CURRENT_TIMESTAMP`,
+        },
+      });
   }
 
   @handleDatabaseErrors

@@ -10,6 +10,7 @@ import {
   serial,
   text,
   timestamp,
+  uniqueIndex,
   varbinary,
   varchar,
 } from "drizzle-orm/mysql-core";
@@ -96,17 +97,26 @@ export const profile = mySqlTable("Profile", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const pushToken = mySqlTable("PushToken", {
-  id: serial("id").primaryKey(),
-  userId: varchar("userId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  token: varchar("token", { length: 255 }).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
-});
+export const pushToken = mySqlTable(
+  "PushToken",
+  {
+    id: serial("id").primaryKey(),
+
+    userId: varchar("userId", { length: 255 })
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .onUpdateNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (table) => ({
+    uniqueToken: uniqueIndex("uniqueToken").on(table.token),
+  }),
+);
 
 export const pushTokenRelations = relations(pushToken, ({ one }) => ({
   user: one(user, {
