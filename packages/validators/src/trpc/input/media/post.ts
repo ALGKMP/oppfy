@@ -4,8 +4,10 @@ import { postContentType } from "../../../shared";
 
 const trpcPostInputSchema = {
   createS3PresignedUrl: z.object({
-    recipient: z.string(),
+    recipientId: z.string(),
     caption: z.string().max(2000).default(""),
+    height: z.number(),
+    width: z.number(),
     contentLength: z.number(),
     contentType: postContentType,
   }),
