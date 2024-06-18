@@ -84,11 +84,11 @@ export class NotificationsService {
       }),
     );
 
+    const nextCursor = items[items.length - 1];
+
     return {
       items: itemsWithProfilePictureUrls,
-      nextCursor: items.length
-        ? items[items.length - 1]?.createdAt.toISOString()
-        : null,
+      nextCursor: nextCursor ? { createdAt: nextCursor.createdAt } : null,
     };
   }
 
