@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { postContentType } from "../../../shared/media";
+import { postContentType } from "../../../shared";
 
 const trpcPostInputSchema = {
   createS3PresignedUrl: z.object({

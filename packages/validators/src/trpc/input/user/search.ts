@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { username } from "../../../shared/user";
+import { username } from "../../../shared";
 
 const trpcSearchInputSchema = {
   profilesByUsername: z.object({
