@@ -43,7 +43,7 @@ export const sendNotificationData = z.union([
 ]);
 
 const extraData = z.object({
-  pushToken: z.string(),
+  pushTokens: z.array(z.string()),
   senderId: z.string(),
   recipientId: z.string(),
 });

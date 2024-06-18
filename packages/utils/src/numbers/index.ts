@@ -1,6 +1,6 @@
 type Abbreviation = "K" | "M" | "B";
 
-export const abbreviateNumber = (value: number): string => {
+export const abbreviatedNumber = (value: number): string => {
   let newValue = value;
   const suffixes: Abbreviation[] = ["K", "M", "B"];
   let suffixIndex = 0;

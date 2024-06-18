@@ -12,6 +12,8 @@ import {
   YStack,
 } from "tamagui";
 
+import { abbreviatedTimeAgo } from "@oppfy/utils";
+
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
 import { ListHeader } from "~/features/connections/components";
@@ -214,7 +216,7 @@ const Inbox = () => {
                     loading={false}
                     title={item.username ?? ""}
                     subtitle={item.message ?? ""}
-                    subtitle2="1d ago"
+                    subtitle2={abbreviatedTimeAgo(item.createdAt)}
                     button={{
                       text: buttonText,
                       disabled: buttonDisabled,

@@ -43,7 +43,7 @@ const lambdaHandler = async (
       throw new Error("Invalid SNS message", result.error);
     }
 
-    const { title, body, pushToken } = result.data;
+    const { title, body, pushTokens } = result.data;
 
     const entityData =
       "entityId" in result.data && "entityType" in result.data
@@ -53,13 +53,15 @@ const lambdaHandler = async (
           } satisfies EntityData)
         : undefined;
 
-    messages.push({
-      to: pushToken,
-      sound: "default",
-      title,
-      body,
-      data: entityData,
-    });
+    for (const pushToken of pushTokens) {
+      messages.push({
+        to: pushToken,
+        sound: "default",
+        title,
+        body,
+        data: entityData,
+      });
+    }
   }
 
   const chunks = expo.chunkPushNotifications(messages);

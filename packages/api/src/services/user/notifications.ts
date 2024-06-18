@@ -136,15 +136,15 @@ export class NotificationsService {
     recipientId: string,
     notificationData: SendNotificationData,
   ) {
-    const pushToken =
-      await this.notificationsRepository.getPushToken(recipientId);
+    const pushTokens =
+      await this.notificationsRepository.getPushTokens(recipientId);
 
-    if (pushToken === null) {
+    if (pushTokens.length === 0) {
       throw new DomainError(ErrorCode.PUSH_TOKEN_NOT_FOUND);
     }
 
     await this.notificationsRepository.sendNotification(
-      pushToken,
+      pushTokens,
       senderId,
       recipientId,
       notificationData,
