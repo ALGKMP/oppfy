@@ -3,7 +3,6 @@ import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
-import { trpcValidators } from "@oppfy/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
 
@@ -40,7 +39,7 @@ export const handler = async (
       .object({
         user: z.string(),
       })
-      .parse(s3Response.$metadata);
+      .parse(s3Response.Metadata);
 
     console.log(metadata);
 
