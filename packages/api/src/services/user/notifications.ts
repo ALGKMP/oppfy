@@ -152,6 +152,6 @@ export class NotificationsService {
   }
 
   async storePushToken(userId: string, pushToken: string) {
-    await this.notificationsRepository.updatePushToken(userId, pushToken);
+    await this.notificationsRepository.storePushToken(userId, pushToken);
   }
 }
