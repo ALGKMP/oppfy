@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Skeleton } from "moti/skeleton";
@@ -26,10 +26,15 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const Inbox = () => {
   const router = useRouter();
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const utils = api.useUtils();
 
-  const { data: requestsCount, isLoading: isCountRequestsLoading } =
-    api.request.countRequests.useQuery();
+  const {
+    data: requestsCount,
+    isLoading: isCountRequestsLoading,
+    refetch: refetchRequestCount,
+  } = api.request.countRequests.useQuery();
 
   const totalRequestCount =
     (requestsCount?.followRequestCount ?? 0) +
@@ -41,7 +46,7 @@ const Inbox = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-    refetch,
+    refetch: refetchNotifications,
   } = api.notifications.paginateNotifications.useInfiniteQuery(
     {
       pageSize: 20,
@@ -120,6 +125,12 @@ const Inbox = () => {
     await followUser.mutateAsync({ userId });
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([refetchNotifications(), refetchRequestCount()]);
+    setRefreshing(false);
+  }, [refetchNotifications]);
+
   const renderRequestCount = () =>
     totalRequestCount > 99 ? (
       <XStack>
@@ -185,7 +196,12 @@ const Inbox = () => {
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <YStack gap="$4">
         {totalRequestCount > 0 && (
           <TouchableOpacity onPress={() => router.navigate("/requests")}>
@@ -218,8 +234,8 @@ const Inbox = () => {
           >
             <FlashList
               data={notificationItems}
-              onRefresh={refetch}
-              refreshing={isNotificationsLoading}
+              // onRefresh={refetch}
+              // refreshing={isNotificationsLoading}
               estimatedItemSize={75}
               onEndReached={handleOnEndReached}
               showsVerticalScrollIndicator={false}
