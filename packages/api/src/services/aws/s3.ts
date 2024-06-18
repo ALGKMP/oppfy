@@ -6,34 +6,28 @@ import { S3Repository } from "../../repositories/aws/s3";
 
 type ContentType = "image/jpeg" | "image/png";
 
-type PostMetadata = {
+interface Metadata {
+  [key: string]: string;
+}
+
+interface PostMetadata extends Metadata {
   author: string;
   recipient: string;
   caption: string;
-};
-type ProfilePictureMetadata = {
+  width: string;
+  height: string;
+}
+
+interface ProfilePictureMetadata extends Metadata {
   user: string;
-};
+}
+
 interface PutObjectPresignedUrlInput {
   Key: string;
   Bucket: string;
   ContentLength: number;
   ContentType: ContentType;
-}
-
-interface BasePutObjectPresignedUrlWithMetadataInput
-  extends PutObjectPresignedUrlInput {
-  Metadata: Record<string, string>;
-}
-
-interface PutObjectPresignedUrlWithPostMetadataInput
-  extends BasePutObjectPresignedUrlWithMetadataInput {
-  Metadata: PostMetadata;
-}
-
-interface PutObjectPresignedUrlWithProfilePictureMetadataInput
-  extends BasePutObjectPresignedUrlWithMetadataInput {
-  Metadata: ProfilePictureMetadata;
+  Metadata: PostMetadata | ProfilePictureMetadata;
 }
 
 interface GetObjectPresignedUrlInput {
@@ -51,13 +45,13 @@ export class S3Service {
   }
 
   async putObjectPresignedUrlWithPostMetadata(
-    putObjectCommandInput: PutObjectPresignedUrlWithPostMetadataInput,
+    putObjectCommandInput: PutObjectPresignedUrlInput,
   ) {
     return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }
 
   async putObjectPresignedUrlWithProfilePictureMetadata(
-    putObjectCommandInput: PutObjectPresignedUrlWithProfilePictureMetadataInput,
+    putObjectCommandInput: PutObjectPresignedUrlInput,
   ) {
     return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }

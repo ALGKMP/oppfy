@@ -15,11 +15,13 @@ export const postRouter = createTRPCRouter({
         const currentDate = Date.now();
         const bucket = process.env.S3_POST_BUCKET!;
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
-        const metadata = {
+        const metadata = sharedValidators.media.postMetadataForS3.parse({
           author: ctx.session.uid,
-          recipient: input.recipient,
+          recipient: input.recipientId,
           caption: input.caption,
-        };
+          width: input.width.toString(), // S3 Metadata have to be strings or some bullshit
+          height: input.height.toString(), // S3 Metadata have to be strings or some bullshit
+        });
 
         return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
           Bucket: bucket,

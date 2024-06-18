@@ -4,10 +4,6 @@ import { z } from "zod";
 
 import { AgeChecker } from "@oppfy/utils";
 
-export const userId = z.string();
-export const profileId = z.string();
-export const profilePicture = z.union([z.string(), z.null()]);
-
 export const fullName = z
   .string()
   .min(3, { message: "Name is too short" })

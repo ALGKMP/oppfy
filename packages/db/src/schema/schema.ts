@@ -189,6 +189,8 @@ export const post = mySqlTable("Post", {
     .notNull(),
   caption: text("caption").default("").notNull(),
   key: varchar("url", { length: 255 }).notNull(),
+  width: int("width", { unsigned: true }).default(500).notNull(),
+  height: int("height", { unsigned: true }).default(500).notNull(),
   mediaType: mysqlEnum("mediaType", ["image", "video"])
     .notNull()
     .default("image"),
