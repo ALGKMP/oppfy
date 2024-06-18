@@ -52,7 +52,6 @@ const ProfileLayout = () => {
 
   return (
     <ScrollView
-      // contentContainerStyle={{ flex: 1 }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

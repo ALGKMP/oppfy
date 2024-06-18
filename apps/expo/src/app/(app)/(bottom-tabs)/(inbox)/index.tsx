@@ -234,8 +234,6 @@ const Inbox = () => {
           >
             <FlashList
               data={notificationItems}
-              // onRefresh={refetch}
-              // refreshing={isNotificationsLoading}
               estimatedItemSize={75}
               onEndReached={handleOnEndReached}
               showsVerticalScrollIndicator={false}
