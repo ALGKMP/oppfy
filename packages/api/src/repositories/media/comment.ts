@@ -34,7 +34,7 @@ export class CommentRepository {
   }
 
   @handleDatabaseErrors
-  async getPaginatedComments(
+  async paginateComments(
     postId: number,
     cursor: { createdAt: Date; commentId: number } | null = null,
     pageSize = 10,

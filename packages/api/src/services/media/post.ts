@@ -379,13 +379,13 @@ export class PostService {
     }
   }
 
-  async getPaginatedComments(
+  async paginateComments(
     postId: number,
     cursor: CommentCursor | null = null,
     pageSize: number,
   ): Promise<PaginatedResponse<CommentProfile>> {
     try {
-      const data = await this.commentRepository.getPaginatedComments(
+      const data = await this.commentRepository.paginateComments(
         postId,
         cursor,
         pageSize,

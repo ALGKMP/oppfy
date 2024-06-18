@@ -6,6 +6,8 @@ import {
 } from "../../repositories";
 import { S3Service } from "../aws/s3";
 
+// TODO: Move these types into a d.types and put the paginated functions into their services.
+
 export interface PaginatedResponse<T> {
   items: T[];
   nextCursor: Cursor | undefined;
