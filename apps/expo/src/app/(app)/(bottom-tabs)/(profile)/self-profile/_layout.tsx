@@ -11,6 +11,7 @@ import {
   SizableText,
   Text,
   useTheme,
+  View,
   XStack,
   YStack,
 } from "tamagui";
@@ -95,48 +96,86 @@ const Profile = (props: ProfileProps) => {
         backgroundColor="$background"
         gap="$4"
       >
-        <Skeleton radius={100} width={105}>
-          <TouchableOpacity
-            style={{ alignItems: "center" }}
-            disabled={props.loading}
-            onPress={pickAndUploadImage}
-          >
-            <Avatar circular size="$10" bordered>
-              <Avatar.Image
-                {...(props.loading
-                  ? {}
-                  : { src: imageUri ?? props.data.profilePictureUrl })}
+        <View marginBottom={-28}>
+          <Skeleton radius={100} width={105}>
+            <TouchableOpacity
+              style={{ alignItems: "center" }}
+              disabled={props.loading}
+              onPress={pickAndUploadImage}
+            >
+              <Avatar circular size="$14" bordered>
+                <Avatar.Image
+                  {...(props.loading
+                    ? {}
+                    : { src: imageUri ?? props.data.profilePictureUrl })}
+                />
+                <Avatar.Fallback />
+              </Avatar>
+            </TouchableOpacity>
+          </Skeleton>
+        </View>
+
+        <XStack justifyContent="space-between" alignItems="center" width="100%">
+          <YStack alignItems="flex-start" gap="$2">
+            {props.loading ? (
+              <Skeleton width={100} height={25}>
+                <SizableText size="$4" textAlign="left" />
+              </Skeleton>
+            ) : (
+              <SizableText
+                size="$5"
+                fontWeight="bold"
+                textAlign="left"
+                lineHeight={0}
+              >
+                {props.data.name}
+              </SizableText>
+            )}
+
+            {props.loading ? (
+              <Skeleton width={250} height={50}>
+                <Paragraph theme="alt1" textAlign="left" />
+              </Skeleton>
+            ) : props.data.bio ? (
+              <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
+                {props.data.bio}
+              </Paragraph>
+            ) : null}
+          </YStack>
+
+          <YStack alignItems="flex-end" gap="$2">
+            <TouchableOpacity
+              disabled={props.loading}
+              onPress={() => router.push("/self-connections/following-list")}
+            >
+              <Stat
+                label="Following"
+                value={
+                  props.loading
+                    ? "0"
+                    : abbreviatedNumber(props.data.followingCount)
+                }
               />
-              <Avatar.Fallback />
-            </Avatar>
-          </TouchableOpacity>
-        </Skeleton>
+            </TouchableOpacity>
+            <TouchableOpacity
+              disabled={props.loading}
+              onPress={() => router.push("/self-connections/follower-list")}
+            >
+              <Stat
+                label="Followers"
+                value={
+                  props.loading
+                    ? "0"
+                    : abbreviatedNumber(props.data.followerCount)
+                }
+              />
+            </TouchableOpacity>
+          </YStack>
+        </XStack>
 
-        <YStack alignItems="center" gap="$2">
-          {props.loading ? (
-            <Skeleton width={100} height={25}>
-              <SizableText size="$4" textAlign="center" />
-            </Skeleton>
-          ) : (
-            <SizableText size="$4" textAlign="center">
-              {props.data.name}
-            </SizableText>
-          )}
-
-          {props.loading ? (
-            <Skeleton width={250} height={50}>
-              <Paragraph theme="alt1" textAlign="center" />
-            </Skeleton>
-          ) : props.data.bio ? (
-            <Paragraph theme="alt1" textAlign="center">
-              {props.data.bio}
-            </Paragraph>
-          ) : null}
-        </YStack>
-
-        <XStack width={250} gap="$4">
+        <XStack gap="$4">
           <Button
-            size="$3"
+            size="$3.5"
             flex={1}
             disabled={props.loading}
             onPress={() => router.push("/edit-profile")}
@@ -144,54 +183,13 @@ const Profile = (props: ProfileProps) => {
             Edit Profile
           </Button>
           <Button
-            size="$3"
+            size="$3.5"
             flex={1}
             disabled={props.loading}
             onPress={() => router.push("/share-profile")}
           >
             Share Profile
           </Button>
-        </XStack>
-
-        <XStack gap="$7">
-          <TouchableOpacity
-            disabled={props.loading}
-            onPress={() => router.push("/self-connections/friend-list")}
-          >
-            <Stat
-              label="Friends"
-              value={
-                props.loading ? "0" : abbreviatedNumber(props.data.friendCount)
-              }
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            disabled={props.loading}
-            onPress={() => router.push("/self-connections/follower-list")}
-          >
-            <Stat
-              label="Followers"
-              value={
-                props.loading
-                  ? "0"
-                  : abbreviatedNumber(props.data.followerCount)
-              }
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            disabled={props.loading}
-            onPress={() => router.push("/self-connections/following-list")}
-          >
-            <Stat
-              label="Following"
-              value={
-                props.loading
-                  ? "0"
-                  : abbreviatedNumber(props.data.followingCount)
-              }
-            />
-          </TouchableOpacity>
         </XStack>
       </YStack>
     </Skeleton.Group>
@@ -205,8 +203,10 @@ interface StatProps {
 
 const Stat = (props: StatProps) => (
   <XStack gap="$1">
-    <Text>{props.label}</Text>
-    <Text>{props.value}</Text>
+    <Text theme="alt1">{props.label}</Text>
+    <Text fontWeight="bold" theme="alt1">
+      {props.value}
+    </Text>
   </XStack>
 );
 
