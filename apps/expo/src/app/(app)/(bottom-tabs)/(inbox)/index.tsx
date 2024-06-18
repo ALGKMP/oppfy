@@ -2,11 +2,14 @@ import React, { useEffect, useMemo } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
+import { Skeleton } from "moti/skeleton";
 import {
   Circle,
   Paragraph,
   Separator,
   SizableText,
+  Spacer,
+  Text,
   View,
   XStack,
   YStack,
@@ -133,25 +136,50 @@ const Inbox = () => {
 
   if (isCountRequestsLoading || isNotificationsLoading) {
     return (
-      <BaseScreenView paddingBottom={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          showsVerticalScrollIndicator={false}
-          renderItem={() => (
-            <VirtualizedListItem
-              loading
-              showSkeletons={{
-                imageUrl: true,
-                title: true,
-                subtitle: true,
-                subtitle2: true,
-                button: true,
-              }}
+      <BaseScreenView scrollable>
+        <YStack gap="$4">
+          <Skeleton.Group show={true}>
+            <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
+              <YStack>
+                <Skeleton width={150}>
+                  <SizableText size="$6" fontWeight="bold">
+                    Loading...
+                  </SizableText>
+                </Skeleton>
+                <Spacer size="$1" />
+                <Skeleton width={300}>
+                  <Paragraph theme="alt1">Loading...</Paragraph>
+                </Skeleton>
+              </YStack>
+            </View>
+          </Skeleton.Group>
+
+          <View
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            borderRadius="$6"
+            backgroundColor="$gray2"
+          >
+            <FlashList
+              data={PLACEHOLDER_DATA}
+              ItemSeparatorComponent={Separator}
+              estimatedItemSize={75}
+              showsVerticalScrollIndicator={false}
+              renderItem={() => (
+                <VirtualizedListItem
+                  loading
+                  showSkeletons={{
+                    imageUrl: true,
+                    title: true,
+                    subtitle: true,
+                    subtitle2: true,
+                    button: true,
+                  }}
+                />
+              )}
             />
-          )}
-        />
+          </View>
+        </YStack>
       </BaseScreenView>
     );
   }
