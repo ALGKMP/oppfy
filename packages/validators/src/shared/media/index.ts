@@ -19,6 +19,16 @@ export const post = z.object({
   createdAt: z.date(), // Added missing field
 });
 
+export const comment = z.object({
+  commentId: z.number(),
+  userId: z.string(),
+  username: z.string().nullable(),
+  profilePictureUrl: z.string(),
+  postId: z.number(),
+  body: z.string(),
+  createdAt: z.date(),
+});
+
 export const postMetadataForS3 = z.object({
   author: z.string(),
   recipient: z.string(),
