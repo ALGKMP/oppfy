@@ -15,7 +15,7 @@ import {
   YStack,
 } from "tamagui";
 
-import { abbreviateNumber } from "@oppfy/utils";
+import { abbreviatedNumber } from "@oppfy/utils";
 
 import { TopTabBar } from "~/components/TabBars";
 import { useUploadProfilePicture } from "~/hooks/media";
@@ -51,22 +51,22 @@ const ProfileLayout = () => {
   }, [refetch]);
 
   return (
-      <ScrollView
-        // contentContainerStyle={{ flex: 1 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {isLoading || profileData === undefined ? (
-          <Profile loading />
-        ) : (
-          <>
-            <Profile loading={false} data={profileData} />
-            <MediaOfYou />
-          </>
-        )}
-      </ScrollView>
+    <ScrollView
+      // contentContainerStyle={{ flex: 1 }}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {isLoading || profileData === undefined ? (
+        <Profile loading />
+      ) : (
+        <>
+          <Profile loading={false} data={profileData} />
+          <MediaOfYou />
+        </>
+      )}
+    </ScrollView>
   );
 };
 
@@ -162,7 +162,7 @@ const Profile = (props: ProfileProps) => {
             <Stat
               label="Friends"
               value={
-                props.loading ? "0" : abbreviateNumber(props.data.friendCount)
+                props.loading ? "0" : abbreviatedNumber(props.data.friendCount)
               }
             />
           </TouchableOpacity>
@@ -174,7 +174,9 @@ const Profile = (props: ProfileProps) => {
             <Stat
               label="Followers"
               value={
-                props.loading ? "0" : abbreviateNumber(props.data.followerCount)
+                props.loading
+                  ? "0"
+                  : abbreviatedNumber(props.data.followerCount)
               }
             />
           </TouchableOpacity>
@@ -187,7 +189,7 @@ const Profile = (props: ProfileProps) => {
               value={
                 props.loading
                   ? "0"
-                  : abbreviateNumber(props.data.followingCount)
+                  : abbreviatedNumber(props.data.followingCount)
               }
             />
           </TouchableOpacity>
