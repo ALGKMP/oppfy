@@ -162,7 +162,10 @@ export class PostService {
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      const data = await this.postRepository.paginatePostsOfUser(userId, cursor);
+      const data = await this.postRepository.paginatePostsOfUser(
+        userId,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -182,12 +185,12 @@ export class PostService {
     try {
       const user = await this.userRepository.getUserByProfileId(profileId);
       if (!user) {
-        throw new DomainError(
-          ErrorCode.USER_NOT_FOUND,
-          "User not found.",
-        );
+        throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found.");
       }
-      const data = await this.postRepository.paginatePostsOfUser(user.id, cursor);
+      const data = await this.postRepository.paginatePostsOfUser(
+        user.id,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -205,7 +208,10 @@ export class PostService {
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      const data = await this.postRepository.paginatePostsByUser(userId, cursor);
+      const data = await this.postRepository.paginatePostsByUser(
+        userId,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -225,12 +231,12 @@ export class PostService {
     try {
       const user = await this.userRepository.getUserByProfileId(profileId);
       if (!user) {
-        throw new DomainError(
-          ErrorCode.USER_NOT_FOUND,
-          "User not found.",
-        );
+        throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found.");
       }
-      const data = await this.postRepository.paginatePostsByUser(user.id, cursor);
+      const data = await this.postRepository.paginatePostsByUser(
+        user.id,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -296,8 +302,8 @@ export class PostService {
 
   async likePost(userId: string, postId: number) {
     try {
-      const likeExists = await this.likeRepository.hasUserLiked(postId, userId);
-      if (!likeExists) {
+      const like = await this.likeRepository.findLike(postId, userId);
+      if (!like) {
         await this.likeRepository.addLike(postId, userId);
       }
     } catch (error) {
@@ -323,6 +329,22 @@ export class PostService {
       throw new DomainError(
         ErrorCode.FAILED_TO_UNLIKE_POST,
         "Failed to unlike post.",
+      );
+    }
+  }
+
+  async hasLiked(userId: string, postId: number): Promise<boolean> {
+    try {
+      const like = await this.likeRepository.findLike(postId, userId);
+      return !!like;
+    } catch (error) {
+      console.error(
+        `Error in hasLiked for userId: ${userId}, postId: ${postId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CHECK_LIKE,
+        "Failed to check if user has liked post.",
       );
     }
   }

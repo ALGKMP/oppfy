@@ -24,10 +24,9 @@ export class LikeRepository {
   }
 
   @handleDatabaseErrors
-  async hasUserLiked(postId: number, userId: string) {
-    const like = await this.db.query.like.findFirst({
+  async findLike(postId: number, userId: string) {
+    return await this.db.query.like.findFirst({
       where: and(eq(schema.like.postId, postId), eq(schema.like.user, userId)),
     });
-    return like !== undefined;
   }
 }
