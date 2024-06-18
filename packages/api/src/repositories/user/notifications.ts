@@ -1,6 +1,17 @@
 import type { z } from "zod";
 
-import { aliasedTable, and, asc, db, eq, gt, or, schema, sql } from "@oppfy/db";
+import {
+  aliasedTable,
+  and,
+  asc,
+  db,
+  desc,
+  eq,
+  gt,
+  or,
+  schema,
+  sql,
+} from "@oppfy/db";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
@@ -36,7 +47,6 @@ export class NotificationsRepository {
       .insert(schema.pushToken)
       .values({ userId, token: pushToken })
       .onDuplicateKeyUpdate({
-        
         set: {
           token: pushToken,
           updatedAt: sql`CURRENT_TIMESTAMP`,
@@ -121,8 +131,8 @@ export class NotificationsRepository {
         ),
       )
       .orderBy(
-        asc(schema.notifications.createdAt),
-        asc(schema.notifications.id),
+        desc(schema.notifications.createdAt),
+        desc(schema.notifications.id),
       )
       .limit(pageSize);
 
@@ -181,7 +191,7 @@ export class NotificationsRepository {
   }
 
   async sendNotification(
-    pushToken: string,
+    pushTokens: string[],
     senderId: string,
     recipientId: string,
     notificationData: SendNotificationData,
@@ -189,7 +199,7 @@ export class NotificationsRepository {
     const message = {
       senderId,
       recipientId,
-      pushToken,
+      pushTokens,
       ...notificationData,
     } satisfies SnsNotificationData;
 
@@ -203,18 +213,14 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async getPushToken(userId: string) {
-    const user = await this.db.query.user.findFirst({
-      where: eq(schema.user.id, userId),
+  async getPushTokens(userId: string) {
+    const possiblePushTokens = await this.db.query.pushToken.findMany({
+      where: eq(schema.pushToken.userId, userId),
       columns: {
-        pushToken: true,
+        token: true,
       },
     });
 
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USERNAME_NOT_FOUND);
-    }
-
-    return user.pushToken;
+    return possiblePushTokens.map((pushToken) => pushToken.token);
   }
 }
