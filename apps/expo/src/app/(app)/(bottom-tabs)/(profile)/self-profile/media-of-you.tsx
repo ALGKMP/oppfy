@@ -709,7 +709,6 @@ const MediaOfYou = () => {
 
   return (
     <View flex={1}>
-      <Separator margin={10} borderColor={"white"} />
       <FlashList
         data={data}
         numColumns={1}
