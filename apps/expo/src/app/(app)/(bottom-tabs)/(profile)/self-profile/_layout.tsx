@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -28,6 +28,7 @@ import { api, RouterOutputs } from "~/utils/api";
 import MediaOfYou from "./media-of-you";
 
 type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
+type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
 
 const ProfileLayout = () => {
   const navigation = useNavigation();
@@ -49,6 +50,11 @@ const ProfileLayout = () => {
   } = api.friend.paginateFriendsSelf.useInfiniteQuery(
     { pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
+  );
+
+  const friendItems = useMemo(
+    () => friendData?.pages.flatMap((page) => page.items) ?? [],
+    [friendData],
   );
 
   React.useLayoutEffect(() => {
@@ -86,56 +92,26 @@ const ProfileLayout = () => {
       scrollEventThrottle={16}
     >
       {isLoading || profileData === undefined ? (
-        <Profile loading />
+        <YStack gap="$5">
+          <Profile loading />
+          <Friends loading />
+        </YStack>
       ) : (
         <>
-          <Animated.View
-            style={[
-              { paddingBottom: getToken("$space.5") },
-              profileAnimatedStyle,
-            ]}
-          >
+          <Animated.View style={profileAnimatedStyle}>
             <YStack gap="$5">
               <Profile loading={false} data={profileData} />
-
-              <View
-                width="100%"
-                paddingVertical="$3"
-                borderRadius="$6"
-                backgroundColor="$gray2"
-              >
-                <YStack gap="$2">
-                  <XStack paddingLeft="$3" gap="$1">
-                    <Text fontWeight="700">
-                      {abbreviatedNumber(profileData.friendCount)}
-                    </Text>
-                    <Text fontWeight="600">Friends</Text>
-                  </XStack>
-
-                  <FlashList
-                    contentContainerStyle={{
-                      paddingHorizontal: 12, // Update this as needed
-                    }}
-                    data={Array.from({ length: 10 })}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    ItemSeparatorComponent={() => <Spacer size="$2" />}
-                    estimatedItemSize={70}
-                    renderItem={() => (
-                      <YStack gap="$1.5">
-                        <Avatar circular size="$6" bordered>
-                          <Avatar.Image src={profileData.profilePictureUrl} />
-                        </Avatar>
-                        <Text fontWeight="600" textAlign="center">
-                          {profileData.username}
-                        </Text>
-                      </YStack>
-                    )}
-                  />
-                </YStack>
-              </View>
+              <Friends
+                loading={false}
+                data={{
+                  friendCount: profileData.friendCount,
+                  friendItems: friendItems,
+                }}
+              />
             </YStack>
           </Animated.View>
+
+          <Spacer size="$5" />
 
           <MediaOfYou />
         </>
@@ -148,12 +124,12 @@ interface LoadingProps {
   loading: true;
 }
 
-interface LoadedProps {
+interface ProfileLoadedProps {
   loading: false;
   data: ProfileData;
 }
 
-type ProfileProps = LoadingProps | LoadedProps;
+type ProfileProps = LoadingProps | ProfileLoadedProps;
 
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
@@ -257,6 +233,112 @@ const Profile = (props: ProfileProps) => {
         </Button>
       </XStack>
     </YStack>
+  );
+};
+
+interface FriendsData {
+  friendCount: number;
+  friendItems: FriendItems;
+}
+
+interface FriendsLoadedProps {
+  loading: false;
+  data: FriendsData;
+}
+
+type FriendsProps = LoadingProps | FriendsLoadedProps;
+
+const Friends = (props: FriendsProps) => {
+  if (props.loading) {
+    return (
+      <View
+        width="100%"
+        paddingVertical="$3"
+        borderRadius="$6"
+        backgroundColor="$gray2"
+      >
+        <YStack gap="$2">
+          <XStack paddingLeft="$3" gap="$1">
+            <Text fontWeight="700">0</Text>
+            <Text fontWeight="600">Friends</Text>
+          </XStack>
+
+          <FlashList
+            contentContainerStyle={{
+              paddingHorizontal: 12,
+            }}
+            data={Array.from({ length: 10 })}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            ItemSeparatorComponent={() => <Spacer size="$2" />}
+            estimatedItemSize={70}
+            renderItem={() => <Skeleton width={60} height={60} radius={30} />}
+          />
+        </YStack>
+      </View>
+    );
+  }
+
+  // if the friend count is 0 lets display some recommendations
+  if (props.data.friendCount === 0) {
+    return (
+      <View
+        width="100%"
+        paddingVertical="$3"
+        borderRadius="$6"
+        backgroundColor="$gray2"
+      >
+        <YStack gap="$2" paddingHorizontal="$3">
+          <Text fontWeight="600">Find Friends</Text>
+          <Button size="$3.5" onPress={() => {}}>
+            @oxy add recommendations here
+          </Button>
+        </YStack>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      width="100%"
+      paddingVertical="$3"
+      borderRadius="$6"
+      backgroundColor="$gray2"
+    >
+      <YStack gap="$2">
+        <XStack paddingLeft="$3" gap="$1">
+          <Text fontWeight="700">
+            {abbreviatedNumber(props.loading ? 0 : props.data.friendCount)}
+          </Text>
+          <Text fontWeight="600">Friends</Text>
+        </XStack>
+
+        <FlashList
+          contentContainerStyle={{
+            paddingHorizontal: 12,
+          }}
+          data={props.data.friendItems}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          ItemSeparatorComponent={() => <Spacer size="$2" />}
+          estimatedItemSize={70}
+          renderItem={({ item }) =>
+            props.loading ? (
+              <Skeleton width={60} height={60} radius={30} />
+            ) : (
+              <YStack gap="$1.5">
+                <Avatar circular size="$6" bordered>
+                  <Avatar.Image src={item.profilePictureUrl} />
+                </Avatar>
+                <Text fontWeight="600" textAlign="center">
+                  {item.username}
+                </Text>
+              </YStack>
+            )
+          }
+        />
+      </YStack>
+    </View>
   );
 };
 
