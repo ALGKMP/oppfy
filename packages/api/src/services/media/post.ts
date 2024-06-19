@@ -36,20 +36,7 @@ type CommentProfile = z.infer<typeof sharedValidators.media.comment>;
 //   createdAt: Date;
 // }
 
-export interface Post {
-  postId: number;
-  authorId: string;
-  authorUsername: string | null;
-  authorProfilePicture: string;
-  recipientId: string;
-  recipientUsername: string | null;
-  recipientProfilePicture: string;
-  imageUrl: string;
-  caption: string | null;
-  likesCount: number;
-  commentsCount: number;
-  createdAt: Date;
-}
+type Post = z.infer<typeof sharedValidators.media.post>;
 
 export class PostService {
   private awsService = new S3Service();
