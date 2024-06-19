@@ -83,7 +83,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
 
 export const profile = mySqlTable("Profile", {
   id: serial("id").primaryKey(),
-  username: varchar("username", { length: 255 }).unique(),
+  username: varchar("username", { length: 255 }).unique().notNull(),
   fullName: varchar("fullName", { length: 255 }),
   dateOfBirth: date("dateOfBirth"),
   bio: text("bio"),

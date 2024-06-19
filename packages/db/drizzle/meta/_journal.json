@@ -43,6 +43,13 @@
       "when": 1718778342399,
       "tag": "0005_wooden_raider",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1718807059765,
+      "tag": "0006_cheerful_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }

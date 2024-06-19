@@ -1,0 +1,1 @@
+ALTER TABLE `Profile` MODIFY COLUMN `username` varchar(255) NOT NULL;
