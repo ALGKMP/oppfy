@@ -216,6 +216,7 @@ const Profile = (props: ProfileProps) => {
 
       <XStack gap="$4">
         <Button
+          borderRadius={"$10"}
           size="$3.5"
           flex={1}
           disabled={props.loading}
@@ -224,6 +225,7 @@ const Profile = (props: ProfileProps) => {
           Edit Profile
         </Button>
         <Button
+          borderRadius={"$10"}
           size="$3.5"
           flex={1}
           disabled={props.loading}
