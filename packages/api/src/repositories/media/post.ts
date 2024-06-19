@@ -51,12 +51,14 @@ export class PostRepository {
         recipientProfilePicture: recipientProfile.profilePictureKey,
         caption: schema.post.caption,
         imageUrl: schema.post.key,
+        width: schema.post.width,
+        height: schema.post.height,
         commentsCount: schema.postStats.comments,
         likesCount: schema.postStats.likes,
         createdAt: schema.post.createdAt,
       })
       .from(schema.post)
-      .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.author, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
@@ -75,11 +77,8 @@ export class PostRepository {
             : undefined,
         ),
       )
-      .orderBy(
-        asc(schema.post.createdAt), // Primary order by the creation date
-        asc(schema.post.id), // Tiebreaker order by post ID
-      )
-      .limit(pageSize + 1); // Fetch an extra item to check if there's a next page
+      .orderBy(asc(schema.post.createdAt), asc(schema.post.id))
+      .limit(pageSize + 1);
   }
 
   @handleDatabaseErrors
@@ -104,6 +103,8 @@ export class PostRepository {
         recipientProfilePicture: recipientProfile.profilePictureKey,
         caption: schema.post.caption,
         imageUrl: schema.post.key,
+        width: schema.post.width,
+        height: schema.post.height,
         commentsCount: schema.postStats.comments,
         likesCount: schema.postStats.likes,
         createdAt: schema.post.createdAt,
@@ -134,7 +135,6 @@ export class PostRepository {
       )
       .limit(pageSize + 1); // Fetch an extra item to check if there's a next page
   }
-
 
   @handleDatabaseErrors
   async updatePost(postId: number, newCaption: string) {
