@@ -256,7 +256,7 @@ const Inbox = () => {
                 return (
                   <VirtualizedListItem
                     loading={false}
-                    title={item.username ?? ""}
+                    title={item.username}
                     subtitle={item.message ?? ""}
                     subtitle2={abbreviatedTimeAgo(item.createdAt)}
                     button={{
