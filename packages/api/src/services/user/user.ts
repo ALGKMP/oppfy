@@ -15,14 +15,19 @@ export class UserService {
   }
 
   async createUser(userId: string, phoneNumber: string) {
-    const userExists = await this._userExists(userId);
-    if (userExists) {
-      throw new DomainError(
-        ErrorCode.USER_ALREADY_EXISTS,
-        "User already exists",
-      );
-    }
-    return await this.userRepository.createUser(userId, phoneNumber);
+    let username;
+    let usernameExists;
+    do {
+      const randomPart = Math.random()
+        .toString(36)
+        .substring(2, 17)
+        .padEnd(15, "0");
+      username = "user" + randomPart;
+
+      usernameExists = await this.profileRepository.usernameExists(username);
+    } while (usernameExists);
+
+    return await this.userRepository.createUser(userId, phoneNumber, username);
   }
 
   async deleteUser(userId: string) {
