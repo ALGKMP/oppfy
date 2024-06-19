@@ -266,7 +266,8 @@ type FriendsProps = LoadingProps | FriendsLoadedProps;
 const Friends = (props: FriendsProps) => {
   const router = useRouter();
 
-  const showMore = props.data.friendItems.length < props.data.friendCount;
+  const showMore =
+    !props.loading && props.data.friendItems.length < props.data.friendCount;
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
