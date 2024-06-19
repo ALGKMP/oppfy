@@ -1,12 +1,15 @@
-import React, { useEffect, useMemo } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
+import { Skeleton } from "moti/skeleton";
 import {
   Circle,
   Paragraph,
   Separator,
   SizableText,
+  Spacer,
+  Text,
   View,
   XStack,
   YStack,
@@ -23,10 +26,15 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const Inbox = () => {
   const router = useRouter();
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const utils = api.useUtils();
 
-  const { data: requestsCount, isLoading: isCountRequestsLoading } =
-    api.request.countRequests.useQuery();
+  const {
+    data: requestsCount,
+    isLoading: isCountRequestsLoading,
+    refetch: refetchRequestCount,
+  } = api.request.countRequests.useQuery();
 
   const totalRequestCount =
     (requestsCount?.followRequestCount ?? 0) +
@@ -38,7 +46,7 @@ const Inbox = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-    refetch,
+    refetch: refetchNotifications,
   } = api.notifications.paginateNotifications.useInfiniteQuery(
     {
       pageSize: 20,
@@ -117,6 +125,12 @@ const Inbox = () => {
     await followUser.mutateAsync({ userId });
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([refetchNotifications(), refetchRequestCount()]);
+    setRefreshing(false);
+  }, [refetchNotifications]);
+
   const renderRequestCount = () =>
     totalRequestCount > 99 ? (
       <XStack>
@@ -133,31 +147,61 @@ const Inbox = () => {
 
   if (isCountRequestsLoading || isNotificationsLoading) {
     return (
-      <BaseScreenView paddingBottom={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          showsVerticalScrollIndicator={false}
-          renderItem={() => (
-            <VirtualizedListItem
-              loading
-              showSkeletons={{
-                imageUrl: true,
-                title: true,
-                subtitle: true,
-                subtitle2: true,
-                button: true,
-              }}
+      <BaseScreenView scrollable>
+        <YStack gap="$4">
+          <Skeleton.Group show={true}>
+            <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
+              <YStack>
+                <Skeleton width={150}>
+                  <SizableText size="$6" fontWeight="bold">
+                    Loading...
+                  </SizableText>
+                </Skeleton>
+                <Spacer size="$1" />
+                <Skeleton width={300}>
+                  <Paragraph theme="alt1">Loading...</Paragraph>
+                </Skeleton>
+              </YStack>
+            </View>
+          </Skeleton.Group>
+
+          <View
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            borderRadius="$6"
+            backgroundColor="$gray2"
+          >
+            <FlashList
+              data={PLACEHOLDER_DATA}
+              ItemSeparatorComponent={Separator}
+              estimatedItemSize={75}
+              showsVerticalScrollIndicator={false}
+              renderItem={() => (
+                <VirtualizedListItem
+                  loading
+                  showSkeletons={{
+                    imageUrl: true,
+                    title: true,
+                    subtitle: true,
+                    subtitle2: true,
+                    button: true,
+                  }}
+                />
+              )}
             />
-          )}
-        />
+          </View>
+        </YStack>
       </BaseScreenView>
     );
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <YStack gap="$4">
         {totalRequestCount > 0 && (
           <TouchableOpacity onPress={() => router.navigate("/requests")}>
@@ -190,8 +234,6 @@ const Inbox = () => {
           >
             <FlashList
               data={notificationItems}
-              onRefresh={refetch}
-              refreshing={isNotificationsLoading}
               estimatedItemSize={75}
               onEndReached={handleOnEndReached}
               showsVerticalScrollIndicator={false}

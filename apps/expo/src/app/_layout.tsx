@@ -4,18 +4,16 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
-import {
-  Inter_100Thin,
-  Inter_200ExtraLight,
-  Inter_300Light,
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-  Inter_900Black,
-} from "@expo-google-fonts/inter";
 import { Modak_400Regular } from "@expo-google-fonts/modak";
+import Inter_900Black from "@tamagui/font-inter/otf/Inter-Black.otf";
+import Inter_700Bold from "@tamagui/font-inter/otf/Inter-Bold.otf";
+import Inter_800ExtraBold from "@tamagui/font-inter/otf/Inter-ExtraBold.otf";
+import Inter_200ExtraLight from "@tamagui/font-inter/otf/Inter-ExtraLight.otf";
+import Inter_300Light from "@tamagui/font-inter/otf/Inter-Light.otf";
+import Inter_400Regular from "@tamagui/font-inter/otf/Inter-Medium.otf";
+import Inter_500Medium from "@tamagui/font-inter/otf/Inter-Medium.otf";
+import Inter_600SemiBold from "@tamagui/font-inter/otf/Inter-SemiBold.otf";
+import Inter_100Thin from "@tamagui/font-inter/otf/Inter-Thin.otf";
 import { TamaguiProvider } from "tamagui";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
@@ -28,17 +26,17 @@ const RootLayout = () => {
   useNotificationObserver();
 
   const [fontsLoaded] = useFonts({
-    Modak_400Regular,
+    Modak: Modak_400Regular,
 
-    Inter_100Thin,
-    Inter_200ExtraLight,
-    Inter_300Light,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_800ExtraBold,
-    Inter_900Black,
+    InterThin: Inter_100Thin,
+    InterExtraLight: Inter_200ExtraLight,
+    InterLight: Inter_300Light,
+    Inter: Inter_400Regular,
+    InterMedium: Inter_500Medium,
+    InterSemiBold: Inter_600SemiBold,
+    InterBold: Inter_700Bold,
+    InterExtraBold: Inter_800ExtraBold,
+    InterBlack: Inter_900Black,
   });
 
   if (!fontsLoaded) {

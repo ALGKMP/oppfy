@@ -53,7 +53,7 @@ const Search = () => {
               estimatedItemSize={75}
               showsVerticalScrollIndicator={false}
               onScrollBeginDrag={Keyboard.dismiss}
-              keyboardDismissMode="interactive"
+              keyboardShouldPersistTaps="handled"
               ListHeaderComponent={
                 <SizableText size="$2" theme="alt1" marginBottom="$2">
                   SEARCH RESULTS

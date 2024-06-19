@@ -9,6 +9,7 @@ import {
   ButtonProps as BaseButtonProps,
   Button,
   SizableText,
+  Spacer,
   XStack,
   YStack,
 } from "tamagui";
@@ -88,6 +89,10 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               </SizableText>
             ) : null}
 
+            {props.loading && props.showSkeletons?.subtitle && (
+              <Spacer size="$1" />
+            )}
+
             {props.loading && props.showSkeletons?.subtitle ? (
               <Skeleton width={100}>
                 <SizableText>Loading...</SizableText>
@@ -97,6 +102,10 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 {props.subtitle}
               </SizableText>
             ) : null}
+
+            {props.loading && props.showSkeletons?.subtitle2 && (
+              <Spacer size="$1" />
+            )}
 
             {props.loading && props.showSkeletons?.subtitle2 ? (
               <Skeleton width={100}>
@@ -123,7 +132,6 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               isButtonProps(props.button) ? (
                 <Button
                   size={isTwoButtons ? "$3.5" : "$3.5"}
-                  width={isTwoButtons ? 85 : 100}
                   onPress={
                     props.button.onPress
                       ? debounce(props.button.onPress, 300)
@@ -151,7 +159,6 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               isButtonProps(props.button2) ? (
                 <Button
                   size={isTwoButtons ? "$3.5" : "$3.5"}
-                  width={isTwoButtons ? 85 : 100}
                   onPress={
                     props.button2.onPress
                       ? debounce(props.button2.onPress, 300)

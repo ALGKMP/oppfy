@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Modal, TouchableOpacity } from "react-native";
+import { Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -210,6 +210,7 @@ const CountriesFlashList = ({
   return (
     <FlashList
       data={data}
+      onScrollBeginDrag={Keyboard.dismiss}
       showsVerticalScrollIndicator={false}
       estimatedItemSize={43}
       renderItem={({ item, index }) => {

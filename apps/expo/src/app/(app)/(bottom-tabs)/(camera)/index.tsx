@@ -23,6 +23,7 @@ import {
   useLocationPermission,
   useMicrophonePermission,
 } from "react-native-vision-camera";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
@@ -115,6 +116,7 @@ const CameraPage = () => {
 
   const onMediaCaptured = useCallback(
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+      console.log("Media captured", { uri: media.path, type });
       router.push({
         pathname: "/preview",
         params: {
@@ -125,6 +127,30 @@ const CameraPage = () => {
     },
     [router],
   );
+
+  const onOpenMediaPicker = useCallback(async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const imagePickerAsset = result.assets[0];
+      if (imagePickerAsset === undefined) return;
+
+      const { uri, type } = imagePickerAsset;
+      console.log("ImagePicker result", { uri, type });
+
+      router.push({
+        pathname: "/preview",
+        params: {
+          type: type === "video" ? "video" : "photo",
+          uri,
+        },
+      });
+    }
+  }, [router]);
 
   const onFlipCameraPressed = useCallback(() => {
     setPosition((p) => (p === "back" ? "front" : "back"));
@@ -231,6 +257,13 @@ const CameraPage = () => {
 
       <StatusBarBlurBackground />
 
+      <TouchableOpacity
+        style={styles.mediaPickerButton}
+        onPress={onOpenMediaPicker}
+      >
+        <Ionicons name="images" color="white" size={32} />
+      </TouchableOpacity>
+
       <View style={styles.leftButtonRow}>
         <TouchableOpacity style={styles.button} onPress={() => router.back()}>
           <Ionicons name="close" color="white" size={24} />
@@ -308,6 +341,11 @@ export default CameraPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  mediaPickerButton: {
+    position: "absolute",
+    bottom: SAFE_AREA_PADDING.paddingBottom + 12,
+    left: SAFE_AREA_PADDING.paddingLeft + 36,
   },
   captureButton: {
     position: "absolute",
