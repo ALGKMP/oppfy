@@ -1,14 +1,17 @@
 import { useCallback, useLayoutEffect, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
 import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
   Button,
+  getToken,
   Paragraph,
   ScrollView,
   SizableText,
+  Spacer,
   Text,
   useTheme,
   View,
@@ -39,6 +42,18 @@ const ProfileLayout = () => {
     refetch,
   } = api.profile.getFullProfileSelf.useQuery();
 
+  const {
+    data: friendData,
+    isLoading: isLoadingFriends,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch: refetchFriends,
+  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
+    { pageSize: 10 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+  );
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: profileData?.username,
@@ -62,8 +77,48 @@ const ProfileLayout = () => {
         <Profile loading />
       ) : (
         <>
-          <Profile loading={false} data={profileData} />
-          <MediaOfYou />
+          <YStack gap="$5">
+            <Profile loading={false} data={profileData} />
+
+            <View
+              width="100%"
+              paddingVertical="$3"
+              borderRadius="$6"
+              backgroundColor="$gray2"
+            >
+              <YStack gap="$2">
+                <XStack paddingLeft="$3" gap="$1">
+                  <Text fontWeight="700">
+                    {abbreviatedNumber(profileData.friendCount)}
+                  </Text>
+                  <Text fontWeight="600">Friends</Text>
+                </XStack>
+
+                <FlashList
+                  contentContainerStyle={{
+                    paddingHorizontal: getToken("$space.3"),
+                  }}
+                  data={Array.from({ length: 10 })}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  ItemSeparatorComponent={() => <Spacer size="$2" />}
+                  estimatedItemSize={70}
+                  renderItem={() => (
+                    <YStack gap="$1.5">
+                      <Avatar circular size="$6" bordered>
+                        <Avatar.Image src={profileData.profilePictureUrl} />
+                      </Avatar>
+                      <Text fontWeight="600" textAlign="center">
+                        {profileData.username}
+                      </Text>
+                    </YStack>
+                  )}
+                />
+              </YStack>
+            </View>
+
+            <MediaOfYou />
+          </YStack>
         </>
       )}
     </ScrollView>
@@ -92,6 +147,7 @@ const Profile = (props: ProfileProps) => {
     <Skeleton.Group show={props.loading}>
       <YStack
         padding="$4"
+        paddingBottom={0}
         alignItems="center"
         backgroundColor="$background"
         gap="$4"
