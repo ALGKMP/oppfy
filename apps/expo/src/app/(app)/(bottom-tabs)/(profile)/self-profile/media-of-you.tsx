@@ -342,7 +342,7 @@ const PostItem = (props: PostItemProps) => {
           </TouchableOpacity>
         </View>
       </View>
-      <CommentsModal
+      <CommentsBottomSheet
         postId={post.postId}
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
