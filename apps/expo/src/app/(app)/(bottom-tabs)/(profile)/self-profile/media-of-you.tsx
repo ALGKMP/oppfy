@@ -73,9 +73,13 @@ const PostItem = (props: PostItemProps) => {
   // variables
   const [modalVisible, setModalVisible] = useState(false);
 
-  const closeModal = () => {
+  useEffect(() => {
+    console.log(`MODAL VISIBLE: ${modalVisible}`)
+  }, [modalVisible])
+
+  const closeModal = useCallback(() => {
     setModalVisible(false);
-  };
+  }, []);
 
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
@@ -341,7 +345,7 @@ const PostItem = (props: PostItemProps) => {
       <CommentsModal
         postId={post.postId}
         modalVisible={modalVisible}
-        closeModal={closeModal}
+        setModalVisible={setModalVisible}
       />
     </View>
   );
