@@ -314,9 +314,13 @@ const Friends = (props: FriendsProps) => {
 
         <FlashList
           contentContainerStyle={{
-            paddingHorizontal: 12,
+            paddingHorizontal: getToken("$space.3"),
           }}
-          data={props.data.friendItems}
+          // data={props.data.friendItems}
+          data={Array.from({ length: 10 }).map((_, index) => ({
+            profilePictureUrl: "https://via.placeholder.com/150",
+            username: "Username",
+          }))}
           horizontal
           showsHorizontalScrollIndicator={false}
           ItemSeparatorComponent={() => <Spacer size="$2" />}
@@ -335,6 +339,32 @@ const Friends = (props: FriendsProps) => {
               </YStack>
             )
           }
+          ListFooterComponent={
+            // props.data.friendItems.length < props.data.friendCount ? (
+            props.data.friendItems.length < 20 ? (
+              <View
+                style={{
+                  marginRight: -100,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    /* Navigate to full friends list or load more */
+                  }}
+                >
+                  <Text style={{ fontWeight: "600", color: "#007AFF" }}>
+                    See More
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : null
+          }
+          ListFooterComponentStyle={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         />
       </YStack>
     </View>
