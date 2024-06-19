@@ -40,7 +40,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { CommentsModal } from "~/components/Comments";
+import { CommentsBottomSheet } from "~/components/Comments";
 import z from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
