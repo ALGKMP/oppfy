@@ -31,7 +31,7 @@ interface CommentsModalProps {
   setModalVisible: (value: boolean) => void;
 }
 
-const CommentsModal = ({
+const CommentsBottomSheet = ({
   postId,
   modalVisible,
   setModalVisible,
@@ -253,4 +253,4 @@ const CommentsModal = ({
   );
 };
 
-export default CommentsModal;
+export default CommentsBottomSheet;

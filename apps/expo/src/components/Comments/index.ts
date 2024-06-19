@@ -1,1 +1,1 @@
-export { default as CommentsModal } from "./CommentsModal";
+export { default as CommentsBottomSheet } from "./CommentsBottomSheet";
