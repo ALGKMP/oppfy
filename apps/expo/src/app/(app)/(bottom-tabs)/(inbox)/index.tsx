@@ -2,6 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
+import {
+  UserCheck,
+  UserPlus,
+  UserRoundCheck,
+  UserRoundPlus,
+} from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
   Circle,
@@ -238,14 +244,23 @@ const Inbox = () => {
               onEndReached={handleOnEndReached}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => {
-                const buttonText = (() => {
+                const buttonProps = (() => {
                   switch (item.relationshipState) {
                     case "notFollowing":
-                      return "Follow";
+                      return {
+                        text: "Follow",
+                        icon: UserRoundPlus,
+                      };
                     case "following":
-                      return "Following";
+                      return {
+                        text: "Following",
+                        icon: UserRoundCheck,
+                      };
                     case "followRequestSent":
-                      return "Requested";
+                      return {
+                        text: "Requested",
+                        icon: UserRoundCheck,
+                      };
                   }
                 })();
 
@@ -260,7 +275,7 @@ const Inbox = () => {
                     subtitle={item.message ?? ""}
                     subtitle2={abbreviatedTimeAgo(item.createdAt)}
                     button={{
-                      text: buttonText,
+                      ...buttonProps,
                       disabled: buttonDisabled,
                       disabledStyle: { opacity: 0.5 },
                       onPress: () => onFollowUser(item.userId),
