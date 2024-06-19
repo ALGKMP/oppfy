@@ -1,6 +1,6 @@
 import type { FunctionComponent } from "react";
 import React, { useMemo } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { ImageSourcePropType, TouchableOpacity, View } from "react-native";
 import debounce from "lodash/debounce";
 import { Skeleton } from "moti/skeleton";
 import type { ThemeName } from "tamagui";
@@ -38,7 +38,7 @@ interface LoadingProps {
 
 interface LoadedProps {
   loading: false;
-  imageUrl?: string;
+  imageUrl?: string | ImageSourcePropType;
   title?: string;
   subtitle?: string;
   subtitle2?: string;

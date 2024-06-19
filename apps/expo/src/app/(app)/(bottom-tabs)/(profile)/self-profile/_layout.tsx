@@ -1,12 +1,27 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { RefreshControl, TouchableOpacity } from "react-native";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Alert,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  RefreshControl,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
+import { debounce, throttle } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
@@ -251,6 +266,48 @@ interface FriendsLoadedProps {
 type FriendsProps = LoadingProps | FriendsLoadedProps;
 
 const Friends = (props: FriendsProps) => {
+  const router = useRouter();
+
+  const showMore =
+    !props.loading && props.data.friendItems.length < props.data.friendCount;
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!showMore) return;
+
+      const { contentSize, contentOffset, layoutMeasurement } =
+        event.nativeEvent;
+
+      if (contentSize && contentOffset && layoutMeasurement) {
+        const contentWidth = contentSize.width;
+        const offsetX = contentOffset.x;
+        const layoutWidth = layoutMeasurement.width;
+
+        // Check if within the threshold from the end
+        if (offsetX + layoutWidth - 80 >= contentWidth) {
+          throttledHandleAction();
+        }
+      }
+    },
+    [],
+  );
+
+  const handleAction = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push("/self-connections/friend-list");
+  };
+
+  const throttledHandleAction = useRef(
+    throttle(handleAction, 300, { leading: true, trailing: false }),
+  ).current;
+
+  useEffect(() => {
+    return () => {
+      // Cleanup throttled fn
+      throttledHandleAction.cancel();
+    };
+  }, []);
+
   if (props.loading) {
     return (
       <View
@@ -281,7 +338,6 @@ const Friends = (props: FriendsProps) => {
     );
   }
 
-  // if the friend count is 0 lets display some recommendations
   if (props.data.friendCount === 0) {
     return (
       <View
@@ -317,12 +373,13 @@ const Friends = (props: FriendsProps) => {
 
         <FlashList
           contentContainerStyle={{
-            paddingHorizontal: 12,
+            paddingHorizontal: getToken("$space.3"),
           }}
           data={props.data.friendItems}
           horizontal
           showsHorizontalScrollIndicator={false}
           ItemSeparatorComponent={() => <Spacer size="$2" />}
+          onScroll={handleScroll}
           estimatedItemSize={70}
           renderItem={({ item }) =>
             props.loading ? (
@@ -338,6 +395,25 @@ const Friends = (props: FriendsProps) => {
               </YStack>
             )
           }
+          ListFooterComponent={
+            showMore ? (
+              <View
+                style={{
+                  marginRight: -100,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ fontWeight: "600", color: "#007AFF" }}>
+                  See More
+                </Text>
+              </View>
+            ) : null
+          }
+          ListFooterComponentStyle={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         />
       </YStack>
     </View>

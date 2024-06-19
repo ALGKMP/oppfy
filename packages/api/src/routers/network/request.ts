@@ -83,8 +83,8 @@ export const requestRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.acceptFriendRequest(
-          ctx.session.uid,
           input.senderId,
+          ctx.session.uid,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
@@ -96,8 +96,8 @@ export const requestRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.declineFriendRequest(
-          ctx.session.uid,
           input.senderId,
+          ctx.session.uid,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
