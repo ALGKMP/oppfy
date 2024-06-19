@@ -27,15 +27,6 @@ interface CommentCursor {
 
 type CommentProfile = z.infer<typeof sharedValidators.media.comment>;
 
-// interface CommentProfile {
-//   commentId: number;
-//   userId: string;
-//   username: string | null;
-//   profilePictureUrl: string;
-//   body: string;
-//   createdAt: Date;
-// }
-
 type Post = z.infer<typeof sharedValidators.media.post>;
 
 export class PostService {
