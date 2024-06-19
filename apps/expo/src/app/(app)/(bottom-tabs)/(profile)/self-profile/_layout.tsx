@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { RefreshControl, TouchableOpacity } from "react-native";
+import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -279,7 +279,6 @@ const Friends = (props: FriendsProps) => {
     );
   }
 
-  // if the friend count is 0 lets display some recommendations
   if (props.data.friendCount === 0) {
     return (
       <View
