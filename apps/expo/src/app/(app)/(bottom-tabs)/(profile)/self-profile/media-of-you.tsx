@@ -224,11 +224,12 @@ const data: DataItem[] = [
 ];
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-const PostItem = ({
-  post,
-}: {
+interface PostItemProps {
   post: z.infer<typeof sharedValidators.media.post>;
-}) => {
+}
+
+const PostItem = (props: PostItemProps) => {
+  const { post } = props;
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
@@ -237,7 +238,7 @@ const PostItem = ({
 
   const {
     data: hasLiked,
-    isLoading,
+    isLoading: isLoadingHasLiked,
     isError,
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
@@ -269,7 +270,13 @@ const PostItem = ({
   );
 
   const comments = useMemo(
-    () => commentsData?.pages.flatMap((page) => page.items ?? []),
+    () =>
+      commentsData?.pages
+        .flatMap((page) => page.items ?? [])
+        .filter(
+          (item): item is z.infer<typeof sharedValidators.media.comment> =>
+            item !== undefined,
+        ),
     [commentsData],
   );
 
@@ -469,7 +476,6 @@ const PostItem = ({
               alignItems: "center",
             },
           ]}
-          // contentFit="contain"
         >
           <Animated.View style={[heartImageAnimatedStyle]}>
             <Heart size={100} color={"red"} fill={"red"} />
@@ -657,7 +663,7 @@ const PostItem = ({
             <BottomSheetFlatList
               scrollEnabled={true}
               data={comments ?? []}
-              keyExtractor={(i) => data.indexOf(i).toString()}
+              keyExtractor={(i) => i.commentId.toString()}
               renderItem={renderComment}
               contentContainerStyle={{
                 // DO NOT USE FLEX: 1 HERE
@@ -759,20 +765,58 @@ const MediaOfYou = () => {
     },
   );
 
+  const itemCount = useMemo(() => {
+    if (postData === undefined) return 0;
+
+    return postData.pages.reduce(
+      (acc, page) => acc + (page.items ?? []).length,
+      0,
+    );
+  }, [postData]);
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
+
   const posts = useMemo(
     () => postData?.pages.flatMap((page) => page.items ?? []),
     [postData],
   );
 
+  const placeholderData = useMemo(() => {
+    return Array.from({ length: 20 }, () => null);
+  }, []);
+
+  useEffect(() => {
+    console.log(isLoading);
+    console.log(posts);
+  }, [isLoading]);
+
   return (
     <View flex={1}>
       <Separator margin={10} borderColor={"white"} />
-      <FlashList
-        data={posts}
-        numColumns={1}
-        renderItem={({ item }) => <PostItem post={item} />}
-        estimatedItemSize={screenWidth}
-      />
+      {isLoading ? (
+        <Skeleton.Group show={true}>
+          <Skeleton width={"100%"} height={100} />
+        </Skeleton.Group>
+      ) : itemCount ? (
+        <FlashList
+          data={isLoading ? placeholderData : posts}
+          numColumns={1}
+          onEndReached={handleOnEndReached}
+          renderItem={({ item }) => {
+            if (item === null || item === undefined) {
+              return null;
+            }
+            return <PostItem post={item} />;
+          }}
+          estimatedItemSize={screenWidth}
+        />
+      ) : (
+        <Text>No posts found</Text>
+      )}
     </View>
   );
 };
