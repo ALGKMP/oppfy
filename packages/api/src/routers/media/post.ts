@@ -211,7 +211,6 @@ export const postRouter = createTRPCRouter({
   like: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
         postId: z.number(),
       }),
     )
@@ -226,10 +225,27 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+  hasliked: protectedProcedure
+    .input(
+      z.object({
+        postId: z.number(),
+      }),
+    )
+    .output(z.boolean())
+    .query(async ({ ctx, input }) => {
+      try {
+        return !!ctx.services.post.hasLiked(ctx.session.uid, input.postId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to check if user has liked post.",
+        });
+      }
+    }),
+
   unlike: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
         postId: z.number(),
       }),
     )
@@ -283,6 +299,31 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
+
+    paginateComments: protectedProcedure
+  .input(
+    trpcValidators.input.post.paginateComments
+  )
+  .output(trpcValidators.output.post.paginatedComments) // Assuming you have a validator for paginated comments
+  .query(async ({ ctx, input }) => {
+    try {
+      const result = await ctx.services.post.paginateComments(
+        input.postId,
+        input.cursor,
+        input.pageSize
+      );
+      const parsedResult = trpcValidators.output.post.paginatedComments.parse(result);
+      return parsedResult;
+    } catch (err) {
+      console.error("TRPC paginateComments error: ", err);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to paginate comments.",
+      });
+    }
+  }),
+
+
 });
 
 export default postRouter;

@@ -67,6 +67,17 @@ const trpcPostInputSchema = {
       .optional(),
     pageSize: z.number().nonnegative().optional(),
   }),
+
+  paginateComments: z.object({
+    postId: z.number(),
+    cursor: z
+      .object({
+        commentId: z.number(),
+        createdAt: z.date(),
+      })
+      .optional(),
+    pageSize: z.number().nonnegative().optional().default(10),
+  }),
 };
 
 export default trpcPostInputSchema;

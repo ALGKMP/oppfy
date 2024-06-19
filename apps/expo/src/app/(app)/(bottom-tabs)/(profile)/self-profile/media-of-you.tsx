@@ -5,11 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  Dimensions,
-  Modal,
-  TouchableOpacity,
-} from "react-native";
+import { Dimensions, Modal, TouchableOpacity } from "react-native";
 import {
   Gesture,
   GestureDetector,
@@ -25,9 +21,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import {
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import BottomSheet, {
   BottomSheetFlatList,
@@ -36,6 +30,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
+import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
   Separator,
@@ -45,6 +40,11 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import z from "zod";
+
+import { sharedValidators } from "@oppfy/validators";
+
+import { api } from "~/utils/api";
 
 interface Comment {
   profilePicture: string;
@@ -224,14 +224,25 @@ const data: DataItem[] = [
 ];
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
-const PostItem = ({ item }: { item: DataItem }) => {
+interface PostItemProps {
+  post: z.infer<typeof sharedValidators.media.post>;
+}
+
+const PostItem = (props: PostItemProps) => {
+  const { post } = props;
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showViewMore, setShowViewMore] = useState(item.caption.length > 100);
+  const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
 
-  const [isLiked, setIsLiked] = useState(item.hasLiked);
+  const {
+    data: hasLiked,
+    isLoading: isLoadingHasLiked,
+    isError,
+  } = api.post.hasliked.useQuery({ postId: post.postId });
+
+  const [isLiked, setIsLiked] = useState<Boolean>(hasLiked ?? false);
   const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
   const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
 
@@ -239,8 +250,37 @@ const PostItem = ({ item }: { item: DataItem }) => {
   const sheetRef = useRef<BottomSheet>(null);
   const innerSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
+
+  // infinite paginate the comments
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    isFetchingNextPage: isFetchingNextPageComments,
+    fetchNextPage: fetchNextPageComments,
+    hasNextPage: hasNextPageComments,
+    refetch: refetchComments,
+  } = api.post.paginateComments.useInfiniteQuery(
+    {
+      postId: post.postId,
+      pageSize: 20,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  const comments = useMemo(
+    () =>
+      commentsData?.pages
+        .flatMap((page) => page.items ?? [])
+        .filter(
+          (item): item is z.infer<typeof sharedValidators.media.comment> =>
+            item !== undefined,
+        ),
+    [commentsData],
+  );
+
   // variables
-  const data = useMemo(() => item.commentList, []);
   const [modalVisible, setModalVisible] = useState(false);
 
   const openBottomSheet = () => {
@@ -274,19 +314,22 @@ const PostItem = ({ item }: { item: DataItem }) => {
   });
 
   const renderComment = useCallback(
-    ({ item }: { item: Comment }) => (
+    ({ item }: { item: z.infer<typeof sharedValidators.media.comment> }) => (
       <View padding={"$3.5"}>
         <XStack gap="$3" alignItems="center">
           <Avatar circular size="$4">
-            <Avatar.Image accessibilityLabel="Cam" src={item.profilePicture} />
+            <Avatar.Image
+              accessibilityLabel="Cam"
+              src={item.profilePictureUrl}
+            />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
           <YStack gap={"$2"}>
             <XStack gap={"$2"}>
               <Text fontWeight={"bold"}>{item.username}</Text>
-              <Text color={"$gray10"}> {item.timeAgo}</Text>
+              <Text color={"$gray10"}> {item.createdAt}</Text>
             </XStack>
-            <Text>{item.text}</Text>
+            <Text>{item.body}</Text>
           </YStack>
         </XStack>
       </View>
@@ -330,10 +373,10 @@ const PostItem = ({ item }: { item: DataItem }) => {
 
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
-    if (item.caption.length <= maxLength || isExpanded) {
-      return item.caption;
+    if (post.caption.length <= maxLength || isExpanded) {
+      return post.caption;
     }
-    return `${item.caption.substring(0, maxLength)}...`;
+    return `${post.caption.substring(0, maxLength)}...`;
   };
 
   // For the fuckin like button
@@ -424,16 +467,15 @@ const PostItem = ({ item }: { item: DataItem }) => {
     >
       <GestureDetector gesture={doubleTap}>
         <Image
-          source={{ uri: item.image }}
+          source={{ uri: post.imageUrl }}
           style={[
             {
-              width: item.width,
-              height: item.height,
+              width: post.width,
+              height: post.height,
               justifyContent: "center",
               alignItems: "center",
             },
           ]}
-          // contentFit="contain"
         >
           <Animated.View style={[heartImageAnimatedStyle]}>
             <Heart size={100} color={"red"} fill={"red"} />
@@ -620,8 +662,8 @@ const PostItem = ({ item }: { item: DataItem }) => {
           >
             <BottomSheetFlatList
               scrollEnabled={true}
-              data={data}
-              keyExtractor={(i) => data.indexOf(i).toString()}
+              data={comments ?? []}
+              keyExtractor={(i) => i.commentId.toString()}
               renderItem={renderComment}
               contentContainerStyle={{
                 // DO NOT USE FLEX: 1 HERE
@@ -707,14 +749,74 @@ const MediaOfYou = () => {
     "loading",
   );
 
+  const {
+    data: postData,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
+    {
+      pageSize: 20,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  const itemCount = useMemo(() => {
+    if (postData === undefined) return 0;
+
+    return postData.pages.reduce(
+      (acc, page) => acc + (page.items ?? []).length,
+      0,
+    );
+  }, [postData]);
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
+
+  const posts = useMemo(
+    () => postData?.pages.flatMap((page) => page.items ?? []),
+    [postData],
+  );
+
+  const placeholderData = useMemo(() => {
+    return Array.from({ length: 20 }, () => null);
+  }, []);
+
+  useEffect(() => {
+    console.log(isLoading);
+    console.log(posts);
+  }, [isLoading]);
+
   return (
     <View flex={1}>
-      <FlashList
-        data={data}
-        numColumns={1}
-        renderItem={(data) => <PostItem item={data.item} />}
-        estimatedItemSize={screenWidth}
-      />
+      <Separator margin={10} borderColor={"white"} />
+      {isLoading ? (
+        <Skeleton.Group show={true}>
+          <Skeleton width={"100%"} height={100} />
+        </Skeleton.Group>
+      ) : itemCount ? (
+        <FlashList
+          data={isLoading ? placeholderData : posts}
+          numColumns={1}
+          onEndReached={handleOnEndReached}
+          renderItem={({ item }) => {
+            if (item === null || item === undefined) {
+              return null;
+            }
+            return <PostItem post={item} />;
+          }}
+          estimatedItemSize={screenWidth}
+        />
+      ) : (
+        <Text>No posts found</Text>
+      )}
     </View>
   );
 };

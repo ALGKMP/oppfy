@@ -1,3 +1,7 @@
+import { z } from "zod";
+
+import { sharedValidators } from "@oppfy/validators";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
@@ -21,14 +25,16 @@ interface CommentCursor {
   commentId: number;
 }
 
-interface CommentProfile {
-  commentId: number;
-  userId: string;
-  username: string | null;
-  body: string;
-  profilePictureUrl: string;
-  createdAt: Date;
-}
+type CommentProfile = z.infer<typeof sharedValidators.media.comment>;
+
+// interface CommentProfile {
+//   commentId: number;
+//   userId: string;
+//   username: string | null;
+//   profilePictureUrl: string;
+//   body: string;
+//   createdAt: Date;
+// }
 
 export interface Post {
   postId: number;
@@ -162,7 +168,10 @@ export class PostService {
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      const data = await this.postRepository.paginatePostsOfUser(userId, cursor);
+      const data = await this.postRepository.paginatePostsOfUser(
+        userId,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -182,12 +191,12 @@ export class PostService {
     try {
       const user = await this.userRepository.getUserByProfileId(profileId);
       if (!user) {
-        throw new DomainError(
-          ErrorCode.USER_NOT_FOUND,
-          "User not found.",
-        );
+        throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found.");
       }
-      const data = await this.postRepository.paginatePostsOfUser(user.id, cursor);
+      const data = await this.postRepository.paginatePostsOfUser(
+        user.id,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -205,7 +214,10 @@ export class PostService {
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      const data = await this.postRepository.paginatePostsByUser(userId, cursor);
+      const data = await this.postRepository.paginatePostsByUser(
+        userId,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -225,12 +237,12 @@ export class PostService {
     try {
       const user = await this.userRepository.getUserByProfileId(profileId);
       if (!user) {
-        throw new DomainError(
-          ErrorCode.USER_NOT_FOUND,
-          "User not found.",
-        );
+        throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found.");
       }
-      const data = await this.postRepository.paginatePostsByUser(user.id, cursor);
+      const data = await this.postRepository.paginatePostsByUser(
+        user.id,
+        cursor,
+      );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -296,8 +308,8 @@ export class PostService {
 
   async likePost(userId: string, postId: number) {
     try {
-      const likeExists = await this.likeRepository.hasUserLiked(postId, userId);
-      if (!likeExists) {
+      const like = await this.likeRepository.findLike(postId, userId);
+      if (!like) {
         await this.likeRepository.addLike(postId, userId);
       }
     } catch (error) {
@@ -323,6 +335,22 @@ export class PostService {
       throw new DomainError(
         ErrorCode.FAILED_TO_UNLIKE_POST,
         "Failed to unlike post.",
+      );
+    }
+  }
+
+  async hasLiked(userId: string, postId: number): Promise<boolean> {
+    try {
+      const like = await this.likeRepository.findLike(postId, userId);
+      return !!like;
+    } catch (error) {
+      console.error(
+        `Error in hasLiked for userId: ${userId}, postId: ${postId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CHECK_LIKE,
+        "Failed to check if user has liked post.",
       );
     }
   }
@@ -357,13 +385,13 @@ export class PostService {
     }
   }
 
-  async getPaginatedComments(
+  async paginateComments(
     postId: number,
     cursor: CommentCursor | null = null,
     pageSize: number,
   ): Promise<PaginatedResponse<CommentProfile>> {
     try {
-      const data = await this.commentRepository.getPaginatedComments(
+      const data = await this.commentRepository.paginateComments(
         postId,
         cursor,
         pageSize,
