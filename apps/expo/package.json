@@ -19,14 +19,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@oppfy/utils": "workspace:*",
+    "@oppfy/validators": "workspace:*",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/modak": "^0.2.3",
     "@expo/metro-config": "^0.18.4",
     "@expo/react-native-action-sheet": "^4.0.1",
-    "@gorhom/bottom-sheet": "^4",
+    "@gorhom/bottom-sheet": "^4.6.3",
     "@hookform/resolvers": "^3.3.4",
-    "@oppfy/utils": "workspace:*",
-    "@oppfy/validators": "workspace:*",
     "@react-native-firebase/app": "^18.9.0",
     "@react-native-firebase/auth": "^18.9.0",
     "@react-native-firebase/crashlytics": "^18.9.0",
