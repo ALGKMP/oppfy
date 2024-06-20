@@ -10,6 +10,8 @@ const Graph = gremlin.structure.Graph;
 const t = gremlin.process.t;
 const Direction = gremlin.process.direction;
 const { onCreate, onMatch } = gremlin.process.merge;
+const __ = gremlin.process.statics; 
+
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
@@ -19,6 +21,60 @@ const contactSyncBody = z.object({
   userPhoneNumberHash: z.string(),
   contacts: z.array(z.string()),
 });
+
+interface Vertex {
+  id: string;
+  label: string;
+  properties: Record<string, any>;
+}
+
+async function updateContacts(
+  g: gremlin.process.GraphTraversalSource,
+  userId: string,
+  userPhoneNumberHash: string,
+  contacts: string[],
+): Promise<boolean> {
+  // Add or update the user vertex
+  let userResult = await g
+    .V()
+    .has("User", "userId", userId)
+    .fold()
+    .coalesce(
+      __.V().unfold(),
+      __
+        .addV("User")
+        .property(t.id, userId)
+        .property("userId", userId)
+        .property("phoneNumberHash", userPhoneNumberHash),
+    )
+    .next();
+
+  // Extract user vertex from the result and assert type
+  const user = userResult.value as unknown as Vertex;
+
+  // Remove existing contacts edges
+  await g.V(user.id).outE("contacts").drop().iterate();
+
+  // Add new contacts edges
+  for (const contactHash of contacts) {
+    let contactResult = await g
+      .V()
+      .has("User", "phoneNumberHash", contactHash)
+      .fold()
+      .coalesce(
+        __.V().unfold(),
+        __.addV("User").property("phoneNumberHash", contactHash),
+      )
+      .next();
+
+    // Extract contact vertex from the result and assert type
+    const contactVertex = contactResult.value as unknown as Vertex;
+
+    await g.V(user.id).addE("contacts").to(g.V(contactVertex.id)).iterate();
+  }
+
+  return true;
+}
 
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
@@ -31,7 +87,6 @@ const lambdaHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   console.log("Lambda invoked");
 
-  console.log(event[0].userId);
   let dc: any;
   let g: gremlin.process.GraphTraversalSource;
 
@@ -39,24 +94,29 @@ const lambdaHandler = async (
 
   try {
     const graph = new Graph();
-    g = graph
-      .traversal()
-      .withRemote(
-        new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {}),
-      );
+    dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
+    g = graph.traversal().withRemote(dc);
 
-    const res = await g.mergeV(
-      new Map([[t.id, event[0].userId]]),
-    ).option(onCreate, new Map([["created", Date.now()]]))
-      .option(onMatch, new Map([["updated", Date.now()]])).elementMap()
-      .toList();
+    const { userId, userPhoneNumberHash, contacts } = event[0];
 
-    console.log(res);
+    updateContacts(g, userId, userPhoneNumberHash, contacts);
+
+    // Remove old contacts
+    /*    for (const existingContact of existingContacts) {
+      if (!contactSet.has(existingContact)) {
+        const contactVertices = await g.V().has('Contact', 'phoneHash', existingContact).toList();
+        for (const contactVertex of contactVertices) {
+          await g.V(userVertex.value.id).outE('hasContact').where(gremlin.process.statics.inV().is(contactVertex)).drop().iterate();
+        }
+      }
+    } */
+
+    console.log("Update successful");
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: "hi",
+        message: "Success",
       }),
     };
   } catch (error) {
