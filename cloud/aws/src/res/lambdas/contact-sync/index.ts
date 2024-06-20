@@ -87,7 +87,7 @@ async function updateContacts(
   // Remove existing contacts edges
   await g.V(user.id).outE("contacts").drop().iterate();
 
-  // Add new contacts edges
+/*   // Add new contacts edges
   for (const contactHash of contacts) {
     let contactResult = await g
       .V()
@@ -103,7 +103,7 @@ async function updateContacts(
     const contactVertex = contactResult.value as unknown as Vertex;
 
     await g.V(user.id).addE("contacts").to(__.V(contactVertex.id)).iterate();
-  }
+  } */
 
   return true;
 }
