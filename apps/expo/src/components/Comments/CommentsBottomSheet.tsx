@@ -53,49 +53,33 @@ const CommentsBottomSheet = ({
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const insets = useSafeAreaInsets();
 
-  // useEffect(() => {
-  //   if (modalVisible) {
-  //     bottomSheetModalRef.current?.present();
-  //     sheetRef.current?.expand();
-  //   } else {
-  //     bottomSheetModalRef.current?.dismiss();
-  //   }
-  // }, [modalVisible]);
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    isFetchingNextPage: isFetchingNextPageComments,
+    fetchNextPage: fetchNextPageComments,
+    hasNextPage: hasNextPageComments,
+    refetch: refetchComments,
+  } = api.post.paginateComments.useInfiniteQuery(
+    {
+      postId,
+      pageSize: 20,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
 
-  // useEffect(() => {
-  //   return () => {
-  //     // Ensure any effects are cleaned up when the modal is removed
-  //     bottomSheetModalRef.current?.dismiss();
-  //   };
-  // }, []);
-
-  // const {
-  //   data: commentsData,
-  //   isLoading: isLoadingComments,
-  //   isFetchingNextPage: isFetchingNextPageComments,
-  //   fetchNextPage: fetchNextPageComments,
-  //   hasNextPage: hasNextPageComments,
-  //   refetch: refetchComments,
-  // } = api.post.paginateComments.useInfiniteQuery(
-  //   {
-  //     postId,
-  //     pageSize: 20,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => lastPage.nextCursor,
-  //   },
-  // );
-
-  // const comments = useMemo(
-  //   () =>
-  //     commentsData?.pages
-  //       .flatMap((page) => page.items ?? [])
-  //       .filter(
-  //         (item): item is z.infer<typeof sharedValidators.media.comment> =>
-  //           item !== undefined,
-  //       ),
-  //   [commentsData],
-  // );
+  const comments = useMemo(
+    () =>
+      commentsData?.pages
+        .flatMap((page) => page.items ?? [])
+        .filter(
+          (item): item is z.infer<typeof sharedValidators.media.comment> =>
+            item !== undefined,
+        ),
+    [commentsData],
+  );
 
   const [inputValue, setInputValue] = useState("");
 
@@ -174,14 +158,23 @@ const CommentsBottomSheet = ({
             handleComponent={renderHeader}
             backgroundStyle={{ backgroundColor: "#282828" }}
           >
-            <BottomSheetFlatList
-              scrollEnabled={true}
-              // data={comments ?? []}
-              data={[]}
-              keyExtractor={(i) => i.commentId.toString()}
-              renderItem={renderComment}
-              contentContainerStyle={{ backgroundColor: "#282828" }}
-            />
+            {
+              // if there are no comments render a message
+              comments?.length === 0 ? (
+                <View flex={1} justifyContent="center" alignItems="center">
+                  <SizableText size={"$7"}>No comments yet</SizableText>
+                  <Text color={"$gray10"}>Be the first to comment</Text>
+                </View>
+              ) : (
+                <BottomSheetFlatList
+                  scrollEnabled={true}
+                  data={comments ?? []}
+                  keyExtractor={(i) => i.commentId.toString()}
+                  renderItem={renderComment}
+                  contentContainerStyle={{ backgroundColor: "#282828" }}
+                />
+              )
+            }
             <XStack
               borderTopColor={"$gray5"}
               borderTopWidth={"$0.25"}
