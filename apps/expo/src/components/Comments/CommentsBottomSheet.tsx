@@ -38,8 +38,9 @@ const CommentsBottomSheet = ({
   modalVisible,
   setModalVisible,
 }: CommentsModalProps) => {
+  const [showModal, setShowModal] = useState(false);
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["100%"], []);
+  const snapPoints = useMemo(() => ["90%"], []);
   const { height: screenHeight } = Dimensions.get("window");
   const insets = useSafeAreaInsets();
   const animatedPosition = useSharedValue(0);
@@ -53,6 +54,26 @@ const CommentsBottomSheet = ({
     );
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
+
+  const openModal = useCallback(() => {
+    setShowModal(true);
+    sheetRef.current?.expand()
+  }, [sheetRef]);
+
+  const closeModal = useCallback(() => {
+    setShowModal(false);
+    setModalVisible(false);
+    sheetRef.current?.close();
+  }, [sheetRef]);
+
+  useEffect(() => {
+    if (modalVisible) {
+      openModal();
+    } else {
+      closeModal();
+    }
+  }, [modalVisible]);
+
 
   const {
     data: commentsData,
@@ -73,6 +94,17 @@ const CommentsBottomSheet = ({
 
   const addComment = api.post.createComment.useMutation();
 
+  const handlePostComment = () => {
+    if (inputValue.length === 0) {
+      return;
+    }
+    addComment.mutate({
+      postId,
+      body: inputValue,
+    });
+    console.log("posting new comment");
+  };
+
   const comments = useMemo(
     () =>
       commentsData?.pages
@@ -91,7 +123,7 @@ const CommentsBottomSheet = ({
     setInputValue((prev) => prev + emoji);
   };
 
-  TimeAgo.addDefaultLocale(en);
+  TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
   const renderComment = useCallback(
@@ -151,8 +183,8 @@ const CommentsBottomSheet = ({
   );
 
   return (
-    <>
-      <Modal transparent={true} visible={modalVisible}>
+    <View flex={1}>
+      <Modal transparent={true} visible={showModal}>
         <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
           <BottomSheet
             topInset={insets.top}
@@ -161,7 +193,10 @@ const CommentsBottomSheet = ({
             snapPoints={snapPoints}
             index={0}
             enablePanDownToClose={true}
-            onClose={() => setModalVisible(false)}
+            onClose={() => {
+              closeModal()
+            }}
+            onChange={(index) => console.log(index)}
             animatedPosition={animatedPosition}
             handleComponent={renderHeader}
             backgroundStyle={{ backgroundColor: "#282828" }}
@@ -220,7 +255,6 @@ const CommentsBottomSheet = ({
                   placeholder="Comment"
                   maxLength={100}
                   value={inputValue}
-                  focusable={true}
                   onChangeText={setInputValue}
                   style={{
                     fontWeight: "bold",
@@ -230,7 +264,7 @@ const CommentsBottomSheet = ({
                     borderRadius: 20,
                     backgroundColor: "#2E2E2E",
                     color: "#fff",
-                    flex: 2,
+                    // flex: 2,
                   }}
                 />
               </View>
@@ -242,11 +276,7 @@ const CommentsBottomSheet = ({
                 borderRadius={"$7"}
                 backgroundColor={"$blue9"}
               >
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log("test test test ");
-                  }}
-                >
+                <TouchableOpacity onPress={handlePostComment}>
                   <SendHorizontal color="$gray12" />
                 </TouchableOpacity>
               </View>
@@ -254,7 +284,7 @@ const CommentsBottomSheet = ({
           </BottomSheet>
         </Animated.View>
       </Modal>
-    </>
+    </View>
   );
 };
 
