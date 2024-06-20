@@ -8,10 +8,10 @@ import { z } from "zod";
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 const Graph = gremlin.structure.Graph;
 const t = gremlin.process.t;
+const p = gremlin.process.P;
 const Direction = gremlin.process.direction;
 const { onCreate, onMatch } = gremlin.process.merge;
-const __ = gremlin.process.statics; 
-
+const __ = gremlin.process.statics;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
@@ -36,16 +36,25 @@ async function updateContacts(
 ): Promise<boolean> {
   // Add or update the user vertex
   let userResult = await g
-    .V()
-    .has("User", "userId", userId)
-    .fold()
-    .coalesce(
-      __.V().unfold(),
-      __
-        .addV("User")
-        .property(t.id, userId)
-        .property("userId", userId)
-        .property("phoneNumberHash", userPhoneNumberHash),
+    .mergeV(
+      new Map([
+        [t.id, userId],
+        [t.label, "User"],
+      ]),
+    )
+    .option(
+      onCreate,
+      new Map([
+        ["created", Date.now().toString()],
+        ["phoneNumberHash", userPhoneNumberHash],
+      ]),
+    )
+    .option(
+      onMatch,
+      new Map([
+        ["phoneNumberHash", userPhoneNumberHash],
+        ["updatedAt", Date.now().toString()],
+      ]),
     )
     .next();
 
@@ -55,23 +64,18 @@ async function updateContacts(
   // Remove existing contacts edges
   await g.V(user.id).outE("contacts").drop().iterate();
 
-  // Add new contacts edges
-  for (const contactHash of contacts) {
-    let contactResult = await g
-      .V()
-      .has("User", "phoneNumberHash", contactHash)
-      .fold()
-      .coalesce(
-        __.V().unfold(),
-        __.addV("User").property("phoneNumberHash", contactHash),
-      )
-      .next();
-
-    // Extract contact vertex from the result and assert type
-    const contactVertex = contactResult.value as unknown as Vertex;
-
-    await g.V(user.id).addE("contacts").to(g.V(contactVertex.id)).iterate();
-  }
+  // Add edges to all other users who have a phoneNumber that matches my edge phone number
+  await g
+    .V(user.id)
+    .as("currentUser")
+    .V()
+    .hasLabel("User")
+    .has("phoneNumberHash", p.within(contacts))
+    .where(p.neq("currentUser"))
+    .addE("contacts")
+    .from_("currentUser")
+    .property("updatedAt", Date.now().toString())
+    .iterate();
 
   return true;
 }
@@ -99,7 +103,7 @@ const lambdaHandler = async (
 
     const { userId, userPhoneNumberHash, contacts } = event[0];
 
-    updateContacts(g, userId, userPhoneNumberHash, contacts);
+    await updateContacts(g, userId, userPhoneNumberHash, contacts);
 
     // Remove old contacts
     /*    for (const existingContact of existingContacts) {
