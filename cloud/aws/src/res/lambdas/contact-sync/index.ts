@@ -8,6 +8,7 @@ import { z } from "zod";
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 const Graph = gremlin.structure.Graph;
 const t = gremlin.process.t;
+const p = gremlin.process.P;
 const Direction = gremlin.process.direction;
 const { onCreate, onMatch } = gremlin.process.merge;
 const __ = gremlin.process.statics;
@@ -34,16 +35,6 @@ async function updateContacts(
   contacts: string[],
 ): Promise<boolean> {
   // Add or update the user vertex
-
-  /*   const res = await g
-    .mergeV(new Map([[t.id, userId]]))
-    .option(onCreate, new Map([["created", Date.now()]]))
-    .option(onMatch, new Map([["updated", Date.now()]]))
-    .elementMap()
-    .toList();
-
-  console.log(res); */
-
   let userResult = await g
     .mergeV(
       new Map([
@@ -67,31 +58,24 @@ async function updateContacts(
     )
     .next();
 
-  console.log(userResult);
-
   // Extract user vertex from the result and assert type
   const user = userResult.value as unknown as Vertex;
 
   // Remove existing contacts edges
   await g.V(user.id).outE("contacts").drop().iterate();
 
-  /*   // Add new contacts edges
-  for (const contactHash of contacts) {
-    let contactResult = await g
-      .V()
-      .has("User", "phoneNumberHash", contactHash)
-      .fold()
-      .coalesce(
-        __.V().unfold(),
-        __.addV("User").property("phoneNumberHash", contactHash),
-      )
-      .next();
-
-    // Extract contact vertex from the result and assert type
-    const contactVertex = contactResult.value as unknown as Vertex;
-
-    await g.V(user.id).addE("contacts").to(__.V(contactVertex.id)).iterate();
-  } */
+  // Add edges to all other users who have a phoneNumber that matches my edge phone number
+  await g
+    .V(user.id)
+    .as("currentUser")
+    .V()
+    .hasLabel("User")
+    .has("phoneNumberHash", p.within(contacts))
+    .where(p.neq("currentUser"))
+    .addE("contacts")
+    .from_("currentUser")
+    .property("updatedAt", Date.now().toString())
+    .iterate();
 
   return true;
 }
