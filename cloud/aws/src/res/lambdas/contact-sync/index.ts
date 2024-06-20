@@ -45,6 +45,25 @@ async function updateContacts(
   console.log(res); */
 
   let userResult = await g
+    .mergeV(new Map([[t.id, userId]]))
+    .option(
+      onCreate,
+      new Map([
+        ["created", Date.now().toString()],
+        ["userId", userId],
+        ["phoneNumberHash", userPhoneNumberHash],
+      ]),
+    )
+    .option(
+      onMatch,
+      new Map([
+        ["phoneNumberHash", userPhoneNumberHash],
+        ["updatedAt", Date.now().toString()],
+      ]),
+    )
+    .next();
+
+  /*   let userResult = await g
     .V()
     .has("User", "userId", userId)
     .fold()
@@ -56,7 +75,7 @@ async function updateContacts(
         .property("phoneNumberHash", userPhoneNumberHash),
     )
     .next();
-
+ */
   // Extract user vertex from the result and assert type
   const user = userResult.value as unknown as Vertex;
 
