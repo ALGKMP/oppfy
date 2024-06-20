@@ -107,16 +107,6 @@ const lambdaHandler = async (
 
     await updateContacts(g, userId, userPhoneNumberHash, contacts);
 
-    // Remove old contacts
-    /*    for (const existingContact of existingContacts) {
-      if (!contactSet.has(existingContact)) {
-        const contactVertices = await g.V().has('Contact', 'phoneHash', existingContact).toList();
-        for (const contactVertex of contactVertices) {
-          await g.V(userVertex.value.id).outE('hasContact').where(gremlin.process.statics.inV().is(contactVertex)).drop().iterate();
-        }
-      }
-    } */
-
     console.log("Update successful");
 
     return {
