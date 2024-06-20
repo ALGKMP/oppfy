@@ -108,7 +108,7 @@ const lambdaHandler = async (
 
     const { userId, userPhoneNumberHash, contacts } = event[0];
 
-    updateContacts(g, userId, userPhoneNumberHash, contacts);
+    await updateContacts(g, userId, userPhoneNumberHash, contacts);
 
     // Remove old contacts
     /*    for (const existingContact of existingContacts) {
