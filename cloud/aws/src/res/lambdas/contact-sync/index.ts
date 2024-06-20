@@ -55,7 +55,6 @@ async function updateContacts(
       onCreate,
       new Map([
         ["created", Date.now().toString()],
-        ["userId", userId],
         ["phoneNumberHash", userPhoneNumberHash],
       ]),
     )
