@@ -20,6 +20,59 @@ const contactSyncBody = z.object({
   contacts: z.array(z.string()),
 });
 
+interface Vertex {
+  id: string;
+  label: string;
+  properties: Record<string, any>;
+}
+
+async function updateContacts(
+  g: gremlin.process.GraphTraversalSource,
+  userId: string,
+  userPhoneNumberHash: string,
+  contacts: string[],
+): Promise<boolean> {
+  // Add or update the user vertex
+  let userResult = await g
+    .V()
+    .has("User", "userId", userId)
+    .fold()
+    .coalesce(
+      g.V().unfold(),
+      g
+        .addV("User")
+        .property("userId", userId)
+        .property("phoneNumberHash", userPhoneNumberHash),
+    )
+    .next();
+
+  // Extract user vertex from the result and assert type
+  const user = userResult.value as unknown as Vertex;
+
+  // Remove existing contacts edges
+  await g.V(user.id).outE("contacts").drop().iterate();
+
+  // Add new contacts edges
+  for (const contactHash of contacts) {
+    let contactResult = await g
+      .V()
+      .has("User", "phoneNumberHash", contactHash)
+      .fold()
+      .coalesce(
+        g.V().unfold(),
+        g.addV("User").property("phoneNumberHash", contactHash),
+      )
+      .next();
+
+    // Extract contact vertex from the result and assert type
+    const contactVertex = contactResult.value as unknown as Vertex;
+
+    await g.V(user.id).addE("contacts").to(g.V(contactVertex.id)).iterate();
+  }
+
+  return true;
+}
+
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
 // 2. Parses records in body key using your schema and return them in a list.
@@ -43,50 +96,7 @@ const lambdaHandler = async (
 
     const { userId, userPhoneNumberHash, contacts } = event[0];
 
-    // Check if user vertex exists and create or update accordingly
-    let userVertex = await g.V().has("User", "userId", userId).next();
-    if (!userVertex.value) {
-      // Create user vertex
-      userVertex = await g
-        .addV("User")
-        .property("userId", userId)
-        .property("userPhoneNumberHash", userPhoneNumberHash)
-        .next();
-    } else {
-      // Update user vertex
-      await g
-        .V(userVertex.value.id)
-        .property("userPhoneNumberHash", userPhoneNumberHash)
-        .next();
-    }
-
-    // Fetch existing contacts
-    const existingContacts = await g
-      .V(userVertex.value.id)
-      .out("hasContact")
-      .values("phoneHash")
-      .toList();
-
-    // Add new contacts and remove old ones
-    const contactSet = new Set(contacts);
-    const existingContactSet = new Set(existingContacts);
-
-    // Add new contacts
-    for (const contact of contacts) {
-      if (!existingContactSet.has(contact)) {
-        const contactVertex = await g
-          .addV("Contact")
-          .property("phoneHash", contact)
-          .next();
-        await g
-          .V(userVertex.value.id)
-          .addE("hasContact")
-          .to(contactVertex)
-          .next();
-      }
-    }
-
-    console.log("did some shit");
+    updateContacts(g, userId, userPhoneNumberHash, contacts);
 
     // Remove old contacts
     /*    for (const existingContact of existingContacts) {
