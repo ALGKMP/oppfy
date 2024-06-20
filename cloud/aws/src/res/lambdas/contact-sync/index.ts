@@ -43,6 +43,7 @@ async function updateContacts(
       __.V().unfold(),
       __
         .addV("User")
+        .property(t.id, userId)
         .property("userId", userId)
         .property("phoneNumberHash", userPhoneNumberHash),
     )
