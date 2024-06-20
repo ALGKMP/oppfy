@@ -10,6 +10,8 @@ const Graph = gremlin.structure.Graph;
 const t = gremlin.process.t;
 const Direction = gremlin.process.direction;
 const { onCreate, onMatch } = gremlin.process.merge;
+const __ = gremlin.process.statics; 
+
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
@@ -38,8 +40,8 @@ async function updateContacts(
     .has("User", "userId", userId)
     .fold()
     .coalesce(
-      g.V().unfold(),
-      g
+      __.V().unfold(),
+      __
         .addV("User")
         .property("userId", userId)
         .property("phoneNumberHash", userPhoneNumberHash),
@@ -59,8 +61,8 @@ async function updateContacts(
       .has("User", "phoneNumberHash", contactHash)
       .fold()
       .coalesce(
-        g.V().unfold(),
-        g.addV("User").property("phoneNumberHash", contactHash),
+        __.V().unfold(),
+        __.addV("User").property("phoneNumberHash", contactHash),
       )
       .next();
 
