@@ -18,6 +18,8 @@ import BottomSheet, {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { Minus, SendHorizontal } from "@tamagui/lucide-icons";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import z from "zod";
 
@@ -89,6 +91,9 @@ const CommentsBottomSheet = ({
     setInputValue((prev) => prev + emoji);
   };
 
+  TimeAgo.addDefaultLocale(en);
+  const timeAgo = new TimeAgo("en-US");
+
   const renderComment = useCallback(
     ({ item }: { item: z.infer<typeof sharedValidators.media.comment> }) => (
       <View padding={"$3.5"}>
@@ -103,7 +108,9 @@ const CommentsBottomSheet = ({
           <YStack gap={"$2"}>
             <XStack gap={"$2"}>
               <Text fontWeight={"bold"}>{item.username}</Text>
-              <Text color={"$gray10"}> {item.createdAt}</Text>
+              <Text color={"$gray10"}>
+                {timeAgo.format(new Date(item.createdAt))}
+              </Text>
             </XStack>
             <Text>{item.body}</Text>
           </YStack>
