@@ -40,7 +40,7 @@ const CommentsBottomSheet = ({
 }: CommentsModalProps) => {
   const [showModal, setShowModal] = useState(false);
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["90%"], []);
+  const snapPoints = useMemo(() => ["100%"], []);
   const { height: screenHeight } = Dimensions.get("window");
   const insets = useSafeAreaInsets();
   const animatedPosition = useSharedValue(0);
