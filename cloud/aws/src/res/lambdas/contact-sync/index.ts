@@ -68,19 +68,6 @@ async function updateContacts(
     )
     .next();
 
-  /*   let userResult = await g
-    .V()
-    .has("User", "userId", userId)
-    .fold()
-    .coalesce(
-      __.V().unfold(),
-      __.addV("User")
-        .property(t.id, userId)
-        .property("userId", userId)
-        .property("phoneNumberHash", userPhoneNumberHash),
-    )
-    .next();
- */
   // Extract user vertex from the result and assert type
   const user = userResult.value as unknown as Vertex;
 
