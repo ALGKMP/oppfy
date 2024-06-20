@@ -35,23 +35,22 @@ async function updateContacts(
 ): Promise<boolean> {
   // Add or update the user vertex
 
-  const res = await g
+  /*   const res = await g
     .mergeV(new Map([[t.id, userId]]))
     .option(onCreate, new Map([["created", Date.now()]]))
     .option(onMatch, new Map([["updated", Date.now()]]))
     .elementMap()
     .toList();
 
-  console.log(res);
+  console.log(res); */
 
-  /*   let userResult = await g
+  let userResult = await g
     .V()
     .has("User", "userId", userId)
     .fold()
     .coalesce(
       __.V().unfold(),
-      __
-        .addV("User")
+      __.addV("User")
         .property(t.id, userId)
         .property("userId", userId)
         .property("phoneNumberHash", userPhoneNumberHash),
@@ -80,7 +79,7 @@ async function updateContacts(
     const contactVertex = contactResult.value as unknown as Vertex;
 
     await g.V(user.id).addE("contacts").to(g.V(contactVertex.id)).iterate();
-  } */
+  }
 
   return true;
 }
