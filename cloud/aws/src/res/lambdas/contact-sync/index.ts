@@ -7,9 +7,7 @@ import { z } from "zod";
 
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 const Graph = gremlin.structure.Graph;
-const t = gremlin.process.t;
-const p = gremlin.process.P;
-const Direction = gremlin.process.direction;
+const { t, P } = gremlin.process;
 const { onCreate, onMatch } = gremlin.process.merge;
 const __ = gremlin.process.statics;
 
@@ -61,25 +59,29 @@ async function updateContacts(
   // Extract user vertex from the result and assert type
   const user = userResult.value as unknown as Vertex;
 
-  // Remove existing contacts edges
-  await g.V(user.id).outE("contacts").drop().iterate();
+  // Remove existing contacts edges (both incoming and outgoing)
+  await g.V(user.id).bothE("contacts").drop().iterate();
 
-  // Add edges to all other users who have a phoneNumber that matches my edge phone number
+  // Add bidirectional edges to all other users who have a phoneNumber that matches my edge phone number
   await g
     .V(user.id)
     .as("currentUser")
     .V()
     .hasLabel("User")
-    .has("phoneNumberHash", p.within(contacts))
-    .where(p.neq("currentUser"))
+    .has("phoneNumberHash", P.within(contacts))
+    .where(P.neq("currentUser"))
+    .as("contactUser")
     .addE("contacts")
     .from_("currentUser")
+    .property("updatedAt", Date.now().toString())
+    .select("contactUser")
+    .addE("contacts")
+    .to("currentUser")
     .property("updatedAt", Date.now().toString())
     .iterate();
 
   return true;
 }
-
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
 // 2. Parses records in body key using your schema and return them in a list.
