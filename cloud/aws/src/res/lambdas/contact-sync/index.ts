@@ -31,7 +31,6 @@ const lambdaHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   console.log("Lambda invoked");
 
-  console.log(event[0].userId);
   let dc: any;
   let g: gremlin.process.GraphTraversalSource;
 
@@ -39,24 +38,72 @@ const lambdaHandler = async (
 
   try {
     const graph = new Graph();
-    g = graph
-      .traversal()
-      .withRemote(
-        new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {}),
-      );
+    dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
+    g = graph.traversal().withRemote(dc);
 
-    const res = await g.mergeV(
-      new Map([[t.id, event[0].userId]]),
-    ).option(onCreate, new Map([["created", Date.now()]]))
-      .option(onMatch, new Map([["updated", Date.now()]])).elementMap()
+    const { userId, userPhoneNumberHash, contacts } = event[0];
+
+    // Check if user vertex exists and create or update accordingly
+    let userVertex = await g.V().has("User", "userId", userId).next();
+    if (!userVertex.value) {
+      // Create user vertex
+      userVertex = await g
+        .addV("User")
+        .property("userId", userId)
+        .property("userPhoneNumberHash", userPhoneNumberHash)
+        .next();
+    } else {
+      // Update user vertex
+      await g
+        .V(userVertex.value.id)
+        .property("userPhoneNumberHash", userPhoneNumberHash)
+        .next();
+    }
+
+    // Fetch existing contacts
+    const existingContacts = await g
+      .V(userVertex.value.id)
+      .out("hasContact")
+      .values("phoneHash")
       .toList();
 
-    console.log(res);
+    // Add new contacts and remove old ones
+    const contactSet = new Set(contacts);
+    const existingContactSet = new Set(existingContacts);
+
+    // Add new contacts
+    for (const contact of contacts) {
+      if (!existingContactSet.has(contact)) {
+        const contactVertex = await g
+          .addV("Contact")
+          .property("phoneHash", contact)
+          .next();
+        await g
+          .V(userVertex.value.id)
+          .addE("hasContact")
+          .to(contactVertex)
+          .next();
+      }
+    }
+
+    console.log("did some shit");
+
+    // Remove old contacts
+    /*    for (const existingContact of existingContacts) {
+      if (!contactSet.has(existingContact)) {
+        const contactVertices = await g.V().has('Contact', 'phoneHash', existingContact).toList();
+        for (const contactVertex of contactVertices) {
+          await g.V(userVertex.value.id).outE('hasContact').where(gremlin.process.statics.inV().is(contactVertex)).drop().iterate();
+        }
+      }
+    } */
+
+    console.log("Update successful");
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: "hi",
+        message: "Success",
       }),
     };
   } catch (error) {
