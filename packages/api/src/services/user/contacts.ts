@@ -1,5 +1,7 @@
-import { sqs } from "@oppfy/sqs";
 import { createHash } from "crypto";
+
+import { sqs } from "@oppfy/sqs";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { ContactsRepository, UserRepository } from "../../repositories";
 
@@ -48,6 +50,25 @@ export class ContactService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
+    // hash the users own phone number and remove from contacts if its in there
+    const userPhoneNumber = user.phoneNumber;
+
+    const userPhoneNumberHash = createHash("sha512")
+      .update(userPhoneNumber)
+      .digest("hex");
+
     await this.contactsRepository.deleteContacts(userId);
+
+    try {
+      await sqs.send({
+        id: userId + "_contactsync_" + Date.now().toString(),
+        body: JSON.stringify({ userId, userPhoneNumberHash, contacts: [] }),
+      });
+    } catch (error) {
+      throw new DomainError(
+        ErrorCode.AWS_ERROR,
+        "Failed to send sqs message to contact sync queue",
+      );
+    }
   }
 }
