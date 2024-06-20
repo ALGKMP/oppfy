@@ -300,30 +300,27 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-    paginateComments: protectedProcedure
-  .input(
-    trpcValidators.input.post.paginateComments
-  )
-  .output(trpcValidators.output.post.paginatedComments) // Assuming you have a validator for paginated comments
-  .query(async ({ ctx, input }) => {
-    try {
-      const result = await ctx.services.post.paginateComments(
-        input.postId,
-        input.cursor,
-        input.pageSize
-      );
-      const parsedResult = trpcValidators.output.post.paginatedComments.parse(result);
-      return parsedResult;
-    } catch (err) {
-      console.error("TRPC paginateComments error: ", err);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to paginate comments.",
-      });
-    }
-  }),
-
-
+  paginateComments: protectedProcedure
+    .input(trpcValidators.input.post.paginateComments)
+    .output(trpcValidators.output.post.paginatedComments)
+    .query(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.services.post.paginateComments(
+          input.postId,
+          input.cursor,
+          input.pageSize,
+        );
+        const parsedResult =
+          trpcValidators.output.post.paginatedComments.parse(result);
+        return parsedResult;
+      } catch (err) {
+        console.error("TRPC paginateComments error: ", err);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate comments.",
+        });
+      }
+    }),
 });
 
 export default postRouter;
