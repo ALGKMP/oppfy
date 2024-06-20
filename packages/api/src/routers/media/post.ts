@@ -263,7 +263,6 @@ export const postRouter = createTRPCRouter({
   createComment: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
         postId: z.number(),
         body: z.string(),
       }),
