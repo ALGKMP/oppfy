@@ -10,8 +10,7 @@ const Graph = gremlin.structure.Graph;
 const t = gremlin.process.t;
 const Direction = gremlin.process.direction;
 const { onCreate, onMatch } = gremlin.process.merge;
-const __ = gremlin.process.statics; 
-
+const __ = gremlin.process.statics;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
@@ -35,7 +34,17 @@ async function updateContacts(
   contacts: string[],
 ): Promise<boolean> {
   // Add or update the user vertex
-  let userResult = await g
+
+  const res = await g
+    .mergeV(new Map([[t.id, userId]]))
+    .option(onCreate, new Map([["created", Date.now()]]))
+    .option(onMatch, new Map([["updated", Date.now()]]))
+    .elementMap()
+    .toList();
+
+  console.log(res);
+
+  /*   let userResult = await g
     .V()
     .has("User", "userId", userId)
     .fold()
@@ -71,7 +80,7 @@ async function updateContacts(
     const contactVertex = contactResult.value as unknown as Vertex;
 
     await g.V(user.id).addE("contacts").to(g.V(contactVertex.id)).iterate();
-  }
+  } */
 
   return true;
 }
