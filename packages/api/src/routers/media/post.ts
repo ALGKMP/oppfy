@@ -263,9 +263,8 @@ export const postRouter = createTRPCRouter({
   createComment: protectedProcedure
     .input(
       z.object({
-        userId: z.string(),
         postId: z.number(),
-        content: z.string(),
+        body: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -273,7 +272,7 @@ export const postRouter = createTRPCRouter({
         await ctx.services.post.commentOnPost(
           ctx.session.uid,
           input.postId,
-          input.content,
+          input.body,
         );
       } catch (err) {
         throw new TRPCError({

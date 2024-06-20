@@ -40,10 +40,11 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { CommentsBottomSheet } from "~/components/Comments";
 import z from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
+
+import { CommentsBottomSheet } from "~/components/Comments";
 import { api } from "~/utils/api";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -72,14 +73,6 @@ const PostItem = (props: PostItemProps) => {
 
   // variables
   const [modalVisible, setModalVisible] = useState(false);
-
-  useEffect(() => {
-    console.log(`MODAL VISIBLE: ${modalVisible}`)
-  }, [modalVisible])
-
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-  }, []);
 
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
@@ -342,6 +335,7 @@ const PostItem = (props: PostItemProps) => {
           </TouchableOpacity>
         </View>
       </View>
+
       <CommentsBottomSheet
         postId={post.postId}
         modalVisible={modalVisible}
@@ -395,11 +389,6 @@ const MediaOfYou = () => {
   const placeholderData = useMemo(() => {
     return Array.from({ length: 20 }, () => null);
   }, []);
-
-  useEffect(() => {
-    console.log(isLoading);
-    console.log(posts);
-  }, [isLoading]);
 
   return (
     <View flex={1}>

@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -35,8 +39,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1(react@18.2.0)
       '@gorhom/bottom-sheet':
-        specifier: ^4
-        version: 4.0.0(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
+        specifier: ^4.6.3
+        version: 4.6.3(@types/react@18.2.79)(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.3.4(react-hook-form@7.51.3)
@@ -235,9 +239,6 @@ importers:
       react-native-vision-camera:
         specifier: ^4.0.5
         version: 4.0.5(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
-      react-time-ago:
-        specifier: ^7.3.3
-        version: 7.3.3(javascript-time-ago@2.5.10)(react-dom@18.2.0)(react@18.2.0)
       superjson:
         specifier: 2.2.0
         version: 2.2.0
@@ -1019,7 +1020,7 @@ importers:
         version: 0.0.0-experimental-c8b3f72-20240517(eslint@9.2.0)
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-26f2496093-20240514(eslint@9.2.0)
+        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.2.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.8.0(eslint@9.2.0)(typescript@5.4.5)
@@ -5624,22 +5625,28 @@ packages:
     dev: false
     optional: true
 
-  /@gorhom/bottom-sheet@4.0.0(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
-    resolution: {integrity: sha512-iG4ZY16co3KsVl6zPrfG6VJuGGv4ml+dDduK9EtudWxTnZMMkFQxc5shGvu2Hbv+N15EhwelyLqZmxFzGXYZqQ==}
+  /@gorhom/bottom-sheet@4.6.3(@types/react@18.2.79)(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-fSuSfbtoKsjmSeyz+tG2C0GtcEL7PS63iEXI23c9M+HeCT1IFK6ffmIa2pqyqB43L1jtkR+BWkpZwqXnN4H8xA==}
     peerDependencies:
+      '@types/react': '*'
+      '@types/react-native': '*'
       react: '*'
       react-native: '*'
       react-native-gesture-handler: '>=1.10.1'
       react-native-reanimated: '>=2.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-native':
+        optional: true
     dependencies:
       '@gorhom/portal': 1.0.14(react-native@0.74.2)(react@18.2.0)
+      '@types/react': 18.2.79
       invariant: 2.2.4
-      nanoid: 3.3.7
       react: 18.2.0
       react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
       react-native-gesture-handler: 2.16.2(react-native@0.74.2)(react@18.2.0)
       react-native-reanimated: 3.10.1(@babel/core@7.24.4)(react-native@0.74.2)(react@18.2.0)
-      react-native-redash: 16.3.0(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
     dev: false
 
   /@gorhom/portal@1.0.14(react-native@0.74.2)(react@18.2.0):
@@ -10425,10 +10432,6 @@ packages:
       event-target-shim: 5.0.1
     dev: false
 
-  /abs-svg-path@0.1.1:
-    resolution: {integrity: sha512-d8XPSGjfyzlXC3Xx891DJRyZfqk5JU0BJrDQcsWomFIV1/BIzPW5HDH5iDdWpqWaav0YVIEzT1RHTwWr0FFshA==}
-    dev: false
-
   /accepts@1.3.8:
     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
     engines: {node: '>= 0.6'}
@@ -13044,8 +13047,8 @@ packages:
       - supports-color
     dev: false
 
-  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.2.0):
-    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
+  /eslint-plugin-react-hooks@5.1.0-beta-94eed63c49-20240425(eslint@9.2.0):
+    resolution: {integrity: sha512-9DabNOh93nRDoBbYYO7kS5QqJdbA1Jh9XNDh7MebrDAYctyGQaHSg29TGoNEieX3iLSSfiKToPcvsLowrAtFRA==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -17433,12 +17436,6 @@ packages:
     resolution: {integrity: sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==}
     engines: {node: '>=0.10.0'}
 
-  /normalize-svg-path@1.1.0:
-    resolution: {integrity: sha512-r9KHKG2UUeB5LoTouwDzBy2VxXlHsiM6fyLQvnJa0S5hrhzqElH/CH7TUGhT1fVvIYBIKf3OpY4YJ4CK+iaqHg==}
-    dependencies:
-      svg-arc-to-cubic-bezier: 3.2.0
-    dev: false
-
   /npm-package-arg@7.0.0:
     resolution: {integrity: sha512-xXxr8y5U0kl8dVkz2oK7yZjPBvqM2fwaO5l3Yg13p03v8+E3qQcD0JNhHzjL1vyGgxcKkD0cco+NLR72iuPk3g==}
     dependencies:
@@ -17855,10 +17852,6 @@ packages:
       pngjs: 3.4.0
     dev: false
 
-  /parse-svg-path@0.1.2:
-    resolution: {integrity: sha512-JyPSBnkTJ0AI8GGJLfMXvKq42cj5c006fnLz6fXy6zfoVjJizi8BNTpu8on8ziI1cKy9d9DGNuY17Ce7wuejpQ==}
-    dev: false
-
   /parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
@@ -17944,10 +17937,6 @@ packages:
 
   /pathe@1.1.2:
     resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
-    dev: false
-
-  /performance-now@2.1.0:
-    resolution: {integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==}
     dev: false
 
   /performant-array-to-tree@1.11.0:
@@ -18451,12 +18440,6 @@ packages:
     resolution: {integrity: sha512-b484I/7b8rDEdSDKckSSBA8knMpcdsXudlE/LNL639wFoHKwLbEkQFZHWEYwDC0wa0FKUcCY+GAF73Z7wxNVFA==}
     dev: false
 
-  /raf@3.4.1:
-    resolution: {integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==}
-    dependencies:
-      performance-now: 2.1.0
-    dev: false
-
   /ramda-adjunct@5.0.1(ramda@0.30.1):
     resolution: {integrity: sha512-UTQCcWnoiuYH+ua+jGg3GTktcmCSD2W7OO2++tmv8p2Ze+N9VgVACERg4g36rRfIXklVMtqazyBLBWXfoPKgRQ==}
     engines: {node: '>=0.10.3'}
@@ -18725,23 +18708,6 @@ packages:
       react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
     transitivePeerDependencies:
       - supports-color
-    dev: false
-
-  /react-native-redash@16.3.0(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
-    resolution: {integrity: sha512-dhmeYbQ/usGzxZSGZmzmRuIFF2LrtJUKqgseKgf9Jdj0JQ7VM20m/LqTg60+wjxeiyAh2D/vKsQ2U7rMkuoplQ==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-gesture-handler: '*'
-      react-native-reanimated: '>=2.0.0'
-    dependencies:
-      abs-svg-path: 0.1.1
-      normalize-svg-path: 1.1.0
-      parse-svg-path: 0.1.2
-      react: 18.2.0
-      react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
-      react-native-gesture-handler: 2.16.2(react-native@0.74.2)(react@18.2.0)
-      react-native-reanimated: 3.10.1(@babel/core@7.24.4)(react-native@0.74.2)(react@18.2.0)
     dev: false
 
   /react-native-safe-area-context@4.10.1(react-native@0.74.2)(react@18.2.0):
@@ -19025,21 +18991,6 @@ packages:
       prismjs: 1.29.0
       react: 18.2.0
       refractor: 3.6.0
-    dev: false
-
-  /react-time-ago@7.3.3(javascript-time-ago@2.5.10)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-5kh2Kuu/UhHzcZrGvf3GUrF2d+IXjkIXif5MR2iDWIfSqQuBW27/ejN/tmzJBRyPiryYTgbDIG6AZFJ4RW3yfw==}
-    peerDependencies:
-      javascript-time-ago: ^2.3.7
-      react: '>=0.16.8'
-      react-dom: '>=0.16.8'
-    dependencies:
-      javascript-time-ago: 2.5.10
-      memoize-one: 6.0.0
-      prop-types: 15.8.1
-      raf: 3.4.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react@18.2.0:
@@ -20217,10 +20168,6 @@ packages:
   /supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  /svg-arc-to-cubic-bezier@3.2.0:
-    resolution: {integrity: sha512-djbJ/vZKZO+gPoSDThGNpKDO+o+bAeA4XQKovvkNCqnIS2t+S4qnLAGQhyyrulhCFRl1WWzAp0wUDV8PpTVU3g==}
-    dev: false
 
   /swagger-client@3.28.2(ramda@0.30.1):
     resolution: {integrity: sha512-g30KCdSVyZlMulWOJnheNo7Ea+L06OZebl0oRU6zHd5Zf5AZKHTqurKRdNOLsMWA3l3bWJiEh7s3JlzFJHRmoQ==}
