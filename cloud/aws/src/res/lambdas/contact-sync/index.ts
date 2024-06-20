@@ -45,7 +45,12 @@ async function updateContacts(
   console.log(res); */
 
   let userResult = await g
-    .mergeV(new Map([[t.id, userId]]))
+    .mergeV(
+      new Map([
+        [t.id, userId],
+        [t.label, "User"],
+      ]),
+    )
     .option(
       onCreate,
       new Map([
