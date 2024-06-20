@@ -39,6 +39,7 @@ const CommentsBottomSheet = ({
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
   const { height: screenHeight } = Dimensions.get("window");
+  const insets = useSafeAreaInsets();
   const animatedPosition = useSharedValue(0);
   const animatedOverlayStyle = useAnimatedStyle(() => {
     const heightPercentage = animatedPosition.value / screenHeight;
@@ -50,52 +51,36 @@ const CommentsBottomSheet = ({
     );
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const insets = useSafeAreaInsets();
 
-  // useEffect(() => {
-  //   if (modalVisible) {
-  //     bottomSheetModalRef.current?.present();
-  //     sheetRef.current?.expand();
-  //   } else {
-  //     bottomSheetModalRef.current?.dismiss();
-  //   }
-  // }, [modalVisible]);
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    isFetchingNextPage: isFetchingNextPageComments,
+    fetchNextPage: fetchNextPageComments,
+    hasNextPage: hasNextPageComments,
+    refetch: refetchComments,
+  } = api.post.paginateComments.useInfiniteQuery(
+    {
+      postId,
+      pageSize: 20,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
 
-  // useEffect(() => {
-  //   return () => {
-  //     // Ensure any effects are cleaned up when the modal is removed
-  //     bottomSheetModalRef.current?.dismiss();
-  //   };
-  // }, []);
+  const addComment = api.post.createComment.useMutation();
 
-  // const {
-  //   data: commentsData,
-  //   isLoading: isLoadingComments,
-  //   isFetchingNextPage: isFetchingNextPageComments,
-  //   fetchNextPage: fetchNextPageComments,
-  //   hasNextPage: hasNextPageComments,
-  //   refetch: refetchComments,
-  // } = api.post.paginateComments.useInfiniteQuery(
-  //   {
-  //     postId,
-  //     pageSize: 20,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => lastPage.nextCursor,
-  //   },
-  // );
-
-  // const comments = useMemo(
-  //   () =>
-  //     commentsData?.pages
-  //       .flatMap((page) => page.items ?? [])
-  //       .filter(
-  //         (item): item is z.infer<typeof sharedValidators.media.comment> =>
-  //           item !== undefined,
-  //       ),
-  //   [commentsData],
-  // );
+  const comments = useMemo(
+    () =>
+      commentsData?.pages
+        .flatMap((page) => page.items ?? [])
+        .filter(
+          (item): item is z.infer<typeof sharedValidators.media.comment> =>
+            item !== undefined,
+        ),
+    [commentsData],
+  );
 
   const [inputValue, setInputValue] = useState("");
 
@@ -174,14 +159,23 @@ const CommentsBottomSheet = ({
             handleComponent={renderHeader}
             backgroundStyle={{ backgroundColor: "#282828" }}
           >
-            <BottomSheetFlatList
-              scrollEnabled={true}
-              // data={comments ?? []}
-              data={[]}
-              keyExtractor={(i) => i.commentId.toString()}
-              renderItem={renderComment}
-              contentContainerStyle={{ backgroundColor: "#282828" }}
-            />
+            {
+              // if there are no comments render a message
+              comments?.length === 0 ? (
+                <View flex={1} justifyContent="center" alignItems="center">
+                  <SizableText size={"$7"}>No comments yet</SizableText>
+                  <Text color={"$gray10"}>Be the first to comment</Text>
+                </View>
+              ) : (
+                <BottomSheetFlatList
+                  scrollEnabled={true}
+                  data={comments ?? []}
+                  keyExtractor={(i) => i.commentId.toString()}
+                  renderItem={renderComment}
+                  contentContainerStyle={{ backgroundColor: "#282828" }}
+                />
+              )
+            }
             <XStack
               borderTopColor={"$gray5"}
               borderTopWidth={"$0.25"}
@@ -241,8 +235,12 @@ const CommentsBottomSheet = ({
                 borderRadius={"$7"}
                 backgroundColor={"$blue9"}
               >
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <SendHorizontal size={24} padding={"$3"} color="$gray12" />
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log("test test test ");
+                  }}
+                >
+                  <SendHorizontal color="$gray12" />
                 </TouchableOpacity>
               </View>
             </XStack>

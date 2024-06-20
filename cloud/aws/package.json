@@ -20,7 +20,7 @@
     "aws-cdk-lib": "2.116.1",
     "aws-lambda": "^1.0.7",
     "constructs": "^10.3.0",
-    "@aws-cdk/aws-neptune-alpha": "^2.139.0-alpha.0"
+    "@aws-cdk/aws-neptune-alpha": "^2.146.0-alpha.0"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
