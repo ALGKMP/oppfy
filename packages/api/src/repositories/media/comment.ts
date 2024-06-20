@@ -50,11 +50,11 @@ export class CommentRepository {
         createdAt: schema.comment.createdAt,
       })
       .from(schema.comment)
-      .innerJoin(schema.user, eq(schema.comment.user, schema.user.id))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .innerJoin(schema.user, eq(schema.user.id, schema.comment.user))
+      .innerJoin(schema.profile, eq(schema.profile.id, schema.user.profileId))
       .where(
         and(
-          eq(schema.like.postId, postId),
+          eq(schema.comment.id, postId),
           cursor
             ? or(
                 gt(schema.comment.createdAt, cursor.createdAt),
@@ -67,8 +67,8 @@ export class CommentRepository {
         ),
       )
       .orderBy(
-        asc(schema.like.createdAt), // Primary order by the creation date
-        asc(schema.user.id), // Tiebreaker order by user ID
+        asc(schema.comment.createdAt), // Primary order by the creation date
+        asc(schema.comment.id),
       )
       .limit(pageSize + 1);
   }
