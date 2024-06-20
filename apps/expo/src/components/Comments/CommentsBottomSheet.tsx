@@ -38,7 +38,6 @@ const CommentsBottomSheet = ({
   modalVisible,
   setModalVisible,
 }: CommentsModalProps) => {
-  const [showModal, setShowModal] = useState(false);
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
   const { height: screenHeight } = Dimensions.get("window");
@@ -56,12 +55,10 @@ const CommentsBottomSheet = ({
   });
 
   const openModal = useCallback(() => {
-    setShowModal(true);
     sheetRef.current?.expand();
   }, [sheetRef]);
 
   const closeModal = useCallback(() => {
-    setShowModal(false);
     setModalVisible(false);
     sheetRef.current?.close();
   }, [sheetRef]);
