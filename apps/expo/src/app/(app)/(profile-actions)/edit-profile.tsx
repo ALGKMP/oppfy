@@ -37,7 +37,7 @@ const EditProfile = () => {
   } = useForm({
     defaultValues: {
       fullName: defaultValues?.name ?? "",
-      username: defaultValues?.username ,
+      username: defaultValues?.username ?? "",
       bio: defaultValues?.bio ?? "",
     },
     resolver: zodResolver(profileSchema),
