@@ -67,13 +67,15 @@ async function updateContacts(
     )
     .next();
 
+  console.log(userResult);
+
   // Extract user vertex from the result and assert type
   const user = userResult.value as unknown as Vertex;
 
   // Remove existing contacts edges
   await g.V(user.id).outE("contacts").drop().iterate();
 
-/*   // Add new contacts edges
+  /*   // Add new contacts edges
   for (const contactHash of contacts) {
     let contactResult = await g
       .V()
