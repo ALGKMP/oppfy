@@ -78,7 +78,7 @@ async function updateContacts(
     // Extract contact vertex from the result and assert type
     const contactVertex = contactResult.value as unknown as Vertex;
 
-    await g.V(user.id).addE("contacts").to(g.V(contactVertex.id)).iterate();
+    await g.V(user.id).addE("contacts").to(__.V(contactVertex.id)).iterate();
   }
 
   return true;
