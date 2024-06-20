@@ -39,6 +39,7 @@ const CommentsBottomSheet = ({
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
   const { height: screenHeight } = Dimensions.get("window");
+  const insets = useSafeAreaInsets();
   const animatedPosition = useSharedValue(0);
   const animatedOverlayStyle = useAnimatedStyle(() => {
     const heightPercentage = animatedPosition.value / screenHeight;
@@ -50,8 +51,6 @@ const CommentsBottomSheet = ({
     );
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const insets = useSafeAreaInsets();
 
   const {
     data: commentsData,
@@ -69,6 +68,8 @@ const CommentsBottomSheet = ({
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  const addComment = api.post.createComment.useMutation();
 
   const comments = useMemo(
     () =>
@@ -234,8 +235,12 @@ const CommentsBottomSheet = ({
                 borderRadius={"$7"}
                 backgroundColor={"$blue9"}
               >
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <SendHorizontal size={24} padding={"$3"} color="$gray12" />
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log("test test test ");
+                  }}
+                >
+                  <SendHorizontal color="$gray12" />
                 </TouchableOpacity>
               </View>
             </XStack>

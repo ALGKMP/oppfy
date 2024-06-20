@@ -260,7 +260,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  comment: protectedProcedure
+  createComment: protectedProcedure
     .input(
       z.object({
         userId: z.string(),

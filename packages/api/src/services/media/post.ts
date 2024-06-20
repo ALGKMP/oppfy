@@ -358,7 +358,7 @@ export class PostService {
       );
       throw new DomainError(
         ErrorCode.FAILED_TO_DELETE_COMMENT,
-        "Failed to delete comment.",
+        `Failed to delete comment for commentId: ${commentId}.`,
       );
     }
   }
@@ -383,7 +383,7 @@ export class PostService {
       );
       throw new DomainError(
         ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
-        "Failed to paginate comments.",
+        `Failed to paginate comments for postId: ${postId}.`,
       );
     }
   }
