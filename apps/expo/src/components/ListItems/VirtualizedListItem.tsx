@@ -73,7 +73,13 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               </Skeleton>
             ) : !props.loading && props.imageUrl ? (
               <Avatar circular size={56}>
-                <Avatar.Image src={props.imageUrl} />
+                <Avatar.Image
+                  source={
+                    typeof props.imageUrl === "string"
+                      ? { uri: props.imageUrl }
+                      : props.imageUrl
+                  }
+                />
               </Avatar>
             ) : null}
           </View>
