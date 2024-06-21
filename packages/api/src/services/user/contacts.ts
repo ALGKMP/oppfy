@@ -33,7 +33,7 @@ export class ContactService {
     try {
       await sqs.send({
         id: userId + "_contactsync_" + Date.now().toString(),
-        body: JSON.stringify({ userId, userPhoneNumberHash, contacts }),
+        body: JSON.stringify({ userId, userPhoneNumberHash, contacts: filteredContacts }),
       });
     } catch (error) {
       throw new DomainError(
