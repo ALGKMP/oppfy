@@ -104,6 +104,9 @@ const lambdaHandler = async (
     g = graph.traversal().withRemote(dc);
 
     const { userId, userPhoneNumberHash, contacts } = event[0];
+    console.log("userId", userId);
+    console.log("userPhoneNumberHash", userPhoneNumberHash);
+    console.log("contacts", contacts);
 
     await updateContacts(g, userId, userPhoneNumberHash, contacts);
 
