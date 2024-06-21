@@ -7,8 +7,7 @@ import { z } from "zod";
 
 const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
 const Graph = gremlin.structure.Graph;
-const t = gremlin.process.t;
-const Direction = gremlin.process.direction;
+const { t, P } = gremlin.process;
 const { onCreate, onMatch } = gremlin.process.merge;
 const __ = gremlin.process.statics;
 
@@ -34,16 +33,6 @@ async function updateContacts(
   contacts: string[],
 ): Promise<boolean> {
   // Add or update the user vertex
-
-  /*   const res = await g
-    .mergeV(new Map([[t.id, userId]]))
-    .option(onCreate, new Map([["created", Date.now()]]))
-    .option(onMatch, new Map([["updated", Date.now()]]))
-    .elementMap()
-    .toList();
-
-  console.log(res); */
-
   let userResult = await g
     .mergeV(
       new Map([
@@ -67,35 +56,32 @@ async function updateContacts(
     )
     .next();
 
-  console.log(userResult);
-
   // Extract user vertex from the result and assert type
   const user = userResult.value as unknown as Vertex;
 
-  // Remove existing contacts edges
-  await g.V(user.id).outE("contacts").drop().iterate();
+  // Remove existing contacts edges (both incoming and outgoing)
+  await g.V(user.id).bothE("contacts").drop().iterate();
 
-  /*   // Add new contacts edges
-  for (const contactHash of contacts) {
-    let contactResult = await g
-      .V()
-      .has("User", "phoneNumberHash", contactHash)
-      .fold()
-      .coalesce(
-        __.V().unfold(),
-        __.addV("User").property("phoneNumberHash", contactHash),
-      )
-      .next();
-
-    // Extract contact vertex from the result and assert type
-    const contactVertex = contactResult.value as unknown as Vertex;
-
-    await g.V(user.id).addE("contacts").to(__.V(contactVertex.id)).iterate();
-  } */
+  // Add bidirectional edges to all other users who have a phoneNumber that matches my edge phone number
+  await g
+    .V(user.id)
+    .as("currentUser")
+    .V()
+    .hasLabel("User")
+    .has("phoneNumberHash", P.within(contacts))
+    .where(P.neq("currentUser"))
+    .as("contactUser")
+    .addE("contacts")
+    .from_("currentUser")
+    .property("updatedAt", Date.now().toString())
+    .select("contactUser")
+    .addE("contacts")
+    .to("currentUser")
+    .property("updatedAt", Date.now().toString())
+    .iterate();
 
   return true;
 }
-
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
 // 2. Parses records in body key using your schema and return them in a list.
@@ -118,18 +104,11 @@ const lambdaHandler = async (
     g = graph.traversal().withRemote(dc);
 
     const { userId, userPhoneNumberHash, contacts } = event[0];
+    console.log("userId", userId);
+    console.log("userPhoneNumberHash", userPhoneNumberHash);
+    console.log("contacts", contacts);
 
     await updateContacts(g, userId, userPhoneNumberHash, contacts);
-
-    // Remove old contacts
-    /*    for (const existingContact of existingContacts) {
-      if (!contactSet.has(existingContact)) {
-        const contactVertices = await g.V().has('Contact', 'phoneHash', existingContact).toList();
-        for (const contactVertex of contactVertices) {
-          await g.V(userVertex.value.id).outE('hasContact').where(gremlin.process.statics.inV().is(contactVertex)).drop().iterate();
-        }
-      }
-    } */
 
     console.log("Update successful");
 
