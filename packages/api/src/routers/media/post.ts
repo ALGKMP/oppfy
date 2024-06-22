@@ -208,7 +208,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  like: protectedProcedure
+  likePost: protectedProcedure
     .input(
       z.object({
         postId: z.number(),
@@ -243,7 +243,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  unlike: protectedProcedure
+  unlikePost: protectedProcedure
     .input(
       z.object({
         postId: z.number(),

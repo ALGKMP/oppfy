@@ -55,6 +55,8 @@ const CommentsBottomSheet = ({
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
 
+  const profile = utils.profile.getFullProfileSelf.getData();
+
   const openModal = useCallback(() => {
     sheetRef.current?.expand();
   }, [sheetRef]);
@@ -109,11 +111,11 @@ const CommentsBottomSheet = ({
                   ...page.items,
                   {
                     ...newComment,
-                    username: "Optimistic User",
+                    username: profile?.username ?? "User",
                     createdAt: new Date(),
-                    userId: "temp-id",
+                    userId: profile?.userId ?? "temp-id",
                     commentId: Math.random(), // Temporary ID
-                    profilePictureUrl: "https://example.com/avatar.jpg",
+                    profilePictureUrl: profile?.profilePictureUrl ?? "https://example.com/avatar.jpg",
                   },
                 ],
               };
@@ -302,7 +304,7 @@ const CommentsBottomSheet = ({
             <Avatar circular size="$4" flex={1}>
               <Avatar.Image
                 accessibilityLabel="User Avatar"
-                src="https://images.unsplash.com/photo-1517841905240-472988babdf9"
+                src={profile?.profilePictureUrl}
               />
               <Avatar.Fallback backgroundColor="$blue10" />
             </Avatar>
@@ -320,7 +322,6 @@ const CommentsBottomSheet = ({
                   borderRadius: 20,
                   backgroundColor: "#2E2E2E",
                   color: "#fff",
-                  // flex: 2,
                 }}
               />
             </View>
