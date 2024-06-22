@@ -1,4 +1,4 @@
-import { and, asc, count, gt } from "drizzle-orm";
+import { and, asc, count, gt, desc } from "drizzle-orm";
 
 import { db, eq, or, schema } from "@oppfy/db";
 
@@ -13,7 +13,6 @@ export class CommentRepository {
       post: postId,
       user: userId,
       body: body,
-      createdAt: new Date(),
     });
   }
 
@@ -54,7 +53,7 @@ export class CommentRepository {
       .innerJoin(schema.profile, eq(schema.profile.id, schema.user.profileId))
       .where(
         and(
-          eq(schema.comment.id, postId),
+          eq(schema.comment.post, postId),
           cursor
             ? or(
                 gt(schema.comment.createdAt, cursor.createdAt),
@@ -67,7 +66,7 @@ export class CommentRepository {
         ),
       )
       .orderBy(
-        asc(schema.comment.createdAt), // Primary order by the creation date
+        desc(schema.comment.createdAt), // Primary order by the creation date
         asc(schema.comment.id),
       )
       .limit(pageSize + 1);

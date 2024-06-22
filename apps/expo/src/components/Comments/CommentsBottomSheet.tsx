@@ -38,6 +38,7 @@ const CommentsBottomSheet = ({
   modalVisible,
   setModalVisible,
 }: CommentsModalProps) => {
+  const utils = api.useUtils();
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
   const { height: screenHeight } = Dimensions.get("window");
@@ -81,24 +82,76 @@ const CommentsBottomSheet = ({
   } = api.post.paginateComments.useInfiniteQuery(
     {
       postId,
-      pageSize: 20,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
 
-  const addComment = api.post.createComment.useMutation();
+  const commentOnPost = api.post.createComment.useMutation({
+    onMutate: async (newComment) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await utils.post.paginateComments.cancel();
 
-  const handlePostComment = () => {
-    if (inputValue.length === 0) {
+      // Snapshot the previous value
+      const prevData = utils.post.paginateComments.getInfiniteData();
+
+      // Optimistically update to the new value
+      utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
+        if (!prevData) return { pages: [], pageParams: [] };
+        return {
+          ...prevData,
+          pages: prevData.pages.map((page, index) => {
+            if (index === prevData.pages.length - 1) {
+              return {
+                ...page,
+                items: [
+                  ...page.items,
+                  {
+                    ...newComment,
+                    username: "Optimistic User",
+                    createdAt: new Date(),
+                    userId: "temp-id",
+                    commentId: Math.random(), // Temporary ID
+                    profilePictureUrl: "https://example.com/avatar.jpg",
+                  },
+                ],
+              };
+            }
+            return page;
+          }),
+        };
+      });
+
+      // Return a context object with the snapshotted value
+      return { prevData };
+    },
+    onError: (err, _newData, ctx) => {
+      // Rollback to the previous value on error
+      console.log(err);
+      if (ctx?.prevData) {
+        utils.post.paginateComments.setInfiniteData({ postId }, ctx.prevData);
+      }
+    },
+    onSettled: () => {
+      // Sync with server once mutation has settled
+      utils.post.paginateComments.invalidate();
+    },
+  });
+
+  const handlePostComment = async () => {
+    if (inputValue.trim().length === 0) {
       return;
     }
-    addComment.mutate({
+
+    const newComment = {
       postId,
-      body: inputValue,
-    });
-    console.log("posting new comment");
+      body: inputValue.trim(),
+    };
+
+    setInputValue(""); // Clear the input field
+
+    await commentOnPost.mutateAsync(newComment);
   };
 
   const comments = useMemo(
@@ -108,9 +161,18 @@ const CommentsBottomSheet = ({
         .filter(
           (item): item is z.infer<typeof sharedValidators.media.comment> =>
             item !== undefined,
-        ),
+        ) ?? [],
     [commentsData],
   );
+
+  useEffect(() => {
+    // mape through all the pages and log the items
+    commentsData?.pages.forEach((page) => {
+      page.items.forEach((item) => {
+        console.log(item);
+      });
+    });
+  }, [commentsData]);
 
   const [inputValue, setInputValue] = useState("");
 
@@ -191,7 +253,6 @@ const CommentsBottomSheet = ({
           onClose={() => {
             closeModal();
           }}
-          onChange={(index) => console.log(index)}
           animatedPosition={animatedPosition}
           handleComponent={renderHeader}
           backgroundStyle={{ backgroundColor: "#282828" }}
