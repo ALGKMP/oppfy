@@ -59,7 +59,8 @@ type VirtualizedListItemProps = (LoadingProps | LoadedProps) & {
 };
 
 interface DefaultButtonProps {
-  size: SizeTokens | number;
+  width?: number | undefined;
+  size?: SizeTokens | number | undefined;
 }
 
 const VirtualizedListItem = (props: VirtualizedListItemProps) => {
@@ -94,6 +95,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
 
   const isTwoButtons = shouldRenderButton && shouldRenderButton2;
   const defaultButtonProps = {
+    width: isTwoButtons ? 85 : undefined,
     size: isTwoButtons ? "$3.5" : "$3.5",
   } as const satisfies DefaultButtonProps;
 
