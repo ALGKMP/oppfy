@@ -30,6 +30,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
+import { debounce } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
@@ -68,11 +69,16 @@ const PostItem = (props: PostItemProps) => {
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
   const [isLiked, setIsLiked] = useState<Boolean>(hasLiked ?? false);
-  const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
-  const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
-
-  // variables
+  const [fillHeart, setFillHeart] = useState(hasLiked ?? false); // Initialize fill state
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    setFillHeart(hasLiked ?? false);
+    setIsLiked(hasLiked ?? false);
+  }, [hasLiked]);
+
+  const likePost = api.post.likePost.useMutation();
+  const unlikePost = api.post.unlikePost.useMutation();
 
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
@@ -141,10 +147,23 @@ const PostItem = (props: PostItemProps) => {
     );
     setIsLiked(!isLiked);
     setFillHeart(!fillHeart); // Toggle fill state
-    setHeartColor(heartColor === "$gray12" ? "red" : "$gray12"); // Toggle heart color
+    debouncedLikePost();
   };
 
-  if (status === "loading") {
+  const handleLikePost = async () => {
+    if (isLiked) {
+      console.log("liking post");
+      await unlikePost.mutateAsync({ postId: post.postId });
+    } else {
+      await likePost.mutateAsync({ postId: post.postId });
+    }
+  };
+
+  const debouncedLikePost = useCallback(debounce(handleLikePost, 3000), [
+    isLiked,
+  ]);
+
+  if (status === "loading" || isLoadingHasLiked) {
     return (
       <View flex={1} alignItems="center" justifyContent="center">
         <Text>Loading...</Text>
@@ -273,7 +292,7 @@ const PostItem = (props: PostItemProps) => {
                   <Heart
                     size={24}
                     padding={"$3"}
-                    color={heartColor}
+                    color={isLiked ? "red" : "$gray12"}
                     fill={"red"}
                     fillOpacity={fillHeart ? 1 : 0}
                   />
