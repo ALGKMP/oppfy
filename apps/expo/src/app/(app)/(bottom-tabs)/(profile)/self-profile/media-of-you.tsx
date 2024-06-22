@@ -30,7 +30,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
-import { debounce } from "lodash";
+import { debounce, throttle } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
@@ -61,6 +61,9 @@ const PostItem = (props: PostItemProps) => {
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
+
+  const utils = api.useUtils();
+  const profile = utils.profile.getFullProfileSelf.getData();
 
   const {
     data: hasLiked,
@@ -147,10 +150,12 @@ const PostItem = (props: PostItemProps) => {
     );
     setIsLiked(!isLiked);
     setFillHeart(!fillHeart); // Toggle fill state
-    debouncedLikePost();
+    // throttledLikePost();
+    // debouncedLikePost();
   };
 
   const handleLikePost = async () => {
+    console.log("liking");
     if (isLiked) {
       console.log("liking post");
       await unlikePost.mutateAsync({ postId: post.postId });
@@ -159,9 +164,15 @@ const PostItem = (props: PostItemProps) => {
     }
   };
 
-  const debouncedLikePost = useCallback(debounce(handleLikePost, 3000), [
-    isLiked,
-  ]);
+  const debouncedLikePost = useCallback(
+    debounce(handleLikePost, 3000, { leading: false, trailing: true }),
+    [isLiked],
+  );
+
+  const throttledLikePost = useCallback(
+    throttle(handleLikePost, 3000, { leading: false, trailing: true }),
+    [isLiked],
+  );
 
   if (status === "loading" || isLoadingHasLiked) {
     return (
@@ -207,7 +218,7 @@ const PostItem = (props: PostItemProps) => {
         <Avatar circular size="$5">
           <Avatar.Image
             accessibilityLabel="Cam"
-            src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+            src={profile?.profilePictureUrl ?? ""}
           />
           <Avatar.Fallback backgroundColor="$blue10" />
         </Avatar>
@@ -222,7 +233,7 @@ const PostItem = (props: PostItemProps) => {
               shadowOpacity={0.5}
               fontWeight={"bold"}
             >
-              @AuthorUsername
+              {profile?.username ?? "@AuthorUsername"}
             </SizableText>
           </TouchableOpacity>
           <XStack gap={"$1"} alignItems="center">
@@ -240,7 +251,7 @@ const PostItem = (props: PostItemProps) => {
                 fontWeight={"bold"}
                 color={"$blue9"}
               >
-                @RecipientUsername
+                {profile?.username ?? "@RecipientUsername"}
               </SizableText>
             </TouchableOpacity>
           </XStack>
