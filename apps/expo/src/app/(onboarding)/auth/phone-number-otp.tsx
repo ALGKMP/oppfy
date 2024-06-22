@@ -33,7 +33,6 @@ const PhoneNumberOTP = () => {
     sharedValidators.user.phoneNumberOTP.safeParse(phoneNumberOTP).success;
 
   const handleNewUser = async (userId: string) => {
-
     if (!phoneNumber) {
       setError(Error.UNKNOWN_ERROR);
       return;
@@ -41,17 +40,19 @@ const PhoneNumberOTP = () => {
 
     await createUser.mutateAsync({
       userId,
-      phoneNumber
+      phoneNumber,
     });
     router.replace("/user-info/welcome");
   };
 
   const handleExistingUser = async (userId: string) => {
     const userOnboardingCompleted =
-      await userOnboardingCompletedMutation.mutateAsync()
+      await userOnboardingCompletedMutation.mutateAsync();
 
     userOnboardingCompleted
-      ? router.replace("/(app)/(bottom-tabs)/(profile)/self-profile/media-of-you")
+      ? router.replace(
+          "/(app)/(bottom-tabs)/(profile)/self-profile/media-of-you",
+        )
       : router.replace("/user-info/welcome");
   };
 

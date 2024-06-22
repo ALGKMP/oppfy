@@ -11,6 +11,14 @@
     "types": ["nativewind/types"],
     "checkJs": false
   },
-  "include": ["index.tsx", "src", "*.ts", "*.js", ".expo/types/**/*.ts", "expo-env.d.ts", "./metro-require.d.ts"],
+  "include": [
+    "index.tsx",
+    "src",
+    "*.ts",
+    "*.js",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "./metro-require.d.ts"
+  ],
   "exclude": ["node_modules"]
 }

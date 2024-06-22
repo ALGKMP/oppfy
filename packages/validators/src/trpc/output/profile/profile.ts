@@ -32,7 +32,10 @@ export const PrivateProfileStatus = z.object({
   otherUserFriendState: FriendState,
 });
 
-export const PrivacyStatus = z.union([PublicProfileStatus, PrivateProfileStatus]);
+export const PrivacyStatus = z.union([
+  PublicProfileStatus,
+  PrivateProfileStatus,
+]);
 
 const trpcProfileOutputSchema = {
   compactProfile: z.object({

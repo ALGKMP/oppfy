@@ -180,8 +180,7 @@ const PreviewScreen = () => {
 };
 
 const PreviewImage = ({ uri }: { uri: string }) => (
-  console.log(uri),
-  <Image source={{ uri }} style={StyleSheet.absoluteFill} />
+  console.log(uri), (<Image source={{ uri }} style={StyleSheet.absoluteFill} />)
 );
 
 const PreviewVideo = ({ uri }: { uri: string }) => {
