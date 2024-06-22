@@ -2,12 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import {
-  UserCheck,
-  UserPlus,
-  UserRoundCheck,
-  UserRoundPlus,
-} from "@tamagui/lucide-icons";
+import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
   Circle,
@@ -15,7 +10,6 @@ import {
   Separator,
   SizableText,
   Spacer,
-  Text,
   View,
   XStack,
   YStack,
@@ -23,29 +17,22 @@ import {
 
 import { abbreviatedTimeAgo } from "@oppfy/utils";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
-import { ListHeader } from "~/features/connections/components";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const Inbox = () => {
   const router = useRouter();
-
   const [refreshing, setRefreshing] = useState(false);
 
   const utils = api.useUtils();
-
   const {
     data: requestsCount,
     isLoading: isCountRequestsLoading,
     refetch: refetchRequestCount,
   } = api.request.countRequests.useQuery();
-
-  const totalRequestCount =
-    (requestsCount?.followRequestCount ?? 0) +
-    (requestsCount?.friendRequestCount ?? 0);
-
   const {
     data: notificationsData,
     isLoading: isNotificationsLoading,
@@ -54,13 +41,13 @@ const Inbox = () => {
     hasNextPage,
     refetch: refetchNotifications,
   } = api.notifications.paginateNotifications.useInfiniteQuery(
-    {
-      pageSize: 20,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    { pageSize: 20 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
+
+  const totalRequestCount =
+    (requestsCount?.followRequestCount ?? 0) +
+    (requestsCount?.friendRequestCount ?? 0);
 
   const notificationItems = useMemo(
     () => notificationsData?.pages.flatMap((page) => page.items) ?? [],
@@ -75,15 +62,11 @@ const Inbox = () => {
 
   const followUser = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.notifications.paginateNotifications.cancel();
-
-      // Get the data from the queryCache
       const prevData =
         utils.notifications.paginateNotifications.getInfiniteData();
-      if (prevData === undefined) return;
+      if (!prevData) return;
 
-      // Optimistically update the data
       utils.notifications.paginateNotifications.setInfiniteData(
         {},
         {
@@ -108,15 +91,14 @@ const Inbox = () => {
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
-      if (ctx === undefined) return;
+      if (!ctx) return;
       utils.notifications.paginateNotifications.setInfiniteData(
         {},
         ctx.prevData,
       );
     },
-    onSettled: async () => {
-      // Sync with server once mutation has settled
-      await utils.notifications.paginateNotifications.invalidate();
+    onSettled: () => {
+      utils.notifications.paginateNotifications.invalidate();
     },
   });
 
@@ -135,7 +117,7 @@ const Inbox = () => {
     setRefreshing(true);
     await Promise.all([refetchNotifications(), refetchRequestCount()]);
     setRefreshing(false);
-  }, [refetchNotifications]);
+  }, [refetchNotifications, refetchRequestCount]);
 
   const renderRequestCount = () =>
     totalRequestCount > 99 ? (
@@ -151,32 +133,24 @@ const Inbox = () => {
       </SizableText>
     );
 
-  if (isCountRequestsLoading || isNotificationsLoading) {
-    return (
+  const renderLoadingSkeletons = () => (
+    <Skeleton.Group show={true}>
       <BaseScreenView scrollable>
         <YStack gap="$4">
-          <Skeleton.Group show={true}>
-            <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
-              <YStack>
-                <Skeleton width={150}>
-                  <SizableText size="$6" fontWeight="bold">
-                    Loading...
-                  </SizableText>
-                </Skeleton>
-                <Spacer size="$1" />
-                <Skeleton width={300}>
-                  <Paragraph theme="alt1">Loading...</Paragraph>
-                </Skeleton>
-              </YStack>
-            </View>
-          </Skeleton.Group>
-
-          <View
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
+          <CardContainer padding="$4">
+            <YStack>
+              <Skeleton width={150}>
+                <SizableText size="$6" fontWeight="bold">
+                  Loading...
+                </SizableText>
+              </Skeleton>
+              <Spacer size="$1" />
+              <Skeleton width={300}>
+                <Paragraph theme="alt1">Loading...</Paragraph>
+              </Skeleton>
+            </YStack>
+          </CardContainer>
+          <CardContainer>
             <FlashList
               data={PLACEHOLDER_DATA}
               ItemSeparatorComponent={Separator}
@@ -195,10 +169,85 @@ const Inbox = () => {
                 />
               )}
             />
-          </View>
+          </CardContainer>
         </YStack>
       </BaseScreenView>
+    </Skeleton.Group>
+  );
+
+  const renderFollowRequests = () =>
+    totalRequestCount > 0 && (
+      <TouchableOpacity onPress={() => router.navigate("/requests")}>
+        <CardContainer padding="$4">
+          <YStack>
+            <SizableText size="$6" fontWeight="bold">
+              Follow and Friend Requests
+            </SizableText>
+            <Paragraph theme="alt1">Approve or ignore these requests</Paragraph>
+          </YStack>
+          <Circle
+            size={totalRequestCount > 99 ? "$2.5" : "$2"}
+            backgroundColor="$red9"
+            style={styles.countContainer}
+          >
+            {renderRequestCount()}
+          </Circle>
+        </CardContainer>
+      </TouchableOpacity>
     );
+
+  const renderNotifications = () =>
+    notificationItems.length > 0 && (
+      <View
+        paddingVertical="$2"
+        paddingHorizontal="$3"
+        borderRadius="$6"
+        backgroundColor="$gray2"
+      >
+        <FlashList
+          data={notificationItems}
+          estimatedItemSize={75}
+          onEndReached={handleOnEndReached}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => {
+            const buttonProps = (() => {
+              switch (item.relationshipState) {
+                case "notFollowing":
+                  return { text: "Follow", icon: UserRoundPlus };
+                case "following":
+                  return { text: "Following", icon: UserRoundCheck };
+                case "followRequestSent":
+                  return { text: "Requested", icon: UserRoundCheck };
+              }
+            })();
+
+            const buttonDisabled =
+              item.relationshipState === "following" ||
+              item.relationshipState === "followRequestSent";
+
+            return (
+              <VirtualizedListItem
+                loading={false}
+                title={item.username}
+                subtitle={item.message ?? ""}
+                subtitle2={abbreviatedTimeAgo(item.createdAt)}
+                button={{
+                  ...buttonProps,
+                  disabled: buttonDisabled,
+                  disabledStyle: { opacity: 0.5 },
+                  onPress: () => onFollowUser(item.userId),
+                }}
+                imageUrl={item.profilePictureUrl}
+                onPress={() => onUserSelected(item.profileId)}
+              />
+            );
+          }}
+        />
+      </View>
+    );
+
+  if (isCountRequestsLoading || isNotificationsLoading) {
+    return renderLoadingSkeletons();
   }
 
   return (
@@ -209,85 +258,8 @@ const Inbox = () => {
       }
     >
       <YStack gap="$4">
-        {totalRequestCount > 0 && (
-          <TouchableOpacity onPress={() => router.navigate("/requests")}>
-            <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
-              <YStack>
-                <SizableText size="$6" fontWeight="bold">
-                  Follow and Friend Requests
-                </SizableText>
-                <Paragraph theme="alt1">
-                  Approve or ignore these requests
-                </Paragraph>
-              </YStack>
-              <Circle
-                size={totalRequestCount > 99 ? "$2.5" : "$2"}
-                backgroundColor="$red9"
-                style={styles.countContainer}
-              >
-                {renderRequestCount()}
-              </Circle>
-            </View>
-          </TouchableOpacity>
-        )}
-
-        {notificationItems.length > 0 && (
-          <View
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
-            <FlashList
-              data={notificationItems}
-              estimatedItemSize={75}
-              onEndReached={handleOnEndReached}
-              showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => {
-                const buttonProps = (() => {
-                  switch (item.relationshipState) {
-                    case "notFollowing":
-                      return {
-                        text: "Follow",
-                        icon: UserRoundPlus,
-                      };
-                    case "following":
-                      return {
-                        text: "Following",
-                        icon: UserRoundCheck,
-                      };
-                    case "followRequestSent":
-                      return {
-                        text: "Requested",
-                        icon: UserRoundCheck,
-                      };
-                  }
-                })();
-
-                const buttonDisabled =
-                  item.relationshipState === "following" ||
-                  item.relationshipState === "followRequestSent";
-
-                return (
-                  <VirtualizedListItem
-                    loading={false}
-                    title={item.username}
-                    subtitle={item.message ?? ""}
-                    subtitle2={abbreviatedTimeAgo(item.createdAt)}
-                    button={{
-                      ...buttonProps,
-                      disabled: buttonDisabled,
-                      disabledStyle: { opacity: 0.5 },
-                      onPress: () => onFollowUser(item.userId),
-                    }}
-                    imageUrl={item.profilePictureUrl}
-                    onPress={() => onUserSelected(item.profileId)}
-                  />
-                );
-              }}
-            />
-          </View>
-        )}
+        {renderFollowRequests()}
+        {renderNotifications()}
       </YStack>
     </BaseScreenView>
   );
