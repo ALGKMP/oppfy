@@ -2,6 +2,7 @@ import { generateOpenApiDocument } from "trpc-openapi";
 
 import {
   blockRouter,
+  contactsRouter,
   followRouter,
   friendRouter,
   notificationsRouter,
@@ -10,7 +11,6 @@ import {
   requestRouter,
   searchRouter,
   userRouter,
-  contactsRouter
 } from "./routers";
 import { createTRPCRouter } from "./trpc";
 

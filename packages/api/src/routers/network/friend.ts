@@ -63,8 +63,6 @@ export const friendRouter = createTRPCRouter({
       }
     }),
 
-
-
   cancelFriendRequest: protectedProcedure
     .input(trpcValidators.input.request.cancelFriendRequest)
     .mutation(async ({ input, ctx }) => {

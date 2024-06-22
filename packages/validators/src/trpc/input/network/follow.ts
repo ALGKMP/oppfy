@@ -9,7 +9,6 @@ const followInputSchema = {
     userId: z.string(),
   }),
 
-
   removeFollower: z.object({
     userId: z.string(),
   }),
