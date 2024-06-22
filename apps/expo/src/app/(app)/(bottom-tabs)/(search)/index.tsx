@@ -4,7 +4,14 @@ import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
 import { debounce } from "lodash";
-import { Input, Separator, SizableText, View, YStack } from "tamagui";
+import {
+  Input,
+  ListItemTitle,
+  Separator,
+  SizableText,
+  View,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -54,11 +61,7 @@ const Search = () => {
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={Keyboard.dismiss}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={
-          <SizableText size="$2" theme="alt1" marginBottom="$2">
-            SEARCH RESULTS
-          </SizableText>
-        }
+        ListHeaderComponent={<ListItemTitle>Search Results</ListItemTitle>}
         renderItem={({ item }) => (
           <View>
             <StatusRenderer
@@ -99,9 +102,7 @@ const Search = () => {
   const renderRecommendations = () => (
     <CardContainer>
       <View>
-        <SizableText size="$2" theme="alt1" marginBottom="$2">
-          Recommendations
-        </SizableText>
+        <ListItemTitle>Recommendations</ListItemTitle>
       </View>
     </CardContainer>
   );
