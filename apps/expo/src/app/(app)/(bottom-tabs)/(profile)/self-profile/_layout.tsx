@@ -39,6 +39,7 @@ import {
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
+import { useUploadProfilePicture } from "~/hooks/media";
 import { api, RouterOutputs } from "~/utils/api";
 import MediaOfYou from "./media-of-you";
 
@@ -149,6 +150,10 @@ type ProfileProps = LoadingProps | ProfileLoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
+  const { imageUri, pickAndUploadImage } = useUploadProfilePicture({
+    optimisticallyUpdate: true,
+  });
+
   return (
     <YStack
       padding="$4"
@@ -161,10 +166,13 @@ const Profile = (props: ProfileProps) => {
         <TouchableOpacity
           style={{ alignItems: "center" }}
           disabled={props.loading}
+          onPress={pickAndUploadImage}
         >
-          <Avatar circular size="$14" bordered>
+          <Avatar circular size="$13" bordered>
             <Avatar.Image
-              {...(props.loading ? {} : { src: props.data.profilePictureUrl })}
+              {...(props.loading
+                ? {}
+                : { src: imageUri ?? props.data.profilePictureUrl })}
             />
             <Avatar.Fallback />
           </Avatar>
