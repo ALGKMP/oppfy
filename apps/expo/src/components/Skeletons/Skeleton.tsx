@@ -1,5 +1,10 @@
-import React from "react";
-import { StyleSheet, ViewStyle } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  DimensionValue,
+  LayoutChangeEvent,
+  StyleSheet,
+  View,
+} from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -11,44 +16,55 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "tamagui";
 
 interface SkeletonProps {
-  width: number;
-  height: number;
+  width: DimensionValue;
+  height: DimensionValue;
   borderRadius?: number;
+  circular?: boolean;
 }
 
-const Skeleton: React.FC<SkeletonProps> = ({
+const Skeleton = ({
   width,
   height,
-  borderRadius = 4,
-}) => {
+  borderRadius = 6,
+  circular = false,
+}: SkeletonProps) => {
   const theme = useTheme();
+  const [measuredWidth, setMeasuredWidth] = useState<number>(0);
+  const translateX = useSharedValue(-measuredWidth);
 
-  // Shared value for animation
-  const translateX = useSharedValue(-width);
-
-  // Animated style for shimmer effect
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
 
-  // Animate the shimmer
-  React.useEffect(() => {
+  useEffect(() => {
     translateX.value = withRepeat(
-      withTiming(width, {
+      withTiming(measuredWidth, {
         duration: 1200,
         easing: Easing.linear,
       }),
       -1,
       false,
     );
-  }, [width]);
+  }, [measuredWidth]);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    setMeasuredWidth(width);
+  };
+
+  const resolvedBorderRadius = circular ? 9999 : borderRadius;
 
   return (
-    <Animated.View
+    <View
       style={[
-        { width, height, borderRadius, overflow: "hidden" },
         styles.container,
+        {
+          width,
+          height,
+          borderRadius: resolvedBorderRadius,
+        },
       ]}
+      onLayout={handleLayout}
     >
       <Animated.View style={[styles.gradientWrapper, animatedStyle]}>
         <LinearGradient
@@ -58,17 +74,18 @@ const Skeleton: React.FC<SkeletonProps> = ({
           style={styles.gradient}
         />
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#2e2e2e",
-    marginVertical: 4,
-  } as ViewStyle,
+    overflow: "hidden",
+  },
   gradientWrapper: {
     ...StyleSheet.absoluteFillObject,
+    flexDirection: "row",
   },
   gradient: {
     flex: 1,
