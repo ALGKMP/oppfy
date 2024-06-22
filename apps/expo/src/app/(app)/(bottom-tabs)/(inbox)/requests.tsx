@@ -3,10 +3,12 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Button, Separator, Spacer, Text, View, YStack } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
 import { ListHeader } from "~/features/connections/components";
 import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const PAGE_SIZE = 5;
 
@@ -224,136 +226,115 @@ const Requests = () => {
 
   const isLoading = followRequestsIsLoading || friendRequestsIsLoading;
 
+  const renderLoadingSkeletons = () => (
+    <BaseScreenView scrollable>
+      <CardContainer>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          estimatedItemSize={75}
+          showsVerticalScrollIndicator={false}
+          renderItem={() => (
+            <VirtualizedListItem
+              loading
+              showSkeletons={{
+                imageUrl: true,
+                title: true,
+                subtitle: true,
+                subtitle2: true,
+                button: true,
+                button2: true,
+              }}
+            />
+          )}
+        />
+      </CardContainer>
+    </BaseScreenView>
+  );
+
+  const renderFriendRequests = () => (
+    <CardContainer>
+      <ListHeader title="FRIEND REQUESTS" />
+
+      {friendRequestItems.map((item, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading={false}
+          title={item.username}
+          subtitle={item.name}
+          imageUrl={item.profilePictureUrl}
+          button={{
+            text: "Accept",
+            theme: "blue",
+            onPress: () => onAcceptFriendRequest(item.userId),
+          }}
+          button2={{
+            text: "Decline",
+            onPress: () => onDeclineFriendRequest(item.userId),
+          }}
+          onPress={() => onUserSelected(item.profileId)}
+        />
+      ))}
+
+      {friendRequestItems.length > PAGE_SIZE && (
+        <>
+          <Spacer size="$2" />
+          <Button
+            onPress={onShowMoreFriendRequests}
+            disabled={friendRequestsIsFetchingNextPage}
+          >
+            Show more
+          </Button>
+        </>
+      )}
+    </CardContainer>
+  );
+
+  const renderFollowRequests = () => (
+    <CardContainer>
+      <ListHeader title="FOLLOW REQUESTS" />
+
+      {followRequestItems.map((item, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading={false}
+          title={item.username}
+          subtitle={item.name}
+          imageUrl={item.profilePictureUrl}
+          button={{
+            text: "Accept",
+            onPress: () => onAcceptFollowRequest(item.userId),
+          }}
+          button2={{
+            text: "Decline",
+            onPress: () => onDeclineFollowRequest(item.userId),
+          }}
+          onPress={() => onUserSelected(item.profileId)}
+        />
+      ))}
+
+      {followRequestItems.length > PAGE_SIZE && (
+        <>
+          <Spacer size="$2" />
+          <Button
+            onPress={onShowMoreFollowRequests}
+            disabled={followRequestsIsFetchingNextPage}
+          >
+            Show more
+          </Button>
+        </>
+      )}
+    </CardContainer>
+  );
+
   if (isLoading) {
-    const skeletonProps = {
-      loading: true,
-      showSkeletons: {
-        title: true,
-        subtitle: true,
-        button: true,
-        button2: true,
-        imageUrl: true,
-      },
-    };
-
-    return (
-      <BaseScreenView scrollable paddingBottom={0}>
-        <YStack flex={1} gap="$4">
-          <View
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
-            <ListHeader title="FRIEND REQUESTS" />
-            {[...Array(5)].map((_, index) => (
-              <VirtualizedListItem key={index} {...skeletonProps} />
-            ))}
-          </View>
-
-          <View
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
-            <ListHeader title="FOLLOW REQUESTS" />
-            {[...Array(5)].map((_, index) => (
-              <VirtualizedListItem key={index} {...skeletonProps} />
-            ))}
-          </View>
-        </YStack>
-      </BaseScreenView>
-    );
+    return renderLoadingSkeletons();
   }
 
   return (
     <BaseScreenView scrollable paddingBottom={0}>
       <YStack flex={1} gap="$4">
-        {friendRequestItems.length > 0 && (
-          <View
-            paddingVertical="$3"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
-            <ListHeader title="FRIEND REQUESTS" />
-
-            {friendRequestItems.map((item, index) => (
-              <VirtualizedListItem
-                key={index}
-                loading={false}
-                title={item.username}
-                subtitle={item.name}
-                imageUrl={item.profilePictureUrl}
-                button={{
-                  text: "Accept",
-                  theme: "blue",
-                  onPress: () => onAcceptFriendRequest(item.userId),
-                }}
-                button2={{
-                  text: "Decline",
-                  onPress: () => onDeclineFriendRequest(item.userId),
-                }}
-                onPress={() => onUserSelected(item.profileId)}
-              />
-            ))}
-
-            {friendRequestItems.length > PAGE_SIZE && (
-              <>
-                <Spacer size="$2" />
-                <Button
-                  onPress={onShowMoreFriendRequests}
-                  disabled={friendRequestsIsFetchingNextPage}
-                >
-                  Show more
-                </Button>
-              </>
-            )}
-          </View>
-        )}
-
-        {followRequestItems.length > 0 && (
-          <View
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
-            <ListHeader title="FRIEND REQUESTS" />
-
-            {followRequestItems.map((item, index) => (
-              <VirtualizedListItem
-                key={index}
-                loading={false}
-                title={item.username}
-                subtitle={item.name}
-                imageUrl={item.profilePictureUrl}
-                button={{
-                  text: "Accept",
-                  onPress: () => onAcceptFollowRequest(item.userId),
-                }}
-                button2={{
-                  text: "Decline",
-                  onPress: () => onDeclineFollowRequest(item.userId),
-                }}
-                onPress={() => onUserSelected(item.profileId)}
-              />
-            ))}
-
-            {followRequestItems.length > PAGE_SIZE && (
-              <>
-                <Spacer size="$2" />
-                <Button
-                  onPress={onShowMoreFollowRequests}
-                  disabled={followRequestsIsFetchingNextPage}
-                >
-                  Show more
-                </Button>
-              </>
-            )}
-          </View>
-        )}
+        {friendRequestItems.length > 0 && renderFriendRequests()}
+        {followRequestItems.length > 0 && renderFollowRequests()}
       </YStack>
     </BaseScreenView>
   );
