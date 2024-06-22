@@ -3,7 +3,6 @@ import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Skeleton } from "moti/skeleton";
 import {
   Circle,
   Paragraph,
@@ -19,6 +18,7 @@ import { abbreviatedTimeAgo } from "@oppfy/utils";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
+import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
@@ -134,45 +134,30 @@ const Inbox = () => {
     );
 
   const renderLoadingSkeletons = () => (
-    <Skeleton.Group show={true}>
-      <BaseScreenView scrollable>
-        <YStack gap="$4">
-          <CardContainer padding="$4">
-            <YStack>
-              <Skeleton width={150}>
-                <SizableText size="$6" fontWeight="bold">
-                  Loading...
-                </SizableText>
-              </Skeleton>
-              <Spacer size="$1" />
-              <Skeleton width={300}>
-                <Paragraph theme="alt1">Loading...</Paragraph>
-              </Skeleton>
-            </YStack>
-          </CardContainer>
-          <CardContainer>
-            <FlashList
-              data={PLACEHOLDER_DATA}
-              ItemSeparatorComponent={Separator}
-              estimatedItemSize={75}
-              showsVerticalScrollIndicator={false}
-              renderItem={() => (
-                <VirtualizedListItem
-                  loading
-                  showSkeletons={{
-                    imageUrl: true,
-                    title: true,
-                    subtitle: true,
-                    subtitle2: true,
-                    button: true,
-                  }}
-                />
-              )}
-            />
-          </CardContainer>
+    <YStack gap="$4">
+      <CardContainer padding="$4">
+        <YStack>
+          <Skeleton width={150} height={30} borderRadius={6} />
+          <Skeleton width={300} height={20} borderRadius={6} />
         </YStack>
-      </BaseScreenView>
-    </Skeleton.Group>
+      </CardContainer>
+
+      <CardContainer>
+        {PLACEHOLDER_DATA.map((item, index) => (
+          <VirtualizedListItem
+            key={index}
+            loading
+            showSkeletons={{
+              imageUrl: true,
+              title: true,
+              subtitle: true,
+              subtitle2: true,
+              button: true,
+            }}
+          />
+        ))}
+      </CardContainer>
+    </YStack>
   );
 
   const renderFollowRequests = () =>
@@ -247,7 +232,9 @@ const Inbox = () => {
     );
 
   if (isCountRequestsLoading || isNotificationsLoading) {
-    return renderLoadingSkeletons();
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+    );
   }
 
   return (
