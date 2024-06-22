@@ -136,9 +136,9 @@ const Inbox = () => {
   const renderLoadingSkeletons = () => (
     <YStack gap="$4">
       <CardContainer padding="$4">
-        <YStack>
-          <Skeleton width={150} height={30} borderRadius={6} />
-          <Skeleton width={300} height={20} borderRadius={6} />
+        <YStack gap="$1">
+          <Skeleton width={150} height={30} />
+          <Skeleton width={"100%"} height={20} />
         </YStack>
       </CardContainer>
 
@@ -231,7 +231,8 @@ const Inbox = () => {
       </View>
     );
 
-  if (isCountRequestsLoading || isNotificationsLoading) {
+  // if (isCountRequestsLoading || isNotificationsLoading) {
+  if (true) {
     return (
       <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
     );

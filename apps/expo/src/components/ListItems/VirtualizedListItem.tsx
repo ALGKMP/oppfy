@@ -108,9 +108,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               data={
                 !props.loading && props.imageUrl ? props.imageUrl : undefined
               }
-              loadingComponent={
-                <Skeleton width={56} height={56} borderRadius={28} />
-              }
+              loadingComponent={<Skeleton circular size={56} />}
               successComponent={(imageUrl) => (
                 <Avatar circular size={56}>
                   <Avatar.Image
