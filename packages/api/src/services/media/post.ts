@@ -317,10 +317,9 @@ export class PostService {
     }
   }
 
-  async hasLiked(userId: string, postId: number): Promise<boolean> {
+  async getLike(userId: string, postId: number) {
     try {
-      const like = await this.likeRepository.findLike(postId, userId);
-      return !!like;
+      return await this.likeRepository.findLike(postId, userId);
     } catch (error) {
       console.error(
         `Error in hasLiked for userId: ${userId}, postId: ${postId}: `,
