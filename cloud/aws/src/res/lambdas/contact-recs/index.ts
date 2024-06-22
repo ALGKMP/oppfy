@@ -145,6 +145,7 @@ export const lambdaHandler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
+    console.log("hi");
     return {
       statusCode: 200,
       body: JSON.stringify({
