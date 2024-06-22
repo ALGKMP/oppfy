@@ -47,7 +47,6 @@ type VirtualizedListItemProps = (LoadingProps | LoadedProps) & {
 };
 
 interface DefaultButtonProps {
-  width: number;
   size: SizeTokens | number;
 }
 
@@ -83,7 +82,6 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
 
   const isTwoButtons = shouldRenderButton && shouldRenderButton2;
   const defaultButtonProps = {
-    width: isTwoButtons ? 85 : 100,
     size: isTwoButtons ? "$3.5" : "$3.5",
   } as const satisfies DefaultButtonProps;
 
@@ -187,7 +185,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 data={!props.loading && props.button ? props.button : undefined}
                 loadingComponent={
                   <Skeleton>
-                    <Button {...defaultButtonProps}>Loading...</Button>
+                    <Button width={100} {...defaultButtonProps} />
                   </Skeleton>
                 }
                 successComponent={(customButtonProps) => (
@@ -213,7 +211,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 }
                 loadingComponent={
                   <Skeleton>
-                    <Button {...defaultButtonProps}>Loading...</Button>
+                    <Button width={100} {...defaultButtonProps} />
                   </Skeleton>
                 }
                 successComponent={(customButtonProps) => (
