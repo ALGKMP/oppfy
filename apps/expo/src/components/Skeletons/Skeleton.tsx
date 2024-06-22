@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
   },
   gradient: {
     flex: 1,
-    width: "200%", // Extend beyond to allow smooth transition
   },
 });
 
