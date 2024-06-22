@@ -55,7 +55,7 @@ const CommentsBottomSheet = ({
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
 
-  const profile = utils.profile.getCompactProfileSelf.getData();
+  const profile = utils.profile.getFullProfileSelf.getData();
 
   const openModal = useCallback(() => {
     sheetRef.current?.expand();
