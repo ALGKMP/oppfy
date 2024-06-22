@@ -72,11 +72,12 @@ const PostItem = (props: PostItemProps) => {
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
   const [isLiked, setIsLiked] = useState<Boolean>(hasLiked ?? false);
-  const [fillHeart, setFillHeart] = useState(hasLiked ?? false); // Initialize fill state
+  // const [fillHeart, setFillHeart] = useState(hasLiked ?? false); // Initialize fill state
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    setFillHeart(hasLiked ?? false);
+    console.log(hasLiked)
+    // setFillHeart(hasLiked ?? false);
     setIsLiked(hasLiked ?? false);
   }, [hasLiked]);
 
@@ -149,13 +150,12 @@ const PostItem = (props: PostItemProps) => {
       },
     );
     setIsLiked(!isLiked);
-    setFillHeart(!fillHeart); // Toggle fill state
-    // throttledLikePost();
+    // setFillHeart(!fillHeart); // Toggle fill state
+    throttledLikePost();
     // debouncedLikePost();
   };
 
   const handleLikePost = async () => {
-    console.log("liking");
     if (isLiked) {
       console.log("liking post");
       await unlikePost.mutateAsync({ postId: post.postId });
@@ -305,7 +305,8 @@ const PostItem = (props: PostItemProps) => {
                     padding={"$3"}
                     color={isLiked ? "red" : "$gray12"}
                     fill={"red"}
-                    fillOpacity={fillHeart ? 1 : 0}
+                    // fillOpacity={fillHeart ? 1 : 0}
+                    fillOpacity={isLiked ? 1 : 0}
                   />
                 </Animated.View>
               </View>
