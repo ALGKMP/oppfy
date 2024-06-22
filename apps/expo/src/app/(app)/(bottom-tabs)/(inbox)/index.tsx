@@ -23,6 +23,7 @@ import {
 
 import { abbreviatedTimeAgo } from "@oppfy/utils";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
 import { ListHeader } from "~/features/connections/components";
@@ -153,10 +154,10 @@ const Inbox = () => {
 
   if (isCountRequestsLoading || isNotificationsLoading) {
     return (
-      <BaseScreenView scrollable>
-        <YStack gap="$4">
-          <Skeleton.Group show={true}>
-            <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
+      <Skeleton.Group show={true}>
+        <BaseScreenView scrollable>
+          <YStack gap="$4">
+            <CardContainer>
               <YStack>
                 <Skeleton width={150}>
                   <SizableText size="$6" fontWeight="bold">
@@ -168,36 +169,36 @@ const Inbox = () => {
                   <Paragraph theme="alt1">Loading...</Paragraph>
                 </Skeleton>
               </YStack>
-            </View>
-          </Skeleton.Group>
+            </CardContainer>
 
-          <View
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
-            <FlashList
-              data={PLACEHOLDER_DATA}
-              ItemSeparatorComponent={Separator}
-              estimatedItemSize={75}
-              showsVerticalScrollIndicator={false}
-              renderItem={() => (
-                <VirtualizedListItem
-                  loading
-                  showSkeletons={{
-                    imageUrl: true,
-                    title: true,
-                    subtitle: true,
-                    subtitle2: true,
-                    button: true,
-                  }}
-                />
-              )}
-            />
-          </View>
-        </YStack>
-      </BaseScreenView>
+            <View
+              paddingVertical="$2"
+              paddingHorizontal="$3"
+              borderRadius="$6"
+              backgroundColor="$gray2"
+            >
+              <FlashList
+                data={PLACEHOLDER_DATA}
+                ItemSeparatorComponent={Separator}
+                estimatedItemSize={75}
+                showsVerticalScrollIndicator={false}
+                renderItem={() => (
+                  <VirtualizedListItem
+                    loading
+                    showSkeletons={{
+                      imageUrl: true,
+                      title: true,
+                      subtitle: true,
+                      subtitle2: true,
+                      button: true,
+                    }}
+                  />
+                )}
+              />
+            </View>
+          </YStack>
+        </BaseScreenView>
+      </Skeleton.Group>
     );
   }
 
@@ -211,7 +212,7 @@ const Inbox = () => {
       <YStack gap="$4">
         {totalRequestCount > 0 && (
           <TouchableOpacity onPress={() => router.navigate("/requests")}>
-            <View padding="$4" borderRadius="$6" backgroundColor="$gray2">
+            <CardContainer>
               <YStack>
                 <SizableText size="$6" fontWeight="bold">
                   Follow and Friend Requests
@@ -227,7 +228,7 @@ const Inbox = () => {
               >
                 {renderRequestCount()}
               </Circle>
-            </View>
+            </CardContainer>
           </TouchableOpacity>
         )}
 
