@@ -3,7 +3,7 @@ import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { debounce } from "lodash";
+import { debounce, throttle } from "lodash";
 import {
   Input,
   ListItemTitle,
@@ -25,75 +25,68 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const SEARCH_REFRESH_DELAY = 200;
 
 const Search = () => {
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<
     RouterOutputs["search"]["profilesByUsername"]
   >([]);
-  const [isSearching, setIsSearching] = useState(false);
 
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 20 }, () => null);
-  }, []);
-
-  const { isLoading, ...searchProfilesByUsername } =
+  const { isLoading, mutateAsync: searchProfilesByUsername } =
     api.search.profilesByUsername.useMutation();
 
-  const debouncedSearch = debounce(async (partialUsername: string) => {
-    setIsSearching(true);
+  const performSearch = async (partialUsername: string) => {
+    setSearchTerm(partialUsername);
 
     if (!partialUsername) {
       setSearchResults([]);
-      setIsSearching(false);
       return;
     }
 
-    const data = await searchProfilesByUsername.mutateAsync({
+    const data = await searchProfilesByUsername({
       username: partialUsername,
     });
     setSearchResults(data);
-  }, SEARCH_REFRESH_DELAY);
+  };
+
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((item, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            button: true,
+          }}
+        />
+      ))}
+    </CardContainer>
+  );
 
   const renderSearchResults = () => (
     <CardContainer>
       <FlashList
-        data={isLoading ? placeholderData : searchResults}
-        ItemSeparatorComponent={Separator}
+        data={searchResults}
         estimatedItemSize={75}
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={Keyboard.dismiss}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={<ListItemTitle>Search Results</ListItemTitle>}
         renderItem={({ item }) => (
-          <View>
-            <StatusRenderer
-              data={item}
-              loadingComponent={
-                <VirtualizedListItem
-                  loading
-                  showSkeletons={{
-                    imageUrl: true,
-                    title: true,
-                    subtitle: true,
-                    button: true,
-                  }}
-                />
-              }
-              successComponent={(item) => (
-                <VirtualizedListItem
-                  loading={false}
-                  title={item.username}
-                  subtitle={item.fullName}
-                  imageUrl={item.profilePictureUrl}
-                  onPress={() => {
-                    if (!item.id) return;
-                    router.navigate({
-                      pathname: "/(search)/profile/[profile-id]/",
-                      params: { profileId: String(item.id) },
-                    });
-                  }}
-                />
-              )}
-            />
-          </View>
+          <VirtualizedListItem
+            loading={false}
+            title={item.username}
+            subtitle={item.fullName}
+            imageUrl={item.profilePictureUrl}
+            onPress={() => {
+              if (!item.id) return;
+              router.navigate({
+                pathname: "/(search)/profile/[profile-id]/",
+                params: { profileId: String(item.id) },
+              });
+            }}
+          />
         )}
       />
     </CardContainer>
@@ -103,6 +96,10 @@ const Search = () => {
     <CardContainer>
       <View>
         <ListItemTitle>Recommendations</ListItemTitle>
+        {/* Recommendations content can be added here */}
+        <SizableText>
+          Popular users or suggestions can be shown here.
+        </SizableText>
       </View>
     </CardContainer>
   );
@@ -118,18 +115,15 @@ const Search = () => {
   return (
     <BaseScreenView scrollable>
       <YStack gap="$4">
-        <Input
-          placeholder="Search by username"
-          placeholderTextColor="#888"
-          color="white"
-          onChangeText={debouncedSearch}
-        />
+        <Input placeholder="Search by username" onChangeText={performSearch} />
         <View>
-          {!isSearching
+          {!searchTerm
             ? renderRecommendations()
-            : searchResults.length
-              ? renderSearchResults()
-              : renderNoResults()}
+            : isLoading
+              ? renderLoadingSkeletons()
+              : searchResults.length
+                ? renderSearchResults()
+                : renderNoResults()}
         </View>
       </YStack>
     </BaseScreenView>
