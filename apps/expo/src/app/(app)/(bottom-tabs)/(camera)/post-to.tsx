@@ -244,6 +244,7 @@ const PostTo = () => {
       </ScrollView>
 
       <XStack
+        marginTop={-6}
         paddingTop="$4"
         paddingHorizontal="$4"
         justifyContent="space-evenly"
