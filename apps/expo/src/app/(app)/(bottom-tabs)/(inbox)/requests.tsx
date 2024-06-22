@@ -227,28 +227,22 @@ const Requests = () => {
   const isLoading = followRequestsIsLoading || friendRequestsIsLoading;
 
   const renderLoadingSkeletons = () => (
-    <BaseScreenView scrollable>
-      <CardContainer>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          estimatedItemSize={75}
-          showsVerticalScrollIndicator={false}
-          renderItem={() => (
-            <VirtualizedListItem
-              loading
-              showSkeletons={{
-                imageUrl: true,
-                title: true,
-                subtitle: true,
-                subtitle2: true,
-                button: true,
-                button2: true,
-              }}
-            />
-          )}
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((item, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            subtitle2: true,
+            button: true,
+            button2: true,
+          }}
         />
-      </CardContainer>
-    </BaseScreenView>
+      ))}
+    </CardContainer>
   );
 
   const renderFriendRequests = () => (
@@ -327,7 +321,9 @@ const Requests = () => {
   );
 
   if (isLoading) {
-    return renderLoadingSkeletons();
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+    );
   }
 
   return (
