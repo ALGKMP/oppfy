@@ -29,7 +29,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { SizableText, Text, View } from "tamagui";
 
-import { CaptureButton, StatusBarBlurBackground } from "~/components/camera";
+import { CaptureButton, StatusBarBlurBackground } from "~/components/Camera";
 import { BaseScreenView } from "~/components/Views";
 import {
   CONTENT_SPACING,

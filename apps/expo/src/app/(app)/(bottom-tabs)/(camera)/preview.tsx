@@ -19,7 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
-import { StatusBarBlurBackground } from "~/components/camera";
+import { StatusBarBlurBackground } from "~/components/Camera";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
