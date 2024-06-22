@@ -157,7 +157,7 @@ const Inbox = () => {
       <Skeleton.Group show={true}>
         <BaseScreenView scrollable>
           <YStack gap="$4">
-            <CardContainer>
+            <CardContainer padding="$4">
               <YStack>
                 <Skeleton width={150}>
                   <SizableText size="$6" fontWeight="bold">
@@ -171,12 +171,7 @@ const Inbox = () => {
               </YStack>
             </CardContainer>
 
-            <View
-              paddingVertical="$2"
-              paddingHorizontal="$3"
-              borderRadius="$6"
-              backgroundColor="$gray2"
-            >
+            <CardContainer>
               <FlashList
                 data={PLACEHOLDER_DATA}
                 ItemSeparatorComponent={Separator}
@@ -195,7 +190,7 @@ const Inbox = () => {
                   />
                 )}
               />
-            </View>
+            </CardContainer>
           </YStack>
         </BaseScreenView>
       </Skeleton.Group>
@@ -212,7 +207,7 @@ const Inbox = () => {
       <YStack gap="$4">
         {totalRequestCount > 0 && (
           <TouchableOpacity onPress={() => router.navigate("/requests")}>
-            <CardContainer>
+            <CardContainer padding="$4">
               <YStack>
                 <SizableText size="$6" fontWeight="bold">
                   Follow and Friend Requests
