@@ -27,7 +27,6 @@ const OnboardingLayout = () => {
         contentStyle: {
           backgroundColor: theme.background.val,
         },
-    
       }}
     >
       <Stack.Screen

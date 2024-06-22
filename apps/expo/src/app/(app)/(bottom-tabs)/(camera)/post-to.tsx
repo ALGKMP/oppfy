@@ -19,6 +19,7 @@ import {
   YStack,
 } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
@@ -118,12 +119,7 @@ const PostTo = () => {
   if (isLoading) {
     return (
       <BaseScreenView scrollable>
-        <View
-          paddingVertical="$2"
-          paddingHorizontal="$3"
-          borderRadius="$6"
-          backgroundColor="$gray2"
-        >
+        <CardContainer>
           <FlashList
             data={PLACEHOLDER_DATA}
             ItemSeparatorComponent={Separator}
@@ -140,7 +136,7 @@ const PostTo = () => {
               />
             )}
           />
-        </View>
+        </CardContainer>
       </BaseScreenView>
     );
   }
@@ -180,12 +176,7 @@ const PostTo = () => {
         }
       >
         <YStack flex={1} gap="$4">
-          <View
-            paddingVertical="$3"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
+          <CardContainer>
             <ListHeader title="Contacts" />
 
             {visibleContacts.map((contact, index) => (
@@ -214,14 +205,9 @@ const PostTo = () => {
                 </Button>
               </>
             )}
-          </View>
+          </CardContainer>
 
-          <View
-            paddingVertical="$2"
-            paddingHorizontal="$3"
-            borderRadius="$6"
-            backgroundColor="$gray2"
-          >
+          <CardContainer>
             <FlashList
               data={friendItems}
               ItemSeparatorComponent={Separator}
@@ -239,11 +225,12 @@ const PostTo = () => {
                 />
               )}
             />
-          </View>
+          </CardContainer>
         </YStack>
       </ScrollView>
 
       <XStack
+        marginTop={-6}
         paddingTop="$4"
         paddingHorizontal="$4"
         justifyContent="space-evenly"

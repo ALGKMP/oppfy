@@ -2,8 +2,8 @@ import { and, asc, count, eq, gt, not, or, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
-import { handleDatabaseErrors } from "../../errors";
 import { friendRequest } from "../../../../db/src/schema/schema";
+import { handleDatabaseErrors } from "../../errors";
 
 export class FriendRepository {
   private db = db;
@@ -93,8 +93,8 @@ export class FriendRepository {
       .select({ count: count() })
       .from(schema.friendRequest)
       .where(eq(schema.friendRequest.recipientId, userId));
-    
-      return result[0]?.count ?? 0;
+
+    return result[0]?.count ?? 0;
   }
 
   @handleDatabaseErrors

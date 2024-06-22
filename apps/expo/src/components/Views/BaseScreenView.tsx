@@ -34,6 +34,7 @@ const BaseScreenView = ({
       <ScrollView
         flex={1}
         padding="$4"
+        paddingBottom={0}
         backgroundColor="$background"
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}

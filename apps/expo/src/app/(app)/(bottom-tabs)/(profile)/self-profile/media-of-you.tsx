@@ -30,6 +30,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
+import { debounce, throttle } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import {
   Avatar,
@@ -61,6 +62,9 @@ const PostItem = (props: PostItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
 
+  const utils = api.useUtils();
+  const profile = utils.profile.getFullProfileSelf.getData();
+
   const {
     data: hasLiked,
     isLoading: isLoadingHasLiked,
@@ -68,11 +72,16 @@ const PostItem = (props: PostItemProps) => {
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
   const [isLiked, setIsLiked] = useState<Boolean>(hasLiked ?? false);
-  const [heartColor, setHeartColor] = useState("$gray12"); // Initialize color state
-  const [fillHeart, setFillHeart] = useState(false); // Initialize fill state
-
-  // variables
+  const [fillHeart, setFillHeart] = useState(hasLiked ?? false); // Initialize fill state
   const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    setFillHeart(hasLiked ?? false);
+    setIsLiked(hasLiked ?? false);
+  }, [hasLiked]);
+
+  const likePost = api.post.likePost.useMutation();
+  const unlikePost = api.post.unlikePost.useMutation();
 
   const renderCaption = () => {
     const maxLength = 100; // Set max length for the caption
@@ -141,10 +150,31 @@ const PostItem = (props: PostItemProps) => {
     );
     setIsLiked(!isLiked);
     setFillHeart(!fillHeart); // Toggle fill state
-    setHeartColor(heartColor === "$gray12" ? "red" : "$gray12"); // Toggle heart color
+    // throttledLikePost();
+    // debouncedLikePost();
   };
 
-  if (status === "loading") {
+  const handleLikePost = async () => {
+    console.log("liking");
+    if (isLiked) {
+      console.log("liking post");
+      await unlikePost.mutateAsync({ postId: post.postId });
+    } else {
+      await likePost.mutateAsync({ postId: post.postId });
+    }
+  };
+
+  const debouncedLikePost = useCallback(
+    debounce(handleLikePost, 3000, { leading: false, trailing: true }),
+    [isLiked],
+  );
+
+  const throttledLikePost = useCallback(
+    throttle(handleLikePost, 3000, { leading: false, trailing: true }),
+    [isLiked],
+  );
+
+  if (status === "loading" || isLoadingHasLiked) {
     return (
       <View flex={1} alignItems="center" justifyContent="center">
         <Text>Loading...</Text>
@@ -188,7 +218,7 @@ const PostItem = (props: PostItemProps) => {
         <Avatar circular size="$5">
           <Avatar.Image
             accessibilityLabel="Cam"
-            src="https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80"
+            src={profile?.profilePictureUrl ?? ""}
           />
           <Avatar.Fallback backgroundColor="$blue10" />
         </Avatar>
@@ -203,7 +233,7 @@ const PostItem = (props: PostItemProps) => {
               shadowOpacity={0.5}
               fontWeight={"bold"}
             >
-              @AuthorUsername
+              {profile?.username ?? "@AuthorUsername"}
             </SizableText>
           </TouchableOpacity>
           <XStack gap={"$1"} alignItems="center">
@@ -221,7 +251,7 @@ const PostItem = (props: PostItemProps) => {
                 fontWeight={"bold"}
                 color={"$blue9"}
               >
-                @RecipientUsername
+                {profile?.username ?? "@RecipientUsername"}
               </SizableText>
             </TouchableOpacity>
           </XStack>
@@ -273,7 +303,7 @@ const PostItem = (props: PostItemProps) => {
                   <Heart
                     size={24}
                     padding={"$3"}
-                    color={heartColor}
+                    color={isLiked ? "red" : "$gray12"}
                     fill={"red"}
                     fillOpacity={fillHeart ? 1 : 0}
                   />

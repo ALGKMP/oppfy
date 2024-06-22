@@ -38,6 +38,7 @@ const CommentsBottomSheet = ({
   modalVisible,
   setModalVisible,
 }: CommentsModalProps) => {
+  const utils = api.useUtils();
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
   const { height: screenHeight } = Dimensions.get("window");
@@ -53,6 +54,8 @@ const CommentsBottomSheet = ({
     );
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
+
+  const profile = utils.profile.getFullProfileSelf.getData();
 
   const openModal = useCallback(() => {
     sheetRef.current?.expand();
@@ -81,24 +84,76 @@ const CommentsBottomSheet = ({
   } = api.post.paginateComments.useInfiniteQuery(
     {
       postId,
-      pageSize: 20,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
 
-  const addComment = api.post.createComment.useMutation();
+  const commentOnPost = api.post.createComment.useMutation({
+    onMutate: async (newComment) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await utils.post.paginateComments.cancel();
 
-  const handlePostComment = () => {
-    if (inputValue.length === 0) {
+      // Snapshot the previous value
+      const prevData = utils.post.paginateComments.getInfiniteData();
+
+      // Optimistically update to the new value
+      utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
+        if (!prevData) return { pages: [], pageParams: [] };
+        return {
+          ...prevData,
+          pages: prevData.pages.map((page, index) => {
+            if (index === prevData.pages.length - 1) {
+              return {
+                ...page,
+                items: [
+                  ...page.items,
+                  {
+                    ...newComment,
+                    username: profile?.username ?? "User",
+                    createdAt: new Date(),
+                    userId: profile?.userId ?? "temp-id",
+                    commentId: Math.random(), // Temporary ID
+                    profilePictureUrl: profile?.profilePictureUrl ?? "https://example.com/avatar.jpg",
+                  },
+                ],
+              };
+            }
+            return page;
+          }),
+        };
+      });
+
+      // Return a context object with the snapshotted value
+      return { prevData };
+    },
+    onError: (err, _newData, ctx) => {
+      // Rollback to the previous value on error
+      console.log(err);
+      if (ctx?.prevData) {
+        utils.post.paginateComments.setInfiniteData({ postId }, ctx.prevData);
+      }
+    },
+    onSettled: () => {
+      // Sync with server once mutation has settled
+      utils.post.paginateComments.invalidate();
+    },
+  });
+
+  const handlePostComment = async () => {
+    if (inputValue.trim().length === 0) {
       return;
     }
-    addComment.mutate({
+
+    const newComment = {
       postId,
-      body: inputValue,
-    });
-    console.log("posting new comment");
+      body: inputValue.trim(),
+    };
+
+    setInputValue(""); // Clear the input field
+
+    await commentOnPost.mutateAsync(newComment);
   };
 
   const comments = useMemo(
@@ -108,9 +163,18 @@ const CommentsBottomSheet = ({
         .filter(
           (item): item is z.infer<typeof sharedValidators.media.comment> =>
             item !== undefined,
-        ),
+        ) ?? [],
     [commentsData],
   );
+
+  useEffect(() => {
+    // mape through all the pages and log the items
+    commentsData?.pages.forEach((page) => {
+      page.items.forEach((item) => {
+        console.log(item);
+      });
+    });
+  }, [commentsData]);
 
   const [inputValue, setInputValue] = useState("");
 
@@ -191,7 +255,6 @@ const CommentsBottomSheet = ({
           onClose={() => {
             closeModal();
           }}
-          onChange={(index) => console.log(index)}
           animatedPosition={animatedPosition}
           handleComponent={renderHeader}
           backgroundStyle={{ backgroundColor: "#282828" }}
@@ -241,7 +304,7 @@ const CommentsBottomSheet = ({
             <Avatar circular size="$4" flex={1}>
               <Avatar.Image
                 accessibilityLabel="User Avatar"
-                src="https://images.unsplash.com/photo-1517841905240-472988babdf9"
+                src={profile?.profilePictureUrl}
               />
               <Avatar.Fallback backgroundColor="$blue10" />
             </Avatar>
@@ -259,7 +322,6 @@ const CommentsBottomSheet = ({
                   borderRadius: 20,
                   backgroundColor: "#2E2E2E",
                   color: "#fff",
-                  // flex: 2,
                 }}
               />
             </View>

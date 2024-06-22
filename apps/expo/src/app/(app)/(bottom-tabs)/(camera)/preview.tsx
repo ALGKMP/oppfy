@@ -19,7 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
-import { StatusBarBlurBackground } from "~/components/camera";
+import { StatusBarBlurBackground } from "~/components/Camera";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
@@ -180,8 +180,7 @@ const PreviewScreen = () => {
 };
 
 const PreviewImage = ({ uri }: { uri: string }) => (
-  console.log(uri),
-  <Image source={{ uri }} style={StyleSheet.absoluteFill} />
+  console.log(uri), (<Image source={{ uri }} style={StyleSheet.absoluteFill} />)
 );
 
 const PreviewVideo = ({ uri }: { uri: string }) => {

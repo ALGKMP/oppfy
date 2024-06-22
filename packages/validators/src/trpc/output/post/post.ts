@@ -1,13 +1,10 @@
 import { z } from "zod";
 
-import { post, comment } from "../../../shared"
-
+import { comment, post } from "../../../shared";
 
 const trpcPostOutputSchema = {
   paginatedPosts: z.object({
-    items: z.array(
-        post.optional(),
-    ),
+    items: z.array(post.optional()),
     nextCursor: z
       .object({
         createdAt: z.date(),
@@ -16,16 +13,14 @@ const trpcPostOutputSchema = {
       .optional(),
   }),
   paginatedComments: z.object({
-    items: z.array(
-      comment.optional(),
-    ),
+    items: z.array(comment.optional()),
     nextCursor: z
       .object({
         createdAt: z.date(),
         commentId: z.number(),
       })
       .optional(),
-  })
+  }),
 };
 
 export default trpcPostOutputSchema;
