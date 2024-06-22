@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  DimensionValue,
-  LayoutChangeEvent,
-  StyleSheet,
-  View,
-} from "react-native";
+import { DimensionValue, LayoutChangeEvent, StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -13,21 +8,26 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
-import { useTheme } from "tamagui";
+import { useTheme, View } from "tamagui";
 
-interface SkeletonProps {
-  width: DimensionValue;
-  height: DimensionValue;
+interface BaseSkeletonProps {
   borderRadius?: number;
-  circular?: boolean;
 }
 
-const Skeleton = ({
-  width,
-  height,
-  borderRadius = 6,
-  circular = false,
-}: SkeletonProps) => {
+interface RectangularSkeletonProps extends BaseSkeletonProps {
+  circular?: false;
+  width: DimensionValue;
+  height: DimensionValue;
+}
+
+interface CircularSkeletonProps extends BaseSkeletonProps {
+  circular: true;
+  size: DimensionValue;
+}
+
+type SkeletonProps = RectangularSkeletonProps | CircularSkeletonProps;
+
+const Skeleton = (props: SkeletonProps) => {
   const theme = useTheme();
   const [measuredWidth, setMeasuredWidth] = useState<number>(0);
   const translateX = useSharedValue(-measuredWidth);
@@ -52,18 +52,21 @@ const Skeleton = ({
     setMeasuredWidth(width);
   };
 
-  const resolvedBorderRadius = circular ? 9999 : borderRadius;
+  const { borderRadius = 6 } = props;
+  const resolvedBorderRadius = props.circular ? 9999 : borderRadius;
+
+  const width = props.circular ? props.size : props.width;
+  const height = props.circular ? props.size : props.height;
 
   return (
     <View
-      style={[
-        styles.container,
-        {
-          width,
-          height,
-          borderRadius: resolvedBorderRadius,
-        },
-      ]}
+      overflow="hidden"
+      backgroundColor={"$gray5"}
+      style={{
+        width,
+        height,
+        borderRadius: resolvedBorderRadius,
+      }}
       onLayout={handleLayout}
     >
       <Animated.View style={[styles.gradientWrapper, animatedStyle]}>
@@ -79,16 +82,13 @@ const Skeleton = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#2e2e2e",
-    overflow: "hidden",
-  },
   gradientWrapper: {
     ...StyleSheet.absoluteFillObject,
     flexDirection: "row",
   },
   gradient: {
     flex: 1,
+    width: "200%", // Extend beyond to allow smooth transition
   },
 });
 
