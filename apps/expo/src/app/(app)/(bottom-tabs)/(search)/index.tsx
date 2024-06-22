@@ -21,7 +21,7 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState<
     RouterOutputs["search"]["profilesByUsername"]
   >([]);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const placeholderData = useMemo(() => {
     return Array.from({ length: 20 }, () => null);
@@ -31,10 +31,11 @@ const Search = () => {
     api.search.profilesByUsername.useMutation();
 
   const debouncedSearch = debounce(async (partialUsername: string) => {
-    setHasSearched(true);
+    setIsSearching(true);
 
     if (!partialUsername) {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
 
@@ -123,7 +124,7 @@ const Search = () => {
           onChangeText={debouncedSearch}
         />
         <View>
-          {!hasSearched
+          {!isSearching
             ? renderRecommendations()
             : searchResults.length
               ? renderSearchResults()
