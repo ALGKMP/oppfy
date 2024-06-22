@@ -1,9 +1,20 @@
 import type { FunctionComponent } from "react";
 import React, { useMemo } from "react";
-import { ImageSourcePropType, TouchableOpacity, View } from "react-native";
+import {
+  ImageSourcePropType,
+  StyleProp,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import debounce from "lodash/debounce";
 import { Skeleton } from "moti/skeleton";
-import type { SizeTokens, ThemeName } from "tamagui";
+import type {
+  SizeTokens,
+  StackProps,
+  ThemeName,
+  ViewProps,
+  XStackProps,
+} from "tamagui";
 import {
   Avatar,
   ButtonProps as BaseButtonProps,
@@ -44,6 +55,7 @@ interface LoadedProps {
 
 type VirtualizedListItemProps = (LoadingProps | LoadedProps) & {
   onPress?: () => void;
+  containerStyle?: ViewProps;
 };
 
 interface DefaultButtonProps {
@@ -87,7 +99,11 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
 
   const content = (
     <Skeleton.Group show={props.loading}>
-      <XStack alignItems="center" paddingVertical="$2">
+      <XStack
+        alignItems="center"
+        paddingVertical="$2"
+        {...props.containerStyle}
+      >
         <XStack flex={1} alignItems="center" gap="$3">
           <View>
             {shouldRenderProfilePicture && (
