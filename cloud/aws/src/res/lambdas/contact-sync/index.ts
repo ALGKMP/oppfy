@@ -82,6 +82,7 @@ async function updateContacts(
     if (contactUserResult.value) {
       const contactUser = contactUserResult.value as Vertex;
       const edgeId = `${userId}_${contactUser.id}`;
+      console.log("adding edge", edgeId);
       newContactEdgeIds.add(edgeId);
 
       await g
@@ -91,7 +92,7 @@ async function updateContacts(
             [t.id, edgeId],
           ]),
         )
-        .from_(userId)
+        .from_(user.id)
         .to(contactUser.id)
         .option(onCreate, new Map([["createdAt", currentTimestamp]]))
         .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
