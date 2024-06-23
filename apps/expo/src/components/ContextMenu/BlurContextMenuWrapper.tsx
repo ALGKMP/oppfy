@@ -27,7 +27,6 @@ type BlurContextMenuWrapperProps = {
 
 const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const [isVisible, setIsVisible] = useState(false);
-  const theme = useTheme();
 
   const scale = useSharedValue(1);
 
@@ -59,10 +58,6 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
 
   const hideContextMenu = () => setIsVisible(false);
 
-  const tapGesture = Gesture.Tap().onEnd(() => {
-    runOnJS(hideContextMenu)();
-  });
-
   return (
     <>
       <GestureDetector gesture={longPressGesture}>
@@ -72,7 +67,6 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
       </GestureDetector>
 
       <Modal transparent={true} visible={isVisible} animationType="fade">
-        {/* <GestureDetector gesture={tapGesture}> */}
         <BlurView
           intensity={50}
           style={styles.blurView}
@@ -106,7 +100,6 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
             </View>
           </YStack>
         </BlurView>
-        {/* </GestureDetector> */}
       </Modal>
     </>
   );
