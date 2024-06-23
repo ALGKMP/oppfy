@@ -29,7 +29,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { SizableText, Text, View } from "tamagui";
 
-import { CaptureButton, StatusBarBlurBackground } from "~/components/Camera";
+import { StatusBarBlurBackground } from "~/components/StatusBars";
 import { BaseScreenView } from "~/components/Views";
 import {
   CONTENT_SPACING,
@@ -39,6 +39,7 @@ import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "~/constants/camera";
+import { CaptureButton } from "~/features/camera/components";
 import useIsForeground from "~/hooks/useIsForeground";
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
