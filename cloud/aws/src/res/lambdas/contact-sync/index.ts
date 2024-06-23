@@ -26,7 +26,6 @@ interface Vertex {
   properties: Record<string, any>;
 }
 
-
 async function updateContacts(
   g: gremlin.process.GraphTraversalSource,
   userId: string,
@@ -41,21 +40,21 @@ async function updateContacts(
       new Map([
         [t.id, userId],
         [t.label, "User"],
-      ])
+      ]),
     )
     .option(
       onCreate,
       new Map([
-        ["created", currentTimestamp],
+        ["createdAt", currentTimestamp],
         ["phoneNumberHash", userPhoneNumberHash],
-      ])
+      ]),
     )
     .option(
       onMatch,
       new Map([
         ["phoneNumberHash", userPhoneNumberHash],
         ["updatedAt", currentTimestamp],
-      ])
+      ]),
     )
     .next();
 
@@ -63,7 +62,11 @@ async function updateContacts(
   const user = userResult.value as Vertex;
 
   // Get current contacts
-  const currentContacts = await g.V(user.id).outE("contacts").id().toList() as string[];
+  const currentContacts = (await g
+    .V(user.id)
+    .outE("contacts")
+    .id()
+    .toList()) as string[];
 
   // Create a set of new contact edge IDs
   const newContactEdgeIds = new Set<string>();
@@ -82,29 +85,25 @@ async function updateContacts(
       newContactEdgeIds.add(edgeId);
 
       await g
-        .mergeE("contacts")
+        .mergeE(
+          new Map([
+            [t.label, "contact"],
+            [t.id, edgeId],
+          ]),
+        )
         .from_(__.V(userId))
         .to(__.V(contactUser.id))
         .property(t.id, edgeId)
-        .option(
-          onCreate,
-          new Map([
-            ["created", currentTimestamp],
-            ["updatedAt", currentTimestamp],
-          ])
-        )
-        .option(
-          onMatch,
-          new Map([
-            ["updatedAt", currentTimestamp],
-          ])
-        )
+        .option(onCreate, new Map([["createdAt", currentTimestamp]]))
+        .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
         .next();
     }
   }
 
   // Remove contacts that are no longer in the list
-  const contactsToRemove = currentContacts.filter(edgeId => !newContactEdgeIds.has(edgeId));
+  const contactsToRemove = currentContacts.filter(
+    (edgeId) => !newContactEdgeIds.has(edgeId),
+  );
   if (contactsToRemove.length > 0) {
     await g.E(contactsToRemove).drop().iterate();
   }
