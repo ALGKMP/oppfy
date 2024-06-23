@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
-import { Stack, Text, useTheme, XStack, YStack } from "tamagui";
+import { Stack, Text, useTheme, View, XStack, YStack } from "tamagui";
 
 const { width, height } = Dimensions.get("window");
 
@@ -40,12 +40,18 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
       });
     })
     .onStart(() => {
+      runOnJS(setIsVisible)(true);
       scale.value = withTiming(1, {
         duration: 250,
         easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
       });
-      runOnJS(setIsVisible)(true);
     })
+    .onFinalize(() => {
+      scale.value = withTiming(1, {
+        duration: 250,
+        easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
+      });
+    });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -74,7 +80,10 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
         <GestureDetector gesture={tapGesture}>
           <Stack flex={1} justifyContent="center" alignItems="center">
             <BlurView intensity={50} style={styles.blurView} tint="light">
-              <Stack style={styles.background} />
+              <View flex={1} justifyContent="center" margin="$4">
+                {props.children}
+              </View>
+              {/* <Stack style={styles.background} />
               <YStack
                 backgroundColor={theme.background}
                 borderRadius="$4"
@@ -110,7 +119,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
                     </XStack>
                   </GestureDetector>
                 ))}
-              </YStack>
+              </YStack> */}
             </BlurView>
           </Stack>
         </GestureDetector>

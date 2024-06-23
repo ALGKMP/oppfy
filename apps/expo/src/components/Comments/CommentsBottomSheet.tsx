@@ -204,14 +204,18 @@ const CommentsBottomSheet = ({
       isNew?: boolean;
     }) => {
       return (
-        <BlurContextMenuWrapper options={[{
-          label: "Delete",
-          icon: <Trash2 />,
-          onPress: () => {
-            console.log("Delete");
-          },
-        }]}>
-          <View padding={"$3.5"}>
+        <BlurContextMenuWrapper
+          options={[
+            {
+              label: "Delete",
+              icon: <Trash2 />,
+              onPress: () => {
+                console.log("Delete");
+              },
+            },
+          ]}
+        >
+          <View padding={"$3.5"} backgroundColor={"$gray4"} borderRadius={"$7"}>
             <XStack gap="$3" alignItems="center">
               <Avatar circular size="$4">
                 <Avatar.Image
