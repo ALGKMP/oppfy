@@ -74,10 +74,10 @@ async function updateContacts(
     .addE("contacts")
     .from_("currentUser")
     .property("updatedAt", Date.now().toString())
-    .select("contactUser")
-    .addE("contacts")
-    .to("currentUser")
-    .property("updatedAt", Date.now().toString())
+    // .select("contactUser")
+    // .addE("contacts")
+    // .to("currentUser")
+    // .property("updatedAt", Date.now().toString())
     .iterate();
 
   return true;
