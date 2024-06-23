@@ -68,8 +68,8 @@ const ReportActionSheet = (props: ReportActionSheetProps) => {
   const { isVisible, onCancel } = props;
   return (
     <ActionSheet
-      title={"Report"}
-      subtitle={"Are you sure you want to report this comment?"}
+      title={"Report comment"}
+      subtitle={"Select reason"}
       buttonOptions={actionSheetOptions}
       isVisible={isVisible}
       onCancel={onCancel}
