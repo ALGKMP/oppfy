@@ -1,16 +1,16 @@
 // BlurContextMenuWrapper.tsx
 import React, { ReactNode, useState } from "react";
 import { Dimensions, Modal, StyleSheet } from "react-native";
-import { BlurView } from "expo-blur";
-import {
-  Stack,
-  Text,
-  useTheme,
-  XStack,
-  YStack,
-} from "tamagui";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { BlurView } from "expo-blur";
+import { Stack, Text, useTheme, XStack, YStack } from "tamagui";
 
 const { width, height } = Dimensions.get("window");
 
@@ -25,13 +25,31 @@ type BlurContextMenuWrapperProps = {
   options: Option[];
 };
 
-const BlurContextMenuWrapper = (props : BlurContextMenuWrapperProps) => {
+const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const theme = useTheme();
 
-  const longPressGesture = Gesture.LongPress().onEnd(() => {
-    runOnJS(setIsVisible)(true);
-  });
+  const scale = useSharedValue(1);
+
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(500)
+    .onBegin(() => {
+      scale.value = withTiming(1.05, {
+        duration: 500,
+        easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
+      });
+    })
+    .onStart(() => {
+      scale.value = withTiming(1, {
+        duration: 250,
+        easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
+      });
+      runOnJS(setIsVisible)(true);
+    })
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   const hideContextMenu = () => setIsVisible(false);
 
@@ -42,7 +60,9 @@ const BlurContextMenuWrapper = (props : BlurContextMenuWrapperProps) => {
   return (
     <>
       <GestureDetector gesture={longPressGesture}>
-        <Stack>{props.children}</Stack>
+        <Animated.View style={animatedStyle}>
+          <Stack>{props.children}</Stack>
+        </Animated.View>
       </GestureDetector>
 
       <Modal
@@ -77,7 +97,9 @@ const BlurContextMenuWrapper = (props : BlurContextMenuWrapperProps) => {
                   >
                     <XStack
                       paddingVertical="$2"
-                      borderBottomWidth={index < props.options.length - 1 ? 1 : 0}
+                      borderBottomWidth={
+                        index < props.options.length - 1 ? 1 : 0
+                      }
                       borderBottomColor="$border"
                       alignItems="center"
                     >
