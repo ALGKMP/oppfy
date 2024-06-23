@@ -234,7 +234,7 @@ export const postRouter = createTRPCRouter({
     .output(z.boolean())
     .query(async ({ ctx, input }) => {
       try {
-        return !!ctx.services.post.hasLiked(ctx.session.uid, input.postId);
+        return !!(await ctx.services.post.getLike(ctx.session.uid, input.postId));
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

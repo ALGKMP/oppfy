@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import debounce from "lodash/debounce";
-import { Skeleton } from "moti/skeleton";
 import type {
   SizeTokens,
   StackProps,
@@ -25,6 +25,7 @@ import {
   YStack,
 } from "tamagui";
 
+import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "../StatusRenderer";
 
 interface LoadingProps {
@@ -95,162 +96,145 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
 
   const isTwoButtons = shouldRenderButton && shouldRenderButton2;
   const defaultButtonProps = {
-    width: isTwoButtons ? 85 : undefined,
     size: isTwoButtons ? "$3.5" : "$3.5",
   } as const satisfies DefaultButtonProps;
 
   const content = (
-    <Skeleton.Group show={props.loading}>
-      <XStack
-        alignItems="center"
-        paddingVertical="$2"
-        {...props.containerStyle}
-      >
-        <XStack flex={1} alignItems="center" gap="$3">
-          <View>
-            {shouldRenderProfilePicture && (
-              <StatusRenderer
-                data={
-                  !props.loading && props.imageUrl ? props.imageUrl : undefined
-                }
-                loadingComponent={
-                  <Skeleton radius={100}>
-                    <Avatar circular size={56} />
-                  </Skeleton>
-                }
-                successComponent={(imageUrl) => (
-                  <Avatar circular size={56}>
-                    <Avatar.Image
-                      source={
-                        typeof imageUrl === "string"
-                          ? { uri: imageUrl }
-                          : imageUrl
-                      }
-                    />
-                  </Avatar>
-                )}
-              />
-            )}
-          </View>
-
-          <YStack flex={1}>
-            {shouldRenderTitle && (
-              <StatusRenderer
-                data={!props.loading && props.title ? props.title : undefined}
-                loadingComponent={
-                  <Skeleton width={75}>
-                    <SizableText>Loading...</SizableText>
-                  </Skeleton>
-                }
-                successComponent={(title) => (
-                  <SizableText fontWeight="bold" lineHeight={0}>
-                    {title}
-                  </SizableText>
-                )}
-              />
-            )}
-
-            {props.loading && props.showSkeletons?.subtitle && (
-              <Spacer size="$1" />
-            )}
-
-            {shouldRenderSubtitle && (
-              <StatusRenderer
-                data={
-                  !props.loading && props.subtitle ? props.subtitle : undefined
-                }
-                loadingComponent={
-                  <Skeleton width={100}>
-                    <SizableText>Loading...</SizableText>
-                  </Skeleton>
-                }
-                successComponent={(subtitle) => (
-                  <SizableText theme="alt1" size={"$3"} lineHeight={0}>
-                    {subtitle}
-                  </SizableText>
-                )}
-              />
-            )}
-
-            {props.loading && props.showSkeletons?.subtitle2 && (
-              <Spacer size="$1" />
-            )}
-
-            {shouldRenderSubtitle2 && (
-              <StatusRenderer
-                data={
-                  !props.loading && props.subtitle2
-                    ? props.subtitle2
-                    : undefined
-                }
-                loadingComponent={
-                  <Skeleton width={100}>
-                    <SizableText>Loading...</SizableText>
-                  </Skeleton>
-                }
-                successComponent={(subtitle2) => (
-                  <SizableText theme="alt1" size={"$2"} lineHeight={0}>
-                    {subtitle2}
-                  </SizableText>
-                )}
-              />
-            )}
-          </YStack>
-
-          <XStack gap="$2">
-            {shouldRenderButton && (
-              <StatusRenderer
-                data={!props.loading && props.button ? props.button : undefined}
-                loadingComponent={
-                  <Skeleton>
-                    <Button width={100} {...defaultButtonProps} />
-                  </Skeleton>
-                }
-                successComponent={(customButtonProps) => (
-                  <Button
-                    {...defaultButtonProps}
-                    {...customButtonProps}
-                    onPress={
-                      customButtonProps.onPress
-                        ? debounce(customButtonProps.onPress, 300)
-                        : undefined
+    <XStack alignItems="center" paddingVertical="$2" {...props.containerStyle}>
+      <XStack flex={1} alignItems="center" gap="$3">
+        <View>
+          {shouldRenderProfilePicture && (
+            <StatusRenderer
+              data={
+                !props.loading && props.imageUrl ? props.imageUrl : undefined
+              }
+              loadingComponent={<Skeleton circular size={56} />}
+              successComponent={(imageUrl) => (
+                <Avatar circular size={56}>
+                  <Avatar.Image
+                    source={
+                      typeof imageUrl === "string"
+                        ? { uri: imageUrl }
+                        : imageUrl
                     }
-                  >
-                    {customButtonProps.text}
-                  </Button>
-                )}
-              />
-            )}
+                  />
+                </Avatar>
+              )}
+            />
+          )}
+        </View>
 
-            {shouldRenderButton2 && (
-              <StatusRenderer
-                data={
-                  !props.loading && props.button2 ? props.button2 : undefined
-                }
-                loadingComponent={
-                  <Skeleton>
-                    <Button width={100} {...defaultButtonProps} />
-                  </Skeleton>
-                }
-                successComponent={(customButtonProps) => (
-                  <Button
-                    {...defaultButtonProps}
-                    {...customButtonProps}
-                    onPress={
-                      customButtonProps.onPress
-                        ? debounce(customButtonProps.onPress, 300)
-                        : undefined
-                    }
-                  >
-                    {customButtonProps.text}
-                  </Button>
-                )}
-              />
-            )}
-          </XStack>
+        <YStack flex={1}>
+          {shouldRenderTitle && (
+            <StatusRenderer
+              data={!props.loading && props.title ? props.title : undefined}
+              loadingComponent={
+                <Skeleton width={75} height={20} borderRadius={4} />
+              }
+              successComponent={(title) => (
+                <SizableText fontWeight="bold" lineHeight={0}>
+                  {title}
+                </SizableText>
+              )}
+            />
+          )}
+
+          {props.loading && props.showSkeletons?.subtitle && (
+            <Spacer size="$1" />
+          )}
+
+          {shouldRenderSubtitle && (
+            <StatusRenderer
+              data={
+                !props.loading && props.subtitle ? props.subtitle : undefined
+              }
+              loadingComponent={
+                <Skeleton width={100} height={18} borderRadius={4} />
+              }
+              successComponent={(subtitle) => (
+                <SizableText theme="alt1" size={"$3"} lineHeight={0}>
+                  {subtitle}
+                </SizableText>
+              )}
+            />
+          )}
+
+          {props.loading && props.showSkeletons?.subtitle2 && (
+            <Spacer size="$1" />
+          )}
+
+          {shouldRenderSubtitle2 && (
+            <StatusRenderer
+              data={
+                !props.loading && props.subtitle2 ? props.subtitle2 : undefined
+              }
+              loadingComponent={
+                <Skeleton width={100} height={16} borderRadius={4} />
+              }
+              successComponent={(subtitle2) => (
+                <SizableText theme="alt1" size={"$2"} lineHeight={0}>
+                  {subtitle2}
+                </SizableText>
+              )}
+            />
+          )}
+        </YStack>
+
+        <XStack gap="$2">
+          {shouldRenderButton && (
+            <StatusRenderer
+              data={!props.loading && props.button ? props.button : undefined}
+              loadingComponent={
+                <Skeleton
+                  width={isTwoButtons ? 85 : 100}
+                  height={40}
+                  borderRadius={10}
+                />
+              }
+              successComponent={(customButtonProps) => (
+                <Button
+                  {...defaultButtonProps}
+                  {...customButtonProps}
+                  onPress={
+                    customButtonProps.onPress
+                      ? debounce(customButtonProps.onPress, 300)
+                      : undefined
+                  }
+                >
+                  {customButtonProps.text}
+                </Button>
+              )}
+            />
+          )}
+
+          {shouldRenderButton2 && (
+            <StatusRenderer
+              data={!props.loading && props.button2 ? props.button2 : undefined}
+              loadingComponent={
+                <Skeleton
+                  width={isTwoButtons ? 85 : 100}
+                  height={40}
+                  borderRadius={10}
+                />
+              }
+              successComponent={(customButtonProps) => (
+                <Button
+                  {...defaultButtonProps}
+                  {...customButtonProps}
+                  onPress={
+                    customButtonProps.onPress
+                      ? debounce(customButtonProps.onPress, 300)
+                      : undefined
+                  }
+                >
+                  {customButtonProps.text}
+                </Button>
+              )}
+            />
+          )}
         </XStack>
       </XStack>
-    </Skeleton.Group>
+    </XStack>
   );
 
   return props.onPress ? (
