@@ -59,7 +59,7 @@ async function updateContacts(
   // Extract user vertex from the result and assert type
   const user = userResult.value as Vertex;
 
-  // Remove existing contacts edges (both incoming and outgoing)
+  // Remove existing contacts edges (outgoing only lol)
   await g.V(user.id).outE("contacts").drop().iterate();
 
   // Add bidirectional edges to all other users who have a phoneNumber that matches my edge phone number
@@ -74,10 +74,10 @@ async function updateContacts(
     .addE("contacts")
     .from_("currentUser")
     .property("updatedAt", Date.now().toString())
-    .select("contactUser")
-    .addE("contacts")
-    .to("currentUser")
-    .property("updatedAt", Date.now().toString())
+    // .select("contactUser")
+    // .addE("contacts")
+    // .to("currentUser")
+    // .property("updatedAt", Date.now().toString())
     .iterate();
 
   return true;

@@ -346,6 +346,29 @@ export class AwsStack extends cdk.Stack {
       value: cluster.clusterEndpoint.hostname,
     });
 
+    const contactRecLambda = new lambdaNodeJs.NodejsFunction(
+      this,
+      "contactRecLambda",
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: "src/res/lambdas/contact-recs/index.ts",
+        handler: "handler",
+        environment: {
+          NEPTUNE_ENDPOINT: cluster.clusterReadEndpoint.socketAddress,
+        },
+        vpc,
+        securityGroups: [neptuneSecurityGroup],
+      },
+    );
+
+    const contactRecLambdaUrl = contactRecLambda.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE,
+    });
+
+    new cdk.CfnOutput(this, "ContactRecLambdaUrl", {
+      value: contactRecLambdaUrl.url,
+    });
+
     const contactSyncLambda = new lambdaNodeJs.NodejsFunction(
       this,
       "contactSyncLambda",
@@ -353,7 +376,6 @@ export class AwsStack extends cdk.Stack {
         runtime: lambda.Runtime.NODEJS_20_X,
         entry: "src/res/lambdas/contact-sync/index.ts",
         handler: "handler",
-        // timeout: cdk.Duration.minutes(3),
         environment: {
           NEPTUNE_ENDPOINT: cluster.clusterEndpoint.socketAddress,
         },
