@@ -67,8 +67,22 @@ async function updateContacts(
     return true;
   }
 
+
+
   // Add or update edges for current contacts
-  await g
+  /*   await g
+    .V(user.id)
+    .as("currentUser")
+    .V()
+    .hasLabel("User")
+    .has("phoneNumberHash", P.within(contacts))
+    .where(P.neq("currentUser"))
+    .as("contactUser")
+    .addE("contacts")
+    .from_("currentUser")
+    .property("updatedAt", Date.now().toString()); */
+
+  /*   await g
     .V(user.id)
     .as("currentUser")
     .V()
@@ -90,10 +104,97 @@ async function updateContacts(
       ]),
     )
     .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
-    .iterate();
+    .iterate(); */
 
   return true;
 }
+
+
+async function updateContacts(
+  g: gremlin.process.GraphTraversalSource,
+  userId: string,
+  userPhoneNumberHash: string,
+  contacts: string[],
+): Promise<boolean> {
+  const currentTimestamp = Date.now().toString();
+
+  // Add or update the user vertex
+  let userResult = await g
+    .mergeV(
+      new Map([
+        [t.id, userId],
+        [t.label, "User"],
+      ])
+    )
+    .option(
+      onCreate,
+      new Map([
+        ["created", currentTimestamp],
+        ["phoneNumberHash", userPhoneNumberHash],
+      ])
+    )
+    .option(
+      onMatch,
+      new Map([
+        ["phoneNumberHash", userPhoneNumberHash],
+        ["updatedAt", currentTimestamp],
+      ])
+    )
+    .next();
+
+  // Extract user vertex from the result and assert type
+  const user = userResult.value as Vertex;
+
+  // Get current contacts
+  const currentContacts = await g.V(user.id).outE("contacts").id().toList() as string[];
+
+  // Create a set of new contact edge IDs
+  const newContactEdgeIds = new Set<string>();
+
+  // Add or update edges for current contacts
+  for (const contactPhoneNumberHash of contacts) {
+    const contactUserResult = await g
+      .V()
+      .hasLabel("User")
+      .has("phoneNumberHash", contactPhoneNumberHash)
+      .next();
+
+    if (contactUserResult.value) {
+      const contactUser = contactUserResult.value as Vertex;
+      const edgeId = `${userId}_${contactUser.id}`;
+      newContactEdgeIds.add(edgeId);
+
+      await g
+        .mergeE("contacts")
+        .from_(__.V(userId))
+        .to(__.V(contactUser.id))
+        .property(t.id, edgeId)
+        .option(
+          onCreate,
+          new Map([
+            ["created", currentTimestamp],
+            ["updatedAt", currentTimestamp],
+          ])
+        )
+        .option(
+          onMatch,
+          new Map([
+            ["updatedAt", currentTimestamp],
+          ])
+        )
+        .next();
+    }
+  }
+
+  // Remove contacts that are no longer in the list
+  const contactsToRemove = currentContacts.filter(edgeId => !newContactEdgeIds.has(edgeId));
+  if (contactsToRemove.length > 0) {
+    await g.E(contactsToRemove).drop().iterate();
+  }
+
+  return true;
+}
+
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
 // 2. Parses records in body key using your schema and return them in a list.
