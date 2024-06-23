@@ -25,12 +25,24 @@ export const handler = async (
       {},
     );
     const g = graph.traversal().withRemote(dc);
+    const userId = event.pathParameters?.userId!;
 
     const reccomendedIds = [];
 
+    // tier 1 reccs, all outgoing people within 1 edge
+    const tier1 = await g.V(userId).out().id().toList();
+
+    // tier 2 reccs, all incoming people within 1 edge not in tier 1
+    const tier2 = await g.V(userId).in_().id().where(P.without(tier1)).toList();
+
+    reccomendedIds.push({
+      tier1,
+      tier2,
+    });
+
     return {
       statusCode: 200,
-      body: "hi",
+      body: JSON.stringify(reccomendedIds),
     };
   } catch (error) {
     console.error("Error during execution", error);
