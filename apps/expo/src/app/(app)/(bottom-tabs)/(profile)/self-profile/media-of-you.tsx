@@ -76,8 +76,6 @@ const PostItem = (props: PostItemProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    console.log(hasLiked)
-    // setFillHeart(hasLiked ?? false);
     setIsLiked(hasLiked ?? false);
   }, [hasLiked]);
 
@@ -157,7 +155,6 @@ const PostItem = (props: PostItemProps) => {
 
   const handleLikePost = async () => {
     if (isLiked) {
-      console.log("liking post");
       await unlikePost.mutateAsync({ postId: post.postId });
     } else {
       await likePost.mutateAsync({ postId: post.postId });
