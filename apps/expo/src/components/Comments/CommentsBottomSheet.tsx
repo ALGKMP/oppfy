@@ -25,7 +25,7 @@ import BottomSheet, {
   BottomSheetModal,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import { Minus, SendHorizontal } from "@tamagui/lucide-icons";
+import { Minus, SendHorizontal, Trash2 } from "@tamagui/lucide-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
@@ -34,6 +34,7 @@ import z from "zod";
 import { sharedValidators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
+import { BlurContextMenuWrapper } from "../ContextMenu";
 
 interface CommentsModalProps {
   postId: number;
@@ -203,6 +204,13 @@ const CommentsBottomSheet = ({
       isNew?: boolean;
     }) => {
       return (
+        <BlurContextMenuWrapper options={[{
+          label: "Delete",
+          icon: <Trash2 />,
+          onPress: () => {
+            console.log("Delete");
+          },
+        }]}>
           <View padding={"$3.5"}>
             <XStack gap="$3" alignItems="center">
               <Avatar circular size="$4">
@@ -223,6 +231,7 @@ const CommentsBottomSheet = ({
               </YStack>
             </XStack>
           </View>
+        </BlurContextMenuWrapper>
       );
     },
     [],
@@ -368,4 +377,3 @@ const CommentsBottomSheet = ({
 };
 
 export default CommentsBottomSheet;
- 
