@@ -11,7 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTheme, View } from "tamagui";
 
 interface BaseSkeletonProps {
-  borderRadius?: number;
+  radius?: number;
 }
 
 interface RectangularSkeletonProps extends BaseSkeletonProps {
@@ -52,8 +52,8 @@ const Skeleton = (props: SkeletonProps) => {
     setMeasuredWidth(width);
   };
 
-  const { borderRadius = 6 } = props;
-  const resolvedBorderRadius = props.circular ? 9999 : borderRadius;
+  const { radius = 6 } = props;
+  const resolvedBorderRadius = props.circular ? 9999 : radius;
 
   const width = props.circular ? props.size : props.width;
   const height = props.circular ? props.size : props.height;
