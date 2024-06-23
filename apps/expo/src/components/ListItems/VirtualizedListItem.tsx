@@ -128,9 +128,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
           {shouldRenderTitle && (
             <StatusRenderer
               data={!props.loading && props.title ? props.title : undefined}
-              loadingComponent={
-                <Skeleton width={75} height={20} borderRadius={4} />
-              }
+              loadingComponent={<Skeleton width={75} height={20} radius={4} />}
               successComponent={(title) => (
                 <SizableText fontWeight="bold" lineHeight={0}>
                   {title}
@@ -148,9 +146,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               data={
                 !props.loading && props.subtitle ? props.subtitle : undefined
               }
-              loadingComponent={
-                <Skeleton width={100} height={18} borderRadius={4} />
-              }
+              loadingComponent={<Skeleton width={100} height={18} radius={4} />}
               successComponent={(subtitle) => (
                 <SizableText theme="alt1" size={"$3"} lineHeight={0}>
                   {subtitle}
@@ -168,9 +164,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               data={
                 !props.loading && props.subtitle2 ? props.subtitle2 : undefined
               }
-              loadingComponent={
-                <Skeleton width={100} height={16} borderRadius={4} />
-              }
+              loadingComponent={<Skeleton width={100} height={16} radius={4} />}
               successComponent={(subtitle2) => (
                 <SizableText theme="alt1" size={"$2"} lineHeight={0}>
                   {subtitle2}
@@ -188,7 +182,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <Skeleton
                   width={isTwoButtons ? 85 : 100}
                   height={40}
-                  borderRadius={10}
+                  radius={10}
                 />
               }
               successComponent={(customButtonProps) => (
@@ -214,7 +208,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                 <Skeleton
                   width={isTwoButtons ? 85 : 100}
                   height={40}
-                  borderRadius={10}
+                  radius={10}
                 />
               }
               successComponent={(customButtonProps) => (
