@@ -93,7 +93,6 @@ async function updateContacts(
         )
         .from_(userId)
         .to(contactUser.id)
-        .property(t.id, edgeId)
         .option(onCreate, new Map([["createdAt", currentTimestamp]]))
         .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
         .next();
