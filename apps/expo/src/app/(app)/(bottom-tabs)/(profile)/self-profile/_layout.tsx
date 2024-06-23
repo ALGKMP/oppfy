@@ -39,7 +39,6 @@ import {
 import { abbreviatedNumber } from "@oppfy/utils";
 
 import CardContainer from "~/components/Containers/CardContainer";
-// import { Skeleton } from "moti/skeleton";
 import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "~/components/StatusRenderer";
 import { useUploadProfilePicture } from "~/hooks/media";
@@ -360,9 +359,9 @@ const Friends = (props: FriendsProps) => {
   );
 
   const renderFriendList = (data: FriendsData) => (
-    <CardContainer>
+    <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
-        <XStack paddingLeft="$3" gap="$1">
+        <XStack paddingHorizontal="$3" gap="$1">
           <Text fontWeight="700">{abbreviatedNumber(data.friendCount)}</Text>
           <Text fontWeight="600">Friends</Text>
         </XStack>
