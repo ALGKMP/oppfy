@@ -15,7 +15,7 @@ import { Stack, Text, useTheme, View, XStack, YStack } from "tamagui";
 const { width, height } = Dimensions.get("window");
 
 type Option = {
-  label: string;
+  label: ReactNode;
   icon: ReactNode;
   onPress: () => void;
 };
@@ -97,9 +97,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
                       borderTopWidth={index === 0 ? 0 : 0.3}
                       borderTopColor="white"
                     >
-                      <Text color="white" marginLeft="$2" fontSize="$5">
-                        {option.label}
-                      </Text>
+                      {option.label}
                       {option.icon}
                     </XStack>
                   </TouchableOpacity>

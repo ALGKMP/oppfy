@@ -212,14 +212,22 @@ const CommentsBottomSheet = ({
         <BlurContextMenuWrapper
           options={[
             {
-              label: "Delete",
+              label: (
+                <Text color="white" marginLeft="$2" fontSize="$5">
+                  Delete
+                </Text>
+              ),
               icon: <Trash2 size={"$1.5"} color="white" />,
               onPress: () => {
                 console.log("Delete");
               },
             },
             {
-              label: "Report",
+              label: (
+                <Text color="red" marginLeft="$2" fontSize="$5">
+                  Report
+                </Text>
+              ),
               icon: <AlertCircle size={"$1.5"} color="red" />,
               onPress: () => {
                 console.log("Report");
