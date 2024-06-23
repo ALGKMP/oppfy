@@ -233,7 +233,9 @@ const CommentsBottomSheet = ({
               ),
               icon: <AlertCircle size={"$1.5"} color="red" />,
               onPress: () => {
-                setIsReportModalVisible(true);
+                setTimeout(() => {
+                  setIsReportModalVisible(true);
+                }, 275);
               },
             },
           ]}
