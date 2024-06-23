@@ -431,6 +431,28 @@ export const blockRelation = relations(block, ({ one }) => ({
   }),
 }));
 
+export const reportComment = mySqlTable("ReportComment", {
+  id: serial("id").primaryKey(),
+  commentId: bigint("commentId", { mode: "number", unsigned: true })
+    .references(() => post.id, { onDelete: "cascade" })
+    .notNull(),
+  reporterUserId: varchar("reporterUserId", { length: 255 })
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  reason: mysqlEnum("reason", [
+    "Violent or abusive",
+    "Sexually explicit or predatory",
+    "Hate, harassment or bullying",
+    "Suicide and self-harm",
+    "Spam or scam",
+    "Other",
+  ]).notNull(),
+  createdAt: timestamp("createdAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .onUpdateNow()
+    .notNull(),
+});
+
 export const reportPost = mySqlTable("ReportPost", {
   id: serial("id").primaryKey(),
   postId: bigint("postId", { mode: "number", unsigned: true })
@@ -470,6 +492,17 @@ export const reportProfile = mySqlTable("ReportProfile", {
     .onUpdateNow()
     .notNull(),
 });
+
+export const reportCommentRelations = relations(reportComment, ({ one }) => ({
+  comment: one(comment, {
+    fields: [reportComment.commentId],
+    references: [comment.id],
+  }),
+  reporter: one(user, {
+    fields: [reportComment.reporterUserId],
+    references: [user.id],
+  }),
+}));
 
 export const reportPostRelations = relations(reportPost, ({ one }) => ({
   post: one(post, {
