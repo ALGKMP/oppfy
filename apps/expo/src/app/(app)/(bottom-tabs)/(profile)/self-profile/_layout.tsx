@@ -26,6 +26,7 @@ import {
   Avatar,
   Button,
   getToken,
+  ListItemTitle,
   Paragraph,
   ScrollView,
   SizableText,
@@ -361,10 +362,9 @@ const Friends = (props: FriendsProps) => {
   const renderFriendList = (data: FriendsData) => (
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
-        <XStack paddingHorizontal="$3" gap="$1">
-          <Text fontWeight="700">{abbreviatedNumber(data.friendCount)}</Text>
-          <Text fontWeight="600">Friends</Text>
-        </XStack>
+        <ListItemTitle paddingLeft="$3">
+          Friends ({abbreviatedNumber(data.friendCount)})
+        </ListItemTitle>
 
         <FlashList
           data={data.friendItems}
