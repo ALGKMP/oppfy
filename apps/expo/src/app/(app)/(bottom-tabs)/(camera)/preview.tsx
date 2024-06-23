@@ -19,12 +19,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
+import { StatusBarBlurBackground } from "~/components/StatusBars";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
   SAFE_AREA_PADDING,
 } from "~/constants/camera";
-import { StatusBarBlurBackground } from "~/features/camera/components";
 
 type SaveState = "idle" | "saving" | "saved";
 
