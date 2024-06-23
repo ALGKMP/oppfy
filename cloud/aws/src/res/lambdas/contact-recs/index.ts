@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import gremlin from "gremlin";
 
-/* const {
+const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
   process: {
@@ -10,16 +10,7 @@ import gremlin from "gremlin";
     merge: { onCreate, onMatch },
     statics: __,
   },
-} = gremlin; */
-
-
-const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
-const Graph = gremlin.structure.Graph;
-const { t, P } = gremlin.process;
-const { onCreate, onMatch } = gremlin.process.merge;
-const __ = gremlin.process.statics;
-
-
+} = gremlin;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 
@@ -35,22 +26,23 @@ export const handler = async (
     const g = graph.traversal().withRemote(dc);
     const userId = event.pathParameters?.userId!;
 
-    const reccomendedIds = [];
-
     // tier 1 reccs, all outgoing people within 1 edge
     const tier1 = await g.V(userId).out().id().toList();
 
-    // tier 2 reccs, all incoming people within 1 edge not in tier 1
-    const tier2 = await g.V(userId).in_().id().where(P.without(tier1)).toList();
+    // tier 2 reccs, all incoming people within 1 edge
+    const allTier2 = await g.V(userId).in_().id().toList();
 
-    reccomendedIds.push({
+    // Manually filtering out tier1 IDs from allTier2 using JavaScript array methods
+    const tier2 = allTier2.filter(id => !tier1.includes(id));
+
+    const recommendedIds = {
       tier1,
       tier2,
-    });
+    };
 
     return {
       statusCode: 200,
-      body: JSON.stringify(reccomendedIds),
+      body: JSON.stringify(recommendedIds),
     };
   } catch (error) {
     console.error("Error during execution", error);
