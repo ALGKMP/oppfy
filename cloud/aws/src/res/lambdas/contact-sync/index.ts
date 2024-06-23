@@ -32,6 +32,8 @@ async function updateContacts(
   userPhoneNumberHash: string,
   contacts: string[],
 ): Promise<boolean> {
+  const currentTimestamp = Date.now().toString();
+
   // Add or update the user vertex
   let userResult = await g
     .mergeV(
@@ -43,7 +45,7 @@ async function updateContacts(
     .option(
       onCreate,
       new Map([
-        ["created", Date.now().toString()],
+        ["created", currentTimestamp],
         ["phoneNumberHash", userPhoneNumberHash],
       ]),
     )
@@ -51,7 +53,7 @@ async function updateContacts(
       onMatch,
       new Map([
         ["phoneNumberHash", userPhoneNumberHash],
-        ["updatedAt", Date.now().toString()],
+        ["updatedAt", currentTimestamp],
       ]),
     )
     .next();
@@ -59,10 +61,13 @@ async function updateContacts(
   // Extract user vertex from the result and assert type
   const user = userResult.value as Vertex;
 
-  // Remove existing contacts edges (outgoing only lol)
-  await g.V(user.id).outE("contacts").drop().iterate();
+  if (contacts.length === 0) {
+    // delete all edges and return
+    await g.V(user.id).outE("contacts").drop().iterate();
+    return true;
+  }
 
-  // Add bidirectional edges to all other users who have a phoneNumber that matches my edge phone number
+  // Add or update edges for current contacts
   await g
     .V(user.id)
     .as("currentUser")
@@ -71,13 +76,20 @@ async function updateContacts(
     .has("phoneNumberHash", P.within(contacts))
     .where(P.neq("currentUser"))
     .as("contactUser")
-    .addE("contacts")
+    .mergeE("contacts")
     .from_("currentUser")
-    .property("updatedAt", Date.now().toString())
-    // .select("contactUser")
-    // .addE("contacts")
-    // .to("currentUser")
-    // .property("updatedAt", Date.now().toString())
+    .property(
+      "phoneNumberHash",
+      __.select("contactUser").values("phoneNumberHash"),
+    )
+    .option(
+      onCreate,
+      new Map([
+        ["created", currentTimestamp],
+        ["updatedAt", currentTimestamp],
+      ]),
+    )
+    .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
     .iterate();
 
   return true;
