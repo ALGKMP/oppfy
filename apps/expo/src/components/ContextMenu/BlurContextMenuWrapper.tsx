@@ -1,6 +1,6 @@
 // BlurContextMenuWrapper.tsx
 import React, { ReactNode, useState } from "react";
-import { Dimensions, Modal, StyleSheet } from "react-native";
+import { Dimensions, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
@@ -71,58 +71,44 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
         </Animated.View>
       </GestureDetector>
 
-      <Modal
-        transparent={true}
-        visible={isVisible}
-        animationType="fade"
-        onRequestClose={hideContextMenu}
-      >
-        <GestureDetector gesture={tapGesture}>
-          <Stack flex={1} justifyContent="center" alignItems="center">
-            <BlurView intensity={50} style={styles.blurView} tint="light">
-              <View flex={1} justifyContent="center" margin="$4">
-                {props.children}
-              </View>
-              {/* <Stack style={styles.background} />
+      <Modal transparent={true} visible={isVisible} animationType="fade">
+        {/* <GestureDetector gesture={tapGesture}> */}
+        <BlurView
+          intensity={50}
+          style={styles.blurView}
+          tint="light"
+          onTouchEnd={hideContextMenu}
+        >
+          <YStack flex={1}>
+            <View flex={1} justifyContent="center" margin="$4" gap="$4">
+              {props.children}
               <YStack
-                backgroundColor={theme.background}
-                borderRadius="$4"
-                padding="$4"
-                shadowColor="#000"
-                shadowOffset={{ width: 0, height: 2 }}
-                shadowOpacity={0.2}
-                shadowRadius={3}
-                elevation={5}
-                maxWidth={300}
-                alignSelf="center"
+                borderRadius={"$5"}
+                backgroundColor={"rgba(63, 63, 62, 0.8)"}
+                marginHorizontal="$6"
               >
                 {props.options.map((option, index) => (
-                  <GestureDetector
-                    key={index}
-                    gesture={Gesture.Tap().onEnd(() => {
-                      // runOnJS(option.onPress)();
-                      runOnJS(hideContextMenu)();
-                    })}
-                  >
+                  <TouchableOpacity key={index} onPress={option.onPress}>
                     <XStack
-                      paddingVertical="$2"
-                      borderBottomWidth={
-                        index < props.options.length - 1 ? 1 : 0
-                      }
-                      borderBottomColor="$border"
+                      paddingVertical="$3"
+                      paddingHorizontal="$4"
                       alignItems="center"
+                      justifyContent="space-between"
+                      borderTopWidth={index === 0 ? 0 : 0.3}
+                      borderTopColor="white"
                     >
-                      {option.icon}
-                      <Text marginLeft="$2" fontSize="$6">
+                      <Text color="white" marginLeft="$2" fontSize="$5">
                         {option.label}
                       </Text>
+                      {option.icon}
                     </XStack>
-                  </GestureDetector>
+                  </TouchableOpacity>
                 ))}
-              </YStack> */}
-            </BlurView>
-          </Stack>
-        </GestureDetector>
+              </YStack>
+            </View>
+          </YStack>
+        </BlurView>
+        {/* </GestureDetector> */}
       </Modal>
     </>
   );

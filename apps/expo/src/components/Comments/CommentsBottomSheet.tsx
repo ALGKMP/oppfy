@@ -25,7 +25,12 @@ import BottomSheet, {
   BottomSheetModal,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import { Minus, SendHorizontal, Trash2 } from "@tamagui/lucide-icons";
+import {
+  AlertCircle,
+  Minus,
+  SendHorizontal,
+  Trash2,
+} from "@tamagui/lucide-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
@@ -208,9 +213,16 @@ const CommentsBottomSheet = ({
           options={[
             {
               label: "Delete",
-              icon: <Trash2 />,
+              icon: <Trash2 size={"$1.5"} color="white" />,
               onPress: () => {
                 console.log("Delete");
+              },
+            },
+            {
+              label: "Report",
+              icon: <AlertCircle size={"$1.5"} color="red" />,
+              onPress: () => {
+                console.log("Report");
               },
             },
           ]}
