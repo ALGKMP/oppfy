@@ -191,9 +191,6 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
-      moti:
-        specifier: ^0.28.1
-        version: 0.28.1(react-dom@18.2.0)(react-native-reanimated@3.10.1)(react@18.2.0)
       nativewind:
         specifier: ^4.0.36
         version: 4.0.36(@babel/core@7.24.4)(react-native-reanimated@3.10.1)(react-native-safe-area-context@4.10.1)(react-native-svg@15.2.0)(react-native@0.74.2)(react@18.2.0)(tailwindcss@3.3.5)
@@ -17122,18 +17119,6 @@ packages:
 
   /moti@0.27.5(react-dom@18.2.0)(react-native-reanimated@3.10.1)(react@18.2.0):
     resolution: {integrity: sha512-6PbHgNTzSyipTon57TBm5w3/cKKMZVugq/Ey2YLbZbMLxsmL4uz6zGO0uBcZWkKaVqm9O8LcK+WdGMyNiR2yrg==}
-    peerDependencies:
-      react-native-reanimated: '*'
-    dependencies:
-      framer-motion: 6.5.1(react-dom@18.2.0)(react@18.2.0)
-      react-native-reanimated: 3.10.1(@babel/core@7.24.4)(react-native@0.74.2)(react@18.2.0)
-    transitivePeerDependencies:
-      - react
-      - react-dom
-    dev: false
-
-  /moti@0.28.1(react-dom@18.2.0)(react-native-reanimated@3.10.1)(react@18.2.0):
-    resolution: {integrity: sha512-DRlb/3k5GMgb2HIgPsjsKS7k2TAIcCTSaV4KFb4/J+WqJtPgywTz0O2byPsxNqUHImvDkf04fKXW5PcpXvC9zA==}
     peerDependencies:
       react-native-reanimated: '*'
     dependencies:
