@@ -121,7 +121,7 @@ const FollowingList = () => {
                     onPress={() =>
                       // @ts-expect-error: Experimental typed routes dont support layouts yet
                       router.push({
-                        pathname: "/profile/[profile-id]",
+                        pathname: "/(profile)/profile/[profile-id]",
                         params: { profileId: String(item.profileId) },
                       })
                     }
