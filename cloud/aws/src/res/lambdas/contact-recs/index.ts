@@ -26,6 +26,8 @@ export const handler = async (
     const g = graph.traversal().withRemote(dc);
     const userId = event.pathParameters?.userId!;
 
+    console.log("Querying for recommendations for user", userId);
+
     // tier 1 reccs, all outgoing people within 1 edge
     const tier1 = await g.V(userId).out().id().toList();
 
@@ -33,7 +35,7 @@ export const handler = async (
     const allTier2 = await g.V(userId).in_().id().toList();
 
     // Manually filtering out tier1 IDs from allTier2 using JavaScript array methods
-    const tier2 = allTier2.filter(id => !tier1.includes(id));
+    const tier2 = allTier2.filter((id) => !tier1.includes(id));
 
     const recommendedIds = {
       tier1,
