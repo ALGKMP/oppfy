@@ -231,8 +231,7 @@ const Inbox = () => {
       </View>
     );
 
-  // if (isCountRequestsLoading || isNotificationsLoading) {
-  if (true) {
+  if (isCountRequestsLoading || isNotificationsLoading) {
     return (
       <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
     );
