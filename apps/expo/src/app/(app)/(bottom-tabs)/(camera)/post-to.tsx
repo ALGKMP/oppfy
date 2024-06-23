@@ -9,6 +9,7 @@ import { FlashList } from "@shopify/flash-list";
 import { ArrowBigLeft, UserRoundX } from "@tamagui/lucide-icons";
 import {
   Button,
+  ListItemTitle,
   ScrollView,
   Separator,
   SizableText,
@@ -136,7 +137,7 @@ const PostTo = () => {
 
   const renderContacts = () => (
     <CardContainer>
-      <ListHeader title="Contacts" />
+      <ListItemTitle>Contacts</ListItemTitle>
 
       {visibleContacts.map((contact, index) => (
         <VirtualizedListItem
@@ -167,7 +168,7 @@ const PostTo = () => {
 
   const renderFriends = () => (
     <CardContainer>
-      <ListHeader title="Friends" />
+      <ListItemTitle>Friends</ListItemTitle>
 
       <FlashList
         data={friendItems}
@@ -202,10 +203,7 @@ const PostTo = () => {
         paddingHorizontal="$4"
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={refetch}
-          />
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
         }
       >
         <YStack flex={1} gap="$4">
@@ -258,17 +256,10 @@ const PostTo = () => {
   }
 
   return renderUsersToPostTo();
-  // return <BaseScreenView scrollable></BaseScreenView>;
 };
 
 interface ListHeaderProps {
   title: string;
 }
-
-const ListHeader = ({ title }: ListHeaderProps) => (
-  <SizableText size="$2" theme="alt1">
-    {title}
-  </SizableText>
-);
 
 export default PostTo;
