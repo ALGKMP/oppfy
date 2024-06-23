@@ -236,7 +236,7 @@ const Requests = () => {
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
-      {PLACEHOLDER_DATA.map((item, index) => (
+      {PLACEHOLDER_DATA.map((_, index) => (
         <VirtualizedListItem
           key={index}
           loading
