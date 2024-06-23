@@ -7,13 +7,7 @@ interface CardContainerProps extends ViewProps {
 
 const CardContainer = ({ children, ...props }: CardContainerProps) => {
   return (
-    <View
-      paddingVertical="$2"
-      paddingHorizontal="$3"
-      borderRadius="$6"
-      backgroundColor="$gray2"
-      {...props}
-    >
+    <View padding="$3" borderRadius="$6" backgroundColor="$gray2" {...props}>
       {children}
     </View>
   );
