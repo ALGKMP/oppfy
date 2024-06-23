@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import gremlin from "gremlin";
 
-const {
+/* const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
   process: {
@@ -10,7 +10,16 @@ const {
     merge: { onCreate, onMatch },
     statics: __,
   },
-} = gremlin;
+} = gremlin; */
+
+
+const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
+const Graph = gremlin.structure.Graph;
+const { t, P } = gremlin.process;
+const { onCreate, onMatch } = gremlin.process.merge;
+const __ = gremlin.process.statics;
+
+
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 
