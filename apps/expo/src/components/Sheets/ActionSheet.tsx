@@ -164,8 +164,13 @@ const ActionSheet = ({
                 </YStack>
 
                 {buttonOptions.map((option, index) => (
-                  <View key={index}>
-                    <Separator theme="alt1" />
+                  <View
+                    key={index}
+                    borderTopWidth={index === 0 ? 0 : 0.2}
+                    borderColor="$gray10"
+
+                  >
+                    {/* <Separator theme="alt1" /> */}
                     <Button
                       size="$5"
                       borderTopLeftRadius={0}
