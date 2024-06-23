@@ -1,4 +1,3 @@
-// BlurContextMenuWrapper.tsx
 import React, { ReactNode, useState } from "react";
 import { Dimensions, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
