@@ -116,46 +116,79 @@ const PostTo = () => {
 
   const isLoading = isLoadingFriends || isLoadingContacts;
 
-  if (isLoading) {
-    return (
-      <BaseScreenView scrollable>
-        <CardContainer>
-          <FlashList
-            data={PLACEHOLDER_DATA}
-            ItemSeparatorComponent={Separator}
-            estimatedItemSize={75}
-            showsVerticalScrollIndicator={false}
-            renderItem={() => (
-              <VirtualizedListItem
-                loading
-                showSkeletons={{
-                  imageUrl: true,
-                  title: true,
-                  subtitle: true,
-                }}
-              />
-            )}
+  const renderLoadingSkeletons = () => {
+    <BaseScreenView scrollable>
+      <CardContainer>
+        {PLACEHOLDER_DATA.map((_, index) => (
+          <VirtualizedListItem
+            key={index}
+            loading
+            showSkeletons={{
+              imageUrl: true,
+              title: true,
+              subtitle: true,
+            }}
           />
-        </CardContainer>
-      </BaseScreenView>
-    );
-  }
+        ))}
+      </CardContainer>
+    </BaseScreenView>;
+  };
 
-  if (itemCount === 0) {
-    return (
-      <BaseScreenView>
-        <View flex={1} justifyContent="center" bottom={headerHeight}>
-          <EmptyPlaceholder
-            title="Nowhere to post"
-            subtitle="No friends yet, once you’ve added someone they’ll show up here."
-            icon={<UserRoundX />}
+  const renderContacts = () => (
+    <CardContainer>
+      <ListHeader title="Contacts" />
+
+      {visibleContacts.map((contact, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading={false}
+          title={contact.name}
+          subtitle={contact.phoneNumbers?.[0]?.number}
+          imageUrl={
+            contact.imageAvailable ? contact.image?.uri : DefaultProfilePicture
+          }
+          // onPress={() => onUserSelected(contact.id)}
+        />
+      ))}
+
+      {visibleContacts.length < contacts.length && (
+        <>
+          <Spacer size="$2" />
+          <Button
+            onPress={showMoreContacts}
+            disabled={visibleContacts.length >= contacts.length}
+          >
+            Show more
+          </Button>
+        </>
+      )}
+    </CardContainer>
+  );
+
+  const renderFriends = () => (
+    <CardContainer>
+      <ListHeader title="Friends" />
+
+      <FlashList
+        data={friendItems}
+        ItemSeparatorComponent={Separator}
+        estimatedItemSize={75}
+        onEndReached={handleOnEndReached}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <VirtualizedListItem
+            loading={false}
+            title={item.username}
+            subtitle={item.name}
+            imageUrl={item.profilePictureUrl}
+            onPress={() => onUserSelected(item.userId)}
           />
-        </View>
-      </BaseScreenView>
-    );
-  }
+        )}
+      />
+    </CardContainer>
+  );
 
-  return (
+  const renderUsersToPostTo = () => (
     <BaseScreenView
       paddingBottom={0}
       paddingHorizontal={0}
@@ -170,62 +203,14 @@ const PostTo = () => {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isLoading || isLoadingContacts}
+            refreshing={isLoading}
             onRefresh={refetch}
           />
         }
       >
         <YStack flex={1} gap="$4">
-          <CardContainer>
-            <ListHeader title="Contacts" />
-
-            {visibleContacts.map((contact, index) => (
-              <VirtualizedListItem
-                key={index}
-                loading={false}
-                title={contact.name}
-                subtitle={contact.phoneNumbers?.[0]?.number}
-                imageUrl={
-                  contact.imageAvailable
-                    ? contact.image?.uri
-                    : DefaultProfilePicture
-                }
-                // onPress={() => onUserSelected(contact.id)}
-              />
-            ))}
-
-            {visibleContacts.length < contacts.length && (
-              <>
-                <Spacer size="$2" />
-                <Button
-                  onPress={showMoreContacts}
-                  disabled={visibleContacts.length >= contacts.length}
-                >
-                  Show more
-                </Button>
-              </>
-            )}
-          </CardContainer>
-
-          <CardContainer>
-            <FlashList
-              data={friendItems}
-              ItemSeparatorComponent={Separator}
-              estimatedItemSize={75}
-              onEndReached={handleOnEndReached}
-              showsVerticalScrollIndicator={false}
-              ListHeaderComponent={<ListHeader title="Friends" />}
-              renderItem={({ item }) => (
-                <VirtualizedListItem
-                  loading={false}
-                  title={item.username}
-                  subtitle={item.name}
-                  imageUrl={item.profilePictureUrl}
-                  onPress={() => onUserSelected(item.userId)}
-                />
-              )}
-            />
-          </CardContainer>
+          {contacts.length > 0 && renderContacts()}
+          {itemCount > 0 && renderFriends()}
         </YStack>
       </ScrollView>
 
@@ -251,6 +236,29 @@ const PostTo = () => {
       </XStack>
     </BaseScreenView>
   );
+
+  const renderNoResults = () => (
+    <BaseScreenView>
+      <View flex={1} justifyContent="center" bottom={headerHeight}>
+        <EmptyPlaceholder
+          title="Nowhere to post"
+          subtitle="No friends yet, once you’ve added someone they’ll show up here."
+          icon={<UserRoundX />}
+        />
+      </View>
+    </BaseScreenView>
+  );
+
+  if (isLoading) {
+    return renderLoadingSkeletons();
+  }
+
+  if (itemCount === 0 && contacts.length === 0) {
+    return renderNoResults();
+  }
+
+  return renderUsersToPostTo();
+  // return <BaseScreenView scrollable></BaseScreenView>;
 };
 
 interface ListHeaderProps {
