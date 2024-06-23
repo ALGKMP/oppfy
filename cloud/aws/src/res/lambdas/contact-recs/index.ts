@@ -18,24 +18,31 @@ const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  let dc: any;
-  let g: gremlin.process.GraphTraversalSource;
-
-  console.log("Connecting to Neptune", NEPTUNE_ENDPOINT, NEPTUNE_PORT);
-
   try {
     const graph = new Graph();
-    dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
-    g = graph.traversal().withRemote(dc);
+    const dc = new DriverRemoteConnection(
+      `wss://${NEPTUNE_ENDPOINT}/gremlin`,
+      {},
+    );
+    const g = graph.traversal().withRemote(dc);
+    const userId = event.pathParameters?.userId!;
 
-    console.log("connected");
+    const reccomendedIds = [];
 
-    // get all vertices
-    const result = await g.V().toList();
+    // tier 1 reccs, all outgoing people within 1 edge
+    const tier1 = await g.V(userId).out().id().toList();
+
+    // tier 2 reccs, all incoming people within 1 edge not in tier 1
+    const tier2 = await g.V(userId).in_().id().where(P.without(tier1)).toList();
+
+    reccomendedIds.push({
+      tier1,
+      tier2,
+    });
 
     return {
       statusCode: 200,
-      body: result.toString(),
+      body: JSON.stringify(reccomendedIds),
     };
   } catch (error) {
     console.error("Error during execution", error);
@@ -45,10 +52,5 @@ export const handler = async (
         message: "Internal server error",
       }),
     };
-  } finally {
-    if (dc) {
-      dc.close();
-      console.log("Remote connection closed");
-    }
   }
 };
