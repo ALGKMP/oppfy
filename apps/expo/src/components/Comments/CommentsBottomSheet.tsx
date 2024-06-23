@@ -6,10 +6,18 @@ import React, {
   useState,
 } from "react";
 import { Dimensions, Modal, TouchableOpacity } from "react-native";
+import { panGestureHandlerCustomNativeProps } from "react-native-gesture-handler/lib/typescript/handlers/PanGestureHandler";
 import Animated, {
+  BounceIn,
+  BounceInDown,
+  Easing,
+  FadeIn,
+  FadeInDown,
   interpolate,
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, {
@@ -54,6 +62,9 @@ const CommentsBottomSheet = ({
     );
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
+  const [optimisticUpdateCommentId, setOptimisticUpdateCommentId] = useState<
+    number | null
+  >(null);
 
   const profile = utils.profile.getFullProfileSelf.getData();
 
@@ -95,6 +106,9 @@ const CommentsBottomSheet = ({
       // Cancel any outgoing refetches to avoid overwriting optimistic update
       await utils.post.paginateComments.cancel();
 
+      const temporaryId = Math.random();
+      setOptimisticUpdateCommentId(temporaryId);
+
       // Snapshot the previous value
       const prevData = utils.post.paginateComments.getInfiniteData();
 
@@ -104,19 +118,21 @@ const CommentsBottomSheet = ({
         return {
           ...prevData,
           pages: prevData.pages.map((page, index) => {
-            if (index === prevData.pages.length - 1) {
+            if (index === 0) {
               return {
                 ...page,
                 items: [
-                  ...page.items,
                   {
                     ...newComment,
                     username: profile?.username ?? "User",
                     createdAt: new Date(),
                     userId: profile?.userId ?? "temp-id",
-                    commentId: Math.random(), // Temporary ID
-                    profilePictureUrl: profile?.profilePictureUrl ?? "https://example.com/avatar.jpg",
+                    commentId: temporaryId, // Temporary ID
+                    profilePictureUrl:
+                      profile?.profilePictureUrl ??
+                      "https://example.com/avatar.jpg",
                   },
+                  ...page.items,
                 ],
               };
             }
@@ -138,6 +154,7 @@ const CommentsBottomSheet = ({
     onSettled: () => {
       // Sync with server once mutation has settled
       utils.post.paginateComments.invalidate();
+      setOptimisticUpdateCommentId(null); // Reset new comment ID after server sync
     },
   });
 
@@ -167,15 +184,6 @@ const CommentsBottomSheet = ({
     [commentsData],
   );
 
-  useEffect(() => {
-    // mape through all the pages and log the items
-    commentsData?.pages.forEach((page) => {
-      page.items.forEach((item) => {
-        console.log(item);
-      });
-    });
-  }, [commentsData]);
-
   const [inputValue, setInputValue] = useState("");
 
   const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
@@ -186,29 +194,37 @@ const CommentsBottomSheet = ({
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
-  const renderComment = useCallback(
-    ({ item }: { item: z.infer<typeof sharedValidators.media.comment> }) => (
-      <View padding={"$3.5"}>
-        <XStack gap="$3" alignItems="center">
-          <Avatar circular size="$4">
-            <Avatar.Image
-              accessibilityLabel="Cam"
-              src={item.profilePictureUrl}
-            />
-            <Avatar.Fallback backgroundColor="$blue10" />
-          </Avatar>
-          <YStack gap={"$2"}>
-            <XStack gap={"$2"}>
-              <Text fontWeight={"bold"}>{item.username}</Text>
-              <Text color={"$gray10"}>
-                {timeAgo.format(new Date(item.createdAt))}
-              </Text>
+  const Comment = useCallback(
+    ({
+      item,
+      isNew = false,
+    }: {
+      item: z.infer<typeof sharedValidators.media.comment>;
+      isNew?: boolean;
+    }) => {
+      return (
+          <View padding={"$3.5"}>
+            <XStack gap="$3" alignItems="center">
+              <Avatar circular size="$4">
+                <Avatar.Image
+                  accessibilityLabel="Cam"
+                  src={item.profilePictureUrl}
+                />
+                <Avatar.Fallback backgroundColor="$blue10" />
+              </Avatar>
+              <YStack gap={"$2"}>
+                <XStack gap={"$2"}>
+                  <Text fontWeight={"bold"}>{item.username}</Text>
+                  <Text color={"$gray10"}>
+                    {timeAgo.format(new Date(item.createdAt))}
+                  </Text>
+                </XStack>
+                <Text>{item.body}</Text>
+              </YStack>
             </XStack>
-            <Text>{item.body}</Text>
-          </YStack>
-        </XStack>
-      </View>
-    ),
+          </View>
+      );
+    },
     [],
   );
 
@@ -268,10 +284,17 @@ const CommentsBottomSheet = ({
               </View>
             ) : (
               <BottomSheetFlatList
+                onEndReached={async () => {
+                  await fetchNextPageComments();
+                }}
                 scrollEnabled={true}
                 data={comments ?? []}
-                keyExtractor={(i) => i.commentId.toString()}
-                renderItem={renderComment}
+                renderItem={({ item }) => (
+                  <Comment
+                    item={item}
+                    isNew={item.commentId === optimisticUpdateCommentId}
+                  />
+                )}
                 contentContainerStyle={{ backgroundColor: "#282828" }}
               />
             )
@@ -345,3 +368,4 @@ const CommentsBottomSheet = ({
 };
 
 export default CommentsBottomSheet;
+ 
