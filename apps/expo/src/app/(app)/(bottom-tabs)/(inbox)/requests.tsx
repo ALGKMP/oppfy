@@ -1,7 +1,15 @@
 import React, { useMemo } from "react";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { Button, Separator, Spacer, Text, View, YStack } from "tamagui";
+import {
+  Button,
+  ListItemTitle,
+  Separator,
+  Spacer,
+  Text,
+  View,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -247,7 +255,7 @@ const Requests = () => {
 
   const renderFriendRequests = () => (
     <CardContainer>
-      <ListHeader title="FRIEND REQUESTS" />
+      <ListItemTitle>Friend Requests</ListItemTitle>
 
       {friendRequestItems.map((item, index) => (
         <VirtualizedListItem
