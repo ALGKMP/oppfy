@@ -25,7 +25,12 @@ import BottomSheet, {
   BottomSheetModal,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import { Minus, SendHorizontal } from "@tamagui/lucide-icons";
+import {
+  AlertCircle,
+  Minus,
+  SendHorizontal,
+  Trash2,
+} from "@tamagui/lucide-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
@@ -34,6 +39,8 @@ import z from "zod";
 import { sharedValidators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
+import { BlurContextMenuWrapper } from "../ContextMenu";
+import ActionSheet, { ButtonOption } from "../Sheets/ActionSheet";
 
 interface CommentsModalProps {
   postId: number;
@@ -194,6 +201,63 @@ const CommentsBottomSheet = ({
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
+  const buttonOptions = [
+    {
+      text: "Violent or abusive",
+      textProps: {
+        color: "$blue9",
+      },
+      onPress: () => {
+        console.log("Report");
+      },
+    },
+    {
+      text: "Sexually explicit or predatory",
+      textProps: {
+        color: "$blue9",
+      },
+      onPress: () => {
+        console.log("Report");
+      },
+    },
+    {
+      text: "Hate, harassment, or bullying",
+      textProps: {
+        color: "$blue9",
+      },
+      onPress: () => {
+        console.log("Report");
+      },
+    },
+    {
+      text: "Suicide and self-harm",
+      textProps: {
+        color: "$blue9",
+      },
+      onPress: () => {
+        console.log("Report");
+      },
+    },
+    {
+      text: "Scam or spam",
+      textProps: {
+        color: "$blue9",
+      },
+      onPress: () => {
+        console.log("Report");
+      },
+    },
+    {
+      text: "Other",
+      textProps: {
+        color: "$blue9",
+      },
+      onPress: () => {
+        console.log("Report");
+      },
+    },
+  ] satisfies ButtonOption[];
+
   const Comment = useCallback(
     ({
       item,
@@ -202,8 +266,35 @@ const CommentsBottomSheet = ({
       item: z.infer<typeof sharedValidators.media.comment>;
       isNew?: boolean;
     }) => {
+      const [isReportModalVisible, setIsReportModalVisible] = useState(false);
       return (
-          <View padding={"$3.5"}>
+        <BlurContextMenuWrapper
+          options={[
+            {
+              label: (
+                <Text color="white" marginLeft="$2" fontSize="$5">
+                  Delete
+                </Text>
+              ),
+              icon: <Trash2 size={"$1.5"} color="white" />,
+              onPress: () => {
+                console.log("Delete");
+              },
+            },
+            {
+              label: (
+                <Text color="red" marginLeft="$2" fontSize="$5">
+                  Report
+                </Text>
+              ),
+              icon: <AlertCircle size={"$1.5"} color="red" />,
+              onPress: () => {
+                setIsReportModalVisible(true);
+              },
+            },
+          ]}
+        >
+          <View padding={"$3.5"} backgroundColor={"$gray4"} borderRadius={"$7"}>
             <XStack gap="$3" alignItems="center">
               <Avatar circular size="$4">
                 <Avatar.Image
@@ -223,6 +314,14 @@ const CommentsBottomSheet = ({
               </YStack>
             </XStack>
           </View>
+          <ActionSheet
+            title={"Report"}
+            subtitle={"Are you sure you want to report this comment?"}
+            buttonOptions={buttonOptions}
+            isVisible={isReportModalVisible}
+            onCancel={() => setIsReportModalVisible(false)}
+          />
+        </BlurContextMenuWrapper>
       );
     },
     [],
@@ -368,4 +467,3 @@ const CommentsBottomSheet = ({
 };
 
 export default CommentsBottomSheet;
- 

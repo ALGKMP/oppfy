@@ -45,7 +45,7 @@ import z from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { CommentsBottomSheet } from "~/components/Comments";
+import { CommentsBottomSheet } from "~/components/BottomSheets";
 import { api } from "~/utils/api";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
