@@ -56,7 +56,7 @@ async function updateContacts(
         ["phoneNumberHash", userPhoneNumberHash],
       ]),
     )
-    .option(onMatch, new Map([["phoneNumberHash", userPhoneNumberHash]]))
+    .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
     .next();
 
   // Extract user vertex from the result and assert type
@@ -78,7 +78,13 @@ async function updateContacts(
     )
     .property(
       "isFollowing",
-      followingIds.has(__.select("contactUser").id().toString()),
+      __.choose(
+        __.select("contactUser")
+          .id()
+          .is(P.within(Array.from(followingIds))),
+        __.constant(true),
+        __.constant(false),
+      ),
     )
     .iterate();
 
