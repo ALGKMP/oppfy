@@ -61,10 +61,36 @@ async function updateContacts(
   // Extract user vertex from the result and assert type
   const user = userResult.value as Vertex;
 
-  // Get current contacts
+  // connect to all users whos phone number is in the contacts list
+  for (const contactPhoneNumberHash of contacts) {
+    const contactUserResult = await g
+      .V()
+      .hasLabel("User")
+      .has("phoneNumberHash", contactPhoneNumberHash)
+      .next();
+
+    if (contactUserResult.value) {
+      const contactUser = contactUserResult.value as Vertex;
+      const edgeId = `${user.id}_${contactUser.id}`;
+      console.log("adding edge", edgeId);
+
+      await g
+        .mergeE(
+          new Map([
+            [t.label, "contact"],
+            [t.id, edgeId],
+          ]),
+        )
+        .option(onCreate, new Map([["createdAt", currentTimestamp]]))
+        .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
+        .next();
+    }
+  }
+
+  /*   // Get current contacts
   const currentContacts = (await g
     .V(user.id)
-    .outE("contacts")
+    .outE("constact")
     .id()
     .toList()) as string[];
 
@@ -92,8 +118,6 @@ async function updateContacts(
             [t.id, edgeId],
           ]),
         )
-        .from_(user.id)
-        .to(contactUser.id)
         .option(onCreate, new Map([["createdAt", currentTimestamp]]))
         .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
         .next();
@@ -107,7 +131,7 @@ async function updateContacts(
   if (contactsToRemove.length > 0) {
     await g.E(contactsToRemove).drop().iterate();
   }
-
+ */
   return true;
 }
 
