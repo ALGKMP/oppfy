@@ -1,18 +1,22 @@
-import { useMemo } from "react";
-import { useHeaderHeight } from "@react-navigation/elements";
+import React, { useMemo } from "react";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Button, Separator, SizableText, View } from "tamagui";
+import { Button, Input, SizableText, View, YStack } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
-import { api } from "~/utils/api";
+import useSearch from "~/hooks/useSearch";
+import { api, RouterOutputs } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+
+type BlockedUserItem =
+  RouterOutputs["block"]["paginateBlockedUsers"]["items"][0];
 
 const BlockedUsers = () => {
   const utils = api.useUtils();
-  const headerHeight = useHeaderHeight();
 
   const unblockUser = api.block.unblockUser.useMutation({
     onMutate: async (newData) => {
@@ -55,16 +59,30 @@ const BlockedUsers = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    refetch,
   } = api.block.paginateBlockedUsers.useInfiniteQuery(
     {
       pageSize: 20,
     },
     {
-      getNextPageParam: (lastPage) => {
-        return lastPage.nextCursor;
-      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  const blockedUsersItems = useMemo(() => {
+    return blockedUsersData?.pages.flatMap((page) => page.items) ?? [];
+  }, [blockedUsersData]);
+
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
+    data: blockedUsersItems,
+    keys: ["name", "username"],
+  });
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
 
   const handleUnblock = async (blockedUserId: string) => {
     await unblockUser.mutateAsync({
@@ -72,94 +90,100 @@ const BlockedUsers = () => {
     });
   };
 
-  const itemCount = useMemo(() => {
-    if (blockedUsersData === undefined) return 0;
-    return blockedUsersData.pages.reduce(
-      (total, page) => total + page.items.length,
-      0,
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((_, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            button: true,
+          }}
+        />
+      ))}
+    </CardContainer>
+  );
+
+  const renderListItem = (item: BlockedUserItem) => (
+    <VirtualizedListItem
+      loading={false}
+      title={item.username}
+      subtitle={item.name}
+      imageUrl={item.profilePictureUrl}
+      button={
+        <ActionSheet
+          title={`Unblock ${item.username}`}
+          subtitle={`Are you sure you want to unblock ${item.username}?`}
+          imageUrl={item.profilePictureUrl}
+          trigger={
+            <Button size="$3" icon={<UserRoundX size="$1" />}>
+              Unblock
+            </Button>
+          }
+          buttonOptions={[
+            {
+              text: "Unblock",
+              textProps: { color: "$red9" },
+              onPress: () => void handleUnblock(item.userId),
+            },
+          ]}
+        />
+      }
+    />
+  );
+
+  const renderBlockedUsers = () => (
+    <CardContainer>
+      <FlashList
+        data={filteredItems}
+        onRefresh={refetch}
+        refreshing={isLoading}
+        estimatedItemSize={75}
+        onEndReached={handleOnEndReached}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => renderListItem(item)}
+      />
+    </CardContainer>
+  );
+
+  const renderNoResults = () => (
+    <View flex={1} justifyContent="center">
+      <EmptyPlaceholder
+        title="No results"
+        subtitle="No blocked users found."
+        icon={<UserRoundX />}
+      />
+    </View>
+  );
+
+  if (isLoading) {
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
     );
-  }, [blockedUsersData]);
+  }
 
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 20 }, () => null);
-  }, []);
-
-  const blockedUsersItems = useMemo(() => {
-    return blockedUsersData?.pages.flatMap((page) => page.items);
-  }, [blockedUsersData]);
-
-  const handleOnEndReached = async () => {
-    if (!isFetchingNextPage && hasNextPage) {
-      console.log("Fetching next page");
-      await fetchNextPage();
-    }
-  };
+  if (blockedUsersItems.length === 0) {
+    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
+  }
 
   return (
-    <BaseScreenView paddingBottom={0}>
-      {isLoading || itemCount ? (
-        <FlashList
-          data={isLoading ? placeholderData : blockedUsersItems}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          onEndReached={handleOnEndReached}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <SizableText size="$2" theme="alt1" marginBottom="$2">
-              BLOCKED USERS
-            </SizableText>
-          }
-          renderItem={({ item }) => (
-            <View>
-              {item === null ? (
-                <VirtualizedListItem
-                  loading
-                  showSkeletons={{
-                    imageUrl: true,
-                    title: true,
-                    subtitle: true,
-                    button: true,
-                  }}
-                />
-              ) : (
-                <VirtualizedListItem
-                  loading={false}
-                  imageUrl={item.profilePictureUrl}
-                  title={item.username}
-                  subtitle={item.name}
-                  button={
-                    <ActionSheet
-                      title={`Unblock ${item.username}`}
-                      subtitle={`Are you sure you want to unblock ${item.username}?`}
-                      imageUrl={item.profilePictureUrl}
-                      trigger={
-                        <Button size="$3" icon={<UserRoundX size="$1" />}>
-                          Unblock
-                        </Button>
-                      }
-                      buttonOptions={[
-                        {
-                          text: "Unblock",
-                          textProps: { color: "$red9" },
-                          onPress: () => void handleUnblock(item.userId),
-                        },
-                      ]}
-                    />
-                  }
-                />
-              )}
-            </View>
-          )}
+    <BaseScreenView scrollable>
+      <YStack gap="$4">
+        <Input
+          placeholder="Search blocked users..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
-      ) : (
-        <View flex={1} justifyContent="center" bottom={headerHeight}>
-          <EmptyPlaceholder
-            title="Blocked Users"
-            subtitle="If you block someone, you'll be able to manage them here."
-            icon={<UserRoundX />}
-          />
-        </View>
-      )}
+
+        {filteredItems.length > 0 ? (
+          renderBlockedUsers()
+        ) : (
+          <SizableText lineHeight={0}>No Users Found</SizableText>
+        )}
+      </YStack>
     </BaseScreenView>
   );
 };
