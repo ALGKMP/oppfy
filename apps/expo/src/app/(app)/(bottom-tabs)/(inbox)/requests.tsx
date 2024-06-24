@@ -1,15 +1,6 @@
 import React, { useMemo } from "react";
 import { useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
-import {
-  Button,
-  ListItemTitle,
-  Separator,
-  Spacer,
-  Text,
-  View,
-  YStack,
-} from "tamagui";
+import { Button, ListItemTitle, Spacer, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -267,11 +258,11 @@ const Requests = () => {
           button={{
             text: "Accept",
             theme: "blue",
-            onPress: () => onAcceptFriendRequest(item.userId),
+            onPress: () => void onAcceptFriendRequest(item.userId),
           }}
           button2={{
             text: "Decline",
-            onPress: () => onDeclineFriendRequest(item.userId),
+            onPress: () => void onDeclineFriendRequest(item.userId),
           }}
           onPress={() => onUserSelected(item.profileId)}
         />
@@ -304,11 +295,11 @@ const Requests = () => {
           imageUrl={item.profilePictureUrl}
           button={{
             text: "Accept",
-            onPress: () => onAcceptFollowRequest(item.userId),
+            onPress: () => void onAcceptFollowRequest(item.userId),
           }}
           button2={{
             text: "Decline",
-            onPress: () => onDeclineFollowRequest(item.userId),
+            onPress: () => void onDeclineFollowRequest(item.userId),
           }}
           onPress={() => onUserSelected(item.profileId)}
         />
