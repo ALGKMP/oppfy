@@ -1,29 +1,13 @@
-import type { FunctionComponent } from "react";
 import React, { useMemo } from "react";
-import {
-  ImageSourcePropType,
-  StyleProp,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import type { ImageSourcePropType } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import debounce from "lodash/debounce";
 import type {
-  SizeTokens,
-  StackProps,
-  ThemeName,
-  ViewProps,
-  XStackProps,
-} from "tamagui";
-import {
-  Avatar,
   ButtonProps as BaseButtonProps,
-  Button,
-  SizableText,
-  Spacer,
-  XStack,
-  YStack,
+  SizeTokens,
+  ViewProps,
 } from "tamagui";
+import { Avatar, Button, SizableText, Spacer, XStack, YStack } from "tamagui";
 
 import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "../StatusRenderer";
@@ -44,14 +28,18 @@ export interface ButtonProps extends BaseButtonProps {
   text: string;
 }
 
+const isButtonProps = (
+  button: ButtonProps | React.ReactNode,
+): button is ButtonProps => typeof button === "object";
+
 interface LoadedProps {
   loading: false;
   imageUrl?: string | ImageSourcePropType;
   title?: string;
   subtitle?: string;
   subtitle2?: string;
-  button?: ButtonProps;
-  button2?: ButtonProps;
+  button?: ButtonProps | React.ReactElement;
+  button2?: ButtonProps | React.ReactElement;
 }
 
 type VirtualizedListItemProps = (LoadingProps | LoadedProps) & {
@@ -71,27 +59,27 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
   );
 
   const shouldRenderProfilePicture =
-    (props.loading && props.showSkeletons?.imageUrl) ||
+    (props.loading && props.showSkeletons?.imageUrl) ??
     (!props.loading && props.imageUrl);
 
   const shouldRenderTitle =
-    (props.loading && props.showSkeletons?.title) ||
+    (props.loading && props.showSkeletons?.title) ??
     (!props.loading && props.title);
 
   const shouldRenderSubtitle =
-    (props.loading && props.showSkeletons?.subtitle) ||
+    (props.loading && props.showSkeletons?.subtitle) ??
     (!props.loading && props.subtitle);
 
   const shouldRenderSubtitle2 =
-    (props.loading && props.showSkeletons?.subtitle2) ||
+    (props.loading && props.showSkeletons?.subtitle2) ??
     (!props.loading && props.subtitle2);
 
   const shouldRenderButton =
-    (props.loading && props.showSkeletons?.button) ||
+    (props.loading && props.showSkeletons?.button) ??
     (!props.loading && props.button);
 
   const shouldRenderButton2 =
-    (props.loading && props.showSkeletons?.button2) ||
+    (props.loading && props.showSkeletons?.button2) ??
     (!props.loading && props.button2);
 
   const isTwoButtons = shouldRenderButton && shouldRenderButton2;
@@ -148,7 +136,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               }
               loadingComponent={<Skeleton width={100} height={18} radius={4} />}
               successComponent={(subtitle) => (
-                <SizableText theme="alt1" size={"$3"} lineHeight={0}>
+                <SizableText theme="alt1" size="$3" lineHeight={0}>
                   {subtitle}
                 </SizableText>
               )}
@@ -166,7 +154,7 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
               }
               loadingComponent={<Skeleton width={100} height={16} radius={4} />}
               successComponent={(subtitle2) => (
-                <SizableText theme="alt1" size={"$2"} lineHeight={0}>
+                <SizableText theme="alt1" size="$2" lineHeight={0}>
                   {subtitle2}
                 </SizableText>
               )}
@@ -185,19 +173,21 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                   radius={10}
                 />
               }
-              successComponent={(customButtonProps) => (
-                <Button
-                  {...defaultButtonProps}
-                  {...customButtonProps}
-                  onPress={
-                    customButtonProps.onPress
-                      ? debounce(customButtonProps.onPress, 300)
-                      : undefined
-                  }
-                >
-                  {customButtonProps.text}
-                </Button>
-              )}
+              successComponent={(button) =>
+                isButtonProps(button) ? (
+                  <Button
+                    {...defaultButtonProps}
+                    {...button}
+                    onPress={
+                      button.onPress ? debounce(button.onPress, 300) : undefined
+                    }
+                  >
+                    {button.text}
+                  </Button>
+                ) : (
+                  button
+                )
+              }
             />
           )}
 
@@ -211,19 +201,23 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
                   radius={10}
                 />
               }
-              successComponent={(customButtonProps) => (
-                <Button
-                  {...defaultButtonProps}
-                  {...customButtonProps}
-                  onPress={
-                    customButtonProps.onPress
-                      ? debounce(customButtonProps.onPress, 300)
-                      : undefined
-                  }
-                >
-                  {customButtonProps.text}
-                </Button>
-              )}
+              successComponent={(button2) =>
+                isButtonProps(button2) ? (
+                  <Button
+                    {...defaultButtonProps}
+                    {...button2}
+                    onPress={
+                      button2.onPress
+                        ? debounce(button2.onPress, 300)
+                        : undefined
+                    }
+                  >
+                    {button2.text}
+                  </Button>
+                ) : (
+                  button2
+                )
+              }
             />
           )}
         </XStack>
