@@ -38,7 +38,7 @@ const Search = () => {
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
-      {PLACEHOLDER_DATA.map((item, index) => (
+      {PLACEHOLDER_DATA.map((_, index) => (
         <VirtualizedListItem
           key={index}
           loading
@@ -90,26 +90,20 @@ const Search = () => {
     </CardContainer>
   );
 
-  const renderNoResults = () => (
-    <EmptyPlaceholder
-      title="No results found."
-      subtitle="Try searching for another username."
-      icon={<UserRoundX />}
-    />
-  );
-
   return (
     <BaseScreenView scrollable>
       <YStack gap="$4">
         <Input placeholder="Search by username" onChangeText={performSearch} />
         <View>
-          {!searchTerm
-            ? renderRecommendations()
-            : isLoading
-              ? renderLoadingSkeletons()
-              : searchResults.length
-                ? renderSearchResults()
-                : renderNoResults()}
+          {!searchTerm ? (
+            renderRecommendations()
+          ) : isLoading ? (
+            renderLoadingSkeletons()
+          ) : searchResults.length ? (
+            renderSearchResults()
+          ) : (
+            <SizableText lineHeight={0}>No Users Found</SizableText>
+          )}
         </View>
       </YStack>
     </BaseScreenView>
