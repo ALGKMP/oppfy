@@ -204,6 +204,16 @@ export class FollowRepository {
   }
 
   @handleDatabaseErrors
+  async getAllFollowingIds(forUserId: string) {
+    const following = await this.db
+      .select({ userId: schema.follower.recipientId })
+      .from(schema.follower)
+      .where(eq(schema.follower.senderId, forUserId));
+
+    return following.map((f) => f.userId);
+  }
+
+  @handleDatabaseErrors
   async paginateFollowingSelf(
     forUserId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
