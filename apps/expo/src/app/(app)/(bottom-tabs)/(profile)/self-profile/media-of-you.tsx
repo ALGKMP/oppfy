@@ -30,12 +30,10 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import {
-  AlertCircle,
   Heart,
-  Minus,
-  Send,
+  Menu,
+  MoreHorizontal,
   SendHorizontal,
-  Trash2,
 } from "@tamagui/lucide-icons";
 import { debounce, throttle } from "lodash";
 import { Skeleton } from "moti/skeleton";
@@ -54,6 +52,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
 import { BlurContextMenuWrapper } from "~/components/ContextMenu";
+import { ReportActionSheet } from "~/components/Sheets";
 import { api } from "~/utils/api";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -69,6 +68,8 @@ const PostItem = (props: PostItemProps) => {
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
+
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
   const utils = api.useUtils();
   const profile = utils.profile.getFullProfileSelf.getData();
@@ -219,54 +220,67 @@ const PostItem = (props: PostItemProps) => {
         </View>
       </GestureDetector>
       <XStack
-        gap={"$2.5"}
+        flex={1}
         position="absolute"
         top={10}
         left={10}
-        justifyContent="flex-start"
+        width={"95%"}
+        justifyContent="space-between"
         alignContent="center"
       >
-        <Avatar circular size="$5">
-          <Avatar.Image
-            accessibilityLabel="Cam"
-            src={profile?.profilePictureUrl ?? ""}
-          />
-          <Avatar.Fallback backgroundColor="$blue10" />
-        </Avatar>
-        <YStack gap={"$1"} justifyContent="center">
-          <TouchableOpacity>
-            <SizableText
-              size={"$3"}
-              lineHeight={14}
-              margin={0}
-              padding={0}
-              shadowRadius={3}
-              shadowOpacity={0.5}
-              fontWeight={"bold"}
-            >
-              {profile?.username ?? "@AuthorUsername"}
-            </SizableText>
-          </TouchableOpacity>
-          <XStack gap={"$1"} alignItems="center">
-            <SizableText size={"$3"} lineHeight={15} marginTop={0} padding={0}>
-              📸
-            </SizableText>
-            <SizableText size={"$2"} lineHeight={15} color={"$gray2"}>
-              posted by:
-            </SizableText>
-
+        <XStack gap={"$2.5"}>
+          <Avatar circular size="$5">
+            <Avatar.Image
+              accessibilityLabel="Cam"
+              src={profile?.profilePictureUrl ?? ""}
+            />
+            <Avatar.Fallback backgroundColor="$blue10" />
+          </Avatar>
+          <YStack gap={"$1"} justifyContent="center">
             <TouchableOpacity>
               <SizableText
-                size={"$2"}
-                lineHeight={15}
+                size={"$3"}
+                lineHeight={14}
+                margin={0}
+                padding={0}
+                shadowRadius={3}
+                shadowOpacity={0.5}
                 fontWeight={"bold"}
-                color={"$blue9"}
               >
-                {profile?.username ?? "@RecipientUsername"}
+                {profile?.username ?? "@AuthorUsername"}
               </SizableText>
             </TouchableOpacity>
-          </XStack>
-        </YStack>
+            <XStack gap={"$1"} alignItems="center">
+              <SizableText
+                size={"$3"}
+                lineHeight={15}
+                marginTop={0}
+                padding={0}
+              >
+                📸
+              </SizableText>
+              <SizableText size={"$2"} lineHeight={15} color={"$gray2"}>
+                posted by:
+              </SizableText>
+
+              <TouchableOpacity>
+                <SizableText
+                  size={"$2"}
+                  lineHeight={15}
+                  fontWeight={"bold"}
+                  color={"$blue9"}
+                >
+                  {profile?.username ?? "@RecipientUsername"}
+                </SizableText>
+              </TouchableOpacity>
+            </XStack>
+          </YStack>
+        </XStack>
+        <View justifyContent="center" alignItems="center">
+          <TouchableOpacity onPress={() => setIsReportModalVisible(true)}>
+            <MoreHorizontal size={24} color="$gray12" />
+          </TouchableOpacity>
+        </View>
       </XStack>
 
       {/* Under Post */}
@@ -377,6 +391,13 @@ const PostItem = (props: PostItemProps) => {
         postId={post.postId}
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
+      />
+      <ReportActionSheet
+        title="Report Post"
+        subtitle="Select reason"
+        postId={post.postId}
+        isVisible={isReportModalVisible}
+        onCancel={() => setIsReportModalVisible(false)}
       />
     </View>
   );

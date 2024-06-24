@@ -261,6 +261,9 @@ const CommentsBottomSheet = ({
             </XStack>
           </View>
           <ReportActionSheet
+            title="Report Comment"
+            subtitle="Select reason"
+            commentId={item.commentId}
             isVisible={isReportModalVisible}
             onCancel={() => setIsReportModalVisible(false)}
           />
