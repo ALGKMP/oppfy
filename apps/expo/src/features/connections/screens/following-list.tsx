@@ -3,12 +3,13 @@ import { useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { Separator, View } from "tamagui";
+import { Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { ListItem } from "../components";
@@ -44,14 +45,11 @@ const FollowingList = () => {
     () => followingData?.pages.flatMap((page) => page.items) ?? [],
     [followingData],
   );
-  const itemCount = useMemo(
-    () =>
-      followingData?.pages.reduce(
-        (total, page) => total + page.items.length,
-        0,
-      ) ?? 0,
-    [followingData],
-  );
+
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
+    data: followingItems,
+    keys: ["name", "username"],
+  });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -59,61 +57,79 @@ const FollowingList = () => {
     }
   };
 
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((_, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            button: true,
+          }}
+        />
+      ))}
+    </CardContainer>
+  );
+
+  const renderFollowing = () => (
+    <CardContainer>
+      <FlashList
+        data={filteredItems}
+        onRefresh={refetch}
+        refreshing={isLoading}
+        estimatedItemSize={75}
+        onEndReached={handleOnEndReached}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <ListItem
+            item={item}
+            handleFollow={follow}
+            handleUnfollow={unfollow}
+            handleCancelFollowRequest={cancelFollowRequest}
+          />
+        )}
+      />
+    </CardContainer>
+  );
+
+  const renderNoResults = () => (
+    <View flex={1} justifyContent="center" bottom={headerHeight}>
+      <EmptyPlaceholder
+        title="Following"
+        subtitle="Once you follow someone, you'll see them here."
+        icon={<UserRoundPlus />}
+      />
+    </View>
+  );
+
   if (isLoading) {
     return (
-      <BaseScreenView scrollable>
-        <CardContainer>
-          {PLACEHOLDER_DATA.map((_, index) => (
-            <VirtualizedListItem
-              key={index}
-              loading
-              showSkeletons={{
-                imageUrl: true,
-                title: true,
-                subtitle: true,
-                button: true,
-              }}
-            />
-          ))}
-        </CardContainer>
-      </BaseScreenView>
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
     );
   }
 
-  if (itemCount === 0) {
-    return (
-      <BaseScreenView>
-        <View flex={1} justifyContent="center" bottom={headerHeight}>
-          <EmptyPlaceholder
-            title="Following"
-            subtitle="Once you follow someone, you'll see them here."
-            icon={<UserRoundPlus />}
-          />
-        </View>
-      </BaseScreenView>
-    );
+  if (followingItems.length === 0) {
+    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
   }
 
   return (
     <BaseScreenView scrollable>
-      <CardContainer>
-        <FlashList
-          onRefresh={refetch}
-          refreshing={isLoading}
-          data={followingItems}
-          estimatedItemSize={75}
-          onEndReached={handleOnEndReached}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <ListItem
-              item={item}
-              handleFollow={follow}
-              handleUnfollow={unfollow}
-              handleCancelFollowRequest={cancelFollowRequest}
-            />
-          )}
+      <YStack gap="$4">
+        <Input
+          placeholder="Search following..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
-      </CardContainer>
+
+        {filteredItems.length > 0 ? (
+          renderFollowing()
+        ) : (
+          <SizableText lineHeight={0}>No Users Found</SizableText>
+        )}
+      </YStack>
     </BaseScreenView>
   );
 };
