@@ -5,12 +5,13 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { Separator, View } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { ListHeader, ListItem } from "../components";
+import { ListItem } from "../components";
 import { useFollowHandlers } from "../hooks";
 
 const FollowingList = () => {
@@ -60,15 +61,11 @@ const FollowingList = () => {
 
   if (isLoading) {
     return (
-      <BaseScreenView paddingBottom={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
-          renderItem={() => (
+      <BaseScreenView scrollable>
+        <CardContainer>
+          {PLACEHOLDER_DATA.map((_, index) => (
             <VirtualizedListItem
+              key={index}
               loading
               showSkeletons={{
                 imageUrl: true,
@@ -77,8 +74,8 @@ const FollowingList = () => {
                 button: true,
               }}
             />
-          )}
-        />
+          ))}
+        </CardContainer>
       </BaseScreenView>
     );
   }
@@ -98,25 +95,25 @@ const FollowingList = () => {
   }
 
   return (
-    <BaseScreenView paddingBottom={0}>
-      <FlashList
-        onRefresh={refetch}
-        refreshing={isLoading}
-        data={followingItems}
-        ItemSeparatorComponent={Separator}
-        estimatedItemSize={75}
-        onEndReached={handleOnEndReached}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
-        renderItem={({ item }) => (
-          <ListItem
-            item={item}
-            handleFollow={follow}
-            handleUnfollow={unfollow}
-            handleCancelFollowRequest={cancelFollowRequest}
-          />
-        )}
-      />
+    <BaseScreenView scrollable>
+      <CardContainer>
+        <FlashList
+          onRefresh={refetch}
+          refreshing={isLoading}
+          data={followingItems}
+          estimatedItemSize={75}
+          onEndReached={handleOnEndReached}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <ListItem
+              item={item}
+              handleFollow={follow}
+              handleUnfollow={unfollow}
+              handleCancelFollowRequest={cancelFollowRequest}
+            />
+          )}
+        />
+      </CardContainer>
     </BaseScreenView>
   );
 };
