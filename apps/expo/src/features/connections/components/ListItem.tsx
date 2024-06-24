@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useRouter, useSegments } from "expo-router";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
@@ -55,7 +55,6 @@ const ListItem = ({
         imageUrl={item.profilePictureUrl}
         button={renderButton(item)}
         onPress={() =>
-          // @ts-expect-error: Experimental typed routes dont support layouts yet
           router.push({
             pathname: `/${segments[2]}/profile/[profile-id]`,
             params: { profileId: String(item.profileId) },
