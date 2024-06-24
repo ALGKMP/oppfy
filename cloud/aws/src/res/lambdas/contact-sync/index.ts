@@ -46,7 +46,7 @@ async function updateContacts(
     .mergeV(
       new Map([
         [t.id, userId],
-        [t.label, "User"],
+        [t.label, userId],
       ]),
     )
     .option(
@@ -67,15 +67,18 @@ async function updateContacts(
     .V(user.id)
     .as("currentUser")
     .V()
-    .hasLabel("User")
     .has("phoneNumberHash", P.within(contacts))
     .where(P.neq("currentUser"))
     .as("contactUser")
     .coalesce(
-      __.inE("contacts").where(__.outV().hasId(userId)),
-      __.addE("contacts")
+      __.inE("contact").where(__.outV().hasId(userId)),
+      __.addE("contact")
         .from_("currentUser")
-        .property("createdAt", currentTimestamp),
+        .property("createdAt", currentTimestamp)
+        .property(
+          t.label,
+          `${userId}_contact_${__.select("contactUser").id()}`,
+        ),
     )
     .property(
       "isFollowing",
