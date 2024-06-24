@@ -1,18 +1,13 @@
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import {
-  Alert,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  RefreshControl,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import { RefreshControl, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -21,14 +16,13 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { debounce, throttle } from "lodash";
+import { throttle } from "lodash";
 import {
   Avatar,
   Button,
   getToken,
   ListItemTitle,
   Paragraph,
-  ScrollView,
   SizableText,
   Spacer,
   Text,
@@ -43,7 +37,8 @@ import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "~/components/StatusRenderer";
 import { useUploadProfilePicture } from "~/hooks/media";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import MediaOfYou from "./media-of-you";
 
@@ -56,28 +51,25 @@ const ProfileLayout = () => {
 
   const {
     data: profileData,
-    isLoading,
-    refetch,
+    isLoading: isLoadingProfileData,
+    refetch: refetchProfileData,
   } = api.profile.getFullProfileSelf.useQuery();
 
   const {
-    data: friendData,
-    isLoading: isLoadingFriends,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch: refetchFriends,
+    data: friendsData,
+    isLoading: isLoadingFriendsData,
+    refetch: refetchFriendsData,
   } = api.friend.paginateFriendsSelf.useInfiniteQuery(
     { pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
   const friendItems = useMemo(
-    () => friendData?.pages.flatMap((page) => page.items) ?? [],
-    [friendData],
+    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
+    [friendsData],
   );
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       title: profileData?.username,
     });
@@ -85,9 +77,9 @@ const ProfileLayout = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetchProfileData(), refetchFriendsData()]);
     setRefreshing(false);
-  }, [refetch]);
+  }, [refetchFriendsData, refetchProfileData]);
 
   const scrollY = useSharedValue(0);
 
@@ -102,7 +94,12 @@ const ProfileLayout = () => {
     };
   });
 
-  if (isLoading || profileData === undefined) {
+  if (
+    isLoadingProfileData ||
+    isLoadingFriendsData ||
+    profileData === undefined ||
+    friendsData === undefined
+  ) {
     return (
       <YStack gap="$5">
         <Profile loading />
@@ -154,32 +151,32 @@ type ProfileProps = LoadingProps | ProfileLoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
-  const { imageUri, pickAndUploadImage } = useUploadProfilePicture({
+  const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
   });
 
   const onFollowingListPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/self-connections/following-list");
   };
 
   const onFollowerListPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/self-connections/follower-list");
   };
 
   const onFriendsListPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/self-connections/friend-list");
   };
 
   const onEditProfilePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/edit-profile");
   };
 
   const onShareProfilePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     // TODO: add sharing functionality with deep linking
   };
 
@@ -261,10 +258,10 @@ const Profile = (props: ProfileProps) => {
           data={!props.loading ? props.data.username : undefined}
           loadingComponent={
             <View flex={1}>
-              <Skeleton width={"100%"} height={44} radius={20} />
+              <Skeleton width="100%" height={44} radius={20} />
             </View>
           }
-          successComponent={(username) => (
+          successComponent={() => (
             <Button flex={1} borderRadius={20} onPress={onEditProfilePress}>
               Edit Profile
             </Button>
@@ -274,10 +271,10 @@ const Profile = (props: ProfileProps) => {
           data={!props.loading ? props.data.username : undefined}
           loadingComponent={
             <View flex={1}>
-              <Skeleton width={"100%"} height={44} radius={20} />
+              <Skeleton width="100%" height={44} radius={20} />
             </View>
           }
-          successComponent={(username) => (
+          successComponent={() => (
             <Button flex={1} borderRadius={20} onPress={onShareProfilePress}>
               Share Profile
             </Button>
@@ -306,27 +303,6 @@ const Friends = (props: FriendsProps) => {
   const showMore =
     !props.loading && props.data.friendItems.length < props.data.friendCount;
 
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (!showMore) return;
-
-      const { contentSize, contentOffset, layoutMeasurement } =
-        event.nativeEvent;
-
-      if (contentSize && contentOffset && layoutMeasurement) {
-        const contentWidth = contentSize.width;
-        const offsetX = contentOffset.x;
-        const layoutWidth = layoutMeasurement.width;
-
-        // Check if within the threshold from the end
-        if (offsetX + layoutWidth - 80 >= contentWidth) {
-          throttledHandleAction();
-        }
-      }
-    },
-    [],
-  );
-
   const handleAction = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/self-connections/friend-list");
@@ -336,7 +312,26 @@ const Friends = (props: FriendsProps) => {
     throttle(handleAction, 300, { leading: true, trailing: false }),
   ).current;
 
-  useEffect(() => throttledHandleAction.cancel(), []);
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!showMore) return;
+
+      const { contentSize, contentOffset, layoutMeasurement } =
+        event.nativeEvent;
+
+      const contentWidth = contentSize.width;
+      const offsetX = contentOffset.x;
+      const layoutWidth = layoutMeasurement.width;
+
+      // Check if within the threshold from the end
+      if (offsetX + layoutWidth - 80 >= contentWidth) {
+        throttledHandleAction();
+      }
+    },
+    [showMore, throttledHandleAction],
+  );
+
+  useEffect(() => throttledHandleAction.cancel(), [throttledHandleAction]);
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
@@ -352,9 +347,7 @@ const Friends = (props: FriendsProps) => {
     <CardContainer>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
-        <Button size="$3.5" onPress={() => {}}>
-          @oxy add recommendations here
-        </Button>
+        <Button size="$3.5">@oxy add recommendations here</Button>
       </YStack>
     </CardContainer>
   );
@@ -399,7 +392,7 @@ const Friends = (props: FriendsProps) => {
           }
           ItemSeparatorComponent={() => <Spacer size="$2" />}
           contentContainerStyle={{
-            paddingHorizontal: getToken("$space.3"),
+            paddingHorizontal: getToken("$3", "space") as number,
           }}
           ListFooterComponentStyle={{
             justifyContent: "center",
