@@ -431,7 +431,7 @@ const Stat = (props: StatProps) => (
     <Text theme="alt1" lineHeight={0}>
       {props.label}{" "}
     </Text>
-    <Text fontWeight="bold" theme="alt1" lineHeight={0}>
+    <Text fontWeight="bold" lineHeight={0}>
       {props.value}
     </Text>
   </XStack>
