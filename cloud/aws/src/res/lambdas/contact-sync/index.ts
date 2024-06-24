@@ -102,18 +102,12 @@ const lambdaHandler = async (
   let dc: any;
   let g: gremlin.process.GraphTraversalSource;
 
-  console.log("Connecting to Neptune", NEPTUNE_ENDPOINT, NEPTUNE_PORT);
-
   try {
     const graph = new Graph();
     dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
     g = graph.traversal().withRemote(dc);
 
     const { userId, userPhoneNumberHash, contacts, followingIds } = event[0];
-    console.log("userId", userId);
-    console.log("userPhoneNumberHash", userPhoneNumberHash);
-    console.log("contacts", contacts);
-    console.log("followingIds", followingIds);
 
     await updateContacts(
       g,
@@ -122,8 +116,6 @@ const lambdaHandler = async (
       contacts,
       followingIds,
     );
-
-    console.log("Update successful");
 
     return {
       statusCode: 200,
