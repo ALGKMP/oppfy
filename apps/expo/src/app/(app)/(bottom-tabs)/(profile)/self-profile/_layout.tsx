@@ -165,11 +165,6 @@ const Profile = (props: ProfileProps) => {
     router.push("/self-connections/follower-list");
   };
 
-  const onFriendsListPress = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/self-connections/friend-list");
-  };
-
   const onEditProfilePress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/edit-profile");
@@ -303,13 +298,21 @@ const Friends = (props: FriendsProps) => {
   const showMore =
     !props.loading && props.data.friendItems.length < props.data.friendCount;
 
-  const handleAction = () => {
+  const handleFriendClicked = (profileId: number) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.navigate({
+      pathname: "/(profile)/profile/[profile-id]/",
+      params: { profileId: String(profileId) },
+    });
+  };
+
+  const handleShowMoreFriends = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/self-connections/friend-list");
   };
 
   const throttledHandleAction = useRef(
-    throttle(handleAction, 300, { leading: true, trailing: false }),
+    throttle(handleShowMoreFriends, 300, { leading: true, trailing: false }),
   ).current;
 
   const handleScroll = useCallback(
@@ -355,9 +358,11 @@ const Friends = (props: FriendsProps) => {
   const renderFriendList = (data: FriendsData) => (
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
-        <ListItemTitle paddingLeft="$3">
-          Friends ({abbreviatedNumber(data.friendCount)})
-        </ListItemTitle>
+        <TouchableOpacity onPress={handleShowMoreFriends}>
+          <ListItemTitle paddingLeft="$3">
+            Friends ({abbreviatedNumber(data.friendCount)})
+          </ListItemTitle>
+        </TouchableOpacity>
 
         <FlashList
           data={data.friendItems}
@@ -366,27 +371,29 @@ const Friends = (props: FriendsProps) => {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => (
-            <YStack gap="$1.5">
-              <Avatar circular size="$6" bordered>
-                <Avatar.Image src={item.profilePictureUrl} />
-              </Avatar>
-              <Text fontWeight="600" textAlign="center">
-                {item.username}
-              </Text>
-            </YStack>
+            <TouchableOpacity
+              onPress={() => handleFriendClicked(item.profileId)}
+            >
+              <YStack gap="$1.5">
+                <Avatar circular size="$6" bordered>
+                  <Avatar.Image src={item.profilePictureUrl} />
+                </Avatar>
+                <Text fontWeight="600" textAlign="center">
+                  {item.username}
+                </Text>
+              </YStack>
+            </TouchableOpacity>
           )}
           ListFooterComponent={
             showMore ? (
               <View
-                style={{
-                  marginRight: -100,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                marginRight={-100}
+                justifyContent="center"
+                alignItems="center"
               >
-                <Text style={{ fontWeight: "600", color: "#007AFF" }}>
-                  See More
-                </Text>
+                <SizableText color="$blue7" fontWeight="600">
+                  See more
+                </SizableText>
               </View>
             ) : null
           }
