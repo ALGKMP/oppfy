@@ -29,8 +29,14 @@ export const handler = async (
 
     console.log("Querying for recommendations for user", userId);
 
-    // tier 1 reccs, all outgoing people within 1 edge
-    const tier1 = await g.V(userId).out().id().toList();
+    // tier 1 reccs, all outgoing people within 1 edge where the isFollowing property on the edge is false
+    const tier1 = await g
+      .V(userId)
+      .outE()
+      .has("isFollowing", false)
+      .inV()
+      .id()
+      .toList();
 
     // tier 2 reccs, all incoming people within 1 edge
     const allTier2 = await g.V(userId).in_().id().toList();
