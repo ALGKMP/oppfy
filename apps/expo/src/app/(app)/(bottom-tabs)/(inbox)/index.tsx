@@ -1,18 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import {
-  Circle,
-  Paragraph,
-  Separator,
-  SizableText,
-  Spacer,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Circle, Paragraph, SizableText, View, XStack, YStack } from "tamagui";
 
 import { abbreviatedTimeAgo } from "@oppfy/utils";
 
@@ -56,7 +47,7 @@ const Inbox = () => {
 
   const handleOnEndReached = () => {
     if (!isFetchingNextPage && hasNextPage) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   };
 
@@ -97,8 +88,8 @@ const Inbox = () => {
         ctx.prevData,
       );
     },
-    onSettled: () => {
-      utils.notifications.paginateNotifications.invalidate();
+    onSettled: async () => {
+      await utils.notifications.paginateNotifications.invalidate();
     },
   });
 
@@ -138,7 +129,7 @@ const Inbox = () => {
       <CardContainer padding="$4">
         <YStack gap="$1">
           <Skeleton width={150} height={30} />
-          <Skeleton width={"100%"} height={20} />
+          <Skeleton width="100%" height={20} />
         </YStack>
       </CardContainer>
 
@@ -214,13 +205,13 @@ const Inbox = () => {
               <VirtualizedListItem
                 loading={false}
                 title={item.username}
-                subtitle={item.message ?? ""}
+                subtitle={item.message}
                 subtitle2={abbreviatedTimeAgo(item.createdAt)}
                 button={{
                   ...buttonProps,
                   disabled: buttonDisabled,
                   disabledStyle: { opacity: 0.5 },
-                  onPress: () => onFollowUser(item.userId),
+                  onPress: () => void onFollowUser(item.userId),
                 }}
                 imageUrl={item.profilePictureUrl}
                 onPress={() => onUserSelected(item.profileId)}

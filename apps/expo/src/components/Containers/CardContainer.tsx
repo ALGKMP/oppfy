@@ -1,5 +1,6 @@
 import React from "react";
-import { View, ViewProps } from "tamagui";
+import type { ViewProps } from "tamagui";
+import { View } from "tamagui";
 
 interface CardContainerProps extends ViewProps {
   children: React.ReactNode;
