@@ -29,7 +29,14 @@ import BottomSheet, {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
-import { Heart, Minus, Send, SendHorizontal } from "@tamagui/lucide-icons";
+import {
+  AlertCircle,
+  Heart,
+  Minus,
+  Send,
+  SendHorizontal,
+  Trash2,
+} from "@tamagui/lucide-icons";
 import { debounce, throttle } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import {
@@ -46,6 +53,7 @@ import z from "zod";
 import { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
+import { BlurContextMenuWrapper } from "~/components/ContextMenu";
 import { api } from "~/utils/api";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -72,7 +80,6 @@ const PostItem = (props: PostItemProps) => {
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
   const [isLiked, setIsLiked] = useState<Boolean>(hasLiked ?? false);
-  // const [fillHeart, setFillHeart] = useState(hasLiked ?? false); // Initialize fill state
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -148,7 +155,6 @@ const PostItem = (props: PostItemProps) => {
       },
     );
     setIsLiked(!isLiked);
-    // setFillHeart(!fillHeart); // Toggle fill state
     throttledLikePost();
     // debouncedLikePost();
   };
@@ -186,23 +192,31 @@ const PostItem = (props: PostItemProps) => {
       justifyContent="center"
       overflow="hidden"
       borderRadius={20}
+      backgroundColor={"$gray2"}
+      marginBottom={"$5"}
     >
       <GestureDetector gesture={doubleTap}>
-        <Image
-          source={{ uri: post.imageUrl }}
-          style={[
-            {
-              width: post.width,
-              height: post.height,
-              justifyContent: "center",
-              alignItems: "center",
-            },
-          ]}
-        >
-          <Animated.View style={[heartImageAnimatedStyle]}>
-            <Heart size={100} color={"red"} fill={"red"} />
-          </Animated.View>
-        </Image>
+        <View aspectRatio={post.width / post.height} width={"100%"}>
+          <Image
+            source={{ uri: post.imageUrl }}
+            style={[
+              {
+                // width: post.width,
+                // height: post.height,
+                width: "100%",
+                height: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 20,
+              },
+            ]}
+            contentFit="cover"
+          >
+            <Animated.View style={[heartImageAnimatedStyle]}>
+              <Heart size={100} color={"red"} fill={"red"} />
+            </Animated.View>
+          </Image>
+        </View>
       </GestureDetector>
       <XStack
         gap={"$2.5"}
@@ -264,7 +278,6 @@ const PostItem = (props: PostItemProps) => {
         borderBottomRightRadius={"$8"}
         borderBottomLeftRadius={"$8"}
         backgroundColor={"$gray2"}
-        marginBottom={"$5"}
       >
         <XStack gap={"$2"} alignItems="flex-start">
           {/* Comment Button */}
@@ -285,10 +298,7 @@ const PostItem = (props: PostItemProps) => {
           </View>
           {/* Like Button */}
           <View flex={1} justifyContent="center">
-            <TouchableOpacity
-              onPress={handleButtonLikeAnimation}
-              // activeOpacity={1} // Uncomment this line to disable the opacity change on press
-            >
+            <TouchableOpacity onPress={handleButtonLikeAnimation}>
               <View
                 justifyContent="center"
                 alignItems="center"
@@ -302,7 +312,6 @@ const PostItem = (props: PostItemProps) => {
                     padding={"$3"}
                     color={isLiked ? "red" : "$gray12"}
                     fill={"red"}
-                    // fillOpacity={fillHeart ? 1 : 0}
                     fillOpacity={isLiked ? 1 : 0}
                   />
                 </Animated.View>
