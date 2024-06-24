@@ -32,7 +32,7 @@ async function updateContacts(
   userId: string,
   userPhoneNumberHash: string,
   contacts: string[],
-  followingIds: string[],
+  followingIds: Set<string>,
 ): Promise<boolean> {
   const currentTimestamp = Date.now().toString();
 
@@ -42,21 +42,16 @@ async function updateContacts(
       new Map([
         [t.id, userId],
         [t.label, "User"],
-      ])
+      ]),
     )
     .option(
       onCreate,
       new Map([
         ["createdAt", currentTimestamp],
         ["phoneNumberHash", userPhoneNumberHash],
-      ])
+      ]),
     )
-    .option(
-      onMatch,
-      new Map([
-        ["phoneNumberHash", userPhoneNumberHash],
-      ])
-    )
+    .option(onMatch, new Map([["phoneNumberHash", userPhoneNumberHash]]))
     .next();
 
   // Extract user vertex from the result and assert type
@@ -73,14 +68,18 @@ async function updateContacts(
     .as("contactUser")
     .coalesce(
       __.inE("contacts").where(__.outV().hasId(userId)),
-      __.addE("contacts").from_("currentUser").property("createdAt", currentTimestamp)
+      __.addE("contacts")
+        .from_("currentUser")
+        .property("createdAt", currentTimestamp),
     )
-    .property("isFollowing", __.select("contactUser").id().is(P.within(followingIds)))
+    .property(
+      "isFollowing",
+      followingIds.has(__.select("contactUser").id().toString()),
+    )
     .iterate();
 
   return true;
 }
-
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
 // 2. Parses records in body key using your schema and return them in a list.
@@ -108,7 +107,13 @@ const lambdaHandler = async (
     console.log("contacts", contacts);
     console.log("followingIds", followingIds);
 
-    await updateContacts(g, userId, userPhoneNumberHash, contacts, followingIds);
+    await updateContacts(
+      g,
+      userId,
+      userPhoneNumberHash,
+      contacts,
+      new Set(followingIds),
+    );
 
     console.log("Update successful");
 
