@@ -74,11 +74,7 @@ async function updateContacts(
       __.inE("contact").where(__.outV().hasId(userId)),
       __.addE("contact")
         .from_("currentUser")
-        .property("createdAt", currentTimestamp)
-        .property(
-          t.label,
-          `${userId}_contact_${__.select("contactUser").id()}`,
-        ),
+        .property("createdAt", currentTimestamp),
     )
     .property(
       "isFollowing",
