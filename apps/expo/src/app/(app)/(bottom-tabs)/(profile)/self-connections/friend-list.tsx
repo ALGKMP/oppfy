@@ -1,21 +1,23 @@
 import React, { useMemo } from "react";
 import { useRouter } from "expo-router";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, Separator, SizableText, View } from "tamagui";
+import { Button, Input, SizableText, View, YStack } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import useSearch from "~/hooks/useSearch";
+import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+
+type FriendItem = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][0];
 
 const FriendList = () => {
-  const headerHeight = useHeaderHeight();
-
   const router = useRouter();
-
   const utils = api.useUtils();
 
   const removeFriend = api.friend.removeFriend.useMutation({
@@ -24,7 +26,7 @@ const FriendList = () => {
       await utils.friend.paginateFriendsSelf.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.follow.paginateFollowersSelf.getInfiniteData();
+      const prevData = utils.friend.paginateFriendsSelf.getInfiniteData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
@@ -59,6 +61,7 @@ const FriendList = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    refetch,
   } = api.friend.paginateFriendsSelf.useInfiniteQuery(
     {
       pageSize: 20,
@@ -68,22 +71,14 @@ const FriendList = () => {
     },
   );
 
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 20 }, () => null);
-  }, []);
-
   const friendsItems = useMemo(() => {
-    return friendsData?.pages.flatMap((page) => page.items);
+    return friendsData?.pages.flatMap((page) => page.items) ?? [];
   }, [friendsData]);
 
-  const itemCount = useMemo(() => {
-    if (friendsData === undefined) return 0;
-
-    return friendsData.pages.reduce(
-      (total, page) => total + page.items.length,
-      0,
-    );
-  }, [friendsData]);
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
+    data: friendsItems,
+    keys: ["name", "username"],
+  });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -91,83 +86,109 @@ const FriendList = () => {
     }
   };
 
-  return (
-    <BaseScreenView paddingBottom={0}>
-      {isLoading || itemCount ? (
-        <FlashList
-          data={isLoading ? placeholderData : friendsItems}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          onEndReached={handleOnEndReached}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <SizableText size="$2" theme="alt1" marginBottom="$2">
-              FRIENDS
-            </SizableText>
-          }
-          renderItem={({ item }) => {
-            return (
-              <View>
-                {item === null ? (
-                  <VirtualizedListItem
-                    loading
-                    showSkeletons={{
-                      imageUrl: true,
-                      title: true,
-                      subtitle: true,
-                      button: true,
-                    }}
-                  />
-                ) : (
-                  <VirtualizedListItem
-                    loading={false}
-                    title={item.username}
-                    subtitle={item.name}
-                    imageUrl={item.profilePictureUrl}
-                    button={
-                      <ActionSheet
-                        title="Remove Friend"
-                        subtitle={`Are you sure you want to remove ${item.username} from your friends?`}
-                        imageUrl={item.profilePictureUrl}
-                        trigger={
-                          <Button size="$3" icon={<UserRoundMinus size="$1" />}>
-                            Remove
-                          </Button>
-                        }
-                        buttonOptions={[
-                          {
-                            text: "Unfriend",
-                            textProps: { color: "$red9" },
-                            onPress: () =>
-                              removeFriend.mutate({
-                                recipientId: item.userId,
-                              }),
-                          },
-                        ]}
-                      />
-                    }
-                    onPress={() =>
-                      // @ts-expect-error: Experimental typed routes dont support layouts yet
-                      router.push({
-                        pathname: "/(profile)/profile/[profile-id]",
-                        params: { profileId: String(item.profileId) },
-                      })
-                    }
-                  />
-                )}
-              </View>
-            );
+  const handleRemoveFriend = async (userId: string) =>
+    await removeFriend.mutateAsync({ recipientId: userId });
+
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((_, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            button: true,
           }}
         />
-      ) : (
-        <View flex={1} justifyContent="center" bottom={headerHeight}>
-          <EmptyPlaceholder
-            title="Friends"
-            subtitle="Once you friend someone, you'll see them here."
-            icon={<UserRoundPlus />}
-          />
-        </View>
-      )}
+      ))}
+    </CardContainer>
+  );
+
+  const renderListItem = (item: FriendItem) => (
+    <VirtualizedListItem
+      loading={false}
+      title={item.username}
+      subtitle={item.name}
+      imageUrl={item.profilePictureUrl}
+      button={
+        <ActionSheet
+          title="Remove Friend"
+          subtitle={`Are you sure you want to remove ${item.username} from your friends?`}
+          imageUrl={item.profilePictureUrl}
+          trigger={
+            <Button size="$3" icon={<UserRoundMinus size="$1" />}>
+              Remove
+            </Button>
+          }
+          buttonOptions={[
+            {
+              text: "Remove",
+              textProps: { color: "$red9" },
+              onPress: () => void handleRemoveFriend(item.userId),
+            },
+          ]}
+        />
+      }
+      onPress={() =>
+        router.push({
+          pathname: "/(profile)/profile/[profile-id]",
+          params: { profileId: String(item.profileId) },
+        })
+      }
+    />
+  );
+
+  const renderFriends = () => (
+    <CardContainer>
+      <FlashList
+        data={filteredItems}
+        onRefresh={refetch}
+        refreshing={isLoading}
+        estimatedItemSize={75}
+        onEndReached={handleOnEndReached}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => renderListItem(item)}
+      />
+    </CardContainer>
+  );
+
+  const renderNoResults = () => (
+    <View flex={1} justifyContent="center">
+      <EmptyPlaceholder
+        title="No results"
+        subtitle="No friends found."
+        icon={<UserRoundPlus />}
+      />
+    </View>
+  );
+
+  if (isLoading) {
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+    );
+  }
+
+  if (friendsItems.length === 0) {
+    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
+  }
+
+  return (
+    <BaseScreenView scrollable>
+      <YStack gap="$4">
+        <Input
+          placeholder="Search friends..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+
+        {filteredItems.length > 0 ? (
+          renderFriends()
+        ) : (
+          <SizableText lineHeight={0}>No Users Found</SizableText>
+        )}
+      </YStack>
     </BaseScreenView>
   );
 };
