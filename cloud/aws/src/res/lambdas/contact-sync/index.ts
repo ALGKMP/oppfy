@@ -42,27 +42,27 @@ async function updateContacts(
       new Map([
         [t.id, userId],
         [t.label, "User"],
-      ]),
+      ])
     )
     .option(
       onCreate,
       new Map([
         ["createdAt", currentTimestamp],
         ["phoneNumberHash", userPhoneNumberHash],
-      ]),
+      ])
     )
     .option(
       onMatch,
       new Map([
         ["phoneNumberHash", userPhoneNumberHash],
-        ["updatedAt", currentTimestamp],
-      ]),
+      ])
     )
     .next();
 
   // Extract user vertex from the result and assert type
   const user = userResult.value as Vertex;
 
+  // Create or update contact edges
   await g
     .V(user.id)
     .as("currentUser")
@@ -71,9 +71,11 @@ async function updateContacts(
     .has("phoneNumberHash", P.within(contacts))
     .where(P.neq("currentUser"))
     .as("contactUser")
-    .addE("contacts")
-    .from_("currentUser")
-    .property("updatedAt", Date.now().toString())
+    .coalesce(
+      __.inE("contacts").where(__.outV().hasId(userId)),
+      __.addE("contacts").from_("currentUser").property("createdAt", currentTimestamp)
+    )
+    .property("isFollowing", __.select("contactUser").id().is(P.within(followingIds)))
     .iterate();
 
   return true;
@@ -104,6 +106,7 @@ const lambdaHandler = async (
     console.log("userId", userId);
     console.log("userPhoneNumberHash", userPhoneNumberHash);
     console.log("contacts", contacts);
+    console.log("followingIds", followingIds);
 
     await updateContacts(g, userId, userPhoneNumberHash, contacts, followingIds);
 
