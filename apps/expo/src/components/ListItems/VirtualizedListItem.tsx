@@ -59,28 +59,28 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
   );
 
   const shouldRenderProfilePicture =
-    (props.loading && props.showSkeletons?.imageUrl) ??
-    (!props.loading && props.imageUrl);
+    (props.loading && !!props.showSkeletons?.imageUrl) ||
+    (!props.loading && !!props.imageUrl);
 
   const shouldRenderTitle =
-    (props.loading && props.showSkeletons?.title) ??
-    (!props.loading && props.title);
+    (props.loading && !!props.showSkeletons?.title) ||
+    (!props.loading && !!props.title);
 
   const shouldRenderSubtitle =
-    (props.loading && props.showSkeletons?.subtitle) ??
-    (!props.loading && props.subtitle);
+    (props.loading && !!props.showSkeletons?.subtitle) ||
+    (!props.loading && !!props.subtitle);
 
   const shouldRenderSubtitle2 =
-    (props.loading && props.showSkeletons?.subtitle2) ??
-    (!props.loading && props.subtitle2);
+    (props.loading && !!props.showSkeletons?.subtitle2) ||
+    (!props.loading && !!props.subtitle2);
 
   const shouldRenderButton =
-    (props.loading && props.showSkeletons?.button) ??
-    (!props.loading && props.button);
+    (props.loading && !!props.showSkeletons?.button) ||
+    (!props.loading && !!props.button);
 
   const shouldRenderButton2 =
-    (props.loading && props.showSkeletons?.button2) ??
-    (!props.loading && props.button2);
+    (props.loading && !!props.showSkeletons?.button2) ||
+    (!props.loading && !!props.button2);
 
   const isTwoButtons = shouldRenderButton && shouldRenderButton2;
   const defaultButtonProps = {
