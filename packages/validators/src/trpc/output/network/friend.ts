@@ -9,6 +9,8 @@ const trpcFriendOutputSchema = {
         username: z.string(),
         name: z.string(),
         profilePictureUrl: z.string(),
+        isFollowing: z.boolean(),
+        privacy: z.enum(["public", "private"]),
       }),
     ),
     nextCursor: z
