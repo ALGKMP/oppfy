@@ -37,7 +37,7 @@ async function updateContacts(
   userId: string,
   userPhoneNumberHash: string,
   contacts: string[],
-  followingIds: Set<string>,
+  followingIds: string[],
 ): Promise<boolean> {
   const currentTimestamp = Date.now().toString();
 
@@ -79,9 +79,7 @@ async function updateContacts(
     .property(
       "isFollowing",
       __.choose(
-        __.select("contactUser")
-          .id()
-          .is(P.within(Array.from(followingIds))),
+        __.select("contactUser").id().is(P.within(followingIds)),
         __.constant(true),
         __.constant(false),
       ),
@@ -122,7 +120,7 @@ const lambdaHandler = async (
       userId,
       userPhoneNumberHash,
       contacts,
-      new Set(followingIds),
+      followingIds,
     );
 
     console.log("Update successful");
