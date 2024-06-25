@@ -27,14 +27,13 @@ export const handler = async (
     );
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
+    console.log("Querying for recommendations for user", userId);
 
     const following = await db
       .select({ userId: schema.follower.recipientId })
       .from(schema.follower)
       .where(eq(schema.follower.senderId, userId))
       .then((res) => res.map((r) => r.userId));
-
-    console.log("Querying for recommendations for user", userId);
 
     const tier1 = await g
       .V(userId)
@@ -46,8 +45,6 @@ export const handler = async (
       .id()
       .toList();
 
-    console.log(tier1);
-
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
       .V(userId)
@@ -56,6 +53,7 @@ export const handler = async (
       .where(__.outV().hasId(P.without(following)))
       .outV()
       .dedup()
+      // .order().by(__.property("createdAt"), __.asc)
       .limit(10)
       .id()
       .toList();
@@ -76,17 +74,20 @@ export const handler = async (
       .limit(10) // Limit to 10 results
       .toList();
 
-    // tier 4 is just people 1 more edge from the tier1
-    /*    const tier4 = await g
-      .V(tier1)
-      .out("contact")
-      .dedup()
-      .limit(10)
-      .id()
-      .toList();
- */
+    // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
+    const tier4 = await Promise.all(
+      tier1.map((v) =>
+        g
+          .V(v)
+          .out("contact")
+          .where(__.not(__.inE("contact").from_(userId)))
+          .limit(10)
+          .id()
+          .toList(),
+      ),
+    ).then((res) => res.flat());
 
-    // console.log(tier4);
+    console.log(tier4);
 
     const recommendedIds = {
       tier1,
