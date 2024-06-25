@@ -17,7 +17,6 @@ const {
 } = gremlin;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
-const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
 
 const contactSyncBody = z.object({
   userId: z.string(),
@@ -37,7 +36,7 @@ async function updateContacts(
   userId: string,
   userPhoneNumberHash: string,
   contacts: string[],
-  followingIds: Set<string>,
+  followingIds: string[],
 ): Promise<boolean> {
   const currentTimestamp = Date.now().toString();
 
@@ -46,7 +45,7 @@ async function updateContacts(
     .mergeV(
       new Map([
         [t.id, userId],
-        [t.label, "User"],
+        [t.label, userId],
       ]),
     )
     .option(
@@ -56,7 +55,7 @@ async function updateContacts(
         ["phoneNumberHash", userPhoneNumberHash],
       ]),
     )
-    .option(onMatch, new Map([["phoneNumberHash", userPhoneNumberHash]]))
+    .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
     .next();
 
   // Extract user vertex from the result and assert type
@@ -67,19 +66,22 @@ async function updateContacts(
     .V(user.id)
     .as("currentUser")
     .V()
-    .hasLabel("User")
     .has("phoneNumberHash", P.within(contacts))
     .where(P.neq("currentUser"))
     .as("contactUser")
     .coalesce(
-      __.inE("contacts").where(__.outV().hasId(userId)),
-      __.addE("contacts")
+      __.inE("contact").where(__.outV().hasId(userId)),
+      __.addE("contact")
         .from_("currentUser")
         .property("createdAt", currentTimestamp),
     )
     .property(
       "isFollowing",
-      followingIds.has(__.select("contactUser").id().toString()),
+      __.choose(
+        __.select("contactUser").id().is(P.within(followingIds)),
+        __.constant(true),
+        __.constant(false),
+      ),
     )
     .iterate();
 
@@ -99,28 +101,22 @@ const lambdaHandler = async (
   let dc: any;
   let g: gremlin.process.GraphTraversalSource;
 
-  console.log("Connecting to Neptune", NEPTUNE_ENDPOINT, NEPTUNE_PORT);
-
   try {
     const graph = new Graph();
     dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
     g = graph.traversal().withRemote(dc);
 
+    console.log(event[0]);
+
     const { userId, userPhoneNumberHash, contacts, followingIds } = event[0];
-    console.log("userId", userId);
-    console.log("userPhoneNumberHash", userPhoneNumberHash);
-    console.log("contacts", contacts);
-    console.log("followingIds", followingIds);
 
     await updateContacts(
       g,
       userId,
       userPhoneNumberHash,
       contacts,
-      new Set(followingIds),
+      followingIds,
     );
-
-    console.log("Update successful");
 
     return {
       statusCode: 200,

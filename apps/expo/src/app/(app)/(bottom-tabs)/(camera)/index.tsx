@@ -141,13 +141,12 @@ const CameraPage = () => {
       if (imagePickerAsset === undefined) return;
 
       const { uri, type } = imagePickerAsset;
-      console.log("ImagePicker result", { uri, type });
 
-      router.push({
-        pathname: "/preview",
+      router.navigate({
+        pathname: "/post-to",
         params: {
-          type: type === "video" ? "video" : "photo",
           uri,
+          type: type === "video" ? "video" : "photo",
         },
       });
     }

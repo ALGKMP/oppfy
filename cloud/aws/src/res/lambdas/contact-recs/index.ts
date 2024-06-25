@@ -24,19 +24,34 @@ export const handler = async (
       {},
     );
     const g = graph.traversal().withRemote(dc);
-    console.log(event.queryStringParameters);
     const userId = event.queryStringParameters?.userId!;
 
     console.log("Querying for recommendations for user", userId);
 
-    // tier 1 reccs, all outgoing people within 1 edge
-    const tier1 = await g.V(userId).out().id().toList();
+    const tier1 = await g
+      .V(userId)
+      .outE("contact")
+      .has("isFollowing", false)
+      .inV()
+      .dedup()
+      .limit(10)
+      .toList();
 
-    // tier 2 reccs, all incoming people within 1 edge
-    const allTier2 = await g.V(userId).in_().id().toList();
+    console.log(tier1);
 
-    // Manually filtering out tier1 IDs from allTier2 using JavaScript array methods
-    const tier2 = allTier2.filter((id) => !tier1.includes(id));
+    // Implementing the provided Gremlin query
+    const tier2 = await g
+      .V(userId)
+      .in_("contact")
+      .where(__.not(__.outE("contact").has("isFollowing", true).to(userId)))
+      .where(__.out("contact").hasId(userId))
+      .where(__.id().is(P.without(tier1)))
+      .dedup()
+      .limit(10)
+      .project("id", "phoneNumberHash")
+      .by(__.id())
+      .by("phoneNumberHash")
+      .toList();
 
     const recommendedIds = {
       tier1,

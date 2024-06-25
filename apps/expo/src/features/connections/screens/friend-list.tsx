@@ -3,14 +3,16 @@ import { useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { Separator, View } from "tamagui";
+import { Input, SizableText, View, YStack } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { ListHeader, ListItem } from "../components";
+import { ListItem } from "../components";
 import { useFollowHandlers } from "../hooks";
 
 const FriendList = () => {
@@ -43,12 +45,11 @@ const FriendList = () => {
     () => friendData?.pages.flatMap((page) => page.items) ?? [],
     [friendData],
   );
-  const itemCount = useMemo(
-    () =>
-      friendData?.pages.reduce((total, page) => total + page.items.length, 0) ??
-      0,
-    [friendData],
-  );
+
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
+    data: friendItems,
+    keys: ["name", "username"],
+  });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -56,56 +57,32 @@ const FriendList = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <BaseScreenView paddingBottom={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ListHeader title="FRIENDS" />}
-          renderItem={() => (
-            <VirtualizedListItem
-              loading
-              showSkeletons={{
-                imageUrl: true,
-                title: true,
-                subtitle: true,
-                button: true,
-              }}
-            />
-          )}
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((_, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            button: true,
+          }}
         />
-      </BaseScreenView>
-    );
-  }
+      ))}
+    </CardContainer>
+  );
 
-  if (itemCount === 0) {
-    return (
-      <BaseScreenView>
-        <View flex={1} justifyContent="center" bottom={headerHeight}>
-          <EmptyPlaceholder
-            title="Friends"
-            subtitle="Once you follow someone, you'll see them here."
-            icon={<UserRoundPlus />}
-          />
-        </View>
-      </BaseScreenView>
-    );
-  }
-
-  return (
-    <BaseScreenView paddingBottom={0}>
+  const renderFriends = () => (
+    <CardContainer>
       <FlashList
+        data={filteredItems}
         onRefresh={refetch}
         refreshing={isLoading}
-        data={friendItems}
-        ItemSeparatorComponent={Separator}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader title="Friends" />}
         renderItem={({ item }) => (
           <ListItem
             item={item}
@@ -115,6 +92,44 @@ const FriendList = () => {
           />
         )}
       />
+    </CardContainer>
+  );
+
+  const renderNoResults = () => (
+    <View flex={1} justifyContent="center" bottom={headerHeight}>
+      <EmptyPlaceholder
+        title="Friends"
+        subtitle="Once you follow someone, you'll see them here."
+        icon={<UserRoundPlus />}
+      />
+    </View>
+  );
+
+  if (isLoading) {
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+    );
+  }
+
+  if (friendItems.length === 0) {
+    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
+  }
+
+  return (
+    <BaseScreenView scrollable>
+      <YStack gap="$4">
+        <Input
+          placeholder="Search friends..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+
+        {filteredItems.length > 0 ? (
+          renderFriends()
+        ) : (
+          <SizableText lineHeight={0}>No Users Found</SizableText>
+        )}
+      </YStack>
     </BaseScreenView>
   );
 };
