@@ -352,9 +352,9 @@ const PostItem = (props: PostItemProps) => {
         {/* Comments and Likes */}
         <XStack flex={1} gap="$2">
           <View flex={4} alignItems="flex-start" paddingLeft={"$2.5"}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
               <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
-                102 other comments
+                {post.commentsCount > 0 ? post.commentsCount > 1 ? `${post.commentsCount} comments` : `${post.commentsCount} comment` : "Be the first to comment" } 
               </SizableText>
             </TouchableOpacity>
           </View>
