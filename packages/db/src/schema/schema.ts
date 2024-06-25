@@ -462,10 +462,12 @@ export const reportPost = mySqlTable("ReportPost", {
     .references(() => user.id, { onDelete: "cascade" })
     .notNull(),
   reason: mysqlEnum("reason", [
-    "It offends me",
-    "Nudity or sexual activity",
-    "Hate speech or symbols",
-    "Bullying or harassment",
+    "Violent or abusive",
+    "Sexually explicit or predatory",
+    "Hate, harassment or bullying",
+    "Suicide and self-harm",
+    "Spam or scam",
+    "Other",
   ]).notNull(),
   createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
@@ -473,7 +475,7 @@ export const reportPost = mySqlTable("ReportPost", {
     .notNull(),
 });
 
-export const reportProfile = mySqlTable("ReportProfile", {
+export const reportUser = mySqlTable("ReportProfile", {
   id: serial("id").primaryKey(),
   targetUserId: varchar("targetUserId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
@@ -515,13 +517,13 @@ export const reportPostRelations = relations(reportPost, ({ one }) => ({
   }),
 }));
 
-export const reportProfileRelations = relations(reportProfile, ({ one }) => ({
+export const reportProfileRelations = relations(reportUser, ({ one }) => ({
   profile: one(user, {
-    fields: [reportProfile.targetUserId],
+    fields: [reportUser.targetUserId],
     references: [user.id],
   }),
   reporter: one(user, {
-    fields: [reportProfile.reporterUserId],
+    fields: [reportUser.reporterUserId],
     references: [user.id],
   }),
 }));
