@@ -55,7 +55,6 @@ export const reportRouter = createTRPCRouter({
           reporterUserId: ctx.session.uid,
         });
       } catch (error) {
-        console.error(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to report comment",

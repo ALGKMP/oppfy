@@ -33,7 +33,7 @@ const ReportCommentActionSheet = (props: ReportCommentActionSheetProps) => {
         }),
     },
     {
-      text: "Hate, harassment, or bullying",
+      text: "Hate, harassment or bullying",
       textProps: { color: "$blue9" },
       onPress: () =>
         reportComment.mutate({
