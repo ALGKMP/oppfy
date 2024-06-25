@@ -39,23 +39,29 @@ export const handler = async (
 
     console.log(tier1);
 
-    // Implementing the provided Gremlin query
-    const tier2 = await g
-      .V(userId)
-      .in_("contact")
-      .where(__.not(__.outE("contact").has("isFollowing", true).to(userId)))
-      .where(__.out("contact").hasId(userId))
-      .where(__.id().is(P.without(tier1)))
-      .dedup()
-      .limit(10)
-      .project("id", "phoneNumberHash")
-      .by(__.id())
-      .by("phoneNumberHash")
-      .toList();
+    // all incoming people
+    const tier2 = await g.V(userId).inE("contact").outV().toList();
+
+    // remove all tier1 from tier2
+    tier2.filter((v) => !tier1.includes(v));
+
+    // get tier 3
+    const tier3 = g
+      .V(userId) // Start from the user vertex
+      .out("contact") // Traverse to all contacts of the user
+      .aggregate("contacts") // Store all contacts in a side-effect named 'contacts'
+      .out("contact") // Traverse to contacts of contacts
+      .where(__.not(__.inE("contact").from_(userId))) // Filter out vertices that are already contacts of the user
+      .groupCount() // Count occurrences of each vertex
+      .unfold() // Unroll the map into individual entries
+      .where(__.values().is(P.gte(3))) // Keep only entries with count >= 3
+      .limit(10) // Limit to 10 results
+      .toList(); // Execute the traversal
 
     const recommendedIds = {
       tier1,
       tier2,
+      tier3,
     };
 
     return {
