@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@oppfy/env": "workspace:*",
     "@mux/mux-node": "^8.5.1"
   },
   "devDependencies": {

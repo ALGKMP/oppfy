@@ -13,8 +13,9 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "sqs-producer": "^5.0.0",
-    "@aws-sdk/client-sqs": "^3.598.0"
+    "@oppfy/env": "workspace:*",
+    "@aws-sdk/client-sqs": "^3.598.0",
+    "sqs-producer": "^5.0.0"
   },
   "devDependencies": {
     "@oppfy/eslint-config": "workspace:*",
