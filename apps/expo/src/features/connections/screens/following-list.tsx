@@ -3,14 +3,16 @@ import { useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { Separator, View } from "tamagui";
+import { Input, SizableText, View, YStack } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { ListHeader, ListItem } from "../components";
+import { ListItem } from "../components";
 import { useFollowHandlers } from "../hooks";
 
 const FollowingList = () => {
@@ -43,14 +45,11 @@ const FollowingList = () => {
     () => followingData?.pages.flatMap((page) => page.items) ?? [],
     [followingData],
   );
-  const itemCount = useMemo(
-    () =>
-      followingData?.pages.reduce(
-        (total, page) => total + page.items.length,
-        0,
-      ) ?? 0,
-    [followingData],
-  );
+
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
+    data: followingItems,
+    keys: ["name", "username"],
+  });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -58,56 +57,32 @@ const FollowingList = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <BaseScreenView paddingBottom={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
-          renderItem={() => (
-            <VirtualizedListItem
-              loading
-              showSkeletons={{
-                imageUrl: true,
-                title: true,
-                subtitle: true,
-                button: true,
-              }}
-            />
-          )}
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((_, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            button: true,
+          }}
         />
-      </BaseScreenView>
-    );
-  }
+      ))}
+    </CardContainer>
+  );
 
-  if (itemCount === 0) {
-    return (
-      <BaseScreenView>
-        <View flex={1} justifyContent="center" bottom={headerHeight}>
-          <EmptyPlaceholder
-            title="Following"
-            subtitle="Once you follow someone, you'll see them here."
-            icon={<UserRoundPlus />}
-          />
-        </View>
-      </BaseScreenView>
-    );
-  }
-
-  return (
-    <BaseScreenView paddingBottom={0}>
+  const renderFollowing = () => (
+    <CardContainer>
       <FlashList
+        data={filteredItems}
         onRefresh={refetch}
         refreshing={isLoading}
-        data={followingItems}
-        ItemSeparatorComponent={Separator}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader title="FOLLOWERS" />}
         renderItem={({ item }) => (
           <ListItem
             item={item}
@@ -117,6 +92,44 @@ const FollowingList = () => {
           />
         )}
       />
+    </CardContainer>
+  );
+
+  const renderNoResults = () => (
+    <View flex={1} justifyContent="center" bottom={headerHeight}>
+      <EmptyPlaceholder
+        title="Following"
+        subtitle="Once you follow someone, you'll see them here."
+        icon={<UserRoundPlus />}
+      />
+    </View>
+  );
+
+  if (isLoading) {
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+    );
+  }
+
+  if (followingItems.length === 0) {
+    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
+  }
+
+  return (
+    <BaseScreenView scrollable>
+      <YStack gap="$4">
+        <Input
+          placeholder="Search following..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+
+        {filteredItems.length > 0 ? (
+          renderFollowing()
+        ) : (
+          <SizableText lineHeight={0}>No Users Found</SizableText>
+        )}
+      </YStack>
     </BaseScreenView>
   );
 };

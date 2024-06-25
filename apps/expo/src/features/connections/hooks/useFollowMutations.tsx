@@ -118,7 +118,7 @@ const useFollowHandlers = ({
   });
 
   const cancelFollowRequestMutation =
-    api.follow.cancelFollowRequest.useMutation({
+    api.request.cancelFollowRequest.useMutation({
       onMutate: async (newData) => {
         const query = getQueryByKey(queryToOptimisticallyUpdate);
 
@@ -140,7 +140,7 @@ const useFollowHandlers = ({
             pages: prevData.pages.map((page) => ({
               ...page,
               items: page.items.map((item) =>
-                item.userId === newData.userId
+                item.userId === newData.senderId
                   ? { ...item, isFollowing: false }
                   : item,
               ),
@@ -153,7 +153,7 @@ const useFollowHandlers = ({
       onError: (_err, newData, ctx) => {
         if (ctx === undefined) return;
         ctx.query.setInfiniteData(
-          { userId: newData.userId, pageSize: 20 },
+          { userId: newData.senderId, pageSize: 20 },
           ctx.prevData,
         );
       },
@@ -173,8 +173,8 @@ const useFollowHandlers = ({
     await unfollowMutation.mutateAsync({ userId });
   };
 
-  const cancelFollowRequest = async (userId: string) => {
-    await cancelFollowRequestMutation.mutateAsync({ userId });
+  const cancelFollowRequest = async (senderId: string) => {
+    await cancelFollowRequestMutation.mutateAsync({ senderId });
   };
 
   return { follow, unfollow, cancelFollowRequest };

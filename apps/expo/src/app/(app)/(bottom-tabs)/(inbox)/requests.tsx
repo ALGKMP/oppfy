@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
-import { Button, Separator, Spacer, Text, View, YStack } from "tamagui";
+import { Button, ListItemTitle, Spacer, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -227,33 +226,27 @@ const Requests = () => {
   const isLoading = followRequestsIsLoading || friendRequestsIsLoading;
 
   const renderLoadingSkeletons = () => (
-    <BaseScreenView scrollable>
-      <CardContainer>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          estimatedItemSize={75}
-          showsVerticalScrollIndicator={false}
-          renderItem={() => (
-            <VirtualizedListItem
-              loading
-              showSkeletons={{
-                imageUrl: true,
-                title: true,
-                subtitle: true,
-                subtitle2: true,
-                button: true,
-                button2: true,
-              }}
-            />
-          )}
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((_, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            subtitle2: true,
+            button: true,
+            button2: true,
+          }}
         />
-      </CardContainer>
-    </BaseScreenView>
+      ))}
+    </CardContainer>
   );
 
   const renderFriendRequests = () => (
     <CardContainer>
-      <ListHeader title="FRIEND REQUESTS" />
+      <ListItemTitle>Friend Requests</ListItemTitle>
 
       {friendRequestItems.map((item, index) => (
         <VirtualizedListItem
@@ -265,11 +258,11 @@ const Requests = () => {
           button={{
             text: "Accept",
             theme: "blue",
-            onPress: () => onAcceptFriendRequest(item.userId),
+            onPress: () => void onAcceptFriendRequest(item.userId),
           }}
           button2={{
             text: "Decline",
-            onPress: () => onDeclineFriendRequest(item.userId),
+            onPress: () => void onDeclineFriendRequest(item.userId),
           }}
           onPress={() => onUserSelected(item.profileId)}
         />
@@ -302,11 +295,11 @@ const Requests = () => {
           imageUrl={item.profilePictureUrl}
           button={{
             text: "Accept",
-            onPress: () => onAcceptFollowRequest(item.userId),
+            onPress: () => void onAcceptFollowRequest(item.userId),
           }}
           button2={{
             text: "Decline",
-            onPress: () => onDeclineFollowRequest(item.userId),
+            onPress: () => void onDeclineFollowRequest(item.userId),
           }}
           onPress={() => onUserSelected(item.profileId)}
         />
@@ -327,7 +320,9 @@ const Requests = () => {
   );
 
   if (isLoading) {
-    return renderLoadingSkeletons();
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+    );
   }
 
   return (

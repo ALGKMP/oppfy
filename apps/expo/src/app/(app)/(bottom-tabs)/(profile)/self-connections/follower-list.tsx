@@ -1,21 +1,24 @@
 import React, { useMemo } from "react";
 import { useRouter } from "expo-router";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, Separator, SizableText, View } from "tamagui";
+import { Button, Input, SizableText, View, YStack } from "tamagui";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import useSearch from "~/hooks/useSearch";
+import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+
+type FollowerItem =
+  RouterOutputs["follow"]["paginateFollowersSelf"]["items"][0];
 
 const FollowerList = () => {
-  const headerHeight = useHeaderHeight();
-
   const router = useRouter();
-
   const utils = api.useUtils();
 
   const removeFollower = api.follow.removeFollower.useMutation({
@@ -57,6 +60,7 @@ const FollowerList = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    refetch,
   } = api.follow.paginateFollowersSelf.useInfiniteQuery(
     {
       pageSize: 20,
@@ -66,22 +70,14 @@ const FollowerList = () => {
     },
   );
 
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 20 }, () => null);
-  }, []);
-
-  const followersItems = useMemo(() => {
-    return followersData?.pages.flatMap((page) => page.items);
+  const followerItems = useMemo(() => {
+    return followersData?.pages.flatMap((page) => page.items) ?? [];
   }, [followersData]);
 
-  const itemCount = useMemo(() => {
-    if (followersData === undefined) return 0;
-
-    return followersData.pages.reduce(
-      (total, page) => total + page.items.length,
-      0,
-    );
-  }, [followersData]);
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
+    data: followerItems,
+    keys: ["name", "username"],
+  });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -89,83 +85,109 @@ const FollowerList = () => {
     }
   };
 
-  return (
-    <BaseScreenView paddingBottom={0}>
-      {isLoading || itemCount ? (
-        <FlashList
-          data={isLoading ? placeholderData : followersItems}
-          ItemSeparatorComponent={Separator}
-          estimatedItemSize={75}
-          onEndReached={handleOnEndReached}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <SizableText size="$2" theme="alt1" marginBottom="$2">
-              FOLLOWERS
-            </SizableText>
-          }
-          renderItem={({ item }) => {
-            return (
-              <View>
-                {item === null ? (
-                  <VirtualizedListItem
-                    loading
-                    showSkeletons={{
-                      imageUrl: true,
-                      title: true,
-                      subtitle: true,
-                      button: true,
-                    }}
-                  />
-                ) : (
-                  <VirtualizedListItem
-                    loading={false}
-                    title={item.username}
-                    subtitle={item.name}
-                    imageUrl={item.profilePictureUrl}
-                    button={
-                      <ActionSheet
-                        title="Remove Follower"
-                        subtitle={`Are you sure you want to remove ${item.username} from your followers?`}
-                        imageUrl={item.profilePictureUrl}
-                        trigger={
-                          <Button size="$3" icon={<UserRoundMinus size="$1" />}>
-                            Remove
-                          </Button>
-                        }
-                        buttonOptions={[
-                          {
-                            text: "Remove",
-                            textProps: { color: "$red9" },
-                            onPress: () =>
-                              removeFollower.mutate({
-                                userId: item.userId,
-                              }),
-                          },
-                        ]}
-                      />
-                    }
-                    onPress={() =>
-                      // @ts-expect-error: Experimental typed routes dont support layouts yet
-                      router.push({
-                        pathname: "/(profile)/profile/[profile-id]",
-                        params: { profileId: String(item.profileId) },
-                      })
-                    }
-                  />
-                )}
-              </View>
-            );
+  const handleRemoveFollower = async (userId: string) =>
+    await removeFollower.mutateAsync({ userId });
+
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      {PLACEHOLDER_DATA.map((_, index) => (
+        <VirtualizedListItem
+          key={index}
+          loading
+          showSkeletons={{
+            imageUrl: true,
+            title: true,
+            subtitle: true,
+            button: true,
           }}
         />
-      ) : (
-        <View flex={1} justifyContent="center" bottom={headerHeight}>
-          <EmptyPlaceholder
-            title="Followers"
-            subtitle="You'll see all the people who follow you here."
-            icon={<UserRoundPlus />}
-          />
-        </View>
-      )}
+      ))}
+    </CardContainer>
+  );
+
+  const renderListItem = (item: FollowerItem) => (
+    <VirtualizedListItem
+      loading={false}
+      title={item.username}
+      subtitle={item.name}
+      imageUrl={item.profilePictureUrl}
+      button={
+        <ActionSheet
+          title="Remove Follower"
+          subtitle={`Are you sure you want to remove ${item.username} from your followers?`}
+          imageUrl={item.profilePictureUrl}
+          trigger={
+            <Button size="$3" icon={<UserRoundMinus size="$1" />}>
+              Remove
+            </Button>
+          }
+          buttonOptions={[
+            {
+              text: "Remove",
+              textProps: { color: "$red9" },
+              onPress: () => void handleRemoveFollower(item.userId),
+            },
+          ]}
+        />
+      }
+      onPress={() =>
+        router.push({
+          pathname: "/(profile)/profile/[profile-id]",
+          params: { profileId: String(item.profileId) },
+        })
+      }
+    />
+  );
+
+  const renderFollowers = () => (
+    <CardContainer>
+      <FlashList
+        data={filteredItems}
+        onRefresh={refetch}
+        refreshing={isLoading}
+        estimatedItemSize={75}
+        onEndReached={handleOnEndReached}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => renderListItem(item)}
+      />
+    </CardContainer>
+  );
+
+  const renderNoResults = () => (
+    <View flex={1} justifyContent="center">
+      <EmptyPlaceholder
+        title="No results"
+        subtitle="No followers found."
+        icon={<UserRoundPlus />}
+      />
+    </View>
+  );
+
+  if (isLoading) {
+    return (
+      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+    );
+  }
+
+  if (followerItems.length === 0) {
+    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
+  }
+
+  return (
+    <BaseScreenView scrollable>
+      <YStack gap="$4">
+        <Input
+          placeholder="Search followers..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+
+        {filteredItems.length > 0 ? (
+          renderFollowers()
+        ) : (
+          <SizableText lineHeight={0}>No Users Found</SizableText>
+        )}
+      </YStack>
     </BaseScreenView>
   );
 };

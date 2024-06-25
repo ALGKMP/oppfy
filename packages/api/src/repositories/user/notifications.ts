@@ -78,12 +78,6 @@ export class NotificationsRepository {
     cursor: { createdAt: Date } | null = null,
     pageSize = 10,
   ) {
-    const followerTable = aliasedTable(schema.follower, "followerTable");
-    const followRequestTable = aliasedTable(
-      schema.followRequest,
-      "followRequestTable",
-    );
-
     const notifications = await this.db
       .select({
         userId: schema.user.id,
@@ -98,9 +92,15 @@ export class NotificationsRepository {
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
-      CASE
-          WHEN ${followerTable.id} IS NOT NULL THEN 'following'
-          WHEN ${followRequestTable.id} IS NOT NULL THEN 'followRequestSent'
+        CASE
+          WHEN EXISTS (
+            SELECT 1 FROM ${schema.follower} f
+            WHERE f.senderId = ${userId} AND f.recipientId = ${schema.user.id}
+          ) THEN 'following'
+          WHEN EXISTS (
+            SELECT 1 FROM ${schema.followRequest} fr
+            WHERE fr.senderId = ${userId} AND fr.recipientId = ${schema.user.id}
+          ) THEN 'followRequestSent'
           ELSE 'notFollowing'
         END
       `,
@@ -108,20 +108,6 @@ export class NotificationsRepository {
       .from(schema.notifications)
       .innerJoin(schema.user, eq(schema.notifications.senderId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .leftJoin(
-        followerTable,
-        and(
-          eq(followerTable.senderId, userId),
-          eq(followerTable.recipientId, schema.user.id),
-        ),
-      )
-      .leftJoin(
-        followRequestTable,
-        and(
-          eq(followRequestTable.senderId, userId),
-          eq(followRequestTable.recipientId, schema.user.id),
-        ),
-      )
       .where(
         and(
           eq(schema.notifications.recipientId, userId),
