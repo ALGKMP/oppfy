@@ -6,10 +6,11 @@ const trpcFollowOutputSchema = {
       z.object({
         userId: z.string(),
         profileId: z.number(),
-        username: z.string(),
         name: z.string(),
+        username: z.string(),
         profilePictureUrl: z.string(),
         privacy: z.enum(["public", "private"]),
+        createdAt: z.date(),
       }),
     ),
     nextCursor: z
@@ -28,8 +29,13 @@ const trpcFollowOutputSchema = {
         username: z.string(),
         name: z.string(),
         profilePictureUrl: z.string(),
-        isFollowing: z.boolean(),
         privacy: z.enum(["public", "private"]),
+        relationshipState: z.enum([
+          "following",
+          "followRequestSent",
+          "notFollowing",
+        ]),
+        createdAt: z.date(),
       }),
     ),
     nextCursor: z
@@ -54,6 +60,7 @@ const trpcFollowOutputSchema = {
           "followRequestSent",
           "notFollowing",
         ]),
+        createdAt: z.date(),
       }),
     ),
     nextCursor: z
@@ -70,10 +77,15 @@ const trpcFollowOutputSchema = {
         userId: z.string(),
         profileId: z.number(),
         username: z.string(),
-        privacy: z.enum(["public", "private"]),
         name: z.string(),
         profilePictureUrl: z.string(),
-        isFollowing: z.boolean(),
+        privacy: z.enum(["public", "private"]),
+        relationshipState: z.enum([
+          "following",
+          "followRequestSent",
+          "notFollowing",
+        ]),
+        createdAt: z.date(),
       }),
     ),
     nextCursor: z
