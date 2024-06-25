@@ -106,6 +106,8 @@ const lambdaHandler = async (
     dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
     g = graph.traversal().withRemote(dc);
 
+    console.log(event[0]);
+
     const { userId, userPhoneNumberHash, contacts, followingIds } = event[0];
 
     await updateContacts(

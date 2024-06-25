@@ -30,14 +30,14 @@ export const handler = async (
 
     const tier1 = await g
       .V(userId)
-      .out("contact")
-      .where(__.not(__.inE("contact").has("isFollowing", true).from_(userId)))
+      .outE("contact")
+      .has("isFollowing", false)
+      .inV()
       .dedup()
       .limit(10)
-      /*       .project("id", "phoneNumberHash")
-      .by(__.id())
-      .by("phoneNumberHash") */
       .toList();
+
+    console.log(tier1);
 
     // Implementing the provided Gremlin query
     const tier2 = await g
