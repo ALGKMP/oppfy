@@ -24,25 +24,26 @@ const ListItem = ({
   const segments = useSegments();
 
   const renderButton = (item: UserItem): ButtonProps => {
-    if (item.privacy === "private" && !item.isFollowing) {
-      return {
-        text: "Sent",
-        icon: Send,
-        onPress: () => void handleCancelFollowRequest(item.userId),
-      };
-    } else if (item.isFollowing) {
-      return {
-        text: "Unfollow",
-        icon: UserRoundMinus,
-        onPress: () => void handleUnfollow(item.userId),
-      };
-    } else {
-      return {
-        text: "Follow",
-        icon: UserRoundPlus,
-        theme: "blue",
-        onPress: () => void handleFollow(item.userId),
-      };
+    switch (item.relationshipState) {
+      case "followRequestSent":
+        return {
+          text: "Sent",
+          icon: Send,
+          onPress: () => void handleCancelFollowRequest(item.userId),
+        };
+      case "following":
+        return {
+          text: "Unfollow",
+          icon: UserRoundMinus,
+          onPress: () => void handleUnfollow(item.userId),
+        };
+      case "notFollowing":
+        return {
+          text: "Follow",
+          icon: UserRoundPlus,
+          theme: "blue",
+          onPress: () => void handleFollow(item.userId),
+        };
     }
   };
 
