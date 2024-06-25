@@ -8,53 +8,65 @@ import { ReportRepository } from "../../repositories";
 export class ReportService {
   private reportRepository = new ReportRepository();
 
-  async reportPost(
-    postId: number,
-    reporterUserId: string,
-    reason: z.infer<typeof reportPostOptions>,
-  ) {
-    const report = await this.reportRepository.createPostReport(
-      reason,
-      postId,
-      reporterUserId,
-    );
-
-    if (!report) {
-      console.error(`Failed to report post ${postId}`);
+  async reportPost({
+    postId,
+    reporterUserId,
+    reason,
+  }: {
+    postId: number;
+    reporterUserId: string;
+    reason: z.infer<typeof reportPostOptions>;
+  }) {
+    try {
+      await this.reportRepository.createPostReport(
+        reason,
+        postId,
+        reporterUserId,
+      );
+    } catch (error) {
+      console.error(`Error reporting post ${postId}:`, error);
       throw new DomainError(ErrorCode.FAILED_TO_REPORT_POST);
     }
   }
 
-  async reportComment(
-    commentId: number,
-    reporterUserId: string,
-    reason: z.infer<typeof reportProfileOptions>,
-  ) {
-    const report = await this.reportRepository.createCommentReport(
-      reason,
-      commentId,
-      reporterUserId,
-    );
-
-    if (!report) {
-      console.error(`Failed to report comment ${commentId}`);
+  async reportComment({
+    commentId,
+    reporterUserId,
+    reason,
+  }: {
+    commentId: number;
+    reporterUserId: string;
+    reason: z.infer<typeof reportProfileOptions>;
+  }) {
+    try {
+      await this.reportRepository.createCommentReport(
+        reason,
+        commentId,
+        reporterUserId,
+      );
+    } catch (error) {
+      console.error(`Error reporting comment ${commentId}:`, error);
       throw new DomainError(ErrorCode.FAILED_TO_REPORT_COMMENT);
     }
   }
 
-  async reportUser(
-    targetUserId: string,
-    reporterUserId: string,
-    reason: z.infer<typeof reportProfileOptions>,
-  ) {
-    const report = await this.reportRepository.createUserReport(
-      reason,
-      targetUserId,
-      reporterUserId,
-    );
-
-    if (!report) {
-      console.error(`Failed to report user ${targetUserId}`);
+  async reportUser({
+    targetUserId,
+    reporterUserId,
+    reason,
+  }: {
+    targetUserId: string;
+    reporterUserId: string;
+    reason: z.infer<typeof reportProfileOptions>;
+  }) {
+    try {
+      await this.reportRepository.createUserReport(
+        reason,
+        targetUserId,
+        reporterUserId,
+      );
+    } catch (error) {
+      console.error(`Error reporting user ${targetUserId}:`, error);
       throw new DomainError(ErrorCode.FAILED_TO_REPORT_USER);
     }
   }

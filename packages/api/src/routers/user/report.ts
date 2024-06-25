@@ -20,7 +20,7 @@ export const reportRouter = createTRPCRouter({
     }),
 
   reportProfile: protectedProcedure
-    .input(trpcValidators.input.report.reportProfile)
+    .input(trpcValidators.input.report.reportUser)
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.report.reportProfile(
