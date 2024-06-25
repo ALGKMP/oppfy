@@ -3,10 +3,15 @@ import { createHash } from "crypto";
 import { sqs } from "@oppfy/sqs";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { ContactsRepository, UserRepository } from "../../repositories";
+import {
+  ContactsRepository,
+  FollowRepository,
+  UserRepository,
+} from "../../repositories";
 
 export class ContactService {
   private contactsRepository = new ContactsRepository();
+  private followRepository = new FollowRepository();
   private userRepository = new UserRepository();
 
   async syncContacts(userId: string, contacts: string[]) {
@@ -30,10 +35,18 @@ export class ContactService {
     // update the contacts in the db
     await this.contactsRepository.updateUserContacts(userId, filteredContacts);
 
+    // get following list from profile
+    const followingIds = await this.followRepository.getAllFollowingIds(userId);
+
     try {
       await sqs.send({
         id: userId + "_contactsync_" + Date.now().toString(),
-        body: JSON.stringify({ userId, userPhoneNumberHash, contacts: filteredContacts }),
+        body: JSON.stringify({
+          userId,
+          userPhoneNumberHash,
+          contacts: filteredContacts,
+          followingIds,
+        }),
       });
     } catch (error) {
       throw new DomainError(
@@ -62,7 +75,12 @@ export class ContactService {
     try {
       await sqs.send({
         id: userId + "_contactsync_" + Date.now().toString(),
-        body: JSON.stringify({ userId, userPhoneNumberHash, contacts: [] }),
+        body: JSON.stringify({
+          userId,
+          userPhoneNumberHash,
+          contacts: [],
+          followingIds: [],
+        }),
       });
     } catch (error) {
       throw new DomainError(

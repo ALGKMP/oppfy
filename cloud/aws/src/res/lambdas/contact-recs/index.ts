@@ -13,7 +13,6 @@ const {
 } = gremlin;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
-const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
 
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -25,24 +24,28 @@ export const handler = async (
       {},
     );
     const g = graph.traversal().withRemote(dc);
-    const userId = event.pathParameters?.userId!;
+    console.log(event.queryStringParameters);
+    const userId = event.queryStringParameters?.userId!;
 
-    const reccomendedIds = [];
+    console.log("Querying for recommendations for user", userId);
 
     // tier 1 reccs, all outgoing people within 1 edge
     const tier1 = await g.V(userId).out().id().toList();
 
-    // tier 2 reccs, all incoming people within 1 edge not in tier 1
-    const tier2 = await g.V(userId).in_().id().where(P.without(tier1)).toList();
+    // tier 2 reccs, all incoming people within 1 edge
+    const allTier2 = await g.V(userId).in_().id().toList();
 
-    reccomendedIds.push({
+    // Manually filtering out tier1 IDs from allTier2 using JavaScript array methods
+    const tier2 = allTier2.filter((id) => !tier1.includes(id));
+
+    const recommendedIds = {
       tier1,
       tier2,
-    });
+    };
 
     return {
       statusCode: 200,
-      body: JSON.stringify(reccomendedIds),
+      body: JSON.stringify(recommendedIds),
     };
   } catch (error) {
     console.error("Error during execution", error);

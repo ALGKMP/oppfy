@@ -5,11 +5,16 @@ import { APIGatewayProxyResult, Context } from "aws-lambda";
 import gremlin from "gremlin";
 import { z } from "zod";
 
-const DriverRemoteConnection = gremlin.driver.DriverRemoteConnection;
-const Graph = gremlin.structure.Graph;
-const { t, P } = gremlin.process;
-const { onCreate, onMatch } = gremlin.process.merge;
-const __ = gremlin.process.statics;
+const {
+  driver: { DriverRemoteConnection },
+  structure: { Graph },
+  process: {
+    t,
+    P,
+    merge: { onCreate, onMatch },
+    statics: __,
+  },
+} = gremlin;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
@@ -18,6 +23,7 @@ const contactSyncBody = z.object({
   userId: z.string(),
   userPhoneNumberHash: z.string(),
   contacts: z.array(z.string()),
+  followingIds: z.array(z.string()),
 });
 
 interface Vertex {
@@ -31,7 +37,10 @@ async function updateContacts(
   userId: string,
   userPhoneNumberHash: string,
   contacts: string[],
+  followingIds: Set<string>,
 ): Promise<boolean> {
+  const currentTimestamp = Date.now().toString();
+
   // Add or update the user vertex
   let userResult = await g
     .mergeV(
@@ -43,26 +52,17 @@ async function updateContacts(
     .option(
       onCreate,
       new Map([
-        ["created", Date.now().toString()],
+        ["createdAt", currentTimestamp],
         ["phoneNumberHash", userPhoneNumberHash],
       ]),
     )
-    .option(
-      onMatch,
-      new Map([
-        ["phoneNumberHash", userPhoneNumberHash],
-        ["updatedAt", Date.now().toString()],
-      ]),
-    )
+    .option(onMatch, new Map([["phoneNumberHash", userPhoneNumberHash]]))
     .next();
 
   // Extract user vertex from the result and assert type
   const user = userResult.value as Vertex;
 
-  // Remove existing contacts edges (outgoing only lol)
-  await g.V(user.id).outE("contacts").drop().iterate();
-
-  // Add bidirectional edges to all other users who have a phoneNumber that matches my edge phone number
+  // Create or update contact edges
   await g
     .V(user.id)
     .as("currentUser")
@@ -71,13 +71,16 @@ async function updateContacts(
     .has("phoneNumberHash", P.within(contacts))
     .where(P.neq("currentUser"))
     .as("contactUser")
-    .addE("contacts")
-    .from_("currentUser")
-    .property("updatedAt", Date.now().toString())
-    // .select("contactUser")
-    // .addE("contacts")
-    // .to("currentUser")
-    // .property("updatedAt", Date.now().toString())
+    .coalesce(
+      __.inE("contacts").where(__.outV().hasId(userId)),
+      __.addE("contacts")
+        .from_("currentUser")
+        .property("createdAt", currentTimestamp),
+    )
+    .property(
+      "isFollowing",
+      followingIds.has(__.select("contactUser").id().toString()),
+    )
     .iterate();
 
   return true;
@@ -103,12 +106,19 @@ const lambdaHandler = async (
     dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
     g = graph.traversal().withRemote(dc);
 
-    const { userId, userPhoneNumberHash, contacts } = event[0];
+    const { userId, userPhoneNumberHash, contacts, followingIds } = event[0];
     console.log("userId", userId);
     console.log("userPhoneNumberHash", userPhoneNumberHash);
     console.log("contacts", contacts);
+    console.log("followingIds", followingIds);
 
-    await updateContacts(g, userId, userPhoneNumberHash, contacts);
+    await updateContacts(
+      g,
+      userId,
+      userPhoneNumberHash,
+      contacts,
+      new Set(followingIds),
+    );
 
     console.log("Update successful");
 
