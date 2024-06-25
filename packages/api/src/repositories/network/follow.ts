@@ -128,8 +128,8 @@ export class FollowRepository {
         profileId: schema.profile.id,
         username: schema.profile.username,
         name: schema.profile.fullName,
-        privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
+        privacy: schema.user.privacySetting,
         createdAt: schema.follower.createdAt,
       })
       .from(schema.follower)
@@ -217,6 +217,21 @@ export class FollowRepository {
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
+        relationshipState: sql<
+          "following" | "followRequestSent" | "notFollowing"
+        >`
+        CASE
+          WHEN EXISTS (
+            SELECT 1 FROM ${schema.follower} f
+            WHERE f.senderId = ${forUserId} AND f.recipientId = ${schema.user.id}
+          ) THEN 'following'
+          WHEN EXISTS (
+            SELECT 1 FROM ${schema.followRequest} fr
+            WHERE fr.senderId = ${forUserId} AND fr.recipientId = ${schema.user.id}
+          ) THEN 'followRequestSent'
+          ELSE 'notFollowing'
+        END
+      `,
         createdAt: schema.follower.createdAt,
       })
       .from(schema.follower)
