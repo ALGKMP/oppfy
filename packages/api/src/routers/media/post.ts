@@ -286,11 +286,12 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         commentId: z.number(),
+        postId: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.post.deleteComment(input.commentId);
+        await ctx.services.post.deleteComment(input.commentId, input.postId);
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
