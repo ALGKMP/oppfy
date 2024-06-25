@@ -40,7 +40,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
 import { BlurContextMenuWrapper } from "../ContextMenu";
-import { ReportActionSheet } from "../Sheets/";
+import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 
 interface CommentsModalProps {
   postId: number;
@@ -260,7 +260,10 @@ const CommentsBottomSheet = ({
               </YStack>
             </XStack>
           </View>
-          <ReportActionSheet
+          <ReportCommentActionSheet
+            title="Report Comment"
+            subtitle="Select reason"
+            commentId={item.commentId}
             isVisible={isReportModalVisible}
             onCancel={() => setIsReportModalVisible(false)}
           />

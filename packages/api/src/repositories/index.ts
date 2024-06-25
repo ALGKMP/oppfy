@@ -8,6 +8,6 @@ export { FollowRepository } from "./network/follow";
 export { FriendRepository } from "./network/friend";
 export { ProfileRepository } from "./profile/profile";
 export { PostRepository } from "./media/post";
-export { ReportRepository } from "./network/report";
 export { MuxRepository } from "./mux/mux";
 export { ContactsRepository } from "./user/contacts";
+export { ReportRepository } from "./report/report";

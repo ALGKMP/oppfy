@@ -63,12 +63,12 @@ const ActionSheet = ({
     Animated.parallel([
       Animated.timing(backgroundOpacity, {
         toValue: 1,
-        duration: 300,
+        duration: 200,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnimation, {
         toValue: 0,
-        duration: 300,
+        duration: 200,
         useNativeDriver: true,
       }),
     ]).start();
@@ -78,13 +78,13 @@ const ActionSheet = ({
     Animated.parallel([
       Animated.timing(backgroundOpacity, {
         toValue: 0,
-        duration: 300,
+        duration: 200,
         useNativeDriver: true,
         easing: Easing.in(Easing.ease),
       }),
       Animated.timing(slideAnimation, {
         toValue: 300,
-        duration: 300,
+        duration: 200,
         useNativeDriver: true,
         easing: Easing.in(Easing.ease),
       }),
