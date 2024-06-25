@@ -1,9 +1,9 @@
 import * as sharedMediaSchema from "./src/shared/media";
 import * as sharedNotificationsSchema from "./src/shared/notifications";
+import * as sharedReportSchema from "./src/shared/report";
 import * as sharedUserSchema from "./src/shared/user";
 import { input, output } from "./src/trpc";
 
-export { post } from "./src/trpc/output/post/post";
 export {
   PublicFollowState,
   PrivateFollowState,
@@ -23,6 +23,7 @@ const sharedValidators = {
   user: sharedUserSchema,
   media: sharedMediaSchema,
   notifications: sharedNotificationsSchema,
+  report: sharedReportSchema,
 };
 
 export { trpcValidators, sharedValidators };
