@@ -11,3 +11,6 @@ export { PostRepository } from "./media/post";
 export { ReportRepository } from "./network/report";
 export { MuxRepository } from "./mux/mux";
 export { ContactsRepository } from "./user/contacts";
+export { ReportPostRepository } from "./report/reportPost";
+export { ReportUserRepository } from "./report/reportUser";
+export { ReportCommentRepository } from "./report/reportComment";
