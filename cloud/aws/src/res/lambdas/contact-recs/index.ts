@@ -28,20 +28,30 @@ export const handler = async (
 
     console.log("Querying for recommendations for user", userId);
 
-    // tier 1 reccs, all outgoing people within 1 edge where the isFollowing property on the edge is false
     const tier1 = await g
       .V(userId)
-      .outE()
-      .has("isFollowing", false)
-      .inV()
-      .id()
+      .out("contact")
+      .where(__.not(__.inE("contact").has("isFollowing", true).from_(userId)))
+      .dedup()
+      .limit(10)
+      /*       .project("id", "phoneNumberHash")
+      .by(__.id())
+      .by("phoneNumberHash") */
       .toList();
 
-    // tier 2 reccs, all incoming people within 1 edge
-    const allTier2 = await g.V(userId).in_().id().toList();
-
-    // Manually filtering out tier1 IDs from allTier2 using JavaScript array methods
-    const tier2 = allTier2.filter((id) => !tier1.includes(id));
+    // Implementing the provided Gremlin query
+    const tier2 = await g
+      .V(userId)
+      .in_("contact")
+      .where(__.not(__.outE("contact").has("isFollowing", true).to(userId)))
+      .where(__.out("contact").hasId(userId))
+      .where(__.id().is(P.without(tier1)))
+      .dedup()
+      .limit(10)
+      .project("id", "phoneNumberHash")
+      .by(__.id())
+      .by("phoneNumberHash")
+      .toList();
 
     const recommendedIds = {
       tier1,
