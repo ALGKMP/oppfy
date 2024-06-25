@@ -85,6 +85,56 @@ function createLambdaFunction(
   });
 }
 
+function createLambdaFunctionWithVpc(
+  scope: Construct,
+  name: string,
+  entryPath: string,
+  vpc: ec2.Vpc,
+  securityGroups?: ec2.SecurityGroup[],
+) {
+  return new lambdaNodeJs.NodejsFunction(scope, name, {
+    runtime: lambda.Runtime.NODEJS_20_X,
+    entry: entryPath,
+    handler: "handler",
+    timeout: cdk.Duration.minutes(3),
+    bundling: {
+      format: lambdaNodeJs.OutputFormat.ESM, // Use ESM format for bundling
+      mainFields: ["module", "main"],
+      esbuildArgs: {
+        "--platform": "node",
+        "--target": "esnext", // Ensure es2020 or higher to support top-level await
+        "--format": "esm", // Bundle as ESM
+        "--banner:js":
+          "import { createRequire } from 'module'; const require = createRequire(import.meta.url);", // Inject require shim
+      },
+    },
+    environment: {
+      // TODO: These should be passed on a case by case basis
+      SNS_PUSH_NOTIFICATION_TOPIC_ARN:
+        process.env.SNS_PUSH_NOTIFICATION_TOPIC_ARN!,
+
+      S3_POST_BUCKET: process.env.S3_POST_BUCKET!,
+      S3_PROFILE_BUCKET: process.env.S3_PROFILE_BUCKET!,
+
+      MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
+      MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
+      MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
+
+      DATABASE_PORT: process.env.DATABASE_PORT!,
+      DATABASE_ENDPOINT: process.env.DATABASE_ENDPOINT!,
+      DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
+      DATABASE_NAME: process.env.DATABASE_NAME!,
+      DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
+
+      OPENSEARCH_URL: process.env.OPENSEARCH_URL!,
+
+      EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN!,
+    },
+    vpc,
+    securityGroups,
+  });
+}
+
 // Helper function to set up bucket and Lambda integration
 function setupBucketLambdaIntegration(
   bucket: s3.Bucket,
@@ -346,7 +396,7 @@ export class AwsStack extends cdk.Stack {
       value: cluster.clusterEndpoint.hostname,
     });
 
-    const contactRecLambda = new lambdaNodeJs.NodejsFunction(
+    /*     const contactRecLambda = new lambdaNodeJs.NodejsFunction(
       this,
       "contactRecLambda",
       {
@@ -359,6 +409,19 @@ export class AwsStack extends cdk.Stack {
         vpc,
         securityGroups: [neptuneSecurityGroup],
       },
+    ); */
+
+    const contactRecLambda = createLambdaFunctionWithVpc(
+      this,
+      "contactRecLambda",
+      "src/res/lambdas/contact-recs/index.ts",
+      vpc,
+      [neptuneSecurityGroup],
+    );
+
+    contactRecLambda.addEnvironment(
+      "NEPTUNE_ENDPOINT",
+      cluster.clusterReadEndpoint.socketAddress,
     );
 
     const contactRecLambdaUrl = contactRecLambda.addFunctionUrl({

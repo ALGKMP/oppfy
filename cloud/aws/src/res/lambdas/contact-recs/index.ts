@@ -1,6 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import gremlin from "gremlin";
 
+import { db, eq, schema } from "@oppfy/db";
+
 const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
@@ -26,6 +28,13 @@ export const handler = async (
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
 
+    const following = (
+      await db
+        .select({ userId: schema.follower.recipientId })
+        .from(schema.follower)
+        .where(eq(schema.follower.senderId, userId))
+    ).map((f) => f.userId);
+
     console.log("Querying for recommendations for user", userId);
 
     const tier1 = await g
@@ -40,14 +49,22 @@ export const handler = async (
 
     console.log(tier1);
 
-    // all incoming people
-    const tier2 = await g.V(userId).inE("contact").outV().toList();
+    // all incoming people who arent in tier1 and tier2
+    const tier2 = await g
+      .V(userId)
+      .inE("contact")
+      .where(__.outV().hasId(P.without(tier1)))
+      .where(__.outV().hasId(P.without(following)))
+      .outV()
+      .dedup()
+      .limit(10)
+      .id()
+      .toList();
 
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
 
     // get tier 3
-
     const tier3 = g
       .V(userId) // Start from the user vertex
       .out("contact") // Traverse to all contacts of the user
