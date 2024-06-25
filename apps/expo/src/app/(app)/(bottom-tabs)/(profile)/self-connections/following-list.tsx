@@ -215,7 +215,7 @@ const FollowingList = () => {
           icon: UserRoundMinus,
           onPress: () => void handleUnfollow(item.userId),
         };
-      default:
+      case "notFollowing":
         return {
           text: "Follow",
           icon: UserRoundPlus,
