@@ -8,6 +8,7 @@ import {
   notificationsRouter,
   postRouter,
   profileRouter,
+  reportRouter,
   requestRouter,
   searchRouter,
   userRouter,
@@ -25,6 +26,7 @@ export const appRouter = createTRPCRouter({
   notifications: notificationsRouter,
   contacts: contactsRouter,
   search: searchRouter,
+  report: reportRouter,
 });
 
 export const openApiDocument = generateOpenApiDocument(appRouter, {

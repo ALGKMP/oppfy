@@ -52,8 +52,8 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
 import { BlurContextMenuWrapper } from "~/components/ContextMenu";
-import { ReportActionSheet } from "~/components/Sheets";
 import { api } from "~/utils/api";
+import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -392,7 +392,7 @@ const PostItem = (props: PostItemProps) => {
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
       />
-      <ReportActionSheet
+      <ReportPostActionSheet
         title="Report Post"
         subtitle="Select reason"
         postId={post.postId}
