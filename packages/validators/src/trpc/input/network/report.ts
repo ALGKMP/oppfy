@@ -3,7 +3,7 @@ import { z } from "zod";
 import { sharedValidators } from "@oppfy/validators";
 
 const trpcReportInputSchema = {
-  reportProfile: z.object({
+  reportUser: z.object({
     targetUserId: z.string(),
     reason: sharedValidators.report.reportUserOptions,
   }),
