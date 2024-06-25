@@ -35,6 +35,7 @@ export const handler = async (
       .inV()
       .dedup()
       .limit(10)
+      .id()
       .toList();
 
     console.log(tier1);
@@ -46,6 +47,7 @@ export const handler = async (
     tier2.filter((v) => !tier1.includes(v));
 
     // get tier 3
+
     const tier3 = g
       .V(userId) // Start from the user vertex
       .out("contact") // Traverse to all contacts of the user
