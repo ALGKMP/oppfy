@@ -1,6 +1,6 @@
 import { and, asc, count, eq, gt, or, sql } from "drizzle-orm";
 
-import { db, schema } from "@oppfy/db";
+import { aliasedTable, db, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../../errors";
 
@@ -205,10 +205,16 @@ export class FollowRepository {
 
   @handleDatabaseErrors
   async paginateFollowingSelf(
-    forUserId: string,
+    userId: string,
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
   ) {
+    const followerTable = aliasedTable(schema.follower, "followerTable");
+    const followRequestTable = aliasedTable(
+      schema.followRequest,
+      "followRequestTable",
+    );
+
     return await this.db
       .select({
         userId: schema.user.id,
@@ -221,14 +227,8 @@ export class FollowRepository {
           "following" | "followRequestSent" | "notFollowing"
         >`
         CASE
-          WHEN EXISTS (
-            SELECT 1 FROM ${schema.follower} f
-            WHERE f.senderId = ${forUserId} AND f.recipientId = ${schema.user.id}
-          ) THEN 'following'
-          WHEN EXISTS (
-            SELECT 1 FROM ${schema.followRequest} fr
-            WHERE fr.senderId = ${forUserId} AND fr.recipientId = ${schema.user.id}
-          ) THEN 'followRequestSent'
+          WHEN ${followerTable.id} IS NOT NULL THEN 'following'
+          WHEN ${followRequestTable.id} IS NOT NULL THEN 'followRequestSent'
           ELSE 'notFollowing'
         END
       `,
@@ -237,9 +237,23 @@ export class FollowRepository {
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .leftJoin(
+        followerTable,
+        and(
+          eq(followerTable.senderId, userId),
+          eq(followerTable.recipientId, schema.user.id),
+        ),
+      )
+      .leftJoin(
+        followRequestTable,
+        and(
+          eq(followRequestTable.senderId, userId),
+          eq(followRequestTable.recipientId, schema.user.id),
+        ),
+      )
       .where(
         and(
-          eq(schema.follower.senderId, forUserId),
+          eq(schema.follower.senderId, userId),
           cursor
             ? or(
                 gt(schema.follower.createdAt, cursor.createdAt),
