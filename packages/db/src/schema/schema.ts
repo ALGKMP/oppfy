@@ -434,7 +434,7 @@ export const blockRelation = relations(block, ({ one }) => ({
 export const reportComment = mySqlTable("ReportComment", {
   id: serial("id").primaryKey(),
   commentId: bigint("commentId", { mode: "number", unsigned: true })
-    .references(() => post.id, { onDelete: "cascade" })
+    .references(() => comment.id, { onDelete: "cascade" })
     .notNull(),
   reporterUserId: varchar("reporterUserId", { length: 255 })
     .references(() => user.id, { onDelete: "cascade" })
