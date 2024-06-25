@@ -17,7 +17,6 @@ const {
 } = gremlin;
 
 const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
-const NEPTUNE_PORT = process.env.NEPTUNE_PORT || 8182;
 
 const contactSyncBody = z.object({
   userId: z.string(),

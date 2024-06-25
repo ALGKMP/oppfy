@@ -24,7 +24,6 @@ export const handler = async (
       {},
     );
     const g = graph.traversal().withRemote(dc);
-    console.log(event.queryStringParameters);
     const userId = event.queryStringParameters?.userId!;
 
     console.log("Querying for recommendations for user", userId);
