@@ -11,12 +11,12 @@ export class ReportRepository {
   async createCommentReport(
     reason: z.infer<typeof sharedValidators.report.reportCommentOptions>,
     commentId: number,
-    userId: string,
+    reporterUserId: string,
   ) {
     const reportComment = await db.insert(schema.reportComment).values({
       reason,
-      reporterUserId: userId,
       commentId,
+      reporterUserId,
     });
 
     return reportComment;
@@ -30,9 +30,9 @@ export class ReportRepository {
     reporterUserId: string,
   ) {
     const reportComment = await db.insert(schema.reportPost).values({
-      reporterUserId,
       reason,
       postId,
+      reporterUserId,
     });
 
     return reportComment;
@@ -47,8 +47,8 @@ export class ReportRepository {
   ) {
     const reportComment = await db.insert(schema.reportUser).values({
       reason,
-      reporterUserId,
       targetUserId,
+      reporterUserId,
     });
 
     return reportComment;

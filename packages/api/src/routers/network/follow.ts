@@ -10,12 +10,11 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowersSelf)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowersSelf(
+        return await ctx.services.paginate.paginateFollowersSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        return trpcValidators.output.follow.paginateFollowersSelf.parse(result);
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
@@ -26,14 +25,11 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowersOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowersOthers(
+        return await ctx.services.paginate.paginateFollowersOthers(
           input.userId,
           ctx.session.uid,
           input.cursor,
           input.pageSize,
-        );
-        return trpcValidators.output.follow.paginateFollowersOthers.parse(
-          result,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
@@ -45,12 +41,11 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowingSelf)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowingSelf(
+        return await ctx.services.paginate.paginateFollowingSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        return trpcValidators.output.follow.paginateFollowingSelf.parse(result);
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
@@ -61,14 +56,11 @@ export const followRouter = createTRPCRouter({
     .output(trpcValidators.output.follow.paginateFollowingOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFollowingOthers(
+        return await ctx.services.paginate.paginateFollowingOthers(
           input.userId,
           ctx.session.uid,
           input.cursor,
           input.pageSize,
-        );
-        return trpcValidators.output.follow.paginateFollowingOthers.parse(
-          result,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });

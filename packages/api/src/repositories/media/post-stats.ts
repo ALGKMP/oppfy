@@ -21,6 +21,62 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
+  async incrementCommentsCount(postId: number) {
+    const currentStats = await this.db.query.postStats.findFirst({
+      where: eq(schema.postStats.postId, postId),
+    });
+
+    if (currentStats) {
+      await this.db
+        .update(schema.postStats)
+        .set({ comments: currentStats.comments + 1 })
+        .where(eq(schema.postStats.postId, postId));
+    }
+  }
+
+  @handleDatabaseErrors
+  async decrementCommentsCount(postId: number) {
+    const currentStats = await this.db.query.postStats.findFirst({
+      where: eq(schema.postStats.postId, postId),
+    });
+
+    if (currentStats) {
+      await this.db
+        .update(schema.postStats)
+        .set({ comments: currentStats.comments - 1 })
+        .where(eq(schema.postStats.postId, postId));
+    }
+  }
+
+  @handleDatabaseErrors
+  async incrementLikesCount(postId: number) {
+    const currentStats = await this.db.query.postStats.findFirst({
+      where: eq(schema.postStats.postId, postId),
+    });
+
+    if (currentStats) {
+      await this.db
+        .update(schema.postStats)
+        .set({ likes: currentStats.likes + 1 })
+        .where(eq(schema.postStats.postId, postId));
+    }
+  }
+
+  @handleDatabaseErrors
+  async decrementLikesCount(postId: number) {
+    const currentStats = await this.db.query.postStats.findFirst({
+      where: eq(schema.postStats.postId, postId),
+    });
+
+    if (currentStats) {
+      await this.db
+        .update(schema.postStats)
+        .set({ likes: currentStats.likes - 1 })
+        .where(eq(schema.postStats.postId, postId));
+    }
+  }
+
+  @handleDatabaseErrors
   async updatePostStats(
     postId: number,
     likes: number,

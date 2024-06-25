@@ -1,28 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { debounce, throttle } from "lodash";
-import {
-  Input,
-  ListItemTitle,
-  Separator,
-  SizableText,
-  View,
-  YStack,
-} from "tamagui";
+import { Input, ListItemTitle, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
-import StatusRenderer from "~/components/StatusRenderer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-
-const SEARCH_REFRESH_DELAY = 200;
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,7 +38,7 @@ const Search = () => {
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
-      {PLACEHOLDER_DATA.map((item, index) => (
+      {PLACEHOLDER_DATA.map((_, index) => (
         <VirtualizedListItem
           key={index}
           loading
@@ -96,20 +85,9 @@ const Search = () => {
     <CardContainer>
       <View>
         <ListItemTitle>Recommendations</ListItemTitle>
-        {/* Recommendations content can be added here */}
-        <SizableText>
-          Popular users or suggestions can be shown here.
-        </SizableText>
+        <SizableText>@oxy show suggestions here</SizableText>
       </View>
     </CardContainer>
-  );
-
-  const renderNoResults = () => (
-    <EmptyPlaceholder
-      title="No results found."
-      subtitle="Try searching for another username."
-      icon={<UserRoundX />}
-    />
   );
 
   return (
@@ -117,13 +95,15 @@ const Search = () => {
       <YStack gap="$4">
         <Input placeholder="Search by username" onChangeText={performSearch} />
         <View>
-          {!searchTerm
-            ? renderRecommendations()
-            : isLoading
-              ? renderLoadingSkeletons()
-              : searchResults.length
-                ? renderSearchResults()
-                : renderNoResults()}
+          {!searchTerm ? (
+            renderRecommendations()
+          ) : isLoading ? (
+            renderLoadingSkeletons()
+          ) : searchResults.length ? (
+            renderSearchResults()
+          ) : (
+            <SizableText lineHeight={0}>No Users Found</SizableText>
+          )}
         </View>
       </YStack>
     </BaseScreenView>

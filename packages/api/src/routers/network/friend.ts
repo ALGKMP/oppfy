@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
-import { sharedValidators, trpcValidators } from "@oppfy/validators";
+import { trpcValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
@@ -11,12 +10,11 @@ export const friendRouter = createTRPCRouter({
     .output(trpcValidators.output.friend.paginateFriendSelf)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFriendsSelf(
+        return await ctx.services.paginate.paginateFriendsSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        return trpcValidators.output.friend.paginateFriendSelf.parse(result);
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
@@ -27,13 +25,12 @@ export const friendRouter = createTRPCRouter({
     .output(trpcValidators.output.friend.paginateFriendsOthers)
     .query(async ({ input, ctx }) => {
       try {
-        const result = await ctx.services.paginate.paginateFriendsOthers(
+        return await ctx.services.paginate.paginateFriendsOthers(
           input.userId,
           input.cursor,
           input.pageSize,
           ctx.session.uid,
         );
-        return trpcValidators.output.friend.paginateFriendsOthers.parse(result);
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }

@@ -14,7 +14,7 @@ export const reportRouter = createTRPCRouter({
         return await ctx.services.report.reportUser({
           targetUserId,
           reason,
-          reporterUserId: ctx.session.user.id,
+          reporterUserId: ctx.session.uid,
         });
       } catch (error) {
         console.error(error);
@@ -33,7 +33,7 @@ export const reportRouter = createTRPCRouter({
         return await ctx.services.report.reportPost({
           postId,
           reason,
-          reporterUserId: ctx.session.user.id,
+          reporterUserId: ctx.session.uid,
         });
       } catch (error) {
         console.error(error);
@@ -52,10 +52,9 @@ export const reportRouter = createTRPCRouter({
         return await ctx.services.report.reportComment({
           commentId,
           reason,
-          reporterUserId: ctx.session.user.id,
+          reporterUserId: ctx.session.uid,
         });
       } catch (error) {
-        console.error(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to report comment",

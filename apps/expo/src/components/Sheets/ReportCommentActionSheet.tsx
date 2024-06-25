@@ -1,4 +1,5 @@
 import { sharedValidators } from "@oppfy/validators";
+import { useState } from "react";
 
 import { api } from "~/utils/api";
 import ActionSheet, { ButtonOption } from "./ActionSheet";
@@ -13,6 +14,7 @@ interface ReportCommentActionSheetProps {
 
 const ReportCommentActionSheet = (props: ReportCommentActionSheetProps) => {
   const { isVisible, onCancel, title, subtitle, commentId } = props;
+  []
 
   const reportComment = api.report.reportComment.useMutation();
 
@@ -33,7 +35,7 @@ const ReportCommentActionSheet = (props: ReportCommentActionSheetProps) => {
         }),
     },
     {
-      text: "Hate, harassment, or bullying",
+      text: "Hate, harassment or bullying",
       textProps: { color: "$blue9" },
       onPress: () =>
         reportComment.mutate({

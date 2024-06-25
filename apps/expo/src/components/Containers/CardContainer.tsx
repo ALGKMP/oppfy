@@ -1,5 +1,6 @@
 import React from "react";
-import { View, ViewProps } from "tamagui";
+import type { ViewProps } from "tamagui";
+import { View } from "tamagui";
 
 interface CardContainerProps extends ViewProps {
   children: React.ReactNode;
@@ -7,13 +8,7 @@ interface CardContainerProps extends ViewProps {
 
 const CardContainer = ({ children, ...props }: CardContainerProps) => {
   return (
-    <View
-      paddingVertical="$2"
-      paddingHorizontal="$3"
-      borderRadius="$6"
-      backgroundColor="$gray2"
-      {...props}
-    >
+    <View padding="$3" borderRadius="$6" backgroundColor="$gray2" {...props}>
       {children}
     </View>
   );

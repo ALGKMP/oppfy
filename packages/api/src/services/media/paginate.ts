@@ -6,7 +6,7 @@ import {
 } from "../../repositories";
 import { S3Service } from "../aws/s3";
 
-// TODO: Move these types into a d.types and put the paginated functions into their services.
+// TODO: Move these types into a types file and put the paginated functions into their services.
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -16,17 +16,6 @@ export interface PaginatedResponse<T> {
 interface Cursor {
   createdAt: Date;
   profileId: number;
-}
-
-export interface UserProfile {
-  userId: string;
-  profileId: number;
-  username: string | null;
-  privacy?: "public" | "private";
-  name: string | null;
-  profilePictureUrl: string;
-  createdAt: Date;
-  isFollowing?: boolean;
 }
 
 export class PaginationService {
@@ -40,13 +29,13 @@ export class PaginationService {
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.followRepository.paginateFollowersSelf(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowersOthers(
@@ -54,27 +43,27 @@ export class PaginationService {
     currentUserId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.followRepository.paginateFollowersOthers(
       userId,
       currentUserId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowingSelf(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.followRepository.paginateFollowingSelf(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowingOthers(
@@ -82,27 +71,27 @@ export class PaginationService {
     currentUserId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.followRepository.paginateFollowingOthers(
       userId,
       currentUserId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
   async paginateFriendsSelf(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.friendRepository.paginateFriendsSelf(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
   async paginateFriendsOthers(
@@ -110,58 +99,57 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
     currentUserId: string,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.friendRepository.paginateFriendsOther(
       userId,
       currentUserId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
   async paginateBlocked(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.blockRepository.getPaginatedBlockedUsers(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
   async paginateFriendRequests(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.friendRepository.paginateFriendRequests(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowRequests(
     userId: string,
     cursor: Cursor | null = null,
     pageSize = 10,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  ) {
     const data = await this.followRepository.paginateFollowRequests(
       userId,
       cursor,
       pageSize,
     );
-    return this._processPaginatedUserData(data, pageSize);
+    return this._processPaginatedData(data, pageSize);
   }
 
-  private async _processPaginatedUserData(
-    data: UserProfile[],
-    pageSize: number,
-  ): Promise<PaginatedResponse<UserProfile>> {
+  private async _processPaginatedData<
+    T extends { profilePictureUrl: string; profileId: number; createdAt: Date },
+  >(data: T[], pageSize: number) {
     try {
       if (data.length === 0) {
         return {

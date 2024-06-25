@@ -1,18 +1,13 @@
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import {
-  Alert,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  RefreshControl,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import { RefreshControl, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -21,14 +16,13 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { debounce, throttle } from "lodash";
-import { Skeleton } from "moti/skeleton";
+import { throttle } from "lodash";
 import {
   Avatar,
   Button,
   getToken,
+  ListItemTitle,
   Paragraph,
-  ScrollView,
   SizableText,
   Spacer,
   Text,
@@ -39,8 +33,13 @@ import {
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
+import CardContainer from "~/components/Containers/CardContainer";
+import { Skeleton } from "~/components/Skeletons";
+import StatusRenderer from "~/components/StatusRenderer";
 import { useUploadProfilePicture } from "~/hooks/media";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import MediaOfYou from "./media-of-you";
 
 type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
@@ -52,28 +51,25 @@ const ProfileLayout = () => {
 
   const {
     data: profileData,
-    isLoading,
-    refetch,
+    isLoading: isLoadingProfileData,
+    refetch: refetchProfileData,
   } = api.profile.getFullProfileSelf.useQuery();
 
   const {
-    data: friendData,
-    isLoading: isLoadingFriends,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch: refetchFriends,
+    data: friendsData,
+    isLoading: isLoadingFriendsData,
+    refetch: refetchFriendsData,
   } = api.friend.paginateFriendsSelf.useInfiniteQuery(
     { pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
   const friendItems = useMemo(
-    () => friendData?.pages.flatMap((page) => page.items) ?? [],
-    [friendData],
+    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
+    [friendsData],
   );
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       title: profileData?.username,
     });
@@ -81,9 +77,9 @@ const ProfileLayout = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetchProfileData(), refetchFriendsData()]);
     setRefreshing(false);
-  }, [refetch]);
+  }, [refetchFriendsData, refetchProfileData]);
 
   const scrollY = useSharedValue(0);
 
@@ -98,40 +94,45 @@ const ProfileLayout = () => {
     };
   });
 
+  if (
+    isLoadingProfileData ||
+    isLoadingFriendsData ||
+    profileData === undefined ||
+    friendsData === undefined
+  ) {
+    return (
+      <YStack gap="$5">
+        <Profile loading />
+        <Friends loading />
+      </YStack>
+    );
+  }
+
   return (
     <Animated.ScrollView
+      onScroll={scrollHandler}
+      scrollEventThrottle={16}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-      onScroll={scrollHandler}
-      scrollEventThrottle={16}
     >
-      {isLoading || profileData === undefined ? (
-        <YStack gap="$5">
-          <Profile loading />
-          <Friends loading />
-        </YStack>
-      ) : (
-        <>
-          <Animated.View style={profileAnimatedStyle}>
-            <YStack gap="$5">
-              <Profile loading={false} data={profileData} />
-              <Friends
-                loading={false}
-                data={{
-                  friendCount: profileData.friendCount,
-                  friendItems: friendItems,
-                }}
-              />
-            </YStack>
-          </Animated.View>
+      <YStack gap="$5">
+        <Animated.View style={profileAnimatedStyle}>
+          <YStack gap="$5">
+            <Profile loading={false} data={profileData} />
+            <Friends
+              loading={false}
+              data={{
+                friendCount: profileData.friendCount,
+                friendItems: friendItems,
+              }}
+            />
+          </YStack>
+        </Animated.View>
 
-          <Spacer size="$5" />
-
-          <MediaOfYou />
-        </>
-      )}
+        <MediaOfYou />
+      </YStack>
     </Animated.ScrollView>
   );
 };
@@ -150,9 +151,29 @@ type ProfileProps = LoadingProps | ProfileLoadedProps;
 const Profile = (props: ProfileProps) => {
   const router = useRouter();
 
-  const { imageUri, pickAndUploadImage } = useUploadProfilePicture({
+  const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
   });
+
+  const onFollowingListPress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push("/self-connections/following-list");
+  };
+
+  const onFollowerListPress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push("/self-connections/follower-list");
+  };
+
+  const onEditProfilePress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push("/edit-profile");
+  };
+
+  const onShareProfilePress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // TODO: add sharing functionality with deep linking
+  };
 
   return (
     <YStack
@@ -162,100 +183,98 @@ const Profile = (props: ProfileProps) => {
       backgroundColor="$background"
       gap="$4"
     >
-      <View marginBottom={-28}>
-        <TouchableOpacity
-          style={{ alignItems: "center" }}
-          disabled={props.loading}
-          onPress={pickAndUploadImage}
-        >
-          <Avatar circular size="$13" bordered>
-            <Avatar.Image
-              {...(props.loading
-                ? {}
-                : { src: imageUri ?? props.data.profilePictureUrl })}
-            />
-            <Avatar.Fallback />
-          </Avatar>
-        </TouchableOpacity>
+      <View marginBottom={-28} alignItems="center">
+        <StatusRenderer
+          data={!props.loading ? props.data.profilePictureUrl : undefined}
+          loadingComponent={<Skeleton circular size={140} />}
+          successComponent={(url) => (
+            <TouchableOpacity onPress={pickAndUploadImage}>
+              <Avatar circular size={140} bordered>
+                <Avatar.Image src={url} />
+                <Avatar.Fallback />
+              </Avatar>
+            </TouchableOpacity>
+          )}
+        />
       </View>
 
       <XStack justifyContent="space-between" alignItems="center" width="100%">
         <YStack alignItems="flex-start" gap="$2">
-          {props.loading ? (
-            <Skeleton width={100} height={25}>
-              <SizableText size="$4" textAlign="left" />
-            </Skeleton>
-          ) : (
-            <SizableText
-              size="$5"
-              fontWeight="bold"
-              textAlign="left"
-              lineHeight={0}
-            >
-              {props.data.name}
-            </SizableText>
-          )}
+          <StatusRenderer
+            data={!props.loading ? props.data.name : undefined}
+            loadingComponent={<Skeleton width={80} height={20} />}
+            successComponent={(name) => (
+              <SizableText
+                size="$5"
+                fontWeight="bold"
+                textAlign="left"
+                lineHeight={0}
+              >
+                {name}
+              </SizableText>
+            )}
+          />
 
-          {props.loading ? (
-            <Skeleton width={250} height={50}>
-              <Paragraph theme="alt1" textAlign="left" />
-            </Skeleton>
-          ) : props.data.bio ? (
-            <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
-              {props.data.bio}
-            </Paragraph>
-          ) : null}
+          <StatusRenderer
+            data={!props.loading ? props.data.bio : undefined}
+            loadingComponent={<Skeleton width={150} height={20} />}
+            successComponent={(bio) => (
+              <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
+                {bio}
+              </Paragraph>
+            )}
+          />
         </YStack>
 
         <YStack alignItems="flex-end" gap="$2">
-          <TouchableOpacity
-            disabled={props.loading}
-            onPress={() => router.push("/self-connections/following-list")}
-          >
-            <Stat
-              label="Following"
-              value={
-                props.loading
-                  ? "0"
-                  : abbreviatedNumber(props.data.followingCount)
-              }
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            disabled={props.loading}
-            onPress={() => router.push("/self-connections/follower-list")}
-          >
-            <Stat
-              label="Followers"
-              value={
-                props.loading
-                  ? "0"
-                  : abbreviatedNumber(props.data.followerCount)
-              }
-            />
-          </TouchableOpacity>
+          <StatusRenderer
+            data={!props.loading ? props.data.followingCount : undefined}
+            loadingComponent={<Skeleton width={80} height={20} />}
+            successComponent={(count) => (
+              <TouchableOpacity onPress={onFollowingListPress}>
+                <Stat label="Following" value={abbreviatedNumber(count)} />
+              </TouchableOpacity>
+            )}
+          />
+          <StatusRenderer
+            data={!props.loading ? props.data.followerCount : undefined}
+            loadingComponent={<Skeleton width={150} height={20} />}
+            successComponent={(count) => (
+              <TouchableOpacity onPress={onFollowerListPress}>
+                <Stat label="Followers" value={abbreviatedNumber(count)} />
+              </TouchableOpacity>
+            )}
+          />
         </YStack>
       </XStack>
 
       <XStack gap="$4">
-        <Button
-          borderRadius={"$10"}
-          size="$3.5"
-          flex={1}
-          disabled={props.loading}
-          onPress={() => router.push("/edit-profile")}
-        >
-          Edit Profile
-        </Button>
-        <Button
-          borderRadius={"$10"}
-          size="$3.5"
-          flex={1}
-          disabled={props.loading}
-          onPress={() => router.push("/share-profile")}
-        >
-          Share Profile
-        </Button>
+        <StatusRenderer
+          data={!props.loading ? props.data.username : undefined}
+          loadingComponent={
+            <View flex={1}>
+              <Skeleton width="100%" height={44} radius={20} />
+            </View>
+          }
+          successComponent={() => (
+            <Button flex={1} borderRadius={20} onPress={onEditProfilePress}>
+              Edit Profile
+            </Button>
+          )}
+        />
+        <StatusRenderer
+          data={!props.loading ? props.data.username : undefined}
+          loadingComponent={
+            <View flex={1}>
+              <Skeleton width="100%" height={44} radius={20} />
+            </View>
+          }
+          successComponent={() => (
+            <Button flex={1} borderRadius={20} onPress={onShareProfilePress}>
+              Share Profile
+            </Button>
+          )}
+        />
       </XStack>
     </YStack>
   );
@@ -279,6 +298,23 @@ const Friends = (props: FriendsProps) => {
   const showMore =
     !props.loading && props.data.friendItems.length < props.data.friendCount;
 
+  const handleFriendClicked = (profileId: number) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.navigate({
+      pathname: "/(profile)/profile/[profile-id]/",
+      params: { profileId: String(profileId) },
+    });
+  };
+
+  const handleShowMoreFriends = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push("/self-connections/friend-list");
+  };
+
+  const throttledHandleAction = useRef(
+    throttle(handleShowMoreFriends, 300, { leading: true, trailing: false }),
+  ).current;
+
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (!showMore) return;
@@ -286,113 +322,58 @@ const Friends = (props: FriendsProps) => {
       const { contentSize, contentOffset, layoutMeasurement } =
         event.nativeEvent;
 
-      if (contentSize && contentOffset && layoutMeasurement) {
-        const contentWidth = contentSize.width;
-        const offsetX = contentOffset.x;
-        const layoutWidth = layoutMeasurement.width;
+      const contentWidth = contentSize.width;
+      const offsetX = contentOffset.x;
+      const layoutWidth = layoutMeasurement.width;
 
-        // Check if within the threshold from the end
-        if (offsetX + layoutWidth - 80 >= contentWidth) {
-          throttledHandleAction();
-        }
+      // Check if within the threshold from the end
+      if (offsetX + layoutWidth - 80 >= contentWidth) {
+        throttledHandleAction();
       }
     },
-    [],
+    [showMore, throttledHandleAction],
   );
 
-  const handleAction = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/self-connections/friend-list");
-  };
+  useEffect(() => throttledHandleAction.cancel(), [throttledHandleAction]);
 
-  const throttledHandleAction = useRef(
-    throttle(handleAction, 300, { leading: true, trailing: false }),
-  ).current;
+  const renderLoadingSkeletons = () => (
+    <CardContainer>
+      <XStack gap="$2">
+        {PLACEHOLDER_DATA.map((item, index) => (
+          <Skeleton key={index} circular size={70} />
+        ))}
+      </XStack>
+    </CardContainer>
+  );
 
-  useEffect(() => {
-    return () => {
-      // Cleanup throttled fn
-      throttledHandleAction.cancel();
-    };
-  }, []);
-
-  if (props.loading) {
-    return (
-      <View
-        width="100%"
-        paddingVertical="$3"
-        borderRadius="$6"
-        backgroundColor="$gray2"
-      >
-        <YStack gap="$2">
-          <XStack paddingLeft="$3" gap="$1">
-            <Text fontWeight="700">0</Text>
-            <Text fontWeight="600">Friends</Text>
-          </XStack>
-
-          <FlashList
-            contentContainerStyle={{
-              paddingHorizontal: 12,
-            }}
-            data={Array.from({ length: 10 })}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            ItemSeparatorComponent={() => <Spacer size="$2" />}
-            estimatedItemSize={70}
-            renderItem={() => <Skeleton width={60} height={60} radius={30} />}
-          />
-        </YStack>
-      </View>
-    );
-  }
-
-  if (props.data.friendCount === 0) {
-    return (
-      <View
-        width="100%"
-        paddingVertical="$3"
-        borderRadius="$6"
-        backgroundColor="$gray2"
-      >
-        <YStack gap="$2" paddingHorizontal="$3">
-          <Text fontWeight="600">Find Friends</Text>
-          <Button size="$3.5" onPress={() => {}}>
-            @oxy add recommendations here
-          </Button>
-        </YStack>
-      </View>
-    );
-  }
-
-  return (
-    <View
-      width="100%"
-      paddingVertical="$3"
-      borderRadius="$6"
-      backgroundColor="$gray2"
-    >
+  const renderSuggestions = () => (
+    <CardContainer>
       <YStack gap="$2">
-        <XStack paddingLeft="$3" gap="$1">
-          <Text fontWeight="700">
-            {abbreviatedNumber(props.loading ? 0 : props.data.friendCount)}
-          </Text>
-          <Text fontWeight="600">Friends</Text>
-        </XStack>
+        <Text fontWeight="600">Find Friends</Text>
+        <Button size="$3.5">@oxy add recommendations here</Button>
+      </YStack>
+    </CardContainer>
+  );
+
+  const renderFriendList = (data: FriendsData) => (
+    <CardContainer paddingHorizontal={0}>
+      <YStack gap="$2">
+        <TouchableOpacity onPress={handleShowMoreFriends}>
+          <ListItemTitle paddingLeft="$3">
+            Friends ({abbreviatedNumber(data.friendCount)})
+          </ListItemTitle>
+        </TouchableOpacity>
 
         <FlashList
-          contentContainerStyle={{
-            paddingHorizontal: getToken("$space.3"),
-          }}
-          data={props.data.friendItems}
+          data={data.friendItems}
           horizontal
-          showsHorizontalScrollIndicator={false}
-          ItemSeparatorComponent={() => <Spacer size="$2" />}
-          onScroll={handleScroll}
           estimatedItemSize={70}
-          renderItem={({ item }) =>
-            props.loading ? (
-              <Skeleton width={60} height={60} radius={30} />
-            ) : (
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => handleFriendClicked(item.profileId)}
+            >
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
                   <Avatar.Image src={item.profilePictureUrl} />
@@ -401,31 +382,43 @@ const Friends = (props: FriendsProps) => {
                   {item.username}
                 </Text>
               </YStack>
-            )
-          }
+            </TouchableOpacity>
+          )}
           ListFooterComponent={
             showMore ? (
               <View
-                style={{
-                  marginRight: -100,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                marginRight={-100}
+                justifyContent="center"
+                alignItems="center"
               >
-                <Text style={{ fontWeight: "600", color: "#007AFF" }}>
-                  See More
-                </Text>
+                <SizableText color="$blue7" fontWeight="600">
+                  See more
+                </SizableText>
               </View>
             ) : null
           }
+          ItemSeparatorComponent={() => <Spacer size="$2" />}
+          contentContainerStyle={{
+            paddingHorizontal: getToken("$3", "space") as number,
+          }}
           ListFooterComponentStyle={{
             justifyContent: "center",
             alignItems: "center",
           }}
         />
       </YStack>
-    </View>
+    </CardContainer>
   );
+
+  if (props.loading) {
+    return renderLoadingSkeletons();
+  }
+
+  if (props.data.friendCount === 0) {
+    return renderSuggestions();
+  }
+
+  return renderFriendList(props.data);
 };
 
 interface StatProps {
@@ -435,8 +428,10 @@ interface StatProps {
 
 const Stat = (props: StatProps) => (
   <XStack gap="$1">
-    <Text theme="alt1">{props.label}</Text>
-    <Text fontWeight="bold" theme="alt1">
+    <Text theme="alt1" lineHeight={0}>
+      {props.label}{" "}
+    </Text>
+    <Text fontWeight="bold" lineHeight={0}>
       {props.value}
     </Text>
   </XStack>

@@ -1,6 +1,6 @@
 import { and, asc, count, eq, gt, not, or, sql } from "drizzle-orm";
 
-import { db, schema } from "@oppfy/db";
+import { db, isNotNull, schema } from "@oppfy/db";
 
 import { friendRequest } from "../../../../db/src/schema/schema";
 import { handleDatabaseErrors } from "../../errors";
@@ -134,7 +134,7 @@ export class FriendRepository {
     cursor: { createdAt: Date; profileId: number } | null = null,
     pageSize = 10,
   ) {
-    return await this.db
+    const friends = await this.db
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
@@ -169,10 +169,25 @@ export class FriendRepository {
                 ),
               )
             : undefined,
+          // ! as of now drizzle does not update the return type
+          isNotNull(schema.profile.username),
+          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.dateOfBirth),
         ),
       )
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
+
+    // todo: remove when drizzle fixes the return type for isNotNull
+    return friends as {
+      userId: string;
+      username: string;
+      name: string;
+      profilePictureUrl: string;
+      profileId: number;
+      privacy: "public" | "private";
+      createdAt: Date;
+    }[];
   }
 
   @handleDatabaseErrors
@@ -189,13 +204,23 @@ export class FriendRepository {
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
-        isFollowing: sql<number>`EXISTS (
-          SELECT 1 FROM ${schema.follower}
-          WHERE ${schema.follower.senderId} = ${currentUserId}
-            AND ${schema.follower.recipientId} = ${schema.user.id}
-        )`.as("isFollowing"),
+        relationshipState: sql<
+          "following" | "followRequestSent" | "notFollowing"
+        >`
+        CASE
+          WHEN EXISTS (
+            SELECT 1 FROM ${schema.follower} f
+            WHERE f.senderId = ${currentUserId} AND f.recipientId = ${schema.user.id}
+          ) THEN 'following'
+          WHEN EXISTS (
+            SELECT 1 FROM ${schema.followRequest} fr
+            WHERE fr.senderId = ${currentUserId} AND fr.recipientId = ${schema.user.id}
+          ) THEN 'followRequestSent'
+          ELSE 'notFollowing'
+        END
+        `,
+        createdAt: schema.follower.createdAt,
       })
       .from(schema.friend)
       .innerJoin(
@@ -222,18 +247,25 @@ export class FriendRepository {
                 ),
               )
             : undefined,
+          // ! as of now drizzle does not update the return type
+          isNotNull(schema.profile.username),
+          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.dateOfBirth),
         ),
       )
       .orderBy(asc(schema.friend.createdAt), asc(schema.profile.id))
       .limit(pageSize + 1);
 
-    // Convert the numeric isFollowing result to boolean
-    const friendsWithBooleanIsFollowing = friends.map((friend) => ({
-      ...friend,
-      isFollowing: Boolean(friend.isFollowing),
-    }));
-
-    return friendsWithBooleanIsFollowing;
+    return friends as {
+      userId: string;
+      username: string;
+      name: string;
+      profilePictureUrl: string;
+      profileId: number;
+      privacy: "public" | "private";
+      relationshipState: "following" | "followRequestSent" | "notFollowing";
+      createdAt: Date;
+    }[];
   }
 
   @handleDatabaseErrors

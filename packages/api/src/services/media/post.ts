@@ -287,9 +287,14 @@ export class PostService {
   async likePost(userId: string, postId: number) {
     try {
       const like = await this.likeRepository.findLike(postId, userId);
-      if (!like) {
-        await this.likeRepository.addLike(postId, userId);
+      if (like) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_LIKE_POST,
+          "Tried to like a post that was already liked.",
+        );
       }
+      await this.likeRepository.addLike(postId, userId);
+      await this.postStatsRepository.incrementLikesCount(postId);
     } catch (error) {
       console.error(
         `Error in likePost for userId: ${userId}, postId: ${postId}: `,
@@ -304,7 +309,15 @@ export class PostService {
 
   async unlikePost(userId: string, postId: number) {
     try {
+      const like = await this.likeRepository.findLike(postId, userId);
+      if (!like) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_UNLIKE_POST,
+          "Tried to unlike a post that was not liked.",
+        );
+      }
       await this.likeRepository.removeLike(postId, userId);
+      await this.postStatsRepository.decrementLikesCount(postId);
     } catch (error) {
       console.error(
         `Error in unlikePost for userId: ${userId}, postId: ${postId}: `,
@@ -335,6 +348,7 @@ export class PostService {
   async commentOnPost(userId: string, postId: number, commentBody: string) {
     try {
       await this.commentRepository.addComment(postId, userId, commentBody);
+      await this.postStatsRepository.incrementCommentsCount(postId);
     } catch (error) {
       console.error(
         `Error in addCommentToPost for userId: ${userId}, postId: ${postId}, commentText: ${commentBody}: `,
@@ -347,9 +361,10 @@ export class PostService {
     }
   }
 
-  async deleteComment(commentId: number) {
+  async deleteComment(commentId: number, postId: number) {
     try {
       await this.commentRepository.removeComment(commentId);
+      await this.postStatsRepository.decrementCommentsCount(postId);
     } catch (error) {
       console.error(
         `Error in deleteComment for commentId: ${commentId}: `,

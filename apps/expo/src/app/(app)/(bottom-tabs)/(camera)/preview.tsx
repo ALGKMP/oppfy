@@ -19,12 +19,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
+import { StatusBarBlurBackground } from "~/components/StatusBars";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
   SAFE_AREA_PADDING,
 } from "~/constants/camera";
-import { StatusBarBlurBackground } from "~/features/camera/components";
 
 type SaveState = "idle" | "saving" | "saved";
 
@@ -179,11 +179,15 @@ const PreviewScreen = () => {
   );
 };
 
-const PreviewImage = ({ uri }: { uri: string }) => (
+interface PreviewProps {
+  uri: string;
+}
+
+const PreviewImage = ({ uri }: PreviewProps) => (
   console.log(uri), (<Image source={{ uri }} style={StyleSheet.absoluteFill} />)
 );
 
-const PreviewVideo = ({ uri }: { uri: string }) => {
+const PreviewVideo = ({ uri }: PreviewProps) => {
   const videoRef = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
@@ -288,6 +292,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     flex: 1,
     justifyContent: "flex-end",
+    pointerEvents: "box-none",
   },
   glassyButton: {
     borderRadius: 16,

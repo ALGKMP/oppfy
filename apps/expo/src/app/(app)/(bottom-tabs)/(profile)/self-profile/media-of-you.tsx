@@ -52,8 +52,8 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
 import { BlurContextMenuWrapper } from "~/components/ContextMenu";
-import { api } from "~/utils/api";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
+import { api } from "~/utils/api";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -352,16 +352,20 @@ const PostItem = (props: PostItemProps) => {
         {/* Comments and Likes */}
         <XStack flex={1} gap="$2">
           <View flex={4} alignItems="flex-start" paddingLeft={"$2.5"}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
               <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
-                102 other comments
+                {post.commentsCount > 0
+                  ? post.commentsCount > 1
+                    ? `${post.commentsCount} comments`
+                    : `${post.commentsCount} comment`
+                  : "Be the first to comment"}
               </SizableText>
             </TouchableOpacity>
           </View>
           <View flex={2} alignItems={"flex-start"}>
             <TouchableOpacity>
               <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
-                1k likes
+                {post.likesCount > 0 ? `${post.likesCount} likes` : ""}
               </SizableText>
             </TouchableOpacity>
           </View>
@@ -451,11 +455,7 @@ const MediaOfYou = () => {
   return (
     <View flex={1}>
       <Separator margin={10} borderColor={"white"} />
-      {isLoading ? (
-        <Skeleton.Group show={true}>
-          <Skeleton width={"100%"} height={100} />
-        </Skeleton.Group>
-      ) : itemCount ? (
+      {itemCount ? (
         <FlashList
           data={isLoading ? placeholderData : posts}
           numColumns={1}
@@ -469,7 +469,9 @@ const MediaOfYou = () => {
           estimatedItemSize={screenWidth}
         />
       ) : (
-        <Text>No posts found</Text>
+        <View flex={1} justifyContent="center" alignItems="center">
+          <Text>No posts found</Text>
+        </View>
       )}
     </View>
   );
