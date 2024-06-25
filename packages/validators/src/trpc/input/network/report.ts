@@ -1,21 +1,25 @@
 import { z } from "zod";
 
-import { sharedValidators } from "@oppfy/validators";
+import {
+  reportCommentOptions,
+  reportPostOptions,
+  reportUserOptions,
+} from "../../../shared";
 
 const trpcReportInputSchema = {
   reportUser: z.object({
     targetUserId: z.string(),
-    reason: sharedValidators.report.reportUserOptions,
+    reason: reportUserOptions,
   }),
 
   reportPost: z.object({
     postId: z.number(),
-    reason: sharedValidators.report.reportPostOptions,
+    reason: reportPostOptions,
   }),
 
   reportComment: z.object({
     commentId: z.number(),
-    reason: sharedValidators.report.reportCommentOptions,
+    reason: reportCommentOptions,
   }),
 };
 

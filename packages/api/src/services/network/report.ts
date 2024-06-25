@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { reportPostOptions, reportProfileOptions } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { ReportRepository } from "../../repositories";
@@ -15,7 +15,7 @@ export class ReportService {
   }: {
     postId: number;
     reporterUserId: string;
-    reason: z.infer<typeof reportPostOptions>;
+    reason: z.infer<typeof sharedValidators.report.reportPostOptions>;
   }) {
     try {
       await this.reportRepository.createPostReport(
@@ -36,7 +36,7 @@ export class ReportService {
   }: {
     commentId: number;
     reporterUserId: string;
-    reason: z.infer<typeof reportProfileOptions>;
+    reason: z.infer<typeof sharedValidators.report.reportCommentOptions>;
   }) {
     try {
       await this.reportRepository.createCommentReport(
@@ -57,7 +57,7 @@ export class ReportService {
   }: {
     targetUserId: string;
     reporterUserId: string;
-    reason: z.infer<typeof reportProfileOptions>;
+    reason: z.infer<typeof sharedValidators.report.reportUserOptions>;
   }) {
     try {
       await this.reportRepository.createUserReport(
