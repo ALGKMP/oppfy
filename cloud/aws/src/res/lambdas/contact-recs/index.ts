@@ -28,12 +28,11 @@ export const handler = async (
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
 
-    const following = (
-      await db
-        .select({ userId: schema.follower.recipientId })
-        .from(schema.follower)
-        .where(eq(schema.follower.senderId, userId))
-    ).map((f) => f.userId);
+    const following = await db
+      .select({ userId: schema.follower.recipientId })
+      .from(schema.follower)
+      .where(eq(schema.follower.senderId, userId))
+      .then((res) => res.map((r) => r.userId));
 
     console.log("Querying for recommendations for user", userId);
 
@@ -65,7 +64,7 @@ export const handler = async (
     tier2.filter((v) => !tier1.includes(v));
 
     // get tier 3
-    const tier3 = g
+    const tier3 = await g
       .V(userId) // Start from the user vertex
       .out("contact") // Traverse to all contacts of the user
       .aggregate("contacts") // Store all contacts in a side-effect named 'contacts'
@@ -75,7 +74,19 @@ export const handler = async (
       .unfold() // Unroll the map into individual entries
       .where(__.values().is(P.gte(3))) // Keep only entries with count >= 3
       .limit(10) // Limit to 10 results
-      .toList(); // Execute the traversal
+      .toList();
+
+    // tier 4 is just people 1 more edge from the tier1
+    /*    const tier4 = await g
+      .V(tier1)
+      .out("contact")
+      .dedup()
+      .limit(10)
+      .id()
+      .toList();
+ */
+
+    // console.log(tier4);
 
     const recommendedIds = {
       tier1,
