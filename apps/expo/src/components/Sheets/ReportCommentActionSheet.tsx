@@ -1,8 +1,8 @@
-import { sharedValidators } from "@oppfy/validators";
 import { useState } from "react";
 
 import { api } from "~/utils/api";
-import ActionSheet, { ButtonOption } from "./ActionSheet";
+import type { ButtonOption } from "./ActionSheet";
+import ActionSheet from "./ActionSheet";
 
 interface ReportCommentActionSheetProps {
   title: string;
@@ -14,7 +14,7 @@ interface ReportCommentActionSheetProps {
 
 const ReportCommentActionSheet = (props: ReportCommentActionSheetProps) => {
   const { isVisible, onCancel, title, subtitle, commentId } = props;
-  []
+  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
 
   const reportComment = api.report.reportComment.useMutation();
 
