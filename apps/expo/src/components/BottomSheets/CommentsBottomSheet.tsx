@@ -24,6 +24,7 @@ import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetModal,
   BottomSheetTextInput,
+  BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
@@ -408,53 +409,56 @@ const CommentsBottomSheet = ({
               </TouchableOpacity>
             ))}
           </XStack>
-          <XStack
-            padding={"$3.5"}
-            paddingBottom={"$6"}
-            gap="$2.5"
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor={"$gray4"}
+          <BottomSheetView
           >
-            <Avatar circular size="$4" flex={1}>
-              <Avatar.Image
-                accessibilityLabel="User Avatar"
-                src={profile?.profilePictureUrl}
-              />
-              <Avatar.Fallback backgroundColor="$blue10" />
-            </Avatar>
-            <View style={{ flex: 5 }}>
-              <BottomSheetTextInput
-                placeholder="Comment"
-                maxLength={100}
-                value={inputValue}
-                onChangeText={setInputValue}
-                style={{
-                  fontWeight: "bold",
-                  justifyContent: "flex-start",
-                  borderWidth: 10,
-                  borderColor: "#2E2E2E",
-                  borderRadius: 20,
-                  backgroundColor: "#2E2E2E",
-                  color: "#fff",
-                }}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={handlePostComment}
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 7,
-                backgroundColor: "rgb(1,145,255)",
-                borderRadius: 20,
-                borderWidth: 0,
-              }}
+            <XStack
+              padding={"$3.5"}
+              paddingBottom={"$6"}
+              gap="$2.5"
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor={"$gray4"}
             >
-              <SendHorizontal color="$gray12" />
-            </TouchableOpacity>
-          </XStack>
+              <Avatar circular size="$4" flex={1}>
+                <Avatar.Image
+                  accessibilityLabel="User Avatar"
+                  src={profile?.profilePictureUrl}
+                />
+                <Avatar.Fallback backgroundColor="$blue10" />
+              </Avatar>
+              <View style={{ flex: 5 }}>
+                <BottomSheetTextInput
+                  placeholder="Comment"
+                  maxLength={100}
+                  value={inputValue}
+                  onChangeText={setInputValue}
+                  style={{
+                    fontWeight: "bold",
+                    justifyContent: "flex-start",
+                    borderWidth: 10,
+                    borderColor: "#2E2E2E",
+                    borderRadius: 20,
+                    backgroundColor: "#2E2E2E",
+                    color: "#fff",
+                  }}
+                />
+              </View>
+              <TouchableOpacity
+                onPress={handlePostComment}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 7,
+                  backgroundColor: "rgb(1,145,255)",
+                  borderRadius: 20,
+                  borderWidth: 0,
+                }}
+              >
+                <SendHorizontal color="$gray12" />
+              </TouchableOpacity>
+            </XStack>
+          </BottomSheetView>
         </BottomSheet>
       </Animated.View>
     </Modal>
