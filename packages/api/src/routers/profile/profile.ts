@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { env } from "@oppfy/env/server";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -9,7 +10,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../../trpc";
-import { env } from "@oppfy/env/server";
 
 export const profileRouter = createTRPCRouter({
   updateFullName: protectedProcedure

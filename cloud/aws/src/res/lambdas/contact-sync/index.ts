@@ -110,7 +110,10 @@ const lambdaHandler = async (
 
   try {
     const graph = new Graph();
-    dc = new DriverRemoteConnection(`wss://${env.NEPTUNE_ENDPOINT}/gremlin`, {});
+    dc = new DriverRemoteConnection(
+      `wss://${env.NEPTUNE_ENDPOINT}/gremlin`,
+      {},
+    );
     g = graph.traversal().withRemote(dc);
 
     console.log(event[0]);

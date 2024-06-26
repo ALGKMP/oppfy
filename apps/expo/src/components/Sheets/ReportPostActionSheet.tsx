@@ -1,6 +1,7 @@
+import { sharedValidators } from "@oppfy/validators";
+
 import { api } from "~/utils/api";
 import ActionSheet, { ButtonOption } from "../Sheets/ActionSheet";
-import { sharedValidators } from "@oppfy/validators";
 
 interface ReportPostActionSheetProps {
   title: string;
@@ -19,22 +20,26 @@ const ReportPostActionSheet = (props: ReportPostActionSheetProps) => {
     {
       text: "Violent or abusive",
       textProps: { color: "$blue9" },
-      onPress: () => reportPost.mutate({ postId, reason: "Violent or abusive" }),
+      onPress: () =>
+        reportPost.mutate({ postId, reason: "Violent or abusive" }),
     },
     {
       text: "Sexually explicit or predatory",
       textProps: { color: "$blue9" },
-      onPress: () => reportPost.mutate({ postId, reason: "Sexually explicit or predatory" }),
+      onPress: () =>
+        reportPost.mutate({ postId, reason: "Sexually explicit or predatory" }),
     },
     {
       text: "Hate, harassment, or bullying",
       textProps: { color: "$blue9" },
-      onPress: () => reportPost.mutate({ postId, reason: "Hate, harassment or bullying" }),
+      onPress: () =>
+        reportPost.mutate({ postId, reason: "Hate, harassment or bullying" }),
     },
     {
       text: "Suicide and self-harm",
       textProps: { color: "$blue9" },
-      onPress: () => reportPost.mutate({ postId, reason: "Suicide and self-harm" }),
+      onPress: () =>
+        reportPost.mutate({ postId, reason: "Suicide and self-harm" }),
     },
     {
       text: "Scam or spam",
