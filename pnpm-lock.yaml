@@ -175,6 +175,9 @@ importers:
       expo-store-review:
         specifier: ^7.0.2
         version: 7.0.2(expo@51.0.14)
+      expo-video:
+        specifier: ^1.1.10
+        version: 1.1.10(expo@51.0.14)
       expo-video-thumbnails:
         specifier: ~8.0.0
         version: 8.0.0(expo@51.0.14)
@@ -13814,6 +13817,14 @@ packages:
 
   /expo-video-thumbnails@8.0.0(expo@51.0.14):
     resolution: {integrity: sha512-VWVkBjn8DRodRVCDDaFxnQrOaPNzTeEcGBvPWcAv9WQ4D+TY0KCl36x4gUf9HUfhhH8uwZdmP1g1rSFtqCTGLg==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.14(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+    dev: false
+
+  /expo-video@1.1.10(expo@51.0.14):
+    resolution: {integrity: sha512-k9ecpgtwAK8Ut8enm8Jv398XkB/uVOyLLqk80M/d8pH9EN5CVrBQ7iEzWlR3quvVUFM7Uf5wRukJ4hk3mZ8NCg==}
     peerDependencies:
       expo: '*'
     dependencies:

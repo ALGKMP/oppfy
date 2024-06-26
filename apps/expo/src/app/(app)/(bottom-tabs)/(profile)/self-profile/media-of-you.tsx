@@ -13,6 +13,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, MoreHorizontal, SendHorizontal } from "@tamagui/lucide-icons";
 import {
@@ -61,6 +62,16 @@ const PostItem = (props: PostItemProps) => {
 
   const [isLiked, setIsLiked] = useState<boolean>(hasLiked ?? false);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const videoSource =
+    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const player = useVideoPlayer(videoSource, (player) => {
+    player.loop = true;
+    player.play();
+  });
 
   useEffect(() => {
     setIsLiked(hasLiked ?? false);
@@ -289,8 +300,6 @@ const PostItem = (props: PostItemProps) => {
             source={{ uri: post.imageUrl }}
             style={[
               {
-                // width: post.width,
-                // height: post.height,
                 width: "100%",
                 height: "100%",
                 justifyContent: "center",
@@ -306,76 +315,84 @@ const PostItem = (props: PostItemProps) => {
           </Image>
         </View>
       </GestureDetector>
-      <XStack
-        flex={1}
-        position="absolute"
-        top={10}
-        left={10}
-        width="95%"
-        justifyContent="space-between"
-        alignContent="center"
-      >
-        <XStack gap="$2.5">
-          <Avatar circular size="$5">
-            <Avatar.Image
-              accessibilityLabel="Cam"
-              src={profile?.profilePictureUrl ?? ""}
-              onPress={() => handleUserClicked(post.recipientProfileId)}
-            />
-            <Avatar.Fallback backgroundColor="$blue10" />
-          </Avatar>
-          <YStack gap="$1" justifyContent="center">
-            <TouchableOpacity
-              onPress={() => handleUserClicked(post.recipientProfileId)}
-            >
-              <SizableText
-                size="$3"
-                lineHeight={14}
-                margin={0}
-                padding={0}
-                shadowRadius={3}
-                shadowOpacity={0.5}
-                fontWeight="bold"
-              >
-                {profile?.username ?? "@RecipientUsername"}
-              </SizableText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                handleUserClicked(post.authorProfileId);
-              }}
-            >
-              <XStack gap="$1" alignItems="center">
-                <SizableText
-                  size="$3"
-                  lineHeight={15}
-                  marginTop={0}
-                  padding={0}
+      {post.mediaType === "image" ? (
+        <>
+          <XStack
+            flex={1}
+            position="absolute"
+            top={10}
+            left={10}
+            width="95%"
+            justifyContent="space-between"
+            alignContent="center"
+          >
+            <XStack gap="$2.5">
+              <Avatar circular size="$5">
+                <Avatar.Image
+                  accessibilityLabel="Cam"
+                  src={profile?.profilePictureUrl ?? ""}
+                  onPress={() => handleUserClicked(post.recipientProfileId)}
+                />
+                <Avatar.Fallback backgroundColor="$blue10" />
+              </Avatar>
+              <YStack gap="$1" justifyContent="center">
+                <TouchableOpacity
+                  onPress={() => handleUserClicked(post.recipientProfileId)}
                 >
-                  📸
-                </SizableText>
-                <SizableText size="$2" lineHeight={15} color="$gray2">
-                  posted by:
-                </SizableText>
+                  <SizableText
+                    size="$3"
+                    lineHeight={14}
+                    margin={0}
+                    padding={0}
+                    shadowRadius={3}
+                    shadowOpacity={0.5}
+                    fontWeight="bold"
+                  >
+                    {profile?.username ?? "@RecipientUsername"}
+                  </SizableText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    handleUserClicked(post.authorProfileId);
+                  }}
+                >
+                  <XStack gap="$1" alignItems="center">
+                    <SizableText
+                      size="$3"
+                      lineHeight={15}
+                      marginTop={0}
+                      padding={0}
+                    >
+                      📸
+                    </SizableText>
+                    <SizableText size="$2" lineHeight={15} color="$gray2">
+                      posted by:
+                    </SizableText>
 
-                <SizableText
-                  size="$2"
-                  lineHeight={15}
-                  fontWeight="bold"
-                  color="$blue9"
-                >
-                  {profile?.username ?? "@AuthorUsername"}
-                </SizableText>
-              </XStack>
-            </TouchableOpacity>
-          </YStack>
-        </XStack>
-        <View justifyContent="center" alignItems="center">
-          <TouchableOpacity onPress={() => setIsReportModalVisible(true)}>
-            <MoreHorizontal size={24} color="$gray12" />
-          </TouchableOpacity>
-        </View>
-      </XStack>
+                    <SizableText
+                      size="$2"
+                      lineHeight={15}
+                      fontWeight="bold"
+                      color="$blue9"
+                    >
+                      {profile?.username ?? "@AuthorUsername"}
+                    </SizableText>
+                  </XStack>
+                </TouchableOpacity>
+              </YStack>
+            </XStack>
+            <View justifyContent="center" alignItems="center">
+              <TouchableOpacity onPress={() => setIsReportModalVisible(true)}>
+                <MoreHorizontal size={24} color="$gray12" />
+              </TouchableOpacity>
+            </View>
+          </XStack>
+        </>
+      ) : (
+        <>
+          <Text>Video</Text>
+        </>
+      )}
 
       {/* Under Post */}
       <View
