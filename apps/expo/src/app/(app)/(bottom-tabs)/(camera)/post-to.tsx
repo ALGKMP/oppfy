@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import * as Contacts from "expo-contacts";
-import { Contact } from "expo-contacts";
+import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -12,7 +12,6 @@ import {
   ListItemTitle,
   ScrollView,
   Separator,
-  SizableText,
   Spacer,
   useTheme,
   View,
@@ -30,9 +29,11 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const PAGE_SIZE = 5;
 
 const PostTo = () => {
-  const { uri, type } = useLocalSearchParams<{
+  const { type, uri, height, width } = useLocalSearchParams<{
     uri: string;
     type: "photo" | "video";
+    height: string;
+    width: string;
   }>();
 
   const theme = useTheme();
@@ -103,6 +104,8 @@ const PostTo = () => {
       params: {
         uri,
         type,
+        width,
+        height,
         recipientId,
       },
     });
@@ -217,14 +220,14 @@ const PostTo = () => {
         paddingTop="$4"
         paddingHorizontal="$4"
         justifyContent="space-evenly"
-        backgroundColor={"$gray2"}
+        backgroundColor="$gray2"
         borderTopLeftRadius={36}
         borderTopRightRadius={36}
         gap="$4"
       >
         <Button
           flex={2}
-          size={"$5"}
+          size="$5"
           borderRadius="$8"
           icon={ArrowBigLeft}
           onPress={() => router.back()}
@@ -257,9 +260,5 @@ const PostTo = () => {
 
   return renderUsersToPostTo();
 };
-
-interface ListHeaderProps {
-  title: string;
-}
 
 export default PostTo;

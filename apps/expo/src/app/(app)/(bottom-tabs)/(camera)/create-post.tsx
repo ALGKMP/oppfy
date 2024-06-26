@@ -29,10 +29,12 @@ const postSchema = z.object({
 type FieldTypes = z.infer<typeof postSchema>;
 
 const CreatePost = () => {
-  const { uri, type, recipientId } = useLocalSearchParams<{
+  const { recipientId, type, uri, height, width } = useLocalSearchParams<{
+    recipientId: string;
     uri: string;
     type: "photo" | "video";
-    recipientId: string;
+    height: string;
+    width: string;
   }>();
 
   const theme = useTheme();
@@ -57,23 +59,24 @@ const CreatePost = () => {
 
   const {
     control,
-    setError,
     handleSubmit,
-    formState: { errors, isSubmitting, isDirty },
+    formState: { errors },
   } = useForm<FieldTypes>({
     resolver: zodResolver(postSchema),
   });
 
   const onSubmit = handleSubmit(async (data) => {
     const input = {
-      uri: uri ?? "",
       recipientId: recipientId ?? "",
+      uri: uri ?? "",
+      width: Number(width),
+      height: Number(height),
       caption: data.caption,
     } satisfies UploadMediaInput;
 
     type === "photo"
-      ? uploadPhotoMutation.mutateAsync(input)
-      : uploadVideoMutation.mutateAsync(input);
+      ? await uploadPhotoMutation.mutateAsync(input)
+      : await uploadVideoMutation.mutateAsync(input);
 
     router.dismissAll();
     router.navigate("/(profile)/self-profile");
@@ -110,7 +113,7 @@ const CreatePost = () => {
                 )}
               />
               {errors.caption && (
-                <Text color="$red9">{errors.caption?.message}</Text>
+                <Text color="$red9">{errors.caption.message}</Text>
               )}
             </YStack>
           </YStack>
@@ -121,14 +124,14 @@ const CreatePost = () => {
         paddingTop="$4"
         paddingHorizontal="$4"
         justifyContent="space-evenly"
-        backgroundColor={"$gray2"}
+        backgroundColor="$gray2"
         borderTopLeftRadius={36}
         borderTopRightRadius={36}
         gap="$4"
       >
         <Button
           flex={1}
-          size={"$5"}
+          size="$5"
           borderRadius="$8"
           icon={ArrowBigLeft}
           onPress={() => router.back()}
@@ -138,7 +141,7 @@ const CreatePost = () => {
 
         <Button
           flex={2}
-          size={"$5"}
+          size="$5"
           borderRadius="$8"
           iconAfter={ArrowBigRight}
           onPress={onSubmit}
