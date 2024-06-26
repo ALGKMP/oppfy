@@ -1,3 +1,5 @@
+import { env } from "@oppfy/env/server";
+
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
@@ -47,7 +49,7 @@ export class NotificationsService {
         const { profilePictureKey, eventType, ...rest } = notification;
 
         const profilePictureUrl = await this.s3Service.getObjectPresignedUrl({
-          Bucket: process.env.S3_PROFILE_BUCKET!,
+          Bucket: env.S3_PROFILE_BUCKET,
           Key: profilePictureKey,
         });
 

@@ -1,5 +1,6 @@
 import type { z } from "zod";
 
+import { env } from "@oppfy/env/server";
 import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -153,7 +154,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = this.s3Repository.getObjectPresignedUrl({
-      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Bucket: env.S3_PROFILE_BUCKET,
       Key: profile.profilePictureKey,
     });
 
@@ -192,7 +193,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = this.s3Repository.getObjectPresignedUrl({
-      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Bucket: env.S3_PROFILE_BUCKET,
       Key: profile.profilePictureKey,
     });
 
@@ -250,7 +251,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
-      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Bucket: env.S3_PROFILE_BUCKET,
       Key: profile.profilePictureKey,
     });
     if (!profilePictureUrl) {
@@ -357,7 +358,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
-      Bucket: process.env.S3_PROFILE_BUCKET!,
+      Bucket: env.S3_PROFILE_BUCKET,
       Key: profile.profilePictureKey,
     });
     if (!profilePictureUrl) {
@@ -402,9 +403,11 @@ export class ProfileService {
       );
     }
 
-    const bucket = process.env.S3_POST_BUCKET!;
     const key = `profile-pictures/${userId}.jpg`;
-    const deleteObject = await this.s3Repository.deleteObject(bucket, key);
+    const deleteObject = await this.s3Repository.deleteObject(
+      env.S3_POST_BUCKET,
+      key,
+    );
 
     if (!deleteObject.DeleteMarker) {
       console.error(

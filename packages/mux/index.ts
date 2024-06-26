@@ -1,6 +1,7 @@
 import Mux from "@mux/mux-node";
+import { env } from "@oppfy/env/server";
 
 export const mux = new Mux({
-  tokenId: process.env.MUX_TOKEN_ID!, // This is the default and can be omitted
-  tokenSecret: process.env.MUX_TOKEN_SECRET!, // This is the default and can be omitted
+  tokenId: env.MUX_TOKEN_ID,
+  tokenSecret: env.MUX_TOKEN_SECRET,
 });

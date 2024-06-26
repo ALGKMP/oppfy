@@ -9,6 +9,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../../trpc";
+import { env } from "@oppfy/env/server";
 
 export const profileRouter = createTRPCRouter({
   updateFullName: protectedProcedure
@@ -61,13 +62,12 @@ export const profileRouter = createTRPCRouter({
   generatePresignedUrlForProfilePicture: protectedProcedure
     .input(trpcValidators.input.profile.generatePresignedUrlForProfilePicture)
     .mutation(async ({ input, ctx }) => {
-      const bucket = process.env.S3_PROFILE_BUCKET!;
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
 
       return await ctx.services.s3.putObjectPresignedUrlWithProfilePictureMetadata(
         {
           Key: key,
-          Bucket: bucket,
+          Bucket: env.S3_PROFILE_BUCKET,
           ContentLength: input.contentLength,
           ContentType: "image/jpeg",
           Metadata: {
