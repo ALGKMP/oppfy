@@ -28,7 +28,7 @@ export const handler = async (
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
     console.log("Querying for recommendations for user", userId);
-
+    
     const following = await db
       .select({ userId: schema.follower.recipientId })
       .from(schema.follower)
@@ -61,7 +61,7 @@ export const handler = async (
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
 
-    // get tier 3
+/*     // get tier 3
     const tier3 = await g
       .V(userId) // Start from the user vertex
       .out("contact") // Traverse to all contacts of the user
@@ -72,27 +72,17 @@ export const handler = async (
       .unfold() // Unroll the map into individual entries
       .where(__.values().is(P.gte(3))) // Keep only entries with count >= 3
       .limit(10) // Limit to 10 results
-      .toList();
+      .toList(); */
 
     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
-    const tier4 = await Promise.all(
-      tier1.map((v) =>
-        g
-          .V(v)
-          .out("contact")
-          .where(__.not(__.inE("contact").from_(userId)))
-          .limit(10)
-          .id()
-          .toList(),
-      ),
-    ).then((res) => res.flat());
 
-    console.log(tier4);
+
+    // console.log(tier4);
 
     const recommendedIds = {
       tier1,
       tier2,
-      tier3,
+      //tier3,
     };
 
     return {
