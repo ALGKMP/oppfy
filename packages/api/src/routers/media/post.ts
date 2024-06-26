@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { env } from "@oppfy/env/server";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError } from "../../errors";
@@ -13,8 +14,8 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         const currentDate = Date.now();
-        const bucket = process.env.S3_POST_BUCKET!;
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
+
         const metadata = sharedValidators.media.postMetadataForS3.parse({
           author: ctx.session.uid,
           recipient: input.recipientId,
@@ -24,7 +25,7 @@ export const postRouter = createTRPCRouter({
         });
 
         return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
-          Bucket: bucket,
+          Bucket: env.S3_POST_BUCKET,
           Key: objectKey,
           ContentLength: input.contentLength,
           ContentType: "image/jpeg",
@@ -234,7 +235,10 @@ export const postRouter = createTRPCRouter({
     .output(z.boolean())
     .query(async ({ ctx, input }) => {
       try {
-        return !!(await ctx.services.post.getLike(ctx.session.uid, input.postId));
+        return !!(await ctx.services.post.getLike(
+          ctx.session.uid,
+          input.postId,
+        ));
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

@@ -1,3 +1,5 @@
+import { env } from "@oppfy/env/server";
+
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
@@ -160,7 +162,7 @@ export class PaginationService {
       const items = await Promise.all(
         data.map(async (item) => {
           const presignedUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Bucket: env.S3_PROFILE_BUCKET,
             Key: item.profilePictureUrl,
           });
           item.profilePictureUrl = presignedUrl;

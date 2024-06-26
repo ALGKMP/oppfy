@@ -1,11 +1,16 @@
+import { createEnv } from "@t3-oss/env-core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { z } from "zod";
 
 import { db, schema } from "@oppfy/db";
 import { mux } from "@oppfy/mux";
 
-// Your Mux signing secret
-const muxWebhookSecret = process.env.MUX_WEBHOOK_SECRET!;
+const env = createEnv({
+  server: {
+    MUX_WEBHOOK_SECRET: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -67,7 +72,7 @@ export const handler = async (
       mux.webhooks.verifySignature(
         rawBody,
         { "mux-signature": muxSignatureHeader },
-        muxWebhookSecret,
+        env.MUX_WEBHOOK_SECRET,
       );
       console.log("Mux signature verified");
 

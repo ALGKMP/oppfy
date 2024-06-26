@@ -1,7 +1,6 @@
 import type { Config } from "drizzle-kit";
 
-// import * as dotenv from "dotenv";
-// dotenv.config({ path: "../../.env" });
+import { env } from "@oppfy/env/server";
 
 export default {
   schema: "./src/schema",
@@ -9,10 +8,10 @@ export default {
   dialect: "mysql",
   out: "./drizzle",
   dbCredentials: {
-    host: process.env.DATABASE_ENDPOINT!,
-    port: 3306,
-    user: process.env.DATABASE_USERNAME!,
-    password: process.env.DATABASE_PASSWORD!,
-    database: process.env.DATABASE_NAME!,
+    port: Number(env.DATABASE_PORT),
+    host: env.DATABASE_ENDPOINT,
+    user: env.DATABASE_USERNAME,
+    password: env.DATABASE_PASSWORD,
+    database: env.DATABASE_NAME,
   },
 } satisfies Config;

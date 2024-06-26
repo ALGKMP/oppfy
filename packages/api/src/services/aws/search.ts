@@ -1,3 +1,4 @@
+import { env } from "@oppfy/env/server";
 import { DomainError, ErrorCode } from "../../errors";
 import { S3Repository } from "../../repositories/aws/s3";
 import { SearchRepository } from "../../repositories/aws/search";
@@ -25,7 +26,7 @@ export class SearchService {
       profiles.map(async ({ profilePictureKey, ...restProfile }) => {
         const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl(
           {
-            Bucket: process.env.S3_PROFILE_BUCKET!,
+            Bucket: env.S3_PROFILE_BUCKET,
             Key: profilePictureKey,
           },
         );
