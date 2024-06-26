@@ -5,9 +5,11 @@ export const postContentType = z.enum(["image/jpeg", "image/png", "image/gif"]);
 export const post = z.object({
   postId: z.number(),
   authorId: z.string(),
+  authorProfileId: z.number(),
   authorUsername: z.string().nullable(),
   authorProfilePicture: z.string(),
   recipientId: z.string(),
+  recipientProfileId: z.number(),
   recipientUsername: z.string().nullable(),
   recipientProfilePicture: z.string(), // Corrected typo
   caption: z.string().default(""),
