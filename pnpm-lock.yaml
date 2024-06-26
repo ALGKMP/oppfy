@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 importers:
 
   .:
@@ -44,6 +40,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.3.4(react-hook-form@7.51.3)
+      '@mux/mux-data-react-native-video':
+        specifier: ^0.15.2
+        version: 0.15.2(react-native-video@6.3.0)(react@18.2.0)
       '@oppfy/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -1133,7 +1132,7 @@ importers:
         version: 0.0.0-experimental-c8b3f72-20240517(eslint@9.2.0)
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.2.0)
+        version: 5.1.0-beta-26f2496093-20240514(eslint@9.2.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.8.0(eslint@9.2.0)(typescript@5.4.5)
@@ -6256,6 +6255,17 @@ packages:
       '@motionone/types': 10.17.1
       hey-listen: 1.0.8
       tslib: 2.6.3
+    dev: false
+
+  /@mux/mux-data-react-native-video@0.15.2(react-native-video@6.3.0)(react@18.2.0):
+    resolution: {integrity: sha512-YDhUHHyIUNMsbXoyCteO0UY/Ez3oaaJAYxx/Vp1zc86mSA7v53Cfc2GD+xC+RdhmDtiBlYUi9tqA2Gj6b4tH8g==}
+    peerDependencies:
+      react: ^18.1.0
+      react-native-video: ^6.0.0-alpha.7
+    dependencies:
+      mux-embed: 5.2.1
+      react: 18.2.0
+      react-native-video: 6.3.0(react-native@0.74.2)(react@18.2.0)
     dev: false
 
   /@mux/mux-node@8.5.1:
@@ -13173,8 +13183,8 @@ packages:
       - supports-color
     dev: false
 
-  /eslint-plugin-react-hooks@5.1.0-beta-94eed63c49-20240425(eslint@9.2.0):
-    resolution: {integrity: sha512-9DabNOh93nRDoBbYYO7kS5QqJdbA1Jh9XNDh7MebrDAYctyGQaHSg29TGoNEieX3iLSSfiKToPcvsLowrAtFRA==}
+  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.2.0):
+    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -17278,6 +17288,10 @@ packages:
     resolution: {integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==}
     dev: true
 
+  /mux-embed@5.2.1:
+    resolution: {integrity: sha512-NukHw91xeEVDBeXVDBpi2BvXNix7gSuvdtyvOph5yR/ROn1hHbTlcYWoKQyCyJX9frsF00UROEul+S8wPzU3aQ==}
+    dev: false
+
   /mv@2.1.1:
     resolution: {integrity: sha512-at/ZndSy3xEGJ8i0ygALh8ru9qy7gWW1cmkaqBN29JmMlIvM//MEO9y1sk/avxuwnPcfhkejkLsuPxH81BrkSg==}
     engines: {node: '>=0.8.0'}
@@ -18881,6 +18895,16 @@ packages:
     dependencies:
       prop-types: 15.8.1
       yargs: 16.2.0
+    dev: false
+
+  /react-native-video@6.3.0(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-lyLjWOdw/jgVpMSrprgKVwhT0KUlGzQRBVTDGyQSYDJ0I5ZkZKcmDE32rWCOyAtWhel+GtJjIyFqgT6xIXuxgg==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
     dev: false
 
   /react-native-vision-camera@4.0.5(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
@@ -21846,3 +21870,7 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false

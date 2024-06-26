@@ -1,4 +1,4 @@
 {
   "include": ["index.ts"],
-  "extends": "@oppfy/tsconfig/lambda.json"
+  "extends": "@oppfy/tsconfig/base.json"
 }
