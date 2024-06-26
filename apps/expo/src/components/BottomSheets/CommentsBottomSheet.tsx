@@ -370,7 +370,7 @@ const CommentsBottomSheet = ({
         >
           {
             // if there are no comments render a message
-            comments?.length === 0 ? (
+            comments.length === 0 ? (
               <View flex={1} justifyContent="center" alignItems="center">
                 <SizableText size={"$7"}>No comments yet</SizableText>
                 <Text color={"$gray10"}>Be the first to comment</Text>
@@ -409,56 +409,53 @@ const CommentsBottomSheet = ({
               </TouchableOpacity>
             ))}
           </XStack>
-          <BottomSheetView
+          <XStack
+            padding={"$3.5"}
+            paddingBottom={"$6"}
+            gap="$2.5"
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor={"$gray4"}
           >
-            <XStack
-              padding={"$3.5"}
-              paddingBottom={"$6"}
-              gap="$2.5"
-              justifyContent="center"
-              alignItems="center"
-              backgroundColor={"$gray4"}
-            >
-              <Avatar circular size="$4" flex={1}>
-                <Avatar.Image
-                  accessibilityLabel="User Avatar"
-                  src={profile?.profilePictureUrl}
-                />
-                <Avatar.Fallback backgroundColor="$blue10" />
-              </Avatar>
-              <View style={{ flex: 5 }}>
-                <BottomSheetTextInput
-                  placeholder="Comment"
-                  maxLength={100}
-                  value={inputValue}
-                  onChangeText={setInputValue}
-                  style={{
-                    fontWeight: "bold",
-                    justifyContent: "flex-start",
-                    borderWidth: 10,
-                    borderColor: "#2E2E2E",
-                    borderRadius: 20,
-                    backgroundColor: "#2E2E2E",
-                    color: "#fff",
-                  }}
-                />
-              </View>
-              <TouchableOpacity
-                onPress={handlePostComment}
+            <Avatar circular size="$4" flex={1}>
+              <Avatar.Image
+                accessibilityLabel="User Avatar"
+                src={profile?.profilePictureUrl}
+              />
+              <Avatar.Fallback backgroundColor="$blue10" />
+            </Avatar>
+            <View style={{ flex: 5 }}>
+              <BottomSheetTextInput
+                placeholder="Comment"
+                maxLength={100}
+                value={inputValue}
+                onChangeText={setInputValue}
                 style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  padding: 7,
-                  backgroundColor: "rgb(1,145,255)",
+                  fontWeight: "bold",
+                  justifyContent: "flex-start",
+                  borderWidth: 10,
+                  borderColor: "#2E2E2E",
                   borderRadius: 20,
-                  borderWidth: 0,
+                  backgroundColor: "#2E2E2E",
+                  color: "#fff",
                 }}
-              >
-                <SendHorizontal color="$gray12" />
-              </TouchableOpacity>
-            </XStack>
-          </BottomSheetView>
+              />
+            </View>
+            <TouchableOpacity
+              onPress={handlePostComment}
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 7,
+                backgroundColor: "rgb(1,145,255)",
+                borderRadius: 20,
+                borderWidth: 0,
+              }}
+            >
+              <SendHorizontal color="$gray12" />
+            </TouchableOpacity>
+          </XStack>
         </BottomSheet>
       </Animated.View>
     </Modal>
