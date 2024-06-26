@@ -111,6 +111,7 @@ const CameraPage = () => {
 
   const supportsHdr = format?.supportsPhotoHdr;
   const supportsFlash = device?.hasFlash ?? false;
+  const supportsFocus = device?.supportsFocus ?? false;
   const supportsNightMode = device?.supportsLowLightBoost ?? false;
   const supports60Fps = useMemo(
     () => device?.formats.some((format) => format.maxFps >= 60),
@@ -123,12 +124,15 @@ const CameraPage = () => {
 
   const onMediaCaptured = useCallback(
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      console.log("Media captured", { uri: media.path, type });
+      const { path: uri, width, height } = media;
+
       router.push({
         pathname: "/preview",
         params: {
           type,
-          uri: media.path,
+          uri,
+          width,
+          height,
         },
       });
     },
@@ -137,21 +141,24 @@ const CameraPage = () => {
 
   const onOpenMediaPicker = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
       quality: 1,
+      aspect: [16, 9],
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
 
     if (!result.canceled) {
       const imagePickerAsset = result.assets[0];
       if (imagePickerAsset === undefined) return;
 
-      const { uri, type } = imagePickerAsset;
+      const { uri, width, height, type } = imagePickerAsset;
 
       router.navigate({
         pathname: "/post-to",
         params: {
-          uri,
           type: type === "video" ? "video" : "photo",
+          uri,
+          width,
+          height,
         },
       });
     }
@@ -206,13 +213,14 @@ const CameraPage = () => {
   const focusGesture = Gesture.Tap()
     .maxDuration(250)
     .numberOfTaps(1)
+    .enabled(supportsFocus)
     .onEnd(({ x, y }) => {
       runOnJS(onFocus)({ x, y });
     });
 
   const composedGesture = Gesture.Exclusive(
     flipCameraGesture,
-    Gesture.Race(focusGesture, zoomGesture),
+    Gesture.Race(supportsFocus ? focusGesture : Gesture.Tap(), zoomGesture),
   );
 
   const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
@@ -231,14 +239,7 @@ const CameraPage = () => {
 
   return (
     <View style={styles.container}>
-      <GestureDetector
-        gesture={composedGesture}
-        // gesture={Gesture.Simultaneous(
-        //   zoomGesture,
-        //   flipCameraGesture,
-        //   focusGesture,
-        // )}
-      >
+      <GestureDetector gesture={composedGesture}>
         <ReanimatedCamera
           ref={camera}
           device={device}

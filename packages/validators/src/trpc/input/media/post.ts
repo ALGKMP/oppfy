@@ -15,6 +15,8 @@ const trpcPostInputSchema = {
   createMuxPresignedUrl: z.object({
     recipientId: z.string(),
     caption: z.string().optional(),
+    height: z.number(),
+    width: z.number(),
   }),
 
   updatePost: z.object({

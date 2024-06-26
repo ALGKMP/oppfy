@@ -29,9 +29,11 @@ import {
 type SaveState = "idle" | "saving" | "saved";
 
 const PreviewScreen = () => {
-  const { uri, type } = useLocalSearchParams<{
+  const { type, uri, height, width } = useLocalSearchParams<{
     uri: string;
     type: "photo" | "video";
+    height: string;
+    width: string;
   }>();
 
   const router = useRouter();
@@ -81,6 +83,8 @@ const PreviewScreen = () => {
       params: {
         uri,
         type,
+        width,
+        height,
       },
     });
   };
@@ -128,7 +132,7 @@ const PreviewScreen = () => {
                   style={[styles.glassyButton]}
                 >
                   <Button
-                    size={"$5"}
+                    size="$5"
                     borderRadius="$8"
                     backgroundColor="transparent"
                     iconAfter={saveState === "idle" ? Download : undefined}
@@ -155,7 +159,7 @@ const PreviewScreen = () => {
                   style={[styles.glassyButton]}
                 >
                   <Button
-                    size={"$5"}
+                    size="$5"
                     borderRadius="$8"
                     backgroundColor="transparent"
                     iconAfter={ArrowBigRight}
