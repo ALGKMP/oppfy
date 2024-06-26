@@ -18,6 +18,8 @@ import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 
+import { env } from "@oppfy/env/server";
+
 // Helper function to create an S3 bucket
 function createBucket(scope: Construct, name: string) {
   return new s3.Bucket(scope, name, {
@@ -62,25 +64,24 @@ function createLambdaFunction(
     },
     environment: {
       // TODO: These should be passed on a case by case basis
-      SNS_PUSH_NOTIFICATION_TOPIC_ARN:
-        process.env.SNS_PUSH_NOTIFICATION_TOPIC_ARN!,
+      SNS_PUSH_NOTIFICATION_TOPIC_ARN: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
 
-      S3_POST_BUCKET: process.env.S3_POST_BUCKET!,
-      S3_PROFILE_BUCKET: process.env.S3_PROFILE_BUCKET!,
+      S3_POST_BUCKET: env.S3_POST_BUCKET,
+      S3_PROFILE_BUCKET: env.S3_PROFILE_BUCKET,
 
-      MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
-      MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
-      MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
+      MUX_TOKEN_ID: env.MUX_TOKEN_ID,
+      MUX_TOKEN_SECRET: env.MUX_TOKEN_SECRET,
+      MUX_WEBHOOK_SECRET: env.MUX_WEBHOOK_SECRET,
 
-      DATABASE_PORT: process.env.DATABASE_PORT!,
-      DATABASE_ENDPOINT: process.env.DATABASE_ENDPOINT!,
-      DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
-      DATABASE_NAME: process.env.DATABASE_NAME!,
-      DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
+      DATABASE_PORT: env.DATABASE_PORT,
+      DATABASE_ENDPOINT: env.DATABASE_ENDPOINT,
+      DATABASE_USERNAME: env.DATABASE_USERNAME,
+      DATABASE_NAME: env.DATABASE_NAME,
+      DATABASE_PASSWORD: env.DATABASE_PASSWORD,
 
-      OPENSEARCH_URL: process.env.OPENSEARCH_URL!,
+      OPENSEARCH_URL: env.OPENSEARCH_URL,
 
-      EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN!,
+      EXPO_ACCESS_TOKEN: env.EXPO_ACCESS_TOKEN,
     },
   });
 }
@@ -107,8 +108,8 @@ export class AwsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, {
       env: {
-        account: process.env.AWS_ACCOUNT_ID,
-        region: process.env.AWS_REGION,
+        account: env.AWS_ACCOUNT_ID,
+        region: env.AWS_REGION,
       },
       ...props,
     });

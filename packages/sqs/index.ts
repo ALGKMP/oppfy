@@ -1,14 +1,16 @@
 import { SQSClient } from "@aws-sdk/client-sqs";
 import { Producer } from "sqs-producer";
 
+import { env } from "@oppfy/env/server";
+
 export const sqs = Producer.create({
-  queueUrl: process.env.SQS_CONTACT_QUEUE!,
-  region: process.env.AWS_REGION!,
+  queueUrl: env.SQS_CONTACT_QUEUE,
+  region: env.AWS_REGION,
   sqs: new SQSClient({
-    region: process.env.AWS_REIGON!,
+    region: env.AWS_REGION,
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
     },
   }),
 });

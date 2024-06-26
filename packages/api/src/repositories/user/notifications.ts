@@ -16,6 +16,7 @@ import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode, handleDatabaseErrors } from "../../errors";
+import { env } from "@oppfy/env/server";
 
 export type EventType = z.infer<
   typeof sharedValidators.notifications.eventType
@@ -191,7 +192,7 @@ export class NotificationsRepository {
 
     const params = {
       Subject: "New notification",
-      TopicArn: process.env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
+      TopicArn: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
       Message: JSON.stringify(message),
     };
 

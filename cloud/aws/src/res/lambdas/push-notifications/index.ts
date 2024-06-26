@@ -3,10 +3,18 @@ import { Expo } from "expo-server-sdk";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { SnsSchema } from "@aws-lambda-powertools/parser/schemas";
 import middy from "@middy/core";
+import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
+
+const env = createEnv({
+  server: {
+    EXPO_ACCESS_TOKEN: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 const originalRecordsSchema = SnsSchema.shape.Records.element;
 
@@ -29,7 +37,7 @@ const lambdaHandler = async (
   _context: Context,
 ): Promise<void> => {
   const expo = new Expo({
-    accessToken: process.env.EXPO_ACCESS_TOKEN,
+    accessToken: env.EXPO_ACCESS_TOKEN,
   });
 
   const messages: ExpoPushMessage[] = [];
@@ -53,15 +61,13 @@ const lambdaHandler = async (
           } satisfies EntityData)
         : undefined;
 
-    for (const pushToken of pushTokens) {
-      messages.push({
-        to: pushToken,
-        sound: "default",
-        title,
-        body,
-        data: entityData,
-      });
-    }
+    messages.push({
+      to: pushTokens,
+      sound: "default",
+      title,
+      body,
+      data: entityData,
+    });
   }
 
   const chunks = expo.chunkPushNotifications(messages);

@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@oppfy/env": "workspace:*",
     "aws-cdk-lib": "2.116.1",
     "aws-lambda": "^1.0.7",
     "constructs": "^10.3.0",
