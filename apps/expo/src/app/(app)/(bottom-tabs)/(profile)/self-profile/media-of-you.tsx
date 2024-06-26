@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, Modal, TouchableOpacity } from "react-native";
+import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   ReduceMotion,
@@ -12,7 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, MoreHorizontal, SendHorizontal } from "@tamagui/lucide-icons";
 import {
@@ -24,9 +24,9 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import z from "zod";
+import type z from "zod";
 
-import { type sharedValidators } from "@oppfy/validators";
+import type { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
@@ -280,11 +280,11 @@ const PostItem = (props: PostItemProps) => {
       justifyContent="center"
       overflow="hidden"
       borderRadius={20}
-      backgroundColor={"$gray2"}
-      marginBottom={"$5"}
+      backgroundColor="$gray2"
+      marginBottom="$5"
     >
       <GestureDetector gesture={doubleTap}>
-        <View aspectRatio={post.width / post.height} width={"100%"}>
+        <View aspectRatio={post.width / post.height} width="100%">
           <Image
             source={{ uri: post.imageUrl }}
             style={[
@@ -301,7 +301,7 @@ const PostItem = (props: PostItemProps) => {
             contentFit="cover"
           >
             <Animated.View style={[heartImageAnimatedStyle]}>
-              <Heart size={100} color={"red"} fill={"red"} />
+              <Heart size={100} color="red" fill="red" />
             </Animated.View>
           </Image>
         </View>
@@ -311,11 +311,11 @@ const PostItem = (props: PostItemProps) => {
         position="absolute"
         top={10}
         left={10}
-        width={"95%"}
+        width="95%"
         justifyContent="space-between"
         alignContent="center"
       >
-        <XStack gap={"$2.5"}>
+        <XStack gap="$2.5">
           <Avatar circular size="$5">
             <Avatar.Image
               accessibilityLabel="Cam"
@@ -324,18 +324,18 @@ const PostItem = (props: PostItemProps) => {
             />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
-          <YStack gap={"$1"} justifyContent="center">
+          <YStack gap="$1" justifyContent="center">
             <TouchableOpacity
               onPress={() => handleUserClicked(post.recipientProfileId)}
             >
               <SizableText
-                size={"$3"}
+                size="$3"
                 lineHeight={14}
                 margin={0}
                 padding={0}
                 shadowRadius={3}
                 shadowOpacity={0.5}
-                fontWeight={"bold"}
+                fontWeight="bold"
               >
                 {profile?.username ?? "@RecipientUsername"}
               </SizableText>
@@ -345,24 +345,24 @@ const PostItem = (props: PostItemProps) => {
                 handleUserClicked(post.authorProfileId);
               }}
             >
-              <XStack gap={"$1"} alignItems="center">
+              <XStack gap="$1" alignItems="center">
                 <SizableText
-                  size={"$3"}
+                  size="$3"
                   lineHeight={15}
                   marginTop={0}
                   padding={0}
                 >
                   📸
                 </SizableText>
-                <SizableText size={"$2"} lineHeight={15} color={"$gray2"}>
+                <SizableText size="$2" lineHeight={15} color="$gray2">
                   posted by:
                 </SizableText>
 
                 <SizableText
-                  size={"$2"}
+                  size="$2"
                   lineHeight={15}
-                  fontWeight={"bold"}
-                  color={"$blue9"}
+                  fontWeight="bold"
+                  color="$blue9"
                 >
                   {profile?.username ?? "@AuthorUsername"}
                 </SizableText>
@@ -380,25 +380,25 @@ const PostItem = (props: PostItemProps) => {
       {/* Under Post */}
       <View
         flex={1}
-        alignSelf={"stretch"}
-        padding={"$2"}
-        paddingTop={"$3"}
-        borderBottomRightRadius={"$8"}
-        borderBottomLeftRadius={"$8"}
-        backgroundColor={"$gray2"}
+        alignSelf="stretch"
+        padding="$2"
+        paddingTop="$3"
+        borderBottomRightRadius="$8"
+        borderBottomLeftRadius="$8"
+        backgroundColor="$gray2"
       >
-        <XStack gap={"$2"} alignItems="flex-start">
+        <XStack gap="$2" alignItems="flex-start">
           {/* Comment Button */}
           <View flex={4} justifyContent="center">
             <TouchableOpacity onPress={() => setModalVisible(true)}>
               <View
                 flex={1}
                 justifyContent="flex-start"
-                padding={"$2.5"}
-                borderRadius={"$7"}
-                backgroundColor={"$gray5"}
+                padding="$2.5"
+                borderRadius="$7"
+                backgroundColor="$gray5"
               >
-                <Text fontWeight={"bold"} color={"$gray9"}>
+                <Text fontWeight="bold" color="$gray9">
                   Comment
                 </Text>
               </View>
@@ -410,16 +410,16 @@ const PostItem = (props: PostItemProps) => {
               <View
                 justifyContent="center"
                 alignItems="center"
-                borderRadius={"$7"}
-                padding={"$2"}
-                backgroundColor={"$gray5"}
+                borderRadius="$7"
+                padding="$2"
+                backgroundColor="$gray5"
               >
                 <Animated.View style={[heartButtonAnimatedStyle]}>
                   <Heart
                     size={24}
-                    padding={"$3"}
+                    padding="$3"
                     color={isLiked ? "red" : "$gray12"}
-                    fill={"red"}
+                    fill="red"
                     fillOpacity={isLiked ? 1 : 0}
                   />
                 </Animated.View>
@@ -434,10 +434,10 @@ const PostItem = (props: PostItemProps) => {
                 justifyContent="center"
                 alignItems="center"
                 padding="$2"
-                borderRadius={"$7"}
-                backgroundColor={"$gray5"}
+                borderRadius="$7"
+                backgroundColor="$gray5"
               >
-                <SendHorizontal size={24} padding={"$3"} color="$gray12" />
+                <SendHorizontal size={24} padding="$3" color="$gray12" />
               </View>
             </TouchableOpacity>
           </View>
@@ -445,9 +445,9 @@ const PostItem = (props: PostItemProps) => {
 
         {/* Comments and Likes */}
         <XStack flex={1} gap="$2">
-          <View flex={4} alignItems="flex-start" paddingLeft={"$2.5"}>
+          <View flex={4} alignItems="flex-start" paddingLeft="$2.5">
             <TouchableOpacity onPress={() => setModalVisible(true)}>
-              <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
+              <SizableText size="$2" fontWeight="bold" color="$gray10">
                 {post.commentsCount > 0
                   ? post.commentsCount > 1
                     ? `${post.commentsCount} comments`
@@ -456,9 +456,9 @@ const PostItem = (props: PostItemProps) => {
               </SizableText>
             </TouchableOpacity>
           </View>
-          <View flex={2} alignItems={"flex-start"}>
+          <View flex={2} alignItems="flex-start">
             <TouchableOpacity>
-              <SizableText size={"$2"} fontWeight={"bold"} color={"$gray10"}>
+              <SizableText size="$2" fontWeight="bold" color="$gray10">
                 {post.likesCount > 0 ? `${post.likesCount} likes` : ""}
               </SizableText>
             </TouchableOpacity>
@@ -476,7 +476,7 @@ const PostItem = (props: PostItemProps) => {
             <Text numberOfLines={isExpanded ? 0 : 2}>
               {renderCaption()}
               {showViewMore && !isExpanded ? (
-                <Text color={"$gray10"}> more</Text>
+                <Text color="$gray10"> more</Text>
               ) : (
                 ""
               )}
@@ -525,10 +525,7 @@ const MediaOfYou = () => {
   const itemCount = useMemo(() => {
     if (postData === undefined) return 0;
 
-    return postData.pages.reduce(
-      (acc, page) => acc + (page.items ?? []).length,
-      0,
-    );
+    return postData.pages.reduce((acc, page) => acc + page.items.length, 0);
   }, [postData]);
 
   const handleOnEndReached = async () => {
@@ -538,7 +535,7 @@ const MediaOfYou = () => {
   };
 
   const posts = useMemo(
-    () => postData?.pages.flatMap((page) => page.items ?? []),
+    () => postData?.pages.flatMap((page) => page.items),
     [postData],
   );
 
@@ -548,7 +545,7 @@ const MediaOfYou = () => {
 
   return (
     <View flex={1}>
-      <Separator margin={10} borderColor={"white"} />
+      <Separator margin={10} borderColor="white" />
       {itemCount ? (
         <FlashList
           data={isLoading ? placeholderData : posts}
