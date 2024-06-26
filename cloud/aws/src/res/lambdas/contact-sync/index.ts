@@ -1,9 +1,17 @@
 import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import middy from "@middy/core";
+import { createEnv } from "@t3-oss/env-core";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
 import gremlin from "gremlin";
 import { z } from "zod";
+
+const env = createEnv({
+  server: {
+    NEPTUNE_ENDPOINT: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 const {
   driver: { DriverRemoteConnection },
@@ -15,8 +23,6 @@ const {
     statics: __,
   },
 } = gremlin;
-
-const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
 
 const contactSyncBody = z.object({
   userId: z.string(),
@@ -104,7 +110,7 @@ const lambdaHandler = async (
 
   try {
     const graph = new Graph();
-    dc = new DriverRemoteConnection(`wss://${NEPTUNE_ENDPOINT}/gremlin`, {});
+    dc = new DriverRemoteConnection(`wss://${env.NEPTUNE_ENDPOINT}/gremlin`, {});
     g = graph.traversal().withRemote(dc);
 
     console.log(event[0]);

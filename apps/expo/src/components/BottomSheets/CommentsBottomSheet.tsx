@@ -38,9 +38,9 @@ import z from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
+import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 import { api } from "~/utils/api";
 import { BlurContextMenuWrapper } from "../ContextMenu";
-import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 
 interface CommentsModalProps {
   postId: number;
@@ -82,11 +82,22 @@ const CommentsBottomSheet = ({
   const closeModal = useCallback(() => {
     setModalVisible(false);
     sheetRef.current?.close();
-  }, [sheetRef]);
+  }, [sheetRef, setModalVisible]);
 
   useEffect(() => {
     if (modalVisible) {
       openModal();
+    } else {
+      closeModal();
+    }
+  }, [modalVisible]);
+
+  useEffect(() => {
+    if (modalVisible) {
+      void (async () => {
+        // Optionally, also refetch posts to ensure comment counts are up-to-date
+        await utils.post.paginatePostsOfUserSelf.refetch();
+      })();
     } else {
       closeModal();
     }
@@ -112,12 +123,39 @@ const CommentsBottomSheet = ({
     onMutate: async (newComment) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
       await utils.post.paginateComments.cancel();
+      await utils.post.paginatePostsOfUserSelf.cancel();
 
       const temporaryId = Math.random();
       setOptimisticUpdateCommentId(temporaryId);
 
       // Snapshot the previous value
-      const prevData = utils.post.paginateComments.getInfiniteData();
+      const prevCommentsData = utils.post.paginateComments.getInfiniteData();
+      const prevPostsData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+        pageSize: 10,
+      });
+      console.log(prevPostsData?.pages[0]?.items);
+
+      utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        { pageSize: 10 },
+        (prevData) => {
+          console.log("Here G");
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            pages: prevData.pages.map((page, index) => {
+              // check if it's postId
+              console.log("this bitch running");
+              page.items.map((item) => {
+                if (item?.postId === postId) {
+                  console.log("Found postId");
+                  item.commentsCount += 1;
+                }
+              });
+              return page;
+            }),
+          };
+        },
+      );
 
       // Optimistically update to the new value
       utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
@@ -149,18 +187,27 @@ const CommentsBottomSheet = ({
       });
 
       // Return a context object with the snapshotted value
-      return { prevData };
+      return { prevCommentsData, prevPostsData };
     },
     onError: (err, _newData, ctx) => {
       // Rollback to the previous value on error
       console.log(err);
-      if (ctx?.prevData) {
-        utils.post.paginateComments.setInfiniteData({ postId }, ctx.prevData);
+      if (ctx?.prevCommentsData) {
+        utils.post.paginateComments.setInfiniteData(
+          { postId },
+          ctx.prevCommentsData,
+        );
+      }
+      if (ctx?.prevPostsData) {
+        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+          { pageSize: 10 },
+          ctx.prevPostsData,
+        );
       }
     },
-    onSettled: () => {
+    onSettled: async () => {
       // Sync with server once mutation has settled
-      utils.post.paginateComments.invalidate();
+      await utils.post.paginateComments.invalidate();
       setOptimisticUpdateCommentId(null); // Reset new comment ID after server sync
     },
   });
@@ -333,7 +380,7 @@ const CommentsBottomSheet = ({
                   await fetchNextPageComments();
                 }}
                 scrollEnabled={true}
-                data={comments ?? []}
+                data={comments}
                 renderItem={({ item }) => (
                   <Comment
                     item={item}

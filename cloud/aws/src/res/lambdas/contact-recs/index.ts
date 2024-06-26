@@ -1,5 +1,14 @@
+import { createEnv } from "@t3-oss/env-core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import gremlin from "gremlin";
+import { z } from "zod";
+
+const env = createEnv({
+  server: {
+    NEPTUNE_ENDPOINT: z.string().min(1),
+  },
+  runtimeEnv: process.env,
+});
 
 import { db, eq, schema } from "@oppfy/db";
 
@@ -14,15 +23,13 @@ const {
   },
 } = gremlin;
 
-const NEPTUNE_ENDPOINT = process.env.NEPTUNE_ENDPOINT;
-
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   try {
     const graph = new Graph();
     const dc = new DriverRemoteConnection(
-      `wss://${NEPTUNE_ENDPOINT}/gremlin`,
+      `wss://${env.NEPTUNE_ENDPOINT}/gremlin`,
       {},
     );
     const g = graph.traversal().withRemote(dc);

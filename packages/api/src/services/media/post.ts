@@ -9,6 +9,7 @@ import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { S3Service } from "../aws/s3";
+import { env } from "@oppfy/env/server";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -47,7 +48,7 @@ export class PostService {
           // Update author profile picture URL
           const authorPresignedUrl =
             await this.awsService.getObjectPresignedUrl({
-              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Bucket: env.S3_PROFILE_BUCKET,
               Key: item.authorProfilePicture ?? "profile-pictures/default.jpg",
             });
           item.authorProfilePicture = authorPresignedUrl;
@@ -55,14 +56,14 @@ export class PostService {
           // Update recipient profile picture URL
           const recipientPresignedUrl =
             await this.awsService.getObjectPresignedUrl({
-              Bucket: process.env.S3_PROFILE_BUCKET!,
+              Bucket: env.S3_PROFILE_BUCKET,
               Key:
                 item.recipientProfilePicture ?? "profile-pictures/default.jpg",
             });
           item.recipientProfilePicture = recipientPresignedUrl;
 
           const imageUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: process.env.S3_POST_BUCKET!,
+            Bucket: env.S3_POST_BUCKET,
             Key: item.imageUrl,
           });
           item.imageUrl = imageUrl;
@@ -103,11 +104,11 @@ export class PostService {
         try {
           const presignedUrl = item.profilePictureUrl
             ? await this.awsService.getObjectPresignedUrl({
-                Bucket: process.env.S3_PROFILE_BUCKET!,
+                Bucket: env.S3_PROFILE_BUCKET,
                 Key: item.profilePictureUrl,
               })
             : await this.awsService.getObjectPresignedUrl({
-                Bucket: process.env.S3_PROFILE_BUCKET!,
+                Bucket: env.S3_PROFILE_BUCKET,
                 Key: "profile-pictures/default.jpg",
               });
           item.profilePictureUrl = presignedUrl;
