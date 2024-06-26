@@ -115,7 +115,7 @@ const lambdaHandler = async (
 
     console.log(event[0]);
 
-    const { userId, userPhoneNumberHash, contacts, followingIds } = event[0];
+    const { userId, userPhoneNumberHash, contacts, followingIds } = event[0]!;
 
     await updateContacts(
       g,
