@@ -440,18 +440,20 @@ const CommentsBottomSheet = ({
                 }}
               />
             </View>
-            <View
-              flex={1}
-              justifyContent="center"
-              alignItems="center"
-              padding="$2"
-              borderRadius={"$7"}
-              backgroundColor={"$blue9"}
+            <TouchableOpacity
+              onPress={handlePostComment}
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 7,
+                backgroundColor: "rgb(1,145,255)",
+                borderRadius: 20,
+                borderWidth: 0,
+              }}
             >
-              <TouchableOpacity onPress={handlePostComment}>
-                <SendHorizontal color="$gray12" />
-              </TouchableOpacity>
-            </View>
+              <SendHorizontal color="$gray12" />
+            </TouchableOpacity>
           </XStack>
         </BottomSheet>
       </Animated.View>
