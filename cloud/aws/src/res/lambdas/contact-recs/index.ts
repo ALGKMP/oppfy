@@ -10,6 +10,8 @@ const env = createEnv({
   runtimeEnv: process.env,
 });
 
+import { db, eq, schema } from "@oppfy/db";
+
 const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
@@ -32,8 +34,13 @@ export const handler = async (
     );
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
-
     console.log("Querying for recommendations for user", userId);
+
+    const following = await db
+      .select({ userId: schema.follower.recipientId })
+      .from(schema.follower)
+      .where(eq(schema.follower.senderId, userId))
+      .then((res) => res.map((r) => r.userId));
 
     const tier1 = await g
       .V(userId)
@@ -42,27 +49,56 @@ export const handler = async (
       .inV()
       .dedup()
       .limit(10)
+      .id()
       .toList();
 
-    console.log(tier1);
-
-    // Implementing the provided Gremlin query
+    // all incoming people who arent in tier1 and tier2
     const tier2 = await g
       .V(userId)
-      .in_("contact")
-      .where(__.not(__.outE("contact").has("isFollowing", true).to(userId)))
-      .where(__.out("contact").hasId(userId))
-      .where(__.id().is(P.without(tier1)))
+      .inE("contact")
+      .where(__.outV().hasId(P.without(tier1)))
+      .where(__.outV().hasId(P.without(following)))
+      .outV()
+      .dedup()
+      // .order().by(__.property("createdAt"), __.asc)
+      .limit(10)
+      .id()
+      .toList();
+
+    // remove all tier1 from tier2
+    tier2.filter((v) => !tier1.includes(v));
+
+    /*     // get tier 3
+    const tier3 = await g
+      .V(userId) // Start from the user vertex
+      .out("contact") // Traverse to all contacts of the user
+      .aggregate("contacts") // Store all contacts in a side-effect named 'contacts'
+      .out("contact") // Traverse to contacts of contacts
+      .where(__.not(__.inE("contact").from_(userId))) // Filter out vertices that are already contacts of the user
+      .groupCount() // Count occurrences of each vertex
+      .unfold() // Unroll the map into individual entries
+      .where(__.values().is(P.gte(3))) // Keep only entries with count >= 3
+      .limit(10) // Limit to 10 results
+      .toList(); */
+
+    // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
+    const tier4 = await g
+      .V(tier1)
+      .out("contact")
+      .out("contact")
+      .where(__.not(__.inE("contact").from_(userId)))
       .dedup()
       .limit(10)
-      .project("id", "phoneNumberHash")
-      .by(__.id())
-      .by("phoneNumberHash")
+      .id()
       .toList();
+
+    // console.log(tier4);
 
     const recommendedIds = {
       tier1,
       tier2,
+      //tier3,
+      tier4
     };
 
     return {

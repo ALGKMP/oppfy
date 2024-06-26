@@ -93,6 +93,7 @@ async function updateContacts(
 
   return true;
 }
+
 // list bc of middy powertools thing
 // 1. Parses data using SqsSchema.
 // 2. Parses records in body key using your schema and return them in a list.
