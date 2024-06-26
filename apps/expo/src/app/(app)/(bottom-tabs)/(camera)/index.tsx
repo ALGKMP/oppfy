@@ -111,6 +111,7 @@ const CameraPage = () => {
 
   const supportsHdr = format?.supportsPhotoHdr;
   const supportsFlash = device?.hasFlash ?? false;
+  const supportsFocus = device?.supportsFocus ?? false;
   const supportsNightMode = device?.supportsLowLightBoost ?? false;
   const supports60Fps = useMemo(
     () => device?.formats.some((format) => format.maxFps >= 60),
@@ -206,13 +207,14 @@ const CameraPage = () => {
   const focusGesture = Gesture.Tap()
     .maxDuration(250)
     .numberOfTaps(1)
+    .enabled(supportsFocus)
     .onEnd(({ x, y }) => {
       runOnJS(onFocus)({ x, y });
     });
 
   const composedGesture = Gesture.Exclusive(
     flipCameraGesture,
-    Gesture.Race(focusGesture, zoomGesture),
+    Gesture.Race(supportsFocus ? focusGesture : Gesture.Tap(), zoomGesture),
   );
 
   const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
@@ -231,14 +233,7 @@ const CameraPage = () => {
 
   return (
     <View style={styles.container}>
-      <GestureDetector
-        gesture={composedGesture}
-        // gesture={Gesture.Simultaneous(
-        //   zoomGesture,
-        //   flipCameraGesture,
-        //   focusGesture,
-        // )}
-      >
+      <GestureDetector gesture={composedGesture}>
         <ReanimatedCamera
           ref={camera}
           device={device}
