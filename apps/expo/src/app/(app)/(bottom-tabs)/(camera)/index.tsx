@@ -39,7 +39,11 @@ import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "~/constants/camera";
-import { CaptureButton } from "~/features/camera/components";
+import {
+  CaptureButton,
+  FocusIcon,
+  useFocusAnimations,
+} from "~/features/camera/components";
 import useIsForeground from "~/hooks/useIsForeground";
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
@@ -58,6 +62,8 @@ const CameraPage = () => {
   const microphone = useMicrophonePermission();
 
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
+
+  const { animations, addAnimation } = useFocusAnimations();
 
   const zoom = useSharedValue(1);
   const startZoom = useSharedValue(zoom.value);
@@ -132,7 +138,6 @@ const CameraPage = () => {
   const onOpenMediaPicker = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
       quality: 1,
     });
 
@@ -160,19 +165,12 @@ const CameraPage = () => {
     setFlash((f) => (f === "off" ? "on" : "off"));
   }, []);
 
-  const onFocus = useCallback((point: Point) => {
-    void camera.current?.focus(point);
-  }, []);
-
-  const flipCameraGesture = React.useMemo(
-    () =>
-      Gesture.Tap()
-        .numberOfTaps(2)
-        .maxDistance(20)
-        .onEnd(() => {
-          runOnJS(onFlipCameraPressed)();
-        }),
-    [onFlipCameraPressed],
+  const onFocus = useCallback(
+    (point: Point) => {
+      addAnimation(point);
+      void camera.current?.focus(point);
+    },
+    [addAnimation],
   );
 
   const zoomGesture = Gesture.Pinch()
@@ -194,9 +192,28 @@ const CameraPage = () => {
       );
     });
 
-  const focusGesture = Gesture.Tap().onEnd(({ x, y }) => {
-    runOnJS(onFocus)({ x, y });
-  });
+  const flipCameraGesture = React.useMemo(
+    () =>
+      Gesture.Tap()
+        .numberOfTaps(2)
+        .maxDuration(250)
+        .onEnd(() => {
+          runOnJS(onFlipCameraPressed)();
+        }),
+    [onFlipCameraPressed],
+  );
+
+  const focusGesture = Gesture.Tap()
+    .maxDuration(250)
+    .numberOfTaps(1)
+    .onEnd(({ x, y }) => {
+      runOnJS(onFocus)({ x, y });
+    });
+
+  const composedGesture = Gesture.Exclusive(
+    flipCameraGesture,
+    Gesture.Race(focusGesture, zoomGesture),
+  );
 
   const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
     const z = Math.max(Math.min(zoom.value, maxZoom), minZoom);
@@ -215,11 +232,12 @@ const CameraPage = () => {
   return (
     <View style={styles.container}>
       <GestureDetector
-        gesture={Gesture.Simultaneous(
-          zoomGesture,
-          flipCameraGesture,
-          focusGesture,
-        )}
+        gesture={composedGesture}
+        // gesture={Gesture.Simultaneous(
+        //   zoomGesture,
+        //   flipCameraGesture,
+        //   focusGesture,
+        // )}
       >
         <ReanimatedCamera
           ref={camera}
@@ -256,6 +274,10 @@ const CameraPage = () => {
       />
 
       <StatusBarBlurBackground />
+
+      {animations.map(({ id, point }) => (
+        <FocusIcon key={id} x={point.x} y={point.y} />
+      ))}
 
       <TouchableOpacity
         style={styles.mediaPickerButton}
