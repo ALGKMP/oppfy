@@ -63,7 +63,8 @@ export const handler = async (
       .where(__.outV().hasId(P.without(following)))
       .outV()
       .dedup()
-      .order().by(__.property("createdAt"), order.desc)
+      .order()
+      .by(__.property("createdAt"), order.desc)
       .limit(10)
       .id()
       .toList();
