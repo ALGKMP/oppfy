@@ -1,18 +1,7 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Dimensions, Modal, TouchableOpacity } from "react-native";
-import {
-  Gesture,
-  GestureDetector,
-  NativeViewGestureHandler,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  interpolate,
   ReduceMotion,
   runOnJS,
   useAnimatedStyle,
@@ -21,22 +10,11 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import BottomSheet, {
-  BottomSheetFlatList,
-  BottomSheetModal,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import {
-  Heart,
-  Menu,
-  MoreHorizontal,
-  SendHorizontal,
-} from "@tamagui/lucide-icons";
-import { debounce, throttle } from "lodash";
-import { Skeleton } from "moti/skeleton";
+import { Heart, MoreHorizontal, SendHorizontal } from "@tamagui/lucide-icons";
 import {
   Avatar,
   Separator,
@@ -48,14 +26,13 @@ import {
 } from "tamagui";
 import z from "zod";
 
-import { sharedValidators } from "@oppfy/validators";
+import { type sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
-import { BlurContextMenuWrapper } from "~/components/ContextMenu";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { api } from "~/utils/api";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get("window");
 
 interface PostItemProps {
   post: z.infer<typeof sharedValidators.media.post>;
@@ -63,13 +40,15 @@ interface PostItemProps {
 
 const PostItem = (props: PostItemProps) => {
   const { post } = props;
-  const [status, setStatus] = useState<"success" | "loading" | "error">(
+  const [status, _setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+
+  const router = useRouter();
 
   const utils = api.useUtils();
   const profile = utils.profile.getFullProfileSelf.getData();
@@ -80,7 +59,7 @@ const PostItem = (props: PostItemProps) => {
     isError,
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
-  const [isLiked, setIsLiked] = useState<Boolean>(hasLiked ?? false);
+  const [isLiked, setIsLiked] = useState<boolean>(hasLiked ?? false);
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -278,6 +257,14 @@ const PostItem = (props: PostItemProps) => {
     return `${post.caption.substring(0, maxLength)}...`;
   };
 
+  const handleUserClicked = (profileId: number) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.navigate({
+      pathname: "/(profile)/profile/[profile-id]/",
+      params: { profileId: String(profileId) },
+    });
+  };
+
   if (status === "loading" || isLoadingHasLiked) {
     return (
       <View flex={1} alignItems="center" justifyContent="center">
@@ -333,11 +320,14 @@ const PostItem = (props: PostItemProps) => {
             <Avatar.Image
               accessibilityLabel="Cam"
               src={profile?.profilePictureUrl ?? ""}
+              onPress={() => handleUserClicked(post.recipientProfileId)}
             />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
           <YStack gap={"$1"} justifyContent="center">
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleUserClicked(post.recipientProfileId)}
+            >
               <SizableText
                 size={"$3"}
                 lineHeight={14}
@@ -347,33 +337,37 @@ const PostItem = (props: PostItemProps) => {
                 shadowOpacity={0.5}
                 fontWeight={"bold"}
               >
-                {profile?.username ?? "@AuthorUsername"}
+                {profile?.username ?? "@RecipientUsername"}
               </SizableText>
             </TouchableOpacity>
-            <XStack gap={"$1"} alignItems="center">
-              <SizableText
-                size={"$3"}
-                lineHeight={15}
-                marginTop={0}
-                padding={0}
-              >
-                📸
-              </SizableText>
-              <SizableText size={"$2"} lineHeight={15} color={"$gray2"}>
-                posted by:
-              </SizableText>
+            <TouchableOpacity
+              onPress={() => {
+                handleUserClicked(post.authorProfileId);
+              }}
+            >
+              <XStack gap={"$1"} alignItems="center">
+                <SizableText
+                  size={"$3"}
+                  lineHeight={15}
+                  marginTop={0}
+                  padding={0}
+                >
+                  📸
+                </SizableText>
+                <SizableText size={"$2"} lineHeight={15} color={"$gray2"}>
+                  posted by:
+                </SizableText>
 
-              <TouchableOpacity>
                 <SizableText
                   size={"$2"}
                   lineHeight={15}
                   fontWeight={"bold"}
                   color={"$blue9"}
                 >
-                  {profile?.username ?? "@RecipientUsername"}
+                  {profile?.username ?? "@AuthorUsername"}
                 </SizableText>
-              </TouchableOpacity>
-            </XStack>
+              </XStack>
+            </TouchableOpacity>
           </YStack>
         </XStack>
         <View justifyContent="center" alignItems="center">
