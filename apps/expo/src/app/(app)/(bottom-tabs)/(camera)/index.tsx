@@ -124,12 +124,15 @@ const CameraPage = () => {
 
   const onMediaCaptured = useCallback(
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      console.log("Media captured", { uri: media.path, type });
+      const { path: uri, width, height } = media;
+
       router.push({
         pathname: "/preview",
         params: {
           type,
-          uri: media.path,
+          uri,
+          width,
+          height,
         },
       });
     },
@@ -138,21 +141,24 @@ const CameraPage = () => {
 
   const onOpenMediaPicker = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
       quality: 1,
+      aspect: [16, 9],
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
 
     if (!result.canceled) {
       const imagePickerAsset = result.assets[0];
       if (imagePickerAsset === undefined) return;
 
-      const { uri, type } = imagePickerAsset;
+      const { uri, width, height, type } = imagePickerAsset;
 
       router.navigate({
         pathname: "/post-to",
         params: {
-          uri,
           type: type === "video" ? "video" : "photo",
+          uri,
+          width,
+          height,
         },
       });
     }
