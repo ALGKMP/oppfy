@@ -391,6 +391,9 @@ importers:
       '@aws-cdk/aws-neptune-alpha':
         specifier: ^2.146.0-alpha.0
         version: 2.146.0-alpha.0(aws-cdk-lib@2.116.1)(constructs@10.3.0)
+      '@oppfy/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       aws-cdk-lib:
         specifier: 2.116.1
         version: 2.116.1(constructs@10.3.0)
@@ -458,6 +461,9 @@ importers:
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
       gremlin:
         specifier: ^3.7.2
         version: 3.7.2
@@ -504,6 +510,9 @@ importers:
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
       gremlin:
         specifier: ^3.7.2
         version: 3.7.2
@@ -553,6 +562,9 @@ importers:
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -593,6 +605,9 @@ importers:
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.30.10)(zod@3.23.8)
@@ -636,6 +651,9 @@ importers:
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -688,6 +706,9 @@ importers:
       '@oppfy/validators':
         specifier: workspace:*
         version: link:../../../../../../packages/validators
+      '@t3-oss/env-core':
+        specifier: ^0.10.1
+        version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
       expo-server-sdk:
         specifier: ^3.10.0
         version: 3.10.0
