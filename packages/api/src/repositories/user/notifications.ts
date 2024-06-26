@@ -12,11 +12,11 @@ import {
   schema,
   sql,
 } from "@oppfy/db";
+import { env } from "@oppfy/env/server";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode, handleDatabaseErrors } from "../../errors";
-import { env } from "@oppfy/env/server";
 
 export type EventType = z.infer<
   typeof sharedValidators.notifications.eventType

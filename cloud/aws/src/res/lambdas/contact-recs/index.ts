@@ -3,14 +3,14 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import gremlin from "gremlin";
 import { z } from "zod";
 
+import { db, eq, schema } from "@oppfy/db";
+
 const env = createEnv({
   server: {
     NEPTUNE_ENDPOINT: z.string().min(1),
   },
   runtimeEnv: process.env,
 });
-
-import { db, eq, schema } from "@oppfy/db";
 
 const {
   driver: { DriverRemoteConnection },
@@ -19,6 +19,7 @@ const {
     t,
     P,
     merge: { onCreate, onMatch },
+    order,
     statics: __,
   },
 } = gremlin;
@@ -48,6 +49,8 @@ export const handler = async (
       .has("isFollowing", false)
       .inV()
       .dedup()
+      .order()
+      .by(__.property("createdAt"), order.desc)
       .limit(10)
       .id()
       .toList();
@@ -60,7 +63,8 @@ export const handler = async (
       .where(__.outV().hasId(P.without(following)))
       .outV()
       .dedup()
-      // .order().by(__.property("createdAt"), __.asc)
+      .order()
+      .by(__.property("createdAt"), order.desc)
       .limit(10)
       .id()
       .toList();
@@ -81,7 +85,7 @@ export const handler = async (
       .limit(10) // Limit to 10 results
       .toList(); */
 
-    // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
+    /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
     const tier4 = await g
       .V(tier1)
       .out("contact")
@@ -90,7 +94,7 @@ export const handler = async (
       .dedup()
       .limit(10)
       .id()
-      .toList();
+      .toList(); */
 
     // console.log(tier4);
 
@@ -98,7 +102,7 @@ export const handler = async (
       tier1,
       tier2,
       //tier3,
-      tier4
+      // tier4
     };
 
     return {

@@ -168,7 +168,6 @@ const ActionSheet = ({
                     key={index}
                     borderTopWidth={index === 0 ? 0 : 0.2}
                     borderColor="$gray10"
-
                   >
                     {/* <Separator theme="alt1" /> */}
                     <Button

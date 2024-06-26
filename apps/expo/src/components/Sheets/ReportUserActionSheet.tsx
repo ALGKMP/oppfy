@@ -1,6 +1,7 @@
+import { sharedValidators } from "@oppfy/validators";
+
 import { api } from "~/utils/api";
 import ActionSheet, { ButtonOption } from "../Sheets/ActionSheet";
-import { sharedValidators } from "@oppfy/validators";
 
 interface ReportUserActionSheetProps {
   title: string;
@@ -19,22 +20,26 @@ const ReportUserActionSheet = (props: ReportUserActionSheetProps) => {
     {
       text: "Posting explicit content",
       textProps: { color: "$blue9" },
-      onPress: () => reportUser.mutate({ targetUserId, reason: "Posting explicit content" }),
+      onPress: () =>
+        reportUser.mutate({ targetUserId, reason: "Posting explicit content" }),
     },
     {
       text: "Under the age of 13",
       textProps: { color: "$blue9" },
-      onPress: () => reportUser.mutate({ targetUserId, reason: "Under the age of 13" }),
+      onPress: () =>
+        reportUser.mutate({ targetUserId, reason: "Under the age of 13" }),
     },
     {
       text: "Catfish account",
       textProps: { color: "$blue9" },
-      onPress: () => reportUser.mutate({ targetUserId, reason: "Catfish account" }),
+      onPress: () =>
+        reportUser.mutate({ targetUserId, reason: "Catfish account" }),
     },
     {
       text: "Scam/spam account",
       textProps: { color: "$blue9" },
-      onPress: () => reportUser.mutate({ targetUserId, reason: "Scam/spam account" }),
+      onPress: () =>
+        reportUser.mutate({ targetUserId, reason: "Scam/spam account" }),
     },
   ];
 
