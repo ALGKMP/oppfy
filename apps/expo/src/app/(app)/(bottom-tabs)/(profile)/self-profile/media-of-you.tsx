@@ -87,22 +87,109 @@ const PostItem = (props: PostItemProps) => {
     setIsLiked(hasLiked ?? false);
   }, [hasLiked]);
 
-  const likePost = api.post.likePost.useMutation();
-  const unlikePost = api.post.unlikePost.useMutation();
+  const likePost = api.post.likePost.useMutation({
+    onMutate: async () => {
+      await utils.post.paginatePostsOfUserSelf.cancel();
+      const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+        pageSize: 10,
+      });
 
-  const renderCaption = () => {
-    const maxLength = 100; // Set max length for the caption
-    if (post.caption.length <= maxLength || isExpanded) {
-      return post.caption;
-    }
-    return `${post.caption.substring(0, maxLength)}...`;
-  };
+      if (!prevPosts) {
+        console.warn("prevPosts is undefined");
+        return { prevPosts: undefined };
+      }
+
+      utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        { pageSize: 10 },
+        (prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            pages: prevData.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) =>
+                item?.postId === post.postId
+                  ? {
+                      ...item,
+                      likesCount: (item.likesCount || 0) + 1,
+                      isLiked: true,
+                    }
+                  : item,
+              ),
+            })),
+          };
+        },
+      );
+
+      return { prevPosts };
+    },
+    onError: (error, variables, context) => {
+      if (context?.prevPosts) {
+        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+          { pageSize: 10 },
+          context.prevPosts,
+        );
+      }
+    },
+    onSettled: async () => {
+      await utils.post.paginatePostsOfUserSelf.invalidate();
+    },
+  });
+
+  const unlikePost = api.post.unlikePost.useMutation({
+    onMutate: async () => {
+      await utils.post.paginatePostsOfUserSelf.cancel();
+      const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+        pageSize: 10,
+      });
+
+      if (!prevPosts) {
+        console.warn("prevPosts is undefined");
+        return { prevPosts: undefined };
+      }
+
+      utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        { pageSize: 10 },
+        (prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            pages: prevData.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) =>
+                item?.postId === post.postId
+                  ? {
+                      ...item,
+                      likesCount: Math.max((item.likesCount || 0) - 1, 0),
+                      isLiked: false,
+                    }
+                  : item,
+              ),
+            })),
+          };
+        },
+      );
+
+      return { prevPosts };
+    },
+    onError: (error, variables, context) => {
+      if (context?.prevPosts) {
+        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+          { pageSize: 10 },
+          context.prevPosts,
+        );
+      }
+    },
+    onSettled: async () => {
+      await utils.post.paginatePostsOfUserSelf.invalidate();
+    },
+  });
 
   // For the fuckin like button
   const imageLikeScale = useSharedValue(0);
   const buttonLikeScale = useSharedValue(1);
 
-  const handleImageLikeAnimation = () => {
+  const handleDoubleTabLike = async () => {
     imageLikeScale.value = withSpring(
       1,
       {
@@ -118,28 +205,7 @@ const PostItem = (props: PostItemProps) => {
         imageLikeScale.value = withDelay(150, withTiming(0, { duration: 250 }));
       },
     );
-    setIsLiked(true); // Update the liked state
-  };
 
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .onEnd(() => {
-      runOnJS(handleImageLikeAnimation)();
-    });
-
-  const heartImageAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: imageLikeScale.value }],
-    };
-  });
-
-  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: buttonLikeScale.value }],
-    };
-  });
-
-  const handleButtonLikeAnimation = () => {
     buttonLikeScale.value = withSpring(
       1.1,
       {
@@ -155,28 +221,62 @@ const PostItem = (props: PostItemProps) => {
         buttonLikeScale.value = withTiming(1, { duration: 200 });
       },
     );
-    setIsLiked(!isLiked);
-    throttledLikePost();
-    // debouncedLikePost();
+    if (!isLiked) {
+      await likePost.mutateAsync({ postId: post.postId });
+      setIsLiked(true); // Update the liked state
+    }
   };
 
-  const handleLikePost = async () => {
+  const handleLikeButtonOnPress = async () => {
+    buttonLikeScale.value = withSpring(
+      1.1,
+      {
+        duration: 100,
+        dampingRatio: 0.5,
+        stiffness: 50,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+        reduceMotion: ReduceMotion.System,
+      },
+      () => {
+        buttonLikeScale.value = withTiming(1, { duration: 200 });
+      },
+    );
     if (isLiked) {
+      setIsLiked(!isLiked);
       await unlikePost.mutateAsync({ postId: post.postId });
     } else {
+      setIsLiked(!isLiked);
       await likePost.mutateAsync({ postId: post.postId });
     }
   };
 
-  const debouncedLikePost = useCallback(
-    debounce(handleLikePost, 3000, { leading: false, trailing: true }),
-    [isLiked],
-  );
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .onEnd(() => {
+      runOnJS(handleDoubleTabLike)();
+    });
 
-  const throttledLikePost = useCallback(
-    throttle(handleLikePost, 3000, { leading: false, trailing: true }),
-    [isLiked],
-  );
+  const heartImageAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: imageLikeScale.value }],
+    };
+  });
+
+  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonLikeScale.value }],
+    };
+  });
+
+  const renderCaption = () => {
+    const maxLength = 100; // Set max length for the caption
+    if (post.caption.length <= maxLength || isExpanded) {
+      return post.caption;
+    }
+    return `${post.caption.substring(0, maxLength)}...`;
+  };
 
   if (status === "loading" || isLoadingHasLiked) {
     return (
@@ -312,7 +412,7 @@ const PostItem = (props: PostItemProps) => {
           </View>
           {/* Like Button */}
           <View flex={1} justifyContent="center">
-            <TouchableOpacity onPress={handleButtonLikeAnimation}>
+            <TouchableOpacity onPress={handleLikeButtonOnPress}>
               <View
                 justifyContent="center"
                 alignItems="center"
