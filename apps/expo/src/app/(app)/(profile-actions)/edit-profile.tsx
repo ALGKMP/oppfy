@@ -1,14 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  View as RNView,
-  StyleSheet,
-} from "react-native";
-import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
+import React, { useCallback, useRef, useState } from "react";
+import { View as RNView } from "react-native";
+import type { TextInput } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetTextInput,
+} from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, Minus } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
@@ -16,10 +17,9 @@ import {
   Avatar,
   Button,
   H3,
-  Input,
   ScrollView,
+  Separator,
   SizableText,
-  Stack,
   Text,
   useTheme,
   View,
@@ -42,7 +42,7 @@ const profileSchema = z.object({
 type ProfileFields = z.infer<typeof profileSchema>;
 type FieldKeys = keyof ProfileFields;
 
-const EditProfile: React.FC = () => {
+const EditProfile = () => {
   const utils = api.useUtils();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -54,6 +54,8 @@ const EditProfile: React.FC = () => {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
+    reset,
   } = useForm<ProfileFields>({
     defaultValues: {
       fullName: defaultValues?.name ?? "",
@@ -69,7 +71,10 @@ const EditProfile: React.FC = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     await updateProfile.mutateAsync(data, {
-      onSuccess: () => bottomSheetRef.current?.close(),
+      onSuccess: () => {
+        bottomSheetRef.current?.close();
+        reset(data);
+      },
       onError: (error) => {
         if (error.data?.code === "CONFLICT") {
           setError("username", {
@@ -85,14 +90,19 @@ const EditProfile: React.FC = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const inputRef = useRef<TextInput>(null);
   const [inputValue, setInputValue] = useState("");
+  const [isFieldChanged, setIsFieldChanged] = useState(false);
 
   const openBottomSheet = (field: FieldKeys) => {
     setCurrentField(field);
     setInputValue(watch(field));
+    setIsFieldChanged(false);
     bottomSheetRef.current?.expand();
   };
 
-  const clearInput = () => setInputValue("");
+  const clearInput = () => {
+    setInputValue("");
+    setIsFieldChanged(true);
+  };
 
   const getCharLimit = (field: FieldKeys): number => {
     const validation = profileSchema.shape[field];
@@ -157,7 +167,7 @@ const EditProfile: React.FC = () => {
           <Controller
             control={control}
             name={field}
-            render={({ field: { onBlur } }) => (
+            render={({ field: { onBlur, value } }) => (
               <RNView
                 onLayout={() => {
                   if (inputRef.current) {
@@ -171,7 +181,10 @@ const EditProfile: React.FC = () => {
                   placeholder={placeholder}
                   onBlur={onBlur}
                   value={inputValue}
-                  onChangeText={setInputValue}
+                  onChangeText={(text) => {
+                    setInputValue(text);
+                    setIsFieldChanged(text !== value);
+                  }}
                   multiline={field === "bio"}
                   maxLength={charLimit}
                   style={{
@@ -224,59 +237,158 @@ const EditProfile: React.FC = () => {
     }
   }, [currentField, renderFieldContent]);
 
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        opacity={0.5}
+        {...props}
+      />
+    ),
+    [],
+  );
+
+  const handleSave = () => {
+    if (currentField && isFieldChanged) {
+      setValue(currentField, inputValue);
+      bottomSheetRef.current?.close();
+    }
+  };
+
+  const handleSheetClose = () => {
+    setCurrentField(null);
+    setInputValue("");
+    setIsFieldChanged(false);
+  };
+
   return (
     <BaseScreenView>
       <ScrollView>
         <YStack gap="$4">
           <TouchableOpacity>
             <YStack alignItems="center" gap="$3">
-              <Avatar size="$12" circular bordered>
-                <Avatar.Image src={defaultValues?.profilePictureUrl} />
-                <Avatar.Fallback backgroundColor="$blue5" />
-              </Avatar>
+              <View position="relative">
+                <Avatar size="$12" circular bordered>
+                  <Avatar.Image src={defaultValues?.profilePictureUrl} />
+                  <Avatar.Fallback backgroundColor="$blue5" />
+                </Avatar>
+                <View
+                  position="absolute"
+                  bottom={0}
+                  right={0}
+                  borderRadius={20}
+                  backgroundColor="$gray5"
+                  padding="$2"
+                >
+                  <Feather name="edit-3" size={24} color={theme.blue9.val} />
+                </View>
+              </View>
               <Text color="$blue10">Edit photo</Text>
             </YStack>
           </TouchableOpacity>
 
           <H3>Profile Details</H3>
-          {(["fullName", "username", "bio"] as const).map((field) => (
-            <XStack
-              key={field}
-              justifyContent="space-between"
-              alignItems="center"
-              onPress={() => openBottomSheet(field)}
-            >
-              <YStack flex={1}>
+
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            onPress={() => openBottomSheet("fullName")}
+          >
+            <XStack flex={1} alignItems="center" space="$3">
+              <Ionicons
+                name="person-outline"
+                size={24}
+                color={theme.gray10.val}
+              />
+              <YStack>
                 <Text
                   fontSize="$5"
                   fontWeight="500"
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {field === "username" ? `@${watch(field)}` : `Add ${field}`}
+                  {watch("fullName") || "Add name"}
                 </Text>
-                <Text color="$gray10">
-                  {field === "fullName" ? "Display name" : field}
-                </Text>
+                <Text color="$gray10">Display name</Text>
               </YStack>
-              <ChevronRight size={24} color="$gray10" />
             </XStack>
-          ))}
+            <ChevronRight size={24} color="$gray10" />
+          </XStack>
+          <Separator />
+
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            onPress={() => openBottomSheet("username")}
+          >
+            <XStack flex={1} alignItems="center" space="$3">
+              <Ionicons name="at-outline" size={24} color={theme.gray10.val} />
+              <YStack>
+                <Text
+                  fontSize="$5"
+                  fontWeight="500"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {watch("username")}
+                </Text>
+                <Text color="$gray10">Username</Text>
+              </YStack>
+            </XStack>
+            <ChevronRight size={24} color="$gray10" />
+          </XStack>
+          <Separator />
+
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            onPress={() => openBottomSheet("bio")}
+          >
+            <XStack flex={1} alignItems="center" space="$3">
+              <Ionicons
+                name="information-circle-outline"
+                size={24}
+                color={theme.gray10.val}
+              />
+              <YStack>
+                <Text
+                  fontSize="$5"
+                  fontWeight="500"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {watch("bio") || "Bio"}
+                </Text>
+                <Text color="$gray10">Bio</Text>
+              </YStack>
+            </XStack>
+            <ChevronRight size={24} color="$gray10" />
+          </XStack>
         </YStack>
       </ScrollView>
 
       <BottomSheet
         ref={bottomSheetRef}
-        snapPoints={["50%"]}
         index={-1}
-        keyboardBlurBehavior="restore"
+        snapPoints={["50%"]}
         enablePanDownToClose
+        keyboardBlurBehavior="restore"
+        onClose={handleSheetClose}
         handleComponent={renderHeader}
+        backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: theme.gray4.val }}
       >
         {renderBottomSheetContent()}
         <XStack padding="$4" paddingBottom={insets.bottom}>
-          <Button flex={1} size="$5" borderRadius="$7" onPress={onSubmit}>
+          <Button
+            flex={1}
+            size="$5"
+            borderRadius="$7"
+            onPress={handleSave}
+            disabled={!isFieldChanged}
+            opacity={isFieldChanged ? 1 : 0.5}
+          >
             Save
           </Button>
         </XStack>
