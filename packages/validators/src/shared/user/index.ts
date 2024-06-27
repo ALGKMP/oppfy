@@ -6,8 +6,8 @@ import { AgeChecker } from "@oppfy/utils";
 
 export const fullName = z
   .string()
-  .min(3, { message: "Name is too short" })
-  .max(50, { message: "Name is too long" })
+  .min(2, { message: "Name is too short" })
+  .max(24, { message: "Name is too long" })
   .regex(/^[a-zA-Z]+([ '-][a-zA-Z]+)*$/, {
     message: "Name contains invalid characters",
   });
@@ -15,9 +15,9 @@ export const fullName = z
 export const username = z
   .string()
   .min(1, { message: "Username is too short" })
-  .max(20, { message: "Username is too long" });
+  .max(24, { message: "Username is too long" });
 
-export const bio = z.string().max(160, { message: "Bio is too long" });
+export const bio = z.string().max(100, { message: "Bio is too long" });
 
 export const dateOfBirth = z
   .date()
