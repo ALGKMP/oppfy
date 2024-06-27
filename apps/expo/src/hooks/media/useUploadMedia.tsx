@@ -14,9 +14,9 @@ export interface UploadMediaInput {
 
 const useUploadMedia = () => {
   const createMuxVideoPresignedUrl =
-    api.post.createMuxVideoPresignedUrl.useMutation();
+    api.post.createMuxVideoPresignedUrlForVideoPost.useMutation();
   const createPresignedUrlForPost =
-    api.post.createPresignedUrlForPost.useMutation();
+    api.post.createPresignedUrlForImagePost.useMutation();
 
   const getMediaBlob = async (uri: string) => {
     const response = await fetch(uri);
