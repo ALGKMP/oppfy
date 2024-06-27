@@ -25,12 +25,6 @@ const CameraLayout = () => {
       }}
     >
       <Stack.Screen
-        name="index"
-        options={{
-          header: () => null,
-        }}
-      />
-      <Stack.Screen
         name="preview"
         options={{
           header: () => null,
