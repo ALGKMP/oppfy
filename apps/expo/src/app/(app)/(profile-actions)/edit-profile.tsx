@@ -3,11 +3,11 @@ import { View as RNView } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
+import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import BottomSheet, {
   BottomSheetBackdrop,
-  BottomSheetBackdropProps,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -66,7 +66,33 @@ const EditProfile = () => {
   });
 
   const updateProfile = api.profile.updateProfile.useMutation({
-    // Mutation Logic
+    onMutate: async (newPartialProfileData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getFullProfileSelf.cancel();
+
+      // Get the data from the queryCache
+      const prevData = utils.profile.getFullProfileSelf.getData();
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.profile.getFullProfileSelf.setData(undefined, {
+        ...prevData,
+        ...newPartialProfileData,
+      });
+
+      // Return the previous data so we can revert if something goes wrong
+      return { prevData };
+    },
+    onError: (_err, _newPartialProfileData, ctx) => {
+      if (ctx === undefined) return;
+
+      // If the mutation fails, use the context-value from onMutate
+      utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.profile.getFullProfileSelf.invalidate();
+    },
   });
 
   const onSubmit = handleSubmit(async (data) => {
@@ -112,8 +138,8 @@ const EditProfile = () => {
     return maxCheck?.kind === "max" ? maxCheck.value : Infinity;
   };
 
-  const renderHeader = useCallback(
-    () => (
+  const renderHeader = useCallback(() => {
+    return (
       <YStack
         flex={1}
         justifyContent="center"
@@ -123,7 +149,9 @@ const EditProfile = () => {
         <Minus size="$4" />
         <View justifyContent="center" alignItems="center">
           <SizableText size="$5" textAlign="center" fontWeight="bold">
-            Edit {currentField}
+            {currentField === "fullName" && "Edit Name"}
+            {currentField === "username" && "Edit Username"}
+            {currentField === "bio" && "Edit Bio"}
           </SizableText>
         </View>
         <View
@@ -133,9 +161,8 @@ const EditProfile = () => {
           marginTop="$3"
         />
       </YStack>
-    ),
-    [currentField],
-  );
+    );
+  }, [currentField]);
 
   const renderFieldContent = useCallback(
     (
@@ -216,21 +243,21 @@ const EditProfile = () => {
           "fullName",
           "What's your name?",
           "Full Name",
-          "✨ Your display name helps others recognize you.",
+          "Your display name helps others recognize you.",
         );
       case "username":
         return renderFieldContent(
           "username",
           "Choose your username",
           "Username",
-          "🔗 Your unique identifier for mentions and sharing.",
+          "Your unique identifier for mentions and sharing.",
         );
       case "bio":
         return renderFieldContent(
           "bio",
-          "Tell us about yourself",
+          "About you",
           "Bio",
-          "🌟 Share a brief description of who you are or what you're passionate about.",
+          "Share a brief description about yourself or what you're passionate about.",
         );
       default:
         return null;
@@ -252,7 +279,7 @@ const EditProfile = () => {
   const handleSave = () => {
     if (currentField && isFieldChanged) {
       setValue(currentField, inputValue);
-      bottomSheetRef.current?.close();
+      onSubmit();
     }
   };
 
@@ -284,11 +311,11 @@ const EditProfile = () => {
                   <Feather name="edit-3" size={24} color={theme.blue9.val} />
                 </View>
               </View>
-              <Text color="$blue10">Edit photo</Text>
+              <Text color="$blue10">Change profile picture</Text>
             </YStack>
           </TouchableOpacity>
 
-          <H3>Profile Details</H3>
+          <H3>Profile Information</H3>
 
           <XStack
             justifyContent="space-between"
@@ -310,7 +337,7 @@ const EditProfile = () => {
                 >
                   {watch("fullName") || "Add name"}
                 </Text>
-                <Text color="$gray10">Display name</Text>
+                <Text color="$gray10">Name</Text>
               </YStack>
             </XStack>
             <ChevronRight size={24} color="$gray10" />
@@ -358,7 +385,7 @@ const EditProfile = () => {
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {watch("bio") || "Bio"}
+                  {watch("bio") || "Add bio"}
                 </Text>
                 <Text color="$gray10">Bio</Text>
               </YStack>
