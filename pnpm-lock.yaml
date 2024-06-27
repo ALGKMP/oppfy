@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -175,6 +179,9 @@ importers:
       expo-store-review:
         specifier: ^7.0.2
         version: 7.0.2(expo@51.0.14)
+      expo-video:
+        specifier: ^1.1.10
+        version: 1.1.10(expo@51.0.14)
       expo-video-thumbnails:
         specifier: ~8.0.0
         version: 8.0.0(expo@51.0.14)
@@ -211,6 +218,9 @@ importers:
       react-native-gesture-handler:
         specifier: 2.16.2
         version: 2.16.2(react-native@0.74.2)(react@18.2.0)
+      react-native-mmkv:
+        specifier: ^2.12.2
+        version: 2.12.2(react-native@0.74.2)(react@18.2.0)
       react-native-pager-view:
         specifier: ^6.3.0
         version: 6.3.0(react-native@0.74.2)(react@18.2.0)
@@ -1132,7 +1142,7 @@ importers:
         version: 0.0.0-experimental-c8b3f72-20240517(eslint@9.2.0)
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-26f2496093-20240514(eslint@9.2.0)
+        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.2.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.8.0(eslint@9.2.0)(typescript@5.4.5)
@@ -13183,8 +13193,8 @@ packages:
       - supports-color
     dev: false
 
-  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.2.0):
-    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
+  /eslint-plugin-react-hooks@5.1.0-beta-94eed63c49-20240425(eslint@9.2.0):
+    resolution: {integrity: sha512-9DabNOh93nRDoBbYYO7kS5QqJdbA1Jh9XNDh7MebrDAYctyGQaHSg29TGoNEieX3iLSSfiKToPcvsLowrAtFRA==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -13814,6 +13824,14 @@ packages:
 
   /expo-video-thumbnails@8.0.0(expo@51.0.14):
     resolution: {integrity: sha512-VWVkBjn8DRodRVCDDaFxnQrOaPNzTeEcGBvPWcAv9WQ4D+TY0KCl36x4gUf9HUfhhH8uwZdmP1g1rSFtqCTGLg==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.14(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+    dev: false
+
+  /expo-video@1.1.10(expo@51.0.14):
+    resolution: {integrity: sha512-k9ecpgtwAK8Ut8enm8Jv398XkB/uVOyLLqk80M/d8pH9EN5CVrBQ7iEzWlR3quvVUFM7Uf5wRukJ4hk3mZ8NCg==}
     peerDependencies:
       expo: '*'
     dependencies:
@@ -18789,6 +18807,16 @@ packages:
       shallowequal: 1.1.0
     dev: false
 
+  /react-native-mmkv@2.12.2(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-6058Aq0p57chPrUutLGe9fYoiDVDNMU2PKV+lLFUJ3GhoHvUrLdsS1PDSCLr00yqzL4WJQ7TTzH+V8cpyrNcfg==}
+    peerDependencies:
+      react: '*'
+      react-native: '>=0.71.0'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
+    dev: false
+
   /react-native-pager-view@6.3.0(react-native@0.74.2)(react@18.2.0):
     resolution: {integrity: sha512-ufJOoVa9pFL1J/yb4hpsCqp8n1qTlcF5VvwqvCacHX//D7hSeRscsiIXg1u1pXNWwllvACb+mqxec/3Uj2mxrA==}
     peerDependencies:
@@ -21870,7 +21898,3 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
