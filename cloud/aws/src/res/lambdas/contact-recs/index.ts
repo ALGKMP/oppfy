@@ -50,12 +50,13 @@ export const handler = async (
       .has("isFollowing", false)
       .inV()
       .dedup()
-      .order()
-      .by(__.property("createdAt"), order.desc)
+      // .order()
+      // .by(__.property("createdAt"), order.desc)
       .limit(10)
       .id()
       .toList();
 
+    console.log(tier1);
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
       .V(userId)
@@ -64,11 +65,12 @@ export const handler = async (
       .where(__.outV().hasId(P.without(following)))
       .outV()
       .dedup()
-      .order()
-      .by(__.property("createdAt"), order.desc)
+      // .order()
+      // .by(__.property("createdAt"), order.desc)
       .limit(30)
       .id()
       .toList();
+    console.log(tier2);
 
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
