@@ -243,8 +243,8 @@ importers:
         specifier: ^3.5.2
         version: 3.5.2(react-native-pager-view@6.3.0)(react-native@0.74.2)(react@18.2.0)
       react-native-vision-camera:
-        specifier: ^4.0.5
-        version: 4.0.5(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
+        specifier: ^4.3.2
+        version: 4.3.2(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
       superjson:
         specifier: 2.2.0
         version: 2.2.0
@@ -18935,8 +18935,8 @@ packages:
       react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
     dev: false
 
-  /react-native-vision-camera@4.0.5(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
-    resolution: {integrity: sha512-MaNQPnRLf6RfWOvhrPb+qiwhOAQIhtWhXJck6UU5Xj0ehoC3SsZjbdPZ39V5BD1KifK1n2YnuS0tzGw/zfrBzg==}
+  /react-native-vision-camera@4.3.2(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-zrMWS+I5kIV9UShryRBOjV0PfOvKIH1LlvnQKw8n4D2NOuT6d3dTZ1KtwmktorwrPxRPf3FRktSn2Gv6F1kmWQ==}
     peerDependencies:
       '@shopify/react-native-skia': '*'
       react: '*'
