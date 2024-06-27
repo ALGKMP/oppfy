@@ -23,15 +23,11 @@ import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
+import useSearch from "~/hooks/useSearch";
 
 const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
 ) as CountryData[];
-
-const fuse = new Fuse(countriesWithoutSections, {
-  keys: ["name", "dialingCode"],
-  threshold: 0.2,
-});
 
 const PhoneNumber = () => {
   const router = useRouter();
@@ -122,21 +118,25 @@ const CountryPicker = ({
   setSelectedCountryData,
 }: CountryPickerProps) => {
   const insets = useSafeAreaInsets();
-
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
+    {
+      data: countriesWithoutSections,
+      keys: ["name", "dialingCode", "countryCode"],
+    },
+  );
+
+  const displayData = useMemo(() => {
+    return !searchQuery
+      ? [...suggestedCountriesData, ...countriesData]
+      : filteredItems;
+  }, [searchQuery, filteredItems]);
 
   const onCountrySelect = (countryData: CountryData) => {
     setSelectedCountryData && setSelectedCountryData(countryData);
     setModalVisible(false);
   };
-
-  const filteredCountries = useMemo(() => {
-    return searchTerm
-      ? fuse.search(searchTerm).map((result) => result.item)
-      : [...suggestedCountriesData, ...countriesData];
-  }, [searchTerm]);
 
   return (
     <>
@@ -168,12 +168,12 @@ const CountryPicker = ({
             <YStack flex={1} gap="$4">
               <Input
                 placeholder="Search"
-                value={searchTerm}
-                onChangeText={setSearchTerm}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
               />
 
               <CountriesFlashList
-                data={filteredCountries}
+                data={displayData}
                 onSelect={onCountrySelect}
                 selectedCountryCode={selectedCountryData?.countryCode}
               />
