@@ -14,7 +14,7 @@ import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
@@ -192,6 +192,14 @@ const PreviewImage = ({ uri }: PreviewProps) => (
 );
 
 const PreviewVideo = ({ uri }: PreviewProps) => {
+  const navigation = useNavigation();
+
+  navigation.setOptions({
+    tabBarStyle: {
+      display: "none",
+    },
+  });
+
   const videoRef = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);

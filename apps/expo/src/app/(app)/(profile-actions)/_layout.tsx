@@ -10,12 +10,8 @@ import { Text } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
-import { api } from "~/utils/api";
 
 const ProfileActionsLayout = () => {
-  const utils = api.useUtils();
-  const username = utils.profile.getFullProfileSelf.getData()?.username;
-
   return (
     <Stack
       screenOptions={{

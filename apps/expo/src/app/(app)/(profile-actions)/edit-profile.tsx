@@ -50,10 +50,9 @@ const EditProfile = () => {
   const insets = useSafeAreaInsets();
   const defaultValues = utils.profile.getFullProfileSelf.getData();
 
-  const { imageUri, pickAndUploadImage, uploadStatus } =
-    useUploadProfilePicture({
-      optimisticallyUpdate: true,
-    });
+  const { pickAndUploadImage } = useUploadProfilePicture({
+    optimisticallyUpdate: true,
+  });
 
   const {
     control,

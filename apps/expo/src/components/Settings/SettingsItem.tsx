@@ -1,6 +1,7 @@
 import { cloneElement } from "react";
 import type { IconProps } from "@tamagui/helpers-icon";
 import {
+  H6,
   ListItem,
   Separator,
   SizableText,
@@ -60,9 +61,8 @@ export interface SettingsGroupInput {
 
 export const renderSettingsGroup = (group: SettingsGroupInput) => (
   <YStack gap="$2" key={group.headerTitle}>
-    <SizableText size="$2" theme="alt1">
-      {group.headerTitle}
-    </SizableText>
+    <H6 theme="alt1">{group.headerTitle}</H6>
+
     <YGroup alignSelf="center" bordered separator={<Separator />}>
       {group.items.map((item, index) => (
         <YGroup.Item key={index}>
