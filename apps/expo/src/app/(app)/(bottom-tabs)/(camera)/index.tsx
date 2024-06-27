@@ -124,7 +124,11 @@ const CameraPage = () => {
 
   const onMediaCaptured = useCallback(
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      const { path: uri, width, height } = media;
+      const { path: uri, width: dimension1, height: dimension2 } = media;
+
+      // todo: reminder to check if react-native-vision-camera resolved this issue
+      const width = Math.min(dimension1, dimension2);
+      const height = Math.max(dimension1, dimension2);
 
       router.push({
         pathname: "/preview",
@@ -153,7 +157,7 @@ const CameraPage = () => {
       const { uri, width, height, type } = imagePickerAsset;
 
       router.navigate({
-        pathname: "/post-to",
+        pathname: "/preview",
         params: {
           type: type === "video" ? "video" : "photo",
           uri,
@@ -250,11 +254,11 @@ const CameraPage = () => {
             fps={fps}
             photoHdr={photoHdr}
             videoHdr={videoHdr}
+            outputOrientation="portrait"
             photoQualityBalance="quality"
             lowLightBoost={device.supportsLowLightBoost && enableNightMode}
             enableZoomGesture={false}
             animatedProps={cameraAnimatedProps}
-            orientation="portrait"
             photo={true}
             video={true}
             audio={microphone.hasPermission}
