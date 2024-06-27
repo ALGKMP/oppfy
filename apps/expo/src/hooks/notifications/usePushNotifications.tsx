@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
+import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
-import { PermissionStatus } from "expo-notifications";
 
 import { api } from "~/utils/api";
 
@@ -47,6 +47,8 @@ const usePushNotifications = (): PushNotificationState => {
     if (existingStatus !== PermissionStatus.GRANTED) return;
 
     const token = await Notifications.getExpoPushTokenAsync({
+      // this is passed in by expo
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       projectId: Constants.expoConfig?.extra?.eas.projectId as string,
     });
 
