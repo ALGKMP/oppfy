@@ -44,7 +44,7 @@ const BottomTabsLayout = () => {
       />
 
       <BottomTabs.Screen
-        name="camera"
+        name="(camera)"
         options={{
           header: () => null,
           tabBarIcon: ({ focused }) => (
