@@ -57,6 +57,7 @@ export class PostRepository {
         height: schema.post.height,
         commentsCount: schema.postStats.comments,
         likesCount: schema.postStats.likes,
+        mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
       })
       .from(schema.post)
@@ -99,9 +100,11 @@ export class PostRepository {
         postId: schema.post.id,
         authorId: schema.post.author,
         authorUsername: authorProfile.username,
+        authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
         recipientId: schema.post.recipient,
         recipientUsername: recipientProfile.username,
+        recipientProfileId: recipientProfile.id,
         recipientProfilePicture: recipientProfile.profilePictureKey,
         caption: schema.post.caption,
         imageUrl: schema.post.key,
@@ -109,6 +112,7 @@ export class PostRepository {
         height: schema.post.height,
         commentsCount: schema.postStats.comments,
         likesCount: schema.postStats.likes,
+        mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
       })
       .from(schema.post)

@@ -18,6 +18,7 @@ export const post = z.object({
   width: z.number(),
   commentsCount: z.number(),
   likesCount: z.number(),
+  mediaType: z.enum(["image", "video"]),
   createdAt: z.date(), // Added missing field
 });
 
