@@ -27,7 +27,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
-import { SizableText, Text, View } from "tamagui";
+import { Button, SizableText, Text, View } from "tamagui";
 
 import { StatusBarBlurBackground } from "~/components/StatusBars";
 import { BaseScreenView } from "~/components/Views";
@@ -240,26 +240,30 @@ const CameraPage = () => {
   return (
     <View style={styles.container}>
       <GestureDetector gesture={composedGesture}>
-        <ReanimatedCamera
-          ref={camera}
-          device={device}
-          isActive={isActive}
-          onInitialized={onInitialized}
-          format={format}
-          fps={fps}
-          photoHdr={photoHdr}
-          videoHdr={videoHdr}
-          photoQualityBalance="quality"
-          lowLightBoost={device.supportsLowLightBoost && enableNightMode}
-          enableZoomGesture={false}
-          animatedProps={cameraAnimatedProps}
-          orientation="portrait"
-          photo={true}
-          video={true}
-          audio={microphone.hasPermission}
-          enableLocation={location.hasPermission}
-          style={StyleSheet.absoluteFill}
-        />
+        <View style={styles.cameraWrapper}>
+          <ReanimatedCamera
+            ref={camera}
+            device={device}
+            isActive={isActive}
+            onInitialized={onInitialized}
+            format={format}
+            fps={fps}
+            photoHdr={photoHdr}
+            videoHdr={videoHdr}
+            photoQualityBalance="quality"
+            lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+            enableZoomGesture={false}
+            animatedProps={cameraAnimatedProps}
+            orientation="portrait"
+            photo={true}
+            video={true}
+            audio={microphone.hasPermission}
+            enableLocation={location.hasPermission}
+            style={styles.camera}
+          >
+            <Button>test</Button>
+          </ReanimatedCamera>
+        </View>
       </GestureDetector>
 
       <CaptureButton
@@ -273,8 +277,6 @@ const CameraPage = () => {
         enabled={isCameraInitialized && isActive}
         setIsPressingButton={setIsPressingButton}
       />
-
-      <StatusBarBlurBackground />
 
       {animations.map(({ id, point }) => (
         <FocusIcon key={id} x={point.x} y={point.y} />
@@ -363,6 +365,18 @@ export default CameraPage;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  cameraWrapper: {
+    width: SCREEN_WIDTH,
+    height: (SCREEN_WIDTH * 16) / 9,
+    borderRadius: 20,
+    overflow: "hidden",
+    alignSelf: "center",
+    position: "absolute",
+    top: SAFE_AREA_PADDING.paddingTop,
+  },
+  camera: {
     flex: 1,
   },
   mediaPickerButton: {
