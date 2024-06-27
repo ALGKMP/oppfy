@@ -40,7 +40,7 @@ const PAN_GESTURE_HANDLER_FAIL_X = [
 const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2] satisfies FailOffset;
 
 const START_RECORDING_DELAY = 200;
-const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.1;
+const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.075;
 
 interface Context {
   offsetY?: number;
