@@ -32,6 +32,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { BaseScreenView } from "~/components/Views";
+import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 
 const profileSchema = z.object({
@@ -48,6 +49,11 @@ const EditProfile = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const defaultValues = utils.profile.getFullProfileSelf.getData();
+
+  const { imageUri, pickAndUploadImage, uploadStatus } =
+    useUploadProfilePicture({
+      optimisticallyUpdate: true,
+    });
 
   const {
     control,
@@ -244,21 +250,21 @@ const EditProfile = () => {
           "fullName",
           "What's your name?",
           "Full Name",
-          "Your display name helps others recognize you.",
+          "✨ Your display name helps others recognize you.",
         );
       case "username":
         return renderFieldContent(
           "username",
           "Choose your username",
           "Username",
-          "Your unique identifier for mentions and sharing.",
+          "🔗 Your unique identifier for mentions and sharing.",
         );
       case "bio":
         return renderFieldContent(
           "bio",
           "About you",
           "Bio",
-          "Share a brief description about yourself or what you're passionate about.",
+          "🌟 Share a brief description of who you are or what you're passionate about.",
         );
       default:
         return null;
@@ -277,10 +283,10 @@ const EditProfile = () => {
     [],
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (currentField && isFieldChanged) {
       setValue(currentField, inputValue);
-      onSubmit();
+      await onSubmit();
     }
   };
 
@@ -294,7 +300,7 @@ const EditProfile = () => {
     <BaseScreenView>
       <ScrollView>
         <YStack gap="$5">
-          <TouchableOpacity>
+          <TouchableOpacity onPress={pickAndUploadImage}>
             <YStack alignItems="center" gap="$3">
               <View position="relative">
                 <Avatar size="$12" circular bordered>
@@ -391,9 +397,8 @@ const EditProfile = () => {
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
-                      {watch("bio") || "Add bio"}
+                      {watch("bio") ? "Edit bio" : "Add bio"}
                     </Text>
-                    <Text color="$gray10">Bio</Text>
                   </YStack>
                 </XStack>
                 <ChevronRight size={24} color="$gray10" />
