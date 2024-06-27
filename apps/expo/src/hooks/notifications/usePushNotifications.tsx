@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import { PermissionStatus } from "expo-notifications";
 
 import { api } from "~/utils/api";
 
@@ -15,9 +16,11 @@ const usePushNotifications = (): PushNotificationState => {
   const storePushToken = api.notifications.storePushToken.useMutation();
 
   Notifications.setNotificationHandler({
+    // ! expo typed this promise incorrectly
+    // eslint-disable-next-line @typescript-eslint/require-await
     handleNotification: async () => ({
-      shouldPlaySound: false,
       shouldShowAlert: true,
+      shouldPlaySound: false,
       shouldSetBadge: false,
     }),
   });
@@ -41,16 +44,16 @@ const usePushNotifications = (): PushNotificationState => {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
 
-    if (existingStatus !== "granted") return;
+    if (existingStatus !== PermissionStatus.GRANTED) return;
 
     const token = await Notifications.getExpoPushTokenAsync({
-      projectId: Constants.expoConfig?.extra?.eas.projectId,
+      projectId: Constants.expoConfig?.extra?.eas.projectId as string,
     });
 
     await storePushToken.mutateAsync({ pushToken: token.data });
 
     if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
+      await Notifications.setNotificationChannelAsync("default", {
         name: "default",
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
@@ -62,7 +65,7 @@ const usePushNotifications = (): PushNotificationState => {
   };
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then((token) => {
+    void registerForPushNotificationsAsync().then((token) => {
       setExpoPushToken(token);
     });
 
@@ -77,11 +80,14 @@ const usePushNotifications = (): PushNotificationState => {
       });
 
     return () => {
+      if (responseListener.current === undefined) return;
+      if (notificationListener.current === undefined) return;
+
       Notifications.removeNotificationSubscription(
-        notificationListener.current!,
+        notificationListener.current,
       );
 
-      Notifications.removeNotificationSubscription(responseListener.current!);
+      Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
 
