@@ -1,21 +1,22 @@
-import React, { useCallback, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  View as RNView,
+  StyleSheet,
+} from "react-native";
+import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronRight, Minus, X } from "@tamagui/lucide-icons";
+import { ChevronRight, Minus } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import {
   Avatar,
   Button,
-  getToken,
-  H1,
-  H2,
   H3,
-  H4,
-  H5,
-  Header,
+  Input,
   ScrollView,
   SizableText,
   Stack,
@@ -38,9 +39,10 @@ const profileSchema = z.object({
   bio: sharedValidators.user.bio,
 });
 
-type FieldKeys = keyof z.infer<typeof profileSchema>;
+type ProfileFields = z.infer<typeof profileSchema>;
+type FieldKeys = keyof ProfileFields;
 
-const EditProfile = () => {
+const EditProfile: React.FC = () => {
   const utils = api.useUtils();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -52,7 +54,7 @@ const EditProfile = () => {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm({
+  } = useForm<ProfileFields>({
     defaultValues: {
       fullName: defaultValues?.name ?? "",
       username: defaultValues?.username ?? "",
@@ -67,6 +69,7 @@ const EditProfile = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     await updateProfile.mutateAsync(data, {
+      onSuccess: () => bottomSheetRef.current?.close(),
       onError: (error) => {
         if (error.data?.code === "CONFLICT") {
           setError("username", {
@@ -76,11 +79,11 @@ const EditProfile = () => {
         }
       },
     });
-    bottomSheetRef.current?.close();
   });
 
   const [currentField, setCurrentField] = useState<FieldKeys | null>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const inputRef = useRef<TextInput>(null);
   const [inputValue, setInputValue] = useState("");
 
   const openBottomSheet = (field: FieldKeys) => {
@@ -89,15 +92,14 @@ const EditProfile = () => {
     bottomSheetRef.current?.expand();
   };
 
-  const clearInput = () => {
-    setInputValue("");
-  };
+  const clearInput = () => setInputValue("");
 
-  const getCharLimit = (field: FieldKeys) => {
+  const getCharLimit = (field: FieldKeys): number => {
     const validation = profileSchema.shape[field];
-    const checks = validation._def.checks;
-    const maxCheck = checks.find((check) => check.kind === "max");
-    return maxCheck?.kind === "max" ? maxCheck.value : undefined;
+    const maxCheck = validation._def.checks.find(
+      (check) => check.kind === "max",
+    );
+    return maxCheck?.kind === "max" ? maxCheck.value : Infinity;
   };
 
   const renderHeader = useCallback(
@@ -125,165 +127,102 @@ const EditProfile = () => {
     [currentField],
   );
 
-  const renderFullNameContent = useCallback(() => {
-    const charLimit = getCharLimit("fullName");
-    return (
-      <YStack flex={1} padding="$4" space="$4">
-        <Text fontSize="$6" fontWeight="bold">
-          What's your name?
-        </Text>
-        <Controller
-          control={control}
-          name="fullName"
-          render={({ field: { onBlur } }) => (
-            <BottomSheetTextInput
-              placeholder="Full Name"
-              onBlur={onBlur}
-              value={inputValue}
-              onChangeText={setInputValue}
-              style={{
-                fontWeight: "bold",
-                justifyContent: "flex-start",
-                borderColor: "#2E2E2E",
-                borderRadius: 20,
-                backgroundColor: "#2E2E2E",
-                color: "#fff",
-                padding: 20,
-              }}
-              maxLength={charLimit}
-            />
-          )}
-        />
-        {errors.fullName && (
-          <Text color="$red9">{errors.fullName.message}</Text>
-        )}
-        <XStack justifyContent="space-between" alignItems="center">
+  const renderFieldContent = useCallback(
+    (
+      field: FieldKeys,
+      title: string,
+      placeholder: string,
+      description: string,
+    ) => {
+      const charLimit = getCharLimit(field);
+      return (
+        <YStack flex={1} padding="$4" space="$4">
+          <XStack justifyContent="space-between">
+            <Text fontSize="$6" fontWeight="bold">
+              {title}
+            </Text>
+            <XStack alignItems="center" space="$2">
+              <Text fontSize="$3" color="$gray10">
+                {inputValue.length}/{charLimit}
+              </Text>
+              <TouchableOpacity onPress={clearInput}>
+                <Ionicons
+                  name="close-circle"
+                  size={20}
+                  color={theme.gray8.val}
+                />
+              </TouchableOpacity>
+            </XStack>
+          </XStack>
+          <Controller
+            control={control}
+            name={field}
+            render={({ field: { onBlur } }) => (
+              <RNView
+                onLayout={() => {
+                  if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }}
+              >
+                <BottomSheetTextInput
+                  ref={inputRef}
+                  autoFocus
+                  placeholder={placeholder}
+                  onBlur={onBlur}
+                  value={inputValue}
+                  onChangeText={setInputValue}
+                  multiline={field === "bio"}
+                  maxLength={charLimit}
+                  style={{
+                    fontWeight: "bold",
+                    justifyContent: "flex-start",
+                    color: theme.color.val,
+                    backgroundColor: theme.gray5.val,
+                    padding: 20,
+                    borderRadius: 20,
+                  }}
+                />
+              </RNView>
+            )}
+          />
           <Text fontSize="$3" color="$gray10">
-            {inputValue.length}/{charLimit}
+            {description}
           </Text>
-          <TouchableOpacity onPress={clearInput}>
-            <X color="$red8" size={24} />
-          </TouchableOpacity>
-        </XStack>
-        <XStack gap="$2">
-          {[`"${inputValue}"`, `${inputValue}'s`, inputValue].map(
-            (suggestion, index) => (
-              <Button key={index} onPress={() => setInputValue(suggestion)}>
-                {suggestion}
-              </Button>
-            ),
-          )}
-        </XStack>
-      </YStack>
-    );
-  }, [control, errors, inputValue]);
-
-  const renderUsernameContent = useCallback(() => {
-    const maxCheck = profileSchema.shape.bio._def.checks.find(
-      (check) => check.kind === "max",
-    );
-    const charLimit = maxCheck?.kind === "max" ? maxCheck.value : undefined;
-
-    return (
-      <YStack flex={1} padding="$4" gap="$4">
-        <Text fontSize="$6" fontWeight="bold">
-          Choose your username
-        </Text>
-        <Controller
-          control={control}
-          name="username"
-          render={({ field: { onBlur } }) => (
-            <BottomSheetTextInput
-              placeholder="Username"
-              onBlur={onBlur}
-              value={inputValue}
-              onChangeText={setInputValue}
-              style={{
-                fontWeight: "bold",
-                justifyContent: "flex-start",
-                borderColor: "#2E2E2E",
-                borderRadius: 20,
-                backgroundColor: "#2E2E2E",
-                color: "#fff",
-                padding: 20,
-              }}
-              maxLength={charLimit}
-            />
-          )}
-        />
-        {errors.username && (
-          <Text color="$red9">{errors.username.message}</Text>
-        )}
-        <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize="$3" color="$gray10">
-            {inputValue.length}/{charLimit}
-          </Text>
-          <TouchableOpacity onPress={clearInput}>
-            <X color={"$red9"} size={24} />
-          </TouchableOpacity>
-        </XStack>
-      </YStack>
-    );
-  }, [control, errors, inputValue]);
-
-  const renderBioContent = useCallback(() => {
-    const charLimit = getCharLimit("bio");
-    return (
-      <YStack flex={1} padding="$4" space="$4">
-        <Text fontSize="$6" fontWeight="bold">
-          Tell us about yourself
-        </Text>
-        <Controller
-          control={control}
-          name="bio"
-          render={({ field: { onBlur } }) => (
-            <BottomSheetTextInput
-              placeholder="Bio"
-              onBlur={onBlur}
-              value={inputValue}
-              onChangeText={setInputValue}
-              multiline={true}
-              style={{
-                fontWeight: "bold",
-                justifyContent: "flex-start",
-                borderColor: "#2E2E2E",
-                borderRadius: 20,
-                backgroundColor: "#2E2E2E",
-                color: "#fff",
-                padding: 20,
-              }}
-              maxLength={charLimit}
-            />
-          )}
-        />
-        {errors.bio && <Text color="$red9">{errors.bio.message}</Text>}
-        <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize="$3" color="$gray10">
-            {inputValue.length}/{charLimit}
-          </Text>
-          <TouchableOpacity onPress={clearInput}>
-            <X color="$red8" size={24} />
-          </TouchableOpacity>
-        </XStack>
-      </YStack>
-    );
-  }, [control, errors, inputValue]);
+          {errors[field] && <Text color="$red8">{errors[field]?.message}</Text>}
+        </YStack>
+      );
+    },
+    [control, errors, inputValue, theme],
+  );
 
   const renderBottomSheetContent = useCallback(() => {
     switch (currentField) {
       case "fullName":
-        return renderFullNameContent();
+        return renderFieldContent(
+          "fullName",
+          "What's your name?",
+          "Full Name",
+          "✨ Your display name helps others recognize you.",
+        );
       case "username":
-        return renderUsernameContent();
+        return renderFieldContent(
+          "username",
+          "Choose your username",
+          "Username",
+          "🔗 Your unique identifier for mentions and sharing.",
+        );
       case "bio":
-        return renderBioContent();
+        return renderFieldContent(
+          "bio",
+          "Tell us about yourself",
+          "Bio",
+          "🌟 Share a brief description of who you are or what you're passionate about.",
+        );
+      default:
+        return null;
     }
-  }, [
-    currentField,
-    renderFullNameContent,
-    renderUsernameContent,
-    renderBioContent,
-  ]);
+  }, [currentField, renderFieldContent]);
 
   return (
     <BaseScreenView>
@@ -295,59 +234,34 @@ const EditProfile = () => {
                 <Avatar.Image src={defaultValues?.profilePictureUrl} />
                 <Avatar.Fallback backgroundColor="$blue5" />
               </Avatar>
-
               <Text color="$blue10">Edit photo</Text>
             </YStack>
           </TouchableOpacity>
 
-          {/* <Text fontSize="$6" fontWeight="bold">
-            Journal
-          </Text> */}
           <H3>Profile Details</H3>
-          <XStack
-            justifyContent="space-between"
-            alignItems="center"
-            onPress={() => openBottomSheet("fullName")}
-          >
-            <YStack>
-              <Text fontSize="$5" fontWeight="500">
-                {defaultValues?.name}
-              </Text>
-              <Text color="$gray10">Display name</Text>
-            </YStack>
-            <ChevronRight size={24} color="$gray10" />
-          </XStack>
-          <XStack
-            justifyContent="space-between"
-            alignItems="center"
-            onPress={() => openBottomSheet("username")}
-          >
-            <YStack>
-              <Text fontSize="$5" fontWeight="500">
-                @{defaultValues?.username}
-              </Text>
-              <Text color="$gray10">Username</Text>
-            </YStack>
-            <ChevronRight size={24} color="$gray10" />
-          </XStack>
-          <XStack
-            justifyContent="space-between"
-            alignItems="center"
-            onPress={() => openBottomSheet("bio")}
-          >
-            <YStack flex={1}>
-              <Text
-                fontSize="$5"
-                fontWeight="500"
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {defaultValues?.bio ?? "Add a bio"}
-              </Text>
-              <Text color="$gray10">Bio</Text>
-            </YStack>
-            <ChevronRight size={24} color="$gray10" />
-          </XStack>
+          {(["fullName", "username", "bio"] as const).map((field) => (
+            <XStack
+              key={field}
+              justifyContent="space-between"
+              alignItems="center"
+              onPress={() => openBottomSheet(field)}
+            >
+              <YStack flex={1}>
+                <Text
+                  fontSize="$5"
+                  fontWeight="500"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {field === "username" ? `@${watch(field)}` : `Add ${field}`}
+                </Text>
+                <Text color="$gray10">
+                  {field === "fullName" ? "Display name" : field}
+                </Text>
+              </YStack>
+              <ChevronRight size={24} color="$gray10" />
+            </XStack>
+          ))}
         </YStack>
       </ScrollView>
 
