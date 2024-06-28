@@ -80,6 +80,7 @@ export const handler = async (
 
     console.log("Tier 2", tier2);
 
+    // TODO: adjust the param below for finetuning
     const tier3 = await g
       .V(userId)
       .out("contact")
@@ -91,7 +92,7 @@ export const handler = async (
       )
       .groupCount()
       .unfold()
-      .filter(__.select(column.values).is(P.gte(3)))
+      .filter(__.select(column.values).is(P.gte(1)))
       .limit(15)
       .id()
       .toList();
@@ -100,17 +101,17 @@ export const handler = async (
 
     /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
     const tier4 = await g
-      .V(tier1)
+      .V(userId)
       .out("contact")
       .out("contact")
       .where(__.not(__.inE("contact").from_(userId)))
       .dedup()
       .limit(10)
       .id()
-      .toList(); */
+      .toList();
 
-    // console.log(tier4);
-
+    console.log(tier4);
+ */
     const recommendedIds = {
       tier1,
       tier2,
