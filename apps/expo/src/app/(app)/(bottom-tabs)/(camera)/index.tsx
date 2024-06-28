@@ -24,12 +24,12 @@ import {
   useMicrophonePermission,
 } from "react-native-vision-camera";
 import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { Button, SizableText, Text, View } from "tamagui";
 
-import { StatusBarBlurBackground } from "~/components/StatusBars";
 import { BaseScreenView } from "~/components/Views";
 import {
   CONTENT_SPACING,
@@ -123,12 +123,12 @@ const CameraPage = () => {
   }, []);
 
   const onMediaCaptured = useCallback(
-    (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      const { path: uri, width: dimension1, height: dimension2 } = media;
+    async (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+      const { path: uri } = media;
 
-      // todo: reminder to check if react-native-vision-camera resolved this issue
-      const width = Math.min(dimension1, dimension2);
-      const height = Math.max(dimension1, dimension2);
+      // todo: reminder to check if react-native-vision-camera resolved the incorrect width/height issues
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      const { width, height } = await MediaLibrary.getAssetInfoAsync(asset);
 
       router.push({
         pathname: "/preview",
