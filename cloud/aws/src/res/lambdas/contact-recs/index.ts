@@ -87,7 +87,7 @@ export const handler = async (
       .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
       .groupCount()
       .unfold()
-      .filter(__.select(__.values()).is(P.gte(1)))
+      // .filter(__.select(__.values()).is(P.gte(1)))
       /*.limit(15)
       .id() */
       .toList();
