@@ -23,7 +23,6 @@ export class FriendRepository {
 
       // Add the two users as friends
       await tx.insert(schema.friend).values({ userId1, userId2 });
-      await tx.insert(schema.friend).values({ userId2, userId1 });
 
       // Delete the friend request from userId1 to userId2
       await tx
