@@ -93,19 +93,6 @@ export const handler = async (
       .toList();
     console.log("Tier 3", tier3);
 
-    // get tier 3
-    /*     const tier3 = await g
-      .V(userId) // Start from the user vertex
-      .out("contact") // Traverse to all contacts of the user
-      .aggregate("contacts") // Store all contacts in a side-effect named 'contacts'
-      .out("contact") // Traverse to contacts of contacts
-      .where(__.not(__.inE("contact").from_(userId))) // Filter out vertices that are already contacts of the user
-      .groupCount() // Count occurrences of each vertex
-      .unfold() // Unroll the map into individual entries
-      .where(__.values().is(P.gte(1))) // Keep only entries with count >= 3
-      .limit(15) // Limit to 15 results
-      .toList();
- */
     /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
     const tier4 = await g
       .V(tier1)
