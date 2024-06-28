@@ -23,14 +23,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, MoreHorizontal, SendHorizontal } from "@tamagui/lucide-icons";
-import {
-  Avatar,
-  SizableText,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
@@ -38,9 +31,8 @@ import type { sharedValidators } from "@oppfy/validators";
 import { CommentsBottomSheet } from "~/components/BottomSheets";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { api } from "~/utils/api";
-
-import ProfileBanner from "./ProfileBanner";
 import FriendsCarousel from "./FriendsCarousel";
+import ProfileBanner from "./ProfileBanner";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -654,13 +646,6 @@ const MediaOfYou = () => {
   };
 
   const FlashListHeader = () => {
-    const scrollY = useSharedValue(0);
-    const profileAnimatedStyle = useAnimatedStyle(() => {
-      const minimalOpacity = Math.max(1 - scrollY.value / 400, 0);
-      return {
-        opacity: minimalOpacity,
-      };
-    });
     if (
       isLoadingProfileData ||
       isLoadingFriendsData ||
@@ -676,18 +661,16 @@ const MediaOfYou = () => {
     }
     return (
       <YStack gap="$5" marginBottom="$5">
-        <Animated.View style={profileAnimatedStyle}>
-          <YStack gap="$5">
-            <ProfileBanner loading={false} data={profileData} />
-            <FriendsCarousel
-              loading={false}
-              data={{
-                friendCount: profileData.friendCount,
-                friendItems: friendItems,
-              }}
-            />
-          </YStack>
-        </Animated.View>
+        <YStack gap="$5">
+          <ProfileBanner loading={false} data={profileData} />
+          <FriendsCarousel
+            loading={false}
+            data={{
+              friendCount: profileData.friendCount,
+              friendItems: friendItems,
+            }}
+          />
+        </YStack>
       </YStack>
     );
   };
@@ -726,6 +709,5 @@ const MediaOfYou = () => {
     </View>
   );
 };
-
 
 export default MediaOfYou;
