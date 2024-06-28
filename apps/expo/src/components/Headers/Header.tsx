@@ -1,11 +1,7 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import type { StackProps } from "tamagui";
-import { getToken, getTokens, Text, useTheme, View, XStack } from "tamagui";
+import { Text, useTheme, View, XStack } from "tamagui";
 
 interface HeaderProps {
   title?: string;

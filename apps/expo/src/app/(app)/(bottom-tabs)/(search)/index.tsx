@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundX } from "@tamagui/lucide-icons";
 import { Input, ListItemTitle, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";

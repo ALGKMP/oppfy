@@ -109,31 +109,32 @@ const ProfileLayout = () => {
   }
 
   return (
-    <Animated.ScrollView
-      onScroll={scrollHandler}
-      scrollEventThrottle={16}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <YStack gap="$5">
-        <Animated.View style={profileAnimatedStyle}>
-          <YStack gap="$5">
-            <Profile loading={false} data={profileData} />
-            <Friends
-              loading={false}
-              data={{
-                friendCount: profileData.friendCount,
-                friendItems: friendItems,
-              }}
-            />
-          </YStack>
-        </Animated.View>
-
-        <MediaOfYou />
-      </YStack>
-    </Animated.ScrollView>
+    <>
+      {/* <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <YStack gap="$5">
+          <Animated.View style={profileAnimatedStyle}>
+            <YStack gap="$5">
+              <Profile loading={false} data={profileData} />
+              <Friends
+                loading={false}
+                data={{
+                  friendCount: profileData.friendCount,
+                  friendItems: friendItems,
+                }}
+              />
+            </YStack>
+          </Animated.View>
+        </YStack> */}
+      <MediaOfYou />
+      {/* </Animated.ScrollView> */}
+    </>
   );
 };
 

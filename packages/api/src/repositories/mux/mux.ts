@@ -7,7 +7,7 @@ export class MuxRepository {
   async createDirectUpload(
     authorId: string,
     recipientId: string,
-    caption: string = "",
+    caption = "",
   ) {
     const metadata = JSON.stringify({
       authorId,

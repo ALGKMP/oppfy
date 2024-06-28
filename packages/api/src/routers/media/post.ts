@@ -8,7 +8,7 @@ import { DomainError } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
-  createPresignedUrlForPost: protectedProcedure
+  createPresignedUrlForImagePost: protectedProcedure
     .input(trpcValidators.input.post.createS3PresignedUrl)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
@@ -40,10 +40,11 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  createMuxVideoPresignedUrl: protectedProcedure
+  createMuxVideoPresignedUrlForVideoPost: protectedProcedure
     .input(trpcValidators.input.post.createMuxPresignedUrl)
     .mutation(async ({ ctx, input }) => {
       try {
+        console.log("Creating Mux URL")
         const result = await ctx.services.mux.createDirectUpload(
           ctx.session.uid,
           input.recipientId,
@@ -90,16 +91,13 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfUserSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        console.log("TRPC getPosts result before validation: ", result);
         const parsedResult =
           trpcValidators.output.post.paginatedPosts.parse(result);
-        console.log("TRPC getPosts result after validation: ", parsedResult);
         return parsedResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);

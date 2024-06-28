@@ -8,8 +8,8 @@ import {
   Trash,
   XCircle,
 } from "@tamagui/lucide-icons";
-import { parsePhoneNumber, type CountryCode } from "libphonenumber-js";
-import { has } from "lodash";
+import { parsePhoneNumber } from "libphonenumber-js";
+import type { CountryCode } from "libphonenumber-js";
 import { Button, YStack } from "tamagui";
 
 import type { SettingsGroupInput } from "~/components/Settings";
@@ -23,11 +23,9 @@ import { api } from "~/utils/api";
 const Other = () => {
   const { deleteAccount } = useSession();
 
-  const { isLoading: isSyncingContacts, ...syncContacts } =
-    api.contacts.syncContacts.useMutation();
+  const syncContacts = api.contacts.syncContacts.useMutation();
 
-  const { isLoading: isDeletingContacts, ...deleteContacts } =
-    api.contacts.deleteContacts.useMutation();
+  const deleteContacts = api.contacts.deleteContacts.useMutation();
 
   const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
     useState(false);
@@ -53,7 +51,7 @@ const Other = () => {
     const phoneNumbers = data.reduce<{ country: string; number: string }[]>(
       (acc, contact) => {
         if (contact.phoneNumbers) {
-          for (let phoneNumber of contact.phoneNumbers) {
+          for (const phoneNumber of contact.phoneNumbers) {
             if (!phoneNumber.countryCode || !phoneNumber.number) continue;
 
             acc.push({
@@ -67,7 +65,7 @@ const Other = () => {
       [],
     );
 
-    let numbers = phoneNumbers.map((numberthing) => {
+    const numbers = phoneNumbers.map((numberthing) => {
       const phoneNumber = parsePhoneNumber(
         numberthing.number,
         numberthing.country.toLocaleUpperCase() as CountryCode,
@@ -87,7 +85,7 @@ const Other = () => {
     void syncContacts.mutateAsync(hashedNumbers);
   };
 
-  const handleDeleteContacts = async () => {
+  const handleDeleteContacts = () => {
     void deleteContacts.mutateAsync();
   };
 

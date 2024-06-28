@@ -50,10 +50,9 @@ const EditProfile = () => {
   const insets = useSafeAreaInsets();
   const defaultValues = utils.profile.getFullProfileSelf.getData();
 
-  const { imageUri, pickAndUploadImage, uploadStatus } =
-    useUploadProfilePicture({
-      optimisticallyUpdate: true,
-    });
+  const { pickAndUploadImage } = useUploadProfilePicture({
+    optimisticallyUpdate: true,
+  });
 
   const {
     control,
@@ -180,12 +179,12 @@ const EditProfile = () => {
     ) => {
       const charLimit = getCharLimit(field);
       return (
-        <YStack flex={1} padding="$4" space="$4">
+        <YStack flex={1} padding="$4" gap="$4">
           <XStack justifyContent="space-between">
             <Text fontSize="$6" fontWeight="bold">
               {title}
             </Text>
-            <XStack alignItems="center" space="$2">
+            <XStack alignItems="center" gap="$2">
               <Text fontSize="$3" color="$gray10">
                 {inputValue.length}/{charLimit}
               </Text>
@@ -330,7 +329,7 @@ const EditProfile = () => {
                 alignItems="center"
                 onPress={() => openBottomSheet("fullName")}
               >
-                <XStack flex={1} alignItems="center" space="$3">
+                <XStack flex={1} alignItems="center" gap="$3">
                   <Ionicons
                     name="person-outline"
                     size={24}
@@ -357,7 +356,7 @@ const EditProfile = () => {
                 alignItems="center"
                 onPress={() => openBottomSheet("username")}
               >
-                <XStack flex={1} alignItems="center" space="$3">
+                <XStack flex={1} alignItems="center" gap="$3">
                   <Ionicons
                     name="at-outline"
                     size={24}
@@ -384,7 +383,7 @@ const EditProfile = () => {
                 alignItems="center"
                 onPress={() => openBottomSheet("bio")}
               >
-                <XStack flex={1} alignItems="center" space="$3">
+                <XStack flex={1} alignItems="center" gap="$3">
                   <Ionicons
                     name="information-circle-outline"
                     size={24}

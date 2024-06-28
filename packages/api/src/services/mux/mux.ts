@@ -6,7 +6,7 @@ export class MuxService {
   async createDirectUpload(
     authorId: string,
     recipientId: string,
-    caption: string = "",
+    caption = "",
   ) {
     return await this.muxRepository.createDirectUpload(
       authorId,

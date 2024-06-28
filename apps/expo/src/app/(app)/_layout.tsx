@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Redirect } from "expo-router";
 
 import { usePermissions } from "~/contexts/PermissionsContext";

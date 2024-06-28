@@ -24,12 +24,12 @@ import {
   useMicrophonePermission,
 } from "react-native-vision-camera";
 import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
-import { SizableText, Text, View } from "tamagui";
+import { Button, SizableText, Text, View } from "tamagui";
 
-import { StatusBarBlurBackground } from "~/components/StatusBars";
 import { BaseScreenView } from "~/components/Views";
 import {
   CONTENT_SPACING,
@@ -123,8 +123,12 @@ const CameraPage = () => {
   }, []);
 
   const onMediaCaptured = useCallback(
-    (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      const { path: uri, width, height } = media;
+    async (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+      const { path: uri } = media;
+
+      // todo: reminder to check if react-native-vision-camera resolved the incorrect width/height issues
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      const { width, height } = await MediaLibrary.getAssetInfoAsync(asset);
 
       router.push({
         pathname: "/preview",
@@ -142,7 +146,7 @@ const CameraPage = () => {
   const onOpenMediaPicker = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 1,
-      aspect: [16, 9],
+      videoMaxDuration: 60,
       mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
 
@@ -153,7 +157,7 @@ const CameraPage = () => {
       const { uri, width, height, type } = imagePickerAsset;
 
       router.navigate({
-        pathname: "/post-to",
+        pathname: "/preview",
         params: {
           type: type === "video" ? "video" : "photo",
           uri,
@@ -240,26 +244,30 @@ const CameraPage = () => {
   return (
     <View style={styles.container}>
       <GestureDetector gesture={composedGesture}>
-        <ReanimatedCamera
-          ref={camera}
-          device={device}
-          isActive={isActive}
-          onInitialized={onInitialized}
-          format={format}
-          fps={fps}
-          photoHdr={photoHdr}
-          videoHdr={videoHdr}
-          photoQualityBalance="quality"
-          lowLightBoost={device.supportsLowLightBoost && enableNightMode}
-          enableZoomGesture={false}
-          animatedProps={cameraAnimatedProps}
-          orientation="portrait"
-          photo={true}
-          video={true}
-          audio={microphone.hasPermission}
-          enableLocation={location.hasPermission}
-          style={StyleSheet.absoluteFill}
-        />
+        <View style={styles.cameraWrapper}>
+          <ReanimatedCamera
+            ref={camera}
+            device={device}
+            isActive={isActive}
+            onInitialized={onInitialized}
+            format={format}
+            fps={fps}
+            photoHdr={photoHdr}
+            videoHdr={videoHdr}
+            outputOrientation="portrait"
+            photoQualityBalance="quality"
+            lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+            enableZoomGesture={false}
+            animatedProps={cameraAnimatedProps}
+            photo={true}
+            video={true}
+            audio={microphone.hasPermission}
+            enableLocation={location.hasPermission}
+            style={styles.camera}
+          >
+            <Button>test</Button>
+          </ReanimatedCamera>
+        </View>
       </GestureDetector>
 
       <CaptureButton
@@ -273,8 +281,6 @@ const CameraPage = () => {
         enabled={isCameraInitialized && isActive}
         setIsPressingButton={setIsPressingButton}
       />
-
-      <StatusBarBlurBackground />
 
       {animations.map(({ id, point }) => (
         <FocusIcon key={id} x={point.x} y={point.y} />
@@ -363,6 +369,18 @@ export default CameraPage;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  cameraWrapper: {
+    width: SCREEN_WIDTH,
+    height: (SCREEN_WIDTH * 16) / 9,
+    borderRadius: 20,
+    overflow: "hidden",
+    alignSelf: "center",
+    position: "absolute",
+    top: SAFE_AREA_PADDING.paddingTop,
+  },
+  camera: {
     flex: 1,
   },
   mediaPickerButton: {

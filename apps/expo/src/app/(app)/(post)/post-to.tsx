@@ -6,9 +6,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { ArrowBigLeft, UserRoundX } from "@tamagui/lucide-icons";
+import {
+  ArrowBigLeft,
+  ChevronRight,
+  Minus,
+  UserRoundX,
+} from "@tamagui/lucide-icons";
 import {
   Button,
+  H6,
   ListItemTitle,
   ScrollView,
   Separator,
@@ -144,7 +150,7 @@ const PostTo = () => {
 
   const renderContacts = () => (
     <CardContainer>
-      <ListItemTitle>Contacts</ListItemTitle>
+      <H6>Contacts</H6>
 
       {visibleContacts.map((contact, index) => (
         <VirtualizedListItem
@@ -152,6 +158,7 @@ const PostTo = () => {
           loading={false}
           title={contact.name}
           subtitle={contact.phoneNumbers?.[0]?.number}
+          button={<ChevronRight size={24} color="$gray10" />}
           imageUrl={
             contact.imageAvailable ? contact.image?.uri : DefaultProfilePicture
           }
@@ -175,7 +182,7 @@ const PostTo = () => {
 
   const renderFriends = () => (
     <CardContainer>
-      <ListItemTitle>Friends</ListItemTitle>
+      <H6>Friends</H6>
 
       <FlashList
         data={friendItems}
@@ -189,6 +196,7 @@ const PostTo = () => {
             title={item.username}
             subtitle={item.name}
             imageUrl={item.profilePictureUrl}
+            button={<ChevronRight size={24} color="$gray10" />}
             onPress={() => onUserSelected(item.userId)}
           />
         )}
@@ -198,47 +206,22 @@ const PostTo = () => {
 
   const renderUsersToPostTo = () => (
     <BaseScreenView
-      paddingBottom={0}
-      paddingHorizontal={0}
-      safeAreaEdges={["bottom"]}
+      flex={1}
+      scrollable
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+      }
       bottomSafeAreaStyle={{
         backgroundColor: theme.gray2.val,
       }}
     >
-      <ScrollView
-        flex={1}
-        paddingHorizontal="$4"
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
-        }
-      >
+      <ScrollView>
         <YStack flex={1} gap="$4">
           {contacts.length > 0 && renderContacts()}
           {itemCount > 0 && renderFriends()}
         </YStack>
       </ScrollView>
-
-      <XStack
-        marginTop={-6}
-        paddingTop="$4"
-        paddingHorizontal="$4"
-        justifyContent="space-evenly"
-        backgroundColor="$gray2"
-        borderTopLeftRadius={36}
-        borderTopRightRadius={36}
-        gap="$4"
-      >
-        <Button
-          flex={2}
-          size="$5"
-          borderRadius="$8"
-          icon={ArrowBigLeft}
-          onPress={() => router.back()}
-        >
-          Back
-        </Button>
-      </XStack>
     </BaseScreenView>
   );
 

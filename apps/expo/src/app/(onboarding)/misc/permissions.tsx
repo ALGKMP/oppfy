@@ -1,6 +1,5 @@
 import React from "react";
 import { Alert, Linking } from "react-native";
-import * as Camera from "expo-camera";
 import * as Contacts from "expo-contacts";
 import * as ImagePicker from "expo-image-picker";
 import { PermissionStatus } from "expo-modules-core";

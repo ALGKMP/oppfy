@@ -3,7 +3,7 @@ import type { KeyboardAvoidingViewProps } from "react-native";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useTheme } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 interface KeyboardSafeViewProps extends KeyboardAvoidingViewProps {
   children?: React.ReactNode;
@@ -15,7 +15,7 @@ const KeyboardSafeView = ({ children, ...props }: KeyboardSafeViewProps) => {
   const headerHeight = useHeaderHeight();
 
   const verticalOffset = useMemo(() => {
-    return headerHeight - insets.bottom;
+    return (headerHeight - insets.bottom + getToken("$2", "space")) as number;
   }, [headerHeight, insets.bottom]);
 
   return (
