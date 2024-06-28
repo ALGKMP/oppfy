@@ -49,7 +49,7 @@ export class PostService {
           const authorPresignedUrl =
             await this.awsService.getObjectPresignedUrl({
               Bucket: env.S3_PROFILE_BUCKET,
-              Key: item.authorProfilePicture ?? "profile-pictures/default.jpg",
+              Key: item.authorProfilePicture,
             });
           item.authorProfilePicture = authorPresignedUrl;
 
@@ -57,16 +57,19 @@ export class PostService {
           const recipientPresignedUrl =
             await this.awsService.getObjectPresignedUrl({
               Bucket: env.S3_PROFILE_BUCKET,
-              Key:
-                item.recipientProfilePicture ?? "profile-pictures/default.jpg",
+              Key: item.recipientProfilePicture,
             });
           item.recipientProfilePicture = recipientPresignedUrl;
 
-          const imageUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: env.S3_POST_BUCKET,
-            Key: item.imageUrl,
-          });
-          item.imageUrl = imageUrl;
+          if (item.mediaType === "image") {
+            const imageUrl = await this.awsService.getObjectPresignedUrl({
+              Bucket: env.S3_POST_BUCKET,
+              Key: item.imageUrl,
+            });
+            item.imageUrl = imageUrl;
+          } else {
+            item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
+          }
         } catch (error) {
           console.error(
             `Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `,
