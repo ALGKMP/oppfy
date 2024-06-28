@@ -40,6 +40,12 @@ export const handler = async (
         }),
         data: z.object({
           passthrough: z.string().optional(),
+          playback_ids: z.array(
+            z.object({
+              id: z.string(),
+            }),
+          ),
+          aspect_ratio: z.string(),
         }),
       })
       .passthrough();
@@ -71,7 +77,8 @@ export const handler = async (
       console.log(`Verifying Mux signature: ${muxSignatureHeader}`);
       mux.webhooks.verifySignature(
         rawBody,
-        { "mux-signature": muxSignatureHeader },
+        event.headers,
+        // { "mux-signature": muxSignatureHeader },
         env.MUX_WEBHOOK_SECRET,
       );
       console.log("Mux signature verified");
@@ -83,21 +90,7 @@ export const handler = async (
         author: metadata.authorId,
         mediaType: "video",
       });
-      if (!post) {
-        return {
-          statusCode: 500,
-          body: "Failed to create post",
-        };
-      }
-      const postStats = await db
-        .insert(schema.postStats)
-        .values({ postId: post[0].insertId });
-      if (!postStats) {
-        return {
-          statusCode: 500,
-          body: "Failed to create post stats",
-        };
-      }
+      await db.insert(schema.postStats).values({ postId: post[0].insertId });
       return {
         statusCode: 200,
         body: "Webhook received and processed",
