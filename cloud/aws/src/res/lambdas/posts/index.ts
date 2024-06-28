@@ -62,7 +62,8 @@ export const handler = async (
       key: objectKey,
     });
 
-    await db.insert(schema.post).values(body);
+    const post = await db.insert(schema.post).values(body);
+    await db.insert(schema.postStats).values({ postId: post[0].insertId });
 
     return {
       statusCode: 200,
