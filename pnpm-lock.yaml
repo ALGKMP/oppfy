@@ -103,6 +103,9 @@ importers:
       babel-preset-expo:
         specifier: ^11.0.6
         version: 11.0.6(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+      blurhash:
+        specifier: ^2.0.5
+        version: 2.0.5
       expo:
         specifier: ^51.0.14
         version: 51.0.14(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
@@ -567,6 +570,9 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
+      blurhash:
+        specifier: ^2.0.5
+        version: 2.0.5
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -610,6 +616,9 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
+      blurhash:
+        specifier: ^2.0.5
+        version: 2.0.5
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.30.10)(zod@3.23.8)
@@ -11303,6 +11312,10 @@ packages:
     resolution: {integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==}
     dev: false
     optional: true
+
+  /blurhash@2.0.5:
+    resolution: {integrity: sha512-cRygWd7kGBQO3VEhPiTgq4Wc43ctsM+o46urrmPOiuAe+07fzlSB9OJVdpgDL0jPqXUVQ9ht7aq7kxOeJHRK+w==}
+    dev: false
 
   /boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
