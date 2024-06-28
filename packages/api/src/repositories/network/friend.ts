@@ -140,8 +140,8 @@ export class FriendRepository {
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
+        createdAt: schema.friend.createdAt,
       })
       .from(schema.friend)
       .innerJoin(
@@ -204,6 +204,7 @@ export class FriendRepository {
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         profileId: schema.profile.id,
+        createdAt: schema.friend.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
@@ -219,7 +220,6 @@ export class FriendRepository {
           ELSE 'notFollowing'
         END
         `,
-        createdAt: schema.follower.createdAt,
       })
       .from(schema.friend)
       .innerJoin(
