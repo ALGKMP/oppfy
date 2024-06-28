@@ -30,7 +30,9 @@ export interface ButtonProps extends BaseButtonProps {
 
 const isButtonProps = (
   button: ButtonProps | React.ReactNode,
-): button is ButtonProps => typeof button === "object";
+): button is ButtonProps => {
+  return button !== null && typeof button === "object" && "text" in button;
+};
 
 interface LoadedProps {
   loading: false;
