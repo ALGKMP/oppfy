@@ -729,41 +729,35 @@ const MediaOfYou = () => {
 
   return (
     <View flex={1}>
-      {itemCount ? (
-        <FlashList
-          data={isLoading ? placeholderData : posts}
-          ListHeaderComponent={FlashListHeader}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          onRefresh={onRefresh}
-          numColumns={1}
-          onEndReached={handleOnEndReached}
-          keyExtractor={(item) => {
-            return item?.postId.toString() ?? "";
-          }}
-          renderItem={({ item }) => {
-            if (item === null || item === undefined) {
-              return null;
-            }
-            return (
-              <PostItem
-                key={item.postId.toString()}
-                post={item}
-                isViewable={viewableItems.includes(item.postId)}
-              />
-            );
-          }}
-          estimatedItemSize={screenWidth}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
-          nestedScrollEnabled={true}
-        />
-      ) : (
-        <View flex={1} justifyContent="center" alignItems="center">
-          <Text>No posts found</Text>
-        </View>
-      )}
+      <FlashList
+        data={isLoading ? placeholderData : posts}
+        ListHeaderComponent={FlashListHeader}
+        refreshing={refreshing}
+        showsVerticalScrollIndicator={false}
+        onRefresh={onRefresh}
+        numColumns={1}
+        onEndReached={handleOnEndReached}
+        keyExtractor={(item) => {
+          return item?.postId.toString() ?? "";
+        }}
+        renderItem={({ item }) => {
+          if (item === null || item === undefined) {
+            return null;
+          }
+          return (
+            <PostItem
+              key={item.postId.toString()}
+              post={item}
+              isViewable={viewableItems.includes(item.postId)}
+            />
+          );
+        }}
+        estimatedItemSize={screenWidth}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        extraData={viewableItems}
+        nestedScrollEnabled={true}
+      />
     </View>
   );
 };
