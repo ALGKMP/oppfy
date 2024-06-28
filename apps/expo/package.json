@@ -46,6 +46,7 @@
     "@trpc/react-query": "^10.45.2",
     "@trpc/server": "^10.45.2",
     "babel-preset-expo": "^11.0.6",
+    "blurhash": "^2.0.5",
     "expo": "^51.0.14",
     "expo-av": "~14.0.5",
     "expo-blur": "~13.0.2",
