@@ -44,6 +44,8 @@ export const handler = async (
       .where(eq(schema.follower.senderId, userId))
       .then((res) => res.map((r) => r.userId));
 
+    console.log(following);
+
     const tier1 = await g
       .V(userId)
       .outE("contact")
