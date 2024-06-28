@@ -83,15 +83,8 @@ const CreatePost = () => {
   });
 
   return (
-    <BaseScreenView
-      paddingBottom={0}
-      paddingHorizontal={0}
-      safeAreaEdges={["bottom"]}
-      bottomSafeAreaStyle={{
-        backgroundColor: theme.gray2.val,
-      }}
-    >
-      <View flex={1} paddingHorizontal="$4">
+    <BaseScreenView safeAreaEdges={["bottom"]}>
+      <View flex={1}>
         <ScrollView flex={1} keyboardDismissMode="interactive">
           <YStack flex={1} gap="$4">
             <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
@@ -120,35 +113,14 @@ const CreatePost = () => {
         </ScrollView>
       </View>
 
-      <XStack
-        paddingTop="$4"
-        paddingHorizontal="$4"
-        justifyContent="space-evenly"
-        backgroundColor="$gray2"
-        borderTopLeftRadius={36}
-        borderTopRightRadius={36}
-        gap="$4"
+      <Button
+        size="$5"
+        borderRadius="$7"
+        iconAfter={ArrowBigRight}
+        onPointerCancel={onSubmit}
       >
-        <Button
-          flex={1}
-          size="$5"
-          borderRadius="$8"
-          icon={ArrowBigLeft}
-          onPress={() => router.back()}
-        >
-          Back
-        </Button>
-
-        <Button
-          flex={2}
-          size="$5"
-          borderRadius="$8"
-          iconAfter={ArrowBigRight}
-          onPress={onSubmit}
-        >
-          Continue
-        </Button>
-      </XStack>
+        Continue
+      </Button>
     </BaseScreenView>
   );
 };
