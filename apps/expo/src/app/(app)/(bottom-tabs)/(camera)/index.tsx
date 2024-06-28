@@ -146,7 +146,7 @@ const CameraPage = () => {
   const onOpenMediaPicker = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 1,
-      aspect: [16, 9],
+      videoMaxDuration: 60,
       mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
 
