@@ -405,21 +405,6 @@ export class AwsStack extends cdk.Stack {
       value: cluster.clusterEndpoint.hostname,
     });
 
-    /*     const contactRecLambda = new lambdaNodeJs.NodejsFunction(
-      this,
-      "contactRecLambda",
-      {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        entry: "src/res/lambdas/contact-recs/index.ts",
-        handler: "handler",
-        environment: {
-          NEPTUNE_ENDPOINT: cluster.clusterReadEndpoint.socketAddress,
-        },
-        vpc,
-        securityGroups: [neptuneSecurityGroup],
-      },
-    ); */
-
     const contactRecLambda = createLambdaFunctionWithVpc(
       this,
       "contactRecLambda",
