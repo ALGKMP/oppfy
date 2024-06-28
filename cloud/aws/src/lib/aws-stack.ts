@@ -439,21 +439,6 @@ export class AwsStack extends cdk.Stack {
       cluster.clusterEndpoint.socketAddress,
     );
 
-    /*     const contactSyncLambda = new lambdaNodeJs.NodejsFunction(
-      this,
-      "contactSyncLambda",
-      {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        entry: "src/res/lambdas/contact-sync/index.ts",
-        handler: "handler",
-        environment: {
-          NEPTUNE_ENDPOINT: cluster.clusterEndpoint.socketAddress,
-        },
-        vpc,
-        securityGroups: [neptuneSecurityGroup],
-      },
-    ); */
-
     // setup sqs for neptune proxy lambda, good for one day for debugging
     const contactSyncDLQ = new sqs.Queue(this, "ContactSyncDLQ", {
       retentionPeriod: cdk.Duration.days(1),
