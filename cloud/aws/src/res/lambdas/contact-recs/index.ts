@@ -44,7 +44,7 @@ export const handler = async (
       .where(eq(schema.follower.senderId, userId))
       .then((res) => res.map((r) => r.userId));
 
-    console.log(following);
+    console.log("Following", following);
 
     const tier1 = await g
       .V(userId)
@@ -58,7 +58,7 @@ export const handler = async (
       .id()
       .toList();
 
-    console.log(tier1);
+    console.log("Tier 1", tier1);
 
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
@@ -73,10 +73,25 @@ export const handler = async (
       .limit(30)
       .id()
       .toList();
-    console.log(tier2);
 
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
+
+    console.log("Tier 2", tier2);
+
+    const tier3 = await g
+      .V(userId)
+      .out("contact")
+      .aggregate("contacts")
+      .out("contact")
+      .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
+      .groupCount()
+      .unfold()
+      .filter(__.select(__.values()).is(P.gte(1)))
+      /*.limit(15)
+      .id() */
+      .toList();
+    console.log("Tier 3", tier3);
 
     // get tier 3
     /*     const tier3 = await g
