@@ -710,7 +710,7 @@ const MediaOfYou = () => {
       );
     }
     return (
-      <YStack gap="$5">
+      <YStack gap="$5" marginBottom={"$5"}>
         <Animated.View style={profileAnimatedStyle}>
           <YStack gap="$5">
             <Profile loading={false} data={profileData} />
@@ -734,6 +734,7 @@ const MediaOfYou = () => {
           data={isLoading ? placeholderData : posts}
           ListHeaderComponent={FlashListHeader}
           refreshing={refreshing}
+          showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
           numColumns={1}
           onEndReached={handleOnEndReached}
