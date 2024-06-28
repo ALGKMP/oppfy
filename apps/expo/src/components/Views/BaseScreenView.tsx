@@ -34,7 +34,7 @@ const BaseScreenView = ({
       <ScrollView
         flex={1}
         padding="$4"
-        paddingBottom={0}
+        paddingBottom="$2"
         backgroundColor="$background"
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
@@ -46,6 +46,7 @@ const BaseScreenView = ({
       <View
         flex={1}
         padding="$4"
+        paddingBottom="$2"
         backgroundColor="$background"
         {...(props as ViewProps)}
       >
@@ -61,7 +62,7 @@ const BaseScreenView = ({
     return (
       <SafeAreaView
         style={[styles.topSafeArea, topSafeAreaStyle]}
-        edges={safeAreaEdges?.includes("top") ? ["top"] : undefined}
+        edges={safeAreaEdges.includes("top") ? ["top"] : undefined}
       />
     );
   };
@@ -74,7 +75,7 @@ const BaseScreenView = ({
     return (
       <SafeAreaView
         style={[styles.bottomSafeArea, bottomSafeAreaStyle]}
-        edges={safeAreaEdges?.includes("bottom") ? ["bottom"] : undefined}
+        edges={safeAreaEdges.includes("bottom") ? ["bottom"] : undefined}
       >
         {renderContent()}
       </SafeAreaView>
