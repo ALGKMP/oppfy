@@ -91,7 +91,7 @@ export const handler = async (
       )
       .groupCount()
       .unfold()
-      .filter(__.select(column.values).is(P.gte(1)))
+      .filter(__.select(column.values).is(P.gte(3)))
       .limit(15)
       .id()
       .toList();
