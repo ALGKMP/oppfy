@@ -98,10 +98,10 @@ const CreatePost = () => {
                     minHeight="$10"
                     placeholder="Caption"
                     keyboardType="twitter"
+                    borderColor={errors.caption ? "$red9" : undefined}
+                    value={value}
                     onBlur={onBlur}
                     onChangeText={onChange}
-                    value={value}
-                    borderColor={errors.caption ? "$red9" : undefined}
                   />
                 )}
               />
