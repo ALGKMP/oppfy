@@ -57,6 +57,7 @@ export const handler = async (
       .toList();
 
     console.log(tier1);
+
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
       .V(userId)
@@ -65,8 +66,8 @@ export const handler = async (
       .where(__.outV().hasId(P.without(following)))
       .outV()
       .dedup()
-      // .order()
-      // .by(__.property("createdAt"), order.desc)
+      .order()
+      .by("createdAt", order.desc)
       .limit(30)
       .id()
       .toList();
