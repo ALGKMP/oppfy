@@ -86,12 +86,16 @@ export const handler = async (
       .aggregate("contacts")
       .out("contact")
       .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
+      .where(
+        __.not(__.where(__.inE("contact").outV().hasId(P.without(following)))),
+      )
       .groupCount()
       .unfold()
       .filter(__.select(column.values).is(P.gte(1)))
-      /*.limit(15)
-      .id() */
+      .limit(15)
+      .id()
       .toList();
+
     console.log("Tier 3", tier3);
 
     /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
@@ -110,7 +114,7 @@ export const handler = async (
     const recommendedIds = {
       tier1,
       tier2,
-      //tier3,
+      tier3,
       // tier4
     };
 
