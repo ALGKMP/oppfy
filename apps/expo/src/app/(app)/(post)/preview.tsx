@@ -3,32 +3,51 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Dimensions,
   Linking,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { AVPlaybackStatus } from "expo-av";
 import { ResizeMode, Video } from "expo-av";
-import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
-import { StatusBarBlurBackground } from "~/components/StatusBars";
+import { BaseScreenView } from "~/components/Views";
 import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
   SAFE_AREA_PADDING,
+  SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "~/constants/camera";
 
 type SaveState = "idle" | "saving" | "saved";
+
+const ASPECT_RATIOS = {
+  PORTRAIT: {
+    WIDTH: 9,
+    HEIGHT: 16,
+  },
+  LANDSCAPE: {
+    WIDTH: 16,
+    HEIGHT: 9,
+  },
+};
+
+// Select the desired aspect ratio (can be easily changed)
+const TARGET_RATIO = ASPECT_RATIOS.PORTRAIT;
+
+// Calculate the target aspect ratio
+const TARGET_ASPECT_RATIO = TARGET_RATIO.WIDTH / TARGET_RATIO.HEIGHT;
+
+// Calculate the maximum content height based on screen width and target aspect ratio
+const MAX_CONTENT_HEIGHT = SCREEN_WIDTH / TARGET_ASPECT_RATIO;
 
 const PreviewScreen = () => {
   const { type, uri, height, width } = useLocalSearchParams<{
@@ -39,7 +58,6 @@ const PreviewScreen = () => {
   }>();
 
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
@@ -58,7 +76,7 @@ const PreviewScreen = () => {
       "Media library permission is required for this app. Please enable it in your device settings.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Open Settings", onPress: openSettings },
+        { text: "Open Settings", onPress: void openSettings },
       ],
     );
 
@@ -91,115 +109,81 @@ const PreviewScreen = () => {
     });
   };
 
-  const aspectRatio = parseFloat(width ?? "") / parseFloat(height ?? "");
-  const screenHeight = Dimensions.get("window").height;
-  const maxContentHeight =
-    screenHeight - SAFE_AREA_PADDING.paddingTop - 105 - insets.bottom; // Subtracting top padding, bottom controls, and bottom inset
-  const contentHeight = Math.min(SCREEN_WIDTH / aspectRatio, maxContentHeight);
+  // Calculate the aspect ratio of the content
+  const contentAspectRatio =
+    parseFloat(width ?? "0") / parseFloat(height ?? "0");
 
-  const isContentTall = contentHeight > screenHeight * 0.6; // Adjust this threshold as needed
+  // Determine the actual content height, constrained by MAX_CONTENT_HEIGHT
+  const contentHeight = Math.min(
+    SCREEN_WIDTH / contentAspectRatio,
+    MAX_CONTENT_HEIGHT,
+  );
+
+  // Check if the content is considered "tall" (more than 60% of screen height)
+  const isContentTall = contentHeight > SCREEN_HEIGHT * 0.6;
+
+  // Calculate the top position for the content
   const topPosition = isContentTall
-    ? SAFE_AREA_PADDING.paddingTop
-    : (screenHeight - contentHeight) / 2;
+    ? SAFE_AREA_PADDING.paddingTop // If tall, position at the top of the safe area
+    : (SCREEN_HEIGHT - contentHeight) / 2; // If not tall, center vertically
 
   return (
-    <View style={styles.container}>
-      <View
-        style={[
-          styles.contentWrapper,
-          { height: contentHeight, top: topPosition },
-        ]}
-      >
-        {type === "photo" ? (
-          <PreviewImage uri={uri ?? ""} />
-        ) : (
-          <PreviewVideo uri={uri ?? ""} />
-        )}
-      </View>
+    <BaseScreenView
+      paddingTop={0}
+      paddingHorizontal={0}
+      safeAreaEdges={["bottom"]}
+    >
+      <View flex={1}>
+        <View
+          style={[
+            styles.contentWrapper,
+            { height: contentHeight, top: topPosition },
+          ]}
+        >
+          {type === "photo" ? (
+            <PreviewImage uri={uri ?? ""} />
+          ) : (
+            <PreviewVideo uri={uri ?? ""} />
+          )}
+        </View>
 
-      <StatusBarBlurBackground />
-
-      <View style={styles.bottomContainer}>
-        <View style={styles.clipBlurView}>
-          <BlurView
-            tint="light"
-            intensity={25}
-            style={{ backgroundColor: "transparent" }}
-          >
-            <XStack
-              height={105}
-              paddingTop="$4"
-              paddingHorizontal="$4"
-              justifyContent="space-evenly"
-              paddingBottom={insets.bottom}
-              gap="$4"
-            >
-              <TouchableOpacity
-                activeOpacity={0.6}
-                style={[
-                  styles.glassyButton,
-                  { flex: 1 },
-                  saveState === "saving" || saveState === "saved"
-                    ? { opacity: 0.5 }
-                    : {},
-                ]}
-                onPress={saveToCameraRoll}
-                disabled={saveState === "saving" || saveState === "saved"}
-              >
-                <BlurView
-                  tint="light"
-                  intensity={40}
-                  style={[styles.glassyButton]}
-                >
-                  <Button
-                    size="$5"
-                    borderRadius="$8"
-                    backgroundColor="transparent"
-                    iconAfter={saveState === "idle" ? Download : undefined}
-                    disabled={true}
-                  >
-                    {saveState === "saving" ? (
-                      <ActivityIndicator size="small" color="#ffffff" />
-                    ) : saveState === "saved" ? (
-                      "Saved"
-                    ) : (
-                      "Save"
-                    )}
-                  </Button>
-                </BlurView>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.6}
-                style={[styles.glassyButton, { flex: 2 }]}
-                onPress={onContinue}
-              >
-                <BlurView
-                  tint="light"
-                  intensity={40}
-                  style={[styles.glassyButton]}
-                >
-                  <Button
-                    size="$5"
-                    borderRadius="$8"
-                    backgroundColor="transparent"
-                    iconAfter={ArrowBigRight}
-                    disabled={true}
-                  >
-                    Continue
-                  </Button>
-                </BlurView>
-              </TouchableOpacity>
-            </XStack>
-          </BlurView>
+        <View style={styles.leftButtonRow}>
+          <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+            <Ionicons name="close" color="white" size={24} />
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.leftButtonRow}>
-        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-          <Ionicons name="close" color="white" size={24} />
-        </TouchableOpacity>
-      </View>
-    </View>
+      <XStack gap="$4" paddingHorizontal="$4">
+        <Button
+          flex={1}
+          size="$5"
+          borderRadius="$7"
+          icon={saveState === "idle" ? Download : undefined}
+          onPress={saveToCameraRoll}
+          disabled={saveState === "saving" || saveState === "saved"}
+          disabledStyle={{ opacity: 0.5 }}
+        >
+          {saveState === "saving" ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : saveState === "saved" ? (
+            "Saved"
+          ) : (
+            "Save"
+          )}
+        </Button>
+
+        <Button
+          flex={3}
+          size="$5"
+          borderRadius="$7"
+          iconAfter={ArrowBigRight}
+          onPress={onContinue}
+        >
+          Continue
+        </Button>
+      </XStack>
+    </BaseScreenView>
   );
 };
 
@@ -212,17 +196,11 @@ const PreviewImage = ({ uri }: PreviewProps) => (
 );
 
 const PreviewVideo = ({ uri }: PreviewProps) => {
-  const navigation = useNavigation();
-
-  navigation.setOptions({
-    tabBarStyle: {
-      display: "none",
-    },
-  });
-
   const videoRef = useRef<Video>(null);
+
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
+
   const controlFadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -257,16 +235,12 @@ const PreviewVideo = ({ uri }: PreviewProps) => {
   };
 
   return (
-    <TouchableOpacity
-      style={StyleSheet.absoluteFill}
-      onPress={handleVideoPress}
-      activeOpacity={1}
-    >
+    <Pressable style={{ flex: 1 }} onPress={handleVideoPress}>
       <Video
         ref={videoRef}
-        style={StyleSheet.absoluteFill}
         source={{ uri }}
         resizeMode={ResizeMode.COVER}
+        style={{ flex: 1 }}
         isLooping
         shouldPlay
         onPlaybackStatusUpdate={(status) => setStatus(status)}
@@ -282,14 +256,11 @@ const PreviewVideo = ({ uri }: PreviewProps) => {
           />
         </Animated.View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   contentWrapper: {
     width: SCREEN_WIDTH,
     borderRadius: 20,
@@ -319,20 +290,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: SAFE_AREA_PADDING.paddingTop + 12,
     left: SAFE_AREA_PADDING.paddingLeft + 12,
-  },
-  clipBlurView: {
-    overflow: "hidden",
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-  },
-  bottomContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    pointerEvents: "box-none",
-  },
-  glassyButton: {
-    borderRadius: 16,
-    overflow: "hidden",
   },
 });
 
