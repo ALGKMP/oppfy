@@ -139,16 +139,13 @@ const CommentsBottomSheet = ({
       utils.post.paginatePostsOfUserSelf.setInfiniteData(
         { pageSize: 10 },
         (prevData) => {
-          console.log("Here G");
           if (!prevData) return prevData;
           return {
             ...prevData,
             pages: prevData.pages.map((page, index) => {
               // check if it's postId
-              console.log("this bitch running");
               page.items.map((item) => {
                 if (item?.postId === postId) {
-                  console.log("Found postId");
                   item.commentsCount += 1;
                 }
               });
