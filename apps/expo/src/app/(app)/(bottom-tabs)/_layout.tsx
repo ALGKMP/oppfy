@@ -50,9 +50,6 @@ const BottomTabsLayout = () => {
           tabBarIcon: ({ focused }) => (
             <Camera strokeWidth={focused ? 2 : 1.5} />
           ),
-          tabBarStyle: {
-            display: "none",
-          },
         }}
       />
 

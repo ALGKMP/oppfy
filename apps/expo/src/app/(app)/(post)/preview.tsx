@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  Dimensions,
   Linking,
   StyleSheet,
   TouchableOpacity,
@@ -14,7 +15,7 @@ import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
@@ -24,6 +25,7 @@ import {
   CONTENT_SPACING,
   CONTROL_BUTTON_SIZE,
   SAFE_AREA_PADDING,
+  SCREEN_WIDTH,
 } from "~/constants/camera";
 
 type SaveState = "idle" | "saving" | "saved";
@@ -56,7 +58,7 @@ const PreviewScreen = () => {
       "Media library permission is required for this app. Please enable it in your device settings.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Open Settings", onPress: void openSettings },
+        { text: "Open Settings", onPress: openSettings },
       ],
     );
 
@@ -89,13 +91,31 @@ const PreviewScreen = () => {
     });
   };
 
+  const aspectRatio = parseFloat(width ?? "") / parseFloat(height ?? "");
+  const screenHeight = Dimensions.get("window").height;
+  const maxContentHeight =
+    screenHeight - SAFE_AREA_PADDING.paddingTop - 105 - insets.bottom; // Subtracting top padding, bottom controls, and bottom inset
+  const contentHeight = Math.min(SCREEN_WIDTH / aspectRatio, maxContentHeight);
+
+  const isContentTall = contentHeight > screenHeight * 0.6; // Adjust this threshold as needed
+  const topPosition = isContentTall
+    ? SAFE_AREA_PADDING.paddingTop
+    : (screenHeight - contentHeight) / 2;
+
   return (
     <View style={styles.container}>
-      {type === "photo" ? (
-        <PreviewImage uri={uri ?? ""} />
-      ) : (
-        <PreviewVideo uri={uri ?? ""} />
-      )}
+      <View
+        style={[
+          styles.contentWrapper,
+          { height: contentHeight, top: topPosition },
+        ]}
+      >
+        {type === "photo" ? (
+          <PreviewImage uri={uri ?? ""} />
+        ) : (
+          <PreviewVideo uri={uri ?? ""} />
+        )}
+      </View>
 
       <StatusBarBlurBackground />
 
@@ -188,10 +208,18 @@ interface PreviewProps {
 }
 
 const PreviewImage = ({ uri }: PreviewProps) => (
-  console.log(uri), (<Image source={{ uri }} style={StyleSheet.absoluteFill} />)
+  <Image source={{ uri }} style={StyleSheet.absoluteFill} />
 );
 
 const PreviewVideo = ({ uri }: PreviewProps) => {
+  const navigation = useNavigation();
+
+  navigation.setOptions({
+    tabBarStyle: {
+      display: "none",
+    },
+  });
+
   const videoRef = useRef<Video>(null);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
@@ -236,7 +264,7 @@ const PreviewVideo = ({ uri }: PreviewProps) => {
     >
       <Video
         ref={videoRef}
-        style={styles.media}
+        style={StyleSheet.absoluteFill}
         source={{ uri }}
         resizeMode={ResizeMode.COVER}
         isLooping
@@ -262,8 +290,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  media: {
-    flex: 1,
+  contentWrapper: {
+    width: SCREEN_WIDTH,
+    borderRadius: 20,
+    overflow: "hidden",
+    alignSelf: "center",
+    position: "absolute",
   },
   playButton: {
     position: "absolute",

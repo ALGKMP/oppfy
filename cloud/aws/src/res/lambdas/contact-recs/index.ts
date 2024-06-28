@@ -33,6 +33,7 @@ export const handler = async (
       `wss://${env.NEPTUNE_ENDPOINT}/gremlin`,
       {},
     );
+
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
     console.log("Querying for recommendations for user", userId);
@@ -49,12 +50,13 @@ export const handler = async (
       .has("isFollowing", false)
       .inV()
       .dedup()
-      .order()
-      .by(__.property("createdAt"), order.desc)
+      // .order()
+      // .by(__.property("createdAt"), order.desc)
       .limit(10)
       .id()
       .toList();
 
+    console.log(tier1);
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
       .V(userId)
@@ -63,16 +65,17 @@ export const handler = async (
       .where(__.outV().hasId(P.without(following)))
       .outV()
       .dedup()
-      .order()
-      .by(__.property("createdAt"), order.desc)
-      .limit(10)
+      // .order()
+      // .by(__.property("createdAt"), order.desc)
+      .limit(30)
       .id()
       .toList();
+    console.log(tier2);
 
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
 
-    /*     // get tier 3
+    // get tier 3
     const tier3 = await g
       .V(userId) // Start from the user vertex
       .out("contact") // Traverse to all contacts of the user
@@ -81,9 +84,9 @@ export const handler = async (
       .where(__.not(__.inE("contact").from_(userId))) // Filter out vertices that are already contacts of the user
       .groupCount() // Count occurrences of each vertex
       .unfold() // Unroll the map into individual entries
-      .where(__.values().is(P.gte(3))) // Keep only entries with count >= 3
-      .limit(10) // Limit to 10 results
-      .toList(); */
+      .where(__.values().is(P.gte(1))) // Keep only entries with count >= 3
+      .limit(15) // Limit to 15 results
+      .toList();
 
     /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
     const tier4 = await g

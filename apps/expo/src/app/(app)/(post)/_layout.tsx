@@ -1,31 +1,48 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
 import { ChevronLeft } from "@tamagui/lucide-icons";
-import { Text } from "tamagui";
+import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
-const ProfileActionsLayout = () => {
+const CameraLayout = () => {
+  const theme = useTheme();
+
   return (
     <Stack
       screenOptions={{
         headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
+        contentStyle: {
+          backgroundColor: theme.background.val,
+        },
       }}
     >
       <Stack.Screen
-        name="edit-profile"
+        name="preview"
         options={{
-          title: "Edit Profile",
+          header: () => null,
+          animation: "fade",
         }}
       />
-      <Stack.Screen name="share-profile" options={{ title: "Share Profile" }} />
+      <Stack.Screen
+        name="post-to"
+        options={{
+          title: "Post To",
+        }}
+      />
+      <Stack.Screen
+        name="create-post"
+        options={{
+          title: "Create Post",
+        }}
+      />
     </Stack>
   );
 };
@@ -82,4 +99,4 @@ const Header = ({ navigation, options }: HeaderProps) => (
   />
 );
 
-export default ProfileActionsLayout;
+export default CameraLayout;

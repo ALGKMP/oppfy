@@ -111,7 +111,7 @@ const ActionSheet = ({
         animationType="none"
         transparent={true}
         visible={showModal}
-        onRequestClose={closeModal} // Use closeModal directly
+        onRequestClose={closeModal}
       >
         <Animated.View
           style={{
@@ -127,17 +127,19 @@ const ActionSheet = ({
             }}
           >
             <YStack
-              paddingHorizontal="$4"
+              paddingHorizontal="$2"
               paddingBottom={insets.bottom}
               gap="$3"
             >
-              <YStack>
+              <YStack
+                borderRadius={9}
+                overflow="hidden"
+                backgroundColor="$background"
+              >
                 <YStack
                   padding="$4"
                   alignItems="center"
                   backgroundColor="$color4"
-                  borderTopLeftRadius={9}
-                  borderTopRightRadius={9}
                   gap="$2"
                 >
                   {imageUrl && (
@@ -145,12 +147,10 @@ const ActionSheet = ({
                       <Avatar.Image src={imageUrl} />
                     </Avatar>
                   )}
-
                   <YStack alignItems="center">
                     <SizableText size="$5" fontWeight="bold" {...titleProps}>
                       {title}
                     </SizableText>
-
                     {subtitle && (
                       <Paragraph
                         textAlign="center"
@@ -162,33 +162,23 @@ const ActionSheet = ({
                     )}
                   </YStack>
                 </YStack>
-
                 {buttonOptions.map((option, index) => (
-                  <View
-                    key={index}
-                    borderTopWidth={index === 0 ? 0 : 0.2}
-                    borderColor="$gray10"
-                  >
-                    {/* <Separator theme="alt1" /> */}
-                    <Button
-                      size="$5"
-                      borderTopLeftRadius={0}
-                      borderTopRightRadius={0}
-                      borderBottomLeftRadius={
-                        index === buttonOptions.length - 1 ? 9 : 0
-                      }
-                      borderBottomRightRadius={
-                        index === buttonOptions.length - 1 ? 9 : 0
-                      }
-                      onPress={() => {
-                        option.onPress?.();
-                        closeModal();
-                      }}
-                    >
-                      <SizableText size="$5" {...option.textProps}>
-                        {option.text}
-                      </SizableText>
-                    </Button>
+                  <View key={index}>
+                    <Separator />
+                    <View>
+                      <Button
+                        size="$5"
+                        borderRadius={0}
+                        onPress={() => {
+                          option.onPress?.();
+                          closeModal();
+                        }}
+                      >
+                        <SizableText size="$5" {...option.textProps}>
+                          {option.text}
+                        </SizableText>
+                      </Button>
+                    </View>
                   </View>
                 ))}
               </YStack>

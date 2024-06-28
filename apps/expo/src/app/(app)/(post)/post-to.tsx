@@ -26,7 +26,8 @@ import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-const PAGE_SIZE = 5;
+const INITIAL_PAGE_SIZE = 5;
+const ADDITIONAL_PAGE_SIZE = 10;
 
 const PostTo = () => {
   const { type, uri, height, width } = useLocalSearchParams<{
@@ -56,7 +57,7 @@ const PostTo = () => {
         ],
       });
       setContacts(data);
-      setVisibleContacts(data.slice(0, PAGE_SIZE));
+      setVisibleContacts(data.slice(0, INITIAL_PAGE_SIZE));
       setIsLoadingContacts(false);
     };
 
@@ -113,7 +114,10 @@ const PostTo = () => {
 
   const showMoreContacts = () => {
     const nextPage = contactsPage + 1;
-    const newVisibleContacts = contacts.slice(0, (nextPage + 1) * PAGE_SIZE);
+    const newVisibleContacts = contacts.slice(
+      0,
+      INITIAL_PAGE_SIZE + nextPage * ADDITIONAL_PAGE_SIZE,
+    );
     setVisibleContacts(newVisibleContacts);
     setContactsPage(nextPage);
   };

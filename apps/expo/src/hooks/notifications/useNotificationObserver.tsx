@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
-import { Notification } from "expo-notifications";
-import { router, useRouter } from "expo-router";
-import { z } from "zod";
+import type { Notification } from "expo-notifications";
+import { useRouter } from "expo-router";
+import type { z } from "zod";
 
-import { sharedValidators } from "@oppfy/validators";
+import type { sharedValidators } from "@oppfy/validators";
 
 type EntityData = z.infer<typeof sharedValidators.notifications.entityData>;
 
@@ -27,11 +27,11 @@ const useNotificationObserver = () => {
       }
     };
 
-    Notifications.getLastNotificationResponseAsync().then((response) => {
+    void Notifications.getLastNotificationResponseAsync().then((response) => {
       if (!isMounted || !response?.notification) {
         return;
       }
-      redirect(response?.notification);
+      redirect(response.notification);
     });
 
     const subscription = Notifications.addNotificationResponseReceivedListener(

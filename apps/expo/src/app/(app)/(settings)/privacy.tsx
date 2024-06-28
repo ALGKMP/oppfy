@@ -15,7 +15,6 @@ type PrivacySetting = RouterInputs["user"]["updatePrivacySetting"]["privacy"];
 
 const Privacy = () => {
   const router = useRouter();
-
   const utils = api.useUtils();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
