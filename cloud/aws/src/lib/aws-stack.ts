@@ -426,7 +426,20 @@ export class AwsStack extends cdk.Stack {
       value: contactRecLambdaUrl.url,
     });
 
-    const contactSyncLambda = new lambdaNodeJs.NodejsFunction(
+    const contactSyncLambda = createLambdaFunctionWithVpc(
+      this,
+      "contactSyncLambda",
+      "src/res/lambdas/contact-sync/index.ts",
+      vpc,
+      [neptuneSecurityGroup],
+    );
+
+    contactSyncLambda.addEnvironment(
+      "NEPTUNE_ENDPOINT",
+      cluster.clusterEndpoint.socketAddress,
+    );
+
+    /*     const contactSyncLambda = new lambdaNodeJs.NodejsFunction(
       this,
       "contactSyncLambda",
       {
@@ -439,7 +452,7 @@ export class AwsStack extends cdk.Stack {
         vpc,
         securityGroups: [neptuneSecurityGroup],
       },
-    );
+    ); */
 
     // setup sqs for neptune proxy lambda, good for one day for debugging
     const contactSyncDLQ = new sqs.Queue(this, "ContactSyncDLQ", {
