@@ -49,10 +49,6 @@ const PostItem = (props: PostItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
 
-  useEffect(() => {
-    console.log("FUCK FUCK FOR FUCKS SAKES");
-  }, [isViewable]);
-
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
   const router = useRouter();
@@ -76,26 +72,23 @@ const PostItem = (props: PostItemProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const player = useVideoPlayer(videoSource, (player) => {
     player.loop = true;
+    player.staysActiveInBackground = false;
   });
 
   useEffect(() => {
-    console.log("isViewable", isViewable);
     if (isViewable) {
       player.play();
+      setIsPlaying(true);
     } else {
       player.pause();
+      setIsPlaying(false);
     }
-  }, [isViewable, player]);
-
-  useEffect(() => {
-    const subscription = player.addListener("playingChange", (isPlaying) => {
-      setIsPlaying(isPlaying);
-    });
 
     return () => {
-      subscription.remove();
+      player.pause();
+      setIsPlaying(false);
     };
-  }, [player]);
+  }, [isViewable, player]);
 
   useEffect(() => {
     setIsLiked(hasLiked ?? false);
@@ -340,17 +333,28 @@ const PostItem = (props: PostItemProps) => {
             </Image>
           ) : (
             <>
-              <VideoView
-                ref={videoRef}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: 20,
+              <TouchableOpacity
+                onPress={() => {
+                  setIsPlaying(!isPlaying);
+                  if (isPlaying) {
+                    player.play();
+                  } else {
+                    player.pause();
+                  }
                 }}
-                contentFit="cover"
-                player={player}
-                nativeControls={false}
-              />
+              >
+                <VideoView
+                  ref={videoRef}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 20,
+                  }}
+                  contentFit="cover"
+                  player={player}
+                  nativeControls={false}
+                />
+              </TouchableOpacity>
             </>
           )}
         </View>
@@ -561,7 +565,7 @@ const MediaOfYou = () => {
 
   const {
     data: postData,
-    isLoading,
+    isLoading: isLoadingPostData,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
@@ -627,22 +631,23 @@ const MediaOfYou = () => {
   const [viewableItems, setViewableItems] = useState<number[]>([]);
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      console.log("shit changing");
+      // if (isLoadingPostData) return;
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
         .map((token) => token.item?.postId)
         .filter((id): id is number => id !== undefined);
-
-      console.log("visibleItemIds", visibleItemIds);
 
       setViewableItems(visibleItemIds);
     },
     [],
   );
 
+  useEffect(() => {
+    console.log("viewableItems", viewableItems);
+  }, [viewableItems]);
+
   const viewabilityConfig = {
-    minimumViewTime: 200,
-    itemVisiblePercentThreshold: 30,
+    itemVisiblePercentThreshold: 40,
   };
 
   const FlashListHeader = () => {
@@ -678,7 +683,7 @@ const MediaOfYou = () => {
   return (
     <View flex={1}>
       <FlashList
-        data={isLoading ? placeholderData : posts}
+        data={posts}
         ListHeaderComponent={FlashListHeader}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
@@ -686,18 +691,26 @@ const MediaOfYou = () => {
         numColumns={1}
         onEndReached={handleOnEndReached}
         keyExtractor={(item) => {
-          console.log("item", item?.postId.toString());
           return item?.postId.toString() ?? "";
         }}
         renderItem={({ item }) => {
-          if (item === null || item === undefined) {
+          if (item === undefined) {
             return null;
           }
           return (
-            <PostItem
-              post={item}
-              isViewable={viewableItems.includes(item.postId)}
-            />
+            <>
+              {isLoadingPostData ? (
+                <>
+                  <Text>Loading...</Text>
+                </>
+              ) : (
+                // <PostItemLoading />
+                <PostItem
+                  post={item}
+                  isViewable={viewableItems.includes(item.postId)}
+                />
+              )}
+            </>
           );
         }}
         estimatedItemSize={screenWidth}
