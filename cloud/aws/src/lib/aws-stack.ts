@@ -405,21 +405,6 @@ export class AwsStack extends cdk.Stack {
       value: cluster.clusterEndpoint.hostname,
     });
 
-    /*     const contactRecLambda = new lambdaNodeJs.NodejsFunction(
-      this,
-      "contactRecLambda",
-      {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        entry: "src/res/lambdas/contact-recs/index.ts",
-        handler: "handler",
-        environment: {
-          NEPTUNE_ENDPOINT: cluster.clusterReadEndpoint.socketAddress,
-        },
-        vpc,
-        securityGroups: [neptuneSecurityGroup],
-      },
-    ); */
-
     const contactRecLambda = createLambdaFunctionWithVpc(
       this,
       "contactRecLambda",
@@ -441,19 +426,17 @@ export class AwsStack extends cdk.Stack {
       value: contactRecLambdaUrl.url,
     });
 
-    const contactSyncLambda = new lambdaNodeJs.NodejsFunction(
+    const contactSyncLambda = createLambdaFunctionWithVpc(
       this,
       "contactSyncLambda",
-      {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        entry: "src/res/lambdas/contact-sync/index.ts",
-        handler: "handler",
-        environment: {
-          NEPTUNE_ENDPOINT: cluster.clusterEndpoint.socketAddress,
-        },
-        vpc,
-        securityGroups: [neptuneSecurityGroup],
-      },
+      "src/res/lambdas/contact-sync/index.ts",
+      vpc,
+      [neptuneSecurityGroup],
+    );
+
+    contactSyncLambda.addEnvironment(
+      "NEPTUNE_ENDPOINT",
+      cluster.clusterEndpoint.socketAddress,
     );
 
     // setup sqs for neptune proxy lambda, good for one day for debugging

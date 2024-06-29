@@ -36,6 +36,9 @@ export const env = createEnv({
 
     // # Expo Config
     EXPO_ACCESS_TOKEN: z.string().min(1),
+
+    // # lambda urls
+    CONTACT_REC_LAMBDA_URL: z.string().min(1),
   },
   runtimeEnv: process.env,
 });
