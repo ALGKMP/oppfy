@@ -107,7 +107,7 @@ const FriendsCarousel = (props: FriendsProps) => {
     <CardContainer>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
-        {recomendations?.length === 0 ? (
+{/*         {recomendations?.length === 0 ? (
           <Text>No recommendations found</Text>
         ) : (
           <FlashList
@@ -130,7 +130,7 @@ const FriendsCarousel = (props: FriendsProps) => {
               paddingHorizontal: getToken("$3", "space") as number,
             }}
           />
-        )}
+        )} */}
         <Button size="$3.5">@oxy add recommendations here</Button>
       </YStack>
     </CardContainer>
