@@ -47,9 +47,9 @@ const FriendsCarousel = (props: FriendsProps) => {
   const router = useRouter();
 
   const {
-    data: reccomendations,
-    isLoading: isReccomendationsLoading,
-    refetch: refectchReccomendations,
+    data: recomendations,
+    isLoading: isRecomendationsLoading,
+    refetch: refectchRecomendations,
   } = api.contacts.getRecomendations.useQuery();
 
   const showMore =
