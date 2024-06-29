@@ -22,7 +22,7 @@ import { abbreviatedNumber } from "@oppfy/utils";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
-import type { RouterOutputs } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
@@ -45,6 +45,12 @@ type FriendsProps = LoadingProps | FriendsLoadedProps;
 
 const FriendsCarousel = (props: FriendsProps) => {
   const router = useRouter();
+
+  const {
+    data: reccomendations,
+    isLoading: isReccomendationsLoading,
+    refetch: refectchReccomendations,
+  } = api.contacts.getRecomendations.useQuery();
 
   const showMore =
     !props.loading && props.data.friendItems.length < props.data.friendCount;
