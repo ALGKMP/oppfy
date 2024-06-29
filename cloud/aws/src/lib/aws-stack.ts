@@ -86,6 +86,8 @@ function createLambdaFunction(
 
       AWS_ACCOUNT_ID: process.env.AWS_ACCOUNT_ID!,
 
+      CONTACT_REC_LAMBDA_URL: process.env.CONTACT_REC_LAMBDA_URL!,
+
       EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN!,
     },
   });
@@ -136,6 +138,8 @@ function createLambdaFunctionWithVpc(
       SQS_CONTACT_QUEUE: env.SQS_CONTACT_QUEUE,
 
       AWS_ACCOUNT_ID: env.AWS_ACCOUNT_ID,
+
+      CONTACT_REC_LAMBDA_URL: env.CONTACT_REC_LAMBDA_URL,
 
       EXPO_ACCESS_TOKEN: env.EXPO_ACCESS_TOKEN,
     },
