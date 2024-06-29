@@ -45,6 +45,7 @@ interface PostItemProps {
 
 const PostItem = (props: PostItemProps) => {
   const { post, isViewable } = props;
+  const [isMuted, setIsMuted] = useState(false);
   const [status, _setStatus] = useState<"success" | "loading" | "error">(
     "success",
   );
@@ -242,6 +243,14 @@ const PostItem = (props: PostItemProps) => {
       runOnJS(handleDoubleTabLike)();
     });
 
+  const tapGesture = Gesture.Tap().onEnd(() => {
+    runOnJS(setIsMuted)(!isMuted);
+    console.log(`isMuted: ${isMuted}`);
+  });
+
+  const g = Gesture.Exclusive(doubleTap, tapGesture);
+
+
   const heartImageAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: imageLikeScale.value }],
@@ -282,7 +291,7 @@ const PostItem = (props: PostItemProps) => {
       backgroundColor="$gray2"
       marginBottom="$5"
     >
-      <GestureDetector gesture={doubleTap}>
+      <GestureDetector gesture={g}>
         <View aspectRatio={post.width / post.height} width="100%">
           {post.mediaType === "image" ? (
             <ImagePost
@@ -293,6 +302,8 @@ const PostItem = (props: PostItemProps) => {
               <VideoPost
                 videoSource="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
                 isViewable={isViewable}
+                isMuted={isMuted}
+                setIsMuted={setIsMuted}
                 animatedHeartImageStyle={heartImageAnimatedStyle}
               />
           )}
