@@ -23,7 +23,6 @@ export class FriendRepository {
 
       // Add the two users as friends
       await tx.insert(schema.friend).values({ userId1, userId2 });
-      await tx.insert(schema.friend).values({ userId2, userId1 });
 
       // Delete the friend request from userId1 to userId2
       await tx
@@ -141,8 +140,8 @@ export class FriendRepository {
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
-        createdAt: schema.friend.createdAt,
         profileId: schema.profile.id,
+        createdAt: schema.friend.createdAt,
       })
       .from(schema.friend)
       .innerJoin(
@@ -205,6 +204,7 @@ export class FriendRepository {
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         profileId: schema.profile.id,
+        createdAt: schema.friend.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
@@ -220,7 +220,6 @@ export class FriendRepository {
           ELSE 'notFollowing'
         END
         `,
-        createdAt: schema.follower.createdAt,
       })
       .from(schema.friend)
       .innerJoin(

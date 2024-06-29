@@ -183,6 +183,7 @@ export class FollowRepository {
         profilePictureUrl: schema.profile.profilePictureKey,
         profileId: schema.profile.id,
         privacy: schema.user.privacySetting,
+        createdAt: schema.follower.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
@@ -198,7 +199,6 @@ export class FollowRepository {
           ELSE 'notFollowing'
         END
         `,
-        createdAt: schema.follower.createdAt,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
@@ -261,6 +261,7 @@ export class FollowRepository {
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
+        createdAt: schema.follower.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
@@ -276,7 +277,6 @@ export class FollowRepository {
           ELSE 'notFollowing'
         END
         `,
-        createdAt: schema.follower.createdAt,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
@@ -330,6 +330,7 @@ export class FollowRepository {
         name: schema.profile.fullName,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
+        createdAt: schema.follower.createdAt,
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
@@ -345,7 +346,6 @@ export class FollowRepository {
           ELSE 'notFollowing'
         END
         `,
-        createdAt: schema.follower.createdAt,
       })
       .from(schema.follower)
       .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))

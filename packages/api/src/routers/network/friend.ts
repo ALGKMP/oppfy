@@ -36,7 +36,6 @@ export const friendRouter = createTRPCRouter({
       }
     }),
 
-  // TODO: Fix the logic behind this
   paginateFriendRequestsSelf: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       return await ctx.services.paginate.paginateFriendRequests(
