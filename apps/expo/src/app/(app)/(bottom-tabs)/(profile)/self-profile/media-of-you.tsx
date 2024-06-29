@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -15,6 +10,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
@@ -50,6 +46,9 @@ const PostItem = (props: PostItemProps) => {
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
+  const [heartGradient, setHeartGradient] = useState<
+    [number, number, number, number]
+  >([0, 0, 1, 1]);
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
@@ -174,6 +173,9 @@ const PostItem = (props: PostItemProps) => {
   const buttonLikeScale = useSharedValue(1);
 
   const handleDoubleTabLike = async () => {
+    const gradient = getRandomGradient();
+    runOnJS(setHeartGradient)(gradient);
+    runOnJS(console.log)(gradient);
     imageLikeScale.value = withSpring(
       1,
       {
@@ -247,10 +249,9 @@ const PostItem = (props: PostItemProps) => {
   });
 
   // TODO: Not sure what I wanna do. Either pause the video, or make the video full screen
-  const longHold = Gesture.LongPress()
-    .onEnd(() => {
-      console.log("long hold")
-    });
+  const longHold = Gesture.LongPress().onEnd(() => {
+    console.log("long hold");
+  });
 
   const postInteractions = Gesture.Exclusive(doubleTap, tapGesture, longHold);
 
@@ -282,6 +283,30 @@ const PostItem = (props: PostItemProps) => {
     });
   };
 
+  const getRandomGradient = useCallback((): [
+    number,
+    number,
+    number,
+    number,
+  ] => {
+    const gradientDirections: [number, number, number, number][] = [
+      [1, 1, 0, 0],
+      [0, 0, 0, 1],
+      [0, 1, 0, 0],
+      [1, 0, 0, 0],
+      [0, 0, 1, 0],
+      [1, 0, 0, 1],
+      [1, 0, 0, 1],
+      [0, 1, 1, 0],
+    ];
+
+    return (
+      gradientDirections[
+        Math.floor(Math.random() * gradientDirections.length)
+      ] ?? [0, 0, 1, 1]
+    );
+  }, []);
+
   return (
     <View
       flex={1}
@@ -295,18 +320,38 @@ const PostItem = (props: PostItemProps) => {
       <GestureDetector gesture={postInteractions}>
         <View aspectRatio={post.width / post.height} width="100%">
           {post.mediaType === "image" ? (
-            <ImagePost
-              imageUrl={post.imageUrl}
+            <ImagePost imageUrl={post.imageUrl}>
+              <Animated.View style={[heartImageAnimatedStyle]}>
+                {/* <Heart size={100} color="red" fill="red" /> */}
+                <Svg height="100" width="100" viewBox="0 0 24 24">
+                  <Defs>
+                    <LinearGradient
+                      id="grad"
+                      x1={heartGradient[0]}
+                      y1={heartGradient[1]}
+                      x2={heartGradient[2]}
+                      y2={heartGradient[3]}
+                    >
+                      {/* TODO: Find better colors */}
+                      <Stop offset="0" stopColor="#ff7f7f" stopOpacity="1" />
+                      <Stop offset="1" stopColor="#ff0000" stopOpacity="1" />
+                    </LinearGradient>
+                  </Defs>
+                  <Path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                    fill="url(#grad)"
+                  />
+                </Svg>
+              </Animated.View>
+            </ImagePost>
+          ) : (
+            <VideoPost
+              videoSource="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              isViewable={isViewable}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
               animatedHeartImageStyle={heartImageAnimatedStyle}
             />
-          ) : (
-              <VideoPost
-                videoSource="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                isViewable={isViewable}
-                isMuted={isMuted}
-                setIsMuted={setIsMuted}
-                animatedHeartImageStyle={heartImageAnimatedStyle}
-              />
           )}
         </View>
       </GestureDetector>
@@ -588,10 +633,6 @@ const MediaOfYou = () => {
     },
     [],
   );
-
-  useEffect(() => {
-    console.log("viewableItems", viewableItems);
-  }, [viewableItems]);
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 40,
