@@ -2,7 +2,6 @@ import { and, asc, count, eq, gt, not, or, sql } from "drizzle-orm";
 
 import { db, isNotNull, schema } from "@oppfy/db";
 
-import { friendRequest } from "../../../../db/src/schema/schema";
 import { handleDatabaseErrors } from "../../errors";
 
 export class FriendRepository {

@@ -686,6 +686,7 @@ const MediaOfYou = () => {
         numColumns={1}
         onEndReached={handleOnEndReached}
         keyExtractor={(item) => {
+          console.log("item", item?.postId.toString());
           return item?.postId.toString() ?? "";
         }}
         renderItem={({ item }) => {
@@ -694,7 +695,6 @@ const MediaOfYou = () => {
           }
           return (
             <PostItem
-              key={item.postId.toString()}
               post={item}
               isViewable={viewableItems.includes(item.postId)}
             />
