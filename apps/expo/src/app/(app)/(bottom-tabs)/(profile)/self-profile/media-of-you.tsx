@@ -2,7 +2,6 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
@@ -245,11 +244,15 @@ const PostItem = (props: PostItemProps) => {
 
   const tapGesture = Gesture.Tap().onEnd(() => {
     runOnJS(setIsMuted)(!isMuted);
-    console.log(`isMuted: ${isMuted}`);
   });
 
-  const g = Gesture.Exclusive(doubleTap, tapGesture);
+  // TODO: Not sure what I wanna do. Either pause the video, or make the video full screen
+  const longHold = Gesture.LongPress()
+    .onEnd(() => {
+      console.log("long hold")
+    });
 
+  const postInteractions = Gesture.Exclusive(doubleTap, tapGesture, longHold);
 
   const heartImageAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -279,8 +282,6 @@ const PostItem = (props: PostItemProps) => {
     });
   };
 
-  // TODO: @Einsight04 - Add a loading state for the post
-
   return (
     <View
       flex={1}
@@ -291,7 +292,7 @@ const PostItem = (props: PostItemProps) => {
       backgroundColor="$gray2"
       marginBottom="$5"
     >
-      <GestureDetector gesture={g}>
+      <GestureDetector gesture={postInteractions}>
         <View aspectRatio={post.width / post.height} width="100%">
           {post.mediaType === "image" ? (
             <ImagePost

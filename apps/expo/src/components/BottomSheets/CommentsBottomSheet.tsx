@@ -35,9 +35,9 @@ import {
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
-import z from "zod";
+import type z from "zod";
 
-import { sharedValidators } from "@oppfy/validators";
+import type { sharedValidators } from "@oppfy/validators";
 
 import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 import { api } from "~/utils/api";
@@ -91,7 +91,7 @@ const CommentsBottomSheet = ({
     } else {
       closeModal();
     }
-  }, [modalVisible]);
+  }, [modalVisible, closeModal, openModal]);
 
   useEffect(() => {
     if (modalVisible) {

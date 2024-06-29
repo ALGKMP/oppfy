@@ -57,28 +57,26 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
   };
 
   return (
-    // <GestureDetector gesture={tapGesture}>
-      <VideoView
-        ref={videoRef}
-        style={{
-          width: "100%",
-          height: "100%",
-          borderRadius: 20,
-        }}
-        contentFit="cover"
-        player={player}
-        nativeControls={false}
+    <VideoView
+      ref={videoRef}
+      style={{
+        width: "100%",
+        height: "100%",
+        borderRadius: 20,
+      }}
+      contentFit="cover"
+      player={player}
+      nativeControls={false}
+    >
+      <Animated.View
+        style={[
+          animatedHeartImageStyle,
+          { flex: 1, justifyContent: "center", alignItems: "center" },
+        ]}
       >
-        <Animated.View
-          style={[
-            animatedHeartImageStyle,
-            { flex: 1, justifyContent: "center", alignItems: "center" },
-          ]}
-        >
-          <Heart size={100} color="red" fill="red" />
-        </Animated.View>
-      </VideoView>
-    // </GestureDetector>
+        <Heart size={100} color="red" fill="red" />
+      </Animated.View>
+    </VideoView>
   );
 };
 
