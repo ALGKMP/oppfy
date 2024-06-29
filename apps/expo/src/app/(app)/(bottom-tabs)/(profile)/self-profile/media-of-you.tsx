@@ -17,9 +17,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useVideoPlayer, VideoView } from "expo-video";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Heart, MoreHorizontal, SendHorizontal } from "@tamagui/lucide-icons";
@@ -32,12 +30,16 @@ import { CommentsBottomSheet } from "~/components/BottomSheets";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { api } from "~/utils/api";
 import FriendsCarousel from "./FriendsCarousel";
+import ImagePost from "./ImagePost";
 import ProfileBanner from "./ProfileBanner";
+import VideoPost from "./VideoPost";
 
 const { width: screenWidth } = Dimensions.get("window");
 
+type Post = z.infer<typeof sharedValidators.media.post>;
+
 interface PostItemProps {
-  post: z.infer<typeof sharedValidators.media.post>;
+  post: Post;
   isViewable: boolean;
 }
 
@@ -64,31 +66,6 @@ const PostItem = (props: PostItemProps) => {
 
   const [isLiked, setIsLiked] = useState<boolean>(hasLiked ?? false);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const videoSource =
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-
-  const videoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const player = useVideoPlayer(videoSource, (player) => {
-    player.loop = true;
-    player.staysActiveInBackground = false;
-  });
-
-  useEffect(() => {
-    if (isViewable) {
-      player.play();
-      setIsPlaying(true);
-    } else {
-      player.pause();
-      setIsPlaying(false);
-    }
-
-    return () => {
-      player.pause();
-      setIsPlaying(false);
-    };
-  }, [isViewable, player]);
 
   useEffect(() => {
     setIsLiked(hasLiked ?? false);
@@ -293,13 +270,7 @@ const PostItem = (props: PostItemProps) => {
     });
   };
 
-  if (status === "loading" || isLoadingHasLiked) {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center">
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
+  // TODO: @Einsight04 - Add a loading state for the post
 
   return (
     <View
@@ -314,48 +285,16 @@ const PostItem = (props: PostItemProps) => {
       <GestureDetector gesture={doubleTap}>
         <View aspectRatio={post.width / post.height} width="100%">
           {post.mediaType === "image" ? (
-            <Image
-              source={{ uri: post.imageUrl }}
-              style={[
-                {
-                  width: "100%",
-                  height: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 20,
-                },
-              ]}
-              contentFit="cover"
-            >
-              <Animated.View style={[heartImageAnimatedStyle]}>
-                <Heart size={100} color="red" fill="red" />
-              </Animated.View>
-            </Image>
+            <ImagePost
+              imageUrl={post.imageUrl}
+              animatedHeartImageStyle={heartImageAnimatedStyle}
+            />
           ) : (
-            <>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsPlaying(!isPlaying);
-                  if (isPlaying) {
-                    player.play();
-                  } else {
-                    player.pause();
-                  }
-                }}
-              >
-                <VideoView
-                  ref={videoRef}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: 20,
-                  }}
-                  contentFit="cover"
-                  player={player}
-                  nativeControls={false}
-                />
-              </TouchableOpacity>
-            </>
+              <VideoPost
+                videoSource="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                isViewable={isViewable}
+                animatedHeartImageStyle={heartImageAnimatedStyle}
+              />
           )}
         </View>
       </GestureDetector>
@@ -417,7 +356,7 @@ const PostItem = (props: PostItemProps) => {
                   fontWeight="bold"
                   color="$blue9"
                 >
-                  {post?.authorUsername ?? "@AuthorUsername"}
+                  {post.authorUsername ?? "@AuthorUsername"}
                 </SizableText>
               </XStack>
             </TouchableOpacity>
@@ -623,10 +562,6 @@ const MediaOfYou = () => {
     () => friendsData?.pages.flatMap((page) => page.items) ?? [],
     [friendsData],
   );
-
-  const placeholderData = useMemo(() => {
-    return Array.from({ length: 20 }, () => null);
-  }, []);
 
   const [viewableItems, setViewableItems] = useState<number[]>([]);
   const onViewableItemsChanged = useCallback(
