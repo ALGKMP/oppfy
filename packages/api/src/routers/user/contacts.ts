@@ -25,4 +25,13 @@ export const contactsRouter = createTRPCRouter({
       });
     }
   }),
+  getRecomendations: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.contact.getRecomendations(ctx.session.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  }),
 });

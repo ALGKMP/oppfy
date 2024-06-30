@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -26,6 +21,7 @@ import type z from "zod";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
+import GradientHeart from "~/components/Icons/GradientHeart";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { api } from "~/utils/api";
 import FriendsCarousel from "./FriendsCarousel";
@@ -50,6 +46,9 @@ const PostItem = (props: PostItemProps) => {
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
+  const [heartGradient, setHeartGradient] = useState<
+    [number, number, number, number]
+  >([0, 0, 1, 1]);
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
@@ -171,9 +170,12 @@ const PostItem = (props: PostItemProps) => {
 
   // For the fuckin like button
   const imageLikeScale = useSharedValue(0);
+  const heartPosition = useSharedValue({ x: 0, y: 0 });
   const buttonLikeScale = useSharedValue(1);
 
-  const handleDoubleTabLike = async () => {
+  const handleDoubleTapLike = async (x: number, y: number) => {
+    const gradient = getRandomGradient();
+    runOnJS(setHeartGradient)(gradient);
     imageLikeScale.value = withSpring(
       1,
       {
@@ -238,8 +240,12 @@ const PostItem = (props: PostItemProps) => {
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
-    .onEnd(() => {
-      runOnJS(handleDoubleTabLike)();
+    .onEnd((event) => {
+      const { x, y } = { x: event.x, y: event.y };
+
+      heartPosition.value = { x, y }; // Update position state
+      // console.log(heartPosition.value);
+      runOnJS(handleDoubleTapLike)(x, y);
     });
 
   const tapGesture = Gesture.Tap().onEnd(() => {
@@ -247,16 +253,22 @@ const PostItem = (props: PostItemProps) => {
   });
 
   // TODO: Not sure what I wanna do. Either pause the video, or make the video full screen
-  const longHold = Gesture.LongPress()
-    .onEnd(() => {
-      console.log("long hold")
-    });
+  const longHold = Gesture.LongPress().onEnd(() => {
+    console.log("long hold");
+  });
 
   const postInteractions = Gesture.Exclusive(doubleTap, tapGesture, longHold);
 
   const heartImageAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: imageLikeScale.value }],
+      position: "absolute",
+      left: heartPosition.value.x,
+      top: heartPosition.value.y,
+      transform: [
+        { translateX: -40 },
+        { translateY: -40 },
+        { scale: imageLikeScale.value },
+      ],
     };
   });
 
@@ -282,6 +294,30 @@ const PostItem = (props: PostItemProps) => {
     });
   };
 
+  const getRandomGradient = useCallback((): [
+    number,
+    number,
+    number,
+    number,
+  ] => {
+    const gradientDirections: [number, number, number, number][] = [
+      [1, 1, 0, 0],
+      [0, 0, 0, 1],
+      [0, 1, 0, 0],
+      [1, 0, 0, 0],
+      [0, 0, 1, 0],
+      [1, 0, 0, 1],
+      [1, 0, 0, 1],
+      [0, 1, 1, 0],
+    ];
+
+    return (
+      gradientDirections[
+        Math.floor(Math.random() * gradientDirections.length)
+      ] ?? [0, 0, 1, 1]
+    );
+  }, []);
+
   return (
     <View
       flex={1}
@@ -295,18 +331,19 @@ const PostItem = (props: PostItemProps) => {
       <GestureDetector gesture={postInteractions}>
         <View aspectRatio={post.width / post.height} width="100%">
           {post.mediaType === "image" ? (
-            <ImagePost
-              imageUrl={post.imageUrl}
+            <ImagePost imageUrl={post.imageUrl}>
+              <Animated.View style={[heartImageAnimatedStyle]}>
+                <GradientHeart gradient={getRandomGradient()} />
+              </Animated.View>
+            </ImagePost>
+          ) : (
+            <VideoPost
+              videoSource="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              isViewable={isViewable}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
               animatedHeartImageStyle={heartImageAnimatedStyle}
             />
-          ) : (
-              <VideoPost
-                videoSource="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                isViewable={isViewable}
-                isMuted={isMuted}
-                setIsMuted={setIsMuted}
-                animatedHeartImageStyle={heartImageAnimatedStyle}
-              />
           )}
         </View>
       </GestureDetector>
@@ -588,10 +625,6 @@ const MediaOfYou = () => {
     },
     [],
   );
-
-  useEffect(() => {
-    console.log("viewableItems", viewableItems);
-  }, [viewableItems]);
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 40,

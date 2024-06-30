@@ -22,7 +22,7 @@ import { abbreviatedNumber } from "@oppfy/utils";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
-import type { RouterOutputs } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
@@ -45,6 +45,12 @@ type FriendsProps = LoadingProps | FriendsLoadedProps;
 
 const FriendsCarousel = (props: FriendsProps) => {
   const router = useRouter();
+
+  const {
+    data: recomendations,
+    isLoading: isRecomendationsLoading,
+    refetch: refectchRecomendations,
+  } = api.contacts.getRecomendations.useQuery();
 
   const showMore =
     !props.loading && props.data.friendItems.length < props.data.friendCount;
@@ -101,6 +107,30 @@ const FriendsCarousel = (props: FriendsProps) => {
     <CardContainer>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
+{/*         {recomendations?.length === 0 ? (
+          <Text>No recommendations found</Text>
+        ) : (
+          <FlashList
+            data={recomendations}
+            horizontal
+            estimatedItemSize={70}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <YStack gap="$1.5">
+                <Avatar circular size="$6" bordered>
+                  <Avatar.Image src={item.profilePictureUrl} />
+                </Avatar>
+                <Text fontWeight="600" textAlign="center">
+                  {item.username}
+                </Text>
+              </YStack>
+            )}
+            ItemSeparatorComponent={() => <Spacer size="$2" />}
+            contentContainerStyle={{
+              paddingHorizontal: getToken("$3", "space") as number,
+            }}
+          />
+        )} */}
         <Button size="$3.5">@oxy add recommendations here</Button>
       </YStack>
     </CardContainer>
