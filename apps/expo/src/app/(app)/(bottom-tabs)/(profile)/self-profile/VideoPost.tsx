@@ -10,7 +10,7 @@ interface VideoPlayerProps {
   isViewable: boolean;
   isMuted: boolean;
   setIsMuted: (isMuted: boolean) => void;
-  animatedHeartImageStyle: StyleProp<ViewStyle>;
+  children: React.ReactNode;
 }
 
 const VideoPost: React.FC<VideoPlayerProps> = ({
@@ -18,7 +18,7 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
   isViewable,
   isMuted = false,
   setIsMuted,
-  animatedHeartImageStyle,
+  children,
 }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -68,14 +68,7 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
       player={player}
       nativeControls={false}
     >
-      <Animated.View
-        style={[
-          animatedHeartImageStyle,
-          { flex: 1, justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <Heart size={100} color="red" fill="red" />
-      </Animated.View>
+      {children}
     </VideoView>
   );
 };
