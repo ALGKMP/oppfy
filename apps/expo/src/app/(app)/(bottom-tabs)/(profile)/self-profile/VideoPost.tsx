@@ -1,9 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { runOnJS } from "react-native-reanimated";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { Heart } from "@tamagui/lucide-icons";
 
 interface VideoPlayerProps {
   videoSource: string;
@@ -47,14 +43,14 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
     player.muted = isMuted;
   }, [isMuted]);
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-    if (isPlaying) {
-      player.pause();
-    } else {
-      player.play();
-    }
-  };
+  // const togglePlay = () => {
+  //   setIsPlaying(!isPlaying);
+  //   if (isPlaying) {
+  //     player.pause();
+  //   } else {
+  //     player.play();
+  //   }
+  // };
 
   return (
     <VideoView
