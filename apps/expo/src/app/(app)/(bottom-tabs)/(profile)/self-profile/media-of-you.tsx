@@ -10,7 +10,6 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
@@ -22,6 +21,7 @@ import type z from "zod";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
+import GradientHeart from "~/components/Icons/GradientHeart";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { api } from "~/utils/api";
 import FriendsCarousel from "./FriendsCarousel";
@@ -170,12 +170,12 @@ const PostItem = (props: PostItemProps) => {
 
   // For the fuckin like button
   const imageLikeScale = useSharedValue(0);
+  const heartPosition = useSharedValue({ x: 0, y: 0 });
   const buttonLikeScale = useSharedValue(1);
 
-  const handleDoubleTabLike = async () => {
+  const handleDoubleTapLike = async (x: number, y: number) => {
     const gradient = getRandomGradient();
     runOnJS(setHeartGradient)(gradient);
-    runOnJS(console.log)(gradient);
     imageLikeScale.value = withSpring(
       1,
       {
@@ -240,8 +240,12 @@ const PostItem = (props: PostItemProps) => {
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
-    .onEnd(() => {
-      runOnJS(handleDoubleTabLike)();
+    .onEnd((event) => {
+      const { x, y } = { x: event.x, y: event.y };
+
+      heartPosition.value = { x, y }; // Update position state
+      // console.log(heartPosition.value);
+      runOnJS(handleDoubleTapLike)(x, y);
     });
 
   const tapGesture = Gesture.Tap().onEnd(() => {
@@ -257,7 +261,14 @@ const PostItem = (props: PostItemProps) => {
 
   const heartImageAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: imageLikeScale.value }],
+      position: "absolute",
+      left: heartPosition.value.x,
+      top: heartPosition.value.y,
+      transform: [
+        { translateX: -40 },
+        { translateY: -40 },
+        { scale: imageLikeScale.value },
+      ],
     };
   });
 
@@ -322,26 +333,7 @@ const PostItem = (props: PostItemProps) => {
           {post.mediaType === "image" ? (
             <ImagePost imageUrl={post.imageUrl}>
               <Animated.View style={[heartImageAnimatedStyle]}>
-                {/* <Heart size={100} color="red" fill="red" /> */}
-                <Svg height="100" width="100" viewBox="0 0 24 24">
-                  <Defs>
-                    <LinearGradient
-                      id="grad"
-                      x1={heartGradient[0]}
-                      y1={heartGradient[1]}
-                      x2={heartGradient[2]}
-                      y2={heartGradient[3]}
-                    >
-                      {/* TODO: Find better colors */}
-                      <Stop offset="0" stopColor="#ff7f7f" stopOpacity="1" />
-                      <Stop offset="1" stopColor="#ff0000" stopOpacity="1" />
-                    </LinearGradient>
-                  </Defs>
-                  <Path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                    fill="url(#grad)"
-                  />
-                </Svg>
+                <GradientHeart gradient={getRandomGradient()} />
               </Animated.View>
             </ImagePost>
           ) : (
