@@ -63,11 +63,12 @@ export const renderSettingsGroup = (group: SettingsGroupInput) => (
   <YStack gap="$2" key={group.headerTitle}>
     <H6 theme="alt1">{group.headerTitle}</H6>
 
-    <YGroup alignSelf="center" bordered separator={<Separator />}>
+    <YGroup alignSelf="center" separator={<Separator borderColor="$gray6" />}>
       {group.items.map((item, index) => (
         <YGroup.Item key={index}>
           <ListItem
             size="$4.5"
+            backgroundColor="$gray3"
             onPress={item.onPress}
             hoverTheme={item.hoverTheme ?? true}
             pressTheme={item.pressTheme ?? true}
