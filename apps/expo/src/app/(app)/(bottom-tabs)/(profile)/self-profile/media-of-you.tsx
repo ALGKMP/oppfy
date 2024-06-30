@@ -46,9 +46,7 @@ const PostItem = (props: PostItemProps) => {
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
-  const [heartGradient, setHeartGradient] = useState<
-    [number, number, number, number]
-  >([0, 0, 1, 1]);
+
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
@@ -173,9 +171,7 @@ const PostItem = (props: PostItemProps) => {
   const heartPosition = useSharedValue({ x: 0, y: 0 });
   const buttonLikeScale = useSharedValue(1);
 
-  const handleDoubleTapLike = async (x: number, y: number) => {
-    const gradient = getRandomGradient();
-    runOnJS(setHeartGradient)(gradient);
+  const handleDoubleTapLike = async () => {
     imageLikeScale.value = withSpring(
       1,
       {
@@ -242,10 +238,8 @@ const PostItem = (props: PostItemProps) => {
     .numberOfTaps(2)
     .onEnd((event) => {
       const { x, y } = { x: event.x, y: event.y };
-
       heartPosition.value = { x, y }; // Update position state
-      // console.log(heartPosition.value);
-      runOnJS(handleDoubleTapLike)(x, y);
+      runOnJS(handleDoubleTapLike)();
     });
 
   const tapGesture = Gesture.Tap().onEnd(() => {
