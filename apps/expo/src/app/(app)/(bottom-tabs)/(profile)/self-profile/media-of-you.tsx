@@ -242,19 +242,6 @@ const PostItem = (props: PostItemProps) => {
 
   const postInteractions = Gesture.Exclusive(doubleTap, tapGesture, longHold);
 
-  const heartImageAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      position: "absolute",
-      left: heartPosition.value.x,
-      top: heartPosition.value.y,
-      transform: [
-        { translateX: -40 },
-        { translateY: -40 },
-        { scale: imageLikeScale.value },
-      ],
-    };
-  });
-
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: buttonLikeScale.value }],
@@ -276,30 +263,6 @@ const PostItem = (props: PostItemProps) => {
       params: { profileId: String(profileId) },
     });
   };
-
-  const getRandomGradient = useCallback((): [
-    number,
-    number,
-    number,
-    number,
-  ] => {
-    const gradientDirections: [number, number, number, number][] = [
-      [1, 1, 0, 0],
-      [0, 0, 0, 1],
-      [0, 1, 0, 0],
-      [1, 0, 0, 0],
-      [0, 0, 1, 0],
-      [1, 0, 0, 1],
-      [1, 0, 0, 1],
-      [0, 1, 1, 0],
-    ];
-
-    return (
-      gradientDirections[
-        Math.floor(Math.random() * gradientDirections.length)
-      ] ?? [0, 0, 1, 1]
-    );
-  }, []);
 
   return (
     <View
@@ -560,12 +523,6 @@ const MediaOfYou = () => {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-
-  const itemCount = useMemo(() => {
-    if (postData === undefined) return 0;
-
-    return postData.pages.reduce((acc, page) => acc + page.items.length, 0);
-  }, [postData]);
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
