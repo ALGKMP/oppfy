@@ -231,21 +231,19 @@ const CountriesFlashList = ({
           const isLastInGroup =
             index === data.length - 1 || typeof data[index + 1] === "string";
 
-          // Render item
           return (
             <View>
               <ListItem
                 size="$4.5"
                 padding={12}
-                borderColor="$gray4"
-                borderWidth={1}
-                borderBottomWidth={0}
+                borderBottomWidth={1}
+                backgroundColor="$gray2"
                 {...(isFirstInGroup && {
                   borderTopLeftRadius: 10,
                   borderTopRightRadius: 10,
                 })}
                 {...(isLastInGroup && {
-                  borderBottomWidth: 1,
+                  borderBottomWidth: 0,
                   borderBottomLeftRadius: 10,
                   borderBottomRightRadius: 10,
                 })}
@@ -267,10 +265,9 @@ const CountriesFlashList = ({
           );
         }
       }}
-      getItemType={(item) => {
-        // To achieve better performance, specify the type based on the item
-        return typeof item === "string" ? "sectionHeader" : "row";
-      }}
+      getItemType={(item) =>
+        typeof item === "string" ? "sectionHeader" : "row"
+      }
     />
   );
 };
