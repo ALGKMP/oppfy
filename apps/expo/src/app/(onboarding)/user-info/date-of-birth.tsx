@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { useRouter } from "expo-router";
@@ -23,8 +23,10 @@ const DateOfBirth = () => {
 
   const updateDateOfBirth = api.profile.updateDateOfBirth.useMutation();
 
-  const isValidDateOfBirth =
-    sharedValidators.user.dateOfBirth.safeParse(dateOfBirth).success;
+  const isValidDateOfBirth = useMemo(
+    () => sharedValidators.user.dateOfBirth.safeParse(dateOfBirth).success,
+    [dateOfBirth],
+  );
 
   const onSubmit = async () => {
     if (dateOfBirth === null) return;

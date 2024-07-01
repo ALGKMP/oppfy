@@ -1,9 +1,9 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
-import { styled, Text, View, XStack, YStack } from "tamagui";
+import { H1, styled, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -35,8 +35,11 @@ const PhoneNumberOTP = () => {
   const userOnboardingCompletedMutation =
     api.user.checkOnboardingComplete.useMutation();
 
-  const isValidPhoneNumberOTP =
-    sharedValidators.user.phoneNumberOTP.safeParse(phoneNumberOTP).success;
+  const isValidPhoneNumberOTP = useMemo(
+    () =>
+      sharedValidators.user.phoneNumberOTP.safeParse(phoneNumberOTP).success,
+    [phoneNumberOTP],
+  );
 
   const handleNewUser = async (userId: string) => {
     if (!phoneNumber) {
@@ -51,7 +54,7 @@ const PhoneNumberOTP = () => {
     router.replace("/user-info/welcome");
   };
 
-  const handleExistingUser = async (userId: string) => {
+  const handleExistingUser = async () => {
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
 

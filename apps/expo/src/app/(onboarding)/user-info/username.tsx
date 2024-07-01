@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { Button, H1, Input, Text, XStack, YStack } from "tamagui";
 
@@ -25,8 +25,10 @@ const Username = () => {
 
   const updateUsername = api.profile.updateUsername.useMutation();
 
-  const isValidUsername =
-    sharedValidators.user.username.safeParse(username).success;
+  const isValidUsername = useMemo(
+    () => sharedValidators.user.username.safeParse(username).success,
+    [username],
+  );
 
   const onSubmit = async () => {
     try {
@@ -63,7 +65,6 @@ const Username = () => {
                 value={username}
                 onChangeText={setUsername}
                 textAlign="center"
-                // placeholder="Username"
                 autoFocus
               />
             </InputWrapper>

@@ -52,10 +52,14 @@ const PhoneNumber = () => {
     flag: "🇺🇸",
   });
 
-  const isValidPhoneNumber = sharedValidators.user.phoneNumber.safeParse({
-    phoneNumber,
-    countryCode: countryData.countryCode,
-  }).success;
+  const isValidPhoneNumber = useMemo(
+    () =>
+      sharedValidators.user.phoneNumber.safeParse({
+        phoneNumber,
+        countryCode: countryData.countryCode,
+      }).success,
+    [phoneNumber, countryData.countryCode],
+  );
 
   const onSubmit = async () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
