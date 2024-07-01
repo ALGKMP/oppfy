@@ -6,10 +6,13 @@ import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import {
   Button,
+  getToken,
   Input,
   ListItem,
   SizableText,
+  styled,
   Text,
+  useTheme,
   View,
   XStack,
   YStack,
@@ -61,52 +64,68 @@ const PhoneNumber = () => {
 
   return (
     <KeyboardSafeView>
-      <BaseScreenView safeAreaEdges={["bottom"]}>
-        <YStack flex={1} gap="$4">
-          <Text fontSize="$8" fontWeight="bold">
-            What&apos;s your phone number?
-          </Text>
-
-          <XStack gap="$2">
-            <CountryPicker
-              selectedCountryData={countryData}
-              setSelectedCountryData={setCountryData}
-            />
-            <Input
-              flex={1}
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              placeholder="Phone number"
-              keyboardType="phone-pad"
-              autoFocus
-            />
-          </XStack>
-
-          <Text color="$gray9">
-            By continuing, you agree to our{" "}
-            <Text color="$gray11" fontWeight="bold">
-              Privacy Policy
-            </Text>{" "}
-            and{" "}
-            <Text color="$gray11" fontWeight="bold">
-              Terms of Service
+      <BaseScreenView
+        safeAreaEdges={["bottom"]}
+        backgroundColor="$background"
+        paddingBottom={0}
+        paddingHorizontal={0}
+      >
+        <YStack flex={1} justifyContent="space-between">
+          <YStack paddingHorizontal="$4">
+            <Text
+              color="$color"
+              fontSize="$10"
+              fontWeight="bold"
+              marginBottom="$6"
+              textAlign="center"
+              letterSpacing={-1}
+            >
+              What's your{"\n"}phone number?
             </Text>
-            .
-          </Text>
-        </YStack>
 
-        <Button
-          onPress={onSubmit}
-          disabled={!isValidPhoneNumber}
-          disabledStyle={{ opacity: 0.5 }}
-        >
-          Continue
-        </Button>
+            <XStack
+              marginBottom="$5"
+              elevation={5}
+              shadowRadius={10}
+              shadowOpacity={0.4}
+            >
+              <CountryPicker
+                selectedCountryData={countryData}
+                setSelectedCountryData={setCountryData}
+              />
+              <StyledInput
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                placeholder="Your number here"
+                keyboardType="phone-pad"
+                autoFocus
+                placeholderTextColor="$gray8"
+                borderTopLeftRadius={0}
+                borderBottomLeftRadius={0}
+              />
+            </XStack>
+
+            <Text color="$gray9" textAlign="center">
+              By continuing, you agree to our{" "}
+              <Text color="$color" fontWeight="bold">
+                Privacy Policy
+              </Text>{" "}
+              and{" "}
+              <Text color="$color" fontWeight="bold">
+                Terms of Service
+              </Text>
+              .
+            </Text>
+          </YStack>
+
+          <StyledButton onPress={onSubmit} disabled={!isValidPhoneNumber}>
+            Send Verification Text
+          </StyledButton>
+        </YStack>
       </BaseScreenView>
     </KeyboardSafeView>
   );
 };
-
 interface CountryPickerProps {
   selectedCountryData?: CountryData;
   setSelectedCountryData?: (countryData: CountryData) => void;
@@ -116,6 +135,8 @@ const CountryPicker = ({
   selectedCountryData,
   setSelectedCountryData,
 }: CountryPickerProps) => {
+  const theme = useTheme();
+
   const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -163,7 +184,7 @@ const CountryPicker = ({
               </TouchableOpacity>
             }
           />
-          <View flex={1} paddingHorizontal="$4">
+          <View flex={1} padding="$4" paddingBottom={0}>
             <YStack flex={1} gap="$4">
               <Input
                 placeholder="Search"
@@ -181,16 +202,30 @@ const CountryPicker = ({
         </View>
       </Modal>
 
-      <Button onPress={() => setModalVisible(true)} paddingHorizontal="$2">
-        {selectedCountryData && (
-          <XStack alignItems="center" gap="$1">
-            <Text fontSize="$8">{selectedCountryData.flag}</Text>
-            <Text fontSize="$5" fontWeight="bold">
-              {selectedCountryData.dialingCode}
-            </Text>
-          </XStack>
-        )}
-      </Button>
+      {/* Do not attempt to use Styled() to clean this up, it breaks the onPress event */}
+      <TouchableOpacity
+        style={{
+          height: 74,
+          borderRadius: getToken("$9", "radius") as number,
+          backgroundColor: theme.gray4.val,
+          paddingLeft: getToken("$3", "space") as number,
+          paddingRight: getToken("$3", "space") as number,
+          justifyContent: "center",
+          shadowColor: theme.gray6.val,
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          borderTopRightRadius: 0,
+          borderBottomRightRadius: 0,
+        }}
+        onPress={() => setModalVisible(true)}
+      >
+        <XStack alignItems="center" gap="$1.5">
+          <Text fontSize="$9">{selectedCountryData?.flag}</Text>
+          <Text fontSize="$6" fontWeight="bold">
+            {selectedCountryData?.dialingCode}
+          </Text>
+        </XStack>
+      </TouchableOpacity>
     </>
   );
 };
@@ -271,5 +306,44 @@ const CountriesFlashList = ({
     />
   );
 };
+
+const StyledButton = styled(Button, {
+  height: 60,
+  borderWidth: 0,
+  borderRadius: 0,
+  backgroundColor: "$color",
+  elevation: 5,
+  shadowRadius: 10,
+  shadowOpacity: 0.4,
+  textProps: {
+    color: "$color1",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  pressStyle: {
+    backgroundColor: "$color11",
+  },
+  disabledStyle: {
+    backgroundColor: "$color9",
+    opacity: 0.7,
+  },
+});
+
+const StyledInput = styled(Input, {
+  flex: 1,
+  height: 74,
+  borderRadius: "$9",
+  backgroundColor: "$gray3",
+  paddingLeft: "$3",
+  paddingRight: "$3",
+  selectionColor: "$color",
+  borderWidth: 0,
+  color: "$color",
+  fontSize: "$8",
+  shadowColor: "$gray6",
+  elevation: 5,
+  shadowRadius: 10,
+  shadowOpacity: 0.4,
+});
 
 export default PhoneNumber;
