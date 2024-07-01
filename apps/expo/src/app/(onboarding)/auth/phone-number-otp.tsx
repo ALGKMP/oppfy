@@ -3,12 +3,17 @@ import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
-import { Button, styled, Text, View, XStack, YStack } from "tamagui";
+import { styled, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
+import {
+  BoldText,
+  DisclaimerText,
+  OnboardingButton,
+} from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
 enum Error {
@@ -92,7 +97,7 @@ const PhoneNumberOTP = () => {
         paddingHorizontal={0}
       >
         <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$4">
+          <YStack paddingHorizontal="$4" gap="$6">
             <Text
               color="$color"
               fontSize="$10"
@@ -106,49 +111,25 @@ const PhoneNumberOTP = () => {
             <OTPInput value={phoneNumberOTP} onChange={setPhoneNumberOTP} />
 
             {error ? (
-              <Text color="$red9" textAlign="center">
-                {error}
-              </Text>
+              <DisclaimerText color="$red9">{error}</DisclaimerText>
             ) : (
-              <Text color="$gray9" textAlign="center">
-                Verification code sent to{" "}
-                <Text color="$color" fontWeight="bold">
-                  {phoneNumber}
-                </Text>
-              </Text>
+              <DisclaimerText>
+                Verification code sent to <BoldText>{phoneNumber}</BoldText>
+              </DisclaimerText>
             )}
           </YStack>
 
-          <StyledButton onPress={onSubmit} disabled={!isValidPhoneNumberOTP}>
+          <OnboardingButton
+            onPress={onSubmit}
+            disabled={!isValidPhoneNumberOTP}
+          >
             Verify Code
-          </StyledButton>
+          </OnboardingButton>
         </YStack>
       </BaseScreenView>
     </KeyboardSafeView>
   );
 };
-
-const StyledButton = styled(Button, {
-  height: 60,
-  borderWidth: 0,
-  borderRadius: 0,
-  backgroundColor: "$color",
-  elevation: 5,
-  shadowRadius: 10,
-  shadowOpacity: 0.4,
-  textProps: {
-    color: "$color1",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  pressStyle: {
-    backgroundColor: "$color11",
-  },
-  disabledStyle: {
-    backgroundColor: "$color9",
-    opacity: 0.7,
-  },
-});
 
 // ! This is for testing purposes only, do not use in production
 auth().settings.appVerificationDisabledForTesting = true;
@@ -191,7 +172,13 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
         />
         <XStack justifyContent="space-between">
           {[0, 1, 2, 3, 4, 5].map((index) => (
-            <OTPBox key={index}>
+            <OTPBox
+              key={index}
+              {...(focused &&
+                index === value.length && {
+                  backgroundColor: "$gray4",
+                })}
+            >
               <Text fontSize="$7" fontWeight="bold" color="$color">
                 {value[index] ?? ""}
               </Text>
