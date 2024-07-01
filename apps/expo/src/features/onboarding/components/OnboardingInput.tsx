@@ -2,8 +2,8 @@ import { Input, styled } from "tamagui";
 
 const OnboardingInput = styled(Input, {
   flex: 1,
-  height: 70,
-  borderRadius: "$9",
+  height: 76,
+  borderRadius: "$10",
   backgroundColor: "$gray3",
   paddingLeft: "$3",
   paddingRight: "$3",

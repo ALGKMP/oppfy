@@ -6,6 +6,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import {
+  BoldText,
   DisclaimerText,
   InputWrapper,
   OnboardingButton,
@@ -58,7 +59,7 @@ const Username = () => {
       >
         <YStack flex={1} justifyContent="space-between">
           <YStack paddingHorizontal="$4" gap="$6">
-            <H1 textAlign="center">Pick a username?</H1>
+            <H1 textAlign="center">Choose a username!</H1>
 
             <InputWrapper>
               <OnboardingInput
@@ -70,7 +71,7 @@ const Username = () => {
             </InputWrapper>
 
             {error ? (
-              <DisclaimerText color="$red9">{error}</DisclaimerText>
+              <BoldText color="$red9">{error}</BoldText>
             ) : (
               <DisclaimerText>
                 Your username is how people find you on OPPFY. Your username

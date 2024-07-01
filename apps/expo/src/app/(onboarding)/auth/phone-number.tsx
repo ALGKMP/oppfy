@@ -104,9 +104,8 @@ const PhoneNumber = () => {
             </InputWrapper>
 
             <DisclaimerText>
-              By Continuing you agree to our
-              <BoldText>Privacy Policy</BoldText> and{" "}
-              <BoldText>Terms of Service</BoldText>.
+              By Continuing you agree to our <BoldText>Privacy Policy</BoldText>{" "}
+              and <BoldText>Terms of Service</BoldText>.
             </DisclaimerText>
           </YStack>
 
@@ -197,8 +196,8 @@ const CountryPicker = ({
       {/* Do not attempt to use Styled() to clean this up, it breaks the onPress event */}
       <TouchableOpacity
         style={{
-          height: 70,
-          borderRadius: getToken("$9", "radius") as number,
+          height: 76,
+          borderRadius: getToken("$10", "radius") as number,
           backgroundColor: theme.gray4.val,
           paddingLeft: getToken("$3", "space") as number,
           paddingRight: getToken("$3", "space") as number,
@@ -259,35 +258,37 @@ const CountriesFlashList = ({
             index === data.length - 1 || typeof data[index + 1] === "string";
 
           return (
-            <TouchableOpacity onPress={() => onSelect && onSelect(item)}>
-              <ListItem
-                size="$4.5"
-                padding={12}
-                borderBottomWidth={1}
-                backgroundColor="$gray2"
-                {...(isFirstInGroup && {
-                  borderTopLeftRadius: 10,
-                  borderTopRightRadius: 10,
-                })}
-                {...(isLastInGroup && {
-                  borderBottomWidth: 0,
-                  borderBottomLeftRadius: 10,
-                  borderBottomRightRadius: 10,
-                })}
-              >
-                <XStack flex={1} justifyContent="space-between">
-                  <XStack alignItems="center" gap="$2">
-                    <Text fontSize="$8">{item.flag}</Text>
-                    <Text fontSize="$5">{item.name}</Text>
-                    <Text fontSize="$5" color="$gray9">
-                      ({item.dialingCode})
-                    </Text>
-                  </XStack>
-
-                  {isSelected && <CheckCircle2 />}
+            <ListItem
+              size="$4.5"
+              padding={12}
+              borderBottomWidth={1}
+              backgroundColor="$gray2"
+              {...(isFirstInGroup && {
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 10,
+              })}
+              {...(isLastInGroup && {
+                borderBottomWidth: 0,
+                borderBottomLeftRadius: 10,
+                borderBottomRightRadius: 10,
+              })}
+              pressStyle={{
+                backgroundColor: "$gray3",
+              }}
+              onPress={() => onSelect && onSelect(item)}
+            >
+              <XStack flex={1} justifyContent="space-between">
+                <XStack alignItems="center" gap="$2">
+                  <Text fontSize="$8">{item.flag}</Text>
+                  <Text fontSize="$5">{item.name}</Text>
+                  <Text fontSize="$5" color="$gray9">
+                    ({item.dialingCode})
+                  </Text>
                 </XStack>
-              </ListItem>
-            </TouchableOpacity>
+
+                {isSelected && <CheckCircle2 />}
+              </XStack>
+            </ListItem>
           );
         }
       }}
