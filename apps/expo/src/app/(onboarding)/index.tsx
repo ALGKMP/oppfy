@@ -1,9 +1,10 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import { Button, Text, YStack } from "tamagui";
+import { Button, H1, Text, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
+import { OnboardingButton } from "~/features/onboarding/components";
 
 const Start = () => {
   const router = useRouter();
@@ -18,9 +19,14 @@ const Start = () => {
   };
 
   return (
-    <BaseScreenView safeAreaEdges={["bottom"]}>
-      <YStack flex={1} alignItems="center" justifyContent="center">
-        <Text fontFamily="$modak" fontSize={64} margin={-24}>
+    <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
+      <YStack
+        flex={1}
+        alignItems="center"
+        justifyContent="center"
+        paddingHorizontal="$4"
+      >
+        <Text fontFamily="$modak" fontSize={96} margin={-34}>
           OPPFY
         </Text>
         <Text fontSize={24} fontWeight="700">
@@ -28,7 +34,7 @@ const Start = () => {
         </Text>
       </YStack>
 
-      <Button onPress={onSubmit}>Welcome</Button>
+      <OnboardingButton onPress={onSubmit}>Welcome</OnboardingButton>
     </BaseScreenView>
   );
 };
