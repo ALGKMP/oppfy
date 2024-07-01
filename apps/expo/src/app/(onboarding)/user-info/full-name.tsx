@@ -41,7 +41,7 @@ const FullName = () => {
         paddingHorizontal={0}
       >
         <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$4">
+          <YStack paddingHorizontal="$4" gap="$6">
             <H1 textAlign="center">What's your{"\n"}full name?</H1>
 
             <InputWrapper>

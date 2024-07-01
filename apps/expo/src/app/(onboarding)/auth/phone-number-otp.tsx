@@ -98,15 +98,7 @@ const PhoneNumberOTP = () => {
       >
         <YStack flex={1} justifyContent="space-between">
           <YStack paddingHorizontal="$4" gap="$6">
-            <Text
-              color="$color"
-              fontSize="$10"
-              fontWeight="bold"
-              textAlign="center"
-              letterSpacing={-1}
-            >
-              Enter your{"\n"}verification code
-            </Text>
+            <H1 textAlign="center">Enter your{"\n"}verification code</H1>
 
             <OTPInput value={phoneNumberOTP} onChange={setPhoneNumberOTP} />
 

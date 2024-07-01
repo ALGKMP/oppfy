@@ -7,6 +7,7 @@ import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import {
   Button,
   getToken,
+  H1,
   Input,
   ListItem,
   SizableText,
@@ -79,15 +80,7 @@ const PhoneNumber = () => {
       >
         <YStack flex={1} justifyContent="space-between">
           <YStack paddingHorizontal="$4" gap="$6">
-            <Text
-              color="$color"
-              fontSize="$10"
-              fontWeight="bold"
-              textAlign="center"
-              letterSpacing={-1}
-            >
-              What's your{"\n"}phone number?
-            </Text>
+            <H1 textAlign="center">What's your{"\n"}phone number?</H1>
 
             <InputWrapper>
               <CountryPicker
