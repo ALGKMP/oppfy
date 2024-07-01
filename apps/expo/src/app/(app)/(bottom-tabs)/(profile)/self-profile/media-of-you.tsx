@@ -6,7 +6,6 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -21,7 +20,9 @@ import type z from "zod";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { CommentsBottomSheet } from "~/components/BottomSheets";
-import GradientHeart from "~/components/Icons/GradientHeart";
+import GradientHeart, {
+  useHeartAnimations,
+} from "~/components/Icons/GradientHeart";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { api } from "~/utils/api";
 import FriendsCarousel from "./FriendsCarousel";
@@ -46,9 +47,6 @@ const PostItem = (props: PostItemProps) => {
   );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
-  const [heartGradient, setHeartGradient] = useState<
-    [number, number, number, number]
-  >([0, 0, 1, 1]);
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
@@ -173,25 +171,12 @@ const PostItem = (props: PostItemProps) => {
   const heartPosition = useSharedValue({ x: 0, y: 0 });
   const buttonLikeScale = useSharedValue(1);
 
-  const handleDoubleTapLike = async (x: number, y: number) => {
-    const gradient = getRandomGradient();
-    runOnJS(setHeartGradient)(gradient);
-    imageLikeScale.value = withSpring(
-      1,
-      {
-        duration: 400,
-        dampingRatio: 0.5,
-        stiffness: 50,
-        overshootClamping: false,
-        restDisplacementThreshold: 0.01,
-        restSpeedThreshold: 2,
-        reduceMotion: ReduceMotion.System,
-      },
-      () => {
-        imageLikeScale.value = withDelay(150, withTiming(0, { duration: 250 }));
-      },
-    );
+  const { hearts, addHeart } = useHeartAnimations();
 
+  const handleDoubleTapLike = async (x: number, y: number) => {
+    addHeart(x, y); // Add a heart animation type shit
+
+    // Also animate the button asw cuz fuck it why not
     buttonLikeScale.value = withSpring(
       1.1,
       {
@@ -209,7 +194,7 @@ const PostItem = (props: PostItemProps) => {
     );
     if (!isLiked) {
       await likePost.mutateAsync({ postId: post.postId });
-      setIsLiked(true); // Update the liked state
+      setIsLiked(true); 
     }
   };
 
@@ -242,9 +227,7 @@ const PostItem = (props: PostItemProps) => {
     .numberOfTaps(2)
     .onEnd((event) => {
       const { x, y } = { x: event.x, y: event.y };
-
-      heartPosition.value = { x, y }; // Update position state
-      // console.log(heartPosition.value);
+      heartPosition.value = { x, y }; // Update position
       runOnJS(handleDoubleTapLike)(x, y);
     });
 
@@ -258,19 +241,6 @@ const PostItem = (props: PostItemProps) => {
   });
 
   const postInteractions = Gesture.Exclusive(doubleTap, tapGesture, longHold);
-
-  const heartImageAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      position: "absolute",
-      left: heartPosition.value.x,
-      top: heartPosition.value.y,
-      transform: [
-        { translateX: -40 },
-        { translateY: -40 },
-        { scale: imageLikeScale.value },
-      ],
-    };
-  });
 
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -294,30 +264,6 @@ const PostItem = (props: PostItemProps) => {
     });
   };
 
-  const getRandomGradient = useCallback((): [
-    number,
-    number,
-    number,
-    number,
-  ] => {
-    const gradientDirections: [number, number, number, number][] = [
-      [1, 1, 0, 0],
-      [0, 0, 0, 1],
-      [0, 1, 0, 0],
-      [1, 0, 0, 0],
-      [0, 0, 1, 0],
-      [1, 0, 0, 1],
-      [1, 0, 0, 1],
-      [0, 1, 1, 0],
-    ];
-
-    return (
-      gradientDirections[
-        Math.floor(Math.random() * gradientDirections.length)
-      ] ?? [0, 0, 1, 1]
-    );
-  }, []);
-
   return (
     <View
       flex={1}
@@ -332,9 +278,13 @@ const PostItem = (props: PostItemProps) => {
         <View aspectRatio={post.width / post.height} width="100%">
           {post.mediaType === "image" ? (
             <ImagePost imageUrl={post.imageUrl}>
-              <Animated.View style={[heartImageAnimatedStyle]}>
-                <GradientHeart gradient={getRandomGradient()} />
-              </Animated.View>
+              {hearts.map((heart) => (
+                <GradientHeart
+                  key={heart.id}
+                  gradient={heart.gradient}
+                  position={heart.position}
+                />
+              ))}
             </ImagePost>
           ) : (
             <VideoPost
@@ -342,8 +292,15 @@ const PostItem = (props: PostItemProps) => {
               isViewable={isViewable}
               isMuted={isMuted}
               setIsMuted={setIsMuted}
-              animatedHeartImageStyle={heartImageAnimatedStyle}
-            />
+            >
+              {hearts.map((heart) => (
+                <GradientHeart
+                  key={heart.id}
+                  gradient={heart.gradient}
+                  position={heart.position}
+                />
+              ))}
+            </VideoPost>
           )}
         </View>
       </GestureDetector>
@@ -566,12 +523,6 @@ const MediaOfYou = () => {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-
-  const itemCount = useMemo(() => {
-    if (postData === undefined) return 0;
-
-    return postData.pages.reduce((acc, page) => acc + page.items.length, 0);
-  }, [postData]);
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {

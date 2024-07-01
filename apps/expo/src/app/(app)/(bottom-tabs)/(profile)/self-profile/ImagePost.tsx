@@ -1,6 +1,5 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Image } from "expo-image";
-import { Heart } from "@tamagui/lucide-icons";
 
 interface ImagePostProps {
   imageUrl: string;
