@@ -11,6 +11,7 @@ const OnboardingInput = styled(Input, {
   borderWidth: 0,
   color: "$color",
   fontSize: "$8",
+  fontWeight: "bold",
   shadowColor: "$gray6",
 });
 
