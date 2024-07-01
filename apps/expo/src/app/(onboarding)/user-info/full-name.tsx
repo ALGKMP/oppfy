@@ -1,19 +1,29 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-import { Button, H1, Input, styled, Text, View, XStack, YStack } from "tamagui";
+import { H1, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import {
+  BoldText,
+  DisclaimerText,
+  InputWrapper,
+  OnboardingButton,
+  OnboardingInput,
+} from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
 const FullName = () => {
   const router = useRouter();
+
   const [fullName, setFullName] = useState("");
   const updateName = api.profile.updateFullName.useMutation();
 
-  const isValidFullName =
-    sharedValidators.user.fullName.safeParse(fullName).success;
+  const isValidFullName = useMemo(
+    () => sharedValidators.user.fullName.safeParse(fullName).success,
+    [fullName],
+  );
 
   const onSubmit = async () => {
     await updateName.mutateAsync({
@@ -34,72 +44,30 @@ const FullName = () => {
           <YStack paddingHorizontal="$4" gap="$4">
             <H1 textAlign="center">What's your{"\n"}full name?</H1>
 
-            <XStack elevation={5} shadowRadius={10} shadowOpacity={0.1}>
-              <StyledInput
+            <InputWrapper>
+              <OnboardingInput
                 value={fullName}
                 onChangeText={setFullName}
                 textAlign="center"
                 placeholderTextColor="$gray8"
                 autoFocus
               />
-            </XStack>
+            </InputWrapper>
 
-            <Text color="$gray9" textAlign="center">
+            <DisclaimerText>
               By continuing, you agree to our{" "}
-              <Text color="$color" fontWeight="bold">
-                Privacy Policy
-              </Text>{" "}
-              and{" "}
-              <Text color="$color" fontWeight="bold">
-                Terms of Service
-              </Text>
-              .
-            </Text>
+              <BoldText>Privacy Policy</BoldText> and{" "}
+              <BoldText>Terms of Service</BoldText>.
+            </DisclaimerText>
           </YStack>
 
-          <StyledButton onPress={onSubmit} disabled={!isValidFullName}>
+          <OnboardingButton onPress={onSubmit} disabled={!isValidFullName}>
             Continue
-          </StyledButton>
+          </OnboardingButton>
         </YStack>
       </BaseScreenView>
     </KeyboardSafeView>
   );
 };
-
-const StyledButton = styled(Button, {
-  height: 60,
-  borderWidth: 0,
-  borderRadius: 0,
-  backgroundColor: "$color",
-  elevation: 5,
-  shadowRadius: 10,
-  shadowOpacity: 0.4,
-  textProps: {
-    color: "$color1",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  pressStyle: {
-    backgroundColor: "$color11",
-  },
-  disabledStyle: {
-    backgroundColor: "$color9",
-    opacity: 0.7,
-  },
-});
-
-const StyledInput = styled(Input, {
-  flex: 1,
-  height: 70,
-  borderRadius: "$9",
-  backgroundColor: "$gray3",
-  paddingLeft: "$3",
-  paddingRight: "$3",
-  selectionColor: "$color",
-  borderWidth: 0,
-  color: "$color",
-  fontSize: "$8",
-  shadowColor: "$gray6",
-});
 
 export default FullName;
