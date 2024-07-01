@@ -2,9 +2,13 @@ import React from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
-import { Avatar, Button, Spinner, Text, XStack, YStack } from "tamagui";
+import { Avatar, Button, H1, Spinner, Text, XStack, YStack } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import {
+  DisclaimerText,
+  OnboardingButton,
+} from "~/features/onboarding/components";
 import { useUploadProfilePicture } from "~/hooks/media";
 
 const ProfilePicture = () => {
@@ -23,15 +27,18 @@ const ProfilePicture = () => {
 
   return (
     <KeyboardSafeView>
-      <BaseScreenView safeAreaEdges={["bottom"]}>
-        <YStack flex={1} gap="$4">
-          <Text fontSize="$8" fontWeight="bold">
-            Upload your profile pic.
-          </Text>
+      <BaseScreenView
+        safeAreaEdges={["bottom"]}
+        backgroundColor="$background"
+        paddingBottom={0}
+        paddingHorizontal={0}
+      >
+        <YStack flex={1} justifyContent="space-between">
+          <YStack paddingHorizontal="$4" gap="$6">
+            <H1 textAlign="center">Upload your profile pic.</H1>
 
-          <XStack height="70%" alignItems="center" gap="$2">
             <TouchableOpacity
-              style={{ flex: 1, alignItems: "center" }}
+              style={{ alignItems: "center" }}
               onPress={pickAndUploadImage}
             >
               <Avatar circular size="$14" bordered>
@@ -43,21 +50,25 @@ const ProfilePicture = () => {
                 <Avatar.Fallback />
               </Avatar>
             </TouchableOpacity>
-          </XStack>
-        </YStack>
 
-        <Button
-          disabled={uploadStatus === "loading"}
-          onPress={imageUri ? onSubmit : onSkip}
-        >
-          {uploadStatus === "loading" ? (
-            <Spinner />
-          ) : imageUri ? (
-            "Continue"
-          ) : (
-            "Skip"
-          )}
-        </Button>
+            <DisclaimerText>
+              Your profile picture helps people recognize you.
+            </DisclaimerText>
+          </YStack>
+
+          <OnboardingButton
+            disabled={uploadStatus === "loading"}
+            onPress={imageUri ? onSubmit : onSkip}
+          >
+            {uploadStatus === "loading" ? (
+              <Spinner />
+            ) : imageUri ? (
+              "Continue"
+            ) : (
+              "Skip"
+            )}
+          </OnboardingButton>
+        </YStack>
       </BaseScreenView>
     </KeyboardSafeView>
   );
