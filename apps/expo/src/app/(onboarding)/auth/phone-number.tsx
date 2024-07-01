@@ -71,24 +71,18 @@ const PhoneNumber = () => {
         paddingHorizontal={0}
       >
         <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4">
+          <YStack paddingHorizontal="$4" gap="$4">
             <Text
               color="$color"
               fontSize="$10"
               fontWeight="bold"
-              marginBottom="$6"
               textAlign="center"
               letterSpacing={-1}
             >
               What's your{"\n"}phone number?
             </Text>
 
-            <XStack
-              marginBottom="$5"
-              elevation={5}
-              shadowRadius={10}
-              shadowOpacity={0.4}
-            >
+            <XStack elevation={5} shadowRadius={10} shadowOpacity={0.4}>
               <CountryPicker
                 selectedCountryData={countryData}
                 setSelectedCountryData={setCountryData}
