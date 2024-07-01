@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
+import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
-import { Button, Input, Text, XStack, YStack } from "tamagui";
+import { Button, styled, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -84,43 +85,152 @@ const PhoneNumberOTP = () => {
 
   return (
     <KeyboardSafeView>
-      <BaseScreenView safeAreaEdges={["bottom"]}>
-        <YStack flex={1} gap="$4">
-          <Text fontSize="$8" fontWeight="bold">
-            Please enter your code.
-          </Text>
+      <BaseScreenView
+        safeAreaEdges={["bottom"]}
+        backgroundColor="$background"
+        paddingBottom={0}
+        paddingHorizontal={0}
+      >
+        <YStack flex={1} justifyContent="space-between">
+          <YStack paddingHorizontal="$4" gap="$4">
+            <Text
+              color="$color"
+              fontSize="$10"
+              fontWeight="bold"
+              textAlign="center"
+              letterSpacing={-1}
+            >
+              Enter your{"\n"}verification code
+            </Text>
 
-          <XStack gap="$2">
-            <Input
-              flex={1}
-              value={phoneNumberOTP}
-              onChangeText={setPhoneNumberOTP}
-              placeholder="6 Digit Code"
-              keyboardType="phone-pad"
-              autoFocus
-            />
-          </XStack>
+            <OTPInput value={phoneNumberOTP} onChange={setPhoneNumberOTP} />
 
-          {error ? (
-            <Text color="$red9">{error}</Text>
-          ) : (
-            <Text color="$gray9">Verification code sent to {phoneNumber}</Text>
-          )}
+            {error ? (
+              <Text color="$red9" textAlign="center">
+                {error}
+              </Text>
+            ) : (
+              <Text color="$gray9" textAlign="center">
+                Verification code sent to{" "}
+                <Text color="$color" fontWeight="bold">
+                  {phoneNumber}
+                </Text>
+              </Text>
+            )}
+          </YStack>
+
+          <StyledButton onPress={onSubmit} disabled={!isValidPhoneNumberOTP}>
+            Verify Code
+          </StyledButton>
         </YStack>
-
-        <Button
-          onPress={onSubmit}
-          disabled={!isValidPhoneNumberOTP}
-          disabledStyle={{ opacity: 0.5 }}
-        >
-          Continue
-        </Button>
       </BaseScreenView>
     </KeyboardSafeView>
   );
 };
 
+const StyledButton = styled(Button, {
+  height: 60,
+  borderWidth: 0,
+  borderRadius: 0,
+  backgroundColor: "$color",
+  elevation: 5,
+  shadowRadius: 10,
+  shadowOpacity: 0.4,
+  textProps: {
+    color: "$color1",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  pressStyle: {
+    backgroundColor: "$color11",
+  },
+  disabledStyle: {
+    backgroundColor: "$color9",
+    opacity: 0.7,
+  },
+});
+
 // ! This is for testing purposes only, do not use in production
 auth().settings.appVerificationDisabledForTesting = true;
+
+interface OTPInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const OTPInput = ({ value, onChange }: OTPInputProps) => {
+  const inputRef = useRef<TextInput>(null);
+  const [focused, setFocused] = useState(false);
+
+  const handleChangeText = useCallback(
+    (text: string) => {
+      const newValue = text.replace(/[^0-9]/g, "").slice(0, 6);
+      onChange(newValue);
+    },
+    [onChange],
+  );
+
+  const handlePress = useCallback(() => {
+    inputRef.current?.focus();
+    setFocused(true);
+  }, []);
+
+  return (
+    <TouchableOpacity activeOpacity={1} onPress={handlePress}>
+      <View>
+        <TextInput
+          ref={inputRef}
+          value={value}
+          onChangeText={handleChangeText}
+          keyboardType="number-pad"
+          maxLength={6}
+          style={styles.hiddenInput}
+          autoFocus={true}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+        <XStack justifyContent="space-between">
+          {[0, 1, 2, 3, 4, 5].map((index) => (
+            <OTPBox key={index}>
+              <Text fontSize="$7" fontWeight="bold" color="$color">
+                {value[index] ?? ""}
+              </Text>
+              {focused && index === value.length && (
+                <View style={styles.cursor} />
+              )}
+            </OTPBox>
+          ))}
+        </XStack>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const OTPBox = styled(View, {
+  width: 50,
+  height: 60,
+  borderRadius: "$4",
+  backgroundColor: "$gray3",
+  justifyContent: "center",
+  alignItems: "center",
+  shadowColor: "$gray6",
+  shadowRadius: 5,
+  shadowOpacity: 0.2,
+});
+
+const styles = StyleSheet.create({
+  hiddenInput: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    opacity: 0,
+  },
+  cursor: {
+    width: 2,
+    height: 32,
+    backgroundColor: "$color",
+    position: "absolute",
+  },
+});
 
 export default PhoneNumberOTP;
