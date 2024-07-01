@@ -2,7 +2,7 @@ import React from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
-import { Avatar, Button, H1, Spinner, Text, XStack, YStack } from "tamagui";
+import { Avatar, H1, Spinner, YStack } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import {
