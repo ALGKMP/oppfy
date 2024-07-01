@@ -25,6 +25,13 @@ import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
+import {
+  BoldText,
+  DisclaimerText,
+  InputWrapper,
+  OnboardingButton,
+  OnboardingInput,
+} from "~/features/onboarding/components";
 import useSearch from "~/hooks/useSearch";
 
 const countriesWithoutSections = countriesData.filter(
@@ -71,7 +78,7 @@ const PhoneNumber = () => {
         paddingHorizontal={0}
       >
         <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$4">
+          <YStack paddingHorizontal="$4" gap="$6">
             <Text
               color="$color"
               fontSize="$10"
@@ -82,12 +89,12 @@ const PhoneNumber = () => {
               What's your{"\n"}phone number?
             </Text>
 
-            <XStack elevation={5} shadowRadius={10} shadowOpacity={0.4}>
+            <InputWrapper>
               <CountryPicker
                 selectedCountryData={countryData}
                 setSelectedCountryData={setCountryData}
               />
-              <StyledInput
+              <OnboardingInput
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
                 placeholder="Your number here"
@@ -97,24 +104,18 @@ const PhoneNumber = () => {
                 borderTopLeftRadius={0}
                 borderBottomLeftRadius={0}
               />
-            </XStack>
+            </InputWrapper>
 
-            <Text color="$gray9" textAlign="center">
-              By continuing, you agree to our{" "}
-              <Text color="$color" fontWeight="bold">
-                Privacy Policy
-              </Text>{" "}
-              and{" "}
-              <Text color="$color" fontWeight="bold">
-                Terms of Service
-              </Text>
-              .
-            </Text>
+            <DisclaimerText>
+              By Continuing you agree to our
+              <BoldText>Privacy Policy</BoldText> and{" "}
+              <BoldText>Terms of Service</BoldText>.
+            </DisclaimerText>
           </YStack>
 
-          <StyledButton onPress={onSubmit} disabled={!isValidPhoneNumber}>
+          <OnboardingButton onPress={onSubmit} disabled={!isValidPhoneNumber}>
             Send Verification Text
-          </StyledButton>
+          </OnboardingButton>
         </YStack>
       </BaseScreenView>
     </KeyboardSafeView>
@@ -199,7 +200,7 @@ const CountryPicker = ({
       {/* Do not attempt to use Styled() to clean this up, it breaks the onPress event */}
       <TouchableOpacity
         style={{
-          height: 74,
+          height: 70,
           borderRadius: getToken("$9", "radius") as number,
           backgroundColor: theme.gray4.val,
           paddingLeft: getToken("$3", "space") as number,
@@ -261,7 +262,7 @@ const CountriesFlashList = ({
             index === data.length - 1 || typeof data[index + 1] === "string";
 
           return (
-            <View>
+            <TouchableOpacity onPress={() => onSelect && onSelect(item)}>
               <ListItem
                 size="$4.5"
                 padding={12}
@@ -276,7 +277,6 @@ const CountriesFlashList = ({
                   borderBottomLeftRadius: 10,
                   borderBottomRightRadius: 10,
                 })}
-                onPress={() => onSelect && onSelect(item)}
               >
                 <XStack flex={1} justifyContent="space-between">
                   <XStack alignItems="center" gap="$2">
@@ -290,7 +290,7 @@ const CountriesFlashList = ({
                   {isSelected && <CheckCircle2 />}
                 </XStack>
               </ListItem>
-            </View>
+            </TouchableOpacity>
           );
         }
       }}
@@ -300,44 +300,5 @@ const CountriesFlashList = ({
     />
   );
 };
-
-const StyledButton = styled(Button, {
-  height: 60,
-  borderWidth: 0,
-  borderRadius: 0,
-  backgroundColor: "$color",
-  elevation: 5,
-  shadowRadius: 10,
-  shadowOpacity: 0.4,
-  textProps: {
-    color: "$color1",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  pressStyle: {
-    backgroundColor: "$color11",
-  },
-  disabledStyle: {
-    backgroundColor: "$color9",
-    opacity: 0.7,
-  },
-});
-
-const StyledInput = styled(Input, {
-  flex: 1,
-  height: 74,
-  borderRadius: "$9",
-  backgroundColor: "$gray3",
-  paddingLeft: "$3",
-  paddingRight: "$3",
-  selectionColor: "$color",
-  borderWidth: 0,
-  color: "$color",
-  fontSize: "$8",
-  shadowColor: "$gray6",
-  elevation: 5,
-  shadowRadius: 10,
-  shadowOpacity: 0.4,
-});
 
 export default PhoneNumber;
