@@ -2,11 +2,17 @@ import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { useRouter } from "expo-router";
-import { Button, Input, Text, View, XStack, YStack } from "tamagui";
+import { Button, H1, Input, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import {
+  DisclaimerText,
+  InputWrapper,
+  OnboardingButton,
+  OnboardingInput,
+} from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
 const DateOfBirth = () => {
@@ -32,32 +38,35 @@ const DateOfBirth = () => {
 
   return (
     <KeyboardSafeView>
-      <BaseScreenView safeAreaEdges={["bottom"]}>
-        <YStack flex={1} gap="$4">
-          <Text fontSize="$8" fontWeight="bold">
-            When&apos;s your birthday?
-          </Text>
+      <BaseScreenView
+        safeAreaEdges={["bottom"]}
+        backgroundColor="$background"
+        paddingBottom={0}
+        paddingHorizontal={0}
+      >
+        <YStack flex={1} justifyContent="space-between">
+          <YStack paddingHorizontal="$4" gap="$6">
+            <H1 textAlign="center">When&apos;s your birthday?</H1>
 
-          <XStack gap="$2">
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => setOpen(true)}>
-              <View pointerEvents="none">
-                <Input placeholder="Birthdate">
+            <TouchableOpacity onPress={() => setOpen(true)}>
+              <InputWrapper>
+                <OnboardingInput
+                  placeholder="Birthday"
+                  textAlign="center"
+                  pointerEvents="none"
+                >
                   {dateOfBirth?.toLocaleDateString()}
-                </Input>
-              </View>
+                </OnboardingInput>
+              </InputWrapper>
             </TouchableOpacity>
-          </XStack>
 
-          <Text color="$gray9">You must be 13+ to use OPPFY.</Text>
+            <DisclaimerText>You must be 13+ to use OPPFY.</DisclaimerText>
+          </YStack>
+
+          <OnboardingButton onPress={onSubmit} disabled={!isValidDateOfBirth}>
+            Continue
+          </OnboardingButton>
         </YStack>
-
-        <Button
-          onPress={onSubmit}
-          disabled={!isValidDateOfBirth}
-          disabledStyle={{ opacity: 0.5 }}
-        >
-          Continue
-        </Button>
 
         <DatePicker
           modal
