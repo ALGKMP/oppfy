@@ -49,7 +49,6 @@ const FullName = () => {
                 value={fullName}
                 onChangeText={setFullName}
                 textAlign="center"
-                placeholderTextColor="$gray8"
                 autoFocus
               />
             </InputWrapper>
