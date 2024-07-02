@@ -7,11 +7,15 @@ export class MuxService {
     authorId: string,
     recipientId: string,
     caption = "",
+    width: number,
+    height: number
   ) {
     return await this.muxRepository.createDirectUpload(
       authorId,
       recipientId,
       caption,
+      width,
+      height
     );
   }
 }
