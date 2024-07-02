@@ -22,6 +22,7 @@ import {
 import { sharedValidators } from "@oppfy/validators";
 
 import { Header } from "~/components/Headers";
+import { SearchInput } from "~/components/Inputs";
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
@@ -117,6 +118,7 @@ const PhoneNumber = () => {
     </KeyboardSafeView>
   );
 };
+
 interface CountryPickerProps {
   selectedCountryData?: CountryData;
   setSelectedCountryData?: (countryData: CountryData) => void;
@@ -177,10 +179,16 @@ const CountryPicker = ({
           />
           <View flex={1} padding="$4" paddingBottom={0}>
             <YStack flex={1} gap="$4">
-              <Input
+              {/* <Input
                 placeholder="Search"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
+              /> */}
+              <SearchInput
+                value={searchQuery}
+                placeholder="Search countries"
+                onChangeText={setSearchQuery}
+                onClear={() => setSearchQuery("")}
               />
 
               <CountriesFlashList
