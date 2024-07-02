@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { Input, ListItemTitle, SizableText, View, YStack } from "tamagui";
+import { ListItemTitle, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
@@ -91,7 +92,12 @@ const Search = () => {
   return (
     <BaseScreenView scrollable>
       <YStack gap="$4">
-        <Input placeholder="Search by username" onChangeText={performSearch} />
+        <SearchInput
+          value={searchTerm}
+          placeholder="Search by username"
+          onChangeText={performSearch}
+          onClear={() => setSearchTerm("")}
+        />
         <View>
           {!searchTerm ? (
             renderRecommendations()

@@ -14,6 +14,7 @@ import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { ListItem } from "../components";
 import { useFollowHandlers } from "../hooks";
+import { SearchInput } from "~/components/Inputs";
 
 const FriendList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -118,10 +119,11 @@ const FriendList = () => {
   return (
     <BaseScreenView scrollable>
       <YStack gap="$4">
-        <Input
+        <SearchInput
           placeholder="Search friends..."
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
         />
 
         {filteredItems.length > 0 ? (

@@ -13,6 +13,7 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import { SearchInput } from "~/components/Inputs";
 
 type FollowerItem =
   RouterOutputs["follow"]["paginateFollowersSelf"]["items"][0];
@@ -176,10 +177,11 @@ const FollowerList = () => {
   return (
     <BaseScreenView scrollable>
       <YStack gap="$4">
-        <Input
+        <SearchInput
           placeholder="Search followers..."
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
         />
 
         {filteredItems.length > 0 ? (

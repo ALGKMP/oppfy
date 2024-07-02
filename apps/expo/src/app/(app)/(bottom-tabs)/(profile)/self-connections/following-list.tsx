@@ -5,6 +5,7 @@ import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import type { ButtonProps } from "~/components/ListItems/VirtualizedListItem";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -278,10 +279,11 @@ const FollowingList = () => {
   return (
     <BaseScreenView scrollable>
       <YStack gap="$4">
-        <Input
+        <SearchInput
           placeholder="Search following..."
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
         />
 
         {filteredItems.length > 0 ? (

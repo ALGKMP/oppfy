@@ -179,11 +179,6 @@ const CountryPicker = ({
           />
           <View flex={1} padding="$4" paddingBottom={0}>
             <YStack flex={1} gap="$4">
-              {/* <Input
-                placeholder="Search"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              /> */}
               <SearchInput
                 value={searchQuery}
                 placeholder="Search countries"
