@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useVideoPlayer, VideoView } from "expo-video";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface VideoPlayerProps {
   videoSource: string;
@@ -41,7 +42,23 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
 
   useEffect(() => {
     player.muted = isMuted;
-  }, [isMuted]);
+  }, [isMuted, player]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // When the screen comes into focus, play the video if it's viewable
+      if (isViewable) {
+        player.play();
+        setIsPlaying(true);
+      }
+
+      // When the screen loses focus, pause the video
+      return () => {
+        player.pause();
+        setIsPlaying(false);
+      };
+    }, [player, isViewable]),
+  );
 
   // const togglePlay = () => {
   //   setIsPlaying(!isPlaying);
@@ -51,6 +68,11 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
   //     player.play();
   //   }
   // };
+
+  // useEffect(() => {
+  //   return () => {
+  //   }
+  // }, [])
 
   return (
     <VideoView
