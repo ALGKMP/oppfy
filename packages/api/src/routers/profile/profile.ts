@@ -110,26 +110,11 @@ export const profileRouter = createTRPCRouter({
       }
     }),
 
-  getCompactProfileSelf: protectedProcedure
-    .output(trpcValidators.output.profile.compactProfile) // Make sure this shit doesn't return more than necessary
-    .query(async ({ ctx }) => {
-      try {
-        return await ctx.services.profile.getBasicProfileByUserId(
-          ctx.session.uid,
-        );
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get current users basic profile",
-        });
-      }
-    }),
-
-  getCompactProfileOther: publicProcedure
-    .input(z.object({ userId: z.string() }))
-    .output(trpcValidators.output.profile.compactProfile) // Make sure this shit doesn't return more than necessary
+  getBatchProfiles: protectedProcedure
+    .input(z.array(z.string()))
+    .output(z.array(trpcValidators.output.profile.compactProfile))
     .query(async ({ ctx, input }) => {
-      return await ctx.services.profile.getBasicProfileByUserId(input.userId);
+      return await ctx.services.profile.getBatchProfiles(input);
     }),
 
   getFullProfileSelf: protectedProcedure
