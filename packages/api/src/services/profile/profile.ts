@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import { z } from "zod";
 
 import { env } from "@oppfy/env/server";
 import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
@@ -130,80 +130,6 @@ export class ProfileService {
       );
     }
     await this.profileRepository.updateProfilePicture(user.profile.id, key);
-  }
-
-  async getBasicProfileByUserId(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-    if (!user) {
-      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
-      throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        "User not found for the provided user ID.",
-      );
-    }
-
-    const profile = await this.profileRepository.getProfileByProfileId(
-      user.profileId,
-    );
-    if (!profile) {
-      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "Profile not found for the provided user ID.",
-      );
-    }
-
-    const profilePictureUrl = this.s3Repository.getObjectPresignedUrl({
-      Bucket: env.S3_PROFILE_BUCKET,
-      Key: profile.profilePictureKey,
-    });
-
-    return trpcValidators.output.profile.compactProfile.parse({
-      userId: user.id,
-      privacy: user.privacySetting,
-      username: profile.username,
-      name: profile.fullName,
-      profilePictureUrl,
-    });
-  }
-
-  async getBasicProfileByProfileId(profileId: number) {
-    const user = await this.userRepository.getUserByProfileId(profileId);
-    if (!user) {
-      console.error(
-        `SERVICE ERROR: User not found for profile ID "${profileId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        "User not found for the provided profile ID.",
-      );
-    }
-
-    const profile = await this.profileRepository.getProfileByProfileId(
-      user.profileId,
-    );
-    if (!profile) {
-      console.error(
-        `SERVICE ERROR: Profile not found for profile ID "${profileId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "Profile not found for the provided profile ID.",
-      );
-    }
-
-    const profilePictureUrl = this.s3Repository.getObjectPresignedUrl({
-      Bucket: env.S3_PROFILE_BUCKET,
-      Key: profile.profilePictureKey,
-    });
-
-    return trpcValidators.output.profile.compactProfile.parse({
-      userId: user.id,
-      privacy: user.privacySetting,
-      username: profile.username,
-      name: profile.fullName,
-      profilePictureUrl,
-    });
   }
 
   async getFullProfileByUserId(userId: string) {
@@ -393,6 +319,15 @@ export class ProfileService {
     return trpcValidators.output.profile.fullProfileOther.parse(profileData);
   }
 
+  async getBatchProfiles(userIds: string[]) {
+    // Warn: if you get zod errors, it's because this functions return doesn't match the compactProfile schema
+    const batchProfiles =  await this.profileRepository.getBatchProfiles(userIds);
+
+    return z.array(trpcValidators.output.profile.compactProfile).parse(
+      batchProfiles,
+    ); 
+  }
+
   async removeProfilePicture(userId: string) {
     const user = await this.profileRepository.getProfileByUserId(userId);
     if (!user) {
@@ -442,6 +377,7 @@ export class ProfileService {
 
     return user.profile;
   }
+
 
   async getNetworkConnectionStatesBetweenUsers(
     targetUserId: string,
