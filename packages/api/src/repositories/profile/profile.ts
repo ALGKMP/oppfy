@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -103,5 +103,25 @@ export class ProfileRepository {
     return await this.db.query.profile.findFirst({
       where: eq(schema.profile.username, username),
     });
+  }
+
+  @handleDatabaseErrors
+  async getBatchProfiles(userIds: string[]) {
+    const user = schema.user;
+    const profile = schema.profile;
+    const fullProfiles = await db
+      .select({
+        userId: user.id,
+        profileId: profile.id,
+        privacy: user.privacySetting,
+        username: profile.username,
+        fullName: profile.fullName,
+        profilePictureKey: profile.profilePictureKey,
+      })
+      .from(schema.user)
+      .innerJoin(profile, eq(user.profileId, profile.id))
+      .where(inArray(user.id, userIds));
+
+    return fullProfiles;
   }
 }
