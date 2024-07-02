@@ -48,7 +48,9 @@ export const handler = async (
             z.object({
               id: z.string(),
             }),
-          ),
+          ).nonempty({
+            message: "Playback IDs must not be empty"
+          }),
           aspect_ratio: z.string(),
         }),
       })
@@ -58,8 +60,8 @@ export const handler = async (
       authorId: z.string(),
       recipientId: z.string(),
       caption: z.string(),
-      // height: z.string(),
-      // width: z.string()
+      height: z.number(),
+      width: z.number(),
     });
 
     const t = m.parse(jsonBody);
@@ -95,10 +97,13 @@ export const handler = async (
       const post = await db.insert(schema.post).values({
         recipient: metadata.recipientId,
         caption: metadata.caption,
-        key: parsedMuxResponseBody.object.id,
+        key: parsedMuxResponseBody.data.playback_ids[0].id,
         author: metadata.authorId,
         mediaType: "video",
+        width: metadata.width,
+        height: metadata.height,
       });
+
       await db.insert(schema.postStats).values({ postId: post[0].insertId });
       return {
         statusCode: 200,
@@ -111,14 +116,6 @@ export const handler = async (
         body: "Invalid Mux Webhook Signature",
       };
     }
-
-    // Process the webhook event
-    // For example, update your database or trigger other actions
-
-    return {
-      statusCode: 200,
-      body: "Webhook received and processed",
-    };
   } catch (error) {
     console.error("Error processing webhook:", error);
     return {
