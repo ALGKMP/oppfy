@@ -40,10 +40,11 @@ export const PrivacyStatus = z.union([
 const trpcProfileOutputSchema = {
   compactProfile: z.object({
     userId: z.string(),
+    profileId: z.number(),
     privacy: z.enum(["public", "private"]),
     username: z.string(),
-    name: z.string(),
-    profilePictureUrl: z.string(),
+    fullName: z.string(),
+    profilePictureKey: z.string(),
   }),
 
   fullProfileSelf: z.object({
