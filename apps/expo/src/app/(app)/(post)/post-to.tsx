@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -14,6 +15,7 @@ import {
 } from "@tamagui/lucide-icons";
 import {
   Button,
+  getToken,
   H6,
   ListItemTitle,
   ScrollView,
@@ -44,6 +46,7 @@ const PostTo = () => {
   }>();
 
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   const router = useRouter();
   const headerHeight = useHeaderHeight();
@@ -216,12 +219,14 @@ const PostTo = () => {
         backgroundColor: theme.gray2.val,
       }}
     >
-      <ScrollView>
-        <YStack flex={1} gap="$4">
-          {contacts.length > 0 && renderContacts()}
-          {itemCount > 0 && renderFriends()}
-        </YStack>
-      </ScrollView>
+      <YStack
+        flex={1}
+        gap="$4"
+        paddingBottom={(insets.bottom + getToken("$4", "space")) as number}
+      >
+        {contacts.length > 0 && renderContacts()}
+        {itemCount > 0 && renderFriends()}
+      </YStack>
     </BaseScreenView>
   );
 

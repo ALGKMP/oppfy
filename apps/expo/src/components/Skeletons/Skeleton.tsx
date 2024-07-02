@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { DimensionValue, LayoutChangeEvent, StyleSheet } from "react-native";
+import type { DimensionValue, LayoutChangeEvent } from "react-native";
+import { StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -7,8 +8,8 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
-import { useTheme, View } from "tamagui";
+import { View } from "tamagui";
+import { LinearGradient } from "tamagui/linear-gradient";
 
 interface BaseSkeletonProps {
   radius?: number;
@@ -28,7 +29,6 @@ interface CircularSkeletonProps extends BaseSkeletonProps {
 type SkeletonProps = RectangularSkeletonProps | CircularSkeletonProps;
 
 const Skeleton = (props: SkeletonProps) => {
-  const theme = useTheme();
   const [measuredWidth, setMeasuredWidth] = useState<number>(0);
   const translateX = useSharedValue(-measuredWidth);
 
@@ -45,7 +45,7 @@ const Skeleton = (props: SkeletonProps) => {
       -1,
       false,
     );
-  }, [measuredWidth]);
+  }, [measuredWidth, translateX]);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { width } = event.nativeEvent.layout;
@@ -61,7 +61,7 @@ const Skeleton = (props: SkeletonProps) => {
   return (
     <View
       overflow="hidden"
-      backgroundColor={"$gray5"}
+      backgroundColor="$gray5"
       style={{
         width,
         height,
@@ -71,10 +71,10 @@ const Skeleton = (props: SkeletonProps) => {
     >
       <Animated.View style={[styles.gradientWrapper, animatedStyle]}>
         <LinearGradient
-          colors={[theme.gray5.val, theme.gray3.val, theme.gray5.val]}
+          flex={1}
+          colors={["$gray5", "$gray3", "$gray5"]}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
-          style={styles.gradient}
         />
       </Animated.View>
     </View>
@@ -85,9 +85,6 @@ const styles = StyleSheet.create({
   gradientWrapper: {
     ...StyleSheet.absoluteFillObject,
     flexDirection: "row",
-  },
-  gradient: {
-    flex: 1,
   },
 });
 

@@ -1,56 +1,69 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-import { Button, Input, Text, XStack, YStack } from "tamagui";
+import { H1, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import {
+  BoldText,
+  DisclaimerText,
+  InputWrapper,
+  OnboardingButton,
+  OnboardingInput,
+} from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
 const FullName = () => {
   const router = useRouter();
 
   const [fullName, setFullName] = useState("");
-
   const updateName = api.profile.updateFullName.useMutation();
 
-  const isValidFullName =
-    sharedValidators.user.fullName.safeParse(fullName).success;
+  const isValidFullName = useMemo(
+    () => sharedValidators.user.fullName.safeParse(fullName).success,
+    [fullName],
+  );
 
   const onSubmit = async () => {
     await updateName.mutateAsync({
       fullName,
     });
-
     router.push("/user-info/date-of-birth");
   };
 
   return (
     <KeyboardSafeView>
-      <BaseScreenView safeAreaEdges={["bottom"]}>
-        <YStack flex={1} gap="$4">
-          <Text fontSize="$8" fontWeight="bold">
-            What&apos;s your name?
-          </Text>
+      <BaseScreenView
+        safeAreaEdges={["bottom"]}
+        backgroundColor="$background"
+        paddingBottom={0}
+        paddingHorizontal={0}
+      >
+        <YStack flex={1} justifyContent="space-between">
+          <YStack paddingHorizontal="$4" gap="$6">
+            <H1 textAlign="center">What's your{"\n"}full name?</H1>
 
-          <XStack gap="$2">
-            <Input
-              flex={1}
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="Full Name"
-              autoFocus
-            />
-          </XStack>
+            <InputWrapper>
+              <OnboardingInput
+                value={fullName}
+                onChangeText={setFullName}
+                textAlign="center"
+                autoFocus
+              />
+            </InputWrapper>
+
+            <DisclaimerText>
+              By continuing, you agree to our{" "}
+              <BoldText>Privacy Policy</BoldText> and{" "}
+              <BoldText>Terms of Service</BoldText>.
+            </DisclaimerText>
+          </YStack>
+
+          <OnboardingButton onPress={onSubmit} disabled={!isValidFullName}>
+            Continue
+          </OnboardingButton>
         </YStack>
-
-        <Button
-          onPress={onSubmit}
-          disabled={!isValidFullName}
-          disabledStyle={{ opacity: 0.5 }}
-        >
-          Continue
-        </Button>
       </BaseScreenView>
     </KeyboardSafeView>
   );

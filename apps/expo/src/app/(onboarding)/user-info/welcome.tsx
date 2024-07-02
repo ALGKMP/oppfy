@@ -1,8 +1,12 @@
 import React from "react";
 import { useRouter } from "expo-router";
-import { Button, Separator, Text, XStack, YGroup, YStack } from "tamagui";
+import { H4, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
+import {
+  DisclaimerText,
+  OnboardingButton,
+} from "~/features/onboarding/components";
 
 const Welcome = () => {
   const router = useRouter();
@@ -12,16 +16,11 @@ const Welcome = () => {
   };
 
   return (
-    <BaseScreenView safeAreaEdges={["bottom"]}>
-      <YStack flex={1} gap="$8">
-        <Text
-          alignSelf="center"
-          textAlign="center"
-          color="$gray9"
-          fontWeight="bold"
-        >
+    <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
+      <YStack flex={1} paddingHorizontal="$4" gap="$8">
+        <DisclaimerText>
           Welcome to OPPFY, a place where roles are reversed.
-        </Text>
+        </DisclaimerText>
 
         <YGroup gap="$4">
           <YGroup.Item>
@@ -74,7 +73,7 @@ const Welcome = () => {
         </YGroup>
       </YStack>
 
-      <Button onPress={onSubmit}>Continue</Button>
+      <OnboardingButton onPress={onSubmit}>Continue</OnboardingButton>
     </BaseScreenView>
   );
 };
@@ -87,14 +86,12 @@ interface ListItemProp {
 
 const ListItem = ({ emoji, title, subTitle }: ListItemProp) => {
   return (
-    <XStack alignItems="center" gap="$2">
+    <XStack alignItems="center" gap="$3">
       <Text fontSize="$10">{emoji}</Text>
 
       <YStack flex={1} gap>
-        <Text fontSize="$7" fontWeight="bold">
-          {title}
-        </Text>
-        <Text color="$gray9">{subTitle}</Text>
+        <H4>{title}</H4>
+        <DisclaimerText textAlign="left">{subTitle}</DisclaimerText>
       </YStack>
     </XStack>
   );
