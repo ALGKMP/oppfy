@@ -288,7 +288,7 @@ const PostItem = (props: PostItemProps) => {
             </ImagePost>
           ) : (
             <VideoPost
-              videoSource="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              videoSource={post.imageUrl}
               isViewable={isViewable}
               isMuted={isMuted}
               setIsMuted={setIsMuted}
