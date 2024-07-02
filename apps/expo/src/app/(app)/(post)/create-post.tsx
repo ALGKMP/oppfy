@@ -117,7 +117,7 @@ const CreatePost = () => {
         size="$5"
         borderRadius="$7"
         iconAfter={ArrowBigRight}
-        onPointerCancel={onSubmit}
+        onPress={onSubmit}
       >
         Continue
       </Button>
