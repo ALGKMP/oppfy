@@ -30,6 +30,10 @@ export const handler = async (
     const jsonBody = JSON.parse(rawBody);
     console.log("Received Mux webhook event:", jsonBody);
 
+    const m = z.object({
+      type: z.string(),
+    });
+
     const muxBodySchema = z
       .object({
         type: z.string(),
@@ -54,31 +58,36 @@ export const handler = async (
       authorId: z.string(),
       recipientId: z.string(),
       caption: z.string(),
+      // height: z.string(),
+      // width: z.string()
     });
 
-    const data = muxBodySchema.parse(jsonBody);
+    const t = m.parse(jsonBody);
 
-    if (data.type != "video.asset.ready") {
-      console.log("Ignoring Mux webhook event:", data.type);
+    if (t.type != "video.asset.ready") {
+      console.log("Ignoring Mux webhook event:", t.type);
       return {
         statusCode: 200,
         body: "Webhook received and ignored",
       };
     }
 
-    const jsonMetadata = data.data.passthrough
-      ? JSON.parse(data.data.passthrough)
+    const parsedMuxResponseBody = muxBodySchema.parse(jsonBody);
+
+    const jsonMetadata = parsedMuxResponseBody.data.passthrough
+      ? JSON.parse(parsedMuxResponseBody.data.passthrough)
       : {};
+
+    console.log(jsonMetadata);
 
     const metadata = metadataSchema.parse(jsonMetadata);
 
     // Verify the Mux webhook signature
     try {
-      console.log(`Verifying Mux signature: ${muxSignatureHeader}`);
       mux.webhooks.verifySignature(
         rawBody,
-        event.headers,
-        // { "mux-signature": muxSignatureHeader },
+        // event.headers,
+        { "mux-signature": muxSignatureHeader },
         env.MUX_WEBHOOK_SECRET,
       );
       console.log("Mux signature verified");
@@ -86,7 +95,7 @@ export const handler = async (
       const post = await db.insert(schema.post).values({
         recipient: metadata.recipientId,
         caption: metadata.caption,
-        key: data.object.id,
+        key: parsedMuxResponseBody.object.id,
         author: metadata.authorId,
         mediaType: "video",
       });
