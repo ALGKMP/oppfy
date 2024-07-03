@@ -30,6 +30,10 @@ export const handler = async (
     const jsonBody = JSON.parse(rawBody);
     console.log("Received Mux webhook event:", jsonBody);
 
+    const m = z.object({
+      type: z.string(),
+    });
+
     const muxBodySchema = z
       .object({
         type: z.string(),
@@ -44,7 +48,9 @@ export const handler = async (
             z.object({
               id: z.string(),
             }),
-          ),
+          ).nonempty({
+            message: "Playback IDs must not be empty"
+          }),
           aspect_ratio: z.string(),
         }),
       })
@@ -54,31 +60,36 @@ export const handler = async (
       authorId: z.string(),
       recipientId: z.string(),
       caption: z.string(),
+      height: z.number(),
+      width: z.number(),
     });
 
-    const data = muxBodySchema.parse(jsonBody);
+    const t = m.parse(jsonBody);
 
-    if (data.type != "video.asset.ready") {
-      console.log("Ignoring Mux webhook event:", data.type);
+    if (t.type != "video.asset.ready") {
+      console.log("Ignoring Mux webhook event:", t.type);
       return {
         statusCode: 200,
         body: "Webhook received and ignored",
       };
     }
 
-    const jsonMetadata = data.data.passthrough
-      ? JSON.parse(data.data.passthrough)
+    const parsedMuxResponseBody = muxBodySchema.parse(jsonBody);
+
+    const jsonMetadata = parsedMuxResponseBody.data.passthrough
+      ? JSON.parse(parsedMuxResponseBody.data.passthrough)
       : {};
+
+    console.log(jsonMetadata);
 
     const metadata = metadataSchema.parse(jsonMetadata);
 
     // Verify the Mux webhook signature
     try {
-      console.log(`Verifying Mux signature: ${muxSignatureHeader}`);
       mux.webhooks.verifySignature(
         rawBody,
-        event.headers,
-        // { "mux-signature": muxSignatureHeader },
+        // event.headers,
+        { "mux-signature": muxSignatureHeader },
         env.MUX_WEBHOOK_SECRET,
       );
       console.log("Mux signature verified");
@@ -86,10 +97,13 @@ export const handler = async (
       const post = await db.insert(schema.post).values({
         recipient: metadata.recipientId,
         caption: metadata.caption,
-        key: data.object.id,
+        key: parsedMuxResponseBody.data.playback_ids[0].id,
         author: metadata.authorId,
         mediaType: "video",
+        width: metadata.width,
+        height: metadata.height,
       });
+
       await db.insert(schema.postStats).values({ postId: post[0].insertId });
       return {
         statusCode: 200,
@@ -102,14 +116,6 @@ export const handler = async (
         body: "Invalid Mux Webhook Signature",
       };
     }
-
-    // Process the webhook event
-    // For example, update your database or trigger other actions
-
-    return {
-      statusCode: 200,
-      body: "Webhook received and processed",
-    };
   } catch (error) {
     console.error("Error processing webhook:", error);
     return {

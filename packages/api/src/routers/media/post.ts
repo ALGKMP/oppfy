@@ -49,6 +49,8 @@ export const postRouter = createTRPCRouter({
           ctx.session.uid,
           input.recipientId,
           input.caption,
+          input.width,
+          input.height,
         );
         return result.url;
       } catch (err) {
