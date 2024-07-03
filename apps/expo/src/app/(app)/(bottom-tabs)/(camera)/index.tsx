@@ -264,9 +264,11 @@ const CameraPage = () => {
             audio={microphone.hasPermission}
             enableLocation={location.hasPermission}
             style={styles.camera}
-          >
-            <Button>test</Button>
-          </ReanimatedCamera>
+          />
+
+          {animations.map(({ id, point }) => (
+            <FocusIcon key={id} x={point.x} y={point.y} />
+          ))}
         </View>
       </GestureDetector>
 
@@ -281,10 +283,6 @@ const CameraPage = () => {
         enabled={isCameraInitialized && isActive}
         setIsPressingButton={setIsPressingButton}
       />
-
-      {animations.map(({ id, point }) => (
-        <FocusIcon key={id} x={point.x} y={point.y} />
-      ))}
 
       <TouchableOpacity
         style={styles.mediaPickerButton}
