@@ -43,10 +43,9 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
     }
   }, [isPlayerReady, player, isPlaying]);
 
-
-  // useEffect(() => {
-  //   player.muted = isMuted;
-  // }, [isMuted, player]);
+  useEffect(() => {
+    player.muted = isMuted;
+  }, [isMuted, player]);
 
   useFocusEffect(
     useCallback(() => {
@@ -61,19 +60,6 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
       };
     }, [isPlayerReady, isViewable, safePlayPause])
   );
-  // const togglePlay = () => {
-  //   setIsPlaying(!isPlaying);
-  //   if (isPlaying) {
-  //     player.pause();
-  //   } else {
-  //     player.play();
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   return () => {
-  //   }
-  // }, [])
 
   return (
     <VideoView
