@@ -7,20 +7,37 @@ import React, {
   useState,
 } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { RefreshControl, TouchableOpacity } from "react-native";
+import {
+  RefreshControl,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import Animated, {
+  Extrapolate,
+  Extrapolation,
+  interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
+import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { throttle } from "lodash";
 import {
   Avatar,
   Button,
   getToken,
+  H2,
+  H3,
+  H4,
+  H5,
+  H6,
   ListItemTitle,
   Paragraph,
   SizableText,
@@ -34,6 +51,7 @@ import {
 import { abbreviatedNumber } from "@oppfy/utils";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import { Header } from "~/components/Headers";
 import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "~/components/StatusRenderer";
 import { useUploadProfilePicture } from "~/hooks/media";
@@ -45,98 +63,90 @@ import MediaOfYou from "./media-of-you";
 type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
 
+const HEADER_HEIGHT = 86;
+
 const ProfileLayout = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const [refreshing, setRefreshing] = useState(false);
-
-  const {
-    data: profileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfileData,
-  } = api.profile.getFullProfileSelf.useQuery();
-
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    { pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
-  );
-
-  const friendItems = useMemo(
-    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendsData],
-  );
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: profileData?.username,
-    });
-  }, [navigation, profileData?.username]);
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refetchProfileData(), refetchFriendsData()]);
+    // refetch our stuff
     setRefreshing(false);
-  }, [refetchFriendsData, refetchProfileData]);
+  }, []);
 
   const scrollY = useSharedValue(0);
-
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
   });
 
-  const profileAnimatedStyle = useAnimatedStyle(() => {
-    const minimalOpacity = Math.max(1 - scrollY.value / 400, 0);
+  const headerStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, HEADER_HEIGHT / 2],
+      [1, 0],
+      Extrapolation.CLAMP,
+    );
+
+    const translateY = interpolate(
+      scrollY.value,
+      [0, HEADER_HEIGHT],
+      [0, -HEADER_HEIGHT],
+      Extrapolation.CLAMP,
+    );
+
     return {
-      opacity: minimalOpacity,
+      opacity,
+      transform: [{ translateY }],
     };
   });
 
-  if (
-    isLoadingProfileData ||
-    isLoadingFriendsData ||
-    profileData === undefined ||
-    friendsData === undefined
-  ) {
-    return (
-      <YStack gap="$5">
-        <Profile loading />
-        <Friends loading />
-      </YStack>
-    );
-  }
-
   return (
-    <>
-      {/* <Animated.ScrollView
+    <View>
+      <StatusBar barStyle="dark-content" />
+      <Animated.View style={[styles.header, headerStyle]}>
+        <Header
+          title="Profile"
+          HeaderRight={
+            <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
+              <MoreHorizontal />
+            </TouchableOpacity>
+          }
+        />
+      </Animated.View>
+      <Animated.ScrollView
+        contentContainerStyle={{
+          paddingTop: HEADER_HEIGHT,
+        }}
         onScroll={scrollHandler}
-        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            progressViewOffset={HEADER_HEIGHT}
+          />
         }
       >
-        <YStack gap="$5">
-          <Animated.View style={profileAnimatedStyle}>
-            <YStack gap="$5">
-              <Profile loading={false} data={profileData} />
-              <Friends
-                loading={false}
-                data={{
-                  friendCount: profileData.friendCount,
-                  friendItems: friendItems,
-                }}
-              />
-            </YStack>
-          </Animated.View>
-        </YStack> */}
-      <MediaOfYou />
-      {/* </Animated.ScrollView> */}
-    </>
+        <MediaOfYou />
+      </Animated.ScrollView>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  header: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    height: HEADER_HEIGHT,
+    backgroundColor: "white", // leave for testing
+  },
+});
 
 interface LoadingProps {
   loading: true;
