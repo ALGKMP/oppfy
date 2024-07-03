@@ -69,119 +69,15 @@ const PostItem = (props: PostItemProps) => {
     setIsLiked(hasLiked ?? false);
   }, [hasLiked]);
 
-  const likePost = api.post.likePost.useMutation({
-    // onMutate: async () => {
-    //   await utils.post.paginatePostsOfUserSelf.cancel();
-    //   const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-    //     pageSize: 10,
-    //   });
+  const likePost = api.post.likePost.useMutation();
 
-    //   if (!prevPosts) {
-    //     console.warn("prevPosts is undefined");
-    //     return { prevPosts: undefined };
-    //   }
-
-    //   utils.post.paginatePostsOfUserSelf.setInfiniteData(
-    //     { pageSize: 10 },
-    //     (prevData) => {
-    //       if (!prevData) return prevData;
-    //       return {
-    //         ...prevData,
-    //         pages: prevData.pages.map((page) => ({
-    //           ...page,
-    //           items: page.items.map((item) =>
-    //             item?.postId === post.postId
-    //               ? {
-    //                   ...item,
-    //                   likesCount: (item.likesCount || 0) + 1,
-    //                   isLiked: true,
-    //                 }
-    //               : item,
-    //           ),
-    //         })),
-    //       };
-    //     },
-    //   );
-
-    //   return { prevPosts };
-    // },
-    // onError: (error, variables, context) => {
-    //   setLikeCount(Math.max(likeCount - 1, 0));
-    //   setIsLiked(false);
-    //   if (context?.prevPosts) {
-    //     utils.post.paginatePostsOfUserSelf.setInfiniteData(
-    //       { pageSize: 10 },
-    //       context.prevPosts,
-    //     );
-    //   }
-    // },
-    // onSettled: async () => {
-    //   await utils.post.paginatePostsOfUserSelf.invalidate();
-    // },
-  });
-
-  const unlikePost = api.post.unlikePost.useMutation({
-    // onMutate: async () => {
-    //   await utils.post.paginatePostsOfUserSelf.cancel();
-    //   const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-    //     pageSize: 10,
-    //   });
-
-    //   if (!prevPosts) {
-    //     console.warn("prevPosts is undefined");
-    //     return { prevPosts: undefined };
-    //   }
-
-    //   utils.post.paginatePostsOfUserSelf.setInfiniteData(
-    //     { pageSize: 10 },
-    //     (prevData) => {
-    //       if (!prevData) return prevData;
-    //       return {
-    //         ...prevData,
-    //         pages: prevData.pages.map((page) => ({
-    //           ...page,
-    //           items: page.items.map((item) =>
-    //             item?.postId === post.postId
-    //               ? {
-    //                   ...item,
-    //                   likesCount: Math.max((item.likesCount || 0) - 1, 0),
-    //                   isLiked: false,
-    //                 }
-    //               : item,
-    //           ),
-    //         })),
-    //       };
-    //     },
-    //   );
-
-    //   return { prevPosts };
-    // },
-    // onError: (error, variables, context) => {
-    //   setLikeCount(Math.max(likeCount + 1, 0));
-    //   setIsLiked(true);
-    //   if (context?.prevPosts) {
-    //     utils.post.paginatePostsOfUserSelf.setInfiniteData(
-    //       { pageSize: 10 },
-    //       context.prevPosts,
-    //     );
-    //   }
-    // },
-    // onSettled: async () => {
-    //   await utils.post.paginatePostsOfUserSelf.invalidate();
-    // },
-  });
+  const unlikePost = api.post.unlikePost.useMutation();
 
   // For the fuckin like button
   const heartPosition = useSharedValue({ x: 0, y: 0 });
   const buttonLikeScale = useSharedValue(1);
 
   const { hearts, addHeart } = useHeartAnimations();
-
-  const handleDoubleTapLike = async (x: number, y: number) => {
-    addHeart(x, y); // Add a heart animation type shit
-    console.log("in this function")
-    await handleLikeToggle({ doubleTap: true });
-  };
 
   const animateButton = () => {
     buttonLikeScale.value = withSpring(
@@ -199,20 +95,16 @@ const PostItem = (props: PostItemProps) => {
         buttonLikeScale.value = withTiming(1, { duration: 200 });
       },
     );
-    // if (isLiked) {
-    //   setIsLiked(!isLiked);
-    //   setLikeCount(Math.max(likeCount - 1, 0));
-    //   await unlikePost.mutateAsync({ postId: post.postId });
-    // } else {
-    //   setIsLiked(!isLiked);
-    //   setLikeCount(likeCount + 1);
-    //   await likePost.mutateAsync({ postId: post.postId });
-    // }
+  };
+
+  const handleDoubleTapLike = async (x: number, y: number) => {
+    addHeart(x, y); // Add a heart animation type shit
+    await handleLikeToggle({ doubleTap: true });
   };
 
   const handleLikeToggle = async ({ doubleTap }: { doubleTap: boolean }) => {
     animateButton();
-    if (isLiked && doubleTap) return
+    if (isLiked && doubleTap) return;
 
     const newIsLiked = !isLiked;
     const newLikeCount = newIsLiked
@@ -222,14 +114,12 @@ const PostItem = (props: PostItemProps) => {
     // Optimistic update
     setIsLiked(newIsLiked);
     setLikeCount(newLikeCount);
-    console.log(isLiked)
+    console.log(isLiked);
 
     try {
       if (newIsLiked) {
-        console.log("here")
         await likePost.mutateAsync({ postId: post.postId });
       } else {
-        console.log("there")
         await unlikePost.mutateAsync({ postId: post.postId });
       }
     } catch (error) {
@@ -237,16 +127,7 @@ const PostItem = (props: PostItemProps) => {
       setIsLiked((prev) => !prev);
       setLikeCount((prev) => (isLiked ? Math.max(prev - 1, 0) : prev + 1));
       console.error("Error processing like:", error);
-      // Optionally, show an error message to the user
     }
-
-    // // Queue the operation
-    // likeQueue.push(post.postId);
-
-    // // Start processing the queue if it's not already being processed
-    // if (!isProcessingQueue) {
-    //   processLikeQueue();
-    // }
   };
 
   const doubleTap = Gesture.Tap()
