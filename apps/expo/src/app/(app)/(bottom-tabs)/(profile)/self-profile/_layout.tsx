@@ -54,6 +54,7 @@ import CardContainer from "~/components/Containers/CardContainer";
 import { Header } from "~/components/Headers";
 import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "~/components/StatusRenderer";
+import { BaseScreenView } from "~/components/Views";
 import { useUploadProfilePicture } from "~/hooks/media";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -63,7 +64,7 @@ import MediaOfYou from "./media-of-you";
 type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
 
-const HEADER_HEIGHT = 86;
+const HEADER_HEIGHT = 38;
 
 const ProfileLayout = () => {
   const router = useRouter();
@@ -105,18 +106,31 @@ const ProfileLayout = () => {
   });
 
   return (
-    <View>
-      <StatusBar barStyle="dark-content" />
+    <BaseScreenView padding={0} safeAreaEdges={["top"]}>
       <Animated.View style={[styles.header, headerStyle]}>
-        <Header
-          title="Profile"
-          HeaderRight={
+        <XStack
+          paddingVertical="$2"
+          paddingHorizontal="$4"
+          alignItems="center"
+          justifyContent="space-between"
+          backgroundColor="$background"
+        >
+          <View minWidth="$2" alignItems="flex-start" />
+
+          <View alignItems="center">
+            <Text fontSize="$5" fontWeight="bold">
+              Profile
+            </Text>
+          </View>
+
+          <View minWidth="$2" alignItems="flex-end">
             <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
               <MoreHorizontal />
             </TouchableOpacity>
-          }
-        />
+          </View>
+        </XStack>
       </Animated.View>
+
       <Animated.ScrollView
         contentContainerStyle={{
           paddingTop: HEADER_HEIGHT,
@@ -133,7 +147,7 @@ const ProfileLayout = () => {
       >
         <MediaOfYou />
       </Animated.ScrollView>
-    </View>
+    </BaseScreenView>
   );
 };
 
@@ -144,7 +158,6 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     height: HEADER_HEIGHT,
-    backgroundColor: "white", // leave for testing
   },
 });
 
