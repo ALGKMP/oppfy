@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -19,47 +19,48 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
 }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
   const player = useVideoPlayer(videoSource, (player) => {
     player.loop = true;
     player.muted = isMuted;
     player.staysActiveInBackground = false;
+    setIsPlayerReady(true);
   });
 
-  useEffect(() => {
-    if (isViewable) {
-      player.play();
-      setIsPlaying(true);
-    } else {
-      player.pause();
-      setIsPlaying(false);
-    }
+  const safePlayPause = useCallback((shouldPlay: boolean) => {
+    if (!isPlayerReady) return;
 
-    return () => {
-      player.pause();
-      setIsPlaying(false);
-    };
-  }, [isViewable, player]);
-
-  useEffect(() => {
-    player.muted = isMuted;
-  }, [isMuted, player]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      // When the screen comes into focus, play the video if it's viewable
-      if (isViewable) {
+    try {
+      if (shouldPlay && !isPlaying) {
         player.play();
         setIsPlaying(true);
-      }
-
-      // When the screen loses focus, pause the video
-      return () => {
+      } else if (!shouldPlay && isPlaying) {
         player.pause();
         setIsPlaying(false);
-      };
-    }, [player, isViewable]),
-  );
+      }
+    } catch (error) {
+      console.error("Error in safePlayPause:", error);
+    }
+  }, [isPlayerReady, player, isPlaying]);
 
+
+  // useEffect(() => {
+  //   player.muted = isMuted;
+  // }, [isMuted, player]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isPlayerReady) {
+        safePlayPause(isViewable);
+      }
+
+      return () => {
+        if (isPlayerReady) {
+          safePlayPause(false);
+        }
+      };
+    }, [isPlayerReady, isViewable, safePlayPause])
+  );
   // const togglePlay = () => {
   //   setIsPlaying(!isPlaying);
   //   if (isPlaying) {
