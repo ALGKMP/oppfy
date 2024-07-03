@@ -25,13 +25,24 @@ export const contactsRouter = createTRPCRouter({
       });
     }
   }),
-  getRecomendations: protectedProcedure.query(async ({ ctx }) => {
+  getRecomendationIds: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.contact.getRecomendations(ctx.session.uid);
+      return await ctx.services.contact.getRecomendationsIds(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
       });
     }
   }),
+  getReccomendationProfiles: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.contact.getReccomendationProfiles(
+        ctx.session.uid,
+      );
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  })
 });

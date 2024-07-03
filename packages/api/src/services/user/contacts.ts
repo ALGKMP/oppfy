@@ -144,7 +144,7 @@ export class ContactService {
     }
   }
 
-  async getRecomendations(userId: string) {
+  async getRecomendationsIds(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
@@ -152,5 +152,21 @@ export class ContactService {
     }
 
     return await getRecommendationsInternal(userId);
+  }
+
+  async getRecommendationProfiles(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+
+    const recommendations = await this.getRecomendationsIds(userId);
+
+    const profiles = await this.userRepository.getUsersByIds(
+      recommendations.tier1,
+    );
+
+    return profiles;
   }
 }
