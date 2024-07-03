@@ -62,6 +62,7 @@ const PostItem = (props: PostItemProps) => {
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
   const [isLiked, setIsLiked] = useState<boolean>(hasLiked ?? false);
+  const [likeCount, setLikeCount] = useState<number>(post.likesCount);
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -69,105 +70,108 @@ const PostItem = (props: PostItemProps) => {
   }, [hasLiked]);
 
   const likePost = api.post.likePost.useMutation({
-    onMutate: async () => {
-      await utils.post.paginatePostsOfUserSelf.cancel();
-      const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-        pageSize: 10,
-      });
+    // onMutate: async () => {
+    //   await utils.post.paginatePostsOfUserSelf.cancel();
+    //   const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+    //     pageSize: 10,
+    //   });
 
-      if (!prevPosts) {
-        console.warn("prevPosts is undefined");
-        return { prevPosts: undefined };
-      }
+    //   if (!prevPosts) {
+    //     console.warn("prevPosts is undefined");
+    //     return { prevPosts: undefined };
+    //   }
 
-      utils.post.paginatePostsOfUserSelf.setInfiniteData(
-        { pageSize: 10 },
-        (prevData) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            pages: prevData.pages.map((page) => ({
-              ...page,
-              items: page.items.map((item) =>
-                item?.postId === post.postId
-                  ? {
-                      ...item,
-                      likesCount: (item.likesCount || 0) + 1,
-                      isLiked: true,
-                    }
-                  : item,
-              ),
-            })),
-          };
-        },
-      );
+    //   utils.post.paginatePostsOfUserSelf.setInfiniteData(
+    //     { pageSize: 10 },
+    //     (prevData) => {
+    //       if (!prevData) return prevData;
+    //       return {
+    //         ...prevData,
+    //         pages: prevData.pages.map((page) => ({
+    //           ...page,
+    //           items: page.items.map((item) =>
+    //             item?.postId === post.postId
+    //               ? {
+    //                   ...item,
+    //                   likesCount: (item.likesCount || 0) + 1,
+    //                   isLiked: true,
+    //                 }
+    //               : item,
+    //           ),
+    //         })),
+    //       };
+    //     },
+    //   );
 
-      return { prevPosts };
-    },
-    onError: (error, variables, context) => {
-      if (context?.prevPosts) {
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
-          { pageSize: 10 },
-          context.prevPosts,
-        );
-      }
-    },
-    onSettled: async () => {
-      await utils.post.paginatePostsOfUserSelf.invalidate();
-    },
+    //   return { prevPosts };
+    // },
+    // onError: (error, variables, context) => {
+    //   setLikeCount(Math.max(likeCount - 1, 0));
+    //   setIsLiked(false);
+    //   if (context?.prevPosts) {
+    //     utils.post.paginatePostsOfUserSelf.setInfiniteData(
+    //       { pageSize: 10 },
+    //       context.prevPosts,
+    //     );
+    //   }
+    // },
+    // onSettled: async () => {
+    //   await utils.post.paginatePostsOfUserSelf.invalidate();
+    // },
   });
 
   const unlikePost = api.post.unlikePost.useMutation({
-    onMutate: async () => {
-      await utils.post.paginatePostsOfUserSelf.cancel();
-      const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-        pageSize: 10,
-      });
+    // onMutate: async () => {
+    //   await utils.post.paginatePostsOfUserSelf.cancel();
+    //   const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+    //     pageSize: 10,
+    //   });
 
-      if (!prevPosts) {
-        console.warn("prevPosts is undefined");
-        return { prevPosts: undefined };
-      }
+    //   if (!prevPosts) {
+    //     console.warn("prevPosts is undefined");
+    //     return { prevPosts: undefined };
+    //   }
 
-      utils.post.paginatePostsOfUserSelf.setInfiniteData(
-        { pageSize: 10 },
-        (prevData) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            pages: prevData.pages.map((page) => ({
-              ...page,
-              items: page.items.map((item) =>
-                item?.postId === post.postId
-                  ? {
-                      ...item,
-                      likesCount: Math.max((item.likesCount || 0) - 1, 0),
-                      isLiked: false,
-                    }
-                  : item,
-              ),
-            })),
-          };
-        },
-      );
+    //   utils.post.paginatePostsOfUserSelf.setInfiniteData(
+    //     { pageSize: 10 },
+    //     (prevData) => {
+    //       if (!prevData) return prevData;
+    //       return {
+    //         ...prevData,
+    //         pages: prevData.pages.map((page) => ({
+    //           ...page,
+    //           items: page.items.map((item) =>
+    //             item?.postId === post.postId
+    //               ? {
+    //                   ...item,
+    //                   likesCount: Math.max((item.likesCount || 0) - 1, 0),
+    //                   isLiked: false,
+    //                 }
+    //               : item,
+    //           ),
+    //         })),
+    //       };
+    //     },
+    //   );
 
-      return { prevPosts };
-    },
-    onError: (error, variables, context) => {
-      if (context?.prevPosts) {
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
-          { pageSize: 10 },
-          context.prevPosts,
-        );
-      }
-    },
-    onSettled: async () => {
-      await utils.post.paginatePostsOfUserSelf.invalidate();
-    },
+    //   return { prevPosts };
+    // },
+    // onError: (error, variables, context) => {
+    //   setLikeCount(Math.max(likeCount + 1, 0));
+    //   setIsLiked(true);
+    //   if (context?.prevPosts) {
+    //     utils.post.paginatePostsOfUserSelf.setInfiniteData(
+    //       { pageSize: 10 },
+    //       context.prevPosts,
+    //     );
+    //   }
+    // },
+    // onSettled: async () => {
+    //   await utils.post.paginatePostsOfUserSelf.invalidate();
+    // },
   });
 
   // For the fuckin like button
-  const imageLikeScale = useSharedValue(0);
   const heartPosition = useSharedValue({ x: 0, y: 0 });
   const buttonLikeScale = useSharedValue(1);
 
@@ -175,30 +179,11 @@ const PostItem = (props: PostItemProps) => {
 
   const handleDoubleTapLike = async (x: number, y: number) => {
     addHeart(x, y); // Add a heart animation type shit
-
-    // Also animate the button asw cuz fuck it why not
-    buttonLikeScale.value = withSpring(
-      1.1,
-      {
-        duration: 100,
-        dampingRatio: 0.5,
-        stiffness: 50,
-        overshootClamping: false,
-        restDisplacementThreshold: 0.01,
-        restSpeedThreshold: 2,
-        reduceMotion: ReduceMotion.System,
-      },
-      () => {
-        buttonLikeScale.value = withTiming(1, { duration: 200 });
-      },
-    );
-    if (!isLiked) {
-      await likePost.mutateAsync({ postId: post.postId });
-      setIsLiked(true); 
-    }
+    console.log("in this function")
+    await handleLikeToggle({ doubleTap: true });
   };
 
-  const handleLikeButtonOnPress = async () => {
+  const animateButton = () => {
     buttonLikeScale.value = withSpring(
       1.1,
       {
@@ -214,13 +199,54 @@ const PostItem = (props: PostItemProps) => {
         buttonLikeScale.value = withTiming(1, { duration: 200 });
       },
     );
-    if (isLiked) {
-      setIsLiked(!isLiked);
-      await unlikePost.mutateAsync({ postId: post.postId });
-    } else {
-      setIsLiked(!isLiked);
-      await likePost.mutateAsync({ postId: post.postId });
+    // if (isLiked) {
+    //   setIsLiked(!isLiked);
+    //   setLikeCount(Math.max(likeCount - 1, 0));
+    //   await unlikePost.mutateAsync({ postId: post.postId });
+    // } else {
+    //   setIsLiked(!isLiked);
+    //   setLikeCount(likeCount + 1);
+    //   await likePost.mutateAsync({ postId: post.postId });
+    // }
+  };
+
+  const handleLikeToggle = async ({ doubleTap }: { doubleTap: boolean }) => {
+    animateButton();
+    if (isLiked && doubleTap) return
+
+    const newIsLiked = !isLiked;
+    const newLikeCount = newIsLiked
+      ? likeCount + 1
+      : Math.max(likeCount - 1, 0);
+
+    // Optimistic update
+    setIsLiked(newIsLiked);
+    setLikeCount(newLikeCount);
+    console.log(isLiked)
+
+    try {
+      if (newIsLiked) {
+        console.log("here")
+        await likePost.mutateAsync({ postId: post.postId });
+      } else {
+        console.log("there")
+        await unlikePost.mutateAsync({ postId: post.postId });
+      }
+    } catch (error) {
+      // Revert optimistic update
+      setIsLiked((prev) => !prev);
+      setLikeCount((prev) => (isLiked ? Math.max(prev - 1, 0) : prev + 1));
+      console.error("Error processing like:", error);
+      // Optionally, show an error message to the user
     }
+
+    // // Queue the operation
+    // likeQueue.push(post.postId);
+
+    // // Start processing the queue if it's not already being processed
+    // if (!isProcessingQueue) {
+    //   processLikeQueue();
+    // }
   };
 
   const doubleTap = Gesture.Tap()
@@ -404,7 +430,9 @@ const PostItem = (props: PostItemProps) => {
           </View>
           {/* Like Button */}
           <View flex={1} justifyContent="center">
-            <TouchableOpacity onPress={handleLikeButtonOnPress}>
+            <TouchableOpacity
+              onPress={async () => await handleLikeToggle({ doubleTap: false })}
+            >
               <View
                 justifyContent="center"
                 alignItems="center"
@@ -457,10 +485,10 @@ const PostItem = (props: PostItemProps) => {
           <View flex={2} alignItems="flex-start">
             <TouchableOpacity>
               <SizableText size="$2" fontWeight="bold" color="$gray10">
-                {post.likesCount > 0
-                  ? post.likesCount > 1
-                    ? `${post.likesCount} likes`
-                    : `${post.likesCount} like`
+                {likeCount > 0
+                  ? likeCount > 1
+                    ? `${likeCount} likes`
+                    : `${likeCount} like`
                   : ""}
               </SizableText>
             </TouchableOpacity>
@@ -635,7 +663,6 @@ const MediaOfYou = () => {
                   <Text>Loading...</Text>
                 </>
               ) : (
-                // <PostItemLoading />
                 <PostItem
                   post={item}
                   isViewable={viewableItems.includes(item.postId)}
