@@ -27,10 +27,15 @@ import { api, type RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
+type RecoemndationItems = RouterOutputs["contacts"]["getReccomendationProfiles"];
 
 interface FriendsData {
   friendCount: number;
   friendItems: FriendItems;
+}
+
+interface RecomendationsData {
+  recomendations: RecoemndationItems;
 }
 
 interface LoadingProps {
@@ -106,7 +111,7 @@ const FriendsCarousel = (props: FriendsProps) => {
     </CardContainer>
   );
 
-  const renderSuggestions = () => (
+  const renderSuggestions = (/* data: RecomendationsData */) => (
     <CardContainer>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
