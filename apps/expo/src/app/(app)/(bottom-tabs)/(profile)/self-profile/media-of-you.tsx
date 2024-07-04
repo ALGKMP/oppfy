@@ -25,7 +25,10 @@ import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
-import { CommentsBottomSheet } from "~/components/BottomSheets";
+import {
+  CommentsBottomSheet,
+  PostActionsBottomSheet,
+} from "~/components/BottomSheets";
 import GradientHeart, {
   useHeartAnimations,
 } from "~/components/Icons/GradientHeart";
@@ -69,7 +72,10 @@ const PostItem = (props: PostItemProps) => {
 
   const [isLiked, setIsLiked] = useState<boolean>(hasLiked ?? false);
   const [likeCount, setLikeCount] = useState<number>(post.likesCount);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [commentsBottomSheetVisible, setCommentsBottomSheetVisible] =
+    useState(false);
+  const [postActionsBottomSheetVisible, setPostActionsBottomSheetVisible] =
+    useState(false);
 
   useEffect(() => {
     setIsLiked(hasLiked ?? false);
@@ -126,7 +132,7 @@ const PostItem = (props: PostItemProps) => {
     animateButton();
     if (isLiked && doubleTap) return;
 
-    // Incremement this shit to keep of user's wasting their time 
+    // Incremement this shit to keep of user's wasting their time
     howManyTimesDidTheMfHitTheLikeButton.current += 1;
     const clickCount = howManyTimesDidTheMfHitTheLikeButton.current;
     const ignoreIfSameAsCurrentState = clickCount % 2 === 0;
@@ -163,13 +169,13 @@ const PostItem = (props: PostItemProps) => {
 
           howManyTimesDidTheMfHitTheLikeButton.current = 0;
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
 
         // Clear the fucking timeout after execution
         setLikeTimeout(null);
       })();
-    }, 3000); 
+    }, 3000);
 
     // Save the new timeout for later idiot
     setLikeTimeout(newTimeout);
@@ -321,7 +327,13 @@ const PostItem = (props: PostItemProps) => {
           </YStack>
         </XStack>
         <View justifyContent="center" alignItems="center">
-          <TouchableOpacity onPress={() => setIsReportModalVisible(true)}>
+          <TouchableOpacity
+            onPress={() => {
+              setPostActionsBottomSheetVisible(true);
+              console.log("touched")
+              // setIsReportModalVisible(true)
+            }}
+          >
             <MoreHorizontal size={24} color="$gray12" />
           </TouchableOpacity>
         </View>
@@ -340,7 +352,9 @@ const PostItem = (props: PostItemProps) => {
         <XStack gap="$2" alignItems="flex-start">
           {/* Comment Button */}
           <View flex={4} justifyContent="center">
-            <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <TouchableOpacity
+              onPress={() => setCommentsBottomSheetVisible(true)}
+            >
               <View
                 flex={1}
                 justifyContent="flex-start"
@@ -398,7 +412,9 @@ const PostItem = (props: PostItemProps) => {
         {/* Comments and Likes */}
         <XStack flex={1} gap="$2">
           <View flex={4} alignItems="flex-start" paddingLeft="$2.5">
-            <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <TouchableOpacity
+              onPress={() => setCommentsBottomSheetVisible(true)}
+            >
               <SizableText size="$2" fontWeight="bold" color="$gray10">
                 {post.commentsCount > 0
                   ? post.commentsCount > 1
@@ -443,9 +459,15 @@ const PostItem = (props: PostItemProps) => {
 
       <CommentsBottomSheet
         postId={post.postId}
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
+        modalVisible={commentsBottomSheetVisible}
+        setModalVisible={setCommentsBottomSheetVisible}
       />
+      <PostActionsBottomSheet
+        postId={post.postId}
+        modalVisible={postActionsBottomSheetVisible}
+        setModalVisible={setPostActionsBottomSheetVisible}
+      />
+
       <ReportPostActionSheet
         title="Report Post"
         subtitle="Select reason"
@@ -518,9 +540,12 @@ const MediaOfYou = () => {
   );
 
   const [viewableItems, setViewableItems] = useState<number[]>([]);
+  useEffect(() => {
+    console.log(viewableItems);
+  }, [viewableItems]);
+
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      // if (isLoadingPostData) return;
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
         .map((token) => token.item?.postId)
@@ -566,8 +591,9 @@ const MediaOfYou = () => {
   };
 
   return (
-    <View flex={1}>
+    <View flex={1} width="100%" height="100%">
       <FlashList
+        nestedScrollEnabled={true}
         data={posts}
         ListHeaderComponent={FlashListHeader}
         refreshing={refreshing}
@@ -601,7 +627,6 @@ const MediaOfYou = () => {
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         extraData={viewableItems}
-        nestedScrollEnabled={true}
       />
     </View>
   );

@@ -6,25 +6,15 @@ import React, {
   useState,
 } from "react";
 import { Dimensions, Modal, TouchableOpacity } from "react-native";
-import { panGestureHandlerCustomNativeProps } from "react-native-gesture-handler/lib/typescript/handlers/PanGestureHandler";
 import Animated, {
-  BounceIn,
-  BounceInDown,
-  Easing,
-  FadeIn,
-  FadeInDown,
   interpolate,
-  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, {
   BottomSheetFlatList,
-  BottomSheetModal,
   BottomSheetTextInput,
-  BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
@@ -64,8 +54,8 @@ const CommentsBottomSheet = ({
     const heightPercentage = animatedPosition.value / screenHeight;
     const opacity = interpolate(
       heightPercentage,
-      [0.2, 0.5],
-      [0.8, 0],
+      [0.2, 0.9],
+      [0.9, 0],
       "clamp",
     );
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
@@ -227,7 +217,7 @@ const CommentsBottomSheet = ({
           if (!prevData) return prevData;
           return {
             ...prevData,
-            pages: prevData.pages.map((page, index) => {
+            pages: prevData.pages.map((page) => {
               // check if it's postId
               page.items.map((item) => {
                 if (item?.postId === postId) {
@@ -245,9 +235,11 @@ const CommentsBottomSheet = ({
         if (!prevData) return { pages: [], pageParams: [] };
         return {
           ...prevData,
-          items: prevData.pages.flatMap((page) => page.items).filter((item) => {
-            return item?.commentId !== newComment.commentId;
-          }),
+          items: prevData.pages
+            .flatMap((page) => page.items)
+            .filter((item) => {
+              return item?.commentId !== newComment.commentId;
+            }),
         };
       });
 
@@ -332,8 +324,8 @@ const CommentsBottomSheet = ({
               </Text>
             ),
             icon: <Trash2 size={"$1.5"} color="white" />,
-            onPress: () => {
-              deleteComment.mutateAsync({
+            onPress: () => async () => {
+              await deleteComment.mutateAsync({
                 postId,
                 commentId: item.commentId,
               });
