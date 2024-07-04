@@ -17,6 +17,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import { date } from "zod";
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
@@ -51,6 +52,8 @@ const FriendsCarousel = (props: FriendsProps) => {
     isLoading: isRecomendationsLoading,
     refetch: refectchRecomendations,
   } = api.contacts.getReccomendationProfiles.useQuery();
+
+  console.log(recomendations);
 
   const showMore =
     !props.loading && props.data.friendItems.length < props.data.friendCount;
@@ -107,7 +110,7 @@ const FriendsCarousel = (props: FriendsProps) => {
     <CardContainer>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
-{/*         {recomendations?.length === 0 ? (
+        {/*         {recomendations?.length === 0 ? (
           <Text>No recommendations found</Text>
         ) : (
           <FlashList

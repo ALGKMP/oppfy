@@ -7,6 +7,7 @@ import { DomainError, ErrorCode } from "../../errors";
 import {
   ContactsRepository,
   FollowRepository,
+  ProfileRepository,
   UserRepository,
 } from "../../repositories";
 
@@ -67,6 +68,7 @@ export class ContactService {
   private contactsRepository = new ContactsRepository();
   private followRepository = new FollowRepository();
   private userRepository = new UserRepository();
+  private profileRepository = new ProfileRepository();
 
   async syncContacts(userId: string, contacts: string[]) {
     const user = await this.userRepository.getUser(userId);
@@ -164,7 +166,7 @@ export class ContactService {
     const recommendationsIds = await this.getRecomendationsIds(userId);
 
     // start a transaction to get all the usernames and profilePhotos
-    const profiles = await this.userRepository.getUsersByIds([
+    const profiles = await this.profileRepository.getBatchProfiles([
       ...recommendationsIds.tier1,
       ...recommendationsIds.tier2,
       ...recommendationsIds.tier3,

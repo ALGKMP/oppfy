@@ -51,13 +51,6 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getUsersByIds(userIds: string[]) {
-    return await this.db.query.user.findMany({
-      where: inArray(schema.user.id, userIds), 
-    });
-  }
-
-  @handleDatabaseErrors
   async deleteUser(userId: string) {
     // TODO: This needs to handle failed states
     await this.db.delete(schema.user).where(eq(schema.user.id, userId));
