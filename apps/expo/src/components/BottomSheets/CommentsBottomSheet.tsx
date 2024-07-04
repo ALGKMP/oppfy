@@ -134,7 +134,6 @@ const CommentsBottomSheet = ({
       const prevPostsData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
         pageSize: 10,
       });
-      console.log(prevPostsData?.pages[0]?.items);
 
       utils.post.paginatePostsOfUserSelf.setInfiniteData(
         { pageSize: 10 },
@@ -210,7 +209,73 @@ const CommentsBottomSheet = ({
     },
   });
 
-  const deleteComment = api.post.deleteComment.useMutation();
+  const deleteComment = api.post.deleteComment.useMutation({
+    onMutate: async (newComment) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await utils.post.paginateComments.cancel();
+      await utils.post.paginatePostsOfUserSelf.cancel();
+
+      // Snapshot the previous value
+      const prevCommentsData = utils.post.paginateComments.getInfiniteData();
+      const prevPostsData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+        pageSize: 10,
+      });
+
+      utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        { pageSize: 10 },
+        (prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            pages: prevData.pages.map((page, index) => {
+              // check if it's postId
+              page.items.map((item) => {
+                if (item?.postId === postId) {
+                  item.commentsCount -= 1;
+                }
+              });
+              return page;
+            }),
+          };
+        },
+      );
+
+      // Optimistically update to the new value
+      utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
+        if (!prevData) return { pages: [], pageParams: [] };
+        return {
+          ...prevData,
+          items: prevData.pages.flatMap((page) => page.items).filter((item) => {
+            return item?.commentId !== newComment.commentId;
+          }),
+        };
+      });
+
+      // Return a context object with the snapshotted value
+      return { prevCommentsData, prevPostsData };
+    },
+    onError: (err, _newData, ctx) => {
+      // Rollback to the previous value on error
+      console.log(err);
+      if (ctx?.prevCommentsData) {
+        utils.post.paginateComments.setInfiniteData(
+          { postId },
+          ctx.prevCommentsData,
+        );
+      }
+      if (ctx?.prevPostsData) {
+        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+          { pageSize: 10 },
+          ctx.prevPostsData,
+        );
+      }
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.post.paginateComments.invalidate();
+      setOptimisticUpdateCommentId(null); // Reset new comment ID after server sync
+    },
+  });
 
   const handlePostComment = async () => {
     if (inputValue.trim().length === 0) {

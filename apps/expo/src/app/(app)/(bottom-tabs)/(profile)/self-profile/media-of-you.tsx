@@ -76,14 +76,14 @@ const PostItem = (props: PostItemProps) => {
   }, [hasLiked]);
 
   const likePost = api.post.likePost.useMutation({
-    // TODO: properly handle this
+    // TODO: Handle this bitch
     onError: (err) => {
       console.log(err);
     },
   });
 
   const unlikePost = api.post.unlikePost.useMutation({
-    // TODO: properly handle this
+    // TODO: Handle this bitch
     onError: (err) => {
       console.log(err);
     },
@@ -130,7 +130,6 @@ const PostItem = (props: PostItemProps) => {
     howManyTimesDidTheMfHitTheLikeButton.current += 1;
     const clickCount = howManyTimesDidTheMfHitTheLikeButton.current;
     const ignoreIfSameAsCurrentState = clickCount % 2 === 0;
-
 
     const newIsLiked = !isLiked;
 
@@ -358,7 +357,7 @@ const PostItem = (props: PostItemProps) => {
           {/* Like Button */}
           <View flex={1} justifyContent="center">
             <TouchableOpacity
-              onPress={async () => await handleLikeToggle({ doubleTap: false })}
+              onPress={() => handleLikeToggle({ doubleTap: false })}
             >
               <View
                 justifyContent="center"
