@@ -26,6 +26,7 @@ import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "~/constants/camera";
+import useSaveVideo from "~/hooks/useSaveVideo";
 
 type SaveState = "idle" | "saving" | "saved";
 
@@ -57,45 +58,9 @@ const PreviewScreen = () => {
     width: string;
   }>();
 
+  const { saveState, saveToCameraRoll } = useSaveVideo();
+
   const router = useRouter();
-
-  const [saveState, setSaveState] = useState<SaveState>("idle");
-
-  const openSettings = async () => {
-    await Linking.openSettings();
-  };
-
-  const requestMediaLibraryPermission = async () => {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status === PermissionStatus.GRANTED) {
-      return true;
-    }
-
-    Alert.alert(
-      "Media Library Permission",
-      "Media library permission is required for this app. Please enable it in your device settings.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Open Settings", onPress: void openSettings },
-      ],
-    );
-
-    return false;
-  };
-
-  const saveToCameraRoll = async () => {
-    setSaveState("saving");
-
-    const hasPermission = await requestMediaLibraryPermission();
-
-    if (!hasPermission) {
-      setSaveState("idle");
-      return;
-    }
-
-    await MediaLibrary.createAssetAsync(uri ?? "");
-    setSaveState("saved");
-  };
 
   const onContinue = () => {
     router.navigate({
@@ -160,7 +125,7 @@ const PreviewScreen = () => {
           size="$5"
           borderRadius="$7"
           icon={saveState === "idle" ? Download : undefined}
-          onPress={saveToCameraRoll}
+          onPress={() => saveToCameraRoll({ uri: uri ?? "" })}
           disabled={saveState === "saving" || saveState === "saved"}
           disabledStyle={{ opacity: 0.5 }}
         >
