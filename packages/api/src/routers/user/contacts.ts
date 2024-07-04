@@ -36,7 +36,7 @@ export const contactsRouter = createTRPCRouter({
   }),
   getReccomendationProfiles: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.contact.getReccomendationProfiles(
+      return await ctx.services.contact.getRecommendationProfiles(
         ctx.session.uid,
       );
     } catch (err) {

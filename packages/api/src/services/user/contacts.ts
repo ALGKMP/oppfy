@@ -161,11 +161,14 @@ export class ContactService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
-    const recommendations = await this.getRecomendationsIds(userId);
+    const recommendationsIds = await this.getRecomendationsIds(userId);
 
-    const profiles = await this.userRepository.getUsersByIds(
-      recommendations.tier1,
-    );
+    // start a transaction to get all the usernames and profilePhotos
+    const profiles = await this.userRepository.getUsersByIds([
+      ...recommendationsIds.tier1,
+      ...recommendationsIds.tier2,
+      ...recommendationsIds.tier3,
+    ]);
 
     return profiles;
   }

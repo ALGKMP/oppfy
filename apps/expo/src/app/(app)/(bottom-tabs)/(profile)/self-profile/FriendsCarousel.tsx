@@ -50,7 +50,7 @@ const FriendsCarousel = (props: FriendsProps) => {
     data: recomendations,
     isLoading: isRecomendationsLoading,
     refetch: refectchRecomendations,
-  } = api.contacts.getRecomendations.useQuery();
+  } = api.contacts.getReccomendationProfiles.useQuery();
 
   const showMore =
     !props.loading && props.data.friendItems.length < props.data.friendCount;

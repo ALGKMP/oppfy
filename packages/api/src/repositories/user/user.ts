@@ -1,4 +1,5 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm"; // Add inArray import
+
 
 import { asc, db, gt, or, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
@@ -46,6 +47,13 @@ export class UserRepository {
   async getUserByProfileId(profileId: number) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.profileId, profileId),
+    });
+  }
+
+  @handleDatabaseErrors
+  async getUsersByIds(userIds: string[]) {
+    return await this.db.query.user.findMany({
+      where: inArray(schema.user.id, userIds), 
     });
   }
 
