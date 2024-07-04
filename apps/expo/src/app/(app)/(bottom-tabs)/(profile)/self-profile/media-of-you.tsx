@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -62,6 +68,7 @@ const PostItem = (props: PostItemProps) => {
   } = api.post.hasliked.useQuery({ postId: post.postId });
 
   const [isLiked, setIsLiked] = useState<boolean>(hasLiked ?? false);
+  const [likeCount, setLikeCount] = useState<number>(post.likesCount);
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -69,114 +76,26 @@ const PostItem = (props: PostItemProps) => {
   }, [hasLiked]);
 
   const likePost = api.post.likePost.useMutation({
-    onMutate: async () => {
-      await utils.post.paginatePostsOfUserSelf.cancel();
-      const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-        pageSize: 10,
-      });
-
-      if (!prevPosts) {
-        console.warn("prevPosts is undefined");
-        return { prevPosts: undefined };
-      }
-
-      utils.post.paginatePostsOfUserSelf.setInfiniteData(
-        { pageSize: 10 },
-        (prevData) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            pages: prevData.pages.map((page) => ({
-              ...page,
-              items: page.items.map((item) =>
-                item?.postId === post.postId
-                  ? {
-                      ...item,
-                      likesCount: (item.likesCount || 0) + 1,
-                      isLiked: true,
-                    }
-                  : item,
-              ),
-            })),
-          };
-        },
-      );
-
-      return { prevPosts };
-    },
-    onError: (error, variables, context) => {
-      if (context?.prevPosts) {
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
-          { pageSize: 10 },
-          context.prevPosts,
-        );
-      }
-    },
-    onSettled: async () => {
-      await utils.post.paginatePostsOfUserSelf.invalidate();
+    // TODO: properly handle this
+    onError: (err) => {
+      console.log(err);
     },
   });
 
   const unlikePost = api.post.unlikePost.useMutation({
-    onMutate: async () => {
-      await utils.post.paginatePostsOfUserSelf.cancel();
-      const prevPosts = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-        pageSize: 10,
-      });
-
-      if (!prevPosts) {
-        console.warn("prevPosts is undefined");
-        return { prevPosts: undefined };
-      }
-
-      utils.post.paginatePostsOfUserSelf.setInfiniteData(
-        { pageSize: 10 },
-        (prevData) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            pages: prevData.pages.map((page) => ({
-              ...page,
-              items: page.items.map((item) =>
-                item?.postId === post.postId
-                  ? {
-                      ...item,
-                      likesCount: Math.max((item.likesCount || 0) - 1, 0),
-                      isLiked: false,
-                    }
-                  : item,
-              ),
-            })),
-          };
-        },
-      );
-
-      return { prevPosts };
-    },
-    onError: (error, variables, context) => {
-      if (context?.prevPosts) {
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
-          { pageSize: 10 },
-          context.prevPosts,
-        );
-      }
-    },
-    onSettled: async () => {
-      await utils.post.paginatePostsOfUserSelf.invalidate();
+    // TODO: properly handle this
+    onError: (err) => {
+      console.log(err);
     },
   });
 
   // For the fuckin like button
-  const imageLikeScale = useSharedValue(0);
   const heartPosition = useSharedValue({ x: 0, y: 0 });
   const buttonLikeScale = useSharedValue(1);
 
   const { hearts, addHeart } = useHeartAnimations();
 
-  const handleDoubleTapLike = async (x: number, y: number) => {
-    addHeart(x, y); // Add a heart animation type shit
-
-    // Also animate the button asw cuz fuck it why not
+  const animateButton = () => {
     buttonLikeScale.value = withSpring(
       1.1,
       {
@@ -192,35 +111,69 @@ const PostItem = (props: PostItemProps) => {
         buttonLikeScale.value = withTiming(1, { duration: 200 });
       },
     );
-    if (!isLiked) {
-      await likePost.mutateAsync({ postId: post.postId });
-      setIsLiked(true); 
-    }
   };
 
-  const handleLikeButtonOnPress = async () => {
-    buttonLikeScale.value = withSpring(
-      1.1,
-      {
-        duration: 100,
-        dampingRatio: 0.5,
-        stiffness: 50,
-        overshootClamping: false,
-        restDisplacementThreshold: 0.01,
-        restSpeedThreshold: 2,
-        reduceMotion: ReduceMotion.System,
-      },
-      () => {
-        buttonLikeScale.value = withTiming(1, { duration: 200 });
-      },
-    );
-    if (isLiked) {
-      setIsLiked(!isLiked);
-      await unlikePost.mutateAsync({ postId: post.postId });
-    } else {
-      setIsLiked(!isLiked);
-      await likePost.mutateAsync({ postId: post.postId });
+  const [likeTimeout, setLikeTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const handleDoubleTapLike = async (x: number, y: number) => {
+    addHeart(x, y); // Add one of those fucking heart animations
+    handleLikeToggle({ doubleTap: true });
+  };
+
+  const howManyTimesDidTheMfHitTheLikeButton = useRef(0);
+
+  const handleLikeToggle = ({ doubleTap }: { doubleTap: boolean }): void => {
+    animateButton();
+    if (isLiked && doubleTap) return;
+
+    // Incremement this shit to keep of user's wasting their time 
+    howManyTimesDidTheMfHitTheLikeButton.current += 1;
+    const clickCount = howManyTimesDidTheMfHitTheLikeButton.current;
+    const ignoreIfSameAsCurrentState = clickCount % 2 === 0;
+
+
+    const newIsLiked = !isLiked;
+
+    // Optimistic update
+    setIsLiked(newIsLiked);
+    setLikeCount(newIsLiked ? likeCount + 1 : Math.max(likeCount - 1, 0));
+
+    // Existing timeouts can fuck off
+    if (likeTimeout) {
+      clearTimeout(likeTimeout);
     }
+
+    // Set a new timeout
+    const newTimeout: NodeJS.Timeout = setTimeout(() => {
+      void (async () => {
+        try {
+          if (ignoreIfSameAsCurrentState) {
+            console.log(
+              `ignoring because the user is fucking spamming the like button on post ${post.postId}`,
+            );
+            return;
+          }
+          if (newIsLiked) {
+            console.log(newIsLiked);
+            await likePost.mutateAsync({ postId: post.postId });
+            console.log(`liked post: ${post.postId}`);
+          } else {
+            await unlikePost.mutateAsync({ postId: post.postId });
+            console.log(`unliked post: ${post.postId}`);
+          }
+
+          howManyTimesDidTheMfHitTheLikeButton.current = 0;
+        } catch (error) {
+          console.log(error)
+        }
+
+        // Clear the fucking timeout after execution
+        setLikeTimeout(null);
+      })();
+    }, 3000); 
+
+    // Save the new timeout for later idiot
+    setLikeTimeout(newTimeout);
   };
 
   const doubleTap = Gesture.Tap()
@@ -404,7 +357,9 @@ const PostItem = (props: PostItemProps) => {
           </View>
           {/* Like Button */}
           <View flex={1} justifyContent="center">
-            <TouchableOpacity onPress={handleLikeButtonOnPress}>
+            <TouchableOpacity
+              onPress={async () => await handleLikeToggle({ doubleTap: false })}
+            >
               <View
                 justifyContent="center"
                 alignItems="center"
@@ -457,10 +412,10 @@ const PostItem = (props: PostItemProps) => {
           <View flex={2} alignItems="flex-start">
             <TouchableOpacity>
               <SizableText size="$2" fontWeight="bold" color="$gray10">
-                {post.likesCount > 0
-                  ? post.likesCount > 1
-                    ? `${post.likesCount} likes`
-                    : `${post.likesCount} like`
+                {likeCount > 0
+                  ? likeCount > 1
+                    ? `${likeCount} likes`
+                    : `${likeCount} like`
                   : ""}
               </SizableText>
             </TouchableOpacity>
@@ -635,7 +590,6 @@ const MediaOfYou = () => {
                   <Text>Loading...</Text>
                 </>
               ) : (
-                // <PostItemLoading />
                 <PostItem
                   post={item}
                   isViewable={viewableItems.includes(item.postId)}

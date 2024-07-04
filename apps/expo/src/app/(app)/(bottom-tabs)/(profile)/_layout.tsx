@@ -26,16 +26,7 @@ const SearchLayout = () => {
       <Stack.Screen
         name="self-profile"
         options={{
-          headerLeft: () => null,
-          headerRight: () => (
-            <View>
-              <Pressable onPress={() => router.push("/(app)/(settings)")}>
-                {({ pressed }) => (
-                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
-                )}
-              </Pressable>
-            </View>
-          ),
+          header: () => null,
         }}
       />
       <Stack.Screen name="self-connections" />
