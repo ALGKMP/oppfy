@@ -210,6 +210,8 @@ const CommentsBottomSheet = ({
     },
   });
 
+  const deleteComment = api.post.deleteComment.useMutation();
+
   const handlePostComment = async () => {
     if (inputValue.trim().length === 0) {
       return;
@@ -228,7 +230,7 @@ const CommentsBottomSheet = ({
   const comments = useMemo(
     () =>
       commentsData?.pages
-        .flatMap((page) => page.items ?? [])
+        .flatMap((page) => page.items)
         .filter(
           (item): item is z.infer<typeof sharedValidators.media.comment> =>
             item !== undefined,
@@ -246,77 +248,78 @@ const CommentsBottomSheet = ({
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
-  const Comment = useCallback(
-    ({
-      item,
-      isNew = false,
-    }: {
-      item: z.infer<typeof sharedValidators.media.comment>;
-      isNew?: boolean;
-    }) => {
-      const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const Comment = ({
+    item,
+    isNew = false,
+  }: {
+    item: z.infer<typeof sharedValidators.media.comment>;
+    isNew?: boolean;
+  }) => {
+    const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
-      return (
-        <BlurContextMenuWrapper
-          options={[
-            {
-              label: (
-                <Text color="white" marginLeft="$2" fontSize="$5">
-                  Delete
-                </Text>
-              ),
-              icon: <Trash2 size={"$1.5"} color="white" />,
-              onPress: () => {
-                console.log("Delete");
-              },
+    return (
+      <BlurContextMenuWrapper
+        options={[
+          {
+            label: (
+              <Text color="white" marginLeft="$2" fontSize="$5">
+                Delete
+              </Text>
+            ),
+            icon: <Trash2 size={"$1.5"} color="white" />,
+            onPress: () => {
+              deleteComment.mutateAsync({
+                postId,
+                commentId: item.commentId,
+              });
+              console.log("Delete");
             },
-            {
-              label: (
-                <Text color="red" marginLeft="$2" fontSize="$5">
-                  Report
-                </Text>
-              ),
-              icon: <AlertCircle size={"$1.5"} color="red" />,
-              onPress: () => {
-                setTimeout(() => {
-                  setIsReportModalVisible(true);
-                }, 275);
-              },
+          },
+          {
+            label: (
+              <Text color="red" marginLeft="$2" fontSize="$5">
+                Report
+              </Text>
+            ),
+            icon: <AlertCircle size={"$1.5"} color="red" />,
+            onPress: () => {
+              setTimeout(() => {
+                setIsReportModalVisible(true);
+              }, 275);
             },
-          ]}
-        >
-          <View padding={"$3.5"} backgroundColor={"$gray4"} borderRadius={"$7"}>
-            <XStack gap="$3" alignItems="center">
-              <Avatar circular size="$4">
-                <Avatar.Image
-                  accessibilityLabel="Cam"
-                  src={item.profilePictureUrl}
-                />
-                <Avatar.Fallback backgroundColor="$blue10" />
-              </Avatar>
-              <YStack gap={"$2"}>
-                <XStack gap={"$2"}>
-                  <Text fontWeight={"bold"}>{item.username}</Text>
-                  <Text color={"$gray10"}>
-                    {timeAgo.format(new Date(item.createdAt))}
-                  </Text>
-                </XStack>
-                <Text>{item.body}</Text>
-              </YStack>
-            </XStack>
-          </View>
-          <ReportCommentActionSheet
-            title="Report Comment"
-            subtitle="Select reason"
-            commentId={item.commentId}
-            isVisible={isReportModalVisible}
-            onCancel={() => setIsReportModalVisible(false)}
-          />
-        </BlurContextMenuWrapper>
-      );
-    },
-    [],
-  );
+          },
+        ]}
+      >
+        <View padding={"$3.5"} backgroundColor={"$gray4"} borderRadius={"$7"}>
+          <XStack gap="$3" alignItems="center">
+            <Avatar circular size="$4">
+              <Avatar.Image
+                accessibilityLabel="Cam"
+                src={item.profilePictureUrl}
+              />
+              <Avatar.Fallback backgroundColor="$blue10" />
+            </Avatar>
+            <YStack gap={"$2"}>
+              <XStack gap={"$2"}>
+                <Text fontWeight={"bold"}>{item.username}</Text>
+                <Text color={"$gray10"}>
+                  {timeAgo.format(new Date(item.createdAt))}
+                </Text>
+              </XStack>
+              <Text>{item.body}</Text>
+            </YStack>
+          </XStack>
+        </View>
+        <ReportCommentActionSheet
+          title="Report Comment"
+          subtitle="Select reason"
+          commentId={item.commentId}
+          isVisible={isReportModalVisible}
+          onCancel={() => setIsReportModalVisible(false)}
+        />
+      </BlurContextMenuWrapper>
+    );
+  };
 
   const renderHeader = useCallback(
     () => (
