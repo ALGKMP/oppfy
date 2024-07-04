@@ -15,14 +15,7 @@ const env = createEnv({
 const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
-  process: {
-    t,
-    P,
-    merge: { onCreate, onMatch },
-    order,
-    column,
-    statics: __,
-  },
+  process: { P, order, column, statics: __ },
 } = gremlin;
 
 export const handler = async (

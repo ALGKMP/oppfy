@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { StyleSheet } from "react-native";
 import Reanimated, {
-  Extrapolate,
+  Extrapolation,
   interpolate,
   useAnimatedProps,
   useAnimatedStyle,
@@ -41,7 +41,12 @@ const FocusIcon: React.FC<FocusIconProps> = ({ x, y }) => {
     opacity: progress.value,
     transform: [
       {
-        scale: interpolate(progress.value, [0, 1], [0.8, 1], Extrapolate.CLAMP),
+        scale: interpolate(
+          progress.value,
+          [0, 1],
+          [0.8, 1],
+          Extrapolation.CLAMP,
+        ),
       },
     ],
   }));
@@ -51,7 +56,7 @@ const FocusIcon: React.FC<FocusIconProps> = ({ x, y }) => {
       progress.value,
       [0, 1],
       [0, SIZE / 2 - STROKE_WIDTH],
-      Extrapolate.CLAMP,
+      Extrapolation.CLAMP,
     ),
   }));
 
