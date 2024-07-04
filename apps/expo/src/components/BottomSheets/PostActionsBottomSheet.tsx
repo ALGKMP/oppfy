@@ -11,6 +11,8 @@ import BottomSheet, {
   BottomSheetFooter,
   BottomSheetSectionList,
 } from "@gorhom/bottom-sheet";
+import { Minus } from "@tamagui/lucide-icons";
+import { View } from "tamagui";
 
 interface PostActionBottomSheetProps {
   postId: number;
@@ -56,6 +58,14 @@ const PostActionsBottomSheet = ({
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
   });
 
+  const renderHeader = useCallback(() => {
+    return (
+      <View flex={1} justifyContent="center" alignItems="center">
+        <Minus size="$4" />
+      </View>
+    );
+  }, []);
+
   return (
     <Modal visible={modalVisible} transparent={true}>
       <TouchableOpacity onPress={closeModal} />
@@ -65,6 +75,8 @@ const PostActionsBottomSheet = ({
           snapPoints={["60%"]}
           enablePanDownToClose={true}
           animatedPosition={animatedPosition}
+          backgroundStyle={{ backgroundColor: "#282828" }}
+          handleComponent={renderHeader}
           ref={sheetRef}
         >
           {/* Add a childrens prop */}
