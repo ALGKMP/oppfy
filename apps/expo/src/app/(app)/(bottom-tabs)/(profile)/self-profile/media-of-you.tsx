@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -69,9 +75,19 @@ const PostItem = (props: PostItemProps) => {
     setIsLiked(hasLiked ?? false);
   }, [hasLiked]);
 
-  const likePost = api.post.likePost.useMutation();
+  const likePost = api.post.likePost.useMutation({
+    // TODO: properly handle this
+    onError: (err) => {
+      console.log(err);
+    },
+  });
 
-  const unlikePost = api.post.unlikePost.useMutation();
+  const unlikePost = api.post.unlikePost.useMutation({
+    // TODO: properly handle this
+    onError: (err) => {
+      console.log(err);
+    },
+  });
 
   // For the fuckin like button
   const heartPosition = useSharedValue({ x: 0, y: 0 });
@@ -97,37 +113,67 @@ const PostItem = (props: PostItemProps) => {
     );
   };
 
+  const [likeTimeout, setLikeTimeout] = useState<NodeJS.Timeout | null>(null);
+
   const handleDoubleTapLike = async (x: number, y: number) => {
-    addHeart(x, y); // Add a heart animation type shit
-    await handleLikeToggle({ doubleTap: true });
+    addHeart(x, y); // Add one of those fucking heart animations
+    handleLikeToggle({ doubleTap: true });
   };
 
-  const handleLikeToggle = async ({ doubleTap }: { doubleTap: boolean }) => {
+  const howManyTimesDidTheMfHitTheLikeButton = useRef(0);
+
+  const handleLikeToggle = ({ doubleTap }: { doubleTap: boolean }): void => {
     animateButton();
     if (isLiked && doubleTap) return;
 
+    // Incremement this shit to keep of user's wasting their time 
+    howManyTimesDidTheMfHitTheLikeButton.current += 1;
+    const clickCount = howManyTimesDidTheMfHitTheLikeButton.current;
+    const ignoreIfSameAsCurrentState = clickCount % 2 === 0;
+
+
     const newIsLiked = !isLiked;
-    const newLikeCount = newIsLiked
-      ? likeCount + 1
-      : Math.max(likeCount - 1, 0);
 
     // Optimistic update
     setIsLiked(newIsLiked);
-    setLikeCount(newLikeCount);
-    console.log(isLiked);
+    setLikeCount(newIsLiked ? likeCount + 1 : Math.max(likeCount - 1, 0));
 
-    try {
-      if (newIsLiked) {
-        await likePost.mutateAsync({ postId: post.postId });
-      } else {
-        await unlikePost.mutateAsync({ postId: post.postId });
-      }
-    } catch (error) {
-      // Revert optimistic update
-      setIsLiked((prev) => !prev);
-      setLikeCount((prev) => (isLiked ? Math.max(prev - 1, 0) : prev + 1));
-      console.error("Error processing like:", error);
+    // Existing timeouts can fuck off
+    if (likeTimeout) {
+      clearTimeout(likeTimeout);
     }
+
+    // Set a new timeout
+    const newTimeout: NodeJS.Timeout = setTimeout(() => {
+      void (async () => {
+        try {
+          if (ignoreIfSameAsCurrentState) {
+            console.log(
+              `ignoring because the user is fucking spamming the like button on post ${post.postId}`,
+            );
+            return;
+          }
+          if (newIsLiked) {
+            console.log(newIsLiked);
+            await likePost.mutateAsync({ postId: post.postId });
+            console.log(`liked post: ${post.postId}`);
+          } else {
+            await unlikePost.mutateAsync({ postId: post.postId });
+            console.log(`unliked post: ${post.postId}`);
+          }
+
+          howManyTimesDidTheMfHitTheLikeButton.current = 0;
+        } catch (error) {
+          console.log(error)
+        }
+
+        // Clear the fucking timeout after execution
+        setLikeTimeout(null);
+      })();
+    }, 3000); 
+
+    // Save the new timeout for later idiot
+    setLikeTimeout(newTimeout);
   };
 
   const doubleTap = Gesture.Tap()
