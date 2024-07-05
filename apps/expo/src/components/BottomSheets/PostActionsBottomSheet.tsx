@@ -47,7 +47,7 @@ const PostActionsBottomSheet = ({
       // Delay this shit so the animation can finish
       setTimeout(() => {
         setModalVisible(false);
-      }, 300); 
+      }, 300);
     } else {
       setModalVisible(false);
     }
@@ -118,7 +118,7 @@ const PostActionsBottomSheet = ({
                   justifyContent="flex-start"
                 >
                   <ArrowDownToLine />
-                  <Text>Save video</Text>
+                  <Text>Save post</Text>
                 </XStack>
               </TouchableOpacity>
               <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
@@ -127,7 +127,7 @@ const PostActionsBottomSheet = ({
                   closeModal();
                   setTimeout(() => {
                     setReportActionSheetVisible(true);
-                  }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it 
+                  }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
                 }}
               >
                 <XStack
