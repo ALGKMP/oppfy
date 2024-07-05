@@ -53,20 +53,20 @@ async function getRecommendationsInternal(userId: string) {
     return await response.json(); */
 
     const response = await fetch(url.toString());
-    console.log("response", response);
+    // console.log("response", response);
 
     if (response.status !== 200) {
       return {
         tier1: [],
         tier2: [],
         tier3: [],
-      }
+      };
     }
 
     return (await response.json()) as {
       tier1: string[];
       tier2: string[];
-      // tier3: string[];
+      tier3: string[];
     };
   } catch (error) {
     console.error("Error invoking Lambda function:", error);
@@ -178,9 +178,9 @@ export class ContactService {
 
     // start a transaction to get all the usernames and profilePhotos
     const profiles = await this.profileRepository.getBatchProfiles([
-       ...recommendationsIds.tier1,
+      ...recommendationsIds.tier1,
       ...recommendationsIds.tier2,
-      // ...recommendationsIds.tier3,
+      ...recommendationsIds.tier3,
     ]);
 
     // Fetch presigned URLs for profile pictures in parallel
