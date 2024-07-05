@@ -101,11 +101,13 @@ export const handler = async (
       .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
       .where(__.inE("contact").outV().hasId(P.within(tier1)))
       .where(__.inE("contact").outV().hasId(P.within(tier2)))
-      .where(__.inE("contact").outV().hasId(P.within(following)))
+      .where(__.inE("contact").outV().hasId(P.without(following)))
       .groupCount()
       .unfold()
+      .filter(__.select(column.values).is(P.gte(1)))
       .limit(15)
-      .toList();
+      .id()
+      .toList()
 
     console.log("Tier 3", tier3);
 
