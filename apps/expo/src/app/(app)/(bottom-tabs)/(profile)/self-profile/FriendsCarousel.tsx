@@ -212,7 +212,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   }
 
   if (props.friendsData.friendCount === 0) {
-    return renderSuggestions(props.reccomendationsData);
+    // return renderSuggestions(props.reccomendationsData);
   }
 
   return renderFriendList(props.friendsData);
