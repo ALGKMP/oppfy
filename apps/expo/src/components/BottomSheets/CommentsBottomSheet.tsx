@@ -6,25 +6,15 @@ import React, {
   useState,
 } from "react";
 import { Dimensions, Modal, TouchableOpacity } from "react-native";
-import { panGestureHandlerCustomNativeProps } from "react-native-gesture-handler/lib/typescript/handlers/PanGestureHandler";
 import Animated, {
-  BounceIn,
-  BounceInDown,
-  Easing,
-  FadeIn,
-  FadeInDown,
   interpolate,
-  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, {
   BottomSheetFlatList,
-  BottomSheetModal,
   BottomSheetTextInput,
-  BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
@@ -64,8 +54,8 @@ const CommentsBottomSheet = ({
     const heightPercentage = animatedPosition.value / screenHeight;
     const opacity = interpolate(
       heightPercentage,
-      [0.2, 0.5],
-      [0.8, 0],
+      [0.2, 0.9],
+      [0.9, 0],
       "clamp",
     );
     return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
@@ -134,7 +124,6 @@ const CommentsBottomSheet = ({
       const prevPostsData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
         pageSize: 10,
       });
-      console.log(prevPostsData?.pages[0]?.items);
 
       utils.post.paginatePostsOfUserSelf.setInfiniteData(
         { pageSize: 10 },
@@ -210,6 +199,76 @@ const CommentsBottomSheet = ({
     },
   });
 
+  const deleteComment = api.post.deleteComment.useMutation({
+    onMutate: async (newComment) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await utils.post.paginateComments.cancel();
+      await utils.post.paginatePostsOfUserSelf.cancel();
+
+      // Snapshot the previous value
+      const prevCommentsData = utils.post.paginateComments.getInfiniteData();
+      const prevPostsData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+        pageSize: 10,
+      });
+
+      utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        { pageSize: 10 },
+        (prevData) => {
+          if (!prevData) return prevData;
+          return {
+            ...prevData,
+            pages: prevData.pages.map((page) => {
+              // check if it's postId
+              page.items.map((item) => {
+                if (item?.postId === postId) {
+                  item.commentsCount -= 1;
+                }
+              });
+              return page;
+            }),
+          };
+        },
+      );
+
+      // Optimistically update to the new value
+      utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
+        if (!prevData) return { pages: [], pageParams: [] };
+        return {
+          ...prevData,
+          items: prevData.pages
+            .flatMap((page) => page.items)
+            .filter((item) => {
+              return item?.commentId !== newComment.commentId;
+            }),
+        };
+      });
+
+      // Return a context object with the snapshotted value
+      return { prevCommentsData, prevPostsData };
+    },
+    onError: (err, _newData, ctx) => {
+      // Rollback to the previous value on error
+      console.log(err);
+      if (ctx?.prevCommentsData) {
+        utils.post.paginateComments.setInfiniteData(
+          { postId },
+          ctx.prevCommentsData,
+        );
+      }
+      if (ctx?.prevPostsData) {
+        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+          { pageSize: 10 },
+          ctx.prevPostsData,
+        );
+      }
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.post.paginateComments.invalidate();
+      setOptimisticUpdateCommentId(null); // Reset new comment ID after server sync
+    },
+  });
+
   const handlePostComment = async () => {
     if (inputValue.trim().length === 0) {
       return;
@@ -228,7 +287,7 @@ const CommentsBottomSheet = ({
   const comments = useMemo(
     () =>
       commentsData?.pages
-        .flatMap((page) => page.items ?? [])
+        .flatMap((page) => page.items)
         .filter(
           (item): item is z.infer<typeof sharedValidators.media.comment> =>
             item !== undefined,
@@ -246,77 +305,78 @@ const CommentsBottomSheet = ({
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
-  const Comment = useCallback(
-    ({
-      item,
-      isNew = false,
-    }: {
-      item: z.infer<typeof sharedValidators.media.comment>;
-      isNew?: boolean;
-    }) => {
-      const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const Comment = ({
+    item,
+    isNew = false,
+  }: {
+    item: z.infer<typeof sharedValidators.media.comment>;
+    isNew?: boolean;
+  }) => {
+    const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
-      return (
-        <BlurContextMenuWrapper
-          options={[
-            {
-              label: (
-                <Text color="white" marginLeft="$2" fontSize="$5">
-                  Delete
-                </Text>
-              ),
-              icon: <Trash2 size={"$1.5"} color="white" />,
-              onPress: () => {
-                console.log("Delete");
-              },
+    return (
+      <BlurContextMenuWrapper
+        options={[
+          {
+            label: (
+              <Text color="white" marginLeft="$2" fontSize="$5">
+                Delete
+              </Text>
+            ),
+            icon: <Trash2 size={"$1.5"} color="white" />,
+            onPress: () => async () => {
+              await deleteComment.mutateAsync({
+                postId,
+                commentId: item.commentId,
+              });
+              console.log("Delete");
             },
-            {
-              label: (
-                <Text color="red" marginLeft="$2" fontSize="$5">
-                  Report
-                </Text>
-              ),
-              icon: <AlertCircle size={"$1.5"} color="red" />,
-              onPress: () => {
-                setTimeout(() => {
-                  setIsReportModalVisible(true);
-                }, 275);
-              },
+          },
+          {
+            label: (
+              <Text color="red" marginLeft="$2" fontSize="$5">
+                Report
+              </Text>
+            ),
+            icon: <AlertCircle size={"$1.5"} color="red" />,
+            onPress: () => {
+              setTimeout(() => {
+                setIsReportModalVisible(true);
+              }, 275);
             },
-          ]}
-        >
-          <View padding={"$3.5"} backgroundColor={"$gray4"} borderRadius={"$7"}>
-            <XStack gap="$3" alignItems="center">
-              <Avatar circular size="$4">
-                <Avatar.Image
-                  accessibilityLabel="Cam"
-                  src={item.profilePictureUrl}
-                />
-                <Avatar.Fallback backgroundColor="$blue10" />
-              </Avatar>
-              <YStack gap={"$2"}>
-                <XStack gap={"$2"}>
-                  <Text fontWeight={"bold"}>{item.username}</Text>
-                  <Text color={"$gray10"}>
-                    {timeAgo.format(new Date(item.createdAt))}
-                  </Text>
-                </XStack>
-                <Text>{item.body}</Text>
-              </YStack>
-            </XStack>
-          </View>
-          <ReportCommentActionSheet
-            title="Report Comment"
-            subtitle="Select reason"
-            commentId={item.commentId}
-            isVisible={isReportModalVisible}
-            onCancel={() => setIsReportModalVisible(false)}
-          />
-        </BlurContextMenuWrapper>
-      );
-    },
-    [],
-  );
+          },
+        ]}
+      >
+        <View padding={"$3.5"} backgroundColor={"$gray4"} borderRadius={"$7"}>
+          <XStack gap="$3" alignItems="center">
+            <Avatar circular size="$4">
+              <Avatar.Image
+                accessibilityLabel="Cam"
+                src={item.profilePictureUrl}
+              />
+              <Avatar.Fallback backgroundColor="$blue10" />
+            </Avatar>
+            <YStack gap={"$2"}>
+              <XStack gap={"$2"}>
+                <Text fontWeight={"bold"}>{item.username}</Text>
+                <Text color={"$gray10"}>
+                  {timeAgo.format(new Date(item.createdAt))}
+                </Text>
+              </XStack>
+              <Text>{item.body}</Text>
+            </YStack>
+          </XStack>
+        </View>
+        <ReportCommentActionSheet
+          title="Report Comment"
+          subtitle="Select reason"
+          commentId={item.commentId}
+          isVisible={isReportModalVisible}
+          onCancel={() => setIsReportModalVisible(false)}
+        />
+      </BlurContextMenuWrapper>
+    );
+  };
 
   const renderHeader = useCallback(
     () => (

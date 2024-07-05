@@ -71,7 +71,7 @@ const ProfileLayout = () => {
   const insets = useSafeAreaInsets();
 
   const [refreshing, setRefreshing] = useState(false);
-  const onRefresh = useCallback(async () => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
     // refetch our stuff
     setRefreshing(false);
@@ -132,6 +132,7 @@ const ProfileLayout = () => {
       </Animated.View>
 
       <Animated.ScrollView
+      nestedScrollEnabled={true}
         contentContainerStyle={{
           paddingTop: HEADER_HEIGHT,
         }}
