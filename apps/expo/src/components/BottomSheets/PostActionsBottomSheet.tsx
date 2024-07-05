@@ -11,8 +11,14 @@ import BottomSheet, {
   BottomSheetFooter,
   BottomSheetSectionList,
 } from "@gorhom/bottom-sheet";
-import { Minus } from "@tamagui/lucide-icons";
-import { View } from "tamagui";
+import {
+  AlertCircle,
+  ArrowDownToLine,
+  Bookmark,
+  Minus,
+  Send,
+} from "@tamagui/lucide-icons";
+import { Separator, Text, View, XStack, YStack } from "tamagui";
 
 interface PostActionBottomSheetProps {
   postId: number;
@@ -72,15 +78,54 @@ const PostActionsBottomSheet = ({
       <Animated.View style={[animatedOverlayStyle, { flex: 1 }]}>
         <BottomSheet
           onClose={closeModal}
-          snapPoints={["60%"]}
+          snapPoints={["30%"]}
           enablePanDownToClose={true}
           animatedPosition={animatedPosition}
-          backgroundStyle={{ backgroundColor: "#282828" }}
+          backgroundStyle={{
+            backgroundColor: "#282828",
+          }}
           handleComponent={renderHeader}
           ref={sheetRef}
         >
-          {/* Add a childrens prop */}
-          <></>
+          <YStack flex={1} marginHorizontal="$4" gap="$4">
+            <YStack borderRadius="$7" backgroundColor="rgba(63, 63, 62, 0.3)">
+              <TouchableOpacity>
+                <XStack
+                  gap="$4"
+                  padding="$4"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                >
+                  <Send />
+                  <Text>Share</Text>
+                </XStack>
+              </TouchableOpacity>
+              <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
+              <TouchableOpacity>
+                <XStack
+                  gap="$4"
+                  padding="$4"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                >
+                  <ArrowDownToLine />
+                  <Text>Save video</Text>
+                </XStack>
+              </TouchableOpacity>
+              <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
+              <TouchableOpacity>
+                <XStack
+                  gap="$4"
+                  padding="$4"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                >
+                  <AlertCircle color="red" />
+                  <Text color="red">Report</Text>
+                </XStack>
+              </TouchableOpacity>
+            </YStack>
+          </YStack>
         </BottomSheet>
       </Animated.View>
     </Modal>
