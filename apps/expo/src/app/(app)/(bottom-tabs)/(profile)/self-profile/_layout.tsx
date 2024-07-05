@@ -107,7 +107,7 @@ const ProfileLayout = () => {
 
   return (
     <BaseScreenView padding={0} safeAreaEdges={["top"]}>
-      {/* <Animated.View style={[styles.header, headerStyle]}>
+      {/* <Animated.View style={[styles.header, headerStyle]}> */}
         <XStack
           paddingVertical="$2"
           paddingHorizontal="$4"
@@ -129,9 +129,9 @@ const ProfileLayout = () => {
             </TouchableOpacity>
           </View>
         </XStack>
-      </Animated.View>
+      {/* </Animated.View> */}
 
-      <Animated.ScrollView
+      {/* <Animated.ScrollView
       nestedScrollEnabled={true}
         contentContainerStyle={{
           paddingTop: HEADER_HEIGHT,
