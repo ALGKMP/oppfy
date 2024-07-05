@@ -56,11 +56,6 @@ async function getRecommendationsInternal(userId: string) {
     // console.log("response", response);
 
     if (response.status !== 200) {
-      return {
-        tier1: [],
-        tier2: [],
-        tier3: [],
-      };
     }
 
     return (await response.json()) as {
@@ -70,7 +65,11 @@ async function getRecommendationsInternal(userId: string) {
     };
   } catch (error) {
     console.error("Error invoking Lambda function:", error);
-    throw error;
+    return {
+      tier1: [],
+      tier2: [],
+      tier3: [],
+    };
   }
 }
 

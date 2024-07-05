@@ -107,7 +107,7 @@ export const handler = async (
     const recommendedIds = {
       tier1,
       tier2,
-      // tier3,
+      tier3,
       // tier4
     };
 
