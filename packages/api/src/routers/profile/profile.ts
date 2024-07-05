@@ -111,7 +111,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   getBatchProfiles: protectedProcedure
-    .input(z.array(z.string()))
+    .input(z.array(z.string()).nonempty())
     .output(z.array(trpcValidators.output.profile.compactProfile))
     .query(async ({ ctx, input }) => {
       return await ctx.services.profile.getBatchProfiles(input);

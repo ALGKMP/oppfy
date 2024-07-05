@@ -1,7 +1,9 @@
 import { createHash } from "crypto";
+import { z } from "zod";
 
 import { env } from "@oppfy/env/server";
 import { sqs } from "@oppfy/sqs";
+import { trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -174,14 +176,18 @@ export class ContactService {
     }
 
     const recommendationsIds = await this.getRecomendationsIds(userId);
-
-    // start a transaction to get all the usernames and profilePhotos
-    const profiles = await this.profileRepository.getBatchProfiles([
+    const allRecommendations = [
       ...recommendationsIds.tier1,
       ...recommendationsIds.tier2,
       ...recommendationsIds.tier3,
-    ]);
+    ];
+    if (allRecommendations.length === 0) {
+      return [];
+    }
 
+    // start a transaction to get all the usernames and profilePhotos
+    const profiles =
+      await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
     // Fetch presigned URLs for profile pictures in parallel
     const profilesWithUrls = await Promise.allSettled(
       profiles.map(async (profile) => {
@@ -191,7 +197,7 @@ export class ContactService {
             Key: profile.profilePictureKey,
           });
           const { profilePictureKey, ...profileWithoutKey } = profile;
-          return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
+          return { ...profileWithoutKey, profilePictureKey: presignedUrl };
         } catch (error) {
           console.error(
             `Failed to get presigned URL for ${profile.userId}:`,

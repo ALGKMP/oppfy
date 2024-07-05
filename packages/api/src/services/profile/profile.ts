@@ -321,11 +321,12 @@ export class ProfileService {
 
   async getBatchProfiles(userIds: string[]) {
     // Warn: if you get zod errors, it's because this functions return doesn't match the compactProfile schema
-    const batchProfiles =  await this.profileRepository.getBatchProfiles(userIds);
+    const batchProfiles =
+      await this.profileRepository.getBatchProfiles(userIds);
 
-    return z.array(trpcValidators.output.profile.compactProfile).parse(
-      batchProfiles,
-    ); 
+    return z
+      .array(trpcValidators.output.profile.compactProfile)
+      .parse(batchProfiles);
   }
 
   async removeProfilePicture(userId: string) {
@@ -377,7 +378,6 @@ export class ProfileService {
 
     return user.profile;
   }
-
 
   async getNetworkConnectionStatesBetweenUsers(
     targetUserId: string,
