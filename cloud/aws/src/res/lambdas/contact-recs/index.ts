@@ -43,7 +43,6 @@ export const handler = async (
     const tier1 = await g
       .V(userId)
       .outE("contact")
-      // .has("isFollowing", false)
       .where(__.inV().hasId(P.without(following)))
       .inV()
       .dedup()
