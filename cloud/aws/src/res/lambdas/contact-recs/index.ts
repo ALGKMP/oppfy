@@ -76,7 +76,7 @@ export const handler = async (
     console.log("Tier 2", tier2);
     totalRecCount += tier2.length;
 
-    // TODO: adjust the param below for finetuning
+    /*     // TODO: adjust the param below for finetuning
     const tier3 = await g
       .V(userId)
       .out("contact")
@@ -94,7 +94,23 @@ export const handler = async (
       .toList();
 
     console.log("Tier 3", tier3);
-    totalRecCount += tier3.length;
+    totalRecCount += tier3.length; */
+
+    const tier3 = await g
+      .V(userId)
+      .out("contact")
+      .aggregate("contacts")
+      .out("contact")
+      .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
+      .where(
+        __.not(__.where(__.inE("contact").outV().hasId(P.without(following)))),
+      )
+      .groupCount()
+      .unfold()
+      .limit(15)
+      .toList();
+
+    console.log("Tier 3", tier3);
 
     /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
     const tier4 = await g
@@ -113,7 +129,7 @@ export const handler = async (
       length: totalRecCount,
       tier1,
       tier2,
-      tier3,
+      // tier3,
       // tier4
     };
 
