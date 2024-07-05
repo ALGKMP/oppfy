@@ -125,7 +125,7 @@ const PreviewScreen = () => {
           size="$5"
           borderRadius="$7"
           icon={saveState === "idle" ? Download : undefined}
-          onPress={() => saveToCameraRoll({ uri: uri ?? "" })}
+          onPress={() => saveToCameraRoll({ uri: uri ?? "" , isNetworkUrl: false})}
           disabled={saveState === "saving" || saveState === "saved"}
           disabledStyle={{ opacity: 0.5 }}
         >

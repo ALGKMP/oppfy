@@ -465,6 +465,7 @@ const PostItem = (props: PostItemProps) => {
 
       <PostActionsBottomSheet
         postId={post.postId}
+        url={post.imageUrl}
         modalVisible={postActionsBottomSheetVisible}
         setModalVisible={setPostActionsBottomSheetVisible}
         setReportActionSheetVisible={setIsReportModalVisible}

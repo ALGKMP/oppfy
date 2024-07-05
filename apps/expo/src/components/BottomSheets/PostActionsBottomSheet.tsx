@@ -6,11 +6,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BottomSheet, {
-  BottomSheetFlatList,
-  BottomSheetFooter,
-  BottomSheetSectionList,
-} from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   ArrowDownToLine,
@@ -20,8 +16,11 @@ import {
 } from "@tamagui/lucide-icons";
 import { Separator, Text, View, XStack, YStack } from "tamagui";
 
+import useSaveVideo from "~/hooks/useSaveVideo";
+
 interface PostActionBottomSheetProps {
   postId: number;
+  url: string;
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
   setReportActionSheetVisible: (value: boolean) => void;
@@ -29,6 +28,7 @@ interface PostActionBottomSheetProps {
 
 const PostActionsBottomSheet = ({
   postId,
+  url,
   modalVisible,
   setModalVisible,
   setReportActionSheetVisible,
@@ -36,6 +36,7 @@ const PostActionsBottomSheet = ({
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useMemo(() => Dimensions.get("window"), []);
   const sheetRef = useRef<BottomSheet>(null);
+  const { saveState, saveToCameraRoll } = useSaveVideo();
 
   const openModal = useCallback(() => {
     sheetRef.current?.expand();
@@ -110,7 +111,11 @@ const PostActionsBottomSheet = ({
                 </XStack>
               </TouchableOpacity>
               <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  await saveToCameraRoll({ uri: url, isNetworkUrl: true });
+                }}
+              >
                 <XStack
                   gap="$4"
                   padding="$4"
