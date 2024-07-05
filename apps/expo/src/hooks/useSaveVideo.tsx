@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Alert, Linking } from "react-native";
+import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
 
@@ -30,7 +31,36 @@ const useSaveVideo = () => {
     return false;
   };
 
-  const saveToCameraRoll = async ({ uri }: { uri: string }) => {
+  const downloadImage = async ({
+    presignedUrl,
+    fileName,
+  }: {
+    presignedUrl: string;
+    fileName: string;
+  }) => {
+    const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+
+    try {
+      const { uri } = await FileSystem.downloadAsync(presignedUrl, fileUri); // Just gonna temporarily store in cache
+      console.log("File downloaded to cache dir:", uri);
+
+      await MediaLibrary.createAssetAsync(uri);
+      // You can add additional logic here, like saving to the phone's gallery
+      await FileSystem.deleteAsync(uri); // Delete that shit from cache
+      return uri;
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      return null;
+    }
+  };
+
+  const saveToCameraRoll = async ({
+    uri,
+    isNetworkUrl,
+  }: {
+    uri: string;
+    isNetworkUrl: boolean;
+  }) => {
     setSaveState("saving");
 
     const hasPermission = await requestMediaLibraryPermission();
@@ -40,8 +70,16 @@ const useSaveVideo = () => {
       return;
     }
 
-    await MediaLibrary.createAssetAsync(uri);
-    setSaveState("saved");
+    if (isNetworkUrl) {
+      await downloadImage({
+        presignedUrl: uri,
+        fileName: "downloaded_image.jpg",
+      });
+      console.log("Downloaded image");
+    } else {
+      await MediaLibrary.createAssetAsync(uri);
+      setSaveState("saved");
+    }
   };
 
   return { saveState, saveToCameraRoll };
