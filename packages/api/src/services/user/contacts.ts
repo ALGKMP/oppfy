@@ -13,8 +13,7 @@ import {
 import { S3Service } from "../aws/s3";
 
 async function getRecommendationsInternal(userId: string) {
-  const lambdaUrl =
-    "https://h3tereq7y7xy4q7rre36tftbje0yoxsq.lambda-url.us-east-1.on.aws";
+  const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
 
   // Construct the full URL with the query parameter
   const url = new URL(lambdaUrl);
@@ -54,6 +53,7 @@ async function getRecommendationsInternal(userId: string) {
     return await response.json(); */
 
     const response = await fetch(url.toString());
+    console.log("response", response);
     return (await response.json()) as {
       tier1: string[];
       tier2: string[];
@@ -185,11 +185,14 @@ export class ContactService {
           const { profilePictureKey, ...profileWithoutKey } = profile;
           return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
         } catch (error) {
-          console.error(`Failed to get presigned URL for ${profile.userId}:`, error);
+          console.error(
+            `Failed to get presigned URL for ${profile.userId}:`,
+            error,
+          );
           const { profilePictureKey, ...profileWithoutKey } = profile;
           return { ...profileWithoutKey, profilePictureUrl: null }; // Handle failure by setting URL to null
         }
-      })
+      }),
     );
 
     // Filter out any rejected promises and return the successful ones
