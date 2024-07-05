@@ -107,7 +107,7 @@ export const handler = async (
       .filter(__.select(column.values).is(P.gte(1)))
       .limit(15)
       .id()
-      .toList()
+      .toList();
 
     console.log("Tier 3", tier3);
 
