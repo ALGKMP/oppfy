@@ -31,7 +31,6 @@ export const handler = async (
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
     console.log("Querying for recommendations for user", userId);
-    let totalRecCount = 0;
 
     const following = await db
       .select({ userId: schema.follower.recipientId })
@@ -54,7 +53,6 @@ export const handler = async (
       .toList();
 
     console.log("Tier 1", tier1);
-    totalRecCount += tier1.length;
 
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
@@ -74,7 +72,6 @@ export const handler = async (
     tier2.filter((v) => !tier1.includes(v));
 
     console.log("Tier 2", tier2);
-    totalRecCount += tier2.length;
 
     /*     // TODO: adjust the param below for finetuning
     const tier3 = await g
@@ -102,11 +99,9 @@ export const handler = async (
       .aggregate("contacts")
       .out("contact")
       .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
- /*      .where(
-        __.not(__.where(__.inE("contact").outV().hasId(P.without(following)))),
-      ) */
-/*       .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier1)))))
-      .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier2))))) */
+      .where(__.inE("contact").outV().hasId(P.without(tier1)))
+      .where(__.inE("contact").outV().hasId(P.without(tier2)))
+      .where(__.inE("contact").outV().hasId(P.without(following)))
       .groupCount()
       .unfold()
       .limit(15)
@@ -128,7 +123,6 @@ export const handler = async (
     console.log(tier4);
  */
     const recommendedIds = {
-      length: totalRecCount,
       tier1,
       tier2,
       // tier3,
