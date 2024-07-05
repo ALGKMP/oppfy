@@ -107,7 +107,7 @@ const ProfileLayout = () => {
 
   return (
     <BaseScreenView padding={0} safeAreaEdges={["top"]}>
-      <Animated.View style={[styles.header, headerStyle]}>
+      {/* <Animated.View style={[styles.header, headerStyle]}>
         <XStack
           paddingVertical="$2"
           paddingHorizontal="$4"
@@ -145,9 +145,9 @@ const ProfileLayout = () => {
             progressViewOffset={HEADER_HEIGHT}
           />
         }
-      >
+      > */}
         <MediaOfYou />
-      </Animated.ScrollView>
+      {/* </Animated.ScrollView> */}
     </BaseScreenView>
   );
 };
