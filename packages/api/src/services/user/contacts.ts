@@ -10,6 +10,7 @@ import {
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
+import { S3Service } from "../aws/s3";
 
 async function getRecommendationsInternal(userId: string) {
   const lambdaUrl =
@@ -69,6 +70,7 @@ export class ContactService {
   private followRepository = new FollowRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
+  private s3Service = new S3Service();
 
   async syncContacts(userId: string, contacts: string[]) {
     const user = await this.userRepository.getUser(userId);
@@ -172,6 +174,27 @@ export class ContactService {
       ...recommendationsIds.tier3,
     ]);
 
-    return profiles;
+    // Fetch presigned URLs for profile pictures in parallel
+    const profilesWithUrls = await Promise.allSettled(
+      profiles.map(async (profile) => {
+        try {
+          const presignedUrl = await this.s3Service.getObjectPresignedUrl({
+            Bucket: env.S3_PROFILE_BUCKET,
+            Key: profile.profilePictureKey,
+          });
+          const { profilePictureKey, ...profileWithoutKey } = profile;
+          return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
+        } catch (error) {
+          console.error(`Failed to get presigned URL for ${profile.userId}:`, error);
+          const { profilePictureKey, ...profileWithoutKey } = profile;
+          return { ...profileWithoutKey, profilePictureUrl: null }; // Handle failure by setting URL to null
+        }
+      })
+    );
+
+    // Filter out any rejected promises and return the successful ones
+    return profilesWithUrls
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => (result as PromiseFulfilledResult<any>).value);
   }
 }

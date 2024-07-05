@@ -106,31 +106,48 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     <CardContainer>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
-        {/*         {recomendations?.length === 0 ? (
-          <Text>No recommendations found</Text>
-        ) : (
-          <FlashList
-            data={recomendations}
-            horizontal
-            estimatedItemSize={70}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
+        <FlashList
+          data={data}
+          horizontal
+          estimatedItemSize={70}
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => handleFriendClicked(item.profileId)}
+            >
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
-                  <Avatar.Image src={item.profilePictureUrl} />
+                  <Avatar.Image src={item.profilePictureKey} />
                 </Avatar>
                 <Text fontWeight="600" textAlign="center">
                   {item.username}
                 </Text>
               </YStack>
-            )}
-            ItemSeparatorComponent={() => <Spacer size="$2" />}
-            contentContainerStyle={{
-              paddingHorizontal: getToken("$3", "space") as number,
-            }}
-          />
-        )} */}
-        <Button size="$3.5">@oxy add recommendations here</Button>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={
+            showMore ? (
+              <View
+                marginRight={-100}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <SizableText color="$blue7" fontWeight="600">
+                  See more
+                </SizableText>
+              </View>
+            ) : null
+          }
+          ItemSeparatorComponent={() => <Spacer size="$2" />}
+          contentContainerStyle={{
+            paddingHorizontal: getToken("$3", "space") as number,
+          }}
+          ListFooterComponentStyle={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        />
       </YStack>
     </CardContainer>
   );
