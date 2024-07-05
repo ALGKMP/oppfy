@@ -19,7 +19,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { Heart, MoreHorizontal, SendHorizontal } from "@tamagui/lucide-icons";
+import { Heart, MoreHorizontal, Send } from "@tamagui/lucide-icons";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
@@ -330,7 +330,7 @@ const PostItem = (props: PostItemProps) => {
           <TouchableOpacity
             onPress={() => {
               setPostActionsBottomSheetVisible(true);
-              console.log("touched")
+              console.log("touched");
               // setIsReportModalVisible(true)
             }}
           >
@@ -403,7 +403,7 @@ const PostItem = (props: PostItemProps) => {
                 borderRadius="$7"
                 backgroundColor="$gray5"
               >
-                <SendHorizontal size={24} padding="$3" color="$gray12" />
+                <Send size={24} padding="$3" color="$gray12" />
               </View>
             </TouchableOpacity>
           </View>
