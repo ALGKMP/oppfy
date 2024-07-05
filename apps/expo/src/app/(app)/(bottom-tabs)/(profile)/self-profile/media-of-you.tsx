@@ -126,11 +126,10 @@ const PostItem = (props: PostItemProps) => {
     animateButton();
     if (isLiked && doubleTap) return;
 
-    // Incremement this shit to keep of user's wasting their time 
+    // Incremement this shit to keep of user's wasting their time
     howManyTimesDidTheMfHitTheLikeButton.current += 1;
     const clickCount = howManyTimesDidTheMfHitTheLikeButton.current;
     const ignoreIfSameAsCurrentState = clickCount % 2 === 0;
-
 
     const newIsLiked = !isLiked;
 
@@ -164,13 +163,13 @@ const PostItem = (props: PostItemProps) => {
 
           howManyTimesDidTheMfHitTheLikeButton.current = 0;
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
 
         // Clear the fucking timeout after execution
         setLikeTimeout(null);
       })();
-    }, 3000); 
+    }, 3000);
 
     // Save the new timeout for later idiot
     setLikeTimeout(newTimeout);
@@ -499,6 +498,12 @@ const MediaOfYou = () => {
   } = api.profile.getFullProfileSelf.useQuery();
 
   const {
+    data: recomendationsData,
+    isLoading: isLoadingRecomendationsData,
+    refetch: refetchRecomendationsData,
+  } = api.contacts.getReccomendationProfiles.useQuery();
+
+  const {
     data: friendsData,
     isLoading: isLoadingFriendsData,
     refetch: refetchFriendsData,
@@ -509,7 +514,11 @@ const MediaOfYou = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refetchProfileData(), refetchFriendsData()]);
+    await Promise.all([
+      refetchProfileData(),
+      refetchFriendsData(),
+      refetchRecomendationsData(),
+    ]);
     setRefreshing(false);
   }, [refetchFriendsData, refetchProfileData]);
 
@@ -540,8 +549,10 @@ const MediaOfYou = () => {
     if (
       isLoadingProfileData ||
       isLoadingFriendsData ||
+      isLoadingRecomendationsData ||
       profileData === undefined ||
-      friendsData === undefined
+      friendsData === undefined ||
+      recomendationsData === undefined
     ) {
       return (
         <YStack gap="$5">
@@ -556,10 +567,11 @@ const MediaOfYou = () => {
           <ProfileBanner loading={false} data={profileData} />
           <FriendsCarousel
             loading={false}
-            data={{
+            friendsData={{
               friendCount: profileData.friendCount,
               friendItems: friendItems,
             }}
+            reccomendationsData={recomendationsData}
           />
         </YStack>
       </YStack>

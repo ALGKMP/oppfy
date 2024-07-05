@@ -40,9 +40,10 @@ export const contactsRouter = createTRPCRouter({
         ctx.session.uid,
       );
     } catch (err) {
+      console.error(err);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
       });
     }
-  })
+  }),
 });

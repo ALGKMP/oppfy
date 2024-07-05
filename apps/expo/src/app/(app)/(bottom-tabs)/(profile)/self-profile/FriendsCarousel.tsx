@@ -27,15 +27,12 @@ import { api, type RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
-type RecoemndationItems = RouterOutputs["contacts"]["getReccomendationProfiles"];
+type RecoemndationItems =
+  RouterOutputs["contacts"]["getReccomendationProfiles"];
 
 interface FriendsData {
   friendCount: number;
   friendItems: FriendItems;
-}
-
-interface RecomendationsData {
-  recomendations: RecoemndationItems;
 }
 
 interface LoadingProps {
@@ -44,24 +41,18 @@ interface LoadingProps {
 
 interface FriendsLoadedProps {
   loading: false;
-  data: FriendsData;
+  friendsData: FriendsData;
+  reccomendationsData: RecoemndationItems;
 }
 
-type FriendsProps = LoadingProps | FriendsLoadedProps;
+type FriendsCarouselProps = LoadingProps | FriendsLoadedProps;
 
-const FriendsCarousel = (props: FriendsProps) => {
+const FriendsCarousel = (props: FriendsCarouselProps) => {
   const router = useRouter();
 
-  const {
-    data: recomendations,
-    isLoading: isRecomendationsLoading,
-    refetch: refectchRecomendations,
-  } = api.contacts.getReccomendationProfiles.useQuery();
-
-  console.log(recomendations);
-
   const showMore =
-    !props.loading && props.data.friendItems.length < props.data.friendCount;
+    !props.loading &&
+    props.friendsData.friendItems.length < props.friendsData.friendCount;
 
   const handleFriendClicked = (profileId: number) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -111,7 +102,7 @@ const FriendsCarousel = (props: FriendsProps) => {
     </CardContainer>
   );
 
-  const renderSuggestions = (/* data: RecomendationsData */) => (
+  const renderSuggestions = (data: RecoemndationItems) => (
     <CardContainer>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
@@ -203,11 +194,11 @@ const FriendsCarousel = (props: FriendsProps) => {
     return renderLoadingSkeletons();
   }
 
-  if (props.data.friendCount === 0) {
-    return renderSuggestions();
+  if (props.friendsData.friendCount === 0) {
+    return renderSuggestions(props.reccomendationsData);
   }
 
-  return renderFriendList(props.data);
+  return renderFriendList(props.friendsData);
 };
 
 export default FriendsCarousel;
