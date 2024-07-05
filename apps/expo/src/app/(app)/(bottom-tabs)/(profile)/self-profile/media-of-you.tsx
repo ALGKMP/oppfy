@@ -462,10 +462,12 @@ const PostItem = (props: PostItemProps) => {
         modalVisible={commentsBottomSheetVisible}
         setModalVisible={setCommentsBottomSheetVisible}
       />
+
       <PostActionsBottomSheet
         postId={post.postId}
         modalVisible={postActionsBottomSheetVisible}
         setModalVisible={setPostActionsBottomSheetVisible}
+        setReportActionSheetVisible={setIsReportModalVisible}
       />
 
       <ReportPostActionSheet

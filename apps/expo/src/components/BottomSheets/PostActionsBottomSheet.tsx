@@ -24,12 +24,14 @@ interface PostActionBottomSheetProps {
   postId: number;
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
+  setReportActionSheetVisible: (value: boolean) => void;
 }
 
 const PostActionsBottomSheet = ({
   postId,
   modalVisible,
   setModalVisible,
+  setReportActionSheetVisible,
 }: PostActionBottomSheetProps) => {
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useMemo(() => Dimensions.get("window"), []);
@@ -40,8 +42,15 @@ const PostActionsBottomSheet = ({
   }, [sheetRef]);
 
   const closeModal = useCallback(() => {
-    setModalVisible(false);
-    sheetRef.current?.close();
+    if (sheetRef.current) {
+      sheetRef.current.close();
+      // Delay this shit so the animation can finish
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 300); 
+    } else {
+      setModalVisible(false);
+    }
   }, [sheetRef, setModalVisible]);
 
   useEffect(() => {
@@ -113,7 +122,14 @@ const PostActionsBottomSheet = ({
                 </XStack>
               </TouchableOpacity>
               <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  closeModal();
+                  setTimeout(() => {
+                    setReportActionSheetVisible(true);
+                  }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it 
+                }}
+              >
                 <XStack
                   gap="$4"
                   padding="$4"
