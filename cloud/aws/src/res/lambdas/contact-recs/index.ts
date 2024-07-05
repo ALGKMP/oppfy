@@ -105,6 +105,8 @@ export const handler = async (
       .where(
         __.not(__.where(__.inE("contact").outV().hasId(P.without(following)))),
       )
+      .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier1)))))
+      .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier2)))))
       .groupCount()
       .unfold()
       .limit(15)
