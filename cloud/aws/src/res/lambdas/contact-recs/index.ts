@@ -102,11 +102,11 @@ export const handler = async (
       .aggregate("contacts")
       .out("contact")
       .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
-      .where(
+ /*      .where(
         __.not(__.where(__.inE("contact").outV().hasId(P.without(following)))),
-      )
-      .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier1)))))
-      .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier2)))))
+      ) */
+/*       .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier1)))))
+      .where(__.not(__.where(__.inE("contact").outV().hasId(P.within(tier2))))) */
       .groupCount()
       .unfold()
       .limit(15)
