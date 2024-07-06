@@ -29,6 +29,7 @@ import {
   CommentsBottomSheet,
   PostActionsBottomSheet,
 } from "~/components/BottomSheets";
+import ShareBottomSheet from "~/components/BottomSheets/ShareBottomSheet";
 import GradientHeart, {
   useHeartAnimations,
 } from "~/components/Icons/GradientHeart";
@@ -58,6 +59,7 @@ const PostItem = (props: PostItemProps) => {
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
 
   const router = useRouter();
 
@@ -394,7 +396,7 @@ const PostItem = (props: PostItemProps) => {
           </View>
           {/* Share Button */}
           <View flex={1} justifyContent="center">
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsShareModalVisible(true)}>
               <View
                 flex={1}
                 justifyContent="center"
@@ -403,7 +405,7 @@ const PostItem = (props: PostItemProps) => {
                 borderRadius="$7"
                 backgroundColor="$gray5"
               >
-                <Send size={24} padding="$3" color="$gray12" />
+                <Send size={24} padding="$3" marginRight="$1" color="$gray12" />
               </View>
             </TouchableOpacity>
           </View>
@@ -465,10 +467,16 @@ const PostItem = (props: PostItemProps) => {
 
       <PostActionsBottomSheet
         postId={post.postId}
+        mediaType={post.mediaType}
         url={post.imageUrl}
         modalVisible={postActionsBottomSheetVisible}
         setModalVisible={setPostActionsBottomSheetVisible}
         setReportActionSheetVisible={setIsReportModalVisible}
+      />
+
+      <ShareBottomSheet
+        modalVisible={isShareModalVisible}
+        setModalVisible={setIsShareModalVisible}
       />
 
       <ReportPostActionSheet
@@ -476,7 +484,9 @@ const PostItem = (props: PostItemProps) => {
         subtitle="Select reason"
         postId={post.postId}
         isVisible={isReportModalVisible}
-        onCancel={() => setIsReportModalVisible(false)}
+        onCancel={() => {
+          setIsReportModalVisible(false);
+        }}
       />
     </View>
   );
