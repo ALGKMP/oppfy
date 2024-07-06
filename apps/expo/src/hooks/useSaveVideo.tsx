@@ -5,8 +5,9 @@ import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
 
 type SaveState = "idle" | "saving" | "saved";
+type MediaType = "image" | "video";
 
-const useSaveVideo = () => {
+const useSaveMedia = () => {
   const [saveState, setSaveState] = useState<SaveState>("idle");
 
   const openSettings = async () => {
@@ -31,22 +32,30 @@ const useSaveVideo = () => {
     return false;
   };
 
-  const downloadImage = async ({
+  const downloadMedia = async ({
     presignedUrl,
     fileName,
+    mediaType,
   }: {
     presignedUrl: string;
     fileName: string;
+    mediaType: MediaType;
   }) => {
-    const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+    const fileExtension = mediaType === "image" ? "jpg" : "mp4";
+    const fileUri = `${FileSystem.cacheDirectory}${fileName}.${fileExtension}`;
 
     try {
-      const { uri } = await FileSystem.downloadAsync(presignedUrl, fileUri); // Just gonna temporarily store in cache
+      const { uri, mimeType, headers, status } = await FileSystem.downloadAsync(
+        presignedUrl,
+        fileUri,
+      );
       console.log("File downloaded to cache dir:", uri);
+      console.log("File MIME type:", mimeType);
+      console.log("File headers:", headers);
+      console.log("File status:", status);
 
       await MediaLibrary.createAssetAsync(uri);
-      // You can add additional logic here, like saving to the phone's gallery
-      await FileSystem.deleteAsync(uri); // Delete that shit from cache
+      await FileSystem.deleteAsync(uri);
       return uri;
     } catch (error) {
       console.error("Error downloading file:", error);
@@ -57,9 +66,11 @@ const useSaveVideo = () => {
   const saveToCameraRoll = async ({
     uri,
     isNetworkUrl,
+    mediaType,
   }: {
     uri: string;
     isNetworkUrl: boolean;
+    mediaType: MediaType;
   }) => {
     setSaveState("saving");
 
@@ -70,19 +81,25 @@ const useSaveVideo = () => {
       return;
     }
 
-    if (isNetworkUrl) {
-      await downloadImage({
-        presignedUrl: uri,
-        fileName: "downloaded_image.jpg",
-      });
-      console.log("Downloaded image");
-    } else {
-      await MediaLibrary.createAssetAsync(uri);
+    try {
+      if (isNetworkUrl) {
+        await downloadMedia({
+          presignedUrl: uri,
+          fileName: `downloaded_${mediaType}`,
+          mediaType,
+        });
+        console.log(`Downloaded ${mediaType}`);
+      } else {
+        await MediaLibrary.createAssetAsync(uri);
+      }
       setSaveState("saved");
+    } catch (error) {
+      console.error(`Error saving ${mediaType}:`, error);
+      setSaveState("idle");
     }
   };
 
   return { saveState, saveToCameraRoll };
 };
 
-export default useSaveVideo;
+export default useSaveMedia;
