@@ -15,11 +15,9 @@ import {
 import {
   Avatar,
   Button,
-  INITIAL_STATE,
   ScrollView,
   Text,
   View,
-  XStack,
 } from "tamagui";
 
 import BottomSheetWrapper from "./BottomSheetWrapper";
@@ -77,13 +75,18 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
       onPress: () => Alert.alert("Share to Instagram"),
     },
     {
-      name: "Messages",
-      icon: MessageCircle,
+      name: "Copy link",
+      icon: Link,
       onPress: () => Alert.alert("Share to Instagram"),
     },
     {
-      name: "Copy link",
-      icon: Link,
+      name: "Qr Code",
+      icon: QrCode,
+      onPress: () => Alert.alert("Share to Instagram"),
+    },
+    {
+      name: "Messages",
+      icon: MessageCircle,
       onPress: () => Alert.alert("Share to Instagram"),
     },
     {
@@ -117,10 +120,10 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
       onOpen={openModal}
       snapPoints={["20%"]}
     >
-      <ScrollView horizontal flexDirection="row" paddingHorizontal="$3" borderTopColor="$gray8" borderTopWidth="$0.5">
+      <ScrollView horizontal flexDirection="row" paddingHorizontal="$4" borderTopColor="$gray8" borderTopWidth="$0.5">
         {apps.map((app, index) => (
           <TouchableOpacity key={index} onPress={app.onPress}>
-            <View alignItems="center" margin="$3" marginLeft="$2" borderRadius="$10">
+            <View alignItems="center" marginHorizontal="$2.5" marginVertical="$3" borderRadius="$10">
               <Avatar circular size="$5"backgroundColor="$gray7" marginBottom="$2">
                 <app.icon size="$2" margin="$1"/>
               </Avatar>
