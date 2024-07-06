@@ -10,6 +10,7 @@ const Index = () => {
   const { isLoading: permissionsIsLoading } = usePermissions();
 
   useEffect(() => {
+    // todo: to remove the black flicker at the start of the app, we need to hide the splash screen on their respective screens not on the initial app load
     // When loading is complete, hide the splash screen
     if (!sessionIsLoading && !permissionsIsLoading) {
       void SplashScreen.hideAsync();
