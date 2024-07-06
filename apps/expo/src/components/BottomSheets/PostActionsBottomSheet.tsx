@@ -10,7 +10,7 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   ArrowDownToLine,
-  Bookmark,
+  QrCode,
   Minus,
   Send,
 } from "@tamagui/lucide-icons";
@@ -21,6 +21,7 @@ import useSaveVideo from "~/hooks/useSaveVideo";
 interface PostActionBottomSheetProps {
   postId: number;
   url: string;
+  mediaType: "image" | "video";
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
   setReportActionSheetVisible: (value: boolean) => void;
@@ -29,6 +30,7 @@ interface PostActionBottomSheetProps {
 const PostActionsBottomSheet = ({
   postId,
   url,
+  mediaType,
   modalVisible,
   setModalVisible,
   setReportActionSheetVisible,
@@ -106,14 +108,15 @@ const PostActionsBottomSheet = ({
                   alignItems="center"
                   justifyContent="flex-start"
                 >
-                  <Send />
-                  <Text>Share</Text>
+                  <QrCode />
+                  <Text>QR Code</Text>
                 </XStack>
               </TouchableOpacity>
               <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
               <TouchableOpacity
                 onPress={async () => {
-                  await saveToCameraRoll({ uri: url, isNetworkUrl: true });
+                  await saveToCameraRoll({ uri: url, isNetworkUrl: true, mediaType});
+                  closeModal();
                 }}
               >
                 <XStack
@@ -129,10 +132,11 @@ const PostActionsBottomSheet = ({
               <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
               <TouchableOpacity
                 onPress={() => {
+                  setReportActionSheetVisible(true)
+                  // setTimeout(() => {
+                  //   setReportActionSheetVisible(true);
+                  // }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
                   closeModal();
-                  setTimeout(() => {
-                    setReportActionSheetVisible(true);
-                  }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
                 }}
               >
                 <XStack
