@@ -1,17 +1,26 @@
 import React, { useCallback, useRef, useState } from "react";
-import {
-  Alert,
-  Button,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import type BottomSheet from "@gorhom/bottom-sheet";
-import { Instagram } from "@tamagui/lucide-icons";
+import {
+  Facebook,
+  Instagram,
+  Link,
+  MessageCircle,
+  QrCode,
+  Twitter,
+  Upload,
+} from "@tamagui/lucide-icons";
+import {
+  Avatar,
+  Button,
+  INITIAL_STATE,
+  ScrollView,
+  Text,
+  View,
+  XStack,
+} from "tamagui";
 
 import BottomSheetWrapper from "./BottomSheetWrapper";
 
@@ -53,65 +62,75 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     setIsSharing(false);
   };
 
+  const shareElement = (
+    <View>
+      <Button onPress={shareImage}>
+        {isSharing ? "Sharing..." : "Share to Other Apps"}
+      </Button>
+    </View>
+  );
+
+  const apps = [
+    {
+      name: "Share to...",
+      icon: Upload,
+      onPress: () => Alert.alert("Share to Instagram"),
+    },
+    {
+      name: "Messages",
+      icon: MessageCircle,
+      onPress: () => Alert.alert("Share to Instagram"),
+    },
+    {
+      name: "Copy link",
+      icon: Link,
+      onPress: () => Alert.alert("Share to Instagram"),
+    },
+    {
+      name: "Instagram",
+      icon: Instagram,
+      onPress: () => Alert.alert("Share to Instagram"),
+    },
+    {
+      name: "X",
+      icon: Twitter,
+      onPress: () => Alert.alert("Share to Facebook"),
+    },
+
+    {
+      name: "SnapChat",
+      icon: Instagram,
+      onPress: () => Alert.alert("Share to Facebook"),
+    },
+    {
+      name: "Facebook",
+      icon: Facebook,
+      onPress: () => Alert.alert("Share to Facebook"),
+    },
+  ];
+
   return (
     <BottomSheetWrapper
       sheetRef={sheetRef}
       modalVisible={modalVisible}
       onClose={closeModal}
       onOpen={openModal}
-      snapPoints={["50%", "90%"]}
+      snapPoints={["20%"]}
     >
-      <View style={styles.container}>
-        <Text style={styles.title}>Share Post</Text>
-        <ScrollView horizontal style={styles.appsContainer}>
-          {/* Add app icons here */}
-          <View style={styles.appItem}>
-            <Instagram />
-            <Text>Snapchat</Text>
-          </View>
-          <View style={styles.appItem}>
-            <Instagram />
-            <Text>Instagram</Text>
-          </View>
-          <View style={styles.appItem}>
-            <Instagram />
-            <Text>iMessage</Text>
-          </View>
-          {/* Add more app icons as needed */}
-        </ScrollView>
-        <Button
-          title={isSharing ? "Sharing..." : "Share to Other Apps"}
-          onPress={shareImage}
-          disabled={isSharing}
-        />
-      </View>
+      <ScrollView horizontal flexDirection="row" paddingHorizontal="$3" borderTopColor="$gray8" borderTopWidth="$0.5">
+        {apps.map((app, index) => (
+          <TouchableOpacity key={index} onPress={app.onPress}>
+            <View alignItems="center" margin="$3" marginLeft="$2" borderRadius="$10">
+              <Avatar circular size="$5"backgroundColor="$gray7" marginBottom="$2">
+                <app.icon size="$2" margin="$1"/>
+              </Avatar>
+              <Text>{app.name}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </BottomSheetWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  appsContainer: {
-    flexDirection: "row",
-    marginBottom: 16,
-  },
-  appItem: {
-    alignItems: "center",
-    marginRight: 16,
-  },
-  appIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginBottom: 8,
-  },
-});
 
 export default ShareBottomSheet;
