@@ -26,7 +26,7 @@ import {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "~/constants/camera";
-import useSaveVideo from "~/hooks/useSaveVideo";
+import useSaveVideo from "~/hooks/useSaveMedia";
 
 type SaveState = "idle" | "saving" | "saved";
 
@@ -125,7 +125,13 @@ const PreviewScreen = () => {
           size="$5"
           borderRadius="$7"
           icon={saveState === "idle" ? Download : undefined}
-          onPress={() => saveToCameraRoll({ uri: uri ?? "" , isNetworkUrl: false, mediaType: type == "photo" ? "image" : "video"})}
+          onPress={() =>
+            saveToCameraRoll({
+              uri: uri ?? "",
+              isNetworkUrl: false,
+              mediaType: type == "photo" ? "image" : "video",
+            })
+          }
           disabled={saveState === "saving" || saveState === "saved"}
           disabledStyle={{ opacity: 0.5 }}
         >

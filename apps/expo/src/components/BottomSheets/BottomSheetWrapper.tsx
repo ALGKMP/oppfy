@@ -5,7 +5,9 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import BottomSheet, { type BottomSheetProps } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  type BottomSheetProps,
+} from "@gorhom/bottom-sheet";
 import { Minus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 

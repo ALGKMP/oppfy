@@ -10,13 +10,13 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   ArrowDownToLine,
-  QrCode,
   Minus,
+  QrCode,
   Send,
 } from "@tamagui/lucide-icons";
 import { Separator, Text, View, XStack, YStack } from "tamagui";
 
-import useSaveVideo from "~/hooks/useSaveVideo";
+import useSaveVideo from "~/hooks/useSaveMedia";
 
 interface PostActionBottomSheetProps {
   postId: number;
@@ -115,7 +115,11 @@ const PostActionsBottomSheet = ({
               <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
               <TouchableOpacity
                 onPress={async () => {
-                  await saveToCameraRoll({ uri: url, isNetworkUrl: true, mediaType});
+                  await saveToCameraRoll({
+                    uri: url,
+                    isNetworkUrl: true,
+                    mediaType,
+                  });
                   closeModal();
                 }}
               >
@@ -132,7 +136,7 @@ const PostActionsBottomSheet = ({
               <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
               <TouchableOpacity
                 onPress={() => {
-                  setReportActionSheetVisible(true)
+                  setReportActionSheetVisible(true);
                   // setTimeout(() => {
                   //   setReportActionSheetVisible(true);
                   // }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
