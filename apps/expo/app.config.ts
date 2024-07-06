@@ -47,8 +47,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-font",
     "expo-video",
     "expo-router",
-    "expo-sharing",
-    "expo-intent-launcher",
     "@react-native-firebase/app",
     "@react-native-firebase/auth",
     "@react-native-firebase/perf",
