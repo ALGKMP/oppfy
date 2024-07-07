@@ -41,6 +41,12 @@ const useSaveMedia = () => {
     fileName: string;
     mediaType: MediaType;
   }) => {
+    const playbackId = await extractPlayback(presignedUrl);
+
+    if (mediaType == "video") {
+      presignedUrl = `https://stream.mux.com/${playbackId}/standard.mp4`;
+    }
+
     const fileExtension = mediaType === "image" ? "jpg" : "mp4";
     const fileUri = `${FileSystem.cacheDirectory}${fileName}.${fileExtension}`;
 
@@ -73,6 +79,7 @@ const useSaveMedia = () => {
     mediaType: MediaType;
   }) => {
     setSaveState("saving");
+    console.log("uri", uri);
 
     const hasPermission = await requestMediaLibraryPermission();
 
@@ -96,6 +103,16 @@ const useSaveMedia = () => {
     } catch (error) {
       console.error(`Error saving ${mediaType}:`, error);
       setSaveState("idle");
+    }
+  };
+
+  const extractPlayback = async (uri: string) => {
+    const regex = /mux\.com\/([a-zA-Z0-9]+)\./;
+    const match = uri.match(regex);
+    if (match) {
+      return match[1];
+    } else {
+      return null;
     }
   };
 
