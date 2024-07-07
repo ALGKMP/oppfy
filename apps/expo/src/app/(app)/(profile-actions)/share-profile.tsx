@@ -1,11 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  Easing,
-  TouchableOpacity,
-  ViewStyle,
-} from "react-native";
+import React from "react";
+import type { ViewStyle } from "react-native";
+import { TouchableOpacity } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
 import * as Sharing from "expo-sharing";
@@ -16,29 +11,14 @@ import { LinearGradient } from "tamagui/linear-gradient";
 
 import { api } from "~/utils/api";
 
+const GRADIENT_COLORS = ["#fc00ff", "#00dbde"];
+const DEEPLINK_PREFIX = "https://yourapp.com/profile/";
+
 const ShareProfile = () => {
   const utils = api.useUtils();
-  const [username, setUsername] = useState<string | undefined>();
-  const [qrValue, setQrValue] = useState<string>("");
-  const animation = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    const fetchedUsername =
-      utils.profile.getFullProfileSelf.getData()?.username;
-    setUsername(fetchedUsername);
-    if (fetchedUsername) {
-      setQrValue(`https://yourapp.com/profile/${fetchedUsername}`);
-    }
-
-    Animated.loop(
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 10000,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      }),
-    ).start();
-  }, [utils.profile.getFullProfileSelf]);
+  const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
+  const qrValue = `{DEEPLINK_PREFIX}${username}`;
 
   const handleShare = async () => {
     if (qrValue) {
@@ -57,37 +37,8 @@ const ShareProfile = () => {
     }
   };
 
-  const gradientColors = [
-    "#4facfe",
-    "#00f2fe",
-    "#43e97b",
-    "#38f9d7",
-    "#4facfe",
-    "#00f2fe",
-  ];
-
-  const animatedColors = gradientColors.map((color, index) => {
-    return animation.interpolate({
-      inputRange: [
-        index / (gradientColors.length - 1),
-        (index + 1) / (gradientColors.length - 1),
-      ],
-      outputRange: [
-        color,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        gradientColors[(index + 1) % gradientColors.length]!,
-      ],
-      extrapolate: "clamp",
-    });
-  });
-
   return (
-    <AnimatedGradient
-      flex={1}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      colors={animatedColors}
-    >
+    <LinearGradient flex={1} colors={GRADIENT_COLORS}>
       <YStack
         flex={1}
         padding="$6"
@@ -95,15 +46,9 @@ const ShareProfile = () => {
         justifyContent="center"
         gap="$4"
       >
-        <QRContainer width="100%">
-          <YStack padding="$8" alignItems="center" gap="$4">
-            <QRCode
-              value={qrValue || "https://yourapp.com"}
-              size={200}
-              color="#3b82f6"
-              backgroundColor="transparent"
-              logoBackgroundColor="white"
-            />
+        <QRContainer paddingVertical="$8" width="100%">
+          <YStack alignItems="center" gap="$4">
+            <MaskedQRCode value={qrValue} />
             <GradientText>{username?.toUpperCase()}</GradientText>
           </YStack>
         </QRContainer>
@@ -120,15 +65,13 @@ const ShareProfile = () => {
           />
         </XStack>
       </YStack>
-    </AnimatedGradient>
+    </LinearGradient>
   );
 };
 
-const AnimatedGradient = Animated.createAnimatedComponent(LinearGradient);
-
 const QRContainer = styled(YStack, {
   alignItems: "center",
-  backgroundColor: "rgba(255, 255, 255, 0.8)",
+  backgroundColor: "white",
   borderRadius: 20,
   shadowColor: "#000",
   shadowOffset: { width: 0, height: 4 },
@@ -138,26 +81,55 @@ const QRContainer = styled(YStack, {
   width: "100%",
 });
 
-const GradientText: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+interface GradientTextProps {
+  children: React.ReactNode;
+}
+
+const GradientText = ({ children }: GradientTextProps) => {
   return (
     <MaskedView
       maskElement={
-        <H4 color="black" fontSize={24} fontWeight="bold">
+        <H4 color="black" fontFamily="$silkscreen" fontSize={24}>
           @{children}
         </H4>
       }
     >
       <LinearGradient
-        colors={["#667eea", "#764ba2"]}
+        colors={GRADIENT_COLORS}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
       >
-        <H4 color="transparent" fontSize={24} fontWeight="bold">
+        <H4 color="transparent" fontFamily="$silkscreen" fontSize={24}>
           @{children}
         </H4>
       </LinearGradient>
+    </MaskedView>
+  );
+};
+
+interface MaskedQRCodeProps {
+  value: string;
+}
+
+const MaskedQRCode = ({ value }: MaskedQRCodeProps) => {
+  return (
+    <MaskedView
+      style={{ height: 200, width: 200 }}
+      maskElement={
+        <QRCode
+          value={value}
+          size={200}
+          color="black"
+          backgroundColor="transparent"
+        />
+      }
+    >
+      <LinearGradient
+        colors={GRADIENT_COLORS}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ height: 200, width: 200 }}
+      />
     </MaskedView>
   );
 };
@@ -168,29 +140,32 @@ interface ActionButtonProps {
   text: string;
 }
 
-const ActionButton: React.FC<ActionButtonProps> = ({ onPress, icon, text }) => (
-  <TouchableOpacity onPress={onPress} style={{ flex: 1 }}>
-    <YStack
-      padding="$4"
-      borderRadius="$6"
-      alignItems="center"
-      backgroundColor="rgba(255, 255, 255, 0.8)"
-      style={
-        {
-          shadowColor: "rgba(0, 0, 0, 0.1)",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 2,
-        } as ViewStyle
-      }
-    >
-      <Ionicons name={icon as any} size={32} color="#3b82f6" />
-      <Text color="#3b82f6" fontSize={16} fontWeight="bold" marginTop="$2">
-        {text}
-      </Text>
-    </YStack>
-  </TouchableOpacity>
+const ActionButton = ({ onPress, icon, text }: ActionButtonProps) => (
+  <Theme name="light">
+    <TouchableOpacity onPress={onPress} style={{ flex: 1 }}>
+      <YStack
+        padding="$4"
+        borderRadius="$6"
+        alignItems="center"
+        backgroundColor="white"
+        style={
+          {
+            shadowColor: "rgba(0, 0, 0, 0.1)",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 2,
+          } as ViewStyle
+        }
+      >
+        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */}
+        <Ionicons name={icon as any} size={32} />
+        <Text fontSize={16} marginTop="$2">
+          {text}
+        </Text>
+      </YStack>
+    </TouchableOpacity>
+  </Theme>
 );
 
 export default ShareProfile;
