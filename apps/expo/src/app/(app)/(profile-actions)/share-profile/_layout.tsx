@@ -50,15 +50,6 @@ const ShareProfileLayout = () => {
               <ChevronLeft />
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {
-                router.navigate("scan-qr");
-              }}
-            >
-              <QrCode />
-            </TouchableOpacity>
-          ),
         }}
       />
     </Stack>
