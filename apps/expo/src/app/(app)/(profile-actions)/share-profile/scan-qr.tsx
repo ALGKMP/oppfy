@@ -55,7 +55,7 @@ const ScanQr: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View flex={1} backgroundColor="$background">
       <Camera
         style={StyleSheet.absoluteFill}
         device={device}
@@ -82,9 +82,6 @@ const borderRadius = 14;
 const borderColor = "rgba(128,128,128,0.9)";
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   centered: {
     flex: 1,
     alignItems: "center",
