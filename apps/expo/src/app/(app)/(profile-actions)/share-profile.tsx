@@ -18,7 +18,7 @@ const ShareProfile = () => {
   const utils = api.useUtils();
 
   const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
-  const qrValue = `{DEEPLINK_PREFIX}${username}`;
+  const qrValue = `${DEEPLINK_PREFIX}${username}`;
 
   const handleShare = async () => {
     if (qrValue) {
