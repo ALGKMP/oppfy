@@ -25,6 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     entitlements: {
       "aps-environment": "development",
     },
+    associatedDomains: ["applinks:oppfy.app"],
   },
   android: {
     googleServicesFile: "./google-services.json",
