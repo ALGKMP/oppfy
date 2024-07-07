@@ -1,0 +1,20 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "UAYFD9QXLS.app.oppfy"
+        ],
+        "components": [
+          {
+            "#": "no_universal_links",
+            "exclude": true
+          },
+          {
+            "/": "/post/*"
+          }
+        ]
+      }
+    ]
+  }
+}
