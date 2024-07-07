@@ -3,6 +3,7 @@ import type { ViewStyle } from "react-native";
 import { TouchableOpacity } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
@@ -11,7 +12,7 @@ import { LinearGradient } from "tamagui/linear-gradient";
 
 import { api } from "~/utils/api";
 
-const GRADIENT_COLORS = ["#fc00ff", "#00dbde"];
+const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
 const DEEPLINK_PREFIX = "https://yourapp.com/profile/";
 
 const ShareProfile = () => {
@@ -21,20 +22,20 @@ const ShareProfile = () => {
   const qrValue = `${DEEPLINK_PREFIX}${username}`;
 
   const handleShare = async () => {
-    if (qrValue) {
-      try {
-        await Sharing.shareAsync(qrValue);
-      } catch (error) {
-        console.error("Error sharing profile:", error);
-      }
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      await Sharing.shareAsync(qrValue);
+    } catch (error) {
+      console.error("Error sharing profile:", error);
     }
   };
 
   const handleCopyLink = async () => {
-    if (qrValue) {
-      await Clipboard.setStringAsync(qrValue);
-      console.log("Link copied to clipboard");
-    }
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    await Clipboard.setStringAsync(qrValue);
+    console.log("Link copied to clipboard");
   };
 
   return (
@@ -49,7 +50,7 @@ const ShareProfile = () => {
         <QRContainer paddingVertical="$8" width="100%">
           <YStack alignItems="center" gap="$4">
             <MaskedQRCode value={qrValue} />
-            <GradientText>{username?.toUpperCase()}</GradientText>
+            <GradientText>{username.toUpperCase()}</GradientText>
           </YStack>
         </QRContainer>
         <XStack width="100%" gap="$4">
@@ -144,7 +145,7 @@ const ActionButton = ({ onPress, icon, text }: ActionButtonProps) => (
   <Theme name="light">
     <TouchableOpacity onPress={onPress} style={{ flex: 1 }}>
       <YStack
-        padding="$4"
+        padding="$3"
         borderRadius="$6"
         alignItems="center"
         backgroundColor="white"
@@ -157,12 +158,11 @@ const ActionButton = ({ onPress, icon, text }: ActionButtonProps) => (
             elevation: 2,
           } as ViewStyle
         }
+        gap="$2"
       >
         {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */}
-        <Ionicons name={icon as any} size={32} />
-        <Text fontSize={16} marginTop="$2">
-          {text}
-        </Text>
+        <Ionicons name={icon as any} size={28} />
+        <Text>{text}</Text>
       </YStack>
     </TouchableOpacity>
   </Theme>
