@@ -13,7 +13,7 @@ import { Text, View } from "tamagui";
 const { width } = Dimensions.get("window");
 
 const ScanQr: React.FC = () => {
-  const _router = useRouter();
+  const router = useRouter();
 
   const device = useCameraDevice("back");
   const [hasPermission, setHasPermission] = useState(false);
@@ -33,7 +33,7 @@ const ScanQr: React.FC = () => {
       if (codes.length > 0) {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         console.log("Scanned QR code:", codes[0]?.value);
-        _router.push(`/scanned-result?code=${codes[0]?.value}`);
+        router.push(`/scanned-result?code=${codes[0]?.value}`);
       }
     },
   });
@@ -71,9 +71,6 @@ const ScanQr: React.FC = () => {
         <View style={styles.frameCornerTopRight} />
         <View style={styles.frameCornerBottomLeft} />
         <View style={styles.frameCornerBottomRight} />
-      </View>
-      <View style={styles.overlay}>
-        <Text style={styles.text}>Scan QR Code</Text>
       </View>
     </View>
   );

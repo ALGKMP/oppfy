@@ -56,39 +56,13 @@ const ShareProfileLayout = () => {
               <ChevronLeft />
             </TouchableOpacity>
           ),
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {
-                router.navigate("scan-qr");
-              }}
-            >
-              <QrCode />
-            </TouchableOpacity>
-          ),
         }}
       />
     </Stack>
   );
 };
 
-type HeaderLeftProps = HeaderBackButtonProps;
-
 type HeaderProps = NativeStackHeaderProps;
-
-const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
-  const router = useRouter();
-
-  return (
-    <TouchableOpacity
-      hitSlop={10}
-      onPress={() => {
-        canGoBack ? void router.back() : null;
-      }}
-    >
-      <ChevronLeft />
-    </TouchableOpacity>
-  );
-};
 
 const Header = ({ navigation, options }: HeaderProps) => (
   <BaseHeader
