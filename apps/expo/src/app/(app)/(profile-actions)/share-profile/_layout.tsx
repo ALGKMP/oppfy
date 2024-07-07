@@ -1,11 +1,7 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import type {
-  HeaderBackButtonProps,
-  NativeStackHeaderProps,
-} from "@react-navigation/native-stack/src/types";
+import type { NativeStackHeaderProps } from "@react-navigation/native-stack/src/types";
 import { ChevronLeft, QrCode, X } from "@tamagui/lucide-icons";
 import { Text } from "tamagui";
 
@@ -27,9 +23,7 @@ const ShareProfileLayout = () => {
           title: "Share Profile",
           headerTransparent: true,
           headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => router.navigate("/profile-actions")}
-            >
+            <TouchableOpacity onPress={() => router.back()}>
               <X />
             </TouchableOpacity>
           ),
@@ -54,6 +48,15 @@ const ShareProfileLayout = () => {
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
               <ChevronLeft />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+                router.navigate("scan-qr");
+              }}
+            >
+              <QrCode />
             </TouchableOpacity>
           ),
         }}
