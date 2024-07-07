@@ -475,6 +475,7 @@ const PostItem = (props: PostItemProps) => {
       />
 
       <ShareBottomSheet
+        imageUrl={post.imageUrl}
         modalVisible={isShareModalVisible}
         setModalVisible={setIsShareModalVisible}
       />
