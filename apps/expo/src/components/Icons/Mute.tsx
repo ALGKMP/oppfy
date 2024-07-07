@@ -49,8 +49,8 @@ const Mute = ({ muted }: { muted: boolean }) => {
   return (
     <Animated.View style={muteAnimatedStyle}>
       <View flex={1} justifyContent="center" alignItems="center">
-        <Avatar circular size="$5" backgroundColor="$gray9">
-          {muted ? <VolumeX size="$3" /> : <Volume2 size="$3" />}
+        <Avatar circular size="$5" backgroundColor="$gray7">
+          {muted ? <VolumeX size="$2" /> : <Volume2 size="$2" />}
         </Avatar>
       </View>
     </Animated.View>
