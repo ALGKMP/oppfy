@@ -25,7 +25,10 @@ const ProfileActionsLayout = () => {
           title: "Edit Profile",
         }}
       />
-      <Stack.Screen name="share-profile" options={{ title: "Share Profile" }} />
+      <Stack.Screen
+        name="share-profile"
+        options={{ title: "Share Profile", headerTransparent: true }}
+      />
     </Stack>
   );
 };
@@ -51,6 +54,9 @@ const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
 
 const Header = ({ navigation, options }: HeaderProps) => (
   <BaseHeader
+    containerProps={{
+      backgroundColor: options.headerTransparent ? "transparent" : undefined,
+    }}
     HeaderLeft={
       options.headerLeft
         ? options.headerLeft({

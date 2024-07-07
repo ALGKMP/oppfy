@@ -56,7 +56,7 @@ const ProfileBanner = (props: ProfileProps) => {
 
   const onShareProfilePress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // TODO: add sharing functionality with deep linking
+    router.push("/share-profile")
   };
 
   return (
