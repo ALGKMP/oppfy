@@ -25,7 +25,12 @@ const StackHeader = ({
   return (
     <SafeAreaView
       edges={["top"]}
-      style={{ backgroundColor: theme.background.val }}
+      style={{
+        backgroundColor:
+          containerProps?.backgroundColor === "transparent"
+            ? "transparent"
+            : theme.background.val,
+      }}
     >
       <XStack
         paddingVertical="$2"
