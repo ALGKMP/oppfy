@@ -60,19 +60,11 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     setIsSharing(false);
   };
 
-  const shareElement = (
-    <View>
-      <Button onPress={shareImage}>
-        {isSharing ? "Sharing..." : "Share to Other Apps"}
-      </Button>
-    </View>
-  );
-
   const apps = [
     {
       name: "Share to...",
       icon: Upload,
-      onPress: () => Alert.alert("Share to Instagram"),
+      onPress: () => shareImage(),
     },
     {
       name: "Copy link",

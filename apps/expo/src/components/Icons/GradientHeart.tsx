@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import Animated, {
   ReduceMotion,
   runOnJS,
-  SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSpring,
   withTiming,
+  type SharedValue,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 
@@ -116,7 +116,6 @@ export const useHeartAnimations = () => {
       };
 
       setHearts((prevHearts) => [...prevHearts, newHeart]);
-      console.log(hearts);
 
       scale.value = withSpring(
         1,
@@ -145,7 +144,7 @@ export const useHeartAnimations = () => {
 
       return scale;
     },
-    [getRandomGradient, scale, hearts],
+    [getRandomGradient, scale],
   );
 
   return { hearts, addHeart };
