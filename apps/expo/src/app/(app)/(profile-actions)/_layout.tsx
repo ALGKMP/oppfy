@@ -1,17 +1,20 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft } from "@tamagui/lucide-icons";
+import { ChevronLeft, QrCode } from "@tamagui/lucide-icons";
 import { Text } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
 const ProfileActionsLayout = () => {
+  const router = useRouter();
+
   return (
     <Stack
       screenOptions={{
@@ -27,7 +30,19 @@ const ProfileActionsLayout = () => {
       />
       <Stack.Screen
         name="share-profile"
-        options={{ title: "Share Profile", headerTransparent: true }}
+        options={{
+          title: "Share Profile",
+          headerTransparent: true,
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+                router.navigate("scan-qr");
+              }}
+            >
+              <QrCode />
+            </TouchableOpacity>
+          ),
+        }}
       />
     </Stack>
   );
