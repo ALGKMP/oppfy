@@ -232,14 +232,6 @@ const PostItem = (props: PostItemProps) => {
     });
   };
 
-  useEffect(() => {
-    console.log("Mute Icons Length: ", muteIcons.length);
-  }, [muteIcons]);
-
-  useEffect(() => {
-    console.log("heart icons length: ", hearts.length), [hearts];
-  });
-
   return (
     <View
       flex={1}
