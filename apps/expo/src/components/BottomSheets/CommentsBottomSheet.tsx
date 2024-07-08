@@ -293,13 +293,10 @@ const CommentsBottomSheet = ({
               </Text>
             ),
             icon: <Trash2 size="$1.5" color="white" />,
-            onPress: () => async () => {
-              await deleteComment.mutateAsync({
-                postId,
-                commentId: item.commentId,
-              });
-              console.log("Delete");
-            },
+            onPress: () => void deleteComment.mutateAsync({
+              postId,
+              commentId: item.commentId,
+            }),
           },
           {
             label: (
@@ -400,11 +397,7 @@ const CommentsBottomSheet = ({
             itemLayoutAnimation={LinearTransition}
             scrollEnabled={true}
             keyExtractor={(item) => item.commentId.toString()}
-            renderItem={({ item }) => (
-              <Comment
-                item={item}
-              />
-            )}
+            renderItem={({ item }) => <Comment item={item} />}
             onEndReached={async () => {
               await fetchNextPageComments();
             }}
