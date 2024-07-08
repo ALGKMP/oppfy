@@ -27,12 +27,14 @@ import type { sharedValidators } from "@oppfy/validators";
 
 import {
   CommentsBottomSheet,
+  CommentsTestBottomSheet,
   PostActionsBottomSheet,
 } from "~/components/BottomSheets";
 import ShareBottomSheet from "~/components/BottomSheets/ShareBottomSheet";
 import GradientHeart, {
   useHeartAnimations,
 } from "~/components/Icons/GradientHeart";
+import Mute, { useMuteAnimations } from "~/components/Icons/Mute";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { api } from "~/utils/api";
 import FriendsCarousel from "./FriendsCarousel";
@@ -102,6 +104,7 @@ const PostItem = (props: PostItemProps) => {
   const buttonLikeScale = useSharedValue(1);
 
   const { hearts, addHeart } = useHeartAnimations();
+  const { muteIcons, addMute } = useMuteAnimations();
 
   const animateButton = () => {
     buttonLikeScale.value = withSpring(
@@ -123,7 +126,7 @@ const PostItem = (props: PostItemProps) => {
 
   const [likeTimeout, setLikeTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  const handleDoubleTapLike = async (x: number, y: number) => {
+  const handleDoubleTapLike = (x: number, y: number) => {
     addHeart(x, y); // Add one of those fucking heart animations
     handleLikeToggle({ doubleTap: true });
   };
@@ -191,8 +194,13 @@ const PostItem = (props: PostItemProps) => {
       runOnJS(handleDoubleTapLike)(x, y);
     });
 
+  const handleTapMute = () => {
+    addMute(!isMuted);
+    setIsMuted(!isMuted);
+  };
+
   const tapGesture = Gesture.Tap().onEnd(() => {
-    runOnJS(setIsMuted)(!isMuted);
+    runOnJS(handleTapMute)();
   });
 
   // TODO: Not sure what I wanna do. Either pause the video, or make the video full screen
@@ -223,6 +231,14 @@ const PostItem = (props: PostItemProps) => {
       params: { profileId: String(profileId) },
     });
   };
+
+  useEffect(() => {
+    console.log("Mute Icons Length: ", muteIcons.length);
+  }, [muteIcons]);
+
+  useEffect(() => {
+    console.log("heart icons length: ", hearts.length), [hearts];
+  });
 
   return (
     <View
@@ -260,6 +276,12 @@ const PostItem = (props: PostItemProps) => {
                   position={heart.position}
                 />
               ))}
+              {/* Mute animation */}
+              <View flex={1} justifyContent="center" alignItems="center">
+                {muteIcons.map((mute) => (
+                  <Mute key={mute.id} muted={mute.muted} />
+                ))}
+              </View>
             </VideoPost>
           )}
         </View>
@@ -464,6 +486,11 @@ const PostItem = (props: PostItemProps) => {
         modalVisible={commentsBottomSheetVisible}
         setModalVisible={setCommentsBottomSheetVisible}
       />
+      {/* <CommentsTestBottomSheet
+        postId={post.postId}
+        modalVisible={commentsBottomSheetVisible}
+        setModalVisible={setCommentsBottomSheetVisible}
+      /> */}
 
       <PostActionsBottomSheet
         postId={post.postId}
