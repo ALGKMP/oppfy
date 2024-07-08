@@ -17,6 +17,8 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState<
     RouterOutputs["search"]["profilesByUsername"]
   >([]);
+  type RecomendationsData =
+    RouterOutputs["contacts"]["getReccomendationProfiles"];
 
   const { isLoading, mutateAsync: searchProfilesByUsername } =
     api.search.profilesByUsername.useMutation();
@@ -83,12 +85,31 @@ const Search = () => {
     </CardContainer>
   );
 
-  const renderRecommendations = () => (
+  const renderRecommendations = (recs: RecomendationsData) => (
     <CardContainer>
-      <View>
-        <ListItemTitle>Recommendations</ListItemTitle>
-        <SizableText>@oxy show suggestions here</SizableText>
-      </View>
+      <FlashList
+        data={recs}
+        estimatedItemSize={75}
+        showsVerticalScrollIndicator={false}
+        onScrollBeginDrag={Keyboard.dismiss}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={<ListItemTitle>Suggested profiles</ListItemTitle>}
+        renderItem={({ item }) => (
+          <VirtualizedListItem
+            loading={false}
+            title={item.username}
+            subtitle={item.fullName!}
+            imageUrl={item.profilePictureUrl}
+            onPress={() => {
+              if (!item.profileId) return;
+              router.navigate({
+                pathname: "/(search)/profile/[profile-id]/",
+                params: { profileId: String(item.profileId) },
+              });
+            }}
+          />
+        )}
+      />
     </CardContainer>
   );
 
@@ -106,7 +127,7 @@ const Search = () => {
             isLoadingRecomendationsData ? (
               renderLoadingSkeletons()
             ) : (
-              renderRecommendations()
+              renderRecommendations(recomendationsData!)
             )
           ) : isLoading ? (
             renderLoadingSkeletons()
