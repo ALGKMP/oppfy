@@ -7,7 +7,10 @@ import React, {
 } from "react";
 import { Dimensions, Modal, TouchableOpacity } from "react-native";
 import Animated, {
+  FadeIn,
+  FadeOut,
   interpolate,
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
@@ -32,6 +35,7 @@ import type { sharedValidators } from "@oppfy/validators";
 import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 import { api } from "~/utils/api";
 import { BlurContextMenuWrapper } from "../ContextMenu";
+import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface CommentsModalProps {
   postId: number;
@@ -47,19 +51,7 @@ const CommentsBottomSheet = ({
   const utils = api.useUtils();
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
-  const { height: screenHeight } = Dimensions.get("window");
   const insets = useSafeAreaInsets();
-  const animatedPosition = useSharedValue(0);
-  const animatedOverlayStyle = useAnimatedStyle(() => {
-    const heightPercentage = animatedPosition.value / screenHeight;
-    const opacity = interpolate(
-      heightPercentage,
-      [0.2, 0.9],
-      [0.9, 0],
-      "clamp",
-    );
-    return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
-  });
   const [optimisticUpdateCommentId, setOptimisticUpdateCommentId] = useState<
     number | null
   >(null);
@@ -82,17 +74,6 @@ const CommentsBottomSheet = ({
       closeModal();
     }
   }, [modalVisible, closeModal, openModal]);
-
-  useEffect(() => {
-    if (modalVisible) {
-      void (async () => {
-        // Optionally, also refetch posts to ensure comment counts are up-to-date
-        await utils.post.paginatePostsOfUserSelf.refetch();
-      })();
-    } else {
-      closeModal();
-    }
-  }, [modalVisible]);
 
   const {
     data: commentsData,
@@ -409,113 +390,102 @@ const CommentsBottomSheet = ({
   );
 
   return (
-    <Modal transparent={true} visible={modalVisible}>
-      <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
-        <BottomSheet
-          topInset={insets.top}
-          keyboardBehavior="interactive"
-          ref={sheetRef}
-          snapPoints={snapPoints}
-          index={0}
-          enablePanDownToClose={true}
-          onClose={() => {
-            closeModal();
+    <BottomSheetWrapper
+      sheetRef={sheetRef}
+      modalVisible={modalVisible}
+      onClose={closeModal}
+      onOpen={openModal}
+      snapPoints={snapPoints}
+      topInset={insets.top}
+      handleComponent={renderHeader}
+    >
+      {
+        // if there are no comments render a message
+        comments.length === 0 ? (
+          <View flex={1} justifyContent="center" alignItems="center">
+            <SizableText size={"$7"}>No comments yet</SizableText>
+            <Text color={"$gray10"}>Be the first to comment</Text>
+          </View>
+        ) : (
+          <Animated.FlatList
+            data={comments}
+            itemLayoutAnimation={LinearTransition}
+            scrollEnabled={true}
+            keyExtractor={(item) => item.commentId.toString()}
+            renderItem={({ item }) => (
+              <Comment
+                item={item}
+                isNew={item.commentId === optimisticUpdateCommentId}
+              />
+            )}
+            onEndReached={async () => {
+              await fetchNextPageComments();
+            }}
+          />
+        )
+      }
+      <XStack
+        borderTopColor={"$gray5"}
+        borderTopWidth={"$0.25"}
+        justifyContent="space-evenly"
+        alignItems="center"
+        paddingTop={"$3"}
+        backgroundColor={"$gray4"}
+      >
+        {emojiList.map((emoji) => (
+          <TouchableOpacity key={emoji} onPress={() => handleEmojiPress(emoji)}>
+            <SizableText size={"$8"}>{emoji}</SizableText>
+          </TouchableOpacity>
+        ))}
+      </XStack>
+      <XStack
+        padding={"$3.5"}
+        paddingBottom={"$6"}
+        gap="$2.5"
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor={"$gray4"}
+      >
+        <Avatar circular size="$4" flex={1}>
+          <Avatar.Image
+            accessibilityLabel="User Avatar"
+            src={profile?.profilePictureUrl}
+          />
+          <Avatar.Fallback backgroundColor="$blue10" />
+        </Avatar>
+        <View style={{ flex: 5 }}>
+          <BottomSheetTextInput
+            placeholder="Comment"
+            maxLength={100}
+            value={inputValue}
+            onChangeText={setInputValue}
+            style={{
+              fontWeight: "bold",
+              justifyContent: "flex-start",
+              borderWidth: 10,
+              borderColor: "#2E2E2E",
+              borderRadius: 20,
+              backgroundColor: "#2E2E2E",
+              color: "#fff",
+            }}
+          />
+        </View>
+        <TouchableOpacity
+          onPress={handlePostComment}
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 7,
+            backgroundColor: "rgb(1,145,255)",
+            borderRadius: 20,
+            borderWidth: 0,
           }}
-          animatedPosition={animatedPosition}
-          handleComponent={renderHeader}
-          backgroundStyle={{ backgroundColor: "#282828" }}
         >
-          {
-            // if there are no comments render a message
-            comments.length === 0 ? (
-              <View flex={1} justifyContent="center" alignItems="center">
-                <SizableText size={"$7"}>No comments yet</SizableText>
-                <Text color={"$gray10"}>Be the first to comment</Text>
-              </View>
-            ) : (
-              <BottomSheetFlatList
-                onEndReached={async () => {
-                  await fetchNextPageComments();
-                }}
-                scrollEnabled={true}
-                data={comments}
-                renderItem={({ item }) => (
-                  <Comment
-                    item={item}
-                    isNew={item.commentId === optimisticUpdateCommentId}
-                  />
-                )}
-                contentContainerStyle={{ backgroundColor: "#282828" }}
-              />
-            )
-          }
-          <XStack
-            borderTopColor={"$gray5"}
-            borderTopWidth={"$0.25"}
-            justifyContent="space-evenly"
-            alignItems="center"
-            paddingTop={"$3"}
-            backgroundColor={"$gray4"}
-          >
-            {emojiList.map((emoji) => (
-              <TouchableOpacity
-                key={emoji}
-                onPress={() => handleEmojiPress(emoji)}
-              >
-                <SizableText size={"$8"}>{emoji}</SizableText>
-              </TouchableOpacity>
-            ))}
-          </XStack>
-          <XStack
-            padding={"$3.5"}
-            paddingBottom={"$6"}
-            gap="$2.5"
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor={"$gray4"}
-          >
-            <Avatar circular size="$4" flex={1}>
-              <Avatar.Image
-                accessibilityLabel="User Avatar"
-                src={profile?.profilePictureUrl}
-              />
-              <Avatar.Fallback backgroundColor="$blue10" />
-            </Avatar>
-            <View style={{ flex: 5 }}>
-              <BottomSheetTextInput
-                placeholder="Comment"
-                maxLength={100}
-                value={inputValue}
-                onChangeText={setInputValue}
-                style={{
-                  fontWeight: "bold",
-                  justifyContent: "flex-start",
-                  borderWidth: 10,
-                  borderColor: "#2E2E2E",
-                  borderRadius: 20,
-                  backgroundColor: "#2E2E2E",
-                  color: "#fff",
-                }}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={handlePostComment}
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 7,
-                backgroundColor: "rgb(1,145,255)",
-                borderRadius: 20,
-                borderWidth: 0,
-              }}
-            >
-              <SendHorizontal color="$gray12" />
-            </TouchableOpacity>
-          </XStack>
-        </BottomSheet>
-      </Animated.View>
-    </Modal>
+          <SendHorizontal color="$gray12" />
+        </TouchableOpacity>
+      </XStack>
+    </BottomSheetWrapper>
   );
 };
 
