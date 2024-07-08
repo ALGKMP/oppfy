@@ -1,5 +1,6 @@
 {
   "applinks": {
+    "apps": [],
     "details": [
       {
         "appIDs": [
@@ -21,6 +22,16 @@
           }
         ]
       }
+    ]
+  },
+  "activitycontinuation": {
+    "apps": [
+      "UAYFD9QXLS.app.oppfy"
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "UAYFD9QXLS.app.oppfy"
     ]
   }
 }
