@@ -6,13 +6,9 @@ import React, {
   useState,
 } from "react";
 import { TouchableOpacity } from "react-native";
-import Animated, {
-  LinearTransition,
-} from "react-native-reanimated";
+import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BottomSheet, {
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   Minus,
@@ -282,10 +278,8 @@ const CommentsBottomSheet = ({
 
   const Comment = ({
     item,
-    isNew = false,
   }: {
     item: z.infer<typeof sharedValidators.media.comment>;
-    isNew?: boolean;
   }) => {
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
@@ -409,7 +403,6 @@ const CommentsBottomSheet = ({
             renderItem={({ item }) => (
               <Comment
                 item={item}
-                isNew={item.commentId === optimisticUpdateCommentId}
               />
             )}
             onEndReached={async () => {
