@@ -10,16 +10,20 @@ import MaskedView from "@react-native-masked-view/masked-view";
 import { H4, styled, Text, Theme, XStack, YStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
+import { env } from "@oppfy/env";
+
 import { api } from "~/utils/api";
 
 const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
-const DEEPLINK_PREFIX = "https://yourapp.com/profile/";
 
 const ShareProfile = () => {
   const utils = api.useUtils();
 
   const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
-  const qrValue = `${DEEPLINK_PREFIX}${username}`;
+  const qrValue = new URL(
+    `/profile/${username}`,
+    env.EXPO_PUBLIC_API_URL,
+  ).toString();
 
   const handleShare = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
