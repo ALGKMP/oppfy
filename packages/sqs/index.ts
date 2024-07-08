@@ -14,5 +14,3 @@ export const sqs = Producer.create({
     },
   }),
 });
-
-process.env.
