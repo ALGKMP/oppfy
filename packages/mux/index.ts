@@ -1,6 +1,6 @@
 import Mux from "@mux/mux-node";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 export const mux = new Mux({
   tokenId: env.MUX_TOKEN_ID,

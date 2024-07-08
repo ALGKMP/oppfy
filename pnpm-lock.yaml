@@ -43,6 +43,9 @@ importers:
       '@mux/mux-data-react-native-video':
         specifier: ^0.15.2
         version: 0.15.2(react-native-video@6.3.0)(react@18.2.0)
+      '@oppfy/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@oppfy/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -329,6 +332,9 @@ importers:
       '@oppfy/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@oppfy/env':
+        specifier: workspace:*
+        version: link:../../packages/env
       '@t3-oss/env-nextjs':
         specifier: ^0.6.1
         version: 0.6.1(typescript@5.4.5)(zod@3.23.8)
@@ -896,13 +902,6 @@ importers:
         version: 5.4.5
 
   packages/env:
-    dependencies:
-      '@t3-oss/env-core':
-        specifier: ^0.10.1
-        version: 0.10.1(typescript@5.4.5)(zod@3.23.8)
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
     devDependencies:
       '@oppfy/eslint-config':
         specifier: workspace:*

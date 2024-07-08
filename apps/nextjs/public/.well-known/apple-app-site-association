@@ -1,5 +1,6 @@
 {
   "applinks": {
+    "apps": [],
     "details": [
       {
         "appIDs": [
@@ -12,9 +13,25 @@
           },
           {
             "/": "/post/*"
+          },
+          {
+            "/": "/profile",
+            "?": {
+              "username": "*"
+            }
           }
         ]
       }
+    ]
+  },
+  "activitycontinuation": {
+    "apps": [
+      "UAYFD9QXLS.app.oppfy"
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "UAYFD9QXLS.app.oppfy"
     ]
   }
 }

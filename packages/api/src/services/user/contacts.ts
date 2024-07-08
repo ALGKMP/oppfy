@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { z } from "zod";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 import { sqs } from "@oppfy/sqs";
 import { trpcValidators } from "@oppfy/validators";
 
@@ -191,27 +191,18 @@ export class ContactService {
     // Fetch presigned URLs for profile pictures in parallel
     const profilesWithUrls = await Promise.allSettled(
       profiles.map(async (profile) => {
-        try {
-          const presignedUrl = await this.s3Service.getObjectPresignedUrl({
-            Bucket: env.S3_PROFILE_BUCKET,
-            Key: profile.profilePictureKey,
-          });
-          const { profilePictureKey, ...profileWithoutKey } = profile;
-          return { ...profileWithoutKey, profilePictureKey: presignedUrl };
-        } catch (error) {
-          console.error(
-            `Failed to get presigned URL for ${profile.userId}:`,
-            error,
-          );
-          const { profilePictureKey, ...profileWithoutKey } = profile;
-          return { ...profileWithoutKey, profilePictureUrl: null }; // Handle failure by setting URL to null
-        }
+        const presignedUrl = await this.s3Service.getObjectPresignedUrl({
+          Bucket: env.S3_PROFILE_BUCKET,
+          Key: profile.profilePictureKey,
+        });
+        const { profilePictureKey, ...profileWithoutKey } = profile;
+        return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
       }),
     );
 
     // Filter out any rejected promises and return the successful ones
     return profilesWithUrls
       .filter((result) => result.status === "fulfilled")
-      .map((result) => (result as PromiseFulfilledResult<any>).value);
+      .map((result) => result.value);
   }
 }
