@@ -81,14 +81,14 @@ async function updateContacts(
         .from_("currentUser")
         .property("createdAt", currentTimestamp),
     )
-    .property(
+/*     .property(
       "isFollowing",
       __.choose(
         __.select("contactUser").id().is(P.within(followingIds)),
         __.constant(true),
         __.constant(false),
       ),
-    )
+    ) */
     .iterate();
 
   return true;
