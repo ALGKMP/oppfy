@@ -1,6 +1,6 @@
 import { SNSClient } from "@aws-sdk/client-sns";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 export { PublishCommand } from "@aws-sdk/client-sns";
 

@@ -1,4 +1,4 @@
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {

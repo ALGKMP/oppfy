@@ -1,6 +1,6 @@
 import type { Config } from "drizzle-kit";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 export default {
   schema: "./src/schema",

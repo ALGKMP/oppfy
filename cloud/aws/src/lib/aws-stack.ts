@@ -18,7 +18,7 @@ import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 // Helper function to create an S3 bucket
 function createBucket(scope: Construct, name: string) {
@@ -391,7 +391,7 @@ export class AwsStack extends cdk.Stack {
       "Allow Gremlin access from any IPv4 address",
     );
 
-    let cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
+    const cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
       vpc,
       iamAuthentication: false,
       instanceType: neptune.InstanceType.T3_MEDIUM,
@@ -476,7 +476,7 @@ export class AwsStack extends cdk.Stack {
     });
 
     // user for debug notebook if someone wants to use that shit
-    let neptuneNotebookRole = new iam.Role(this, "NeptuneNotebookRole", {
+    const neptuneNotebookRole = new iam.Role(this, "NeptuneNotebookRole", {
       assumedBy: new iam.ServicePrincipal("sagemaker.amazonaws.com"),
       description: "Role for neptune notebook",
     });

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";

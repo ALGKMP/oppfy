@@ -5,18 +5,19 @@
   "main": "index.tsx",
   "scripts": {
     "clean": "git clean -xdf .expo .gitignore .turbo node_modules",
-    "dev": "expo start",
-    "dev:ios": "expo start --ios",
-    "dev:android": "expo start --android",
-    "ios": "expo run:ios",
-    "android": "expo run:android",
+    "dev": "pnpm with-env expo start",
+    "dev:ios": "pnpm with-env expo start --ios",
+    "dev:android": "pnpm with-env expo start --android",
+    "ios": "pnpm with-env expo run:ios",
+    "android": "pnpm with-env expo run:android",
     "prebuild": "expo prebuild",
     "prebuild:clean": "expo prebuild --clean",
     "open:ios": "open -a \"Xcode\" ios",
     "open:android": "open -a \"Android Studio\" android",
     "lint": "eslint",
     "format": "prettier --check . --ignore-path ../../.gitignore",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@oppfy/env": "workspace:*",

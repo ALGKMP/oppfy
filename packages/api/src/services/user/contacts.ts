@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { z } from "zod";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 import { sqs } from "@oppfy/sqs";
 import { trpcValidators } from "@oppfy/validators";
 

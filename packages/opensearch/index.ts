@@ -2,7 +2,7 @@ import { defaultProvider } from "@aws-sdk/credential-provider-node";
 import { Client as OpenSearchClient } from "@opensearch-project/opensearch";
 import { AwsSigv4Signer } from "@opensearch-project/opensearch/aws";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 export const openSearch = new OpenSearchClient({
   ...AwsSigv4Signer({

@@ -1,7 +1,7 @@
 import { SQSClient } from "@aws-sdk/client-sqs";
 import { Producer } from "sqs-producer";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 export const sqs = Producer.create({
   queueUrl: env.SQS_CONTACT_QUEUE,
@@ -14,3 +14,5 @@ export const sqs = Producer.create({
     },
   }),
 });
+
+process.env.

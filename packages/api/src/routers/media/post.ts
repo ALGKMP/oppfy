@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError } from "../../errors";
@@ -44,7 +44,7 @@ export const postRouter = createTRPCRouter({
     .input(trpcValidators.input.post.createMuxPresignedUrl)
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("Creating Mux URL")
+        console.log("Creating Mux URL");
         const result = await ctx.services.mux.createDirectUpload(
           ctx.session.uid,
           input.recipientId,
