@@ -5,18 +5,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Dimensions, Modal, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import Animated, {
-  FadeIn,
-  FadeOut,
-  interpolate,
   LinearTransition,
-  useAnimatedStyle,
-  useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet, {
-  BottomSheetFlatList,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import {
@@ -304,7 +298,7 @@ const CommentsBottomSheet = ({
                 Delete
               </Text>
             ),
-            icon: <Trash2 size={"$1.5"} color="white" />,
+            icon: <Trash2 size="$1.5" color="white" />,
             onPress: () => async () => {
               await deleteComment.mutateAsync({
                 postId,
@@ -319,7 +313,7 @@ const CommentsBottomSheet = ({
                 Report
               </Text>
             ),
-            icon: <AlertCircle size={"$1.5"} color="red" />,
+            icon: <AlertCircle size="$1.5" color="red" />,
             onPress: () => {
               setTimeout(() => {
                 setIsReportModalVisible(true);
@@ -328,7 +322,7 @@ const CommentsBottomSheet = ({
           },
         ]}
       >
-        <View padding={"$3.5"} backgroundColor={"$gray4"} borderRadius={"$7"}>
+        <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
           <XStack gap="$3" alignItems="center">
             <Avatar circular size="$4">
               <Avatar.Image
@@ -337,10 +331,10 @@ const CommentsBottomSheet = ({
               />
               <Avatar.Fallback backgroundColor="$blue10" />
             </Avatar>
-            <YStack gap={"$2"}>
-              <XStack gap={"$2"}>
-                <Text fontWeight={"bold"}>{item.username}</Text>
-                <Text color={"$gray10"}>
+            <YStack gap="$2">
+              <XStack gap="$2">
+                <Text fontWeight="bold">{item.username}</Text>
+                <Text color="$gray10">
                   {timeAgo.format(new Date(item.createdAt))}
                 </Text>
               </XStack>
@@ -367,22 +361,22 @@ const CommentsBottomSheet = ({
         alignItems="center"
         position="relative"
       >
-        <Minus size={"$4"} />
+        <Minus size="$4" />
         <View justifyContent="center" alignItems="center">
           <SizableText
-            size={"$5"}
+            size="$5"
             textAlign="center"
-            color={"$white"}
-            fontWeight={"bold"}
+            color="$white"
+            fontWeight="bold"
           >
             Comments
           </SizableText>
         </View>
         <View
-          width={"95%"}
-          borderColor={"$gray8"}
-          borderWidth={"$0.25"}
-          marginTop={"$3"}
+          width="95%"
+          borderColor="$gray8"
+          borderWidth="$0.25"
+          marginTop="$3"
         />
       </YStack>
     ),
@@ -403,8 +397,8 @@ const CommentsBottomSheet = ({
         // if there are no comments render a message
         comments.length === 0 ? (
           <View flex={1} justifyContent="center" alignItems="center">
-            <SizableText size={"$7"}>No comments yet</SizableText>
-            <Text color={"$gray10"}>Be the first to comment</Text>
+            <SizableText size="$7">No comments yet</SizableText>
+            <Text color="$gray10">Be the first to comment</Text>
           </View>
         ) : (
           <Animated.FlatList
@@ -425,26 +419,26 @@ const CommentsBottomSheet = ({
         )
       }
       <XStack
-        borderTopColor={"$gray5"}
-        borderTopWidth={"$0.25"}
+        borderTopColor="$gray5"
+        borderTopWidth="$0.25"
         justifyContent="space-evenly"
         alignItems="center"
-        paddingTop={"$3"}
-        backgroundColor={"$gray4"}
+        paddingTop="$3"
+        backgroundColor="$gray4"
       >
         {emojiList.map((emoji) => (
           <TouchableOpacity key={emoji} onPress={() => handleEmojiPress(emoji)}>
-            <SizableText size={"$8"}>{emoji}</SizableText>
+            <SizableText size="$8">{emoji}</SizableText>
           </TouchableOpacity>
         ))}
       </XStack>
       <XStack
-        padding={"$3.5"}
-        paddingBottom={"$6"}
+        padding="$3.5"
+        paddingBottom="$6"
         gap="$2.5"
         justifyContent="center"
         alignItems="center"
-        backgroundColor={"$gray4"}
+        backgroundColor="$gray4"
       >
         <Avatar circular size="$4" flex={1}>
           <Avatar.Image
