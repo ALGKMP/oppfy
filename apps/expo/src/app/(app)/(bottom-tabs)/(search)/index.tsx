@@ -21,6 +21,9 @@ const Search = () => {
   const { isLoading, mutateAsync: searchProfilesByUsername } =
     api.search.profilesByUsername.useMutation();
 
+  const { data: recomendationsData, isLoading: isLoadingRecomendationsData } =
+    api.contacts.getReccomendationProfiles.useQuery();
+
   const performSearch = async (partialUsername: string) => {
     setSearchTerm(partialUsername);
 
@@ -100,7 +103,11 @@ const Search = () => {
         />
         <View>
           {!searchTerm ? (
-            renderRecommendations()
+            isLoadingRecomendationsData ? (
+              renderLoadingSkeletons()
+            ) : (
+              renderRecommendations()
+            )
           ) : isLoading ? (
             renderLoadingSkeletons()
           ) : searchResults.length ? (
