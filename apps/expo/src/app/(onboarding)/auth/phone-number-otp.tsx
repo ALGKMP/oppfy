@@ -16,6 +16,9 @@ import {
 } from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
+// ! This is for testing purposes only, do not use in production
+auth().settings.appVerificationDisabledForTesting = true;
+
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
   ERROR_SENDING_CODE = "Error sending code. Try again later.",
@@ -88,7 +91,7 @@ const PhoneNumberOTP = () => {
       return;
     }
 
-    isNewUser ? await handleNewUser(userId) : await handleExistingUser(userId);
+    isNewUser ? await handleNewUser(userId) : await handleExistingUser();
   };
 
   return (
@@ -125,9 +128,6 @@ const PhoneNumberOTP = () => {
     </KeyboardSafeView>
   );
 };
-
-// ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = true;
 
 interface OTPInputProps {
   value: string;

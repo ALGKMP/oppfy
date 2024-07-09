@@ -5,13 +5,10 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import {
-  Button,
   getToken,
   H1,
-  Input,
   ListItem,
   SizableText,
-  styled,
   Text,
   useTheme,
   View,

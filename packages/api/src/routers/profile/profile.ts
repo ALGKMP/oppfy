@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import { sharedValidators, trpcValidators } from "@oppfy/validators";
+import { trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
@@ -43,53 +43,6 @@ export const profileRouter = createTRPCRouter({
       }
 
       return possibleProfile.id;
-    }),
-
-  updateFullName: protectedProcedure
-    .input(trpcValidators.input.profile.updateFullName)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.profile.updateFullName(
-          ctx.session.uid,
-          input.fullName,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
-  updateDateOfBirth: protectedProcedure
-    .input(trpcValidators.input.profile.updateDateOfBirth)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await ctx.services.profile.updateDateOfBirth(
-          ctx.session.uid,
-          input.dateOfBirth,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
-  updateUsername: protectedProcedure
-    .input(trpcValidators.input.profile.updateUsername)
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await ctx.services.profile.updateUsername(
-          ctx.session.uid,
-          input.username,
-        );
-      } catch (err) {
-        if (err instanceof DomainError) {
-          if (err.code === ErrorCode.USERNAME_ALREADY_EXISTS) {
-            throw new TRPCError({
-              code: "CONFLICT",
-              message: "Username already exists",
-            });
-          }
-        }
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
     }),
 
   generatePresignedUrlForProfilePicture: protectedProcedure

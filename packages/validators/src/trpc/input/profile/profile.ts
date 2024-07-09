@@ -1,14 +1,17 @@
 import { z } from "zod";
 
+import { bio, dateOfBirth, fullName, username } from "../../../shared";
+
 const trpcProfileInputSchema = {
   generatePresignedUrlForProfilePicture: z.object({
     contentLength: z.number().refine((size) => size < 5 * 1024 * 1024),
   }),
 
   updateProfile: z.object({
-    fullName: z.string().max(50),
-    username: z.string().max(50),
-    bio: z.string().max(160),
+    fullName: fullName.optional(),
+    username: username.optional(),
+    bio: bio.optional(),
+    dateOfBirth: dateOfBirth.optional(),
   }),
 
   updateUsername: z.object({

@@ -18,7 +18,7 @@ const FullName = () => {
   const router = useRouter();
 
   const [fullName, setFullName] = useState("");
-  const updateName = api.profile.updateFullName.useMutation();
+  const updateProfile = api.profile.updateProfile.useMutation();
 
   const isValidFullName = useMemo(
     () => sharedValidators.user.fullName.safeParse(fullName).success,
@@ -26,7 +26,7 @@ const FullName = () => {
   );
 
   const onSubmit = async () => {
-    await updateName.mutateAsync({
+    await updateProfile.mutateAsync({
       fullName,
     });
     router.push("/user-info/date-of-birth");
