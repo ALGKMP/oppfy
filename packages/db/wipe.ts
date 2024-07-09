@@ -14,15 +14,15 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-async function promptUser(question: string): Promise<string> {
+const promptUser = async (question: string): Promise<string> => {
   return new Promise((resolve) => {
     rl.question(question, (answer) => {
       resolve(answer.trim());
     });
   });
-}
+};
 
-async function wipeDatabase() {
+const wipeDatabase = async () => {
   console.log("WARNING: This will completely wipe the database!");
   console.log("Database URL:", env.DATABASE_URL);
 
@@ -67,6 +67,6 @@ async function wipeDatabase() {
     rl.close();
     await queryClient.end();
   }
-}
+};
 
 await wipeDatabase();
