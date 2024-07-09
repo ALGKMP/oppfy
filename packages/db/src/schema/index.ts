@@ -148,7 +148,7 @@ export const pushToken = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueToken: uniqueIndex("unique_token").on(table.token),
+    uniquePushToken: uniqueIndex("unique_push_token").on(table.token),
   }),
 );
 
