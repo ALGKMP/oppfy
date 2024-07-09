@@ -23,6 +23,7 @@ declare global {
       DATABASE_USERNAME: string;
       DATABASE_NAME: string;
       DATABASE_PASSWORD: string;
+      DATABASE_URL: string;
 
       OPENSEARCH_URL: string;
 

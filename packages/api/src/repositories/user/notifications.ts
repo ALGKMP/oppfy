@@ -47,7 +47,8 @@ export class NotificationsRepository {
     await this.db
       .insert(schema.pushToken)
       .values({ userId, token: pushToken })
-      .onDuplicateKeyUpdate({
+      .onConflictDoUpdate({
+        target: schema.pushToken.token,
         set: {
           token: pushToken,
           updatedAt: sql`CURRENT_TIMESTAMP`,

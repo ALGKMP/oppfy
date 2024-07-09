@@ -1,6 +1,5 @@
 import { and, eq, inArray } from "drizzle-orm"; // Add inArray import
 
-
 import { asc, db, gt, or, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 
@@ -19,18 +18,30 @@ export class UserRepository {
   async createUser(userId: string, phoneNumber: string, username: string) {
     return await this.db.transaction(async (tx) => {
       // Create an empty profile for the user, ready to be updated later
-      const profile = await tx.insert(schema.profile).values({ username });
+      const [profile] = await tx
+        .insert(schema.profile)
+        .values({ username })
+        .returning({ id: schema.profile.id });
 
       // Create default notification settings for the user
-      const notificationSetting = await tx
+      const [notificationSetting] = await tx
         .insert(schema.notificationSettings)
-        .values({});
+        .values({})
+        .returning({ id: schema.notificationSettings.id });
 
-      // Create the user with the profileId and notificationSettingId
+      if (profile === undefined) {
+        throw new Error("Profile was not created");
+      }
+
+      if (notificationSetting === undefined) {
+        throw new Error("Notification setting was not created");
+      }
+
+      // Create the user with the profileId and notificationSettingsId
       await tx.insert(schema.user).values({
         id: userId,
-        profileId: profile[0].insertId,
-        notificationSettingsId: notificationSetting[0].insertId,
+        profileId: profile.id,
+        notificationSettingsId: notificationSetting.id,
         phoneNumber,
       });
     });
