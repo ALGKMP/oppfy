@@ -528,7 +528,7 @@ export class AwsStack extends cdk.Stack {
       value: contactSyncQueue.queueUrl,
     });
 
-    // user for debug notebook if someone wants to use that shit
+   /*  // user for debug notebook if someone wants to use that shit
     const neptuneNotebookRole = new iam.Role(this, "NeptuneNotebookRole", {
       assumedBy: new iam.ServicePrincipal("sagemaker.amazonaws.com"),
       description: "Role for neptune notebook",
@@ -584,7 +584,7 @@ EOF`;
         lifecycleConfigName:
           notebookLifecycleConfig.notebookInstanceLifecycleConfigName,
       },
-    );
+    ); */
 
     // TODO: dms depends on this task - we need to wait for it to be created
     // Create the IAM role for DMS VPC management
