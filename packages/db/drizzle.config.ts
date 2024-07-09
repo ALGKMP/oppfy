@@ -5,7 +5,7 @@ import { env } from "@oppfy/env";
 export default {
   schema: "./src/schema",
   tablesFilter: ["t3turbo_*"],
-  dialect: "mysql",
+  dialect: "postgresql",
   out: "./drizzle",
   dbCredentials: {
     port: Number(env.DATABASE_PORT),
