@@ -1,1 +1,0 @@
-ALTER TABLE `Notifications` DROP COLUMN `test`;
