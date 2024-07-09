@@ -3,38 +3,15 @@ import type {
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3/dist-types/commands";
 
-import { openSearch } from "@oppfy/opensearch";
+import type {
+  OpenSearchProfileIndexResult,
+  OpenSearchResponse,
+} from "@oppfy/opensearch";
+import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
 
 import { handleOpensearchErrors } from "../../errors";
 
 export type { GetObjectCommandInput, PutObjectCommandInput };
-
-enum OpenSearchIndex {
-  PROFILE = "profile",
-}
-
-interface OpenSearchResult {
-  id: number;
-  username: string;
-  fullName: string;
-  bio: string;
-  profilePictureKey: string;
-}
-
-interface OpenSearchResponse<T> {
-  hits: {
-    total: {
-      value: number;
-    };
-    hits: {
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-    }[];
-  };
-}
 
 export class SearchRepository {
   private openSearch = openSearch;
@@ -46,7 +23,7 @@ export class SearchRepository {
     limit = 15,
   ) {
     const response = await this.openSearch.search<
-      OpenSearchResponse<OpenSearchResult>
+      OpenSearchResponse<OpenSearchProfileIndexResult>
     >({
       index: OpenSearchIndex.PROFILE,
       body: {
@@ -70,5 +47,87 @@ export class SearchRepository {
     });
 
     return response.body.hits.hits.map((hit) => hit._source);
+  }
+
+  @handleOpensearchErrors
+  async upsertProfile(
+    profileId: number,
+    profileData: Partial<OpenSearchProfileIndexResult>,
+  ) {
+    // Search for existing document
+    const searchResult = await this.openSearch.search<
+      OpenSearchResponse<OpenSearchProfileIndexResult>
+    >({
+      index: OpenSearchIndex.PROFILE,
+      body: {
+        query: {
+          term: { id: profileId },
+        },
+      },
+    });
+
+    if (searchResult.body.hits.hits.length > 0) {
+      // Update existing document
+      const documentId = searchResult.body.hits.hits[0]?._id;
+
+      if (documentId === undefined) {
+        throw new Error("Document ID was not found");
+      }
+
+      await this.openSearch.update({
+        index: OpenSearchIndex.PROFILE,
+        id: documentId,
+        body: {
+          doc: {
+            ...profileData,
+            id: profileId, // Ensure the id is always included
+          },
+        },
+      });
+    } else {
+      // Insert new document
+      await this.openSearch.index({
+        index: OpenSearchIndex.PROFILE,
+        body: {
+          ...profileData,
+          id: profileId, // Ensure the id is always included
+        },
+      });
+    }
+
+    // Return the updated/inserted data
+    return {
+      id: profileId,
+      ...profileData,
+    };
+  }
+
+  @handleOpensearchErrors
+  async deleteProfile(profileId: number) {
+    // Search for the document in OpenSearch
+    const searchResult = await this.openSearch.search<
+      OpenSearchResponse<OpenSearchProfileIndexResult>
+    >({
+      index: OpenSearchIndex.PROFILE,
+      body: {
+        query: {
+          term: { id: profileId },
+        },
+      },
+    });
+
+    // If a matching document is found, delete it
+    if (searchResult.body.hits.hits.length > 0) {
+      const documentId = searchResult.body.hits.hits[0]?._id;
+
+      if (documentId === undefined) {
+        throw new Error("Document ID was not found");
+      }
+
+      await this.openSearch.delete({
+        index: OpenSearchIndex.PROFILE,
+        id: documentId,
+      });
+    }
   }
 }
