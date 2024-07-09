@@ -48,7 +48,7 @@ export class NotificationsRepository {
       .insert(schema.pushToken)
       .values({ userId, token: pushToken })
       .onConflictDoUpdate({
-        target: schema.pushToken.userId,
+        target: schema.pushToken.token,
         set: {
           token: pushToken,
           updatedAt: sql`CURRENT_TIMESTAMP`,
