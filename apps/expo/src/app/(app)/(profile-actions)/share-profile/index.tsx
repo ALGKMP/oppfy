@@ -21,7 +21,7 @@ const ShareProfile = () => {
 
   const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
   const qrValue = new URL(
-    `/profile/${username}`,
+    `/profile?username=${username}`,
     env.EXPO_PUBLIC_API_URL,
   ).toString();
 
