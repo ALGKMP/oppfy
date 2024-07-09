@@ -1,6 +1,4 @@
-// app/profile/[username].js
 import { useEffect } from "react";
-import { Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
@@ -18,36 +16,46 @@ export default function ProfilePage() {
   useEffect(() => {
     const routeProfile = async () => {
       if (!username) {
-        console.error("No username provided");
+        router.navigate("/(profile)/self-profile");
         return;
       }
 
       let otherProfileId: number;
-
-      try {
-        otherProfileId = await getProfileIdByUsername.mutateAsync({
-          username,
-        });
-      } catch (error) {
-        console.error("Error getting profile ID:", error);
-        return;
-      }
-
       let selfProfileId: number;
 
       try {
-        selfProfileId = await getProfileId.mutateAsync();
+        const [otherProfileIdPromise, selfProfileIdPromise] = [
+          getProfileIdByUsername.mutateAsync({ username }),
+          getProfileId.mutateAsync(),
+        ];
+
+        const [otherProfileIdResult, selfProfileIdResult] =
+          await Promise.allSettled([
+            otherProfileIdPromise,
+            selfProfileIdPromise,
+          ]);
+
+        if (
+          otherProfileIdResult.status === "rejected" ||
+          selfProfileIdResult.status === "rejected"
+        ) {
+          router.navigate("/(profile)/self-profile");
+          return;
+        }
+
+        otherProfileId = otherProfileIdResult.value;
+
+        selfProfileId = selfProfileIdResult.value;
       } catch (error) {
-        console.error("Error getting self profile ID:", error);
+        router.navigate("/(profile)/self-profile");
         return;
       }
 
       if (selfProfileId === otherProfileId) {
-        console.log("Same profile");
         router.navigate("/(profile)/self-profile");
-      } else {
-        console.log("Different profile");
       }
+
+      router.navigate(`/(home)/profile/${username}`);
     };
 
     void routeProfile();
