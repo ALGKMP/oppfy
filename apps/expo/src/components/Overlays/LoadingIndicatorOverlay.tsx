@@ -1,16 +1,13 @@
 import React from "react";
-import { Spinner, View } from "tamagui";
+import { Spinner } from "tamagui";
+
+import { BaseScreenView } from "../Views";
 
 const LoadingIndicatorOverlay = () => {
   return (
-    <View
-      flex={1}
-      justifyContent="center"
-      alignItems="center"
-      backgroundColor="black"
-    >
+    <BaseScreenView alignItems="center" justifyContent="center">
       <Spinner size="large" color="$gray8" />
-    </View>
+    </BaseScreenView>
   );
 };
 
