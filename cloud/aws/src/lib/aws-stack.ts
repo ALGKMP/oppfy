@@ -1,7 +1,6 @@
 import * as neptune from "@aws-cdk/aws-neptune-alpha";
 import * as cdk from "aws-cdk-lib";
 import { RemovalPolicy } from "aws-cdk-lib";
-import * as dms from "aws-cdk-lib/aws-dms";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -192,47 +191,20 @@ export class AwsStack extends cdk.Stack {
       ],
     });
 
-    const OLDdbSecurityGroup = new ec2.SecurityGroup(
+    const dbSecurityGroup = new ec2.SecurityGroup(
       this,
-      "MyDbSecurityGroup",
+      "PostgressSecurityGroup",
       {
         vpc,
         allowAllOutbound: true,
-        description: "Security group for RDS DB instance",
+        description: "Security group for RDS PostgreSQL instance",
       },
     );
-
-    OLDdbSecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(3306),
-      "Allow MySQL access from any IPv4 address",
-    );
-
-    const dbSecurityGroup = new ec2.SecurityGroup(this, "PostgressSecurityGroup", {
-      vpc,
-      allowAllOutbound: true,
-      description: "Security group for RDS PostgreSQL instance",
-    });
 
     dbSecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(5432),
       "Allow PostgreSQL access from any IPv4 address",
-    );
-
-    const OLDdbCredentialsSecret = new secretsmanager.Secret(
-      this,
-      "DBCredentialsSecret",
-      {
-        generateSecretString: {
-          secretStringTemplate: JSON.stringify({
-            username: "oppfy_db",
-          }),
-          generateStringKey: "password",
-          passwordLength: 16,
-          excludeCharacters: '"@/\\;:%+`?[]{}()<>|~!#$^&*_=',
-        },
-      },
     );
 
     const dbCredentialsSecret = new secretsmanager.Secret(
@@ -248,73 +220,26 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    const OLDmysqlParameterGroup = new rds.ParameterGroup(
-      this,
-      "MySqlParameterGroup",
-      {
-        engine: rds.DatabaseInstanceEngine.mysql({
-          version: rds.MysqlEngineVersion.VER_8_0,
-        }),
-        parameters: {
-          binlog_format: "ROW",
-          binlog_checksum: "NONE",
-          binlog_row_image: "FULL",
-        },
-      },
-    );
-
-    const OLDrdsInstance = new rds.DatabaseInstance(
-      this,
-      "MyFreeTierRdsInstance",
-      {
-        engine: rds.DatabaseInstanceEngine.mysql({
-          version: rds.MysqlEngineVersion.VER_8_0,
-        }),
-        instanceType: ec2.InstanceType.of(
-          ec2.InstanceClass.T3,
-          ec2.InstanceSize.MICRO,
-        ),
-        vpc,
-        vpcSubnets: {
-          subnetType: ec2.SubnetType.PUBLIC,
-        },
-        publiclyAccessible: true,
-        securityGroups: [OLDdbSecurityGroup],
-        credentials: rds.Credentials.fromSecret(OLDdbCredentialsSecret),
-        parameterGroup: OLDmysqlParameterGroup,
-        databaseName: "mydatabase",
-        multiAz: false,
-        allocatedStorage: 20,
-        storageType: rds.StorageType.GP2,
-        backupRetention: cdk.Duration.days(1),
-        deletionProtection: false,
-      },
-    );
-
-    const rdsInstance = new rds.DatabaseInstance(
-      this,
-      "PostgresInstance",
-      {
-        engine: rds.DatabaseInstanceEngine.postgres({
-          version: rds.PostgresEngineVersion.VER_14,
-        }),
-        instanceType: ec2.InstanceType.of(
-          ec2.InstanceClass.T3,
-          ec2.InstanceSize.MICRO,
-        ),
-        vpc,
-        vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
-        publiclyAccessible: true,
-        securityGroups: [dbSecurityGroup],
-        credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
-        databaseName: "mydatabase",
-        allocatedStorage: 20,
-        maxAllocatedStorage: 20,
-        backupRetention: cdk.Duration.days(1),
-        deleteAutomatedBackups: true,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
-      },
-    );
+    const _rdsInstance = new rds.DatabaseInstance(this, "PostgresInstance", {
+      engine: rds.DatabaseInstanceEngine.postgres({
+        version: rds.PostgresEngineVersion.VER_14,
+      }),
+      instanceType: ec2.InstanceType.of(
+        ec2.InstanceClass.T3,
+        ec2.InstanceSize.MICRO,
+      ),
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      publiclyAccessible: true,
+      securityGroups: [dbSecurityGroup],
+      credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
+      databaseName: "mydatabase",
+      allocatedStorage: 20,
+      maxAllocatedStorage: 20,
+      backupRetention: cdk.Duration.days(1),
+      deleteAutomatedBackups: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
 
     const postBucket = createBucket(this, "Post");
     const profileBucket = createBucket(this, "Profile");
@@ -355,22 +280,6 @@ export class AwsStack extends cdk.Stack {
       "AllowProfileS3Invocation",
     );
 
-    // Define a security group for OpenSearch access
-    const openSearchRole = new iam.Role(this, "DMSAccessRole", {
-      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
-      description: "Role for OpenSearch Service access",
-    });
-
-    openSearchRole.addToPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["es:*"],
-        resources: [
-          `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
-        ],
-      }),
-    );
-
     const openSearchSecurityGroup = new ec2.SecurityGroup(
       this,
       "MyOpenSearchSecurityGroup",
@@ -406,16 +315,6 @@ export class AwsStack extends cdk.Stack {
       },
       // Removed VPC and Subnet configurations
       securityGroups: [openSearchSecurityGroup],
-      accessPolicies: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          principals: [new iam.ArnPrincipal(openSearchRole.roleArn)],
-          actions: ["es:*"],
-          resources: [
-            `arn:aws:es:${this.region}:${this.account}:domain/testing/*`,
-          ],
-        }),
-      ],
       nodeToNodeEncryption: true,
       encryptionAtRest: {
         enabled: true,
@@ -528,7 +427,7 @@ export class AwsStack extends cdk.Stack {
       value: contactSyncQueue.queueUrl,
     });
 
-   /*  // user for debug notebook if someone wants to use that shit
+    /*  // user for debug notebook if someone wants to use that shit
     const neptuneNotebookRole = new iam.Role(this, "NeptuneNotebookRole", {
       assumedBy: new iam.ServicePrincipal("sagemaker.amazonaws.com"),
       description: "Role for neptune notebook",
@@ -585,155 +484,6 @@ EOF`;
           notebookLifecycleConfig.notebookInstanceLifecycleConfigName,
       },
     ); */
-
-    // TODO: dms depends on this task - we need to wait for it to be created
-    // Create the IAM role for DMS VPC management
-    const _dmsVpcRole = new iam.Role(this, "DmsVpcRole", {
-      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
-      roleName: "dms-vpc-role",
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AmazonDMSVPCManagementRole",
-        ),
-      ],
-    });
-
-    // ! IF YOU RUN INTO A dms-vpc-role DOESNT EXIST ERROR:
-    // ! 1. COMMENT ALL CODE BELOW
-    // ! 2. RUN cdk deploy
-    // ! 3. UNCOMMENT ALL CODE BELOW
-    // ! 4. RUN cdk deploy
-
-    // Create the IAM role for DMS CloudWatch Logs
-    const _dmsCloudWatchLogsRole = new iam.Role(this, "DmsCloudWatchLogsRole", {
-      assumedBy: new iam.ServicePrincipal("dms.amazonaws.com"),
-      roleName: "dms-cloudwatch-logs-role",
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AmazonDMSCloudWatchLogsRole",
-        ),
-      ],
-    });
-
-    // Define the replication subnet group using the VPC's private subnets
-    const dmsSubnetGroup = new dms.CfnReplicationSubnetGroup(
-      this,
-      "DmsSubnetGroup",
-      {
-        replicationSubnetGroupIdentifier: "dms-subnet-group", // Unique identifier
-        replicationSubnetGroupDescription:
-          "Subnet group for DMS replication instances",
-        subnetIds: vpc.publicSubnets.map((subnet) => subnet.subnetId),
-      },
-    );
-
-    // Define a security group for the RDS instance within the VPC
-    const dmsSecurityGroup = new ec2.SecurityGroup(this, "MyDmsSecurityGroup", {
-      vpc,
-      allowAllOutbound: true,
-      description: "Security group for DMS replication instance",
-    });
-
-    // Create the DMS replication instance
-    const dmsReplicationInstance = new dms.CfnReplicationInstance(
-      this,
-      "MyDmsReplicationInstance",
-      {
-        replicationInstanceClass: "dms.t2.micro",
-        allocatedStorage: 50,
-        publiclyAccessible: true,
-        // vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId],
-        // replicationSubnetGroupIdentifier:
-        //   dmsSubnetGroup.replicationSubnetGroupIdentifier,
-        multiAz: false,
-      },
-    );
-
-    const dmsSourceEndpoint = new dms.CfnEndpoint(this, "MyDmsSourceEndpoint", {
-      endpointType: "source",
-      engineName: "mysql",
-      username: cdk.Fn.sub(
-        "{{resolve:secretsmanager:${MyDbSecret}:SecretString:username}}",
-        {
-          MyDbSecret: OLDdbCredentialsSecret.secretArn,
-        },
-      ),
-      password: cdk.Fn.sub(
-        "{{resolve:secretsmanager:${MyDbSecret}:SecretString:password}}",
-        {
-          MyDbSecret: OLDdbCredentialsSecret.secretArn,
-        },
-      ),
-      serverName: OLDrdsInstance.dbInstanceEndpointAddress,
-      port: 3306, // MySQL's default port
-      databaseName: "mydatabase",
-      sslMode: "none",
-    });
-
-    // DMS Target Endpoint for OpenSearch
-    const dmsTargetEndpoint = new dms.CfnEndpoint(this, "MyDmsTargetEndpoint", {
-      endpointType: "target",
-      engineName: "opensearch",
-      elasticsearchSettings: {
-        serviceAccessRoleArn: openSearchRole.roleArn,
-        endpointUri: openSearchDomain.domainEndpoint,
-      },
-    });
-
-    const tableMappings = JSON.stringify({
-      rules: [
-        // Rule to select the Profile table
-        {
-          "rule-type": "selection",
-          "rule-id": "1",
-          "rule-name": "SelectProfileTable",
-          "object-locator": {
-            "schema-name": "mydatabase",
-            "table-name": "Profile",
-          },
-          "rule-action": "include",
-        },
-      ],
-    });
-
-    // Create the DMS replication task
-    const dmsReplicationTask = new dms.CfnReplicationTask(
-      this,
-      "MyDmsReplicationTask",
-      {
-        replicationInstanceArn: dmsReplicationInstance.ref, // ARN of the replication instance
-        sourceEndpointArn: dmsSourceEndpoint.ref, // ARN of the source endpoint
-        targetEndpointArn: dmsTargetEndpoint.ref, // ARN of the target endpoint
-        migrationType: "full-load-and-cdc", // Perform full load and then replicate ongoing changes
-        tableMappings: tableMappings, // Use the table mappings defined above
-        replicationTaskSettings: JSON.stringify({
-          TargetMetadata: {
-            TargetSchema: "",
-            SupportLobs: true, // Enable LOB support
-            FullLobMode: true, // Set to true to include entire LOB in the migration
-            LobChunkSize: 64, // Size in KB of LOB chunks
-            LimitedSizeLobMode: false, // Set to false if FullLobMode is true
-            LobMaxSize: 32, // Maximum size in KB for LOB columns (if LimitedSizeLobMode is true)
-            InlineLobMaxSize: 0,
-            LoadMaxFileSize: 0,
-            ParallelLoadThreads: 0,
-            BatchApplyEnabled: false,
-          },
-          FullLoadSettings: {
-            FullLoadEnabled: true,
-            ApplyChangesEnabled: true,
-          },
-          Logging: {
-            EnableLogging: true,
-          },
-        }),
-      },
-    );
-
-    // Output the replication task ARN
-    new cdk.CfnOutput(this, "ReplicationTaskArn", {
-      value: dmsReplicationTask.ref,
-    });
 
     const pushNotificationsLambda = createLambdaFunction(
       this,
