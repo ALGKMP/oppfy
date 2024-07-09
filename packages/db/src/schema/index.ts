@@ -1,71 +1,105 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  customType,
   date,
-  int,
-  mysqlEnum,
-  mysqlTable,
+  integer,
+  pgEnum,
+  pgTable,
   primaryKey,
   serial,
   text,
   timestamp,
   uniqueIndex,
-  varbinary,
-  varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 
-import { mySqlTable } from "./_table";
+const dateType = customType<{ data: Date | null; driverData: string | null }>({
+  dataType() {
+    return "date";
+  },
+  toDriver(value: Date | null): string | null {
+    return value ? value.toISOString().split("T")[0] ?? null : null;
+  },
+  fromDriver(value: string | null): Date | null {
+    return value ? new Date(value) : null;
+  },
+});
 
-export const user = mySqlTable("User", {
-  id: varchar("id", { length: 255 }).primaryKey(),
-  profileId: bigint("profile", { mode: "number", unsigned: true })
-    .references(() => profile.id, { onDelete: "cascade" })
-    .notNull(),
-  notificationSettingsId: bigint("notificationSettingsId", {
-    mode: "number",
-    unsigned: true,
-  })
-    .references(() => notificationSettings.id, { onDelete: "cascade" })
-    .notNull(),
-  privacySetting: mysqlEnum("privacySetting", ["public", "private"])
+const privacySettingEnum = pgEnum("privacy_setting", ["public", "private"]);
+
+const eventTypeEnum = pgEnum("event_type", [
+  "like",
+  "post",
+  "comment",
+  "follow",
+  "friend",
+  "followRequest",
+  "friendRequest",
+]);
+
+const entityTypeEnum = pgEnum("entity_type", ["post", "profile", "comment"]);
+const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
+
+const reportReasonEnum = pgEnum("report_reason", [
+  "Violent or abusive",
+  "Sexually explicit or predatory",
+  "Hate, harassment or bullying",
+  "Suicide and self-harm",
+  "Spam or scam",
+  "Other",
+]);
+
+const reportUserReasonEnum = pgEnum("report_user_reason", [
+  "Posting explicit content",
+  "Under the age of 13",
+  "Catfish account",
+  "Scam/spam account",
+]);
+
+export const user = pgTable("user", {
+  id: text("id").primaryKey(),
+  profileId: bigint("profile_id", { mode: "number" })
+    .notNull()
+    .references(() => profile.id, { onDelete: "cascade" }),
+  notificationSettingsId: bigint("notification_settings_id", { mode: "number" })
+    .notNull()
+    .references(() => notificationSettings.id, { onDelete: "cascade" }),
+  privacySetting: privacySettingEnum("privacy_setting")
     .default("public")
     .notNull(),
-  phoneNumber: varchar("phoneNumber", { length: 128 }).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  phoneNumber: text("phone_number").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
-
-export const contact = mysqlTable("Contact", {
-  id: varbinary("id", { length: 512 }).primaryKey(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
-export const userContact = mysqlTable(
-  "UserContact",
+export const contact = pgTable("contact", {
+  id: text("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const userContact = pgTable(
+  "user_contact",
   {
-    userId: varchar("userId", { length: 255 })
-      .references(() => user.id, { onDelete: "cascade" })
-      .notNull(),
-    contactId: varbinary("contactId", { length: 512 })
-      .references(() => contact.id, { onDelete: "cascade" })
-      .notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .onUpdateNow()
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    contactId: text("contact_id")
+      .notNull()
+      .references(() => contact.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
       .notNull(),
   },
-  (table) => {
-    return {
-      pk: primaryKey({ columns: [table.userId, table.contactId] }),
-    };
-  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.contactId] }),
+  }),
 );
 
 export const userRelations = relations(user, ({ one, many }) => ({
@@ -81,40 +115,40 @@ export const userRelations = relations(user, ({ one, many }) => ({
   pushTokens: many(pushToken),
 }));
 
-export const profile = mySqlTable("Profile", {
+export const profile = pgTable("profile", {
   id: serial("id").primaryKey(),
-  username: varchar("username", { length: 255 }).unique().notNull(),
-  fullName: varchar("fullName", { length: 255 }),
-  dateOfBirth: date("dateOfBirth"),
+  username: text("username").unique().notNull(),
+  fullName: text("full_name"),
+  dateOfBirth: dateType("date_of_birth"),
   bio: text("bio"),
-  profilePictureKey: varchar("profilePictureKey", { length: 255 })
+  profilePictureKey: text("profile_picture_key")
     .default("profile-pictures/default.jpg")
     .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
-export const pushToken = mySqlTable(
-  "PushToken",
+export const pushToken = pgTable(
+  "push_token",
   {
     id: serial("id").primaryKey(),
-
-    userId: varchar("userId", { length: 255 })
-      .references(() => user.id, { onDelete: "cascade" })
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    token: text("token").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
       .notNull(),
-    token: varchar("token", { length: 255 }).notNull(),
-
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .onUpdateNow()
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
   },
   (table) => ({
-    uniqueToken: uniqueIndex("uniqueToken").on(table.token),
+    uniqueToken: uniqueIndex("unique_token").on(table.token),
   }),
 );
 
@@ -125,36 +159,24 @@ export const pushTokenRelations = relations(pushToken, ({ one }) => ({
   }),
 }));
 
-export const notifications = mySqlTable("Notifications", {
+export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
-
-  senderId: varchar("senderId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  recipientId: varchar("recipientId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-
+  senderId: text("sender_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  recipientId: text("recipient_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
   read: boolean("read").default(false).notNull(),
-
-  eventType: mysqlEnum("eventType", [
-    "like",
-    "post",
-    "comment",
-    "follow",
-    "friend",
-    "followRequest",
-    "friendRequest",
-  ]).notNull(),
-
-  entityId: varchar("entityId", { length: 255 }),
-  entityType: mysqlEnum("type", ["post", "profile", "comment"]),
-
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  eventType: eventTypeEnum("event_type").notNull(),
+  entityId: text("entity_id"),
+  entityType: entityTypeEnum("entity_type"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
@@ -164,41 +186,41 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
-export const notificationSettings = mySqlTable("NotificationSettings", {
+export const notificationSettings = pgTable("notification_settings", {
   id: serial("id").primaryKey(),
   posts: boolean("posts").default(true).notNull(),
   likes: boolean("likes").default(true).notNull(),
   mentions: boolean("mentions").default(true).notNull(),
   comments: boolean("comments").default(true).notNull(),
-  followRequests: boolean("followRequests").default(true).notNull(),
-  friendRequests: boolean("friendRequests").default(true).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  followRequests: boolean("follow_requests").default(true).notNull(),
+  friendRequests: boolean("friend_requests").default(true).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
-export const post = mySqlTable("Post", {
+export const post = pgTable("post", {
   id: serial("id").primaryKey(),
-  author: varchar("author", { length: 255 })
-    .references(() => user.id)
-    .notNull(),
-  recipient: varchar("recipient", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  caption: text("caption").default("").notNull(),
-  key: varchar("url", { length: 255 }).notNull(),
-  width: int("width", { unsigned: true }).default(500).notNull(),
-  height: int("height", { unsigned: true }).default(500).notNull(),
-  mediaType: mysqlEnum("mediaType", ["image", "video"])
+  author: text("author")
     .notNull()
-    .default("image"),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+    .references(() => user.id),
+  recipient: text("recipient")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  caption: text("caption").notNull().default(""),
+  key: text("key").notNull(),
+  width: integer("width").notNull().default(500),
+  height: integer("height").notNull().default(500),
+  mediaType: mediaTypeEnum("media_type").notNull().default("image"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const postRelations = relations(post, ({ one, many }) => ({
@@ -220,19 +242,20 @@ export const postRelations = relations(post, ({ one, many }) => ({
   comments: many(comment),
 }));
 
-export const postStats = mySqlTable("PostStats", {
+export const postStats = pgTable("post_stats", {
   id: serial("id").primaryKey(),
-  postId: bigint("postId", { mode: "number", unsigned: true })
-    .references(() => post.id, { onDelete: "cascade" })
+  postId: bigint("post_id", { mode: "number" })
+    .notNull()
+    .references(() => post.id, { onDelete: "cascade" }),
+  likes: integer("likes").notNull().default(0),
+  comments: integer("comments").notNull().default(0),
+  views: integer("views").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  likes: int("likes").default(0).notNull(),
-  comments: int("comments").default(0).notNull(),
-  views: int("views").default(0).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
 export const postStatsRelations = relations(postStats, ({ one }) => ({
@@ -242,17 +265,16 @@ export const postStatsRelations = relations(postStats, ({ one }) => ({
   }),
 }));
 
-export const like = mySqlTable("Like", {
+export const like = pgTable("like", {
   id: serial("id").primaryKey(),
-  postId: bigint("postId", { mode: "number", unsigned: true })
-    .references(() => post.id, { onDelete: "cascade" })
-    .notNull(),
-  user: varchar("user", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  postId: bigint("post_id", { mode: "number" })
+    .notNull()
+    .references(() => post.id, { onDelete: "cascade" }),
+  user: text("user")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
@@ -267,20 +289,21 @@ export const likeRelations = relations(like, ({ one }) => ({
   }),
 }));
 
-export const comment = mySqlTable("Comment", {
+export const comment = pgTable("comment", {
   id: serial("id").primaryKey(),
-  user: varchar("user", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  post: bigint("postId", { mode: "number", unsigned: true })
-    .references(() => post.id, { onDelete: "cascade" })
-    .notNull(),
+  user: text("user")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  post: bigint("post_id", { mode: "number" })
+    .notNull()
+    .references(() => post.id, { onDelete: "cascade" }),
   body: text("body").notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const commentRelations = relations(comment, ({ one }) => ({
@@ -288,23 +311,22 @@ export const commentRelations = relations(comment, ({ one }) => ({
     fields: [comment.post],
     references: [post.id],
   }),
-  commenetedBy: one(user, {
+  commentedBy: one(user, {
     fields: [comment.user],
     references: [user.id],
   }),
 }));
 
-export const follower = mySqlTable("Follower", {
+export const follower = pgTable("follower", {
   id: serial("id").primaryKey(),
-  senderId: varchar("senderId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  recipientId: varchar("recipientId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  senderId: text("sender_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  recipientId: text("recipient_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
@@ -321,19 +343,20 @@ export const followerRelations = relations(follower, ({ one }) => ({
   }),
 }));
 
-export const friendRequest = mySqlTable("FriendRequest", {
+export const friendRequest = pgTable("friend_request", {
   id: serial("id").primaryKey(),
-  senderId: varchar("senderId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
+  senderId: text("sender_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  recipientId: text("recipient_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  recipientId: varchar("recipientId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
 export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
@@ -349,22 +372,23 @@ export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
   }),
 }));
 
-export const followRequest = mySqlTable("FollowRequest", {
+export const followRequest = pgTable("follow_request", {
   id: serial("id").primaryKey(),
-  senderId: varchar("senderId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
+  senderId: text("sender_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  recipientId: text("recipient_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  recipientId: varchar("recipientId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
-    .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const followRequestRelation = relations(followRequest, ({ one }) => ({
+export const followRequestRelations = relations(followRequest, ({ one }) => ({
   sender: one(user, {
     relationName: "sender",
     fields: [followRequest.senderId],
@@ -377,17 +401,16 @@ export const followRequestRelation = relations(followRequest, ({ one }) => ({
   }),
 }));
 
-export const friend = mySqlTable("Friend", {
+export const friend = pgTable("friend", {
   id: serial("id").primaryKey(),
-  userId1: varchar("userId1", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  userId2: varchar("userId2", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  userId1: text("user_id_1")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  userId2: text("user_id_2")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
@@ -404,94 +427,71 @@ export const friendRelations = relations(friend, ({ one }) => ({
   }),
 }));
 
-export const block = mySqlTable("Blocked", {
+export const block = pgTable("blocked", {
   id: serial("id").primaryKey(),
-  userId: varchar("userId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  blockedUserId: varchar("blockedUserId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  blockedUserId: text("blocked_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
-export const blockRelation = relations(block, ({ one }) => ({
-  userId: one(user, {
-    relationName: "userId",
+export const blockRelations = relations(block, ({ one }) => ({
+  user: one(user, {
+    relationName: "user",
     fields: [block.userId],
     references: [user.id],
   }),
-  blockedUserId: one(user, {
-    relationName: "blockedUserId",
+  blockedUser: one(user, {
+    relationName: "blockedUser",
     fields: [block.blockedUserId],
     references: [user.id],
   }),
 }));
 
-export const reportComment = mySqlTable("ReportComment", {
+export const reportComment = pgTable("report_comment", {
   id: serial("id").primaryKey(),
-  commentId: bigint("commentId", { mode: "number", unsigned: true })
-    .references(() => comment.id, { onDelete: "cascade" })
-    .notNull(),
-  reporterUserId: varchar("reporterUserId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  reason: mysqlEnum("reason", [
-    "Violent or abusive",
-    "Sexually explicit or predatory",
-    "Hate, harassment or bullying",
-    "Suicide and self-harm",
-    "Spam or scam",
-    "Other",
-  ]).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  commentId: bigint("comment_id", { mode: "number" })
+    .notNull()
+    .references(() => comment.id, { onDelete: "cascade" }),
+  reporterUserId: text("reporter_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  reason: reportReasonEnum("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
-export const reportPost = mySqlTable("ReportPost", {
+export const reportPost = pgTable("report_post", {
   id: serial("id").primaryKey(),
-  postId: bigint("postId", { mode: "number", unsigned: true })
-    .references(() => post.id, { onDelete: "cascade" })
-    .notNull(),
-  reporterUserId: varchar("reporterUserId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  reason: mysqlEnum("reason", [
-    "Violent or abusive",
-    "Sexually explicit or predatory",
-    "Hate, harassment or bullying",
-    "Suicide and self-harm",
-    "Spam or scam",
-    "Other",
-  ]).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  postId: bigint("post_id", { mode: "number" })
+    .notNull()
+    .references(() => post.id, { onDelete: "cascade" }),
+  reporterUserId: text("reporter_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  reason: reportReasonEnum("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
-export const reportUser = mySqlTable("ReportProfile", {
+export const reportUser = pgTable("report_profile", {
   id: serial("id").primaryKey(),
-  targetUserId: varchar("targetUserId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  reporterUserId: varchar("reporterUsdId", { length: 255 })
-    .references(() => user.id, { onDelete: "cascade" })
-    .notNull(),
-  reason: mysqlEnum("reason", [
-    "Posting explicit content",
-    "Under the age of 13",
-    "Catfish account",
-    "Scam/spam account",
-  ]).notNull(),
-  createdAt: timestamp("createdAt")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .onUpdateNow()
+  targetUserId: text("target_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  reporterUserId: text("reporter_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  reason: reportUserReasonEnum("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
     .notNull(),
 });
 
