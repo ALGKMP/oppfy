@@ -192,19 +192,35 @@ export class AwsStack extends cdk.Stack {
       ],
     });
 
-    const dbSecurityGroup = new ec2.SecurityGroup(this, "MyDbSecurityGroup", {
-      vpc,
-      allowAllOutbound: true,
-      description: "Security group for RDS DB instance",
-    });
+    const OLDdbSecurityGroup = new ec2.SecurityGroup(
+      this,
+      "MyDbSecurityGroup",
+      {
+        vpc,
+        allowAllOutbound: true,
+        description: "Security group for RDS DB instance",
+      },
+    );
 
-    dbSecurityGroup.addIngressRule(
+    OLDdbSecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(3306),
       "Allow MySQL access from any IPv4 address",
     );
 
-    const dbCredentialsSecret = new secretsmanager.Secret(
+    const dbSecurityGroup = new ec2.SecurityGroup(this, "PostgressSecurityGroup", {
+      vpc,
+      allowAllOutbound: true,
+      description: "Security group for RDS PostgreSQL instance",
+    });
+
+    dbSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(5432),
+      "Allow PostgreSQL access from any IPv4 address",
+    );
+
+    const OLDdbCredentialsSecret = new secretsmanager.Secret(
       this,
       "DBCredentialsSecret",
       {
@@ -219,7 +235,20 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    const mysqlParameterGroup = new rds.ParameterGroup(
+    const dbCredentialsSecret = new secretsmanager.Secret(
+      this,
+      "PostgressCredentialsSecret",
+      {
+        generateSecretString: {
+          secretStringTemplate: JSON.stringify({ username: "oppfy_db" }),
+          generateStringKey: "password",
+          passwordLength: 16,
+          excludeCharacters: '"@/\\;:%+`?[]{}()<>|~!#$^&*_=',
+        },
+      },
+    );
+
+    const OLDmysqlParameterGroup = new rds.ParameterGroup(
       this,
       "MySqlParameterGroup",
       {
@@ -234,7 +263,7 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    const rdsInstance = new rds.DatabaseInstance(
+    const OLDrdsInstance = new rds.DatabaseInstance(
       this,
       "MyFreeTierRdsInstance",
       {
@@ -250,15 +279,40 @@ export class AwsStack extends cdk.Stack {
           subnetType: ec2.SubnetType.PUBLIC,
         },
         publiclyAccessible: true,
-        securityGroups: [dbSecurityGroup],
-        credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
-        parameterGroup: mysqlParameterGroup,
+        securityGroups: [OLDdbSecurityGroup],
+        credentials: rds.Credentials.fromSecret(OLDdbCredentialsSecret),
+        parameterGroup: OLDmysqlParameterGroup,
         databaseName: "mydatabase",
         multiAz: false,
         allocatedStorage: 20,
         storageType: rds.StorageType.GP2,
         backupRetention: cdk.Duration.days(1),
         deletionProtection: false,
+      },
+    );
+
+    const rdsInstance = new rds.DatabaseInstance(
+      this,
+      "PostgresInstance",
+      {
+        engine: rds.DatabaseInstanceEngine.postgres({
+          version: rds.PostgresEngineVersion.VER_14,
+        }),
+        instanceType: ec2.InstanceType.of(
+          ec2.InstanceClass.T3,
+          ec2.InstanceSize.MICRO,
+        ),
+        vpc,
+        vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+        publiclyAccessible: true,
+        securityGroups: [dbSecurityGroup],
+        credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
+        databaseName: "mydatabase",
+        allocatedStorage: 20,
+        maxAllocatedStorage: 20,
+        backupRetention: cdk.Duration.days(1),
+        deleteAutomatedBackups: true,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
       },
     );
 
@@ -601,16 +655,16 @@ EOF`;
       username: cdk.Fn.sub(
         "{{resolve:secretsmanager:${MyDbSecret}:SecretString:username}}",
         {
-          MyDbSecret: dbCredentialsSecret.secretArn,
+          MyDbSecret: OLDdbCredentialsSecret.secretArn,
         },
       ),
       password: cdk.Fn.sub(
         "{{resolve:secretsmanager:${MyDbSecret}:SecretString:password}}",
         {
-          MyDbSecret: dbCredentialsSecret.secretArn,
+          MyDbSecret: OLDdbCredentialsSecret.secretArn,
         },
       ),
-      serverName: rdsInstance.dbInstanceEndpointAddress,
+      serverName: OLDrdsInstance.dbInstanceEndpointAddress,
       port: 3306, // MySQL's default port
       databaseName: "mydatabase",
       sslMode: "none",
