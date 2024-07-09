@@ -12,7 +12,7 @@ import {
   schema,
   sql,
 } from "@oppfy/db";
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 

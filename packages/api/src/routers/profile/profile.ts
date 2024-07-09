@@ -1,17 +1,50 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { env } from "@oppfy/env/server";
+import { eq, schema } from "@oppfy/db";
+import { env } from "@oppfy/env";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "../../trpc";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
+  getProfileId: protectedProcedure.input(z.void()).mutation(async ({ ctx }) => {
+    const possibleUser = await ctx.db.query.user.findFirst({
+      where: eq(schema.user.id, ctx.session.uid),
+    });
+
+    if (possibleUser === undefined) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
+      });
+    }
+
+    return possibleUser.profileId;
+  }),
+
+  getProfileIdByUsername: protectedProcedure
+    .input(
+      z.object({
+        username: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const possibleProfile = await ctx.db.query.profile.findFirst({
+        where: eq(schema.profile.username, input.username),
+      });
+
+      if (possibleProfile === undefined) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      return possibleProfile.id;
+    }),
+
   updateFullName: protectedProcedure
     .input(trpcValidators.input.profile.updateFullName)
     .mutation(async ({ input, ctx }) => {

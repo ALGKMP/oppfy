@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import * as mysql from "mysql2/promise";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 import * as migration from "./src/schema/schema";
 

@@ -16,6 +16,8 @@ interface GradientHeartProps {
   position: { x: number; y: number };
 }
 
+const ANIMATION_DURATION = 400;
+
 const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
   const [x1, y1, x2, y2] = gradient;
   const { x, y } = position;
@@ -25,7 +27,7 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
     scale.value = withSpring(
       1,
       {
-        duration: 400,
+        duration: ANIMATION_DURATION,
         dampingRatio: 0.5,
         stiffness: 50,
         overshootClamping: false,
@@ -74,7 +76,6 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
 interface HeartAnimation {
   id: number;
   position: { x: number; y: number };
-  scale: SharedValue<number>;
   gradient: [number, number, number, number];
 }
 
@@ -105,46 +106,23 @@ export const useHeartAnimations = () => {
     );
   }, []);
 
-  const scale = useSharedValue(0);
   const addHeart = useCallback(
     (x: number, y: number) => {
       const newHeart: HeartAnimation = {
         id: Date.now(),
         position: { x, y },
-        scale,
         gradient: getRandomGradient(),
       };
 
       setHearts((prevHearts) => [...prevHearts, newHeart]);
 
-      scale.value = withSpring(
-        1,
-        {
-          duration: 400,
-          dampingRatio: 0.5,
-          stiffness: 50,
-          overshootClamping: false,
-          restDisplacementThreshold: 0.01,
-          restSpeedThreshold: 2,
-          reduceMotion: ReduceMotion.System,
-        },
-        () => {
-          scale.value = withDelay(
-            150,
-            withTiming(0, { duration: 250 }, () => {
-              runOnJS(() => {
-                setHearts((prevHearts) =>
-                  prevHearts.filter((heart) => heart.id !== newHeart.id),
-                );
-              });
-            }),
-          );
-        },
-      );
-
-      return scale;
+      setTimeout(() => {
+        setHearts((prevHearts) =>
+          prevHearts.filter((heart) => heart.id !== newHeart.id),
+        );
+      }, ANIMATION_DURATION * 3);
     },
-    [getRandomGradient, scale],
+    [getRandomGradient],
   );
 
   return { hearts, addHeart };

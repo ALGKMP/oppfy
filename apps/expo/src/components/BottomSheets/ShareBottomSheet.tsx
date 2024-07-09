@@ -14,7 +14,6 @@ import {
 } from "@tamagui/lucide-icons";
 import {
   Avatar,
-  Button,
   ScrollView,
   Text,
   View,

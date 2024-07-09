@@ -1,13 +1,12 @@
 import React, { useCallback, useEffect } from "react";
 import { Dimensions, Modal } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import BottomSheet, {
-  type BottomSheetProps,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { type BottomSheetProps } from "@gorhom/bottom-sheet";
 import { Minus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 

@@ -9,20 +9,20 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
-import { Stack, Text, useTheme, View, XStack, YStack } from "tamagui";
+import { Stack, View, XStack, YStack } from "tamagui";
 
 const { width, height } = Dimensions.get("window");
 
-type Option = {
+interface Option {
   label: ReactNode;
   icon: ReactNode;
   onPress: () => void;
-};
+}
 
-type BlurContextMenuWrapperProps = {
+interface BlurContextMenuWrapperProps {
   children: ReactNode;
   options: Option[];
-};
+}
 
 const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -76,8 +76,8 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
             <View flex={1} justifyContent="center" margin="$4" gap="$4">
               {props.children}
               <YStack
-                borderRadius={"$5"}
-                backgroundColor={"rgba(63, 63, 62, 0.8)"}
+                borderRadius="$5"
+                backgroundColor="rgba(63, 63, 62, 0.8)"
                 marginHorizontal="$6"
               >
                 {props.options.map((option, index) => (

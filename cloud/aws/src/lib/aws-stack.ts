@@ -18,7 +18,7 @@ import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 
-import { env } from "@oppfy/env/server";
+import { env } from "@oppfy/env";
 
 // Helper function to create an S3 bucket
 function createBucket(scope: Construct, name: string) {
@@ -64,31 +64,30 @@ function createLambdaFunction(
     },
     environment: {
       // TODO: These should be passed on a case by case basis
-      SNS_PUSH_NOTIFICATION_TOPIC_ARN:
-        process.env.SNS_PUSH_NOTIFICATION_TOPIC_ARN!,
+      SNS_PUSH_NOTIFICATION_TOPIC_ARN: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
 
-      S3_POST_BUCKET: process.env.S3_POST_BUCKET!,
-      S3_PROFILE_BUCKET: process.env.S3_PROFILE_BUCKET!,
+      S3_POST_BUCKET: env.S3_POST_BUCKET,
+      S3_PROFILE_BUCKET: env.S3_PROFILE_BUCKET,
 
-      MUX_TOKEN_ID: process.env.MUX_TOKEN_ID!,
-      MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET!,
-      MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET!,
+      MUX_TOKEN_ID: env.MUX_TOKEN_ID,
+      MUX_TOKEN_SECRET: env.MUX_TOKEN_SECRET,
+      MUX_WEBHOOK_SECRET: env.MUX_WEBHOOK_SECRET,
 
-      DATABASE_PORT: process.env.DATABASE_PORT!,
-      DATABASE_ENDPOINT: process.env.DATABASE_ENDPOINT!,
-      DATABASE_USERNAME: process.env.DATABASE_USERNAME!,
-      DATABASE_NAME: process.env.DATABASE_NAME!,
-      DATABASE_PASSWORD: process.env.DATABASE_PASSWORD!,
+      DATABASE_PORT: env.DATABASE_PORT,
+      DATABASE_ENDPOINT: env.DATABASE_ENDPOINT,
+      DATABASE_USERNAME: env.DATABASE_USERNAME,
+      DATABASE_NAME: env.DATABASE_NAME,
+      DATABASE_PASSWORD: env.DATABASE_PASSWORD,
 
-      OPENSEARCH_URL: process.env.OPENSEARCH_URL!,
+      OPENSEARCH_URL: env.OPENSEARCH_URL,
 
-      SQS_CONTACT_QUEUE: process.env.SQS_CONTACT_QUEUE!,
+      SQS_CONTACT_QUEUE: env.SQS_CONTACT_QUEUE,
 
-      AWS_ACCOUNT_ID: process.env.AWS_ACCOUNT_ID!,
+      AWS_ACCOUNT_ID: env.AWS_ACCOUNT_ID,
 
-      CONTACT_REC_LAMBDA_URL: process.env.CONTACT_REC_LAMBDA_URL!,
+      CONTACT_REC_LAMBDA_URL: env.CONTACT_REC_LAMBDA_URL,
 
-      EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN!,
+      EXPO_ACCESS_TOKEN: env.EXPO_ACCESS_TOKEN,
     },
   });
 }
@@ -391,7 +390,7 @@ export class AwsStack extends cdk.Stack {
       "Allow Gremlin access from any IPv4 address",
     );
 
-    let cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
+    const cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
       vpc,
       iamAuthentication: false,
       instanceType: neptune.InstanceType.T3_MEDIUM,
@@ -476,7 +475,7 @@ export class AwsStack extends cdk.Stack {
     });
 
     // user for debug notebook if someone wants to use that shit
-    let neptuneNotebookRole = new iam.Role(this, "NeptuneNotebookRole", {
+    const neptuneNotebookRole = new iam.Role(this, "NeptuneNotebookRole", {
       assumedBy: new iam.ServicePrincipal("sagemaker.amazonaws.com"),
       description: "Role for neptune notebook",
     });
