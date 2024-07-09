@@ -26,9 +26,12 @@ const dateType = customType<{ data: Date | null; driverData: string | null }>({
   },
 });
 
-const privacySettingEnum = pgEnum("privacy_setting", ["public", "private"]);
+export const privacySettingEnum = pgEnum("privacy_setting", [
+  "public",
+  "private",
+]);
 
-const eventTypeEnum = pgEnum("event_type", [
+export const eventTypeEnum = pgEnum("event_type", [
   "like",
   "post",
   "comment",
@@ -38,10 +41,14 @@ const eventTypeEnum = pgEnum("event_type", [
   "friendRequest",
 ]);
 
-const entityTypeEnum = pgEnum("entity_type", ["post", "profile", "comment"]);
-const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
+export const entityTypeEnum = pgEnum("entity_type", [
+  "post",
+  "profile",
+  "comment",
+]);
+export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
-const reportReasonEnum = pgEnum("report_reason", [
+export const reportReasonEnum = pgEnum("report_reason", [
   "Violent or abusive",
   "Sexually explicit or predatory",
   "Hate, harassment or bullying",
@@ -50,7 +57,7 @@ const reportReasonEnum = pgEnum("report_reason", [
   "Other",
 ]);
 
-const reportUserReasonEnum = pgEnum("report_user_reason", [
+export const reportUserReasonEnum = pgEnum("report_user_reason", [
   "Posting explicit content",
   "Under the age of 13",
   "Catfish account",
