@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 importers:
 
   .:
@@ -868,13 +872,16 @@ importers:
         version: link:../env
       drizzle-orm:
         specifier: ^0.30.10
-        version: 0.30.10(@aws-sdk/client-rds-data@3.564.0)(mysql2@3.9.7)
+        version: 0.30.10(@aws-sdk/client-rds-data@3.564.0)(mysql2@3.9.7)(postgres@3.4.4)
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.30.10)(zod@3.23.8)
       mysql2:
         specifier: ^3.9.7
         version: 3.9.7
+      postgres:
+        specifier: ^3.4.4
+        version: 3.4.4
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -1167,7 +1174,7 @@ importers:
         version: 0.0.0-experimental-c8b3f72-20240517(eslint@9.2.0)
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-26f2496093-20240514(eslint@9.2.0)
+        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.2.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.8.0(eslint@9.2.0)(typescript@5.4.5)
@@ -12704,7 +12711,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.30.10(@aws-sdk/client-rds-data@3.564.0)(mysql2@3.9.7):
+  /drizzle-orm@0.30.10(@aws-sdk/client-rds-data@3.564.0)(mysql2@3.9.7)(postgres@3.4.4):
     resolution: {integrity: sha512-IRy/QmMWw9lAQHpwbUh1b8fcn27S/a9zMIzqea1WNOxK9/4EB8gIo+FZWLiPXzl2n9ixGSv8BhsLZiOppWEwBw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -12786,6 +12793,7 @@ packages:
     dependencies:
       '@aws-sdk/client-rds-data': 3.564.0
       mysql2: 3.9.7
+      postgres: 3.4.4
     dev: false
 
   /drizzle-zod@0.5.1(drizzle-orm@0.30.10)(zod@3.23.8):
@@ -12794,7 +12802,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.30.10(@aws-sdk/client-rds-data@3.564.0)(mysql2@3.9.7)
+      drizzle-orm: 0.30.10(@aws-sdk/client-rds-data@3.564.0)(mysql2@3.9.7)(postgres@3.4.4)
       zod: 3.23.8
     dev: false
 
@@ -13361,8 +13369,8 @@ packages:
       - supports-color
     dev: false
 
-  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.2.0):
-    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
+  /eslint-plugin-react-hooks@5.1.0-beta-94eed63c49-20240425(eslint@9.2.0):
+    resolution: {integrity: sha512-9DabNOh93nRDoBbYYO7kS5QqJdbA1Jh9XNDh7MebrDAYctyGQaHSg29TGoNEieX3iLSSfiKToPcvsLowrAtFRA==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -18424,6 +18432,11 @@ packages:
       picocolors: 1.0.1
       source-map-js: 1.2.0
 
+  /postgres@3.4.4:
+    resolution: {integrity: sha512-IbyN+9KslkqcXa8AO9fxpk97PA4pzewvpi2B3Dwy9u4zpV32QicaEdgmF3eSQUzdRk7ttDHQejNgAEr4XoeH4A==}
+    engines: {node: '>=12'}
+    dev: false
+
   /prebuild-install@7.1.2:
     resolution: {integrity: sha512-UnNke3IQb6sgarcZIDU3gbMeTp/9SSU1DAIkil7PrqG1vZlBtY5msYccSKSHDqa3hNg436IXK+SNImReuA1wEQ==}
     engines: {node: '>=10'}
@@ -22120,7 +22133,3 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
