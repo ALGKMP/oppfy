@@ -19,7 +19,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { Heart, MoreHorizontal, Send } from "@tamagui/lucide-icons";
+import { Heart, MoreHorizontal, Send, CameraOff } from "@tamagui/lucide-icons";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
@@ -674,6 +674,12 @@ const MediaOfYou = () => {
         viewabilityConfig={viewabilityConfig}
         extraData={viewableItems}
       />
+      {posts?.length === 0 && !isLoadingPostData && (
+        <View flex={1} justifyContent="center" alignItems="center">
+          <CameraOff size={64} color="$gray12" />
+          <Text>No posts to show</Text>
+        </View>
+      )}
     </View>
   );
 };
