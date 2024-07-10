@@ -21,7 +21,7 @@ const DateOfBirth = () => {
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [open, setOpen] = useState(false);
 
-  const updateDateOfBirth = api.profile.updateDateOfBirth.useMutation();
+  const updateProfile = api.profile.updateProfile.useMutation();
 
   const isValidDateOfBirth = useMemo(
     () => sharedValidators.user.dateOfBirth.safeParse(dateOfBirth).success,
@@ -31,7 +31,7 @@ const DateOfBirth = () => {
   const onSubmit = async () => {
     if (dateOfBirth === null) return;
 
-    await updateDateOfBirth.mutateAsync({
+    await updateProfile.mutateAsync({
       dateOfBirth,
     });
 

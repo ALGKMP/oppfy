@@ -24,7 +24,7 @@ const Username = () => {
   const [username, setUsername] = useState("");
   const [error, setError] = useState<Error | null>(null);
 
-  const updateUsername = api.profile.updateUsername.useMutation();
+  const updateProfile = api.profile.updateProfile.useMutation();
 
   const isValidUsername = useMemo(
     () => sharedValidators.user.username.safeParse(username).success,
@@ -33,7 +33,7 @@ const Username = () => {
 
   const onSubmit = async () => {
     try {
-      await updateUsername.mutateAsync({
+      await updateProfile.mutateAsync({
         username,
       });
 

@@ -13,13 +13,13 @@ export class SearchService {
   async profilesByUsername(username: string, currentUserId: string) {
     const user = await this.userRepository.getUser(currentUserId);
 
-    if (!user) {
+    if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
     const profiles = await this.searchRepository.profilesByUsername(
       username,
-      user.profileId,
+      user.profileId, // profileId to ignore, we dont want to display ourselves
     );
 
     // Use Promise.all to get presigned URLs and return profiles with URLs

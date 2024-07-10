@@ -59,77 +59,28 @@ export class ProfileService {
   private followService = new FollowService();
   private blockService = new BlockService();
 
-  async updateFullName(userId: string, fullName: string) {
-    const profile = await this._getUserProfile(userId);
-    return await this.profileRepository.updateFullName(profile.id, fullName);
-  }
-
-  async updateDateOfBirth(userId: string, dateOfBirth: Date) {
-    const profile = await this._getUserProfile(userId);
-    await this.profileRepository.updateDateOfBirth(profile.id, dateOfBirth);
-  }
-
-  async updateBio(userId: string, bio: string) {
-    const profile = await this._getUserProfile(userId);
-    await this.profileRepository.updateBio(profile.id, bio);
-  }
-
-  async updateUsername(userId: string, newUsername: string) {
-    const profile = await this._getUserProfile(userId);
-    if (profile.username === newUsername) {
-      return;
-    }
-    const usernameExists =
-      await this.profileRepository.usernameExists(newUsername);
-    if (usernameExists) {
-      console.error(`SERVICE ERROR: username "${newUsername}" already exists`);
-      throw new DomainError(
-        ErrorCode.USERNAME_ALREADY_EXISTS,
-        "The provided username already exists.",
-      );
-    }
-    await this.profileRepository.updateUsername(profile.id, newUsername);
-  }
-
-  async updateProfile(userId: string, updates: UpdateProfile): Promise<void> {
+  async updateProfile(userId: string, newData: UpdateProfile): Promise<void> {
     const profile = await this._getUserProfile(userId);
 
-    const updateData: Partial<UpdateProfile> = {};
-    if (updates.fullName !== undefined) {
-      updateData.fullName = updates.fullName;
-    }
-    if (updates.bio !== undefined) {
-      updateData.bio = updates.bio;
-    }
-    if (updates.username !== undefined) {
+    if (
+      newData.username !== undefined &&
+      newData.username !== profile.username
+    ) {
       const usernameExists = await this.profileRepository.usernameExists(
-        updates.username,
+        newData.username,
       );
+
       if (usernameExists) {
-        console.error(
-          `SERVICE ERROR: username "${updates.username}" already exists`,
-        );
-        throw new DomainError(
-          ErrorCode.USERNAME_ALREADY_EXISTS,
-          "The provided username already exists.",
-        );
+        throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
       }
-      updateData.username = updates.username;
     }
 
-    await this.profileRepository.updateProfile(profile.id, updateData);
+    await this.profileRepository.updateProfile(profile.id, newData);
   }
 
   async updateProfilePicture(userId: string, key: string) {
-    const user = await this.profileRepository.getProfileByUserId(userId);
-    if (!user) {
-      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "Profile not found for the provided user ID.",
-      );
-    }
-    await this.profileRepository.updateProfilePicture(user.profile.id, key);
+    const profile = await this._getUserProfile(userId);
+    await this.profileRepository.updateProfilePicture(profile.id, key);
   }
 
   async getFullProfileByUserId(userId: string) {
