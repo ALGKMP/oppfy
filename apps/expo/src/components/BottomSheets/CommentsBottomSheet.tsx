@@ -42,9 +42,6 @@ const CommentsBottomSheet = ({
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
   const insets = useSafeAreaInsets();
-  const [optimisticUpdateCommentId, setOptimisticUpdateCommentId] = useState<
-    number | null
-  >(null);
 
   const profile = utils.profile.getFullProfileSelf.getData();
 
@@ -67,11 +64,11 @@ const CommentsBottomSheet = ({
 
   const {
     data: commentsData,
-    isLoading: isLoadingComments,
-    isFetchingNextPage: isFetchingNextPageComments,
-    fetchNextPage: fetchNextPageComments,
-    hasNextPage: hasNextPageComments,
-    refetch: refetchComments,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
   } = api.post.paginateComments.useInfiniteQuery(
     {
       postId,
@@ -88,7 +85,6 @@ const CommentsBottomSheet = ({
       await utils.post.paginatePostsOfUserSelf.cancel();
 
       const temporaryId = Math.random();
-      setOptimisticUpdateCommentId(temporaryId);
 
       // Snapshot the previous value
       const prevCommentsData = utils.post.paginateComments.getInfiniteData();
@@ -166,7 +162,6 @@ const CommentsBottomSheet = ({
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.post.paginateComments.invalidate();
-      setOptimisticUpdateCommentId(null); // Reset new comment ID after server sync
     },
   });
 
@@ -236,9 +231,14 @@ const CommentsBottomSheet = ({
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.post.paginateComments.invalidate();
-      setOptimisticUpdateCommentId(null); // Reset new comment ID after server sync
     },
   });
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
 
   const handlePostComment = async () => {
     if (inputValue.trim().length === 0) {
@@ -293,10 +293,11 @@ const CommentsBottomSheet = ({
               </Text>
             ),
             icon: <Trash2 size="$1.5" color="white" />,
-            onPress: () => void deleteComment.mutateAsync({
-              postId,
-              commentId: item.commentId,
-            }),
+            onPress: () =>
+              void deleteComment.mutateAsync({
+                postId,
+                commentId: item.commentId,
+              }),
           },
           {
             label: (
@@ -398,9 +399,7 @@ const CommentsBottomSheet = ({
             scrollEnabled={true}
             keyExtractor={(item) => item.commentId.toString()}
             renderItem={({ item }) => <Comment item={item} />}
-            onEndReached={async () => {
-              await fetchNextPageComments();
-            }}
+            onEndReached={handleOnEndReached}
           />
         )
       }
