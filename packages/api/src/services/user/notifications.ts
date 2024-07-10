@@ -130,7 +130,7 @@ export class NotificationsService {
     senderId: string,
     eventType?: EventType | EventType[],
   ) {
-    this.notificationsRepository.deleteNotification(senderId, eventType);
+    await this.notificationsRepository.deleteNotification(senderId, eventType);
   }
 
   async sendNotification(

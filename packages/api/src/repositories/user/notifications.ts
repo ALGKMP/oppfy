@@ -96,12 +96,12 @@ export class NotificationsRepository {
         >`
         CASE
           WHEN EXISTS (
-            SELECT 1 FROM ${schema.follower} f
-            WHERE f.senderId = ${userId} AND f.recipientId = ${schema.user.id}
+            SELECT 1 FROM ${schema.follower}
+            WHERE ${schema.follower.senderId} = ${userId} AND ${schema.follower.recipientId} = ${schema.user.id}
           ) THEN 'following'
           WHEN EXISTS (
-            SELECT 1 FROM ${schema.followRequest} fr
-            WHERE fr.senderId = ${userId} AND fr.recipientId = ${schema.user.id}
+            SELECT 1 FROM ${schema.followRequest}
+            WHERE ${schema.followRequest.senderId} = ${userId} AND ${schema.followRequest.recipientId} = ${schema.user.id}
           ) THEN 'followRequestSent'
           ELSE 'notFollowing'
         END
