@@ -15,6 +15,13 @@ import {
 import { S3Service } from "../aws/s3";
 
 async function getRecommendationsInternal(userId: string) {
+  // ! this fn was breaking the app, added a temp mock return
+  return {
+    tier1: ["1", "2", "3"],
+    tier2: ["4", "5", "6"],
+    tier3: ["7", "8", "9"],
+  };
+
   const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
 
   // Construct the full URL with the query parameter
