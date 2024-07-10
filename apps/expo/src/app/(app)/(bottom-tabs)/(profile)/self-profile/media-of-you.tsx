@@ -674,12 +674,12 @@ const MediaOfYou = () => {
         viewabilityConfig={viewabilityConfig}
         extraData={viewableItems}
       />
-      {posts?.length === 0 && !isLoadingPostData && (
+      {/* {posts?.length === 0 && !isLoadingPostData && (
         <View flex={1} justifyContent="center" alignItems="center">
           <CameraOff size={64} color="$gray12" />
           <Text>No posts to show</Text>
         </View>
-      )}
+      )} */}
     </View>
   );
 };
