@@ -43,7 +43,6 @@ export class SearchRepository {
             },
           },
         },
-        _source: ["id", "username", "fullName", "bio", "profilePictureKey"],
         size: limit,
       },
     });
@@ -56,7 +55,6 @@ export class SearchRepository {
     profileId: number,
     newProfileData: Partial<OpenSearchProfileIndexResult>,
   ) {
-    // get users profile data
     const profile = await this.db.query.profile.findFirst({
       where: eq(schema.profile.id, profileId),
       columns: {
@@ -73,48 +71,16 @@ export class SearchRepository {
       throw new Error("Profile not found");
     }
 
-    // Search for existing document
-    const searchResult = await this.openSearch.search<
-      OpenSearchResponse<OpenSearchProfileIndexResult>
-    >({
+    const documentBody = {
+      ...profile,
+      ...newProfileData,
+    };
+
+    await this.openSearch.index({
       index: OpenSearchIndex.PROFILE,
-      body: {
-        query: {
-          term: { id: profileId },
-        },
-      },
+      id: profileId.toString(),
+      body: documentBody,
     });
-
-    if (searchResult.body.hits.hits.length > 0) {
-      // Update existing document
-      const documentId = searchResult.body.hits.hits[0]?._id;
-
-      if (documentId === undefined) {
-        throw new Error("Document ID was not found");
-      }
-
-      await this.openSearch.update({
-        index: OpenSearchIndex.PROFILE,
-        id: documentId,
-        body: {
-          doc: {
-            ...profile,
-            ...newProfileData,
-          },
-        },
-      });
-    } else {
-      // Insert new document
-      await this.openSearch.index({
-        index: OpenSearchIndex.PROFILE,
-        body: {
-          doc: {
-            ...profile,
-            ...newProfileData,
-          },
-        },
-      });
-    }
   }
 
   @handleOpensearchErrors
