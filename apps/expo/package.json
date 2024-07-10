@@ -60,7 +60,7 @@
     "expo-constants": "~16.0.2",
     "expo-contacts": "^13.0.4",
     "expo-crypto": "~13.0.2",
-    "expo-task-manager" : "^11.8.2",
+    "expo-task-manager": "^11.8.2",
     "expo-dev-client": "~4.0.18",
     "expo-device": "~6.0.2",
     "expo-file-system": "~17.0.1",
@@ -122,7 +122,7 @@
     "@types/react": "^18.2.79",
     "eslint": "^9.2.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5"
   },
   "prettier": "@oppfy/prettier-config"
 }

@@ -20,7 +20,7 @@
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5"
   },
   "prettier": "@oppfy/prettier-config"
 }
