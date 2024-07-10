@@ -78,20 +78,14 @@ export class SearchRepository {
         index: OpenSearchIndex.PROFILE,
         id: documentId,
         body: {
-          doc: {
-            ...profileData,
-            id: profileId, // Ensure the id is always included
-          },
+          doc: profileData,
         },
       });
     } else {
       // Insert new document
       await this.openSearch.index({
         index: OpenSearchIndex.PROFILE,
-        body: {
-          ...profileData,
-          id: profileId, // Ensure the id is always included
-        },
+        body: profileData,
       });
     }
 

@@ -1,8 +1,9 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { ProfileRepository } from "../../repositories";
+import { ProfileRepository, SearchRepository } from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
 
 export class UserService {
+  private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
 
@@ -31,11 +32,14 @@ export class UserService {
   }
 
   async deleteUser(userId: string) {
-    const userExists = await this._userExists(userId);
-    if (!userExists) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    const user = await this.userRepository.getUser(userId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
+
     await this.userRepository.deleteUser(userId);
+    await this.searchRepository.deleteProfile(user.profileId);
   }
 
   async checkOnboardingComplete(userId: string) {

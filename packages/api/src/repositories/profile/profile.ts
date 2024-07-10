@@ -31,6 +31,8 @@ export class ProfileRepository {
       .update(schema.profile)
       .set(update)
       .where(eq(schema.profile.id, profileId));
+
+      
   }
 
   @handleDatabaseErrors

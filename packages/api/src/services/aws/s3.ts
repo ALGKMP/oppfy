@@ -1,14 +1,8 @@
-import type { z } from "zod";
-
-import type { trpcValidators } from "@oppfy/validators";
-
 import { S3Repository } from "../../repositories/aws/s3";
 
 type ContentType = "image/jpeg" | "image/png";
 
-interface Metadata {
-  [key: string]: string;
-}
+type Metadata = Record<string, string>;
 
 interface PostMetadata extends Metadata {
   author: string;

@@ -1,8 +1,15 @@
+import { profile } from "console";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
+import {
+  openSearch,
+  OpenSearchIndex,
+  OpenSearchProfileIndexResult,
+  OpenSearchResponse,
+} from "@oppfy/opensearch";
 
 const s3Client = new S3Client({ region: "us-east-1" });
 
@@ -57,6 +64,48 @@ export const handler = async (
         profilePictureKey: objectKey,
       })
       .where(eq(schema.profile.id, user.profileId));
+
+    // Search for existing document
+    const searchResult = await openSearch.search<
+      OpenSearchResponse<OpenSearchProfileIndexResult>
+    >({
+      index: OpenSearchIndex.PROFILE,
+      body: {
+        query: {
+          term: { id: user.profileId },
+        },
+      },
+    });
+
+    if (searchResult.body.hits.hits.length === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "OpenSearch profile index missing.",
+        }),
+      };
+    }
+
+    const documentId = searchResult.body.hits.hits[0]?._id;
+
+    if (documentId === undefined) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "DocumentId not found.",
+        }),
+      };
+    }
+
+    await openSearch.update({
+      index: OpenSearchIndex.PROFILE,
+      id: documentId,
+      body: {
+        doc: {
+          profilePictureKey: objectKey,
+        },
+      },
+    });
 
     return {
       statusCode: 200,

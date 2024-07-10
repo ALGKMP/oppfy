@@ -9,6 +9,7 @@ import {
   FriendRepository,
   ProfileRepository,
   S3Repository,
+  SearchRepository,
   UserRepository,
 } from "../../repositories";
 import { BlockService } from "../network/block";
@@ -51,6 +52,7 @@ interface _ProfileData {
 export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
+  private searchRepository = new SearchRepository();
   private s3Repository = new S3Repository();
   private followRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
@@ -76,12 +78,18 @@ export class ProfileService {
     }
 
     await this.profileRepository.updateProfile(profile.id, newData);
+    await this.searchRepository.upsertProfile(profile.id, {
+      fullName: newData.fullName,
+      username: newData.username,
+      bio: newData.bio,
+    });
   }
 
-  async updateProfilePicture(userId: string, key: string) {
-    const profile = await this._getUserProfile(userId);
-    await this.profileRepository.updateProfilePicture(profile.id, key);
-  }
+  // ! if something like this ever gets used dont forget to sync with opensearch
+  // async updateProfilePicture(userId: string, key: string) {
+  //   const profile = await this._getUserProfile(userId);
+  //   await this.profileRepository.updateProfilePicture(profile.id, key);
+  // }
 
   async getFullProfileByUserId(userId: string) {
     const user = await this.userRepository.getUser(userId);
