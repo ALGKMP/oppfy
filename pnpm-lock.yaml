@@ -693,6 +693,9 @@ importers:
       '@oppfy/db':
         specifier: workspace:*
         version: link:../../../../../../packages/db
+      '@oppfy/opensearch':
+        specifier: workspace:*
+        version: link:../../../../../../packages/opensearch
       '@oppfy/utils':
         specifier: workspace:*
         version: link:../../../../../../packages/utils
