@@ -28,7 +28,7 @@ export class UserService {
       usernameExists = await this.profileRepository.usernameExists(username);
     } while (usernameExists);
 
-    return await this.userRepository.createUser(userId, phoneNumber, username);
+    await this.userRepository.createUser(userId, phoneNumber, username);
   }
 
   async deleteUser(userId: string) {

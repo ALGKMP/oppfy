@@ -103,6 +103,7 @@ export const handler = async (
       body: {
         doc: {
           profilePictureKey: objectKey,
+          id: user.profileId, // Ensure the id is always included
         },
       },
     });

@@ -16,7 +16,7 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async createUser(userId: string, phoneNumber: string, username: string) {
-    return await this.db.transaction(async (tx) => {
+    await this.db.transaction(async (tx) => {
       // Create an empty profile for the user, ready to be updated later
       const [profile] = await tx
         .insert(schema.profile)

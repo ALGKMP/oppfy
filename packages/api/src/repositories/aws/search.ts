@@ -3,6 +3,7 @@ import type {
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3/dist-types/commands";
 
+import { db, eq, schema } from "@oppfy/db";
 import type {
   OpenSearchProfileIndexResult,
   OpenSearchResponse,
@@ -14,6 +15,7 @@ import { handleOpensearchErrors } from "../../errors";
 export type { GetObjectCommandInput, PutObjectCommandInput };
 
 export class SearchRepository {
+  private db = db;
   private openSearch = openSearch;
 
   @handleOpensearchErrors
@@ -52,8 +54,25 @@ export class SearchRepository {
   @handleOpensearchErrors
   async upsertProfile(
     profileId: number,
-    profileData: Partial<OpenSearchProfileIndexResult>,
+    newProfileData: Partial<OpenSearchProfileIndexResult>,
   ) {
+    // get users profile data
+    const profile = await this.db.query.profile.findFirst({
+      where: eq(schema.profile.id, profileId),
+      columns: {
+        id: true,
+        username: true,
+        fullName: true,
+        bio: true,
+        dateOfBirth: true,
+        profilePictureKey: true,
+      },
+    });
+
+    if (profile === undefined) {
+      throw new Error("Profile not found");
+    }
+
     // Search for existing document
     const searchResult = await this.openSearch.search<
       OpenSearchResponse<OpenSearchProfileIndexResult>
@@ -78,22 +97,24 @@ export class SearchRepository {
         index: OpenSearchIndex.PROFILE,
         id: documentId,
         body: {
-          doc: profileData,
+          doc: {
+            ...profile,
+            ...newProfileData,
+          },
         },
       });
     } else {
       // Insert new document
       await this.openSearch.index({
         index: OpenSearchIndex.PROFILE,
-        body: profileData,
+        body: {
+          doc: {
+            ...profile,
+            ...newProfileData,
+          },
+        },
       });
     }
-
-    // Return the updated/inserted data
-    return {
-      id: profileId,
-      ...profileData,
-    };
   }
 
   @handleOpensearchErrors
