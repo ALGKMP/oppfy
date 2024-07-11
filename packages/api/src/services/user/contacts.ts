@@ -16,17 +16,38 @@ import { S3Service } from "../aws/s3";
 
 async function getRecommendationsInternal(userId: string) {
   // ! this fn was breaking the app, added a temp mock return
-  return {
-    tier1: ["1", "2", "3"],
-    tier2: ["4", "5", "6"],
-    tier3: ["7", "8", "9"],
-  };
+  // return {
+  //   tier1: ["1", "2", "3"],
+  //   tier2: ["4", "5", "6"],
+  //   tier3: ["7", "8", "9"],
+  // };
 
   const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
 
   // Construct the full URL with the query parameter
   const url = new URL(lambdaUrl);
   url.searchParams.append("userId", userId);
+
+  console.log(url.toString());
+
+  // make the request
+  const response = await fetch(url);
+
+  if (response.status !== 200) {
+    console.error("code", response.status);
+    console.log("Error invoking Lambda function: ", response.statusText);
+    return {
+      tier1: [],
+      tier2: [],
+      tier3: [],
+    };
+  }
+
+  return (await response.json()) as {
+    tier1: string[];
+    tier2: string[];
+    tier3: string[];
+  };
 
   /*   // Create the HTTP request
   const request = new HttpRequest({
@@ -49,8 +70,8 @@ async function getRecommendationsInternal(userId: string) {
   const signedRequest = await signer.sign(request); */
 
   // Make the request using fetch
-  try {
-    /*     const response = await fetch(url.toString(), {
+  /*   try {
+        const response = await fetch(url.toString(), {
       method: signedRequest.method,
       headers: signedRequest.headers as HeadersInit,
     });
@@ -59,12 +80,16 @@ async function getRecommendationsInternal(userId: string) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json(); */
+    return await response.json();
 
     const response = await fetch(url.toString());
     // console.log("response", response);
 
     if (response.status !== 200) {
+      console.log(
+        "Error invoking Lambda function: up here",
+        response.statusText,
+      );
     }
 
     return (await response.json()) as {
@@ -79,7 +104,7 @@ async function getRecommendationsInternal(userId: string) {
       tier2: [],
       tier3: [],
     };
-  }
+  } */
 }
 
 export class ContactService {
@@ -183,6 +208,9 @@ export class ContactService {
     }
 
     const recommendationsIds = await this.getRecomendationsIds(userId);
+
+    console.log("Recommendations", recommendationsIds);
+
     const allRecommendations = [
       ...recommendationsIds.tier1,
       ...recommendationsIds.tier2,

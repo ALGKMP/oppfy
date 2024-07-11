@@ -111,6 +111,8 @@ export const handler = async (
       // tier4
     };
 
+    console.log("Recommended ids", recommendedIds);
+
     return {
       statusCode: 200,
       body: JSON.stringify(recommendedIds),
