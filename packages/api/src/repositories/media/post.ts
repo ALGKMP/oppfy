@@ -14,12 +14,17 @@ export class PostRepository {
     recipient: string,
     caption: string,
   ) {
-    return await this.db.insert(schema.post).values({
-      key,
-      author,
-      recipient,
-      caption,
-    });
+    const post = await this.db
+      .insert(schema.post)
+      .values({
+        key,
+        author,
+        recipient,
+        caption,
+      })
+      .returning({ insertedId: schema.post.id });
+
+    return post[0]?.insertedId;
   }
 
   @handleDatabaseErrors
