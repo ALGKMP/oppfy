@@ -113,33 +113,15 @@ export class FollowService {
       );
     }
 
-    const result = await this.followRepository.removeFollowRequest(
+    await this.followRepository.removeFollowRequest(
       senderId,
       recipientId,
     );
-    if (!result.insertId) {
-      console.error(
-        `SERVICE ERROR: Failed to remove follow request from "${senderId}" to "${recipientId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_REMOVE_FOLLOW_REQUEST,
-        "Failed to remove follow request.",
-      );
-    }
 
-    const result2 = await this.followRepository.addFollower(
+    await this.followRepository.addFollower(
       senderId,
       recipientId,
     );
-    if (!result2.insertId) {
-      console.error(
-        `SERVICE ERROR: Failed to add follower "${recipientId}" for sender ID "${senderId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_FOLLOW_USER,
-        "Failed to add follower.",
-      );
-    }
   }
 
   async declineFollowRequest(
