@@ -102,9 +102,16 @@ export const handler = async (
         mediaType: "video",
         width: metadata.width,
         height: metadata.height,
-      });
+      }).returning({insertedId: schema.post.id});
 
-      await db.insert(schema.postStats).values({ postId: post[0].insertId });
+      if (!post[0]?.insertedId) {
+        return {
+          statusCode: 500,
+          body: "Failed to insert post",
+        };
+      }
+
+      await db.insert(schema.postStats).values({ postId: post[0]?.insertedId });
       return {
         statusCode: 200,
         body: "Webhook received and processed",
