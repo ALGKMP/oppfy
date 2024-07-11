@@ -60,7 +60,7 @@ const useContacts = (syncNow: boolean): ContactFns => {
   if (syncNow) {
     useEffect(() => {
       void syncContacts();
-    });
+    }, []);
   }
 
   return {
