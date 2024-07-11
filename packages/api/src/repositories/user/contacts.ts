@@ -12,9 +12,9 @@ export class ContactsRepository {
         where: eq(schema.userContact.userId, userId),
       });
 
-      oldContacts.forEach(
+ /*      oldContacts.forEach(
         (c) => (c.contactId = Buffer.from(c.contactId, "hex").toString()),
-      );
+      ); */
 
       // contacts to delete
       const contactsToDelete = oldContacts.filter(

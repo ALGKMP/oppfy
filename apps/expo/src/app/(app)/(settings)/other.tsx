@@ -23,7 +23,14 @@ import { api } from "~/utils/api";
 
 const Other = () => {
   const { deleteAccount } = useSession();
-  const { syncContacts, deleteContacts } = useContacts();
+  const {
+    syncContacts: handleSyncContacts,
+    deleteContacts: handleDeleteContacts,
+  } = useContacts(false);
+
+  /*   const syncContacts = api.contacts.syncContacts.useMutation();
+
+  const deleteContacts = api.contacts.deleteContacts.useMutation(); */
 
   const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
     useState(false);
@@ -40,6 +47,52 @@ const Other = () => {
       idempotent: true,
     });
   };
+
+  /*   const handleSyncContacts = async () => {
+    const { data } = await Contacts.getContactsAsync({
+      fields: [Contacts.Fields.PhoneNumbers],
+    });
+
+    const phoneNumbers = data.reduce<{ country: string; number: string }[]>(
+      (acc, contact) => {
+        if (contact.phoneNumbers) {
+          for (const phoneNumber of contact.phoneNumbers) {
+            if (!phoneNumber.countryCode || !phoneNumber.number) continue;
+
+            acc.push({
+              country: phoneNumber.countryCode,
+              number: phoneNumber.number,
+            });
+          }
+        }
+        return acc;
+      },
+      [],
+    );
+
+    const numbers = phoneNumbers.map((numberthing) => {
+      const phoneNumber = parsePhoneNumber(
+        numberthing.number,
+        numberthing.country.toLocaleUpperCase() as CountryCode,
+      );
+      return phoneNumber.formatInternational().replaceAll(" ", "");
+    });
+
+    const hashedNumbers = await Promise.all(
+      numbers.map(async (number) => {
+        return await Crypto.digestStringAsync(
+          Crypto.CryptoDigestAlgorithm.SHA512,
+          number,
+        );
+      }),
+    );
+
+    void syncContacts.mutateAsync(hashedNumbers);
+  };
+
+  const handleDeleteContacts = () => {
+    void deleteContacts.mutateAsync();
+  }; */
 
   const clearCachetitle = "Clear Cache";
   const clearCacheSubtitle =
@@ -64,7 +117,7 @@ const Other = () => {
     {
       text: "Sync Contacts",
       onPress: () => {
-        void syncContacts();
+        void handleSyncContacts();
         setIsSyncContactsModalVisible(false);
       },
     },
@@ -80,7 +133,7 @@ const Other = () => {
         color: "$red9",
       },
       onPress: () => {
-        void deleteContacts();
+        void handleDeleteContacts();
         setIsDeleteContactsModalVisible(false);
       },
     },

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import * as Contacts from "expo-contacts";
 import * as Crypto from "expo-crypto";
 import { parsePhoneNumber } from "libphonenumber-js";
@@ -10,7 +11,7 @@ export interface ContactFns {
   deleteContacts: () => void;
 }
 
-const useContacts = (): ContactFns => {
+const useContacts = (syncNow: boolean): ContactFns => {
   const deleteContactsMutation = api.contacts.deleteContacts.useMutation();
   const syncContactsMutation = api.contacts.syncContacts.useMutation();
 
@@ -55,6 +56,12 @@ const useContacts = (): ContactFns => {
 
     void syncContactsMutation.mutateAsync(hashedNumbers);
   };
+
+  if (syncNow) {
+    useEffect(() => {
+      void syncContacts();
+    });
+  }
 
   return {
     syncContacts,
