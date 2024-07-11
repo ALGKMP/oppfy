@@ -1,1 +1,1 @@
-export { default as useSyncContacts } from "./useSyncContacts";
+export { default as useContacts } from "./useContacts";
