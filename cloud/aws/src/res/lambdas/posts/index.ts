@@ -62,8 +62,17 @@ export const handler = async (
       key: objectKey,
     });
 
-    const post = await db.insert(schema.post).values(body);
-    await db.insert(schema.postStats).values({ postId: post[0].insertId });
+    const post = await db
+      .insert(schema.post)
+      .values(body)
+      .returning({ insertId: schema.post.id });
+    if (!post[0]?.insertId) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ message: "Failed to insert post" }),
+      };
+    }
+    await db.insert(schema.postStats).values({ postId: post[0]?.insertId });
 
     return {
       statusCode: 200,
