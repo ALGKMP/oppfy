@@ -243,14 +243,20 @@ export class PostService {
     objectKey: string,
   ) {
     try {
-      const result = await this.postRepository.createPost(
+      const postId = await this.postRepository.createPost(
         postedBy,
         postedFor,
         caption,
         objectKey,
       );
 
-      const postId = result[0].insertId;
+      if (!postId) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_CREATE_POST,
+          "Failed to create post.",
+        );
+      }
+
       await this.postStatsRepository.createPostStats(postId);
     } catch (error) {
       console.error(
