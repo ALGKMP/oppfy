@@ -15,27 +15,17 @@ import {
 import { S3Service } from "../aws/s3";
 
 async function getRecommendationsInternal(userId: string) {
-  // ! this fn was breaking the app, added a temp mock return
-  // return {
-  //   tier1: ["1", "2", "3"],
-  //   tier2: ["4", "5", "6"],
-  //   tier3: ["7", "8", "9"],
-  // };
-
   const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
 
   // Construct the full URL with the query parameter
   const url = new URL(lambdaUrl);
   url.searchParams.append("userId", userId);
 
-  console.log(url.toString());
-
   // make the request
   const response = await fetch(url);
 
   if (response.status !== 200) {
-    console.error("code", response.status);
-    console.log("Error invoking Lambda function: ", response.statusText);
+    console.error("Error invoking Lambda function: ", response.statusText);
     return {
       tier1: [],
       tier2: [],
