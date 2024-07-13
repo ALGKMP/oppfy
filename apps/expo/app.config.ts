@@ -27,6 +27,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     associatedDomains: [
       "applinks:oppfy.app",
+      "applinks:www.oppfy.app",
       "applinks:oppfy-nextjs.vercel.app",
     ],
   },
@@ -119,5 +120,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         assets: ["./assets"],
       },
     ],
+    [
+        "react-native-creative-sdk",
+        {
+          "clientId": "e029e4cb-efc7-43c4-bab3-608dce70c69f"
+        }
+      ]
   ],
 });
