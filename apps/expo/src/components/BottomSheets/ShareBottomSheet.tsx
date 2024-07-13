@@ -4,6 +4,10 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import {
+  CreativeKit,
+  PhotoContentParams,
+} from "@snapchat/snap-kit-react-native";
+import {
   Facebook,
   Instagram,
   Link,
@@ -12,12 +16,7 @@ import {
   Twitter,
   Upload,
 } from "@tamagui/lucide-icons";
-import {
-  Avatar,
-  ScrollView,
-  Text,
-  View,
-} from "tamagui";
+import { Avatar, ScrollView, Text, View } from "tamagui";
 
 import BottomSheetWrapper from "./BottomSheetWrapper";
 
@@ -59,6 +58,31 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     setIsSharing(false);
   };
 
+  const shareImageToSnapchat = async () => {
+    try {
+      const fileUri = `${FileSystem.cacheDirectory}shared_image.jpg`;
+      await FileSystem.downloadAsync(imageUrl, fileUri);
+      const photoContent: PhotoContentParams = {
+        content: {
+          uri: fileUri,
+        },
+        caption: "Fuck yea baby",
+        // attachmentUrl: imageUrl,
+      };
+
+      // const mediaType = CreativeKit.MediaType.PHOTO;
+      // const stickerUri = 'https://example.com/sticker.png';
+      // const attachmentUrl = 'https://example.com/attachment.html';
+      // const caption = 'Check out this cool sticker!';
+      // const shareData = { mediaType, media: fileUri, sticker: stickerUri, attachmentUrl, caption };
+
+      await CreativeKit.sharePhoto(photoContent);
+    } catch (error) {
+      console.error("Error sharing image to Snapchat:", error);
+      Alert.alert("An error occurred while sharing the image to Snapchat");
+    }
+  };
+
   const apps = [
     {
       name: "Share to...",
@@ -94,7 +118,10 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     {
       name: "SnapChat",
       icon: Instagram,
-      onPress: () => Alert.alert("Share to Facebook"),
+      onPress: async () => {
+        Alert.alert("Would you like to go to SnapChat");
+        await shareImageToSnapchat();
+      },
     },
     {
       name: "Facebook",
@@ -111,12 +138,28 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
       onOpen={openModal}
       snapPoints={["20%"]}
     >
-      <ScrollView horizontal flexDirection="row" paddingHorizontal="$4" borderTopColor="$gray8" borderTopWidth="$0.5">
+      <ScrollView
+        horizontal
+        flexDirection="row"
+        paddingHorizontal="$4"
+        borderTopColor="$gray8"
+        borderTopWidth="$0.5"
+      >
         {apps.map((app, index) => (
           <TouchableOpacity key={index} onPress={app.onPress}>
-            <View alignItems="center" marginHorizontal="$2.5" marginVertical="$3" borderRadius="$10">
-              <Avatar circular size="$5"backgroundColor="$gray7" marginBottom="$2">
-                <app.icon size="$2" margin="$1"/>
+            <View
+              alignItems="center"
+              marginHorizontal="$2.5"
+              marginVertical="$3"
+              borderRadius="$10"
+            >
+              <Avatar
+                circular
+                size="$5"
+                backgroundColor="$gray7"
+                marginBottom="$2"
+              >
+                <app.icon size="$2" margin="$1" />
               </Avatar>
               <Text>{app.name}</Text>
             </View>
