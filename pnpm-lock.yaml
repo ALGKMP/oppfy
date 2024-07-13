@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 importers:
 
   .:
@@ -89,6 +85,9 @@ importers:
       '@shopify/flash-list':
         specifier: 1.6.4
         version: 1.6.4(@babel/runtime@7.24.4)(react-native@0.74.2)(react@18.2.0)
+      '@snapchat/snap-kit-react-native':
+        specifier: ^0.4.0
+        version: 0.4.0(react-native@0.74.2)(react@18.2.0)
       '@tamagui/babel-plugin':
         specifier: ^1.95.3
         version: 1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.5.2)
@@ -1177,7 +1176,7 @@ importers:
         version: 0.0.0-experimental-c8b3f72-20240517(eslint@9.2.0)
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.2.0)
+        version: 5.1.0-beta-26f2496093-20240514(eslint@9.2.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.8.0(eslint@9.2.0)(typescript@5.5.2)
@@ -8107,6 +8106,16 @@ packages:
       tslib: 2.6.3
     dev: false
 
+  /@snapchat/snap-kit-react-native@0.4.0(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-hGHJzRZvFUk+OhLbUeMSIvGyqg74d9R/WsGhJj6BumNYE1VoCLGCVAjDk61TWeYwkAnIThQraiJAQU5sP1/9qg==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
+    dev: false
+
   /@swagger-api/apidom-ast@1.0.0-alpha.5:
     resolution: {integrity: sha512-ZH3xryzmwd8OvUdOJH4ujNAyQMXN6NCrRT0HGR8z9TnA0nFPFoOAswq7317mCn77VJmViu/tpCuvmRS0a9BROg==}
     dependencies:
@@ -13366,8 +13375,8 @@ packages:
       - supports-color
     dev: false
 
-  /eslint-plugin-react-hooks@5.1.0-beta-94eed63c49-20240425(eslint@9.2.0):
-    resolution: {integrity: sha512-9DabNOh93nRDoBbYYO7kS5QqJdbA1Jh9XNDh7MebrDAYctyGQaHSg29TGoNEieX3iLSSfiKToPcvsLowrAtFRA==}
+  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.2.0):
+    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -22093,3 +22102,7 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
