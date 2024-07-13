@@ -19,7 +19,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { Heart, MoreHorizontal, Send, CameraOff } from "@tamagui/lucide-icons";
+import { CameraOff, Heart, MoreHorizontal, Send } from "@tamagui/lucide-icons";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
@@ -478,11 +478,6 @@ const PostItem = (props: PostItemProps) => {
         modalVisible={commentsBottomSheetVisible}
         setModalVisible={setCommentsBottomSheetVisible}
       />
-      {/* <CommentsTestBottomSheet
-        postId={post.postId}
-        modalVisible={commentsBottomSheetVisible}
-        setModalVisible={setCommentsBottomSheetVisible}
-      /> */}
 
       <PostActionsBottomSheet
         postId={post.postId}
@@ -495,6 +490,7 @@ const PostItem = (props: PostItemProps) => {
 
       <ShareBottomSheet
         imageUrl={post.imageUrl}
+        mediaType={post.mediaType}
         modalVisible={isShareModalVisible}
         setModalVisible={setIsShareModalVisible}
       />

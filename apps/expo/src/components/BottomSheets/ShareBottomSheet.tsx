@@ -5,7 +5,10 @@ import * as Sharing from "expo-sharing";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import {
   CreativeKit,
+  MetadataParams,
   PhotoContentParams,
+  VideoContentParams,
+  VideoData,
 } from "@snapchat/snap-kit-react-native";
 import {
   Facebook,
@@ -18,10 +21,12 @@ import {
 } from "@tamagui/lucide-icons";
 import { Avatar, ScrollView, Text, View } from "tamagui";
 
+import useSaveMedia from "~/hooks/useSaveMedia";
 import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface ShareBottomSheetProps {
   modalVisible: boolean;
+  mediaType: "image" | "video";
   setModalVisible: (value: boolean) => void;
   imageUrl: string; // S3 presigned URL
 }
@@ -30,6 +35,8 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
   const { modalVisible, setModalVisible, imageUrl } = props;
   const sheetRef = useRef<BottomSheet>(null);
   const [isSharing, setIsSharing] = useState(false);
+
+  const { cacheMedia, deleteCachedMedia } = useSaveMedia();
 
   const closeModal = useCallback(() => {
     sheetRef.current?.close();
@@ -58,28 +65,47 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     setIsSharing(false);
   };
 
-  const shareImageToSnapchat = async () => {
+  const shareImageUrlToSnapchat = async () => {
     try {
-      const fileUri = `${FileSystem.cacheDirectory}shared_image.jpg`;
-      await FileSystem.downloadAsync(imageUrl, fileUri);
-      const photoContent: PhotoContentParams = {
-        content: {
-          uri: fileUri,
+      const metadata: MetadataParams = {
+        sticker: {
+          uri: imageUrl,
+          width: 300,
+          height: 300,
+          posX: 0.5,
+          posY: 0.6,
         },
-        caption: "Fuck yea baby",
-        // attachmentUrl: imageUrl,
+        attachmentUrl: "https://oppfy.app",
       };
-
-      // const mediaType = CreativeKit.MediaType.PHOTO;
-      // const stickerUri = 'https://example.com/sticker.png';
-      // const attachmentUrl = 'https://example.com/attachment.html';
-      // const caption = 'Check out this cool sticker!';
-      // const shareData = { mediaType, media: fileUri, sticker: stickerUri, attachmentUrl, caption };
-
-      await CreativeKit.sharePhoto(photoContent);
+      await CreativeKit.shareToCameraPreview(metadata);
     } catch (error) {
       console.error("Error sharing image to Snapchat:", error);
       Alert.alert("An error occurred while sharing the image to Snapchat");
+    }
+  };
+
+  const shareVideoUrlToSnapchat = async () => {
+    try {
+      const fileUri = await cacheMedia({
+        presignedUrl: imageUrl,
+        fileName: "shared_video",
+        mediaType: "video",
+      });
+      if (!fileUri) {
+        throw new Error("Failed to cache video file");
+      }
+
+      const videoData: VideoContentParams = {
+        content: {
+          uri: fileUri,
+        },
+        attachmentUrl: "https://oppfy.app",
+      };
+      await CreativeKit.shareVideo(videoData);
+      await deleteCachedMedia(fileUri);
+    } catch (error) {
+      console.error("Error sharing video to Snapchat:", error);
+      Alert.alert("An error occurred while sharing the video to Snapchat");
     }
   };
 
@@ -92,11 +118,6 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     {
       name: "Copy link",
       icon: Link,
-      onPress: () => Alert.alert("Share to Instagram"),
-    },
-    {
-      name: "Qr Code",
-      icon: QrCode,
       onPress: () => Alert.alert("Share to Instagram"),
     },
     {
@@ -119,7 +140,12 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
       name: "SnapChat",
       icon: Instagram,
       onPress: async () => {
-        await shareImageToSnapchat();
+        if (props.mediaType === "video") {
+          await shareVideoUrlToSnapchat();
+        } else {
+          // await shareImageToSnapchat();
+          await shareImageUrlToSnapchat();
+        }
       },
     },
     {
