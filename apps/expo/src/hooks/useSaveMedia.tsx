@@ -32,6 +32,48 @@ const useSaveMedia = () => {
     return false;
   };
 
+  const cacheMedia = async ({
+    presignedUrl,
+    fileName,
+    mediaType,
+  }: {
+    presignedUrl: string;
+    fileName: string;
+    mediaType: MediaType;
+  }) => {
+    const playbackId = await extractPlayback(presignedUrl);
+    if (mediaType == "video") {
+      presignedUrl = `https://stream.mux.com/${playbackId}/standard.mp4`;
+    }
+
+    const fileExtension = mediaType === "image" ? "jpg" : "mp4";
+    const fileUri = `${FileSystem.cacheDirectory}${fileName}.${fileExtension}`;
+
+    try {
+      const { uri, mimeType, headers, status } = await FileSystem.downloadAsync(
+        presignedUrl,
+        fileUri,
+      );
+      console.log("File downloaded to cache dir:", uri);
+      console.log("File MIME type:", mimeType);
+      console.log("File headers:", headers);
+      console.log("File status:", status);
+
+      return uri;
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      return null;
+    }
+  };
+
+  const deleteCachedMedia = async (uri: string) => {
+    try {
+      await FileSystem.deleteAsync(uri);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+
   const downloadMedia = async ({
     presignedUrl,
     fileName,
@@ -116,7 +158,7 @@ const useSaveMedia = () => {
     }
   };
 
-  return { saveState, saveToCameraRoll };
+  return { saveState, saveToCameraRoll, cacheMedia, deleteCachedMedia};
 };
 
 export default useSaveMedia;
