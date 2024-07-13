@@ -119,7 +119,6 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
       name: "SnapChat",
       icon: Instagram,
       onPress: async () => {
-        Alert.alert("Would you like to go to SnapChat");
         await shareImageToSnapchat();
       },
     },
