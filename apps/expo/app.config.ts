@@ -27,6 +27,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     associatedDomains: [
       "applinks:oppfy.app",
+      "applinks:www.oppfy.app",
       "applinks:oppfy-nextjs.vercel.app",
     ],
   },
