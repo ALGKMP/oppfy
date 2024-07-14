@@ -243,7 +243,7 @@ const PostItem = (props: PostItemProps) => {
       marginBottom="$5"
     >
       <GestureDetector gesture={postInteractions}>
-        <View aspectRatio={post.width / post.height} width="100%">
+        <View width="100%" aspectRatio={Math.max(post.width / post.height, 9/12)}>
           {post.mediaType === "image" ? (
             <ImagePost imageUrl={post.imageUrl}>
               {hearts.map((heart) => (
