@@ -454,23 +454,25 @@ const PostItem = (props: PostItemProps) => {
         </XStack>
 
         {/* Caption */}
-        <View flex={1} alignItems="flex-start" padding="$2">
-          <TouchableOpacity
-            onPress={() => {
-              setIsExpanded(!isExpanded);
-              setShowViewMore(false);
-            }}
-          >
-            <Text numberOfLines={isExpanded ? 0 : 2}>
-              {renderCaption()}
-              {showViewMore && !isExpanded ? (
-                <Text color="$gray10"> more</Text>
-              ) : (
-                ""
-              )}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {post.caption && (
+          <View flex={1} alignItems="flex-start" padding="$2">
+            <TouchableOpacity
+              onPress={() => {
+                setIsExpanded(!isExpanded);
+                setShowViewMore(false);
+              }}
+            >
+              <Text numberOfLines={isExpanded ? 0 : 2}>
+                {renderCaption()}
+                {showViewMore && !isExpanded ? (
+                  <Text color="$gray10"> more</Text>
+                ) : (
+                  ""
+                )}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <CommentsBottomSheet
