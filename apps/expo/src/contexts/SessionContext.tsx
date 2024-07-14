@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
+  getCurrentUserProfileId: () => Promise<number | undefined>;
 
   isLoading: boolean;
   isSignedIn: boolean;
@@ -37,6 +38,15 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const [status, setStatus] = useState<Status>("loading");
 
   const deleteUser = api.user.deleteUser.useMutation();
+
+  const profileMutation = api.profile.getProfileId.useMutation();
+  const getCurrentUserProfileId = async () => {
+    if (user) {
+      return await profileMutation.mutateAsync();
+    } else {
+      return undefined;
+    }
+  };
 
   const isLoading = status === "loading";
   const isSignedIn = !!user;
@@ -79,6 +89,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     <AuthContext.Provider
       value={{
         user,
+        getCurrentUserProfileId,
         isLoading,
         isSignedIn,
         deleteAccount,
