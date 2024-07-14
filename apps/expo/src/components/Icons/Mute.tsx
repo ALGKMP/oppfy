@@ -47,12 +47,25 @@ const Mute = ({ muted }: { muted: boolean }) => {
   });
 
   return (
-    <Animated.View style={muteAnimatedStyle}>
-      <View flex={1} justifyContent="center" alignItems="center">
-        <Avatar circular size="$5" backgroundColor="$gray7">
-          {muted ? <VolumeX size="$2" /> : <Volume2 size="$2" />}
-        </Avatar>
-      </View>
+    <Animated.View
+      style={[
+        muteAnimatedStyle,
+        {
+          position: "absolute",
+          top: "50%", // Temporary because the animation shifts if the timing isn't perfect when using flex
+          left: "45%",
+          // transform: [{ translateX: -20 }, { translateY: -20 }],
+        },
+      ]}
+    >
+      <Avatar
+        circular
+        size="$5"
+        backgroundColor="$gray7"
+        flex={1}
+      >
+        {muted ? <VolumeX size="$2" /> : <Volume2 size="$2" />}
+      </Avatar>
     </Animated.View>
   );
 };
