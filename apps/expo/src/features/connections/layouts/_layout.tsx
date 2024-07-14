@@ -11,6 +11,9 @@ const ConnectionsLayout = () => {
     username: string;
     initialRouteName: string;
   }>();
+  console.log(`initial route name: ${initialRouteName}`)
+  console.log(`username: ${username}`)
+  console.log(`userId: ${userId}`)
 
   const theme = useTheme();
 
