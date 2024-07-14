@@ -643,7 +643,7 @@ const MediaOfYou = () => {
 
   return (
     <View flex={1} width="100%" height="100%">
-      {posts?.length && !isLoadingPostData ? (
+      {posts?.length ? (
         <FlashList
           nestedScrollEnabled={true}
           data={posts}
