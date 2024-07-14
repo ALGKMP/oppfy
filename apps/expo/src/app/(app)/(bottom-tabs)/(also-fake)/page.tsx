@@ -14,7 +14,7 @@ const Page = () => {
       <TouchableOpacity
         onPress={() =>
           router.push({
-            pathname: `${segments[2]}/(fake-connections)/${user?.uid}/some-test-shit`,
+            pathname: `/(fake-connections)/${user?.uid}/some-test-shit`,
             params: {
               userId: user?.uid,
             },
