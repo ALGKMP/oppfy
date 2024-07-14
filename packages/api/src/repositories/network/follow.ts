@@ -268,11 +268,11 @@ export class FollowRepository {
         CASE
           WHEN EXISTS (
             SELECT 1 FROM ${schema.follower} f
-            WHERE f.senderId = ${userId} AND f.recipientId = ${schema.user.id}
+            WHERE f.sender_id = ${userId} AND f.recipient_id = ${schema.user.id}
           ) THEN 'following'
           WHEN EXISTS (
             SELECT 1 FROM ${schema.followRequest} fr
-            WHERE fr.senderId = ${userId} AND fr.recipientId = ${schema.user.id}
+            WHERE fr.sender_id = ${userId} AND fr.recipient_id = ${schema.user.id}
           ) THEN 'followRequestSent'
           ELSE 'notFollowing'
         END
@@ -337,11 +337,11 @@ export class FollowRepository {
         CASE
           WHEN EXISTS (
             SELECT 1 FROM ${schema.follower} f
-            WHERE f.senderId = ${currentUserId} AND f.recipientId = ${schema.user.id}
+            WHERE f.sender_id = ${currentUserId} AND f.recipient_id = ${schema.user.id}
           ) THEN 'following'
           WHEN EXISTS (
             SELECT 1 FROM ${schema.followRequest} fr
-            WHERE fr.senderId = ${currentUserId} AND fr.recipientId = ${schema.user.id}
+            WHERE fr.sender_id = ${currentUserId} AND fr.recipient_id = ${schema.user.id}
           ) THEN 'followRequestSent'
           ELSE 'notFollowing'
         END
