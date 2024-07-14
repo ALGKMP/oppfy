@@ -18,7 +18,7 @@ const useContacts = (syncNow: boolean): ContactFns => {
   const syncContacts = async () => {
 
     // make sure its allowed
-    const { status } = await Contacts.requestPermissionsAsync();
+    const { status } = await Contacts.getPermissionsAsync();
     if (status !== "granted") {
       return;
     }
