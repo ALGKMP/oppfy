@@ -19,7 +19,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, Heart, MoreHorizontal, Send } from "@tamagui/lucide-icons";
+import { Camera, Heart, MoreHorizontal, Send } from "@tamagui/lucide-icons";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
@@ -642,48 +642,68 @@ const MediaOfYou = () => {
 
   return (
     <View flex={1} width="100%" height="100%">
-      <FlashList
-        nestedScrollEnabled={true}
-        data={posts}
-        ListHeaderComponent={FlashListHeader}
-        refreshing={refreshing}
-        showsVerticalScrollIndicator={false}
-        onRefresh={onRefresh}
-        numColumns={1}
-        onEndReached={handleOnEndReached}
-        keyExtractor={(item) => {
-          return item?.postId.toString() ?? "";
-        }}
-        renderItem={({ item }) => {
-          if (item === undefined) {
-            return null;
-          }
-          return (
-            <>
-              {isLoadingPostData ? (
-                <>
-                  <Text>Loading...</Text>
-                </>
-              ) : (
-                <PostItem
-                  post={item}
-                  isViewable={viewableItems.includes(item.postId)}
-                />
-              )}
-            </>
-          );
-        }}
-        estimatedItemSize={screenWidth}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        extraData={viewableItems}
-      />
-      {/* {posts?.length === 0 && !isLoadingPostData && (
-        <View flex={1} justifyContent="center" alignItems="center">
-          <CameraOff size={64} color="$gray12" />
-          <Text>No posts to show</Text>
-        </View>
-      )} */}
+      {posts?.length && !isLoadingPostData ? (
+        <FlashList
+          nestedScrollEnabled={true}
+          data={posts}
+          ListHeaderComponent={FlashListHeader}
+          refreshing={refreshing}
+          showsVerticalScrollIndicator={false}
+          onRefresh={onRefresh}
+          numColumns={1}
+          onEndReached={handleOnEndReached}
+          keyExtractor={(item) => {
+            return item?.postId.toString() ?? "";
+          }}
+          renderItem={({ item }) => {
+            if (item === undefined) {
+              return null;
+            }
+            return (
+              <>
+                {isLoadingPostData ? (
+                  <>
+                    <Text>Loading...</Text>
+                  </>
+                ) : (
+                  <PostItem
+                    post={item}
+                    isViewable={viewableItems.includes(item.postId)}
+                  />
+                )}
+              </>
+            );
+          }}
+          estimatedItemSize={screenWidth}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={viewableItems}
+        />
+      ) : (
+        <FlashList
+          nestedScrollEnabled={true}
+          data={[1]}
+          ListHeaderComponent={FlashListHeader}
+          refreshing={refreshing}
+          showsVerticalScrollIndicator={false}
+          onRefresh={onRefresh}
+          numColumns={1}
+          // keyExtractor={(item) => {item.toString();
+          // }}
+          renderItem={() => {
+            return (
+              <YStack flex={1} justifyContent="center" alignItems="center" aspectRatio={9/6}>
+                <Camera size="$9" color="$gray12" />
+                <SizableText size="$8">No posts yet</SizableText>
+              </YStack>
+            );
+          }}
+          estimatedItemSize={screenWidth}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={viewableItems}
+        />
+      )}
     </View>
   );
 };
