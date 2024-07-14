@@ -38,6 +38,7 @@ import Mute, { useMuteAnimations } from "~/components/Icons/Mute";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
+import FlashListHeader from "./FlashListHeader";
 import FriendsCarousel from "./FriendsCarousel";
 import ImagePost from "./ImagePost";
 import ProfileBanner from "./ProfileBanner";
@@ -607,38 +608,38 @@ const MediaOfYou = () => {
     itemVisiblePercentThreshold: 40,
   };
 
-  const FlashListHeader = () => {
-    if (
-      isLoadingProfileData ||
-      isLoadingFriendsData ||
-      isLoadingRecomendationsData ||
-      profileData === undefined ||
-      friendsData === undefined ||
-      recomendationsData === undefined
-    ) {
-      return (
-        <YStack gap="$5">
-          <ProfileBanner loading />
-          <FriendsCarousel loading />
-        </YStack>
-      );
-    }
-    return (
-      <YStack gap="$5" marginBottom="$5">
-        <YStack gap="$5">
-          <ProfileBanner loading={false} data={profileData} />
-          <FriendsCarousel
-            loading={false}
-            friendsData={{
-              friendCount: profileData.friendCount,
-              friendItems: friendItems,
-            }}
-            reccomendationsData={recomendationsData}
-          />
-        </YStack>
-      </YStack>
-    );
-  };
+  // const FlashListHeader = () => {
+  //   if (
+  //     isLoadingProfileData ||
+  //     isLoadingFriendsData ||
+  //     isLoadingRecomendationsData ||
+  //     profileData === undefined ||
+  //     friendsData === undefined ||
+  //     recomendationsData === undefined
+  //   ) {
+  //     return (
+  //       <YStack gap="$5">
+  //         <ProfileBanner loading />
+  //         <FriendsCarousel loading />
+  //       </YStack>
+  //     );
+  //   }
+  //   return (
+  //     <YStack gap="$5" marginBottom="$5">
+  //       <YStack gap="$5">
+  //         <ProfileBanner loading={false} data={profileData} />
+  //         <FriendsCarousel
+  //           loading={false}
+  //           friendsData={{
+  //             friendCount: profileData.friendCount,
+  //             friendItems: friendItems,
+  //           }}
+  //           reccomendationsData={recomendationsData}
+  //         />
+  //       </YStack>
+  //     </YStack>
+  //   );
+  // };
 
   return (
     <View flex={1} width="100%" height="100%">
@@ -646,7 +647,18 @@ const MediaOfYou = () => {
         <FlashList
           nestedScrollEnabled={true}
           data={posts}
-          ListHeaderComponent={FlashListHeader}
+          ListHeaderComponent={() => {return (
+            <>
+              <FlashListHeader
+                isLoadingProfileData={isLoadingProfileData}
+                isLoadingFriendsData={isLoadingFriendsData}
+                isLoadingRecomendationsData={isLoadingRecomendationsData}
+                profileData={profileData}
+                friendsData={friendItems}
+                recomendationsData={recomendationsData}
+              />
+            </>
+          )}}
           refreshing={refreshing}
           showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
@@ -692,7 +704,12 @@ const MediaOfYou = () => {
           // }}
           renderItem={() => {
             return (
-              <YStack flex={1} justifyContent="center" alignItems="center" aspectRatio={9/6}>
+              <YStack
+                flex={1}
+                justifyContent="center"
+                alignItems="center"
+                aspectRatio={9 / 6}
+              >
                 <Camera size="$9" color="$gray12" />
                 <SizableText size="$8">No posts yet</SizableText>
               </YStack>
