@@ -36,6 +36,7 @@ import GradientHeart, {
 } from "~/components/Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "~/components/Icons/Mute";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
+import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 import FriendsCarousel from "./FriendsCarousel";
 import ImagePost from "./ImagePost";
@@ -62,6 +63,8 @@ const PostItem = (props: PostItemProps) => {
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+
+  const { getCurrentUserProfileId } = useSession();
 
   const router = useRouter();
 
@@ -224,8 +227,13 @@ const PostItem = (props: PostItemProps) => {
     return `${post.caption.substring(0, maxLength)}...`;
   };
 
-  const handleUserClicked = (profileId: number) => {
+  const handleUserClicked = async (profileId: number) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const currentUserProfileId = await getCurrentUserProfileId();
+    if (profileId === currentUserProfileId) {
+      router.navigate({ pathname: "/(profile)/self-profile/media-of-you" });
+      return;
+    }
     router.navigate({
       pathname: "/(profile)/profile/[profile-id]/",
       params: { profileId: String(profileId) },
@@ -243,7 +251,10 @@ const PostItem = (props: PostItemProps) => {
       marginBottom="$5"
     >
       <GestureDetector gesture={postInteractions}>
-        <View width="100%" aspectRatio={Math.max(post.width / post.height, 9/12)}>
+        <View
+          width="100%"
+          aspectRatio={Math.max(post.width / post.height, 9 / 12)}
+        >
           {post.mediaType === "image" ? (
             <ImagePost imageUrl={post.imageUrl}>
               {hearts.map((heart) => (
