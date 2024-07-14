@@ -16,6 +16,13 @@ const useContacts = (syncNow: boolean): ContactFns => {
   const syncContactsMutation = api.contacts.syncContacts.useMutation();
 
   const syncContacts = async () => {
+
+    // make sure its allowed
+    const { status } = await Contacts.requestPermissionsAsync();
+    if (status !== "granted") {
+      return;
+    }
+
     const { data } = await Contacts.getContactsAsync({
       fields: [Contacts.Fields.PhoneNumbers],
     });
