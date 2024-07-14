@@ -17,6 +17,7 @@ import { SearchInput } from "~/components/Inputs";
 
 const FollowerList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
+  console.log(`userId: ${userId}`)
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
     userId,
