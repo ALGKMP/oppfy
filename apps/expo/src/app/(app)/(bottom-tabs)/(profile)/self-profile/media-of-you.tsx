@@ -79,10 +79,21 @@ const PostItem = (props: PostItemProps) => {
 
   const [isLiked, setIsLiked] = useState<boolean>(hasLiked ?? false);
   const [likeCount, setLikeCount] = useState<number>(post.likesCount);
+  const [likeThrottleTimeout, setLikeThrottleTimeout] =
+    useState<NodeJS.Timeout | null>(null);
+  const howManyTimesDidTheMfHitTheLikeButton = useRef(0);
+
   const [commentsBottomSheetVisible, setCommentsBottomSheetVisible] =
     useState(false);
   const [postActionsBottomSheetVisible, setPostActionsBottomSheetVisible] =
     useState(false);
+
+  // For the fuckin like button
+  const heartPosition = useSharedValue({ x: 0, y: 0 });
+  const buttonLikeScale = useSharedValue(1);
+
+  const { hearts, addHeart } = useHeartAnimations();
+  const { muteIcons, addMute } = useMuteAnimations();
 
   useEffect(() => {
     setIsLiked(hasLiked ?? false);
@@ -102,45 +113,11 @@ const PostItem = (props: PostItemProps) => {
     },
   });
 
-  // For the fuckin like button
-  const heartPosition = useSharedValue({ x: 0, y: 0 });
-  const buttonLikeScale = useSharedValue(1);
-
-  const { hearts, addHeart } = useHeartAnimations();
-  const { muteIcons, addMute } = useMuteAnimations();
-
-  const animateButton = () => {
-    buttonLikeScale.value = withSpring(
-      1.1,
-      {
-        duration: 100,
-        dampingRatio: 0.5,
-        stiffness: 50,
-        overshootClamping: false,
-        restDisplacementThreshold: 0.01,
-        restSpeedThreshold: 2,
-        reduceMotion: ReduceMotion.System,
-      },
-      () => {
-        buttonLikeScale.value = withTiming(1, { duration: 200 });
-      },
-    );
-  };
-
-  const [likeTimeout, setLikeTimeout] = useState<NodeJS.Timeout | null>(null);
-
-  const handleDoubleTapLike = (x: number, y: number) => {
-    addHeart(x, y); // Add one of those fucking heart animations
-    handleLikeToggle({ doubleTap: true });
-  };
-
-  const howManyTimesDidTheMfHitTheLikeButton = useRef(0);
-
   const handleLikeToggle = ({ doubleTap }: { doubleTap: boolean }): void => {
     animateButton();
     if (isLiked && doubleTap) return;
 
-    // Incremement this shit to keep of user's wasting their time
+    // Incremement this shit to keep track of user's wasting their time
     howManyTimesDidTheMfHitTheLikeButton.current += 1;
     const clickCount = howManyTimesDidTheMfHitTheLikeButton.current;
     const ignoreIfSameAsCurrentState = clickCount % 2 === 0;
@@ -152,8 +129,8 @@ const PostItem = (props: PostItemProps) => {
     setLikeCount(newIsLiked ? likeCount + 1 : Math.max(likeCount - 1, 0));
 
     // Existing timeouts can fuck off
-    if (likeTimeout) {
-      clearTimeout(likeTimeout);
+    if (likeThrottleTimeout) {
+      clearTimeout(likeThrottleTimeout);
     }
 
     // Set a new timeout
@@ -181,12 +158,40 @@ const PostItem = (props: PostItemProps) => {
         }
 
         // Clear the fucking timeout after execution
-        setLikeTimeout(null);
+        setLikeThrottleTimeout(null);
       })();
     }, 3000);
 
     // Save the new timeout for later idiot
-    setLikeTimeout(newTimeout);
+    setLikeThrottleTimeout(newTimeout);
+  };
+
+  const animateButton = () => {
+    buttonLikeScale.value = withSpring(
+      1.1,
+      {
+        duration: 100,
+        dampingRatio: 0.5,
+        stiffness: 50,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 2,
+        reduceMotion: ReduceMotion.System,
+      },
+      () => {
+        buttonLikeScale.value = withTiming(1, { duration: 200 });
+      },
+    );
+  };
+
+  const handleDoubleTapLike = (x: number, y: number) => {
+    addHeart(x, y); // Add one of those fucking heart animations
+    handleLikeToggle({ doubleTap: true });
+  };
+
+  const handleTapMute = () => {
+    addMute(!isMuted);
+    setIsMuted(!isMuted);
   };
 
   const doubleTap = Gesture.Tap()
@@ -196,11 +201,6 @@ const PostItem = (props: PostItemProps) => {
       heartPosition.value = { x, y }; // Update position
       runOnJS(handleDoubleTapLike)(x, y);
     });
-
-  const handleTapMute = () => {
-    addMute(!isMuted);
-    setIsMuted(!isMuted);
-  };
 
   const tapGesture = Gesture.Tap().onEnd(() => {
     runOnJS(handleTapMute)();
@@ -227,7 +227,7 @@ const PostItem = (props: PostItemProps) => {
     return `${post.caption.substring(0, maxLength)}...`;
   };
 
-  const handleUserClicked = async (profileId: number) => {
+  const handleRouteToNewUser = async (profileId: number) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const currentUserProfileId = await getCurrentUserProfileId();
     if (profileId === currentUserProfileId) {
@@ -303,13 +303,13 @@ const PostItem = (props: PostItemProps) => {
             <Avatar.Image
               accessibilityLabel="Cam"
               src={profile?.profilePictureUrl ?? ""}
-              onPress={() => handleUserClicked(post.recipientProfileId)}
+              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
             />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
           <YStack gap="$1" justifyContent="center">
             <TouchableOpacity
-              onPress={() => handleUserClicked(post.recipientProfileId)}
+              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
             >
               <SizableText
                 size="$3"
@@ -324,8 +324,8 @@ const PostItem = (props: PostItemProps) => {
               </SizableText>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => {
-                handleUserClicked(post.authorProfileId);
+              onPress={async () => {
+                await handleRouteToNewUser(post.authorProfileId);
               }}
             >
               <XStack gap="$1.5" alignItems="center">
@@ -525,6 +525,29 @@ const MediaOfYou = () => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "loading",
   );
+  const [refreshing, setRefreshing] = useState(false);
+  const [viewableItems, setViewableItems] = useState<number[]>([]);
+
+  const {
+    data: profileData,
+    isLoading: isLoadingProfileData,
+    refetch: refetchProfileData,
+  } = api.profile.getFullProfileSelf.useQuery();
+
+  const {
+    data: recomendationsData,
+    isLoading: isLoadingRecomendationsData,
+    refetch: refetchRecomendationsData,
+  } = api.contacts.getReccomendationProfiles.useQuery();
+
+  const {
+    data: friendsData,
+    isLoading: isLoadingFriendsData,
+    refetch: refetchFriendsData,
+  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
+    { pageSize: 10 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+  );
 
   const {
     data: postData,
@@ -553,29 +576,6 @@ const MediaOfYou = () => {
     [postData],
   );
 
-  const [refreshing, setRefreshing] = useState(false);
-
-  const {
-    data: profileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfileData,
-  } = api.profile.getFullProfileSelf.useQuery();
-
-  const {
-    data: recomendationsData,
-    isLoading: isLoadingRecomendationsData,
-    refetch: refetchRecomendationsData,
-  } = api.contacts.getReccomendationProfiles.useQuery();
-
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    { pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
-  );
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([
@@ -584,17 +584,12 @@ const MediaOfYou = () => {
       refetchRecomendationsData(),
     ]);
     setRefreshing(false);
-  }, [refetchFriendsData, refetchProfileData]);
+  }, [refetchFriendsData, refetchProfileData, refetchRecomendationsData]);
 
   const friendItems = useMemo(
     () => friendsData?.pages.flatMap((page) => page.items) ?? [],
     [friendsData],
   );
-
-  const [viewableItems, setViewableItems] = useState<number[]>([]);
-  useEffect(() => {
-    console.log(viewableItems);
-  }, [viewableItems]);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
