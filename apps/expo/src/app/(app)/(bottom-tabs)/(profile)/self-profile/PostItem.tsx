@@ -283,7 +283,7 @@ const PostItem = (props: PostItemProps) => {
                 >
                   📸
                 </SizableText>
-                <SizableText size="$1" lineHeight={15} fontWeight="bold">
+                <SizableText size="$1" lineHeight={15}>
                   posted by:
                 </SizableText>
 
