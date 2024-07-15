@@ -20,10 +20,10 @@ const ProfilePicture = () => {
     });
 
   const onSubmit = () =>
-    router.replace("/(app)/(bottom-tabs)/(profile)/self-profile/media-of-you");
+    router.replace("/(app)/(bottom-tabs)/(profile)/self-profile/profile");
 
   const onSkip = () =>
-    router.replace("/(app)/(bottom-tabs)/(profile)/self-profile/media-of-you");
+    router.replace("/(app)/(bottom-tabs)/(profile)/self-profile/profile");
 
   return (
     <KeyboardSafeView>

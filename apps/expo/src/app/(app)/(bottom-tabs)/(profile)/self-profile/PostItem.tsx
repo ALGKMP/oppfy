@@ -218,7 +218,7 @@ const PostItem = (props: PostItemProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const currentUserProfileId = await getCurrentUserProfileId();
     if (profileId === currentUserProfileId) {
-      router.navigate({ pathname: "/(profile)/self-profile/media-of-you" });
+      router.navigate({ pathname: "/(profile)/self-profile/profile" });
       return;
     }
     router.navigate({
@@ -380,8 +380,7 @@ const PostItem = (props: PostItemProps) => {
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {`add a comment for ${post.recipientUsername}`.length >
-                 19 
+                  {`add a comment for ${post.recipientUsername}`.length > 19
                     ? `${`add a comment for ${post.recipientUsername}`.slice(0, 27)}...`
                     : `add a comment for ${post.recipientUsername}`}
                 </Text>
