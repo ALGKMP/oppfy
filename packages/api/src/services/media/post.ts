@@ -21,6 +21,11 @@ interface PostCursor {
   postId: number;
 }
 
+interface FollowingPostCursor {
+  createdAt: Date;
+  followerId: number;
+}
+
 interface CommentCursor {
   createdAt: Date;
   commentId: number;
@@ -192,15 +197,48 @@ export class PostService {
 
   async paginatePostsOfFollowing(
     userId: string,
-    cursor: PostCursor | null = null,
+    cursor: FollowingPostCursor | null = null,
     pageSize?: number,
-  ) {}
+  ) {
+    try {
+      const data = await this.postRepository.paginatePostsOfFollowing(
+        userId,
+        cursor,
+      );
+      console.log(data);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      return updatedData;
+    } catch (error) {
+      console.error(`Error in getPosts for userId: ${userId}: `, error);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_POSTS,
+        "Failed to paginate posts.",
+      );
+    }
+  }
 
   async paginatePostsOfRecomended(
     userId: string,
     cursor: PostCursor | null = null,
     pageSize?: number,
-  ) {}
+  ) {
+    /*     try {
+      const data = await this.postRepository.paginatePostsOfRecomended(
+        userId,
+        cursor,
+      );
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      return updatedData;
+    } catch (error) {
+      console.error(`Error in getPosts for userId: ${userId}: `, error);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_PAGINATE_POSTS,
+        "Failed to paginate posts.",
+      );
+    } */
+
+    throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_POSTS, "unimpl");
+  }
 
   async paginatePostsByUserSelf(
     userId: string,

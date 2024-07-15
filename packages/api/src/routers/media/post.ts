@@ -172,6 +172,70 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+  paginatePostsForFeed: protectedProcedure
+    .input(trpcValidators.input.post.paginatePostsForFeed)
+    .output(trpcValidators.output.post.paginatedPosts)
+    .query(async ({ ctx, input }) => {
+      try {
+   /*      const result = await ctx.services.post.paginatePostsForFeed(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        ); */
+/*         const parsedResult =
+          trpcValidators.output.post.paginatedPosts.parse(result); */
+        // return parsedResult;
+
+
+        // promise.all the 2 fns
+        // return the result of the promise.all
+        // parse the result of the promise.all
+        // return the parsed result
+/*         const result = await Promise.all([
+          ctx.services.post.paginatePostsOfFollowing(
+            ctx.session.uid,
+            input.cursor,
+            input.pageSize,
+          ),
+          ctx.services.post.paginatePostsOfRecomended(
+            ctx.session.uid,
+            input.cursor,
+            input.pageSize,
+          ),
+        ]);
+ */
+
+        const result = await ctx.services.post.paginatePostsOfFollowing(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
+
+
+        console.error("paginate posts for following", result);
+
+
+
+        const parsedResult =
+          trpcValidators.output.post.paginatedPosts.parse(result);
+        return parsedResult;
+        
+
+      } catch (err) {
+        console.error("TRPC getPosts error: ", err);
+        if (err instanceof DomainError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate posts.",
+        });
+      }
+    }),
+
   paginatePostsOfUserOther: protectedProcedure
     .input(trpcValidators.input.post.paginatePostsOfUserOther)
     .output(trpcValidators.output.post.paginatedPosts)

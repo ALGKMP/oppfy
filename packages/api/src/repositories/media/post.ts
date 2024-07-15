@@ -1,4 +1,4 @@
-import { aliasedTable, and, asc, eq, gt, or } from "drizzle-orm";
+import { aliasedTable, and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -33,6 +33,83 @@ export class PostRepository {
       where: eq(schema.post.id, postId),
     });
   }
+
+  @handleDatabaseErrors
+  async paginatePostsOfFollowing(
+    userId: string,
+    cursor: { createdAt: Date; followerId: number } | null = null,
+    pageSize = 10,
+  ) {
+    const author = aliasedTable(schema.user, "author");
+    const recipient = aliasedTable(schema.user, "recipient");
+    const authorProfile = aliasedTable(schema.profile, "authorProfile");
+    const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
+    const follower = aliasedTable(schema.follower, "follower");
+
+    console.log("in here");
+
+    // Subquery to get the latest post for each followed user
+    const latestPosts = this.db
+      .select({
+        postId: sql<number>`max(${schema.post.id})`.as("latest_post_id"),
+        authorId: schema.post.author,
+        followerId: follower.id,
+      })
+      .from(schema.post)
+      .innerJoin(follower, eq(follower.recipientId, schema.post.author))
+      .where(eq(follower.senderId, userId))
+      .groupBy(schema.post.author, follower.id)
+      .as("latest_posts");
+
+    return await this.db
+      .select({
+        postId: schema.post.id,
+        authorId: schema.post.author,
+        authorUsername: authorProfile.username,
+        authorProfileId: authorProfile.id,
+        authorProfilePicture: authorProfile.profilePictureKey,
+        recipientId: schema.post.recipient,
+        recipientUsername: recipientProfile.username,
+        recipientProfileId: recipientProfile.id,
+        recipientProfilePicture: recipientProfile.profilePictureKey,
+        caption: schema.post.caption,
+        imageUrl: schema.post.key,
+        width: schema.post.width,
+        height: schema.post.height,
+        commentsCount: schema.postStats.comments,
+        likesCount: schema.postStats.likes,
+        mediaType: schema.post.mediaType,
+        createdAt: schema.post.createdAt,
+        followerId: latestPosts.followerId,
+      })
+      .from(latestPosts)
+      .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
+      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .where(
+        cursor
+          ? or(
+              lt(schema.post.createdAt, cursor.createdAt),
+              and(
+                eq(schema.post.createdAt, cursor.createdAt),
+                gt(latestPosts.followerId, cursor.followerId),
+              ),
+            )
+          : undefined,
+      )
+      .orderBy(desc(schema.post.createdAt), asc(latestPosts.followerId))
+      .limit(pageSize + 1);
+  }
+
+  @handleDatabaseErrors
+  async paginatePostsOfRecomended(
+    userId: string,
+    cursor: { createdAt: Date; followerId: number } | null = null,
+    pageSize = 10,
+  ) {}
 
   @handleDatabaseErrors
   async paginatePostsOfUser(
