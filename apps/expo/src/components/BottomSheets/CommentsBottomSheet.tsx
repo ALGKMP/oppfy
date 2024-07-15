@@ -389,7 +389,7 @@ const CommentsBottomSheet = ({
         // if there are no comments render a message
         comments.length === 0 ? (
           <View flex={1} justifyContent="center" alignItems="center">
-            <SizableText size="$7">No comments yet</SizableText>
+            <SizableText size="$7" fontWeight="bold">No comments yet</SizableText>
             <Text color="$gray10">Be the first to comment</Text>
           </View>
         ) : (
@@ -434,12 +434,12 @@ const CommentsBottomSheet = ({
         </Avatar>
         <View style={{ flex: 5 }}>
           <BottomSheetTextInput
-            placeholder="Comment"
+            placeholder={"add a comment..."}
             maxLength={100}
             value={inputValue}
             onChangeText={setInputValue}
             style={{
-              fontWeight: "bold",
+              fontWeight: "normal",
               justifyContent: "flex-start",
               borderWidth: 10,
               borderColor: "#2E2E2E",
