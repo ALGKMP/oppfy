@@ -88,7 +88,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  paginatePostsOfUserSelf: protectedProcedure
+  paginatePostsOfUserOther: protectedProcedure
     .input(trpcValidators.input.post.paginatePostsOfUserSelf)
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
