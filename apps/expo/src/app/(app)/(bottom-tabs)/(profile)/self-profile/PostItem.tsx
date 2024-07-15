@@ -1,8 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -238,9 +234,84 @@ const PostItem = (props: PostItemProps) => {
       justifyContent="center"
       overflow="hidden"
       borderRadius={20}
-      backgroundColor="$gray2"
       marginBottom="$5"
     >
+      <XStack
+        flex={1}
+        // margin="$2"
+        padding="$2"
+        width="100%"
+        justifyContent="space-between"
+        alignContent="center"
+      >
+        <XStack gap="$2.5">
+          <Avatar circular size="$3">
+            <Avatar.Image
+              accessibilityLabel="Cam"
+              src={profile?.profilePictureUrl ?? ""}
+              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
+            />
+            <Avatar.Fallback backgroundColor="$blue10" />
+          </Avatar>
+          <YStack gap="$1" justifyContent="center">
+            <TouchableOpacity
+              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
+            >
+              <SizableText
+                size="$2"
+                lineHeight={14}
+                margin={0}
+                padding={0}
+                shadowRadius={3}
+                shadowOpacity={0.5}
+                fontWeight="bold"
+              >
+                {post.recipientUsername ?? "@RecipientUsername"}
+              </SizableText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                await handleRouteToNewUser(post.authorProfileId);
+              }}
+            >
+              <XStack gap="$1.5" alignItems="center">
+                <SizableText
+                  size="$2"
+                  lineHeight={15}
+                  marginTop={0}
+                  padding={0}
+                >
+                  📸
+                </SizableText>
+                <SizableText size="$1" lineHeight={15} fontWeight="bold">
+                  posted by:
+                </SizableText>
+
+                <SizableText
+                  size="$2"
+                  lineHeight={15}
+                  fontWeight="bold"
+                  color="$blue9"
+                >
+                  {post.authorUsername ?? "@AuthorUsername"}
+                </SizableText>
+              </XStack>
+            </TouchableOpacity>
+          </YStack>
+        </XStack>
+        <View justifyContent="center" alignItems="center">
+          <TouchableOpacity
+            onPress={() => {
+              setPostActionsBottomSheetVisible(true);
+              console.log("touched");
+              // setIsReportModalVisible(true)
+            }}
+          >
+            <MoreHorizontal size={24} color="$gray12" />
+          </TouchableOpacity>
+        </View>
+      </XStack>
+
       <GestureDetector gesture={postInteractions}>
         <View
           width="100%"
@@ -280,83 +351,6 @@ const PostItem = (props: PostItemProps) => {
           )}
         </View>
       </GestureDetector>
-      <XStack
-        flex={1}
-        position="absolute"
-        top={10}
-        left={10}
-        width="95%"
-        justifyContent="space-between"
-        alignContent="center"
-      >
-        <XStack gap="$2.5">
-          <Avatar circular size="$5">
-            <Avatar.Image
-              accessibilityLabel="Cam"
-              src={profile?.profilePictureUrl ?? ""}
-              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
-            />
-            <Avatar.Fallback backgroundColor="$blue10" />
-          </Avatar>
-          <YStack gap="$1" justifyContent="center">
-            <TouchableOpacity
-              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
-            >
-              <SizableText
-                size="$3"
-                lineHeight={14}
-                margin={0}
-                padding={0}
-                shadowRadius={3}
-                shadowOpacity={0.5}
-                fontWeight="bold"
-              >
-                {post.recipientUsername ?? "@RecipientUsername"}
-              </SizableText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={async () => {
-                await handleRouteToNewUser(post.authorProfileId);
-              }}
-            >
-              <XStack gap="$1.5" alignItems="center">
-                <SizableText
-                  size="$3"
-                  lineHeight={15}
-                  marginTop={0}
-                  padding={0}
-                >
-                  📸
-                </SizableText>
-                <SizableText size="$2" lineHeight={15} fontWeight="bold">
-                  posted by:
-                </SizableText>
-
-                <SizableText
-                  size="$2"
-                  lineHeight={15}
-                  fontWeight="bold"
-                  color="$blue9"
-                >
-                  {post.authorUsername ?? "@AuthorUsername"}
-                </SizableText>
-              </XStack>
-            </TouchableOpacity>
-          </YStack>
-        </XStack>
-        <View justifyContent="center" alignItems="center">
-          <TouchableOpacity
-            onPress={() => {
-              setPostActionsBottomSheetVisible(true);
-              console.log("touched");
-              // setIsReportModalVisible(true)
-            }}
-          >
-            <MoreHorizontal size={24} color="$gray12" />
-          </TouchableOpacity>
-        </View>
-      </XStack>
-
       {/* Under Post */}
       <View
         flex={1}
@@ -365,7 +359,7 @@ const PostItem = (props: PostItemProps) => {
         paddingTop="$3"
         borderBottomRightRadius="$8"
         borderBottomLeftRadius="$8"
-        backgroundColor="$gray2"
+        // backgroundColor="$gray2"
       >
         <XStack gap="$2" alignItems="flex-start">
           {/* Comment Button */}
@@ -380,8 +374,16 @@ const PostItem = (props: PostItemProps) => {
                 borderRadius="$7"
                 backgroundColor="$gray5"
               >
-                <Text fontWeight="bold" color="$gray9">
-                  Comment
+                <Text
+                  fontWeight="normal"
+                  color="$gray9"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {`add a comment for ${post.recipientUsername}`.length >
+                 19 
+                    ? `${`add a comment for ${post.recipientUsername}`.slice(0, 27)}...`
+                    : `add a comment for ${post.recipientUsername}`}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -433,7 +435,7 @@ const PostItem = (props: PostItemProps) => {
             <TouchableOpacity
               onPress={() => setCommentsBottomSheetVisible(true)}
             >
-              <SizableText size="$2" fontWeight="bold" color="$gray10">
+              <SizableText size="$2" fontWeight="normal" color="$gray10">
                 {post.commentsCount > 0
                   ? post.commentsCount > 1
                     ? `${post.commentsCount} comments`
@@ -444,7 +446,7 @@ const PostItem = (props: PostItemProps) => {
           </View>
           <View flex={2} alignItems="flex-start">
             <TouchableOpacity>
-              <SizableText size="$2" fontWeight="bold" color="$gray10">
+              <SizableText size="$2" fontWeight="normal" color="$gray10">
                 {likeCount > 0
                   ? likeCount > 1
                     ? `${likeCount} likes`

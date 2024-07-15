@@ -16,7 +16,9 @@ const ImagePost: React.FC<ImagePostProps> = ({ imageUrl, children }) => {
           height: "100%",
           justifyContent: "center",
           alignItems: "center",
-          borderRadius: 20,
+          // borderRadius: 20,
+          // borderTopLeftRadius: 20,
+          // borderTopRightRadius: 20,
         },
       ]}
       contentFit="cover"
