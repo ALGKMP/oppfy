@@ -117,35 +117,60 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsOfFollowing: protectedProcedure
-  .input(trpcValidators.input.post.paginatePostsOfFollowing)
-  .output(trpcValidators.output.post.paginatedPosts)
-  .query(async ({ ctx, input }) => {
-    try {
-      const result = await ctx.services.post.paginatePostsOfFollowing(
-        ctx.session.uid,
-        input.cursor,
-        input.pageSize,
-      );
-      const parsedResult =
-        trpcValidators.output.post.paginatedPosts.parse(result);
-      return parsedResult;
-    } catch (err) {
-      console.error("TRPC getPosts error: ", err);
-      if (err instanceof DomainError) {
+    .input(trpcValidators.input.post.paginatePostsOfFollowing)
+    .output(trpcValidators.output.post.paginatedPosts)
+    .query(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.services.post.paginatePostsOfFollowing(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
+        const parsedResult =
+          trpcValidators.output.post.paginatedPosts.parse(result);
+        return parsedResult;
+      } catch (err) {
+        console.error("TRPC getPosts error: ", err);
+        if (err instanceof DomainError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: err.message,
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate posts.",
         });
       }
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to paginate posts.",
-      });
-    }
-  }),
+    }),
 
-
-
+  paginatePostsOfRecommended: protectedProcedure
+    .input(trpcValidators.input.post.paginatePostsOfRecommended)
+    .output(trpcValidators.output.post.paginatedPosts)
+    .query(async ({ ctx, input }) => {
+      try {
+        const result = await ctx.services.post.paginatePostsOfRecomended(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
+        const parsedResult =
+          trpcValidators.output.post.paginatedPosts.parse(result);
+        return parsedResult;
+      } catch (err) {
+        console.error("TRPC getPosts error: ", err);
+        if (err instanceof DomainError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to paginate posts.",
+        });
+      }
+    }),
 
   paginatePostsOfUserOther: protectedProcedure
     .input(trpcValidators.input.post.paginatePostsOfUserOther)
