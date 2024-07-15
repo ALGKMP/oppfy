@@ -10,6 +10,12 @@ import { BottomTabs } from "~/layouts";
 const BottomTabsLayout = () => {
   const theme = useTheme();
 
+  const getTabBarIcon =
+    (IconComponent: React.ElementType) =>
+    ({ focused }: { focused: boolean }) => (
+      <IconComponent strokeWidth={focused ? 3 : 1.5} />
+    );
+
   return (
     <BottomTabs
       tabBar={(props) => <BottomTabBar {...props} />}
@@ -29,7 +35,7 @@ const BottomTabsLayout = () => {
         name="(home)"
         options={{
           title: "Home",
-          tabBarIcon: ({ focused }) => <Home strokeWidth={focused ? 2 : 1.5} />,
+          tabBarIcon: getTabBarIcon(Home),
         }}
       />
 
@@ -37,9 +43,7 @@ const BottomTabsLayout = () => {
         name="(search)"
         options={{
           header: () => null,
-          tabBarIcon: ({ focused }) => (
-            <Search strokeWidth={focused ? 2 : 1.5} />
-          ),
+          tabBarIcon: getTabBarIcon(Search),
         }}
       />
 
@@ -47,9 +51,7 @@ const BottomTabsLayout = () => {
         name="(camera)"
         options={{
           header: () => null,
-          tabBarIcon: ({ focused }) => (
-            <Camera strokeWidth={focused ? 2 : 1.5} />
-          ),
+          tabBarIcon: getTabBarIcon(Camera),
         }}
       />
 
@@ -57,9 +59,7 @@ const BottomTabsLayout = () => {
         name="(inbox)"
         options={{
           header: () => null,
-          tabBarIcon: ({ focused }) => (
-            <Inbox strokeWidth={focused ? 2 : 1.5} />
-          ),
+          tabBarIcon: getTabBarIcon(Inbox),
         }}
       />
 
@@ -67,9 +67,7 @@ const BottomTabsLayout = () => {
         name="(profile)"
         options={{
           header: () => null,
-          tabBarIcon: ({ focused }) => (
-            <User2 strokeWidth={focused ? 2 : 1.5} />
-          ),
+          tabBarIcon: getTabBarIcon(User2),
         }}
       />
     </BottomTabs>
