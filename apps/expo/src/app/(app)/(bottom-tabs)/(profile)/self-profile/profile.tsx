@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions } from "react-native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -54,6 +54,26 @@ const MediaOfYou = () => {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  const {
+    data: coolpostData,
+    isLoading: coolisLoadingPostData,
+    isFetchingNextPage: coolisfetching,
+    fetchNextPage: collfetch,
+    hasNextPage: coolhasnext,
+    refetch: coolrefetch,
+  } = api.post.paginatePostsForFeed.useInfiniteQuery(
+    {
+      pageSize: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  useEffect(() => {
+    console.log(coolpostData);
+  }, []);
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {

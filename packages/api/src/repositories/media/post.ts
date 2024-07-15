@@ -35,6 +35,73 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
+  async paginatePostsOfFollowing(
+    userId: string,
+    cursor: { createdAt: Date; followerId: number } | null = null,
+    pageSize = 10,
+  ) {
+    const author = aliasedTable(schema.user, "author");
+    const recipient = aliasedTable(schema.user, "recipient");
+    const authorProfile = aliasedTable(schema.profile, "authorProfile");
+    const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
+    const follower = aliasedTable(schema.follower, "follower");
+
+    console.log("in here");
+
+    return await this.db
+      .select({
+        postId: schema.post.id,
+        authorId: schema.post.author,
+        authorUsername: authorProfile.username,
+        authorProfileId: authorProfile.id,
+        authorProfilePicture: authorProfile.profilePictureKey,
+        recipientId: schema.post.recipient,
+        recipientUsername: recipientProfile.username,
+        recipientProfileId: recipientProfile.id,
+        recipientProfilePicture: recipientProfile.profilePictureKey,
+        caption: schema.post.caption,
+        imageUrl: schema.post.key,
+        width: schema.post.width,
+        height: schema.post.height,
+        commentsCount: schema.postStats.comments,
+        likesCount: schema.postStats.likes,
+        mediaType: schema.post.mediaType,
+        createdAt: schema.post.createdAt,
+      })
+      .from(schema.post)
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
+      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .innerJoin(follower, eq(follower.recipientId, schema.post.recipient))
+      .where(
+        and(
+          eq(follower.senderId, userId),
+          cursor
+            ? or(
+                gt(schema.post.createdAt, cursor.createdAt),
+                gt(follower.id, cursor.followerId),
+                and(
+                  eq(schema.post.createdAt, cursor.createdAt),
+                  gt(follower.id, cursor.followerId),
+                ),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(asc(schema.post.createdAt), asc(follower.id))
+      .limit(pageSize + 1);
+  }
+
+  @handleDatabaseErrors
+  async paginatePostsOfRecomended(
+    userId: string,
+    cursor: { createdAt: Date; followerId: number } | null = null,
+    pageSize = 10,
+  ) {}
+
+  @handleDatabaseErrors
   async paginatePostsOfUser(
     userId: string,
     cursor: { createdAt: Date; postId: number } | null = null,

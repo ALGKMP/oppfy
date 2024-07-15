@@ -52,7 +52,7 @@ const trpcPostInputSchema = {
   paginatePostsOfFollowing: z.object({
     cursor: z
       .object({
-        postId: z.number(),
+        followerId: z.number(),
         createdAt: z.date(),
       })
       .optional(),
@@ -72,7 +72,7 @@ const trpcPostInputSchema = {
   paginatePostsForFeed: z.object({
     cursor: z
       .object({
-        postId: z.number(),
+        followerId: z.number(),
         createdAt: z.date(),
       })
       .optional(),
