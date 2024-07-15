@@ -49,15 +49,25 @@ export class ContactsRepository {
           await tx.insert(schema.contact).values({ id: contact });
         }
 
-        try {
-          await tx.insert(schema.userContact).values({
-            userId,
-            contactId: contact,
-          });
-        } catch (error) {
-          // error here is going to be duplicate if that happens for some reason,
-          // just catching it here and ignoring it is faster than actually checking
-          // if theres a collision on every single one lol
+        // Check if the user_contact entry already exists
+        const userContactExists = await tx.query.userContact.findFirst({
+          where: and(
+            eq(schema.userContact.userId, userId),
+            eq(schema.userContact.contactId, contact),
+          ),
+        });
+
+        if (!userContactExists) {
+          try {
+            await tx.insert(schema.userContact).values({
+              userId,
+              contactId: contact,
+            });
+          } catch (error) {
+            // error here is going to be duplicate if that happens for some reason,
+            // just catching it here and ignoring it is faster than actually checking
+            // if there's a collision on every single one lol
+          }
         }
       }
     });
