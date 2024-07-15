@@ -34,15 +34,16 @@ const SearchLayout = () => {
       <Stack.Screen
         name="profile/[profile-id]"
         options={{
-          headerRight: () => (
-            <View>
-              <Pressable onPress={() => console.log("THING CLICKED")}>
-                {({ pressed }) => (
-                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
-                )}
-              </Pressable>
-            </View>
-          ),
+          header: () => null,
+          // headerRight: () => (
+          //   <View>
+          //     <Pressable onPress={() => console.log("THING CLICKED")}>
+          //       {({ pressed }) => (
+          //         <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
+          //       )}
+          //     </Pressable>
+          //   </View>
+          // ),
         }}
       />
       <Stack.Screen name="connections/[user-id]" />

@@ -59,7 +59,7 @@ import { useUploadProfilePicture } from "~/hooks/media";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import MediaOfYou from "./media-of-you";
+import MediaOfYou from "./profile";
 
 type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
