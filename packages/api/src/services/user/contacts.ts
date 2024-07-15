@@ -14,88 +14,7 @@ import {
 } from "../../repositories";
 import { S3Service } from "../aws/s3";
 
-async function getRecommendationsInternal(userId: string) {
-  const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
 
-  // Construct the full URL with the query parameter
-  const url = new URL(lambdaUrl);
-  url.searchParams.append("userId", userId);
-
-  // make the request
-  const response = await fetch(url);
-
-  if (response.status !== 200) {
-    console.error("Error invoking Lambda function: ", response.statusText);
-    return {
-      tier1: [],
-      tier2: [],
-      tier3: [],
-    };
-  }
-
-  return (await response.json()) as {
-    tier1: string[];
-    tier2: string[];
-    tier3: string[];
-  };
-
-  /*   // Create the HTTP request
-  const request = new HttpRequest({
-    method: "GET",
-    headers: {
-      host: url.hostname,
-    },
-    hostname: url.hostname,
-    path: `${url.pathname}${url.search}`,
-  });
-
-  // Sign the request
-  const signer = new SignatureV4({
-    credentials: defaultProvider(),
-    region: region,
-    service: "lambda",
-    sha256: Uint8Array.from,
-  });
-
-  const signedRequest = await signer.sign(request); */
-
-  // Make the request using fetch
-  /*   try {
-        const response = await fetch(url.toString(), {
-      method: signedRequest.method,
-      headers: signedRequest.headers as HeadersInit,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return await response.json();
-
-    const response = await fetch(url.toString());
-    // console.log("response", response);
-
-    if (response.status !== 200) {
-      console.log(
-        "Error invoking Lambda function: up here",
-        response.statusText,
-      );
-    }
-
-    return (await response.json()) as {
-      tier1: string[];
-      tier2: string[];
-      tier3: string[];
-    };
-  } catch (error) {
-    console.error("Error invoking Lambda function:", error);
-    return {
-      tier1: [],
-      tier2: [],
-      tier3: [],
-    };
-  } */
-}
 
 export class ContactService {
   private contactsRepository = new ContactsRepository();
@@ -187,7 +106,7 @@ export class ContactService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
-    return await getRecommendationsInternal(userId);
+    return await this.contactsRepository.getRecommendationsInternal(userId);
   }
 
   async getRecommendationProfiles(userId: string) {

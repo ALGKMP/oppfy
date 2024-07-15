@@ -1,6 +1,7 @@
 import { and, db, eq, or, schema } from "@oppfy/db";
 
 import { handleDatabaseErrors } from "../../errors";
+import { env } from "@oppfy/env";
 
 export class ContactsRepository {
   private db = db;
@@ -78,5 +79,32 @@ export class ContactsRepository {
     return await this.db
       .delete(schema.userContact)
       .where(eq(schema.userContact.userId, userId));
+  }
+
+  @handleDatabaseErrors
+  async getRecommendationsInternal(userId: string) {
+    const lambdaUrl = env.CONTACT_REC_LAMBDA_URL;
+  
+    // Construct the full URL with the query parameter
+    const url = new URL(lambdaUrl);
+    url.searchParams.append("userId", userId);
+  
+    // make the request
+    const response = await fetch(url);
+  
+    if (response.status !== 200) {
+      console.error("Error invoking Lambda function: ", response.statusText);
+      return {
+        tier1: [],
+        tier2: [],
+        tier3: [],
+      };
+    }
+  
+    return (await response.json()) as {
+      tier1: string[];
+      tier2: string[];
+      tier3: string[];
+    };
   }
 }
