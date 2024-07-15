@@ -1,4 +1,3 @@
-import { contact } from "../../../db/src/schema/schema";
 import { S3Service } from "./aws/s3";
 import { SearchService } from "./aws/search";
 import { PaginationService } from "./media/paginate";

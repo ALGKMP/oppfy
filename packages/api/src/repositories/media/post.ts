@@ -1,4 +1,4 @@
-import { aliasedTable, and, asc, eq, gt, or } from "drizzle-orm";
+import { aliasedTable, and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -80,7 +80,7 @@ export class PostRepository {
           eq(follower.senderId, userId),
           cursor
             ? or(
-                gt(schema.post.createdAt, cursor.createdAt),
+                // gt(schema.post.createdAt, cursor.createdAt),
                 gt(follower.id, cursor.followerId),
                 and(
                   eq(schema.post.createdAt, cursor.createdAt),
