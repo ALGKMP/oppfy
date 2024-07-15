@@ -88,7 +88,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  paginatePostsOfUserOther: protectedProcedure
+  paginatePostsOfUserSelf: protectedProcedure
     .input(trpcValidators.input.post.paginatePostsOfUserSelf)
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
@@ -177,21 +177,20 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-   /*      const result = await ctx.services.post.paginatePostsForFeed(
+        /*      const result = await ctx.services.post.paginatePostsForFeed(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         ); */
-/*         const parsedResult =
+        /*         const parsedResult =
           trpcValidators.output.post.paginatedPosts.parse(result); */
         // return parsedResult;
-
 
         // promise.all the 2 fns
         // return the result of the promise.all
         // parse the result of the promise.all
         // return the parsed result
-/*         const result = await Promise.all([
+        /*         const result = await Promise.all([
           ctx.services.post.paginatePostsOfFollowing(
             ctx.session.uid,
             input.cursor,
@@ -211,16 +210,11 @@ export const postRouter = createTRPCRouter({
           input.pageSize,
         );
 
-
         console.error("paginate posts for following", result);
-
-
 
         const parsedResult =
           trpcValidators.output.post.paginatedPosts.parse(result);
         return parsedResult;
-        
-
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
