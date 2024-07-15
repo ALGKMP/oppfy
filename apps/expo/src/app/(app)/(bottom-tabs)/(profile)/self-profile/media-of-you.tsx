@@ -695,8 +695,18 @@ const MediaOfYou = () => {
         <FlashList
           nestedScrollEnabled={true}
           data={[1]}
-          ListHeaderComponent={FlashListHeader}
-          refreshing={refreshing}
+          ListHeaderComponent={() => {return (
+            <>
+              <FlashListHeader
+                isLoadingProfileData={isLoadingProfileData}
+                isLoadingFriendsData={isLoadingFriendsData}
+                isLoadingRecomendationsData={isLoadingRecomendationsData}
+                profileData={profileData}
+                friendsData={friendItems}
+                recomendationsData={recomendationsData}
+              />
+            </>
+          )}}          refreshing={refreshing}
           showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
           numColumns={1}
