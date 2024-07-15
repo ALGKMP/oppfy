@@ -40,7 +40,7 @@ const trpcProfileInputSchema = {
   }),
 
   getFullProfileOther: z.object({
-    profileId: z.string(),
+    profileId: z.number(),
   }),
 };
 

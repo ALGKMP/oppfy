@@ -248,7 +248,7 @@ const PostItem = (props: PostItemProps) => {
           <Avatar circular size="$3">
             <Avatar.Image
               accessibilityLabel="Cam"
-              src={profile?.profilePictureUrl ?? ""}
+              src={post.recipientProfilePicture}
               onPress={() => handleRouteToNewUser(post.recipientProfileId)}
             />
             <Avatar.Fallback backgroundColor="$blue10" />

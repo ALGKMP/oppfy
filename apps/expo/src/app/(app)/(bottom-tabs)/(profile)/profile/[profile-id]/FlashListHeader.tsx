@@ -10,7 +10,7 @@ interface FlashListHeaderProps {
   isLoadingProfileData: boolean;
   isLoadingFriendsData: boolean;
   isLoadingRecomendationsData: boolean;
-  profileData: z.infer<typeof trpcValidators.output.profile.fullProfileSelf> | undefined;
+  profileData: z.infer<typeof trpcValidators.output.profile.fullProfileSelf> | z.infer<typeof trpcValidators.output.profile.fullProfileOther> | undefined;
   friendsData: z.infer<typeof trpcValidators.output.friend.friendItems> | undefined;
   recomendationsData: z.infer<typeof trpcValidators.output.recommendations.recommededProfiles> | undefined;
 }

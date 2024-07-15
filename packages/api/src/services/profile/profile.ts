@@ -268,6 +268,7 @@ export class ProfileService {
       username: username,
       name: fullName,
       bio: profile.bio,
+      privacy: otherUser.privacySetting,
       followerCount,
       followingCount,
       friendCount,

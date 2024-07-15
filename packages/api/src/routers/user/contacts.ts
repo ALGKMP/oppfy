@@ -34,11 +34,27 @@ export const contactsRouter = createTRPCRouter({
       });
     }
   }),
-  getReccomendationProfiles: protectedProcedure
+  getRecommendationProfilesOther: protectedProcedure
+    .input(trpcValidators.input.contacts.getRecommendationProfilesOther)
+    .output(trpcValidators.output.recommendations.recommededProfiles)
+    .query(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.contact.getRecommendationProfilesOtherByProfileId(
+          input.profileId
+        );
+      } catch (err) {
+        console.error(err);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }),
+
+  getRecommendationProfilesSelf: protectedProcedure
     .output(trpcValidators.output.recommendations.recommededProfiles)
     .query(async ({ ctx }) => {
       try {
-        return await ctx.services.contact.getRecommendationProfiles(
+        return await ctx.services.contact.getRecommendationProfilesSelf(
           ctx.session.uid,
         );
       } catch (err) {

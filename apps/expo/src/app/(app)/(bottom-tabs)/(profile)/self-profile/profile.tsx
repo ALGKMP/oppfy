@@ -28,7 +28,7 @@ const MediaOfYou = () => {
     data: recomendationsData,
     isLoading: isLoadingRecomendationsData,
     refetch: refetchRecomendationsData,
-  } = api.contacts.getReccomendationProfiles.useQuery();
+  } = api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const {
     data: friendsData,

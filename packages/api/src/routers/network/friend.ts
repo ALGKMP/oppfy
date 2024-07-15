@@ -36,6 +36,25 @@ export const friendRouter = createTRPCRouter({
       }
     }),
 
+  paginateFriendsOthersByProfileId: protectedProcedure
+    .input(trpcValidators.input.friend.paginateFriendsOtherByProfileId)
+    .output(trpcValidators.output.friend.paginateFriendsOthers)
+    .query(async ({ input, ctx }) => {
+      try {
+        const user = await ctx.services.user.getUserByProfileId(
+          input.profileId,
+        );
+        return await ctx.services.paginate.paginateFriendsOthers(
+          user.id,
+          input.cursor,
+          input.pageSize,
+          ctx.session.uid,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
+
   paginateFriendRequestsSelf: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       return await ctx.services.paginate.paginateFriendRequests(

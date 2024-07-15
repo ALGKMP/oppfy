@@ -109,12 +109,54 @@ export class ContactService {
     return await this.contactsRepository.getRecommendationsInternal(userId);
   }
 
-  async getRecommendationProfiles(userId: string) {
+  async getRecommendationProfilesSelf(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
+
+    const recommendationsIds = await this.getRecomendationsIds(userId);
+
+    console.log("Recommendations", recommendationsIds);
+
+    const allRecommendations = [
+      ...recommendationsIds.tier1,
+      ...recommendationsIds.tier2,
+      ...recommendationsIds.tier3,
+    ];
+    if (allRecommendations.length === 0) {
+      return [];
+    }
+
+    // start a transaction to get all the usernames and profilePhotos
+    const profiles =
+      await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
+    // Fetch presigned URLs for profile pictures in parallel
+    const profilesWithUrls = await Promise.allSettled(
+      profiles.map(async (profile) => {
+        const presignedUrl = await this.s3Service.getObjectPresignedUrl({
+          Bucket: env.S3_PROFILE_BUCKET,
+          Key: profile.profilePictureKey,
+        });
+        const { profilePictureKey, ...profileWithoutKey } = profile;
+        return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
+      }),
+    );
+
+    // Filter out any rejected promises and return the successful ones
+    return profilesWithUrls
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => result.value);
+  }
+
+  async getRecommendationProfilesOtherByProfileId(profileId: number) {
+    const user = await this.userRepository.getUserByProfileId(profileId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    const userId = user.id;
 
     const recommendationsIds = await this.getRecomendationsIds(userId);
 
