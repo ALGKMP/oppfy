@@ -182,8 +182,8 @@ importers:
         specifier: ^17.0.1
         version: 17.0.1(expo@51.0.14)
       expo-media-library:
-        specifier: ^16.0.3
-        version: 16.0.3(expo@51.0.14)
+        specifier: ^16.0.4
+        version: 16.0.4(expo@51.0.14)
       expo-notifications:
         specifier: ^0.28.9
         version: 0.28.9(expo@51.0.14)
@@ -1176,7 +1176,7 @@ importers:
         version: 0.0.0-experimental-c8b3f72-20240517(eslint@9.2.0)
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-26f2496093-20240514(eslint@9.2.0)
+        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.2.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.8.0(eslint@9.2.0)(typescript@5.5.2)
@@ -13375,8 +13375,8 @@ packages:
       - supports-color
     dev: false
 
-  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.2.0):
-    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
+  /eslint-plugin-react-hooks@5.1.0-beta-94eed63c49-20240425(eslint@9.2.0):
+    resolution: {integrity: sha512-9DabNOh93nRDoBbYYO7kS5QqJdbA1Jh9XNDh7MebrDAYctyGQaHSg29TGoNEieX3iLSSfiKToPcvsLowrAtFRA==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -13887,8 +13887,8 @@ packages:
       - supports-color
     dev: false
 
-  /expo-media-library@16.0.3(expo@51.0.14):
-    resolution: {integrity: sha512-E++h+ZyVOXhGOKddeg/wjoEFH+JAGazcAsMpjAOT+/F69nrIEl27Fymi9XVAzooazp38dKrDBNeOJuWoXUdUAw==}
+  /expo-media-library@16.0.4(expo@51.0.14):
+    resolution: {integrity: sha512-nX9iN8+XAoERDVGPpDdUbhFwvfYdBpkgTAxwDOYL7heASYCOdxfqQtXy/jv1+QZpj0epaR6Owq/LUn1lVP3ykg==}
     peerDependencies:
       expo: '*'
     dependencies:

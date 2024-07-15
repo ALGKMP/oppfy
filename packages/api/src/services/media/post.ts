@@ -190,6 +190,18 @@ export class PostService {
     }
   }
 
+  async paginatePostsOfFollowing(
+    userId: string,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ) {}
+
+  async paginatePostsOfRecomended(
+    userId: string,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ) {}
+
   async paginatePostsByUserSelf(
     userId: string,
     cursor: PostCursor | null = null,
