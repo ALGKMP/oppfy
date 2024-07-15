@@ -15,6 +15,14 @@ export class UserService {
     return user;
   }
 
+  async getUserByProfileId(profileId: number) {
+    const user = await this.userRepository.getUserByProfileId(profileId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    return user;
+  }
+
   async createUser(userId: string, phoneNumber: string) {
     let username;
     let usernameExists;
