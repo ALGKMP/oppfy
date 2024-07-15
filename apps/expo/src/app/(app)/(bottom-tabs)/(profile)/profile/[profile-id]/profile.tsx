@@ -1,13 +1,13 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions } from "react-native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Camera } from "@tamagui/lucide-icons";
 import { SizableText, Text, View, YStack } from "tamagui";
 
+import ProfileHeaderProps from "~/components/Hero/Profile/ProfileHeader";
+import PostItem from "~/components/Media/PostItem";
 import { api } from "~/utils/api";
-import FlashListHeader from "./FlashListHeader";
-import PostItem from "./PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -118,7 +118,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
           ListHeaderComponent={() => {
             return (
               <>
-                <FlashListHeader
+                <ProfileHeaderProps
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecomendationsData={isLoadingRecomendationsData}
@@ -168,7 +168,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
           ListHeaderComponent={() => {
             return (
               <>
-                <FlashListHeader
+                <ProfileHeaderProps
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecomendationsData={isLoadingRecomendationsData}

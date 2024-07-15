@@ -6,7 +6,7 @@ import type { trpcValidators } from "@oppfy/validators";
 import FriendsCarousel from "../../Carousels/FriendsCarousel";
 import ProfileBanner from "./ProfileBanner";
 
-interface FlashListHeaderProps {
+interface ProfileHeaderProps {
   isLoadingProfileData: boolean;
   isLoadingFriendsData: boolean;
   isLoadingRecomendationsData: boolean;
@@ -21,7 +21,7 @@ interface FlashListHeaderProps {
     | undefined;
 }
 
-const FlashListHeader = (props: FlashListHeaderProps) => {
+const ProfileHeaderProps = (props: ProfileHeaderProps) => {
   const {
     isLoadingProfileData,
     isLoadingFriendsData,
@@ -62,4 +62,4 @@ const FlashListHeader = (props: FlashListHeaderProps) => {
   );
 };
 
-export default FlashListHeader;
+export default ProfileHeaderProps;
