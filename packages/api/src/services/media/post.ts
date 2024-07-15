@@ -92,9 +92,15 @@ export class PostService {
     let nextCursor: PostCursor | undefined = undefined;
     if (items.length > pageSize) {
       const nextItem = items.pop();
+      if (!nextItem) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_PAGINATE_POSTS,
+          "Failed to paginate posts.",
+        );
+      }
       nextCursor = {
-        createdAt: nextItem!.createdAt,
-        postId: nextItem!.postId,
+        createdAt: nextItem.createdAt,
+        postId: nextItem.postId,
       };
     }
     return {
