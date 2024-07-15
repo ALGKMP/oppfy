@@ -18,13 +18,13 @@ const Search = () => {
     RouterOutputs["search"]["profilesByUsername"]
   >([]);
   type RecomendationsData =
-    RouterOutputs["contacts"]["getReccomendationProfiles"];
+    RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
 
   const { isLoading, mutateAsync: searchProfilesByUsername } =
     api.search.profilesByUsername.useMutation();
 
   const { data: recomendationsData, isLoading: isLoadingRecomendationsData } =
-    api.contacts.getReccomendationProfiles.useQuery();
+    api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const performSearch = async (partialUsername: string) => {
     setSearchTerm(partialUsername);

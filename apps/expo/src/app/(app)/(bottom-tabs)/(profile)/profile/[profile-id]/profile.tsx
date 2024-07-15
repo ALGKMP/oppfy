@@ -11,7 +11,14 @@ import PostItem from "./PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const MediaOfYou = () => {
+interface MediaOfYouProps {
+  profileId: string;
+}
+
+const MediaOfYou = (props: MediaOfYouProps) => {
+  const { profileId: profileIdFromRoute } = props;
+  const profileId = parseInt(profileIdFromRoute);
+
   const [status, setStatus] = useState<"success" | "loading" | "error">(
     "loading",
   );
@@ -22,20 +29,24 @@ const MediaOfYou = () => {
     data: profileData,
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
-  } = api.profile.getFullProfileSelf.useQuery();
+  } = api.profile.getOtherUserFullProfile.useQuery({
+    profileId: profileId,
+  });
 
   const {
     data: recomendationsData,
     isLoading: isLoadingRecomendationsData,
     refetch: refetchRecomendationsData,
-  } = api.contacts.getReccomendationProfiles.useQuery();
+  } = api.contacts.getRecommendationProfilesOther.useQuery({
+    profileId: profileId,
+  });
 
   const {
     data: friendsData,
     isLoading: isLoadingFriendsData,
     refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    { pageSize: 10 },
+  } = api.friend.paginateFriendsOthersByProfileId.useInfiniteQuery(
+    { profileId, pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
@@ -46,8 +57,9 @@ const MediaOfYou = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
+  } = api.post.paginatePostsOfUserOther.useInfiniteQuery(
     {
+      profileId,
       pageSize: 10,
     },
     {

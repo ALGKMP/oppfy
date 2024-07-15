@@ -25,7 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { throttle } from "lodash";
@@ -67,6 +67,7 @@ type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
 const HEADER_HEIGHT = 38;
 
 const ProfileLayout = () => {
+  const profileId = useLocalSearchParams<{ profileId: string }>().profileId;
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -108,27 +109,27 @@ const ProfileLayout = () => {
   return (
     <BaseScreenView padding={0} safeAreaEdges={["top"]}>
       {/* <Animated.View style={[styles.header, headerStyle]}> */}
-        <XStack
-          paddingVertical="$2"
-          paddingHorizontal="$4"
-          alignItems="center"
-          justifyContent="space-between"
-          backgroundColor="$background"
-        >
-          <View minWidth="$2" alignItems="flex-start" />
+      <XStack
+        paddingVertical="$2"
+        paddingHorizontal="$4"
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor="$background"
+      >
+        <View minWidth="$2" alignItems="flex-start" />
 
-          <View alignItems="center">
-            <Text fontSize="$5" fontWeight="bold">
-              Profile
-            </Text>
-          </View>
+        <View alignItems="center">
+          <Text fontSize="$5" fontWeight="bold">
+            Profile
+          </Text>
+        </View>
 
-          <View minWidth="$2" alignItems="flex-end">
-            <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
-              <MoreHorizontal />
-            </TouchableOpacity>
-          </View>
-        </XStack>
+        <View minWidth="$2" alignItems="flex-end">
+          <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
+            <MoreHorizontal />
+          </TouchableOpacity>
+        </View>
+      </XStack>
       {/* </Animated.View> */}
 
       {/* <Animated.ScrollView
@@ -146,7 +147,7 @@ const ProfileLayout = () => {
           />
         }
       > */}
-        <MediaOfYou />
+      {profileId && <MediaOfYou profileId={profileId} />}
       {/* </Animated.ScrollView> */}
     </BaseScreenView>
   );
