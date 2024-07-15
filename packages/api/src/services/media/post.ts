@@ -137,9 +137,16 @@ export class PostService {
     let nextCursor: CommentCursor | undefined = undefined;
     if (items.length > pageSize) {
       const nextItem = items.pop();
+      if (!nextItem) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
+          "Failed to paginate comments.",
+        );
+      }
+
       nextCursor = {
-        createdAt: nextItem!.createdAt,
-        commentId: nextItem!.commentId,
+        createdAt: nextItem.createdAt,
+        commentId: nextItem.commentId,
       };
       console.log("server: next cursor:", nextCursor);
     }
