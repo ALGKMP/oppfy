@@ -607,58 +607,27 @@ const MediaOfYou = () => {
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 40,
   };
-
-  // const FlashListHeader = () => {
-  //   if (
-  //     isLoadingProfileData ||
-  //     isLoadingFriendsData ||
-  //     isLoadingRecomendationsData ||
-  //     profileData === undefined ||
-  //     friendsData === undefined ||
-  //     recomendationsData === undefined
-  //   ) {
-  //     return (
-  //       <YStack gap="$5">
-  //         <ProfileBanner loading />
-  //         <FriendsCarousel loading />
-  //       </YStack>
-  //     );
-  //   }
-  //   return (
-  //     <YStack gap="$5" marginBottom="$5">
-  //       <YStack gap="$5">
-  //         <ProfileBanner loading={false} data={profileData} />
-  //         <FriendsCarousel
-  //           loading={false}
-  //           friendsData={{
-  //             friendCount: profileData.friendCount,
-  //             friendItems: friendItems,
-  //           }}
-  //           reccomendationsData={recomendationsData}
-  //         />
-  //       </YStack>
-  //     </YStack>
-  //   );
-  // };
-
+  
   return (
     <View flex={1} width="100%" height="100%">
       {posts?.length ? (
         <FlashList
           nestedScrollEnabled={true}
           data={posts}
-          ListHeaderComponent={() => {return (
-            <>
-              <FlashListHeader
-                isLoadingProfileData={isLoadingProfileData}
-                isLoadingFriendsData={isLoadingFriendsData}
-                isLoadingRecomendationsData={isLoadingRecomendationsData}
-                profileData={profileData}
-                friendsData={friendItems}
-                recomendationsData={recomendationsData}
-              />
-            </>
-          )}}
+          ListHeaderComponent={() => {
+            return (
+              <>
+                <FlashListHeader
+                  isLoadingProfileData={isLoadingProfileData}
+                  isLoadingFriendsData={isLoadingFriendsData}
+                  isLoadingRecomendationsData={isLoadingRecomendationsData}
+                  profileData={profileData}
+                  friendsData={friendItems}
+                  recomendationsData={recomendationsData}
+                />
+              </>
+            );
+          }}
           refreshing={refreshing}
           showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
@@ -695,18 +664,21 @@ const MediaOfYou = () => {
         <FlashList
           nestedScrollEnabled={true}
           data={[1]}
-          ListHeaderComponent={() => {return (
-            <>
-              <FlashListHeader
-                isLoadingProfileData={isLoadingProfileData}
-                isLoadingFriendsData={isLoadingFriendsData}
-                isLoadingRecomendationsData={isLoadingRecomendationsData}
-                profileData={profileData}
-                friendsData={friendItems}
-                recomendationsData={recomendationsData}
-              />
-            </>
-          )}}          refreshing={refreshing}
+          ListHeaderComponent={() => {
+            return (
+              <>
+                <FlashListHeader
+                  isLoadingProfileData={isLoadingProfileData}
+                  isLoadingFriendsData={isLoadingFriendsData}
+                  isLoadingRecomendationsData={isLoadingRecomendationsData}
+                  profileData={profileData}
+                  friendsData={friendItems}
+                  recomendationsData={recomendationsData}
+                />
+              </>
+            );
+          }}
+          refreshing={refreshing}
           showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
           numColumns={1}
