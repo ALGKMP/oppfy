@@ -28,7 +28,7 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
 type RecoemndationItems =
-  RouterOutputs["contacts"]["getReccomendationProfiles"];
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
 
 interface FriendsData {
   friendCount: number;

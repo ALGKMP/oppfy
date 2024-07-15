@@ -5,7 +5,7 @@ import { Camera } from "@tamagui/lucide-icons";
 import { SizableText, Text, useTheme, View, YStack } from "tamagui";
 
 import { api } from "~/utils/api";
-import PostItem from "../(profile)/self-profile/PostItem";
+import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -122,7 +122,7 @@ const HomeScreen = () => {
                 alignItems="center"
                 aspectRatio={9 / 6}
               >
-                <Camera size="$9" color="$gray12" />
+                <Camera size="$8" color="$gray12" strokeWidth="$1" />
                 <SizableText size="$8">No posts yet</SizableText>
               </YStack>
             );

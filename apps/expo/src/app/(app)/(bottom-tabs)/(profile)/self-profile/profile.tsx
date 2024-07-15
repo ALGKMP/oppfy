@@ -6,8 +6,8 @@ import { Camera } from "@tamagui/lucide-icons";
 import { SizableText, Text, View, YStack } from "tamagui";
 
 import { api } from "~/utils/api";
-import FlashListHeader from "./FlashListHeader";
-import PostItem from "./PostItem";
+import FlashListHeader from "../../../../../components/Hero/Profile/ProfileHeader";
+import PostItem from "../../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
