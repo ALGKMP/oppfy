@@ -239,7 +239,7 @@ const PostItem = (props: PostItemProps) => {
       <XStack
         flex={1}
         // margin="$2"
-        padding="$2"
+        padding="$2.5"
         width="100%"
         justifyContent="space-between"
         alignContent="center"
@@ -253,7 +253,7 @@ const PostItem = (props: PostItemProps) => {
             />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
-          <YStack gap="$1" justifyContent="center">
+          <YStack gap="$0.5" justifyContent="center">
             <TouchableOpacity
               onPress={() => handleRouteToNewUser(post.recipientProfileId)}
             >
@@ -355,7 +355,7 @@ const PostItem = (props: PostItemProps) => {
       <View
         flex={1}
         alignSelf="stretch"
-        padding="$2"
+        padding="$2.5"
         paddingTop="$3"
         borderBottomRightRadius="$8"
         borderBottomLeftRadius="$8"
