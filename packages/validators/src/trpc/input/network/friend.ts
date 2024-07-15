@@ -29,6 +29,17 @@ const friendInputSchema = {
       .optional(),
     pageSize: z.number().optional(),
   }),
+
+  paginateFriendsOtherByProfileId: z.object({
+    profileId: z.number(),
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        profileId: z.number(),
+      })
+      .optional(),
+    pageSize: z.number().optional(),
+  }),
 };
 
 export default friendInputSchema;
