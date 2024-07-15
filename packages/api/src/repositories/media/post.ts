@@ -48,6 +48,19 @@ export class PostRepository {
 
     console.log("in here");
 
+    // Subquery to get the latest post for each followed user
+    const latestPosts = this.db
+      .select({
+        postId: sql<number>`max(${schema.post.id})`.as("latest_post_id"),
+        authorId: schema.post.author,
+        followerId: follower.id,
+      })
+      .from(schema.post)
+      .innerJoin(follower, eq(follower.recipientId, schema.post.author))
+      .where(eq(follower.senderId, userId))
+      .groupBy(schema.post.author, follower.id)
+      .as("latest_posts");
+
     return await this.db
       .select({
         postId: schema.post.id,
@@ -67,30 +80,27 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
+        followerId: latestPosts.followerId,
       })
-      .from(schema.post)
+      .from(latestPosts)
+      .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.author, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .innerJoin(follower, eq(follower.recipientId, schema.post.recipient))
       .where(
-        and(
-          eq(follower.senderId, userId),
-          cursor
-            ? or(
-                // gt(schema.post.createdAt, cursor.createdAt),
-                gt(follower.id, cursor.followerId),
-                and(
-                  eq(schema.post.createdAt, cursor.createdAt),
-                  gt(follower.id, cursor.followerId),
-                ),
-              )
-            : undefined,
-        ),
+        cursor
+          ? or(
+              lt(schema.post.createdAt, cursor.createdAt),
+              and(
+                eq(schema.post.createdAt, cursor.createdAt),
+                gt(latestPosts.followerId, cursor.followerId),
+              ),
+            )
+          : undefined,
       )
-      .orderBy(asc(schema.post.createdAt), asc(follower.id))
+      .orderBy(desc(schema.post.createdAt), asc(latestPosts.followerId))
       .limit(pageSize + 1);
   }
 
