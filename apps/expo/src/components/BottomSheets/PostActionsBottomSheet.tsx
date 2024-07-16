@@ -17,6 +17,7 @@ import {
 import { Separator, Text, View, XStack, YStack } from "tamagui";
 
 import useSaveVideo from "~/hooks/useSaveMedia";
+import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface PostActionBottomSheetProps {
   postId: number;
@@ -39,6 +40,8 @@ const PostActionsBottomSheet = ({
   const { height: screenHeight } = useMemo(() => Dimensions.get("window"), []);
   const sheetRef = useRef<BottomSheet>(null);
   const { saveState, saveToCameraRoll } = useSaveVideo();
+
+  const bottomInsetPercentage = (insets.bottom / screenHeight) * 100;
 
   const openModal = useCallback(() => {
     sheetRef.current?.expand();
@@ -64,18 +67,6 @@ const PostActionsBottomSheet = ({
     }
   }, [modalVisible, closeModal, openModal]);
 
-  const animatedPosition = useSharedValue(0);
-  const animatedOverlayStyle = useAnimatedStyle(() => {
-    const heightPercentage = animatedPosition.value / screenHeight;
-    const opacity = interpolate(
-      heightPercentage,
-      [0.2, 0.9],
-      [0.9, 0],
-      "clamp",
-    );
-    return { backgroundColor: `rgba(0, 0, 0, ${opacity})` };
-  });
-
   const renderHeader = useCallback(() => {
     return (
       <View flex={1} justifyContent="center" alignItems="center">
@@ -85,79 +76,78 @@ const PostActionsBottomSheet = ({
   }, []);
 
   return (
-    <Modal visible={modalVisible} transparent={true}>
-      <TouchableOpacity onPress={closeModal} />
-      <Animated.View style={[animatedOverlayStyle, { flex: 1 }]}>
-        <BottomSheet
-          onClose={closeModal}
-          snapPoints={["30%"]}
-          enablePanDownToClose={true}
-          animatedPosition={animatedPosition}
-          backgroundStyle={{
-            backgroundColor: "#282828",
-          }}
-          handleComponent={renderHeader}
-          ref={sheetRef}
-        >
-          <YStack flex={1} marginHorizontal="$4" gap="$4">
-            <YStack borderRadius="$7" backgroundColor="rgba(63, 63, 62, 0.3)">
-              <TouchableOpacity>
-                <XStack
-                  gap="$4"
-                  padding="$4"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                >
-                  <QrCode />
-                  <Text>QR Code</Text>
-                </XStack>
-              </TouchableOpacity>
-              <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
-              <TouchableOpacity
-                onPress={async () => {
-                  await saveToCameraRoll({
-                    uri: url,
-                    isNetworkUrl: true,
-                    mediaType,
-                  });
-                  closeModal();
-                }}
-              >
-                <XStack
-                  gap="$4"
-                  padding="$4"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                >
-                  <ArrowDownToLine />
-                  <Text>Save post</Text>
-                </XStack>
-              </TouchableOpacity>
-              <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
-              <TouchableOpacity
-                onPress={() => {
-                  setReportActionSheetVisible(true);
-                  // setTimeout(() => {
-                  //   setReportActionSheetVisible(true);
-                  // }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
-                  closeModal();
-                }}
-              >
-                <XStack
-                  gap="$4"
-                  padding="$4"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                >
-                  <AlertCircle color="red" />
-                  <Text color="red">Report</Text>
-                </XStack>
-              </TouchableOpacity>
-            </YStack>
-          </YStack>
-        </BottomSheet>
-      </Animated.View>
-    </Modal>
+    <BottomSheetWrapper
+      sheetRef={sheetRef}
+      modalVisible={modalVisible}
+      onClose={closeModal}
+      onOpen={openModal}
+      snapPoints={[`${bottomInsetPercentage + 30}%`]}
+      topInset={insets.top}
+      handleComponent={renderHeader}
+    >
+      <YStack
+        flex={1}
+        marginHorizontal="$4"
+        gap="$4"
+        borderTopColor="$gray5"
+        borderTopWidth="$0.25"
+      >
+        <YStack borderRadius="$7" backgroundColor="rgba(63, 63, 62, 0.3)">
+          <TouchableOpacity>
+            <XStack
+              gap="$4"
+              padding="$4"
+              alignItems="center"
+              justifyContent="flex-start"
+            >
+              <QrCode />
+              <Text>QR Code</Text>
+            </XStack>
+          </TouchableOpacity>
+          <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
+          <TouchableOpacity
+            onPress={async () => {
+              await saveToCameraRoll({
+                uri: url,
+                isNetworkUrl: true,
+                mediaType,
+              });
+              closeModal();
+            }}
+          >
+            <XStack
+              gap="$4"
+              padding="$4"
+              alignItems="center"
+              justifyContent="flex-start"
+            >
+              <ArrowDownToLine />
+              <Text>Save post</Text>
+            </XStack>
+          </TouchableOpacity>
+          <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
+          <TouchableOpacity
+            onPress={() => {
+              setReportActionSheetVisible(true);
+              // setTimeout(() => {
+              //   setReportActionSheetVisible(true);
+              // }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
+              closeModal();
+            }}
+          >
+            <XStack
+              gap="$4"
+              padding="$4"
+              alignItems="center"
+              justifyContent="flex-start"
+            >
+              <AlertCircle color="red" />
+              <Text color="red">Report</Text>
+            </XStack>
+          </TouchableOpacity>
+        </YStack>
+      </YStack>
+    </BottomSheetWrapper>
   );
 };
 

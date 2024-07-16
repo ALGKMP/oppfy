@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 import { Dimensions, Modal } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -20,6 +20,7 @@ interface BottomSheetWrapperProps extends Partial<BottomSheetProps> {
 }
 
 const screenHeight = Dimensions.get("window").height;
+
 
 const BottomSheetWrapper = (props: BottomSheetWrapperProps) => {
   const {
@@ -54,7 +55,11 @@ const BottomSheetWrapper = (props: BottomSheetWrapperProps) => {
 
   const renderHeader = useCallback(() => {
     return (
-      <View flex={1} justifyContent="center" alignItems="center">
+      <View
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+      >
         <Minus size="$4" />
       </View>
     );
