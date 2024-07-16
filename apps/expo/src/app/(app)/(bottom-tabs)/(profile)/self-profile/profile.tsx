@@ -55,26 +55,6 @@ const MediaOfYou = () => {
     },
   );
 
-  const {
-    data: coolpostData,
-    isLoading: coolisLoadingPostData,
-    isFetchingNextPage: coolisfetching,
-    fetchNextPage: collfetch,
-    hasNextPage: coolhasnext,
-    refetch: coolrefetch,
-  } = api.post.paginatePostsForFeed.useInfiniteQuery(
-    {
-      pageSize: 10,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
-  );
-
-  useEffect(() => {
-    console.log(coolpostData);
-  }, []);
-
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
