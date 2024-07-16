@@ -1,4 +1,4 @@
-import { and, asc, count, desc, gt } from "drizzle-orm";
+import { and, asc, count, desc, gt, lt } from "drizzle-orm";
 
 import { db, eq, or, schema } from "@oppfy/db";
 
@@ -56,7 +56,7 @@ export class CommentRepository {
           eq(schema.comment.post, postId),
           cursor
             ? or(
-                gt(schema.comment.createdAt, cursor.createdAt),
+                lt(schema.comment.createdAt, cursor.createdAt),
                 and(
                   eq(schema.comment.createdAt, cursor.createdAt),
                   eq(schema.comment.id, cursor.commentId),

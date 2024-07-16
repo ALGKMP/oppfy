@@ -389,7 +389,9 @@ const CommentsBottomSheet = ({
         // if there are no comments render a message
         comments.length === 0 ? (
           <View flex={1} justifyContent="center" alignItems="center">
-            <SizableText size="$7" fontWeight="bold">No comments yet</SizableText>
+            <SizableText size="$7" fontWeight="bold">
+              No comments yet
+            </SizableText>
             <Text color="$gray10">Be the first to comment</Text>
           </View>
         ) : (
