@@ -25,9 +25,9 @@ export const contactsRouter = createTRPCRouter({
       });
     }
   }),
-  getRecomendationIds: protectedProcedure.query(async ({ ctx }) => {
+  getRecommendationIds: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.contact.getRecomendationsIds(ctx.session.uid);
+      return await ctx.services.contact.getRecommendationsIds(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -40,7 +40,7 @@ export const contactsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.contact.getRecommendationProfilesOtherByProfileId(
-          input.profileId
+          input.profileId,
         );
       } catch (err) {
         console.error(err);

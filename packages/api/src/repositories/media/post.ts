@@ -107,7 +107,7 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async paginatePostsOfRecomended(
+  async paginatePostsOfRecommended(
     userId: string,
     cursor: { createdAt: Date; postId: number } | null = null,
     pageSize = 10,

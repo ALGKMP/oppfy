@@ -9,14 +9,14 @@ import ProfileBanner from "./ProfileBanner";
 interface ProfileHeaderProps {
   isLoadingProfileData: boolean;
   isLoadingFriendsData: boolean;
-  isLoadingRecomendationsData: boolean;
+  isLoadingRecommendationsData: boolean;
   profileData:
     | z.infer<typeof trpcValidators.output.profile.fullProfileSelf>
     | undefined;
   friendsData:
     | z.infer<typeof trpcValidators.output.friend.friendItems>
     | undefined;
-  recomendationsData:
+  recommendationsData:
     | z.infer<typeof trpcValidators.output.recommendations.recommededProfiles>
     | undefined;
 }
@@ -25,18 +25,18 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
   const {
     isLoadingProfileData,
     isLoadingFriendsData,
-    isLoadingRecomendationsData,
+    isLoadingRecommendationsData,
     profileData,
     friendsData,
-    recomendationsData,
+    recommendationsData: recommendationsData,
   } = props;
   if (
     isLoadingProfileData ||
     isLoadingFriendsData ||
-    isLoadingRecomendationsData ||
+    isLoadingRecommendationsData ||
     profileData === undefined ||
     friendsData === undefined ||
-    recomendationsData === undefined
+    recommendationsData === undefined
   ) {
     return (
       <YStack gap="$5">
@@ -55,7 +55,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
             friendCount: profileData.friendCount,
             friendItems: friendsData,
           }}
-          reccomendationsData={recomendationsData}
+          reccomendationsData={recommendationsData}
         />
       </YStack>
     </YStack>
