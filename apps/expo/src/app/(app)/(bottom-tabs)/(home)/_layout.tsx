@@ -112,8 +112,8 @@ const HomeScreen = () => {
           showsVerticalScrollIndicator={false}
           // onRefresh={onRefresh}
           numColumns={1}
-          // keyExtractor={(item) => {item.toString();
-          // }}
+          keyExtractor={(item) => {item.toString();
+          }}
           renderItem={() => {
             return (
               <YStack

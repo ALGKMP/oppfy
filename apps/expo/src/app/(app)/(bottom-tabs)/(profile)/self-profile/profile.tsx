@@ -5,7 +5,7 @@ import { FlashList } from "@shopify/flash-list";
 import { Camera } from "@tamagui/lucide-icons";
 import { SizableText, Text, View, YStack } from "tamagui";
 
-import ProfileHeaderProps from "~/components/Hero/Profile/ProfileHeader";
+import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
 import { api } from "~/utils/api";
 
@@ -126,7 +126,7 @@ const MediaOfYou = () => {
           ListHeaderComponent={() => {
             return (
               <>
-                <ProfileHeaderProps
+                <ProfileHeader
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecomendationsData={isLoadingRecomendationsData}
@@ -176,7 +176,7 @@ const MediaOfYou = () => {
           ListHeaderComponent={() => {
             return (
               <>
-                <ProfileHeaderProps
+                <ProfileHeader
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecomendationsData={isLoadingRecomendationsData}

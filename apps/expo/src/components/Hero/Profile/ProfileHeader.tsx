@@ -21,7 +21,7 @@ interface ProfileHeaderProps {
     | undefined;
 }
 
-const ProfileHeaderProps = (props: ProfileHeaderProps) => {
+const ProfileHeader = (props: ProfileHeaderProps) => {
   const {
     isLoadingProfileData,
     isLoadingFriendsData,
@@ -62,4 +62,4 @@ const ProfileHeaderProps = (props: ProfileHeaderProps) => {
   );
 };
 
-export default ProfileHeaderProps;
+export default ProfileHeader;
