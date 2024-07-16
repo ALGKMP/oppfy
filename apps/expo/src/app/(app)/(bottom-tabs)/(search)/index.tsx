@@ -17,13 +17,13 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState<
     RouterOutputs["search"]["profilesByUsername"]
   >([]);
-  type RecomendationsData =
+  type RecommendationsData =
     RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
 
   const { isLoading, mutateAsync: searchProfilesByUsername } =
     api.search.profilesByUsername.useMutation();
 
-  const { data: recomendationsData, isLoading: isLoadingRecomendationsData } =
+  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const performSearch = async (partialUsername: string) => {
@@ -85,7 +85,7 @@ const Search = () => {
     </CardContainer>
   );
 
-  const renderRecommendations = (recs: RecomendationsData) => (
+  const renderRecommendations = (recs: RecommendationsData) => (
     <CardContainer>
       <FlashList
         data={recs}
@@ -124,10 +124,10 @@ const Search = () => {
         />
         <View>
           {!searchTerm ? (
-            isLoadingRecomendationsData ? (
+            isLoadingRecommendationsData ? (
               renderLoadingSkeletons()
             ) : (
-              renderRecommendations(recomendationsData!)
+              renderRecommendations(recommendationsData!)
             )
           ) : isLoading ? (
             renderLoadingSkeletons()

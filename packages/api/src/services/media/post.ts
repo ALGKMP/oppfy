@@ -230,7 +230,7 @@ export class PostService {
     }
   }
 
-  async paginatePostsOfRecomended(
+  async paginatePostsOfRecommended(
     userId: string,
     cursor: PostCursor | null = null,
     pageSize?: number,

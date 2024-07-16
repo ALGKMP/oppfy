@@ -149,7 +149,7 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginatePostsOfRecomended(
+        const result = await ctx.services.post.paginatePostsOfRecommended(
           ctx.session.uid,
           input.cursor,
           input.pageSize,

@@ -25,9 +25,9 @@ const MediaOfYou = () => {
   } = api.profile.getFullProfileSelf.useQuery();
 
   const {
-    data: recomendationsData,
-    isLoading: isLoadingRecomendationsData,
-    refetch: refetchRecomendationsData,
+    data: recommendationsData,
+    isLoading: isLoadingRecommendationsData,
+    refetch: refetchRecommendationsData,
   } = api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const {
@@ -91,10 +91,10 @@ const MediaOfYou = () => {
     await Promise.all([
       refetchProfileData(),
       refetchFriendsData(),
-      refetchRecomendationsData(),
+      refetchRecommendationsData(),
     ]);
     setRefreshing(false);
-  }, [refetchFriendsData, refetchProfileData, refetchRecomendationsData]);
+  }, [refetchFriendsData, refetchProfileData, refetchRecommendationsData]);
 
   const friendItems = useMemo(
     () => friendsData?.pages.flatMap((page) => page.items) ?? [],
@@ -129,10 +129,10 @@ const MediaOfYou = () => {
                 <ProfileHeader
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
-                  isLoadingRecomendationsData={isLoadingRecomendationsData}
+                  isLoadingRecommendationsData={isLoadingRecommendationsData}
                   profileData={profileData}
                   friendsData={friendItems}
-                  recomendationsData={recomendationsData}
+                  recommendationsData={recommendationsData}
                 />
               </>
             );
@@ -179,10 +179,10 @@ const MediaOfYou = () => {
                 <ProfileHeader
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
-                  isLoadingRecomendationsData={isLoadingRecomendationsData}
+                  isLoadingRecommendationsData={isLoadingRecommendationsData}
                   profileData={profileData}
                   friendsData={friendItems}
-                  recomendationsData={recomendationsData}
+                  recommendationsData={recommendationsData}
                 />
               </>
             );

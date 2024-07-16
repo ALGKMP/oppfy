@@ -14,8 +14,6 @@ import {
 } from "../../repositories";
 import { S3Service } from "../aws/s3";
 
-
-
 export class ContactService {
   private contactsRepository = new ContactsRepository();
   private followRepository = new FollowRepository();
@@ -99,7 +97,7 @@ export class ContactService {
     }
   }
 
-  async getRecomendationsIds(userId: string) {
+  async getRecommendationsIds(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
     if (user === undefined) {
@@ -116,7 +114,7 @@ export class ContactService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
-    const recommendationsIds = await this.getRecomendationsIds(userId);
+    const recommendationsIds = await this.getRecommendationsIds(userId);
 
     console.log("Recommendations", recommendationsIds);
 
@@ -158,7 +156,7 @@ export class ContactService {
     }
     const userId = user.id;
 
-    const recommendationsIds = await this.getRecomendationsIds(userId);
+    const recommendationsIds = await this.getRecommendationsIds(userId);
 
     console.log("Recommendations", recommendationsIds);
 

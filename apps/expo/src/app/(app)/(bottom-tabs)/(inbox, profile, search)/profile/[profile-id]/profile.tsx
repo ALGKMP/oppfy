@@ -34,9 +34,9 @@ const MediaOfYou = (props: MediaOfYouProps) => {
   });
 
   const {
-    data: recomendationsData,
-    isLoading: isLoadingRecomendationsData,
-    refetch: refetchRecomendationsData,
+    data: recommendationsData,
+    isLoading: isLoadingRecommendationsData,
+    refetch: refetchRecommendationsData,
   } = api.contacts.getRecommendationProfilesOther.useQuery({
     profileId: profileId,
   });
@@ -83,10 +83,10 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     await Promise.all([
       refetchProfileData(),
       refetchFriendsData(),
-      refetchRecomendationsData(),
+      refetchRecommendationsData(),
     ]);
     setRefreshing(false);
-  }, [refetchFriendsData, refetchProfileData, refetchRecomendationsData]);
+  }, [refetchFriendsData, refetchProfileData, refetchRecommendationsData]);
 
   const friendItems = useMemo(
     () => friendsData?.pages.flatMap((page) => page.items) ?? [],
@@ -121,10 +121,10 @@ const MediaOfYou = (props: MediaOfYouProps) => {
                 <ProfileHeader
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
-                  isLoadingRecomendationsData={isLoadingRecomendationsData}
+                  isLoadingRecommendationsData={isLoadingRecommendationsData}
                   profileData={profileData}
                   friendsData={friendItems}
-                  recomendationsData={recomendationsData}
+                  recommendationsData={recommendationsData}
                 />
               </>
             );
@@ -171,10 +171,10 @@ const MediaOfYou = (props: MediaOfYouProps) => {
                 <ProfileHeader
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
-                  isLoadingRecomendationsData={isLoadingRecomendationsData}
+                  isLoadingRecommendationsData={isLoadingRecommendationsData}
                   profileData={profileData}
                   friendsData={friendItems}
-                  recomendationsData={recomendationsData}
+                  recommendationsData={recommendationsData}
                 />
               </>
             );
