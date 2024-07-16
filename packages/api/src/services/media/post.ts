@@ -26,6 +26,11 @@ interface FollowingPostCursor {
   followerId: number;
 }
 
+/* interface FeedCursor {
+  followingPostCursor?: FollowingPostCursor;
+  postCursor?: PostCursor;
+} */
+
 interface CommentCursor {
   createdAt: Date;
   commentId: number;
@@ -235,8 +240,8 @@ export class PostService {
     cursor: PostCursor | null = null,
     pageSize?: number,
   ) {
-    /*     try {
-      const data = await this.postRepository.paginatePostsOfRecomended(
+    try {
+      const data = await this.postRepository.paginatePostsOfRecommended(
         userId,
         cursor,
       );
@@ -248,9 +253,7 @@ export class PostService {
         ErrorCode.FAILED_TO_PAGINATE_POSTS,
         "Failed to paginate posts.",
       );
-    } */
-
-    throw new DomainError(ErrorCode.FAILED_TO_PAGINATE_POSTS, "unimpl");
+    }
   }
 
   async paginatePostsByUserSelf(
