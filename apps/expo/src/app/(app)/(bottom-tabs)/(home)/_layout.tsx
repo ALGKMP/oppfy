@@ -68,71 +68,41 @@ const HomeScreen = () => {
 
   return (
     <View flex={1} width="100%" height="100%">
-      {posts?.length ? (
-        <FlashList
-          nestedScrollEnabled={true}
-          data={posts}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          // onRefresh={onRefresh}
-          numColumns={1}
-          onEndReached={handleOnEndReached}
-          keyExtractor={(item) => {
-            return item?.postId.toString() ?? "";
-          }}
-          renderItem={({ item }) => {
-            if (item === undefined) {
-              return null;
-            }
-            return (
-              <>
-                {isLoadingPostData ? (
-                  <>
-                    <Text>Loading...</Text>
-                  </>
-                ) : (
-                  <PostItem
-                    post={item}
-                    isViewable={viewableItems.includes(item.postId)}
-                  />
-                )}
-              </>
-            );
-          }}
-          estimatedItemSize={screenWidth}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
-        />
-      ) : (
-        <FlashList
-          nestedScrollEnabled={true}
-          data={[1]}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          // onRefresh={onRefresh}
-          numColumns={1}
-          keyExtractor={(item) => {item.toString();
-          }}
-          renderItem={() => {
-            return (
-              <YStack
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                aspectRatio={9 / 6}
-              >
-                <Camera size="$8" color="$gray12" strokeWidth="$1" />
-                <SizableText size="$8">No posts yet</SizableText>
-              </YStack>
-            );
-          }}
-          estimatedItemSize={screenWidth}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
-        />
-      )}
+      <FlashList
+        nestedScrollEnabled={true}
+        data={posts}
+        refreshing={refreshing}
+        showsVerticalScrollIndicator={false}
+        // onRefresh={onRefresh}
+        numColumns={1}
+        onEndReached={handleOnEndReached}
+        keyExtractor={(item) => {
+          return item?.postId.toString() ?? "";
+        }}
+        renderItem={({ item }) => {
+          if (item === undefined) {
+            return null;
+          }
+          return (
+            <>
+              {isLoadingPostData ? (
+                <>
+                  <Text>Loading...</Text>
+                </>
+              ) : (
+                <PostItem
+                  post={item}
+                  isViewable={viewableItems.includes(item.postId)}
+                />
+              )}
+            </>
+          );
+        }}
+        estimatedItemSize={screenWidth}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        extraData={viewableItems}
+      />
     </View>
   );
 };

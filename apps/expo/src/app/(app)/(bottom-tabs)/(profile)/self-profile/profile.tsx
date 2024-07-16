@@ -191,8 +191,6 @@ const MediaOfYou = () => {
           showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
           numColumns={1}
-          // keyExtractor={(item) => {item.toString();
-          // }}
           renderItem={() => {
             return (
               <YStack
