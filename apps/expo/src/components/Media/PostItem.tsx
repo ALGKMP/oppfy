@@ -218,10 +218,10 @@ const PostItem = (props: PostItemProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const currentUserProfileId = await getCurrentUserProfileId();
     if (profileId === currentUserProfileId) {
-      router.navigate({ pathname: "/(profile)/self-profile/profile" });
+      router.push({ pathname: "/(profile)/self-profile/profile" });
       return;
     }
-    router.navigate({
+    router.push({
       pathname: "/(profile)/profile/[profile-id]/",
       params: { profileId: String(profileId) },
     });
