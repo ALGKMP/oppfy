@@ -4,9 +4,9 @@ import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, View, XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
-import MediaOfYou from "./profile";
+import MediaOfYou from "./MediaOfYou";
 
-const ProfileLayout = () => {
+const SelfProfile = () => {
   const router = useRouter();
 
   return (
@@ -37,4 +37,4 @@ const ProfileLayout = () => {
   );
 };
 
-export default ProfileLayout;
+export default SelfProfile;
