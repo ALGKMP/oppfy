@@ -790,6 +790,9 @@ importers:
 
   packages/api:
     dependencies:
+      '@aws-sdk/cloudfront-signer':
+        specifier: ^3.609.0
+        version: 3.609.0
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.564.0
         version: 3.564.0
@@ -875,6 +878,9 @@ importers:
       '@aws-sdk/client-cloudfront':
         specifier: ^3.614.0
         version: 3.614.0
+      '@aws-sdk/cloudfront-signer':
+        specifier: ^3.609.0
+        version: 3.609.0
       '@oppfy/env':
         specifier: workspace:*
         version: link:../env
@@ -2306,6 +2312,14 @@ packages:
       tslib: 2.6.3
     transitivePeerDependencies:
       - aws-crt
+    dev: false
+
+  /@aws-sdk/cloudfront-signer@3.609.0:
+    resolution: {integrity: sha512-/3PacoMXOmHeont8IyjaoS708nzn/7sYcIbqbs24wDClsJ9/ObCOm0tDJlH5R725pmtIW1o1pXsBhsJOHMVYeg==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@smithy/url-parser': 3.0.3
+      tslib: 2.6.3
     dev: false
 
   /@aws-sdk/core@3.556.0:
