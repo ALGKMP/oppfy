@@ -136,7 +136,7 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(
         schema.follower,
-        eq(schema.follower.recipientId, schema.post.author),
+        eq(schema.follower.recipientId, schema.post.recipient),
       )
       .where(inArray(schema.post.author, reccomendedUserIds))
       .groupBy(schema.post.author, schema.follower.id)
