@@ -1,6 +1,6 @@
 import { TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { useRouter } from "expo-router";
+import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, View, XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
@@ -18,7 +18,19 @@ const SelfProfile = () => {
         justifyContent="space-between"
         backgroundColor="$background"
       >
-        <View minWidth="$2" alignItems="flex-start" />
+        {router.canGoBack() ? (
+          <View minWidth="$2" alignItems="flex-start">
+            <TouchableOpacity
+              onPress={() => {
+                void router.back();
+              }}
+            >
+              <ChevronLeft />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View minWidth="$2" alignItems="flex-start" />
+        )}
 
         <View alignItems="center">
           <Text fontSize="$5" fontWeight="bold">
