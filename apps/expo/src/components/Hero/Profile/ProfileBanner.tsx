@@ -16,9 +16,9 @@ import { abbreviatedNumber } from "@oppfy/utils";
 
 import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "~/components/StatusRenderer";
+import { useSession } from "~/contexts/SessionContext";
 import { useUploadProfilePicture } from "~/hooks/media";
 import type { RouterOutputs } from "~/utils/api";
-
 
 type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
 
@@ -34,6 +34,7 @@ type ProfileProps = LoadingProps | ProfileLoadedProps;
 
 const ProfileBanner = (props: ProfileProps) => {
   const router = useRouter();
+  const { user } = useSession();
 
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
@@ -56,7 +57,7 @@ const ProfileBanner = (props: ProfileProps) => {
 
   const onShareProfilePress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/share-profile")
+    router.push("/share-profile");
   };
 
   return (
@@ -69,15 +70,24 @@ const ProfileBanner = (props: ProfileProps) => {
     >
       <View marginBottom={-28} alignItems="center">
         <StatusRenderer
-          data={!props.loading ? props.data.profilePictureUrl : undefined}
+          data={!props.loading ? props.data : undefined}
           loadingComponent={<Skeleton circular size={140} />}
-          successComponent={(url) => (
-            <TouchableOpacity onPress={pickAndUploadImage}>
-              <Avatar circular size={140} bordered>
-                <Avatar.Image src={url} />
-                <Avatar.Fallback />
-              </Avatar>
-            </TouchableOpacity>
+          successComponent={(profileData) => (
+            <>
+              {user?.uid === profileData.userId ? (
+                <TouchableOpacity onPress={pickAndUploadImage}>
+                  <Avatar circular size={140} bordered>
+                    <Avatar.Image src={profileData.profilePictureUrl} />
+                    <Avatar.Fallback />
+                  </Avatar>
+                </TouchableOpacity>
+              ) : (
+                <Avatar circular size={140} bordered>
+                  <Avatar.Image src={profileData.profilePictureUrl} />
+                  <Avatar.Fallback />
+                </Avatar>
+              )}
+            </>
           )}
         />
       </View>
