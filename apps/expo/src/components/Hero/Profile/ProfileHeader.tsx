@@ -4,7 +4,7 @@ import type { z } from "zod";
 import type { trpcValidators } from "@oppfy/validators";
 
 import FriendsCarousel from "../../Carousels/FriendsCarousel";
-import ProfileBanner from "./ProfileBanner";
+import ProfileDetailsSelf from "./ProfileDetails";
 
 interface ProfileHeaderProps {
   isLoadingProfileData: boolean;
@@ -40,7 +40,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
   ) {
     return (
       <YStack gap="$5">
-        <ProfileBanner loading />
+        <ProfileDetailsSelf loading />
         <FriendsCarousel loading />
       </YStack>
     );
@@ -48,7 +48,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
   return (
     <YStack gap="$5" marginBottom="$5">
       <YStack gap="$5">
-        <ProfileBanner loading={false} data={profileData} />
+        <ProfileDetailsSelf loading={false} data={profileData} />
         <FriendsCarousel
           loading={false}
           friendsData={{
