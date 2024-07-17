@@ -17,6 +17,7 @@ import { ZodError } from "zod";
 import { db } from "@oppfy/db";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
+import { cloudfront } from "@oppfy/cloudfront";
 
 import { services } from "./services";
 import { auth } from "./utils/firebase";
@@ -50,6 +51,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
     db,
     mux,
     auth,
+    cloudfront,
     services,
     session: opts.session,
   };
