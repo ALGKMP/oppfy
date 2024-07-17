@@ -27,7 +27,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
 
   // Profile data
   const selfProfileQuery = api.profile.getFullProfileSelf.useQuery();
-  const otherProfileQuery = api.profile.getOtherUserFullProfile.useQuery(
+  const otherProfileQuery = api.profile.getFullProfileOther.useQuery(
     { profileId: profileId! },
     { enabled: !isSelfProfile },
   );

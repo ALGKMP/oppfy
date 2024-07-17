@@ -20,7 +20,7 @@ import { useSession } from "~/contexts/SessionContext";
 import { useUploadProfilePicture } from "~/hooks/media";
 import type { RouterOutputs } from "~/utils/api";
 
-type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
+type ProfileData = RouterOutputs["profile"]["getFullProfileOther"];
 
 interface LoadingProps {
   loading: true;
