@@ -4,7 +4,7 @@ import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, View, XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
-import MediaOfYou from "./MediaOfYou";
+import MediaOfYou from "../../(profile)/MediaOfYou";
 
 const Profile = () => {
   const profileId = useLocalSearchParams<{ profileId: string }>().profileId;

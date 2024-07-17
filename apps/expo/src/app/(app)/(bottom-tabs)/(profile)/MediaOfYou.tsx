@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import React, { useCallback, useMemo, useState } from "react";
 import { Dimensions } from "react-native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -11,49 +13,104 @@ import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const MediaOfYou = () => {
-  const [status, setStatus] = useState<"success" | "loading" | "error">(
-    "loading",
-  );
+interface MediaOfYouProps {
+  profileId?: string; // Optional: if not provided, it's the user's own profile
+}
+
+const MediaOfYou = (props: MediaOfYouProps) => {
+  const { profileId: profileIdFromRoute } = props;
+  const isSelfProfile = !profileIdFromRoute;
+  const profileId = isSelfProfile ? undefined : parseInt(profileIdFromRoute);
+
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
 
-  const {
-    data: profileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfileData,
-  } = api.profile.getFullProfileSelf.useQuery();
+  // Profile data
+  const selfProfileQuery = api.profile.getFullProfileSelf.useQuery();
+  const otherProfileQuery = api.profile.getOtherUserFullProfile.useQuery(
+    { profileId: profileId! },
+    { enabled: !isSelfProfile },
+  );
 
-  const {
-    data: recommendationsData,
-    isLoading: isLoadingRecommendationsData,
-    refetch: refetchRecommendationsData,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery();
+  const profileData = isSelfProfile
+    ? selfProfileQuery.data
+    : otherProfileQuery.data;
+  const isLoadingProfileData = isSelfProfile
+    ? selfProfileQuery.isLoading
+    : otherProfileQuery.isLoading;
+  const refetchProfileData = isSelfProfile
+    ? selfProfileQuery.refetch
+    : otherProfileQuery.refetch;
 
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
+  // Recommendations data
+  const selfRecommendationsQuery =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
+  const otherRecommendationsQuery =
+    api.contacts.getRecommendationProfilesOther.useQuery(
+      { profileId: profileId! },
+      { enabled: !isSelfProfile },
+    );
+
+  const recommendationsData = isSelfProfile
+    ? selfRecommendationsQuery.data
+    : otherRecommendationsQuery.data;
+  const isLoadingRecommendationsData = isSelfProfile
+    ? selfRecommendationsQuery.isLoading
+    : otherRecommendationsQuery.isLoading;
+  const refetchRecommendationsData = isSelfProfile
+    ? selfRecommendationsQuery.refetch
+    : otherRecommendationsQuery.refetch;
+
+  // Friends data
+  const selfFriendsQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
     { pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
+  const otherFriendsQuery =
+    api.friend.paginateFriendsOthersByProfileId.useInfiniteQuery(
+      { profileId: profileId!, pageSize: 10 },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        enabled: !isSelfProfile,
+      },
+    );
 
-  const {
-    data: postData,
-    isLoading: isLoadingPostData,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
-    {
-      pageSize: 10,
-    },
+  const friendsData = isSelfProfile
+    ? selfFriendsQuery.data
+    : otherFriendsQuery.data;
+  const isLoadingFriendsData = isSelfProfile
+    ? selfFriendsQuery.isLoading
+    : otherFriendsQuery.isLoading;
+  const refetchFriendsData = isSelfProfile
+    ? selfFriendsQuery.refetch
+    : otherFriendsQuery.refetch;
+
+  // Posts data
+  const selfPostsQuery = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
+    { pageSize: 10 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+  );
+  const otherPostsQuery = api.post.paginatePostsOfUserOther.useInfiniteQuery(
+    { profileId: profileId!, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !isSelfProfile,
     },
   );
+
+  const postData = isSelfProfile ? selfPostsQuery.data : otherPostsQuery.data;
+  const isLoadingPostData = isSelfProfile
+    ? selfPostsQuery.isLoading
+    : otherPostsQuery.isLoading;
+  const isFetchingNextPage = isSelfProfile
+    ? selfPostsQuery.isFetchingNextPage
+    : otherPostsQuery.isFetchingNextPage;
+  const fetchNextPage = isSelfProfile
+    ? selfPostsQuery.fetchNextPage
+    : otherPostsQuery.fetchNextPage;
+  const hasNextPage = isSelfProfile
+    ? selfPostsQuery.hasNextPage
+    : otherPostsQuery.hasNextPage;
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -171,6 +228,8 @@ const MediaOfYou = () => {
           showsVerticalScrollIndicator={false}
           onRefresh={onRefresh}
           numColumns={1}
+          // keyExtractor={(item) => {item.toString();
+          // }}
           renderItem={() => {
             return (
               <YStack
