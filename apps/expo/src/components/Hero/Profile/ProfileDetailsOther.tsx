@@ -44,7 +44,7 @@ const ProfileDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `/connections/[user-id]/following-list`,
+        pathname: `(profile)/connections/[user-id]/following-list`,
         params: {userId: props.data.userId},
       })
     }
@@ -54,7 +54,7 @@ const ProfileDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `/connections/[user-id]/followers-list`,
+        pathname: `(profile)/connections/[user-id]/followers-list`,
         params: {userId: props.data.userId},
       })
     }
