@@ -2,7 +2,7 @@ import React from "react";
 import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { Input, SizableText, View, YStack } from "tamagui";
+import { SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -15,7 +15,7 @@ import { ListItem } from "../components";
 import { useFollowHandlers } from "../hooks";
 import { SearchInput } from "~/components/Inputs";
 
-const FollowerList = () => {
+const FollowersList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   console.log(`userId: ${userId}`)
 
@@ -133,4 +133,4 @@ const FollowerList = () => {
   );
 };
 
-export default FollowerList;
+export default FollowersList;
