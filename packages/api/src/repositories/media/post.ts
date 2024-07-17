@@ -234,7 +234,7 @@ export class PostRepository {
             : undefined,
         ),
       )
-      .orderBy(asc(schema.post.createdAt), asc(schema.post.id))
+      .orderBy(desc(schema.post.createdAt), desc(schema.post.id))
       .limit(pageSize + 1);
   }
 
