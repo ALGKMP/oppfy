@@ -23,15 +23,15 @@ const StackHeader = ({
   const theme = useTheme();
 
   return (
-    // <SafeAreaView
-    //   edges={["top"]}
-    //   style={{
-    //     backgroundColor:
-    //       containerProps?.backgroundColor === "transparent"
-    //         ? "transparent"
-    //         : theme.background.val,
-    //   }}
-    // >
+    <SafeAreaView
+      edges={["top"]}
+      style={{
+        backgroundColor:
+          containerProps?.backgroundColor === "transparent"
+            ? "transparent"
+            : theme.background.val,
+      }}
+    >
       <XStack
         // paddingVertical="$2"
         paddingHorizontal="$4"
@@ -50,7 +50,7 @@ const StackHeader = ({
           {HeaderRight}
         </View>
       </XStack>
-    // </SafeAreaView>
+    </SafeAreaView>
   );
 };
 

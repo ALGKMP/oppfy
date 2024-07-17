@@ -1,8 +1,7 @@
 import { TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, View, XStack } from "tamagui";
-import { ChevronLeft } from "@tamagui/lucide-icons";
 
 import { BaseScreenView } from "~/components/Views";
 import MediaOfYou from "../../(profile)/MediaOfYou";
@@ -12,7 +11,7 @@ const Profile = () => {
   const router = useRouter();
 
   return (
-    <BaseScreenView padding={0} safeAreaEdges={["top"]}>
+    <BaseScreenView padding={0}>
       <XStack
         paddingVertical="$2"
         paddingHorizontal="$4"

@@ -1,10 +1,9 @@
 import { Slot, Stack } from "expo-router";
-import {Text} from "tamagui";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { useTheme } from "tamagui";
+import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 
@@ -16,7 +15,8 @@ const ProfileLayout = () => {
   return (
     <Stack
       screenOptions={{
-        header: (props) => <Header {...props} />, // So this bitch makes it so the header doesn't look like shit rn
+        // header: (props) => <Header {...props} />, // So this bitch makes it so the header doesn't look like shit rn
+        headerShown: false,
         contentStyle: { backgroundColor: theme.background.val }, // this bitch sets the color for wtv the fuck idek
       }}
     >

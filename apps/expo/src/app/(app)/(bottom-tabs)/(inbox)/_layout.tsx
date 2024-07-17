@@ -17,7 +17,7 @@ const InboxLayout = () => {
   return (
     <Stack
       screenOptions={{
-        headerLeft: (props) => <HeaderLeft {...props} />,
+        // headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
@@ -31,21 +31,7 @@ const InboxLayout = () => {
       />
 
       <Stack.Screen name="requests" />
-
-      <Stack.Screen
-        name="profile/[profile-id]"
-        options={{
-          headerRight: () => (
-            <View>
-              <Pressable onPress={() => console.log("THING CLICKED")}>
-                {({ pressed }) => (
-                  <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
-                )}
-              </Pressable>
-            </View>
-          ),
-        }}
-      />
+     
       <Stack.Screen name="connections/[user-id]" />
     </Stack>
   );
