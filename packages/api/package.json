@@ -19,6 +19,7 @@
     "@oppfy/validators": "workspace:*",
     "@oppfy/s3": "workspace:*",
     "@oppfy/sqs": "workspace:*",
+    "@oppfy/cloudfront": "workspace:*",
     "@oppfy/sns": "workspace:*",
     "@oppfy/mux": "workspace:*",
     "@oppfy/opensearch": "workspace:*",
