@@ -1,51 +1,10 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
-import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import {
-  TouchableOpacity,
-} from "react-native";
-import * as Haptics from "expo-haptics";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
+import { TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
-import { throttle } from "lodash";
-import {
-  Avatar,
-  Button,
-  getToken,
-  H2,
-  H3,
-  H4,
-  H5,
-  H6,
-  ListItemTitle,
-  Paragraph,
-  SizableText,
-  Spacer,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Text, View, XStack } from "tamagui";
 
-import { abbreviatedNumber } from "@oppfy/utils";
-
-import CardContainer from "~/components/Containers/CardContainer";
-import { Header } from "~/components/Headers";
-import { Skeleton } from "~/components/Skeletons";
-import StatusRenderer from "~/components/StatusRenderer";
 import { BaseScreenView } from "~/components/Views";
-import { useUploadProfilePicture } from "~/hooks/media";
-import type { RouterOutputs } from "~/utils/api";
-import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import MediaOfYou from "./profile";
-
-type ProfileData = RouterOutputs["profile"]["getFullProfileSelf"];
-type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
 
 const ProfileLayout = () => {
   const profileId = useLocalSearchParams<{ profileId: string }>().profileId;
@@ -74,7 +33,7 @@ const ProfileLayout = () => {
           </TouchableOpacity>
         </View>
       </XStack>
-       {profileId && <MediaOfYou profileId={profileId} />}
+      {profileId && <MediaOfYou profileId={profileId} />}
     </BaseScreenView>
   );
 };
