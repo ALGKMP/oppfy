@@ -164,6 +164,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
             return (
               <>
                 <ProfileHeader
+                  isSelfProfile={isSelfProfile}
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecommendationsData={isLoadingRecommendationsData}
@@ -214,6 +215,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
             return (
               <>
                 <ProfileHeader
+                  isSelfProfile={isSelfProfile}
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecommendationsData={isLoadingRecommendationsData}
