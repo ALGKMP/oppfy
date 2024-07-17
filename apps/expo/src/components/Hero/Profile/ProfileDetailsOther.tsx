@@ -42,12 +42,12 @@ const ProfileDetailsOther = (props: ProfileProps) => {
 
   const onFollowingListPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/self-connections/following-list");
+    router.push(`/connections/[${user?.uid}]/following-list`);
   };
 
   const onFollowerListPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/self-connections/follower-list");
+    router.push(`/connections/[${user?.uid}]/follower-list`);
   };
 
   const onEditProfilePress = () => {

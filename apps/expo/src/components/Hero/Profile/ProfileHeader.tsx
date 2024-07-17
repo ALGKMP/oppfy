@@ -4,7 +4,7 @@ import { z } from "zod";
 import { trpcValidators } from "@oppfy/validators";
 
 import FriendsCarousel from "../../Carousels/FriendsCarousel";
-import ProfileDetailsSelf from "./ProfileDetails";
+import ProfileDetailsSelf from "./ProfileDetailsSelf";
 import ProfileDetailsOther from "./ProfileDetailsOther";
 
 interface ProfileHeaderProps {
