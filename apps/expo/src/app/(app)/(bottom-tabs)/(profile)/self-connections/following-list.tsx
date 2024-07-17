@@ -125,7 +125,7 @@ const FollowingList = () => {
           pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.map((item) =>
-              item.userId === newData.senderId
+              item.userId === newData.recipientId
                 ? { ...item, relationshipState: "notFollowing" }
                 : item,
             ),
@@ -183,7 +183,7 @@ const FollowingList = () => {
     await unfollowMutation.mutateAsync({ userId });
 
   const handleCancelFollowRequest = async (senderId: string) =>
-    await cancelFollowRequest.mutateAsync({ senderId });
+    await cancelFollowRequest.mutateAsync({ recipientId: senderId });
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
