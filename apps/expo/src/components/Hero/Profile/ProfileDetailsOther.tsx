@@ -60,14 +60,14 @@ const ProfileDetailsOther = (props: ProfileProps) => {
     }
   };
 
-  const onEditProfilePress = () => {
+  const onFollowPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/edit-profile");
+    // TODO: Follow/Unfollow
   };
 
-  const onShareProfilePress = () => {
+  const onFriendPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/share-profile");
+    // TODO: Friend/Unfriend/Cancel-Outbound-Friend-Request/Accept-Inbound-Friend-Request/Reject-Inbound-Friend-Request
   };
 
   return (
@@ -161,8 +161,8 @@ const ProfileDetailsOther = (props: ProfileProps) => {
             </View>
           }
           successComponent={() => (
-            <Button flex={1} borderRadius={20} onPress={onEditProfilePress}>
-              Edit Profile
+            <Button flex={1} borderRadius={20} onPress={onFollowPress}>
+              Follow
             </Button>
           )}
         />
@@ -174,8 +174,8 @@ const ProfileDetailsOther = (props: ProfileProps) => {
             </View>
           }
           successComponent={() => (
-            <Button flex={1} borderRadius={20} onPress={onShareProfilePress}>
-              Share Profile
+            <Button flex={1} borderRadius={20} onPress={onFriendPress}>
+              Friend Request
             </Button>
           )}
         />
