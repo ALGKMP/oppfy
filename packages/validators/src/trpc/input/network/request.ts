@@ -46,7 +46,7 @@ const trpcRequestInputSchema = {
   }),
 
   cancelFollowRequest: z.object({
-    senderId: z.string(),
+    recipientId: z.string(),
   }),
 };
 
