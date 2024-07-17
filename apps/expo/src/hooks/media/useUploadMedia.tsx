@@ -1,4 +1,6 @@
+import { Blurhash } from "react-native-blurhash";
 import { useMutation } from "@tanstack/react-query";
+import { encode } from "blurhash";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -51,6 +53,20 @@ const useUploadMedia = () => {
   const uploadPhotoMutation = useMutation(
     async ({ uri, caption, recipientId, width, height }: UploadMediaInput) => {
       const photoBlob = await getMediaBlob(uri);
+
+      const fuck = Blurhash.isBlurhashValid("LEHLk~WB2yk8pyo0adR*.7kCMdnj");
+      console.log("fuck", fuck);
+
+      // method 2
+      console.log("uri", uri);
+      const bitch = await Blurhash.encode(uri, 1, 1);
+      console.log("blurhash", bitch);
+      const r = Blurhash.isBlurhashValid(bitch);
+      if (r.isValid) {
+        console.log("don't kys");
+      } else {
+        console.log("kill yourself");
+      }
 
       const parsedMediaType = sharedValidators.media.postContentType.safeParse(
         photoBlob.type,
