@@ -1,9 +1,7 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 import { trpcValidators } from "@oppfy/validators";
 
-import { friend } from "../../../../db/src/schema/schema";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const requestRouter = createTRPCRouter({
@@ -149,7 +147,7 @@ export const requestRouter = createTRPCRouter({
       try {
         await ctx.services.follow.cancelFollowRequest(
           ctx.session.uid,
-          input.senderId,
+          input.recipientId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
