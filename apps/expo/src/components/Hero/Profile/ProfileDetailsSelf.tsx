@@ -47,7 +47,7 @@ const ProfileDetailsSelf = (props: ProfileProps) => {
 
   const onFollowerListPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/self-connections/follower-list");
+    router.push("/self-connections/followers-list");
   };
 
   const onEditProfilePress = () => {
