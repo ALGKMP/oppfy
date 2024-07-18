@@ -422,13 +422,15 @@ const PostItem = (props: PostItemProps) => {
         </XStack>
 
         {/* Likes Count */}
-        <TouchableOpacity>
-          <SizableText size="$3" fontWeight="bold" marginBottom="$1">
-            {likeCount > 0
-              ? `${likeCount} ${likeCount === 1 ? "like" : "likes"}`
-              : ""}
-          </SizableText>
-        </TouchableOpacity>
+        {likeCount > 0 && (
+          <TouchableOpacity>
+            <SizableText size="$3" fontWeight="bold" marginBottom="$1">
+              {likeCount > 0
+                ? `${likeCount} ${likeCount === 1 ? "like" : "likes"}`
+                : ""}
+            </SizableText>
+          </TouchableOpacity>
+        )}
 
         {/* Caption */}
         {post.caption && (
@@ -440,7 +442,7 @@ const PostItem = (props: PostItemProps) => {
               }}
             >
               <Text>
-                <Text fontWeight="bold">{post.recipientUsername} </Text>
+                <Text fontWeight="bold">{post.authorUsername} </Text>
                 <Text numberOfLines={isExpanded ? 0 : 2}>
                   {renderCaption()}
                   {showViewMore && !isExpanded && (
