@@ -11,7 +11,7 @@ import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
 import { api } from "~/utils/api";
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface MediaOfYouProps {
   profileId?: string; // Optional: if not provided, it's the user's own profile
@@ -45,21 +45,9 @@ const MediaOfYou = (props: MediaOfYouProps) => {
   // Recommendations data
   const selfRecommendationsQuery =
     api.contacts.getRecommendationProfilesSelf.useQuery();
-  const otherRecommendationsQuery =
-    api.contacts.getRecommendationProfilesOther.useQuery(
-      { profileId: profileId! },
-      { enabled: !isSelfProfile },
-    );
-
-  const recommendationsData = isSelfProfile
-    ? selfRecommendationsQuery.data
-    : otherRecommendationsQuery.data;
-  const isLoadingRecommendationsData = isSelfProfile
-    ? selfRecommendationsQuery.isLoading
-    : otherRecommendationsQuery.isLoading;
-  const refetchRecommendationsData = isSelfProfile
-    ? selfRecommendationsQuery.refetch
-    : otherRecommendationsQuery.refetch;
+  const isLoadingRecommendationsData = selfRecommendationsQuery.isLoading;
+  const recommendationsData = selfRecommendationsQuery.data;
+  const refetchRecommendationsData = selfRecommendationsQuery.refetch;
 
   // Friends data
   const selfFriendsQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
@@ -183,6 +171,10 @@ const MediaOfYou = (props: MediaOfYouProps) => {
           keyExtractor={(item) => {
             return item?.postId.toString() ?? "";
           }}
+          estimatedItemSize={screenHeight}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={viewableItems}
           renderItem={({ item }) => {
             if (item === undefined) {
               return null;
@@ -202,10 +194,6 @@ const MediaOfYou = (props: MediaOfYouProps) => {
               </>
             );
           }}
-          estimatedItemSize={screenWidth}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
         />
       ) : (
         <FlashList
@@ -245,7 +233,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
               </YStack>
             );
           }}
-          estimatedItemSize={screenWidth}
+          estimatedItemSize={screenHeight}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
           extraData={viewableItems}

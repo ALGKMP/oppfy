@@ -118,7 +118,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
             >
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
-                  <Avatar.Image src={item.profilePictureUrl}/>
+                  <Avatar.Image src={item.profilePictureUrl} />
                 </Avatar>
                 <Text fontWeight="600" textAlign="center">
                   {item.username}
@@ -212,10 +212,11 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   }
 
   if (props.friendsData.friendCount === 0) {
+    if (props.reccomendationsData.length === 0) {
+      return null;
+    }
     return renderSuggestions(props.reccomendationsData);
   }
-
-  return renderFriendList(props.friendsData);
 };
 
 export default FriendsCarousel;
