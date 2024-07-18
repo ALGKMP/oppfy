@@ -132,8 +132,6 @@ const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
           {isSelfPost && (
             <TouchableOpacity
               onPress={() => {
-                // TODO: Open a confirmation modal and optimistically delete the post
-                console.log("delete cliekd")
                 setTimeout(() => {
                   setDeleteActionSheetVisible(true);
                 }, 300);

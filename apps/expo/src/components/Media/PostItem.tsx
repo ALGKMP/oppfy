@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import PagerView from "react-native-pager-view";
 import Animated, {
   ReduceMotion,
   runOnJS,
@@ -97,6 +98,36 @@ const PostItem = (props: PostItemProps) => {
     // TODO: Handle this bitch
     onError: (err) => {
       console.log(err);
+    },
+  });
+
+  const utils = api.useUtils();
+
+  const deletePost = api.post.deletePost.useMutation({
+    onMutate: async (newData) => {
+      await utils.post.paginatePostsOfUserSelf.invalidate();
+
+      const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData();
+      if (!prevData) return;
+
+      utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter((item) => item?.postId != newData.postId),
+          })),
+        },
+      );
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (!ctx) return;
+      utils.post.paginatePostsOfUserSelf.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      await utils.post.paginatePostsOfUserSelf.invalidate();
     },
   });
 
@@ -496,17 +527,17 @@ const PostItem = (props: PostItemProps) => {
       <ActionSheet
         title="Delete Post"
         subtitle="Are you sure you want to delete this post? This action cannot be undone!"
-        buttonOptions={
-          [
-            {
-              text: "Delete Post",
-              textProps: {
-                color: "$red9",
-              },
-              onPress: () => console.log("Deleting Post"),
+        buttonOptions={[
+          {
+            text: "Delete Post",
+            textProps: {
+              color: "$red9",
             },
-          ]
-        }
+            onPress: () => {
+              void deletePost.mutateAsync({ postId: post.postId });
+            },
+          },
+        ]}
         isVisible={isDeleteModalVisible}
         onCancel={() => {
           setIsDeleteModalVisible(false);
