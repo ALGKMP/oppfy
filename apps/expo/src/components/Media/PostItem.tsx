@@ -391,8 +391,6 @@ const PostItem = (props: PostItemProps) => {
         alignSelf="stretch"
         padding="$2.5"
         paddingTop="$3"
-        borderBottomWidth={1}
-        borderBottomColor="$gray5"
       >
         <XStack gap="$4" alignItems="center" marginBottom="$2">
           {/* Like Button */}
