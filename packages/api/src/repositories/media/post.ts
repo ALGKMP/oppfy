@@ -58,7 +58,7 @@ export class PostRepository {
         followerId: follower.id,
       })
       .from(schema.post)
-      .innerJoin(follower, eq(follower.recipientId, schema.post.author))
+      .innerJoin(follower, eq(follower.recipientId, schema.post.recipient))
       .where(eq(follower.senderId, userId))
       .groupBy(schema.post.author, follower.id)
       .as("latest_posts");
@@ -124,6 +124,8 @@ export class PostRepository {
         return [...res.tier1, ...res.tier2, ...res.tier3];
       });
 
+    // if TODO: if recs is empty just return top posts
+
     // get one post from each rec id
     const latestPosts = this.db
       .select({
@@ -134,7 +136,7 @@ export class PostRepository {
       .from(schema.post)
       .innerJoin(
         schema.follower,
-        eq(schema.follower.recipientId, schema.post.author),
+        eq(schema.follower.recipientId, schema.post.recipient),
       )
       .where(inArray(schema.post.author, reccomendedUserIds))
       .groupBy(schema.post.author, schema.follower.id)
