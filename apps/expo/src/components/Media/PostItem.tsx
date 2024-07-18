@@ -386,12 +386,7 @@ const PostItem = (props: PostItemProps) => {
         </View>
       </GestureDetector>
       {/* Under Post */}
-      <View
-        flex={1}
-        alignSelf="stretch"
-        padding="$2.5"
-        paddingTop="$3"
-      >
+      <View flex={1} alignSelf="stretch" padding="$2.5" paddingTop="$3">
         <XStack gap="$4" alignItems="center" marginBottom="$2">
           {/* Like Button */}
           <TouchableOpacity
@@ -415,7 +410,7 @@ const PostItem = (props: PostItemProps) => {
 
           {/* Share Button */}
           <TouchableOpacity onPress={() => setIsShareModalVisible(true)}>
-            <Send size={28} color="$gray12" />
+            <Send size={28} color="$gray12" marginLeft="$-1" />
           </TouchableOpacity>
         </XStack>
 
@@ -464,8 +459,7 @@ const PostItem = (props: PostItemProps) => {
 
       {/* Bottom Sheets & Action sheets*/}
 
-      {commentsBottomSheetVisible &&
-      (
+      {commentsBottomSheetVisible && (
         <CommentsBottomSheet
           postId={post.postId}
           modalVisible={commentsBottomSheetVisible}
