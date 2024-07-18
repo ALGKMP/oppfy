@@ -174,47 +174,38 @@ export const postRouter = createTRPCRouter({
 
   paginatePostsForFeed: protectedProcedure
     .input(trpcValidators.input.post.paginatePostsForFeed)
-    .output(trpcValidators.output.post.paginatedPosts)
+    .output(trpcValidators.output.post.paginatedFeedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        /*      const result = await ctx.services.post.paginatePostsForFeed(
-          ctx.session.uid,
-          input.cursor,
-          input.pageSize,
-        ); */
-        /*         const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result); */
-        // return parsedResult;
-
-        // promise.all the 2 fns
-        // return the result of the promise.all
-        // parse the result of the promise.all
-        // return the parsed result
-        /*         const result = await Promise.all([
-          ctx.services.post.paginatePostsOfFollowing(
-            ctx.session.uid,
-            input.cursor,
-            input.pageSize,
-          ),
-          ctx.services.post.paginatePostsOfRecomended(
-            ctx.session.uid,
-            input.cursor,
-            input.pageSize,
-          ),
-        ]);
- */
-
+        console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfFollowing(
           ctx.session.uid,
-          input.cursor,
+          input.cursor?.followingCursor,
           input.pageSize,
         );
 
-        console.error("paginate posts for following", result);
+        const parsedFollowingResult =
+          trpcValidators.output.post.paginatedFeedPosts.parse(result);
 
-        const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result);
-        return parsedResult;
+        if (parsedFollowingResult.items.length < input.pageSize!) {
+          const result = await ctx.services.post.paginatePostsOfRecommended(
+            ctx.session.uid,
+            input.cursor?.recomendedCursor,
+            input.pageSize! - parsedFollowingResult.items.length,
+          );
+
+          const parsedRecommendedResult =
+            trpcValidators.output.post.paginatedFeedPosts.parse(result);
+
+          parsedRecommendedResult.items = [
+            ...parsedFollowingResult.items,
+            ...parsedRecommendedResult.items,
+          ];
+
+          return parsedRecommendedResult;
+        }
+
+        return parsedFollowingResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {

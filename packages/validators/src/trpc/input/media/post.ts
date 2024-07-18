@@ -70,12 +70,22 @@ const trpcPostInputSchema = {
   }),
 
   paginatePostsForFeed: z.object({
-    cursor: z
-      .object({
-        followerId: z.number(),
-        createdAt: z.date(),
-      })
-      .optional(),
+    cursor: z.object({
+      doneFollowing: z.boolean(),
+      followingCursor: z
+        .object({
+          createdAt: z.date(),
+          followerId: z.number(),
+        })
+        .optional(),
+      recomendedCursor: z
+        .object({
+          createdAt: z.date(),
+          postId: z.number(),
+        })
+        .optional(),
+    }).optional(),
+
     pageSize: z.number().nonnegative().optional(),
   }),
 

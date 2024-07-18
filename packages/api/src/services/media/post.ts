@@ -50,7 +50,7 @@ export class PostService {
 
   private async _processPaginatedPostData(
     data: Post[],
-    pageSize = 10,
+    pageSize = 20,
   ): Promise<PaginatedResponse<Post>> {
     const items = await Promise.all(
       data.map(async (item) => {
@@ -96,9 +96,7 @@ export class PostService {
 
     let nextCursor: PostCursor | undefined = undefined;
     if (items.length > pageSize) {
-      console.log("posts: ", items);
       const nextItem = items.pop();
-      console.log("nextItem: ", nextItem);
       if (!nextItem) {
         throw new DomainError(
           ErrorCode.FAILED_TO_PAGINATE_POSTS,
@@ -175,13 +173,10 @@ export class PostService {
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      console.log("BACKEND:", cursor)
       const data = await this.postRepository.paginatePostsOfUser(
         userId,
         cursor,
-        pageSize,
       );
-      console.log("Data: ", data)
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -206,7 +201,6 @@ export class PostService {
       const data = await this.postRepository.paginatePostsOfUser(
         user.id,
         cursor,
-        pageSize,
       );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
