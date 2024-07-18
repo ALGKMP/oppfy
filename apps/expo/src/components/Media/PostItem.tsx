@@ -12,7 +12,12 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { Heart, MoreHorizontal, Send } from "@tamagui/lucide-icons";
+import {
+  Heart,
+  MessageCircle,
+  MoreHorizontal,
+  Send,
+} from "@tamagui/lucide-icons";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
@@ -386,125 +391,75 @@ const PostItem = (props: PostItemProps) => {
         alignSelf="stretch"
         padding="$2.5"
         paddingTop="$3"
-        borderBottomRightRadius="$8"
-        borderBottomLeftRadius="$8"
-        // backgroundColor="$gray2"
+        borderBottomWidth={1}
+        borderBottomColor="$gray5"
       >
-        <XStack gap="$2" alignItems="flex-start">
-          {/* Comment Button */}
-          <View flex={4} justifyContent="center">
-            <TouchableOpacity
-              onPress={() => setCommentsBottomSheetVisible(true)}
-            >
-              <View
-                flex={1}
-                justifyContent="flex-start"
-                padding="$2.5"
-                borderRadius="$7"
-                backgroundColor="$gray5"
-              >
-                <Text
-                  fontWeight="normal"
-                  color="$gray9"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {`add a comment for ${post.recipientUsername}`.length > 19
-                    ? `${`add a comment for ${post.recipientUsername}`.slice(0, 27)}...`
-                    : `add a comment for ${post.recipientUsername}`}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+        <XStack gap="$4" alignItems="center" marginBottom="$2">
           {/* Like Button */}
-          <View flex={1} justifyContent="center">
-            <TouchableOpacity
-              onPress={() => handleLikeToggle({ doubleTap: false })}
-            >
-              <View
-                justifyContent="center"
-                alignItems="center"
-                borderRadius="$7"
-                padding="$2"
-                backgroundColor="$gray5"
-              >
-                <Animated.View style={[heartButtonAnimatedStyle]}>
-                  <Heart
-                    size={24}
-                    padding="$3"
-                    color={isLiked ? "red" : "$gray12"}
-                    fill="red"
-                    fillOpacity={isLiked ? 1 : 0}
-                  />
-                </Animated.View>
-              </View>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => handleLikeToggle({ doubleTap: false })}
+          >
+            <Animated.View style={[heartButtonAnimatedStyle]}>
+              <Heart
+                size={24}
+                padding="$3"
+                color={isLiked ? "red" : "$gray12"}
+                fill="red"
+                fillOpacity={isLiked ? 1 : 0}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+
+          {/* Comment Button */}
+          <TouchableOpacity onPress={() => setCommentsBottomSheetVisible(true)}>
+            <MessageCircle size={28} color="$gray12" />
+          </TouchableOpacity>
+
           {/* Share Button */}
-          <View flex={1} justifyContent="center">
-            <TouchableOpacity onPress={() => setIsShareModalVisible(true)}>
-              <View
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                padding="$2"
-                borderRadius="$7"
-                backgroundColor="$gray5"
-              >
-                <Send size={24} padding="$3" marginRight="$1" color="$gray12" />
-              </View>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={() => setIsShareModalVisible(true)}>
+            <Send size={28} color="$gray12" />
+          </TouchableOpacity>
         </XStack>
 
-        {/* Comments and Likes */}
-        <XStack flex={1} gap="$2">
-          <View flex={4} alignItems="flex-start" paddingLeft="$2.5">
-            <TouchableOpacity
-              onPress={() => setCommentsBottomSheetVisible(true)}
-            >
-              <SizableText size="$2" fontWeight="normal" color="$gray10">
-                {post.commentsCount > 0
-                  ? post.commentsCount > 1
-                    ? `${post.commentsCount} comments`
-                    : `${post.commentsCount} comment`
-                  : "Be the first to comment"}
-              </SizableText>
-            </TouchableOpacity>
-          </View>
-          <View flex={2} alignItems="flex-start">
-            <TouchableOpacity>
-              <SizableText size="$2" fontWeight="normal" color="$gray10">
-                {likeCount > 0
-                  ? likeCount > 1
-                    ? `${likeCount} likes`
-                    : `${likeCount} like`
-                  : ""}
-              </SizableText>
-            </TouchableOpacity>
-          </View>
-        </XStack>
+        {/* Likes Count */}
+        <TouchableOpacity>
+          <SizableText size="$3" fontWeight="bold" marginBottom="$1">
+            {likeCount > 0
+              ? `${likeCount} ${likeCount === 1 ? "like" : "likes"}`
+              : ""}
+          </SizableText>
+        </TouchableOpacity>
 
         {/* Caption */}
         {post.caption && (
-          <View flex={1} alignItems="flex-start" padding="$2">
+          <View flex={1} alignItems="flex-start">
             <TouchableOpacity
               onPress={() => {
                 setIsExpanded(!isExpanded);
                 setShowViewMore(false);
               }}
             >
-              <Text numberOfLines={isExpanded ? 0 : 2}>
-                {renderCaption()}
-                {showViewMore && !isExpanded ? (
-                  <Text color="$gray10"> more</Text>
-                ) : (
-                  ""
-                )}
+              <Text>
+                <Text fontWeight="bold">{post.recipientUsername} </Text>
+                <Text numberOfLines={isExpanded ? 0 : 2}>
+                  {renderCaption()}
+                  {showViewMore && !isExpanded && (
+                    <Text color="$gray10"> more</Text>
+                  )}
+                </Text>
               </Text>
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Comments Count */}
+        <TouchableOpacity onPress={() => setCommentsBottomSheetVisible(true)}>
+          <SizableText size="$3" color="$gray10" marginTop="$1">
+            {post.commentsCount > 0
+              ? `View ${post.commentsCount > 1 ? "all " : ""}${post.commentsCount} ${post.commentsCount === 1 ? "comment" : "comments"}`
+              : "Be the first to comment"}
+          </SizableText>
+        </TouchableOpacity>
       </View>
 
       <CommentsBottomSheet
