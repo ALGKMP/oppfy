@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Dimensions, Modal, TouchableOpacity } from "react-native";
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BottomSheet from "@gorhom/bottom-sheet";
 import {
@@ -12,7 +7,7 @@ import {
   ArrowDownToLine,
   Minus,
   QrCode,
-  Send,
+  Trash2,
 } from "@tamagui/lucide-icons";
 import { Separator, Text, View, XStack, YStack } from "tamagui";
 
@@ -21,21 +16,25 @@ import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface PostActionBottomSheetProps {
   postId: number;
+  isSelfPost: boolean;
   url: string;
   mediaType: "image" | "video";
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
   setReportActionSheetVisible: (value: boolean) => void;
+  setDeleteActionSheetVisible: (value: boolean) => void;
 }
 
-const PostActionsBottomSheet = ({
-  postId,
-  url,
-  mediaType,
-  modalVisible,
-  setModalVisible,
-  setReportActionSheetVisible,
-}: PostActionBottomSheetProps) => {
+const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
+  const {
+    isSelfPost,
+    url,
+    mediaType,
+    modalVisible,
+    setModalVisible,
+    setReportActionSheetVisible,
+    setDeleteActionSheetVisible,
+  } = props;
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useMemo(() => Dimensions.get("window"), []);
   const sheetRef = useRef<BottomSheet>(null);
@@ -81,7 +80,11 @@ const PostActionsBottomSheet = ({
       modalVisible={modalVisible}
       onClose={closeModal}
       onOpen={openModal}
-      snapPoints={[`${bottomInsetPercentage + 30}%`]}
+      snapPoints={
+        isSelfPost
+          ? [`${bottomInsetPercentage + 35}%`]
+          : [`${bottomInsetPercentage + 30}%`]
+      }
       topInset={insets.top}
       handleComponent={renderHeader}
     >
@@ -103,8 +106,8 @@ const PostActionsBottomSheet = ({
               <QrCode />
               <Text>QR Code</Text>
             </XStack>
+            <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
           </TouchableOpacity>
-          <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
           <TouchableOpacity
             onPress={async () => {
               await saveToCameraRoll({
@@ -124,14 +127,34 @@ const PostActionsBottomSheet = ({
               <ArrowDownToLine />
               <Text>Save post</Text>
             </XStack>
+            <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
           </TouchableOpacity>
-          <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
+          {isSelfPost && (
+            <TouchableOpacity
+              onPress={() => {
+                setTimeout(() => {
+                  setDeleteActionSheetVisible(true);
+                }, 300);
+                closeModal();
+              }}
+            >
+              <XStack
+                gap="$4"
+                padding="$4"
+                alignItems="center"
+                justifyContent="flex-start"
+              >
+                <Trash2 />
+                <Text>Delete post</Text>
+              </XStack>
+              <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => {
-              setReportActionSheetVisible(true);
-              // setTimeout(() => {
-              //   setReportActionSheetVisible(true);
-              // }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
+              setTimeout(() => {
+                setReportActionSheetVisible(true);
+              }, 300); // Gotta add a timeout to this shit because of the timeout in closeModal idfk just go with it
               closeModal();
             }}
           >

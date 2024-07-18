@@ -227,16 +227,16 @@ export class PostRepository {
           eq(schema.post.recipient, userId),
           cursor
             ? or(
-                gt(schema.post.createdAt, cursor.createdAt),
+                lt(schema.post.createdAt, cursor.createdAt),
                 and(
                   eq(schema.post.createdAt, cursor.createdAt),
-                  gt(schema.post.id, cursor.postId),
+                  lt(schema.post.id, cursor.postId),
                 ),
               )
             : undefined,
         ),
       )
-      .orderBy(asc(schema.post.createdAt), asc(schema.post.id))
+      .orderBy(desc(schema.post.createdAt), desc(schema.post.id))
       .limit(pageSize + 1);
   }
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import PagerView from "react-native-pager-view";
 import Animated, {
   ReduceMotion,
   runOnJS,
@@ -11,7 +12,12 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { Heart, MoreHorizontal, Send } from "@tamagui/lucide-icons";
+import {
+  Heart,
+  MessageCircle,
+  MoreHorizontal,
+  Send,
+} from "@tamagui/lucide-icons";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
@@ -29,6 +35,7 @@ import Mute, { useMuteAnimations } from "~/components/Icons/Mute";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
+import { ActionSheet } from "../Sheets";
 import ImagePost from "./ImagePost";
 import VideoPost from "./VideoPost";
 
@@ -36,11 +43,12 @@ type Post = z.infer<typeof sharedValidators.media.post>;
 
 interface PostItemProps {
   post: Post;
+  isSelfPost: boolean;
   isViewable: boolean;
 }
 
 const PostItem = (props: PostItemProps) => {
-  const { post, isViewable } = props;
+  const { post, isSelfPost, isViewable } = props;
   const [isMuted, setIsMuted] = useState(false);
   const [status, _setStatus] = useState<"success" | "loading" | "error">(
     "success",
@@ -50,13 +58,11 @@ const PostItem = (props: PostItemProps) => {
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { getCurrentUserProfileId } = useSession();
 
   const router = useRouter();
-
-  const utils = api.useUtils();
-  const profile = utils.profile.getFullProfileSelf.getData();
 
   const {
     data: hasLiked,
@@ -97,6 +103,36 @@ const PostItem = (props: PostItemProps) => {
     // TODO: Handle this bitch
     onError: (err) => {
       console.log(err);
+    },
+  });
+
+  const utils = api.useUtils();
+
+  const deletePost = api.post.deletePost.useMutation({
+    onMutate: async (newData) => {
+      await utils.post.paginatePostsOfUserSelf.invalidate();
+
+      const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData();
+      if (!prevData) return;
+
+      utils.post.paginatePostsOfUserSelf.setInfiniteData(
+        {},
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter((item) => item?.postId != newData.postId),
+          })),
+        },
+      );
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (!ctx) return;
+      utils.post.paginatePostsOfUserSelf.setInfiniteData({}, ctx.prevData);
+    },
+    onSettled: async () => {
+      await utils.post.paginatePostsOfUserSelf.invalidate();
     },
   });
 
@@ -218,10 +254,10 @@ const PostItem = (props: PostItemProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const currentUserProfileId = await getCurrentUserProfileId();
     if (profileId === currentUserProfileId) {
-      router.navigate({ pathname: "/(profile)/self-profile/profile" });
+      router.push({ pathname: "/(profile)/self-profile" });
       return;
     }
-    router.navigate({
+    router.push({
       pathname: "/(profile)/profile/[profile-id]/",
       params: { profileId: String(profileId) },
     });
@@ -303,8 +339,6 @@ const PostItem = (props: PostItemProps) => {
           <TouchableOpacity
             onPress={() => {
               setPostActionsBottomSheetVisible(true);
-              console.log("touched");
-              // setIsReportModalVisible(true)
             }}
           >
             <MoreHorizontal size={24} color="$gray12" />
@@ -352,145 +386,116 @@ const PostItem = (props: PostItemProps) => {
         </View>
       </GestureDetector>
       {/* Under Post */}
-      <View
-        flex={1}
-        alignSelf="stretch"
-        padding="$2.5"
-        paddingTop="$3"
-        borderBottomRightRadius="$8"
-        borderBottomLeftRadius="$8"
-        // backgroundColor="$gray2"
-      >
-        <XStack gap="$2" alignItems="flex-start">
-          {/* Comment Button */}
-          <View flex={4} justifyContent="center">
-            <TouchableOpacity
-              onPress={() => setCommentsBottomSheetVisible(true)}
-            >
-              <View
-                flex={1}
-                justifyContent="flex-start"
-                padding="$2.5"
-                borderRadius="$7"
-                backgroundColor="$gray5"
-              >
-                <Text
-                  fontWeight="normal"
-                  color="$gray9"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {`add a comment for ${post.recipientUsername}`.length > 19
-                    ? `${`add a comment for ${post.recipientUsername}`.slice(0, 27)}...`
-                    : `add a comment for ${post.recipientUsername}`}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+      <View flex={1} alignSelf="stretch" padding="$2.5" paddingTop="$3">
+        <XStack gap="$4" alignItems="center" marginBottom="$2">
           {/* Like Button */}
-          <View flex={1} justifyContent="center">
-            <TouchableOpacity
-              onPress={() => handleLikeToggle({ doubleTap: false })}
-            >
-              <View
-                justifyContent="center"
-                alignItems="center"
-                borderRadius="$7"
-                padding="$2"
-                backgroundColor="$gray5"
-              >
-                <Animated.View style={[heartButtonAnimatedStyle]}>
-                  <Heart
-                    size={24}
-                    padding="$3"
-                    color={isLiked ? "red" : "$gray12"}
-                    fill="red"
-                    fillOpacity={isLiked ? 1 : 0}
-                  />
-                </Animated.View>
-              </View>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => handleLikeToggle({ doubleTap: false })}
+          >
+            <Animated.View style={[heartButtonAnimatedStyle]}>
+              <Heart
+                size={24}
+                padding="$3"
+                color={isLiked ? "red" : "$gray12"}
+                fill="red"
+                fillOpacity={isLiked ? 1 : 0}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+
+          {/* Comment Button */}
+          <TouchableOpacity onPress={() => setCommentsBottomSheetVisible(true)}>
+            <MessageCircle size={28} color="$gray12" />
+          </TouchableOpacity>
+
           {/* Share Button */}
-          <View flex={1} justifyContent="center">
-            <TouchableOpacity onPress={() => setIsShareModalVisible(true)}>
-              <View
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                padding="$2"
-                borderRadius="$7"
-                backgroundColor="$gray5"
-              >
-                <Send size={24} padding="$3" marginRight="$1" color="$gray12" />
-              </View>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={() => setIsShareModalVisible(true)}>
+            <Send size={28} color="$gray12" marginLeft="$-1" />
+          </TouchableOpacity>
         </XStack>
 
-        {/* Comments and Likes */}
-        <XStack flex={1} gap="$2">
-          <View flex={4} alignItems="flex-start" paddingLeft="$2.5">
-            <TouchableOpacity
-              onPress={() => setCommentsBottomSheetVisible(true)}
-            >
-              <SizableText size="$2" fontWeight="normal" color="$gray10">
-                {post.commentsCount > 0
-                  ? post.commentsCount > 1
-                    ? `${post.commentsCount} comments`
-                    : `${post.commentsCount} comment`
-                  : "Be the first to comment"}
-              </SizableText>
-            </TouchableOpacity>
-          </View>
-          <View flex={2} alignItems="flex-start">
-            <TouchableOpacity>
-              <SizableText size="$2" fontWeight="normal" color="$gray10">
-                {likeCount > 0
-                  ? likeCount > 1
-                    ? `${likeCount} likes`
-                    : `${likeCount} like`
-                  : ""}
-              </SizableText>
-            </TouchableOpacity>
-          </View>
-        </XStack>
+        {/* Likes Count */}
+        {likeCount > 0 && (
+          <TouchableOpacity>
+            <SizableText size="$3" fontWeight="bold" marginBottom="$1">
+              {likeCount > 0
+                ? `${likeCount} ${likeCount === 1 ? "like" : "likes"}`
+                : ""}
+            </SizableText>
+          </TouchableOpacity>
+        )}
 
         {/* Caption */}
         {post.caption && (
-          <View flex={1} alignItems="flex-start" padding="$2">
+          <View flex={1} alignItems="flex-start">
             <TouchableOpacity
               onPress={() => {
                 setIsExpanded(!isExpanded);
                 setShowViewMore(false);
               }}
             >
-              <Text numberOfLines={isExpanded ? 0 : 2}>
-                {renderCaption()}
-                {showViewMore && !isExpanded ? (
-                  <Text color="$gray10"> more</Text>
-                ) : (
-                  ""
-                )}
+              <Text>
+                <Text fontWeight="bold">{post.authorUsername} </Text>
+                <Text numberOfLines={isExpanded ? 0 : 2}>
+                  {renderCaption()}
+                  {showViewMore && !isExpanded && (
+                    <Text color="$gray10"> more</Text>
+                  )}
+                </Text>
               </Text>
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Comments Count */}
+        <TouchableOpacity onPress={() => setCommentsBottomSheetVisible(true)}>
+          <SizableText size="$3" color="$gray10" marginTop="$1">
+            {post.commentsCount > 0
+              ? `View ${post.commentsCount > 1 ? "all " : ""}${post.commentsCount} ${post.commentsCount === 1 ? "comment" : "comments"}`
+              : "Be the first to comment"}
+          </SizableText>
+        </TouchableOpacity>
       </View>
 
-      <CommentsBottomSheet
-        postId={post.postId}
-        modalVisible={commentsBottomSheetVisible}
-        setModalVisible={setCommentsBottomSheetVisible}
-      />
+      {/* Bottom Sheets & Action sheets*/}
+
+      {commentsBottomSheetVisible && (
+        <CommentsBottomSheet
+          postId={post.postId}
+          modalVisible={commentsBottomSheetVisible}
+          setModalVisible={setCommentsBottomSheetVisible}
+        />
+      )}
 
       <PostActionsBottomSheet
         postId={post.postId}
+        isSelfPost={isSelfPost}
         mediaType={post.mediaType}
         url={post.imageUrl}
         modalVisible={postActionsBottomSheetVisible}
         setModalVisible={setPostActionsBottomSheetVisible}
         setReportActionSheetVisible={setIsReportModalVisible}
+        setDeleteActionSheetVisible={setIsDeleteModalVisible}
+      />
+
+      <ActionSheet
+        title="Delete Post"
+        subtitle="Are you sure you want to delete this post? This action cannot be undone!"
+        buttonOptions={[
+          {
+            text: "Delete Post",
+            textProps: {
+              color: "$red9",
+            },
+            onPress: () => {
+              void deletePost.mutateAsync({ postId: post.postId });
+            },
+          },
+        ]}
+        isVisible={isDeleteModalVisible}
+        onCancel={() => {
+          setIsDeleteModalVisible(false);
+        }}
       />
 
       <ShareBottomSheet

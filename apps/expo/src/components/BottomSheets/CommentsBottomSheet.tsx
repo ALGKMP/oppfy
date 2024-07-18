@@ -17,7 +17,15 @@ import {
 } from "@tamagui/lucide-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
+import {
+  Avatar,
+  SizableText,
+  Spinner,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
@@ -64,7 +72,7 @@ const CommentsBottomSheet = ({
 
   const {
     data: commentsData,
-    isLoading,
+    isLoading: commentsLoading,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
@@ -385,9 +393,14 @@ const CommentsBottomSheet = ({
       topInset={insets.top}
       handleComponent={renderHeader}
     >
+      {commentsLoading && (
+        <View flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="large" color="white" />
+        </View>
+      )}
       {
         // if there are no comments render a message
-        comments.length === 0 ? (
+        !commentsLoading && comments.length === 0 ? (
           <View flex={1} justifyContent="center" alignItems="center">
             <SizableText size="$7" fontWeight="bold">
               No comments yet

@@ -11,9 +11,9 @@ const ConnectionsLayout = () => {
     username: string;
     initialRouteName: string;
   }>();
-  console.log(`initial route name: ${initialRouteName}`)
-  console.log(`username: ${username}`)
-  console.log(`userId: ${userId}`)
+  console.log(`initial route name: ${initialRouteName}`);
+  console.log(`username: ${username}`);
+  console.log(`userId: ${userId}`);
 
   const theme = useTheme();
 
@@ -45,7 +45,7 @@ const ConnectionsLayout = () => {
         initialParams={{ userId }}
       />
       <TopTabs.Screen
-        name="follower-list"
+        name="followers-list"
         options={{
           tabBarLabel: "Followers",
         }}

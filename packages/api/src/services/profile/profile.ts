@@ -151,6 +151,7 @@ export class ProfileService {
 
     const profileData = {
       userId: user.id,
+      profileId: profile.id,
       privacy: user.privacySetting,
       username: profile.username,
       name: profile.fullName,
@@ -266,6 +267,7 @@ export class ProfileService {
     > = {
       userId: otherUser.id,
       username: username,
+      profileId: profile.id,
       name: fullName,
       bio: profile.bio,
       privacy: otherUser.privacySetting,

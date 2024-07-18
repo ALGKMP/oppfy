@@ -27,7 +27,7 @@ export class FriendRepository {
       await tx
         .delete(schema.friendRequest)
         .where(
-          and(
+          or(
             eq(schema.friendRequest.senderId, userId1),
             eq(schema.friendRequest.recipientId, userId2),
           ),
@@ -42,7 +42,7 @@ export class FriendRepository {
     const result = await this.db
       .delete(schema.friend)
       .where(
-        and(
+        or(
           and(
             eq(schema.friend.userId1, userId1),
             eq(schema.friend.userId2, userId2),
@@ -108,7 +108,7 @@ export class FriendRepository {
     const result = await this.db
       .delete(schema.friendRequest)
       .where(
-        and(
+        or(
           eq(schema.friendRequest.senderId, senderId),
           eq(schema.friendRequest.recipientId, recipientId),
         ),
@@ -119,7 +119,7 @@ export class FriendRepository {
   @handleDatabaseErrors
   async getFriendRequest(senderId: string, targetUserId: string) {
     return await this.db.query.friendRequest.findFirst({
-      where: and(
+      where: or(
         eq(schema.friendRequest.senderId, senderId),
         eq(schema.friendRequest.recipientId, targetUserId),
       ),

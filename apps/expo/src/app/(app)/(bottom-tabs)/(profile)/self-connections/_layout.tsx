@@ -37,7 +37,7 @@ const ConnectionsLayout = () => {
         }}
       />
       <TopTabs.Screen
-        name="follower-list"
+        name="followers-list"
         options={{
           title: "Test",
           tabBarLabel: "Followers",

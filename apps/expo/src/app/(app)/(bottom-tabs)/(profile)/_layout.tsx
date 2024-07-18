@@ -1,11 +1,11 @@
 import React from "react";
-import { Pressable, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
+import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
@@ -13,12 +13,11 @@ import { Stack } from "~/layouts";
 
 const SearchLayout = () => {
   const theme = useTheme();
-  const router = useRouter();
 
   return (
     <Stack
       screenOptions={{
-        headerLeft: (props) => <HeaderLeft {...props} />,
+        // headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
@@ -31,21 +30,6 @@ const SearchLayout = () => {
       />
       <Stack.Screen name="self-connections" />
 
-      <Stack.Screen
-        name="profile/[profile-id]"
-        options={{
-          header: () => null,
-          // headerRight: () => (
-          //   <View>
-          //     <Pressable onPress={() => console.log("THING CLICKED")}>
-          //       {({ pressed }) => (
-          //         <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
-          //       )}
-          //     </Pressable>
-          //   </View>
-          // ),
-        }}
-      />
       <Stack.Screen name="connections/[user-id]" />
     </Stack>
   );

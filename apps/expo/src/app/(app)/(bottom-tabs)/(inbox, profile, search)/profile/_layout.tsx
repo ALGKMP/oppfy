@@ -1,58 +1,43 @@
-import React from "react";
-import { Pressable, TouchableOpacity, View } from "react-native";
-import { useRouter } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
-import { Stack } from "~/layouts";
 
-const InboxLayout = () => {
+type HeaderProps = NativeStackHeaderProps;
+
+const ProfileLayout = () => {
   const theme = useTheme();
 
   return (
     <Stack
       screenOptions={{
-        // headerLeft: (props) => <HeaderLeft {...props} />,
-        header: (props) => <Header {...props} />,
-        contentStyle: { backgroundColor: theme.background.val },
+        // header: (props) => <Header {...props} />, // So this bitch makes it so the header doesn't look like shit rn
+        headerShown: false,
+        contentStyle: { backgroundColor: theme.background.val }, // this bitch sets the color for wtv the fuck idek
       }}
     >
       <Stack.Screen
-        name="index"
-        options={{
-          headerLeft: () => null,
-          title: "Inbox",
-        }}
+        name="[profile-id]"
+        options={
+          {
+            // headerShown: false,
+            // header: () => null,
+            // headerRight: () => (
+            //   <View>
+            //     <Pressable onPress={() => console.log("THING CLICKED")}>
+            //       {({ pressed }) => (
+            //         <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
+            //       )}
+            //     </Pressable>
+            //   </View>
+          }
+        }
       />
-
-      <Stack.Screen name="requests" />
-     
-      <Stack.Screen name="connections/[user-id]" />
     </Stack>
-  );
-};
-
-type HeaderLeftProps = HeaderBackButtonProps;
-
-type HeaderProps = NativeStackHeaderProps;
-
-const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
-  const router = useRouter();
-
-  return (
-    <TouchableOpacity
-      hitSlop={10}
-      onPress={() => {
-        canGoBack ? void router.back() : null;
-      }}
-    >
-      <ChevronLeft />
-    </TouchableOpacity>
   );
 };
 
@@ -89,4 +74,4 @@ const Header = ({ navigation, options }: HeaderProps) => (
   />
 );
 
-export default InboxLayout;
+export default ProfileLayout;

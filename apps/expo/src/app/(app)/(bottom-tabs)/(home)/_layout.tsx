@@ -92,6 +92,7 @@ const HomeScreen = () => {
               ) : (
                 <PostItem
                   post={item}
+                  isSelfPost={false}
                   isViewable={viewableItems.includes(item.postId)}
                 />
               )}

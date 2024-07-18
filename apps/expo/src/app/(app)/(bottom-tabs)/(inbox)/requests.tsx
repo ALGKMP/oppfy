@@ -5,7 +5,6 @@ import { Button, ListItemTitle, Spacer, YStack } from "tamagui";
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
-import { ListHeader } from "~/features/connections/components";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
@@ -284,8 +283,6 @@ const Requests = () => {
 
   const renderFollowRequests = () => (
     <CardContainer>
-      <ListHeader title="FOLLOW REQUESTS" />
-
       {followRequestItems.map((item, index) => (
         <VirtualizedListItem
           key={index}

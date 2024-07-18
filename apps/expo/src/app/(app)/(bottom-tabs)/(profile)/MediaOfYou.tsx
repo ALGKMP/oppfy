@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import React, { useCallback, useMemo, useState } from "react";
 import { Dimensions } from "react-native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -9,66 +11,98 @@ import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
 import { api } from "~/utils/api";
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface MediaOfYouProps {
-  profileId: string;
+  profileId?: string; // Optional: if not provided, it's the user's own profile
 }
 
 const MediaOfYou = (props: MediaOfYouProps) => {
   const { profileId: profileIdFromRoute } = props;
-  const profileId = parseInt(profileIdFromRoute);
+  const isSelfProfile = !profileIdFromRoute;
+  const profileId = isSelfProfile ? undefined : parseInt(profileIdFromRoute);
 
-  const [status, setStatus] = useState<"success" | "loading" | "error">(
-    "loading",
-  );
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
 
-  const {
-    data: profileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfileData,
-  } = api.profile.getOtherUserFullProfile.useQuery({
-    profileId: profileId,
-  });
+  // Profile data
+  const selfProfileQuery = api.profile.getFullProfileSelf.useQuery();
+  const otherProfileQuery = api.profile.getFullProfileOther.useQuery(
+    { profileId: profileId! },
+    { enabled: !isSelfProfile },
+  );
 
-  const {
-    data: recommendationsData,
-    isLoading: isLoadingRecommendationsData,
-    refetch: refetchRecommendationsData,
-  } = api.contacts.getRecommendationProfilesOther.useQuery({
-    profileId: profileId,
-  });
+  const profileData = isSelfProfile
+    ? selfProfileQuery.data
+    : otherProfileQuery.data;
+  const isLoadingProfileData = isSelfProfile
+    ? selfProfileQuery.isLoading
+    : otherProfileQuery.isLoading;
+  const refetchProfileData = isSelfProfile
+    ? selfProfileQuery.refetch
+    : otherProfileQuery.refetch;
 
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsOthersByProfileId.useInfiniteQuery(
-    { profileId, pageSize: 10 },
+  // Recommendations data
+  const selfRecommendationsQuery =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
+  const isLoadingRecommendationsData = selfRecommendationsQuery.isLoading;
+  const recommendationsData = selfRecommendationsQuery.data;
+  const refetchRecommendationsData = selfRecommendationsQuery.refetch;
+
+  // Friends data
+  const selfFriendsQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
+    { pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
+  const otherFriendsQuery =
+    api.friend.paginateFriendsOthersByProfileId.useInfiniteQuery(
+      { profileId: profileId!, pageSize: 10 },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        enabled: !isSelfProfile,
+      },
+    );
 
-  const {
-    data: postData,
-    isLoading: isLoadingPostData,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.post.paginatePostsOfUserOther.useInfiniteQuery(
-    {
-      profileId,
-      pageSize: 10,
-    },
+  const friendsData = isSelfProfile
+    ? selfFriendsQuery.data
+    : otherFriendsQuery.data;
+  const isLoadingFriendsData = isSelfProfile
+    ? selfFriendsQuery.isLoading
+    : otherFriendsQuery.isLoading;
+  const refetchFriendsData = isSelfProfile
+    ? selfFriendsQuery.refetch
+    : otherFriendsQuery.refetch;
+
+  // Posts data
+  const selfPostsQuery = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
+    { pageSize: 5 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+  );
+  const otherPostsQuery = api.post.paginatePostsOfUserOther.useInfiniteQuery(
+    { profileId: profileId!, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !isSelfProfile,
     },
   );
+
+  const postData = isSelfProfile ? selfPostsQuery.data : otherPostsQuery.data;
+  const isLoadingPostData = isSelfProfile
+    ? selfPostsQuery.isLoading
+    : otherPostsQuery.isLoading;
+  const isFetchingNextPage = isSelfProfile
+    ? selfPostsQuery.isFetchingNextPage
+    : otherPostsQuery.isFetchingNextPage;
+  const fetchNextPage = isSelfProfile
+    ? selfPostsQuery.fetchNextPage
+    : otherPostsQuery.fetchNextPage;
+  const hasNextPage = isSelfProfile
+    ? selfPostsQuery.hasNextPage
+    : otherPostsQuery.hasNextPage;
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
+      console.log("fetching next page")
       await fetchNextPage();
     }
   };
@@ -119,6 +153,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
             return (
               <>
                 <ProfileHeader
+                  isSelfProfile={isSelfProfile}
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecommendationsData={isLoadingRecommendationsData}
@@ -137,6 +172,10 @@ const MediaOfYou = (props: MediaOfYouProps) => {
           keyExtractor={(item) => {
             return item?.postId.toString() ?? "";
           }}
+          estimatedItemSize={screenHeight}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={viewableItems}
           renderItem={({ item }) => {
             if (item === undefined) {
               return null;
@@ -150,16 +189,13 @@ const MediaOfYou = (props: MediaOfYouProps) => {
                 ) : (
                   <PostItem
                     post={item}
+                    isSelfPost={isSelfProfile}
                     isViewable={viewableItems.includes(item.postId)}
                   />
                 )}
               </>
             );
           }}
-          estimatedItemSize={screenWidth}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
         />
       ) : (
         <FlashList
@@ -169,6 +205,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
             return (
               <>
                 <ProfileHeader
+                  isSelfProfile={isSelfProfile}
                   isLoadingProfileData={isLoadingProfileData}
                   isLoadingFriendsData={isLoadingFriendsData}
                   isLoadingRecommendationsData={isLoadingRecommendationsData}
@@ -198,7 +235,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
               </YStack>
             );
           }}
-          estimatedItemSize={screenWidth}
+          estimatedItemSize={screenHeight}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
           extraData={viewableItems}

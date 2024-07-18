@@ -1,6 +1,8 @@
 import * as neptune from "@aws-cdk/aws-neptune-alpha";
 import * as cdk from "aws-cdk-lib";
 import { RemovalPolicy } from "aws-cdk-lib";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -10,7 +12,6 @@ import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
-import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
@@ -27,15 +28,19 @@ function createBucket(scope: Construct, name: string) {
       {
         allowedHeaders: ["*"],
         allowedMethods: [
+          s3.HttpMethods.GET,
+          s3.HttpMethods.HEAD,
           s3.HttpMethods.PUT,
           s3.HttpMethods.POST,
           s3.HttpMethods.DELETE,
         ],
         allowedOrigins: ["*"],
         exposedHeaders: [],
-        maxAge: 600,
+        maxAge: 3000,
       },
     ],
+    publicReadAccess: false,
+    blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
   });
 }
 
@@ -245,6 +250,74 @@ export class AwsStack extends cdk.Stack {
 
     const postBucket = createBucket(this, "Post");
     const profileBucket = createBucket(this, "Profile");
+
+    // CloudFront distribution for post bucket
+    const postDistribution = new cloudfront.Distribution(
+      this,
+      "PostDistribution",
+      {
+        defaultBehavior: {
+          origin: new origins.S3Origin(postBucket),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        },
+      },
+    );
+
+    // CloudFront distribution for profile bucket
+    const profileDistribution = new cloudfront.Distribution(
+      this,
+      "ProfileDistribution",
+      {
+        defaultBehavior: {
+          origin: new origins.S3Origin(profileBucket),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        },
+      },
+    );
+
+    new cdk.CfnOutput(this, "PostDistributionUrl", {
+      value: `https://${postDistribution.distributionDomainName}`,
+    });
+
+    new cdk.CfnOutput(this, "ProfileDistributionUrl", {
+      value: `https://${profileDistribution.distributionDomainName}`,
+    });
+
+    // Add this after creating the CloudFront distributions
+    const cloudfrontOriginAccessIdentity = new cloudfront.OriginAccessIdentity(
+      this,
+      "CloudFrontOAI",
+    );
+
+    postBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:GetObject"],
+        resources: [postBucket.arnForObjects("*")],
+        principals: [
+          new iam.CanonicalUserPrincipal(
+            cloudfrontOriginAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
+          ),
+        ],
+      }),
+    );
+
+    profileBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ["s3:GetObject"],
+        resources: [profileBucket.arnForObjects("*")],
+        principals: [
+          new iam.CanonicalUserPrincipal(
+            cloudfrontOriginAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
+          ),
+        ],
+      }),
+    );
 
     const postLambda = createLambdaFunction(
       this,

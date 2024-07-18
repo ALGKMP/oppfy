@@ -133,7 +133,7 @@ export const profileRouter = createTRPCRouter({
     }),
 
   // TRPC Procedure for getting a full user profile
-  getOtherUserFullProfile: protectedProcedure
+  getFullProfileOther: protectedProcedure
     .input(trpcValidators.input.profile.getFullProfileOther)
     .output(trpcValidators.output.profile.fullProfileOther)
     .query(async ({ ctx, input }) => {

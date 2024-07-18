@@ -59,7 +59,7 @@ export class CommentRepository {
                 lt(schema.comment.createdAt, cursor.createdAt),
                 and(
                   eq(schema.comment.createdAt, cursor.createdAt),
-                  eq(schema.comment.id, cursor.commentId),
+                  lt(schema.comment.id, cursor.commentId),
                 ),
               )
             : undefined,
@@ -67,7 +67,7 @@ export class CommentRepository {
       )
       .orderBy(
         desc(schema.comment.createdAt), // Primary order by the creation date
-        asc(schema.comment.id),
+        desc(schema.comment.id),
       )
       .limit(pageSize + 1);
   }

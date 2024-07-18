@@ -1,0 +1,29 @@
+{
+  "name": "@oppfy/cloudfront",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudfront": "^3.614.0",
+    "@aws-sdk/cloudfront-signer": "^3.609.0",
+    "@oppfy/env": "workspace:*"
+  },
+  "devDependencies": {
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
+    "eslint": "^9.2.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.5"
+  },
+  "prettier": "@oppfy/prettier-config"
+}

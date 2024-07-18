@@ -27,7 +27,7 @@ import { TopTabs } from "~/layouts";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
-type ProfileData = RouterOutputs["profile"]["getOtherUserFullProfile"];
+type ProfileData = RouterOutputs["profile"]["getFullProfileOther"];
 
 interface ProfileDataWithProfileId extends ProfileData {
   profileId: number;
@@ -44,7 +44,7 @@ const ProfileLayout = () => {
     data: profileData,
     isLoading,
     refetch,
-  } = api.profile.getOtherUserFullProfile.useQuery({
+  } = api.profile.getFullProfileOther.useQuery({
     profileId: Number(profileId),
   });
 
@@ -130,15 +130,15 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getOtherUserFullProfile.cancel();
+      await utils.profile.getFullProfileOther.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getOtherUserFullProfile.getData({
+      const prevData = utils.profile.getFullProfileOther.getData({
         profileId: props.data.profileId,
       });
       if (prevData === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         {
           profileId: props.data.profileId,
         },
@@ -164,7 +164,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
       if (ctx === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         { profileId: props.data.profileId },
         ctx.prevData,
       );
@@ -173,7 +173,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Sync with server once mutation has settled
-      await utils.profile.getOtherUserFullProfile.invalidate();
+      await utils.profile.getFullProfileOther.invalidate();
     },
   });
 
@@ -182,15 +182,15 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getOtherUserFullProfile.cancel();
+      await utils.profile.getFullProfileOther.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getOtherUserFullProfile.getData({
+      const prevData = utils.profile.getFullProfileOther.getData({
         profileId: props.data.profileId,
       });
       if (prevData === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         {
           profileId: props.data.profileId,
         },
@@ -210,7 +210,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
       if (ctx === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         { profileId: props.data.profileId },
         ctx.prevData,
       );
@@ -219,7 +219,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Sync with server once mutation has settled
-      await utils.profile.getOtherUserFullProfile.invalidate();
+      await utils.profile.getFullProfileOther.invalidate();
     },
   });
 
@@ -228,15 +228,15 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getOtherUserFullProfile.cancel();
+      await utils.profile.getFullProfileOther.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getOtherUserFullProfile.getData({
+      const prevData = utils.profile.getFullProfileOther.getData({
         profileId: props.data.profileId,
       });
       if (prevData === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         {
           profileId: props.data.profileId,
         },
@@ -261,7 +261,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
       if (ctx === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         { profileId: props.data.profileId },
         ctx.prevData,
       );
@@ -270,7 +270,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Sync with server once mutation has settled
-      await utils.profile.getOtherUserFullProfile.invalidate();
+      await utils.profile.getFullProfileOther.invalidate();
     },
   });
 
@@ -279,15 +279,15 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getOtherUserFullProfile.cancel();
+      await utils.profile.getFullProfileOther.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getOtherUserFullProfile.getData({
+      const prevData = utils.profile.getFullProfileOther.getData({
         profileId: props.data.profileId,
       });
       if (prevData === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         {
           profileId: props.data.profileId,
         },
@@ -306,7 +306,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
       if (ctx === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         { profileId: props.data.profileId },
         ctx.prevData,
       );
@@ -315,7 +315,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Sync with server once mutation has settled
-      await utils.profile.getOtherUserFullProfile.invalidate();
+      await utils.profile.getFullProfileOther.invalidate();
     },
   });
 
@@ -324,15 +324,15 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getOtherUserFullProfile.cancel();
+      await utils.profile.getFullProfileOther.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getOtherUserFullProfile.getData({
+      const prevData = utils.profile.getFullProfileOther.getData({
         profileId: props.data.profileId,
       });
       if (prevData === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         {
           profileId: props.data.profileId,
         },
@@ -351,7 +351,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
       if (ctx === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         { profileId: props.data.profileId },
         ctx.prevData,
       );
@@ -360,7 +360,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Sync with server once mutation has settled
-      await utils.profile.getOtherUserFullProfile.invalidate();
+      await utils.profile.getFullProfileOther.invalidate();
     },
   });
 
@@ -369,15 +369,15 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.profile.getOtherUserFullProfile.cancel();
+      await utils.profile.getFullProfileOther.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.profile.getOtherUserFullProfile.getData({
+      const prevData = utils.profile.getFullProfileOther.getData({
         profileId: props.data.profileId,
       });
       if (prevData === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         {
           profileId: props.data.profileId,
         },
@@ -396,7 +396,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
       if (ctx === undefined) return;
 
-      utils.profile.getOtherUserFullProfile.setData(
+      utils.profile.getFullProfileOther.setData(
         { profileId: props.data.profileId },
         ctx.prevData,
       );
@@ -405,7 +405,7 @@ const Profile = (props: ProfileProps) => {
       if (props.loading) return;
 
       // Sync with server once mutation has settled
-      await utils.profile.getOtherUserFullProfile.invalidate();
+      await utils.profile.getFullProfileOther.invalidate();
     },
   });
 
@@ -649,7 +649,7 @@ const Profile = (props: ProfileProps) => {
                 params: {
                   userId: props.loading ? "" : props.data.userId,
                   username: props.loading ? "" : props.data.username,
-                  initialRouteName: "follower-list",
+                  initialRouteName: "followers-list",
                 },
               })
             }
