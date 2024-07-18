@@ -189,6 +189,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
                 ) : (
                   <PostItem
                     post={item}
+                    isSelfPost={isSelfProfile}
                     isViewable={viewableItems.includes(item.postId)}
                   />
                 )}

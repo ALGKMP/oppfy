@@ -36,11 +36,12 @@ type Post = z.infer<typeof sharedValidators.media.post>;
 
 interface PostItemProps {
   post: Post;
+  isSelfPost: boolean;
   isViewable: boolean;
 }
 
 const PostItem = (props: PostItemProps) => {
-  const { post, isViewable } = props;
+  const { post, isSelfPost, isViewable } = props;
   const [isMuted, setIsMuted] = useState(false);
   const [status, _setStatus] = useState<"success" | "loading" | "error">(
     "success",
@@ -54,9 +55,6 @@ const PostItem = (props: PostItemProps) => {
   const { getCurrentUserProfileId } = useSession();
 
   const router = useRouter();
-
-  const utils = api.useUtils();
-  const profile = utils.profile.getFullProfileSelf.getData();
 
   const {
     data: hasLiked,
@@ -304,7 +302,6 @@ const PostItem = (props: PostItemProps) => {
             onPress={() => {
               setPostActionsBottomSheetVisible(true);
               console.log("touched");
-              // setIsReportModalVisible(true)
             }}
           >
             <MoreHorizontal size={24} color="$gray12" />
@@ -486,6 +483,7 @@ const PostItem = (props: PostItemProps) => {
 
       <PostActionsBottomSheet
         postId={post.postId}
+        isSelfPost={isSelfPost}
         mediaType={post.mediaType}
         url={post.imageUrl}
         modalVisible={postActionsBottomSheetVisible}
