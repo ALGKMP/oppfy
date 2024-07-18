@@ -80,6 +80,7 @@ const CommentsBottomSheet = ({
   } = api.post.paginateComments.useInfiniteQuery(
     {
       postId,
+      pageSize: 10,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
