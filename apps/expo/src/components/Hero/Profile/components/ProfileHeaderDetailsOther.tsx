@@ -36,7 +36,7 @@ interface ProfileLoadedProps {
 }
 type ProfileProps = LoadingProps | ProfileLoadedProps;
 
-const ProfileDetailsOther = (props: ProfileProps) => {
+const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
 
@@ -577,7 +577,7 @@ const ProfileDetailsOther = (props: ProfileProps) => {
       </View>
 
       <XStack justifyContent="space-between" alignItems="center" width="100%">
-        <YStack alignItems="flex-start" gap="$2" >
+        <YStack alignItems="flex-start" gap="$2">
           <StatusRenderer
             data={!props.loading ? props.data.name : undefined}
             loadingComponent={<Skeleton width={80} height={20} />}
@@ -752,4 +752,4 @@ const FriendButton = ({
   );
 };
 
-export default ProfileDetailsOther;
+export default ProfileHeaderDetailsOther;

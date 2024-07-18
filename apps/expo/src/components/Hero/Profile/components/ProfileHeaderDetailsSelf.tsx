@@ -32,7 +32,7 @@ interface ProfileLoadedProps {
 }
 type ProfileProps = LoadingProps | ProfileLoadedProps;
 
-const ProfileDetailsSelf = (props: ProfileProps) => {
+const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
 
@@ -197,4 +197,4 @@ const Stat = (props: StatProps) => (
   </XStack>
 );
 
-export default ProfileDetailsSelf;
+export default ProfileHeaderDetailsSelf;

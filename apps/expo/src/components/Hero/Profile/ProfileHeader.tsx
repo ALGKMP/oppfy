@@ -1,11 +1,11 @@
 import { Text, View, YStack } from "tamagui";
-import { z } from "zod";
+import type { z } from "zod";
 
-import { trpcValidators } from "@oppfy/validators";
+import type { trpcValidators } from "@oppfy/validators";
 
 import FriendsCarousel from "../../Carousels/FriendsCarousel";
-import ProfileDetailsSelf from "./ProfileDetailsSelf";
-import ProfileDetailsOther from "./ProfileDetailsOther";
+import ProfileHeaderDetailsOther from "./components/ProfileHeaderDetailsOther";
+import ProfileHeaderDetailsSelf from "./components/ProfileHeaderDetailsSelf";
 
 interface ProfileHeaderProps {
   isSelfProfile: boolean;
@@ -50,7 +50,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
   ) {
     return (
       <YStack gap="$5">
-        <ProfileDetailsSelf loading />
+        <ProfileHeaderDetailsSelf loading />
         <FriendsCarousel loading />
       </YStack>
     );
@@ -59,9 +59,9 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     <YStack gap="$5" marginBottom="$5">
       <YStack gap="$5">
         {isSelfProfile ? (
-          <ProfileDetailsSelf loading={false} data={profileData} />
+          <ProfileHeaderDetailsSelf loading={false} data={profileData} />
         ) : isOtherProfile(profileData) ? (
-          <ProfileDetailsOther loading={false} data={profileData} />
+          <ProfileHeaderDetailsOther loading={false} data={profileData} />
         ) : (
           <View>
             <Text>Error because of some dumb shit</Text>
