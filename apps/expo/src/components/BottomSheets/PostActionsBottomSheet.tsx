@@ -22,6 +22,7 @@ interface PostActionBottomSheetProps {
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
   setReportActionSheetVisible: (value: boolean) => void;
+  setDeleteActionSheetVisible: (value: boolean) => void;
 }
 
 const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
@@ -32,6 +33,7 @@ const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
     modalVisible,
     setModalVisible,
     setReportActionSheetVisible,
+    setDeleteActionSheetVisible,
   } = props;
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useMemo(() => Dimensions.get("window"), []);
@@ -129,9 +131,12 @@ const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
           </TouchableOpacity>
           {isSelfPost && (
             <TouchableOpacity
-              onPress={async () => {
+              onPress={() => {
                 // TODO: Open a confirmation modal and optimistically delete the post
-                console.log("deleting post");
+                console.log("delete cliekd")
+                setTimeout(() => {
+                  setDeleteActionSheetVisible(true);
+                }, 300);
                 closeModal();
               }}
             >

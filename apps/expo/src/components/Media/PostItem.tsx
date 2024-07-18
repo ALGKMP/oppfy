@@ -29,6 +29,7 @@ import Mute, { useMuteAnimations } from "~/components/Icons/Mute";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
+import { ActionSheet } from "../Sheets";
 import ImagePost from "./ImagePost";
 import VideoPost from "./VideoPost";
 
@@ -51,6 +52,7 @@ const PostItem = (props: PostItemProps) => {
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { getCurrentUserProfileId } = useSession();
 
@@ -301,7 +303,6 @@ const PostItem = (props: PostItemProps) => {
           <TouchableOpacity
             onPress={() => {
               setPostActionsBottomSheetVisible(true);
-              console.log("touched");
             }}
           >
             <MoreHorizontal size={24} color="$gray12" />
@@ -489,6 +490,27 @@ const PostItem = (props: PostItemProps) => {
         modalVisible={postActionsBottomSheetVisible}
         setModalVisible={setPostActionsBottomSheetVisible}
         setReportActionSheetVisible={setIsReportModalVisible}
+        setDeleteActionSheetVisible={setIsDeleteModalVisible}
+      />
+
+      <ActionSheet
+        title="Delete Post"
+        subtitle="Are you sure you want to delete this post? This action cannot be undone!"
+        buttonOptions={
+          [
+            {
+              text: "Delete Post",
+              textProps: {
+                color: "$red9",
+              },
+              onPress: () => console.log("Deleting Post"),
+            },
+          ]
+        }
+        isVisible={isDeleteModalVisible}
+        onCancel={() => {
+          setIsDeleteModalVisible(false);
+        }}
       />
 
       <ShareBottomSheet
