@@ -172,7 +172,8 @@ export class PaginationService {
 
       let nextCursor: Cursor | undefined = undefined;
       if (items.length > pageSize) {
-        const nextItem = items.pop();
+        // const nextItem = items.pop();
+        const nextItem = items[pageSize];
         nextCursor = {
           createdAt: nextItem!.createdAt,
           profileId: nextItem!.profileId,

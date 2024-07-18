@@ -147,7 +147,8 @@ export class PostService {
 
     let nextCursor: CommentCursor | undefined = undefined;
     if (items.length > pageSize) {
-      const nextItem = items.pop();
+      const nextItem = items[pageSize];
+      // const nextItem = items.pop()
       if (!nextItem) {
         throw new DomainError(
           ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
@@ -159,8 +160,9 @@ export class PostService {
         createdAt: nextItem.createdAt,
         commentId: nextItem.commentId,
       };
-      console.log("server: next cursor:", nextCursor);
     }
+    console.log("Items", items);
+    console.log("Next Cursor", nextCursor);
     return {
       items,
       nextCursor,
