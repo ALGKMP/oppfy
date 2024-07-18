@@ -161,8 +161,6 @@ export class PostService {
         commentId: nextItem.commentId,
       };
     }
-    console.log("Items", items);
-    console.log("Next Cursor", nextCursor);
     return {
       items,
       nextCursor,

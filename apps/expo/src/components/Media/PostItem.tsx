@@ -270,7 +270,7 @@ const PostItem = (props: PostItemProps) => {
       justifyContent="center"
       overflow="hidden"
       borderRadius={20}
-      marginBottom="$5"
+      marginBottom="$2"
     >
       <XStack
         flex={1}
