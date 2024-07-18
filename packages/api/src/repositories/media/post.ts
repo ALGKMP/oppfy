@@ -138,7 +138,7 @@ export class PostRepository {
         schema.follower,
         eq(schema.follower.recipientId, schema.post.recipient),
       )
-      .where(inArray(schema.post.author, reccomendedUserIds))
+      .where(inArray(schema.post.recipient, reccomendedUserIds))
       .groupBy(schema.post.author, schema.follower.id)
       .as("latest_posts");
 
