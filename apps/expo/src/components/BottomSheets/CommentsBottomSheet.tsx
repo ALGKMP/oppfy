@@ -64,7 +64,7 @@ const CommentsBottomSheet = ({
 
   const {
     data: commentsData,
-    isLoading,
+    isLoading: commentsLoading,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
