@@ -251,6 +251,17 @@ export class AwsStack extends cdk.Stack {
     const postBucket = createBucket(this, "Post");
     const profileBucket = createBucket(this, "Profile");
 
+    // Create a public key
+    const publicKey = new cloudfront.PublicKey(this, "MyPublicKey", {
+      encodedKey: env.CLOUDFRONT_PUBLIC_KEY,
+      comment: "Key for signing CloudFront URLs",
+    });
+
+    // Create a key group
+    const cfKeyGroup = new cloudfront.KeyGroup(this, "MyKeyGroup", {
+      items: [publicKey],
+    });
+
     // CloudFront distribution for post bucket
     const postDistribution = new cloudfront.Distribution(
       this,
@@ -262,6 +273,7 @@ export class AwsStack extends cdk.Stack {
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          trustedKeyGroups: [cfKeyGroup],
         },
       },
     );
@@ -277,6 +289,7 @@ export class AwsStack extends cdk.Stack {
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          trustedKeyGroups: [cfKeyGroup],
         },
       },
     );
