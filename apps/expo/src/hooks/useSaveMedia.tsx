@@ -2,10 +2,7 @@ import { useState } from "react";
 import { Alert, Linking } from "react-native";
 import Marker, {
   Position,
-  TextBackgroundType,
-  ImageFormat
 } from "react-native-image-marker";
-import { Asset, useAssets } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
@@ -15,7 +12,6 @@ type MediaType = "image" | "video";
 
 const useSaveMedia = () => {
   const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [assets, error] = useAssets(require("assets/watermark.png"));
 
   const addWatermark = async (imageUri: string) => {
     try {
