@@ -75,7 +75,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
 
   // Posts data
   const selfPostsQuery = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
-    { pageSize: 5 },
+    { pageSize: 1 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
   const otherPostsQuery = api.post.paginatePostsOfUserOther.useInfiniteQuery(

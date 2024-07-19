@@ -93,7 +93,7 @@ export class PostService {
 
     let nextCursor: PostCursor | undefined = undefined;
     if (items.length > pageSize) {
-      const nextItem = items.pop();
+      const nextItem = items[pageSize];
       if (!nextItem) {
         throw new DomainError(
           ErrorCode.FAILED_TO_PAGINATE_POSTS,
@@ -138,7 +138,6 @@ export class PostService {
     let nextCursor: CommentCursor | undefined = undefined;
     if (items.length > pageSize) {
       const nextItem = items[pageSize];
-      // const nextItem = items.pop()
       if (!nextItem) {
         throw new DomainError(
           ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
@@ -166,6 +165,7 @@ export class PostService {
       const data = await this.postRepository.paginatePostsOfUser(
         userId,
         cursor,
+        pageSize,
       );
       const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;

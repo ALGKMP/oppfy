@@ -173,7 +173,6 @@ export class PaginationService {
 
       let nextCursor: Cursor | undefined = undefined;
       if (items.length > pageSize) {
-        // const nextItem = items.pop();
         const nextItem = items[pageSize];
         if (!nextItem) {
           // Can just return itemds without nextCursor
