@@ -355,7 +355,6 @@ const PostItem = (props: PostItemProps) => {
             <ImagePost imageUrl={post.imageUrl}>
               {hearts.map((heart) => (
                 <GradientHeart
-                  key={heart.id}
                   gradient={heart.gradient}
                   position={heart.position}
                 />
@@ -370,7 +369,6 @@ const PostItem = (props: PostItemProps) => {
             >
               {hearts.map((heart) => (
                 <GradientHeart
-                  key={heart.id}
                   gradient={heart.gradient}
                   position={heart.position}
                 />
@@ -378,7 +376,7 @@ const PostItem = (props: PostItemProps) => {
               {/* Mute animation */}
               <View flex={1} justifyContent="center" alignItems="center">
                 {muteIcons.map((mute) => (
-                  <Mute key={mute.id} muted={mute.muted} />
+                  <Mute muted={mute.muted} />
                 ))}
               </View>
             </VideoPost>

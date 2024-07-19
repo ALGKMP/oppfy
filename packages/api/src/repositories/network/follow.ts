@@ -18,7 +18,7 @@ export class FollowRepository {
   @handleDatabaseErrors
   async removeFollower(senderId: string, recipientId: string) {
     const result = await this.db.delete(schema.follower).where(
-      // Sender is removing the recipient from their followers
+      // Sender is removing the recipient
       and(
         eq(schema.follower.senderId, senderId),
         eq(schema.follower.recipientId, recipientId),

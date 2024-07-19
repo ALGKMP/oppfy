@@ -172,7 +172,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
           keyExtractor={(item) => {
             return item?.postId.toString() ?? "";
           }}
-          estimatedItemSize={screenHeight}
+          estimatedItemSize={300}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
           extraData={viewableItems}

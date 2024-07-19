@@ -141,7 +141,6 @@ export class ProfileService {
       this.cloudFrontService.getSignedUrlForProfilePicture(
         profile.profilePictureKey,
       );
-    console.log("From the Client", profilePictureUrl);
 
     if (!profilePictureUrl) {
       console.error(
