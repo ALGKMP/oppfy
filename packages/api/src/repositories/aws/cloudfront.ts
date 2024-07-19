@@ -2,8 +2,6 @@ import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 
 import { env } from "@oppfy/env";
 
-import { handleAwsErrors } from "../../errors";
-
 export class CloudFrontRepository {
   getSignedUrl({ url }: { url: string }) {
      return getSignedUrl({
