@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { Alert, Linking } from "react-native";
+import Marker, {
+  Position,
+  TextBackgroundType,
+  ImageFormat
+} from "react-native-image-marker";
+import { Asset, useAssets } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
@@ -9,6 +15,31 @@ type MediaType = "image" | "video";
 
 const useSaveMedia = () => {
   const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [assets, error] = useAssets(require("assets/watermark.png"));
+
+  const addWatermark = async (imageUri: string) => {
+    try {
+      const result = await Marker.markImage({
+        backgroundImage: {
+          src: imageUri,
+          scale: 1,
+        },
+        watermarkImages: [
+          {
+            src: require("assets/watermark.png"),
+            position: {
+              position: Position.bottomRight,
+            },
+          },
+        ],
+      });
+
+      return result;
+    } catch (error) {
+      console.error("Error adding watermark:", error);
+      return null;
+    }
+  };
 
   const openSettings = async () => {
     await Linking.openSettings();
@@ -93,16 +124,21 @@ const useSaveMedia = () => {
     const fileUri = `${FileSystem.cacheDirectory}${fileName}.${fileExtension}`;
 
     try {
-      const { uri, mimeType, headers, status } = await FileSystem.downloadAsync(
-        presignedUrl,
-        fileUri,
-      );
+      const { uri } = await FileSystem.downloadAsync(presignedUrl, fileUri);
       console.log("File downloaded to cache dir:", uri);
-      console.log("File MIME type:", mimeType);
-      console.log("File headers:", headers);
-      console.log("File status:", status);
 
-      await MediaLibrary.createAssetAsync(uri);
+      if (mediaType === "image") {
+        const watermarkedUri = await addWatermark(uri);
+        console.log("watermarkedUri", watermarkedUri);
+        if (watermarkedUri) {
+          await MediaLibrary.createAssetAsync(watermarkedUri);
+          await FileSystem.deleteAsync(watermarkedUri);
+        } else {
+          await MediaLibrary.createAssetAsync(uri);
+        }
+      } else {
+        await MediaLibrary.createAssetAsync(uri);
+      }
       await FileSystem.deleteAsync(uri);
       return uri;
     } catch (error) {
@@ -158,7 +194,7 @@ const useSaveMedia = () => {
     }
   };
 
-  return { saveState, saveToCameraRoll, cacheMedia, deleteCachedMedia};
+  return { saveState, saveToCameraRoll, cacheMedia, deleteCachedMedia };
 };
 
 export default useSaveMedia;
