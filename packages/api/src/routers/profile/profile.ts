@@ -125,9 +125,9 @@ export const profileRouter = createTRPCRouter({
               });
           }
         }
+        console.error(err)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "err.",
         });
       }
     }),

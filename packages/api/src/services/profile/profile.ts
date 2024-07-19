@@ -15,6 +15,7 @@ import {
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
+import { CloudFrontService } from "../aws/cloudfront";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
@@ -60,6 +61,7 @@ export class ProfileService {
   private friendService = new FriendService();
   private followService = new FollowService();
   private blockService = new BlockService();
+  private cloudFrontService = new CloudFrontService();
 
   async updateProfile(userId: string, newData: UpdateProfile): Promise<void> {
     const profile = await this._getUserProfile(userId);
@@ -134,11 +136,16 @@ export class ProfileService {
         "Failed to count friends for the user.",
       );
     }
+    
+    const profilePictureUrl = await this.cloudFrontService.getSignedUrlForProfilePicture(
+      profile.profilePictureKey,
+    );
+    console.log(profilePictureUrl);
 
-    const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
-      Bucket: env.S3_PROFILE_BUCKET,
-      Key: profile.profilePictureKey,
-    });
+    // const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
+    //   Bucket: env.S3_PROFILE_BUCKET,
+    //   Key: profile.profilePictureKey,
+    // });
     if (!profilePictureUrl) {
       console.error(
         `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
@@ -323,14 +330,6 @@ export class ProfileService {
   async _getUserProfile(userId: string) {
     const user = await this.profileRepository.getProfileByUserId(userId);
     if (!user) {
-      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "Profile not found for the provided user ID.",
-      );
-    }
-
-    if (!user.profile) {
       console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,

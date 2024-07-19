@@ -6,6 +6,7 @@ import {
   FollowRepository,
   FriendRepository,
 } from "../../repositories";
+import { CloudFrontService } from "../aws/cloudfront";
 import { S3Service } from "../aws/s3";
 
 // TODO: Move these types into a types file and put the paginated functions into their services.
@@ -26,6 +27,7 @@ export class PaginationService {
   private blockRepository = new BlockRepository();
 
   private awsService = new S3Service();
+  private cloudFrontService = new CloudFrontService();
 
   async paginateFollowersSelf(
     userId: string,
@@ -174,9 +176,17 @@ export class PaginationService {
       if (items.length > pageSize) {
         // const nextItem = items.pop();
         const nextItem = items[pageSize];
+        if (!nextItem) {
+          // Can just return itemds without nextCursor
+          throw new DomainError(
+            ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+            "Failed to get profile picture URLs",
+          );
+        }
+
         nextCursor = {
-          createdAt: nextItem!.createdAt,
-          profileId: nextItem!.profileId,
+          createdAt: nextItem.createdAt,
+          profileId: nextItem.profileId,
         };
       }
       return {
