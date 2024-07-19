@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Alert, Linking } from "react-native";
-import Marker, {
-  Position,
-} from "react-native-image-marker";
+import Marker, { Position } from "react-native-image-marker";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
@@ -91,6 +89,22 @@ const useSaveMedia = () => {
       console.error("Error downloading file:", error);
       return null;
     }
+  };
+
+  const cacheMediaWithWatermark = async ({
+    presignedUrl,
+    fileName,
+    mediaType,
+  }: {
+    presignedUrl: string;
+    fileName: string;
+    mediaType: MediaType;
+  }) => {
+    const cachedUri = await cacheMedia({ presignedUrl, fileName, mediaType });
+    if (!cachedUri) {
+      return null;
+    }
+    return await addWatermark(cachedUri);
   };
 
   const deleteCachedMedia = async (uri: string) => {
@@ -190,7 +204,14 @@ const useSaveMedia = () => {
     }
   };
 
-  return { saveState, saveToCameraRoll, cacheMedia, deleteCachedMedia };
+  return {
+    saveState,
+    addWatermark,
+    saveToCameraRoll,
+    cacheMedia,
+    cacheMediaWithWatermark,
+    deleteCachedMedia,
+  };
 };
 
 export default useSaveMedia;
