@@ -1,6 +1,5 @@
 import type { z } from "zod";
 
-import { env } from "@oppfy/env";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -9,7 +8,7 @@ import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
-import { S3Service } from "../aws/s3";
+import { CloudFrontService } from "../aws/cloudfront";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -41,58 +40,56 @@ type CommentProfile = z.infer<typeof sharedValidators.media.comment>;
 type Post = z.infer<typeof sharedValidators.media.post>;
 
 export class PostService {
-  private awsService = new S3Service();
   private likeRepository = new LikeRepository();
   private commentRepository = new CommentRepository();
   private postRepository = new PostRepository();
   private postStatsRepository = new PostStatsRepository();
   private userRepository = new UserRepository();
 
-  private async _processPaginatedPostData(
+  private cloudFrontService = new CloudFrontService();
+
+  private _processPaginatedPostData(
     data: Post[],
     pageSize = 20,
-  ): Promise<PaginatedResponse<Post>> {
-    const items = await Promise.all(
-      data.map(async (item) => {
-        try {
-          // Update author profile picture URL
-          const authorPresignedUrl =
-            await this.awsService.getObjectPresignedUrl({
-              Bucket: env.S3_PROFILE_BUCKET,
-              Key: item.authorProfilePicture,
-            });
-          item.authorProfilePicture = authorPresignedUrl;
-
-          // Update recipient profile picture URL
-          const recipientPresignedUrl =
-            await this.awsService.getObjectPresignedUrl({
-              Bucket: env.S3_PROFILE_BUCKET,
-              Key: item.recipientProfilePicture,
-            });
-          item.recipientProfilePicture = recipientPresignedUrl;
-
-          if (item.mediaType === "image") {
-            const imageUrl = await this.awsService.getObjectPresignedUrl({
-              Bucket: env.S3_POST_BUCKET,
-              Key: item.imageUrl,
-            });
-            item.imageUrl = imageUrl;
-          } else {
-            item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
-          }
-        } catch (error) {
-          console.error(
-            `Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `,
-            error,
+  ): PaginatedResponse<Post> {
+    const items = data.map((item) => {
+      try {
+        // Update author profile picture URL
+        const authorPresignedUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            item.authorProfilePicture,
           );
-          throw new DomainError(
-            ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-            "Failed to get profile picture URL.",
+
+        item.authorProfilePicture = authorPresignedUrl;
+
+        // Update recipient profile picture URL
+        const recipientPresignedUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            item.recipientProfilePicture,
           );
+
+        item.recipientProfilePicture = recipientPresignedUrl;
+
+        if (item.mediaType === "image") {
+          const imageUrl = this.cloudFrontService.getSignedUrlForPost(
+            item.imageUrl,
+          );
+          item.imageUrl = imageUrl;
+        } else {
+          item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
         }
-        return item;
-      }),
-    );
+      } catch (error) {
+        console.error(
+          `Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `,
+          error,
+        );
+        throw new DomainError(
+          ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+          "Failed to get profile picture URL.",
+        );
+      }
+      return item;
+    });
 
     let nextCursor: PostCursor | undefined = undefined;
     if (items.length > pageSize) {
@@ -114,36 +111,29 @@ export class PostService {
     };
   }
 
-  private async _updateProfilePictureUrls2(
+  private _updateProfilePictureUrls2(
     data: CommentProfile[],
     pageSize: number,
-  ): Promise<PaginatedResponse<CommentProfile>> {
-    const items = await Promise.all(
-      data.map(async (item) => {
-        try {
-          const presignedUrl = item.profilePictureUrl
-            ? await this.awsService.getObjectPresignedUrl({
-                Bucket: env.S3_PROFILE_BUCKET,
-                Key: item.profilePictureUrl,
-              })
-            : await this.awsService.getObjectPresignedUrl({
-                Bucket: env.S3_PROFILE_BUCKET,
-                Key: "profile-pictures/default.jpg",
-              });
-          item.profilePictureUrl = presignedUrl;
-        } catch (error) {
-          console.error(
-            `Error updating profile picture URL for commentId: ${item.commentId}, userId: ${item.userId}: `,
-            error,
+  ): PaginatedResponse<CommentProfile> {
+    const items = data.map((item) => {
+      try {
+        const profilePictureUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            item.profilePictureUrl,
           );
-          throw new DomainError(
-            ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-            "Failed to get comment profile picture URL.",
-          );
-        }
-        return item;
-      }),
-    );
+        item.profilePictureUrl = profilePictureUrl;
+      } catch (error) {
+        console.error(
+          `Error updating profile picture URL for commentId: ${item.commentId}, userId: ${item.userId}: `,
+          error,
+        );
+        throw new DomainError(
+          ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+          "Failed to get comment profile picture URL.",
+        );
+      }
+      return item;
+    });
 
     let nextCursor: CommentCursor | undefined = undefined;
     if (items.length > pageSize) {
@@ -177,7 +167,7 @@ export class PostService {
         userId,
         cursor,
       );
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -202,7 +192,7 @@ export class PostService {
         user.id,
         cursor,
       );
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for profile: ${profileId}: `, error);
@@ -224,7 +214,7 @@ export class PostService {
         cursor,
       );
       console.log(data);
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -245,7 +235,7 @@ export class PostService {
         userId,
         cursor,
       );
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -266,7 +256,7 @@ export class PostService {
         userId,
         cursor,
       );
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -291,7 +281,7 @@ export class PostService {
         user.id,
         cursor,
       );
-      const updatedData = await this._processPaginatedPostData(data, pageSize);
+      const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for profile: ${profileId}: `, error);
@@ -464,7 +454,7 @@ export class PostService {
         cursor,
         pageSize,
       );
-      const updatedData = await this._updateProfilePictureUrls2(data, pageSize);
+      const updatedData = this._updateProfilePictureUrls2(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(
