@@ -461,6 +461,7 @@ const PostItem = (props: PostItemProps) => {
 
       {commentsBottomSheetVisible && (
         <CommentsBottomSheet
+          isSelfPost={isSelfPost}
           postId={post.postId}
           modalVisible={commentsBottomSheetVisible}
           setModalVisible={setCommentsBottomSheetVisible}

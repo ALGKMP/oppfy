@@ -37,12 +37,14 @@ import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface CommentsModalProps {
   postId: number;
+  isSelfPost: boolean;
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
 }
 
 const CommentsBottomSheet = ({
   postId,
+  isSelfPost,
   modalVisible,
   setModalVisible,
 }: CommentsModalProps) => {
@@ -286,67 +288,85 @@ const CommentsBottomSheet = ({
   const timeAgo = new TimeAgo("en-US");
 
   const Comment = ({
-    item,
+    comment,
   }: {
-    item: z.infer<typeof sharedValidators.media.comment>;
+    comment: z.infer<typeof sharedValidators.media.comment>;
   }) => {
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
     return (
       <BlurContextMenuWrapper
-        options={[
-          {
-            label: (
-              <Text color="white" marginLeft="$2" fontSize="$5">
-                Delete
-              </Text>
-            ),
-            icon: <Trash2 size="$1.5" color="white" />,
-            onPress: () =>
-              void deleteComment.mutateAsync({
-                postId,
-                commentId: item.commentId,
-              }),
-          },
-          {
-            label: (
-              <Text color="red" marginLeft="$2" fontSize="$5">
-                Report
-              </Text>
-            ),
-            icon: <AlertCircle size="$1.5" color="red" />,
-            onPress: () => {
-              setTimeout(() => {
-                setIsReportModalVisible(true);
-              }, 275);
-            },
-          },
-        ]}
+        options={
+          isSelfPost || comment.userId === profile?.userId
+            ? [
+                {
+                  label: (
+                    <Text color="white" marginLeft="$2" fontSize="$5">
+                      Delete
+                    </Text>
+                  ),
+                  icon: <Trash2 size="$1.5" color="white" />,
+                  onPress: () =>
+                    void deleteComment.mutateAsync({
+                      postId,
+                      commentId: comment.commentId,
+                    }),
+                },
+                {
+                  label: (
+                    <Text color="red" marginLeft="$2" fontSize="$5">
+                      Report
+                    </Text>
+                  ),
+                  icon: <AlertCircle size="$1.5" color="red" />,
+                  onPress: () => {
+                    setTimeout(() => {
+                      setIsReportModalVisible(true);
+                    }, 275);
+                  },
+                },
+              ]
+            : [
+                {
+                  label: (
+                    <Text color="red" marginLeft="$2" fontSize="$5">
+                      Report
+                    </Text>
+                  ),
+                  icon: <AlertCircle size="$1.5" color="red" />,
+                  onPress: () => {
+                    setTimeout(() => {
+                      setIsReportModalVisible(true);
+                    }, 275);
+                  },
+                },
+              ]
+        }
       >
         <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
           <XStack gap="$3" alignItems="center">
             <Avatar circular size="$4">
               <Avatar.Image
                 accessibilityLabel="Cam"
-                src={item.profilePictureUrl}
+                src={comment.profilePictureUrl}
               />
               <Avatar.Fallback backgroundColor="$blue10" />
             </Avatar>
             <YStack gap="$2">
               <XStack gap="$2">
-                <Text fontWeight="bold">{item.username}</Text>
+                <Text fontWeight="bold">{comment.username}</Text>
                 <Text color="$gray10">
-                  {timeAgo.format(new Date(item.createdAt))}
+                  {timeAgo.format(new Date(comment.createdAt))}
                 </Text>
               </XStack>
-              <Text>{item.body}</Text>
+              <Text>{comment.body}</Text>
             </YStack>
           </XStack>
         </View>
         <ReportCommentActionSheet
           title="Report Comment"
           subtitle="Select reason"
-          commentId={item.commentId}
+          commentId={comment.commentId}
           isVisible={isReportModalVisible}
           onCancel={() => setIsReportModalVisible(false)}
         />
@@ -414,7 +434,7 @@ const CommentsBottomSheet = ({
             itemLayoutAnimation={LinearTransition}
             scrollEnabled={true}
             keyExtractor={(item) => item.commentId.toString()}
-            renderItem={({ item }) => <Comment item={item} />}
+            renderItem={({ item }) => <Comment comment={item} />}
             onEndReached={handleOnEndReached}
           />
         )
@@ -450,7 +470,7 @@ const CommentsBottomSheet = ({
         </Avatar>
         <View style={{ flex: 5 }}>
           <BottomSheetTextInput
-            placeholder={"add a comment..."}
+            placeholder="add a comment..."
             maxLength={100}
             value={inputValue}
             onChangeText={setInputValue}
