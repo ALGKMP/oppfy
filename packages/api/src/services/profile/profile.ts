@@ -141,12 +141,8 @@ export class ProfileService {
       this.cloudFrontService.getSignedUrlForProfilePicture(
         profile.profilePictureKey,
       );
-    console.log("From the Client", profilePictureUrl);  
+    console.log("From the Client", profilePictureUrl);
 
-    // const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
-    //   Bucket: env.S3_PROFILE_BUCKET,
-    //   Key: profile.profilePictureKey,
-    // });
     if (!profilePictureUrl) {
       console.error(
         `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
@@ -251,10 +247,11 @@ export class ProfileService {
       );
     }
 
-    const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
-      Bucket: env.S3_PROFILE_BUCKET,
-      Key: profile.profilePictureKey,
-    });
+    const profilePictureUrl =
+      this.cloudFrontService.getSignedUrlForProfilePicture(
+        profile.profilePictureKey,
+      );
+
     if (!profilePictureUrl) {
       console.error(
         `SERVICE ERROR: Failed to get profile picture for user ID "${otherUser.id}"`,
