@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { env } from "@oppfy/env";
 import { sqs } from "@oppfy/sqs";
-import { trpcValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -12,6 +11,7 @@ import {
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
+import { CloudFrontService } from "../aws/cloudfront";
 import { S3Service } from "../aws/s3";
 
 export class ContactService {
@@ -19,7 +19,9 @@ export class ContactService {
   private followRepository = new FollowRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
+
   private s3Service = new S3Service();
+  private cloudFrontService = new CloudFrontService();
 
   async syncContacts(userId: string, contacts: string[]) {
     const user = await this.userRepository.getUser(userId);
@@ -131,21 +133,17 @@ export class ContactService {
     const profiles =
       await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
     // Fetch presigned URLs for profile pictures in parallel
-    const profilesWithUrls = await Promise.allSettled(
-      profiles.map(async (profile) => {
-        const presignedUrl = await this.s3Service.getObjectPresignedUrl({
-          Bucket: env.S3_PROFILE_BUCKET,
-          Key: profile.profilePictureKey,
-        });
-        const { profilePictureKey, ...profileWithoutKey } = profile;
-        return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
-      }),
-    );
+    const profilesWithUrls = profiles.map((profile) => {
+      const presignedUrl = this.cloudFrontService.getSignedUrlForProfilePicture(
+        profile.profilePictureKey,
+      );
+
+      const { profilePictureKey, ...profileWithoutKey } = profile;
+      return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
+    });
 
     // Filter out any rejected promises and return the successful ones
-    return profilesWithUrls
-      .filter((result) => result.status === "fulfilled")
-      .map((result) => result.value);
+    return profilesWithUrls;
   }
 
   async getRecommendationProfilesOtherByProfileId(profileId: number) {
@@ -173,20 +171,15 @@ export class ContactService {
     const profiles =
       await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
     // Fetch presigned URLs for profile pictures in parallel
-    const profilesWithUrls = await Promise.allSettled(
-      profiles.map(async (profile) => {
-        const presignedUrl = await this.s3Service.getObjectPresignedUrl({
-          Bucket: env.S3_PROFILE_BUCKET,
-          Key: profile.profilePictureKey,
-        });
-        const { profilePictureKey, ...profileWithoutKey } = profile;
-        return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
-      }),
-    );
+    const profilesWithUrls = profiles.map((profile) => {
+      const presignedUrl = this.cloudFrontService.getSignedUrlForProfilePicture(
+        profile.profilePictureKey,
+      );
+      const { profilePictureKey, ...profileWithoutKey } = profile;
+      return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
+    });
 
     // Filter out any rejected promises and return the successful ones
-    return profilesWithUrls
-      .filter((result) => result.status === "fulfilled")
-      .map((result) => result.value);
+    return profilesWithUrls;
   }
 }
