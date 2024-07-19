@@ -32,6 +32,10 @@ declare global {
       CONTACT_REC_LAMBDA_URL: string;
 
       EXPO_PUBLIC_API_URL: string;
+
+      CLOUDFRONT_PUBLIC_KEY: string;
+
+      CLOUDFRONT_PRIVATE_KEY: string;
     }
   }
 }
