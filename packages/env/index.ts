@@ -34,8 +34,9 @@ declare global {
       EXPO_PUBLIC_API_URL: string;
 
       CLOUDFRONT_PUBLIC_KEY: string;
-
       CLOUDFRONT_PRIVATE_KEY: string;
+      CLOUDFRONT_POST_DISTRIBUTION_DOMAIN: string;
+      CLOUDFRONT_PROFILE_DISTRIBUTION_DOMAIN: string;
     }
   }
 }
