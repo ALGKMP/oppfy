@@ -9,6 +9,7 @@ import type {
   SnsNotificationData,
   StoreNotificationData,
 } from "../../repositories/user/notifications";
+import { CloudFrontService } from "../aws/cloudfront";
 import { S3Service } from "../aws/s3";
 import { UserService } from "./user";
 
@@ -17,6 +18,7 @@ export class NotificationsService {
 
   private userService = new UserService();
   private s3Service = new S3Service();
+  private cloudFrontService = new CloudFrontService();
 
   async getNotificationSettings(userId: string) {
     const user = await this.userService.getUser(userId);
@@ -44,20 +46,16 @@ export class NotificationsService {
       pageSize,
     );
 
-    const itemsWithProfilePictureUrls = await Promise.all(
-      items.map(async (notification) => {
+    const itemsWithProfilePictureUrls = 
+      items.map( (notification) => {
         const { profilePictureKey, eventType, ...rest } = notification;
 
-        const profilePictureUrl = await this.s3Service.getObjectPresignedUrl({
-          Bucket: env.S3_PROFILE_BUCKET,
-          Key: profilePictureKey,
-        });
+        const profilePictureUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            profilePictureKey,
+          );
 
         const { username } = rest;
-
-        if (username === null) {
-          throw new DomainError(ErrorCode.USERNAME_NOT_FOUND);
-        }
 
         const message = (() => {
           switch (eventType) {
@@ -83,8 +81,7 @@ export class NotificationsService {
           message,
           profilePictureUrl,
         };
-      }),
-    );
+      })
 
     const nextCursor = items[items.length - 1];
 
