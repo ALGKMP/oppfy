@@ -49,6 +49,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
   },
   plugins: [
+    // Custom plugins
+    [
+      "./snapchat-plugin",
+      { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" },
+    ],
+
     "expo-font",
     "expo-video",
     "expo-router",
@@ -120,6 +126,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         assets: ["./assets"],
       },
     ],
-    ["./snapchat-plugin", { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" }],
+    ["react-native-image-marker"],
   ],
 });
