@@ -151,7 +151,7 @@ export class PaginationService {
     return this._processPaginatedData(data, pageSize);
   }
 
-  private async _processPaginatedData<
+  private _processPaginatedData<
     T extends { profilePictureUrl: string; profileId: number; createdAt: Date },
   >(data: T[], pageSize: number) {
     try {
@@ -161,16 +161,15 @@ export class PaginationService {
           nextCursor: undefined,
         };
       }
-      const items = await Promise.all(
-        data.map(async (item) => {
-          const presignedUrl = await this.awsService.getObjectPresignedUrl({
-            Bucket: env.S3_PROFILE_BUCKET,
-            Key: item.profilePictureUrl,
-          });
-          item.profilePictureUrl = presignedUrl;
-          return item;
-        }),
-      );
+      const items = data.map((item) => {
+        const profilePicturePresignedUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            item.profilePictureUrl,
+          );
+
+        item.profilePictureUrl = profilePicturePresignedUrl;
+        return item;
+      });
 
       let nextCursor: Cursor | undefined = undefined;
       if (items.length > pageSize) {
