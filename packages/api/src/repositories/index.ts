@@ -11,3 +11,4 @@ export { PostRepository } from "./media/post";
 export { MuxRepository } from "./mux/mux";
 export { ContactsRepository } from "./user/contacts";
 export { ReportRepository } from "./report/report";
+export { CloudFrontRepository } from "./aws/cloudfront";

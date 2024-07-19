@@ -1,19 +1,18 @@
-import { getSignedUrl } from "@aws-sdk/cloudfront-signer"; // ESM
+import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 
-const cloudfrontDistributionDomain = "https://d111111abcdef8.cloudfront.net";
-const s3ObjectKey = "private-content/private.jpeg";
-const url = `${cloudfrontDistributionDomain}/${s3ObjectKey}`;
-const privateKey = "CONTENTS-OF-PRIVATE-KEY";
-const keyPairId = "PUBLIC-KEY-ID-OF-CLOUDFRONT-KEY-PAIR";
-const dateLessThan = "2022-01-01"; // any Date constructor compatible
+import { env } from "@oppfy/env";
+
+import { handleAwsErrors } from "../../errors";
 
 export class CloudFrontRepository {
-  getSignedUrl() {
-    return getSignedUrl({
+  @handleAwsErrors
+  async getSignedUrl({ url }: { url: string }) {
+    const signedUrl = await getSignedUrl({
       url,
-      keyPairId,
-      dateLessThan,
-      privateKey,
+      keyPairId: env.CLOUDFRONT_PUBLIC_KEY_ID,
+      privateKey: env.CLOUDFRONT_PRIVATE_KEY,
+      dateLessThan: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour btw
     });
+    return signedUrl;
   }
 }
