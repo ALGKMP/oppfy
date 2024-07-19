@@ -76,22 +76,6 @@ const HomeScreen = () => {
 
   return (
     <View flex={1} width="100%" height="100%">
-      {isLoadingRecommendationsData ? (
-        <RecommendationsCarousel loading />
-      ) : (
-        recommendationsData && (
-          <RecommendationsCarousel
-            loading={isLoadingRecommendationsData}
-            reccomendationsData={recommendationsData}
-          ></RecommendationsCarousel>
-        )
-      )}
-
-      {/*       <RecommendationsCarousel
-        loading={isLoadingRecommendationsData}
-        reccomendationsData={recommendationsData}
-      ></RecommendationsCarousel>
- */}
       <FlashList
         nestedScrollEnabled={true}
         data={posts}
@@ -103,7 +87,7 @@ const HomeScreen = () => {
         keyExtractor={(item) => {
           return "home_" + item?.postId.toString() ?? "home_undefined";
         }}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           if (item === undefined) {
             return null;
           }
@@ -113,6 +97,24 @@ const HomeScreen = () => {
                 <>
                   <Text>Loading...</Text>
                 </>
+              ) : index == 0 ? (
+                <YStack>
+                  {isLoadingRecommendationsData ? (
+                    <RecommendationsCarousel loading />
+                  ) : (
+                    recommendationsData && (
+                      <RecommendationsCarousel
+                        loading={isLoadingRecommendationsData}
+                        reccomendationsData={recommendationsData}
+                      ></RecommendationsCarousel>
+                    )
+                  )}
+                  <PostItem
+                    post={item}
+                    isSelfPost={false}
+                    isViewable={viewableItems.includes(item.postId)}
+                  />
+                </YStack>
               ) : (
                 <PostItem
                   post={item}

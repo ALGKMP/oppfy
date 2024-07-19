@@ -102,7 +102,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   );
 
   const renderSuggestions = (data: RecoemndationItems) => (
-    <CardContainer>
+    <CardContainer backgroundColor={"$background"}>
       <YStack gap="$2">
         <Text fontWeight="600">Find Friends</Text>
         <FlashList
