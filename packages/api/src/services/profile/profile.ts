@@ -12,10 +12,10 @@ import {
   SearchRepository,
   UserRepository,
 } from "../../repositories";
+import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
-import { CloudFrontService } from "../aws/cloudfront";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
@@ -136,11 +136,12 @@ export class ProfileService {
         "Failed to count friends for the user.",
       );
     }
-    
-    const profilePictureUrl = await this.cloudFrontService.getSignedUrlForProfilePicture(
-      profile.profilePictureKey,
-    );
-    console.log(profilePictureUrl);
+
+    const profilePictureUrl =
+      this.cloudFrontService.getSignedUrlForProfilePicture(
+        profile.profilePictureKey,
+      );
+    console.log("From the Client", profilePictureUrl);  
 
     // const profilePictureUrl = await this.s3Repository.getObjectPresignedUrl({
     //   Bucket: env.S3_PROFILE_BUCKET,
