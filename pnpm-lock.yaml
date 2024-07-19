@@ -247,6 +247,9 @@ importers:
       react-native-gesture-handler:
         specifier: 2.16.2
         version: 2.16.2(react-native@0.74.2)(react@18.2.0)
+      react-native-image-marker:
+        specifier: ^1.2.6
+        version: 1.2.6(react-native@0.74.2)(react@18.2.0)
       react-native-mmkv:
         specifier: ^2.12.2
         version: 2.12.2(react-native@0.74.2)(react@18.2.0)
@@ -19114,6 +19117,11 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
+  /postinstall-postinstall@2.1.0:
+    resolution: {integrity: sha512-7hQX6ZlZXIoRiWNrbMQaLzUUfH+sSx39u8EJ9HYuDc1kLo9IXKWjM5RSquZN1ad5GnH8CGFM78fsAAQi3OKEEQ==}
+    requiresBuild: true
+    dev: false
+
   /prebuild-install@7.1.2:
     resolution: {integrity: sha512-UnNke3IQb6sgarcZIDU3gbMeTp/9SSU1DAIkil7PrqG1vZlBtY5msYccSKSHDqa3hNg436IXK+SNImReuA1wEQ==}
     engines: {node: '>=10'}
@@ -19713,6 +19721,19 @@ packages:
       react: 18.2.0
       react-fast-compare: 3.2.2
       shallowequal: 1.1.0
+    dev: false
+
+  /react-native-image-marker@1.2.6(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-57PLHF0D2OvwwyHdfC89+7QvTaRl6IHKDm+HIkwDgq3PPPNBewsHfuE3lnqLCuR3Zoi80DyukBVKhoRqomaLPw==}
+    engines: {node: '>= 16.0.0'}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+    dependencies:
+      patch-package: 8.0.0
+      postinstall-postinstall: 2.1.0
+      react: 18.2.0
+      react-native: 0.74.2(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
     dev: false
 
   /react-native-mmkv@2.12.2(react-native@0.74.2)(react@18.2.0):
