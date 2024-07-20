@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Dimensions } from "react-native";
 import { FlashList, ViewToken } from "@shopify/flash-list";
 import { Camera } from "@tamagui/lucide-icons";
-import { SizableText, Text, useTheme, View, YStack } from "tamagui";
+import { Separator, SizableText, Text, useTheme, View, YStack } from "tamagui";
 
 import RecommendationsCarousel from "~/components/Carousels/RecommendationsCarousel";
 import { api } from "~/utils/api";
