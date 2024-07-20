@@ -49,17 +49,25 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     sheetRef.current?.expand();
   }, [sheetRef]);
 
-  const shareImage = async () => {
+  const shareImage = async ({ uri }: { uri: string }) => {
     setIsSharing(true);
     try {
-      const fileUri = `${FileSystem.cacheDirectory}shared_image.jpg`;
-      await FileSystem.downloadAsync(imageUrl, fileUri);
+      const processesedUri = await cacheMediaWithWatermark({
+        presignedUrl: uri,
+        fileName: "shared_image",
+        mediaType: "image",
+      });
+
+      if (!processesedUri) {
+        throw new Error("Failed to cache image file");
+      }
 
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri);
+        await Sharing.shareAsync(processesedUri, {dialogTitle: "Share to..."});
       } else {
         Alert.alert("Sharing is not available on your device");
       }
+      await deleteCachedMedia(processesedUri);
     } catch (error) {
       console.error("Error sharing image:", error);
       Alert.alert("An error occurred while sharing the image");
@@ -82,9 +90,10 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
         content: {
           uri: `file://${processesedUri}`,
         },
-        // attachmentUrl: `https://www.oppfy.app/post/`,
+        attachmentUrl: `https://www.oppfy.app/post/`,
       };
-      await CreativeKit.shareToCameraPreview(metadata);
+      await CreativeKit.sharePhoto(metadata);
+      await deleteCachedMedia(processesedUri);
     } catch (error) {
       console.error("Error sharing image to Snapchat:", error);
       Alert.alert("An error occurred while sharing the image to Snapchat");
@@ -180,7 +189,7 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     {
       name: "Share to...",
       icon: Upload,
-      onPress: () => shareImage(),
+      onPress: () => shareImage({ uri: imageUrl }),
     },
     {
       name: "Copy link",
@@ -210,9 +219,9 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
         if (props.mediaType === "video") {
           await shareVideoUrlToSnapchat();
         } else {
-          // await shareFullImageToSnapchat({ uri: imageUrl });
+          await shareFullImageToSnapchat({ uri: imageUrl });
           // await shareImageAsStickerToSnapchat({ uri: imageUrl });
-          await _sharePostUrlToSnapChat({ uri: imageUrl, postId });
+          // await _sharePostUrlToSnapChat({ uri: imageUrl, postId });
         }
       },
     },
