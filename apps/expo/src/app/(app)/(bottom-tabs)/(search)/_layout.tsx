@@ -17,7 +17,7 @@ const SearchLayout = () => {
   return (
     <Stack
       screenOptions={{
-        headerLeft: (props) => <HeaderLeft {...props} />,
+        // headerLeft: (props) => <HeaderLeft {...props} />,
         header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
@@ -30,7 +30,6 @@ const SearchLayout = () => {
         }}
       />
 
-     
       <Stack.Screen name="connections/[user-id]" />
     </Stack>
   );

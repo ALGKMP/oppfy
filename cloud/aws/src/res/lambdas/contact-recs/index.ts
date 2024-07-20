@@ -91,7 +91,7 @@ export const handler = async (
 
     console.log("Tier 2", tier2);
 
-    const tier3 = await g
+/*     const tier3 = await g
       .V(userId)
       .out("contact")
       .aggregate("contacts")
@@ -107,7 +107,7 @@ export const handler = async (
       .id()
       .toList();
 
-    console.log("Tier 3", tier3);
+    console.log("Tier 3", tier3); */
 
     /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
     const tier4 = await g
@@ -125,7 +125,7 @@ export const handler = async (
     const recommendedIds = {
       tier1,
       tier2,
-      tier3,
+      tier3 : [],
       // tier4
     };
 
