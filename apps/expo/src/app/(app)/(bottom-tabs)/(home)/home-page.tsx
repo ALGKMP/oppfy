@@ -109,6 +109,7 @@ const HomeScreen = () => {
                       ></RecommendationsCarousel>
                     )
                   )}
+                  <Separator />
                   <PostItem
                     post={item}
                     isSelfPost={false}
