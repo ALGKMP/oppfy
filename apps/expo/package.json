@@ -9,6 +9,7 @@
     "dev:ios": "pnpm with-env expo start --ios",
     "dev:android": "pnpm with-env expo start --android",
     "ios": "pnpm with-env expo run:ios",
+    "build:ios": "pnpm with-env expo build:ios",
     "android": "pnpm with-env expo run:android",
     "prebuild": "expo prebuild",
     "prebuild:clean": "expo prebuild --clean",
