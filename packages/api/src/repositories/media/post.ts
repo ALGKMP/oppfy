@@ -124,7 +124,10 @@ export class PostRepository {
         return [...res.tier1, ...res.tier2, ...res.tier3];
       });
 
-    // if TODO: if recs is empty just return top posts
+    // TODO: if recs is empty just return top posts
+    if (reccomendedUserIds.length === 0) {
+      return [];
+    }
 
     // get one post from each rec id
     const latestPosts = this.db
