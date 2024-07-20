@@ -61,7 +61,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
     });
   };
 
-  const handleShowMoreFriends = () => {
+/*   const handleShowMoreFriends = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/self-connections/friend-list");
   };
@@ -86,10 +86,10 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
         throttledHandleAction();
       }
     },
-    [/* showMore,  */ throttledHandleAction],
+    [showMore,  throttledHandleAction],
   );
 
-  useEffect(() => throttledHandleAction.cancel(), [throttledHandleAction]);
+  useEffect(() => throttledHandleAction.cancel(), [throttledHandleAction]); */
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
@@ -104,13 +104,12 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   const renderSuggestions = (data: RecoemndationItems) => (
     <CardContainer backgroundColor={"$background"}>
       <YStack gap="$2">
-        <Text fontWeight="600">Find Friends</Text>
         <FlashList
           data={data}
           horizontal
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
-          onScroll={handleScroll}
+          // onScroll={handleScroll}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => handleProfileClicked(item.profileId)}

@@ -18,7 +18,7 @@ const InboxLayout = () => {
     <Stack
       screenOptions={{
         // headerLeft: (props) => <HeaderLeft {...props} />,
-        header: (props) => <Header {...props} />,
+        // header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
@@ -31,7 +31,7 @@ const InboxLayout = () => {
       />
 
       <Stack.Screen name="requests" />
-     
+
       <Stack.Screen name="connections/[user-id]" />
     </Stack>
   );
