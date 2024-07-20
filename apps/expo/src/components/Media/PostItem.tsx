@@ -353,9 +353,9 @@ const PostItem = (props: PostItemProps) => {
         >
           {post.mediaType === "image" ? (
             <ImagePost imageUrl={post.imageUrl}>
-              {hearts.map((heart) => (
+              {hearts.map((heart, index) => (
                 <GradientHeart
-                  key={heart.id}
+                  key={heart.id} // This key is not tied to the item prop in any way, so it does not hinder peformance (w due for a win)
                   gradient={heart.gradient}
                   position={heart.position}
                 />
@@ -368,17 +368,20 @@ const PostItem = (props: PostItemProps) => {
               isMuted={isMuted}
               setIsMuted={setIsMuted}
             >
-              {hearts.map((heart) => (
+              {hearts.map((heart, index) => (
                 <GradientHeart
-                  key={heart.id}
+                  key={heart.id} // This key is not tied to the item prop in any way, so it does not hinder peformance (w due for a win)
                   gradient={heart.gradient}
                   position={heart.position}
                 />
               ))}
               {/* Mute animation */}
               <View flex={1} justifyContent="center" alignItems="center">
-                {muteIcons.map((mute) => (
-                  <Mute key={mute.id} muted={mute.muted} />
+                {muteIcons.map((mute, index) => (
+                  <Mute
+                    key={mute.id} // This key is not tied to the item prop in any way, so it does not hinder peformance (w due for a win)
+                    muted={mute.muted}
+                  />
                 ))}
               </View>
             </VideoPost>
@@ -468,54 +471,62 @@ const PostItem = (props: PostItemProps) => {
         />
       )}
 
-      <PostActionsBottomSheet
-        postId={post.postId}
-        isSelfPost={isSelfPost}
-        mediaType={post.mediaType}
-        url={post.imageUrl}
-        modalVisible={postActionsBottomSheetVisible}
-        setModalVisible={setPostActionsBottomSheetVisible}
-        setReportActionSheetVisible={setIsReportModalVisible}
-        setDeleteActionSheetVisible={setIsDeleteModalVisible}
-      />
+      {postActionsBottomSheetVisible && (
+        <PostActionsBottomSheet
+          postId={post.postId}
+          isSelfPost={isSelfPost}
+          mediaType={post.mediaType}
+          url={post.imageUrl}
+          modalVisible={postActionsBottomSheetVisible}
+          setModalVisible={setPostActionsBottomSheetVisible}
+          setReportActionSheetVisible={setIsReportModalVisible}
+          setDeleteActionSheetVisible={setIsDeleteModalVisible}
+        />
+      )}
 
-      <ActionSheet
-        title="Delete Post"
-        subtitle="Are you sure you want to delete this post? This action cannot be undone!"
-        buttonOptions={[
-          {
-            text: "Delete Post",
-            textProps: {
-              color: "$red9",
+      {postActionsBottomSheetVisible && (
+        <ActionSheet
+          title="Delete Post"
+          subtitle="Are you sure you want to delete this post? This action cannot be undone!"
+          buttonOptions={[
+            {
+              text: "Delete Post",
+              textProps: {
+                color: "$red9",
+              },
+              onPress: () => {
+                void deletePost.mutateAsync({ postId: post.postId });
+              },
             },
-            onPress: () => {
-              void deletePost.mutateAsync({ postId: post.postId });
-            },
-          },
-        ]}
-        isVisible={isDeleteModalVisible}
-        onCancel={() => {
-          setIsDeleteModalVisible(false);
-        }}
-      />
+          ]}
+          isVisible={isDeleteModalVisible}
+          onCancel={() => {
+            setIsDeleteModalVisible(false);
+          }}
+        />
+      )}
 
-      <ShareBottomSheet
-        postId={post.postId}
-        imageUrl={post.imageUrl}
-        mediaType={post.mediaType}
-        modalVisible={isShareModalVisible}
-        setModalVisible={setIsShareModalVisible}
-      />
+      {isShareModalVisible && (
+        <ShareBottomSheet
+          postId={post.postId}
+          imageUrl={post.imageUrl}
+          mediaType={post.mediaType}
+          modalVisible={isShareModalVisible}
+          setModalVisible={setIsShareModalVisible}
+        />
+      )}
 
-      <ReportPostActionSheet
-        title="Report Post"
-        subtitle="Select reason"
-        postId={post.postId}
-        isVisible={isReportModalVisible}
-        onCancel={() => {
-          setIsReportModalVisible(false);
-        }}
-      />
+      {isReportModalVisible && (
+        <ReportPostActionSheet
+          title="Report Post"
+          subtitle="Select reason"
+          postId={post.postId}
+          isVisible={isReportModalVisible}
+          onCancel={() => {
+            setIsReportModalVisible(false);
+          }}
+        />
+      )}
     </View>
   );
 };

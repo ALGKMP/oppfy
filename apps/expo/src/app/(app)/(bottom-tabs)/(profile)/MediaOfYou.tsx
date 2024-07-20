@@ -75,7 +75,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
 
   // Posts data
   const selfPostsQuery = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
-    { pageSize: 1 },
+    { pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
   const otherPostsQuery = api.post.paginatePostsOfUserOther.useInfiniteQuery(
@@ -102,7 +102,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
-      console.log("fetching next page")
+      console.log("fetching next page");
       await fetchNextPage();
     }
   };
@@ -145,102 +145,70 @@ const MediaOfYou = (props: MediaOfYouProps) => {
 
   return (
     <View flex={1} width="100%" height="100%">
-      {posts?.length ? (
-        <FlashList
-          nestedScrollEnabled={true}
-          data={posts}
-          ListHeaderComponent={() => {
-            return (
-              <>
-                <ProfileHeader
-                  isSelfProfile={isSelfProfile}
-                  isLoadingProfileData={isLoadingProfileData}
-                  isLoadingFriendsData={isLoadingFriendsData}
-                  isLoadingRecommendationsData={isLoadingRecommendationsData}
-                  profileData={profileData}
-                  friendsData={friendItems}
-                  recommendationsData={recommendationsData}
-                />
-              </>
-            );
-          }}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          onRefresh={onRefresh}
-          numColumns={1}
-          onEndReached={handleOnEndReached}
-          keyExtractor={(item) => {
-            return item?.postId.toString() ?? "";
-          }}
-          estimatedItemSize={300}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
-          renderItem={({ item }) => {
-            if (item === undefined) {
-              return null;
-            }
-            return (
-              <>
-                {isLoadingPostData ? (
+      <FlashList
+        nestedScrollEnabled={true}
+        data={posts}
+        refreshing={refreshing}
+        showsVerticalScrollIndicator={false}
+        onRefresh={onRefresh}
+        numColumns={1}
+        onEndReached={handleOnEndReached}
+        estimatedItemSize={700}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        extraData={viewableItems}
+        keyExtractor={(item) => {
+          return item?.postId.toString() ?? "";
+        }}
+        ListHeaderComponent={() => {
+          return (
+            <>
+              <ProfileHeader
+                isSelfProfile={isSelfProfile}
+                isLoadingProfileData={isLoadingProfileData}
+                isLoadingFriendsData={isLoadingFriendsData}
+                isLoadingRecommendationsData={isLoadingRecommendationsData}
+                profileData={profileData}
+                friendsData={friendItems}
+                recommendationsData={recommendationsData}
+              />
+            </>
+          );
+        }}
+        renderItem={({ item }) => {
+          if (item === undefined) {
+            return null;
+          }
+          return (
+            <>
+              {/* {isLoadingPostData ? (
                   <>
                     <Text>Loading...</Text>
                   </>
-                ) : (
-                  <PostItem
-                    post={item}
-                    isSelfPost={isSelfProfile}
-                    isViewable={viewableItems.includes(item.postId)}
-                  />
-                )}
-              </>
-            );
-          }}
-        />
-      ) : (
-        <FlashList
-          nestedScrollEnabled={true}
-          data={[1]}
-          ListHeaderComponent={() => {
-            return (
-              <>
-                <ProfileHeader
-                  isSelfProfile={isSelfProfile}
-                  isLoadingProfileData={isLoadingProfileData}
-                  isLoadingFriendsData={isLoadingFriendsData}
-                  isLoadingRecommendationsData={isLoadingRecommendationsData}
-                  profileData={profileData}
-                  friendsData={friendItems}
-                  recommendationsData={recommendationsData}
-                />
-              </>
-            );
-          }}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          onRefresh={onRefresh}
-          numColumns={1}
-          // keyExtractor={(item) => {item.toString();
-          // }}
-          renderItem={() => {
-            return (
-              <YStack
-                flex={1}
-                justifyContent="center"
-                alignItems="center"
-                aspectRatio={9 / 6}
-              >
-                <Camera size="$9" color="$gray12" />
-                <SizableText size="$8">No posts yet</SizableText>
-              </YStack>
-            );
-          }}
-          estimatedItemSize={screenHeight}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
-        />
-      )}
+                ) : ( */}
+              <PostItem
+                post={item}
+                isSelfPost={isSelfProfile}
+                isViewable={viewableItems.includes(item.postId)}
+              />
+              {/* )} */}
+            </>
+          );
+        }}
+        ListEmptyComponent={() => {
+          return (
+            <YStack
+              flex={1}
+              justifyContent="center"
+              alignItems="center"
+              aspectRatio={9 / 6}
+            >
+              <Camera size="$9" color="$gray12" />
+              <SizableText size="$8">No posts yet</SizableText>
+            </YStack>
+          );
+        }}
+      />
     </View>
   );
 };
