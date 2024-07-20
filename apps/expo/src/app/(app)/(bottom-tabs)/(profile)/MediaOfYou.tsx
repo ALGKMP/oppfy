@@ -143,9 +143,39 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     itemVisiblePercentThreshold: 40,
   };
 
+  const onLoadListener = useCallback(
+    ({ elapsedTimeInMs }: { elapsedTimeInMs: number }) => {
+      console.log(`FlashList loaded in ${elapsedTimeInMs}ms`);
+    },
+    [],
+  );
+
+  const memoizedProfileHeader = useMemo(() => {
+    return (
+      <ProfileHeader
+        isSelfProfile={isSelfProfile}
+        isLoadingProfileData={isLoadingProfileData}
+        isLoadingFriendsData={isLoadingFriendsData}
+        isLoadingRecommendationsData={isLoadingRecommendationsData}
+        profileData={profileData}
+        friendsData={friendItems}
+        recommendationsData={recommendationsData}
+      />
+    );
+  }, [
+    friendItems,
+    isLoadingFriendsData,
+    isLoadingProfileData,
+    isLoadingRecommendationsData,
+    isSelfProfile,
+    profileData,
+    recommendationsData,
+  ]); // Added dependencies
+
   return (
     <View flex={1} width="100%" height="100%">
       <FlashList
+        onLoad={onLoadListener}
         nestedScrollEnabled={true}
         data={posts}
         refreshing={refreshing}
@@ -160,21 +190,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         keyExtractor={(item) => {
           return item?.postId.toString() ?? "";
         }}
-        ListHeaderComponent={() => {
-          return (
-            <>
-              <ProfileHeader
-                isSelfProfile={isSelfProfile}
-                isLoadingProfileData={isLoadingProfileData}
-                isLoadingFriendsData={isLoadingFriendsData}
-                isLoadingRecommendationsData={isLoadingRecommendationsData}
-                profileData={profileData}
-                friendsData={friendItems}
-                recommendationsData={recommendationsData}
-              />
-            </>
-          );
-        }}
+        ListHeaderComponent={memoizedProfileHeader}
         renderItem={({ item }) => {
           if (item === undefined) {
             return null;
