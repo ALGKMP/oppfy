@@ -462,14 +462,15 @@ const PostItem = (props: PostItemProps) => {
 
       {/* Bottom Sheets & Action sheets*/}
 
-      {commentsBottomSheetVisible && (
+      {/* {commentsBottomSheetVisible && ( */}
         <CommentsBottomSheet
           isSelfPost={isSelfPost}
+          profileIdOfPostRecipient={post.recipientProfileId}
           postId={post.postId}
           modalVisible={commentsBottomSheetVisible}
           setModalVisible={setCommentsBottomSheetVisible}
         />
-      )}
+      {/* )} */}
 
       {postActionsBottomSheetVisible && (
         <PostActionsBottomSheet

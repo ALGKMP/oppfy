@@ -30,6 +30,7 @@ import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
+import SelfProfile from "~/app/(app)/(bottom-tabs)/(profile)/self-profile";
 import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 import { api } from "~/utils/api";
 import { BlurContextMenuWrapper } from "../ContextMenu";
@@ -37,6 +38,7 @@ import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface CommentsModalProps {
   postId: number;
+  profileIdOfPostRecipient: number;
   isSelfPost: boolean;
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
@@ -44,6 +46,7 @@ interface CommentsModalProps {
 
 const CommentsBottomSheet = ({
   postId,
+  profileIdOfPostRecipient,
   isSelfPost,
   modalVisible,
   setModalVisible,
@@ -93,34 +96,66 @@ const CommentsBottomSheet = ({
     onMutate: async (newComment) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
       await utils.post.paginateComments.cancel();
-      await utils.post.paginatePostsOfUserSelf.cancel();
+      if (isSelfPost) {
+        await utils.post.paginatePostsOfUserSelf.cancel();
+      } else {
+        await utils.post.paginatePostsOfUserOther.cancel();
+      }
 
       const temporaryId = Math.random();
 
       // Snapshot the previous value
       const prevCommentsData = utils.post.paginateComments.getInfiniteData();
-      const prevPostsData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-        pageSize: 10,
-      });
+      const prevPostsData = isSelfPost
+        ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
+            pageSize: 10,
+          })
+        : utils.post.paginatePostsOfUserOther.getInfiniteData({
+            profileId: profileIdOfPostRecipient,
+            pageSize: 10,
+          });
 
-      utils.post.paginatePostsOfUserSelf.setInfiniteData(
-        { pageSize: 10 },
-        (prevData) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            pages: prevData.pages.map((page, index) => {
-              // check if it's postId
-              page.items.map((item) => {
-                if (item?.postId === postId) {
-                  item.commentsCount += 1;
-                }
-              });
-              return page;
-            }),
-          };
-        },
-      );
+      if (isSelfPost) {
+        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+          { pageSize: 10 },
+          (prevData) => {
+            if (!prevData) return prevData;
+            return {
+              ...prevData,
+              pages: prevData.pages.map((page, index) => {
+                // check if it's postId
+                page.items.map((item) => {
+                  if (item?.postId === postId) {
+                    console.log("adding extra count");
+                    item.commentsCount += 1;
+                  }
+                });
+                return page;
+              }),
+            };
+          },
+        );
+      } else {
+        utils.post.paginatePostsOfUserOther.setInfiniteData(
+          { profileId: profileIdOfPostRecipient, pageSize: 10 },
+          (prevData) => {
+            if (!prevData) return prevData;
+            return {
+              ...prevData,
+              pages: prevData.pages.map((page, index) => {
+                // check if it's postId
+                page.items.map((item) => {
+                  if (item?.postId === postId) {
+                    console.log("adding extra count");
+                    item.commentsCount += 1;
+                  }
+                });
+                return page;
+              }),
+            };
+          },
+        );
+      }
 
       // Optimistically update to the new value
       utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
@@ -164,10 +199,17 @@ const CommentsBottomSheet = ({
         );
       }
       if (ctx?.prevPostsData) {
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
-          { pageSize: 10 },
-          ctx.prevPostsData,
-        );
+        if (isSelfPost) {
+          utils.post.paginatePostsOfUserSelf.setInfiniteData(
+            { pageSize: 10 },
+            ctx.prevPostsData,
+          );
+        } else {
+          utils.post.paginatePostsOfUserOther.setInfiniteData(
+            { profileId: profileIdOfPostRecipient, pageSize: 10 },
+            ctx.prevPostsData,
+          );
+        }
       }
     },
     onSettled: async () => {
@@ -180,43 +222,72 @@ const CommentsBottomSheet = ({
     onMutate: async (newComment) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
       await utils.post.paginateComments.cancel();
-      await utils.post.paginatePostsOfUserSelf.cancel();
+      if (isSelfPost) {
+        await utils.post.paginatePostsOfUserSelf.cancel();
+      } else {
+        await utils.post.paginatePostsOfUserOther.cancel();
+      }
 
       // Snapshot the previous value
       const prevCommentsData = utils.post.paginateComments.getInfiniteData();
-      const prevPostsData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
-        pageSize: 10,
-      });
+      const prevPostsData = isSelfPost
+        ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
+            pageSize: 10,
+          })
+        : utils.post.paginatePostsOfUserOther.getInfiniteData({
+            profileId: profileIdOfPostRecipient,
+            pageSize: 10,
+          });
 
-      utils.post.paginatePostsOfUserSelf.setInfiniteData(
-        { pageSize: 10 },
-        (prevData) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            pages: prevData.pages.map((page) => {
-              // check if it's postId
-              page.items.map((item) => {
-                if (item?.postId === postId) {
-                  item.commentsCount -= 1;
-                }
-              });
-              return page;
-            }),
-          };
-        },
-      );
+      if (isSelfPost) {
+        utils.post.paginatePostsOfUserSelf.setInfiniteData(
+          { pageSize: 10 },
+          (prevData) => {
+            if (!prevData) return prevData;
+            return {
+              ...prevData,
+              pages: prevData.pages.map((page) => {
+                page.items.map((item) => {
+                  if (item?.postId === postId) {
+                    item.commentsCount -= 1;
+                  }
+                });
+                return page;
+              }),
+            };
+          },
+        );
+      } else {
+        utils.post.paginatePostsOfUserOther.setInfiniteData(
+          { profileId: profileIdOfPostRecipient, pageSize: 10 },
+          (prevData) => {
+            if (!prevData) return prevData;
+            return {
+              ...prevData,
+              pages: prevData.pages.map((page) => {
+                page.items.map((item) => {
+                  if (item?.postId === postId) {
+                    item.commentsCount -= 1;
+                  }
+                });
+                return page;
+              }),
+            };
+          },
+        );
+      }
 
       // Optimistically update to the new value
       utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
         if (!prevData) return { pages: [], pageParams: [] };
         return {
           ...prevData,
-          items: prevData.pages
-            .flatMap((page) => page.items)
-            .filter((item) => {
-              return item?.commentId !== newComment.commentId;
-            }),
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (item) => item?.commentId !== newComment.commentId,
+            ),
+          })),
         };
       });
 
@@ -233,15 +304,27 @@ const CommentsBottomSheet = ({
         );
       }
       if (ctx?.prevPostsData) {
-        utils.post.paginatePostsOfUserSelf.setInfiniteData(
-          { pageSize: 10 },
-          ctx.prevPostsData,
-        );
+        if (isSelfPost) {
+          utils.post.paginatePostsOfUserSelf.setInfiniteData(
+            { pageSize: 10 },
+            ctx.prevPostsData,
+          );
+        } else {
+          utils.post.paginatePostsOfUserOther.setInfiniteData(
+            { profileId: profileIdOfPostRecipient, pageSize: 10 },
+            ctx.prevPostsData,
+          );
+        }
       }
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.post.paginateComments.invalidate();
+      if (isSelfPost) {
+        await utils.post.paginatePostsOfUserSelf.invalidate();
+      } else {
+        await utils.post.paginatePostsOfUserOther.invalidate();
+      }
     },
   });
 
