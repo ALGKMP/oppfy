@@ -500,6 +500,7 @@ const PostItem = (props: PostItemProps) => {
       />
 
       <ShareBottomSheet
+        postId={post.postId}
         imageUrl={post.imageUrl}
         mediaType={post.mediaType}
         modalVisible={isShareModalVisible}

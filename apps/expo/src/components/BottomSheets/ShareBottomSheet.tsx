@@ -10,6 +10,7 @@ import {
   VideoContentParams,
   VideoData,
 } from "@snapchat/snap-kit-react-native";
+import { widths } from "@tamagui/config";
 import {
   Facebook,
   Instagram,
@@ -25,6 +26,7 @@ import useSaveMedia from "~/hooks/useSaveMedia";
 import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface ShareBottomSheetProps {
+  postId: number;
   modalVisible: boolean;
   mediaType: "image" | "video";
   setModalVisible: (value: boolean) => void;
@@ -32,11 +34,11 @@ interface ShareBottomSheetProps {
 }
 
 const ShareBottomSheet = (props: ShareBottomSheetProps) => {
-  const { modalVisible, setModalVisible, imageUrl } = props;
+  const { modalVisible, setModalVisible, imageUrl, postId, mediaType } = props;
   const sheetRef = useRef<BottomSheet>(null);
   const [isSharing, setIsSharing] = useState(false);
 
-  const { cacheMedia, deleteCachedMedia } = useSaveMedia();
+  const { deleteCachedMedia, cacheMediaWithWatermark } = useSaveMedia();
 
   const closeModal = useCallback(() => {
     sheetRef.current?.close();
@@ -65,17 +67,82 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
     setIsSharing(false);
   };
 
-  const shareImageUrlToSnapchat = async () => {
+  const shareFullImageToSnapchat = async ({ uri }: { uri: string }) => {
     try {
+      const processesedUri = await cacheMediaWithWatermark({
+        presignedUrl: uri,
+        fileName: "shared_image",
+        mediaType: "image",
+      });
+      if (!processesedUri) {
+        throw new Error("Failed to cache image file");
+      }
+      console.log(processesedUri);
+      const metadata: PhotoContentParams = {
+        content: {
+          uri: `file://${processesedUri}`,
+        },
+        // attachmentUrl: `https://www.oppfy.app/post/`,
+      };
+      await CreativeKit.shareToCameraPreview(metadata);
+    } catch (error) {
+      console.error("Error sharing image to Snapchat:", error);
+      Alert.alert("An error occurred while sharing the image to Snapchat");
+    }
+  };
+
+  const shareImageAsStickerToSnapchat = async ({ uri }: { uri: string }) => {
+    try {
+      const processesedUri = await cacheMediaWithWatermark({
+        presignedUrl: uri,
+        fileName: "shared_image",
+        mediaType: "image",
+      });
+      if (!processesedUri) {
+        throw new Error("Failed to cache image file");
+      }
       const metadata: MetadataParams = {
         sticker: {
-          uri: imageUrl,
-          width: 300,
-          height: 300,
+          uri: `file://${processesedUri}`,
+          height: 500,
+          width: 500,
           posX: 0.5,
-          posY: 0.6,
+          posY: 0.5,
         },
-        attachmentUrl: "https://oppfy.app",
+        attachmentUrl: `https://www.oppfy.app/post/`,
+      };
+      await CreativeKit.shareToCameraPreview(metadata);
+    } catch (error) {
+      console.error("Error sharing image to Snapchat:", error);
+      Alert.alert("An error occurred while sharing the image to Snapchat");
+    }
+  };
+
+  const _sharePostUrlToSnapChat = async ({
+    uri,
+    postId,
+  }: {
+    uri: string;
+    postId: number;
+  }) => {
+    try {
+      const processesedUri = await cacheMediaWithWatermark({
+        presignedUrl: uri,
+        fileName: "shared_image",
+        mediaType: "image",
+      });
+      if (!processesedUri) {
+        throw new Error("Failed to cache image file");
+      }
+      const metadata: MetadataParams = {
+        sticker: {
+          uri: `file://${processesedUri}`,
+          height: 500,
+          width: 500,
+          posX: 0.5,
+          posY: 0.5,
+        },
+        attachmentUrl: `https://www.oppfy.app/post/`,
       };
       await CreativeKit.shareToCameraPreview(metadata);
     } catch (error) {
@@ -86,7 +153,7 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
 
   const shareVideoUrlToSnapchat = async () => {
     try {
-      const fileUri = await cacheMedia({
+      const fileUri = await cacheMediaWithWatermark({
         presignedUrl: imageUrl,
         fileName: "shared_video",
         mediaType: "video",
@@ -143,8 +210,9 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
         if (props.mediaType === "video") {
           await shareVideoUrlToSnapchat();
         } else {
-          // await shareImageToSnapchat();
-          await shareImageUrlToSnapchat();
+          // await shareFullImageToSnapchat({ uri: imageUrl });
+          // await shareImageAsStickerToSnapchat({ uri: imageUrl });
+          await _sharePostUrlToSnapChat({ uri: imageUrl, postId });
         }
       },
     },
