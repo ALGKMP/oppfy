@@ -43,7 +43,7 @@ export const handler = async (
     }
 
     if (userId == "getAllVerteciessecretagainmp1201plsdontfindthis") {
-      const vertecies = await g.V().valueMap().toList();
+      const vertecies = await g.V().toList();
       return {
         statusCode: 200,
         body: JSON.stringify(vertecies),
