@@ -20,6 +20,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@dev-plugins/react-query": "^0.0.6",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/modak": "^0.2.3",
     "@expo/metro-config": "^0.18.4",

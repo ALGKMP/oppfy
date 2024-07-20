@@ -22,6 +22,9 @@ importers:
 
   apps/expo:
     dependencies:
+      '@dev-plugins/react-query':
+        specifier: ^0.0.6
+        version: 0.0.6(@tanstack/react-query@4.36.1)(expo@51.0.14)
       '@expo-google-fonts/inter':
         specifier: ^0.2.3
         version: 0.2.3
@@ -4996,6 +4999,17 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       cloneable-readable: 3.0.0
+    dev: false
+
+  /@dev-plugins/react-query@0.0.6(@tanstack/react-query@4.36.1)(expo@51.0.14):
+    resolution: {integrity: sha512-vxddpeongPPTN3NeWRsNRxwpB+7KpL+3FUVU0PmrFpEbMsLd0zbDEM7uC7z7ZR9qFuqeIY3uvwuq3LoYHBLT4w==}
+    peerDependencies:
+      '@tanstack/react-query': '*'
+      expo: '*'
+    dependencies:
+      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react-native@0.74.2)(react@18.2.0)
+      expo: 51.0.14(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+      flatted: 3.3.1
     dev: false
 
   /@egjs/hammerjs@2.0.17:
