@@ -170,7 +170,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     isSelfProfile,
     profileData,
     recommendationsData,
-  ]); // Added dependencies
+  ]);
 
   return (
     <View flex={1} width="100%" height="100%">
@@ -196,19 +196,11 @@ const MediaOfYou = (props: MediaOfYouProps) => {
             return null;
           }
           return (
-            <>
-              {/* {isLoadingPostData ? (
-                  <>
-                    <Text>Loading...</Text>
-                  </>
-                ) : ( */}
-              <PostItem
-                post={item}
-                isSelfPost={isSelfProfile}
-                isViewable={viewableItems.includes(item.postId)}
-              />
-              {/* )} */}
-            </>
+            <PostItem
+              post={item}
+              isSelfPost={isSelfProfile}
+              isViewable={viewableItems.includes(item.postId)}
+            />
           );
         }}
         ListEmptyComponent={() => {
