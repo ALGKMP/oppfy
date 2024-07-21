@@ -25,7 +25,7 @@ const OnboardingLayout = () => {
         headerRight: (props) => <HeaderRight {...props} />,
         header: (props) => <Header {...props} />,
         contentStyle: {
-          backgroundColor: theme.background.val,
+          backgroundColor: "#F214FF",
         },
       }}
     >
