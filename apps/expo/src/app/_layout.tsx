@@ -14,12 +14,14 @@ import Inter_500Medium from "@tamagui/font-inter/otf/Inter-Medium.otf";
 import Inter_600SemiBold from "@tamagui/font-inter/otf/Inter-SemiBold.otf";
 import Inter_100Thin from "@tamagui/font-inter/otf/Inter-Thin.otf";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
+import { View } from "tamagui";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { useNotificationObserver } from "~/hooks/notifications";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
+import { TamaguiProvider } from "tamagui";
 
 const RootLayout = () => {
   useNotificationObserver();
