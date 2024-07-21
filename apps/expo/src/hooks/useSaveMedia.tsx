@@ -237,6 +237,7 @@ const useSaveMedia = () => {
     cacheMedia,
     cacheMediaWithWatermark,
     deleteCachedMedia,
+    cleanupCacheDirectory,
   };
 };
 
