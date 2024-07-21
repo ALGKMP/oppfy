@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Animated,
-  Linking,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -11,8 +9,6 @@ import {
 import type { AVPlaybackStatus } from "expo-av";
 import { ResizeMode, Video } from "expo-av";
 import { Image } from "expo-image";
-import * as MediaLibrary from "expo-media-library";
-import { PermissionStatus } from "expo-media-library";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
@@ -27,8 +23,6 @@ import {
   SCREEN_WIDTH,
 } from "~/constants/camera";
 import useSaveVideo from "~/hooks/useSaveMedia";
-
-type SaveState = "idle" | "saving" | "saved";
 
 const ASPECT_RATIOS = {
   PORTRAIT: {
