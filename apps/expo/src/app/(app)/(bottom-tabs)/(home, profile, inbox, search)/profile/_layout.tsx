@@ -21,7 +21,7 @@ const ProfileLayout = () => {
       }}
     >
       <Stack.Screen
-        name="[profile-id]"
+        name="[profileId]"
         options={
           {
             // headerShown: false,

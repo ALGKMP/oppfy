@@ -217,7 +217,7 @@ const Requests = () => {
 
   const onUserSelected = (profileId: number) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[profile-id]/",
+      pathname: "/(inbox)/profile/[profileId]/",
       params: { profileId: String(profileId) },
     });
   };

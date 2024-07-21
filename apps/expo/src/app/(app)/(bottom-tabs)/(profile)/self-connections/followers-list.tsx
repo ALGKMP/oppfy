@@ -5,6 +5,7 @@ import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Button, Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -13,7 +14,6 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { SearchInput } from "~/components/Inputs";
 
 type FollowerItem =
   RouterOutputs["follow"]["paginateFollowersSelf"]["items"][0];
@@ -133,7 +133,7 @@ const FollowerList = () => {
       }
       onPress={() =>
         router.push({
-          pathname: "/(profile)/profile/[profile-id]",
+          pathname: "/(profile)/profile/[profileId]",
           params: { profileId: String(item.profileId) },
         })
       }

@@ -75,7 +75,7 @@ const Search = () => {
             onPress={() => {
               if (!item.id) return;
               router.navigate({
-                pathname: "/(search)/profile/[profile-id]/",
+                pathname: "/(search)/profile/[profileId]/",
                 params: { profileId: String(item.id) },
               });
             }}
@@ -103,7 +103,7 @@ const Search = () => {
             onPress={() => {
               if (!item.profileId) return;
               router.navigate({
-                pathname: "/(search)/profile/[profile-id]/",
+                pathname: "/(search)/profile/[profileId]/",
                 params: { profileId: String(item.profileId) },
               });
             }}
