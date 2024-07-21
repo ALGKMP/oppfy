@@ -100,7 +100,7 @@ const CreatePost = () => {
       : await uploadVideoMutation.mutateAsync(input);
 
     router.dismissAll();
-    router.navigate("/(profile)/self-profile");
+    router.navigate("/(home)/home");
   });
 
   return (

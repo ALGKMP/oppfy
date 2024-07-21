@@ -96,7 +96,7 @@ const Start = () => {
   const scale = useSharedValue(1);
   const rotate = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const colorAnimation = useSharedValue(0);
+  // const colorAnimation = useSharedValue(0);
   const subtitleOpacity = useSharedValue(0);
   const subtitleTranslateY = useSharedValue(20);
   const buttonOpacity = useSharedValue(0);
@@ -150,13 +150,13 @@ const Start = () => {
       withTiming(0, { duration: 500 }),
     );
 
-    colorAnimation.value = withSequence(
-      withTiming(1, { duration: 500 }),
-      withTiming(2, { duration: 500 }),
-      withTiming(3, { duration: 500 }),
-      withTiming(4, { duration: 500 }),
-      withTiming(5, { duration: 500 }),
-    );
+    // colorAnimation.value = withSequence(
+    //   withTiming(1, { duration: 500 }),
+    //   withTiming(2, { duration: 500 }),
+    //   withTiming(3, { duration: 500 }),
+    //   withTiming(4, { duration: 500 }),
+    //   withTiming(5, { duration: 500 }),
+    // );
 
     subtitleOpacity.value = withDelay(1800, withTiming(1, { duration: 800 }));
     subtitleTranslateY.value = withDelay(
@@ -177,11 +177,11 @@ const Start = () => {
       { rotate: `${rotate.value}deg` },
       { translateY: translateY.value },
     ],
-    color: interpolateColor(
-      colorAnimation.value,
-      [0, 1, 2, 3, 4, 5],
-      ["#FFFFFF", "#FF00FF", "#00FFFF", "#FFFF00", "#FF8000", "#FFFFFF"]
-    ),
+    // color: interpolateColor(
+    //   colorAnimation.value,
+    //   [0, 1, 2, 3, 4, 5],
+    //   ["#FFFFFF", "#00FFFF", "#ff1100", "#FFFF00", "#FF8000", "#FFFFFF"]
+    // ),
   }));
 
   const animatedSubtitleStyle = useAnimatedStyle(() => ({
@@ -200,7 +200,7 @@ const Start = () => {
   );
 
   return (
-    <BaseScreenView safeAreaEdges={["top", "bottom"]} paddingHorizontal={0}>
+    <BaseScreenView safeAreaEdges={["top", "bottom"]} paddingHorizontal={0} backgroundColor={"#F214FF"}>
       <YStack
         flex={1}
         alignItems="center"

@@ -34,7 +34,8 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(home)"
         options={{
-          title: "Home",
+          // title: "Home",
+          header: () => null,
           tabBarIcon: getTabBarIcon(Home),
         }}
       />

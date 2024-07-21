@@ -103,4 +103,18 @@ export const followRouter = createTRPCRouter({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
+
+  isFollowingSelf: protectedProcedure
+    .input(trpcValidators.input.follow.isFollowingSelf)
+    .output(trpcValidators.output.follow.isFollowingSelf)
+    .query(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.follow.isFollowing(
+          ctx.session.uid,
+          input.userId,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
 });

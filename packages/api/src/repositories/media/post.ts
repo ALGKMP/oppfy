@@ -31,9 +31,39 @@ export class PostRepository {
 
   @handleDatabaseErrors
   async getPost(postId: number) {
-    return await this.db.query.post.findFirst({
-      where: eq(schema.post.id, postId),
-    });
+    const author = aliasedTable(schema.user, "author");
+    const recipient = aliasedTable(schema.user, "recipient");
+    const authorProfile = aliasedTable(schema.profile, "authorProfile");
+    const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
+
+    return await this.db
+      .selectDistinct({
+        postId: schema.post.id,
+        authorId: schema.post.author,
+        authorUsername: authorProfile.username,
+        authorProfileId: authorProfile.id,
+        authorProfilePicture: authorProfile.profilePictureKey,
+        recipientId: schema.post.recipient,
+        recipientProfileId: recipientProfile.id,
+        recipientUsername: recipientProfile.username,
+        recipientProfilePicture: recipientProfile.profilePictureKey,
+        caption: schema.post.caption,
+        imageUrl: schema.post.key,
+        width: schema.post.width,
+        height: schema.post.height,
+        commentsCount: schema.postStats.comments,
+        likesCount: schema.postStats.likes,
+        mediaType: schema.post.mediaType,
+        createdAt: schema.post.createdAt,
+      })
+      .from(schema.post)
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
+      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .where(eq(schema.post.id, postId))
+      .limit(1);
   }
 
   @handleDatabaseErrors

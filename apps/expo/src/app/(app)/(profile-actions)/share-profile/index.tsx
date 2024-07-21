@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
+import { ToastViewport, useToastController } from "@tamagui/toast";
 import { H4, styled, Text, Theme, XStack, YStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
@@ -18,6 +19,7 @@ const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
 
 const ShareProfile = () => {
   const utils = api.useUtils();
+  const toast = useToastController();
 
   const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
   const qrValue = new URL(
@@ -30,6 +32,7 @@ const ShareProfile = () => {
 
     try {
       await Sharing.shareAsync(qrValue);
+      toast.show("Profile shared");
     } catch (error) {
       console.error("Error sharing profile:", error);
     }
@@ -37,9 +40,11 @@ const ShareProfile = () => {
 
   const handleCopyLink = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
     await Clipboard.setStringAsync(qrValue);
-    console.log("Link copied to clipboard");
+    toast.show("Link copied", {
+      native: true,
+      duration: 1000,
+    });
   };
 
   return (

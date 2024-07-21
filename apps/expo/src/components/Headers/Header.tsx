@@ -33,7 +33,7 @@ const StackHeader = ({
       }}
     >
       <XStack
-        // paddingVertical="$2"
+        paddingVertical="$2"
         paddingHorizontal="$4"
         alignItems="center"
         justifyContent="space-between"

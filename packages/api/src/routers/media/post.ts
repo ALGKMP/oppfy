@@ -314,6 +314,20 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+  getPost: protectedProcedure
+    .input(z.object({ postId: z.number() }))
+    .output(sharedValidators.media.post)
+    .query(async ({ ctx, input }) => {
+      try {
+        return await ctx.services.post.getPost(input.postId);
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to get post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
+        });
+      }
+    }),
+
   likePost: protectedProcedure
     .input(
       z.object({

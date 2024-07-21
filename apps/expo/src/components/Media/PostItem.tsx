@@ -254,7 +254,7 @@ const PostItem = (props: PostItemProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const currentUserProfileId = await getCurrentUserProfileId();
     if (profileId === currentUserProfileId) {
-      router.push({ pathname: "/(profile)/self-profile" });
+      router.push({ pathname: "/(home)/home" });
       return;
     }
     router.push({
@@ -462,7 +462,7 @@ const PostItem = (props: PostItemProps) => {
 
       {/* Bottom Sheets & Action sheets*/}
 
-      {/* {commentsBottomSheetVisible && ( */}
+      {commentsBottomSheetVisible && (
         <CommentsBottomSheet
           isSelfPost={isSelfPost}
           profileIdOfPostRecipient={post.recipientProfileId}
@@ -470,7 +470,7 @@ const PostItem = (props: PostItemProps) => {
           modalVisible={commentsBottomSheetVisible}
           setModalVisible={setCommentsBottomSheetVisible}
         />
-      {/* )} */}
+      )}
 
       {postActionsBottomSheetVisible && (
         <PostActionsBottomSheet
