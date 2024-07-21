@@ -115,6 +115,32 @@ const useSaveMedia = () => {
     }
   };
 
+  const cleanupCacheDirectory = async () => {
+    try {
+      const cacheDir = FileSystem.cacheDirectory;
+      if (!cacheDir) {
+        console.log("Cache directory not available");
+        return;
+      }
+
+      const contents = await FileSystem.readDirectoryAsync(cacheDir);
+
+      for (const item of contents) {
+        const itemPath = `${cacheDir}${item}`;
+        try {
+          await FileSystem.deleteAsync(itemPath, { idempotent: true });
+          console.log(`Deleted: ${itemPath}`);
+        } catch (error) {
+          console.error(`Error deleting ${itemPath}:`, error);
+        }
+      }
+
+      console.log("Cache directory cleanup completed");
+    } catch (error) {
+      console.error("Error cleaning up cache directory:", error);
+    }
+  };
+
   const downloadMedia = async ({
     presignedUrl,
     fileName,
