@@ -1,4 +1,3 @@
-import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
@@ -14,6 +13,7 @@ import Inter_500Medium from "@tamagui/font-inter/otf/Inter-Medium.otf";
 import Inter_600SemiBold from "@tamagui/font-inter/otf/Inter-SemiBold.otf";
 import Inter_100Thin from "@tamagui/font-inter/otf/Inter-Thin.otf";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
+import { TamaguiProvider, View } from "tamagui";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { useNotificationObserver } from "~/hooks/notifications";
