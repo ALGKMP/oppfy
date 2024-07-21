@@ -45,14 +45,31 @@ const trpcFriendOutputSchema = {
       .optional(),
   }),
 
-  friendItems: z.array(z.object({
-    userId: z.string(),
-    profileId: z.number(),
-    username: z.string(),
-    name: z.string(),
-    profilePictureUrl: z.string(),
-    privacy: z.enum(["public", "private"]),
-  })),
+  friendItems: z.array(
+    z.object({
+      userId: z.string(),
+      profileId: z.number(),
+      username: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string(),
+      privacy: z.enum(["public", "private"]),
+    }),
+  ),
+  friendItemsOther: z.array(
+    z.object({
+      userId: z.string(),
+      profileId: z.number(),
+      username: z.string(),
+      name: z.string(),
+      profilePictureUrl: z.string(),
+      relationshipState: z.enum([
+        "following",
+        "followRequestSent",
+        "notFollowing",
+      ]),
+      privacy: z.enum(["public", "private"]),
+    }),
+  ),
 };
 
 export default trpcFriendOutputSchema;
