@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Star,
 } from "@tamagui/lucide-icons";
+import { reportRouter } from "node_modules/@oppfy/api/src/routers";
 import { Button, YStack } from "tamagui";
 
 import type { SettingsGroupInput } from "~/components/Settings";
@@ -125,6 +126,13 @@ const Settings = () => {
           onPress={() => setIsModalVisible(true)}
         >
           Logout
+        </Button>
+        <Button
+          size="$4.5"
+          color="$yellow10Dark"
+          onPress={() => router.push("/sitemap")}
+        >
+          Sitemap
         </Button>
       </YStack>
 
