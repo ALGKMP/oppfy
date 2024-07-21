@@ -1,5 +1,14 @@
-import { Stack } from "expo-router";
-import { useTheme } from "tamagui";
+import { TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
+import type {
+  HeaderBackButtonProps,
+  NativeStackHeaderProps,
+} from "@react-navigation/native-stack/src/types";
+import { ChevronLeft } from "@tamagui/lucide-icons";
+import { Text, useTheme } from "tamagui";
+
+import { Header as BaseHeader } from "~/components/Headers";
+import { Stack } from "~/layouts";
 
 const HomeLayout = () => {
   const theme = useTheme();
@@ -7,32 +16,70 @@ const HomeLayout = () => {
   return (
     <Stack
       screenOptions={{
-        // header: () => null,
-        headerShown: false,
+        headerLeft: (props) => <HeaderLeft {...props} />,
+        header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
         name="home"
-        options={{
-          title: "home",
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: theme.background.val, // Use the theme background color
-          },
-          headerShadowVisible: false,
-          headerTitleStyle: {
-            color: theme.color.val, // Use the theme text color
-            fontWeight: "bold",
-          },
-          contentStyle: {
-            backgroundColor: theme.background.val,
-          },
-        }}
+        options={{ headerLeft: () => null, title: "Home" }}
       />
       <Stack.Screen name="post/[postId]" options={{ header: () => null }} />
     </Stack>
   );
 };
+
+type HeaderLeftProps = HeaderBackButtonProps;
+
+type HeaderProps = NativeStackHeaderProps;
+
+const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
+  const router = useRouter();
+
+  return (
+    <TouchableOpacity
+      hitSlop={10}
+      onPress={() => {
+        canGoBack ? void router.back() : null;
+      }}
+    >
+      <ChevronLeft />
+    </TouchableOpacity>
+  );
+};
+
+const Header = ({ navigation, options }: HeaderProps) => (
+  <BaseHeader
+    HeaderLeft={
+      options.headerLeft
+        ? options.headerLeft({
+            canGoBack: navigation.canGoBack(),
+            tintColor: options.headerTintColor,
+          })
+        : undefined
+    }
+    HeaderTitle={
+      typeof options.headerTitle === "function" ? (
+        options.headerTitle({
+          children: options.title ?? "",
+          tintColor: options.headerTintColor,
+        })
+      ) : options.title ? (
+        <Text fontSize="$5" fontWeight="bold">
+          {options.title}
+        </Text>
+      ) : null
+    }
+    HeaderRight={
+      options.headerRight
+        ? options.headerRight({
+            canGoBack: navigation.canGoBack(),
+            tintColor: options.headerTintColor,
+          })
+        : undefined
+    }
+  />
+);
 
 export default HomeLayout;
