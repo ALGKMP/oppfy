@@ -90,7 +90,7 @@ const HomeScreen = () => {
           numColumns={1}
           onEndReached={handleOnEndReached}
           keyExtractor={(item) => {
-            return "home_" + item?.postId.toString() ?? "home_undefined";
+            return "home_" + item?.postId.toString();
           }}
           renderItem={({ item, index }) => {
             if (item === undefined) {
