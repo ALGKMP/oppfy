@@ -48,6 +48,45 @@ export class PostService {
 
   private cloudFrontService = new CloudFrontService();
 
+  private _processPostData(data: Post): Post {
+    try {
+      // Update author profile picture URL
+      const authorPresignedUrl =
+        this.cloudFrontService.getSignedUrlForProfilePicture(
+          data.authorProfilePicture,
+        );
+
+      data.authorProfilePicture = authorPresignedUrl;
+
+      // Update recipient profile picture URL
+      const recipientPresignedUrl =
+        this.cloudFrontService.getSignedUrlForProfilePicture(
+          data.recipientProfilePicture,
+        );
+
+      data.recipientProfilePicture = recipientPresignedUrl;
+
+      if (data.mediaType === "image") {
+        const imageUrl = this.cloudFrontService.getSignedUrlForPost(
+          data.imageUrl,
+        );
+        data.imageUrl = imageUrl;
+      } else {
+        data.imageUrl = `https://stream.mux.com/${data.imageUrl}.m3u8`;
+      }
+    } catch (error) {
+      console.error(
+        `Error updating profile picture URLs for postId: ${data.postId}, authorId: ${data.authorId}, recipientId: ${data.recipientId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
+      );
+    }
+    return data;
+  }
+
   private _processPaginatedPostData(
     data: Post[],
     pageSize = 20,
@@ -301,7 +340,8 @@ export class PostService {
           "Failed to get post.",
         );
       }
-      return post[0]
+      const updatedPost = this._processPostData(post[0]);
+      return updatedPost;
     } catch (error) {
       console.error(`Error in getPost for postId: ${postId}: `, error);
       throw new DomainError(
