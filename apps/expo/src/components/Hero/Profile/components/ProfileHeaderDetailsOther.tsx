@@ -552,21 +552,21 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       backgroundColor="$background"
       gap="$4"
     >
-      <View alignItems="center" marginBottom="$-9">
+      <View alignItems="center" marginBottom={-20}>
         <StatusRenderer
           data={!props.loading ? props.data : undefined}
-          loadingComponent={<Skeleton circular size={140} />}
+          loadingComponent={<Skeleton circular size={160} />}
           successComponent={(profileData) => (
             <>
               {user?.uid === profileData.userId ? (
                 <TouchableOpacity onPress={pickAndUploadImage}>
-                  <Avatar circular size={140} bordered>
+                  <Avatar circular size={160} bordered>
                     <Avatar.Image src={profileData.profilePictureUrl} />
                     <Avatar.Fallback />
                   </Avatar>
                 </TouchableOpacity>
               ) : (
-                <Avatar circular size={140} bordered>
+                <Avatar circular size={160} bordered>
                   <Avatar.Image src={profileData.profilePictureUrl} />
                   <Avatar.Fallback />
                 </Avatar>

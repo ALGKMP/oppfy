@@ -1,69 +1,196 @@
-import { Pressable } from "react-native";
+import React, { useState } from "react";
+import { Dimensions, TouchableOpacity, View } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { router } from "expo-router";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, Image, ScrollView, Text, XStack, YStack } from "tamagui";
+import {
+  Button,
+  Image,
+  ScrollView,
+  Text,
+  useTheme,
+  XStack,
+  YStack,
+} from "tamagui";
+
+import { BaseScreenView } from "~/components/Views";
+import { OnboardingButton } from "~/features/onboarding/components";
+import { api, RouterOutputs } from "~/utils/api";
 
 const placeholderUsers = [
-  { name: "Michael", username: "michaelyyz" },
-  { name: "Ben Archer", username: "benarcher" },
-  { name: "Nebula", username: "nebula1600" },
-  { name: "kareem", username: "6kaleio" },
-  { name: "ayaaniqbal", username: "ayaaniqbal" },
-  { name: "Ali", username: "aliy45" },
-  { name: "itsalianna", username: "itsaliannaaa" },
-  { name: "Bautista", username: "bautista12" },
-  { name: "mckalaaaaa", username: "mckalaaaa" },
+  { fullName: "Michael", username: "michaelyyz" },
+  { fullName: "Ben Archer", username: "benarcher" },
+  { fullName: "Nebula", username: "nebula1600" },
+  { fullName: "kareem", username: "6kaleio" },
+  { fullName: "ayaaniqbal", username: "ayaaniqbal" },
+  { fullName: "Ali", username: "aliy45" },
+  { fullName: "itsalianna", username: "itsaliannaaa" },
+  { fullName: "Bautista", username: "bautista12" },
+  //   { fullName: "mckalaaaaa", username: "mckalaaaa" },
   // Add more users if needed
 ];
 
+const { width: screenWidth } = Dimensions.get("window");
+const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, considering margin and padding
+
+const AnimatedUserProfile = ({
+  user,
+  index,
+}: {
+  user: { fullName: string | null; username: string };
+  index: number;
+}) => {
+  const [isAdded, setIsAdded] = useState(false);
+  const opacity = useSharedValue(1);
+  const checkmarkOpacity = useSharedValue(0);
+  const theme = useTheme();
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
+
+  const checkmarkAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: checkmarkOpacity.value,
+    };
+  });
+
+  const handlePress = () => {
+    setIsAdded((prev) => !prev);
+    opacity.value = withSequence(
+      withTiming(0, { duration: 200 }),
+      withDelay(700, withTiming(1, { duration: 200 })),
+    );
+    checkmarkOpacity.value = withSequence(
+      withDelay(200, withTiming(1, { duration: 200 })),
+      withDelay(500, withTiming(0, { duration: 200 })),
+    );
+  };
+
+  return (
+    <TouchableOpacity onPress={handlePress} disabled={isAdded}>
+      <YStack
+        width={itemWidth}
+        alignItems="center"
+        marginBottom="$4"
+        marginRight="4" // Add margin to create spacing between items
+      >
+        <View style={{ position: "relative", width: 80, height: 80 }}>
+          <Animated.View style={animatedStyle}>
+            <Image
+              source={{ uri: `https://picsum.photos/100?random=${index}` }}
+              width={80}
+              height={80}
+              borderRadius={40}
+            />
+          </Animated.View>
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                justifyContent: "center",
+                alignItems: "center",
+              },
+              checkmarkAnimatedStyle,
+            ]}
+          >
+            <UserRoundCheck size={40} color="white" />
+          </Animated.View>
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                bottom: -5,
+                right: -5,
+                backgroundColor: isAdded ? "#1a1a1a" : "#333",
+                borderRadius: 15,
+                width: 30,
+                height: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                borderWidth: 2,
+                borderColor: theme.background.val,
+              },
+              animatedStyle,
+            ]}
+          >
+            {isAdded ? (
+              <UserRoundCheck size={16} color="white" />
+            ) : (
+              <UserRoundPlus size={16} color="white" />
+            )}
+          </Animated.View>
+        </View>
+        <Text fontSize="$3" fontWeight="bold" color="white">
+          {user.fullName}
+        </Text>
+        <Text fontSize="$2" color="$gray10">
+          {user.username}
+        </Text>
+      </YStack>
+    </TouchableOpacity>
+  );
+};
+
 const OnboardingRecomendations = () => {
+  const theme = useTheme();
+
+  const { data: recommendations, isLoading } =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
+
   const onDone = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
 
   return (
-    <ScrollView backgroundColor="black">
-      <YStack padding="$4" space="$4">
-        <Text fontSize="$6" fontWeight="bold" color="white">
-          Recommendations
-        </Text>
-        <XStack flexWrap="wrap" justifyContent="space-between">
-          {placeholderUsers.map((user, index) => (
-            <YStack
-              key={index}
-              width="32%"
-              alignItems="center"
-              marginBottom="$4"
-            >
-              <YStack position="relative">
-                <Image
-                  source={{ uri: `https://picsum.photos/100?random=${index}` }}
-                  width={100}
-                  height={100}
-                  borderRadius={50}
-                />
-                <Button
-                  position="absolute"
-                  bottom={0}
-                  right={0}
-                  backgroundColor="$gray8"
-                  borderRadius={12}
-                  padding={4}
-                  onPress={() => console.log(`Add ${user.name}`)}
-                >
-                  <UserRoundPlus size={16} color="white" />
-                </Button>
-              </YStack>
-              <Text fontSize="$3" fontWeight="bold" color="white">
-                {user.name}
-              </Text>
-              <Text fontSize="$2" color="$gray10">
-                {user.username}
-              </Text>
-            </YStack>
-          ))}
-        </XStack>
-      </YStack>
-    </ScrollView>
+    <BaseScreenView
+      flex={1}
+      backgroundColor={theme.background.val}
+      padding={0}
+      safeAreaEdges={["bottom"]}
+    >
+      <Text
+        fontSize="$6"
+        fontWeight="bold"
+        color="white"
+        backgroundColor={"transparent"}
+        textAlign="center"
+        marginVertical="$4"
+      >
+        Recommendations
+      </Text>
+      <ScrollView
+        backgroundColor="$background"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <YStack padding="$4" gap="$4" alignItems="center">
+          {recommendations && recommendations.length > 0 ? (
+            recommendations.map((user, index) => (
+              <AnimatedUserProfile key={index} user={user} index={index} />
+            ))
+          ) : (
+            <Text color="$gray10">No recommendations available</Text>
+          )}
+        </YStack>
+      </ScrollView>
+      <OnboardingButton onPress={onDone}>Done</OnboardingButton>
+    </BaseScreenView>
   );
 };
 

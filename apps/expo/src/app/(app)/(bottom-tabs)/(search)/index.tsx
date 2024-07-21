@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { ListItemTitle, SizableText, View, YStack } from "tamagui";
+import { ListItemTitle, SizableText, Text, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -126,8 +127,14 @@ const Search = () => {
           {!searchTerm ? (
             isLoadingRecommendationsData ? (
               renderLoadingSkeletons()
-            ) : (
+            ) : recommendationsData?.length ? (
               renderRecommendations(recommendationsData!)
+            ) : (
+              // TODO: Implement
+              <Text>
+                let users invite contacts not on the app. or maybe even let them
+                post to people not on the app
+              </Text>
             )
           ) : isLoading ? (
             renderLoadingSkeletons()

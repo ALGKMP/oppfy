@@ -25,13 +25,19 @@ const OnboardingLayout = () => {
         headerRight: (props) => <HeaderRight {...props} />,
         header: (props) => <Header {...props} />,
         contentStyle: {
-          backgroundColor: "#F214FF",
+          backgroundColor: theme.background.val,
         },
       }}
     >
       <Stack.Screen
         name="index"
-        options={{ animation: "fade", header: () => null }}
+        options={{
+          animation: "fade",
+          contentStyle: {
+            backgroundColor: "#F214FF",
+          },
+          header: () => null,
+        }}
       />
 
       <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
