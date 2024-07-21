@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Dimensions, TouchableOpacity, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -20,6 +20,7 @@ import {
   YStack,
 } from "tamagui";
 
+import { OnboardingButton } from "~/features/onboarding/components";
 import { api, RouterOutputs } from "~/utils/api";
 
 const placeholderUsers = [
@@ -31,9 +32,12 @@ const placeholderUsers = [
   { fullName: "Ali", username: "aliy45" },
   { fullName: "itsalianna", username: "itsaliannaaa" },
   { fullName: "Bautista", username: "bautista12" },
-  { fullName: "mckalaaaaa", username: "mckalaaaa" },
+  //   { fullName: "mckalaaaaa", username: "mckalaaaa" },
   // Add more users if needed
 ];
+
+const { width: screenWidth } = Dimensions.get("window");
+const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, considering margin and padding
 
 const AnimatedUserProfile = ({
   user,
@@ -73,7 +77,12 @@ const AnimatedUserProfile = ({
 
   return (
     <TouchableOpacity onPress={handlePress}>
-      <YStack width="100%" alignItems="center" marginBottom="$4">
+      <YStack
+        width={itemWidth}
+        alignItems="center"
+        marginBottom="$4"
+        marginRight="4" // Add margin to create spacing between items
+      >
         <View style={{ position: "relative", width: 80, height: 80 }}>
           <Animated.View style={animatedStyle}>
             <Image
@@ -112,7 +121,7 @@ const AnimatedUserProfile = ({
                 justifyContent: "center",
                 alignItems: "center",
                 borderWidth: 2,
-                borderColor: "black",
+                borderColor: theme.background.val,
               },
               animatedStyle,
             ]}
@@ -145,20 +154,33 @@ const OnboardingRecomendations = () => {
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
 
   return (
-    <ScrollView backgroundColor="$background">
-      <YStack padding="$4" gap="$4">
-        <Text fontSize="$6" fontWeight="bold" color="white" textAlign="center">
-          Recommendations
-        </Text>
-        <XStack flexWrap="wrap">
-          <AnimatedUserProfile user={placeholderUsers[0]!} index={0} />
-          {/*           {placeholderUsers.map((user, index) => (
-            <AnimatedUserProfile key={index} user={user} index={index} />
-          ))} */}
-        </XStack>
-        <Button onPress={onDone}>Done</Button>
-      </YStack>
-    </ScrollView>
+    <YStack flex={1} backgroundColor={theme.background.val}>
+      <Text
+        fontSize="$6"
+        fontWeight="bold"
+        color="white"
+        // backgroundColor={"transparent"}
+        textAlign="center"
+      >
+        Recommendations
+      </Text>
+      <ScrollView
+        backgroundColor="$background"
+        contentContainerStyle={{
+          flex: 1,
+          alignItems: "center",
+        }}
+      >
+        <YStack padding="$4" gap="$4">
+          <XStack flexWrap="wrap" justifyContent="center" width="100%">
+            {placeholderUsers.map((user, index) => (
+              <AnimatedUserProfile key={index} user={user} index={index} />
+            ))}
+          </XStack>
+        </YStack>
+      </ScrollView>
+      <OnboardingButton onPress={onDone}>Done</OnboardingButton>
+    </YStack>
   );
 };
 
