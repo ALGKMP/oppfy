@@ -67,7 +67,7 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
       style={{
         width: "100%",
         height: "100%",
-        borderRadius: 20,
+        // borderRadius: 20,
       }}
       contentFit="cover"
       player={player}
