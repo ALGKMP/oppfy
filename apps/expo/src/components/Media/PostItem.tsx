@@ -354,7 +354,7 @@ const PostItem = (props: PostItemProps) => {
           aspectRatio={Math.max(post.width / post.height, 9 / 12)}
         >
           {post.mediaType === "image" ? (
-            <ImagePost imageUrl={post.imageUrl}>
+            <ImagePost postId={post.postId} imageUrl={post.imageUrl}>
               {hearts.map((heart, index) => (
                 <GradientHeart
                   key={heart.id} // This key is not tied to the item prop in any way, so it does not hinder peformance (w due for a win)
