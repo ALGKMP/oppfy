@@ -109,17 +109,15 @@ const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
             )}
           />
 
-          {!props.loading && props.data.bio && (
-            <StatusRenderer
-              data={!props.loading ? props.data.bio : undefined}
-              loadingComponent={<Skeleton width={150} height={20} />}
-              successComponent={(bio) => (
-                <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
-                  {bio}
-                </Paragraph>
-              )}
-            />
-          )}
+          <StatusRenderer
+            data={!props.loading ? props.data.bio ?? "" : undefined}
+            loadingComponent={<Skeleton width={150} height={20} />}
+            successComponent={(bio) => (
+              <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
+                {bio}
+              </Paragraph>
+            )}
+          />
         </YStack>
 
         <YStack alignItems="flex-end" gap="$2">
