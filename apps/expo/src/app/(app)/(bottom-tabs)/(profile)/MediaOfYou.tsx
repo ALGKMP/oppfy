@@ -150,7 +150,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         onRefresh={onRefresh}
         numColumns={1}
         onEndReached={handleOnEndReached}
-        estimatedItemSize={700}
+        estimatedItemSize={600}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         extraData={{ viewableItems, posts }}
