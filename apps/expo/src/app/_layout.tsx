@@ -13,7 +13,7 @@ import Inter_400Regular from "@tamagui/font-inter/otf/Inter-Medium.otf";
 import Inter_500Medium from "@tamagui/font-inter/otf/Inter-Medium.otf";
 import Inter_600SemiBold from "@tamagui/font-inter/otf/Inter-SemiBold.otf";
 import Inter_100Thin from "@tamagui/font-inter/otf/Inter-Thin.otf";
-import { TamaguiProvider, ToastProvider, ToastViewport, View } from "tamagui";
+import { ToastProvider, ToastViewport } from "@tamagui/toast";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { useNotificationObserver } from "~/hooks/notifications";
