@@ -54,6 +54,10 @@ const followInputSchema = {
       .optional(),
     pageSize: z.number().optional(),
   }),
+
+   isFollowing: z.object({
+    userId: z.string(),
+  }),
 };
 
 export default followInputSchema;
