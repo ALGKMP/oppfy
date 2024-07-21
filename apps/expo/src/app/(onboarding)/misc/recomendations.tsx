@@ -20,6 +20,7 @@ import {
   YStack,
 } from "tamagui";
 
+import { BaseScreenView } from "~/components/Views";
 import { OnboardingButton } from "~/features/onboarding/components";
 import { api, RouterOutputs } from "~/utils/api";
 
@@ -43,7 +44,7 @@ const AnimatedUserProfile = ({
   user,
   index,
 }: {
-  user: { fullName: string; username: string };
+  user: { fullName: string | null; username: string };
   index: number;
 }) => {
   const [isAdded, setIsAdded] = useState(false);
@@ -76,7 +77,7 @@ const AnimatedUserProfile = ({
   };
 
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <TouchableOpacity onPress={handlePress} disabled={isAdded}>
       <YStack
         width={itemWidth}
         alignItems="center"
@@ -154,33 +155,42 @@ const OnboardingRecomendations = () => {
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
 
   return (
-    <YStack flex={1} backgroundColor={theme.background.val}>
+    <BaseScreenView
+      flex={1}
+      backgroundColor={theme.background.val}
+      padding={0}
+      safeAreaEdges={["bottom"]}
+    >
       <Text
         fontSize="$6"
         fontWeight="bold"
         color="white"
-        // backgroundColor={"transparent"}
+        backgroundColor={"transparent"}
         textAlign="center"
+        marginVertical="$4"
       >
         Recommendations
       </Text>
       <ScrollView
         backgroundColor="$background"
         contentContainerStyle={{
-          flex: 1,
+          flexGrow: 1,
+          justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <YStack padding="$4" gap="$4">
-          <XStack flexWrap="wrap" justifyContent="center" width="100%">
-            {placeholderUsers.map((user, index) => (
+        <YStack padding="$4" gap="$4" alignItems="center">
+          {recommendations && recommendations.length > 0 ? (
+            recommendations.map((user, index) => (
               <AnimatedUserProfile key={index} user={user} index={index} />
-            ))}
-          </XStack>
+            ))
+          ) : (
+            <Text color="$gray10">No recommendations available</Text>
+          )}
         </YStack>
       </ScrollView>
       <OnboardingButton onPress={onDone}>Done</OnboardingButton>
-    </YStack>
+    </BaseScreenView>
   );
 };
 
