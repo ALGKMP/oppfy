@@ -1,7 +1,20 @@
-import HomeScreen from "./home-page";
+import { Stack } from "expo-router";
+import { useTheme } from "tamagui";
 
-const Home = () => {
-  return <HomeScreen />;
+const HomeLayout = () => {
+  const theme = useTheme();
+
+  return (
+    <Stack
+      screenOptions={{
+        header: () => null,
+        contentStyle: { backgroundColor: theme.background.val },
+      }}
+    >
+      <Stack.Screen name="home" options={{ header: () => null }} />
+      <Stack.Screen name="post/[postId]" options={{ header: () => null }} />
+    </Stack>
+  );
 };
 
-export default Home;
+export default HomeLayout;

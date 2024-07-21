@@ -29,7 +29,6 @@ const SearchLayout = () => {
         }}
       />
       <Stack.Screen name="self-connections" />
-
       <Stack.Screen name="connections/[user-id]" />
     </Stack>
   );
