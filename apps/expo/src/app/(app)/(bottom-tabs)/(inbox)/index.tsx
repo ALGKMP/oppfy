@@ -16,14 +16,16 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const Inbox = () => {
   const router = useRouter();
+  const utils = api.useUtils();
+
   const [refreshing, setRefreshing] = useState(false);
 
-  const utils = api.useUtils();
   const {
     data: requestsCount,
     isLoading: isCountRequestsLoading,
     refetch: refetchRequestCount,
   } = api.request.countRequests.useQuery();
+
   const {
     data: notificationsData,
     isLoading: isNotificationsLoading,

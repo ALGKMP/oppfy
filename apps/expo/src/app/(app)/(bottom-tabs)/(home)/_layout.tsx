@@ -16,14 +16,16 @@ const HomeLayout = () => {
   return (
     <Stack
       screenOptions={{
-        headerLeft: (props) => <HeaderLeft {...props} />,
-        header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
         name="home"
-        options={{ headerLeft: () => null, title: "Home" }}
+        options={{
+          header: (props) => <Header {...props} />,
+          headerLeft: () => null,
+          title: "Home",
+        }}
       />
       <Stack.Screen name="post/[postId]" options={{ header: () => null }} />
     </Stack>
