@@ -7,7 +7,7 @@ import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
-import { useToastController } from "@tamagui/toast";
+import { ToastViewport, useToastController } from "@tamagui/toast";
 import { H4, styled, Text, Theme, XStack, YStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
@@ -41,7 +41,10 @@ const ShareProfile = () => {
   const handleCopyLink = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await Clipboard.setStringAsync(qrValue);
-    toast.show("Link copied");
+    toast.show("Link copied", {
+      native: true,
+      duration: 1000,
+    });
   };
 
   return (
