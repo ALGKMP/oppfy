@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
-import { Blurhash } from "react-native-blurhash";
 import { Image } from "expo-image";
-import { FlipType, manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,39 +42,6 @@ const CreatePost = () => {
   const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-  const [blurhashValue, setBlurhashValue] = useState<string | null>(null);
-
-  const blurhashMedia = useCallback(async (uri: string) => {
-    const { uri: compressedUri } = await manipulateAsync(uri, [], {
-      format: SaveFormat.PNG,
-      compress: 0.5,
-    });
-
-    return await Blurhash.encode(compressedUri, 4, 3);
-  }, []);
-
-  useEffect(() => {
-    const generateThumbnailAndBlurhash = async () => {
-      if (type === "video") {
-        const { uri: thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
-          uri ?? "",
-        );
-        setThumbnail(thumbnailUri);
-
-        // Generate blurhash after thumbnail is created
-        console.log("here")
-        const hash = await blurhashMedia(thumbnailUri);
-        setBlurhashValue(hash);
-        console.log("Video hash", hash);
-      } else if (type === "photo" && uri) {
-        const hash = await blurhashMedia(uri);
-        setBlurhashValue(hash);
-        console.log("Photo hash", hash);
-      }
-    };
-
-    void generateThumbnailAndBlurhash();
-  }, [type, uri, blurhashMedia]);
 
   const {
     control,
@@ -109,7 +74,6 @@ const CreatePost = () => {
         <ScrollView flex={1} keyboardDismissMode="interactive">
           <YStack flex={1} gap="$4">
             <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
-            <Blurhash blurhash={blurhashValue ?? ""} style={styles.media} />
 
             <YStack flex={1} gap="$2">
               <Controller
