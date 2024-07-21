@@ -9,96 +9,73 @@ import { SizableText, Text, View, YStack } from "tamagui";
 
 import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
-import { api } from "~/utils/api";
+import { api, RouterOutputs } from "~/utils/api";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
+type ProfileData =
+  | RouterOutputs["profile"]["getFullProfileSelf"]
+  | RouterOutputs["profile"]["getFullProfileOther"];
+type RecommendationsData =
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
+type FriendsData = RouterOutputs["friend"]["paginateFriendsSelf"];
+// | RouterOutputs["friend"]["paginateFriendsOthersByProfileId"];
+type PostData = RouterOutputs["post"]["paginatePostsOfUserSelf"];
+
 interface MediaOfYouProps {
-  profileId?: string; // Optional: if not provided, it's the user's own profile
+  profileId?: string;
+  isSelfProfile: boolean;
+
+  profileData: ProfileData | undefined; // Replace 'any' with the actual type of your profile data
+  isLoadingProfileData: boolean;
+  // refetchProfileData: () => Promise<ProfileData>;
+  refetchProfileData: () => Promise<any>;
+
+  recommendations: RecommendationsData; // Replace 'any' with the actual type
+  isLoadingRecommendationsData: boolean;
+  // refetchRecommendationsData: () => Promise<RecommendationsData>;
+  refetchRecommendationsData: () => Promise<any>;
+
+  friends: FriendsData["items"]; // Replace 'any' with the actual type
+  isLoadingFriendsData: boolean;
+  // refetchFriendsData: () => Promise<FriendsData>;
+  refetchFriendsData: () => Promise<any>;
+
+  posts: PostData["items"]; // Replace 'any' with the actual type of your post items
+  isLoadingPostData: boolean;
+  isFetchingNextPage: boolean;
+  // fetchNextPage: () => Promise<PostData>;
+  fetchNextPage: () => Promise<any>;
+
+  hasNextPage: boolean;
 }
 
 const MediaOfYou = (props: MediaOfYouProps) => {
-  const { profileId: profileIdFromRoute } = props;
-  const isSelfProfile = !profileIdFromRoute;
-  const profileId = isSelfProfile ? undefined : parseInt(profileIdFromRoute);
+  const {
+    profileId,
+    isSelfProfile,
+
+    profileData,
+    isLoadingProfileData,
+    refetchProfileData,
+
+    recommendations,
+    isLoadingRecommendationsData,
+    refetchRecommendationsData,
+
+    friends,
+    isLoadingFriendsData,
+    refetchFriendsData,
+
+    posts,
+    isLoadingPostData,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = props;
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
-
-  // Profile data
-  const selfProfileQuery = api.profile.getFullProfileSelf.useQuery();
-  const otherProfileQuery = api.profile.getFullProfileOther.useQuery(
-    { profileId: profileId! },
-    { enabled: !isSelfProfile },
-  );
-
-  const profileData = isSelfProfile
-    ? selfProfileQuery.data
-    : otherProfileQuery.data;
-  const isLoadingProfileData = isSelfProfile
-    ? selfProfileQuery.isLoading
-    : otherProfileQuery.isLoading;
-  const refetchProfileData = isSelfProfile
-    ? selfProfileQuery.refetch
-    : otherProfileQuery.refetch;
-
-  // Recommendations data
-  const selfRecommendationsQuery =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
-  const isLoadingRecommendationsData = selfRecommendationsQuery.isLoading;
-  const recommendationsData = selfRecommendationsQuery.data;
-  const refetchRecommendationsData = selfRecommendationsQuery.refetch;
-
-  // Friends data
-  const selfFriendsQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    { pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
-  );
-  const otherFriendsQuery =
-    api.friend.paginateFriendsOthersByProfileId.useInfiniteQuery(
-      { profileId: profileId!, pageSize: 10 },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-        enabled: !isSelfProfile,
-      },
-    );
-
-  const friendsData = isSelfProfile
-    ? selfFriendsQuery.data
-    : otherFriendsQuery.data;
-  const isLoadingFriendsData = isSelfProfile
-    ? selfFriendsQuery.isLoading
-    : otherFriendsQuery.isLoading;
-  const refetchFriendsData = isSelfProfile
-    ? selfFriendsQuery.refetch
-    : otherFriendsQuery.refetch;
-
-  // Posts data
-  const selfPostsQuery = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
-    { pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
-  );
-  const otherPostsQuery = api.post.paginatePostsOfUserOther.useInfiniteQuery(
-    { profileId: profileId!, pageSize: 10 },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !isSelfProfile,
-    },
-  );
-
-  const postData = isSelfProfile ? selfPostsQuery.data : otherPostsQuery.data;
-  const isLoadingPostData = isSelfProfile
-    ? selfPostsQuery.isLoading
-    : otherPostsQuery.isLoading;
-  const isFetchingNextPage = isSelfProfile
-    ? selfPostsQuery.isFetchingNextPage
-    : otherPostsQuery.isFetchingNextPage;
-  const fetchNextPage = isSelfProfile
-    ? selfPostsQuery.fetchNextPage
-    : otherPostsQuery.fetchNextPage;
-  const hasNextPage = isSelfProfile
-    ? selfPostsQuery.hasNextPage
-    : otherPostsQuery.hasNextPage;
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -106,11 +83,6 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       await fetchNextPage();
     }
   };
-
-  const posts = useMemo(
-    () => postData?.pages.flatMap((page) => page.items),
-    [postData],
-  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -121,11 +93,6 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     ]);
     setRefreshing(false);
   }, [refetchFriendsData, refetchProfileData, refetchRecommendationsData]);
-
-  const friendItems = useMemo(
-    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendsData],
-  );
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -158,18 +125,18 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         isLoadingFriendsData={isLoadingFriendsData}
         isLoadingRecommendationsData={isLoadingRecommendationsData}
         profileData={profileData}
-        friendsData={friendItems}
-        recommendationsData={recommendationsData}
+        friendsData={friends}
+        recommendationsData={recommendations}
       />
     );
   }, [
-    friendItems,
+    friends,
     isLoadingFriendsData,
     isLoadingProfileData,
     isLoadingRecommendationsData,
     isSelfProfile,
     profileData,
-    recommendationsData,
+    recommendations,
   ]);
 
   return (
