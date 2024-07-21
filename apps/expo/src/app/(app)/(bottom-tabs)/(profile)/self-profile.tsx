@@ -18,19 +18,7 @@ const SelfProfile = () => {
         justifyContent="space-between"
         backgroundColor="$background"
       >
-        {router.canGoBack() ? (
-          <View minWidth="$2" alignItems="flex-start">
-            <TouchableOpacity
-              onPress={() => {
-                void router.back();
-              }}
-            >
-              <ChevronLeft />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View minWidth="$2" alignItems="flex-start" />
-        )}
+        <View minWidth="$2" alignItems="flex-start" />
 
         <View alignItems="center">
           <Text fontSize="$5" fontWeight="bold">
