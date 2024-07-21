@@ -292,6 +292,25 @@ export class PostService {
     }
   }
 
+  async getPost(postId: number): Promise<Post> {
+    try {
+      const post = await this.postRepository.getPost(postId);
+      if (!post[0]) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_GET_POST,
+          "Failed to get post.",
+        );
+      }
+      return post[0]
+    } catch (error) {
+      console.error(`Error in getPost for postId: ${postId}: `, error);
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_POST,
+        "Failed to get post.",
+      );
+    }
+  }
+
   async createPost(
     postedBy: string,
     postedFor: string,
