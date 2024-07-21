@@ -19,12 +19,16 @@ const ProfilePicture = () => {
       optimisticallyUpdate: true,
     });
 
-  const onSubmit = () =>
+  const onSubmit = () => router.replace("/(onboarding)/misc/recomendations");
+
+  const onSkip = () => router.replace("/(onboarding)//misc/recomendations");
+
+  /*   const onSubmit = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
 
   const onSkip = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
-
+ */
   return (
     <KeyboardSafeView>
       <BaseScreenView
