@@ -8,6 +8,7 @@ import {
   desc,
   eq,
   gt,
+  lt,
   or,
   schema,
   sql,
@@ -114,7 +115,10 @@ export class NotificationsRepository {
         and(
           eq(schema.notifications.recipientId, userId),
           cursor
-            ? gt(schema.notifications.createdAt, cursor.createdAt)
+            ? or(
+                lt(schema.notifications.createdAt, cursor.createdAt),
+                eq(schema.notifications.createdAt, cursor.createdAt),
+              )
             : undefined,
         ),
       )
@@ -122,7 +126,9 @@ export class NotificationsRepository {
         desc(schema.notifications.createdAt),
         desc(schema.notifications.id),
       )
-      .limit(pageSize);
+      .limit(pageSize + 1);
+
+    console.log(notifications);
 
     return notifications;
   }
