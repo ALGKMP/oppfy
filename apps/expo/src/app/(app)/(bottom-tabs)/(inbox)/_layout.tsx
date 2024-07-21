@@ -16,22 +16,36 @@ const InboxLayout = () => {
   return (
     <Stack
       screenOptions={{
-        headerLeft: (props) => <HeaderLeft {...props} />,
-        header: (props) => <Header {...props} />,
+        header: () => null,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
         name="index"
         options={{
+          header: (props) => <Header {...props} />,
           headerLeft: () => null,
           title: "Inbox",
         }}
       />
 
-      <Stack.Screen name="requests" />
+      <Stack.Screen
+        name="requests"
+        options={{
+          header: (props) => <Header {...props} />,
+          headerLeft: (props) => <HeaderLeft {...props} />,
+          title: "Requests",
+        }}
+      />
 
-      <Stack.Screen name="connections/[user-id]" />
+      <Stack.Screen
+        name="connections/[user-id]"
+        options={{
+          header: (props) => <Header {...props} />,
+          headerLeft: (props) => <HeaderLeft {...props} />,
+          title: "Connections",
+        }}
+      />
     </Stack>
   );
 };
