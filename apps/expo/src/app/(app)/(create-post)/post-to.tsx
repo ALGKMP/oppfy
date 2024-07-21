@@ -7,23 +7,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import {
-  ArrowBigLeft,
-  ChevronRight,
-  Minus,
-  UserRoundX,
-} from "@tamagui/lucide-icons";
+import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
 import {
   Button,
   getToken,
   H6,
-  ListItemTitle,
-  ScrollView,
   Separator,
   Spacer,
   useTheme,
   View,
-  XStack,
   YStack,
 } from "tamagui";
 
