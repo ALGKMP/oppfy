@@ -15,8 +15,9 @@ export class FollowService {
   private userService = new UserService();
   private notificationsService = new NotificationsService();
 
-  async isFollowing(userId: string, recipientId: string) {
-    return !!(await this.followRepository.getFollower(userId, recipientId));
+  async isFollowing(senderId: string, recipientId: string) {
+    if (senderId === recipientId) return true; // Temporary fix
+    return !!(await this.followRepository.getFollower(senderId, recipientId));
   }
 
   // @tony: Example for noti handling
@@ -81,6 +82,7 @@ export class FollowService {
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
+    if (senderId === recipientId) return true; // Temporary fix
     const isFollowing = await this.isFollowing(senderId, recipientId);
     if (!isFollowing) {
       console.error(
@@ -113,15 +115,9 @@ export class FollowService {
       );
     }
 
-    await this.followRepository.removeFollowRequest(
-      senderId,
-      recipientId,
-    );
+    await this.followRepository.removeFollowRequest(senderId, recipientId);
 
-    await this.followRepository.addFollower(
-      senderId,
-      recipientId,
-    );
+    await this.followRepository.addFollower(senderId, recipientId);
   }
 
   async declineFollowRequest(
