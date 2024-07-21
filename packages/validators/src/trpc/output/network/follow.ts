@@ -96,7 +96,7 @@ const trpcFollowOutputSchema = {
       .optional(),
   }),
 
-  isFollowing: z.boolean(),
+  isFollowingSelf: z.boolean(),
 };
 
 export default trpcFollowOutputSchema;

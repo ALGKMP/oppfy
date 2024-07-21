@@ -55,7 +55,7 @@ const followInputSchema = {
     pageSize: z.number().optional(),
   }),
 
-   isFollowing: z.object({
+  isFollowingSelf: z.object({
     userId: z.string(),
   }),
 };

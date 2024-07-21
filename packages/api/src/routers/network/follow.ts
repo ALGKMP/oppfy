@@ -104,9 +104,9 @@ export const followRouter = createTRPCRouter({
       }
     }),
 
-    isFollowing: protectedProcedure
-    .input(trpcValidators.input.follow.isFollowing)
-    .output(trpcValidators.output.follow.isFollowing)
+  isFollowingSelf: protectedProcedure
+    .input(trpcValidators.input.follow.isFollowingSelf)
+    .output(trpcValidators.output.follow.isFollowingSelf)
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.isFollowing(
