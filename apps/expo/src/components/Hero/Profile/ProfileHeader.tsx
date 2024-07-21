@@ -18,6 +18,7 @@ interface ProfileHeaderProps {
     | undefined;
   friendsData:
     | z.infer<typeof trpcValidators.output.friend.friendItems>
+    | z.infer<typeof trpcValidators.output.friend.friendItemsOther>
     | undefined;
   recommendationsData:
     | z.infer<typeof trpcValidators.output.recommendations.recommededProfiles>
