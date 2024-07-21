@@ -57,7 +57,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   const handleProfileClicked = (profileId: number) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
-      pathname: "/(profile)/profile/[profile-id]/",
+      pathname: "/(home)/profile/[profile-id]/",
       params: { profileId: String(profileId) },
     });
   };
@@ -150,7 +150,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
     return renderLoadingSkeletons();
   }
 
-/*   if (props.reccomendationsData.length === 0) {
+  /*   if (props.reccomendationsData.length === 0) {
     return null;
   } */
   return renderSuggestions(props.reccomendationsData);
