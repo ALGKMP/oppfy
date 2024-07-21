@@ -1,15 +1,21 @@
 import React from "react";
+import { processColorsInProps } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
 import { Image } from "expo-image";
+import { PersonStanding } from "@tamagui/lucide-icons";
 
 interface ImagePostProps {
+  postId: number;
   imageUrl: string;
   children: React.ReactNode;
 }
 
-const ImagePost: React.FC<ImagePostProps> = ({ imageUrl, children }) => {
+const ImagePost: React.FC<ImagePostProps> = (props: ImagePostProps) => {
+  const { postId, imageUrl, children } = props;
+  const postKey = postId.toString();
   return (
     <Image
       source={{ uri: imageUrl }}
+      recyclingKey={postKey}
       style={[
         {
           width: "100%",
