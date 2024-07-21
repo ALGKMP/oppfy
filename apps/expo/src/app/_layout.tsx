@@ -20,7 +20,6 @@ import { useNotificationObserver } from "~/hooks/notifications";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
-import { TamaguiProvider } from "tamagui";
 
 const RootLayout = () => {
   useNotificationObserver();
