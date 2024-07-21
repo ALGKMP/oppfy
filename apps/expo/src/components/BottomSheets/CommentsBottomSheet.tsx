@@ -30,7 +30,6 @@ import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
-import SelfProfile from "~/app/(app)/(bottom-tabs)/(profile)/self-profile";
 import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 import { api } from "~/utils/api";
 import { BlurContextMenuWrapper } from "../ContextMenu";

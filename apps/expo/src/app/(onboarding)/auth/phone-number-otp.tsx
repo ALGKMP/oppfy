@@ -62,7 +62,7 @@ const PhoneNumberOTP = () => {
       await userOnboardingCompletedMutation.mutateAsync();
 
     userOnboardingCompleted
-      ? router.replace("/(app)/(bottom-tabs)/(profile)/self-profile")
+      ? router.replace("/(app)/(bottom-tabs)/(home)/home")
       : router.replace("/user-info/welcome");
   };
 
