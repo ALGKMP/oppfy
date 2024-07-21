@@ -150,9 +150,9 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
     return renderLoadingSkeletons();
   }
 
-  if (props.reccomendationsData.length === 0) {
+/*   if (props.reccomendationsData.length === 0) {
     return null;
-  }
+  } */
   return renderSuggestions(props.reccomendationsData);
 };
 
