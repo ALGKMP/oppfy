@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { Dimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList, ViewToken } from "@shopify/flash-list";
 import { Camera } from "@tamagui/lucide-icons";
 import { Separator, SizableText, Text, useTheme, View, YStack } from "tamagui";
 
 import RecommendationsCarousel from "~/components/Carousels/RecommendationsCarousel";
+import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import PostItem from "../../../../components/Media/PostItem";
 
@@ -16,6 +18,8 @@ const HomeScreen = () => {
   );
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
+
+  const insets = useSafeAreaInsets();
 
   const {
     data: postData,
@@ -75,63 +79,65 @@ const HomeScreen = () => {
   };
 
   return (
-    <View flex={1} width="100%" height="100%">
-      <FlashList
-        nestedScrollEnabled={true}
-        data={posts}
-        refreshing={refreshing}
-        showsVerticalScrollIndicator={false}
-        // onRefresh={onRefresh}
-        numColumns={1}
-        onEndReached={handleOnEndReached}
-        keyExtractor={(item) => {
-          return "home_" + item?.postId.toString() ?? "home_undefined";
-        }}
-        renderItem={({ item, index }) => {
-          if (item === undefined) {
-            return null;
-          }
-          return (
-            <>
-              {isLoadingPostData ? (
-                <>
-                  <Text>Loading...</Text>
-                </>
-              ) : index == 0 ? (
-                <YStack>
-                  {isLoadingRecommendationsData ? (
-                    <RecommendationsCarousel loading />
-                  ) : (
-                    recommendationsData && (
-                      <RecommendationsCarousel
-                        loading={isLoadingRecommendationsData}
-                        reccomendationsData={recommendationsData}
-                      ></RecommendationsCarousel>
-                    )
-                  )}
-                  <Separator />
+    // <BaseScreenView top={insets.top} padding={0}>
+      <View flex={1} width="100%" height="100%">
+        <FlashList
+          nestedScrollEnabled={true}
+          data={posts}
+          refreshing={refreshing}
+          showsVerticalScrollIndicator={false}
+          // onRefresh={onRefresh}
+          numColumns={1}
+          onEndReached={handleOnEndReached}
+          keyExtractor={(item) => {
+            return "home_" + item?.postId.toString() ?? "home_undefined";
+          }}
+          renderItem={({ item, index }) => {
+            if (item === undefined) {
+              return null;
+            }
+            return (
+              <>
+                {isLoadingPostData ? (
+                  <>
+                    <Text>Loading...</Text>
+                  </>
+                ) : index == 0 ? (
+                  <YStack>
+                    {isLoadingRecommendationsData ? (
+                      <RecommendationsCarousel loading />
+                    ) : (
+                      recommendationsData && (
+                        <RecommendationsCarousel
+                          loading={isLoadingRecommendationsData}
+                          reccomendationsData={recommendationsData}
+                        ></RecommendationsCarousel>
+                      )
+                    )}
+                    <Separator />
+                    <PostItem
+                      post={item}
+                      isSelfPost={false}
+                      isViewable={viewableItems.includes(item.postId)}
+                    />
+                  </YStack>
+                ) : (
                   <PostItem
                     post={item}
                     isSelfPost={false}
                     isViewable={viewableItems.includes(item.postId)}
                   />
-                </YStack>
-              ) : (
-                <PostItem
-                  post={item}
-                  isSelfPost={false}
-                  isViewable={viewableItems.includes(item.postId)}
-                />
-              )}
-            </>
-          );
-        }}
-        estimatedItemSize={screenWidth}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        extraData={viewableItems}
-      />
-    </View>
+                )}
+              </>
+            );
+          }}
+          estimatedItemSize={screenWidth}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={viewableItems}
+        />
+      </View>
+    // </BaseScreenView>
   );
 };
 
