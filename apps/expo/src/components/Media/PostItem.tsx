@@ -34,6 +34,7 @@ import GradientHeart, {
 import Mute, { useMuteAnimations } from "~/components/Icons/Mute";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { useSession } from "~/contexts/SessionContext";
+import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
 import { ActionSheet } from "../Sheets";
 import ImagePost from "./ImagePost";
@@ -61,6 +62,7 @@ const PostItem = (props: PostItemProps) => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { getCurrentUserProfileId } = useSession();
+  const { isSharing, shareImage } = useShare();
 
   const router = useRouter();
 
@@ -412,7 +414,10 @@ const PostItem = (props: PostItemProps) => {
           </TouchableOpacity>
 
           {/* Share Button */}
-          <TouchableOpacity onPress={() => setIsShareModalVisible(true)}>
+          <TouchableOpacity
+            onPress={() => shareImage({ uri: post.imageUrl })} // TODO: Add loading spinner on this
+            // setIsShareModalVisible(true)}
+          >
             <Send size={28} color="$gray12" marginLeft="$-1" />
           </TouchableOpacity>
         </XStack>
@@ -507,7 +512,7 @@ const PostItem = (props: PostItemProps) => {
         />
       )}
 
-      {isShareModalVisible && (
+      {/* {isShareModalVisible && (
         <ShareBottomSheet
           postId={post.postId}
           imageUrl={post.imageUrl}
@@ -515,7 +520,7 @@ const PostItem = (props: PostItemProps) => {
           modalVisible={isShareModalVisible}
           setModalVisible={setIsShareModalVisible}
         />
-      )}
+      )} */}
 
       {isReportModalVisible && (
         <ReportPostActionSheet
