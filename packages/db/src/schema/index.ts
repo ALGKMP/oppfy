@@ -170,6 +170,7 @@ export const profileStats = pgTable("profile_stats", {
     .references(() => profile.id, { onDelete: "cascade" }),
   followers: integer("followers").notNull().default(0),
   following: integer("following").notNull().default(0),
+  friends: integer("friends").notNull().default(0), // Add this line
   posts: integer("posts").notNull().default(0),
   views: integer("views").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -276,7 +277,7 @@ export const post = pgTable("post", {
   id: serial("id").primaryKey(),
   author: text("author")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   recipient: text("recipient")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
