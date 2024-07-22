@@ -16,12 +16,82 @@ export const postRouter = createTRPCRouter({
         const currentDate = Date.now();
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
 
-        const metadata = sharedValidators.media.postMetadataForS3.parse({
+        // const metadata = {
+        //   author: ctx.session.uid,
+        //   recipient: input.recipientId,
+        //   caption: input.caption,
+        //   width: input.width.toString(), // S3 Metadata have to be strings or some bullshit
+        //   height: input.height.toString(), // S3 Metadata have to be strings or some bullshit
+        //   type: "onApp",
+        // };
+
+        const s3ObjectMetadataForUserOnAppSchema = z.object({
+          author: z.string(),
+          recipient: z.string(),
+          caption: z.string().default(" "),
+          height: z.string(),
+          width: z.string(),
+          type: z.literal("onApp"),
+        });
+
+        const metadata = s3ObjectMetadataForUserOnAppSchema.parse({
           author: ctx.session.uid,
           recipient: input.recipientId,
           caption: input.caption,
           width: input.width.toString(), // S3 Metadata have to be strings or some bullshit
           height: input.height.toString(), // S3 Metadata have to be strings or some bullshit
+          type: "onApp",
+        });
+
+        return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
+          Bucket: env.S3_POST_BUCKET,
+          Key: objectKey,
+          ContentLength: input.contentLength,
+          ContentType: "image/jpeg",
+          Metadata: metadata,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Failed to create presigned URL for post upload. Please check your network connection and try again.",
+        });
+      }
+    }),
+
+  createPresignedUrlForImagePostOfUserNotOnApp: protectedProcedure
+    .input(trpcValidators.input.post.createS3PresignedUrl)
+    .output(z.string())
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const currentDate = Date.now();
+        const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
+
+        // const metadata = {
+        //   author: ctx.session.uid,
+        //   recipient: input.recipientId,
+        //   caption: input.caption,
+        //   width: input.width.toString(), // S3 Metadata have to be strings or some bullshit
+        //   height: input.height.toString(), // S3 Metadata have to be strings or some bullshit
+        //   type: "onApp",
+        // };
+
+        const s3ObjectMetadataForUserNotOnAppSchema = z.object({
+          author: z.string(),
+          phoneNumber: z.string(),
+          caption: z.string(),
+          height: z.string(),
+          width: z.string(),
+          type: z.literal("notOnApp"),
+        });
+
+        const metadata = s3ObjectMetadataForUserNotOnAppSchema.parse({
+          author: ctx.session.uid,
+          recipient: input.recipientId,
+          caption: input.caption,
+          width: input.width.toString(), // S3 Metadata have to be strings or some bullshit
+          height: input.height.toString(), // S3 Metadata have to be strings or some bullshit
+          type: "onApp",
         });
 
         return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
