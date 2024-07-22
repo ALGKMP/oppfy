@@ -12,6 +12,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -87,7 +88,7 @@ export const user = pgTable("user", {
 });
 
 export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
-  id: text("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   phoneNumber: text("phone_number").notNull(),
   author: text("author")
     .notNull()
