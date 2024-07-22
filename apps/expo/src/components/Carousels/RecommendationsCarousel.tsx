@@ -50,9 +50,7 @@ type RecommendationsCarouselProps = LoadingProps | RecommendationsLoadingProps;
 const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   const router = useRouter();
 
-  /*   const showMore =
-    !props.loading &&
-    props.reccomendationsData.length < props.; */
+  const showMore = !props.loading && props.reccomendationsData.length < 10;
 
   const handleProfileClicked = (profileId: number) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -73,6 +71,37 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
       console.error("Error sharing:", error);
     }
   };
+
+  const handleShowMoreRecs = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    console.log("going in there");
+    router.push("/self-connections/friend-list");
+  };
+
+  const throttledHandleAction = useRef(
+    throttle(handleShowMoreRecs, 300, { leading: true, trailing: false }),
+  ).current;
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!showMore) return;
+
+      const { contentSize, contentOffset, layoutMeasurement } =
+        event.nativeEvent;
+
+      const contentWidth = contentSize.width;
+      const offsetX = contentOffset.x;
+      const layoutWidth = layoutMeasurement.width;
+
+      // Check if within the threshold from the end
+      if (offsetX + layoutWidth - 80 >= contentWidth) {
+        throttledHandleAction();
+      }
+    },
+    [showMore, throttledHandleAction],
+  );
+
+  useEffect(() => throttledHandleAction.cancel(), [throttledHandleAction]);
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
@@ -96,7 +125,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
           horizontal
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
-          // onScroll={handleScroll}
+          onScroll={handleScroll}
           renderItem={({ item, index }) =>
             // check type of item
             "last" in item ? (
@@ -154,10 +183,6 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
     return renderLoadingSkeletons();
   }
 
-  /*   if (props.reccomendationsData.length === 0) {
-  /*   if (props.reccomendationsData.length === 0) {
-    return null;
-  } */
   return renderSuggestions(props.reccomendationsData);
 };
 
