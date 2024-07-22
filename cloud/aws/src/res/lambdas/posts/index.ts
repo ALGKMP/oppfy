@@ -1,29 +1,37 @@
+import { parser } from "@aws-lambda-powertools/parser/middleware";
+import { S3Schema } from "@aws-lambda-powertools/parser/schemas";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import middy from "@middy/core";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
 import { db, schema } from "@oppfy/db";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
+
+const metadataSchema = z.object({
+  author: z.string(),
+  recipient: z.string(),
+  height: z.string().transform((val) => parseInt(val)),
+  width: z.string().transform((val) => parseInt(val)),
+  caption: z.string().transform((val) => val),
+  key: z.string(),
+});
+
+type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
 export const s3Client = new S3Client({
   region: "us-east-1",
 });
 
-export const handler = async (
-  event: S3Event,
+const lambdaHandler = async (
+  event: S3ObjectLambdaEvent,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
   const record = event.Records[0];
 
-  if (!record) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No record found in event" }),
-    };
-  }
-
-  const objectKey = record.s3.object.key;
-  const objectBucket = record.s3.bucket.name;
+  const objectKey = record?.s3.object.key;
+  const objectBucket = record?.s3.bucket.name;
 
   console.log("Received event:", JSON.stringify(event));
 
@@ -86,3 +94,5 @@ export const handler = async (
     };
   }
 };
+
+export const handler = middy(lambdaHandler).use(parser({ schema: S3Schema }));
