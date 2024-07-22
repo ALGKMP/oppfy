@@ -15,6 +15,13 @@
       "when": 1720688356180,
       "tag": "0001_hesitant_boomer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1721665011062,
+      "tag": "0002_bouncy_ogun",
+      "breakpoints": true
     }
   ]
 }
