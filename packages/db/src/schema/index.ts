@@ -140,6 +140,8 @@ export const userRelations = relations(user, ({ one, many }) => ({
     fields: [user.notificationSettingsId],
     references: [notificationSettings.id],
   }),
+  postViews: many(postView),
+  profileViews: many(profileView),
   notifications: many(notifications),
   pushTokens: many(pushToken),
 }));
@@ -160,6 +162,45 @@ export const profile = pgTable("profile", {
     .defaultNow()
     .notNull(),
 });
+
+export const profileStats = pgTable("profile_stats", {
+  id: serial("id").primaryKey(),
+  profileId: bigint("profile_id", { mode: "number" })
+    .notNull()
+    .references(() => profile.id, { onDelete: "cascade" }),
+  followers: integer("followers").notNull().default(0),
+  following: integer("following").notNull().default(0),
+  posts: integer("posts").notNull().default(0),
+  views: integer("views").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const profileRelations = relations(profile, ({ one, many }) => ({
+  user: one(user, {
+    fields: [profile.id],
+    references: [user.profileId],
+  }),
+  postStats: one(profileStats, {
+    fields: [profile.id],
+    references: [profileStats.profileId],
+  }),
+  followers: many(follower),
+  following: many(follower),
+  posts: many(post),
+  profileViews: many(profileView),
+}));
+
+export const profileStatsRelations = relations(profileStats, ({ one }) => ({
+  profile: one(profile, {
+    fields: [profileStats.profileId],
+    references: [profile.id],
+  }),
+}));
 
 export const pushToken = pgTable(
   "push_token",
@@ -267,9 +308,36 @@ export const postRelations = relations(post, ({ one, many }) => ({
     fields: [post.id],
     references: [postStats.postId],
   }),
+  views: many(postView),
   likes: many(like),
   comments: many(comment),
 }));
+
+export const postView = pgTable("post_view", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  postId: bigint("post_id", { mode: "number" })
+    .notNull()
+    .references(() => post.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const profileView = pgTable("profile_view", {
+  id: serial("id").primaryKey(),
+  viewerUserId: text("viewer_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  viewedProfileId: bigint("viewed_profile_id", { mode: "number" })
+    .notNull()
+    .references(() => profile.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 export const postStats = pgTable("post_stats", {
   id: serial("id").primaryKey(),
