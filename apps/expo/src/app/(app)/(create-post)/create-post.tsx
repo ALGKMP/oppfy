@@ -18,9 +18,7 @@ const postSchema = z.object({
 
 type FieldTypes = z.infer<typeof postSchema>;
 
-interface CreatePostBaseParams {
-  // index signature
-  [key: string]: string;
+interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
   type: "photo" | "video";
   height: string;
@@ -32,16 +30,14 @@ interface CreatePostWithRecipient extends CreatePostBaseParams {
 }
 
 interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
-  phoneNumber: string;
+  recipientPhoneNumber: string;
 }
 
 const CreatePost = () => {
-  const { type, uri, height, width, ...id } = useLocalSearchParams<
+  const params = useLocalSearchParams<
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
-
-  const recipientId = "recipientId" in id ? id.recipientId : undefined;
-  const phoneNumber = "phoneNumber" in id ? id.phoneNumber : undefined;
+  const { type, uri, height, width } = params;
 
   const router = useRouter();
 
@@ -58,13 +54,25 @@ const CreatePost = () => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    const input = {
-      recipientId: recipientId ?? "",
+    const baseData = {
       uri: uri ?? "",
       width: Number(width),
       height: Number(height),
       caption: data.caption,
-    } satisfies UploadMediaInput;
+    };
+
+    const input =
+      "recipientId" in params
+        ? {
+            ...baseData,
+            recipientId: params.recipientId ?? "",
+            type: "onApp" as const,
+          }
+        : {
+            ...baseData,
+            recipientPhoneNumber: params.phoneNumber ?? "",
+            type: "notOnApp" as const,
+          };
 
     type === "photo"
       ? await uploadPhotoMutation.mutateAsync(input)

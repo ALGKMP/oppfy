@@ -161,7 +161,7 @@ const PostTo = () => {
     }
   };
 
-  const onContactSelected = (phoneNumber: string) => {
+  const onContactSelected = (recipientPhoneNumber: string) => {
     router.navigate({
       pathname: "/create-post",
       params: {
@@ -169,7 +169,7 @@ const PostTo = () => {
         type,
         width,
         height,
-        phoneNumber,
+        recipientPhoneNumber,
       },
     });
   };
