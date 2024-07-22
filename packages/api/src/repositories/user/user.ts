@@ -23,14 +23,21 @@ export class UserRepository {
         .values({ username })
         .returning({ id: schema.profile.id });
 
+      if (!profile) throw new Error("Profile was not created");
+
+      const [profileStats] = await tx
+        .insert(schema.profileStats)
+        .values({ profileId: profile.id })
+        .returning({ id: schema.profileStats.id });
+
       // Create default notification settings for the user
       const [notificationSetting] = await tx
         .insert(schema.notificationSettings)
         .values({})
         .returning({ id: schema.notificationSettings.id });
 
-      if (profile === undefined) {
-        throw new Error("Profile was not created");
+      if (profileStats === undefined) {
+        throw new Error("Profile stats was not created");
       }
 
       if (notificationSetting === undefined) {
@@ -70,7 +77,6 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async deleteUser(userId: string) {
-    // TODO: This needs to handle failed states
     await this.db.delete(schema.user).where(eq(schema.user.id, userId));
     await this.auth.deleteUser(userId);
   }

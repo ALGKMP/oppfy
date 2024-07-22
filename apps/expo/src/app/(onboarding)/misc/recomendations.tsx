@@ -34,7 +34,6 @@ const placeholderUsers = [
   { fullName: "Ali", username: "aliy45" },
   { fullName: "itsalianna", username: "itsaliannaaa" },
   { fullName: "Bautista", username: "bautista12" },
-  //   { fullName: "mckalaaaaa", username: "mckalaaaa" },
   // Add more users if needed
 ];
 
@@ -44,11 +43,11 @@ const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, conside
 const AnimatedUserProfile = ({
   user,
   index,
-  onUserAdded,
+  onUserSelected,
 }: {
-  user: { fullName: string | null; username: string };
+  user: { userId: string; fullName: string | null; username: string };
   index: number;
-  onUserAdded: (added: boolean) => void;
+  onUserSelected: (userId: string, added: boolean) => void;
 }) => {
   const [isAdded, setIsAdded] = useState(false);
   const opacity = useSharedValue(1);
@@ -68,7 +67,8 @@ const AnimatedUserProfile = ({
   });
 
   const handlePress = () => {
-    onUserAdded(true);
+    const newIsAdded = !isAdded;
+    onUserSelected(user.userId, newIsAdded);
 
     opacity.value = withSequence(
       withTiming(0, { duration: 200 }),
@@ -79,7 +79,6 @@ const AnimatedUserProfile = ({
       withDelay(500, withTiming(0, { duration: 200 })),
     );
     setTimeout(() => {
-      const newIsAdded = !isAdded;
       setIsAdded(newIsAdded);
     }, 1000);
   };
@@ -115,7 +114,7 @@ const AnimatedUserProfile = ({
               checkmarkAnimatedStyle,
             ]}
           >
-            <UserRoundCheck size={40} color="white" />
+            <UserRoundCheck marginLeft={2} size={40} color="white" />
           </Animated.View>
           <Animated.View
             style={[
@@ -156,20 +155,37 @@ const AnimatedUserProfile = ({
 
 const OnboardingRecomendations = () => {
   const theme = useTheme();
-  const [addedUsersCount, setAddedUsersCount] = useState(0);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const requiredUsers = 5;
 
   const { data: recommendations, isLoading } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
 
-  const onDone = () =>
-    router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
+  const followMultipleUsersMutation = api.follow.followUsers.useMutation();
 
-  const handleUserAdded = (added: boolean) => {
-    setAddedUsersCount((prev) => (added ? prev + 1 : prev - 1));
+  const handleUserSelected = (username: string, selected: boolean) => {
+    setSelectedUsers((prev) =>
+      selected ? [...prev, username] : prev.filter((u) => u !== username),
+    );
   };
 
-  const remainingUsers = Math.max(0, requiredUsers - addedUsersCount);
+  const onDone = async () => {
+    // if (selectedUsers.length >= requiredUsers) {
+    try {
+      void followMultipleUsersMutation.mutateAsync({
+        userIds: selectedUsers,
+      });
+
+      router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
+
+      console.log("Followed users:", selectedUsers);
+    } catch (error) {
+      console.error("Failed to follow users:", error);
+      // Handle error (e.g., show an error message to the user)
+    }
+    // }
+  };
+  const remainingUsers = Math.max(0, requiredUsers - selectedUsers.length);
 
   return (
     <BaseScreenView
@@ -189,13 +205,13 @@ const OnboardingRecomendations = () => {
         Recommendations
       </Text>
       <FlashList
-        data={placeholderUsers}
+        data={recommendations}
         estimatedItemSize={itemWidth}
         renderItem={({ item, index }) => (
           <AnimatedUserProfile
             user={item}
             index={index}
-            onUserAdded={handleUserAdded}
+            onUserSelected={handleUserSelected}
           />
         )}
         numColumns={3}
@@ -204,7 +220,7 @@ const OnboardingRecomendations = () => {
           paddingHorizontal: 12,
         }}
       />
-      <OnboardingButton
+      {/*       <OnboardingButton
         onPress={onDone}
         disabled={remainingUsers > 0}
         opacity={remainingUsers > 0 ? 0.5 : 1}
@@ -212,7 +228,8 @@ const OnboardingRecomendations = () => {
         {remainingUsers > 0
           ? `Add ${remainingUsers} more user${remainingUsers > 1 ? "s" : ""} to continue`
           : "Done"}
-      </OnboardingButton>
+      </OnboardingButton> */}
+      <OnboardingButton onPress={onDone}>Done</OnboardingButton>
     </BaseScreenView>
   );
 };

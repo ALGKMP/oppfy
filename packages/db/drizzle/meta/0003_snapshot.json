@@ -1,6 +1,6 @@
 {
-  "id": "42722cc9-8173-4dce-92ba-48b1b7fbd6a9",
-  "prevId": "d42b3b0b-4c95-4141-9690-a15b710f42c2",
+  "id": "303db7ea-cd28-42ae-84df-a8efbac485ad",
+  "prevId": "42722cc9-8173-4dce-92ba-48b1b7fbd6a9",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -740,7 +740,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "post_recipient_user_id_fk": {
@@ -1079,6 +1079,13 @@
         },
         "following": {
           "name": "following",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "friends": {
+          "name": "friends",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

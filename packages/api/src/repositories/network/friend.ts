@@ -8,30 +8,42 @@ export class FriendRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addFriend(userId1: string, userId2: string) {
+  async createFriend(senderId: string, recipientId: string) {
     return await this.db.transaction(async (tx) => {
-      // Make userId1 follow userId2
-      await tx
-        .insert(schema.follower)
-        .values({ senderId: userId1, recipientId: userId2 });
+      // Create friend relationship
+      await tx.insert(schema.friend).values([
+        { userId1: senderId, userId2: recipientId },
+        { userId1: recipientId, userId2: senderId },
+      ]);
 
-      // Make userId2 follow userId1
-      await tx
-        .insert(schema.follower)
-        .values({ senderId: userId2, recipientId: userId1 });
-
-      // Add the two users as friends
-      await tx.insert(schema.friend).values({ userId1, userId2 });
-
-      // Delete the friend request from userId1 to userId2
+      // Delete the friend request
       await tx
         .delete(schema.friendRequest)
         .where(
-          or(
-            eq(schema.friendRequest.senderId, userId1),
-            eq(schema.friendRequest.recipientId, userId2),
+          and(
+            eq(schema.friendRequest.senderId, senderId),
+            eq(schema.friendRequest.recipientId, recipientId),
           ),
         );
+
+      // Update profileStats for both users
+      const updateProfileStats = async (userId: string) => {
+        const [userProfile] = await tx
+          .select({ profileId: schema.user.profileId })
+          .from(schema.user)
+          .where(eq(schema.user.id, userId));
+
+        if (!userProfile)
+          throw new Error(`Profile not found for user ${userId}`);
+
+        await tx
+          .update(schema.profileStats)
+          .set({ friends: sql`${schema.profileStats.friends} + 1` })
+          .where(eq(schema.profileStats.profileId, userProfile.profileId));
+      };
+
+      await updateProfileStats(senderId);
+      await updateProfileStats(recipientId);
 
       return true;
     });
@@ -39,21 +51,44 @@ export class FriendRepository {
 
   @handleDatabaseErrors
   async removeFriend(userId1: string, userId2: string) {
-    const result = await this.db
-      .delete(schema.friend)
-      .where(
-        or(
-          and(
-            eq(schema.friend.userId1, userId1),
-            eq(schema.friend.userId2, userId2),
+    return await this.db.transaction(async (tx) => {
+      // Remove friend relationship
+      await tx
+        .delete(schema.friend)
+        .where(
+          or(
+            and(
+              eq(schema.friend.userId1, userId1),
+              eq(schema.friend.userId2, userId2),
+            ),
+            and(
+              eq(schema.friend.userId1, userId2),
+              eq(schema.friend.userId2, userId1),
+            ),
           ),
-          and(
-            eq(schema.friend.userId1, userId2),
-            eq(schema.friend.userId2, userId1),
-          ),
-        ),
-      );
-    return result[0];
+        );
+
+      // Update profileStats for both users
+      const updateProfileStats = async (userId: string) => {
+        const [userProfile] = await tx
+          .select({ profileId: schema.user.profileId })
+          .from(schema.user)
+          .where(eq(schema.user.id, userId));
+
+        if (!userProfile)
+          throw new Error(`Profile not found for user ${userId}`);
+
+        await tx
+          .update(schema.profileStats)
+          .set({ friends: sql`${schema.profileStats.friends} - 1` })
+          .where(eq(schema.profileStats.profileId, userProfile.profileId));
+      };
+
+      await updateProfileStats(userId1);
+      await updateProfileStats(userId2);
+
+      return true;
+    });
   }
 
   @handleDatabaseErrors

@@ -71,17 +71,20 @@ const lambdaHandler = async (
         key: objectKey,
       });
 
-      const post = await db
-        .insert(schema.post)
-        .values(body)
-        .returning({ insertId: schema.post.id });
-      if (!post[0]?.insertId) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ message: "Failed to insert post" }),
-        };
-      }
-      await db.insert(schema.postStats).values({ postId: post[0]?.insertId });
+      const result = await db.transaction(async (tx) => {
+        const post = await tx
+          .insert(schema.post)
+          .values(body)
+          .returning({ insertId: schema.post.id });
+
+        if (!post[0]?.insertId) {
+          throw new Error("Failed to insert post");
+        }
+
+        await tx.insert(schema.postStats).values({ postId: post[0].insertId });
+
+        return post[0].insertId;
+      });
     } else {
       // MF not on the app
       const insertPostSchema = createInsertSchema(schema.postOfUserNotOnApp);

@@ -49,7 +49,7 @@ export class FriendService {
         "Friend request not found",
       );
     }
-    const addFriendResult = await this.friendRepository.addFriend(
+    const addFriendResult = await this.friendRepository.createFriend(
       senderId,
       recipientId,
     );
