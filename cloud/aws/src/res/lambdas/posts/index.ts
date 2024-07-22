@@ -2,21 +2,17 @@ import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { S3Schema } from "@aws-lambda-powertools/parser/schemas";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import middy from "@middy/core";
-import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
+import type { APIGatewayProxyResult, Context } from "aws-lambda";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import { db, schema } from "@oppfy/db";
-import { sharedValidators, trpcValidators } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
-const metadataSchema = z.object({
-  author: z.string(),
-  recipient: z.string(),
-  height: z.string().transform((val) => parseInt(val)),
-  width: z.string().transform((val) => parseInt(val)),
-  caption: z.string().transform((val) => val),
-  key: z.string(),
-});
+const metadataSchema = z.union([
+  sharedValidators.aws.s3ObjectMetadataForUserNotOnAppSchema,
+  sharedValidators.aws.s3ObjectMetadataForUserOnAppSchema,
+]);
 
 type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
@@ -58,30 +54,41 @@ const lambdaHandler = async (
       };
     }
 
-    const metadata = sharedValidators.media.postMetadataForS3.parse(Metadata);
-    const insertPostSchema = createInsertSchema(schema.post);
-
-    const body = insertPostSchema.parse({
-      author: metadata.author,
-      recipient: metadata.recipient,
-      height: parseInt(metadata.height),
-      width: parseInt(metadata.width),
-      caption: metadata.caption,
-      key: objectKey,
+    const metadata = metadataSchema.parse({
+      ...Metadata,
+      type: Metadata.type,
     });
 
-    const post = await db
-      .insert(schema.post)
-      .values(body)
-      .returning({ insertId: schema.post.id });
-    if (!post[0]?.insertId) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ message: "Failed to insert post" }),
-      };
-    }
-    await db.insert(schema.postStats).values({ postId: post[0]?.insertId });
+    if (metadata.type === "onApp") {
+      console.log("I'm Here")
+      const insertPostSchema = createInsertSchema(schema.post);
 
+      const body = insertPostSchema.parse({
+        author: metadata.author,
+        recipient: metadata.recipient,
+        height: metadata.height,
+        width: metadata.width,
+        caption: metadata.caption,
+        key: objectKey,
+      });
+
+      const post = await db
+        .insert(schema.post)
+        .values(body)
+        .returning({ insertId: schema.post.id });
+      if (!post[0]?.insertId) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Failed to insert post" }),
+        };
+      }
+      await db.insert(schema.postStats).values({ postId: post[0]?.insertId });
+    } else {
+      // Handle the case for users not on the app
+      // You can add your custom logic here
+      console.log("Processing post for user not on app:", metadata);
+      // TODO: Add your custom database operations here
+    }
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Post processed successfully" }),
