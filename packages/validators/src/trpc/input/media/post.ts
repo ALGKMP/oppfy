@@ -1,10 +1,20 @@
 import { z } from "zod";
 
-import { postContentType } from "../../../shared";
+import { phoneNumber, postContentType } from "../../../shared";
 
 const trpcPostInputSchema = {
-  createS3PresignedUrl: z.object({
+  createPresignedUrlForPost: z.object({
     recipientId: z.string(),
+    caption: z.string().max(2000).default(""),
+    height: z.number(),
+    width: z.number(),
+    contentLength: z.number(),
+    contentType: postContentType,
+  }),
+
+  createPresignedUrlForPostOfUserNotOnApp: z.object({
+    author: z.string(),
+    phoneNumber: z.string(),
     caption: z.string().max(2000).default(""),
     height: z.number(),
     width: z.number(),
