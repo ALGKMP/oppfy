@@ -15,6 +15,13 @@
       "when": 1720688356180,
       "tag": "0001_hesitant_boomer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1721666266107,
+      "tag": "0002_material_mercury",
+      "breakpoints": true
     }
   ]
 }
