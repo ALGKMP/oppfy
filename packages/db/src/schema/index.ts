@@ -12,6 +12,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -47,6 +48,7 @@ export const entityTypeEnum = pgEnum("entity_type", [
   "profile",
   "comment",
 ]);
+
 export const mediaTypeEnum = pgEnum("media_type", ["image", "video"]);
 
 export const reportReasonEnum = pgEnum("report_reason", [
@@ -77,6 +79,25 @@ export const user = pgTable("user", {
     .default("public")
     .notNull(),
   phoneNumber: text("phone_number").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  phoneNumber: text("phone_number").notNull(),
+  author: text("author")
+    .notNull()
+    .references(() => user.id),
+  caption: text("caption").notNull().default(""),
+  key: text("key").notNull(),
+  width: integer("width").notNull().default(500),
+  height: integer("height").notNull().default(500),
+  mediaType: mediaTypeEnum("media_type").notNull().default("image"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

@@ -1,14 +1,12 @@
 import React from "react";
-import { Dimensions, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 
-import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
 import {
   Heart,
 
   Send,
 } from "@tamagui/lucide-icons";
-import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
+import { Avatar, SizableText, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";

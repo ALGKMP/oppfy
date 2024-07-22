@@ -1,17 +1,25 @@
-import { profile } from "console";
+import {
+  CloudFrontClient,
+  CreateInvalidationCommand,
+} from "@aws-sdk/client-cloudfront";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
+import { env } from "@oppfy/env";
 import {
   openSearch,
   OpenSearchIndex,
   OpenSearchProfileIndexResult,
   OpenSearchResponse,
 } from "@oppfy/opensearch";
+import { sharedValidators } from "@oppfy/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
+const cloudFrontClient = new CloudFrontClient({ region: "us-east-1" });
+
+const CLOUDFRONT_DISTRIBUTION_ID = env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID;
 
 export const handler = async (
   event: S3Event,
@@ -42,11 +50,10 @@ export const handler = async (
       throw err; // Rethrow to handle it in the outer try-catch block
     });
 
-    const metadata = z
-      .object({
-        user: z.string(),
-      })
-      .parse(s3Response.Metadata);
+    const metadata =
+      sharedValidators.aws.s3ObjectMetadataForProfilePicturesSchema.parse(
+        s3Response.Metadata,
+      );
 
     console.log(metadata);
 
@@ -76,6 +83,8 @@ export const handler = async (
         },
       },
     });
+
+    await createCloudFrontInvalidation(objectKey);
 
     if (searchResult.body.hits.hits.length === 0) {
       return {
@@ -122,3 +131,26 @@ export const handler = async (
     };
   }
 };
+
+async function createCloudFrontInvalidation(objectKey: string) {
+  const params = {
+    DistributionId: CLOUDFRONT_DISTRIBUTION_ID,
+    InvalidationBatch: {
+      CallerReference: Date.now().toString(),
+      Paths: {
+        Quantity: 1,
+        Items: [`/${objectKey}`],
+      },
+    },
+  };
+
+  const command = new CreateInvalidationCommand(params);
+
+  try {
+    const response = await cloudFrontClient.send(command);
+    console.log("CloudFront invalidation created:", response);
+  } catch (error) {
+    console.error("Error creating CloudFront invalidation:", error);
+    throw error;
+  }
+}

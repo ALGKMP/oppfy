@@ -11,8 +11,6 @@ import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
 import { api, RouterOutputs } from "~/utils/api";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-
 type ProfileData =
   | RouterOutputs["profile"]["getFullProfileSelf"]
   | RouterOutputs["profile"]["getFullProfileOther"];

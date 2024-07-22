@@ -32,10 +32,3 @@ export const comment = z.object({
   createdAt: z.date(),
 });
 
-export const postMetadataForS3 = z.object({
-  author: z.string(),
-  recipient: z.string(),
-  caption: z.string().max(2000).default(""),
-  width: z.string(),
-  height: z.string(),
-});

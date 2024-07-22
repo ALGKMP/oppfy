@@ -69,11 +69,11 @@ const useUploadProfilePicture = ({
         // If the mutation fails, use the context-value from onMutate
         utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
       },
-      onSettled: async () => {
+      onSettled: () => {
         if (!optimisticallyUpdate) return;
-
         // Sync with server once mutation has settled
-        await utils.profile.getFullProfileSelf.invalidate();
+        setTimeout(() => void utils.profile.getFullProfileSelf.invalidate(), 10000);
+        // await utils.profile.getFullProfileSelf.invalidate();
       },
     },
   );

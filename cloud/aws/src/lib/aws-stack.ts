@@ -93,6 +93,8 @@ function createLambdaFunction(
       CONTACT_REC_LAMBDA_URL: env.CONTACT_REC_LAMBDA_URL,
 
       EXPO_ACCESS_TOKEN: env.EXPO_ACCESS_TOKEN,
+      CLOUDFRONT_PROFILE_DISTRIBUTION_ID:
+        env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
     },
   });
 }
@@ -332,16 +334,36 @@ export class AwsStack extends cdk.Stack {
       }),
     );
 
+    const openSearchSecurityGroup = new ec2.SecurityGroup(
+      this,
+      "MyOpenSearchSecurityGroup",
+      {
+        vpc,
+        description: "Security group for Open Search Service",
+        allowAllOutbound: true,
+      },
+    );
+
     const postLambda = createLambdaFunction(
       this,
       "postLambda",
       "src/res/lambdas/posts/index.ts",
     );
+
     const profileLambda = createLambdaFunction(
       this,
       "profileLambda",
       "src/res/lambdas/profile-picture/index.ts",
     );
+    profileLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["cloudfront:CreateInvalidation"],
+        resources: [
+          `arn:aws:cloudfront::${env.AWS_ACCOUNT_ID}:distribution/${env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID}`,
+        ],
+      }),
+    );
+
     const muxWebhookLambda = createLambdaFunction(
       this,
       "muxLambda",
@@ -366,16 +388,6 @@ export class AwsStack extends cdk.Stack {
       profileBucket,
       profileLambda,
       "AllowProfileS3Invocation",
-    );
-
-    const openSearchSecurityGroup = new ec2.SecurityGroup(
-      this,
-      "MyOpenSearchSecurityGroup",
-      {
-        vpc,
-        description: "Security group for Open Search Service",
-        allowAllOutbound: true,
-      },
     );
 
     openSearchSecurityGroup.addIngressRule(
@@ -409,6 +421,23 @@ export class AwsStack extends cdk.Stack {
       },
       removalPolicy: RemovalPolicy.DESTROY,
     });
+
+    // Grant Lambda permission to access OpenSearch
+    const openSearchPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        "es:ESHttpPost",
+        "es:ESHttpGet",
+        "es:ESHttpPut",
+        "es:ESHttpDelete",
+      ],
+      resources: [
+        openSearchDomain.domainArn,
+        `${openSearchDomain.domainArn}/*`,
+      ],
+    });
+
+    profileLambda.addToRolePolicy(openSearchPolicy);
 
     // Output the OpenSearch domain endpoint
     new cdk.CfnOutput(this, "OpenSearchDomainEndpoint", {

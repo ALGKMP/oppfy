@@ -2,26 +2,41 @@ import { S3Repository } from "../../repositories/aws/s3";
 
 type ContentType = "image/jpeg" | "image/png";
 
-type Metadata = Record<string, string>;
+type BaseMetadata = Record<string, string>;
 
-interface PostMetadata extends Metadata {
+interface PostForUserOnAppMetadata extends BaseMetadata {
   author: string;
   recipient: string;
   caption: string;
   width: string;
   height: string;
+  type: "onApp";
 }
 
-interface ProfilePictureMetadata extends Metadata {
+interface PostForUserNotOnAppMetadata extends BaseMetadata {
+  author: string;
+  phoneNumber: string;
+  caption: string;
+  width: string;
+  height: string;
+  type: "notOnApp";
+}
+
+interface ProfilePictureMetadata extends BaseMetadata {
   user: string;
 }
+
+export type Metadata =
+  | PostForUserOnAppMetadata
+  | PostForUserNotOnAppMetadata
+  | ProfilePictureMetadata;
 
 interface PutObjectPresignedUrlInput {
   Key: string;
   Bucket: string;
   ContentLength: number;
   ContentType: ContentType;
-  Metadata: PostMetadata | ProfilePictureMetadata;
+  Metadata: Metadata
 }
 
 interface GetObjectPresignedUrlInput {

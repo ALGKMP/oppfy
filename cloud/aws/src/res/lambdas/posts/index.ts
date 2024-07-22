@@ -1,29 +1,33 @@
+import { parser } from "@aws-lambda-powertools/parser/middleware";
+import { S3Schema } from "@aws-lambda-powertools/parser/schemas";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
+import middy from "@middy/core";
+import type { APIGatewayProxyResult, Context } from "aws-lambda";
 import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
 import { db, schema } from "@oppfy/db";
-import { sharedValidators, trpcValidators } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
+
+const metadataSchema = z.union([
+  sharedValidators.aws.s3ObjectMetadataForUserNotOnAppSchema,
+  sharedValidators.aws.s3ObjectMetadataForUserOnAppSchema,
+]);
+
+type S3ObjectLambdaEvent = z.infer<typeof S3Schema>;
 
 export const s3Client = new S3Client({
   region: "us-east-1",
 });
 
-export const handler = async (
-  event: S3Event,
+const lambdaHandler = async (
+  event: S3ObjectLambdaEvent,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
   const record = event.Records[0];
 
-  if (!record) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "No record found in event" }),
-    };
-  }
-
-  const objectKey = record.s3.object.key;
-  const objectBucket = record.s3.bucket.name;
+  const objectKey = record?.s3.object.key;
+  const objectBucket = record?.s3.bucket.name;
 
   console.log("Received event:", JSON.stringify(event));
 
@@ -50,30 +54,58 @@ export const handler = async (
       };
     }
 
-    const metadata = sharedValidators.media.postMetadataForS3.parse(Metadata);
-    const insertPostSchema = createInsertSchema(schema.post);
-
-    const body = insertPostSchema.parse({
-      author: metadata.author,
-      recipient: metadata.recipient,
-      height: parseInt(metadata.height),
-      width: parseInt(metadata.width),
-      caption: metadata.caption,
-      key: objectKey,
+    const metadata = metadataSchema.parse({
+      ...Metadata,
+      type: Metadata.type,
     });
 
-    const post = await db
-      .insert(schema.post)
-      .values(body)
-      .returning({ insertId: schema.post.id });
-    if (!post[0]?.insertId) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ message: "Failed to insert post" }),
-      };
-    }
-    await db.insert(schema.postStats).values({ postId: post[0]?.insertId });
+    if (metadata.type === "onApp") {
+      const insertPostSchema = createInsertSchema(schema.post);
 
+      const body = insertPostSchema.parse({
+        author: metadata.author,
+        recipient: metadata.recipient,
+        height: metadata.height,
+        width: metadata.width,
+        caption: metadata.caption,
+        key: objectKey,
+      });
+
+      const post = await db
+        .insert(schema.post)
+        .values(body)
+        .returning({ insertId: schema.post.id });
+      if (!post[0]?.insertId) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Failed to insert post" }),
+        };
+      }
+      await db.insert(schema.postStats).values({ postId: post[0]?.insertId });
+    } else {
+      // MF not on the app
+      const insertPostSchema = createInsertSchema(schema.postOfUserNotOnApp);
+      const body = insertPostSchema.parse({
+        author: metadata.author,
+        phoneNumber: metadata.phoneNumber,
+        height: metadata.height,
+        width: metadata.width,
+        caption: metadata.caption,
+        key: objectKey,
+      });
+      const post = await db
+        .insert(schema.postOfUserNotOnApp)
+        .values(body)
+        .returning({ insertId: schema.postOfUserNotOnApp.id });
+      if (!post[0]?.insertId) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Failed to insert post" }),
+        };
+      }
+
+      console.log("Processing post for user not on app:", metadata);
+    }
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Post processed successfully" }),
@@ -86,3 +118,5 @@ export const handler = async (
     };
   }
 };
+
+export const handler = middy(lambdaHandler).use(parser({ schema: S3Schema }));
