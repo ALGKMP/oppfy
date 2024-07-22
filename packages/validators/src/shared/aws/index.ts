@@ -2,23 +2,27 @@ import { z } from "zod";
 
 export const userTypeEnum = z.enum(["onApp", "notOnApp"]);
 
-export const s3ObjectMetadataForUserOnAppSchema = z.object({
+const baseSchema = z.object({
   author: z.string(),
-  recipient: z.string(),
   caption: z.string().default(""),
   height: z.string().transform((val) => parseInt(val)),
   width: z.string().transform((val) => parseInt(val)),
+});
+
+const s3ObjectMetadataForUserOnAppSchema = baseSchema.extend({
+  recipient: z.string(),
   type: z.literal("onApp"),
 });
 
-export const s3ObjectMetadataForUserNotOnAppSchema = z.object({
-  author: z.string(),
+const s3ObjectMetadataForUserNotOnAppSchema = baseSchema.extend({
   phoneNumber: z.string(),
-  caption: z.string().default(""),
-  height: z.string().transform((val) => parseInt(val)),
-  width: z.string().transform((val) => parseInt(val)),
   type: z.literal("notOnApp"),
 });
+
+export const metadataSchema = z.discriminatedUnion("type", [
+  s3ObjectMetadataForUserOnAppSchema,
+  s3ObjectMetadataForUserNotOnAppSchema,
+]);
 
 export const s3ObjectMetadataForProfilePicturesSchema = z.object({
   user: z.string(),

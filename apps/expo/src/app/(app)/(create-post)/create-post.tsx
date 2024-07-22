@@ -40,11 +40,8 @@ const CreatePost = () => {
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
 
-  // check if the id is a phone number or a recipientId
   const recipientId = "recipientId" in id ? id.recipientId : undefined;
   const phoneNumber = "phoneNumber" in id ? id.phoneNumber : undefined;
-
-  console.log(recipientId, phoneNumber);
 
   const router = useRouter();
 
