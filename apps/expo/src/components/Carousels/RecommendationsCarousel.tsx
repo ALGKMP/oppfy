@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import { Share, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Share, TouchableOpacity, Animated } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -27,14 +27,9 @@ import { Skeleton } from "~/components/Skeletons";
 import { api, type RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-// type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
+
 type RecoemndationItems =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
-
-/* interface FriendsData {
-  friendCount: number;
-  friendItems: FriendItems;
-} */
 
 interface LoadingProps {
   loading: true;
@@ -50,7 +45,7 @@ type RecommendationsCarouselProps = LoadingProps | RecommendationsLoadingProps;
 const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   const router = useRouter();
 
-  const showMore = !props.loading && props.reccomendationsData.length < 10;
+  const showMore = !props.loading && props.reccomendationsData.length > 10;
 
   const handleProfileClicked = (profileId: number) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
