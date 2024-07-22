@@ -103,9 +103,12 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   );
 
   const renderSuggestions = (data: RecoemndationItems) => (
-    <CardContainer>
+    
+    <CardContainer borderRadius={0} paddingLeft={0} margin={1}>
       <YStack gap="$2">
-        <Text fontWeight="600">Find Friends</Text>
+        <Text paddingLeft={"$3"} fontWeight="600">
+          Find Friends
+        </Text>
         <FlashList
           data={data}
           horizontal
@@ -217,6 +220,8 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     }
     return renderSuggestions(props.reccomendationsData);
   }
+
+  return renderFriendList(props.friendsData);
 };
 
 export default FriendsCarousel;

@@ -85,7 +85,11 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   );
 
   const renderSuggestions = (data: RecoemndationItems) => (
-    <CardContainer backgroundColor={"$background"}>
+    <CardContainer
+      backgroundColor={"$background"}
+      borderRadius={0}
+      paddingLeft={0}
+    >
       <YStack gap="$2">
         <FlashList
           data={[...data, { last: true }]}
