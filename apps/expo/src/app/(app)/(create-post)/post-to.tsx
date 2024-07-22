@@ -8,6 +8,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
+import { parsePhoneNumber } from "libphonenumber-js";
 import {
   Button,
   getToken,
@@ -30,6 +31,12 @@ const INITIAL_PAGE_SIZE = 5;
 const ADDITIONAL_PAGE_SIZE = 10;
 
 const PostTo = () => {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const router = useRouter();
+  const headerHeight = useHeaderHeight();
+
   const { type, uri, height, width } = useLocalSearchParams<{
     uri: string;
     type: "photo" | "video";
@@ -37,16 +44,27 @@ const PostTo = () => {
     width: string;
   }>();
 
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
-
-  const router = useRouter();
-  const headerHeight = useHeaderHeight();
+  const filterContactsOnApp =
+    api.contacts.filterPhoneNumbersOnApp.useMutation();
 
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [visibleContacts, setVisibleContacts] = useState<Contact[]>([]);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [contactsPage, setContactsPage] = useState(0);
+
+  const formatPhoneNumber = (phoneNumber: string | undefined) => {
+    if (phoneNumber === undefined) return;
+
+    try {
+      const parsedNumber = parsePhoneNumber(phoneNumber);
+
+      return parsedNumber.isValid()
+        ? parsedNumber.formatNational()
+        : phoneNumber;
+    } catch (error) {
+      return phoneNumber;
+    }
+  };
 
   useEffect(() => {
     const loadContacts = async () => {
@@ -57,12 +75,55 @@ const PostTo = () => {
           Contacts.Fields.PhoneNumbers,
         ],
       });
-      setContacts(data);
-      setVisibleContacts(data.slice(0, INITIAL_PAGE_SIZE));
+
+      const phoneNumbers = data
+        .map((contact) => {
+          const number = contact.phoneNumbers?.[0]?.number;
+          if (number === undefined) return null;
+
+          try {
+            const parsedNumber = parsePhoneNumber(number);
+            return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
+          } catch (error) {
+            return null;
+          }
+        })
+        .filter((number) => number !== null);
+
+      // filter out the numbers
+      const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
+        phoneNumbers,
+      });
+
+      // build up the object again using phoneNumbersNotOnApp
+      const contacts = phoneNumbersNotOnApp
+        .map((phoneNumber) => {
+          return data.find((contact) => {
+            const number = contact.phoneNumbers?.[0]?.number;
+
+            if (number === undefined) return false;
+
+            try {
+              const parsedNumber = parsePhoneNumber(number);
+              return (
+                parsedNumber.isValid() &&
+                parsedNumber.format("E.164") === phoneNumber
+              );
+            } catch (error) {
+              return false;
+            }
+          });
+        })
+        .filter((contact) => contact !== undefined);
+
+      setContacts(contacts);
+      setVisibleContacts(contacts.slice(0, INITIAL_PAGE_SIZE));
       setIsLoadingContacts(false);
     };
 
     void loadContacts();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {
@@ -152,7 +213,7 @@ const PostTo = () => {
           key={index}
           loading={false}
           title={contact.name}
-          subtitle={contact.phoneNumbers?.[0]?.number}
+          subtitle={formatPhoneNumber(contact.phoneNumbers?.[0]?.number)}
           button={<ChevronRight size={24} color="$gray10" />}
           imageUrl={
             contact.imageAvailable ? contact.image?.uri : DefaultProfilePicture
@@ -227,7 +288,7 @@ const PostTo = () => {
       <View flex={1} justifyContent="center" bottom={headerHeight}>
         <EmptyPlaceholder
           title="Nowhere to post"
-          subtitle="No friends yet, once you’ve added someone they’ll show up here."
+          subtitle="No friends yet, once you've added someone they'll show up here."
           icon={<UserRoundX />}
         />
       </View>

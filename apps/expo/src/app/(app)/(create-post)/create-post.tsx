@@ -1,21 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as VideoThumbnails from "expo-video-thumbnails";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowBigLeft, ArrowBigRight } from "@tamagui/lucide-icons";
+import { ArrowBigRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Button,
-  ScrollView,
-  Text,
-  TextArea,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Button, ScrollView, Text, TextArea, View, YStack } from "tamagui";
 import { z } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
