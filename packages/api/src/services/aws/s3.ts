@@ -23,11 +23,11 @@ interface GetObjectPresignedUrlInput {
   Bucket: string;
 }
 
-type PostMetadataUserOnApp = z.infer<
+export type PostMetadataUserOnApp = z.infer<
   typeof sharedValidators.aws.s3ObjectMetadataForUserOnAppSchema
 >;
 
-type PostMetadataUserNotOnApp = z.infer<
+export type PostMetadataUserNotOnApp = z.infer<
   typeof sharedValidators.aws.s3ObjectMetadataForUserNotOnAppSchema
 >;
 

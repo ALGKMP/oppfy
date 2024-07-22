@@ -18,13 +18,19 @@ export const postRouter = createTRPCRouter({
 
         const { contentLength, contentType, ...metadata } = input;
 
-        return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
-          Bucket: env.S3_POST_BUCKET,
-          Key: objectKey,
-          ContentLength: contentLength,
-          ContentType: contentType,
-          Metadata: metadata,
-        });
+        const presignedUrl =
+          await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
+            Bucket: env.S3_POST_BUCKET,
+            Key: objectKey,
+            ContentLength: contentLength,
+            ContentType: contentType,
+            Metadata: {
+              ...metadata,
+              authorId: ctx.session.uid,
+            },
+          });
+
+        return presignedUrl;
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

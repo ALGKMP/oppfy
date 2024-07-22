@@ -7,15 +7,21 @@ import {
   s3ObjectMetadataForUserOnAppSchema,
 } from "../../../shared";
 
-const metadataOnTheAppSchema = s3ObjectMetadataForUserOnAppSchema.extend({
-  contentLength: z.number(),
-  contentType: postContentType,
-});
+const metadataOnTheAppSchema = z
+  .object({
+    ...s3ObjectMetadataForUserOnAppSchema.shape,
+    contentLength: z.number(),
+    contentType: postContentType,
+  })
+  .omit({ authorId: true });
 
-const metadataNotOnTheAppSchema = s3ObjectMetadataForUserNotOnAppSchema.extend({
-  contentLength: z.number(),
-  contentType: postContentType,
-});
+const metadataNotOnTheAppSchema = z
+  .object({
+    ...s3ObjectMetadataForUserNotOnAppSchema.shape,
+    contentLength: z.number(),
+    contentType: postContentType,
+  })
+  .omit({ authorId: true });
 
 const metadataSchema = z.discriminatedUnion("type", [
   metadataOnTheAppSchema,

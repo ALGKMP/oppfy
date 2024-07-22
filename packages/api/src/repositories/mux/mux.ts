@@ -9,14 +9,14 @@ export class MuxRepository {
     recipientId: string,
     caption = "",
     width: number,
-    height: number
+    height: number,
   ) {
     const metadata = JSON.stringify({
       authorId,
       recipientId,
       caption,
       width,
-      height
+      height,
     });
     return await mux.video.uploads.create({
       new_asset_settings: {
