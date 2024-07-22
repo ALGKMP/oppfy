@@ -1,48 +1,41 @@
+import type { z } from "zod";
+
+import type { sharedValidators } from "@oppfy/validators";
+
 import { S3Repository } from "../../repositories/aws/s3";
 
-type ContentType = "image/jpeg" | "image/png";
-
-type BaseMetadata = Record<string, string>;
-
-interface PostForUserOnAppMetadata extends BaseMetadata {
-  author: string;
-  recipient: string;
-  caption: string;
-  width: string;
-  height: string;
-  type: "onApp";
-}
-
-interface PostForUserNotOnAppMetadata extends BaseMetadata {
-  author: string;
-  phoneNumber: string;
-  caption: string;
-  width: string;
-  height: string;
-  type: "notOnApp";
-}
-
-interface ProfilePictureMetadata extends BaseMetadata {
-  user: string;
-}
-
-export type Metadata =
-  | PostForUserOnAppMetadata
-  | PostForUserNotOnAppMetadata
-  | ProfilePictureMetadata;
+type ContentType = z.infer<typeof sharedValidators.media.postContentType>;
 
 interface PutObjectPresignedUrlInput {
   Key: string;
   Bucket: string;
   ContentLength: number;
   ContentType: ContentType;
-  Metadata: Metadata
+}
+
+export interface BasePutObjectPresignedUrlWithMetadataInput<T>
+  extends PutObjectPresignedUrlInput {
+  Metadata: T;
 }
 
 interface GetObjectPresignedUrlInput {
   Key: string;
   Bucket: string;
 }
+
+type PostMetadataUserOnApp = z.infer<
+  typeof sharedValidators.aws.s3ObjectMetadataForUserOnAppSchema
+>;
+
+type PostMetadataUserNotOnApp = z.infer<
+  typeof sharedValidators.aws.s3ObjectMetadataForUserNotOnAppSchema
+>;
+
+export type PostMetadata = PostMetadataUserOnApp | PostMetadataUserNotOnApp;
+
+export type ProfilePictureMetadata = z.infer<
+  typeof sharedValidators.aws.s3ObjectMetadataForProfilePicturesSchema
+>;
 
 export class S3Service {
   private s3Repository = new S3Repository();
@@ -54,13 +47,15 @@ export class S3Service {
   }
 
   async putObjectPresignedUrlWithPostMetadata(
-    putObjectCommandInput: PutObjectPresignedUrlInput,
+    putObjectCommandInput: BasePutObjectPresignedUrlWithMetadataInput<
+      PostMetadataUserOnApp | PostMetadataUserNotOnApp
+    >,
   ) {
     return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }
 
   async putObjectPresignedUrlWithProfilePictureMetadata(
-    putObjectCommandInput: PutObjectPresignedUrlInput,
+    putObjectCommandInput: BasePutObjectPresignedUrlWithMetadataInput<ProfilePictureMetadata>,
   ) {
     return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }
