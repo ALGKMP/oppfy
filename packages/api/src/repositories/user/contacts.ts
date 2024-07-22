@@ -9,7 +9,7 @@ export class ContactsRepository {
   @handleDatabaseErrors
   async updateUserContacts(userId: string, hashedPhoneNumbers: string[]) {
     return await this.db.transaction(async (tx) => {
-      let oldContacts = await tx.query.userContact.findMany({
+      const oldContacts = await tx.query.userContact.findMany({
         where: eq(schema.userContact.userId, userId),
       });
 
@@ -79,6 +79,13 @@ export class ContactsRepository {
     return await this.db
       .delete(schema.userContact)
       .where(eq(schema.userContact.userId, userId));
+  }
+
+  @handleDatabaseErrors
+  async getContacts(userId: string) {
+    return await this.db.query.userContact.findMany({
+      where: eq(schema.userContact.userId, userId),
+    });
   }
 
   @handleDatabaseErrors
