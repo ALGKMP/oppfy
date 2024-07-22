@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { router } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import {
   Button,
@@ -65,7 +66,6 @@ const AnimatedUserProfile = ({
   });
 
   const handlePress = () => {
-    setIsAdded((prev) => !prev);
     opacity.value = withSequence(
       withTiming(0, { duration: 200 }),
       withDelay(700, withTiming(1, { duration: 200 })),
@@ -74,6 +74,7 @@ const AnimatedUserProfile = ({
       withDelay(200, withTiming(1, { duration: 200 })),
       withDelay(500, withTiming(0, { duration: 200 })),
     );
+    setTimeout(() => setIsAdded((prev) => !prev), 1000);
   };
 
   return (
@@ -115,22 +116,23 @@ const AnimatedUserProfile = ({
                 position: "absolute",
                 bottom: -5,
                 right: -5,
-                backgroundColor: isAdded ? "#1a1a1a" : "#333",
+                backgroundColor: isAdded ? "#F214FF" : "#333",
                 borderRadius: 15,
                 width: 30,
                 height: 30,
+                marginLeft: 2,
                 justifyContent: "center",
                 alignItems: "center",
-                borderWidth: 2,
+                borderWidth: 3,
                 borderColor: theme.background.val,
               },
               animatedStyle,
             ]}
           >
             {isAdded ? (
-              <UserRoundCheck size={16} color="white" />
+              <UserRoundCheck marginLeft={2} size={16} color="white" />
             ) : (
-              <UserRoundPlus size={16} color="white" />
+              <UserRoundPlus marginLeft={2} size={16} color="white" />
             )}
           </Animated.View>
         </View>
@@ -171,24 +173,18 @@ const OnboardingRecomendations = () => {
       >
         Recommendations
       </Text>
-      <ScrollView
-        backgroundColor="$background"
+      <FlashList
+        data={placeholderUsers}
+        estimatedItemSize={itemWidth}
+        renderItem={({ item, index }) => (
+          <AnimatedUserProfile user={item} index={index} />
+        )}
+        numColumns={3}
+        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-          alignItems: "center",
+          paddingHorizontal: 12,
         }}
-      >
-        <YStack padding="$4" gap="$4" alignItems="center">
-          {recommendations && recommendations.length > 0 ? (
-            recommendations.map((user, index) => (
-              <AnimatedUserProfile key={index} user={user} index={index} />
-            ))
-          ) : (
-            <Text color="$gray10">No recommendations available</Text>
-          )}
-        </YStack>
-      </ScrollView>
+      />
       <OnboardingButton onPress={onDone}>Done</OnboardingButton>
     </BaseScreenView>
   );

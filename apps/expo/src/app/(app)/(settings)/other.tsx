@@ -1,6 +1,4 @@
 import { useState } from "react";
-import * as Contacts from "expo-contacts";
-import * as Crypto from "expo-crypto";
 import * as FileSystem from "expo-file-system";
 import {
   ChevronRight,
@@ -8,8 +6,6 @@ import {
   Trash,
   XCircle,
 } from "@tamagui/lucide-icons";
-import { parsePhoneNumber } from "libphonenumber-js";
-import type { CountryCode } from "libphonenumber-js";
 import { Button, YStack } from "tamagui";
 
 import type { SettingsGroupInput } from "~/components/Settings";
@@ -19,7 +15,6 @@ import { ActionSheet } from "~/components/Sheets";
 import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import { useContacts } from "~/hooks/contacts";
-import { api } from "~/utils/api";
 
 const Other = () => {
   const { deleteAccount } = useSession();
@@ -39,9 +34,14 @@ const Other = () => {
 
   const handleClearCache = async () => {
     if (FileSystem.cacheDirectory === null) return;
-    await FileSystem.deleteAsync(FileSystem.cacheDirectory, {
-      idempotent: true,
-    });
+
+    try {
+      await FileSystem.deleteAsync(FileSystem.cacheDirectory, {
+        idempotent: true,
+      });
+    } catch {
+      /* empty */
+    }
   };
 
   const clearCachetitle = "Clear Cache";
