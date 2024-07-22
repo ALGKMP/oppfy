@@ -1,16 +1,29 @@
 import { z } from "zod";
 
-import { phoneNumber, postContentType } from "../../../shared";
+import { sharedValidators } from "../../../..";
+import {
+  postContentType,
+  s3ObjectMetadataForUserNotOnAppSchema,
+  s3ObjectMetadataForUserOnAppSchema,
+} from "../../../shared";
+
+const metadataOnTheAppSchema = s3ObjectMetadataForUserOnAppSchema.extend({
+  contentLength: z.number(),
+  contentType: postContentType,
+});
+
+const metadataNotOnTheAppSchema = s3ObjectMetadataForUserNotOnAppSchema.extend({
+  contentLength: z.number(),
+  contentType: postContentType,
+});
+
+const metadataSchema = z.discriminatedUnion("type", [
+  metadataOnTheAppSchema,
+  metadataNotOnTheAppSchema,
+]);
 
 const trpcPostInputSchema = {
-  createPresignedUrlForPost: z.object({
-    recipientId: z.string(),
-    caption: z.string().max(2000).default(""),
-    height: z.number(),
-    width: z.number(),
-    contentLength: z.number(),
-    contentType: postContentType,
-  }),
+  createPresignedUrlForPost: metadataSchema,
 
   createPresignedUrlForPostOfUserNotOnApp: z.object({
     author: z.string(),
@@ -80,21 +93,23 @@ const trpcPostInputSchema = {
   }),
 
   paginatePostsForFeed: z.object({
-    cursor: z.object({
-      doneFollowing: z.boolean(),
-      followingCursor: z
-        .object({
-          createdAt: z.date(),
-          followerId: z.number(),
-        })
-        .optional(),
-      recomendedCursor: z
-        .object({
-          createdAt: z.date(),
-          postId: z.number(),
-        })
-        .optional(),
-    }).optional(),
+    cursor: z
+      .object({
+        doneFollowing: z.boolean(),
+        followingCursor: z
+          .object({
+            createdAt: z.date(),
+            followerId: z.number(),
+          })
+          .optional(),
+        recomendedCursor: z
+          .object({
+            createdAt: z.date(),
+            postId: z.number(),
+          })
+          .optional(),
+      })
+      .optional(),
 
     pageSize: z.number().nonnegative().optional(),
   }),
