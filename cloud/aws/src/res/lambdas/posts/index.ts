@@ -60,7 +60,6 @@ const lambdaHandler = async (
     });
 
     if (metadata.type === "onApp") {
-      console.log("I'm Here")
       const insertPostSchema = createInsertSchema(schema.post);
 
       const body = insertPostSchema.parse({
@@ -84,10 +83,28 @@ const lambdaHandler = async (
       }
       await db.insert(schema.postStats).values({ postId: post[0]?.insertId });
     } else {
-      // Handle the case for users not on the app
-      // You can add your custom logic here
+      // MF not on the app
+      const insertPostSchema = createInsertSchema(schema.postOfUserNotOnApp);
+      const body = insertPostSchema.parse({
+        author: metadata.author,
+        phoneNumber: metadata.phoneNumber,
+        height: metadata.height,
+        width: metadata.width,
+        caption: metadata.caption,
+        key: objectKey,
+      });
+      const post = await db
+        .insert(schema.postOfUserNotOnApp)
+        .values(body)
+        .returning({ insertId: schema.postOfUserNotOnApp.id });
+      if (!post[0]?.insertId) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Failed to insert post" }),
+        };
+      }
+
       console.log("Processing post for user not on app:", metadata);
-      // TODO: Add your custom database operations here
     }
     return {
       statusCode: 200,
