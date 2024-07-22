@@ -8,23 +8,79 @@ export class FollowRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addFollower(senderId: string, recipientId: string) {
-    const result = await this.db
-      .insert(schema.follower)
-      .values({ recipientId, senderId });
-    return result[0];
+  async addFollower(senderUserId: string, recipientUserId: string) {
+    return await this.db.transaction(async (tx) => {
+      const result = await tx
+        .insert(schema.follower)
+        .values({ recipientId: recipientUserId, senderId: senderUserId });
+
+      const [senderProfile] = await tx
+        .select({ profileId: schema.user.profileId })
+        .from(schema.user)
+        .where(eq(schema.user.id, senderUserId));
+
+      if (!senderProfile) throw new Error("Sender profile not found");
+
+      await tx
+        .update(schema.profileStats)
+        .set({ following: sql`${schema.profileStats.following} + 1` })
+        .where(eq(schema.profileStats.profileId, senderProfile.profileId));
+
+      const [recipientProfile] = await tx
+        .select({ profileId: schema.user.profileId })
+        .from(schema.user)
+        .where(eq(schema.user.id, recipientUserId));
+
+      if (!recipientProfile) throw new Error("Recipient profile not found");
+
+      await tx
+        .update(schema.profileStats)
+        .set({ followers: sql`${schema.profileStats.followers} + 1` })
+        .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
+
+      return result[0];
+    });
   }
 
   @handleDatabaseErrors
   async removeFollower(senderId: string, recipientId: string) {
-    const result = await this.db.delete(schema.follower).where(
-      // Sender is removing the recipient
-      and(
-        eq(schema.follower.senderId, senderId),
-        eq(schema.follower.recipientId, recipientId),
-      ),
-    );
-    return result[0];
+    return await this.db.transaction(async (tx) => {
+      const result = await tx
+        .delete(schema.follower)
+        .where(
+          and(
+            eq(schema.follower.senderId, senderId),
+            eq(schema.follower.recipientId, recipientId),
+          ),
+        );
+
+      const [senderProfile] = await tx
+        .select({ profileId: schema.user.profileId })
+        .from(schema.user)
+        .where(eq(schema.user.id, senderId));
+
+      if (!senderProfile) throw new Error("Sender profile not found");
+
+      // Update sender's following count
+      await tx
+        .update(schema.profileStats)
+        .set({ following: sql`${schema.profileStats.following} - 1` })
+        .where(eq(schema.profileStats.profileId, senderProfile.profileId));
+
+      const [recipientProfile] = await tx
+        .select({ profileId: schema.user.profileId })
+        .from(schema.user)
+        .where(eq(schema.user.id, recipientId));
+
+      if (!recipientProfile) throw new Error("Recipient profile not found");
+
+      await tx
+        .update(schema.profileStats)
+        .set({ followers: sql`${schema.profileStats.followers} - 1` })
+        .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
+
+      return result[0];
+    });
   }
 
   @handleDatabaseErrors
@@ -111,6 +167,31 @@ export class FollowRepository {
             eq(schema.followRequest.recipientId, recipientId),
           ),
         );
+
+      // Update profileStats for both sender and recipient
+      const [senderProfile] = await tx
+        .select({ profileId: schema.user.profileId })
+        .from(schema.user)
+        .where(eq(schema.user.id, senderId));
+
+      if (!senderProfile) throw new Error("Sender profile not found");
+
+      await tx
+        .update(schema.profileStats)
+        .set({ following: sql`${schema.profileStats.following} + 1` })
+        .where(eq(schema.profileStats.profileId, senderProfile.profileId));
+
+      const [recipientProfile] = await tx
+        .select({ profileId: schema.user.profileId })
+        .from(schema.user)
+        .where(eq(schema.user.id, recipientId));
+
+      if (!recipientProfile) throw new Error("Recipient profile not found");
+
+      await tx
+        .update(schema.profileStats)
+        .set({ followers: sql`${schema.profileStats.followers} + 1` })
+        .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
 
       return true;
     });

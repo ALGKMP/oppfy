@@ -31,25 +31,6 @@ export class ProfileRepository {
       .update(schema.profile)
       .set(update)
       .where(eq(schema.profile.id, profileId));
-
-      
-  }
-
-  @handleDatabaseErrors
-  async getProfilePicture(profileId: number) {
-    return await this.db.query.profile.findFirst({
-      where: eq(schema.profile.id, profileId),
-      with: {
-        profilePicture: true,
-      },
-    });
-  }
-
-  @handleDatabaseErrors
-  async getProfilePictureByKey(key: string) {
-    return await this.db.query.profile.findFirst({
-      where: eq(schema.profile.profilePictureKey, key),
-    });
   }
 
   @handleDatabaseErrors
