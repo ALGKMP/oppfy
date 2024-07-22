@@ -161,7 +161,20 @@ const PostTo = () => {
     }
   };
 
-  const onUserSelected = (recipientId: string) => {
+  const onContactSelected = (phoneNumber: string) => {
+    router.navigate({
+      pathname: "/create-post",
+      params: {
+        uri,
+        type,
+        width,
+        height,
+        phoneNumber,
+      },
+    });
+  };
+
+  const onFriendSelected = (recipientId: string) => {
     router.navigate({
       pathname: "/create-post",
       params: {
@@ -218,7 +231,9 @@ const PostTo = () => {
           imageUrl={
             contact.imageAvailable ? contact.image?.uri : DefaultProfilePicture
           }
-          // onPress={() => onUserSelected(contact.id)}
+          onPress={() =>
+            onContactSelected(contact.phoneNumbers?.[0]?.number ?? "")
+          }
         />
       ))}
 
@@ -253,7 +268,7 @@ const PostTo = () => {
             subtitle={item.name}
             imageUrl={item.profilePictureUrl}
             button={<ChevronRight size={24} color="$gray10" />}
-            onPress={() => onUserSelected(item.userId)}
+            onPress={() => onFriendSelected(item.userId)}
           />
         )}
       />

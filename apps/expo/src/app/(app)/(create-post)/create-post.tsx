@@ -18,14 +18,33 @@ const postSchema = z.object({
 
 type FieldTypes = z.infer<typeof postSchema>;
 
+interface CreatePostBaseParams {
+  // index signature
+  [key: string]: string;
+  uri: string;
+  type: "photo" | "video";
+  height: string;
+  width: string;
+}
+
+interface CreatePostWithRecipient extends CreatePostBaseParams {
+  recipientId: string;
+}
+
+interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
+  phoneNumber: string;
+}
+
 const CreatePost = () => {
-  const { recipientId, type, uri, height, width } = useLocalSearchParams<{
-    recipientId: string;
-    uri: string;
-    type: "photo" | "video";
-    height: string;
-    width: string;
-  }>();
+  const { type, uri, height, width, ...id } = useLocalSearchParams<
+    CreatePostWithRecipient | CreatePostWithPhoneNumber
+  >();
+
+  // check if the id is a phone number or a recipientId
+  const recipientId = "recipientId" in id ? id.recipientId : undefined;
+  const phoneNumber = "phoneNumber" in id ? id.phoneNumber : undefined;
+
+  console.log(recipientId, phoneNumber);
 
   const router = useRouter();
 
