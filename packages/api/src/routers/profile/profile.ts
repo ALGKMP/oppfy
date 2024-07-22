@@ -50,15 +50,17 @@ export const profileRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
 
+      const metadata = {
+        user: ctx.session.uid,
+      };
+
       return await ctx.services.s3.putObjectPresignedUrlWithProfilePictureMetadata(
         {
           Key: key,
           Bucket: env.S3_PROFILE_BUCKET,
           ContentLength: input.contentLength,
           ContentType: "image/jpeg",
-          Metadata: {
-            user: ctx.session.uid,
-          },
+          Metadata: metadata,
         },
       );
     }),
@@ -125,7 +127,7 @@ export const profileRouter = createTRPCRouter({
               });
           }
         }
-        console.error(err)
+        console.error(err);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
         });
