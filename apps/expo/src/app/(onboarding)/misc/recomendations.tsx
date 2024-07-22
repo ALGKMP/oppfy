@@ -44,9 +44,11 @@ const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, conside
 const AnimatedUserProfile = ({
   user,
   index,
+  onUserAdded,
 }: {
   user: { fullName: string | null; username: string };
   index: number;
+  onUserAdded: (added: boolean) => void;
 }) => {
   const [isAdded, setIsAdded] = useState(false);
   const opacity = useSharedValue(1);
@@ -66,6 +68,8 @@ const AnimatedUserProfile = ({
   });
 
   const handlePress = () => {
+    onUserAdded(true);
+
     opacity.value = withSequence(
       withTiming(0, { duration: 200 }),
       withDelay(700, withTiming(1, { duration: 200 })),
@@ -74,7 +78,10 @@ const AnimatedUserProfile = ({
       withDelay(200, withTiming(1, { duration: 200 })),
       withDelay(500, withTiming(0, { duration: 200 })),
     );
-    setTimeout(() => setIsAdded((prev) => !prev), 1000);
+    setTimeout(() => {
+      const newIsAdded = !isAdded;
+      setIsAdded(newIsAdded);
+    }, 1000);
   };
 
   return (
@@ -149,12 +156,20 @@ const AnimatedUserProfile = ({
 
 const OnboardingRecomendations = () => {
   const theme = useTheme();
+  const [addedUsersCount, setAddedUsersCount] = useState(0);
+  const requiredUsers = 5;
 
   const { data: recommendations, isLoading } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const onDone = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
+
+  const handleUserAdded = (added: boolean) => {
+    setAddedUsersCount((prev) => (added ? prev + 1 : prev - 1));
+  };
+
+  const remainingUsers = Math.max(0, requiredUsers - addedUsersCount);
 
   return (
     <BaseScreenView
@@ -177,7 +192,11 @@ const OnboardingRecomendations = () => {
         data={placeholderUsers}
         estimatedItemSize={itemWidth}
         renderItem={({ item, index }) => (
-          <AnimatedUserProfile user={item} index={index} />
+          <AnimatedUserProfile
+            user={item}
+            index={index}
+            onUserAdded={handleUserAdded}
+          />
         )}
         numColumns={3}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
@@ -185,7 +204,15 @@ const OnboardingRecomendations = () => {
           paddingHorizontal: 12,
         }}
       />
-      <OnboardingButton onPress={onDone}>Done</OnboardingButton>
+      <OnboardingButton
+        onPress={onDone}
+        disabled={remainingUsers > 0}
+        opacity={remainingUsers > 0 ? 0.5 : 1}
+      >
+        {remainingUsers > 0
+          ? `Add ${remainingUsers} more user${remainingUsers > 1 ? "s" : ""} to continue`
+          : "Done"}
+      </OnboardingButton>
     </BaseScreenView>
   );
 };
