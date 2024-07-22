@@ -85,4 +85,17 @@ export class UserRepository {
       .set({ privacySetting: newPrivacySetting })
       .where(eq(schema.user.id, userId));
   }
+
+  @handleDatabaseErrors
+  async existingPhoneNumbers(phoneNumbers: string[]) {
+    if (phoneNumbers.length === 0) {
+      return [];
+    }
+
+    const existingNumbers = await this.db.query.user.findMany({
+      where: inArray(schema.user.phoneNumber, phoneNumbers),
+    });
+
+    return existingNumbers.map((user) => user.phoneNumber);
+  }
 }

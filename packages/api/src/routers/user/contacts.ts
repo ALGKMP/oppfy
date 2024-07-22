@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { trpcValidators } from "@oppfy/validators";
 
@@ -63,5 +64,17 @@ export const contactsRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
         });
       }
+    }),
+
+  filterPhoneNumbersOnApp: protectedProcedure
+    .input(
+      z.object({
+        phoneNumbers: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.services.contact.filterPhoneNumbersOnApp(
+        input.phoneNumbers,
+      );
     }),
 });

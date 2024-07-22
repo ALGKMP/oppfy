@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import { z } from "zod";
 
+import { and, db, inArray, notInArray, schema, sql } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { sqs } from "@oppfy/sqs";
 
@@ -99,38 +100,13 @@ export class ContactService {
     }
   }
 
-  // TODO: IDK this shit doesn't do what it is can't think
-  async getContactsNotOnApp(
-    userId: string,
-    contacts: { phoneNumber: string }[],
-  ) {
-    try {
-      const user = await this.userRepository.getUser(userId);
+  async filterPhoneNumbersOnApp(phoneNumbers: string[]) {
+    const existingPhoneNumbers =
+      await this.userRepository.existingPhoneNumbers(phoneNumbers);
 
-      if (user === undefined) {
-        throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-      }
-
-      await Promise.all(
-        contacts.map(async (contact) => {
-          const user = await this.userRepository.getUserByPhoneNumber(
-            contact.phoneNumber,
-          );
-          if (user === undefined) {
-            return contact;
-          }
-
-          return {
-            ...contact,
-          };
-        }),
-      );
-
-      return contacts;
-    } catch (error) {
-      console.error(error);
-      throw new DomainError(ErrorCode.AWS_ERROR, "Failed to get contacts");
-    }
+    return phoneNumbers.filter(
+      (number) => !existingPhoneNumbers.includes(number),
+    );
   }
 
   async getRecommendationsIds(userId: string) {
