@@ -463,7 +463,11 @@ export class AwsStack extends cdk.Stack {
     const cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
       vpc,
       iamAuthentication: false,
-      instanceType: neptune.InstanceType.T3_MEDIUM,
+      instanceType: neptune.InstanceType.SERVERLESS,
+      serverlessScalingConfiguration: {
+        minCapacity: 1,
+        maxCapacity: 5,
+      },
       engineVersion: neptune.EngineVersion.V1_3_0_0,
       securityGroups: [neptuneSecurityGroup],
     });
