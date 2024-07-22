@@ -170,7 +170,7 @@ export const profileStats = pgTable("profile_stats", {
     .references(() => profile.id, { onDelete: "cascade" }),
   followers: integer("followers").notNull().default(0),
   following: integer("following").notNull().default(0),
-  friends: integer("friends").notNull().default(0), // Add this line
+  friends: integer("friends").notNull().default(0),
   posts: integer("posts").notNull().default(0),
   views: integer("views").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -336,6 +336,9 @@ export const profileView = pgTable("profile_view", {
     .notNull()
     .references(() => profile.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
