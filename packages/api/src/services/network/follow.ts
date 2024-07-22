@@ -20,6 +20,15 @@ export class FollowService {
     return !!(await this.followRepository.getFollower(senderId, recipientId));
   }
 
+  // TODO: @tony: This function is not used, should we remove it?
+  async followUsers(senderId: string, recipientIds: string[]) {
+    const results = await Promise.allSettled(
+      recipientIds.map((recipientId) => this.followUser(senderId, recipientId)),
+    );
+
+    console.log("results", results);
+  }
+
   // @tony: Example for noti handling
   async followUser(senderId: string, recipientId: string) {
     const isFollowing = await this.isFollowing(senderId, recipientId);

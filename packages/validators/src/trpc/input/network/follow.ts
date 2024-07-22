@@ -5,6 +5,10 @@ const followInputSchema = {
     userId: z.string(),
   }),
 
+  followUsers: z.object({
+    userIds: z.array(z.string()),
+  }),
+
   unfollowUser: z.object({
     userId: z.string(),
   }),
