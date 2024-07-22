@@ -2,20 +2,22 @@ import { z } from "zod";
 
 export const userTypeEnum = z.enum(["onApp", "notOnApp"]);
 
-const baseSchema = z.object({
-  author: z.string(),
-  caption: z.string().default(""),
-  height: z.string().transform((val) => parseInt(val)),
-  width: z.string().transform((val) => parseInt(val)),
-});
+const baseSchema = z
+  .object({
+    authorId: z.string(),
+    caption: z.string().default(""),
+    height: z.string(),
+    width: z.string(),
+  })
+  .catchall(z.string());
 
-const s3ObjectMetadataForUserOnAppSchema = baseSchema.extend({
-  recipient: z.string(),
+export const s3ObjectMetadataForUserOnAppSchema = baseSchema.extend({
+  recipientId: z.string(),
   type: z.literal("onApp"),
 });
 
-const s3ObjectMetadataForUserNotOnAppSchema = baseSchema.extend({
-  phoneNumber: z.string(),
+export const s3ObjectMetadataForUserNotOnAppSchema = baseSchema.extend({
+  recipientPhoneNumber: z.string(),
   type: z.literal("notOnApp"),
 });
 
