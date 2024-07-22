@@ -4,12 +4,22 @@ type ContentType = "image/jpeg" | "image/png";
 
 type Metadata = Record<string, string>;
 
-interface PostMetadata extends Metadata {
+interface PostForUserOnAppMetadata extends Metadata {
   author: string;
   recipient: string;
   caption: string;
   width: string;
   height: string;
+  type: "onApp";
+}
+
+interface PostForUserNotOnAppMetadata extends Metadata {
+  author: string;
+  phoneNumber: string;
+  caption: string;
+  width: string;
+  height: string;
+  type: "notOnApp";
 }
 
 interface ProfilePictureMetadata extends Metadata {
@@ -21,7 +31,10 @@ interface PutObjectPresignedUrlInput {
   Bucket: string;
   ContentLength: number;
   ContentType: ContentType;
-  Metadata: PostMetadata | ProfilePictureMetadata;
+  Metadata:
+    | PostForUserOnAppMetadata
+    | PostForUserNotOnAppMetadata
+    | ProfilePictureMetadata;
 }
 
 interface GetObjectPresignedUrlInput {
