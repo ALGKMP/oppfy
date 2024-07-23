@@ -18,9 +18,13 @@ const muxBodySchema = z
       error: z.string().optional(),
     }),
     data: z.object({
-      passthrough: sharedValidators.aws.metadataSchema,
-      playback_ids: z.array(z.object({ id: z.string() })).nonempty(),
       aspect_ratio: z.string(),
+      playback_ids: z.array(z.object({ id: z.string() })).nonempty(),
+      passthrough: z
+        .string()
+        .transform((str) =>
+          sharedValidators.aws.metadataSchema.parse(JSON.parse(str)),
+        ),
     }),
   })
   .passthrough();

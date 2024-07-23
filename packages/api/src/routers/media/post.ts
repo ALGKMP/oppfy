@@ -44,8 +44,8 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
-          author: ctx.session.uid,
           ...input,
+          author: ctx.session.uid,
         });
 
         return url;
@@ -173,14 +173,13 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedFeedPosts)
     .query(async ({ ctx, input }) => {
       try {
-
         const result = await ctx.services.post.paginatePostsForFeed(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
 
- /*        console.log("TRPC getPosts input: ", input);
+        /*        console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfFollowing(
           ctx.session.uid,
           input.cursor?.followingCursor,
@@ -190,7 +189,7 @@ export const postRouter = createTRPCRouter({
         const parsedFollowingResult =
           trpcValidators.output.post.paginatedFeedPosts.parse(result);
 
-/*         if (parsedFollowingResult.items.length < input.pageSize!) {
+        /*         if (parsedFollowingResult.items.length < input.pageSize!) {
           const result = await ctx.services.post.paginatePostsOfRecommended(
             ctx.session.uid,
             input.cursor?.recomendedCursor,
