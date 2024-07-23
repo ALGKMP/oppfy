@@ -9,7 +9,7 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForImagePost: protectedProcedure
-    .input(trpcValidators.input.post.createPresignedUrlForPost)
+    .input(trpcValidators.input.post.createPresignedUrlForImagePost)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
       try {
@@ -17,8 +17,6 @@ export const postRouter = createTRPCRouter({
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
 
         const { contentLength, contentType, ...metadata } = input;
-
-        console.log("TRPC createPresignedUrlForImagePost input: ", input);
 
         const presignedUrl =
           await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
@@ -41,19 +39,16 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  createMuxVideoPresignedUrlForVideoPost: protectedProcedure
-    .input(trpcValidators.input.post.createMuxPresignedUrl)
+  createPresignedUrlForVideoPost: protectedProcedure
+    .input(trpcValidators.input.post.createPresignedUrlForVideoPost)
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("Creating Mux URL");
-        const result = await ctx.services.mux.createDirectUpload(
-          ctx.session.uid,
-          input.recipientId,
-          input.caption,
-          input.width,
-          input.height,
-        );
-        return result.url;
+        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
+          author: ctx.session.uid,
+          ...input,
+        });
+
+        return url;
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
