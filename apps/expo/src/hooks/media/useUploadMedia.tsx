@@ -14,10 +14,12 @@ interface UploadMediaInputBase {
 
 interface UploadMediaInputOnApp extends UploadMediaInputBase {
   recipient: string;
+  type: "onApp";
 }
 
 interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
   number: string;
+  type: "notOnApp";
 }
 
 type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
@@ -80,7 +82,7 @@ const useUploadMedia = () => {
     };
 
     const presignedUrl =
-      "recipient" in input
+      input.type === "onApp"
         ? await createPresignedUrlForPost.mutateAsync({
             ...baseData,
             type: "onApp",
