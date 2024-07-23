@@ -479,6 +479,38 @@ export const postRouter = createTRPCRouter({
         });
       }
     }),
+
+  viewPost: protectedProcedure
+    .input(z.object({ postId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.viewPost({
+          userId: ctx.session.uid,
+          postId: input.postId,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to view post for ${input.postId}`,
+        });
+      }
+    }),
+
+  viewMultiplePosts: protectedProcedure
+    .input(z.object({ postIds: z.array(z.number()) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.viewMultiplePosts({
+          userId: ctx.session.uid,
+          postIds: input.postIds,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to view multiple posts for ${input.postIds}`,
+        });
+      }
+    }),
 });
 
 export default postRouter;
