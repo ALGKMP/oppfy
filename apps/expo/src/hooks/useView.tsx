@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
-const DEBOUNCE_DELAY = 5000; // 5 seconds
+const DEBOUNCE_DELAY = 10000; // 5 seconds
 
 const useView = () => {
   const [viewedItems, setViewedItems] = useState<{ type: 'post' | 'profile', id: number }[]>([]);
@@ -33,6 +33,7 @@ const useView = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (viewedItems.length > 0) {
+        console.log("sending View Data")
         sendViewedData();
       }
     }, DEBOUNCE_DELAY);
