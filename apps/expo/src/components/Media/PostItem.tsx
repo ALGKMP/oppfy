@@ -35,6 +35,7 @@ import Mute, { useMuteAnimations } from "~/components/Icons/Mute";
 import ReportPostActionSheet from "~/components/Sheets/ReportPostActionSheet";
 import { useSession } from "~/contexts/SessionContext";
 import useShare from "~/hooks/useShare";
+import useView from "~/hooks/useView";
 import { api } from "~/utils/api";
 import { ActionSheet } from "../Sheets";
 import ImagePost from "./ImagePost";
@@ -63,6 +64,14 @@ const PostItem = (props: PostItemProps) => {
 
   const { getCurrentUserProfileId } = useSession();
   const { isSharing, shareImage } = useShare();
+  const { viewPost } = useView();
+
+  useEffect(() => {
+    console.log(`${post.postId} is viewable: ${isViewable}`);
+    if (isViewable) {
+      viewPost(post.postId);
+    }
+  }, [isViewable, post.postId, viewPost]);
 
   const router = useRouter();
 
