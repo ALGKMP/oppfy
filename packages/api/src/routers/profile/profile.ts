@@ -160,4 +160,36 @@ export const profileRouter = createTRPCRouter({
         });
       }
     }),
+
+  viewProfile: protectedProcedure
+    .input(z.object({ profileId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.profile.viewProfile({
+          viewerUserId: ctx.session.uid,
+          viewedProfileId: input.profileId,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to view profile for ${input.profileId}`,
+        });
+      }
+    }),
+
+  viewMultipleProfiles: protectedProcedure
+    .input(z.object({ profileIds: z.array(z.number()) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.profile.viewMultipleProfiles({
+          viewerUserId: ctx.session.uid,
+          viewedProfileIds: input.profileIds,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to view multiple profiles`,
+        });
+      }
+    }),
 });

@@ -47,9 +47,7 @@ export class S3Service {
   }
 
   async putObjectPresignedUrlWithPostMetadata(
-    putObjectCommandInput: BasePutObjectPresignedUrlWithMetadataInput<
-      PostMetadataUserOnApp | PostMetadataUserNotOnApp
-    >,
+    putObjectCommandInput: BasePutObjectPresignedUrlWithMetadataInput<PostMetadata>,
   ) {
     return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }

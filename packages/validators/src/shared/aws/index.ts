@@ -4,7 +4,7 @@ export const userTypeEnum = z.enum(["onApp", "notOnApp"]);
 
 const baseSchema = z
   .object({
-    authorId: z.string(),
+    author: z.string(),
     caption: z.string().default(""),
     height: z.string(),
     width: z.string(),
@@ -12,12 +12,12 @@ const baseSchema = z
   .catchall(z.string());
 
 export const s3ObjectMetadataForUserOnAppSchema = baseSchema.extend({
-  recipientId: z.string(),
+  recipient: z.string(),
   type: z.literal("onApp"),
 });
 
 export const s3ObjectMetadataForUserNotOnAppSchema = baseSchema.extend({
-  recipientPhoneNumber: z.string(),
+  number: z.string(),
   type: z.literal("notOnApp"),
 });
 

@@ -3,7 +3,7 @@ import type { z } from "zod";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { UserRepository } from "../../repositories";
+import { UserRepository, ViewRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
@@ -45,6 +45,7 @@ export class PostService {
   private postRepository = new PostRepository();
   private postStatsRepository = new PostStatsRepository();
   private userRepository = new UserRepository();
+  private viewRepository = new ViewRepository();
 
   private cloudFrontService = new CloudFrontService();
 
@@ -526,4 +527,41 @@ export class PostService {
       );
     }
   }
+
+  async viewPost({ userId, postId }: { userId: string; postId: number }) {
+    try {
+      await this.viewRepository.viewPost({ userId, postId });
+    } catch (error) {
+      console.error(
+        `Error in viewPost for userId: ${userId}, postId: ${postId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CREATE_VIEW,
+        "Failed to create post view.",
+      );
+    }
+  }
+
+  async viewMultiplePosts({
+    userId,
+    postIds,
+  }: {
+    userId: string;
+    postIds: number[];
+  }) {
+    try {
+      await this.viewRepository.viewMultiplePosts({ userId, postIds });
+    } catch (error) {
+      console.error(
+        `Error in viewMultiplePosts for userId: ${userId}, postIds: ${postIds}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CREATE_VIEW,
+        "Failed to create post view.",
+      );
+    }
+  }
+
 }

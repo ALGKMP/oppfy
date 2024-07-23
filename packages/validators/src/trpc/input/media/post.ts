@@ -7,46 +7,44 @@ import {
   s3ObjectMetadataForUserOnAppSchema,
 } from "../../../shared";
 
-const metadataOnTheAppSchema = z
+const s3MetadataOnTheAppSchema = z
   .object({
     ...s3ObjectMetadataForUserOnAppSchema.shape,
     contentLength: z.number(),
     contentType: postContentType,
   })
-  .omit({ authorId: true });
+  .omit({ author: true });
 
-const metadataNotOnTheAppSchema = z
+const s3MetadataNotOnTheAppSchema = z
   .object({
     ...s3ObjectMetadataForUserNotOnAppSchema.shape,
     contentLength: z.number(),
     contentType: postContentType,
   })
-  .omit({ authorId: true });
+  .omit({ author: true });
 
-const metadataSchema = z.discriminatedUnion("type", [
-  metadataOnTheAppSchema,
-  metadataNotOnTheAppSchema,
+const s3MetadataSchema = z.discriminatedUnion("type", [
+  s3MetadataOnTheAppSchema,
+  s3MetadataNotOnTheAppSchema,
+]);
+
+const muxMetadataOnTheAppSchema = z
+  .object(s3ObjectMetadataForUserOnAppSchema.shape)
+  .omit({ author: true });
+
+const muxMetadataNotOnTheAppSchema = z
+  .object(s3ObjectMetadataForUserNotOnAppSchema.shape)
+  .omit({ author: true });
+
+const muxMetadataSchema = z.discriminatedUnion("type", [
+  muxMetadataOnTheAppSchema,
+  muxMetadataNotOnTheAppSchema,
 ]);
 
 const trpcPostInputSchema = {
-  createPresignedUrlForPost: metadataSchema,
+  createPresignedUrlForImagePost: s3MetadataSchema,
 
-  createPresignedUrlForPostOfUserNotOnApp: z.object({
-    author: z.string(),
-    phoneNumber: z.string(),
-    caption: z.string().max(2000).default(""),
-    height: z.number(),
-    width: z.number(),
-    contentLength: z.number(),
-    contentType: postContentType,
-  }),
-
-  createMuxPresignedUrl: z.object({
-    recipientId: z.string(),
-    caption: z.string().optional(),
-    height: z.number(),
-    width: z.number(),
-  }),
+  createPresignedUrlForVideoPost: muxMetadataSchema,
 
   updatePost: z.object({
     postId: z.number(),

@@ -26,11 +26,13 @@ interface CreatePostBaseParams extends Record<string, string> {
 }
 
 interface CreatePostWithRecipient extends CreatePostBaseParams {
-  recipientId: string;
+  recipient: string;
+  userType: "onApp";
 }
 
 interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
-  recipientPhoneNumber: string;
+  number: string;
+  userType: "notOnApp";
 }
 
 const CreatePost = () => {
@@ -62,15 +64,15 @@ const CreatePost = () => {
     };
 
     const input =
-      "recipientId" in params
+      params.userType === "onApp"
         ? {
             ...baseData,
-            recipientId: params.recipientId ?? "",
+            recipient: params.recipient ?? "",
             type: "onApp" as const,
           }
         : {
             ...baseData,
-            recipientPhoneNumber: params.phoneNumber ?? "",
+            number: params.number ?? "",
             type: "notOnApp" as const,
           };
 

@@ -11,6 +11,7 @@ import {
   S3Repository,
   SearchRepository,
   UserRepository,
+  ViewRepository,
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
@@ -57,6 +58,7 @@ export class ProfileService {
   private s3Repository = new S3Repository();
   private followRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
+  private viewRepository = new ViewRepository();
 
   private friendService = new FriendService();
   private followService = new FollowService();
@@ -390,5 +392,48 @@ export class ProfileService {
     };
 
     return PrivacyStatus.parse(profileStatus);
+  }
+
+  async viewProfile({
+    viewerUserId,
+    viewedProfileId,
+  }: {
+    viewerUserId: string;
+    viewedProfileId: number;
+  }): Promise<void> {
+    try {
+      await this.viewRepository.viewProfile({ viewerUserId, viewedProfileId });
+    } catch (err) {
+      console.error(
+        `SERVICE ERROR: Failed to create profile view for user ID "${viewerUserId}" viewing profile ID "${viewedProfileId}"`,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CREATE_VIEW,
+        "Failed to create profile view for the user.",
+      );
+    }
+  }
+
+  async viewMultipleProfiles({
+    viewerUserId,
+    viewedProfileIds,
+  }: {
+    viewerUserId: string;
+    viewedProfileIds: number[];
+  }): Promise<void> {
+    try {
+      await this.viewRepository.viewMultipleProfiles({
+        viewerUserId,
+        viewedProfileIds,
+      });
+    } catch (err) {
+      console.error(
+        `SERVICE ERROR: Failed to create profile views for user ID "${viewerUserId}" viewing profiles "${viewedProfileIds}"`,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CREATE_VIEW,
+        "Failed to create profile views for the user.",
+      );
+    }
   }
 }

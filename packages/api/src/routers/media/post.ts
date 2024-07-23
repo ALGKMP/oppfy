@@ -9,7 +9,7 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForImagePost: protectedProcedure
-    .input(trpcValidators.input.post.createPresignedUrlForPost)
+    .input(trpcValidators.input.post.createPresignedUrlForImagePost)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
       try {
@@ -26,7 +26,7 @@ export const postRouter = createTRPCRouter({
             ContentType: contentType,
             Metadata: {
               ...metadata,
-              authorId: ctx.session.uid,
+              author: ctx.session.uid,
             },
           });
 
@@ -39,19 +39,16 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  createMuxVideoPresignedUrlForVideoPost: protectedProcedure
-    .input(trpcValidators.input.post.createMuxPresignedUrl)
+  createPresignedUrlForVideoPost: protectedProcedure
+    .input(trpcValidators.input.post.createPresignedUrlForVideoPost)
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("Creating Mux URL");
-        const result = await ctx.services.mux.createDirectUpload(
-          ctx.session.uid,
-          input.recipientId,
-          input.caption,
-          input.width,
-          input.height,
-        );
-        return result.url;
+        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
+          author: ctx.session.uid,
+          ...input,
+        });
+
+        return url;
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -440,6 +437,38 @@ export const postRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to paginate comments.",
+        });
+      }
+    }),
+
+  viewPost: protectedProcedure
+    .input(z.object({ postId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.viewPost({
+          userId: ctx.session.uid,
+          postId: input.postId,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to view post for ${input.postId}`,
+        });
+      }
+    }),
+
+  viewMultiplePosts: protectedProcedure
+    .input(z.object({ postIds: z.array(z.number()) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.post.viewMultiplePosts({
+          userId: ctx.session.uid,
+          postIds: input.postIds,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to view multiple posts for ${input.postIds}`,
         });
       }
     }),
