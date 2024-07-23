@@ -170,18 +170,25 @@ export const profileRouter = createTRPCRouter({
           viewedProfileId: input.profileId,
         });
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "User not found",
-              });
-          }
-        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Failed to view profile for ${input.profileId}`,
+        });
+      }
+    }),
+
+  viewMultipleProfiles: protectedProcedure
+    .input(z.object({ profileIds: z.array(z.number()) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.services.profile.viewMultipleProfiles({
+          viewerUserId: ctx.session.uid,
+          viewedProfileIds: input.profileIds,
+        });
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Failed to view multiple profiles`,
         });
       }
     }),
