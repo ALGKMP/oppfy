@@ -69,6 +69,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   const handleShowMoreRecs = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     console.log("going in there");
+    router.push("/(app)/(recomended)/recomended");
     // router.push("/(app)/(onboarding)/misc/recomendations");
     // router.push("/self-connections/friend-list");
   };
