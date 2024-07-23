@@ -552,7 +552,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       backgroundColor="$background"
       gap="$4"
     >
-      <View alignItems="center" marginBottom={-20}>
+      <View alignItems="center" marginBottom={-30}>
         <StatusRenderer
           data={!props.loading ? props.data : undefined}
           loadingComponent={<Skeleton circular size={160} />}

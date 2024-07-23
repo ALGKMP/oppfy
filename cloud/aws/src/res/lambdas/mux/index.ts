@@ -1,133 +1,82 @@
-import { createEnv } from "@t3-oss/env-core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { parser } from "@aws-lambda-powertools/parser/middleware";
+import { APIGatewayProxyEventV2Schema } from "@aws-lambda-powertools/parser/schemas";
+import middy from "@middy/core";
 import { z } from "zod";
 
 import { db, schema } from "@oppfy/db";
 import { mux } from "@oppfy/mux";
+import { sharedValidators } from "@oppfy/validators";
 
-const env = createEnv({
-  server: {
-    MUX_WEBHOOK_SECRET: z.string().min(1),
-  },
-  runtimeEnv: process.env,
-});
+type APIGatewayProxyEvent = z.infer<typeof APIGatewayProxyEventV2Schema>;
 
-export const handler = async (
-  event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
-  try {
-    // Extract the raw body and headers
-    const rawBody = event.body; // need this to verify mux signature
-    const muxSignatureHeader = event.headers["mux-signature"];
-
-    if (!rawBody || !muxSignatureHeader) {
-      return {
-        statusCode: 400,
-        body: "Missing raw body or mux-signature header",
-      };
-    }
-
-    const jsonBody = JSON.parse(rawBody);
-    console.log("Received Mux webhook event:", jsonBody);
-
-    const m = z.object({
+const muxBodySchema = z
+  .object({
+    type: z.literal("video.asset.ready"),
+    object: z.object({
+      id: z.string(),
       type: z.string(),
-    });
+      error: z.string().optional(),
+    }),
+    data: z.object({
+      passthrough: sharedValidators.aws.metadataSchema,
+      playback_ids: z.array(z.object({ id: z.string() })).nonempty(),
+      aspect_ratio: z.string(),
+    }),
+  })
+  .passthrough();
 
-    const muxBodySchema = z
-      .object({
-        type: z.string(),
-        object: z.object({
-          id: z.string(),
-          type: z.string(),
-          error: z.string().optional(),
-        }),
-        data: z.object({
-          passthrough: z.string().optional(),
-          playback_ids: z.array(
-            z.object({
-              id: z.string(),
-            }),
-          ).nonempty({
-            message: "Playback IDs must not be empty"
-          }),
-          aspect_ratio: z.string(),
-        }),
-      })
-      .passthrough();
+const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
+  const rawBody = event.body;
+  const headers = event.headers;
 
-    const metadataSchema = z.object({
-      authorId: z.string(),
-      recipientId: z.string(),
-      caption: z.string(),
-      height: z.number(),
-      width: z.number(),
-    });
+  if (rawBody === undefined) {
+    throw new Error("Missing raw body or mux-signature header");
+  }
 
-    const t = m.parse(jsonBody);
+  try {
+    mux.webhooks.verifySignature(rawBody, headers);
+  } catch {
+    throw new Error("Invalid Mux Webhook Signature");
+  }
 
-    if (t.type != "video.asset.ready") {
-      console.log("Ignoring Mux webhook event:", t.type);
-      return {
-        statusCode: 200,
-        body: "Webhook received and ignored",
-      };
-    }
+  const body = muxBodySchema.parse(JSON.parse(rawBody));
 
-    const parsedMuxResponseBody = muxBodySchema.parse(jsonBody);
+  const key = body.data.playback_ids[0].id;
+  const metadata = body.data.passthrough;
 
-    const jsonMetadata = parsedMuxResponseBody.data.passthrough
-      ? JSON.parse(parsedMuxResponseBody.data.passthrough)
-      : {};
+  const data = {
+    key,
+    mediaType: "video" as const,
+    author: metadata.author,
+    height: parseInt(metadata.height),
+    width: parseInt(metadata.width),
+    caption: metadata.caption,
+  };
 
-    console.log(jsonMetadata);
+  if (metadata.type === "onApp") {
+    await db.transaction(async (tx) => {
+      const [post] = await tx
+        .insert(schema.post)
+        .values({
+          ...data,
+          recipient: metadata.recipient,
+        })
+        .returning({ insertId: schema.post.id });
 
-    const metadata = metadataSchema.parse(jsonMetadata);
-
-    // Verify the Mux webhook signature
-    try {
-      mux.webhooks.verifySignature(
-        rawBody,
-        // event.headers,
-        { "mux-signature": muxSignatureHeader },
-        env.MUX_WEBHOOK_SECRET,
-      );
-      console.log("Mux signature verified");
-
-      const post = await db.insert(schema.post).values({
-        recipient: metadata.recipientId,
-        caption: metadata.caption,
-        key: parsedMuxResponseBody.data.playback_ids[0].id,
-        author: metadata.authorId,
-        mediaType: "video",
-        width: metadata.width,
-        height: metadata.height,
-      }).returning({insertedId: schema.post.id});
-
-      if (!post[0]?.insertedId) {
-        return {
-          statusCode: 500,
-          body: "Failed to insert post",
-        };
+      if (post === undefined) {
+        throw new Error("Failed to insert post");
       }
 
-      await db.insert(schema.postStats).values({ postId: post[0]?.insertedId });
-      return {
-        statusCode: 200,
-        body: "Webhook received and processed",
-      };
-    } catch (error) {
-      console.error("Error verifying Mux webhook signature:", error);
-      return {
-        statusCode: 401,
-        body: "Invalid Mux Webhook Signature",
-      };
-    }
-  } catch (error) {
-    console.error("Error processing webhook:", error);
-    return {
-      statusCode: 500,
-      body: "Internal Server Error",
-    };
+      await tx.insert(schema.postStats).values({ postId: post.insertId });
+    });
+  } else {
+    await db.insert(schema.postOfUserNotOnApp).values({
+      ...data,
+      phoneNumber: metadata.number,
+    });
   }
 };
+
+export const handler = middy(lambdaHandler).use(
+  parser({ schema: APIGatewayProxyEventV2Schema }),
+);

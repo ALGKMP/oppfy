@@ -601,6 +601,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.564.0
         version: 3.564.0
+      '@mux/mux-node':
+        specifier: ^8.5.1
+        version: 8.5.1
       '@opensearch-project/opensearch':
         specifier: ^2.8.0
         version: 2.8.0
@@ -653,9 +656,6 @@ importers:
       '@oppfy/db':
         specifier: workspace:*
         version: link:../../../../../../packages/db
-      '@oppfy/s3':
-        specifier: workspace:*
-        version: link:../../../../../../packages/s3
       '@oppfy/utils':
         specifier: workspace:*
         version: link:../../../../../../packages/utils

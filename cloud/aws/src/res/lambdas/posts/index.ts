@@ -24,12 +24,12 @@ const lambdaHandler = async (
     throw new Error("Record not provided");
   }
 
-  const objectKey = record.s3.object.key;
+  const key = record.s3.object.key;
   const objectBucket = record.s3.bucket.name;
 
   const command = new HeadObjectCommand({
     Bucket: objectBucket,
-    Key: objectKey,
+    Key: key,
   });
 
   const { Metadata } = await s3.send(command);
@@ -38,17 +38,15 @@ const lambdaHandler = async (
     throw new Error("Metadata not provided");
   }
 
-  const metadata = sharedValidators.aws.metadataSchema.parse({
-    ...Metadata,
-    type: Metadata.type,
-  });
+  const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
 
   const data = {
+    key,
+    mediaType: "image" as const,
     author: metadata.author,
     height: parseInt(metadata.height),
     width: parseInt(metadata.width),
     caption: metadata.caption,
-    key: objectKey,
   };
 
   if (metadata.type === "onApp") {

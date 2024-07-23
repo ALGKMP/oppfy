@@ -21,7 +21,7 @@ const Other = () => {
   const {
     syncContacts: handleSyncContacts,
     deleteContacts: handleDeleteContacts,
-  } = useContacts(false);
+  } = useContacts();
 
   const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
     useState(false);

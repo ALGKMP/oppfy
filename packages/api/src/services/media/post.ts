@@ -2,6 +2,7 @@ import type { z } from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
+import { user } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository, ViewRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
@@ -29,6 +30,12 @@ interface FollowingPostCursor {
   followingPostCursor?: FollowingPostCursor;
   postCursor?: PostCursor;
 } */
+
+interface FeedCursor {
+  doneFollowing: boolean;
+  followingCursor?: FollowingPostCursor;
+  recomendedCursor?: PostCursor;
+}
 
 interface CommentCursor {
   createdAt: Date;
@@ -285,6 +292,115 @@ export class PostService {
       );
     }
   }
+
+  async paginatePostsForFeed(
+    userId: string,
+    cursor: FeedCursor | null = null,
+    pageSize?: number,
+  ) {
+    if (cursor?.doneFollowing) {
+      const recommendedResult =
+        await this.postRepository.paginatePostsOfRecommended(
+          userId,
+          cursor?.recomendedCursor,
+          pageSize,
+        );
+
+      const parsedRecommendedResult = this._processPaginatedPostData(
+        recommendedResult,
+        pageSize,
+      );
+
+      // spread
+      const { nextCursor, ...rest } = parsedRecommendedResult;
+
+      return {
+        ...rest,
+        nextCursor: {
+          doneFollowing: true,
+          recomendedCursor: nextCursor,
+        },
+      };
+    }
+
+    const followingResult = await this.postRepository.paginatePostsOfFollowing(
+      userId,
+      cursor?.followingCursor,
+      pageSize,
+    );
+
+    const parsedFollowingResult = this._processPaginatedPostData(
+      followingResult,
+      pageSize,
+    );
+
+    if (parsedFollowingResult.items.length < pageSize!) {
+      const recommendedResult =
+        await this.postRepository.paginatePostsOfRecommended(
+          userId,
+          cursor?.recomendedCursor,
+          pageSize! - parsedFollowingResult.items.length,
+        );
+
+      const parsedRecommendedResult = this._processPaginatedPostData(
+        recommendedResult,
+        pageSize,
+      );
+
+      parsedRecommendedResult.items = [
+        ...parsedFollowingResult.items,
+        ...parsedRecommendedResult.items,
+      ];
+
+      const { nextCursor, ...rest } = parsedRecommendedResult;
+
+      return {
+        ...rest,
+        nextCursor: {
+          doneFollowing: true,
+          recomendedCursor: nextCursor,
+        },
+      };
+    }
+
+    return parsedFollowingResult;
+  }
+
+  /*   async paginatePostsForFeed(
+    userId: string,
+    cursor: PostCursor | null = null,
+    pageSize?: number,
+  ) {
+    console.log("TRPC getPosts input: ", input);
+    const result = await ctx.services.post.paginatePostsOfFollowing(
+      ctx.session.uid,
+      input.cursor?.followingCursor,
+      input.pageSize,
+    );
+
+    const parsedFollowingResult =
+      trpcValidators.output.post.paginatedFeedPosts.parse(result);
+
+    if (parsedFollowingResult.items.length < input.pageSize!) {
+      const result = await ctx.services.post.paginatePostsOfRecommended(
+        ctx.session.uid,
+        input.cursor?.recomendedCursor,
+        input.pageSize! - parsedFollowingResult.items.length,
+      );
+
+      const parsedRecommendedResult =
+        trpcValidators.output.post.paginatedFeedPosts.parse(result);
+
+      parsedRecommendedResult.items = [
+        ...parsedFollowingResult.items,
+        ...parsedRecommendedResult.items,
+      ];
+
+      return parsedRecommendedResult;
+    }
+
+    return parsedFollowingResult;
+  } */
 
   async paginatePostsByUserSelf(
     userId: string,
@@ -563,5 +679,4 @@ export class PostService {
       );
     }
   }
-
 }
