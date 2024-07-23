@@ -1,16 +1,24 @@
 import React, { useState } from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as SMS from "expo-sms";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
-import { Button, ScrollView, Text, TextArea, View, YStack } from "tamagui";
+import {
+  Button,
+  Dialog,
+  ScrollView,
+  Text,
+  TextArea,
+  View,
+  YStack,
+} from "tamagui";
 import { z } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
 import { useUploadMedia } from "~/hooks/media";
-import type { UploadMediaInput } from "~/hooks/media";
 
 const postSchema = z.object({
   caption: z.optional(z.string().max(1000)),
@@ -40,12 +48,10 @@ const CreatePost = () => {
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
   const { type, uri, height, width } = params;
-
   const router = useRouter();
-
   const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
-
   const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [showSmsDialog, setShowSmsDialog] = useState(false);
 
   const {
     control,
@@ -55,6 +61,16 @@ const CreatePost = () => {
     resolver: zodResolver(postSchema),
   });
 
+  const sendSMS = async (number: string, message: string) => {
+    const isAvailable = await SMS.isAvailableAsync();
+    if (isAvailable) {
+      const { result } = await SMS.sendSMSAsync([number], message);
+      console.log(result);
+    } else {
+      console.log("SMS is not available on this device");
+    }
+  };
+
   const onSubmit = handleSubmit(async (data) => {
     const baseData = {
       uri: uri ?? "",
@@ -63,6 +79,14 @@ const CreatePost = () => {
       caption: data.caption,
     };
 
+    if (params.userType === "notOnApp") {
+      setShowSmsDialog(true);
+    } else {
+      await uploadMedia(baseData, params);
+    }
+  });
+
+  const uploadMedia = async (baseData: any, params: any) => {
     const input =
       params.userType === "onApp"
         ? {
@@ -82,7 +106,26 @@ const CreatePost = () => {
 
     router.dismissAll();
     router.navigate("/(home)/home");
-  });
+  };
+
+  const handleSendSMS = async () => {
+    if (params.userType === "notOnApp") {
+      await sendSMS(
+        params.number,
+        "Hey! I've shared a post with you. Download our app to view it!",
+      );
+      await uploadMedia(
+        {
+          uri: uri ?? "",
+          width: Number(width),
+          height: Number(height),
+          caption: control._formValues.caption,
+        },
+        params,
+      );
+    }
+    setShowSmsDialog(false);
+  };
 
   return (
     <BaseScreenView safeAreaEdges={["bottom"]}>
@@ -90,7 +133,6 @@ const CreatePost = () => {
         <ScrollView flex={1} keyboardDismissMode="interactive">
           <YStack flex={1} gap="$4">
             <Image source={{ uri: thumbnail ?? uri }} style={styles.media} />
-
             <YStack flex={1} gap="$2">
               <Controller
                 control={control}
@@ -114,7 +156,6 @@ const CreatePost = () => {
           </YStack>
         </ScrollView>
       </View>
-
       <Button
         size="$5"
         borderRadius="$7"
@@ -123,6 +164,48 @@ const CreatePost = () => {
       >
         Continue
       </Button>
+
+      <Dialog open={showSmsDialog} onOpenChange={setShowSmsDialog}>
+        <Dialog.Portal>
+          <Dialog.Overlay
+            key="overlay"
+            animation="quick"
+            opacity={0.5}
+            enterStyle={{ opacity: 0 }}
+            exitStyle={{ opacity: 0 }}
+          />
+          <Dialog.Content
+            bordered
+            elevate
+            key="content"
+            animation={[
+              "quick",
+              {
+                opacity: {
+                  overshootClamping: true,
+                },
+              },
+            ]}
+            enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
+            exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
+            gap="$4"
+          >
+            <Dialog.Title>Send SMS</Dialog.Title>
+            <Dialog.Description>
+              This user is not on the app. We need to send them an SMS to invite
+              them to view your post.
+            </Dialog.Description>
+            <YStack gap="$3">
+              <Button onPress={handleSendSMS} theme="active">
+                Send SMS and Post
+              </Button>
+              <Button onPress={() => setShowSmsDialog(false)} theme="alt1">
+                Cancel
+              </Button>
+            </YStack>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog>
     </BaseScreenView>
   );
 };
