@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm"; // Add inArray import
+import { eq, inArray } from "drizzle-orm"; // Add inArray import
 
 import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
