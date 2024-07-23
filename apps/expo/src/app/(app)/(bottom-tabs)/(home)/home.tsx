@@ -80,63 +80,71 @@ const HomeScreen = () => {
 
   return (
     // <BaseScreenView top={insets.top} padding={0}>
-      <View flex={1} width="100%" height="100%">
-        <FlashList
-          nestedScrollEnabled={true}
-          data={posts}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          // onRefresh={onRefresh}
-          numColumns={1}
-          onEndReached={handleOnEndReached}
-          keyExtractor={(item) => {
-            return "home_" + item?.postId.toString();
-          }}
-          renderItem={({ item, index }) => {
-            if (item === undefined) {
-              return null;
-            }
-            return (
-              <>
-                {isLoadingPostData ? (
-                  <>
-                    <Text>Loading...</Text>
-                  </>
-                ) : index == 0 ? (
-                  <YStack>
-                    {isLoadingRecommendationsData ? (
-                      <RecommendationsCarousel loading />
-                    ) : (
-                      recommendationsData && (
-                        <RecommendationsCarousel
-                          loading={isLoadingRecommendationsData}
-                          reccomendationsData={recommendationsData}
-                        ></RecommendationsCarousel>
-                      )
-                    )}
-                    <Separator />
-                    <PostItem
-                      post={item}
-                      isSelfPost={false}
-                      isViewable={viewableItems.includes(item.postId)}
-                    />
-                  </YStack>
-                ) : (
+    <View flex={1} width="100%" height="100%">
+      <FlashList
+        nestedScrollEnabled={true}
+        data={posts}
+        refreshing={refreshing}
+        showsVerticalScrollIndicator={false}
+        // onRefresh={onRefresh}
+        numColumns={1}
+        onEndReached={handleOnEndReached}
+        keyExtractor={(item) => {
+          return "home_" + item?.postId.toString();
+        }}
+        renderItem={({ item, index }) => {
+          if (item === undefined) {
+            return null;
+          }
+          return (
+            <>
+              {isLoadingPostData ? (
+                <>
+                  <Text>Loading...</Text>
+                </>
+              ) : index == 0 ? (
+                <YStack>
+                  {isLoadingRecommendationsData ? (
+                    <RecommendationsCarousel loading />
+                  ) : (
+                    recommendationsData && (
+                      <RecommendationsCarousel
+                        loading={isLoadingRecommendationsData}
+                        reccomendationsData={[
+                          ...recommendationsData,
+                          ...recommendationsData,
+                          ...recommendationsData,
+                          ...recommendationsData,
+                          ...recommendationsData,
+                          ...recommendationsData,
+                          ...recommendationsData,
+                        ]}
+                      ></RecommendationsCarousel>
+                    )
+                  )}
+                  <Separator />
                   <PostItem
                     post={item}
                     isSelfPost={false}
                     isViewable={viewableItems.includes(item.postId)}
                   />
-                )}
-              </>
-            );
-          }}
-          estimatedItemSize={screenWidth}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
-        />
-      </View>
+                </YStack>
+              ) : (
+                <PostItem
+                  post={item}
+                  isSelfPost={false}
+                  isViewable={viewableItems.includes(item.postId)}
+                />
+              )}
+            </>
+          );
+        }}
+        estimatedItemSize={screenWidth}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        extraData={viewableItems}
+      />
+    </View>
     // </BaseScreenView>
   );
 };

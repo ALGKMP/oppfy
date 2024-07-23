@@ -9,7 +9,7 @@ import { api } from "~/utils/api";
 
 const AppLayout = () => {
   usePushNotifications();
-  // useContacts(true);
+  useContacts(true);
 
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();

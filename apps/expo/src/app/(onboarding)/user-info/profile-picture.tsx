@@ -10,6 +10,7 @@ import {
   OnboardingButton,
 } from "~/features/onboarding/components";
 import { useUploadProfilePicture } from "~/hooks/media";
+import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
   const router = useRouter();
@@ -19,9 +20,10 @@ const ProfilePicture = () => {
       optimisticallyUpdate: true,
     });
 
-  const onSubmit = () => router.replace("/(onboarding)/misc/recomendations");
+  api.useUtils().contacts.getRecommendationProfilesSelf.prefetch();
 
-  const onSkip = () => router.replace("/(onboarding)//misc/recomendations");
+  const onSubmit = () => router.replace("misc/recomendations");
+  const onSkip = () => router.replace("misc/recomendations");
 
   /*   const onSubmit = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
