@@ -18,6 +18,8 @@ export const postRouter = createTRPCRouter({
 
         const { contentLength, contentType, ...metadata } = input;
 
+        console.log("TRPC createPresignedUrlForImagePost input: ", input);
+
         const presignedUrl =
           await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
             Bucket: env.S3_POST_BUCKET,
@@ -26,7 +28,7 @@ export const postRouter = createTRPCRouter({
             ContentType: contentType,
             Metadata: {
               ...metadata,
-              authorId: ctx.session.uid,
+              author: ctx.session.uid,
             },
           });
 
