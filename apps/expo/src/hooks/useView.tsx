@@ -8,9 +8,8 @@ const useView = () => {
   const [viewedItems, setViewedItems] = useState<{ type: 'post' | 'profile', id: number }[]>([]);
   const { getCurrentUserProfileId } = useSession();
 
-  const viewPostMutation = api.post.viewPost.useMutation();
   const viewMultiplePostsMutation = api.post.viewMultiplePosts.useMutation();
-  const viewProfileMutation = api.profile.viewProfile.useMutation(); // Assuming you have this mutation
+  const viewMultipleProfilesMutation = api.profile.viewMultipleProfiles.useMutation();
 
   const addViewedItem = useCallback((type: 'post' | 'profile', id: number) => {
     setViewedItems(prev => [...prev, { type, id }]);
@@ -24,12 +23,12 @@ const useView = () => {
       viewMultiplePostsMutation.mutate({ postIds: posts });
     }
 
-    profiles.forEach(profileId => {
-      viewProfileMutation.mutate({ profileId });
-    });
+    if (profiles.length > 0) {
+      viewMultipleProfilesMutation.mutate({ profileIds: profiles });
+    }
 
     setViewedItems([]);
-  }, [viewedItems, viewMultiplePostsMutation, viewProfileMutation]);
+  }, [viewedItems, viewMultiplePostsMutation, viewMultipleProfilesMutation]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
