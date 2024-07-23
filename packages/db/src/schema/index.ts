@@ -92,7 +92,7 @@ export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
   phoneNumber: text("phone_number").notNull(),
   author: text("author")
     .notNull()
-    .references(() => user.id, {onDelete: "cascade"}),
+    .references(() => user.id, { onDelete: "cascade" }),
   caption: text("caption").notNull().default(""),
   key: text("key").notNull(),
   width: integer("width").notNull().default(500),
@@ -285,7 +285,7 @@ export const post = pgTable("post", {
   key: text("key").notNull(),
   width: integer("width").notNull().default(500),
   height: integer("height").notNull().default(500),
-  mediaType: mediaTypeEnum("media_type").notNull().default("image"),
+  mediaType: mediaTypeEnum("media_type").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
