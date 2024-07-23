@@ -200,6 +200,9 @@ importers:
       expo-sharing:
         specifier: ~12.0.1
         version: 12.0.1(expo@51.0.14)
+      expo-sms:
+        specifier: ~12.0.1
+        version: 12.0.1(expo@51.0.14)
       expo-splash-screen:
         specifier: ~0.27.5
         version: 0.27.5(expo-modules-autolinking@1.11.1)(expo@51.0.14)
@@ -14603,6 +14606,14 @@ packages:
 
   /expo-sharing@12.0.1(expo@51.0.14):
     resolution: {integrity: sha512-wBT+WeXwapj/9NWuLJO01vi9bdlchYu/Q/xD8slL/Ls4vVYku8CPqzkTtDFcjLrjtlJqyeHsdQXwKLvORmBIew==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.14(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+    dev: false
+
+  /expo-sms@12.0.1(expo@51.0.14):
+    resolution: {integrity: sha512-LuKymmqWQFVBjypFpo+Ed/M+rywWwcM4TfB7y5m0tmF7p9n+KAlyhOOQBUWwyXBYEXho9hK9s/H5cpW97gseNg==}
     peerDependencies:
       expo: '*'
     dependencies:
