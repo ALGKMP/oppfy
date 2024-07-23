@@ -92,7 +92,7 @@ export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
   phoneNumber: text("phone_number").notNull(),
   author: text("author")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, {onDelete: "cascade"}),
   caption: text("caption").notNull().default(""),
   key: text("key").notNull(),
   width: integer("width").notNull().default(500),
