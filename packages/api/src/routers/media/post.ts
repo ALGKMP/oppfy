@@ -173,17 +173,24 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedFeedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        console.log("TRPC getPosts input: ", input);
+
+        const result = await ctx.services.post.paginatePostsForFeed(
+          ctx.session.uid,
+          input.cursor,
+          input.pageSize,
+        );
+
+ /*        console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfFollowing(
           ctx.session.uid,
           input.cursor?.followingCursor,
           input.pageSize,
         );
-
+ */
         const parsedFollowingResult =
           trpcValidators.output.post.paginatedFeedPosts.parse(result);
 
-        if (parsedFollowingResult.items.length < input.pageSize!) {
+/*         if (parsedFollowingResult.items.length < input.pageSize!) {
           const result = await ctx.services.post.paginatePostsOfRecommended(
             ctx.session.uid,
             input.cursor?.recomendedCursor,
@@ -200,7 +207,7 @@ export const postRouter = createTRPCRouter({
 
           return parsedRecommendedResult;
         }
-
+ */
         return parsedFollowingResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
