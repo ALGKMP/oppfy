@@ -13,7 +13,7 @@ const metadataOnTheAppSchema = z
     contentLength: z.number(),
     contentType: postContentType,
   })
-  .omit({ authorId: true });
+  .omit({ author: true });
 
 const metadataNotOnTheAppSchema = z
   .object({
@@ -21,7 +21,7 @@ const metadataNotOnTheAppSchema = z
     contentLength: z.number(),
     contentType: postContentType,
   })
-  .omit({ authorId: true });
+  .omit({ author: true });
 
 const metadataSchema = z.discriminatedUnion("type", [
   metadataOnTheAppSchema,
@@ -30,16 +30,6 @@ const metadataSchema = z.discriminatedUnion("type", [
 
 const trpcPostInputSchema = {
   createPresignedUrlForPost: metadataSchema,
-
-  createPresignedUrlForPostOfUserNotOnApp: z.object({
-    author: z.string(),
-    phoneNumber: z.string(),
-    caption: z.string().max(2000).default(""),
-    height: z.number(),
-    width: z.number(),
-    contentLength: z.number(),
-    contentType: postContentType,
-  }),
 
   createMuxPresignedUrl: z.object({
     recipientId: z.string(),

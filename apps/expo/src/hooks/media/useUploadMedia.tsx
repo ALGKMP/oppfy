@@ -13,11 +13,11 @@ interface UploadMediaInputBase {
 }
 
 interface UploadMediaInputOnApp extends UploadMediaInputBase {
-  recipientId: string;
+  recipient: string;
 }
 
 interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
-  recipientPhoneNumber: string;
+  number: string;
 }
 
 type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
@@ -80,16 +80,16 @@ const useUploadMedia = () => {
     };
 
     const presignedUrl =
-      "recipientId" in input
+      "recipient" in input
         ? await createPresignedUrlForPost.mutateAsync({
             ...baseData,
             type: "onApp",
-            recipientId: input.recipientId,
+            recipient: input.recipient,
           })
         : await createPresignedUrlForPost.mutateAsync({
             ...baseData,
             type: "notOnApp",
-            recipientPhoneNumber: input.recipientPhoneNumber,
+            number: input.number,
           });
 
     const response = await fetch(presignedUrl, {

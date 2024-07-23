@@ -169,7 +169,7 @@ const PostTo = () => {
         type,
         width,
         height,
-        recipientPhoneNumber,
+        number: recipientPhoneNumber,
       },
     });
   };
@@ -182,7 +182,7 @@ const PostTo = () => {
         type,
         width,
         height,
-        recipientId,
+        recipient: recipientId,
       },
     });
   };
