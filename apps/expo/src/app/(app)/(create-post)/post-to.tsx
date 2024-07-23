@@ -183,6 +183,7 @@ const PostTo = () => {
         width,
         height,
         recipient: recipientId,
+        userType: "onApp",
       },
     });
   };
