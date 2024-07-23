@@ -29,6 +29,13 @@
       "when": 1721667060182,
       "tag": "0003_salty_luckman",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1721744975341,
+      "tag": "0004_chunky_sleeper",
+      "breakpoints": true
     }
   ]
 }
