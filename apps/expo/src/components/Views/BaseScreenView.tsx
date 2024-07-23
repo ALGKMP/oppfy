@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { Edge } from "react-native-safe-area-context";
 import type { ScrollViewProps, ViewProps } from "tamagui";
-import { ScrollView, View } from "tamagui";
+import { ScrollView, useTheme, View } from "tamagui";
 
 type BaseScreenViewProps =
   | ({
@@ -29,6 +29,8 @@ const BaseScreenView = ({
   scrollable,
   ...props
 }: CommonProps & BaseScreenViewProps) => {
+  const theme = useTheme();
+
   const renderContent = () =>
     scrollable ? (
       <ScrollView
@@ -61,7 +63,11 @@ const BaseScreenView = ({
 
     return (
       <SafeAreaView
-        style={[styles.topSafeArea, topSafeAreaStyle]}
+        style={[
+          styles.topSafeArea,
+          topSafeAreaStyle,
+          { backgroundColor: theme.background.val },
+        ]}
         edges={safeAreaEdges.includes("top") ? ["top"] : undefined}
       />
     );
@@ -74,7 +80,11 @@ const BaseScreenView = ({
 
     return (
       <SafeAreaView
-        style={[styles.bottomSafeArea, bottomSafeAreaStyle]}
+        style={[
+          styles.bottomSafeArea,
+          bottomSafeAreaStyle,
+          { backgroundColor: theme.background.val },
+        ]}
         edges={safeAreaEdges.includes("bottom") ? ["bottom"] : undefined}
       >
         {renderContent()}
