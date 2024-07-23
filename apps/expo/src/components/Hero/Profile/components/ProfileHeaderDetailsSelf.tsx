@@ -68,7 +68,7 @@ const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
       backgroundColor="$background"
       gap="$4"
     >
-      <View marginBottom={-20} alignItems="center">
+      <View alignItems="center" marginBottom={-30}>
         <StatusRenderer
           data={!props.loading ? props.data : undefined}
           loadingComponent={<Skeleton circular size={160} />}
@@ -112,11 +112,13 @@ const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
           <StatusRenderer
             data={!props.loading ? props.data.bio ?? "" : undefined}
             loadingComponent={<Skeleton width={150} height={20} />}
-            successComponent={(bio) => (
-              <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
-                {bio}
-              </Paragraph>
-            )}
+            successComponent={(bio) =>
+              bio.length ? (
+                <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
+                  {bio}
+                </Paragraph>
+              ) : null
+            }
           />
         </YStack>
 
