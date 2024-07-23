@@ -402,7 +402,7 @@ export class ProfileService {
     viewedProfileId: number;
   }): Promise<void> {
     try {
-      await this.viewRepository.createView({ viewerUserId, viewedProfileId });
+      await this.viewRepository.viewProfile({ viewerUserId, viewedProfileId });
     } catch (err) {
       console.error(
         `SERVICE ERROR: Failed to create profile view for user ID "${viewerUserId}" viewing profile ID "${viewedProfileId}"`,
@@ -410,6 +410,29 @@ export class ProfileService {
       throw new DomainError(
         ErrorCode.FAILED_TO_CREATE_VIEW,
         "Failed to create profile view for the user.",
+      );
+    }
+  }
+
+  async viewMultipleProfiles({
+    viewerUserId,
+    viewedProfileIds,
+  }: {
+    viewerUserId: string;
+    viewedProfileIds: number[];
+  }): Promise<void> {
+    try {
+      await this.viewRepository.viewMultipleProfiles({
+        viewerUserId,
+        viewedProfileIds,
+      });
+    } catch (err) {
+      console.error(
+        `SERVICE ERROR: Failed to create profile views for user ID "${viewerUserId}" viewing profiles "${viewedProfileIds}"`,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CREATE_VIEW,
+        "Failed to create profile views for the user.",
       );
     }
   }
