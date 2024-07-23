@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { router } from "expo-router";
+import { useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import {
@@ -24,7 +25,6 @@ import {
 import { BaseScreenView } from "~/components/Views";
 import { OnboardingButton } from "~/features/onboarding/components";
 import { api, RouterOutputs } from "~/utils/api";
-import { useRoute } from "@react-navigation/native";
 
 const placeholderUsers = [
   { fullName: "Michael", username: "michaelyyz" },
@@ -163,7 +163,7 @@ const OnboardingRecomendations = () => {
   const theme = useTheme();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const requiredUsers = 5;
-  
+
   const { data: recommendations, isLoading } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
 
