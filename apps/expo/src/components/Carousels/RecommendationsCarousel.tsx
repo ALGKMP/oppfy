@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Share, TouchableOpacity, Animated } from "react-native";
+import React, { useCallback, useEffect, useRef } from "react";
+import { Share, TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -26,7 +26,6 @@ import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
 import { api, type RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-
 
 type RecoemndationItems =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
@@ -70,7 +69,8 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   const handleShowMoreRecs = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     console.log("going in there");
-    router.push("/self-connections/friend-list");
+    // router.push("/(app)/(onboarding)/misc/recomendations");
+    // router.push("/self-connections/friend-list");
   };
 
   const throttledHandleAction = useRef(
@@ -160,6 +160,19 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
                 </YStack>
               </TouchableOpacity>
             )
+          }
+          ListFooterComponent={
+            showMore ? (
+              <View
+                marginRight={-100}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <SizableText color="#F214FF" fontWeight="600">
+                  See more
+                </SizableText>
+              </View>
+            ) : null
           }
           ItemSeparatorComponent={() => <Spacer size="$2" />}
           contentContainerStyle={{
