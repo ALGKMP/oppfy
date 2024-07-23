@@ -1,33 +1,50 @@
 import { z } from "zod";
 
-import { phoneNumber, postContentType } from "../../../shared";
+import { sharedValidators } from "../../../..";
+import {
+  postContentType,
+  s3ObjectMetadataForUserNotOnAppSchema,
+  s3ObjectMetadataForUserOnAppSchema,
+} from "../../../shared";
+
+const s3MetadataOnTheAppSchema = z
+  .object({
+    ...s3ObjectMetadataForUserOnAppSchema.shape,
+    contentLength: z.number(),
+    contentType: postContentType,
+  })
+  .omit({ author: true });
+
+const s3MetadataNotOnTheAppSchema = z
+  .object({
+    ...s3ObjectMetadataForUserNotOnAppSchema.shape,
+    contentLength: z.number(),
+    contentType: postContentType,
+  })
+  .omit({ author: true });
+
+const s3MetadataSchema = z.discriminatedUnion("type", [
+  s3MetadataOnTheAppSchema,
+  s3MetadataNotOnTheAppSchema,
+]);
+
+const muxMetadataOnTheAppSchema = z
+  .object(s3ObjectMetadataForUserOnAppSchema.shape)
+  .omit({ author: true });
+
+const muxMetadataNotOnTheAppSchema = z
+  .object(s3ObjectMetadataForUserNotOnAppSchema.shape)
+  .omit({ author: true });
+
+const muxMetadataSchema = z.discriminatedUnion("type", [
+  muxMetadataOnTheAppSchema,
+  muxMetadataNotOnTheAppSchema,
+]);
 
 const trpcPostInputSchema = {
-  createPresignedUrlForPost: z.object({
-    recipientId: z.string(),
-    caption: z.string().max(2000).default(""),
-    height: z.number(),
-    width: z.number(),
-    contentLength: z.number(),
-    contentType: postContentType,
-  }),
+  createPresignedUrlForImagePost: s3MetadataSchema,
 
-  createPresignedUrlForPostOfUserNotOnApp: z.object({
-    author: z.string(),
-    phoneNumber: z.string(),
-    caption: z.string().max(2000).default(""),
-    height: z.number(),
-    width: z.number(),
-    contentLength: z.number(),
-    contentType: postContentType,
-  }),
-
-  createMuxPresignedUrl: z.object({
-    recipientId: z.string(),
-    caption: z.string().optional(),
-    height: z.number(),
-    width: z.number(),
-  }),
+  createPresignedUrlForVideoPost: muxMetadataSchema,
 
   updatePost: z.object({
     postId: z.number(),
@@ -80,21 +97,23 @@ const trpcPostInputSchema = {
   }),
 
   paginatePostsForFeed: z.object({
-    cursor: z.object({
-      doneFollowing: z.boolean(),
-      followingCursor: z
-        .object({
-          createdAt: z.date(),
-          followerId: z.number(),
-        })
-        .optional(),
-      recomendedCursor: z
-        .object({
-          createdAt: z.date(),
-          postId: z.number(),
-        })
-        .optional(),
-    }).optional(),
+    cursor: z
+      .object({
+        doneFollowing: z.boolean(),
+        followingCursor: z
+          .object({
+            createdAt: z.date(),
+            followerId: z.number(),
+          })
+          .optional(),
+        recomendedCursor: z
+          .object({
+            createdAt: z.date(),
+            postId: z.number(),
+          })
+          .optional(),
+      })
+      .optional(),
 
     pageSize: z.number().nonnegative().optional(),
   }),

@@ -4,29 +4,16 @@ import { handleMuxErrors } from "../../errors";
 
 export class MuxRepository {
   @handleMuxErrors
-  async createDirectUpload(
-    authorId: string,
-    recipientId: string,
-    caption = "",
-    width: number,
-    height: number
-  ) {
-    const metadata = JSON.stringify({
-      authorId,
-      recipientId,
-      caption,
-      width,
-      height
-    });
+  async createDirectUpload(metadata: object) {
     return await mux.video.uploads.create({
-      new_asset_settings: {
-        playback_policy: ["public"],
-        encoding_tier: "smart",
-        passthrough: metadata,
-        test: true,
-        mp4_support: "standard",
-      },
       cors_origin: "*",
+      new_asset_settings: {
+        test: true,
+        encoding_tier: "smart",
+        mp4_support: "standard",
+        playback_policy: ["public"],
+        passthrough: JSON.stringify(metadata),
+      },
     });
   }
 

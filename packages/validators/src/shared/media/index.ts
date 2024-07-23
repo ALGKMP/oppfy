@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const postContentType = z.enum(["image/jpeg", "image/png", "image/gif"]);
+export const postContentType = z.enum(["image/jpeg", "image/png"]);
 
 export const post = z.object({
   postId: z.number(),
@@ -31,4 +31,3 @@ export const comment = z.object({
   body: z.string(),
   createdAt: z.date(),
 });
-

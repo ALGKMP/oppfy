@@ -5,89 +5,50 @@ import { env } from "@oppfy/env";
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
 import { DomainError } from "../../errors";
-import type { Metadata } from "../../services/aws/s3";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
   createPresignedUrlForImagePost: protectedProcedure
-    .input(trpcValidators.input.post.createPresignedUrlForPost)
+    .input(trpcValidators.input.post.createPresignedUrlForImagePost)
     .output(z.string())
     .mutation(async ({ ctx, input }) => {
       try {
         const currentDate = Date.now();
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
 
-        const metadata: Metadata = {
-          author: ctx.session.uid,
-          recipient: input.recipientId,
-          caption: input.caption,
-          width: input.width.toString(), // S3 Metadata have to be strings or some bullshit
-          height: input.height.toString(), // S3 Metadata have to be strings or some bullshit
-          type: "onApp",
-        };
+        const { contentLength, contentType, ...metadata } = input;
 
-        return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
-          Bucket: env.S3_POST_BUCKET,
-          Key: objectKey,
-          ContentLength: input.contentLength,
-          ContentType: "image/jpeg",
-          Metadata: metadata,
-        });
+        const presignedUrl =
+          await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
+            Bucket: env.S3_POST_BUCKET,
+            Key: objectKey,
+            ContentLength: contentLength,
+            ContentType: contentType,
+            Metadata: {
+              ...metadata,
+              author: ctx.session.uid,
+            },
+          });
+
+        return presignedUrl;
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Failed to create presigned URL for post upload. Please check your network connection and try again.",
+          message: "Failed to create presigned URL for post upload.",
         });
       }
     }),
 
-  createPresignedUrlForImagePostOfUserNotOnApp: protectedProcedure
-    .input(trpcValidators.input.post.createPresignedUrlForPostOfUserNotOnApp)
-    .output(z.string())
+  createPresignedUrlForVideoPost: protectedProcedure
+    .input(trpcValidators.input.post.createPresignedUrlForVideoPost)
     .mutation(async ({ ctx, input }) => {
       try {
-        const currentDate = Date.now();
-        const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
-
-        const metadata: Metadata = {
+        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           author: ctx.session.uid,
-          phoneNumber: input.phoneNumber,
-          caption: input.caption,
-          width: input.width.toString(), // S3 Metadata have to be strings or some bullshit
-          height: input.height.toString(), // S3 Metadata have to be strings or some bullshit
-          type: "notOnApp",
-        };
-
-        return await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
-          Bucket: env.S3_POST_BUCKET,
-          Key: objectKey,
-          ContentLength: input.contentLength,
-          ContentType: "image/jpeg",
-          Metadata: metadata,
+          ...input,
         });
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Failed to create presigned URL for post upload. Please check your network connection and try again.",
-        });
-      }
-    }),
 
-  createMuxVideoPresignedUrlForVideoPost: protectedProcedure
-    .input(trpcValidators.input.post.createMuxPresignedUrl)
-    .mutation(async ({ ctx, input }) => {
-      try {
-        console.log("Creating Mux URL");
-        const result = await ctx.services.mux.createDirectUpload(
-          ctx.session.uid,
-          input.recipientId,
-          input.caption,
-          input.width,
-          input.height,
-        );
-        return result.url;
+        return url;
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

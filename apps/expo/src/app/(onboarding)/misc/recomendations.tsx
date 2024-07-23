@@ -45,7 +45,12 @@ const AnimatedUserProfile = ({
   index,
   onUserSelected,
 }: {
-  user: { userId: string; fullName: string | null; username: string };
+  user: {
+    userId: string;
+    fullName: string | null;
+    username: string;
+    profilePictureUrl: string;
+  };
   index: number;
   onUserSelected: (userId: string, added: boolean) => void;
 }) => {
@@ -94,7 +99,7 @@ const AnimatedUserProfile = ({
         <View style={{ position: "relative", width: 80, height: 80 }}>
           <Animated.View style={animatedStyle}>
             <Image
-              source={{ uri: `https://picsum.photos/100?random=${index}` }}
+              source={{ uri: user.profilePictureUrl }}
               width={80}
               height={80}
               borderRadius={40}

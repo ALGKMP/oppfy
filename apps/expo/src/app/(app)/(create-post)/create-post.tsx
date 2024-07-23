@@ -1,21 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as VideoThumbnails from "expo-video-thumbnails";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowBigLeft, ArrowBigRight } from "@tamagui/lucide-icons";
+import { ArrowBigRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Button,
-  ScrollView,
-  Text,
-  TextArea,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Button, ScrollView, Text, TextArea, View, YStack } from "tamagui";
 import { z } from "zod";
 
 import { BaseScreenView } from "~/components/Views";
@@ -28,14 +18,28 @@ const postSchema = z.object({
 
 type FieldTypes = z.infer<typeof postSchema>;
 
+interface CreatePostBaseParams extends Record<string, string> {
+  uri: string;
+  type: "photo" | "video";
+  height: string;
+  width: string;
+}
+
+interface CreatePostWithRecipient extends CreatePostBaseParams {
+  recipient: string;
+  userType: "onApp";
+}
+
+interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
+  number: string;
+  userType: "notOnApp";
+}
+
 const CreatePost = () => {
-  const { recipientId, type, uri, height, width } = useLocalSearchParams<{
-    recipientId: string;
-    uri: string;
-    type: "photo" | "video";
-    height: string;
-    width: string;
-  }>();
+  const params = useLocalSearchParams<
+    CreatePostWithRecipient | CreatePostWithPhoneNumber
+  >();
+  const { type, uri, height, width } = params;
 
   const router = useRouter();
 
@@ -52,13 +56,25 @@ const CreatePost = () => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    const input = {
-      recipientId: recipientId ?? "",
+    const baseData = {
       uri: uri ?? "",
       width: Number(width),
       height: Number(height),
       caption: data.caption,
-    } satisfies UploadMediaInput;
+    };
+
+    const input =
+      params.userType === "onApp"
+        ? {
+            ...baseData,
+            recipient: params.recipient ?? "",
+            type: "onApp" as const,
+          }
+        : {
+            ...baseData,
+            number: params.number ?? "",
+            type: "notOnApp" as const,
+          };
 
     type === "photo"
       ? await uploadPhotoMutation.mutateAsync(input)

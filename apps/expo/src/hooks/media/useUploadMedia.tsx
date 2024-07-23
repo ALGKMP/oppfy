@@ -1,21 +1,33 @@
 import { useMutation } from "@tanstack/react-query";
+import { z } from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
 
-export interface UploadMediaInput {
+interface UploadMediaInputBase {
   uri: string;
-  recipientId: string;
   caption?: string;
   width: number;
   height: number;
 }
 
+interface UploadMediaInputOnApp extends UploadMediaInputBase {
+  recipient: string;
+  type: "onApp";
+}
+
+interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
+  number: string;
+  type: "notOnApp";
+}
+
+type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
+
 const useUploadMedia = () => {
-  const createMuxVideoPresignedUrl =
-    api.post.createMuxVideoPresignedUrlForVideoPost.useMutation();
-  const createPresignedUrlForPost =
+  const createPresignedUrlForVideoPost =
+    api.post.createPresignedUrlForVideoPost.useMutation();
+  const createPresignedUrlForImagePost =
     api.post.createPresignedUrlForImagePost.useMutation();
 
   const getMediaBlob = async (uri: string) => {
@@ -23,62 +35,86 @@ const useUploadMedia = () => {
     return await response.blob();
   };
 
-  const uploadVideoMutation = useMutation(
-    async ({ uri, caption, recipientId, width, height }: UploadMediaInput) => {
-      const videoBlob = await getMediaBlob(uri);
+  const uploadVideoMutation = useMutation(async (input: UploadMediaInput) => {
+    const { uri, caption, width, height } = input;
 
-      const presignedUrl = await createMuxVideoPresignedUrl.mutateAsync({
-        caption,
-        recipientId,
-        width,
-        height,
-      });
+    const videoBlob = await getMediaBlob(uri);
 
-      const response = await fetch(presignedUrl, {
-        method: "PUT",
-        headers: {
-          "Content-Type": videoBlob.type,
-        },
-        body: videoBlob,
-      });
+    const baseData = {
+      caption,
+      width: width.toString(),
+      height: height.toString(),
+    };
 
-      if (!response.ok) {
-        throw new Error("Failed to upload video");
-      }
-    },
-  );
+    const presignedUrl =
+      input.type === "onApp"
+        ? await createPresignedUrlForVideoPost.mutateAsync({
+            ...baseData,
+            type: "onApp",
+            recipient: input.recipient,
+          })
+        : await createPresignedUrlForVideoPost.mutateAsync({
+            ...baseData,
+            type: "notOnApp",
+            number: input.number,
+          });
 
-  const uploadPhotoMutation = useMutation(
-    async ({ uri, caption, recipientId, width, height }: UploadMediaInput) => {
-      const photoBlob = await getMediaBlob(uri);
+    const response = await fetch(presignedUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": videoBlob.type,
+      },
+      body: videoBlob,
+    });
 
-      const parsedMediaType = sharedValidators.media.postContentType.safeParse(
-        photoBlob.type,
-      );
+    if (!response.ok) {
+      throw new Error("Failed to upload video");
+    }
+  });
 
-      if (!parsedMediaType.success) {
-        throw new Error("Invalid media type");
-      }
+  const uploadPhotoMutation = useMutation(async (input: UploadMediaInput) => {
+    const { uri, caption, width, height } = input;
 
-      const presignedUrl = await createPresignedUrlForPost.mutateAsync({
-        caption,
-        recipientId,
-        width,
-        height,
-        contentLength: photoBlob.size,
-        contentType: parsedMediaType.data,
-      });
+    const photoBlob = await getMediaBlob(uri);
 
-      const response = await fetch(presignedUrl, {
-        method: "PUT",
-        body: photoBlob,
-      });
+    const parsedMediaType = sharedValidators.media.postContentType.safeParse(
+      photoBlob.type,
+    );
 
-      if (!response.ok) {
-        throw new Error("Failed to upload photo");
-      }
-    },
-  );
+    if (!parsedMediaType.success) {
+      throw new Error("Invalid media type");
+    }
+
+    const baseData = {
+      caption,
+      width: width.toString(),
+      height: height.toString(),
+      contentLength: photoBlob.size,
+      contentType: parsedMediaType.data,
+    };
+
+    const presignedUrl =
+      input.type === "onApp"
+        ? await createPresignedUrlForImagePost.mutateAsync({
+            ...baseData,
+            type: "onApp",
+            recipient: input.recipient,
+          })
+        : await createPresignedUrlForImagePost.mutateAsync({
+            ...baseData,
+            type: "notOnApp",
+            number: input.number,
+          });
+
+    const response = await fetch(presignedUrl, {
+      method: "PUT",
+      body: photoBlob,
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload photo");
+    }
+  });
 
   return {
     uploadVideoMutation,
