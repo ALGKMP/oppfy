@@ -2,9 +2,9 @@ import { eq, inArray } from "drizzle-orm"; // Add inArray import
 
 import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
+import { auth } from "@oppfy/firebase";
 
 import { handleDatabaseErrors } from "../../errors";
-import { auth } from "../../utils/firebase";
 
 export type PrivacySettings = NonNullable<
   InferInsertModel<typeof schema.user>["privacySetting"]

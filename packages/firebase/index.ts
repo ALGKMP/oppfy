@@ -1,7 +1,6 @@
 import admin from "firebase-admin";
 import type { ServiceAccount } from "firebase-admin/app";
-
-import serviceKey from "../../admin-service-account.json";
+import serviceKey from "./admin-service-account.json"
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -10,3 +9,4 @@ if (!admin.apps.length) {
 }
 
 export const auth = admin.auth();
+

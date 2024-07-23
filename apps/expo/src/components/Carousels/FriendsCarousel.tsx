@@ -103,7 +103,6 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   );
 
   const renderSuggestions = (data: RecoemndationItems) => (
-    
     <CardContainer borderRadius={0} paddingLeft={0} margin={1}>
       <YStack gap="$2">
         <Text paddingLeft={"$3"} fontWeight="600">
