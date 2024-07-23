@@ -13,14 +13,14 @@ export class FriendRepository {
       // Create friend relationship
       await tx.insert(schema.friend).values([
         { userId1: senderId, userId2: recipientId },
-        { userId1: recipientId, userId2: senderId },
+        // { userId1: recipientId, userId2: senderId },
       ]);
 
       // Delete the friend request
       await tx
         .delete(schema.friendRequest)
         .where(
-          and(
+          or(
             eq(schema.friendRequest.senderId, senderId),
             eq(schema.friendRequest.recipientId, recipientId),
           ),
