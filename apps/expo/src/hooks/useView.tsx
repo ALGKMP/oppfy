@@ -1,14 +1,55 @@
+import { useState, useCallback, useEffect } from 'react';
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
+const DEBOUNCE_DELAY = 5000; // 5 seconds
+
 const useView = () => {
-  const viewProfile = (profileId: string) => {
-    
-  };
+  const [viewedItems, setViewedItems] = useState<{ type: 'post' | 'profile', id: number }[]>([]);
+  const { getCurrentUserProfileId } = useSession();
 
-  const viewPost = (postId: string) => {
-    console.log("Viewing post", postId);
-  };
+  const viewPostMutation = api.post.viewPost.useMutation();
+  const viewMultiplePostsMutation = api.post.viewMultiplePosts.useMutation();
+  const viewProfileMutation = api.profile.viewProfile.useMutation(); // Assuming you have this mutation
 
-  return { viewProfile, viewPost };
+  const addViewedItem = useCallback((type: 'post' | 'profile', id: number) => {
+    setViewedItems(prev => [...prev, { type, id }]);
+  }, []);
+
+  const sendViewedData = useCallback(() => {
+    const posts = viewedItems.filter(item => item.type === 'post').map(item => item.id);
+    const profiles = viewedItems.filter(item => item.type === 'profile').map(item => item.id);
+
+    if (posts.length > 0) {
+      viewMultiplePostsMutation.mutate({ postIds: posts });
+    }
+
+    profiles.forEach(profileId => {
+      viewProfileMutation.mutate({ profileId });
+    });
+
+    setViewedItems([]);
+  }, [viewedItems, viewMultiplePostsMutation, viewProfileMutation]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (viewedItems.length > 0) {
+        sendViewedData();
+      }
+    }, DEBOUNCE_DELAY);
+
+    return () => clearTimeout(timer);
+  }, [viewedItems, sendViewedData]);
+
+  const viewPost = useCallback((postId: number) => {
+    addViewedItem('post', postId);
+  }, [addViewedItem]);
+
+  const viewProfile = useCallback((profileId: number) => {
+    addViewedItem('profile', profileId);
+  }, [addViewedItem]);
+
+  return { viewPost, viewProfile };
 };
+
+export default useView;
