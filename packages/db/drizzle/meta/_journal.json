@@ -43,6 +43,27 @@
       "when": 1721785392189,
       "tag": "0005_previous_stellaris",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1721845298903,
+      "tag": "0006_complete_wong",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1721845329032,
+      "tag": "0007_round_luke_cage",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1721846678168,
+      "tag": "0008_round_ironclad",
+      "breakpoints": true
     }
   ]
 }
