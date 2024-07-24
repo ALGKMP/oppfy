@@ -36,6 +36,13 @@
       "when": 1721744975341,
       "tag": "0004_chunky_sleeper",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1721785392189,
+      "tag": "0005_previous_stellaris",
+      "breakpoints": true
     }
   ]
 }

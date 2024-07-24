@@ -190,9 +190,9 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
     fields: [profile.id],
     references: [profileStats.profileId],
   }),
-  followers: many(follower),
-  following: many(follower),
-  posts: many(post),
+  followers: many(follower, { relationName: "profileFollowers" }),
+  following: many(follower, { relationName: "profileFollowing" }),
+  posts: many(post, { relationName: "profilePosts" }),
   profileViews: many(profileView),
 }));
 
@@ -305,6 +305,11 @@ export const postRelations = relations(post, ({ one, many }) => ({
     fields: [post.recipient],
     references: [user.id],
   }),
+  authorProfile: one(profile, {
+    relationName: "profilePosts",
+    fields: [post.author],
+    references: [profile.id],
+  }),
   stats: one(postStats, {
     fields: [post.id],
     references: [postStats.postId],
@@ -327,6 +332,13 @@ export const postView = pgTable("post_view", {
     .notNull(),
 });
 
+export const postViewRelation = relations(postView, ({ one }) => ({
+  post: one(post, {
+    fields: [postView.postId],
+    references: [post.id],
+  }),
+}));
+
 export const profileView = pgTable("profile_view", {
   id: serial("id").primaryKey(),
   viewerUserId: text("viewer_user_id")
@@ -342,6 +354,17 @@ export const profileView = pgTable("profile_view", {
     .defaultNow()
     .notNull(),
 });
+
+export const profileViewRelations = relations(profileView, ({ one }) => ({
+  viewer: one(user, {
+    fields: [profileView.viewerUserId],
+    references: [user.id],
+  }),
+  viewedProfile: one(profile, {
+    fields: [profileView.viewedProfileId],
+    references: [profile.id],
+  }),
+}));
 
 export const postStats = pgTable("post_stats", {
   id: serial("id").primaryKey(),
@@ -441,6 +464,16 @@ export const followerRelations = relations(follower, ({ one }) => ({
     relationName: "recipient",
     fields: [follower.recipientId],
     references: [user.id],
+  }),
+  senderProfile: one(profile, {
+    relationName: "profileFollowing",
+    fields: [follower.senderId],
+    references: [user.id], // Change this from profile.id to user.id
+  }),
+  recipientProfile: one(profile, {
+    relationName: "profileFollowers",
+    fields: [follower.recipientId],
+    references: [user.id], // Change this from profile.id to user.id
   }),
 }));
 
