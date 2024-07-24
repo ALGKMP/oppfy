@@ -468,40 +468,6 @@ export class PostService {
     }
   }
 
-  async createPost(
-    postedBy: string,
-    postedFor: string,
-    caption: string,
-    objectKey: string,
-  ) {
-    try {
-      const postId = await this.postRepository.createPost(
-        postedBy,
-        postedFor,
-        caption,
-        objectKey,
-      );
-
-      if (!postId) {
-        throw new DomainError(
-          ErrorCode.FAILED_TO_CREATE_POST,
-          "Failed to create post.",
-        );
-      }
-
-      await this.postStatsRepository.createPostStats(postId);
-    } catch (error) {
-      console.error(
-        `Error in createPost by user: ${postedBy} for user: ${postedFor}: `,
-        error,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_CREATE_POST,
-        "Failed to create post.",
-      );
-    }
-  }
-
   async editPost(postId: number, newCaption: string) {
     try {
       await this.postRepository.updatePost(postId, newCaption);

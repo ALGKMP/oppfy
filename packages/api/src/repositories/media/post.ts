@@ -10,26 +10,6 @@ export class PostRepository {
   private contactsRepository = new ContactsRepository();
 
   @handleDatabaseErrors
-  async createPost(
-    key: string,
-    author: string,
-    recipient: string,
-    caption: string,
-  ) {
-    const post = await this.db
-      .insert(schema.post)
-      .values({
-        key,
-        author,
-        recipient,
-        caption,
-      })
-      .returning({ insertedId: schema.post.id });
-
-    return post[0]?.insertedId;
-  }
-
-  @handleDatabaseErrors
   async getPost(postId: number) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
