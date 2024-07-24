@@ -13,15 +13,12 @@ import { Stack } from "~/layouts";
 
 const SettingsLayout = () => {
   return (
-    <Stack
-      screenOptions={{
-        headerLeft: (props) => <HeaderLeft {...props} />,
-        header: (props) => <Header {...props} />,
-      }}
-    >
+    <Stack screenOptions={{}}>
       <Stack.Screen
         name="index"
         options={{
+          headerLeft: (props) => <HeaderLeft {...props} />,
+          header: (props) => <Header {...props} />,
           title: "Find more friends",
         }}
       />
