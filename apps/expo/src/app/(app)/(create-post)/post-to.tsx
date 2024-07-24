@@ -170,6 +170,7 @@ const PostTo = () => {
         width,
         height,
         number: recipientPhoneNumber,
+        userType: "notOnApp",
       },
     });
   };
