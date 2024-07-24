@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
+import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SMS from "expo-sms";
@@ -37,14 +38,15 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
 }
 
 const CreatePost = () => {
+  const router = useRouter();
+
   const params = useLocalSearchParams<
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
   const { type, uri, height, width } = params;
 
-  const router = useRouter();
-
   const [thumbnail, setThumbnail] = useState<string | null>(null);
+
   const [cancelledDialogVisible, setCancelledDialogVisible] = useState(false);
   const [smsNotAvailableDialogVisible, setSmsNotAvailableDialogVisible] =
     useState(false);
@@ -71,9 +73,34 @@ const CreatePost = () => {
         return;
       }
 
+      // Get a content URI for the file
+      const contentUri = await FileSystem.getContentUriAsync(uri ?? "");
+
+      const attachment = {
+        uri: contentUri,
+        mimeType: type === "photo" ? "image/jpeg" : "video/mp4", // Adjust as needed
+        filename: `shared_${type}.${type === "photo" ? "jpg" : "mp4"}`, // Adjust as needed
+      } satisfies SMS.SMSAttachment;
+
+      const inviteMessage = `
+Hey there! 👋
+
+Your friend has shared an amazing ${type} with you on Oppfy! 🎉
+
+Check out the attached ${type}!
+
+To join the fun and see more great content, download our app:
+https://oppfy.com
+
+We can't wait to see you there! 😊
+      `.trim();
+
       const { result } = await SMS.sendSMSAsync(
         [params.number ?? ""],
-        "Your friend has shared a post with you. Download our app to view it!",
+        inviteMessage,
+        {
+          attachments: [attachment],
+        },
       );
 
       if (result === "cancelled") {
