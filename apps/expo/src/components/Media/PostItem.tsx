@@ -18,6 +18,7 @@ import {
   MoreHorizontal,
   Send,
 } from "@tamagui/lucide-icons";
+import { format, formatDistanceToNow } from "date-fns";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
@@ -59,7 +60,6 @@ const PostItem = (props: PostItemProps) => {
   const [showViewMore, setShowViewMore] = useState(post.caption.length > 100);
 
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { getCurrentUserProfileId } = useSession();
@@ -259,6 +259,19 @@ const PostItem = (props: PostItemProps) => {
       return post.caption;
     }
     return `${post.caption.substring(0, maxLength)}...`;
+  };
+
+  const formatPostDate = (createdAt: Date) => {
+    const now = new Date();
+    const diffInDays = Math.floor(
+      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (diffInDays < 7) {
+      return formatDistanceToNow(createdAt, { addSuffix: true });
+    } else {
+      return format(createdAt, "MMMM d");
+    }
   };
 
   const handleRouteToNewUser = async (profileId: number) => {
@@ -472,10 +485,14 @@ const PostItem = (props: PostItemProps) => {
               : "Be the first to comment"}
           </SizableText>
         </TouchableOpacity>
+
+        {/* Post Date */}
+        <SizableText size="$2" color="$gray10" marginTop="$1">
+          {formatPostDate(new Date(post.createdAt))}
+        </SizableText>
       </View>
 
       {/* Bottom Sheets & Action sheets*/}
-
       {commentsBottomSheetVisible && (
         <CommentsBottomSheet
           isSelfPost={isSelfPost}
