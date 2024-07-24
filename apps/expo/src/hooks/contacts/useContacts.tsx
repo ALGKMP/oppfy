@@ -7,10 +7,10 @@ import type { CountryCode } from "libphonenumber-js";
 import { api } from "~/utils/api";
 
 export interface ContactFns {
-  syncContacts: () => void;
-  deleteContacts: () => void;
+  syncContacts: () => Promise<void>;
+  deleteContacts: () => Promise<void>;
   getDeviceContacts: () => Promise<Contacts.Contact[]>;
-  getRecomendedContacts: () => void;
+  getRecomendedContacts: () => Promise<Contacts.Contact[]>;
 }
 
 const useContacts = (syncNow = false): ContactFns => {
