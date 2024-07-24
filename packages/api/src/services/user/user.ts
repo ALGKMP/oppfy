@@ -7,22 +7,6 @@ export class UserService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
 
-  async getUser(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
-    return user;
-  }
-
-  async getUserByProfileId(profileId: number) {
-    const user = await this.userRepository.getUserByProfileId(profileId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
-    return user;
-  }
-
   async createUser(userId: string, phoneNumber: string) {
     let username;
     let usernameExists;
@@ -37,6 +21,23 @@ export class UserService {
     } while (usernameExists);
 
     await this.userRepository.createUser(userId, phoneNumber, username);
+  }
+
+
+  async getUser(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    return user;
+  }
+
+  async getUserByProfileId(profileId: number) {
+    const user = await this.userRepository.getUserByProfileId(profileId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    return user;
   }
 
   async deleteUser(userId: string) {
@@ -60,10 +61,5 @@ export class UserService {
       !!user.profile.fullName &&
       !!user.profile.username
     );
-  }
-
-  private async _userExists(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-    return user !== undefined;
   }
 }

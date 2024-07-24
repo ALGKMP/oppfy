@@ -16,7 +16,6 @@ export const userRouter = createTRPCRouter({
       try {
         await ctx.services.user.createUser(input.userId, input.phoneNumber);
       } catch (err) {
-        // Example error handling for when creating a user fails
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create a new user",
@@ -67,6 +66,8 @@ export const userRouter = createTRPCRouter({
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to get privacy settings",
+        cause: err,
       });
     }
   }),
@@ -82,6 +83,8 @@ export const userRouter = createTRPCRouter({
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update privacy settings",
+          cause: err,
         });
       }
     }),
