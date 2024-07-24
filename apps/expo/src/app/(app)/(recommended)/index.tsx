@@ -16,6 +16,7 @@ import {
   Button,
   Image,
   ScrollView,
+  Spacer,
   Text,
   useTheme,
   XStack,
@@ -72,7 +73,7 @@ const AnimatedUserProfile = ({
     };
   });
 
-  const handlePress = () => {
+  const handleFollowPress = () => {
     const newIsAdded = !isAdded;
     onUserSelected(user.userId, newIsAdded);
 
@@ -89,14 +90,18 @@ const AnimatedUserProfile = ({
     }, 1000);
   };
 
+  const handleProfilePress = () => {
+    router.push(`/profile/${user.username}`);
+  };
+
   return (
-    <TouchableOpacity onPress={handlePress} disabled={isAdded}>
-      <YStack
-        width={itemWidth}
-        alignItems="center"
-        marginBottom="$4"
-        marginRight="4" // Add margin to create spacing between items
-      >
+    <YStack
+      width={itemWidth}
+      alignItems="center"
+      marginBottom="$4"
+      marginRight="4"
+    >
+      <TouchableOpacity onPress={handleProfilePress}>
         <View style={{ position: "relative", width: 80, height: 80 }}>
           <Animated.View style={animatedStyle}>
             <Image
@@ -122,40 +127,43 @@ const AnimatedUserProfile = ({
           >
             <UserRoundCheck marginLeft={2} size={40} color="white" />
           </Animated.View>
-          <Animated.View
-            style={[
-              {
-                position: "absolute",
-                bottom: -5,
-                right: -5,
-                backgroundColor: isAdded ? "#F214FF" : "#333",
-                borderRadius: 15,
-                width: 30,
-                height: 30,
-                marginLeft: 2,
-                justifyContent: "center",
-                alignItems: "center",
-                borderWidth: 3,
-                borderColor: theme.background.val,
-              },
-              animatedStyle,
-            ]}
-          >
-            {isAdded ? (
-              <UserRoundCheck marginLeft={2} size={16} color="white" />
-            ) : (
-              <UserRoundPlus marginLeft={2} size={16} color="white" />
-            )}
-          </Animated.View>
         </View>
-        <Text fontSize="$3" fontWeight="bold" color="white">
-          {user.fullName}
-        </Text>
-        <Text fontSize="$2" color="$gray10">
-          {user.username}
-        </Text>
-      </YStack>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleFollowPress}>
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              bottom: -5,
+              right: -40,
+              backgroundColor: isAdded ? "#F214FF" : "#333",
+              borderRadius: 15,
+              width: 30,
+              height: 30,
+              marginLeft: 2,
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 3,
+              borderColor: theme.background.val,
+            },
+            animatedStyle,
+          ]}
+        >
+          {isAdded ? (
+            <UserRoundCheck marginLeft={2} size={16} color="white" />
+          ) : (
+            <UserRoundPlus marginLeft={2} size={16} color="white" />
+          )}
+        </Animated.View>
+      </TouchableOpacity>
+      <Spacer size="$2" />
+      <Text fontSize="$3" fontWeight="bold" color="white">
+        {user.fullName}
+      </Text>
+      <Text fontSize="$2" color="$gray10">
+        {user.username}
+      </Text>
+    </YStack>
   );
 };
 
