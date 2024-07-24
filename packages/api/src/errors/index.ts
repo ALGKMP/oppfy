@@ -105,6 +105,9 @@ export function handleError(
           console.error("Error message:", error.message);
           console.error("Error stack:", error.stack);
         }
+        if (error instanceof DomainError) {
+          throw error;
+        }
         throw new DomainError(code, message, error);
       }
     };
@@ -116,6 +119,12 @@ export const handleDatabaseErrors = handleError(
   "DatabaseError",
   "Database error occurred",
   ErrorCode.DATABASE_ERROR,
+);
+
+export const handleServiceError = handleError(
+  "ServiceError",
+  "Service error occurred",
+  ErrorCode.SERVICE_ERROR,
 );
 
 export const handleAwsErrors = handleError(
@@ -135,96 +144,3 @@ export const handleOpensearchErrors = handleError(
   "Opensearch error occurred",
   ErrorCode.OPENSEARCH_ERROR,
 );
-
-export function handleRepositoryErrors() {
-  return function (
-    _target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
-    const originalMethod = descriptor.value;
-    descriptor.value = async function (...args: any[]) {
-      try {
-        return await originalMethod.apply(this, args);
-      } catch (error) {
-        console.error(`Repository Error in ${propertyKey}:`, error);
-        throw new DomainError(
-          ErrorCode.DATABASE_ERROR,
-          "Database operation failed",
-          error,
-        );
-      }
-    };
-    return descriptor;
-  };
-}
-
-// Service Layer Decorator
-export function handleServiceErrors() {
-  return function (
-    _target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
-    const originalMethod = descriptor.value;
-    descriptor.value = async function (...args: any[]) {
-      try {
-        return await originalMethod.apply(this, args);
-      } catch (error) {
-        if (error instanceof DomainError) {
-          // Rethrow domain errors from the fucking DB
-          throw error;
-        }
-        console.error(`Service Error in ${propertyKey}:`, error);
-        throw new DomainError(
-          ErrorCode.SERVICE_ERROR,
-          "Service operation failed due to Database Error:",
-          error,
-        );
-      }
-    };
-    return descriptor;
-  };
-}
-
-// Router Layer Decorator
-export function handleRouterErrors() {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
-    const originalMethod = descriptor.value;
-    descriptor.value = async function (...args: any[]) {
-      try {
-        return await originalMethod.apply(this, args);
-      } catch (error) {
-        console.error(`Router Error in ${propertyKey}:`, error);
-        if (error instanceof DomainError) {
-          switch (error.code) {
-            case ErrorCode.USER_ALREADY_EXISTS:
-              throw new TRPCError({
-                code: "CONFLICT",
-                message: "User already exists",
-              });
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "User not found",
-              });
-            default:
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "An error occurred while processing your request",
-              });
-          }
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "An unexpected error occurred",
-        });
-      }
-    };
-    return descriptor;
-  };
-}
