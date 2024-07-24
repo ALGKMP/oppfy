@@ -105,7 +105,7 @@ export function handleError(
           console.error("Error message:", error.message);
           console.error("Error stack:", error.stack);
         }
-        if (error instanceof DomainError) {
+        if (error instanceof DomainError) { // If the error is already a DomainError, rethrow it - it was thrown from a lower level
           throw error;
         }
         throw new DomainError(code, message, error);
@@ -119,12 +119,6 @@ export const handleDatabaseErrors = handleError(
   "DatabaseError",
   "Database error occurred",
   ErrorCode.DATABASE_ERROR,
-);
-
-export const handleServiceError = handleError(
-  "ServiceError",
-  "Service error occurred",
-  ErrorCode.SERVICE_ERROR,
 );
 
 export const handleAwsErrors = handleError(
@@ -143,4 +137,10 @@ export const handleOpensearchErrors = handleError(
   "OpensearchError",
   "Opensearch error occurred",
   ErrorCode.OPENSEARCH_ERROR,
+);
+
+export const handleServiceError = handleError(
+  "ServiceError",
+  "Service error occurred",
+  ErrorCode.SERVICE_ERROR,
 );
