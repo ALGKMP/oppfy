@@ -91,7 +91,10 @@ const AnimatedUserProfile = ({
   };
 
   const handleProfilePress = () => {
-    router.push(`/profile/${user.username}`);
+    router.navigate({
+      pathname: "/profile/[profileId]",
+      params: { profileId: user.userId },
+    });
   };
 
   return (
