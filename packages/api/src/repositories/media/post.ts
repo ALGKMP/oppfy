@@ -322,4 +322,15 @@ export class PostRepository {
   async deletePost(postId: number) {
     await this.db.delete(schema.post).where(eq(schema.post.id, postId));
   }
+
+  @handleDatabaseErrors
+  async getCountOfPostsNotOnApp(userId: string) {
+    return await this.db
+      .select({
+        count: sql<number>`count(*)`.as("count"),
+      })
+      .from(schema.postOfUserNotOnApp)
+      .where(eq(schema.post.author, userId))
+      .limit(1);
+  }
 }
