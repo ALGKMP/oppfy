@@ -334,6 +334,8 @@ export class PostService {
       pageSize,
     );
 
+    console.log("parsedFollowingResult", parsedFollowingResult);
+
     if (parsedFollowingResult.items.length < pageSize!) {
       const recommendedResult =
         await this.postRepository.paginatePostsOfRecommended(
@@ -346,6 +348,8 @@ export class PostService {
         recommendedResult,
         pageSize,
       );
+
+      console.log("hiiiiii", parsedRecommendedResult);
 
       parsedRecommendedResult.items = [
         ...parsedFollowingResult.items,
