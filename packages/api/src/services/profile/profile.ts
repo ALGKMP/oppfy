@@ -55,12 +55,13 @@ export class ProfileService {
     const user = await this.profileRepository.getUserProfile(userId);
 
     if (!user) {
-      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,
         "Profile not found for the provided user ID.",
+        "SERVICE ERROR: Profile not found for the provided user ID in updateProfile",
       );
     }
+
     const profile = user.profile;
 
     if (
@@ -72,7 +73,11 @@ export class ProfileService {
       );
 
       if (usernameExists) {
-        throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
+        throw new DomainError(
+          ErrorCode.USERNAME_ALREADY_EXISTS,
+          "Username already exists.",
+          `SERVICE ERROR: Username "${newData.username}" already exists in updateProfile`,
+        );
       }
     }
 
@@ -99,6 +104,7 @@ export class ProfileService {
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,
         "Profile not found for the provided user ID.",
+        `SERVICE ERROR: Profile not found for user ID "${userId}" in getFullProfileSelf`,
       );
     }
 
@@ -108,12 +114,10 @@ export class ProfileService {
       );
 
     if (!profilePictureUrl) {
-      console.error(
-        `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
-      );
       throw new DomainError(
         ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
         "Failed to get profile picture URL.",
+        `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
       );
     }
 
@@ -141,12 +145,10 @@ export class ProfileService {
   }): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileOther>> {
     const user = await this.profileRepository.getUserFullProfile(otherUserId);
     if (!user) {
-      console.error(
-        `SERVICE ERROR: Profile not found for user ID "${otherUserId}"`,
-      );
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,
         "Profile not found for the provided user ID.",
+        `SERVICE ERROR: Profile not found for user ID "${otherUserId}"`,
       );
     }
 
@@ -156,12 +158,10 @@ export class ProfileService {
       );
 
     if (!profilePictureUrl) {
-      console.error(
-        `SERVICE ERROR: Failed to get profile picture for user ID "${user.id}"`,
-      );
       throw new DomainError(
         ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
         "Failed to get profile picture URL.",
+        `SERVICE ERROR: Failed to get profile picture for user ID "${user.id}"`,
       );
     }
 
