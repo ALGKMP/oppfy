@@ -4,7 +4,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { TRPCError } from "@trpc/server";
+import {
+  TRPC_ERROR_CODE_KEY,
+  TRPC_ERROR_CODE_NUMBER,
+  TRPC_ERROR_CODES_BY_KEY,
+  TRPC_ERROR_CODES_BY_NUMBER,
+} from "@trpc/server/rpc";
 
 export enum ErrorCode {
   USER_NOT_FOUND = "USER_NOT_FOUND",
@@ -75,7 +80,10 @@ type ErrorCodes = keyof typeof ErrorCode;
 
 export class DomainError extends Error {
   constructor(
-    public code: ErrorCodes,
+    public code: {
+      code: ErrorCodes;
+      trpcErrorCode: TRPC_ERROR_CODE_NUMBER;
+    },
     message?: string,
     public error?: unknown,
   ) {
@@ -86,7 +94,10 @@ export class DomainError extends Error {
 export function handleError(
   _errorType: string,
   message: string,
-  code: ErrorCodes,
+  code: {
+    code: ErrorCodes;
+    trpcErrorCode: TRPC_ERROR_CODE_NUMBER;
+  },
 ) {
   return function (
     _target: any,
@@ -105,7 +116,9 @@ export function handleError(
           console.error("Error message:", error.message);
           console.error("Error stack:", error.stack);
         }
-        if (error instanceof DomainError) { // If the error is already a DomainError, rethrow it - it was thrown from a lower level
+        if (error instanceof DomainError) {
+          // If the error is already a DomainError, rethrow it - it was thrown from a lower level
+          console.error(error.message);
           throw error;
         }
         throw new DomainError(code, message, error);
@@ -118,29 +131,36 @@ export function handleError(
 export const handleDatabaseErrors = handleError(
   "DatabaseError",
   "Database error occurred",
-  ErrorCode.DATABASE_ERROR,
+  {
+    code: ErrorCode.DATABASE_ERROR,
+    trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
+  },
 );
 
-export const handleAwsErrors = handleError(
-  "AwsError",
-  "AWS error occurred",
-  ErrorCode.AWS_ERROR,
-);
+export const handleAwsErrors = handleError("AwsError", "AWS error occurred", {
+  code: ErrorCode.AWS_ERROR,
+  trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
+});
 
-export const handleMuxErrors = handleError(
-  "MuxError",
-  "Mux error occurred",
-  ErrorCode.MUX_ERROR,
-);
+export const handleMuxErrors = handleError("MuxError", "Mux error occurred", {
+  code: ErrorCode.MUX_ERROR,
+  trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
+});
 
 export const handleOpensearchErrors = handleError(
   "OpensearchError",
   "Opensearch error occurred",
-  ErrorCode.OPENSEARCH_ERROR,
+  {
+    code: ErrorCode.OPENSEARCH_ERROR,
+    trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
+  },
 );
 
 export const handleServiceError = handleError(
   "ServiceError",
   "Service error occurred",
-  ErrorCode.SERVICE_ERROR,
+  {
+    code: ErrorCode.SERVICE_ERROR,
+    trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
+  },
 );
