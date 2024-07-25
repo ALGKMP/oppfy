@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
@@ -5,10 +6,21 @@ import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
+import { useSession } from "~/contexts/SessionContext";
 import { BottomTabs } from "~/layouts";
+import { api } from "~/utils/api";
 
 const BottomTabsLayout = () => {
   const theme = useTheme();
+  const { user } = useSession();
+  const utils = api.useUtils();
+
+  useEffect(() => {
+    const prefetch = async () => {
+      await utils.profile.getFullProfileSelf.prefetch();
+    };
+    void prefetch();
+  }, [utils.profile.getFullProfileSelf]);
 
   const getTabBarIcon =
     (IconComponent: React.ElementType) =>
