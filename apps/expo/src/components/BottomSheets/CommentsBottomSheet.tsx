@@ -50,6 +50,8 @@ const CommentsBottomSheet = ({
   modalVisible,
   setModalVisible,
 }: CommentsModalProps) => {
+  const [inputValue, setInputValue] = useState("");
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const utils = api.useUtils();
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["100%"], []);
@@ -211,8 +213,7 @@ const CommentsBottomSheet = ({
         }
       }
     },
-    onSettled: async () => {
-      // Sync with server once mutation has settled
+    onSuccess: async () => {
       await utils.post.paginateComments.invalidate();
     },
   });
@@ -316,9 +317,9 @@ const CommentsBottomSheet = ({
         }
       }
     },
-    onSettled: async () => {
-      // Sync with server once mutation has settled
-      await utils.post.paginateComments.invalidate();
+    onSuccess: async () => {
+      // Only invalidate on success
+      await utils.post.paginateComments.invalidate({ postId });
       if (isSelfPost) {
         await utils.post.paginatePostsOfUserSelf.invalidate();
       } else {
@@ -327,13 +328,13 @@ const CommentsBottomSheet = ({
     },
   });
 
-  const handleOnEndReached = async () => {
+  const handleOnEndReached = useCallback(async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  };
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-  const handlePostComment = async () => {
+  const handlePostComment = useCallback(async () => {
     if (inputValue.trim().length === 0) {
       return;
     }
@@ -346,7 +347,7 @@ const CommentsBottomSheet = ({
     setInputValue(""); // Clear the input field
 
     await commentOnPost.mutateAsync(newComment);
-  };
+  }, [inputValue, postId, commentOnPost]);
 
   const comments = useMemo(
     () =>
@@ -358,8 +359,6 @@ const CommentsBottomSheet = ({
         ) ?? [],
     [commentsData],
   );
-
-  const [inputValue, setInputValue] = useState("");
 
   const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
   const handleEmojiPress = (emoji: string) => {
@@ -374,8 +373,6 @@ const CommentsBottomSheet = ({
   }: {
     comment: z.infer<typeof sharedValidators.media.comment>;
   }) => {
-    const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-
     return (
       <BlurContextMenuWrapper
         options={
