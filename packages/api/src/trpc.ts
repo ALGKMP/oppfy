@@ -13,6 +13,7 @@ import type { DecodedIdToken } from "firebase-admin/auth";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
+import { TRPC_ERROR_CODES_BY_NUMBER } from "@trpc/server/http";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import { db } from "@oppfy/db";
@@ -21,6 +22,7 @@ import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
 
 import { services } from "./services";
+import { DomainError, ErrorCode } from "./errors";
 
 /**
  * 1. CONTEXT
@@ -176,3 +178,27 @@ export const publicProcedure = t.procedure;
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+export function withAsyncErrorHandling<T>(
+  procedureFn: () => Promise<T>,
+  errorMessage: string,
+): () => Promise<T> {
+  return async () => {
+    try {
+      return await procedureFn();
+    } catch (err) {
+      if (err instanceof DomainError) {
+        throw new TRPCError({
+          code: TRPC_ERROR_CODES_BY_NUMBER[err.code.trpcErrorCode],
+          message: err.message,
+          cause: err.error,
+        });
+      }
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: errorMessage,
+        cause: err,
+      });
+    }
+  };
+}
