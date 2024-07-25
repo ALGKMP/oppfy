@@ -5,7 +5,7 @@ import { eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { trpcValidators } from "@oppfy/validators";
 
-import { ErrorCode, ServiceError } from "../../errors";
+import { ErrorCode, DomainError } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
@@ -82,7 +82,7 @@ export const profileRouter = createTRPCRouter({
       try {
         await ctx.services.profile.updateProfile(ctx.session.uid, input);
       } catch (err) {
-        if (err instanceof ServiceError) {
+        if (err instanceof DomainError) {
           switch (err.code) {
             case ErrorCode.USERNAME_ALREADY_EXISTS:
               throw new TRPCError({
