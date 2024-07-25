@@ -2,7 +2,6 @@ import type { z } from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
-import { user } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository, ViewRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
