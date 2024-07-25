@@ -66,7 +66,7 @@ const trpcPostInputSchema = {
   }),
 
   paginatePostsOfUserOther: z.object({
-    profileId: z.number(),
+    userId: z.string(),
     cursor: z
       .object({
         postId: z.number(),
@@ -129,7 +129,7 @@ const trpcPostInputSchema = {
   }),
 
   paginatePostsByUserOther: z.object({
-    profileId: z.number(),
+    userId: z.string(),
     cursor: z
       .object({
         postId: z.number(),

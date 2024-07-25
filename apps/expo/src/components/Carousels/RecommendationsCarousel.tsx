@@ -46,11 +46,11 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
 
   const showMore = !props.loading && props.reccomendationsData.length > 10;
 
-  const handleProfileClicked = (profileId: number) => {
+  const handleProfileClicked = (userId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
-      pathname: "/(profile)/profile/[profileId]/",
-      params: { profileId: String(profileId) },
+      pathname: "/(profile)/profile/[userId]/",
+      params: { userId: userId },
     });
   };
 
@@ -149,7 +149,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => handleProfileClicked(item.profileId)}
+                onPress={() => handleProfileClicked(item.userId)}
               >
                 <YStack gap="$1.5">
                   <Avatar circular size="$6" bordered>

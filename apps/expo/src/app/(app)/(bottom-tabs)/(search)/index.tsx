@@ -76,8 +76,8 @@ const Search = () => {
             onPress={() => {
               if (!item.id) return;
               router.navigate({
-                pathname: "/(search)/profile/[profileId]/",
-                params: { profileId: String(item.id) },
+                pathname: "/(search)/profile/[userId]/",
+                params: { userId: item.id },
               });
             }}
           />
@@ -102,10 +102,10 @@ const Search = () => {
             subtitle={item.fullName!}
             imageUrl={item.profilePictureUrl}
             onPress={() => {
-              if (!item.profileId) return;
+              if (!item.userId) return;
               router.navigate({
-                pathname: "/(search)/profile/[profileId]/",
-                params: { profileId: String(item.profileId) },
+                pathname: "/(search)/profile/[userId]/",
+                params: { userId: item.userId },
               });
             }}
           />

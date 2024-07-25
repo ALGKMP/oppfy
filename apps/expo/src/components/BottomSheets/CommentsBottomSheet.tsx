@@ -37,7 +37,7 @@ import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface CommentsModalProps {
   postId: number;
-  profileIdOfPostRecipient: number;
+  userIdOfPostRecipient: string;
   isSelfPost: boolean;
   modalVisible: boolean;
   setModalVisible: (value: boolean) => void;
@@ -45,7 +45,7 @@ interface CommentsModalProps {
 
 const CommentsBottomSheet = ({
   postId,
-  profileIdOfPostRecipient,
+  userIdOfPostRecipient,
   isSelfPost,
   modalVisible,
   setModalVisible,
@@ -110,7 +110,7 @@ const CommentsBottomSheet = ({
             pageSize: 10,
           })
         : utils.post.paginatePostsOfUserOther.getInfiniteData({
-            profileId: profileIdOfPostRecipient,
+            userId: userIdOfPostRecipient,
             pageSize: 10,
           });
 
@@ -121,7 +121,7 @@ const CommentsBottomSheet = ({
             if (!prevData) return prevData;
             return {
               ...prevData,
-              pages: prevData.pages.map((page, index) => {
+              pages: prevData.pages.map((page) => {
                 // check if it's postId
                 page.items.map((item) => {
                   if (item?.postId === postId) {
@@ -136,7 +136,7 @@ const CommentsBottomSheet = ({
         );
       } else {
         utils.post.paginatePostsOfUserOther.setInfiniteData(
-          { profileId: profileIdOfPostRecipient, pageSize: 10 },
+          { userId: userIdOfPostRecipient, pageSize: 10 },
           (prevData) => {
             if (!prevData) return prevData;
             return {
@@ -205,7 +205,7 @@ const CommentsBottomSheet = ({
           );
         } else {
           utils.post.paginatePostsOfUserOther.setInfiniteData(
-            { profileId: profileIdOfPostRecipient, pageSize: 10 },
+            { userId: userIdOfPostRecipient, pageSize: 10 },
             ctx.prevPostsData,
           );
         }
@@ -234,7 +234,7 @@ const CommentsBottomSheet = ({
             pageSize: 10,
           })
         : utils.post.paginatePostsOfUserOther.getInfiniteData({
-            profileId: profileIdOfPostRecipient,
+            userId: userIdOfPostRecipient,
             pageSize: 10,
           });
 
@@ -258,7 +258,7 @@ const CommentsBottomSheet = ({
         );
       } else {
         utils.post.paginatePostsOfUserOther.setInfiniteData(
-          { profileId: profileIdOfPostRecipient, pageSize: 10 },
+          { userId: userIdOfPostRecipient, pageSize: 10 },
           (prevData) => {
             if (!prevData) return prevData;
             return {
@@ -310,7 +310,7 @@ const CommentsBottomSheet = ({
           );
         } else {
           utils.post.paginatePostsOfUserOther.setInfiniteData(
-            { profileId: profileIdOfPostRecipient, pageSize: 10 },
+            { userId: userIdOfPostRecipient, pageSize: 10 },
             ctx.prevPostsData,
           );
         }

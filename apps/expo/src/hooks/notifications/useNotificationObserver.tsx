@@ -21,8 +21,8 @@ const useNotificationObserver = () => {
       switch (entityType) {
         case "profile":
           router.navigate({
-            pathname: "/(search)/profile/[profileId]",
-            params: { profileId: entityId },
+            pathname: "/(search)/profile/[userId]",
+            params: { userId: entityId },
           });
       }
     };
@@ -44,7 +44,7 @@ const useNotificationObserver = () => {
       isMounted = false;
       subscription.remove();
     };
-  }, []);
+  }, [router]);
 };
 
 export default useNotificationObserver;

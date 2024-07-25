@@ -31,7 +31,7 @@ const friendInputSchema = {
   }),
 
   paginateFriendsOtherByProfileId: z.object({
-    profileId: z.number(),
+    userId: z.string(),
     cursor: z
       .object({
         createdAt: z.date(),

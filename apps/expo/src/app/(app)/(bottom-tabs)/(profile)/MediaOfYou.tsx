@@ -21,7 +21,7 @@ type FriendsData = RouterOutputs["friend"]["paginateFriendsSelf"];
 type PostData = RouterOutputs["post"]["paginatePostsOfUserSelf"];
 
 interface MediaOfYouProps {
-  profileId?: string;
+  userId?: string;
   isSelfProfile: boolean;
 
   profileData: ProfileData | undefined; // Replace 'any' with the actual type of your profile data
@@ -50,7 +50,7 @@ interface MediaOfYouProps {
 
 const MediaOfYou = (props: MediaOfYouProps) => {
   const {
-    profileId,
+    userId,
     isSelfProfile,
 
     profileData,

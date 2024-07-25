@@ -54,11 +54,11 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     !props.loading &&
     props.friendsData.friendItems.length < props.friendsData.friendCount;
 
-  const handleProfileClicked = (profileId: number) => {
+  const handleProfileClicked = (userId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
-      pathname: "/(profile)/profile/[profileId]/",
-      params: { profileId: String(profileId) },
+      pathname: "/(profile)/profile/[userId]/",
+      params: { userId: userId },
     });
   };
 
@@ -116,7 +116,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
           onScroll={handleScroll}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleProfileClicked(item.profileId)}
+              onPress={() => handleProfileClicked(item.userId)}
             >
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
@@ -171,7 +171,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
           onScroll={handleScroll}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleProfileClicked(item.profileId)}
+              onPress={() => handleProfileClicked(item.userId)}
             >
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>

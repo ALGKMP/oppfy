@@ -57,8 +57,8 @@ const ListItem = ({
         button={renderButton(item)}
         onPress={() =>
           router.push({
-            pathname: `/${segments[2]}/profile/[profileId]`,
-            params: { profileId: String(item.profileId) },
+            pathname: `/${segments[2]}/profile/[userId]`,
+            params: { userId: item.userId },
           })
         }
       />
