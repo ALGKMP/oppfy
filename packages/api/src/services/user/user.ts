@@ -1,10 +1,15 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { ProfileRepository, SearchRepository } from "../../repositories";
+import {
+  PostRepository,
+  ProfileRepository,
+  SearchRepository,
+} from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
 
 export class UserService {
   private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
+  private postRepository = new PostRepository();
   private profileRepository = new ProfileRepository();
 
   async createUser(userId: string, phoneNumber: string) {
@@ -22,7 +27,6 @@ export class UserService {
 
     await this.userRepository.createUser(userId, phoneNumber, username);
   }
-
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
@@ -61,5 +65,15 @@ export class UserService {
       !!user.profile.fullName &&
       !!user.profile.username
     );
+  }
+
+  async isNewUser(uid: string) {
+    const counts = await this.postRepository.getCountOfPostsNotOnApp(uid);
+
+    if (counts === undefined) {
+      return true;
+    }
+
+    return counts[0]?.count === 0;
   }
 }
