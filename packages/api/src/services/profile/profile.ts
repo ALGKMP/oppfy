@@ -1,11 +1,12 @@
-import { TRPC_ERROR_CODES_BY_KEY } from "@trpc/server/rpc";
 import { z } from "zod";
 
 import { env } from "@oppfy/env";
 import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
 
-import { ErrorCode, handleServiceError, ServiceError } from "../../errors";
+import { DomainError, ErrorCode } from "../../errors";
 import {
+  FollowRepository,
+  FriendRepository,
   ProfileRepository,
   S3Repository,
   SearchRepository,
@@ -19,11 +20,29 @@ import { FriendService } from "../network/friend";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
+type PublicFollowState = "NotFollowing" | "Following";
+type PrivateFollowState = "NotFollowing" | "Requested" | "Following";
+type FriendState = "NotFriends" | "Requested" | "Friends";
+
+interface PublicProfileStatus {
+  privacy: "public";
+  followState: PublicFollowState;
+  friendState: FriendState;
+}
+
+interface PrivateProfileStatus {
+  privacy: "private";
+  followState: PrivateFollowState;
+  friendState: FriendState;
+}
+
 export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private searchRepository = new SearchRepository();
   private s3Repository = new S3Repository();
+  private followRepository = new FollowRepository();
+  private friendsRepository = new FriendRepository();
   private viewRepository = new ViewRepository();
 
   private friendService = new FriendService();
@@ -31,17 +50,15 @@ export class ProfileService {
   private blockService = new BlockService();
   private cloudFrontService = new CloudFrontService();
 
-  @handleServiceError
+   
   async updateProfile(userId: string, newData: UpdateProfile): Promise<void> {
     const user = await this.profileRepository.getUserProfile(userId);
 
     if (!user) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.PROFILE_NOT_FOUND,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.NOT_FOUND,
-        },
-        `SERVICE ERROR: Profile not found for user ID "${userId}"`,
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+        "SERVICE ERROR: Profile not found for the provided user ID in updateProfile",
       );
     }
 
@@ -56,11 +73,9 @@ export class ProfileService {
       );
 
       if (usernameExists) {
-        throw new ServiceError(
-          {
-            code: ErrorCode.USERNAME_ALREADY_EXISTS,
-            trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.CONFLICT,
-          },
+        throw new DomainError(
+          ErrorCode.USERNAME_ALREADY_EXISTS,
+          "Username already exists.",
           `SERVICE ERROR: Username "${newData.username}" already exists in updateProfile`,
         );
       }
@@ -80,18 +95,16 @@ export class ProfileService {
   //   await this.profileRepository.updateProfilePicture(profile.id, key);
   // }
 
-  @handleServiceError
+   
   async getFullProfileSelf(userId: string) {
     const user = await this.profileRepository.getUserFullProfile(userId);
 
     if (!user) {
       console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
-      throw new ServiceError(
-        {
-          code: ErrorCode.PROFILE_NOT_FOUND,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.NOT_FOUND,
-        },
-        `Profile not found for the provided user ID.`,
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+        `SERVICE ERROR: Profile not found for user ID "${userId}" in getFullProfileSelf`,
       );
     }
 
@@ -101,11 +114,9 @@ export class ProfileService {
       );
 
     if (!profilePictureUrl) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
-        },
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
         `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
       );
     }
@@ -124,7 +135,7 @@ export class ProfileService {
     });
   }
 
-  @handleServiceError
+   
   async getFullProfileOther({
     currentUserId,
     otherUserId,
@@ -134,11 +145,9 @@ export class ProfileService {
   }): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileOther>> {
     const user = await this.profileRepository.getUserFullProfile(otherUserId);
     if (!user) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.PROFILE_NOT_FOUND,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.NOT_FOUND,
-        },
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
         `SERVICE ERROR: Profile not found for user ID "${otherUserId}"`,
       );
     }
@@ -149,11 +158,9 @@ export class ProfileService {
       );
 
     if (!profilePictureUrl) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
-        },
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
         `SERVICE ERROR: Failed to get profile picture for user ID "${user.id}"`,
       );
     }
@@ -180,7 +187,7 @@ export class ProfileService {
     return trpcValidators.output.profile.fullProfileOther.parse(profileData);
   }
 
-  @handleServiceError
+   
   async getBatchProfiles(userIds: string[]) {
     const batchProfiles =
       await this.profileRepository.getBatchProfiles(userIds);
@@ -190,16 +197,13 @@ export class ProfileService {
       .parse(batchProfiles);
   }
 
-  @handleServiceError
+   
   async removeProfilePicture(userId: string) {
     const user = await this.profileRepository.getUserProfile(userId);
     if (!user) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.USER_NOT_FOUND,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.NOT_FOUND,
-        },
-        `SERVICE ERROR: User not found for user ID "${userId}" in removeProfilePicture`,
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found for the provided user ID.",
       );
     }
 
@@ -209,7 +213,7 @@ export class ProfileService {
     await this.profileRepository.removeProfilePicture(user.profile.id);
   }
 
-  @handleServiceError
+   
   async getNetworkConnectionStatesBetweenUsers({
     currentUserId,
     otherUserId,
@@ -219,21 +223,17 @@ export class ProfileService {
   }): Promise<z.infer<typeof PrivacyStatus>> {
     const targetUser = await this.userRepository.getUser(currentUserId);
     if (!targetUser) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.USER_NOT_FOUND,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.NOT_FOUND,
-        },
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found",
         `SERVICE ERROR: User not found for target user ID "${currentUserId}" in getNetworkConnectionStates`,
       );
     }
     const otherUser = await this.userRepository.getUser(otherUserId);
     if (!otherUser) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.USER_NOT_FOUND,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.NOT_FOUND,
-        },
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found",
         `SERVICE ERROR: User not found for other user ID "${otherUserId}" in getNetworkConnectionStates`,
       );
     }
@@ -274,7 +274,7 @@ export class ProfileService {
     return PrivacyStatus.parse(profileStatus);
   }
 
-  @handleServiceError
+   
   async viewMultipleProfiles({
     viewerUserId,
     viewedProfileIds,
@@ -288,11 +288,9 @@ export class ProfileService {
         viewedProfileIds,
       });
     } catch (err) {
-      throw new ServiceError(
-        {
-          code: ErrorCode.SERVICE_ERROR,
-          trpcErrorCode: TRPC_ERROR_CODES_BY_KEY.INTERNAL_SERVER_ERROR,
-        },
+      throw new DomainError(
+        ErrorCode.FAILED_TO_CREATE_VIEW,
+        "Failed to create profile views for the user.",
         `SERVICE ERROR: Failed to create profile views for user ID "${viewerUserId}" viewing profiles "${viewedProfileIds}"`,
       );
     }
