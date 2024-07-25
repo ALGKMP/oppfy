@@ -128,31 +128,26 @@ export class PostRepository {
     const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
 
     // get recc ids
-    const reccomendedUserIds = await this.contactsRepository
+    const recommendedUserIds = await this.contactsRepository
       .getRecommendationsInternal(userId)
       .then((res) => {
         return [...res.tier1, ...res.tier2, ...res.tier3];
       });
 
     // TODO: if recs is empty just return top posts
-    if (reccomendedUserIds.length === 0) {
+    if (recommendedUserIds.length === 0) {
       return [];
     }
 
-    // get one post from each rec id
+    // get one post from each recommended user
     const latestPosts = this.db
       .select({
         postId: sql<number>`max(${schema.post.id})`.as("latest_post_id"),
         authorId: schema.post.author,
-        followerId: schema.follower.id,
       })
       .from(schema.post)
-      .innerJoin(
-        schema.follower,
-        eq(schema.follower.recipientId, schema.post.recipient),
-      )
-      .where(inArray(schema.post.recipient, reccomendedUserIds))
-      .groupBy(schema.post.author, schema.follower.id)
+      .where(inArray(schema.post.author, recommendedUserIds))
+      .groupBy(schema.post.author)
       .as("latest_posts");
 
     return await this.db
@@ -174,7 +169,6 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        followerId: latestPosts.followerId,
       })
       .from(latestPosts)
       .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
@@ -189,12 +183,12 @@ export class PostRepository {
               lt(schema.post.createdAt, cursor.createdAt),
               and(
                 eq(schema.post.createdAt, cursor.createdAt),
-                gt(latestPosts.postId, cursor.postId),
+                gt(schema.post.id, cursor.postId),
               ),
             )
           : undefined,
       )
-      .orderBy(desc(schema.post.createdAt), asc(latestPosts.followerId))
+      .orderBy(desc(schema.post.createdAt), desc(schema.post.id))
       .limit(pageSize + 1);
   }
 
