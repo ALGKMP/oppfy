@@ -110,15 +110,7 @@ const HomeScreen = () => {
                     recommendationsData && (
                       <RecommendationsCarousel
                         loading={isLoadingRecommendationsData}
-                        reccomendationsData={[
-                          ...recommendationsData,
-                          ...recommendationsData,
-                          ...recommendationsData,
-                          ...recommendationsData,
-                          ...recommendationsData,
-                          ...recommendationsData,
-                          ...recommendationsData,
-                        ]}
+                        reccomendationsData={recommendationsData}
                       ></RecommendationsCarousel>
                     )
                   )}
