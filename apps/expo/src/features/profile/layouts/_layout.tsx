@@ -29,14 +29,14 @@ import type { RouterOutputs } from "~/utils/api";
 
 type ProfileData = RouterOutputs["profile"]["getFullProfileOther"];
 
-interface ProfileDataWithProfileId extends ProfileData {
-  profileId: number;
+interface ProfileDataWithUserId extends ProfileData {
+  userId: string;
 }
 
 const ProfileLayout = () => {
   const theme = useTheme();
 
-  const { profileId } = useLocalSearchParams<{ profileId: string }>();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -44,9 +44,14 @@ const ProfileLayout = () => {
     data: profileData,
     isLoading,
     refetch,
-  } = api.profile.getFullProfileOther.useQuery({
-    profileId: Number(profileId),
-  });
+  } = api.profile.getFullProfileOther.useQuery(
+    {
+      userId: userId ?? ""
+    },
+    {
+      enabled: userId !== undefined,
+    },
+  );
 
   const navigation = useNavigation();
 
@@ -79,7 +84,6 @@ const ProfileLayout = () => {
               <Profile
                 loading={false}
                 data={{
-                  profileId: Number(profileId),
                   ...profileData,
                 }}
               />
@@ -114,7 +118,7 @@ interface LoadingProps {
 
 interface LoadedProps {
   loading: false;
-  data: ProfileDataWithProfileId;
+  data: ProfileDataWithUserId;
 }
 
 type ProfileProps = LoadingProps | LoadedProps;
@@ -134,13 +138,13 @@ const Profile = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -165,7 +169,7 @@ const Profile = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -186,13 +190,13 @@ const Profile = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -211,7 +215,7 @@ const Profile = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -232,13 +236,13 @@ const Profile = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -262,7 +266,7 @@ const Profile = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -283,13 +287,13 @@ const Profile = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -307,7 +311,7 @@ const Profile = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -319,7 +323,7 @@ const Profile = (props: ProfileProps) => {
     },
   });
 
-  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
+  const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
     onMutate: async (_newData) => {
       if (props.loading) return;
 
@@ -328,13 +332,13 @@ const Profile = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -352,7 +356,7 @@ const Profile = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -373,13 +377,13 @@ const Profile = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -397,7 +401,7 @@ const Profile = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -443,7 +447,7 @@ const Profile = (props: ProfileProps) => {
     if (props.loading) return;
 
     await cancelFollowRequest.mutateAsync({
-      userId: props.data.userId,
+      recipientId: props.data.userId,
     });
   };
   const handleCancelFriendRequest = async () => {
