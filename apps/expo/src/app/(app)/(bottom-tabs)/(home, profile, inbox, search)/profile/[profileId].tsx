@@ -9,7 +9,7 @@ import { api } from "~/utils/api";
 import MediaOfYou from "../../(profile)/MediaOfYou";
 
 const Profile = () => {
-  const { profileId } = useLocalSearchParams<{ profileId: string }>();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
   const router = useRouter();
 
   // Profile data query
@@ -18,8 +18,8 @@ const Profile = () => {
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
   } = api.profile.getFullProfileOther.useQuery(
-    { profileId: parseInt(profileId ?? "") },
-    { enabled: !!profileId },
+    { userId: userId ?? "" },
+    { enabled: !!userId },
   );
 
   // Friends data query
