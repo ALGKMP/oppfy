@@ -19,7 +19,7 @@ const SettingsLayout = () => {
         options={{
           headerLeft: (props) => <HeaderLeft {...props} />,
           header: (props) => <Header {...props} />,
-          title: "Find more friends",
+          title: "Find more friends 💁‍♂️🙋‍♀️",
         }}
       />
 
