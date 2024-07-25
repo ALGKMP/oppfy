@@ -1,12 +1,9 @@
-import { env } from "@oppfy/env";
-
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
   EventType,
   NotificationSettings,
   SendNotificationData,
-  SnsNotificationData,
   StoreNotificationData,
 } from "../../repositories/user/notifications";
 import { CloudFrontService } from "../aws/cloudfront";

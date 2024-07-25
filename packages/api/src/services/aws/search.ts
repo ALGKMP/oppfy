@@ -1,4 +1,3 @@
-import { env } from "@oppfy/env";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { S3Repository } from "../../repositories/aws/s3";

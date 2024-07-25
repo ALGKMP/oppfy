@@ -1,4 +1,4 @@
-import { schema } from "@oppfy/db";
+import type { schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 
 import { DomainError, ErrorCode } from "../../errors";
@@ -27,15 +27,9 @@ export class PrivacyService {
     if (!userExists) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
-    const updatedPrivacy = await this.userRepository.updatePrivacySetting(
+     await this.userRepository.updatePrivacySetting(
       userId,
       newPrivacySetting,
     );
-    if (!updatedPrivacy) {
-      throw new DomainError(
-        ErrorCode.FAILED_TO_UPDATE_PRIVACY_SETTING,
-        "Failed to update privacy settings",
-      );
-    }
   }
 }
