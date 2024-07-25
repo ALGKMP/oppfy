@@ -178,7 +178,7 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
     fields: [profile.id],
     references: [user.profileId],
   }),
-  postStats: one(profileStats, {
+  profileStats: one(profileStats, {
     fields: [profile.id],
     references: [profileStats.profileId],
   }),
