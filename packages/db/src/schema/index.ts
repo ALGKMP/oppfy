@@ -182,10 +182,6 @@ export const profileRelations = relations(profile, ({ one, many }) => ({
     fields: [profile.id],
     references: [profileStats.profileId],
   }),
-  // followers: many(follower, { relationName: "profileFollowers" }),
-  // following: many(follower, { relationName: "profileFollowing" }),
-  // posts: many(post, { relationName: "profilePosts" }),
-  // profileViews: many(profileView),
 }));
 
 export const profileStats = pgTable("profile_stats", {
