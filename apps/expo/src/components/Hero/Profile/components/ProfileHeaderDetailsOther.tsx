@@ -115,13 +115,13 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+        userId: props.data.userId,
         },
         {
           ...prevData,
@@ -146,7 +146,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -167,13 +167,13 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -192,7 +192,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -213,13 +213,13 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -243,7 +243,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -264,13 +264,13 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -288,7 +288,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -309,13 +309,13 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -333,7 +333,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -354,13 +354,13 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -378,7 +378,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -399,14 +399,14 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -424,7 +424,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
@@ -445,14 +445,14 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileOther.getData({
-        profileId: props.data.profileId,
+        userId: props.data.userId,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.profile.getFullProfileOther.setData(
         {
-          profileId: props.data.profileId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -470,7 +470,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (ctx === undefined) return;
 
       utils.profile.getFullProfileOther.setData(
-        { profileId: props.data.profileId },
+        { userId: props.data.userId },
         ctx.prevData,
       );
     },
