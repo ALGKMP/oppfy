@@ -72,7 +72,7 @@ const FriendItem = ({ item }: { item: { id: number } }) => (
       <Circle size="$4" backgroundColor="$gray8" />
       <Text color="white">Friend {item.id}</Text>
     </XStack>
-    <Button variant="outlined" size="$2">
+    <Button size="$2">
       <Text>Invite</Text>
     </Button>
   </XStack>
