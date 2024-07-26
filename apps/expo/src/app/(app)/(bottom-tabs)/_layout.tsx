@@ -1,14 +1,75 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
-import { Text, useTheme, View } from "tamagui";
+import {
+  Camera,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Circle,
+  Home,
+  Inbox,
+  Search,
+  User2,
+} from "@tamagui/lucide-icons";
+import {
+  Button,
+  Paragraph,
+  Text,
+  Tooltip,
+  TooltipGroup,
+  TooltipProps,
+  useTheme,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
 import { useSession } from "~/contexts/SessionContext";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
+
+const CameraTabIcon = ({ focused }: { focused: boolean }) => {
+  const [showTooltip, setShowTooltip] = useState(true);
+
+  useEffect(() => {
+    // Hide tooltip when the tab is focused
+    setShowTooltip(!focused);
+  }, [focused]);
+
+  return (
+    /*     <View position="absolute" top={-50} zIndex={1000000}>
+      <Text>hellooo</Text>
+    </View> */
+    <YStack>
+      {/*       {showTooltip && (
+        <View position="absolute" top={-50}>
+          <Tooltip open>
+            <Tooltip.Content
+              enterStyle={{ y: -5, opacity: 0, scale: 0.9 }}
+              exitStyle={{ y: -5, opacity: 0, scale: 0.9 }}
+              y={0}
+              opacity={1}
+              scale={1}
+              animation="quick"
+            >
+              <Paragraph size="$2" lineHeight="$1">
+                Some shit
+              </Paragraph>
+            </Tooltip.Content>
+          </Tooltip>
+        </View>
+      )} */}
+      <View position="absolute" top={-50}>
+        <Text>hello</Text>
+      </View>
+      <Camera strokeWidth={focused ? 3 : 1.5} />
+    </YStack>
+  );
+};
 
 const BottomTabsLayout = () => {
   const theme = useTheme();
@@ -31,66 +92,60 @@ const BottomTabsLayout = () => {
     );
 
   return (
-    <View flex={1}>
-      <BottomTabs
-        tabBar={(props) => <BottomTabBar {...props} />}
-        screenOptions={{
-          header: (props) => <Header {...props} />,
+    <BottomTabs
+      tabBar={(props) => <BottomTabBar {...props} />}
+      screenOptions={{
+        header: (props) => <Header {...props} />,
+      }}
+      sceneContainerStyle={{
+        backgroundColor: theme.background.val,
+      }}
+      screenListeners={{
+        tabPress: () =>
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+      }}
+      backBehavior="history"
+    >
+      <BottomTabs.Screen
+        name="(home)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(Home),
         }}
-        sceneContainerStyle={{
-          backgroundColor: theme.background.val,
+      />
+
+      <BottomTabs.Screen
+        name="(search)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(Search),
         }}
-        screenListeners={{
-          tabPress: () =>
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+      />
+
+      <BottomTabs.Screen
+        name="(camera)"
+        options={{
+          header: () => null,
+          tabBarIcon: CameraTabIcon,
         }}
-        backBehavior="history"
-      >
-        <BottomTabs.Screen
-          name="(home)"
-          options={{
-            // title: "Home",
-            header: () => null,
-            tabBarIcon: getTabBarIcon(Home),
-          }}
-        />
+      />
 
-        <BottomTabs.Screen
-          name="(search)"
-          options={{
-            header: () => null,
-            tabBarIcon: getTabBarIcon(Search),
-          }}
-        />
+      <BottomTabs.Screen
+        name="(inbox)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(Inbox),
+        }}
+      />
 
-        <BottomTabs.Screen
-          name="(camera)"
-          options={{
-            header: () => null,
-            tabBarIcon: getTabBarIcon(Camera),
-          }}
-        />
-
-        <BottomTabs.Screen
-          name="(inbox)"
-          options={{
-            header: () => null,
-            tabBarIcon: getTabBarIcon(Inbox),
-          }}
-        />
-
-        <BottomTabs.Screen
-          name="(profile)"
-          options={{
-            header: () => null,
-            tabBarIcon: getTabBarIcon(User2),
-          }}
-        />
-      </BottomTabs>
-      <Text position="absolute" top={100}>
-        hello negro
-      </Text>
-    </View>
+      <BottomTabs.Screen
+        name="(profile)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(User2),
+        }}
+      />
+    </BottomTabs>
   );
 };
 
