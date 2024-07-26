@@ -226,7 +226,7 @@ export class AwsStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const postBucket = new s3.Bucket(this, "PostBucket", {
+    const postBucket = new s3.Bucket(this, "Post", {
       versioned: true,
       cors: [
         {
@@ -245,10 +245,9 @@ export class AwsStack extends cdk.Stack {
       ],
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
     });
 
-    const profileBucket = new s3.Bucket(this, "ProfileBucket", {
+    const profileBucket = new s3.Bucket(this, "Profile", {
       versioned: true,
       cors: [
         {
@@ -266,93 +265,107 @@ export class AwsStack extends cdk.Stack {
         },
       ],
       publicReadAccess: false,
-      blockPublicAccess: {
-        blockPublicAcls: false,
-        ignorePublicAcls: false,
-        blockPublicPolicy: true,
-        restrictPublicBuckets: true,
-      },
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     });
 
-    // Add bucket policy for public access to tagged objects
-    const publicAccessPolicy = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: ["s3:GetObject"],
-      principals: [new iam.AnyPrincipal()],
-      resources: [postBucket.arnForObjects("*")],
-      conditions: {
-        StringEquals: {
-          "s3:ExistingObjectTag/public": "true",
-        },
-      },
-    });
-
-    postBucket.addToResourcePolicy(publicAccessPolicy);
-
-    // CloudFront setup
-    const cloudfrontOAI = new cloudfront.OriginAccessIdentity(
-      this,
-      "CloudFrontOAI",
-    );
-
-    postBucket.addToResourcePolicy(
-      new iam.PolicyStatement({
-        actions: ["s3:GetObject"],
-        resources: [postBucket.arnForObjects("*")],
-        principals: [
-          new iam.CanonicalUserPrincipal(
-            cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId,
-          ),
-          new iam.AnyPrincipal(),
-        ],
-      }),
-    );
-
+    // Create a public key
     const publicKey = new cloudfront.PublicKey(this, "MyPublicKey", {
       encodedKey: env.CLOUDFRONT_PUBLIC_KEY,
       comment: "Key for signing CloudFront URLs",
     });
 
+    // Create a key group
     const cfKeyGroup = new cloudfront.KeyGroup(this, "MyKeyGroup", {
       items: [publicKey],
     });
 
+    // Lambda@Edge for access control
+    const accessControlLambda = new lambdaNodeJs.NodejsFunction(
+      this,
+      "AccessControlLambda",
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: "src/res/lambdas/access-control/index.ts",
+        handler: "handler",
+        bundling: {
+          format: lambdaNodeJs.OutputFormat.ESM, // Use ESM format for bundling
+          mainFields: ["module", "main"],
+          esbuildArgs: {
+            "--platform": "node",
+            "--target": "esnext", // Ensure es2020 or higher to support top-level await
+            "--format": "esm", // Bundle as ESM
+            "--banner:js":
+              "import { createRequire } from 'module'; const require = createRequire(import.meta.url);", // Inject require shim
+          },
+        },
+      },
+    );
+
+    // Grant the Lambda function permissions to access S3 and RDS
+    postBucket.grantRead(accessControlLambda);
+    profileBucket.grantRead(accessControlLambda);
+
+    // Create a version for the Lambda function (required for Lambda@Edge)
+    const accessControlLambdaVersion = new lambda.Version(
+      this,
+      "AccessControlLambdaVersion",
+      {
+        lambda: accessControlLambda,
+      },
+    );
+
+    // CloudFront setup
+    const cloudfrontOriginAccessIdentity = new cloudfront.OriginAccessIdentity(
+      this,
+      "CloudFrontOAI",
+    );
+
+    // CloudFront distribution for post bucket
     const postDistribution = new cloudfront.Distribution(
       this,
       "PostDistribution",
       {
         defaultBehavior: {
           origin: new origins.S3Origin(postBucket, {
-            originAccessIdentity: cloudfrontOAI,
-          }),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-        },
-      },
-    );
-
-    const profileDistribution = new cloudfront.Distribution(
-      this,
-      "ProfileDistribution",
-      {
-        defaultBehavior: {
-          origin: new origins.S3Origin(profileBucket, {
-            originAccessIdentity: cloudfrontOAI,
+            originAccessIdentity: cloudfrontOriginAccessIdentity,
           }),
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
           trustedKeyGroups: [cfKeyGroup],
+          edgeLambdas: [
+            {
+              functionVersion: accessControlLambdaVersion,
+              eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+            },
+          ],
         },
       },
     );
 
-    // Grant CloudFront OAI read access to buckets
-    postBucket.grantRead(cloudfrontOAI);
-    profileBucket.grantRead(cloudfrontOAI);
+    // CloudFront distribution for profile bucket
+    const profileDistribution = new cloudfront.Distribution(
+      this,
+      "ProfileDistribution",
+      {
+        defaultBehavior: {
+          origin: new origins.S3Origin(profileBucket, {
+            originAccessIdentity: cloudfrontOriginAccessIdentity,
+          }),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          edgeLambdas: [
+            {
+              functionVersion: accessControlLambdaVersion,
+              eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+            },
+          ],
+        },
+      },
+    );
 
     new cdk.CfnOutput(this, "PostDistributionUrl", {
       value: `https://${postDistribution.distributionDomainName}`,
@@ -368,7 +381,7 @@ export class AwsStack extends cdk.Stack {
         resources: [postBucket.arnForObjects("*")],
         principals: [
           new iam.CanonicalUserPrincipal(
-            cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId,
+            cloudfrontOriginAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
           ),
         ],
       }),
@@ -380,7 +393,7 @@ export class AwsStack extends cdk.Stack {
         resources: [profileBucket.arnForObjects("*")],
         principals: [
           new iam.CanonicalUserPrincipal(
-            cloudfrontOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId,
+            cloudfrontOriginAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
           ),
         ],
       }),
@@ -515,6 +528,7 @@ export class AwsStack extends cdk.Stack {
     const cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
       vpc,
       iamAuthentication: false,
+      // instanceType: neptune.InstanceType.T3_MEDIUM,
       instanceType: neptune.InstanceType.SERVERLESS,
       serverlessScalingConfiguration: {
         minCapacity: 1,

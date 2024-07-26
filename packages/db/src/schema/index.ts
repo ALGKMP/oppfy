@@ -87,6 +87,31 @@ export const user = pgTable("user", {
     .notNull(),
 });
 
+export const userRelations = relations(user, ({ one, many }) => ({
+  profile: one(profile, {
+    fields: [user.profileId],
+    references: [profile.id],
+  }),
+  notificationSettings: one(notificationSettings, {
+    fields: [user.notificationSettingsId],
+    references: [notificationSettings.id],
+  }),
+  postViews: many(postView),
+  viewerProfileViews: many(profileView, {
+    relationName: "viewerProfileViews",
+  }),
+  viewedProfileViews: many(profileView, {
+    relationName: "viewedProfileViews",
+  }),
+  receivedNotifications: many(notifications, {
+    relationName: "notificationRecipient",
+  }),
+  sentNotifications: many(notifications, {
+    relationName: "notificationSender",
+  }),
+  pushTokens: many(pushToken),
+}));
+
 export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
   id: uuid("id").primaryKey().defaultRandom(),
   phoneNumber: text("phone_number").notNull(),
@@ -131,21 +156,6 @@ export const userContact = pgTable(
   }),
 );
 
-export const userRelations = relations(user, ({ one, many }) => ({
-  profile: one(profile, {
-    fields: [user.profileId],
-    references: [profile.id],
-  }),
-  notificationSettings: one(notificationSettings, {
-    fields: [user.notificationSettingsId],
-    references: [notificationSettings.id],
-  }),
-  postViews: many(postView),
-  profileViews: many(profileView),
-  notifications: many(notifications),
-  pushTokens: many(pushToken),
-}));
-
 export const profile = pgTable("profile", {
   id: serial("id").primaryKey(),
   username: text("username").unique().notNull(),
@@ -162,6 +172,17 @@ export const profile = pgTable("profile", {
     .defaultNow()
     .notNull(),
 });
+
+export const profileRelations = relations(profile, ({ one, many }) => ({
+  user: one(user, {
+    fields: [profile.id],
+    references: [user.profileId],
+  }),
+  profileStats: one(profileStats, {
+    fields: [profile.id],
+    references: [profileStats.profileId],
+  }),
+}));
 
 export const profileStats = pgTable("profile_stats", {
   id: serial("id").primaryKey(),
@@ -181,25 +202,39 @@ export const profileStats = pgTable("profile_stats", {
     .notNull(),
 });
 
-export const profileRelations = relations(profile, ({ one, many }) => ({
-  user: one(user, {
-    fields: [profile.id],
-    references: [user.profileId],
-  }),
-  postStats: one(profileStats, {
-    fields: [profile.id],
-    references: [profileStats.profileId],
-  }),
-  followers: many(follower, { relationName: "profileFollowers" }),
-  following: many(follower, { relationName: "profileFollowing" }),
-  posts: many(post, { relationName: "profilePosts" }),
-  profileViews: many(profileView),
-}));
-
 export const profileStatsRelations = relations(profileStats, ({ one }) => ({
   profile: one(profile, {
     fields: [profileStats.profileId],
     references: [profile.id],
+  }),
+}));
+
+export const profileView = pgTable("profile_view", {
+  id: serial("id").primaryKey(),
+  viewerUserId: text("viewer_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  viewedUserId: text("viewed_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const profileViewRelations = relations(profileView, ({ one }) => ({
+  viewer: one(user, {
+    relationName: "viewerProfileViews",
+    fields: [profileView.viewerUserId],
+    references: [user.id],
+  }),
+  viewedProfile: one(user, {
+    relationName: "viewedProfileViews",
+    fields: [profileView.viewedUserId],
+    references: [user.id],
   }),
 }));
 
@@ -254,6 +289,12 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   recipient: one(user, {
     fields: [notifications.recipientId],
     references: [user.id],
+    relationName: "notificationRecipient",
+  }),
+  sender: one(user, {
+    fields: [notifications.senderId],
+    references: [user.id],
+    relationName: "notificationSender",
   }),
 }));
 
@@ -305,12 +346,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
     fields: [post.recipient],
     references: [user.id],
   }),
-  authorProfile: one(profile, {
-    relationName: "profilePosts",
-    fields: [post.author],
-    references: [profile.id],
-  }),
-  stats: one(postStats, {
+  postStats: one(postStats, {
     fields: [post.id],
     references: [postStats.postId],
   }),
@@ -337,32 +373,9 @@ export const postViewRelation = relations(postView, ({ one }) => ({
     fields: [postView.postId],
     references: [post.id],
   }),
-}));
-
-export const profileView = pgTable("profile_view", {
-  id: serial("id").primaryKey(),
-  viewerUserId: text("viewer_user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  viewedProfileId: bigint("viewed_profile_id", { mode: "number" })
-    .notNull()
-    .references(() => profile.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-export const profileViewRelations = relations(profileView, ({ one }) => ({
-  viewer: one(user, {
-    fields: [profileView.viewerUserId],
+  user: one(user, {
+    fields: [postView.userId],
     references: [user.id],
-  }),
-  viewedProfile: one(profile, {
-    fields: [profileView.viewedProfileId],
-    references: [profile.id],
   }),
 }));
 
@@ -464,16 +477,6 @@ export const followerRelations = relations(follower, ({ one }) => ({
     relationName: "recipient",
     fields: [follower.recipientId],
     references: [user.id],
-  }),
-  senderProfile: one(profile, {
-    relationName: "profileFollowing",
-    fields: [follower.senderId],
-    references: [user.id], // Change this from profile.id to user.id
-  }),
-  recipientProfile: one(profile, {
-    relationName: "profileFollowers",
-    fields: [follower.recipientId],
-    references: [user.id], // Change this from profile.id to user.id
   }),
 }));
 

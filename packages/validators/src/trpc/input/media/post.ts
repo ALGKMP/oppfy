@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { sharedValidators } from "../../../..";
+import { sharedValidators } from "@oppfy/validators";
 import {
   postContentType,
   s3ObjectMetadataForUserNotOnAppSchema,
