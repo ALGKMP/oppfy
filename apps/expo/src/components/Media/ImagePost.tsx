@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { processColorsInProps } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
 import { Image } from "expo-image";
 import { PersonStanding } from "@tamagui/lucide-icons";
@@ -12,9 +12,23 @@ interface ImagePostProps {
 const ImagePost: React.FC<ImagePostProps> = (props: ImagePostProps) => {
   const { postId, imageUrl, children } = props;
   const postKey = postId.toString();
+
+  useEffect(() => {
+    console.log("IMAGE URL", imageUrl);
+    // hit the image url here and see if it works
+
+    const fn = async () => {
+      const res = await fetch(imageUrl);
+      console.log("RES", res);
+    };
+
+    void fn();
+  }, [imageUrl]);
+
   return (
     <Image
       source={{ uri: imageUrl }}
+      onError={(err) => console.error("ERROR", err)}
       recyclingKey={postKey}
       style={[
         {

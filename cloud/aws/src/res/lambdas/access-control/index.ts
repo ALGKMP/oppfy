@@ -38,6 +38,7 @@ export async function handler(
     if (isPublic) {
       return request;
     } else {
+      console.log("private uri", `/private${uri}`);
       request.uri = `/private${uri}`;
       return request;
     }

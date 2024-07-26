@@ -302,6 +302,19 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
+    // Create a version for the Lambda function (required for Lambda@Edge)
+    const accessControlLambdaVersion = new lambda.Version(
+      this,
+      "AccessControlLambdaVersion8",
+      {
+        lambda: accessControlLambda,
+      },
+    );
+
+    // Grant the Lambda function permissions to access S3 and RDS
+    postBucket.grantRead(accessControlLambda);
+    profileBucket.grantRead(accessControlLambda);
+
     // Add IAM permissions for CloudWatch Logs
     accessControlLambda.addToRolePolicy(
       new iam.PolicyStatement({
@@ -326,31 +339,19 @@ export class AwsStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // Grant the Lambda function permissions to access S3 and RDS
-    postBucket.grantRead(accessControlLambda);
-    profileBucket.grantRead(accessControlLambda);
-
-    // Create a version for the Lambda function (required for Lambda@Edge)
-    const accessControlLambdaVersion = new lambda.Version(
-      this,
-      "AccessControlLambdaVersion4",
-      {
-        lambda: accessControlLambda,
-      },
-    );
-
-    const publicBehavior = {
+    const defaultBehavior = {
+      origin: new origins.S3Origin(postBucket),
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
       cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
     };
 
     const privateBehavior = {
-      origin: new origins.S3Origin(profileBucket),
+      origin: new origins.S3Origin(postBucket),
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
       cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-      trustedKeyGroups: [cfKeyGroup], // For signed URLs
+      trustedKeyGroups: [cfKeyGroup],
     };
 
     const postDistribution = new cloudfront.Distribution(
@@ -358,8 +359,7 @@ export class AwsStack extends cdk.Stack {
       "PostDistribution",
       {
         defaultBehavior: {
-          origin: new origins.S3Origin(profileBucket),
-          ...publicBehavior,
+          ...defaultBehavior,
           edgeLambdas: [
             {
               functionVersion: accessControlLambdaVersion,
