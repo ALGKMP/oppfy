@@ -10,6 +10,11 @@ const BottomTabBar = ({
 }: BottomTabBarProps) => {
   const theme = useTheme();
 
+  // Check if state and routes are defined
+  if (!state || !state.routes || state.routes.length === 0) {
+    return null;
+  }
+
   // Determine if the current screen should hide the tab bar
   const shouldHideTabBar = state.routes[state.index]
     ? (
@@ -31,7 +36,7 @@ const BottomTabBar = ({
     >
       <XStack height="$5" borderTopWidth={1} borderTopColor="$gray2">
         {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key]!;
+          const { options } = descriptors[route.key] || {};
           const isFocused = state.index === index;
 
           const onPress = () => {
@@ -41,7 +46,7 @@ const BottomTabBar = ({
               canPreventDefault: true,
             });
             if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
+              navigation.navigate(route.name);
             }
           };
 
@@ -52,7 +57,7 @@ const BottomTabBar = ({
             });
           };
 
-          const TabBarIcon = options.tabBarIcon;
+          const TabBarIcon = options?.tabBarIcon;
           const iconElement = TabBarIcon ? (
             <TabBarIcon focused={isFocused} color="white" size={24} />
           ) : null;
@@ -70,7 +75,7 @@ const BottomTabBar = ({
                 justifyContent: "center",
               }}
             >
-              {isCamera && (
+              {isCamera && !isFocused && (
                 <View
                   position="absolute"
                   top={-20}
