@@ -274,20 +274,20 @@ export class AwsStack extends cdk.Stack {
       },
     });
 
-    // // Add bucket policy for public access to tagged objects
-    // const publicAccessPolicy = new iam.PolicyStatement({
-    //   effect: iam.Effect.ALLOW,
-    //   actions: ["s3:GetObject"],
-    //   principals: [new iam.AnyPrincipal()],
-    //   resources: [postBucket.arnForObjects("*")],
-    //   conditions: {
-    //     StringEquals: {
-    //       "s3:ExistingObjectTag/public": "true",
-    //     },
-    //   },
-    // });
+    // Add bucket policy for public access to tagged objects
+    const publicAccessPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["s3:GetObject"],
+      principals: [new iam.AnyPrincipal()],
+      resources: [postBucket.arnForObjects("*")],
+      conditions: {
+        StringEquals: {
+          "s3:ExistingObjectTag/public": "true",
+        },
+      },
+    });
 
-    // postBucket.addToResourcePolicy(publicAccessPolicy);
+    postBucket.addToResourcePolicy(publicAccessPolicy);
 
     // CloudFront setup
     const cloudfrontOAI = new cloudfront.OriginAccessIdentity(
