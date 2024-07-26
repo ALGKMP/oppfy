@@ -297,7 +297,7 @@ export class PostService {
       const recommendedResult =
         await this.postRepository.paginatePostsOfRecommended(
           userId,
-          cursor?.recomendedCursor,
+          cursor.recomendedCursor,
           pageSize,
         );
 

@@ -56,7 +56,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
 
   const handleProfileClicked = (userId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.navigate({
+    router.push({
       pathname: "/(profile)/profile/[userId]/",
       params: { userId: userId },
     });

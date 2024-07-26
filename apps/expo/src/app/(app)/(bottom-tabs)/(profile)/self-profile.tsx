@@ -10,13 +10,16 @@ import MediaOfYou from "./MediaOfYou";
 
 const SelfProfile = () => {
   const router = useRouter();
+  const utils = api.useUtils();
 
   // Profile data query
-  const {
-    data: profileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfileData,
-  } = api.profile.getFullProfileSelf.useQuery();
+  // const {
+  //   data: profileData,
+  //   isLoading: isLoadingProfileData,
+  //   refetch: refetchProfileData,
+  // } = api.profile.getFullProfileSelf.useQuery();
+
+  const profileData = utils.profile.getFullProfileSelf.getData();
 
   // Recommendations data query
   const {
@@ -78,8 +81,8 @@ const SelfProfile = () => {
         <MediaOfYou
           isSelfProfile={true}
           profileData={profileData}
-          isLoadingProfileData={isLoadingProfileData}
-          refetchProfileData={refetchProfileData}
+          isLoadingProfileData={false}
+          refetchProfileData={() => utils.profile.getFullProfileSelf.refetch()}
           recommendations={recommendationsData ?? []}
           isLoadingRecommendationsData={isLoadingRecommendationsData}
           refetchRecommendationsData={refetchRecommendationsData}
