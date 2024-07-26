@@ -17,6 +17,8 @@ import {
   OnboardingButton,
   OnboardingInput,
 } from "~/features/onboarding/components";
+import { useContacts } from "~/hooks/contacts";
+import { getProjectConfigDescriptionWithPaths } from "expo/config";
 
 const Header = () => (
   <YStack padding="$4" gap="$4">
@@ -50,7 +52,6 @@ const Search = () => (
     <XStack
       alignItems="center"
       justifyContent="center"
-      //   backgroundColor="$blue8"
       backgroundColor="#F214FF"
       borderRadius="$10"
       padding="$2"
@@ -81,6 +82,7 @@ const FriendItem = ({ item }: { item: { id: number } }) => (
 const InvitePage = () => {
   const friends = Array.from({ length: 5 }, (_, i) => ({ id: i + 1 }));
   const theme = useTheme();
+  const contacts = useContacts();
 
   return (
     <KeyboardSafeView>

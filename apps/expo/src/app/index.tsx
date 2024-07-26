@@ -14,14 +14,6 @@ const Index = () => {
   const { data: profileData, isLoading: isLoadingProfileData } =
     api.profile.getFullProfileSelf.useQuery();
 
-  // const utils = api.useUtils();
-  // useEffect(() => {
-  //   const prefetch = async () => {
-  //     await utils.profile.getFullProfileSelf.prefetch();
-  //   };
-  //   if (isSignedIn) void prefetch();
-  // }, [utils.profile.getFullProfileSelf, isSignedIn]);
-
   useEffect(() => {
     async function prepare() {
       try {
@@ -57,7 +49,7 @@ const Index = () => {
   }
 
   return isSignedIn ? (
-    profileData. ? (
+    profileData?.profileStats.posts === 0 ? (
       <Redirect href="/invite" />
     ) : (
       <Redirect href="/(app)/(bottom-tabs)/(home)/home" />
