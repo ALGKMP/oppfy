@@ -12,6 +12,7 @@ import {
   YStack,
 } from "tamagui";
 
+import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import {
   OnboardingButton,
   OnboardingInput,
@@ -20,16 +21,12 @@ import {
 const Header = () => (
   <YStack padding="$4" gap="$4">
     <YStack alignItems="center" gap="$4">
-      <Text color="white" fontSize="$8" fontWeight="bold">
-        invite only
+      <Text color="white" fontSize="$8" fontStyle="normal">
+        Invite Only
       </Text>
-
-      <Button backgroundColor="#F214FF" borderRadius="$10">
-        <Text>POST FOR 5 FRIENDS</Text>
-      </Button>
     </YStack>
 
-    <XStack justifyContent="space-between" paddingVertical="$4">
+    <XStack justifyContent="space-between">
       {[1, 2, 3].map((_, index) => (
         <YStack key={index} alignItems="center" gap="$2">
           <Circle size="$6" borderColor="$gray8" borderWidth={1}>
@@ -53,18 +50,18 @@ const Search = () => (
     <XStack
       alignItems="center"
       justifyContent="center"
-      backgroundColor="$blue8"
+      //   backgroundColor="$blue8"
+      backgroundColor="#F214FF"
       borderRadius="$10"
       padding="$2"
     >
       <Input
-        placeholder="Your 5 best friends 🔍"
-        placeholderTextColor="$blue10"
-        color="$blue10"
+        placeholder={"Your 3 best friends 🔍" + " 0/3"}
+        placeholderTextColor="white"
+        // color="$blue10"
         backgroundColor="transparent"
         borderWidth={0}
       />
-      <Text color="$blue10">0/5</Text>
     </XStack>
   </YStack>
 );
@@ -86,16 +83,27 @@ const InvitePage = () => {
   const theme = useTheme();
 
   return (
-    <View flex={1} backgroundColor={theme.background.val}>
-      <FlashList
-        data={friends}
-        renderItem={({ item }) => <FriendItem item={item} />}
-        estimatedItemSize={50}
-        ListHeaderComponent={Header}
-        // ListFooterComponent={Footer}
-      />
-      {/* <Footer /> */}
-    </View>
+    <KeyboardSafeView>
+      <BaseScreenView
+        backgroundColor="$background"
+        paddingBottom={0}
+        safeAreaEdges={["bottom"]}
+        paddingHorizontal={0}
+      >
+        <View flex={1} backgroundColor={theme.background.val}>
+          <View flex={1} paddingHorizontal="$4">
+            <FlashList
+              data={friends}
+              renderItem={({ item }) => <FriendItem item={item} />}
+              estimatedItemSize={50}
+              ListHeaderComponent={Header}
+              // ListFooterComponent={Footer}
+            />
+          </View>
+          <OnboardingButton onPress={() => {}}>CONTINUE</OnboardingButton>
+        </View>
+      </BaseScreenView>
+    </KeyboardSafeView>
   );
 };
 
