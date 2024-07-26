@@ -75,20 +75,20 @@ const BottomTabBar = ({
                 justifyContent: "center",
               }}
             >
-              {isCamera && !isFocused && (
+              {/*               {isCamera && !isFocused && (
                 <View
                   position="absolute"
-                  top={-20}
-                  backgroundColor="$background"
+                  top={-50}
+                  backgroundColor="#F214FF"
                   paddingHorizontal="$2"
                   paddingVertical="$1"
                   borderRadius="$2"
                 >
-                  <Text fontSize="$1" color="$color">
+                  <Text fontSize="$5" color="$color">
                     Some shit
                   </Text>
                 </View>
-              )}
+              )} */}
               {iconElement}
             </TouchableOpacity>
           );
