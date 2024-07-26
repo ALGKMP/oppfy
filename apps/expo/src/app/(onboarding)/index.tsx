@@ -200,7 +200,13 @@ const Start = () => {
   );
 
   return (
-    <BaseScreenView safeAreaEdges={["top", "bottom"]} paddingHorizontal={0} backgroundColor="#F214FF">
+    <BaseScreenView
+      safeAreaEdges={["top", "bottom"]}
+      paddingHorizontal={0}
+      backgroundColor="#F214FF"
+      bottomSafeAreaStyle={{ backgroundColor: "#F214FF" }}
+      topSafeAreaStyle={{ backgroundColor: "#F214FF" }}
+    >
       <YStack
         flex={1}
         alignItems="center"
