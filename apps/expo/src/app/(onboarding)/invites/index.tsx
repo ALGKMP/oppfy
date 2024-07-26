@@ -1,6 +1,6 @@
 import React from "react";
 import { FlashList } from "@shopify/flash-list";
-import { UserRound, UserRoundPlus } from "@tamagui/lucide-icons";
+import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
   Button,
   Circle,
@@ -12,20 +12,20 @@ import {
   YStack,
 } from "tamagui";
 
+import {
+  OnboardingButton,
+  OnboardingInput,
+} from "~/features/onboarding/components";
+
 const Header = () => (
   <YStack padding="$4" gap="$4">
-    <Text color="$gray11">Help</Text>
-
     <YStack alignItems="center" gap="$4">
-      <Text color="white" fontSize="$8" fontWeight="300">
-        Oppfy is
-      </Text>
-      <Text color="white" fontSize="$8" fontWeight="300" fontStyle="italic">
+      <Text color="white" fontSize="$8" fontWeight="bold">
         invite only
       </Text>
 
       <Button backgroundColor="#F214FF" borderRadius="$10">
-        <Text>INVITE 5 FRIENDS</Text>
+        <Text>POST FOR 5 FRIENDS</Text>
       </Button>
     </YStack>
 
@@ -33,36 +33,38 @@ const Header = () => (
       {[1, 2, 3].map((_, index) => (
         <YStack key={index} alignItems="center" gap="$2">
           <Circle size="$6" borderColor="$gray8" borderWidth={1}>
-            <UserRoundPlus size="$2" marginLeft="$1"/>
+            <UserRoundPlus size="$2" marginLeft="$1" />
           </Circle>
           <Text color="$gray11" fontSize="$2">
             No friend
           </Text>
           <Text color="$gray11" fontSize="$2">
-            invited yet
+            Posted for yet
           </Text>
         </YStack>
       ))}
     </XStack>
-
-    <Button color="$blue10">
-      <Text>Why 5 friends?</Text>
-    </Button>
+    <Search />
   </YStack>
 );
 
-const Footer = () => (
-  <YStack padding="$4">
-    <XStack alignItems="center">
-      <Text>🔍</Text>
+const Search = () => (
+  <YStack>
+    <XStack
+      alignItems="center"
+      justifyContent="center"
+      backgroundColor="$blue8"
+      borderRadius="$10"
+      padding="$2"
+    >
       <Input
-        placeholder="Your 5 best friends"
+        placeholder="Your 5 best friends 🔍"
         placeholderTextColor="$blue10"
         color="$blue10"
-        backgroundColor="$blue5"
-        borderRadius="$10"
-        height="$5"
+        backgroundColor="transparent"
+        borderWidth={0}
       />
+      <Text color="$blue10">0/5</Text>
     </XStack>
   </YStack>
 );
@@ -85,14 +87,14 @@ const InvitePage = () => {
 
   return (
     <View flex={1} backgroundColor={theme.background.val}>
-      <Header />
       <FlashList
         data={friends}
         renderItem={({ item }) => <FriendItem item={item} />}
         estimatedItemSize={50}
-        // ListHeaderComponent={Header}
-        ListFooterComponent={Footer}
+        ListHeaderComponent={Header}
+        // ListFooterComponent={Footer}
       />
+      {/* <Footer /> */}
     </View>
   );
 };
