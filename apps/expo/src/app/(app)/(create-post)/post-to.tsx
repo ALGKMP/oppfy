@@ -45,7 +45,7 @@ const PostTo = () => {
   }>();
 
   const filterContactsOnApp =
-    api.contacts.filterPhoneNumbersOnApp.useMutation();
+    api.contacts.filterOutPhoneNumbersOnApp.useMutation();
 
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [visibleContacts, setVisibleContacts] = useState<Contact[]>([]);
@@ -77,23 +77,23 @@ const PostTo = () => {
       });
 
       const phoneNumbers = data
-        .map((contact) => {
-          const number = contact.phoneNumbers?.[0]?.number;
-          if (number === undefined) return null;
-
-          try {
-            const parsedNumber = parsePhoneNumber(number);
-            return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
-          } catch (error) {
-            return null;
-          }
-        })
-        .filter((number) => number !== null);
-
-      // filter out the numbers
-      const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
-        phoneNumbers,
-      });
+      .map((contact) => {
+        const number = contact.phoneNumbers?.[0]?.number;
+        if (number === undefined) return null;
+    
+        try {
+          const parsedNumber = parsePhoneNumber(number);
+          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
+        } catch (error) {
+          return null;
+        }
+      })
+      .filter((number): number is string => number !== null);
+    
+    // Now phoneNumbers is of type string[]
+    const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
+      phoneNumbers,
+    });
 
       // build up the object again using phoneNumbersNotOnApp
       const contacts = phoneNumbersNotOnApp
@@ -116,8 +116,10 @@ const PostTo = () => {
         })
         .filter((contact) => contact !== undefined);
 
-      setContacts(contacts);
-      setVisibleContacts(contacts.slice(0, INITIAL_PAGE_SIZE));
+      // Filter out undefined contacts
+      const validContacts = contacts.filter((contact): contact is Contact => contact !== undefined);
+      setContacts(validContacts);
+      setVisibleContacts(validContacts.slice(0, INITIAL_PAGE_SIZE));
       setIsLoadingContacts(false);
     };
 
