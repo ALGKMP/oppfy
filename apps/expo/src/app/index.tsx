@@ -50,7 +50,7 @@ const Index = () => {
 
   return isSignedIn ? (
     profileData?.profileStats.posts === 0 ? (
-      <Redirect href="/invites" />
+      <Redirect href="/(app)/invites" />
     ) : (
       <Redirect href="/(app)/(bottom-tabs)/(home)/home" />
     )
