@@ -1,5 +1,6 @@
 import React from "react";
 import { FlashList } from "@shopify/flash-list";
+import { UserRound, UserRoundPlus } from "@tamagui/lucide-icons";
 import {
   Button,
   Circle,
@@ -32,9 +33,7 @@ const Header = () => (
       {[1, 2, 3].map((_, index) => (
         <YStack key={index} alignItems="center" gap="$2">
           <Circle size="$6" borderColor="$gray8" borderWidth={1}>
-            <Text color="white" fontSize="$4">
-              +
-            </Text>
+            <UserRoundPlus size="$2" marginLeft="$1"/>
           </Circle>
           <Text color="$gray11" fontSize="$2">
             No friend
