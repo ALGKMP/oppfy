@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
-import { Text, useTheme } from "tamagui";
+import { Text, useTheme, View } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
@@ -22,6 +22,8 @@ const BottomTabsLayout = () => {
     void prefetch();
   }, [utils.profile.getFullProfileSelf]);
 
+  const thing = utils.profile.getFullProfileSelf.getData();
+
   const getTabBarIcon =
     (IconComponent: React.ElementType) =>
     ({ focused }: { focused: boolean }) => (
@@ -29,61 +31,66 @@ const BottomTabsLayout = () => {
     );
 
   return (
-    <BottomTabs
-      tabBar={(props) => <BottomTabBar {...props} />}
-      screenOptions={{
-        header: (props) => <Header {...props} />,
-      }}
-      sceneContainerStyle={{
-        backgroundColor: theme.background.val,
-      }}
-      screenListeners={{
-        tabPress: () =>
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
-      }}
-      backBehavior="history"
-    >
-      <BottomTabs.Screen
-        name="(home)"
-        options={{
-          // title: "Home",
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Home),
+    <View flex={1}>
+      <BottomTabs
+        tabBar={(props) => <BottomTabBar {...props} />}
+        screenOptions={{
+          header: (props) => <Header {...props} />,
         }}
-      />
+        sceneContainerStyle={{
+          backgroundColor: theme.background.val,
+        }}
+        screenListeners={{
+          tabPress: () =>
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+        }}
+        backBehavior="history"
+      >
+        <BottomTabs.Screen
+          name="(home)"
+          options={{
+            // title: "Home",
+            header: () => null,
+            tabBarIcon: getTabBarIcon(Home),
+          }}
+        />
 
-      <BottomTabs.Screen
-        name="(search)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Search),
-        }}
-      />
+        <BottomTabs.Screen
+          name="(search)"
+          options={{
+            header: () => null,
+            tabBarIcon: getTabBarIcon(Search),
+          }}
+        />
 
-      <BottomTabs.Screen
-        name="(camera)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Camera),
-        }}
-      />
+        <BottomTabs.Screen
+          name="(camera)"
+          options={{
+            header: () => null,
+            tabBarIcon: getTabBarIcon(Camera),
+          }}
+        />
 
-      <BottomTabs.Screen
-        name="(inbox)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Inbox),
-        }}
-      />
+        <BottomTabs.Screen
+          name="(inbox)"
+          options={{
+            header: () => null,
+            tabBarIcon: getTabBarIcon(Inbox),
+          }}
+        />
 
-      <BottomTabs.Screen
-        name="(profile)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(User2),
-        }}
-      />
-    </BottomTabs>
+        <BottomTabs.Screen
+          name="(profile)"
+          options={{
+            header: () => null,
+            tabBarIcon: getTabBarIcon(User2),
+          }}
+        />
+      </BottomTabs>
+      <Text position="absolute" top={100}>
+        hello negro
+      </Text>
+    </View>
   );
 };
 
