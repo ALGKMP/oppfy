@@ -17,6 +17,7 @@ import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
+import { profileStats } from "../../../../db/src/schema";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
@@ -132,6 +133,7 @@ export class ProfileService {
       followingCount: user.profile.profileStats.following,
       friendCount: user.profile.profileStats.friends,
       profilePictureUrl,
+      profileStats: user.profile.profileStats,
     });
   }
 

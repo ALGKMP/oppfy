@@ -22,6 +22,8 @@ const BottomTabsLayout = () => {
     void prefetch();
   }, [utils.profile.getFullProfileSelf]);
 
+  const thing = utils.profile.getFullProfileSelf.getData();
+
   const getTabBarIcon =
     (IconComponent: React.ElementType) =>
     ({ focused }: { focused: boolean }) => (
@@ -65,6 +67,20 @@ const BottomTabsLayout = () => {
         options={{
           header: () => null,
           tabBarIcon: getTabBarIcon(Camera),
+          tabBarLabel: () => (
+            <Text
+              fontSize="$1"
+              color="$color"
+              position="absolute"
+              top={-20}
+              backgroundColor="$background"
+              paddingHorizontal="$2"
+              paddingVertical="$1"
+              borderRadius="$2"
+            >
+              Some shit
+            </Text>
+          ),
         }}
       />
 

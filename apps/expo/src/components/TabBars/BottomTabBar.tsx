@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { useTheme, XStack } from "tamagui";
+import { Text, useTheme, View, XStack } from "tamagui";
 
 const BottomTabBar = ({
   state,
@@ -40,7 +40,6 @@ const BottomTabBar = ({
               target: route.key,
               canPreventDefault: true,
             });
-
             if (!isFocused && !event.defaultPrevented) {
               navigation.navigate(route.name, route.params);
             }
@@ -58,6 +57,8 @@ const BottomTabBar = ({
             <TabBarIcon focused={isFocused} color="white" size={24} />
           ) : null;
 
+          const isCamera = route.name === "(camera)";
+
           return (
             <TouchableOpacity
               key={route.key}
@@ -69,6 +70,20 @@ const BottomTabBar = ({
                 justifyContent: "center",
               }}
             >
+              {isCamera && (
+                <View
+                  position="absolute"
+                  top={-20}
+                  backgroundColor="$background"
+                  paddingHorizontal="$2"
+                  paddingVertical="$1"
+                  borderRadius="$2"
+                >
+                  <Text fontSize="$1" color="$color">
+                    Some shit
+                  </Text>
+                </View>
+              )}
               {iconElement}
             </TouchableOpacity>
           );
