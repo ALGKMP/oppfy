@@ -339,25 +339,17 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
-    // CloudFront setup
-    const cloudfrontOriginAccessIdentity = new cloudfront.OriginAccessIdentity(
-      this,
-      "CloudFrontOAI",
-    );
-
     const publicBehavior = {
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-      cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
     };
 
     const privateBehavior = {
-      origin: new origins.S3Origin(postBucket, {
-        originAccessIdentity: cloudfrontOriginAccessIdentity,
-      }),
+      origin: new origins.S3Origin(profileBucket),
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-      cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
       trustedKeyGroups: [cfKeyGroup], // For signed URLs
     };
 
@@ -366,9 +358,7 @@ export class AwsStack extends cdk.Stack {
       "PostDistribution",
       {
         defaultBehavior: {
-          origin: new origins.S3Origin(postBucket, {
-            originAccessIdentity: cloudfrontOriginAccessIdentity,
-          }),
+          origin: new origins.S3Origin(profileBucket),
           ...publicBehavior,
           edgeLambdas: [
             {
@@ -389,9 +379,7 @@ export class AwsStack extends cdk.Stack {
       "ProfileDistribution",
       {
         defaultBehavior: {
-          origin: new origins.S3Origin(profileBucket, {
-            originAccessIdentity: cloudfrontOriginAccessIdentity,
-          }),
+          origin: new origins.S3Origin(profileBucket),
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
@@ -413,6 +401,12 @@ export class AwsStack extends cdk.Stack {
     new cdk.CfnOutput(this, "ProfileDistributionUrl", {
       value: `https://${profileDistribution.distributionDomainName}`,
     });
+
+    // CloudFront setup
+    const cloudfrontOriginAccessIdentity = new cloudfront.OriginAccessIdentity(
+      this,
+      "CloudFrontOAI",
+    );
 
     postBucket.addToResourcePolicy(
       new iam.PolicyStatement({
