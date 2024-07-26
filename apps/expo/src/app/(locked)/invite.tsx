@@ -1,4 +1,5 @@
 import React from "react";
+import { getProjectConfigDescriptionWithPaths } from "expo/config";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
@@ -13,16 +14,15 @@ import {
 } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
-import {
-  OnboardingButton,
-  OnboardingInput,
-} from "~/features/onboarding/components";
+import { OnboardingButton } from "~/features/onboarding/components";
 import { useContacts } from "~/hooks/contacts";
-import { getProjectConfigDescriptionWithPaths } from "expo/config";
 
 const Header = () => (
   <YStack padding="$4" gap="$4">
     <YStack alignItems="center" gap="$4">
+      <Text color="white" fontSize="$8" fontWeight="bold">
+        Oppfy is
+      </Text>
       <Text color="white" fontSize="$8" fontStyle="normal">
         Invite Only
       </Text>
@@ -89,7 +89,7 @@ const InvitePage = () => {
       <BaseScreenView
         backgroundColor="$background"
         paddingBottom={0}
-        safeAreaEdges={["bottom"]}
+        safeAreaEdges={["bottom", "top"]}
         paddingHorizontal={0}
       >
         <View flex={1} backgroundColor={theme.background.val}>

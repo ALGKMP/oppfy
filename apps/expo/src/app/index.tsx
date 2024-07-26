@@ -13,6 +13,7 @@ const Index = () => {
   const { cleanupCacheDirectory } = useSaveMedia();
   const { data: profileData, isLoading: isLoadingProfileData } =
     api.profile.getFullProfileSelf.useQuery();
+  const utils = api.useUtils();
 
   useEffect(() => {
     async function prepare() {
@@ -26,9 +27,11 @@ const Index = () => {
           permissionsIsLoading ||
           isLoadingProfileData
         ) {
+          if (isSignedIn && (sessionIsLoading || permissionsIsLoading)) {
+            await utils.profile.getFullProfileSelf.refetch();
+          }
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
-
         // When loading is complete, hide the splash screen
         await SplashScreen.hideAsync();
       } catch (e) {
@@ -42,6 +45,8 @@ const Index = () => {
     permissionsIsLoading,
     isLoadingProfileData,
     cleanupCacheDirectory,
+    utils,
+    isSignedIn,
   ]);
 
   if (sessionIsLoading || permissionsIsLoading || isLoadingProfileData) {
@@ -50,7 +55,7 @@ const Index = () => {
 
   return isSignedIn ? (
     profileData?.profileStats.posts === 0 ? (
-      <Redirect href="/(app)/invites" />
+      <Redirect href="/(locked)/invite" />
     ) : (
       <Redirect href="/(app)/(bottom-tabs)/(home)/home" />
     )
