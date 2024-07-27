@@ -92,7 +92,7 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async getFriend(userId1: string, userId2: string) {
+  async getFriendship(userId1: string, userId2: string) {
     return await this.db.query.friend.findFirst({
       where: or(
         and(
