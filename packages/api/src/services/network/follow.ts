@@ -26,8 +26,11 @@ export class FollowService {
     console.log("results", results);
   }
 
-  // @tony: Example for noti handling
   async followUser(senderId: string, recipientId: string) {
+    if (senderId === recipientId) {
+      throw new DomainError(ErrorCode.CANNOT_FOLLOW_SELF);
+    }
+
     const isFollowing = await this.isFollowing(senderId, recipientId);
 
     if (isFollowing) {
@@ -81,10 +84,8 @@ export class FollowService {
   async unfollowUser(senderId: string, recipientId: string) {
     if (senderId === recipientId) return true; // Temporary fix
     const isFollowing = await this.isFollowing(senderId, recipientId);
+
     if (!isFollowing) {
-      console.error(
-        `SERVICE ERROR: Follow relationship not found for sender ID "${senderId}" and recipient ID "${recipientId}"`,
-      );
       throw new DomainError(
         ErrorCode.FOLLOW_NOT_FOUND,
         "Follow relationship not found.",
@@ -92,8 +93,6 @@ export class FollowService {
     }
 
     await this.followRepository.removeFollower(senderId, recipientId);
-
-    // @tony we also need to delete the stored event to avoid duplication
     await this.notificationsService.deleteNotification(senderId, "follow");
   }
 
@@ -102,18 +101,15 @@ export class FollowService {
       senderId,
       recipientId,
     );
+
     if (!followRequestExists) {
-      console.error(
-        `SERVICE ERROR: Follow request not found from "${senderId}" to "${recipientId}"`,
-      );
       throw new DomainError(
         ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
-        "Follow request not found.",
+        `Follow request from "${senderId}" to "${recipientId} not found"`,
       );
     }
 
     await this.followRepository.removeFollowRequest(senderId, recipientId);
-
     await this.followRepository.addFollower(senderId, recipientId);
   }
 
@@ -125,17 +121,15 @@ export class FollowService {
       userIdBeingRejected,
       userIdRejecting,
     );
+
     if (!followRequestExists) {
-      console.error(
-        `SERVICE ERROR: Follow request not found from "${userIdBeingRejected}" to "${userIdRejecting}"`,
-      );
       throw new DomainError(
         ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
-        "Follow request not found.",
+        `Follow request from "${userIdBeingRejected}" to "${userIdRejecting}" not found`,
       );
     }
 
-    return await this.followRepository.removeFollowRequest(
+    await this.followRepository.removeFollowRequest(
       userIdBeingRejected,
       userIdRejecting,
     );
