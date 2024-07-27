@@ -41,7 +41,10 @@ const AppLayout = () => {
   //   console.log("Routing TO POST GUIDE");
   //   return <Redirect href="/(locked)/invite" />;
   // }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8c015f2472bf1e443cec183381debdbd5489db40
   if (profileData && profileData.profileStats.posts < 0) {
     console.log("Routing TO POST GUIDE");
     return <Redirect href="/(locked)/invite" />;

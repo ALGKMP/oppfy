@@ -20,7 +20,8 @@ export class CloudFrontService {
   }
 
   private _getPostDistributionDomainUrlForObject(objectKey: string): string {
-    const postDistributionDomain = env.CLOUDFRONT_POST_DISTRIBUTION_DOMAIN;
+    const postDistributionDomain =
+      env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN;
     return `https://${postDistributionDomain}/${objectKey.replace(/^\//, "")}`;
   }
 
