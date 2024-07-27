@@ -1,6 +1,8 @@
 import type {
+  Callback,
   CloudFrontRequestEvent,
   CloudFrontRequestResult,
+  Context,
 } from "aws-lambda";
 import { Client } from "pg";
 
@@ -15,6 +17,8 @@ const dbConfig = {
 
 export async function handler(
   event: CloudFrontRequestEvent,
+  context: Context,
+  callback: Callback,
 ): Promise<CloudFrontRequestResult> {
   const request = event.Records[0]?.cf.request;
   if (request === undefined) {
@@ -36,11 +40,11 @@ export async function handler(
     console.log("isPublic", isPublic);
 
     if (isPublic) {
+      console.log("Access Granted");
       return request;
     } else {
-      console.log("private uri", `/private${uri}`);
-      request.uri = `/private${uri}`;
-      return request;
+      console.log("Access Denied");
+      return { status: "403", statusDescription: "Access Denied" };
     }
   } catch (error) {
     console.error("Error:", error);

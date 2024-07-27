@@ -8,7 +8,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
-import * as logs from "aws-cdk-lib/aws-logs";
 import * as opensearch from "aws-cdk-lib/aws-opensearchservice";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -20,6 +19,30 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import type { Construct } from "constructs";
 
 import { env } from "@oppfy/env";
+
+// Helper function to create an S3 bucket
+function createBucket(scope: Construct, name: string) {
+  return new s3.Bucket(scope, name, {
+    versioned: true,
+    cors: [
+      {
+        allowedHeaders: ["*"],
+        allowedMethods: [
+          s3.HttpMethods.GET,
+          s3.HttpMethods.HEAD,
+          s3.HttpMethods.PUT,
+          s3.HttpMethods.POST,
+          s3.HttpMethods.DELETE,
+        ],
+        allowedOrigins: ["*"],
+        exposedHeaders: [],
+        maxAge: 3000,
+      },
+    ],
+    publicReadAccess: false,
+    blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+  });
+}
 
 // Helper function to create a Lambda function
 function createLambdaFunction(
@@ -227,47 +250,8 @@ export class AwsStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const postBucket = new s3.Bucket(this, "Post", {
-      versioned: true,
-      cors: [
-        {
-          allowedHeaders: ["*"],
-          allowedMethods: [
-            s3.HttpMethods.GET,
-            s3.HttpMethods.HEAD,
-            s3.HttpMethods.PUT,
-            s3.HttpMethods.POST,
-            s3.HttpMethods.DELETE,
-          ],
-          allowedOrigins: ["*"],
-          exposedHeaders: [],
-          maxAge: 3000,
-        },
-      ],
-      publicReadAccess: false,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-    });
-
-    const profileBucket = new s3.Bucket(this, "Profile", {
-      versioned: true,
-      cors: [
-        {
-          allowedHeaders: ["*"],
-          allowedMethods: [
-            s3.HttpMethods.GET,
-            s3.HttpMethods.HEAD,
-            s3.HttpMethods.PUT,
-            s3.HttpMethods.POST,
-            s3.HttpMethods.DELETE,
-          ],
-          allowedOrigins: ["*"],
-          exposedHeaders: [],
-          maxAge: 3000,
-        },
-      ],
-      publicReadAccess: false,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-    });
+    const postBucket = createBucket(this, "Post");
+    const profileBucket = createBucket(this, "Profile");
 
     // Create a public key
     const publicKey = new cloudfront.PublicKey(this, "MyPublicKey", {
@@ -305,70 +289,45 @@ export class AwsStack extends cdk.Stack {
     // Create a version for the Lambda function (required for Lambda@Edge)
     const accessControlLambdaVersion = new lambda.Version(
       this,
-      "AccessControlLambdaVersion8",
+      "AccessControlLambdaVersion28",
       {
         lambda: accessControlLambda,
       },
     );
 
-    // Grant the Lambda function permissions to access S3 and RDS
-    postBucket.grantRead(accessControlLambda);
-    profileBucket.grantRead(accessControlLambda);
-
-    // Add IAM permissions for CloudWatch Logs
-    accessControlLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["logs:CreateLogGroup"],
-        resources: ["arn:aws:logs:*:*:*"],
-      }),
-    );
-
-    accessControlLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["logs:CreateLogStream", "logs:PutLogEvents"],
-        resources: ["arn:aws:logs:*:*:log-group:*:*"],
-      }),
-    );
-
-    // Create a log group for the Lambda function
-    new logs.LogGroup(this, "AccessControlLambdaLogGroup", {
-      logGroupName: `/aws/lambda/${accessControlLambda.functionName}`,
-      retention: logs.RetentionDays.ONE_WEEK,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-
-    const defaultBehavior = {
-      origin: new origins.S3Origin(postBucket),
-      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-    };
-
-    const privateBehavior = {
-      origin: new origins.S3Origin(postBucket),
-      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-      trustedKeyGroups: [cfKeyGroup],
-    };
-
-    const postDistribution = new cloudfront.Distribution(
+    // CloudFront distribution for post bucket
+    const privatePostsDistribution = new cloudfront.Distribution(
       this,
-      "PostDistribution",
+      "PrivatePostsDistribution",
       {
         defaultBehavior: {
-          ...defaultBehavior,
+          origin: new origins.S3Origin(postBucket),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          trustedKeyGroups: [cfKeyGroup],
+        },
+      },
+    );
+
+    // Cloudfront distribution for public posts
+    const publicPostsDistribution = new cloudfront.Distribution(
+      this,
+      "PublicPostsDistribution",
+      {
+        defaultBehavior: {
+          origin: new origins.S3Origin(postBucket),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
           edgeLambdas: [
             {
               functionVersion: accessControlLambdaVersion,
-              eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+              eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
             },
           ],
-        },
-        additionalBehaviors: {
-          "/private/*": privateBehavior,
         },
       },
     );
@@ -384,25 +343,24 @@ export class AwsStack extends cdk.Stack {
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-          edgeLambdas: [
-            {
-              functionVersion: accessControlLambdaVersion,
-              eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
-            },
-          ],
+          trustedKeyGroups: [cfKeyGroup],
         },
       },
     );
 
-    new cdk.CfnOutput(this, "PostDistributionUrl", {
-      value: `https://${postDistribution.distributionDomainName}`,
+    new cdk.CfnOutput(this, "PrivatePostsDistributionUrl", {
+      value: `https://${privatePostsDistribution.distributionDomainName}`,
+    });
+
+    new cdk.CfnOutput(this, "PublicPostsDistributionUrl", {
+      value: `https://${publicPostsDistribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "ProfileDistributionUrl", {
       value: `https://${profileDistribution.distributionDomainName}`,
     });
 
-    // CloudFront setup
+    // Add this after creating the CloudFront distributions
     const cloudfrontOriginAccessIdentity = new cloudfront.OriginAccessIdentity(
       this,
       "CloudFrontOAI",
@@ -431,13 +389,6 @@ export class AwsStack extends cdk.Stack {
         ],
       }),
     );
-
-    new cdk.CfnOutput(this, "PostBucketName", {
-      value: postBucket.bucketName,
-    });
-    new cdk.CfnOutput(this, "ProfileBucketName", {
-      value: profileBucket.bucketName,
-    });
 
     const openSearchSecurityGroup = new ec2.SecurityGroup(
       this,
