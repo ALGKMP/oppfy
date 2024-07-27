@@ -1,3 +1,4 @@
+import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import type {
   Callback,
   CloudFrontRequestEvent,
@@ -6,19 +7,34 @@ import type {
 } from "aws-lambda";
 import { Client } from "pg";
 
-// Hardcode the database connection details
-const dbConfig = {
-  host: "awsstack-postgresinstance19cdd68a-kaugnb8fmy74.ch4ias0oqqnx.us-east-1.rds.amazonaws.com",
-  port: 5432,
-  database: "mydatabase",
-  user: "oppfy_db",
-  password: "bF5BvbGii-e2ixpj",
-};
+interface DbConfig {
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password: string;
+}
+
+const ssmClient = new SSMClient({ region: "us-east-1" });
+
+async function getDbConfig() {
+  const parameterName = "/oppfy/db-config";
+  const command = new GetParameterCommand({
+    Name: parameterName,
+    WithDecryption: true,
+  });
+
+  try {
+    const response = await ssmClient.send(command);
+    return JSON.parse(response.Parameter?.Value ?? "{}") as DbConfig;
+  } catch (error) {
+    console.error("Error fetching DB config:", error);
+    throw error;
+  }
+}
 
 export async function handler(
   event: CloudFrontRequestEvent,
-  context: Context,
-  callback: Callback,
 ): Promise<CloudFrontRequestResult> {
   const request = event.Records[0]?.cf.request;
   if (request === undefined) {
@@ -53,6 +69,7 @@ export async function handler(
 }
 
 async function checkIfPublic(postKey: string): Promise<boolean> {
+  const dbConfig = await getDbConfig();
   const client = new Client(dbConfig);
   await client.connect();
   try {

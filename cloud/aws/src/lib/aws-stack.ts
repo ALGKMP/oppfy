@@ -16,7 +16,9 @@ import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as ssm from "aws-cdk-lib/aws-ssm";
 import type { Construct } from "constructs";
+import * as logs from "aws-cdk-lib/aws-logs";
 
 import { env } from "@oppfy/env";
 
@@ -286,14 +288,61 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
+    new ssm.StringParameter(this, "DbConfigParameter", {
+      parameterName: "/oppfy/db-config",
+      stringValue: JSON.stringify({
+        host: env.DATABASE_ENDPOINT,
+        port: env.DATABASE_PORT,
+        database: env.DATABASE_NAME,
+        user: env.DATABASE_USERNAME,
+        password: env.DATABASE_PASSWORD,
+      }),
+      tier: ssm.ParameterTier.STANDARD,
+      description: "Database configuration for the application",
+    });
+
+    // Grant permissions to access Parameter Store
+    accessControlLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [
+          `arn:aws:ssm:us-east-1:${this.account}:parameter/oppfy/db-config`,
+        ],
+      }),
+    );
+
     // Create a version for the Lambda function (required for Lambda@Edge)
     const accessControlLambdaVersion = new lambda.Version(
       this,
-      "AccessControlLambdaVersion28",
+      "AccessControlLambdaVersion40",
       {
         lambda: accessControlLambda,
       },
     );
+
+    // Add IAM permissions for CloudWatch Logs
+    accessControlLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["logs:CreateLogGroup"],
+        resources: ["arn:aws:logs:*:*:*"],
+      }),
+    );
+
+    accessControlLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["logs:CreateLogStream", "logs:PutLogEvents"],
+        resources: ["arn:aws:logs:*:*:log-group:*:*"],
+      }),
+    );
+
+    // Create a log group for the Lambda function
+    new logs.LogGroup(this, "AccessControlLambdaLogGroup", {
+      logGroupName: `/aws/lambda/${accessControlLambda.functionName}`,
+      retention: logs.RetentionDays.ONE_WEEK,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
 
     // CloudFront distribution for post bucket
     const privatePostsDistribution = new cloudfront.Distribution(
