@@ -143,7 +143,7 @@ const CommentsBottomSheet = ({
             if (!prevData) return prevData;
             return {
               ...prevData,
-              pages: prevData.pages.map((page, index) => {
+              pages: prevData.pages.map((page) => {
                 // check if it's postId
                 page.items.map((item) => {
                   if (item?.postId === postId) {
@@ -422,8 +422,13 @@ const CommentsBottomSheet = ({
               ]
         }
       >
-        <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
-          <XStack gap="$3" alignItems="center">
+        <View
+          padding="$3.5"
+          backgroundColor="$gray4"
+          borderRadius="$7"
+          flex={1}
+        >
+          <XStack gap="$3" alignItems="center" flex={1}>
             <Avatar circular size="$4">
               <Avatar.Image
                 accessibilityLabel="Cam"
@@ -431,7 +436,7 @@ const CommentsBottomSheet = ({
               />
               <Avatar.Fallback backgroundColor="$blue10" />
             </Avatar>
-            <YStack gap="$2">
+            <YStack gap="$2" width="100%" flex={1}>
               <XStack gap="$2">
                 <Text fontWeight="bold">{comment.username}</Text>
                 <Text color="$gray10">
@@ -552,6 +557,7 @@ const CommentsBottomSheet = ({
             placeholder="add a comment..."
             maxLength={100}
             value={inputValue}
+            numberOfLines={4}
             onChangeText={setInputValue}
             style={{
               fontWeight: "normal",
