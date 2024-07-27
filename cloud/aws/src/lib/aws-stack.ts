@@ -314,7 +314,7 @@ export class AwsStack extends cdk.Stack {
     // Create a version for the Lambda function (required for Lambda@Edge)
     const accessControlLambdaVersion = new lambda.Version(
       this,
-      "AccessControlLambdaVersion40",
+      "AccessControlLambdaVersion42",
       {
         lambda: accessControlLambda,
       },
