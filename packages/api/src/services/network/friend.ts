@@ -2,66 +2,117 @@ import { FriendState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories/network/friend";
+import { ProfileRepository } from "../../repositories/profile/profile";
+import { NotificationsService } from "../user/notifications";
+import { UserService } from "../user/user";
 
 export class FriendService {
   private friendRepository = new FriendRepository();
+  private profileRepository = new ProfileRepository();
 
-  async areFriends(userId1: string, userId2: string) {
-    const friendshipExists = await this.friendRepository.getFriend(
-      userId1,
-      userId2,
-    );
-    const reverseFriendshipExists = await this.friendRepository.getFriend(
-      userId2,
-      userId1,
-    );
-    return !!friendshipExists || !!reverseFriendshipExists;
-  }
+  private userService = new UserService();
+  private notificationsService = new NotificationsService();
 
   async sendFriendRequest(senderId: string, recipientId: string) {
-    const alreadyFriends = await this.areFriends(senderId, recipientId);
-    if (alreadyFriends) {
-      console.error(
-        `SERVICE ERROR: Users "${senderId}" and "${recipientId}" are already friends`,
-      );
+    if (senderId === recipientId) {
+      throw new DomainError(ErrorCode.CANNOT_FRIEND_SELF);
+    }
+
+    const friendshipExists = await this.friendshipExists(senderId, recipientId);
+
+    if (friendshipExists) {
       throw new DomainError(
         ErrorCode.USER_ALREADY_FRIENDS,
-        "Users are already friends",
+        `Users "${senderId}" and "${recipientId}" are already friends`,
       );
     }
-    return await this.friendRepository.createFriendRequest(
-      senderId,
-      recipientId,
-    );
+
+    const friendRequest = await this.getFriendRequest(senderId, recipientId);
+
+    if (friendRequest) {
+      throw new DomainError(
+        ErrorCode.FRIEND_REQUEST_ALREADY_SENT,
+        `Friend request already sent from "${senderId}" to "${recipientId}"`,
+      );
+    }
+
+    await this.friendRepository.createFriendRequest(senderId, recipientId);
+
+    const sender = await this.userService.getUser(senderId);
+    const profile = await this.profileRepository.getProfile(sender.profileId);
+
+    if (profile === undefined) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${senderId}"`,
+      );
+    }
+
+    await this.notificationsService.storeNotification(senderId, recipientId, {
+      eventType: "friendRequest",
+      entityType: "profile",
+      entityId: sender.id,
+    });
+
+    const { friendRequests } =
+      await this.notificationsService.getNotificationSettings(recipientId);
+
+    if (!friendRequests) {
+      return;
+    }
+
+    await this.notificationsService.sendNotification(senderId, recipientId, {
+      title: "Friend Request",
+      body: `${profile.username} has sent you a friend request`,
+
+      entityType: "profile",
+      entityId: sender.id,
+    });
   }
 
   async acceptFriendRequest(senderId: string, recipientId: string) {
-    const requestExists = await this.friendRepository.getFriendRequest(
-      senderId,
-      recipientId,
-    );
-    if (!requestExists) {
-      console.error(
-        `SERVICE ERROR: Friend request from "${senderId}" to "${recipientId}" not found`,
-      );
-      throw new DomainError(
-        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
-        "Friend request not found",
-      );
-    }
-    const addFriendResult = await this.friendRepository.createFriend(
+    const friendRequest = await this.friendRepository.getFriendRequest(
       senderId,
       recipientId,
     );
 
-    if (!addFriendResult) {
-      console.error(
-        `SERVICE ERROR: Failed to add friend for requester "${senderId}" and requested "${recipientId}"`,
-      );
+    if (friendRequest === undefined) {
       throw new DomainError(
-        ErrorCode.FAILED_TO_ADD_FRIEND,
-        "Failed to add friend",
+        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
+        `Friend request from "${senderId}" to "${recipientId}" not found`,
       );
+    }
+
+    await this.friendRepository.createFriend(senderId, recipientId);
+
+    const recipient = await this.userService.getUser(recipientId);
+    const recipientProfile = await this.profileRepository.getProfile(
+      recipient.profileId,
+    );
+
+    if (recipientProfile === undefined) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${recipientId}"`,
+      );
+    }
+
+    await this.notificationsService.storeNotification(recipientId, senderId, {
+      eventType: "friend",
+      entityType: "profile",
+      entityId: recipient.id,
+    });
+
+    const { friendRequests } =
+      await this.notificationsService.getNotificationSettings(senderId);
+
+    if (friendRequests) {
+      await this.notificationsService.sendNotification(recipientId, senderId, {
+        title: "Friend Request Accepted",
+        body: `${recipientProfile.username} has accepted your friend request`,
+        entityType: "profile",
+        entityId: recipient.id,
+      });
     }
   }
 
@@ -117,7 +168,7 @@ export class FriendService {
   }
 
   async removeFriend(targetUserId: string, otherUserId: string) {
-    const friendshipExists = await this.friendRepository.getFriend(
+    const friendshipExists = await this.friendRepository.getFriendship(
       targetUserId,
       otherUserId,
     );
@@ -138,11 +189,11 @@ export class FriendService {
   }
 
   public async determineFriendState(userId: string, targetUserId: string) {
-    const areFriends = await this.areFriends(userId, targetUserId);
+    const friendshipExists = await this.friendshipExists(userId, targetUserId);
     const friendRequest = await this.getFriendRequest(userId, targetUserId);
     const incomingRequest = await this.getFriendRequest(targetUserId, userId);
 
-    if (areFriends) {
+    if (friendshipExists) {
       return FriendState.Enum.Friends;
     } else if (friendRequest) {
       return FriendState.Enum.OutboundRequest;
@@ -151,5 +202,17 @@ export class FriendService {
     } else {
       return FriendState.Enum.NotFriends;
     }
+  }
+
+  async friendshipExists(userId1: string, userId2: string) {
+    const friendshipExists = await this.friendRepository.getFriendship(
+      userId1,
+      userId2,
+    );
+    const reverseFriendshipExists = await this.friendRepository.getFriendship(
+      userId2,
+      userId1,
+    );
+    return !!friendshipExists || !!reverseFriendshipExists;
   }
 }

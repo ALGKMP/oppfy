@@ -19,11 +19,9 @@ export class FollowService {
   }
 
   async followUsers(senderId: string, recipientIds: string[]) {
-    const results = await Promise.allSettled(
+    await Promise.all(
       recipientIds.map((recipientId) => this.followUser(senderId, recipientId)),
     );
-
-    console.log("results", results);
   }
 
   async followUser(senderId: string, recipientId: string) {
@@ -43,26 +41,54 @@ export class FollowService {
     const sender = await this.userService.getUser(senderId);
     const recipient = await this.userService.getUser(recipientId);
 
+    const senderProfile = await this.profileRepository.getProfile(
+      sender.profileId,
+    );
+
+    if (senderProfile === undefined) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${senderId}"`,
+      );
+    }
+
     if (recipient.privacySetting === "private") {
       await this.followRepository.createFollowRequest(senderId, recipientId);
+      await this.notificationsService.storeNotification(
+        sender.id,
+        recipient.id,
+        {
+          eventType: "followRequest",
+          entityType: "profile",
+          entityId: sender.id,
+        },
+      );
+
+      const { followRequests } =
+        await this.notificationsService.getNotificationSettings(recipient.id);
+
+      if (followRequests) {
+        await this.notificationsService.sendNotification(
+          sender.id,
+          recipient.id,
+          {
+            title: "Follow Request",
+            body: `${senderProfile.username} has sent you a follow request.`,
+
+            entityType: "profile",
+            entityId: sender.id,
+          },
+        );
+      }
       return;
     }
 
     await this.followRepository.addFollower(senderId, recipientId);
 
-    const profile = await this.profileRepository.getProfile(sender.profileId);
-
-    if (profile === undefined) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        `Profile not found for user ID "${recipientId}"`,
-      );
-    }
-
     await this.notificationsService.storeNotification(sender.id, recipient.id, {
       eventType: "follow",
       entityType: "profile",
-      entityId: String(sender.profileId),
+      entityId: sender.id,
     });
 
     const { followRequests } =
@@ -74,10 +100,10 @@ export class FollowService {
 
     await this.notificationsService.sendNotification(sender.id, recipient.id, {
       title: "New follower",
-      body: `${profile.username} is now following you.`,
+      body: `${senderProfile.username} is now following you.`,
 
       entityType: "profile",
-      entityId: String(sender.profileId),
+      entityId: sender.id,
     });
   }
 
@@ -97,12 +123,12 @@ export class FollowService {
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
-    const followRequestExists = await this.followRepository.getFollowRequest(
+    const followRequest = await this.followRepository.getFollowRequest(
       senderId,
       recipientId,
     );
 
-    if (!followRequestExists) {
+    if (followRequest === undefined) {
       throw new DomainError(
         ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
         `Follow request from "${senderId}" to "${recipientId} not found"`,
@@ -111,6 +137,36 @@ export class FollowService {
 
     await this.followRepository.removeFollowRequest(senderId, recipientId);
     await this.followRepository.addFollower(senderId, recipientId);
+
+    const recipient = await this.userService.getUser(recipientId);
+    const recipientProfile = await this.profileRepository.getProfile(
+      recipient.profileId,
+    );
+
+    if (recipientProfile === undefined) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${recipientId}"`,
+      );
+    }
+
+    await this.notificationsService.storeNotification(recipientId, senderId, {
+      eventType: "follow",
+      entityType: "profile",
+      entityId: recipient.id,
+    });
+
+    const { followRequests } =
+      await this.notificationsService.getNotificationSettings(senderId);
+
+    if (followRequests) {
+      await this.notificationsService.sendNotification(recipientId, senderId, {
+        title: "Follow Request Accepted",
+        body: `${recipientProfile.username} has accepted your follow request`,
+        entityType: "profile",
+        entityId: recipient.id,
+      });
+    }
   }
 
   async declineFollowRequest(
