@@ -71,32 +71,48 @@ export class FriendService {
   }
 
   async acceptFriendRequest(senderId: string, recipientId: string) {
-    const requestExists = await this.friendRepository.getFriendRequest(
-      senderId,
-      recipientId,
-    );
-    if (!requestExists) {
-      console.error(
-        `SERVICE ERROR: Friend request from "${senderId}" to "${recipientId}" not found`,
-      );
-      throw new DomainError(
-        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
-        "Friend request not found",
-      );
-    }
-    const addFriendResult = await this.friendRepository.createFriend(
+    const friendRequest = await this.friendRepository.getFriendRequest(
       senderId,
       recipientId,
     );
 
-    if (!addFriendResult) {
-      console.error(
-        `SERVICE ERROR: Failed to add friend for requester "${senderId}" and requested "${recipientId}"`,
-      );
+    if (friendRequest === undefined) {
       throw new DomainError(
-        ErrorCode.FAILED_TO_ADD_FRIEND,
-        "Failed to add friend",
+        ErrorCode.FRIEND_REQUEST_NOT_FOUND,
+        `Friend request from "${senderId}" to "${recipientId}" not found`,
       );
+    }
+
+    await this.friendRepository.createFriend(senderId, recipientId);
+
+    const recipient = await this.userService.getUser(recipientId);
+    const recipientProfile = await this.profileRepository.getProfile(
+      recipient.profileId,
+    );
+
+    if (recipientProfile === undefined) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        `Profile not found for user ID "${recipientId}"`,
+      );
+    }
+
+    await this.notificationsService.storeNotification(recipientId, senderId, {
+      eventType: "friend",
+      entityType: "profile",
+      entityId: recipient.id,
+    });
+
+    const { friendRequests } =
+      await this.notificationsService.getNotificationSettings(senderId);
+
+    if (friendRequests) {
+      await this.notificationsService.sendNotification(recipientId, senderId, {
+        title: "Friend Request Accepted",
+        body: `${recipientProfile.username} has accepted your friend request`,
+        entityType: "profile",
+        entityId: recipient.id,
+      });
     }
   }
 

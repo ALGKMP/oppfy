@@ -44,8 +44,6 @@ export class FriendRepository {
 
       await updateProfileStats(senderId);
       await updateProfileStats(recipientId);
-
-      return true;
     });
   }
 
