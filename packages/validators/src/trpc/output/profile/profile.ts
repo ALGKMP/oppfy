@@ -58,6 +58,17 @@ const trpcProfileOutputSchema = {
     followingCount: z.number(),
     friendCount: z.number(),
     profilePictureUrl: z.string(),
+    profileStats: z.object({
+      createdAt: z.date(),
+      profileId: z.number(),
+      posts: z.number(),
+      following: z.number(),
+      id: z.number(),
+      updatedAt: z.date(),
+      followers: z.number(),
+      friends: z.number(),
+      views: z.number(),
+    }),
   }),
 
   fullProfileOther: z.object({

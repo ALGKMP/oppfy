@@ -16,7 +16,11 @@ const Welcome = () => {
   };
 
   return (
-    <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
+    <BaseScreenView
+      safeAreaEdges={["bottom"]}
+      paddingHorizontal={0}
+      backgroundColor="#F214FF"
+    >
       <YStack flex={1} paddingHorizontal="$4" gap="$8">
         <DisclaimerText>
           Welcome to OPPFY, a place where roles are reversed.

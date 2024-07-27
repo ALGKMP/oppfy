@@ -5,7 +5,7 @@ import { eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { trpcValidators } from "@oppfy/validators";
 
-import { DomainError, ErrorCode } from "../../errors";
+import { ErrorCode, DomainError } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
@@ -109,24 +109,8 @@ export const profileRouter = createTRPCRouter({
     .output(trpcValidators.output.profile.fullProfileSelf)
     .query(async ({ ctx }) => {
       try {
-        return await ctx.services.profile.getFullProfileByUserId(
-          ctx.session.uid,
-        );
+        return await ctx.services.profile.getFullProfileSelf(ctx.session.uid);
       } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "User not found",
-              });
-            default:
-              throw new TRPCError({
-                code: "UNPROCESSABLE_CONTENT",
-                message: err.message,
-              });
-          }
-        }
         console.error(err);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -140,39 +124,14 @@ export const profileRouter = createTRPCRouter({
     .output(trpcValidators.output.profile.fullProfileOther)
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.profile.getFullProfileByProfileId(
-          ctx.session.uid,
-          input.profileId,
-        );
-      } catch (err) {
-        if (err instanceof DomainError) {
-          switch (err.code) {
-            case ErrorCode.USER_NOT_FOUND:
-              throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "User not found",
-              });
-          }
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to get full profile for ${input.profileId}`,
-        });
-      }
-    }),
-
-  viewProfile: protectedProcedure
-    .input(z.object({ profileId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.services.profile.viewProfile({
-          viewerUserId: ctx.session.uid,
-          viewedProfileId: input.profileId,
+        return await ctx.services.profile.getFullProfileOther({
+          currentUserId: ctx.session.uid,
+          otherUserId: input.userId,
         });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to view profile for ${input.profileId}`,
+          message: `Failed to get full profile for ${input.userId}`,
         });
       }
     }),

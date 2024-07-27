@@ -8,17 +8,32 @@ export class ProfileRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async getProfileByProfileId(profileId: number) {
+  async getProfile(profileId: number) {
     return await this.db.query.profile.findFirst({
       where: eq(schema.profile.id, profileId),
     });
   }
 
   @handleDatabaseErrors
-  async getProfileByUserId(userId: string) {
+  async getUserProfile(userId: string) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.id, userId),
       with: { profile: true },
+    });
+  }
+
+  @handleDatabaseErrors
+  async getUserFullProfile(userId: string) {
+    return await this.db.query.user.findFirst({
+      where: eq(schema.user.id, userId),
+      with: {
+        profile: {
+          with: {
+            user: true,
+            profileStats: true,
+          },
+        },
+      },
     });
   }
 

@@ -1,27 +1,16 @@
 import { DomainError, ErrorCode } from "../../errors";
-import { ProfileRepository, SearchRepository } from "../../repositories";
+import {
+  PostRepository,
+  ProfileRepository,
+  SearchRepository,
+} from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
 
 export class UserService {
   private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
+  private postRepository = new PostRepository();
   private profileRepository = new ProfileRepository();
-
-  async getUser(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
-    return user;
-  }
-
-  async getUserByProfileId(profileId: number) {
-    const user = await this.userRepository.getUserByProfileId(profileId);
-    if (!user) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
-    return user;
-  }
 
   async createUser(userId: string, phoneNumber: string) {
     let username;
@@ -39,6 +28,22 @@ export class UserService {
     await this.userRepository.createUser(userId, phoneNumber, username);
   }
 
+  async getUser(userId: string) {
+    const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    return user;
+  }
+
+  async getUserByProfileId(profileId: number) {
+    const user = await this.userRepository.getUserByProfileId(profileId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    return user;
+  }
+
   async deleteUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
 
@@ -51,7 +56,7 @@ export class UserService {
   }
 
   async checkOnboardingComplete(userId: string) {
-    const user = await this.profileRepository.getProfileByUserId(userId);
+    const user = await this.profileRepository.getUserProfile(userId);
     if (user?.profile === undefined) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, "Profile not found");
     }
@@ -62,8 +67,13 @@ export class UserService {
     );
   }
 
-  private async _userExists(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-    return user !== undefined;
+  async isNewUser(uid: string) {
+    const counts = await this.postRepository.getCountOfPostsNotOnApp(uid);
+
+    if (counts === undefined) {
+      return true;
+    }
+
+    return counts[0]?.count === 0;
   }
 }

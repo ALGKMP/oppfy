@@ -230,7 +230,7 @@ export const postRouter = createTRPCRouter({
       try {
         console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfUserOther(
-          input.profileId,
+          input.userId,
           input.cursor,
           input.pageSize,
         );
@@ -293,7 +293,7 @@ export const postRouter = createTRPCRouter({
       try {
         console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfUserOther(
-          input.profileId,
+          input.userId,
           input.cursor,
           input.pageSize,
         );

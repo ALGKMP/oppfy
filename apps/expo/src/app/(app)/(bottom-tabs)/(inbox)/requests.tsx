@@ -215,10 +215,10 @@ const Requests = () => {
     }
   };
 
-  const onUserSelected = (profileId: number) => {
+  const onUserSelected = (userId: string) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[profileId]/",
-      params: { profileId: String(profileId) },
+      pathname: "/(inbox)/profile/[userId]/",
+      params: { userId },
     });
   };
 
@@ -263,7 +263,7 @@ const Requests = () => {
             text: "Decline",
             onPress: () => void onDeclineFriendRequest(item.userId),
           }}
-          onPress={() => onUserSelected(item.profileId)}
+          onPress={() => onUserSelected(item.userId)}
         />
       ))}
 
@@ -298,7 +298,7 @@ const Requests = () => {
             text: "Decline",
             onPress: () => void onDeclineFollowRequest(item.userId),
           }}
-          onPress={() => onUserSelected(item.profileId)}
+          onPress={() => onUserSelected(item.userId)}
         />
       ))}
 

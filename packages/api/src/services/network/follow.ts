@@ -3,8 +3,6 @@ import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories/network/follow";
 import { ProfileRepository } from "../../repositories/profile/profile";
-import type { StoreNotificationData } from "../../repositories/user/notifications";
-import { NotificationsRepository } from "../../repositories/user/notifications";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
@@ -20,7 +18,6 @@ export class FollowService {
     return !!(await this.followRepository.getFollower(senderId, recipientId));
   }
 
-  // TODO: @tony: This function is not used, should we remove it?
   async followUsers(senderId: string, recipientIds: string[]) {
     const results = await Promise.allSettled(
       recipientIds.map((recipientId) => this.followUser(senderId, recipientId)),
@@ -50,18 +47,9 @@ export class FollowService {
 
     await this.followRepository.addFollower(senderId, recipientId);
 
-    const profile = await this.profileRepository.getProfileByProfileId(
-      sender.profileId,
-    );
+    const profile = await this.profileRepository.getProfile(sender.profileId);
 
     if (profile === undefined) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        `Profile not found for user ID "${recipientId}"`,
-      );
-    }
-
-    if (profile.username === null) {
       throw new DomainError(
         ErrorCode.PROFILE_NOT_FOUND,
         `Profile not found for user ID "${recipientId}"`,

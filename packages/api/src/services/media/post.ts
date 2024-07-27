@@ -2,7 +2,6 @@ import type { z } from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
-import { user } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import { UserRepository, ViewRepository } from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
@@ -226,23 +225,19 @@ export class PostService {
   }
 
   async paginatePostsOfUserOther(
-    profileId: number,
+    userId: string,
     cursor: PostCursor | null = null,
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
-      const user = await this.userRepository.getUserByProfileId(profileId);
-      if (!user) {
-        throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found.");
-      }
       const data = await this.postRepository.paginatePostsOfUser(
-        user.id,
+        userId,
         cursor,
       );
       const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
-      console.error(`Error in getPosts for profile: ${profileId}: `, error);
+      console.error(`Error in getPosts for profile: ${userId}: `, error);
       throw new DomainError(
         ErrorCode.FAILED_TO_PAGINATE_POSTS,
         "Failed to paginate posts.",
@@ -302,7 +297,7 @@ export class PostService {
       const recommendedResult =
         await this.postRepository.paginatePostsOfRecommended(
           userId,
-          cursor?.recomendedCursor,
+          cursor.recomendedCursor,
           pageSize,
         );
 
@@ -334,6 +329,8 @@ export class PostService {
       pageSize,
     );
 
+    console.log("parsedFollowingResult", parsedFollowingResult);
+
     if (parsedFollowingResult.items.length < pageSize!) {
       const recommendedResult =
         await this.postRepository.paginatePostsOfRecommended(
@@ -346,6 +343,8 @@ export class PostService {
         recommendedResult,
         pageSize,
       );
+
+      console.log("hiiiiii", parsedRecommendedResult);
 
       parsedRecommendedResult.items = [
         ...parsedFollowingResult.items,

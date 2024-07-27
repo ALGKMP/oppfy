@@ -54,11 +54,11 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     !props.loading &&
     props.friendsData.friendItems.length < props.friendsData.friendCount;
 
-  const handleProfileClicked = (profileId: number) => {
+  const handleProfileClicked = (userId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.navigate({
-      pathname: "/(profile)/profile/[profileId]/",
-      params: { profileId: String(profileId) },
+    router.push({
+      pathname: "/(profile)/profile/[userId]/",
+      params: { userId: userId },
     });
   };
 
@@ -115,9 +115,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => handleProfileClicked(item.profileId)}
-            >
+            <TouchableOpacity onPress={() => handleProfileClicked(item.userId)}>
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
                   <Avatar.Image src={item.profilePictureUrl} />
@@ -158,8 +156,8 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
         <TouchableOpacity onPress={handleShowMoreFriends}>
-          <ListItemTitle paddingLeft="$3">
-            Friends ({abbreviatedNumber(data.friendCount)})
+          <ListItemTitle paddingLeft="$3" fontWeight={"bold"}>
+            🙋‍♂️💁‍♀️ Friends‍ ({abbreviatedNumber(data.friendCount)})
           </ListItemTitle>
         </TouchableOpacity>
 
@@ -170,9 +168,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => handleProfileClicked(item.profileId)}
-            >
+            <TouchableOpacity onPress={() => handleProfileClicked(item.userId)}>
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
                   <Avatar.Image src={item.profilePictureUrl} />

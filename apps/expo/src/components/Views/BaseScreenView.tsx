@@ -65,8 +65,8 @@ const BaseScreenView = ({
       <SafeAreaView
         style={[
           styles.topSafeArea,
-          topSafeAreaStyle,
           { backgroundColor: theme.background.val },
+          topSafeAreaStyle,
         ]}
         edges={safeAreaEdges.includes("top") ? ["top"] : undefined}
       />
@@ -82,8 +82,8 @@ const BaseScreenView = ({
       <SafeAreaView
         style={[
           styles.bottomSafeArea,
-          bottomSafeAreaStyle,
           { backgroundColor: theme.background.val },
+          bottomSafeAreaStyle,
         ]}
         edges={safeAreaEdges.includes("bottom") ? ["bottom"] : undefined}
       >

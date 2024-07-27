@@ -95,10 +95,10 @@ const Inbox = () => {
     },
   });
 
-  const onUserSelected = (profileId: number) => {
+  const onUserSelected = (userId: string) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[profileId]/",
-      params: { profileId: String(profileId) },
+      pathname: "/(inbox)/profile/[userId]/",
+      params: { userId: userId },
     });
   };
 
@@ -216,7 +216,7 @@ const Inbox = () => {
                   onPress: () => void onFollowUser(item.userId),
                 }}
                 imageUrl={item.profilePictureUrl}
-                onPress={() => onUserSelected(item.profileId)}
+                onPress={() => onUserSelected(item.userId)}
               />
             );
           }}

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import * as Contacts from "expo-contacts";
+import type { Contact } from "expo-contacts";
 import * as Crypto from "expo-crypto";
 import { parsePhoneNumber } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
@@ -7,15 +8,18 @@ import type { CountryCode } from "libphonenumber-js";
 import { api } from "~/utils/api";
 
 export interface ContactFns {
-  syncContacts: () => void;
-  deleteContacts: () => void;
+  syncContacts: () => Promise<void>;
+  deleteContacts: () => Promise<void>;
   getDeviceContacts: () => Promise<Contacts.Contact[]>;
-  getRecomendedContacts: () => void;
+  getRecomendedContacts: () => Promise<Contacts.Contact[]>;
+  getDeviceContactsNotOnApp: () => Promise<Contacts.Contact[]>;
 }
 
 const useContacts = (syncNow = false): ContactFns => {
   const deleteContactsMutation = api.contacts.deleteContacts.useMutation();
   const syncContactsMutation = api.contacts.syncContacts.useMutation();
+  const filterContactsOnApp =
+    api.contacts.filterOutPhoneNumbersOnApp.useMutation();
 
   const syncContacts = async () => {
     // make sure its allowed
@@ -71,6 +75,57 @@ const useContacts = (syncNow = false): ContactFns => {
     return data;
   };
 
+  const getDeviceContactsNotOnApp = async () => {
+    const { data } = await Contacts.getContactsAsync({
+      fields: [
+        Contacts.Fields.Name,
+        Contacts.Fields.Image,
+        Contacts.Fields.PhoneNumbers,
+      ],
+    });
+    const phoneNumbers = data
+      .map((contact) => {
+        const number = contact.phoneNumbers?.[0]?.number;
+        if (number === undefined) return null;
+
+        try {
+          const parsedNumber = parsePhoneNumber(number);
+          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
+        } catch (error) {
+          return null;
+        }
+      })
+      .filter((number): number is string => number !== null);
+
+    // Now phoneNumbers is of type string[]
+    const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
+      phoneNumbers,
+    });
+
+    // build up the object again using phoneNumbersNotOnApp
+    const contacts = phoneNumbersNotOnApp
+      .map((phoneNumber) => {
+        return data.find((contact) => {
+          const number = contact.phoneNumbers?.[0]?.number;
+
+          if (number === undefined) return false;
+
+          try {
+            const parsedNumber = parsePhoneNumber(number);
+            return (
+              parsedNumber.isValid() &&
+              parsedNumber.format("E.164") === phoneNumber
+            );
+          } catch (error) {
+            return false;
+          }
+        });
+      })
+      .filter((contact) => contact !== undefined);
+
+    return contacts.filter((contact): contact is Contact => contact !== undefined);
+  };
+
   const getRecomendedContacts = async () => {
     // get contacts with profile pictures
     const { data } = await Contacts.getContactsAsync({
@@ -121,6 +176,7 @@ const useContacts = (syncNow = false): ContactFns => {
     deleteContacts: deleteContactsMutation.mutateAsync,
     getDeviceContacts,
     getRecomendedContacts,
+    getDeviceContactsNotOnApp,
   };
 };
 

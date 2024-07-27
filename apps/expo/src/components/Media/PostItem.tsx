@@ -62,7 +62,6 @@ const PostItem = (props: PostItemProps) => {
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const { getCurrentUserProfileId } = useSession();
   const { isSharing, shareImage } = useShare();
   const { viewPost } = useView();
 
@@ -74,6 +73,7 @@ const PostItem = (props: PostItemProps) => {
   }, [isViewable, post.postId, viewPost]);
 
   const router = useRouter();
+  const { user } = useSession();
 
   const {
     data: hasLiked,
@@ -274,16 +274,15 @@ const PostItem = (props: PostItemProps) => {
     }
   };
 
-  const handleRouteToNewUser = async (profileId: number) => {
+  const handleRouteToNewUser = (userId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const currentUserProfileId = await getCurrentUserProfileId();
-    if (profileId === currentUserProfileId) {
+    if (user?.uid === userId) {
       router.push({ pathname: "/(profile)/self-profile" });
       return;
     }
     router.push({
-      pathname: "/(profile)/profile/[profileId]/",
-      params: { profileId: String(profileId) },
+      pathname: "/(profile)/profile/[userId]/",
+      params: { userId: userId },
     });
   };
 
@@ -309,13 +308,13 @@ const PostItem = (props: PostItemProps) => {
             <Avatar.Image
               accessibilityLabel="Cam"
               src={post.recipientProfilePicture}
-              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
+              onPress={() => handleRouteToNewUser(post.recipientId)}
             />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
           <YStack gap="$0.5" justifyContent="center">
             <TouchableOpacity
-              onPress={() => handleRouteToNewUser(post.recipientProfileId)}
+              onPress={() => handleRouteToNewUser(post.recipientId)}
             >
               <SizableText
                 size="$2"
@@ -331,7 +330,7 @@ const PostItem = (props: PostItemProps) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={async () => {
-                await handleRouteToNewUser(post.authorProfileId);
+                handleRouteToNewUser(post.authorId);
               }}
             >
               <XStack gap="$1.5" alignItems="center">
@@ -377,7 +376,7 @@ const PostItem = (props: PostItemProps) => {
         >
           {post.mediaType === "image" ? (
             <ImagePost postId={post.postId} imageUrl={post.imageUrl}>
-              {hearts.map((heart, index) => (
+              {hearts.map((heart) => (
                 <GradientHeart
                   key={heart.id} // This key is not tied to the item prop in any way, so it does not hinder peformance (w due for a win)
                   gradient={heart.gradient}
@@ -392,7 +391,7 @@ const PostItem = (props: PostItemProps) => {
               isMuted={isMuted}
               setIsMuted={setIsMuted}
             >
-              {hearts.map((heart, index) => (
+              {hearts.map((heart) => (
                 <GradientHeart
                   key={heart.id} // This key is not tied to the item prop in any way, so it does not hinder peformance (w due for a win)
                   gradient={heart.gradient}
@@ -401,7 +400,7 @@ const PostItem = (props: PostItemProps) => {
               ))}
               {/* Mute animation */}
               <View flex={1} justifyContent="center" alignItems="center">
-                {muteIcons.map((mute, index) => (
+                {muteIcons.map((mute) => (
                   <Mute
                     key={mute.id} // This key is not tied to the item prop in any way, so it does not hinder peformance (w due for a win)
                     muted={mute.muted}
@@ -496,7 +495,7 @@ const PostItem = (props: PostItemProps) => {
       {commentsBottomSheetVisible && (
         <CommentsBottomSheet
           isSelfPost={isSelfPost}
-          profileIdOfPostRecipient={post.recipientProfileId}
+          userIdOfPostRecipient={post.recipientId}
           postId={post.postId}
           modalVisible={commentsBottomSheetVisible}
           setModalVisible={setCommentsBottomSheetVisible}

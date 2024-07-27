@@ -24,25 +24,21 @@ interface MediaOfYouProps {
   userId?: string;
   isSelfProfile: boolean;
 
-  profileData: ProfileData | undefined; // Replace 'any' with the actual type of your profile data
+  profileData: ProfileData | undefined;
   isLoadingProfileData: boolean;
-  // refetchProfileData: () => Promise<ProfileData>;
   refetchProfileData: () => Promise<any>;
 
-  recommendations: RecommendationsData; // Replace 'any' with the actual type
+  recommendations: RecommendationsData;
   isLoadingRecommendationsData: boolean;
-  // refetchRecommendationsData: () => Promise<RecommendationsData>;
   refetchRecommendationsData: () => Promise<any>;
 
-  friends: FriendsData["items"]; // Replace 'any' with the actual type
+  friends: FriendsData["items"];
   isLoadingFriendsData: boolean;
-  // refetchFriendsData: () => Promise<FriendsData>;
   refetchFriendsData: () => Promise<any>;
 
-  posts: PostData["items"]; // Replace 'any' with the actual type of your post items
+  posts: PostData["items"];
   isLoadingPostData: boolean;
   isFetchingNextPage: boolean;
-  // fetchNextPage: () => Promise<PostData>;
   fetchNextPage: () => Promise<any>;
 
   hasNextPage: boolean;

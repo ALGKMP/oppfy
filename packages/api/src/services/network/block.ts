@@ -30,82 +30,22 @@ export class BlockService {
     );
 
     if (followingUserBeingBlocked) {
-      const unfollow = await this.followRepository.removeFollower(
-        userId,
-        userIdBeingBlocked,
-      );
-      if (!unfollow) {
-        console.error(
-          `SERVICE ERROR: Failed to remove follower "${userIdBeingBlocked}" for user "${userId}"`,
-        );
-        throw new DomainError(
-          ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
-          "Failed to remove follower",
-        );
-      }
+      await this.followRepository.removeFollower(userId, userIdBeingBlocked);
     }
 
     if (followedByUserBeingBlocked) {
-      const removeFollower = await this.followRepository.removeFollower(
-        userIdBeingBlocked,
-        userId,
-      );
-      if (!removeFollower) {
-        console.error(
-          `SERVICE ERROR: Failed to remove follower "${userId}" for user "${userIdBeingBlocked}"`,
-        );
-        throw new DomainError(
-          ErrorCode.FAILED_TO_REMOVE_FOLLOWER,
-          "Failed to remove follower",
-        );
-      }
+      await this.followRepository.removeFollower(userIdBeingBlocked, userId);
     }
 
     if (isFriends) {
-      const unfriend = await this.friendRepository.removeFriend(
-        userId,
-        userIdBeingBlocked,
-      );
-      if (!unfriend) {
-        console.error(
-          `SERVICE ERROR: Failed to remove friend "${userIdBeingBlocked}" for user "${userId}"`,
-        );
-        throw new DomainError(
-          ErrorCode.FAILED_TO_REMOVE_FRIEND,
-          "Failed to remove friend",
-        );
-      }
+      await this.friendRepository.removeFriend(userId, userIdBeingBlocked);
     }
 
-    const result = await this.blockRepository.blockUser(
-      userId,
-      userIdBeingBlocked,
-    );
-    if (!result) {
-      console.error(
-        `SERVICE ERROR: Failed to block user "${userIdBeingBlocked}" for user "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_BLOCK_USER,
-        "Failed to block user",
-      );
-    }
+    await this.blockRepository.blockUser(userId, userIdBeingBlocked);
   }
 
   async unblockUser(userId: string, blockedUserId: string) {
-    const unblock = await this.blockRepository.unblockUser(
-      userId,
-      blockedUserId,
-    );
-    if (!unblock) {
-      console.error(
-        `SERVICE ERROR: Failed to unblock user "${blockedUserId}" for user "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_UNBLOCK_USER,
-        "Failed to unblock user",
-      );
-    }
+    await this.blockRepository.unblockUser(userId, blockedUserId);
   }
 
   async isUserBlocked(userId: string, blockedUserId: string) {

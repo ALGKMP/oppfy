@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import defaultProfilePicture from "@assets/default-profile-picture.png";
@@ -9,18 +9,26 @@ import {
   DisclaimerText,
   OnboardingButton,
 } from "~/features/onboarding/components";
+import { useContacts } from "~/hooks/contacts";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
   const router = useRouter();
+  // sync the contacts
+  const { syncContacts } = useContacts();
+  const utils = api.useUtils();
 
   const { imageUri, pickAndUploadImage, uploadStatus } =
     useUploadProfilePicture({
       optimisticallyUpdate: true,
     });
 
-  api.useUtils().contacts.getRecommendationProfilesSelf.prefetch();
+  useEffect(() => {
+    void syncContacts().then(() => {
+      utils.contacts.getRecommendationProfilesSelf.prefetch();
+    });
+  }, []);
 
   const onSubmit = () => router.replace("misc/recomendations");
   const onSkip = () => router.replace("misc/recomendations");

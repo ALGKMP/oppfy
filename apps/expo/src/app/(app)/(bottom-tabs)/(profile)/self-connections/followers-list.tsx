@@ -133,8 +133,8 @@ const FollowerList = () => {
       }
       onPress={() =>
         router.push({
-          pathname: "/(profile)/profile/[profileId]",
-          params: { profileId: String(item.profileId) },
+          pathname: "/(profile)/profile/[userId]",
+          params: { userId: item.userId },
         })
       }
     />

@@ -81,7 +81,7 @@ export const followRouter = createTRPCRouter({
       }
     }),
 
-   followUsers: protectedProcedure
+  followUsers: protectedProcedure
     .input(trpcValidators.input.follow.followUsers)
     .mutation(async ({ input, ctx }) => {
       try {
@@ -93,7 +93,7 @@ export const followRouter = createTRPCRouter({
         console.error(err);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
-    }), 
+    }),
 
   unfollowUser: protectedProcedure
     .input(trpcValidators.input.follow.unfollowUser)

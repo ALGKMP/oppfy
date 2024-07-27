@@ -66,7 +66,7 @@ export const contactsRouter = createTRPCRouter({
       }
     }),
 
-  filterPhoneNumbersOnApp: protectedProcedure
+  filterOutPhoneNumbersOnApp: protectedProcedure
     .input(
       z.object({
         phoneNumbers: z.array(z.string()),

@@ -9,7 +9,7 @@ import { api } from "~/utils/api";
 import MediaOfYou from "../../(profile)/MediaOfYou";
 
 const Profile = () => {
-  const { profileId } = useLocalSearchParams<{ profileId: string }>();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
   const router = useRouter();
 
   // Profile data query
@@ -18,8 +18,8 @@ const Profile = () => {
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
   } = api.profile.getFullProfileOther.useQuery(
-    { profileId: parseInt(profileId ?? "") },
-    { enabled: !!profileId },
+    { userId: userId ?? "" },
+    { enabled: !!userId },
   );
 
   // Friends data query
@@ -27,11 +27,11 @@ const Profile = () => {
     data: friendsData,
     isLoading: isLoadingFriendsData,
     refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsOthersByProfileId.useInfiniteQuery(
-    { profileId: parseInt(profileId ?? ""), pageSize: 10 },
+  } = api.friend.paginateFriendsOthers.useInfiniteQuery(
+    { userId: userId ?? "", pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!profileId,
+      enabled: !!userId,
     },
   );
 
@@ -43,10 +43,10 @@ const Profile = () => {
     fetchNextPage,
     hasNextPage,
   } = api.post.paginatePostsOfUserOther.useInfiniteQuery(
-    { profileId: parseInt(profileId ?? ""), pageSize: 10 },
+    { userId: userId ?? "", pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!profileId,
+      enabled: !!userId,
     },
   );
 
@@ -84,9 +84,9 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
       </XStack>
-      {profileId && (
+      {userId && (
         <MediaOfYou
-          profileId={profileId}
+          userId={userId}
           isSelfProfile={false}
           profileData={profileData}
           isLoadingProfileData={isLoadingProfileData}

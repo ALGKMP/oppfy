@@ -17,6 +17,7 @@ import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
+import { profileStats } from "../../../../db/src/schema";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
@@ -36,21 +37,6 @@ interface PrivateProfileStatus {
   friendState: FriendState;
 }
 
-type ProfileStatus = PublicProfileStatus | PrivateProfileStatus;
-
-interface _ProfileData {
-  name: string;
-  username: string;
-  bio: string | null;
-  userId: string;
-  profilePictureUrl: string;
-  followerCount: number;
-  followingCount: number;
-  friendCount: number;
-  profileStatus: ProfileStatus;
-  blocked: boolean;
-}
-
 export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
@@ -65,8 +51,19 @@ export class ProfileService {
   private blockService = new BlockService();
   private cloudFrontService = new CloudFrontService();
 
+   
   async updateProfile(userId: string, newData: UpdateProfile): Promise<void> {
-    const profile = await this._getUserProfile(userId);
+    const user = await this.profileRepository.getUserProfile(userId);
+
+    if (!user) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+        "SERVICE ERROR: Profile not found for the provided user ID in updateProfile",
+      );
+    }
+
+    const profile = user.profile;
 
     if (
       newData.username !== undefined &&
@@ -77,7 +74,11 @@ export class ProfileService {
       );
 
       if (usernameExists) {
-        throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
+        throw new DomainError(
+          ErrorCode.USERNAME_ALREADY_EXISTS,
+          "Username already exists.",
+          `SERVICE ERROR: Username "${newData.username}" already exists in updateProfile`,
+        );
       }
     }
 
@@ -95,200 +96,101 @@ export class ProfileService {
   //   await this.profileRepository.updateProfilePicture(profile.id, key);
   // }
 
-  async getFullProfileByUserId(userId: string) {
-    const user = await this.userRepository.getUser(userId);
+   
+  async getFullProfileSelf(userId: string) {
+    const user = await this.profileRepository.getUserFullProfile(userId);
+
     if (!user) {
-      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
+      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
       throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        "User not found for the provided user ID.",
-      );
-    }
-    const profile = await this._getUserProfile(userId);
-
-    const followerCount = await this.followRepository.countFollowers(userId);
-    if (followerCount === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count followers for user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_COUNT_FOLLOWERS,
-        "Failed to count followers for the user.",
-      );
-    }
-
-    const followingCount = await this.followRepository.countFollowing(userId);
-    if (followingCount === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count following for user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_COUNT_FOLLOWING,
-        "Failed to count following for the user.",
-      );
-    }
-
-    const friendCount = await this.friendsRepository.countFriends(userId);
-    if (friendCount === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count friends for user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_COUNT_FRIENDS,
-        "Failed to count friends for the user.",
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+        `SERVICE ERROR: Profile not found for user ID "${userId}" in getFullProfileSelf`,
       );
     }
 
     const profilePictureUrl =
       this.cloudFrontService.getSignedUrlForProfilePicture(
-        profile.profilePictureKey,
+        user.profile.profilePictureKey,
       );
 
     if (!profilePictureUrl) {
-      console.error(
-        `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
-      );
       throw new DomainError(
         ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
         "Failed to get profile picture URL.",
+        `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
       );
     }
+
+    return trpcValidators.output.profile.fullProfileSelf.parse({
+      userId: user.id,
+      profileId: user.profile.id,
+      privacy: user.privacySetting,
+      username: user.profile.username,
+      name: user.profile.fullName,
+      bio: user.profile.bio,
+      followerCount: user.profile.profileStats.followers,
+      followingCount: user.profile.profileStats.following,
+      friendCount: user.profile.profileStats.friends,
+      profilePictureUrl,
+      profileStats: user.profile.profileStats,
+    });
+  }
+
+   
+  async getFullProfileOther({
+    currentUserId,
+    otherUserId,
+  }: {
+    currentUserId: string;
+    otherUserId: string;
+  }): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileOther>> {
+    const user = await this.profileRepository.getUserFullProfile(otherUserId);
+    if (!user) {
+      throw new DomainError(
+        ErrorCode.PROFILE_NOT_FOUND,
+        "Profile not found for the provided user ID.",
+        `SERVICE ERROR: Profile not found for user ID "${otherUserId}"`,
+      );
+    }
+
+    const profilePictureUrl =
+      this.cloudFrontService.getSignedUrlForProfilePicture(
+        user.profile.profilePictureKey,
+      );
+
+    if (!profilePictureUrl) {
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
+        `SERVICE ERROR: Failed to get profile picture for user ID "${user.id}"`,
+      );
+    }
+
+    const networkStatus = await this.getNetworkConnectionStatesBetweenUsers({
+      currentUserId,
+      otherUserId,
+    });
 
     const profileData = {
       userId: user.id,
-      profileId: profile.id,
+      profileId: user.profile.id,
       privacy: user.privacySetting,
-      username: profile.username,
-      name: profile.fullName,
-      bio: profile.bio,
-      followerCount,
-      followingCount,
-      friendCount,
+      username: user.profile.username,
+      name: user.profile.fullName,
+      bio: user.profile.bio,
+      followerCount: user.profile.profileStats.followers,
+      followingCount: user.profile.profileStats.following,
+      friendCount: user.profile.profileStats.friends,
       profilePictureUrl,
-    };
-
-    return trpcValidators.output.profile.fullProfileSelf.parse(profileData);
-  }
-
-  async getFullProfileByProfileId(
-    currentUserId: string,
-    profileId: number,
-  ): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileOther>> {
-    const otherUser = await this.userRepository.getUserByProfileId(profileId);
-    if (!otherUser) {
-      console.error(
-        `SERVICE ERROR: User not found for profile ID "${profileId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.USER_NOT_FOUND,
-        "User not found for the provided profile ID.",
-      );
-    }
-
-    const profile = await this.profileRepository.getProfileByProfileId(
-      otherUser.profileId,
-    );
-    if (!profile) {
-      console.error(
-        `SERVICE ERROR: Profile not found for profile ID "${profileId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "Profile not found for the provided profile ID.",
-      );
-    }
-
-    const username = profile.username;
-    const fullName = profile.fullName;
-
-    if (!username || !fullName) {
-      console.error(
-        `SERVICE ERROR: Profile username and/or fullname not found for profile ID "${profileId}". Username: ${username}, Fullname: ${fullName}`,
-      );
-      throw new DomainError(
-        ErrorCode.PROFILE_INCOMPLETE,
-        "Profile username and/or fullname not found.",
-      );
-    }
-
-    const followerCount = await this.followRepository.countFollowers(
-      otherUser.id,
-    );
-    if (followerCount === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count followers for user ID "${otherUser.id}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_COUNT_FOLLOWERS,
-        "Failed to count followers for the user.",
-      );
-    }
-
-    const followingCount = await this.followRepository.countFollowing(
-      otherUser.id,
-    );
-    if (followingCount === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count following for user ID "${otherUser.id}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_COUNT_FOLLOWING,
-        "Failed to count following for the user.",
-      );
-    }
-
-    const friendCount = await this.friendsRepository.countFriends(otherUser.id);
-    if (friendCount === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count friends for user ID "${otherUser.id}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_COUNT_FRIENDS,
-        "Failed to count friends for the user.",
-      );
-    }
-
-    const profilePictureUrl =
-      this.cloudFrontService.getSignedUrlForProfilePicture(
-        profile.profilePictureKey,
-      );
-
-    if (!profilePictureUrl) {
-      console.error(
-        `SERVICE ERROR: Failed to get profile picture for user ID "${otherUser.id}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-        "Failed to get profile picture URL.",
-      );
-    }
-
-    const networkStatus = await this.getNetworkConnectionStatesBetweenUsers(
-      currentUserId,
-      otherUser.id,
-    );
-
-    const profileData: z.infer<
-      typeof trpcValidators.output.profile.fullProfileOther
-    > = {
-      userId: otherUser.id,
-      username: username,
-      profileId: profile.id,
-      name: fullName,
-      bio: profile.bio,
-      privacy: otherUser.privacySetting,
-      followerCount,
-      followingCount,
-      friendCount,
-      profilePictureUrl,
-      networkStatus: networkStatus,
+      networkStatus,
     };
 
     return trpcValidators.output.profile.fullProfileOther.parse(profileData);
   }
 
+   
   async getBatchProfiles(userIds: string[]) {
-    // Warn: if you get zod errors, it's because this functions return doesn't match the compactProfile schema
     const batchProfiles =
       await this.profileRepository.getBatchProfiles(userIds);
 
@@ -297,10 +199,10 @@ export class ProfileService {
       .parse(batchProfiles);
   }
 
+   
   async removeProfilePicture(userId: string) {
-    const user = await this.profileRepository.getProfileByUserId(userId);
+    const user = await this.profileRepository.getUserProfile(userId);
     if (!user) {
-      console.error(`SERVICE ERROR: User not found for user ID "${userId}"`);
       throw new DomainError(
         ErrorCode.USER_NOT_FOUND,
         "User not found for the provided user ID.",
@@ -308,78 +210,58 @@ export class ProfileService {
     }
 
     const key = `profile-pictures/${userId}.jpg`;
-    const deleteObject = await this.s3Repository.deleteObject(
-      env.S3_POST_BUCKET,
-      key,
-    );
-
-    if (!deleteObject.DeleteMarker) {
-      console.error(
-        `SERVICE ERROR: Failed to delete profile picture for user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_DELETE,
-        "Failed to delete the profile picture.",
-      );
-    }
+    await this.s3Repository.deleteObject(env.S3_POST_BUCKET, key);
 
     await this.profileRepository.removeProfilePicture(user.profile.id);
   }
 
-  async _getUserProfile(userId: string) {
-    const user = await this.profileRepository.getProfileByUserId(userId);
-    if (!user) {
-      console.error(`SERVICE ERROR: Profile not found for user ID "${userId}"`);
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "Profile not found for the provided user ID.",
-      );
-    }
-
-    return user.profile;
-  }
-
-  async getNetworkConnectionStatesBetweenUsers(
-    targetUserId: string,
-    otherUserId: string,
-  ): Promise<z.infer<typeof PrivacyStatus>> {
-    const targetUser = await this.userRepository.getUser(targetUserId);
+   
+  async getNetworkConnectionStatesBetweenUsers({
+    currentUserId,
+    otherUserId,
+  }: {
+    currentUserId: string;
+    otherUserId: string;
+  }): Promise<z.infer<typeof PrivacyStatus>> {
+    const targetUser = await this.userRepository.getUser(currentUserId);
     if (!targetUser) {
-      console.error(
-        `SERVICE ERROR: User not found for target user ID "${targetUserId}" in getNetworkConnectionStates`,
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found",
+        `SERVICE ERROR: User not found for target user ID "${currentUserId}" in getNetworkConnectionStates`,
       );
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
     const otherUser = await this.userRepository.getUser(otherUserId);
     if (!otherUser) {
-      console.error(
+      throw new DomainError(
+        ErrorCode.USER_NOT_FOUND,
+        "User not found",
         `SERVICE ERROR: User not found for other user ID "${otherUserId}" in getNetworkConnectionStates`,
       );
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
 
     const blocked = await this.blockService.areEitherUsersBlocked(
-      targetUserId,
+      currentUserId,
       otherUserId,
     );
 
     const targetUserFollowState = await this.followService.determineFollowState(
-      targetUserId,
+      currentUserId,
       otherUserId,
       otherUser.privacySetting,
     );
     const otherUserFollowState = await this.followService.determineFollowState(
       otherUserId,
-      targetUserId,
+      currentUserId,
       otherUser.privacySetting,
     );
     const targetUserFriendState = await this.friendService.determineFriendState(
-      targetUserId,
+      currentUserId,
       otherUserId,
     );
     const otherUserFriendState = await this.friendService.determineFriendState(
       otherUserId,
-      targetUserId,
+      currentUserId,
     );
 
     const profileStatus = {
@@ -394,26 +276,7 @@ export class ProfileService {
     return PrivacyStatus.parse(profileStatus);
   }
 
-  async viewProfile({
-    viewerUserId,
-    viewedProfileId,
-  }: {
-    viewerUserId: string;
-    viewedProfileId: number;
-  }): Promise<void> {
-    try {
-      await this.viewRepository.viewProfile({ viewerUserId, viewedProfileId });
-    } catch (err) {
-      console.error(
-        `SERVICE ERROR: Failed to create profile view for user ID "${viewerUserId}" viewing profile ID "${viewedProfileId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_CREATE_VIEW,
-        "Failed to create profile view for the user.",
-      );
-    }
-  }
-
+   
   async viewMultipleProfiles({
     viewerUserId,
     viewedProfileIds,
@@ -427,12 +290,10 @@ export class ProfileService {
         viewedProfileIds,
       });
     } catch (err) {
-      console.error(
-        `SERVICE ERROR: Failed to create profile views for user ID "${viewerUserId}" viewing profiles "${viewedProfileIds}"`,
-      );
       throw new DomainError(
         ErrorCode.FAILED_TO_CREATE_VIEW,
         "Failed to create profile views for the user.",
+        `SERVICE ERROR: Failed to create profile views for user ID "${viewerUserId}" viewing profiles "${viewedProfileIds}"`,
       );
     }
   }

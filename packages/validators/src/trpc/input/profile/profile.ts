@@ -35,12 +35,8 @@ const trpcProfileInputSchema = {
     dateOfBirth: z.date(),
   }),
 
-  getCompactProfileOther: z.object({
-    profileId: z.number(),
-  }),
-
   getFullProfileOther: z.object({
-    profileId: z.number(),
+    userId: z.string(),
   }),
 };
 

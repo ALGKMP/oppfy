@@ -134,17 +134,7 @@ export class FriendService {
   }
 
   public async countFriendRequests(userId: string) {
-    const result = await this.friendRepository.countFriendRequests(userId);
-    if (result === undefined) {
-      console.error(
-        `SERVICE ERROR: Failed to count friend requests for user ID "${userId}"`,
-      );
-      throw new DomainError(
-        ErrorCode.DATABASE_ERROR,
-        "Failed to count friend requests",
-      );
-    }
-    return result;
+    return await this.friendRepository.countFriendRequests(userId);
   }
 
   public async determineFriendState(userId: string, targetUserId: string) {

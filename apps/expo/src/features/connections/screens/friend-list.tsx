@@ -6,6 +6,7 @@ import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
@@ -14,7 +15,6 @@ import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { ListItem } from "../components";
 import { useFollowHandlers } from "../hooks";
-import { SearchInput } from "~/components/Inputs";
 
 const FriendList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();

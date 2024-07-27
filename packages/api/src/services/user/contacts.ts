@@ -21,7 +21,6 @@ export class ContactService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
 
-  private s3Service = new S3Service();
   private cloudFrontService = new CloudFrontService();
 
   async syncContacts(userId: string, contacts: string[]) {
