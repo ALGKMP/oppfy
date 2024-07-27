@@ -24,6 +24,7 @@ import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import { useContacts } from "~/hooks/contacts";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
@@ -51,6 +52,7 @@ const PostTo = () => {
   const [visibleContacts, setVisibleContacts] = useState<Contact[]>([]);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [contactsPage, setContactsPage] = useState(0);
+  const { getDeviceContactsNotOnApp } = useContacts();
 
   const formatPhoneNumber = (phoneNumber: string | undefined) => {
     if (phoneNumber === undefined) return;
@@ -68,58 +70,9 @@ const PostTo = () => {
 
   useEffect(() => {
     const loadContacts = async () => {
-      const { data } = await Contacts.getContactsAsync({
-        fields: [
-          Contacts.Fields.Name,
-          Contacts.Fields.Image,
-          Contacts.Fields.PhoneNumbers,
-        ],
-      });
-
-      const phoneNumbers = data
-      .map((contact) => {
-        const number = contact.phoneNumbers?.[0]?.number;
-        if (number === undefined) return null;
-    
-        try {
-          const parsedNumber = parsePhoneNumber(number);
-          return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
-        } catch (error) {
-          return null;
-        }
-      })
-      .filter((number): number is string => number !== null);
-    
-    // Now phoneNumbers is of type string[]
-    const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
-      phoneNumbers,
-    });
-
-      // build up the object again using phoneNumbersNotOnApp
-      const contacts = phoneNumbersNotOnApp
-        .map((phoneNumber) => {
-          return data.find((contact) => {
-            const number = contact.phoneNumbers?.[0]?.number;
-
-            if (number === undefined) return false;
-
-            try {
-              const parsedNumber = parsePhoneNumber(number);
-              return (
-                parsedNumber.isValid() &&
-                parsedNumber.format("E.164") === phoneNumber
-              );
-            } catch (error) {
-              return false;
-            }
-          });
-        })
-        .filter((contact) => contact !== undefined);
-
-      // Filter out undefined contacts
-      const validContacts = contacts.filter((contact): contact is Contact => contact !== undefined);
-      setContacts(validContacts);
-      setVisibleContacts(validContacts.slice(0, INITIAL_PAGE_SIZE));
+      const contactsNotOnApp = await getDeviceContactsNotOnApp();
+      setContacts(contactsNotOnApp);
+      setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
       setIsLoadingContacts(false);
     };
 
