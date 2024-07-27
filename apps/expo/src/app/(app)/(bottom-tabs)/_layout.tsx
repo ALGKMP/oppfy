@@ -1,4 +1,12 @@
 import { useEffect, useState } from "react";
+import Animated, {
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
+import Svg, { LinearGradient, Path, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import {
@@ -32,40 +40,73 @@ import { useSession } from "~/contexts/SessionContext";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
 
+const AnimatedSvg = Animated.createAnimatedComponent(Svg);
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+
 const CameraTabIcon = ({ focused }: { focused: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(true);
+  const gradientOffset = useSharedValue(0);
 
   useEffect(() => {
-    // Hide tooltip when the tab is focused
     setShowTooltip(!focused);
+
+    gradientOffset.value = withRepeat(
+      withTiming(1, {
+        duration: 3000,
+        easing: Easing.linear,
+      }),
+      -1,
+      true,
+    );
   }, [focused]);
 
+  const animatedGradientProps = useAnimatedProps(() => ({
+    x1: `${gradientOffset.value * 200 - 50}%`,
+    x2: `${gradientOffset.value * 200 + 50}%`,
+  }));
+
   return (
-    /*     <View position="absolute" top={-50} zIndex={1000000}>
-      <Text>hellooo</Text>
-    </View> */
-    <YStack>
-      {/*       {showTooltip && (
-        <View position="absolute" top={-50}>
-          <Tooltip open>
-            <Tooltip.Content
-              enterStyle={{ y: -5, opacity: 0, scale: 0.9 }}
-              exitStyle={{ y: -5, opacity: 0, scale: 0.9 }}
-              y={0}
-              opacity={1}
-              scale={1}
-              animation="quick"
+    <YStack alignItems="center">
+      {showTooltip && (
+        <View position="absolute" bottom={40} width={140} height={60}>
+          <AnimatedSvg
+            width={140}
+            height={60}
+            viewBox="-10 -10 140 60"
+            style={{ position: "absolute", top: 0, left: 0 }}
+          >
+            <AnimatedLinearGradient
+              id="rainbow"
+              animatedProps={animatedGradientProps}
             >
-              <Paragraph size="$2" lineHeight="$1">
-                Some shit
-              </Paragraph>
-            </Tooltip.Content>
-          </Tooltip>
+              <Stop offset="0%" stopColor="#FF0000" />
+              <Stop offset="16.67%" stopColor="#FF7F00" />
+              <Stop offset="33.33%" stopColor="#FFFF00" />
+              <Stop offset="50%" stopColor="#00FF00" />
+              <Stop offset="66.67%" stopColor="#0000FF" />
+              <Stop offset="83.33%" stopColor="#4B0082" />
+              <Stop offset="100%" stopColor="#9400D3" />
+            </AnimatedLinearGradient>
+            <Path
+              d="M10 0 H110 A10 10 0 0 1 120 10 V25 A10 10 0 0 1 110 35 H65 L60 40 L55 35 H10 A10 10 0 0 1 0 25 V10 A10 10 0 0 1 10 0 Z"
+              fill="#000000"
+              stroke="url(#rainbow)"
+              strokeWidth={4}
+            />
+          </AnimatedSvg>
+          <Text
+            color="white"
+            fontSize={12}
+            position="absolute"
+            top={20}
+            left={10}
+            right={10}
+            textAlign="center"
+          >
+            Take a photo
+          </Text>
         </View>
-      )} */}
-      <View position="absolute" top={-50}>
-        <Text>hello</Text>
-      </View>
+      )}
       <Camera strokeWidth={focused ? 3 : 1.5} />
     </YStack>
   );
