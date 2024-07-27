@@ -234,6 +234,7 @@ export const postRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
+
         console.log("TRPC getPosts result before validation: ", result);
         const parsedResult =
           trpcValidators.output.post.paginatedPosts.parse(result);

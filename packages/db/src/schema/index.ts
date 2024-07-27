@@ -112,6 +112,22 @@ export const userRelations = relations(user, ({ one, many }) => ({
   pushTokens: many(pushToken),
 }));
 
+export const userNotOnApp = pgTable("userNotOnApp", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  phoneNumber: text("phone_number").notNull(),
+  profilePictureKey: text("profile_picture_key"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const userNotOnAppRelations = relations(userNotOnApp, ({ many }) => ({
+  posts: many(postOfUserNotOnApp),
+}));
+
 export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
   id: uuid("id").primaryKey().defaultRandom(),
   phoneNumber: text("phone_number").notNull(),
@@ -119,6 +135,9 @@ export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   caption: text("caption").notNull().default(""),
+  recipientId: uuid("recipient")
+    .notNull()
+    .references(() => userNotOnApp.id),
   key: text("key").notNull(),
   width: integer("width").notNull().default(500),
   height: integer("height").notNull().default(500),
@@ -130,6 +149,16 @@ export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
     .defaultNow()
     .notNull(),
 });
+
+export const postOfUserNotOnAppRelations = relations(
+  postOfUserNotOnApp,
+  ({ one }) => ({
+    userNotOnApp: one(userNotOnApp, {
+      fields: [postOfUserNotOnApp.phoneNumber],
+      references: [userNotOnApp.phoneNumber],
+    }),
+  }),
+);
 
 export const contact = pgTable("contact", {
   id: varchar("id", { length: 128 }).primaryKey(),
@@ -173,7 +202,7 @@ export const profile = pgTable("profile", {
     .notNull(),
 });
 
-export const profileRelations = relations(profile, ({ one }) => ({
+export const profileRelations = relations(profile, ({ one, many }) => ({
   user: one(user, {
     fields: [profile.id],
     references: [user.profileId],

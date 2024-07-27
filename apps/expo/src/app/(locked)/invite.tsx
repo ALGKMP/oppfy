@@ -19,7 +19,6 @@ import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { OnboardingButton } from "~/features/onboarding/components";
 import { useContacts } from "~/hooks/contacts";
 import { api } from "~/utils/api";
-import { userContact } from "../../../../../packages/db/src/schema";
 
 const INITIAL_PAGE_SIZE = 5;
 const ADDITIONAL_PAGE_SIZE = 10;
@@ -144,7 +143,9 @@ const InvitePage = () => {
               // ListFooterComponent={Footer}
             />
           </View>
-          <OnboardingButton onPress={() => {}}>CONTINUE</OnboardingButton>
+          <OnboardingButton disabled onPress={() => {}}>
+            CONTINUE
+          </OnboardingButton>
         </View>
       </BaseScreenView>
     </KeyboardSafeView>

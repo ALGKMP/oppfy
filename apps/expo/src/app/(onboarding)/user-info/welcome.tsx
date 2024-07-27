@@ -19,7 +19,6 @@ const Welcome = () => {
     <BaseScreenView
       safeAreaEdges={["bottom"]}
       paddingHorizontal={0}
-      backgroundColor="#F214FF"
     >
       <YStack flex={1} paddingHorizontal="$4" gap="$8">
         <DisclaimerText>
