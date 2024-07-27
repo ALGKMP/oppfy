@@ -1,5 +1,5 @@
-import trpcFollowOutputSchema from "../output/network/follow";
-import trpcProfileOutputSchema from "../output/profile/profile";
+import trpcFollowOutputSchema from "./network/follow";
+import trpcProfileOutputSchema from "./profile/profile";
 import trpcBlockOutputSchema from "./network/block";
 import trpcFriendOutputSchema from "./network/friend";
 import trpcRequestOutputSchema from "./network/request";
