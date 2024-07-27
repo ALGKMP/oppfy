@@ -58,7 +58,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const hideContextMenu = () => setIsVisible(false);
 
   return (
-    <>
+    <View>
       <GestureDetector gesture={longPressGesture}>
         <Animated.View style={animatedStyle}>
           <Stack>{props.children}</Stack>
@@ -100,7 +100,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
           </YStack>
         </BlurView>
       </Modal>
-    </>
+    </View>
   );
 };
 

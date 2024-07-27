@@ -6,7 +6,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import {
@@ -45,15 +45,55 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 const CameraTabIcon = ({ focused }: { focused: boolean }) => {
   const [showTooltip, setShowTooltip] = useState(true);
-  const gradientOffset = useSharedValue(0);
+  const gradientX1 = useSharedValue(0);
+  const gradientY1 = useSharedValue(0);
+  const gradientX2 = useSharedValue(1);
+  const gradientY2 = useSharedValue(1);
+  const pulseScale = useSharedValue(1);
 
   useEffect(() => {
     setShowTooltip(!focused);
 
-    gradientOffset.value = withRepeat(
+    gradientX1.value = withRepeat(
       withTiming(1, {
-        duration: 3000,
+        duration: 4000,
         easing: Easing.linear,
+      }),
+      -1,
+      false,
+    );
+
+    gradientY1.value = withRepeat(
+      withTiming(1, {
+        duration: 4000,
+        easing: Easing.linear,
+      }),
+      -1,
+      false,
+    );
+
+    gradientX2.value = withRepeat(
+      withTiming(0, {
+        duration: 4000,
+        easing: Easing.linear,
+      }),
+      -1,
+      false,
+    );
+
+    gradientY2.value = withRepeat(
+      withTiming(0, {
+        duration: 4000,
+        easing: Easing.linear,
+      }),
+      -1,
+      false,
+    );
+
+    pulseScale.value = withRepeat(
+      withTiming(1.05, {
+        duration: 1000,
+        easing: Easing.inOut(Easing.sin),
       }),
       -1,
       true,
@@ -61,8 +101,14 @@ const CameraTabIcon = ({ focused }: { focused: boolean }) => {
   }, [focused]);
 
   const animatedGradientProps = useAnimatedProps(() => ({
-    x1: `${gradientOffset.value * 200 - 50}%`,
-    x2: `${gradientOffset.value * 200 + 50}%`,
+    x1: `${gradientX1.value * 100}%`,
+    y1: `${gradientY1.value * 100}%`,
+    x2: `${gradientX2.value * 100}%`,
+    y2: `${gradientY2.value * 100}%`,
+  }));
+
+  const animatedSvgProps = useAnimatedProps(() => ({
+    transform: [{ scale: pulseScale.value }],
   }));
 
   return (
@@ -74,19 +120,22 @@ const CameraTabIcon = ({ focused }: { focused: boolean }) => {
             height={60}
             viewBox="-10 -10 140 60"
             style={{ position: "absolute", top: 0, left: 0 }}
+            animatedProps={animatedSvgProps}
           >
-            <AnimatedLinearGradient
-              id="rainbow"
-              animatedProps={animatedGradientProps}
-            >
-              <Stop offset="0%" stopColor="#FF0000" />
-              <Stop offset="16.67%" stopColor="#FF7F00" />
-              <Stop offset="33.33%" stopColor="#FFFF00" />
-              <Stop offset="50%" stopColor="#00FF00" />
-              <Stop offset="66.67%" stopColor="#0000FF" />
-              <Stop offset="83.33%" stopColor="#4B0082" />
-              <Stop offset="100%" stopColor="#9400D3" />
-            </AnimatedLinearGradient>
+            <Defs>
+              <AnimatedLinearGradient
+                id="rainbow"
+                animatedProps={animatedGradientProps}
+              >
+                <Stop offset="0%" stopColor="#FF0000" />
+                <Stop offset="16.67%" stopColor="#FF7F00" />
+                <Stop offset="33.33%" stopColor="#FFFF00" />
+                <Stop offset="50%" stopColor="#00FF00" />
+                <Stop offset="66.67%" stopColor="#0000FF" />
+                <Stop offset="83.33%" stopColor="#4B0082" />
+                <Stop offset="100%" stopColor="#9400D3" />
+              </AnimatedLinearGradient>
+            </Defs>
             <Path
               d="M10 0 H110 A10 10 0 0 1 120 10 V25 A10 10 0 0 1 110 35 H65 L60 40 L55 35 H10 A10 10 0 0 1 0 25 V10 A10 10 0 0 1 10 0 Z"
               fill="#000000"
@@ -96,9 +145,9 @@ const CameraTabIcon = ({ focused }: { focused: boolean }) => {
           </AnimatedSvg>
           <Text
             color="white"
-            fontSize={12}
+            fontSize={16}
             position="absolute"
-            top={20}
+            top={17}
             left={10}
             right={10}
             textAlign="center"
