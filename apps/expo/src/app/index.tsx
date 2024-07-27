@@ -11,8 +11,6 @@ const Index = () => {
   const { isLoading: sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: permissionsIsLoading } = usePermissions();
   const { cleanupCacheDirectory } = useSaveMedia();
-  const { data: profileData, isLoading: isLoadingProfileData } =
-    api.profile.getFullProfileSelf.useQuery();
   const utils = api.useUtils();
 
   useEffect(() => {
@@ -22,17 +20,14 @@ const Index = () => {
         await cleanupCacheDirectory();
 
         // Wait for session and permissions to load
-        while (
-          sessionIsLoading ||
-          permissionsIsLoading ||
-          isLoadingProfileData
-        ) {
-          if (isSignedIn && (sessionIsLoading || permissionsIsLoading)) {
-            await utils.profile.getFullProfileSelf.refetch();
-          }
+
+        while (sessionIsLoading || permissionsIsLoading) {
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         // When loading is complete, hide the splash screen
+        if (isSignedIn) {
+          await utils.profile.getFullProfileSelf.prefetch();
+        }
         await SplashScreen.hideAsync();
       } catch (e) {
         console.error("Error during app initialization:", e);
@@ -43,22 +38,17 @@ const Index = () => {
   }, [
     sessionIsLoading,
     permissionsIsLoading,
-    isLoadingProfileData,
     cleanupCacheDirectory,
-    utils,
     isSignedIn,
+    utils.profile.getFullProfileSelf,
   ]);
 
-  if (sessionIsLoading || permissionsIsLoading || isLoadingProfileData) {
+  if (sessionIsLoading || permissionsIsLoading) {
     return <LoadingIndicatorOverlay />;
   }
 
   return isSignedIn ? (
-    profileData?.profileStats.posts === 0 ? (
-      <Redirect href="/(locked)/invite" />
-    ) : (
-      <Redirect href="/(app)/(bottom-tabs)/(home)/home" />
-    )
+    <Redirect href="/(app)/(bottom-tabs)/(home)/home" />
   ) : (
     <Redirect href="/(onboarding)" />
   );
