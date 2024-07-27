@@ -1,7 +1,9 @@
-import React from "react";
-import { getProjectConfigDescriptionWithPaths } from "expo/config";
+import React, { useEffect, useState } from "react";
+import type { Contact } from "expo-contacts";
+import * as Contacts from "expo-contacts";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
+import { parsePhoneNumber } from "libphonenumber-js";
 import {
   Button,
   Circle,
@@ -16,6 +18,11 @@ import {
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { OnboardingButton } from "~/features/onboarding/components";
 import { useContacts } from "~/hooks/contacts";
+import { api } from "~/utils/api";
+import { userContact } from "../../../../../packages/db/src/schema";
+
+const INITIAL_PAGE_SIZE = 5;
+const ADDITIONAL_PAGE_SIZE = 10;
 
 const Header = () => (
   <YStack padding="$4" gap="$4">
@@ -82,7 +89,42 @@ const FriendItem = ({ item }: { item: { id: number } }) => (
 const InvitePage = () => {
   const friends = Array.from({ length: 5 }, (_, i) => ({ id: i + 1 }));
   const theme = useTheme();
-  const contacts = useContacts();
+  const filterContactsOnApp =
+    api.contacts.filterOutPhoneNumbersOnApp.useMutation();
+
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [visibleContacts, setVisibleContacts] = useState<Contact[]>([]);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(true);
+  const [contactsPage, setContactsPage] = useState(0);
+  const { getDeviceContactsNotOnApp } = useContacts();
+
+  const formatPhoneNumber = (phoneNumber: string | undefined) => {
+    if (phoneNumber === undefined) return;
+
+    try {
+      const parsedNumber = parsePhoneNumber(phoneNumber);
+
+      return parsedNumber.isValid()
+        ? parsedNumber.formatNational()
+        : phoneNumber;
+    } catch (error) {
+      return phoneNumber;
+    }
+  };
+
+  useEffect(() => {
+    const loadContacts = async () => {
+      const contactsNotOnApp = await getDeviceContactsNotOnApp();
+
+      setContacts(contactsNotOnApp);
+      setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
+      setIsLoadingContacts(false);
+    };
+
+    void loadContacts();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <KeyboardSafeView>
