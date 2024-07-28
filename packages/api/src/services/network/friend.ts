@@ -139,7 +139,7 @@ export class FriendService {
       );
     }
 
-    await this.friendRepository.cancelFriendRequest(senderId, recipientId);
+    await this.friendRepository.deleteFriendRequest(senderId, recipientId);
     await this.notificationsService.deleteNotification(
       senderId,
       "friendRequest",

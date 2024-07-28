@@ -331,7 +331,7 @@ const PostItem = (props: PostItemProps) => {
               </SizableText>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={async () => {
+              onPress={() => {
                 handleRouteToNewUser(post.authorId);
               }}
             >
