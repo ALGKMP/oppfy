@@ -96,7 +96,7 @@ const HomeScreen = () => {
           if (item === undefined) {
             return null;
           }
-          
+
           return (
             <>
               {isLoadingPostData ? (

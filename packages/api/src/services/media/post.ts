@@ -169,6 +169,8 @@ export class PostService {
       // spread
       const { nextCursor, ...rest } = parsedRecommendedResult;
 
+      if (nextCursor === undefined) return undefined;
+
       return {
         ...rest,
         nextCursor: {

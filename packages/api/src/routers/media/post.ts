@@ -207,6 +207,7 @@ export const postRouter = createTRPCRouter({
           return parsedRecommendedResult;
         }
  */
+
         return parsedFollowingResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
