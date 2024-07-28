@@ -79,7 +79,7 @@ export const handler = async (
       index: OpenSearchIndex.PROFILE,
       body: {
         query: {
-          term: { id: user.profileId },
+          term: { id: user.id },
         },
       },
     });
@@ -112,7 +112,7 @@ export const handler = async (
       body: {
         doc: {
           profilePictureKey: objectKey,
-          id: user.profileId, // Ensure the id is always included
+          id: user.id, // Ensure the id is always included
         },
       },
     });

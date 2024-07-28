@@ -3,6 +3,7 @@ import { z } from "zod";
 import { env } from "@oppfy/env";
 import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
 
+import { profileStats } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   FollowRepository,
@@ -17,7 +18,6 @@ import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
-import { profileStats } from "../../../../db/src/schema";
 
 type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
 
@@ -51,19 +51,14 @@ export class ProfileService {
   private blockService = new BlockService();
   private cloudFrontService = new CloudFrontService();
 
-   
   async updateProfile(userId: string, newData: UpdateProfile): Promise<void> {
-    const user = await this.profileRepository.getUserProfile(userId);
+    const userWithProfile = await this.profileRepository.getUserProfile(userId);
 
-    if (!user) {
-      throw new DomainError(
-        ErrorCode.PROFILE_NOT_FOUND,
-        "Profile not found for the provided user ID.",
-        "SERVICE ERROR: Profile not found for the provided user ID in updateProfile",
-      );
+    if (userWithProfile === undefined) {
+      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND);
     }
 
-    const profile = user.profile;
+    const { profile } = userWithProfile;
 
     if (
       newData.username !== undefined &&
@@ -74,16 +69,12 @@ export class ProfileService {
       );
 
       if (usernameExists) {
-        throw new DomainError(
-          ErrorCode.USERNAME_ALREADY_EXISTS,
-          "Username already exists.",
-          `SERVICE ERROR: Username "${newData.username}" already exists in updateProfile`,
-        );
+        throw new DomainError(ErrorCode.USERNAME_ALREADY_EXISTS);
       }
     }
 
     await this.profileRepository.updateProfile(profile.id, newData);
-    await this.searchRepository.upsertProfile(profile.id, {
+    await this.searchRepository.upsertProfile(userWithProfile.id, {
       fullName: newData.fullName,
       username: newData.username,
       bio: newData.bio,
@@ -96,7 +87,6 @@ export class ProfileService {
   //   await this.profileRepository.updateProfilePicture(profile.id, key);
   // }
 
-   
   async getFullProfileSelf(userId: string) {
     const user = await this.profileRepository.getUserFullProfile(userId);
 
@@ -137,7 +127,6 @@ export class ProfileService {
     });
   }
 
-   
   async getFullProfileOther({
     currentUserId,
     otherUserId,
@@ -189,7 +178,6 @@ export class ProfileService {
     return trpcValidators.output.profile.fullProfileOther.parse(profileData);
   }
 
-   
   async getBatchProfiles(userIds: string[]) {
     const batchProfiles =
       await this.profileRepository.getBatchProfiles(userIds);
@@ -199,7 +187,6 @@ export class ProfileService {
       .parse(batchProfiles);
   }
 
-   
   async removeProfilePicture(userId: string) {
     const user = await this.profileRepository.getUserProfile(userId);
     if (!user) {
@@ -215,7 +202,6 @@ export class ProfileService {
     await this.profileRepository.removeProfilePicture(user.profile.id);
   }
 
-   
   async getNetworkConnectionStatesBetweenUsers({
     currentUserId,
     otherUserId,
@@ -276,7 +262,6 @@ export class ProfileService {
     return PrivacyStatus.parse(profileStatus);
   }
 
-   
   async viewMultipleProfiles({
     viewerUserId,
     viewedProfileIds,

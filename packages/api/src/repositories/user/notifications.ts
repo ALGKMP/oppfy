@@ -78,11 +78,12 @@ export class NotificationsRepository {
   @handleDatabaseErrors
   async paginateNotifications(
     userId: string,
-    cursor: { createdAt: Date } | null = null,
+    cursor: { createdAt: Date; id: string } | null = null,
     pageSize = 10,
   ) {
     const notifications = await this.db
       .select({
+        id: schema.notifications.id, // Add this line to select the notification id
         userId: schema.user.id,
         profileId: schema.profile.id,
         username: schema.profile.username,
@@ -95,18 +96,18 @@ export class NotificationsRepository {
         relationshipState: sql<
           "following" | "followRequestSent" | "notFollowing"
         >`
-        CASE
-          WHEN EXISTS (
-            SELECT 1 FROM ${schema.follower}
-            WHERE ${schema.follower.senderId} = ${userId} AND ${schema.follower.recipientId} = ${schema.user.id}
-          ) THEN 'following'
-          WHEN EXISTS (
-            SELECT 1 FROM ${schema.followRequest}
-            WHERE ${schema.followRequest.senderId} = ${userId} AND ${schema.followRequest.recipientId} = ${schema.user.id}
-          ) THEN 'followRequestSent'
-          ELSE 'notFollowing'
-        END
-      `,
+      CASE
+        WHEN EXISTS (
+          SELECT 1 FROM ${schema.follower}
+          WHERE ${schema.follower.senderId} = ${userId} AND ${schema.follower.recipientId} = ${schema.user.id}
+        ) THEN 'following'
+        WHEN EXISTS (
+          SELECT 1 FROM ${schema.followRequest}
+          WHERE ${schema.followRequest.senderId} = ${userId} AND ${schema.followRequest.recipientId} = ${schema.user.id}
+        ) THEN 'followRequestSent'
+        ELSE 'notFollowing'
+      END
+    `,
       })
       .from(schema.notifications)
       .innerJoin(schema.user, eq(schema.notifications.senderId, schema.user.id))
@@ -117,7 +118,10 @@ export class NotificationsRepository {
           cursor
             ? or(
                 lt(schema.notifications.createdAt, cursor.createdAt),
-                eq(schema.notifications.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.notifications.createdAt, cursor.createdAt),
+                  lt(schema.notifications.id, cursor.id),
+                ),
               )
             : undefined,
         ),
@@ -127,9 +131,6 @@ export class NotificationsRepository {
         desc(schema.notifications.id),
       )
       .limit(pageSize + 1);
-
-    console.log(notifications);
-
     return notifications;
   }
 

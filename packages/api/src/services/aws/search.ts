@@ -1,4 +1,3 @@
-
 import { DomainError, ErrorCode } from "../../errors";
 import { S3Repository } from "../../repositories/aws/s3";
 import { SearchRepository } from "../../repositories/aws/search";
@@ -21,7 +20,7 @@ export class SearchService {
 
     const profiles = await this.searchRepository.profilesByUsername(
       username,
-      user.profileId, // profileId to ignore, we dont want to display ourselves
+      user.id, // userId to ignore, we dont want to display ourselves
     );
 
     // Use Promise.all to get presigned URLs and return profiles with URLs

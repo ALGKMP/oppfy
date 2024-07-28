@@ -97,7 +97,17 @@ export class FriendService {
       );
     }
 
+    await this.notificationsService.deleteNotification(
+      senderId,
+      "friendRequest",
+    );
     await this.notificationsService.storeNotification(recipientId, senderId, {
+      eventType: "friend",
+      entityType: "profile",
+      entityId: recipient.id,
+    });
+
+    await this.notificationsService.storeNotification(senderId, recipientId, {
       eventType: "friend",
       entityType: "profile",
       entityId: recipient.id,
@@ -117,36 +127,42 @@ export class FriendService {
   }
 
   async declineFriendRequest(senderId: string, recipientId: string) {
-    const requestExists = await this.friendRepository.getFriendRequest(
+    const friendRequest = await this.friendRepository.getFriendRequest(
       senderId,
       recipientId,
     );
-    if (!requestExists) {
-      console.error(
-        `SERVICE ERROR: Friend request from "${senderId}" to "${recipientId}" not found`,
-      );
+
+    if (friendRequest === undefined) {
       throw new DomainError(
         ErrorCode.FRIEND_REQUEST_NOT_FOUND,
-        "Friend request not found",
+        `Friend request from "${senderId}" to "${recipientId}" not found`,
       );
     }
-    await this.friendRepository.deleteFriendRequest(senderId, recipientId);
+
+    await this.friendRepository.cancelFriendRequest(senderId, recipientId);
+    await this.notificationsService.deleteNotification(
+      senderId,
+      "friendRequest",
+    );
   }
 
   async cancelFriendRequest(senderId: string, recipientId: string) {
-    const friendRequestExists = await this.friendRepository.getFriendRequest(
+    const friendRequest = await this.friendRepository.getFriendRequest(
       senderId,
       recipientId,
     );
-    if (!friendRequestExists) {
-      console.error(
-        `SERVICE ERROR: Friend request from "${senderId}" to "${recipientId}" not found`,
-      );
+    if (friendRequest === undefined) {
       throw new DomainError(
         ErrorCode.FRIEND_REQUEST_NOT_FOUND,
-        "Friend request not found",
+        `Friend request from "${senderId}" to "${recipientId}" not found`,
       );
     }
+
+    // handlen notis
+    await this.notificationsService.deleteNotification(
+      senderId,
+      "friendRequest",
+    );
 
     return await this.friendRepository.deleteFriendRequest(
       senderId,
@@ -168,19 +184,20 @@ export class FriendService {
   }
 
   async removeFriend(targetUserId: string, otherUserId: string) {
-    const friendshipExists = await this.friendRepository.getFriendship(
+    const friendship = await this.friendRepository.getFriendship(
       targetUserId,
       otherUserId,
     );
-    if (!friendshipExists) {
-      console.error(
-        `SERVICE ERROR: Friendship between "${targetUserId}" and "${otherUserId}" not found`,
-      );
+
+    if (friendship === undefined) {
       throw new DomainError(
         ErrorCode.FRIENDSHIP_NOT_FOUND,
-        "Friendship not found",
+        `Friendship between "${targetUserId}" and "${otherUserId}" not found`,
       );
     }
+
+    await this.notificationsService.deleteNotification(targetUserId, "friend");
+    await this.notificationsService.deleteNotification(otherUserId, "friend");
     return await this.friendRepository.removeFriend(targetUserId, otherUserId);
   }
 

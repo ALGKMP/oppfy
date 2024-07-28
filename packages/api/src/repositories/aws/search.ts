@@ -21,7 +21,7 @@ export class SearchRepository {
   @handleOpensearchErrors
   async profilesByUsername(
     username: string,
-    currentProfileId: number,
+    currentUserId: string,
     limit = 15,
   ) {
     const response = await this.openSearch.search<
@@ -38,7 +38,7 @@ export class SearchRepository {
             },
             must_not: {
               term: {
-                id: currentProfileId,
+                _id: currentUserId,
               },
             },
           },
@@ -47,68 +47,54 @@ export class SearchRepository {
       },
     });
 
-    return response.body.hits.hits.map((hit) => hit._source);
+    return response.body.hits.hits.map((hit) => ({
+      ...hit._source,
+      userId: hit._id,
+    }));
   }
 
   @handleOpensearchErrors
   async upsertProfile(
-    profileId: number,
+    userId: string,
     newProfileData: Partial<OpenSearchProfileIndexResult>,
   ) {
-    const profile = await this.db.query.profile.findFirst({
-      where: eq(schema.profile.id, profileId),
-      columns: {
-        id: true,
-        username: true,
-        fullName: true,
-        bio: true,
-        dateOfBirth: true,
-        profilePictureKey: true,
+    const userWithProfile = await this.db.query.user.findFirst({
+      where: eq(schema.user.id, userId),
+      with: {
+        profile: {
+          columns: {
+            username: true,
+            fullName: true,
+            bio: true,
+            dateOfBirth: true,
+            profilePictureKey: true,
+          },
+        },
       },
     });
 
-    if (profile === undefined) {
+    if (userWithProfile === undefined) {
       throw new Error("Profile not found");
     }
+    const profileData = userWithProfile.profile;
 
     const documentBody = {
-      ...profile,
+      ...profileData,
       ...newProfileData,
     };
 
     await this.openSearch.index({
       index: OpenSearchIndex.PROFILE,
-      id: profileId.toString(),
+      id: userId,
       body: documentBody,
     });
   }
 
   @handleOpensearchErrors
-  async deleteProfile(profileId: number) {
-    // Search for the document in OpenSearch
-    const searchResult = await this.openSearch.search<
-      OpenSearchResponse<OpenSearchProfileIndexResult>
-    >({
+  async deleteProfile(userId: string) {
+    await this.openSearch.delete({
       index: OpenSearchIndex.PROFILE,
-      body: {
-        query: {
-          term: { id: profileId },
-        },
-      },
+      id: userId,
     });
-
-    // If a matching document is found, delete it
-    if (searchResult.body.hits.hits.length > 0) {
-      const documentId = searchResult.body.hits.hits[0]?._id;
-
-      if (documentId === undefined) {
-        throw new Error("Document ID was not found");
-      }
-
-      await this.openSearch.delete({
-        index: OpenSearchIndex.PROFILE,
-        id: documentId,
-      });
-    }
   }
 }

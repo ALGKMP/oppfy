@@ -32,7 +32,7 @@ export class NotificationsService {
 
   async paginateNotifications(
     userId: string,
-    cursor: { createdAt: Date } | null = null,
+    cursor: { createdAt: Date; id: string } | null = null,
     pageSize = 10,
   ) {
     const items = await this.notificationsRepository.paginateNotifications(
@@ -76,10 +76,12 @@ export class NotificationsService {
     });
 
     const nextCursor = items[items.length - 1];
-
     return {
-      items: itemsWithProfilePictureUrls,
-      nextCursor: nextCursor ? { createdAt: nextCursor.createdAt } : null,
+      items: itemsWithProfilePictureUrls.slice(0, pageSize),
+      nextCursor:
+        items.length > pageSize
+          ? { createdAt: nextCursor.createdAt, id: nextCursor.id }
+          : null,
     };
   }
 
