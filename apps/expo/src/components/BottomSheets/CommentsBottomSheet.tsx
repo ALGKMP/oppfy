@@ -17,6 +17,7 @@ import {
 } from "@tamagui/lucide-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
+import { input } from "node_modules/@oppfy/validators/src/trpc";
 import {
   Avatar,
   SizableText,
@@ -43,6 +44,8 @@ interface CommentsModalProps {
   setModalVisible: (value: boolean) => void;
 }
 
+type Comment = z.infer<typeof sharedValidators.media.comment>;
+
 const CommentsBottomSheet = ({
   postId,
   userIdOfPostRecipient,
@@ -51,6 +54,7 @@ const CommentsBottomSheet = ({
   setModalVisible,
 }: CommentsModalProps) => {
   const [inputValue, setInputValue] = useState("");
+
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const utils = api.useUtils();
   const sheetRef = useRef<BottomSheet>(null);
@@ -213,7 +217,7 @@ const CommentsBottomSheet = ({
         }
       }
     },
-    onSuccess: async () => {
+    onSettled: async () => {
       await utils.post.paginateComments.invalidate();
     },
   });
@@ -317,7 +321,7 @@ const CommentsBottomSheet = ({
         }
       }
     },
-    onSuccess: async () => {
+    onSettled: async () => {
       // Only invalidate on success
       await utils.post.paginateComments.invalidate({ postId });
       if (isSelfPost) {
@@ -334,129 +338,104 @@ const CommentsBottomSheet = ({
     }
   }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-  const handlePostComment = useCallback(async () => {
-    if (inputValue.trim().length === 0) {
-      return;
-    }
-
-    const newComment = {
-      postId,
-      body: inputValue.trim(),
-    };
-
-    setInputValue(""); // Clear the input field
-
-    await commentOnPost.mutateAsync(newComment);
-  }, [inputValue, postId, commentOnPost]);
-
   const comments = useMemo(
     () =>
       commentsData?.pages
         .flatMap((page) => page.items)
-        .filter(
-          (item): item is z.infer<typeof sharedValidators.media.comment> =>
-            item !== undefined,
-        ) ?? [],
+        .filter((item): item is Comment => item !== undefined) ?? [],
     [commentsData],
   );
-
-  const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
-  const handleEmojiPress = (emoji: string) => {
-    setInputValue((prev) => prev + emoji);
-  };
 
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
-  const Comment = ({
-    comment,
-  }: {
-    comment: z.infer<typeof sharedValidators.media.comment>;
-  }) => {
-    return (
-      <BlurContextMenuWrapper
-        options={
-          isSelfPost || comment.userId === profile?.userId
-            ? [
-                {
-                  label: (
-                    <Text color="white" marginLeft="$2" fontSize="$5">
-                      Delete
-                    </Text>
-                  ),
-                  icon: <Trash2 size="$1.5" color="white" />,
-                  onPress: () =>
-                    void deleteComment.mutateAsync({
-                      postId,
-                      commentId: comment.commentId,
-                    }),
-                },
-                {
-                  label: (
-                    <Text color="red" marginLeft="$2" fontSize="$5">
-                      Report
-                    </Text>
-                  ),
-                  icon: <AlertCircle size="$1.5" color="red" />,
-                  onPress: () => {
-                    setTimeout(() => {
-                      setIsReportModalVisible(true);
-                    }, 275);
+  const MemoizedAvatar = React.memo(({ src }: { src: string }) => (
+    <Avatar circular size="$4" flex={1}>
+      <Avatar.Image accessibilityLabel="User Avatar" src={src} />
+      <Avatar.Fallback backgroundColor="$blue10" />
+    </Avatar>
+  ));
+
+  const Comment = React.memo(
+    ({
+      comment,
+    }: {
+      comment: z.infer<typeof sharedValidators.media.comment>;
+    }) => {
+      return (
+        <BlurContextMenuWrapper
+          options={
+            isSelfPost || comment.userId === profile?.userId
+              ? [
+                  {
+                    label: (
+                      <Text color="white" marginLeft="$2" fontSize="$5">
+                        Delete
+                      </Text>
+                    ),
+                    icon: <Trash2 size="$1.5" color="white" />,
+                    onPress: () =>
+                      void deleteComment.mutateAsync({
+                        postId,
+                        commentId: comment.commentId,
+                      }),
                   },
-                },
-              ]
-            : [
-                {
-                  label: (
-                    <Text color="red" marginLeft="$2" fontSize="$5">
-                      Report
-                    </Text>
-                  ),
-                  icon: <AlertCircle size="$1.5" color="red" />,
-                  onPress: () => {
-                    setTimeout(() => {
-                      setIsReportModalVisible(true);
-                    }, 275);
+                  {
+                    label: (
+                      <Text color="red" marginLeft="$2" fontSize="$5">
+                        Report
+                      </Text>
+                    ),
+                    icon: <AlertCircle size="$1.5" color="red" />,
+                    onPress: () => {
+                      setTimeout(() => {
+                        setIsReportModalVisible(true);
+                      }, 275);
+                    },
                   },
-                },
-              ]
-        }
-      >
-        <View
-          padding="$3.5"
-          backgroundColor="$gray4"
-          borderRadius="$7"
-          flex={1}
+                ]
+              : [
+                  {
+                    label: (
+                      <Text color="red" marginLeft="$2" fontSize="$5">
+                        Report
+                      </Text>
+                    ),
+                    icon: <AlertCircle size="$1.5" color="red" />,
+                    onPress: () => {
+                      setTimeout(() => {
+                        setIsReportModalVisible(true);
+                      }, 275);
+                    },
+                  },
+                ]
+          }
         >
-          <XStack gap="$3" alignItems="center" flex={1}>
-            <Avatar circular size="$4">
-              <Avatar.Image
-                accessibilityLabel="Cam"
-                src={comment.profilePictureUrl}
-              />
-              <Avatar.Fallback backgroundColor="$blue10" />
-            </Avatar>
-            <YStack gap="$2" width="100%" flex={1}>
-              <XStack gap="$2">
-                <Text fontWeight="bold">{comment.username}</Text>
-                <Text color="$gray10">
-                  {timeAgo.format(new Date(comment.createdAt))}
-                </Text>
-              </XStack>
-              <Text>{comment.body}</Text>
-            </YStack>
-          </XStack>
-        </View>
-        <ReportCommentActionSheet
-          title="Report Comment"
-          subtitle="Select reason"
-          commentId={comment.commentId}
-          isVisible={isReportModalVisible}
-          onCancel={() => setIsReportModalVisible(false)}
-        />
-      </BlurContextMenuWrapper>
-    );
-  };
+          <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
+            <XStack gap="$3" alignItems="center">
+              <MemoizedAvatar src={comment.profilePictureUrl} />
+              <YStack gap="$2" width="100%" flex={1}>
+                <XStack gap="$2">
+                  <Text fontWeight="bold">{comment.username}</Text>
+                  <Text color="$gray10">
+                    {timeAgo.format(new Date(comment.createdAt))}
+                  </Text>
+                </XStack>
+                <Text>{comment.body}</Text>
+              </YStack>
+            </XStack>
+          </View>
+          <ReportCommentActionSheet
+            title="Report Comment"
+            subtitle="Select reason"
+            commentId={comment.commentId}
+            isVisible={isReportModalVisible}
+            onCancel={() => setIsReportModalVisible(false)}
+          />
+        </BlurContextMenuWrapper>
+      );
+    },
+  );
 
   const renderHeader = useCallback(
     () => (
@@ -486,6 +465,115 @@ const CommentsBottomSheet = ({
       </YStack>
     ),
     [],
+  );
+
+  interface CommentInputProps {
+    onPostComment: (commentBody: string) => Promise<void>;
+    profile: any; // Replace 'any' with the correct type for your profile object
+  }
+
+  const CommentInput: React.FC<CommentInputProps> = React.memo(
+    ({ onPostComment, profile }) => {
+      const [inputValue, setInputValue] = useState("");
+
+      const handleChangeText = useCallback((text: string) => {
+        console.log("TEXT CHANGING");
+        setInputValue(text);
+      }, []);
+
+      const handlePostComment = useCallback(() => {
+        if (inputValue.trim().length === 0) return;
+        onPostComment(inputValue.trim());
+        setInputValue("");
+      }, [inputValue, onPostComment]);
+
+      const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
+      const handleEmojiPress = useCallback((emoji: string) => {
+        setInputValue((prev) => prev + emoji);
+      }, []);
+
+      return (
+        <>
+          <XStack
+            borderTopColor="$gray5"
+            borderTopWidth="$0.25"
+            justifyContent="space-evenly"
+            alignItems="center"
+            paddingTop="$3"
+            backgroundColor="$gray4"
+          >
+            {emojiList.map((emoji) => (
+              <TouchableOpacity
+                key={emoji}
+                onPress={() => handleEmojiPress(emoji)}
+              >
+                <SizableText size="$8">{emoji}</SizableText>
+              </TouchableOpacity>
+            ))}
+          </XStack>
+          <XStack
+            padding="$3.5"
+            paddingBottom="$6"
+            gap="$2.5"
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor="$gray4"
+          >
+            <Avatar circular size="$4" flex={1}>
+              <Avatar.Image
+                accessibilityLabel="User Avatar"
+                src={profile?.profilePictureUrl}
+              />
+              <Avatar.Fallback backgroundColor="$blue10" />
+            </Avatar>
+            <View style={{ flex: 5 }}>
+              <BottomSheetTextInput
+                placeholder="add a comment..."
+                maxLength={100}
+                value={inputValue}
+                numberOfLines={4}
+                onChangeText={handleChangeText}
+                style={{
+                  fontWeight: "normal",
+                  justifyContent: "flex-start",
+                  borderWidth: 10,
+                  borderColor: "#2E2E2E",
+                  borderRadius: 20,
+                  backgroundColor: "#2E2E2E",
+                  color: "#fff",
+                }}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={handlePostComment}
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 7,
+                backgroundColor: "rgb(1,145,255)",
+                borderRadius: 20,
+                borderWidth: 0,
+              }}
+            >
+              <SendHorizontal color="$gray12" />
+            </TouchableOpacity>
+          </XStack>
+        </>
+      );
+    },
+  );
+
+  const handlePostComment = useCallback(
+    async (commentBody: string) => {
+      const newComment = {
+        postId,
+        body: commentBody,
+      };
+
+      await commentOnPost.mutateAsync(newComment);
+    },
+    [postId, commentOnPost],
   );
 
   return (
@@ -523,68 +611,7 @@ const CommentsBottomSheet = ({
           />
         )
       }
-      <XStack
-        borderTopColor="$gray5"
-        borderTopWidth="$0.25"
-        justifyContent="space-evenly"
-        alignItems="center"
-        paddingTop="$3"
-        backgroundColor="$gray4"
-      >
-        {emojiList.map((emoji) => (
-          <TouchableOpacity key={emoji} onPress={() => handleEmojiPress(emoji)}>
-            <SizableText size="$8">{emoji}</SizableText>
-          </TouchableOpacity>
-        ))}
-      </XStack>
-      <XStack
-        padding="$3.5"
-        paddingBottom="$6"
-        gap="$2.5"
-        justifyContent="center"
-        alignItems="center"
-        backgroundColor="$gray4"
-      >
-        <Avatar circular size="$4" flex={1}>
-          <Avatar.Image
-            accessibilityLabel="User Avatar"
-            src={profile?.profilePictureUrl}
-          />
-          <Avatar.Fallback backgroundColor="$blue10" />
-        </Avatar>
-        <View style={{ flex: 5 }}>
-          <BottomSheetTextInput
-            placeholder="add a comment..."
-            maxLength={100}
-            value={inputValue}
-            numberOfLines={4}
-            onChangeText={setInputValue}
-            style={{
-              fontWeight: "normal",
-              justifyContent: "flex-start",
-              borderWidth: 10,
-              borderColor: "#2E2E2E",
-              borderRadius: 20,
-              backgroundColor: "#2E2E2E",
-              color: "#fff",
-            }}
-          />
-        </View>
-        <TouchableOpacity
-          onPress={handlePostComment}
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 7,
-            backgroundColor: "rgb(1,145,255)",
-            borderRadius: 20,
-            borderWidth: 0,
-          }}
-        >
-          <SendHorizontal color="$gray12" />
-        </TouchableOpacity>
-      </XStack>
+      <CommentInput onPostComment={handlePostComment} profile={profile} />
     </BottomSheetWrapper>
   );
 };
