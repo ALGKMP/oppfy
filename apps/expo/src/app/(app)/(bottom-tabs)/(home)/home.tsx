@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList, ViewToken } from "@shopify/flash-list";
@@ -33,7 +33,10 @@ const HomeScreen = () => {
       pageSize: 10,
     },
     {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      getNextPageParam: (lastPage) => {
+        console.log("lat page", lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
     },
   );
 
@@ -45,7 +48,9 @@ const HomeScreen = () => {
   const refetchRecommendationsData = selfRecommendationsQuery.refetch;
 
   const handleOnEndReached = async () => {
+    console.log("reached end");
     if (!isFetchingNextPage && hasNextPage) {
+      console.log(hasNextPage);
       await fetchNextPage();
     }
   };
