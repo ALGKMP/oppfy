@@ -45,14 +45,8 @@ export class UserService {
   }
 
   async deleteUser(userId: string) {
-    const user = await this.userRepository.getUser(userId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
     await this.userRepository.deleteUser(userId);
-    await this.searchRepository.deleteProfile(user.profileId);
+    await this.searchRepository.deleteProfile(userId);
   }
 
   async checkOnboardingComplete(userId: string) {

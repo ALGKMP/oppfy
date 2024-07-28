@@ -9,7 +9,7 @@ export enum OpenSearchIndex {
 }
 
 export interface OpenSearchProfileIndexResult {
-  id: number;
+  userId: string;
   username: string;
   fullName: string;
   bio: string;

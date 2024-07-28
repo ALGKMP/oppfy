@@ -74,10 +74,9 @@ const Search = () => {
             subtitle={item.fullName}
             imageUrl={item.profilePictureUrl}
             onPress={() => {
-              if (!item.id) return;
               router.navigate({
                 pathname: "/(search)/profile/[userId]/",
-                params: { userId: item.id },
+                params: { userId: item.userId },
               });
             }}
           />
