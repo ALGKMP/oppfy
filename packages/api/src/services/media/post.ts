@@ -213,14 +213,19 @@ export class PostService {
         pageSize,
       );
 
-      console.log("hiiiiii", parsedRecommendedResult);
-
       parsedRecommendedResult.items = [
         ...parsedFollowingResult.items,
         ...parsedRecommendedResult.items,
       ];
 
       const { nextCursor, ...rest } = parsedRecommendedResult;
+
+      if (nextCursor === undefined) {
+        return {
+          ...rest,
+          nextCursor: undefined,
+        };
+      }
 
       return {
         ...rest,

@@ -73,7 +73,7 @@ const HomeScreen = () => {
         .filter((token) => token.isViewable)
         .map((token) => token.item?.postId)
         .filter((id): id is number => id !== undefined);
-
+``
       setViewableItems(visibleItemIds);
     },
     [],
