@@ -51,7 +51,7 @@ const HomeScreen = () => {
   };
 
   const posts = useMemo(
-    () => postData?.pages.flatMap((page) => page.items),
+    () => postData?.pages.flatMap((page) => page.items).filter(Boolean) || [],
     [postData],
   );
 
@@ -81,58 +81,56 @@ const HomeScreen = () => {
   return (
     // <BaseScreenView top={insets.top} padding={0}>
     <View flex={1} width="100%" height="100%">
-      <FlashList
-        nestedScrollEnabled={true}
-        data={posts}
-        refreshing={refreshing}
-        showsVerticalScrollIndicator={false}
-        // onRefresh={onRefresh}
-        numColumns={1}
-        onEndReached={handleOnEndReached}
-        keyExtractor={(item) => {
-          return "home_" + item?.postId.toString();
-        }}
-        renderItem={({ item, index }) => {
-          if (item === undefined) {
-            return null;
-          }
-          
-          return (
+      {isLoadingPostData ? (
+        <YStack gap="$5" padding="$5">
+          <Camera size={48} />
+          <SizableText size="$3">Loading posts...</SizableText>
+        </YStack>
+      ) : (
+        <FlashList
+          nestedScrollEnabled={true}
+          data={posts}
+          refreshing={refreshing}
+          showsVerticalScrollIndicator={false}
+          // onRefresh={onRefresh}
+          numColumns={1}
+          onEndReached={handleOnEndReached}
+          keyExtractor={(item) => {
+            return "home_" + item?.postId.toString();
+          }}
+          renderItem={({ item }) => {
+            if (item === undefined) {
+              return null;
+            }
+            return (
+              <PostItem
+                post={item}
+                isSelfPost={false}
+                isViewable={viewableItems.includes(item.postId)}
+              />
+            );
+          }}
+          ListHeaderComponent={
             <>
-              {isLoadingPostData ? (
-                <>
-                  <Text>Loading...</Text>
-                </>
+              {isLoadingRecommendationsData ? (
+                <RecommendationsCarousel loading />
               ) : (
-                <PostItem
-                  post={item}
-                  isSelfPost={false}
-                  isViewable={viewableItems.includes(item.postId)}
-                />
+                recommendationsData && (
+                  <RecommendationsCarousel
+                    loading={isLoadingRecommendationsData}
+                    reccomendationsData={recommendationsData}
+                  ></RecommendationsCarousel>
+                )
               )}
+              <Separator />
             </>
-          );
-        }}
-        ListHeaderComponent={
-          <>
-            {isLoadingRecommendationsData ? (
-              <RecommendationsCarousel loading />
-            ) : (
-              recommendationsData && (
-                <RecommendationsCarousel
-                  loading={isLoadingRecommendationsData}
-                  reccomendationsData={recommendationsData}
-                ></RecommendationsCarousel>
-              )
-            )}
-            <Separator />
-          </>
-        }
-        estimatedItemSize={screenWidth}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        extraData={viewableItems}
-      />
+          }
+          estimatedItemSize={screenWidth}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={viewableItems}
+        />
+      )}
     </View>
     // </BaseScreenView>
   );
