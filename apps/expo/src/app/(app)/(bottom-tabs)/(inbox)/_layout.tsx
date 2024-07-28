@@ -16,7 +16,7 @@ const InboxLayout = () => {
   return (
     <Stack
       screenOptions={{
-        header: () => null,
+        header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
