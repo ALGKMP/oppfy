@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import {
   Heart,
   MessageCircle,
@@ -26,9 +26,9 @@ import type { sharedValidators } from "@oppfy/validators";
 
 import {
   CommentsBottomSheet,
+  CommentsTestBottomSheet,
   PostActionsBottomSheet,
 } from "~/components/BottomSheets";
-import ShareBottomSheet from "~/components/BottomSheets/ShareBottomSheet";
 import GradientHeart, {
   useHeartAnimations,
 } from "~/components/Icons/GradientHeart";
@@ -274,14 +274,16 @@ const PostItem = (props: PostItemProps) => {
     }
   };
 
+  const routeSegments = useSegments();
+
   const handleRouteToNewUser = (userId: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (user?.uid === userId) {
-      router.push({ pathname: "/(profile)/self-profile" });
+      router.push({ pathname: `/${routeSegments[2]}/self-profile` });
       return;
     }
     router.push({
-      pathname: "/(profile)/profile/[userId]/",
+      pathname: `/${routeSegments[2]}/profile/[userId]`,
       params: { userId: userId },
     });
   };
@@ -500,6 +502,12 @@ const PostItem = (props: PostItemProps) => {
           modalVisible={commentsBottomSheetVisible}
           setModalVisible={setCommentsBottomSheetVisible}
         />
+
+        // <CommentsTestBottomSheet
+        //   postId={post.postId}
+        //   modalVisible={commentsBottomSheetVisible}
+        //   setModalVisible={setCommentsBottomSheetVisible}
+        // />
       )}
 
       {postActionsBottomSheetVisible && (
