@@ -57,7 +57,7 @@ export class UserService {
 
   async checkOnboardingComplete(userId: string) {
     const user = await this.profileRepository.getUserProfile(userId);
-    if (user?.profile === undefined) {
+    if (!user?.profile) {
       throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, "Profile not found");
     }
     return (
