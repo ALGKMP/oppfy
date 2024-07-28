@@ -29,8 +29,12 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (!onboardingComplete) {
+  if (onboardingComplete === false) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
+  }
+  
+  if (onboardingComplete === undefined) {
+    return <Redirect href="/(onboarding)" />;
   }
 
   if (!requiredPermissions) {
