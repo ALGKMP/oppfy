@@ -115,7 +115,6 @@ export class PostService {
         userId,
         cursor,
       );
-      console.log(data);
       const updatedData = this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
@@ -197,8 +196,6 @@ export class PostService {
       followingResult,
       pageSize,
     );
-
-    console.log("parsedFollowingResult", parsedFollowingResult);
 
     if (parsedFollowingResult.items.length < pageSize!) {
       const recommendedResult =
