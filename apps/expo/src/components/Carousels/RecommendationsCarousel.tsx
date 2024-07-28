@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { Share, TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRound, UserRoundPlus } from "@tamagui/lucide-icons";
 import { throttle } from "lodash";
@@ -99,11 +99,17 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
 
   useEffect(() => throttledHandleAction.cancel(), [throttledHandleAction]);
 
+  const segments = useSegments();
+
   const renderLoadingSkeletons = () => (
     <CardContainer>
       <XStack gap="$2">
         {PLACEHOLDER_DATA.map((item, index) => (
-          <Skeleton key={index} circular size={70} />
+          <Skeleton
+            key={segments[segments.length - 1]! + index}
+            circular
+            size={70}
+          />
         ))}
       </XStack>
     </CardContainer>

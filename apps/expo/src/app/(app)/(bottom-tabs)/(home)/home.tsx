@@ -96,31 +96,13 @@ const HomeScreen = () => {
           if (item === undefined) {
             return null;
           }
+          
           return (
             <>
               {isLoadingPostData ? (
                 <>
                   <Text>Loading...</Text>
                 </>
-              ) : index == 0 ? (
-                <YStack>
-                  {isLoadingRecommendationsData ? (
-                    <RecommendationsCarousel loading />
-                  ) : (
-                    recommendationsData && (
-                      <RecommendationsCarousel
-                        loading={isLoadingRecommendationsData}
-                        reccomendationsData={recommendationsData}
-                      ></RecommendationsCarousel>
-                    )
-                  )}
-                  <Separator />
-                  <PostItem
-                    post={item}
-                    isSelfPost={false}
-                    isViewable={viewableItems.includes(item.postId)}
-                  />
-                </YStack>
               ) : (
                 <PostItem
                   post={item}
@@ -131,6 +113,21 @@ const HomeScreen = () => {
             </>
           );
         }}
+        ListHeaderComponent={
+          <>
+            {isLoadingRecommendationsData ? (
+              <RecommendationsCarousel loading />
+            ) : (
+              recommendationsData && (
+                <RecommendationsCarousel
+                  loading={isLoadingRecommendationsData}
+                  reccomendationsData={recommendationsData}
+                ></RecommendationsCarousel>
+              )
+            )}
+            <Separator />
+          </>
+        }
         estimatedItemSize={screenWidth}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
