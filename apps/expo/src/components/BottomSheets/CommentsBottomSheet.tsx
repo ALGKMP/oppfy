@@ -46,6 +46,8 @@ interface CommentsModalProps {
 
 type Comment = z.infer<typeof sharedValidators.media.comment>;
 
+const ITEM_HEIGHT = 100;
+
 const CommentsBottomSheet = ({
   postId,
   userIdOfPostRecipient,
@@ -94,6 +96,13 @@ const CommentsBottomSheet = ({
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+    //   select: (data) => ({
+    //     pages: data.pages.map((page) => ({
+    //       ...page,
+    //       items: page.items.filter(Boolean),
+    //     })),
+    //     pageParams: data.pageParams,
+    //   }),
     },
   );
 
@@ -106,8 +115,6 @@ const CommentsBottomSheet = ({
       } else {
         await utils.post.paginatePostsOfUserOther.cancel();
       }
-
-      const temporaryId = Math.random();
 
       // Snapshot the previous value
       const prevCommentsData = utils.post.paginateComments.getInfiniteData();
@@ -161,6 +168,8 @@ const CommentsBottomSheet = ({
           },
         );
       }
+
+      const temporaryId = Math.random();
 
       // Optimistically update to the new value
       utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
@@ -346,6 +355,8 @@ const CommentsBottomSheet = ({
     [commentsData],
   );
 
+  const memoizedComments = useMemo(() => comments, [comments]);
+
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
 
@@ -357,11 +368,7 @@ const CommentsBottomSheet = ({
   ));
 
   const Comment = React.memo(
-    ({
-      comment,
-    }: {
-      comment: z.infer<typeof sharedValidators.media.comment>;
-    }) => {
+    ({ comment }: { comment: Comment }) => {
       return (
         <BlurContextMenuWrapper
           options={
@@ -435,6 +442,12 @@ const CommentsBottomSheet = ({
         </BlurContextMenuWrapper>
       );
     },
+    (prevProps, nextProps) => {
+      return (
+        prevProps.comment.commentId === nextProps.comment.commentId &&
+        prevProps.comment.body === nextProps.comment.body
+      );
+    },
   );
 
   const renderHeader = useCallback(
@@ -469,7 +482,7 @@ const CommentsBottomSheet = ({
 
   interface CommentInputProps {
     onPostComment: (commentBody: string) => Promise<void>;
-    profile: any; // Replace 'any' with the correct type for your profile object
+    profile: any;
   }
 
   const CommentInput: React.FC<CommentInputProps> = React.memo(
@@ -481,9 +494,9 @@ const CommentsBottomSheet = ({
         setInputValue(text);
       }, []);
 
-      const handlePostComment = useCallback(() => {
+      const handlePostComment = useCallback(async () => {
         if (inputValue.trim().length === 0) return;
-        onPostComment(inputValue.trim());
+        await onPostComment(inputValue.trim());
         setInputValue("");
       }, [inputValue, onPostComment]);
 
@@ -576,6 +589,15 @@ const CommentsBottomSheet = ({
     [postId, commentOnPost],
   );
 
+  const getItemLayout = useCallback(
+    (_data: any, index: number) => ({
+      length: ITEM_HEIGHT,
+      offset: ITEM_HEIGHT * index,
+      index,
+    }),
+    [],
+  );
+
   return (
     <BottomSheetWrapper
       sheetRef={sheetRef}
@@ -602,9 +624,10 @@ const CommentsBottomSheet = ({
           </View>
         ) : (
           <Animated.FlatList
-            data={comments}
+            data={memoizedComments}
             itemLayoutAnimation={LinearTransition}
             scrollEnabled={true}
+            getItemLayout={getItemLayout}
             keyExtractor={(item) => item.commentId.toString()}
             renderItem={({ item }) => <Comment comment={item} />}
             onEndReached={handleOnEndReached}
