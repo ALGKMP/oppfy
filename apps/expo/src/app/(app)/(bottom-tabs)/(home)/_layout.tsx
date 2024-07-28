@@ -16,6 +16,7 @@ const HomeLayout = () => {
   return (
     <Stack
       screenOptions={{
+          header: (props) => <Header {...props} />,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
