@@ -99,7 +99,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       if (action === "accept") {
         void handleAcceptFriendRequest();
       } else if (action === "reject") {
-        void handleRejectFriendRequest;
+        void handleRejectFriendRequest();
       }
     }
   };
@@ -436,7 +436,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     },
   });
 
-  const declineFriendRequest = api.request.declineFollowRequest.useMutation({
+  const declineFriendRequest = api.request.declineFriendRequest.useMutation({
     onMutate: async (_newData) => {
       if (props.loading) return;
 
