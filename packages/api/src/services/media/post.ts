@@ -169,6 +169,15 @@ export class PostService {
       // spread
       const { nextCursor, ...rest } = parsedRecommendedResult;
 
+      if (nextCursor === undefined) {
+        // const { nextCursor, ...rest } = parsedRecommendedResult;
+
+        return {
+          ...rest,
+          nextCursor: undefined,
+        };
+      }
+
       return {
         ...rest,
         nextCursor: {

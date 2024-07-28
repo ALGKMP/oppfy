@@ -179,34 +179,9 @@ export const postRouter = createTRPCRouter({
           input.pageSize,
         );
 
-        /*        console.log("TRPC getPosts input: ", input);
-        const result = await ctx.services.post.paginatePostsOfFollowing(
-          ctx.session.uid,
-          input.cursor?.followingCursor,
-          input.pageSize,
-        );
- */
         const parsedFollowingResult =
           trpcValidators.output.post.paginatedFeedPosts.parse(result);
 
-        /*         if (parsedFollowingResult.items.length < input.pageSize!) {
-          const result = await ctx.services.post.paginatePostsOfRecommended(
-            ctx.session.uid,
-            input.cursor?.recomendedCursor,
-            input.pageSize! - parsedFollowingResult.items.length,
-          );
-
-          const parsedRecommendedResult =
-            trpcValidators.output.post.paginatedFeedPosts.parse(result);
-
-          parsedRecommendedResult.items = [
-            ...parsedFollowingResult.items,
-            ...parsedRecommendedResult.items,
-          ];
-
-          return parsedRecommendedResult;
-        }
- */
         return parsedFollowingResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
