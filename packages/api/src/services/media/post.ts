@@ -3,12 +3,17 @@ import type { z } from "zod";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
-import { UserRepository, ViewRepository } from "../../repositories";
+import {
+  ProfileRepository,
+  UserRepository,
+  ViewRepository,
+} from "../../repositories";
 import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { CloudFrontService } from "../aws/cloudfront";
+import { NotificationsService } from "../user/notifications";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -51,156 +56,11 @@ export class PostService {
   private postRepository = new PostRepository();
   private postStatsRepository = new PostStatsRepository();
   private userRepository = new UserRepository();
+  private profileRepository = new ProfileRepository();
   private viewRepository = new ViewRepository();
 
   private cloudFrontService = new CloudFrontService();
-
-  private _processPostData(data: Post): Post {
-    try {
-      // Update author profile picture URL
-      const authorPresignedUrl =
-        this.cloudFrontService.getSignedUrlForProfilePicture(
-          data.authorProfilePicture,
-        );
-
-      data.authorProfilePicture = authorPresignedUrl;
-
-      // Update recipient profile picture URL
-      const recipientPresignedUrl =
-        this.cloudFrontService.getSignedUrlForProfilePicture(
-          data.recipientProfilePicture,
-        );
-
-      data.recipientProfilePicture = recipientPresignedUrl;
-
-      if (data.mediaType === "image") {
-        const imageUrl = this.cloudFrontService.getSignedUrlForPost(
-          data.imageUrl,
-        );
-        data.imageUrl = imageUrl;
-      } else {
-        data.imageUrl = `https://stream.mux.com/${data.imageUrl}.m3u8`;
-      }
-    } catch (error) {
-      console.error(
-        `Error updating profile picture URLs for postId: ${data.postId}, authorId: ${data.authorId}, recipientId: ${data.recipientId}: `,
-        error,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-        "Failed to get profile picture URL.",
-      );
-    }
-    return data;
-  }
-
-  private _processPaginatedPostData(
-    data: Post[],
-    pageSize = 20,
-  ): PaginatedResponse<Post> {
-    const items = data.map((item) => {
-      try {
-        // Update author profile picture URL
-        const authorPresignedUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.authorProfilePicture,
-          );
-
-        item.authorProfilePicture = authorPresignedUrl;
-
-        // Update recipient profile picture URL
-        const recipientPresignedUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.recipientProfilePicture,
-          );
-
-        item.recipientProfilePicture = recipientPresignedUrl;
-
-        if (item.mediaType === "image") {
-          const imageUrl = this.cloudFrontService.getSignedUrlForPost(
-            item.imageUrl,
-          );
-          item.imageUrl = imageUrl;
-        } else {
-          item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
-        }
-      } catch (error) {
-        console.error(
-          `Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `,
-          error,
-        );
-        throw new DomainError(
-          ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-          "Failed to get profile picture URL.",
-        );
-      }
-      return item;
-    });
-
-    let nextCursor: PostCursor | undefined = undefined;
-    if (items.length > pageSize) {
-      const nextItem = items[pageSize];
-      if (!nextItem) {
-        throw new DomainError(
-          ErrorCode.FAILED_TO_PAGINATE_POSTS,
-          "Failed to paginate posts.",
-        );
-      }
-      nextCursor = {
-        createdAt: nextItem.createdAt,
-        postId: nextItem.postId,
-      };
-    }
-    return {
-      items,
-      nextCursor,
-    };
-  }
-
-  private _updateProfilePictureUrls2(
-    data: CommentProfile[],
-    pageSize: number,
-  ): PaginatedResponse<CommentProfile> {
-    const items = data.map((item) => {
-      try {
-        const profilePictureUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.profilePictureUrl,
-          );
-        item.profilePictureUrl = profilePictureUrl;
-      } catch (error) {
-        console.error(
-          `Error updating profile picture URL for commentId: ${item.commentId}, userId: ${item.userId}: `,
-          error,
-        );
-        throw new DomainError(
-          ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-          "Failed to get comment profile picture URL.",
-        );
-      }
-      return item;
-    });
-
-    let nextCursor: CommentCursor | undefined = undefined;
-    if (items.length > pageSize) {
-      const nextItem = items[pageSize];
-      if (!nextItem) {
-        throw new DomainError(
-          ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
-          "Failed to paginate comments.",
-        );
-      }
-
-      nextCursor = {
-        createdAt: nextItem.createdAt,
-        commentId: nextItem.commentId,
-      };
-    }
-    return {
-      items,
-      nextCursor,
-    };
-  }
+  private notificationsService = new NotificationsService();
 
   async paginatePostsOfUserSelf(
     userId: string,
@@ -553,35 +413,51 @@ export class PostService {
   }
 
   async commentOnPost(userId: string, postId: number, commentBody: string) {
-    try {
-      await this.commentRepository.addComment(postId, userId, commentBody);
-      await this.postStatsRepository.incrementCommentsCount(postId);
-    } catch (error) {
-      console.error(
-        `Error in addCommentToPost for userId: ${userId}, postId: ${postId}, commentText: ${commentBody}: `,
-        error,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_ADD_COMMENT,
-        "Failed to add comment to post.",
-      );
+    await this.commentRepository.addComment(postId, userId, commentBody);
+    await this.postStatsRepository.incrementCommentsCount(postId);
+
+    const post = await this.getPost(postId);
+
+    await this.notificationsService.storeNotification(
+      userId,
+      post.recipientId,
+      {
+        eventType: "comment",
+
+        entityId: postId.toString(),
+        entityType: "post",
+      },
+    );
+
+    const user = await this.profileRepository.getUserProfile(userId);
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
+
+    const { profile } = user;
+
+    await this.notificationsService.sendNotification(userId, post.recipientId, {
+      title: "New Comment",
+      body: `${profile.username} commented on your post`,
+
+      entityId: postId.toString(),
+      entityType: "post",
+    });
   }
 
   async deleteComment(commentId: number, postId: number) {
-    try {
-      await this.commentRepository.removeComment(commentId);
-      await this.postStatsRepository.decrementCommentsCount(postId);
-    } catch (error) {
-      console.error(
-        `Error in deleteComment for commentId: ${commentId}: `,
-        error,
-      );
-      throw new DomainError(
-        ErrorCode.FAILED_TO_DELETE_COMMENT,
-        `Failed to delete comment for commentId: ${commentId}.`,
-      );
-    }
+    await this.commentRepository.removeComment(commentId);
+    await this.postStatsRepository.decrementCommentsCount(postId);
+
+    const post = await this.getPost(postId);
+
+    // // delete noti
+    // todo: implement some sort of tracking for interaction ids
+    // await this.notificationsService.deleteNotification(
+    //   post.recipientId,
+    //   userId,
+    // );
   }
 
   async paginateComments(
@@ -643,5 +519,152 @@ export class PostService {
         "Failed to create post view.",
       );
     }
+  }
+
+  private _processPostData(data: Post): Post {
+    try {
+      // Update author profile picture URL
+      const authorPresignedUrl =
+        this.cloudFrontService.getSignedUrlForProfilePicture(
+          data.authorProfilePicture,
+        );
+
+      data.authorProfilePicture = authorPresignedUrl;
+
+      // Update recipient profile picture URL
+      const recipientPresignedUrl =
+        this.cloudFrontService.getSignedUrlForProfilePicture(
+          data.recipientProfilePicture,
+        );
+
+      data.recipientProfilePicture = recipientPresignedUrl;
+
+      if (data.mediaType === "image") {
+        const imageUrl = this.cloudFrontService.getSignedUrlForPost(
+          data.imageUrl,
+        );
+        data.imageUrl = imageUrl;
+      } else {
+        data.imageUrl = `https://stream.mux.com/${data.imageUrl}.m3u8`;
+      }
+    } catch (error) {
+      console.error(
+        `Error updating profile picture URLs for postId: ${data.postId}, authorId: ${data.authorId}, recipientId: ${data.recipientId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
+      );
+    }
+    return data;
+  }
+
+  private _processPaginatedPostData(
+    data: Post[],
+    pageSize = 20,
+  ): PaginatedResponse<Post> {
+    const items = data.map((item) => {
+      try {
+        // Update author profile picture URL
+        const authorPresignedUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            item.authorProfilePicture,
+          );
+
+        item.authorProfilePicture = authorPresignedUrl;
+
+        // Update recipient profile picture URL
+        const recipientPresignedUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            item.recipientProfilePicture,
+          );
+
+        item.recipientProfilePicture = recipientPresignedUrl;
+
+        if (item.mediaType === "image") {
+          const imageUrl = this.cloudFrontService.getSignedUrlForPost(
+            item.imageUrl,
+          );
+          item.imageUrl = imageUrl;
+        } else {
+          item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
+        }
+      } catch (error) {
+        console.error(
+          `Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `,
+          error,
+        );
+        throw new DomainError(
+          ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+          "Failed to get profile picture URL.",
+        );
+      }
+      return item;
+    });
+
+    let nextCursor: PostCursor | undefined = undefined;
+    if (items.length > pageSize) {
+      const nextItem = items[pageSize];
+      if (!nextItem) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_PAGINATE_POSTS,
+          "Failed to paginate posts.",
+        );
+      }
+      nextCursor = {
+        createdAt: nextItem.createdAt,
+        postId: nextItem.postId,
+      };
+    }
+    return {
+      items,
+      nextCursor,
+    };
+  }
+
+  private _updateProfilePictureUrls2(
+    data: CommentProfile[],
+    pageSize: number,
+  ): PaginatedResponse<CommentProfile> {
+    const items = data.map((item) => {
+      try {
+        const profilePictureUrl =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            item.profilePictureUrl,
+          );
+        item.profilePictureUrl = profilePictureUrl;
+      } catch (error) {
+        console.error(
+          `Error updating profile picture URL for commentId: ${item.commentId}, userId: ${item.userId}: `,
+          error,
+        );
+        throw new DomainError(
+          ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+          "Failed to get comment profile picture URL.",
+        );
+      }
+      return item;
+    });
+
+    let nextCursor: CommentCursor | undefined = undefined;
+    if (items.length > pageSize) {
+      const nextItem = items[pageSize];
+      if (!nextItem) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
+          "Failed to paginate comments.",
+        );
+      }
+
+      nextCursor = {
+        createdAt: nextItem.createdAt,
+        commentId: nextItem.commentId,
+      };
+    }
+    return {
+      items,
+      nextCursor,
+    };
   }
 }
