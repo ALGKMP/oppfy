@@ -33,10 +33,7 @@ const HomeScreen = () => {
       pageSize: 10,
     },
     {
-      getNextPageParam: (lastPage) => {
-        console.log("lat page", lastPage.nextCursor);
-        return lastPage.nextCursor;
-      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
 
@@ -48,9 +45,7 @@ const HomeScreen = () => {
   const refetchRecommendationsData = selfRecommendationsQuery.refetch;
 
   const handleOnEndReached = async () => {
-    console.log("reached end");
     if (!isFetchingNextPage && hasNextPage) {
-      console.log(hasNextPage);
       await fetchNextPage();
     }
   };
@@ -73,7 +68,6 @@ const HomeScreen = () => {
         .filter((token) => token.isViewable)
         .map((token) => token.item?.postId)
         .filter((id): id is number => id !== undefined);
-``
       setViewableItems(visibleItemIds);
     },
     [],
