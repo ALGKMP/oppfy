@@ -133,8 +133,8 @@ export const requestRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.declineFollowRequest(
-          ctx.session.uid,
           input.senderId,
+          ctx.session.uid,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });

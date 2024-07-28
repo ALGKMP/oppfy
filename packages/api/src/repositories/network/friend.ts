@@ -137,7 +137,7 @@ export class FriendRepository {
   }
 
   @handleDatabaseErrors
-  async cancelFriendRequest(senderId: string, recipientId: string) {
+  async deleteFriendRequest(senderId: string, recipientId: string) {
     const result = await this.db
       .delete(schema.friendRequest)
       .where(

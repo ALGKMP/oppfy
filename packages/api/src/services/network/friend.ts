@@ -130,7 +130,7 @@ export class FriendService {
         "Friend request not found",
       );
     }
-    await this.friendRepository.cancelFriendRequest(senderId, recipientId);
+    await this.friendRepository.deleteFriendRequest(senderId, recipientId);
   }
 
   async cancelFriendRequest(senderId: string, recipientId: string) {
@@ -148,7 +148,7 @@ export class FriendService {
       );
     }
 
-    return await this.friendRepository.cancelFriendRequest(
+    return await this.friendRepository.deleteFriendRequest(
       senderId,
       recipientId,
     );

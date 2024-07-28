@@ -170,24 +170,24 @@ export class FollowService {
   }
 
   async declineFollowRequest(
-    userIdBeingRejected: string,
-    userIdRejecting: string,
+    requestSenderId: string,
+    requestRecipientId: string,
   ) {
     const followRequestExists = await this.followRepository.getFollowRequest(
-      userIdBeingRejected,
-      userIdRejecting,
+      requestSenderId,
+      requestRecipientId,
     );
 
     if (!followRequestExists) {
       throw new DomainError(
         ErrorCode.FOLLOW_REQUEST_NOT_FOUND,
-        `Follow request from "${userIdBeingRejected}" to "${userIdRejecting}" not found`,
+        `Follow request from "${requestSenderId}" to "${requestRecipientId}" not found`,
       );
     }
 
     await this.followRepository.removeFollowRequest(
-      userIdBeingRejected,
-      userIdRejecting,
+      requestSenderId,
+      requestRecipientId,
     );
   }
 
