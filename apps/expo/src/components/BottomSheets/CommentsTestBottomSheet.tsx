@@ -26,6 +26,9 @@ const CommentsTestBottomSheet = (props: CommentsModalProps) => {
   const { postId, modalVisible, setModalVisible } = props;
   const sheetRef = useRef<BottomSheet>(null);
 
+  const picture =
+    "https://media.discordapp.net/attachments/1002773521975480371/1265418323122851860/image.png?ex=66a8b066&is=66a75ee6&hm=268499286f1a3ece0194b3489fa13650edc4be306ac272b4fac821f9ee87f24e&=&format=webp&quality=lossless&width=627&height=627";
+
   const [comments, setComments] = useState<
     z.infer<typeof sharedValidators.media.comment>[]
   >([
@@ -33,7 +36,7 @@ const CommentsTestBottomSheet = (props: CommentsModalProps) => {
       commentId: 1,
       userId: "796f6d5f-26c1-4f88-90fd-bb6c1bf5a9f3",
       username: "amandajones",
-      profilePictureUrl: "https://placeimg.com/591/620/any",
+      profilePictureUrl: picture,
       postId: 6,
       body: "Box size without various season pass. Everybody him player trade garden professor large. So kid leg laugh two subject.\nDifficult focus on role protect five large.",
       createdAt: new Date(),
@@ -42,7 +45,7 @@ const CommentsTestBottomSheet = (props: CommentsModalProps) => {
       commentId: 2,
       userId: "d2bc0bec-f898-440c-bc71-8e4b2bf24fff",
       username: "carriesantos",
-      profilePictureUrl: "https://placekitten.com/542/814",
+      profilePictureUrl: picture,
       postId: 15,
       body: "Different arrive arm well kid seat really nothing. Call heavy move country pattern smile. Bring fall hard than against represent two type.",
       createdAt: new Date(),
@@ -63,13 +66,12 @@ const CommentsTestBottomSheet = (props: CommentsModalProps) => {
       userId: "d2bc0bec-f898-440c-bc71-8e4b2bf24fff",
       username: "carriesantos",
       profilePictureUrl:
-        "https://media.discordapp.net/attachments/970814059635163221/1266901627529592852/image.png?ex=66a6d595&is=66a58415&hm=41eb9aed7b07b67b5325c33c2dc129ab0adca8181e16bcd4c3b141050c5c19c5&=&format=webp&quality=lossless&width=1228&height=676",
+        picture,
       postId: 15,
       body: "Different arrive arm well kid seat really nothing. Call heavy move country pattern smile. Bring fall hard than against represent two type.",
       createdAt: new Date(),
     };
     setComments((prevComments) => [newComment, ...prevComments]);
-    // const newComments = [...comments, newComment];
     // setComments(newComments)
   }, [comments.length]);
 
@@ -100,16 +102,6 @@ const CommentsTestBottomSheet = (props: CommentsModalProps) => {
           keyExtractor={(item) => item.commentId.toString()}
           extraData={comments.length}
           renderItem={({ item }) => (
-            // <Animated.View
-            //   key={item.commentId}
-            //     entering={FadeIn}
-            //     exiting={FadeOut}
-            //   //   layout={LinearTransition}
-            //   onLayout={() => {
-            //     console.log("Layout");
-            //   }}
-            //   style={{ flex: 1 }}
-            // >
             <View flex={1} justifyContent="center" alignItems="center">
               <MemoizedAvatar src={item.profilePictureUrl} />
               <Text>{item.username}</Text>

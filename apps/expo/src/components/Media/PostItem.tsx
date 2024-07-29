@@ -51,6 +51,7 @@ interface PostItemProps {
 }
 
 const PostItem = (props: PostItemProps) => {
+  console.log("PostItem RE-Rendering")
   const { post, isSelfPost, isViewable } = props;
   const [isMuted, setIsMuted] = useState(false);
   const [status, _setStatus] = useState<"success" | "loading" | "error">(
