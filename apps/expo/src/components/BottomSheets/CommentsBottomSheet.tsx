@@ -8,7 +8,10 @@ import React, {
 import { TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetTextInput,
+} from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   Minus,
@@ -55,8 +58,6 @@ const CommentsBottomSheet = ({
   modalVisible,
   setModalVisible,
 }: CommentsModalProps) => {
-  const [inputValue, setInputValue] = useState("");
-
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const utils = api.useUtils();
   const sheetRef = useRef<BottomSheet>(null);
@@ -96,28 +97,27 @@ const CommentsBottomSheet = ({
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    //   select: (data) => ({
-    //     pages: data.pages.map((page) => ({
-    //       ...page,
-    //       items: page.items.filter(Boolean),
-    //     })),
-    //     pageParams: data.pageParams,
-    //   }),
     },
   );
 
   const commentOnPost = api.post.createComment.useMutation({
     onMutate: async (newComment) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
-      await utils.post.paginateComments.cancel();
+      await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
       if (isSelfPost) {
-        await utils.post.paginatePostsOfUserSelf.cancel();
+        await utils.post.paginatePostsOfUserSelf.cancel({ pageSize: 10 });
       } else {
-        await utils.post.paginatePostsOfUserOther.cancel();
+        await utils.post.paginatePostsOfUserOther.cancel({
+          userId: userIdOfPostRecipient,
+          pageSize: 10,
+        });
       }
 
       // Snapshot the previous value
-      const prevCommentsData = utils.post.paginateComments.getInfiniteData();
+      const prevCommentsData = utils.post.paginateComments.getInfiniteData({
+        postId,
+        pageSize: 10,
+      });
       const prevPostsData = isSelfPost
         ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
             pageSize: 10,
@@ -172,33 +172,36 @@ const CommentsBottomSheet = ({
       const temporaryId = Math.random();
 
       // Optimistically update to the new value
-      utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
-        if (!prevData) return { pages: [], pageParams: [] };
-        return {
-          ...prevData,
-          pages: prevData.pages.map((page, index) => {
-            if (index === 0) {
-              return {
-                ...page,
-                items: [
-                  {
-                    ...newComment,
-                    username: profile?.username ?? "User",
-                    createdAt: new Date(),
-                    userId: profile?.userId ?? "temp-id",
-                    commentId: temporaryId, // Temporary ID
-                    profilePictureUrl:
-                      profile?.profilePictureUrl ??
-                      "https://example.com/avatar.jpg",
-                  },
-                  ...page.items,
-                ],
-              };
-            }
-            return page;
-          }),
-        };
-      });
+      utils.post.paginateComments.setInfiniteData(
+        { postId, pageSize: 10 },
+        (prevData) => {
+          if (!prevData) return { pages: [], pageParams: [] };
+          return {
+            ...prevData,
+            pages: prevData.pages.map((page, index) => {
+              if (index === 0) {
+                return {
+                  ...page,
+                  items: [
+                    {
+                      ...newComment,
+                      username: profile?.username ?? "User",
+                      createdAt: new Date(),
+                      userId: profile?.userId ?? "temp-id",
+                      commentId: temporaryId, // Temporary ID
+                      profilePictureUrl:
+                        profile?.profilePictureUrl ??
+                        "https://example.com/avatar.jpg",
+                    },
+                    ...page.items,
+                  ],
+                };
+              }
+              return page;
+            }),
+          };
+        },
+      );
 
       // Return a context object with the snapshotted value
       return { prevCommentsData, prevPostsData };
@@ -208,7 +211,7 @@ const CommentsBottomSheet = ({
       console.log(err);
       if (ctx?.prevCommentsData) {
         utils.post.paginateComments.setInfiniteData(
-          { postId },
+          { postId, pageSize: 10 },
           ctx.prevCommentsData,
         );
       }
@@ -226,9 +229,9 @@ const CommentsBottomSheet = ({
         }
       }
     },
-    onSettled: async () => {
-      await utils.post.paginateComments.invalidate();
-    },
+    // onSettled: async () => {
+    //   await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
+    // },
   });
 
   const deleteComment = api.post.deleteComment.useMutation({
@@ -242,7 +245,10 @@ const CommentsBottomSheet = ({
       }
 
       // Snapshot the previous value
-      const prevCommentsData = utils.post.paginateComments.getInfiniteData();
+      const prevCommentsData = utils.post.paginateComments.getInfiniteData({
+        postId,
+        pageSize: 10,
+      });
       const prevPostsData = isSelfPost
         ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
             pageSize: 10,
@@ -291,18 +297,21 @@ const CommentsBottomSheet = ({
       }
 
       // Optimistically update to the new value
-      utils.post.paginateComments.setInfiniteData({ postId }, (prevData) => {
-        if (!prevData) return { pages: [], pageParams: [] };
-        return {
-          ...prevData,
-          pages: prevData.pages.map((page) => ({
-            ...page,
-            items: page.items.filter(
-              (item) => item?.commentId !== newComment.commentId,
-            ),
-          })),
-        };
-      });
+      utils.post.paginateComments.setInfiniteData(
+        { postId, pageSize: 10 },
+        (prevData) => {
+          if (!prevData) return { pages: [], pageParams: [] };
+          return {
+            ...prevData,
+            pages: prevData.pages.map((page) => ({
+              ...page,
+              items: page.items.filter(
+                (item) => item?.commentId !== newComment.commentId,
+              ),
+            })),
+          };
+        },
+      );
 
       // Return a context object with the snapshotted value
       return { prevCommentsData, prevPostsData };
@@ -312,7 +321,7 @@ const CommentsBottomSheet = ({
       console.log(err);
       if (ctx?.prevCommentsData) {
         utils.post.paginateComments.setInfiniteData(
-          { postId },
+          { postId, pageSize: 10 },
           ctx.prevCommentsData,
         );
       }
@@ -332,7 +341,7 @@ const CommentsBottomSheet = ({
     },
     onSettled: async () => {
       // Only invalidate on success
-      await utils.post.paginateComments.invalidate({ postId });
+      await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
       if (isSelfPost) {
         await utils.post.paginatePostsOfUserSelf.invalidate();
       } else {
@@ -490,7 +499,6 @@ const CommentsBottomSheet = ({
       const [inputValue, setInputValue] = useState("");
 
       const handleChangeText = useCallback((text: string) => {
-        console.log("TEXT CHANGING");
         setInputValue(text);
       }, []);
 
@@ -532,13 +540,7 @@ const CommentsBottomSheet = ({
             alignItems="center"
             backgroundColor="$gray4"
           >
-            <Avatar circular size="$4" flex={1}>
-              <Avatar.Image
-                accessibilityLabel="User Avatar"
-                src={profile?.profilePictureUrl}
-              />
-              <Avatar.Fallback backgroundColor="$blue10" />
-            </Avatar>
+            <MemoizedAvatar src={profile?.profilePictureUrl ?? ""} />
             <View style={{ flex: 5 }}>
               <BottomSheetTextInput
                 placeholder="add a comment..."
@@ -598,6 +600,11 @@ const CommentsBottomSheet = ({
     [],
   );
 
+  const renderItem = useCallback(
+    ({ item }: { item: Comment }) => <Comment comment={item} />,
+    [Comment],
+  );
+
   return (
     <BottomSheetWrapper
       sheetRef={sheetRef}
@@ -628,8 +635,9 @@ const CommentsBottomSheet = ({
             itemLayoutAnimation={LinearTransition}
             scrollEnabled={true}
             getItemLayout={getItemLayout}
+            extraData={memoizedComments}
             keyExtractor={(item) => item.commentId.toString()}
-            renderItem={({ item }) => <Comment comment={item} />}
+            renderItem={renderItem}
             onEndReached={handleOnEndReached}
           />
         )
