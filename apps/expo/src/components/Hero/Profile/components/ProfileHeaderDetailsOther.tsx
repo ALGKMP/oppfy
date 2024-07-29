@@ -710,7 +710,7 @@ const FollowButton = ({
   const isDisabled =
     (networkStatus.privacy === "private" &&
       friendState === "OutboundRequest") ||
-    friendState === "Friends";
+    friendState === "Friends" || friendState === "OutboundRequest";
 
   if (isDisabled) {
     return null;
