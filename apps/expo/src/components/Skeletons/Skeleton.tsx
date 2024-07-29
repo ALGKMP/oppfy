@@ -2,12 +2,12 @@ import React, { useMemo } from "react";
 import type { DimensionValue } from "react-native";
 import { StyleSheet } from "react-native";
 import Animated, {
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-  interpolate,
 } from "react-native-reanimated";
 import { View } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
@@ -38,7 +38,6 @@ const Skeleton = ({
   shimmerColor = "$gray3",
   backgroundColor = "$gray5",
   shimmerDuration = 1000,
-  testID,
   ...props
 }: SkeletonProps) => {
   const resolvedBorderRadius = props.circular ? 9999 : radius;
@@ -51,28 +50,26 @@ const Skeleton = ({
     shimmer.value = withRepeat(
       withSequence(
         withTiming(1, { duration: shimmerDuration }),
-        withTiming(0, { duration: shimmerDuration })
+        withTiming(0, { duration: shimmerDuration }),
       ),
       -1,
-      false
+      false,
     );
-  }, [shimmerDuration]);
+  }, [shimmer, shimmerDuration]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(shimmer.value, [0, 1], [-100, 100]) }],
+    transform: [
+      { translateX: interpolate(shimmer.value, [0, 1], [-100, 100]) },
+    ],
   }));
 
-  const memoizedGradientColors = useMemo(() => [
-    backgroundColor,
-    shimmerColor,
-    backgroundColor,
-  ], [backgroundColor, shimmerColor]);
+  const memoizedGradientColors = useMemo(
+    () => [backgroundColor, shimmerColor, backgroundColor],
+    [backgroundColor, shimmerColor],
+  );
 
   return (
     <View
-      accessibilityRole="progressbar"
-      accessibilityLabel="Loading..."
-      testID={testID}
       overflow="hidden"
       backgroundColor={backgroundColor}
       style={{
