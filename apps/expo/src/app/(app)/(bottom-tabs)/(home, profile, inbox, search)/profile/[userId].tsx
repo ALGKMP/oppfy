@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, View, XStack } from "tamagui";
 
@@ -9,8 +9,13 @@ import { api } from "~/utils/api";
 import MediaOfYou from "../../(profile)/MediaOfYou";
 
 const Profile = () => {
-  const { userId } = useLocalSearchParams<{ userId: string }>();
   const router = useRouter();
+  const navigation = useNavigation();
+
+  const { userId, username } = useLocalSearchParams<{
+    userId: string;
+    username: string;
+  }>();
 
   // Profile data query
   const {
@@ -53,9 +58,15 @@ const Profile = () => {
   const posts = postsData?.pages.flatMap((page) => page.items) ?? [];
   const friends = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: username ?? profileData?.username,
+    });
+  }, [navigation, username, profileData]);
+
   return (
     <BaseScreenView padding={0}>
-      <XStack
+      {/* <XStack
         paddingVertical="$2"
         paddingHorizontal="$4"
         alignItems="center"
@@ -83,7 +94,7 @@ const Profile = () => {
             <MoreHorizontal />
           </TouchableOpacity>
         </View>
-      </XStack>
+      </XStack> */}
       {userId && (
         <MediaOfYou
           userId={userId}

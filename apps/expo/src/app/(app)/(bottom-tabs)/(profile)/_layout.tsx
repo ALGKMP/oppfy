@@ -5,31 +5,45 @@ import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft } from "@tamagui/lucide-icons";
-import { Text, useTheme } from "tamagui";
+import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
+import { Text, useTheme, View } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";
 
 const SearchLayout = () => {
   const theme = useTheme();
+  const router = useRouter();
 
   return (
     <Stack
       screenOptions={{
-        // headerLeft: (props) => <HeaderLeft {...props} />,
-        header: (props) => <Header {...props} />,
+        header: () => null,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
         name="self-profile"
         options={{
-          header: () => null,
+          header: (props) => <Header {...props} />,
+          headerRight: () => (
+            <View>
+              <TouchableOpacity
+                onPress={() => router.push("/(app)/(settings)")}
+              >
+                <MoreHorizontal />
+              </TouchableOpacity>
+            </View>
+          ),
         }}
       />
-      <Stack.Screen name="self-connections" />
-      <Stack.Screen name="connections/[user-id]" />
+      <Stack.Screen
+        name="self-connections"
+        options={{
+          header: (props) => <Header {...props} />,
+          headerLeft: (props) => <HeaderLeft {...props} />,
+        }}
+      />
     </Stack>
   );
 };

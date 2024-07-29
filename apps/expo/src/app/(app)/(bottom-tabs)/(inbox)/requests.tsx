@@ -5,10 +5,15 @@ import { Button, ListItemTitle, Spacer, YStack } from "tamagui";
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
-import { api } from "~/utils/api";
+import { api, RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const PAGE_SIZE = 5;
+
+type FriendRequestItem =
+  RouterOutputs["request"]["paginateFriendRequests"]["items"][0];
+type FollowRequestItem =
+  RouterOutputs["request"]["paginateFollowRequests"]["items"][0];
 
 const Requests = () => {
   const router = useRouter();
@@ -215,10 +220,23 @@ const Requests = () => {
     }
   };
 
-  const onUserSelected = (userId: string) => {
+  const onFriendRequestUserSelected = ({
+    userId,
+    username,
+  }: FriendRequestItem) => {
     router.navigate({
       pathname: "/(inbox)/profile/[userId]/",
-      params: { userId },
+      params: { userId, username },
+    });
+  };
+
+  const onFollowRequestUserSelected = ({
+    userId,
+    username,
+  }: FollowRequestItem) => {
+    router.navigate({
+      pathname: "/(inbox)/profile/[userId]/",
+      params: { userId, username },
     });
   };
 
@@ -263,7 +281,7 @@ const Requests = () => {
             text: "Decline",
             onPress: () => void onDeclineFriendRequest(item.userId),
           }}
-          onPress={() => onUserSelected(item.userId)}
+          onPress={() => onFriendRequestUserSelected(item)}
         />
       ))}
 
@@ -298,7 +316,7 @@ const Requests = () => {
             text: "Decline",
             onPress: () => void onDeclineFollowRequest(item.userId),
           }}
-          onPress={() => onUserSelected(item.userId)}
+          onPress={() => onFollowRequestUserSelected(item)}
         />
       ))}
 

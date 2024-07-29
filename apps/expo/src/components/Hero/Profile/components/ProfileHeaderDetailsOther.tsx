@@ -1,6 +1,6 @@
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import {
   Adapt,
   Avatar,
@@ -13,7 +13,6 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { useSegments } from "expo-router";
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
@@ -40,7 +39,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
   const segments = useSegments();
-  const currentSegment = segments[segments.length - 1];
+  const currentSegment = segments[segments.length - 3];
 
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
@@ -50,8 +49,8 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `/connections/[user-id]/following-list`,
-        params: { userId: props.data.userId },
+        pathname: `${currentSegment}/profile/connections/[user-id]/following-list`,
+        params: { userId: props.data.userId, username: props.data.username },
       });
     }
   };
@@ -60,8 +59,8 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `/connections/[user-id]/followers-list`,
-        params: { userId: props.data.userId },
+        pathname: `${currentSegment}/profile/connections/[user-id]/followers-list`,
+        params: { userId: props.data.userId, username: props.data.username },
       });
     }
   };
@@ -737,7 +736,6 @@ const FriendButton = ({
   networkStatus: ProfileData["networkStatus"];
   onFriendPress: (action?: "accept" | "reject") => void;
 }) => {
-
   const friendState = networkStatus.targetUserFriendState;
 
   if (networkStatus.targetUserFriendState === "IncomingRequest") {
