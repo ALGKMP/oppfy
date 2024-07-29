@@ -17,8 +17,6 @@ import {
   YStack,
 } from "tamagui";
 
-import { abbreviatedNumber } from "@oppfy/utils";
-
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
 import type { RouterOutputs } from "~/utils/api";
@@ -104,7 +102,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   const renderLoadingSkeletons = () => (
     <CardContainer>
       <XStack gap="$2">
-        {PLACEHOLDER_DATA.map((index) => (
+        {PLACEHOLDER_DATA.map((_, index) => (
           <Skeleton key={index} circular size={70} />
         ))}
       </XStack>
@@ -114,7 +112,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   const renderSuggestions = (data: RecemmendationItem[]) => (
     <CardContainer borderRadius={0} paddingLeft={0} margin={1}>
       <YStack gap="$2">
-        <Text paddingLeft={"$3"} fontWeight="600">
+        <Text paddingLeft="$3" fontWeight="600">
           🙋‍♂️💁‍♀️ D‍iscover People
         </Text>
         <FlashList
