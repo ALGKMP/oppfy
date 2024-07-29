@@ -149,7 +149,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       <FlashList
         numColumns={1}
         nestedScrollEnabled={true}
-        data={isRestricted ? posts : []}
+        data={isRestricted ? [] : posts}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
