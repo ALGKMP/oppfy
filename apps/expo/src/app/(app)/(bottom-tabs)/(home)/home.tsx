@@ -1,16 +1,105 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Sharing from "expo-sharing";
 import { FlashList, ViewToken } from "@shopify/flash-list";
 import { Camera } from "@tamagui/lucide-icons";
-import { Separator, SizableText, Text, useTheme, View, YStack } from "tamagui";
+import {
+  Button,
+  Circle,
+  Image,
+  Separator,
+  SizableText,
+  styled,
+  Text,
+  useTheme,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import RecommendationsCarousel from "~/components/Carousels/RecommendationsCarousel";
 import { BaseScreenView } from "~/components/Views";
+import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
 import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
+
+const StyledImage = styled(Image, {
+  width: "100%",
+  height: "100%",
+});
+
+const ListFooter = () => {
+  return (
+    <YStack padding="$5" alignItems="center" space="$4">
+      <XStack justifyContent="center" alignItems="center">
+        <Circle
+          size={60}
+          backgroundColor="$blue500"
+          borderWidth={1}
+          borderColor="white"
+          overflow="hidden"
+        >
+          <StyledImage
+            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
+          />
+        </Circle>
+        <Circle
+          size={70}
+          backgroundColor="$green500"
+          borderWidth={1}
+          borderColor="white"
+          overflow="hidden"
+          zIndex={1}
+          marginLeft={-15}
+          marginRight={-15}
+        >
+          <StyledImage
+            source={{ uri: "https://randomuser.me/api/portraits/women/1.jpg" }}
+          />
+        </Circle>
+        <Circle
+          size={60}
+          backgroundColor="$yellow500"
+          borderWidth={1}
+          borderColor="white"
+          overflow="hidden"
+        >
+          <StyledImage
+            source={{ uri: "https://randomuser.me/api/portraits/men/2.jpg" }}
+          />
+        </Circle>
+      </XStack>
+      <Text color="white" textAlign="center">
+        Invite some friends you want to use Oppfy with
+      </Text>
+      <Button
+        backgroundColor="#F214FF"
+        color="white"
+        borderRadius={20}
+        paddingHorizontal={20}
+        pressStyle={{ opacity: 0.8 }}
+        onPress={async () => {
+          // expo share open app store
+          await Sharing.shareAsync("https://google.com", {
+            dialogTitle: "Share to...",
+          });
+        }}
+      >
+        ✨ Share Invites
+      </Button>
+    </YStack>
+  );
+};
+const styles = StyleSheet.create({
+  inviteText: {
+    color: "white",
+    textAlign: "center",
+    marginVertical: 10,
+  },
+});
 
 const HomeScreen = () => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
@@ -124,6 +213,7 @@ const HomeScreen = () => {
               <Separator />
             </>
           }
+          ListFooterComponent={ListFooter}
           estimatedItemSize={screenWidth}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
