@@ -222,7 +222,39 @@ const HomeScreen = () => {
                 recommendationsData && (
                   <RecommendationsCarousel
                     loading={isLoadingRecommendationsData}
-                    reccomendationsData={recommendationsData}
+                    reccomendationsData={[
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                      ...recommendationsData,
+                    ]}
                   ></RecommendationsCarousel>
                 )
               )}

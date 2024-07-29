@@ -8,14 +8,14 @@ export class CloudFrontService {
   getSignedUrlForPost(objectKey: string) {
     const url = this._getPostDistributionDomainUrlForObject(`${objectKey}`);
     const signedUrl = this.cloudFrontRepository.getSignedUrl({ url });
-    console.log("signedUrlfrom the service", signedUrl);
+    // console.log("signedUrlfrom the service", signedUrl);
     return signedUrl;
   }
 
   getSignedUrlForProfilePicture(objectKey: string) {
     const url = this._getProfileDistributionDomainUrlForObject(`${objectKey}`);
     const signedUrl = this.cloudFrontRepository.getSignedUrl({ url });
-    console.log("signedUrl from the service", signedUrl);
+    // console.log("signedUrl from the service", signedUrl);
     return signedUrl;
   }
 
