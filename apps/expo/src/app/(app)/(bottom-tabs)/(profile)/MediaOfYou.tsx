@@ -129,6 +129,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         isLoadingRecommendationsData={isLoadingRecommendationsData}
         profileData={profileData}
         friendsData={friends}
+        isRestricted={isRestricted}
         recommendationsData={recommendations}
       />
     );
@@ -139,6 +140,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     isLoadingRecommendationsData,
     isSelfProfile,
     profileData,
+    isRestricted,
     recommendations,
   ]);
 
