@@ -121,7 +121,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       utils.profile.getFullProfileOther.setData(
         {
-        userId: props.data.userId,
+          userId: props.data.userId,
         },
         {
           ...prevData,
@@ -413,6 +413,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
           networkStatus: {
             ...prevData.networkStatus,
             targetUserFriendState: "Friends",
+            targetUserFollowState: "Following"
           },
         },
       );
@@ -630,21 +631,17 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
 
       <XStack gap="$4">
         <StatusRenderer
-          data={!props.loading ? props : undefined}
+          data={!props.loading ? props.data : undefined}
           loadingComponent={
             <View flex={1}>
               <Skeleton width="100%" height={44} radius={20} />
             </View>
           }
-          successComponent={(props) => (
-            <Button flex={1} borderRadius={20} onPress={onFollowPress}>
-              {props.data.networkStatus.targetUserFollowState === "Following"
-                ? "Unfollow"
-                : props.data.networkStatus.targetUserFollowState ===
-                    "OutboundRequest"
-                  ? "Cancel Request"
-                  : "Follow"}
-            </Button>
+          successComponent={(profileData) => (
+            <FollowButton
+              networkStatus={profileData.networkStatus}
+              onFollowPress={onFollowPress}
+            />
           )}
         />
         <StatusRenderer
@@ -687,6 +684,45 @@ const Stat = (props: StatProps) => (
   </XStack>
 );
 
+const FollowButton = ({
+  networkStatus,
+  onFollowPress,
+}: {
+  networkStatus: ProfileData["networkStatus"];
+  onFollowPress: () => void;
+}) => {
+  const followState = networkStatus.targetUserFollowState;
+  const friendState = networkStatus.targetUserFriendState;
+  const isDisabled =
+    (networkStatus.privacy === "private" &&
+      friendState === "OutboundRequest") ||
+    friendState === "Friends";
+
+  if (isDisabled) {
+    return null;
+  }
+  
+  let buttonText: string;
+  switch (followState) {
+    case "Following":
+      buttonText = "Unfollow";
+      break;
+    case "OutboundRequest":
+      buttonText = "Cancel Request";
+      break;
+    case "NotFollowing":
+    default:
+      buttonText = "Follow";
+      break;
+  }
+
+  return (
+    <Button flex={1} borderRadius={20} onPress={onFollowPress}>
+      {buttonText}
+    </Button>
+  );
+};
+
 const FriendButton = ({
   networkStatus,
   onFriendPress,
@@ -694,6 +730,14 @@ const FriendButton = ({
   networkStatus: ProfileData["networkStatus"];
   onFriendPress: (action?: "accept" | "reject") => void;
 }) => {
+  // const isDisabled =
+  //   networkStatus.privacy === "private" &&
+  //   networkStatus.targetUserFollowState !== "Following";
+
+  // if (isDisabled) {
+  //   return null;
+  // }
+
   if (networkStatus.targetUserFriendState === "IncomingRequest") {
     return (
       <Popover size="$5" allowFlip={true}>
@@ -742,7 +786,12 @@ const FriendButton = ({
   }
 
   return (
-    <Button flex={1} borderRadius={20} onPress={() => onFriendPress()}>
+    <Button
+      flex={1}
+      borderRadius={20}
+      onPress={() => onFriendPress()}
+      // disabled={isDisabled}
+    >
       {networkStatus.targetUserFriendState === "Friends"
         ? "Remove Friend"
         : networkStatus.targetUserFriendState === "OutboundRequest"
