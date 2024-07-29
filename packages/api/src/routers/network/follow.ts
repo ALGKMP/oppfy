@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { trpcValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { DomainError } from "../../errors";
 
 export const followRouter = createTRPCRouter({
   paginateFollowersSelf: protectedProcedure
@@ -104,6 +105,15 @@ export const followRouter = createTRPCRouter({
           input.userId,
         );
       } catch (err) {
+        if (err instanceof DomainError) {
+          switch (err.code) {
+            case "CANNOT_UNFOLLOW_FRIENDS":
+              throw new TRPCError({
+                code: "CONFLICT",
+                message: "Cannot unfollow friends",
+              });
+          }
+        }
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),

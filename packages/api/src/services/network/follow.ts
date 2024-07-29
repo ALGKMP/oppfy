@@ -1,6 +1,7 @@
 import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
+import { FriendRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
 import { ProfileRepository } from "../../repositories/profile/profile";
 import { NotificationsService } from "../user/notifications";
@@ -9,6 +10,7 @@ import { UserService } from "../user/user";
 export class FollowService {
   private followRepository = new FollowRepository();
   private profileRepository = new ProfileRepository();
+  private friendRespository = new FriendRepository();
 
   private userService = new UserService();
   private notificationsService = new NotificationsService();
@@ -118,7 +120,20 @@ export class FollowService {
       );
     }
 
+    const friendship = await this.friendRespository.getFriendship(
+      senderId,
+      recipientId,
+    );
+
+    if (friendship) {
+      throw new DomainError(
+        ErrorCode.CANNOT_UNFOLLOW_FRIENDS,
+        "Cannot unfollow a friend.",
+      );
+    }
+
     await this.followRepository.removeFollower(senderId, recipientId);
+
     await this.notificationsService.deleteNotification(senderId, "follow");
   }
 
