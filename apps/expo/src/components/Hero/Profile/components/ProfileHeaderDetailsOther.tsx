@@ -413,7 +413,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
           networkStatus: {
             ...prevData.networkStatus,
             targetUserFriendState: "Friends",
-            targetUserFollowState: "Following"
+            targetUserFollowState: "Following",
           },
         },
       );
@@ -701,7 +701,7 @@ const FollowButton = ({
   if (isDisabled) {
     return null;
   }
-  
+
   let buttonText: string;
   switch (followState) {
     case "Following":
@@ -717,7 +717,12 @@ const FollowButton = ({
   }
 
   return (
-    <Button flex={1} borderRadius={20} onPress={onFollowPress}>
+    <Button
+      flex={1}
+      borderRadius={20}
+      onPress={onFollowPress}
+      backgroundColor={followState === "NotFollowing" ? "#F214FF" : "$primary"}
+    >
       {buttonText}
     </Button>
   );
@@ -730,13 +735,8 @@ const FriendButton = ({
   networkStatus: ProfileData["networkStatus"];
   onFriendPress: (action?: "accept" | "reject") => void;
 }) => {
-  // const isDisabled =
-  //   networkStatus.privacy === "private" &&
-  //   networkStatus.targetUserFollowState !== "Following";
 
-  // if (isDisabled) {
-  //   return null;
-  // }
+  const friendState = networkStatus.targetUserFriendState;
 
   if (networkStatus.targetUserFriendState === "IncomingRequest") {
     return (
@@ -790,7 +790,7 @@ const FriendButton = ({
       flex={1}
       borderRadius={20}
       onPress={() => onFriendPress()}
-      // disabled={isDisabled}
+      backgroundColor={friendState === "NotFriends" ? "#F214FF" : "$primary"}
     >
       {networkStatus.targetUserFriendState === "Friends"
         ? "Remove Friend"
