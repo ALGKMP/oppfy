@@ -83,7 +83,7 @@ export class FollowService {
       return;
     }
 
-    await this.followRepository.addFollower(senderId, recipientId);
+    await this.followRepository.createFollower(senderId, recipientId);
 
     await this.notificationsService.storeNotification(sender.id, recipient.id, {
       eventType: "follow",
@@ -136,7 +136,7 @@ export class FollowService {
     }
 
     await this.followRepository.removeFollowRequest(senderId, recipientId);
-    await this.followRepository.addFollower(senderId, recipientId);
+    await this.followRepository.createFollower(senderId, recipientId);
 
     const recipient = await this.userService.getUser(recipientId);
     const recipientProfile = await this.profileRepository.getProfile(

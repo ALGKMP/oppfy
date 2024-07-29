@@ -8,7 +8,7 @@ export class FollowRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addFollower(senderUserId: string, recipientUserId: string) {
+  async createFollower(senderUserId: string, recipientUserId: string) {
     return await this.db.transaction(async (tx) => {
       const result = await tx
         .insert(schema.follower)

@@ -97,11 +97,11 @@ export class FriendService {
     );
 
     if (!senderFollowsRecipient) {
-      await this.followRespository.addFollower(senderId, recipientId);
+      await this.followRespository.createFollower(senderId, recipientId);
     }
 
     if (!recipientFollowsSender) {
-      await this.followRespository.addFollower(recipientId, senderId);
+      await this.followRespository.createFollower(recipientId, senderId);
     }
 
     const recipient = await this.userService.getUser(recipientId);
