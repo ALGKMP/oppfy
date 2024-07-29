@@ -72,7 +72,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   };
 
   const throttledHandleAction = useRef(
-    throttle(handleShowMoreRecs, 300, { leading: true, trailing: false }),
+    throttle(handleShowMoreRecs, 500, { leading: true, trailing: false }),
   ).current;
 
   const handleScroll = useCallback(
