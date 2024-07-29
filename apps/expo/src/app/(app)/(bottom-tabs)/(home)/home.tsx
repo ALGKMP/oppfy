@@ -164,7 +164,7 @@ const HomeScreen = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refetchRecommendationsData, refetchPosts]);
+    await Promise.all([refetchRecommendationsData(), refetchPosts()]);
     setRefreshing(false);
   }, [refetchRecommendationsData, refetchPosts]);
 
