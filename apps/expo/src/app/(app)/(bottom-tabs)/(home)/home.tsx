@@ -134,7 +134,7 @@ const HomeScreen = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-    refetch,
+    refetch: refetchPosts,
   } = api.post.paginatePostsForFeed.useInfiniteQuery(
     {
       pageSize: 10,
@@ -162,12 +162,11 @@ const HomeScreen = () => {
     [postData],
   );
 
-  /*   const onRefresh = useCallback(async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([
-    ]);
+    await Promise.all([refetchRecommendationsData(), refetchPosts()]);
     setRefreshing(false);
-  }, [refetchFriendsData, refetchProfileData, refetchRecomendationsData]); */
+  }, [refetchRecommendationsData, refetchPosts]);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -197,7 +196,7 @@ const HomeScreen = () => {
           data={posts}
           refreshing={refreshing}
           showsVerticalScrollIndicator={false}
-          // onRefresh={onRefresh}
+          onRefresh={onRefresh}
           numColumns={1}
           onEndReached={handleOnEndReached}
           keyExtractor={(item) => {
