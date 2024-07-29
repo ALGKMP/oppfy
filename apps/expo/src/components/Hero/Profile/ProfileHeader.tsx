@@ -30,6 +30,7 @@ interface ProfileHeaderProps {
   profileData: FullProfileOther | FullProfileSelf | undefined;
   friendsData: FriendItems | FriendItemsOther | undefined;
   recommendationsData: RecommendedProfiles | undefined;
+  isRestricted: boolean;
 }
 
 function isOtherProfile(
@@ -47,6 +48,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     profileData,
     friendsData,
     recommendationsData: recommendationsData,
+    isRestricted
   } = props;
   if (
     isLoadingProfileData ||
@@ -72,7 +74,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
             data={profileData as FullProfileSelf}
           />
         ) : isOtherProfile(profileData) ? (
-          <ProfileHeaderDetailsOther loading={false} data={profileData} />
+          <ProfileHeaderDetailsOther loading={false} data={profileData} isRestricted={isRestricted} />
         ) : (
           <View>
             <Text>Error because of some dumb shit</Text>

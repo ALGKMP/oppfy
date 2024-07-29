@@ -129,6 +129,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         isLoadingRecommendationsData={isLoadingRecommendationsData}
         profileData={profileData}
         friendsData={friends}
+        isRestricted={isRestricted}
         recommendationsData={recommendations}
       />
     );
@@ -139,6 +140,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     isLoadingRecommendationsData,
     isSelfProfile,
     profileData,
+    isRestricted,
     recommendations,
   ]);
 
@@ -147,7 +149,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       <FlashList
         numColumns={1}
         nestedScrollEnabled={true}
-        data={isRestricted ? posts : []}
+        data={isRestricted ? [] : posts}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}

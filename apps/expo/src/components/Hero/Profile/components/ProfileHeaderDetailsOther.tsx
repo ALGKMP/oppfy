@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter, useSegments } from "expo-router";
@@ -32,6 +33,7 @@ interface LoadingProps {
 interface ProfileLoadedProps {
   loading: false;
   data: ProfileData;
+  isRestricted: boolean;
 }
 type ProfileProps = LoadingProps | ProfileLoadedProps;
 
@@ -45,24 +47,28 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     optimisticallyUpdate: true,
   });
 
-  const onFollowingListPress = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  useEffect(() => {
     if (!props.loading) {
-      router.navigate({
-        pathname: `${currentSegment}/profile/connections/[user-id]/following-list`,
-        params: { userId: props.data.userId, username: props.data.username },
-      });
+      console.log(props.isRestricted);
     }
+  }, [props.loading, props]);
+
+  const onFollowingListPress = () => {
+    if (props.loading || (props.isRestricted && !props.loading)) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.navigate({
+      pathname: `/connections/[user-id]/following-list`,
+      params: { userId: props.data.userId },
+    });
   };
 
   const onFollowerListPress = () => {
+    if (props.loading || (props.isRestricted && !props.loading)) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (!props.loading) {
-      router.navigate({
-        pathname: `${currentSegment}/profile/connections/[user-id]/followers-list`,
-        params: { userId: props.data.userId, username: props.data.username },
-      });
-    }
+    router.navigate({
+      pathname: `/connections/[user-id]/followers-list`,
+      params: { userId: props.data.userId },
+    });
   };
 
   const onFollowPress = () => {
@@ -613,16 +619,23 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             data={!props.loading ? props.data.followingCount : undefined}
             loadingComponent={<Skeleton width={80} height={20} />}
             successComponent={(count) => (
-              <TouchableOpacity onPress={onFollowingListPress}>
+              <TouchableOpacity
+                onPress={onFollowingListPress}
+                disabled={!props.loading ? props.isRestricted : true}
+              >
                 <Stat label="Following" value={abbreviatedNumber(count)} />
               </TouchableOpacity>
             )}
           />
+
           <StatusRenderer
             data={!props.loading ? props.data.followerCount : undefined}
             loadingComponent={<Skeleton width={150} height={20} />}
             successComponent={(count) => (
-              <TouchableOpacity onPress={onFollowerListPress}>
+              <TouchableOpacity
+                onPress={onFollowerListPress}
+                disabled={!props.loading ? props.isRestricted : true}
+              >
                 <Stat label="Followers" value={abbreviatedNumber(count)} />
               </TouchableOpacity>
             )}
@@ -697,7 +710,7 @@ const FollowButton = ({
   const isDisabled =
     (networkStatus.privacy === "private" &&
       friendState === "OutboundRequest") ||
-    friendState === "Friends";
+    friendState === "Friends" || friendState === "OutboundRequest";
 
   if (isDisabled) {
     return null;

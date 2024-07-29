@@ -114,8 +114,8 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   const renderSuggestions = (data: RecemmendationItem[]) => (
     <CardContainer borderRadius={0} paddingLeft={0} margin={1}>
       <YStack gap="$2">
-        <Text paddingLeft="$3" fontWeight="600">
-          Find Friends
+        <Text paddingLeft={"$3"} fontWeight="600">
+          🙋‍♂️💁‍♀️ D‍iscover People
         </Text>
         <FlashList
           data={data}
@@ -167,9 +167,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
         <TouchableOpacity onPress={handleShowMoreFriends}>
-          <ListItemTitle paddingLeft="$3" fontWeight="bold">
-            🙋‍♂️💁‍♀️ Friends‍ ({abbreviatedNumber(data.friendCount)})
-          </ListItemTitle>
+          <ListItemTitle paddingLeft="$3">🙋‍♂️💁‍♀️ Friends‍</ListItemTitle>
         </TouchableOpacity>
 
         <FlashList
