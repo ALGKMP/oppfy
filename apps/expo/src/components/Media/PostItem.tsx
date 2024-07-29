@@ -277,7 +277,7 @@ const PostItem = (props: PostItemProps) => {
 
   const routeSegments = useSegments();
 
-  const handleRouteToNewUser = (userId: string) => {
+  const handleRouteToNewUser = (userId: string, username: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (user?.uid === userId) {
       router.push({ pathname: `/${routeSegments[2]}/self-profile` });
@@ -285,7 +285,7 @@ const PostItem = (props: PostItemProps) => {
     }
     router.push({
       pathname: `/${routeSegments[2]}/profile/[userId]`,
-      params: { userId: userId },
+      params: { userId, username },
     });
   };
 
@@ -311,13 +311,23 @@ const PostItem = (props: PostItemProps) => {
             <Avatar.Image
               accessibilityLabel="Cam"
               src={post.recipientProfilePicture}
-              onPress={() => handleRouteToNewUser(post.recipientId)}
+              onPress={() =>
+                handleRouteToNewUser(
+                  post.recipientId,
+                  post.recipientUsername ?? "",
+                )
+              }
             />
             <Avatar.Fallback backgroundColor="$blue10" />
           </Avatar>
           <YStack gap="$0.5" justifyContent="center">
             <TouchableOpacity
-              onPress={() => handleRouteToNewUser(post.recipientId)}
+              onPress={() =>
+                handleRouteToNewUser(
+                  post.recipientId,
+                  post.recipientUsername ?? "",
+                )
+              }
             >
               <SizableText
                 size="$2"
@@ -333,7 +343,7 @@ const PostItem = (props: PostItemProps) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                handleRouteToNewUser(post.authorId);
+                handleRouteToNewUser(post.authorId, post.authorUsername ?? "");
               }}
             >
               <XStack gap="$1.5" alignItems="center">

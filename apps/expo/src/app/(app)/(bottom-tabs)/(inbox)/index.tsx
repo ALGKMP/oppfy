@@ -11,8 +11,11 @@ import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
-import { api } from "~/utils/api";
+import { api, RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+
+type NotificationItem =
+  RouterOutputs["notifications"]["paginateNotifications"]["items"][0];
 
 const Inbox = () => {
   const router = useRouter();
@@ -57,11 +60,13 @@ const Inbox = () => {
     onMutate: async (newData) => {
       await utils.notifications.paginateNotifications.cancel();
       const prevData =
-        utils.notifications.paginateNotifications.getInfiniteData();
+        utils.notifications.paginateNotifications.getInfiniteData({
+          pageSize: 20,
+        });
       if (!prevData) return;
 
       utils.notifications.paginateNotifications.setInfiniteData(
-        {},
+        { pageSize: 20 },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -95,10 +100,10 @@ const Inbox = () => {
     },
   });
 
-  const onUserSelected = (userId: string) => {
+  const onUserSelected = ({ userId, username }: NotificationItem) => {
     router.navigate({
       pathname: "/(inbox)/profile/[userId]/",
-      params: { userId: userId },
+      params: { userId, username },
     });
   };
 
@@ -216,7 +221,7 @@ const Inbox = () => {
                   onPress: () => void onFollowUser(item.userId),
                 }}
                 imageUrl={item.profilePictureUrl}
-                onPress={() => onUserSelected(item.userId)}
+                onPress={() => onUserSelected(item)}
               />
             );
           }}

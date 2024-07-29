@@ -41,7 +41,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
   const segments = useSegments();
-  const currentSegment = segments[segments.length - 1];
+  const currentSegment = segments[segments.length - 3];
 
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,

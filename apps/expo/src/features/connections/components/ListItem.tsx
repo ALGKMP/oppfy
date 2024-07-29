@@ -58,7 +58,7 @@ const ListItem = ({
         onPress={() =>
           router.push({
             pathname: `/${segments[2]}/profile/[userId]`,
-            params: { userId: item.userId },
+            params: { userId: item.userId, username: item.username },
           })
         }
       />

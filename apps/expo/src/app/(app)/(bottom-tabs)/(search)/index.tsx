@@ -7,7 +7,6 @@ import { ListItemTitle, SizableText, Text, View, YStack } from "tamagui";
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -76,7 +75,7 @@ const Search = () => {
             onPress={() => {
               router.navigate({
                 pathname: "/(search)/profile/[userId]/",
-                params: { userId: item.userId },
+                params: { userId: item.userId, username: item.username },
               });
             }}
           />
@@ -98,13 +97,13 @@ const Search = () => {
           <VirtualizedListItem
             loading={false}
             title={item.username}
-            subtitle={item.fullName!}
+            subtitle={item.fullName ?? ""}
             imageUrl={item.profilePictureUrl}
             onPress={() => {
               if (!item.userId) return;
               router.navigate({
                 pathname: "/(search)/profile/[userId]/",
-                params: { userId: item.userId },
+                params: { userId: item.userId, username: item.username },
               });
             }}
           />
@@ -127,7 +126,7 @@ const Search = () => {
             isLoadingRecommendationsData ? (
               renderLoadingSkeletons()
             ) : recommendationsData?.length ? (
-              renderRecommendations(recommendationsData!)
+              renderRecommendations(recommendationsData)
             ) : (
               // TODO: Implement
               <Text>

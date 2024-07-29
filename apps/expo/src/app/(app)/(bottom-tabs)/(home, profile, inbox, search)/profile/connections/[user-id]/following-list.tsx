@@ -1,27 +1,28 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useLocalSearchParams } from "expo-router";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import { ListItem } from "~/features/connections/components";
+import { useFollowHandlers } from "~/features/connections/hooks";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { ListItem } from "../components";
-import { useFollowHandlers } from "../hooks";
-import { SearchInput } from "~/components/Inputs";
 
-const FollowersList = () => {
+const FollowingList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  console.log(`userId: ${userId}`)
+  const headerHeight = useHeaderHeight();
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
-    userId,
-    queryToOptimisticallyUpdate: "follow.paginateFollowersOthers",
+    userId: userId ?? "",
+    queryToOptimisticallyUpdate: "follow.paginateFollowingOthers",
     queriesToInvalidate: [
       "follow.paginateFollowingOthers",
       "follow.paginateFollowersOthers",
@@ -30,22 +31,24 @@ const FollowersList = () => {
   });
 
   const {
-    data: followersData,
+    data: followingData,
     isLoading,
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.follow.paginateFollowersOthers.useInfiniteQuery(
-    { userId, pageSize: 20 },
+  } = api.follow.paginateFollowingOthers.useInfiniteQuery(
+    { userId: userId ?? "", pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const followerItems =
-    followersData?.pages.flatMap((page) => page.items) ?? [];
+  const followingItems = useMemo(
+    () => followingData?.pages.flatMap((page) => page.items) ?? [],
+    [followingData],
+  );
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch({
-    data: followerItems,
+    data: followingItems,
     keys: ["name", "username"],
   });
 
@@ -72,7 +75,7 @@ const FollowersList = () => {
     </CardContainer>
   );
 
-  const renderFriends = () => (
+  const renderFollowing = () => (
     <CardContainer>
       <FlashList
         data={filteredItems}
@@ -94,10 +97,10 @@ const FollowersList = () => {
   );
 
   const renderNoResults = () => (
-    <View flex={1} justifyContent="center">
+    <View flex={1} justifyContent="center" bottom={headerHeight}>
       <EmptyPlaceholder
-        title="No results"
-        subtitle="No followers found."
+        title="Following"
+        subtitle="Once you follow someone, you'll see them here."
         icon={<UserRoundPlus />}
       />
     </View>
@@ -109,7 +112,7 @@ const FollowersList = () => {
     );
   }
 
-  if (followerItems.length === 0) {
+  if (followingItems.length === 0) {
     return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
   }
 
@@ -117,14 +120,14 @@ const FollowersList = () => {
     <BaseScreenView scrollable>
       <YStack gap="$4">
         <SearchInput
-          placeholder="Search followers..."
+          placeholder="Search following..."
           value={searchQuery}
           onChangeText={setSearchQuery}
           onClear={() => setSearchQuery("")}
         />
 
         {filteredItems.length > 0 ? (
-          renderFriends()
+          renderFollowing()
         ) : (
           <SizableText lineHeight={0}>No Users Found</SizableText>
         )}
@@ -133,4 +136,4 @@ const FollowersList = () => {
   );
 };
 
-export default FollowersList;
+export default FollowingList;

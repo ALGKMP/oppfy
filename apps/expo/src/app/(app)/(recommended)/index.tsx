@@ -93,7 +93,7 @@ const AnimatedUserProfile = ({
   const handleProfilePress = () => {
     router.navigate({
       pathname: "/profile/[userId]",
-      params: { userId: user.userId },
+      params: { userId: user.userId, username: user.username },
     });
   };
 

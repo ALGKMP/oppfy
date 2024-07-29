@@ -7,7 +7,6 @@ import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
   Avatar,
-  Button,
   getToken,
   ListItemTitle,
   SizableText,
@@ -17,22 +16,21 @@ import {
   XStack,
   YStack,
 } from "tamagui";
-import { date } from "zod";
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
-import { api, type RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-type FriendItems = RouterOutputs["friend"]["paginateFriendsSelf"]["items"];
-type RecoemndationItems =
-  RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
+type FriendItem = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][0];
+type RecemmendationItem =
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
 
 interface FriendsData {
   friendCount: number;
-  friendItems: FriendItems;
+  friendItems: FriendItem[];
 }
 
 interface LoadingProps {
@@ -42,7 +40,7 @@ interface LoadingProps {
 interface FriendsLoadedProps {
   loading: false;
   friendsData: FriendsData;
-  reccomendationsData: RecoemndationItems;
+  reccomendationsData: RecemmendationItem[];
 }
 
 type FriendsCarouselProps = LoadingProps | FriendsLoadedProps;
@@ -54,11 +52,22 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     !props.loading &&
     props.friendsData.friendItems.length < props.friendsData.friendCount;
 
-  const handleProfileClicked = (userId: string) => {
+  const handleSuggestionsProfileClicked = ({
+    userId,
+    username,
+  }: RecemmendationItem) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
       pathname: "/(profile)/profile/[userId]/",
-      params: { userId: userId },
+      params: { userId, username },
+    });
+  };
+
+  const handleFriendProfileClicked = ({ userId, username }: FriendItem) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: "/(profile)/profile/[userId]/",
+      params: { userId, username },
     });
   };
 
@@ -95,14 +104,14 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   const renderLoadingSkeletons = () => (
     <CardContainer>
       <XStack gap="$2">
-        {PLACEHOLDER_DATA.map((item, index) => (
+        {PLACEHOLDER_DATA.map((index) => (
           <Skeleton key={index} circular size={70} />
         ))}
       </XStack>
     </CardContainer>
   );
 
-  const renderSuggestions = (data: RecoemndationItems) => (
+  const renderSuggestions = (data: RecemmendationItem[]) => (
     <CardContainer borderRadius={0} paddingLeft={0} margin={1}>
       <YStack gap="$2">
         <Text paddingLeft={"$3"} fontWeight="600">
@@ -115,7 +124,9 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleProfileClicked(item.userId)}>
+            <TouchableOpacity
+              onPress={() => handleSuggestionsProfileClicked(item)}
+            >
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
                   <Avatar.Image src={item.profilePictureUrl} />
@@ -166,7 +177,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleProfileClicked(item.userId)}>
+            <TouchableOpacity onPress={() => handleFriendProfileClicked(item)}>
               <YStack gap="$1.5">
                 <Avatar circular size="$6" bordered>
                   <Avatar.Image src={item.profilePictureUrl} />
