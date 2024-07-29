@@ -1,18 +1,23 @@
-import React, { useEffect, useState } from "react";
-import type { DimensionValue, LayoutChangeEvent } from "react-native";
+import React, { useMemo } from "react";
+import type { DimensionValue } from "react-native";
 import { StyleSheet } from "react-native";
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSequence,
   withTiming,
+  interpolate,
 } from "react-native-reanimated";
 import { View } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
 interface BaseSkeletonProps {
   radius?: number;
+  shimmerColor?: string;
+  backgroundColor?: string;
+  shimmerDuration?: number;
+  testID?: string;
 }
 
 interface RectangularSkeletonProps extends BaseSkeletonProps {
@@ -28,51 +33,58 @@ interface CircularSkeletonProps extends BaseSkeletonProps {
 
 type SkeletonProps = RectangularSkeletonProps | CircularSkeletonProps;
 
-const Skeleton = (props: SkeletonProps) => {
-  const [measuredWidth, setMeasuredWidth] = useState<number>(0);
-  const translateX = useSharedValue(-measuredWidth);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
-
-  useEffect(() => {
-    translateX.value = withRepeat(
-      withTiming(measuredWidth, {
-        duration: 1200,
-        easing: Easing.linear,
-      }),
-      -1,
-      false,
-    );
-  }, [measuredWidth, translateX]);
-
-  const handleLayout = (event: LayoutChangeEvent) => {
-    const { width } = event.nativeEvent.layout;
-    setMeasuredWidth(width);
-  };
-
-  const { radius = 6 } = props;
+const Skeleton = ({
+  radius = 6,
+  shimmerColor = "$gray3",
+  backgroundColor = "$gray5",
+  shimmerDuration = 1000,
+  testID,
+  ...props
+}: SkeletonProps) => {
   const resolvedBorderRadius = props.circular ? 9999 : radius;
-
   const width = props.circular ? props.size : props.width;
   const height = props.circular ? props.size : props.height;
 
+  const shimmer = useSharedValue(0);
+
+  React.useEffect(() => {
+    shimmer.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: shimmerDuration }),
+        withTiming(0, { duration: shimmerDuration })
+      ),
+      -1,
+      false
+    );
+  }, [shimmerDuration]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(shimmer.value, [0, 1], [-100, 100]) }],
+  }));
+
+  const memoizedGradientColors = useMemo(() => [
+    backgroundColor,
+    shimmerColor,
+    backgroundColor,
+  ], [backgroundColor, shimmerColor]);
+
   return (
     <View
+      accessibilityRole="progressbar"
+      accessibilityLabel="Loading..."
+      testID={testID}
       overflow="hidden"
-      backgroundColor="$gray5"
+      backgroundColor={backgroundColor}
       style={{
         width,
         height,
         borderRadius: resolvedBorderRadius,
       }}
-      onLayout={handleLayout}
     >
       <Animated.View style={[styles.gradientWrapper, animatedStyle]}>
         <LinearGradient
           flex={1}
-          colors={["$gray5", "$gray3", "$gray5"]}
+          colors={memoizedGradientColors}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
         />
@@ -88,4 +100,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Skeleton;
+export default React.memo(Skeleton);
