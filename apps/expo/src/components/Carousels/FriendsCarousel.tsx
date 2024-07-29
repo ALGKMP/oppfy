@@ -17,8 +17,6 @@ import {
   YStack,
 } from "tamagui";
 
-import { abbreviatedNumber } from "@oppfy/utils";
-
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
 import type { RouterOutputs } from "~/utils/api";
@@ -58,7 +56,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   }: RecemmendationItem) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
-      pathname: "/(profile)/profile/[userId]/",
+      pathname: "/profile/[userId]/",
       params: { userId, username },
     });
   };
@@ -66,7 +64,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   const handleFriendProfileClicked = ({ userId, username }: FriendItem) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
-      pathname: "/(profile)/profile/[userId]/",
+      pathname: "/profile/[userId]/",
       params: { userId, username },
     });
   };
