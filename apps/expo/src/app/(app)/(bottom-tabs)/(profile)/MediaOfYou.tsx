@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import React, { useCallback, useMemo, useState } from "react";
-import { Dimensions } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { Camera } from "@tamagui/lucide-icons";
+import { Camera, Lock } from "@tamagui/lucide-icons";
 import { SizableText, Text, View, YStack } from "tamagui";
 
 import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
 import { api, RouterOutputs } from "~/utils/api";
 
-type ProfileData =
-  | RouterOutputs["profile"]["getFullProfileSelf"]
-  | RouterOutputs["profile"]["getFullProfileOther"];
+type ProfileDataSelf = RouterOutputs["profile"]["getFullProfileSelf"];
+type profileDataOther = RouterOutputs["profile"]["getFullProfileOther"];
+
+type ProfileData = ProfileDataSelf | profileDataOther;
 type RecommendationsData =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
 type FriendsData = RouterOutputs["friend"]["paginateFriendsSelf"];
@@ -24,7 +24,7 @@ interface MediaOfYouProps {
   userId?: string;
   isSelfProfile: boolean;
 
-  profileData: ProfileData | undefined; // Replace 'any' with the actual type of your profile data
+  profileData: ProfileData | undefined;
   isLoadingProfileData: boolean;
   // refetchProfileData: () => Promise<ProfileData>;
   refetchProfileData: () => Promise<any>;
@@ -34,12 +34,12 @@ interface MediaOfYouProps {
   // refetchRecommendationsData: () => Promise<RecommendationsData>;
   refetchRecommendationsData: () => Promise<any>;
 
-  friends: FriendsData["items"]; // Replace 'any' with the actual type
+  friends: FriendsData["items"];
   isLoadingFriendsData: boolean;
   // refetchFriendsData: () => Promise<FriendsData>;
   refetchFriendsData: () => Promise<any>;
 
-  posts: PostData["items"]; // Replace 'any' with the actual type of your post items
+  posts: PostData["items"];
   isLoadingPostData: boolean;
   isFetchingNextPage: boolean;
   // fetchNextPage: () => Promise<PostData>;
@@ -74,6 +74,18 @@ const MediaOfYou = (props: MediaOfYouProps) => {
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
+  const [isRestricted, setIsRestricted] = useState(false);
+
+  useEffect(() => {
+    if (profileData && !isSelfProfile && "networkStatus" in profileData) {
+      const privacy = profileData.networkStatus.privacy;
+      const canView =
+        privacy === "public" ||
+        profileData.networkStatus.targetUserFollowState === "Following" ||
+        profileData.networkStatus.targetUserFriendState === "Friends";
+      setIsRestricted(!canView);
+    }
+  }, [profileData, isSelfProfile]);
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -108,13 +120,6 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     itemVisiblePercentThreshold: 40,
   };
 
-  const onLoadListener = useCallback(
-    ({ elapsedTimeInMs }: { elapsedTimeInMs: number }) => {
-      console.log(`FlashList loaded in ${elapsedTimeInMs}ms`);
-    },
-    [],
-  );
-
   const memoizedProfileHeader = useMemo(() => {
     return (
       <ProfileHeader
@@ -141,9 +146,8 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     <View flex={1} width="100%" height="100%">
       <FlashList
         numColumns={1}
-        onLoad={onLoadListener}
         nestedScrollEnabled={true}
-        data={posts}
+        data={isRestricted ? posts : []}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
@@ -174,10 +178,27 @@ const MediaOfYou = (props: MediaOfYouProps) => {
               flex={1}
               justifyContent="center"
               alignItems="center"
+              paddingHorizontal="$8"
               aspectRatio={9 / 6}
             >
-              <Camera size="$9" color="$gray12" />
-              <SizableText size="$8">No posts yet</SizableText>
+              {isRestricted ? (
+                <>
+                  <Lock size="$9" color="$gray12" />
+                  <SizableText size="$7" fontWeight="bold">
+                    This account is private
+                  </SizableText>
+                  <Text alignContent="center" textAlign="center">
+                    Follow or friend this account to see their photos and videos
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Camera size="$9" color="$gray12" />
+                  <SizableText size="$7" fontWeight="bold">
+                    No posts yet
+                  </SizableText>
+                </>
+              )}
             </YStack>
           );
         }}
