@@ -216,7 +216,8 @@ const BottomTabsLayout = () => {
         name="(camera)"
         options={{
           header: () => null,
-          tabBarIcon: CameraTabIcon,
+          tabBarIcon: getTabBarIcon(Camera),
+          // tabBarIcon: CameraTabIcon,
         }}
       />
 
