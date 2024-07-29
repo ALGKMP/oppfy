@@ -1,6 +1,7 @@
 import { FriendState } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
+import { FollowRepository } from "../../repositories";
 import { FriendRepository } from "../../repositories/network/friend";
 import { ProfileRepository } from "../../repositories/profile/profile";
 import { NotificationsService } from "../user/notifications";
@@ -9,6 +10,7 @@ import { UserService } from "../user/user";
 export class FriendService {
   private friendRepository = new FriendRepository();
   private profileRepository = new ProfileRepository();
+  private followRespository = new FollowRepository();
 
   private userService = new UserService();
   private notificationsService = new NotificationsService();
@@ -84,6 +86,23 @@ export class FriendService {
     }
 
     await this.friendRepository.createFriend(senderId, recipientId);
+
+    const senderFollowsRecipient = await this.followRespository.getFollower(
+      senderId,
+      recipientId,
+    );
+    const recipientFollowsSender = await this.followRespository.getFollower(
+      recipientId,
+      senderId,
+    );
+
+    if (!senderFollowsRecipient) {
+      await this.followRespository.addFollower(senderId, recipientId);
+    }
+
+    if (!recipientFollowsSender) {
+      await this.followRespository.addFollower(recipientId, senderId);
+    }
 
     const recipient = await this.userService.getUser(recipientId);
     const recipientProfile = await this.profileRepository.getProfile(
