@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -14,6 +13,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import { useSegments } from "expo-router";
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
@@ -39,6 +39,8 @@ type ProfileProps = LoadingProps | ProfileLoadedProps;
 const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
+  const segments = useSegments();
+  const currentSegment = segments[segments.length - 1];
 
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
@@ -48,7 +50,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `(profile)/connections/[user-id]/following-list`,
+        pathname: `/connections/[user-id]/following-list`,
         params: { userId: props.data.userId },
       });
     }
@@ -58,7 +60,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `(profile)/connections/[user-id]/followers-list`,
+        pathname: `/connections/[user-id]/followers-list`,
         params: { userId: props.data.userId },
       });
     }
