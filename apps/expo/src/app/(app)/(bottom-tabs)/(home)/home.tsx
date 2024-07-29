@@ -93,13 +93,31 @@ const ListFooter = () => {
     </YStack>
   );
 };
-const styles = StyleSheet.create({
-  inviteText: {
-    color: "white",
-    textAlign: "center",
-    marginVertical: 10,
-  },
-});
+
+const EmptyHomeScreen = () => {
+  return (
+    <YStack justifyContent="center" alignItems="center" gap="$4" padding="$5">
+      <ListFooter></ListFooter>
+      <YStack
+        alignItems="center"
+        gap="$2"
+        marginTop="$4"
+        paddingHorizontal="$5"
+      >
+        <Text color="white" fontSize={32} fontWeight="bold">
+          Welcome to
+        </Text>
+        <Text color="white" fontSize={32} fontWeight="bold">
+          OPPFY🎉
+        </Text>
+        <Text color="white" textAlign="center">
+          When you follow people, you'll see who gets opped here the second it
+          happens!
+        </Text>
+      </YStack>
+    </YStack>
+  );
+};
 
 const HomeScreen = () => {
   const [status, setStatus] = useState<"success" | "loading" | "error">(
@@ -166,8 +184,7 @@ const HomeScreen = () => {
     itemVisiblePercentThreshold: 40,
   };
 
-  return (
-    // <BaseScreenView top={insets.top} padding={0}>
+  return (recommendationsData?.length ?? 0) > 0 || posts.length > 0 ? (
     <View flex={1} width="100%" height="100%">
       {isLoadingPostData ? (
         <YStack gap="$5" padding="$5">
@@ -221,7 +238,8 @@ const HomeScreen = () => {
         />
       )}
     </View>
-    // </BaseScreenView>
+  ) : (
+    <EmptyHomeScreen />
   );
 };
 
