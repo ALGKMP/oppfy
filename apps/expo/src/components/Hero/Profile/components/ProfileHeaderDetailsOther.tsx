@@ -57,8 +57,8 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     if (props.loading || (props.isRestricted && !props.loading)) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
-      pathname: `/connections/[user-id]/following-list`,
-      params: { userId: props.data.userId },
+      pathname: `${currentSegment}/profile/connections/[user-id]/following-list`,
+      params: { userId: props.data.userId, username: props.data.username },
     });
   };
 
@@ -66,8 +66,8 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     if (props.loading || (props.isRestricted && !props.loading)) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
-      pathname: `/connections/[user-id]/followers-list`,
-      params: { userId: props.data.userId },
+      pathname: `${currentSegment}/profile/connections/[user-id]/followers-list`,
+      params: { userId: props.data.userId, username: props.data.username },
     });
   };
 
@@ -710,7 +710,8 @@ const FollowButton = ({
   const isDisabled =
     (networkStatus.privacy === "private" &&
       friendState === "OutboundRequest") ||
-    friendState === "Friends" || friendState === "OutboundRequest";
+    friendState === "Friends" ||
+    friendState === "OutboundRequest";
 
   if (isDisabled) {
     return null;
