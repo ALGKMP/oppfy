@@ -60,7 +60,7 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
         <Defs>
           <LinearGradient id="grad" x1={x1} y1={y1} x2={x2} y2={y2}>
             {/* TODO: Find better colors */}
-            <Stop offset="0" stopColor="#ff7f7f" stopOpacity="1" />
+            <Stop offset="0" stopColor="#F214FF" stopOpacity="1" />
             <Stop offset="1" stopColor="#ff0000" stopOpacity="1" />
           </LinearGradient>
         </Defs>
