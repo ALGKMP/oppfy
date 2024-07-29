@@ -50,7 +50,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
       pathname: "/(profile)/profile/[userId]/",
-      params: { userId: userId },
+      params: { userId: userId }, // TODO: @oxy we need to pass in username now
     });
   };
 

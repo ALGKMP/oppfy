@@ -1,10 +1,4 @@
-import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import type {
-  HeaderBackButtonProps,
-  NativeStackHeaderProps,
-} from "@react-navigation/native-stack/src/types";
-import { ChevronLeft } from "@tamagui/lucide-icons";
+import type { NativeStackHeaderProps } from "@react-navigation/native-stack/src/types";
 import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
@@ -16,16 +10,16 @@ const HomeLayout = () => {
   return (
     <Stack
       screenOptions={{
-          header: (props) => <Header {...props} />,
+        header: () => null,
         contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
         name="home"
         options={{
-          header: (props) => <Header {...props} />,
-          headerLeft: () => null,
           title: "Home",
+          headerLeft: () => null,
+          header: (props) => <Header {...props} />,
         }}
       />
       <Stack.Screen name="post/[postId]" options={{ header: () => null }} />
@@ -33,24 +27,7 @@ const HomeLayout = () => {
   );
 };
 
-type HeaderLeftProps = HeaderBackButtonProps;
-
 type HeaderProps = NativeStackHeaderProps;
-
-const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
-  const router = useRouter();
-
-  return (
-    <TouchableOpacity
-      hitSlop={10}
-      onPress={() => {
-        canGoBack ? void router.back() : null;
-      }}
-    >
-      <ChevronLeft />
-    </TouchableOpacity>
-  );
-};
 
 const Header = ({ navigation, options }: HeaderProps) => (
   <BaseHeader

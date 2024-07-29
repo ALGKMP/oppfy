@@ -1,43 +1,68 @@
-import { Slot, Stack } from "expo-router";
+import { TouchableOpacity } from "react-native";
+import { Stack, useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { Text, useTheme } from "tamagui";
+import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
+import { Text, useTheme, View } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 
-type HeaderProps = NativeStackHeaderProps;
-
 const ProfileLayout = () => {
   const theme = useTheme();
+  const router = useRouter();
 
   return (
     <Stack
       screenOptions={{
-        // header: (props) => <Header {...props} />, // So this bitch makes it so the header doesn't look like shit rn
-        headerShown: false,
-        contentStyle: { backgroundColor: theme.background.val }, // this bitch sets the color for wtv the fuck idek
+        header: () => null,
+        contentStyle: { backgroundColor: theme.background.val },
       }}
     >
       <Stack.Screen
         name="[userId]"
-        options={
-          {
-            // headerShown: false,
-            // header: () => null,
-            // headerRight: () => (
-            //   <View>
-            //     <Pressable onPress={() => console.log("THING CLICKED")}>
-            //       {({ pressed }) => (
-            //         <MoreHorizontal style={{ opacity: pressed ? 0.5 : 1 }} />
-            //       )}
-            //     </Pressable>
-            //   </View>
-          }
-        }
+        options={{
+          header: (props) => <Header {...props} />,
+          headerLeft: (props) => <HeaderLeft {...props} />,
+          headerRight: () => (
+            <View>
+              <TouchableOpacity
+                onPress={() => router.push("/(app)/(settings)")}
+              >
+                <MoreHorizontal />
+              </TouchableOpacity>
+            </View>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="connections/[user-id]"
+        options={{
+          header: (props) => <Header {...props} />,
+          headerLeft: (props) => <HeaderLeft {...props} />,
+        }}
       />
     </Stack>
+  );
+};
+
+type HeaderLeftProps = HeaderBackButtonProps;
+
+type HeaderProps = NativeStackHeaderProps;
+
+const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
+  const router = useRouter();
+
+  return (
+    <TouchableOpacity
+      hitSlop={10}
+      onPress={() => {
+        canGoBack ? void router.back() : null;
+      }}
+    >
+      <ChevronLeft />
+    </TouchableOpacity>
   );
 };
 

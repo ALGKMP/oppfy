@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { Text, View, XStack } from "tamagui";
 
@@ -10,6 +10,8 @@ import MediaOfYou from "./MediaOfYou";
 
 const SelfProfile = () => {
   const router = useRouter();
+  const navigation = useNavigation();
+
   const utils = api.useUtils();
 
   // Profile data query
@@ -53,9 +55,15 @@ const SelfProfile = () => {
   const posts = postsData?.pages.flatMap((page) => page.items) ?? [];
   const friends = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: profileData?.username,
+    });
+  }, [navigation, profileData?.username]);
+
   return (
-    <BaseScreenView padding={0} safeAreaEdges={["top"]}>
-      <XStack
+    <BaseScreenView padding={0}>
+      {/* <XStack
         paddingVertical="$2"
         paddingHorizontal="$4"
         alignItems="center"
@@ -75,7 +83,7 @@ const SelfProfile = () => {
             <MoreHorizontal />
           </TouchableOpacity>
         </View>
-      </XStack>
+      </XStack> */}
       {
         // MediaOfYou component
         <MediaOfYou

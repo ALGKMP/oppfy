@@ -6,18 +6,14 @@ import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
 
 const ConnectionsLayout = () => {
+  const theme = useTheme();
+  const navigation = useNavigation();
+
   const { userId, username, initialRouteName } = useLocalSearchParams<{
     userId: string;
     username: string;
     initialRouteName: string;
   }>();
-  console.log(`initial route name: ${initialRouteName}`);
-  console.log(`username: ${username}`);
-  console.log(`userId: ${userId}`);
-
-  const theme = useTheme();
-
-  const navigation = useNavigation();
 
   useLayoutEffect(() => {
     navigation.setOptions({

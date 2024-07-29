@@ -3,25 +3,25 @@ import { useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { Input, SizableText, View, YStack } from "tamagui";
+import { SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import { ListItem } from "~/features/connections/components";
+import { useFollowHandlers } from "~/features/connections/hooks";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { ListItem } from "../components";
-import { useFollowHandlers } from "../hooks";
 
 const FriendList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const headerHeight = useHeaderHeight();
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
-    userId,
+    userId: userId ?? "",
     queryToOptimisticallyUpdate: "friend.paginateFriendsOthers",
     queriesToInvalidate: [
       "follow.paginateFollowingOthers",
@@ -38,7 +38,7 @@ const FriendList = () => {
     hasNextPage,
     refetch,
   } = api.friend.paginateFriendsOthers.useInfiniteQuery(
-    { userId, pageSize: 20 },
+    { userId: userId ?? "", pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
