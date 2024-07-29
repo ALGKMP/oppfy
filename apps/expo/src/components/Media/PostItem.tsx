@@ -422,7 +422,7 @@ const PostItem = (props: PostItemProps) => {
           >
             <Animated.View style={[heartButtonAnimatedStyle]}>
               <Heart
-                size={24}
+                size="$2"
                 padding="$3"
                 color={isLiked ? "red" : "$gray12"}
                 fill="red"
@@ -433,7 +433,7 @@ const PostItem = (props: PostItemProps) => {
 
           {/* Comment Button */}
           <TouchableOpacity onPress={() => setCommentsBottomSheetVisible(true)}>
-            <MessageCircle size={28} color="$gray12" />
+            <MessageCircle size="$2" color="$gray12" />
           </TouchableOpacity>
 
           {/* Share Button */}
@@ -441,7 +441,7 @@ const PostItem = (props: PostItemProps) => {
             onPress={() => shareImage({ uri: post.imageUrl })} // TODO: Add loading spinner on this
             // setIsShareModalVisible(true)}
           >
-            <Send size={28} color="$gray12" marginLeft="$-1" />
+            <Send size={26} color="$gray12" marginLeft="$-1.5" />
           </TouchableOpacity>
         </XStack>
 

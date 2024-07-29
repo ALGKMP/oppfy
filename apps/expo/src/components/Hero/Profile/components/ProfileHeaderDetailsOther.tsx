@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
@@ -14,6 +13,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import { useSegments } from "expo-router";
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
@@ -39,6 +39,8 @@ type ProfileProps = LoadingProps | ProfileLoadedProps;
 const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
+  const segments = useSegments();
+  const currentSegment = segments[segments.length - 1];
 
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
@@ -48,7 +50,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `(profile)/connections/[user-id]/following-list`,
+        pathname: `/connections/[user-id]/following-list`,
         params: { userId: props.data.userId },
       });
     }
@@ -58,7 +60,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (!props.loading) {
       router.navigate({
-        pathname: `(profile)/connections/[user-id]/followers-list`,
+        pathname: `/connections/[user-id]/followers-list`,
         params: { userId: props.data.userId },
       });
     }
@@ -413,7 +415,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
           networkStatus: {
             ...prevData.networkStatus,
             targetUserFriendState: "Friends",
-            targetUserFollowState: "Following"
+            targetUserFollowState: "Following",
           },
         },
       );
@@ -701,7 +703,7 @@ const FollowButton = ({
   if (isDisabled) {
     return null;
   }
-  
+
   let buttonText: string;
   switch (followState) {
     case "Following":
@@ -717,7 +719,12 @@ const FollowButton = ({
   }
 
   return (
-    <Button flex={1} borderRadius={20} onPress={onFollowPress}>
+    <Button
+      flex={1}
+      borderRadius={20}
+      onPress={onFollowPress}
+      backgroundColor={followState === "NotFollowing" ? "#F214FF" : "$primary"}
+    >
       {buttonText}
     </Button>
   );
@@ -730,13 +737,8 @@ const FriendButton = ({
   networkStatus: ProfileData["networkStatus"];
   onFriendPress: (action?: "accept" | "reject") => void;
 }) => {
-  // const isDisabled =
-  //   networkStatus.privacy === "private" &&
-  //   networkStatus.targetUserFollowState !== "Following";
 
-  // if (isDisabled) {
-  //   return null;
-  // }
+  const friendState = networkStatus.targetUserFriendState;
 
   if (networkStatus.targetUserFriendState === "IncomingRequest") {
     return (
@@ -790,7 +792,7 @@ const FriendButton = ({
       flex={1}
       borderRadius={20}
       onPress={() => onFriendPress()}
-      // disabled={isDisabled}
+      backgroundColor={friendState === "NotFriends" ? "#F214FF" : "$primary"}
     >
       {networkStatus.targetUserFriendState === "Friends"
         ? "Remove Friend"

@@ -1,4 +1,4 @@
-import { Text, View, YStack } from "tamagui";
+import { Separator, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
 
 import type { trpcValidators } from "@oppfy/validators";
@@ -8,11 +8,19 @@ import ProfileHeaderDetailsOther from "./components/ProfileHeaderDetailsOther";
 import ProfileHeaderDetailsSelf from "./components/ProfileHeaderDetailsSelf";
 
 // Define types at the top of the file
-type FullProfileOther = z.infer<typeof trpcValidators.output.profile.fullProfileOther>;
-type FullProfileSelf = z.infer<typeof trpcValidators.output.profile.fullProfileSelf>;
+type FullProfileOther = z.infer<
+  typeof trpcValidators.output.profile.fullProfileOther
+>;
+type FullProfileSelf = z.infer<
+  typeof trpcValidators.output.profile.fullProfileSelf
+>;
 type FriendItems = z.infer<typeof trpcValidators.output.friend.friendItems>;
-type FriendItemsOther = z.infer<typeof trpcValidators.output.friend.friendItemsOther>;
-type RecommendedProfiles = z.infer<typeof trpcValidators.output.recommendations.recommededProfiles>;
+type FriendItemsOther = z.infer<
+  typeof trpcValidators.output.friend.friendItemsOther
+>;
+type RecommendedProfiles = z.infer<
+  typeof trpcValidators.output.recommendations.recommededProfiles
+>;
 
 interface ProfileHeaderProps {
   isSelfProfile: boolean;
@@ -56,7 +64,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     );
   }
   return (
-    <YStack gap="$5" marginBottom="$5">
+    <YStack gap="$5">
       <YStack gap="$5">
         {isSelfProfile ? (
           <ProfileHeaderDetailsSelf
@@ -79,6 +87,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
           reccomendationsData={recommendationsData}
         />
       </YStack>
+      <Separator />
     </YStack>
   );
 };
