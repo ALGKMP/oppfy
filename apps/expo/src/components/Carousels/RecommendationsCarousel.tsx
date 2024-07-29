@@ -117,6 +117,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
       backgroundColor={"$background"}
       borderRadius={0}
       paddingLeft={0}
+      paddingRight={0}
     >
       <YStack gap="$2">
         <FlashList
