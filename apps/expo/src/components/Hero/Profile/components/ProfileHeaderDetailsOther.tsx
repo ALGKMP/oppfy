@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter, useSegments } from "expo-router";
+import { UserPlus2, UserRoundCheck } from "@tamagui/lucide-icons";
 import {
   Adapt,
   Avatar,
@@ -504,7 +505,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       setIsFollowLoading(false);
     }
   };
-  
+
   const handleUnfollow = async () => {
     if (props.loading) return;
     setIsFollowLoading(true);
@@ -516,7 +517,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       setIsFollowLoading(false);
     }
   };
-  
+
   const handleAddFriend = async () => {
     if (props.loading) return;
     setIsFriendLoading(true);
@@ -528,7 +529,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       setIsFriendLoading(false);
     }
   };
-  
+
   const handleRemoveFriend = async () => {
     if (props.loading) return;
     setIsFriendLoading(true);
@@ -540,7 +541,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       setIsFriendLoading(false);
     }
   };
-  
+
   const handleCancelFollowRequest = async () => {
     if (props.loading) return;
     setIsFollowLoading(true);
@@ -552,7 +553,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       setIsFollowLoading(false);
     }
   };
-  
+
   const handleCancelFriendRequest = async () => {
     if (props.loading) return;
     setIsFriendLoading(true);
@@ -564,7 +565,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       setIsFriendLoading(false);
     }
   };
-  
+
   const handleAcceptFriendRequest = async () => {
     if (props.loading) return;
     setIsFriendLoading(true);
@@ -576,7 +577,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
       setIsFriendLoading(false);
     }
   };
-  
+
   const handleRejectFriendRequest = async () => {
     if (props.loading) return;
     setIsFriendLoading(true);
@@ -781,8 +782,8 @@ const FollowButton = ({
       disabled={isLoading}
     >
       <XStack gap="$2" alignItems="center">
-        {isLoading && <Spinner size="small" color="$color" />}
         <Text>{buttonText}</Text>
+        {isLoading && <Spinner size="small" color="$color" />}
       </XStack>
     </Button>
   );
@@ -854,7 +855,6 @@ const FriendButton = ({
       disabled={isLoading}
     >
       <XStack gap="$2" alignItems="center">
-        {isLoading && <Spinner size="small" color="$color" />}
         <Text>
           {networkStatus.targetUserFriendState === "Friends"
             ? "Remove Friend"
@@ -862,6 +862,7 @@ const FriendButton = ({
               ? "Cancel Request"
               : "Add Friend"}
         </Text>
+        {isLoading && <Spinner size="small" color="$color" />}
       </XStack>
     </Button>
   );

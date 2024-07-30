@@ -87,26 +87,26 @@ export class FollowService {
 
     await this.followRepository.createFollower(senderId, recipientId);
 
-    await this.notificationsService.storeNotification(sender.id, recipient.id, {
-      eventType: "follow",
-      entityType: "profile",
-      entityId: sender.id,
-    });
+    // await this.notificationsService.storeNotification(sender.id, recipient.id, {
+    //   eventType: "follow",
+    //   entityType: "profile",
+    //   entityId: sender.id,
+    // });
 
-    const { followRequests } =
-      await this.notificationsService.getNotificationSettings(recipient.id);
+    // const { followRequests } =
+    //   await this.notificationsService.getNotificationSettings(recipient.id);
 
-    if (!followRequests) {
-      return;
-    }
+    // if (!followRequests) {
+    //   return;
+    // }
 
-    await this.notificationsService.sendNotification(sender.id, recipient.id, {
-      title: "New follower",
-      body: `${senderProfile.username} is now following you.`,
+    // await this.notificationsService.sendNotification(sender.id, recipient.id, {
+    //   title: "New follower",
+    //   body: `${senderProfile.username} is now following you.`,
 
-      entityType: "profile",
-      entityId: sender.id,
-    });
+    //   entityType: "profile",
+    //   entityId: sender.id,
+    // });
   }
 
   async unfollowUser(senderId: string, recipientId: string) {

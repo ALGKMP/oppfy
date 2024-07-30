@@ -67,7 +67,6 @@ const PostItem = React.memo((props: PostItemProps) => {
   const { viewPost } = useView();
 
   useEffect(() => {
-    console.log(`${post.postId} is viewable: ${isViewable}`);
     if (isViewable) {
       viewPost(post.postId);
     }
@@ -278,7 +277,7 @@ const PostItem = React.memo((props: PostItemProps) => {
   const handleRouteToNewUser = (userId: string, username: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (user?.uid === userId) {
-      router.push({ pathname: `/${routeSegments[2]}/self-profile` });
+      router.push({ pathname: `/(profile)/self-profile` });
       return;
     }
     router.push({
