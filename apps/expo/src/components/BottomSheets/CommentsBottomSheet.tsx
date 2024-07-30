@@ -80,216 +80,6 @@ const CommentsBottomSheet = React.memo(
       }
     }, [modalVisible, closeModal, openModal]);
 
-    // const {
-    //   data: commentsData,
-    //   isLoading: commentsLoading,
-    //   isFetchingNextPage,
-    //   fetchNextPage,
-    //   hasNextPage,
-    //   refetch,
-    // } = api.post.paginateComments.useInfiniteQuery(
-    //   {
-    //     postId,
-    //     pageSize: 10,
-    //   },
-    //   {
-    //     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    //   },
-    // );
-
-    const deleteComment = api.post.deleteComment.useMutation({
-      onMutate: async (newComment) => {
-        // Cancel any outgoing refetches to avoid overwriting optimistic update
-        await utils.post.paginateComments.cancel();
-        if (isSelfPost) {
-          await utils.post.paginatePostsOfUserSelf.cancel();
-        } else {
-          await utils.post.paginatePostsOfUserOther.cancel();
-        }
-
-        // Snapshot the previous value
-        const prevCommentsData = utils.post.paginateComments.getInfiniteData({
-          postId,
-          pageSize: 10,
-        });
-        const prevPostsData = isSelfPost
-          ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
-              pageSize: 10,
-            })
-          : utils.post.paginatePostsOfUserOther.getInfiniteData({
-              userId: userIdOfPostRecipient,
-              pageSize: 10,
-            });
-
-        if (isSelfPost) {
-          utils.post.paginatePostsOfUserSelf.setInfiniteData(
-            { pageSize: 10 },
-            (prevData) => {
-              if (!prevData) return prevData;
-              return {
-                ...prevData,
-                pages: prevData.pages.map((page) => {
-                  page.items.map((item) => {
-                    if (item?.postId === postId) {
-                      item.commentsCount -= 1;
-                    }
-                  });
-                  return page;
-                }),
-              };
-            },
-          );
-        } else {
-          utils.post.paginatePostsOfUserOther.setInfiniteData(
-            { userId: userIdOfPostRecipient, pageSize: 10 },
-            (prevData) => {
-              if (!prevData) return prevData;
-              return {
-                ...prevData,
-                pages: prevData.pages.map((page) => {
-                  page.items.map((item) => {
-                    if (item?.postId === postId) {
-                      item.commentsCount -= 1;
-                    }
-                  });
-                  return page;
-                }),
-              };
-            },
-          );
-        }
-
-        // Optimistically update to the new value
-        utils.post.paginateComments.setInfiniteData(
-          { postId, pageSize: 10 },
-          (prevData) => {
-            if (!prevData) return { pages: [], pageParams: [] };
-            return {
-              ...prevData,
-              pages: prevData.pages.map((page) => ({
-                ...page,
-                items: page.items.filter(
-                  (item) => item?.commentId !== newComment.commentId,
-                ),
-              })),
-            };
-          },
-        );
-
-        // Return a context object with the snapshotted value
-        return { prevCommentsData, prevPostsData };
-      },
-      onError: (err, _newData, ctx) => {
-        // Rollback to the previous value on error
-        console.log(err);
-        if (ctx?.prevCommentsData) {
-          utils.post.paginateComments.setInfiniteData(
-            { postId, pageSize: 10 },
-            ctx.prevCommentsData,
-          );
-        }
-        if (ctx?.prevPostsData) {
-          if (isSelfPost) {
-            utils.post.paginatePostsOfUserSelf.setInfiniteData(
-              { pageSize: 10 },
-              ctx.prevPostsData,
-            );
-          } else {
-            utils.post.paginatePostsOfUserOther.setInfiniteData(
-              { userId: userIdOfPostRecipient, pageSize: 10 },
-              ctx.prevPostsData,
-            );
-          }
-        }
-      },
-      onSettled: async () => {
-        // Only invalidate on success
-        await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
-        if (isSelfPost) {
-          await utils.post.paginatePostsOfUserSelf.invalidate();
-        } else {
-          await utils.post.paginatePostsOfUserOther.invalidate();
-        }
-      },
-    });
-
-    // const handleOnEndReached = useCallback(async () => {
-    //   if (!isFetchingNextPage && hasNextPage) {
-    //     await fetchNextPage();
-    //   }
-    // }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
-
-    // const comments = useMemo(
-    //   () =>
-    //     commentsData?.pages
-    //       .flatMap((page) => page.items)
-    //       .filter((item): item is Comment => item !== undefined) ?? [],
-    //   [commentsData],
-    // );
-
-    // const memoizedComments = useMemo(() => comments, [comments]);
-
-    const renderHeader = useCallback(
-      () => (
-        <YStack
-          flex={1}
-          justifyContent="center"
-          alignItems="center"
-          position="relative"
-        >
-          <Minus size="$4" />
-          <View justifyContent="center" alignItems="center">
-            <SizableText
-              size="$5"
-              textAlign="center"
-              color="$white"
-              fontWeight="bold"
-            >
-              Comments
-            </SizableText>
-          </View>
-          <View
-            width="95%"
-            borderColor="$gray8"
-            borderWidth="$0.25"
-            marginTop="$3"
-          />
-        </YStack>
-      ),
-      [],
-    );
-
-    return (
-      <BottomSheetWrapper
-        sheetRef={sheetRef}
-        modalVisible={modalVisible}
-        onClose={closeModal}
-        onOpen={openModal}
-        snapPoints={snapPoints}
-        topInset={insets.top}
-        handleComponent={renderHeader}
-      >
-        <CommentsList isSelfPost={isSelfPost} postId={postId} />
-        <CommentInput
-          isSelfPost={isSelfPost}
-          postId={postId}
-          profile={profile}
-          userIdOfPostRecipient={userIdOfPostRecipient}
-        />
-      </BottomSheetWrapper>
-    );
-  },
-);
-
-interface CommentInputProps {
-  isSelfPost: boolean;
-  postId: number;
-  profile: any;
-  userIdOfPostRecipient: string;
-}
-
-const CommentInput: React.FC<CommentInputProps> = React.memo(
-  ({ isSelfPost, postId, userIdOfPostRecipient, profile }) => {
     const [inputValue, setInputValue] = useState("");
 
     const handleChangeText = useCallback((text: string) => {
@@ -300,8 +90,6 @@ const CommentInput: React.FC<CommentInputProps> = React.memo(
     const handleEmojiPress = useCallback((emoji: string) => {
       setInputValue((prev) => prev + emoji);
     }, []);
-
-    const utils = api.useUtils();
 
     const commentOnPost = api.post.createComment.useMutation({
       onMutate: async (newComment) => {
@@ -437,8 +225,6 @@ const CommentInput: React.FC<CommentInputProps> = React.memo(
       // },
     });
 
-    const commentOnPostWithoutExtraShit = api.post.createComment.useMutation();
-
     const handlePostComment = useCallback(async () => {
       if (inputValue.trim().length === 0) return;
       const newComment = {
@@ -446,12 +232,125 @@ const CommentInput: React.FC<CommentInputProps> = React.memo(
         body: inputValue,
       };
       setInputValue("");
-      // await commentOnPostWithoutExtraShit.mutateAsync(newComment);
       await commentOnPost.mutateAsync(newComment);
     }, [inputValue, postId, commentOnPost]);
 
+    const renderItem = useCallback(
+      ({ item }: { item: Comment }) => (
+        <Comment
+          comment={item}
+          isSelfPost={isSelfPost}
+          postId={postId}
+          userIdOfPostRecipient={userIdOfPostRecipient}
+        />
+      ),
+      [],
+    );
+
+    const {
+      data: commentsData,
+      isLoading: commentsLoading,
+      isFetchingNextPage,
+      fetchNextPage,
+      hasNextPage,
+      refetch,
+    } = api.post.paginateComments.useInfiniteQuery(
+      {
+        postId,
+        pageSize: 10,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
+
+    const handleOnEndReached = useCallback(async () => {
+      if (!isFetchingNextPage && hasNextPage) {
+        await fetchNextPage();
+      }
+    }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+
+    const comments = useMemo(
+      () =>
+        commentsData?.pages
+          .flatMap((page) => page.items)
+          .filter((item): item is Comment => item !== undefined) ?? [],
+      [commentsData],
+    );
+
+    const memoizedComments = useMemo(() => comments, [comments]);
+
+    const renderHeader = useCallback(
+      () => (
+        <YStack
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          position="relative"
+        >
+          <Minus size="$4" />
+          <View justifyContent="center" alignItems="center">
+            <SizableText
+              size="$5"
+              textAlign="center"
+              color="$white"
+              fontWeight="bold"
+            >
+              Comments
+            </SizableText>
+          </View>
+          <View
+            width="95%"
+            borderColor="$gray8"
+            borderWidth="$0.25"
+            marginTop="$3"
+          />
+        </YStack>
+      ),
+      [],
+    );
+
     return (
-      <>
+      <BottomSheetWrapper
+        sheetRef={sheetRef}
+        modalVisible={modalVisible}
+        onClose={closeModal}
+        onOpen={openModal}
+        snapPoints={snapPoints}
+        topInset={insets.top}
+        handleComponent={renderHeader}
+      >
+         {commentsLoading && (
+          <View flex={1} justifyContent="center" alignItems="center">
+            <Spinner size="large" color="white" />
+          </View>
+        )}
+        {
+          // if there are no comments render a message
+          !commentsLoading && comments.length === 0 ? (
+            <View flex={1} justifyContent="center" alignItems="center">
+              <SizableText size="$7" fontWeight="bold">
+                No comments yet
+              </SizableText>
+              <Text color="$gray10">Be the first to comment</Text>
+            </View>
+          ) : (
+            <Animated.FlatList
+              data={memoizedComments}
+              itemLayoutAnimation={LinearTransition}
+              scrollEnabled={true}
+              keyExtractor={(item) => item.commentId.toString()}
+              renderItem={renderItem}
+              onEndReached={handleOnEndReached}
+            />
+          )
+        }
+        {/* <CommentInput
+          isSelfPost={isSelfPost}
+          postId={postId}
+          profile={profile}
+          userIdOfPostRecipient={userIdOfPostRecipient}
+        /> */}
         <XStack
           borderTopColor="$gray5"
           borderTopWidth="$0.25"
@@ -477,7 +376,7 @@ const CommentInput: React.FC<CommentInputProps> = React.memo(
           alignItems="center"
           backgroundColor="$gray4"
         >
-          <MemoizedAvatar src={profile?.profilePictureUrl} />
+          <MemoizedAvatar src={profile?.profilePictureUrl ?? ""} />
           <View style={{ flex: 5 }}>
             <BottomSheetTextInput
               placeholder="add a comment..."
@@ -511,7 +410,7 @@ const CommentInput: React.FC<CommentInputProps> = React.memo(
             <SendHorizontal color="$gray12" />
           </TouchableOpacity>
         </XStack>
-      </>
+      </BottomSheetWrapper>
     );
   },
 );
@@ -526,165 +425,214 @@ const MemoizedAvatar = React.memo(({ src }: { src: string }) => (
 interface CommentsListProps {
   postId: number;
   isSelfPost: boolean;
+  userIdOfPostRecipient: string;
 }
-
-const CommentsList = React.memo(({ isSelfPost, postId }: CommentsListProps) => {
-  const renderItem = useCallback(
-    ({ item }: { item: Comment }) => (
-      <Comment comment={item} isSelfPost={isSelfPost} />
-    ),
-    [],
-  );
-
-  const {
-    data: commentsData,
-    isLoading: commentsLoading,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.post.paginateComments.useInfiniteQuery(
-    {
-      postId,
-      pageSize: 10,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
-  );
-
-  const handleOnEndReached = useCallback(async () => {
-    if (!isFetchingNextPage && hasNextPage) {
-      await fetchNextPage();
-    }
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
-
-  const comments = useMemo(
-    () =>
-      commentsData?.pages
-        .flatMap((page) => page.items)
-        .filter((item): item is Comment => item !== undefined) ?? [],
-    [commentsData],
-  );
-
-  const memoizedComments = useMemo(() => comments, [comments]);
-
-  return (
-    <>
-      {commentsLoading && (
-        <View flex={1} justifyContent="center" alignItems="center">
-          <Spinner size="large" color="white" />
-        </View>
-      )}
-      {
-        // if there are no comments render a message
-        !commentsLoading && comments.length === 0 ? (
-          <View flex={1} justifyContent="center" alignItems="center">
-            <SizableText size="$7" fontWeight="bold">
-              No comments yet
-            </SizableText>
-            <Text color="$gray10">Be the first to comment</Text>
-          </View>
-        ) : (
-          <Animated.FlatList
-            data={memoizedComments}
-            itemLayoutAnimation={LinearTransition}
-            scrollEnabled={true}
-            keyExtractor={(item) => item.commentId.toString()}
-            renderItem={renderItem}
-            onEndReached={handleOnEndReached}
-          />
-        )
-      }
-    </>
-  );
-});
 
 interface CommentProps {
   comment: Comment;
   isSelfPost: boolean;
+  postId: number;
+  userIdOfPostRecipient: string;
 }
 
-const Comment = React.memo(({ comment, isSelfPost }: CommentProps) => {
-  TimeAgo.addLocale(en);
-  const timeAgo = new TimeAgo("en-US");
-  const utils = api.useUtils();
+const Comment = React.memo(
+  ({ comment, isSelfPost, postId, userIdOfPostRecipient }: CommentProps) => {
+    TimeAgo.addLocale(en);
+    const timeAgo = new TimeAgo("en-US");
+    const utils = api.useUtils();
 
-  const profile = utils.profile.getFullProfileSelf.getData();
+    const profile = utils.profile.getFullProfileSelf.getData();
 
-  return (
-    <BlurContextMenuWrapper
-      options={
-        isSelfPost || comment.userId === profile?.userId
-          ? [
-              {
-                label: (
-                  <Text color="white" marginLeft="$2" fontSize="$5">
-                    Delete
-                  </Text>
+    const deleteComment = api.post.deleteComment.useMutation({
+      onMutate: async (newComment) => {
+        // Cancel any outgoing refetches to avoid overwriting optimistic update
+        await utils.post.paginateComments.cancel();
+        if (isSelfPost) {
+          await utils.post.paginatePostsOfUserSelf.cancel();
+        } else {
+          await utils.post.paginatePostsOfUserOther.cancel();
+        }
+
+        // Snapshot the previous value
+        const prevCommentsData = utils.post.paginateComments.getInfiniteData({
+          postId,
+          pageSize: 10, // TODO: In theory, prevComments should only be the first 10 comments now
+        });
+        const prevPostsData = isSelfPost
+          ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
+              pageSize: 10,
+            })
+          : utils.post.paginatePostsOfUserOther.getInfiniteData({
+              userId: userIdOfPostRecipient,
+              pageSize: 10,
+            });
+
+        if (isSelfPost) {
+          utils.post.paginatePostsOfUserSelf.setInfiniteData(
+            { pageSize: 10 },
+            (prevData) => { 
+              if (!prevData) return prevData;
+              return {
+                ...prevData,
+                pages: prevData.pages.map((page) => {
+                  page.items.map((item) => {
+                    if (item?.postId === postId) {
+                      item.commentsCount -= 1;
+                    }
+                  });
+                  return page;
+                }),
+              };
+            },
+          );
+        } else {
+          utils.post.paginatePostsOfUserOther.setInfiniteData(
+            { userId: userIdOfPostRecipient, pageSize: 10 },
+            (prevData) => {// TODO: If prevData is only the first pages, then this should not optimistically update
+              console.log("prevData", prevData);
+              if (!prevData) return prevData;
+              return {
+                ...prevData,
+                pages: prevData.pages.map((page) => {
+                  page.items.map((item) => {
+                    if (item?.postId === postId) {
+                      item.commentsCount -= 1;
+                    }
+                  });
+                  return page;
+                }),
+              };
+            },
+          );
+        }
+
+        // Optimistically update to the new value
+        utils.post.paginateComments.setInfiniteData(
+          { postId, pageSize: 10 },
+          (prevData) => {
+            if (!prevData) return { pages: [], pageParams: [] };
+            return {
+              ...prevData,
+              pages: prevData.pages.map((page) => ({
+                ...page,
+                items: page.items.filter(
+                  (item) => item?.commentId !== newComment.commentId,
                 ),
-                icon: <Trash2 size="$1.5" color="white" />,
-                onPress: () => {
-                  // void deleteComment.mutateAsync({
-                  //   postId,
-                  //   commentId: comment.commentId,
-                  // }),
+              })),
+            };
+          },
+        );
+
+        // Return a context object with the snapshotted value
+        return { prevCommentsData, prevPostsData };
+      },
+      onError: (err, _newData, ctx) => {
+        // Rollback to the previous value on error
+        console.log(err);
+        if (ctx?.prevCommentsData) {
+          utils.post.paginateComments.setInfiniteData(
+            { postId, pageSize: 10 },
+            ctx.prevCommentsData,
+          );
+        }
+        if (ctx?.prevPostsData) {
+          if (isSelfPost) {
+            utils.post.paginatePostsOfUserSelf.setInfiniteData(
+              { pageSize: 10 },
+              ctx.prevPostsData,
+            );
+          } else {
+            utils.post.paginatePostsOfUserOther.setInfiniteData(
+              { userId: userIdOfPostRecipient, pageSize: 10 },
+              ctx.prevPostsData,
+            );
+          }
+        }
+      },
+      onSettled: async () => {
+        // Only invalidate on success
+        await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
+        if (isSelfPost) {
+          await utils.post.paginatePostsOfUserSelf.invalidate();
+        } else {
+          await utils.post.paginatePostsOfUserOther.invalidate();
+        }
+      },
+    });
+
+    return (
+      <BlurContextMenuWrapper
+        options={
+          isSelfPost || comment.userId === profile?.userId
+            ? [
+                {
+                  label: (
+                    <Text color="white" marginLeft="$2" fontSize="$5">
+                      Delete
+                    </Text>
+                  ),
+                  icon: <Trash2 size="$1.5" color="white" />,
+                  onPress: () =>
+                    void deleteComment.mutateAsync({
+                      postId,
+                      commentId: comment.commentId,
+                    }),
                 },
-              },
-              {
-                label: (
-                  <Text color="red" marginLeft="$2" fontSize="$5">
-                    Report
-                  </Text>
-                ),
-                icon: <AlertCircle size="$1.5" color="red" />,
-                onPress: () => {
-                  setTimeout(() => {
-                    // setIsReportModalVisible(true);
-                  }, 275);
+                {
+                  label: (
+                    <Text color="red" marginLeft="$2" fontSize="$5">
+                      Report
+                    </Text>
+                  ),
+                  icon: <AlertCircle size="$1.5" color="red" />,
+                  onPress: () => {
+                    setTimeout(() => {
+                      // setIsReportModalVisible(true);
+                    }, 275);
+                  },
                 },
-              },
-            ]
-          : [
-              {
-                label: (
-                  <Text color="red" marginLeft="$2" fontSize="$5">
-                    Report
-                  </Text>
-                ),
-                icon: <AlertCircle size="$1.5" color="red" />,
-                onPress: () => {
-                  setTimeout(() => {
-                    // setIsReportModalVisible(true);
-                  }, 275);
+              ]
+            : [
+                {
+                  label: (
+                    <Text color="red" marginLeft="$2" fontSize="$5">
+                      Report
+                    </Text>
+                  ),
+                  icon: <AlertCircle size="$1.5" color="red" />,
+                  onPress: () => {
+                    setTimeout(() => {
+                      // setIsReportModalVisible(true);
+                    }, 275);
+                  },
                 },
-              },
-            ]
-      }
-    >
-      <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
-        <XStack gap="$3" alignItems="center">
-          <MemoizedAvatar src={comment.profilePictureUrl} />
-          <YStack gap="$2" width="100%" flex={1}>
-            <XStack gap="$2">
-              <Text fontWeight="bold">{comment.username}</Text>
-              <Text color="$gray10">
-                {timeAgo.format(new Date(comment.createdAt))}
-              </Text>
-            </XStack>
-            <Text>{comment.body}</Text>
-          </YStack>
-        </XStack>
-      </View>
-      {/* <ReportCommentActionSheet
+              ]
+        }
+      >
+        <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
+          <XStack gap="$3" alignItems="center">
+            <MemoizedAvatar src={comment.profilePictureUrl} />
+            <YStack gap="$2" width="100%" flex={1}>
+              <XStack gap="$2">
+                <Text fontWeight="bold">{comment.username}</Text>
+                <Text color="$gray10">
+                  {timeAgo.format(new Date(comment.createdAt))}
+                </Text>
+              </XStack>
+              <Text>{comment.body}</Text>
+            </YStack>
+          </XStack>
+        </View>
+        {/* <ReportCommentActionSheet
           title="Report Comment"
           subtitle="Select reason"
           commentId={comment.commentId}
           isVisible={isReportModalVisible}
           onCancel={() => setIsReportModalVisible(false)}
         /> */}
-    </BlurContextMenuWrapper>
-  );
-});
+      </BlurContextMenuWrapper>
+    );
+  },
+);
 
 export default CommentsBottomSheet;
