@@ -570,14 +570,33 @@ const CommentsList = React.memo(({ isSelfPost, postId }: CommentsListProps) => {
   const memoizedComments = useMemo(() => comments, [comments]);
 
   return (
-    <Animated.FlatList
-      data={memoizedComments}
-      itemLayoutAnimation={LinearTransition}
-      scrollEnabled={true}
-      keyExtractor={(item) => item.commentId.toString()}
-      renderItem={renderItem}
-      onEndReached={handleOnEndReached}
-    />
+    <>
+      {commentsLoading && (
+        <View flex={1} justifyContent="center" alignItems="center">
+          <Spinner size="large" color="white" />
+        </View>
+      )}
+      {
+        // if there are no comments render a message
+        !commentsLoading && comments.length === 0 ? (
+          <View flex={1} justifyContent="center" alignItems="center">
+            <SizableText size="$7" fontWeight="bold">
+              No comments yet
+            </SizableText>
+            <Text color="$gray10">Be the first to comment</Text>
+          </View>
+        ) : (
+          <Animated.FlatList
+            data={memoizedComments}
+            itemLayoutAnimation={LinearTransition}
+            scrollEnabled={true}
+            keyExtractor={(item) => item.commentId.toString()}
+            renderItem={renderItem}
+            onEndReached={handleOnEndReached}
+          />
+        )
+      }
+    </>
   );
 });
 
