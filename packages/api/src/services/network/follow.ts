@@ -133,8 +133,13 @@ export class FollowService {
     }
 
     await this.followRepository.removeFollower(senderId, recipientId);
-
-    await this.notificationsService.deleteNotification(senderId, "follow");
+    await this.notificationsService.deleteSpecificNotificationsFromSender(
+      senderId,
+      {
+        eventType: ["follow", "followRequest"],
+        entityType: "profile",
+      },
+    );
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {

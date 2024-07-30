@@ -116,10 +116,14 @@ export class FriendService {
       );
     }
 
-    await this.notificationsService.deleteNotification(
+    await this.notificationsService.deleteSpecificNotificationsFromSender(
       senderId,
-      "friendRequest",
+      {
+        eventType: ["friendRequest"],
+        entityType: "profile",
+      },
     );
+
     await this.notificationsService.storeNotification(recipientId, senderId, {
       eventType: "friend",
       entityType: "profile",
@@ -159,9 +163,12 @@ export class FriendService {
     }
 
     await this.friendRepository.deleteFriendRequest(senderId, recipientId);
-    await this.notificationsService.deleteNotification(
+    await this.notificationsService.deleteSpecificNotificationsFromSender(
       senderId,
-      "friendRequest",
+      {
+        eventType: ["friendRequest"],
+        entityType: "profile",
+      },
     );
   }
 
@@ -177,10 +184,12 @@ export class FriendService {
       );
     }
 
-    // handlen notis
-    await this.notificationsService.deleteNotification(
+    await this.notificationsService.deleteSpecificNotificationsFromSender(
       senderId,
-      "friendRequest",
+      {
+        eventType: ["friendRequest"],
+        entityType: "profile",
+      },
     );
 
     return await this.friendRepository.deleteFriendRequest(
@@ -215,8 +224,10 @@ export class FriendService {
       );
     }
 
-    await this.notificationsService.deleteNotification(targetUserId, "friend");
-    await this.notificationsService.deleteNotification(otherUserId, "friend");
+    await this.notificationsService.deleteAllFriendRelatedNotificationsBetweenUsers(
+      targetUserId,
+      otherUserId,
+    );
     return await this.friendRepository.removeFriend(targetUserId, otherUserId);
   }
 
