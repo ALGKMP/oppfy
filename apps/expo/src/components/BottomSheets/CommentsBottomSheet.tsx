@@ -244,7 +244,7 @@ const CommentsBottomSheet = React.memo(
           userIdOfPostRecipient={userIdOfPostRecipient}
         />
       ),
-      [],
+      [isSelfPost, postId, userIdOfPostRecipient],
     );
 
     const {
@@ -320,7 +320,7 @@ const CommentsBottomSheet = React.memo(
         topInset={insets.top}
         handleComponent={renderHeader}
       >
-         {commentsLoading && (
+        {commentsLoading && (
           <View flex={1} justifyContent="center" alignItems="center">
             <Spinner size="large" color="white" />
           </View>
@@ -422,12 +422,6 @@ const MemoizedAvatar = React.memo(({ src }: { src: string }) => (
   </Avatar>
 ));
 
-interface CommentsListProps {
-  postId: number;
-  isSelfPost: boolean;
-  userIdOfPostRecipient: string;
-}
-
 interface CommentProps {
   comment: Comment;
   isSelfPost: boolean;
@@ -470,7 +464,7 @@ const Comment = React.memo(
         if (isSelfPost) {
           utils.post.paginatePostsOfUserSelf.setInfiniteData(
             { pageSize: 10 },
-            (prevData) => { 
+            (prevData) => {
               if (!prevData) return prevData;
               return {
                 ...prevData,
@@ -488,7 +482,8 @@ const Comment = React.memo(
         } else {
           utils.post.paginatePostsOfUserOther.setInfiniteData(
             { userId: userIdOfPostRecipient, pageSize: 10 },
-            (prevData) => {// TODO: If prevData is only the first pages, then this should not optimistically update
+            (prevData) => {
+              // TODO: If prevData is only the first pages, then this should not optimistically update
               console.log("prevData", prevData);
               if (!prevData) return prevData;
               return {
