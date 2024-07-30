@@ -9,6 +9,8 @@ export const eventType = z.enum([
   "friend",
   "followRequest",
   "friendRequest",
+  "followRequestAccepted",
+  "friendRequestAccepted",
 ]);
 
 export const entityData = z.object({
