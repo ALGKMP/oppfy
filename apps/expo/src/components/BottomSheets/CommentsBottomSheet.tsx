@@ -80,22 +80,22 @@ const CommentsBottomSheet = React.memo(
       }
     }, [modalVisible, closeModal, openModal]);
 
-    const {
-      data: commentsData,
-      isLoading: commentsLoading,
-      isFetchingNextPage,
-      fetchNextPage,
-      hasNextPage,
-      refetch,
-    } = api.post.paginateComments.useInfiniteQuery(
-      {
-        postId,
-        pageSize: 10,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-      },
-    );
+    // const {
+    //   data: commentsData,
+    //   isLoading: commentsLoading,
+    //   isFetchingNextPage,
+    //   fetchNextPage,
+    //   hasNextPage,
+    //   refetch,
+    // } = api.post.paginateComments.useInfiniteQuery(
+    //   {
+    //     postId,
+    //     pageSize: 10,
+    //   },
+    //   {
+    //     getNextPageParam: (lastPage) => lastPage.nextCursor,
+    //   },
+    // );
 
     const deleteComment = api.post.deleteComment.useMutation({
       onMutate: async (newComment) => {
@@ -213,21 +213,21 @@ const CommentsBottomSheet = React.memo(
       },
     });
 
-    const handleOnEndReached = useCallback(async () => {
-      if (!isFetchingNextPage && hasNextPage) {
-        await fetchNextPage();
-      }
-    }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+    // const handleOnEndReached = useCallback(async () => {
+    //   if (!isFetchingNextPage && hasNextPage) {
+    //     await fetchNextPage();
+    //   }
+    // }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-    const comments = useMemo(
-      () =>
-        commentsData?.pages
-          .flatMap((page) => page.items)
-          .filter((item): item is Comment => item !== undefined) ?? [],
-      [commentsData],
-    );
+    // const comments = useMemo(
+    //   () =>
+    //     commentsData?.pages
+    //       .flatMap((page) => page.items)
+    //       .filter((item): item is Comment => item !== undefined) ?? [],
+    //   [commentsData],
+    // );
 
-    const memoizedComments = useMemo(() => comments, [comments]);
+    // const memoizedComments = useMemo(() => comments, [comments]);
 
     const renderHeader = useCallback(
       () => (
@@ -269,37 +269,7 @@ const CommentsBottomSheet = React.memo(
         topInset={insets.top}
         handleComponent={renderHeader}
       >
-        {commentsLoading && (
-          <View flex={1} justifyContent="center" alignItems="center">
-            <Spinner size="large" color="white" />
-          </View>
-        )}
-        {
-          // if there are no comments render a message
-          !commentsLoading && comments.length === 0 ? (
-            <View flex={1} justifyContent="center" alignItems="center">
-              <SizableText size="$7" fontWeight="bold">
-                No comments yet
-              </SizableText>
-              <Text color="$gray10">Be the first to comment</Text>
-            </View>
-          ) : (
-            <CommentsList
-              comments={memoizedComments}
-              handleOnEndReached={handleOnEndReached}
-              isSelfPost={isSelfPost}
-            />
-
-            // <Animated.FlatList
-            //   data={memoizedComments}
-            //   itemLayoutAnimation={LinearTransition}
-            //   scrollEnabled={true}
-            //   keyExtractor={(item) => item.commentId.toString()}
-            //   renderItem={renderItem}
-            //   onEndReached={handleOnEndReached}
-            // />
-          )
-        }
+        <CommentsList isSelfPost={isSelfPost} postId={postId} />
         <CommentInput
           isSelfPost={isSelfPost}
           postId={postId}
@@ -554,34 +524,62 @@ const MemoizedAvatar = React.memo(({ src }: { src: string }) => (
 ));
 
 interface CommentsListProps {
-  comments: Comment[];
-  handleOnEndReached: () => Promise<void>;
+  postId: number;
   isSelfPost: boolean;
 }
 
-const CommentsList = React.memo(
-  ({ comments, handleOnEndReached, isSelfPost }: CommentsListProps) => {
-    const renderItem = useCallback(
-      ({ item }: { item: Comment }) => (
-        <Comment comment={item} isSelfPost={isSelfPost} />
-      ),
-      [],
-    );
+const CommentsList = React.memo(({ isSelfPost, postId }: CommentsListProps) => {
+  const renderItem = useCallback(
+    ({ item }: { item: Comment }) => (
+      <Comment comment={item} isSelfPost={isSelfPost} />
+    ),
+    [],
+  );
 
-    const memoizedComments = useMemo(() => comments, [comments]);
+  const {
+    data: commentsData,
+    isLoading: commentsLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.post.paginateComments.useInfiniteQuery(
+    {
+      postId,
+      pageSize: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
 
-    return (
-      <Animated.FlatList
-        data={memoizedComments}
-        itemLayoutAnimation={LinearTransition}
-        scrollEnabled={true}
-        keyExtractor={(item) => item.commentId.toString()}
-        renderItem={renderItem}
-        onEndReached={handleOnEndReached}
-      />
-    );
-  },
-);
+  const handleOnEndReached = useCallback(async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+
+  const comments = useMemo(
+    () =>
+      commentsData?.pages
+        .flatMap((page) => page.items)
+        .filter((item): item is Comment => item !== undefined) ?? [],
+    [commentsData],
+  );
+
+  const memoizedComments = useMemo(() => comments, [comments]);
+
+  return (
+    <Animated.FlatList
+      data={memoizedComments}
+      itemLayoutAnimation={LinearTransition}
+      scrollEnabled={true}
+      keyExtractor={(item) => item.commentId.toString()}
+      renderItem={renderItem}
+      onEndReached={handleOnEndReached}
+    />
+  );
+});
 
 interface CommentProps {
   comment: Comment;
@@ -589,7 +587,6 @@ interface CommentProps {
 }
 
 const Comment = React.memo(({ comment, isSelfPost }: CommentProps) => {
-  console.log("Rerendering comment", comment.commentId);
   TimeAgo.addLocale(en);
   const timeAgo = new TimeAgo("en-US");
   const utils = api.useUtils();
