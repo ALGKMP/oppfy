@@ -27,6 +27,7 @@ import type { sharedValidators } from "@oppfy/validators";
 import {
   CommentsBottomSheet,
   CommentsTestBottomSheet,
+  CommentsTestBottomSheet2,
   PostActionsBottomSheet,
 } from "~/components/BottomSheets";
 import GradientHeart, {
@@ -50,8 +51,8 @@ interface PostItemProps {
   isViewable: boolean;
 }
 
-const PostItem = (props: PostItemProps) => {
-  console.log("PostItem RE-Rendering")
+const PostItem = React.memo((props: PostItemProps) => {
+  console.log("PostItem RE-Rendering");
   const { post, isSelfPost, isViewable } = props;
   const [isMuted, setIsMuted] = useState(false);
   const [status, _setStatus] = useState<"success" | "loading" | "error">(
@@ -513,6 +514,13 @@ const PostItem = (props: PostItemProps) => {
           modalVisible={commentsBottomSheetVisible}
           setModalVisible={setCommentsBottomSheetVisible}
         />
+        // <CommentsTestBottomSheet2
+        //   isSelfPost={isSelfPost}
+        //   userIdOfPostRecipient={post.recipientId}
+        //   postId={post.postId}
+        //   modalVisible={commentsBottomSheetVisible}
+        //   setModalVisible={setCommentsBottomSheetVisible}
+        // />
 
         // <CommentsTestBottomSheet
         //   postId={post.postId}
@@ -579,6 +587,6 @@ const PostItem = (props: PostItemProps) => {
       )}
     </View>
   );
-};
+});
 
 export default PostItem;

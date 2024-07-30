@@ -8,10 +8,7 @@ import React, {
 import { TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BottomSheet, {
-  BottomSheetFlatList,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   Minus,
@@ -34,9 +31,9 @@ import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
-import ReportCommentActionSheet from "~/components/Sheets/ReportCommentActionSheet";
 import { api } from "~/utils/api";
 import { BlurContextMenuWrapper } from "../ContextMenu";
+import { ReportPostActionSheet } from "../Sheets";
 import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface CommentsModalProps {
@@ -48,8 +45,6 @@ interface CommentsModalProps {
 }
 
 type Comment = z.infer<typeof sharedValidators.media.comment>;
-
-const ITEM_HEIGHT = 100;
 
 const CommentsBottomSheet = React.memo(
   ({
@@ -101,213 +96,6 @@ const CommentsBottomSheet = React.memo(
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
     );
-
-    const commentOnPostWithoutExtraShit = api.post.createComment.useMutation({
-      onMutate: async (newComment) => {
-        // Cancel any outgoing refetches to avoid overwriting optimistic update
-        await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
-
-        // Snapshot the previous value
-        const prevCommentsData = utils.post.paginateComments.getInfiniteData({
-          postId,
-          pageSize: 10,
-        });
-
-        const temporaryId = Math.random();
-
-        // Optimistically update to the new value
-        utils.post.paginateComments.setInfiniteData(
-          { postId, pageSize: 10 },
-          (prevData) => {
-            if (!prevData) return { pages: [], pageParams: [] };
-            return {
-              ...prevData,
-              pages: prevData.pages.map((page, index) => {
-                if (index === 0) {
-                  return {
-                    ...page,
-                    items: [
-                      {
-                        ...newComment,
-                        username: profile?.username ?? "User",
-                        createdAt: new Date(),
-                        userId: profile?.userId ?? "temp-id",
-                        commentId: temporaryId, // Temporary ID
-                        profilePictureUrl:
-                          profile?.profilePictureUrl ??
-                          "https://example.com/avatar.jpg",
-                      },
-                      ...page.items,
-                    ],
-                  };
-                }
-                return page;
-              }),
-            };
-          },
-        );
-        console.log("Running onMutate for setPaginateComments");
-
-        // Return a context object with the snapshotted value
-        return { prevCommentsData };
-      },
-      onError: (err, _newData, ctx) => {
-        // Rollback to the previous value on error
-        console.log(err);
-        if (ctx?.prevCommentsData) {
-          utils.post.paginateComments.setInfiniteData(
-            { postId, pageSize: 10 },
-            ctx.prevCommentsData,
-          );
-        }
-      },
-      // onSettled: async () => {
-      //   await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
-      // },
-    });
-
-    const commentOnPost = api.post.createComment.useMutation({
-      onMutate: async (newComment) => {
-        // Cancel any outgoing refetches to avoid overwriting optimistic update
-        console.log("Running onMutate");
-        await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
-        if (isSelfPost) {
-          await utils.post.paginatePostsOfUserSelf.cancel({ pageSize: 10 });
-        } else {
-          await utils.post.paginatePostsOfUserOther.cancel({
-            userId: userIdOfPostRecipient,
-            pageSize: 10,
-          });
-        }
-
-        // Snapshot the previous value
-        const prevCommentsData = utils.post.paginateComments.getInfiniteData({
-          postId,
-          pageSize: 10,
-        });
-        const prevPostsData = isSelfPost
-          ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
-              pageSize: 10,
-            })
-          : utils.post.paginatePostsOfUserOther.getInfiniteData({
-              userId: userIdOfPostRecipient,
-              pageSize: 10,
-            });
-
-        if (isSelfPost) {
-          console.log(
-            "Running onMutate setInfiniteData for paginatePostsOfUserSelf",
-          );
-          utils.post.paginatePostsOfUserSelf.setInfiniteData(
-            { pageSize: 10 },
-            (prevData) => {
-              if (!prevData) return prevData;
-              return {
-                ...prevData,
-                pages: prevData.pages.map((page) => {
-                  // check if it's postId
-                  page.items.map((item) => {
-                    if (item?.postId === postId) {
-                      console.log("adding extra count");
-                      item.commentsCount += 1;
-                    }
-                  });
-                  return page;
-                }),
-              };
-            },
-          );
-        } else {
-          utils.post.paginatePostsOfUserOther.setInfiniteData(
-            { userId: userIdOfPostRecipient, pageSize: 10 },
-            (prevData) => {
-              if (!prevData) return prevData;
-              return {
-                ...prevData,
-                pages: prevData.pages.map((page) => {
-                  // check if it's postId
-                  page.items.map((item) => {
-                    if (item?.postId === postId) {
-                      console.log("adding extra count");
-                      item.commentsCount += 1;
-                    }
-                  });
-                  return page;
-                }),
-              };
-            },
-          );
-        }
-
-        const temporaryId = Math.random();
-
-        // Optimistically update to the new value
-        utils.post.paginateComments.setInfiniteData(
-          { postId, pageSize: 10 },
-          (prevData) => {
-            if (!prevData) return { pages: [], pageParams: [] };
-            return {
-              ...prevData,
-              pages: prevData.pages.map((page, index) => {
-                if (index === 0) {
-                  return {
-                    ...page,
-                    items: [
-                      {
-                        ...newComment,
-                        username: profile?.username ?? "User",
-                        createdAt: new Date(),
-                        userId: profile?.userId ?? "temp-id",
-                        commentId: temporaryId, // Temporary ID
-                        profilePictureUrl:
-                          profile?.profilePictureUrl ??
-                          "https://example.com/avatar.jpg",
-                      },
-                      ...page.items,
-                    ],
-                  };
-                }
-                return page;
-              }),
-            };
-          },
-        );
-        console.log("Running onMutate for setPaginateComments");
-
-        // Return a context object with the snapshotted value
-        return { prevCommentsData, prevPostsData };
-      },
-      onError: (err, _newData, ctx) => {
-        // Rollback to the previous value on error
-        console.log(err);
-        if (ctx?.prevCommentsData) {
-          utils.post.paginateComments.setInfiniteData(
-            { postId, pageSize: 10 },
-            ctx.prevCommentsData,
-          );
-        }
-        if (ctx?.prevPostsData) {
-          if (isSelfPost) {
-            utils.post.paginatePostsOfUserSelf.setInfiniteData(
-              { pageSize: 10 },
-              ctx.prevPostsData,
-            );
-          } else {
-            utils.post.paginatePostsOfUserOther.setInfiniteData(
-              { userId: userIdOfPostRecipient, pageSize: 10 },
-              ctx.prevPostsData,
-            );
-          }
-        }
-      },
-      // onSettled: async () => {
-      //   await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
-      // },
-    });
-
-    useEffect(() => {
-      console.log("comments loading", commentsLoading);
-    }, [commentsLoading]);
 
     const deleteComment = api.post.deleteComment.useMutation({
       onMutate: async (newComment) => {
@@ -441,113 +229,6 @@ const CommentsBottomSheet = React.memo(
 
     const memoizedComments = useMemo(() => comments, [comments]);
 
-    TimeAgo.addLocale(en);
-    const timeAgo = new TimeAgo("en-US");
-
-    const MemoizedAvatar = React.memo(({ src }: { src: string }) => (
-      <Avatar circular size="$4" flex={1}>
-        <Avatar.Image accessibilityLabel="User Avatar" src={src} />
-        <Avatar.Fallback backgroundColor="$blue10" />
-      </Avatar>
-    ));
-
-    const Comment = React.memo(
-      ({ comment }: { comment: Comment }) => {
-        console.log("Rerendering comment", comment.commentId);
-        return (
-          <BlurContextMenuWrapper
-            options={
-              isSelfPost || comment.userId === profile?.userId
-                ? [
-                    {
-                      label: (
-                        <Text color="white" marginLeft="$2" fontSize="$5">
-                          Delete
-                        </Text>
-                      ),
-                      icon: <Trash2 size="$1.5" color="white" />,
-                      onPress: () =>
-                        void deleteComment.mutateAsync({
-                          postId,
-                          commentId: comment.commentId,
-                        }),
-                    },
-                    {
-                      label: (
-                        <Text color="red" marginLeft="$2" fontSize="$5">
-                          Report
-                        </Text>
-                      ),
-                      icon: <AlertCircle size="$1.5" color="red" />,
-                      onPress: () => {
-                        setTimeout(() => {
-                          setIsReportModalVisible(true);
-                        }, 275);
-                      },
-                    },
-                  ]
-                : [
-                    {
-                      label: (
-                        <Text color="red" marginLeft="$2" fontSize="$5">
-                          Report
-                        </Text>
-                      ),
-                      icon: <AlertCircle size="$1.5" color="red" />,
-                      onPress: () => {
-                        setTimeout(() => {
-                          setIsReportModalVisible(true);
-                        }, 275);
-                      },
-                    },
-                  ]
-            }
-          >
-            <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
-              <XStack gap="$3" alignItems="center">
-                <MemoizedAvatar src={comment.profilePictureUrl} />
-                <YStack gap="$2" width="100%" flex={1}>
-                  <XStack gap="$2">
-                    <Text fontWeight="bold">{comment.username}</Text>
-                    <Text color="$gray10">
-                      {timeAgo.format(new Date(comment.createdAt))}
-                    </Text>
-                  </XStack>
-                  <Text>{comment.body}</Text>
-                </YStack>
-              </XStack>
-            </View>
-            <ReportCommentActionSheet
-              title="Report Comment"
-              subtitle="Select reason"
-              commentId={comment.commentId}
-              isVisible={isReportModalVisible}
-              onCancel={() => setIsReportModalVisible(false)}
-            />
-          </BlurContextMenuWrapper>
-        );
-      },
-      (prevProps, nextProps) => {
-        console.log("prev commentID", prevProps.comment.commentId);
-        console.log("next commentID", nextProps.comment.commentId);
-        console.log("prev comments", prevProps.comment.body);
-        console.log("next comments", nextProps.comment.body);
-        console.log(
-          "are commentIds equal?",
-          prevProps.comment.commentId === nextProps.comment.commentId,
-        );
-        console.log(
-          "are bodies equal?",
-          prevProps.comment.body === nextProps.comment.body,
-        );
-        const shouldPersist =
-          prevProps.comment.commentId === nextProps.comment.commentId ||
-          prevProps.comment.body === nextProps.comment.body;
-        console.log("should update", shouldPersist);
-        return shouldPersist;
-      },
-    );
-
     const renderHeader = useCallback(
       () => (
         <YStack
@@ -578,147 +259,6 @@ const CommentsBottomSheet = React.memo(
       [],
     );
 
-    interface CommentInputProps {
-      onPostComment: (commentBody: string) => Promise<void>;
-      profile: any;
-    }
-
-    const CommentInput: React.FC<CommentInputProps> = React.memo(
-      ({ onPostComment, profile }) => {
-        const [inputValue, setInputValue] = useState("");
-
-        const handleChangeText = useCallback((text: string) => {
-          setInputValue(text);
-        }, []);
-
-        const handlePostComment = useCallback(async () => {
-          if (inputValue.trim().length === 0) return;
-          await onPostComment(inputValue.trim());
-          setInputValue("");
-        }, [inputValue, onPostComment]);
-
-        const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
-        const handleEmojiPress = useCallback((emoji: string) => {
-          setInputValue((prev) => prev + emoji);
-        }, []);
-
-        return (
-          <>
-            <XStack
-              borderTopColor="$gray5"
-              borderTopWidth="$0.25"
-              justifyContent="space-evenly"
-              alignItems="center"
-              paddingTop="$3"
-              backgroundColor="$gray4"
-            >
-              {emojiList.map((emoji) => (
-                <TouchableOpacity
-                  key={emoji}
-                  onPress={() => handleEmojiPress(emoji)}
-                >
-                  <SizableText size="$8">{emoji}</SizableText>
-                </TouchableOpacity>
-              ))}
-            </XStack>
-            <XStack
-              padding="$3.5"
-              paddingBottom="$6"
-              gap="$2.5"
-              justifyContent="center"
-              alignItems="center"
-              backgroundColor="$gray4"
-            >
-              <MemoizedAvatar src={profile?.profilePictureUrl} />
-              <View style={{ flex: 5 }}>
-                <BottomSheetTextInput
-                  placeholder="add a comment..."
-                  maxLength={100}
-                  value={inputValue}
-                  numberOfLines={4}
-                  onChangeText={handleChangeText}
-                  style={{
-                    fontWeight: "normal",
-                    justifyContent: "flex-start",
-                    borderWidth: 10,
-                    borderColor: "#2E2E2E",
-                    borderRadius: 20,
-                    backgroundColor: "#2E2E2E",
-                    color: "#fff",
-                  }}
-                />
-              </View>
-              <TouchableOpacity
-                onPress={handlePostComment}
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  padding: 7,
-                  backgroundColor: "rgb(1,145,255)",
-                  borderRadius: 20,
-                  borderWidth: 0,
-                }}
-              >
-                <SendHorizontal color="$gray12" />
-              </TouchableOpacity>
-            </XStack>
-          </>
-        );
-      },
-    );
-
-    const handlePostComment = useCallback(
-      async (commentBody: string) => {
-        const newComment = {
-          postId,
-          body: commentBody,
-        };
-        console.log("RUnning handlePostComment (1)");
-        // add a comment to the post
-        // memoizedComments.unshift({
-        //   commentId: Math.random(),
-        //   userId: profile?.userId ?? "temp-id",
-        //   username: profile?.username ?? "User",
-        //   profilePictureUrl:
-        //     profile?.profilePictureUrl ?? "https://example.com/avatar.jpg",
-        //   postId,
-        //   body: commentBody,
-        //   createdAt: new Date(),
-        // });
-        // comments.unshift({
-        //   commentId: Math.random(),
-        //   userId: profile?.userId ?? "temp-id",
-        //   username: profile?.username ?? "User",
-        //   profilePictureUrl:
-        //     profile?.profilePictureUrl ?? "https://example.com/avatar.jpg",
-        //   postId,
-        //   body: commentBody,
-        //   createdAt: new Date(),
-        // });
-
-        // await commentOnPost.mutateAsync(newComment);
-        await commentOnPostWithoutExtraShit.mutateAsync(newComment);
-      },
-      // [postId, commentOnPost],
-      [postId, commentOnPostWithoutExtraShit],
-      // [postId, comments, profile],
-    );
-
-    const getItemLayout = useCallback(
-      (_data: any, index: number) => ({
-        length: ITEM_HEIGHT,
-        offset: ITEM_HEIGHT * index,
-        index,
-      }),
-      [],
-    );
-
-    const renderItem = useCallback(
-      ({ item }: { item: Comment }) => <Comment comment={item} />,
-      [Comment],
-    );
-
     return (
       <BottomSheetWrapper
         sheetRef={sheetRef}
@@ -729,7 +269,7 @@ const CommentsBottomSheet = React.memo(
         topInset={insets.top}
         handleComponent={renderHeader}
       >
-        {/* {commentsLoading && (
+        {commentsLoading && (
           <View flex={1} justifyContent="center" alignItems="center">
             <Spinner size="large" color="white" />
           </View>
@@ -744,30 +284,391 @@ const CommentsBottomSheet = React.memo(
               <Text color="$gray10">Be the first to comment</Text>
             </View>
           ) : (
-            <Animated.FlatList
-              data={memoizedComments}
-              itemLayoutAnimation={LinearTransition}
-              scrollEnabled={true}
-              getItemLayout={getItemLayout}
-              keyExtractor={(item) => item.commentId.toString()}
-              renderItem={renderItem}
-              onEndReached={handleOnEndReached}
+            <CommentsList
+              comments={memoizedComments}
+              handleOnEndReached={handleOnEndReached}
+              isSelfPost={isSelfPost}
             />
+
+            // <Animated.FlatList
+            //   data={memoizedComments}
+            //   itemLayoutAnimation={LinearTransition}
+            //   scrollEnabled={true}
+            //   keyExtractor={(item) => item.commentId.toString()}
+            //   renderItem={renderItem}
+            //   onEndReached={handleOnEndReached}
+            // />
           )
-        } */}
-        <Animated.FlatList
-          data={memoizedComments}
-          itemLayoutAnimation={LinearTransition}
-          scrollEnabled={true}
-          getItemLayout={getItemLayout}
-          keyExtractor={(item) => item.commentId.toString()}
-          renderItem={renderItem}
-          onEndReached={handleOnEndReached}
+        }
+        <CommentInput
+          isSelfPost={isSelfPost}
+          postId={postId}
+          profile={profile}
+          userIdOfPostRecipient={userIdOfPostRecipient}
         />
-        <CommentInput onPostComment={handlePostComment} profile={profile} />
       </BottomSheetWrapper>
     );
   },
 );
+
+interface CommentInputProps {
+  isSelfPost: boolean;
+  postId: number;
+  profile: any;
+  userIdOfPostRecipient: string;
+}
+
+const CommentInput: React.FC<CommentInputProps> = React.memo(
+  ({ isSelfPost, postId, userIdOfPostRecipient, profile }) => {
+    const [inputValue, setInputValue] = useState("");
+
+    const handleChangeText = useCallback((text: string) => {
+      setInputValue(text);
+    }, []);
+
+    const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
+    const handleEmojiPress = useCallback((emoji: string) => {
+      setInputValue((prev) => prev + emoji);
+    }, []);
+
+    const utils = api.useUtils();
+
+    const commentOnPost = api.post.createComment.useMutation({
+      onMutate: async (newComment) => {
+        // Cancel any outgoing refetches to avoid overwriting optimistic update
+        console.log("Running onMutate");
+        await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
+        if (isSelfPost) {
+          await utils.post.paginatePostsOfUserSelf.cancel({ pageSize: 10 });
+        } else {
+          await utils.post.paginatePostsOfUserOther.cancel({
+            userId: userIdOfPostRecipient,
+            pageSize: 10,
+          });
+        }
+
+        // Snapshot the previous value
+        const prevCommentsData = utils.post.paginateComments.getInfiniteData({
+          postId,
+          pageSize: 10,
+        });
+        const prevPostsData = isSelfPost
+          ? utils.post.paginatePostsOfUserSelf.getInfiniteData({
+              pageSize: 10,
+            })
+          : utils.post.paginatePostsOfUserOther.getInfiniteData({
+              userId: userIdOfPostRecipient,
+              pageSize: 10,
+            });
+
+        if (isSelfPost) {
+          utils.post.paginatePostsOfUserSelf.setInfiniteData(
+            { pageSize: 10 },
+            (prevData) => {
+              if (!prevData) return prevData;
+              return {
+                ...prevData,
+                pages: prevData.pages.map((page) => {
+                  // check if it's postId
+                  page.items.map((item) => {
+                    if (item?.postId === postId) {
+                      console.log("adding extra count");
+                      item.commentsCount += 1;
+                    }
+                  });
+                  return page;
+                }),
+              };
+            },
+          );
+        } else {
+          utils.post.paginatePostsOfUserOther.setInfiniteData(
+            { userId: userIdOfPostRecipient, pageSize: 10 },
+            (prevData) => {
+              if (!prevData) return prevData;
+              return {
+                ...prevData,
+                pages: prevData.pages.map((page) => {
+                  // check if it's postId
+                  page.items.map((item) => {
+                    if (item?.postId === postId) {
+                      console.log("adding extra count");
+                      item.commentsCount += 1;
+                    }
+                  });
+                  return page;
+                }),
+              };
+            },
+          );
+        }
+
+        const temporaryId = Math.random();
+
+        // Optimistically update to the new value
+        utils.post.paginateComments.setInfiniteData(
+          { postId, pageSize: 10 },
+          (prevData) => {
+            if (!prevData) return { pages: [], pageParams: [] };
+            return {
+              ...prevData,
+              pages: prevData.pages.map((page, index) => {
+                if (index === 0) {
+                  return {
+                    ...page,
+                    items: [
+                      {
+                        ...newComment,
+                        username: profile?.username ?? "User",
+                        createdAt: new Date(),
+                        userId: profile?.userId ?? "temp-id",
+                        commentId: temporaryId, // Temporary ID
+                        profilePictureUrl:
+                          profile?.profilePictureUrl ??
+                          "https://example.com/avatar.jpg",
+                      },
+                      ...page.items,
+                    ],
+                  };
+                }
+                return page;
+              }),
+            };
+          },
+        );
+        // Return a context object with the snapshotted value
+        return { prevCommentsData, prevPostsData };
+      },
+      onError: (err, _newData, ctx) => {
+        // Rollback to the previous value on error
+        console.log(err);
+        if (ctx?.prevCommentsData) {
+          utils.post.paginateComments.setInfiniteData(
+            { postId, pageSize: 10 },
+            ctx.prevCommentsData,
+          );
+        }
+        if (ctx?.prevPostsData) {
+          if (isSelfPost) {
+            utils.post.paginatePostsOfUserSelf.setInfiniteData(
+              { pageSize: 10 },
+              ctx.prevPostsData,
+            );
+          } else {
+            utils.post.paginatePostsOfUserOther.setInfiniteData(
+              { userId: userIdOfPostRecipient, pageSize: 10 },
+              ctx.prevPostsData,
+            );
+          }
+        }
+      },
+      // onSettled: async () => {
+      //   await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
+      // },
+    });
+
+    const commentOnPostWithoutExtraShit = api.post.createComment.useMutation();
+
+    const handlePostComment = useCallback(async () => {
+      if (inputValue.trim().length === 0) return;
+      const newComment = {
+        postId,
+        body: inputValue,
+      };
+      setInputValue("");
+      // await commentOnPostWithoutExtraShit.mutateAsync(newComment);
+      await commentOnPost.mutateAsync(newComment);
+    }, [inputValue, postId, commentOnPost]);
+
+    return (
+      <>
+        <XStack
+          borderTopColor="$gray5"
+          borderTopWidth="$0.25"
+          justifyContent="space-evenly"
+          alignItems="center"
+          paddingTop="$3"
+          backgroundColor="$gray4"
+        >
+          {emojiList.map((emoji) => (
+            <TouchableOpacity
+              key={emoji}
+              onPress={() => handleEmojiPress(emoji)}
+            >
+              <SizableText size="$8">{emoji}</SizableText>
+            </TouchableOpacity>
+          ))}
+        </XStack>
+        <XStack
+          padding="$3.5"
+          paddingBottom="$6"
+          gap="$2.5"
+          justifyContent="center"
+          alignItems="center"
+          backgroundColor="$gray4"
+        >
+          <MemoizedAvatar src={profile?.profilePictureUrl} />
+          <View style={{ flex: 5 }}>
+            <BottomSheetTextInput
+              placeholder="add a comment..."
+              maxLength={100}
+              value={inputValue}
+              numberOfLines={4}
+              onChangeText={handleChangeText}
+              style={{
+                fontWeight: "normal",
+                justifyContent: "flex-start",
+                borderWidth: 10,
+                borderColor: "#2E2E2E",
+                borderRadius: 20,
+                backgroundColor: "#2E2E2E",
+                color: "#fff",
+              }}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={handlePostComment}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 7,
+              backgroundColor: "rgb(1,145,255)",
+              borderRadius: 20,
+              borderWidth: 0,
+            }}
+          >
+            <SendHorizontal color="$gray12" />
+          </TouchableOpacity>
+        </XStack>
+      </>
+    );
+  },
+);
+
+const MemoizedAvatar = React.memo(({ src }: { src: string }) => (
+  <Avatar circular size="$4" flex={1}>
+    <Avatar.Image accessibilityLabel="User Avatar" src={src} />
+    <Avatar.Fallback backgroundColor="$blue10" />
+  </Avatar>
+));
+
+interface CommentsListProps {
+  comments: Comment[];
+  handleOnEndReached: () => Promise<void>;
+  isSelfPost: boolean;
+}
+
+const CommentsList = React.memo(
+  ({ comments, handleOnEndReached, isSelfPost }: CommentsListProps) => {
+    const renderItem = useCallback(
+      ({ item }: { item: Comment }) => (
+        <Comment comment={item} isSelfPost={isSelfPost} />
+      ),
+      [],
+    );
+
+    const memoizedComments = useMemo(() => comments, [comments]);
+
+    return (
+      <Animated.FlatList
+        data={memoizedComments}
+        itemLayoutAnimation={LinearTransition}
+        scrollEnabled={true}
+        keyExtractor={(item) => item.commentId.toString()}
+        renderItem={renderItem}
+        onEndReached={handleOnEndReached}
+      />
+    );
+  },
+);
+
+interface CommentProps {
+  comment: Comment;
+  isSelfPost: boolean;
+}
+
+const Comment = React.memo(({ comment, isSelfPost }: CommentProps) => {
+  console.log("Rerendering comment", comment.commentId);
+  TimeAgo.addLocale(en);
+  const timeAgo = new TimeAgo("en-US");
+  const utils = api.useUtils();
+
+  const profile = utils.profile.getFullProfileSelf.getData();
+
+  return (
+    <BlurContextMenuWrapper
+      options={
+        isSelfPost || comment.userId === profile?.userId
+          ? [
+              {
+                label: (
+                  <Text color="white" marginLeft="$2" fontSize="$5">
+                    Delete
+                  </Text>
+                ),
+                icon: <Trash2 size="$1.5" color="white" />,
+                onPress: () => {
+                  // void deleteComment.mutateAsync({
+                  //   postId,
+                  //   commentId: comment.commentId,
+                  // }),
+                },
+              },
+              {
+                label: (
+                  <Text color="red" marginLeft="$2" fontSize="$5">
+                    Report
+                  </Text>
+                ),
+                icon: <AlertCircle size="$1.5" color="red" />,
+                onPress: () => {
+                  setTimeout(() => {
+                    // setIsReportModalVisible(true);
+                  }, 275);
+                },
+              },
+            ]
+          : [
+              {
+                label: (
+                  <Text color="red" marginLeft="$2" fontSize="$5">
+                    Report
+                  </Text>
+                ),
+                icon: <AlertCircle size="$1.5" color="red" />,
+                onPress: () => {
+                  setTimeout(() => {
+                    // setIsReportModalVisible(true);
+                  }, 275);
+                },
+              },
+            ]
+      }
+    >
+      <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
+        <XStack gap="$3" alignItems="center">
+          <MemoizedAvatar src={comment.profilePictureUrl} />
+          <YStack gap="$2" width="100%" flex={1}>
+            <XStack gap="$2">
+              <Text fontWeight="bold">{comment.username}</Text>
+              <Text color="$gray10">
+                {timeAgo.format(new Date(comment.createdAt))}
+              </Text>
+            </XStack>
+            <Text>{comment.body}</Text>
+          </YStack>
+        </XStack>
+      </View>
+      {/* <ReportCommentActionSheet
+          title="Report Comment"
+          subtitle="Select reason"
+          commentId={comment.commentId}
+          isVisible={isReportModalVisible}
+          onCancel={() => setIsReportModalVisible(false)}
+        /> */}
+    </BlurContextMenuWrapper>
+  );
+});
 
 export default CommentsBottomSheet;
