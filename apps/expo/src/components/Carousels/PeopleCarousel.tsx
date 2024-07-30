@@ -136,6 +136,27 @@ function PeopleCarousel<T extends PersonItem>({
             </TouchableOpacity>
           )}
           ListFooterComponent={
+            showMore ? (
+              <View
+                marginRight={-100}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <SizableText color="#F214FF" fontWeight="600">
+                  See more
+                </SizableText>
+              </View>
+            ) : null
+          }
+          /*           ListHeaderComponent={
+            renderExtraItem ? (
+              <>
+                {renderExtraItem()}
+                <ListFooter showMore={showMore} />
+              </>
+            ) : null
+          } */
+          /*           ListFooterComponent={
             // render the extra element if thats a thign then the see more if thats a thing also
             renderExtraItem ? (
               <>
@@ -145,7 +166,7 @@ function PeopleCarousel<T extends PersonItem>({
             ) : (
               <ListFooter showMore={showMore} />
             )
-          }
+          } */
           ItemSeparatorComponent={() => <Spacer size="$2" />}
           contentContainerStyle={{
             paddingHorizontal: getToken("$3", "space") as number,
