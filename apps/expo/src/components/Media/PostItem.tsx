@@ -290,7 +290,7 @@ const PostItem = React.memo((props: PostItemProps) => {
   return (
     <View
       flex={1}
-      // bg="$gray2"
+      bg="$gray2"
       alignItems="center"
       justifyContent="center"
       overflow="hidden"
