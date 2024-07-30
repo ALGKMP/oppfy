@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { FlashList, ViewToken } from "@shopify/flash-list";
-import { Camera } from "@tamagui/lucide-icons";
+import { Camera, UserRoundPlus } from "@tamagui/lucide-icons";
 import {
+  Avatar,
   Button,
   Circle,
   Image,
   Separator,
   SizableText,
+  Spacer,
   styled,
   Text,
   useTheme,
@@ -18,10 +22,12 @@ import {
   YStack,
 } from "tamagui";
 
+import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import RecommendationsCarousel from "~/components/Carousels/RecommendationsCarousel";
 import { BaseScreenView } from "~/components/Views";
 import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
+import { profile } from "../../../../../../../packages/db/src/schema";
 import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -125,6 +131,7 @@ const HomeScreen = () => {
   );
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
+  const router = useRouter();
 
   const insets = useSafeAreaInsets();
 
@@ -220,45 +227,64 @@ const HomeScreen = () => {
                 <RecommendationsCarousel loading />
               ) : (
                 recommendationsData && (
-                  <RecommendationsCarousel
+                  <PeopleCarousel
+                    showMore={recommendationsData.length > 10}
+                    data={recommendationsData}
                     loading={isLoadingRecommendationsData}
-                    reccomendationsData={[
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                    ]}
-                  ></RecommendationsCarousel>
+                    onItemPress={(curProf) => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Medium,
+                      );
+                      router.navigate({
+                        pathname: "/profile/[userId]/",
+                        params: {
+                          userId: curProf.userId,
+                          username: curProf.username,
+                        }, // TODO: @oxy we need to pass in username now
+                      });
+                    }}
+                    onShowMore={() => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Medium,
+                      );
+                      router.navigate({
+                        pathname: "/(recommended)",
+                      });
+                    }}
+                    // title={"Find friends 🙋‍♂️ 💁‍♀️"}
+                    renderExtraItem={() => {
+                      return (
+                        <TouchableOpacity onPress={() => console.log("hi")}>
+                          <YStack
+                            marginLeft={"$2"}
+                            gap="$1.5"
+                            alignItems="center"
+                          >
+                            <Avatar circular size="$6" bordered>
+                              <Avatar.Fallback backgroundColor={"#F214FF"}>
+                                <XStack
+                                  flex={1}
+                                  alignItems="center"
+                                  justifyContent="center"
+                                >
+                                  <UserRoundPlus
+                                    marginLeft={4}
+                                    bg={"$colorTransparent"}
+                                    color="white"
+                                  />
+                                </XStack>
+                              </Avatar.Fallback>
+                            </Avatar>
+                            <Text fontWeight="600" textAlign="center">
+                              Invite
+                            </Text>
+                          </YStack>
+                        </TouchableOpacity>
+                      );
+                    }}
+                  ></PeopleCarousel>
                 )
               )}
-              <Separator />
             </>
           }
           ListFooterComponent={ListFooter}
