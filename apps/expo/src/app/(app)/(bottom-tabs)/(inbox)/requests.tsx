@@ -117,7 +117,7 @@ const Requests = () => {
     },
   });
 
-  const declineFriendRequest = api.request.declineFollowRequest.useMutation({
+  const declineFriendRequest = api.request.declineFriendRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.request.paginateFriendRequests.cancel();
