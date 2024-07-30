@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { FlashList, ViewToken } from "@shopify/flash-list";
 import { Camera } from "@tamagui/lucide-icons";
@@ -18,10 +20,12 @@ import {
   YStack,
 } from "tamagui";
 
+import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import RecommendationsCarousel from "~/components/Carousels/RecommendationsCarousel";
 import { BaseScreenView } from "~/components/Views";
 import useShare from "~/hooks/useShare";
 import { api } from "~/utils/api";
+import { profile } from "../../../../../../../packages/db/src/schema";
 import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -125,6 +129,7 @@ const HomeScreen = () => {
   );
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
+  const router = useRouter();
 
   const insets = useSafeAreaInsets();
 
@@ -220,42 +225,31 @@ const HomeScreen = () => {
                 <RecommendationsCarousel loading />
               ) : (
                 recommendationsData && (
-                  <RecommendationsCarousel
+                  /*  <RecommendationsCarousel
                     loading={isLoadingRecommendationsData}
-                    reccomendationsData={[
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                      ...recommendationsData,
-                    ]}
-                  ></RecommendationsCarousel>
+                    reccomendationsData={recommendationsData}
+                  ></RecommendationsCarousel> */
+
+                  <PeopleCarousel
+                    data={recommendationsData}
+                    loading={isLoadingRecommendationsData}
+                    onItemPress={(curProf) => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Medium,
+                      );
+                      router.navigate({
+                        pathname: "/profile/[userId]/",
+                        params: {
+                          userId: curProf.userId,
+                          username: curProf.username,
+                        }, // TODO: @oxy we need to pass in username now
+                      });
+                    }}
+                    onShowMore={() => {
+                      console.log("showing more");
+                    }}
+                    title={"hello this is my carousle"}
+                  ></PeopleCarousel>
                 )
               )}
               <Separator />
