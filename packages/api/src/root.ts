@@ -5,7 +5,7 @@ import {
   contactsRouter,
   followRouter,
   friendRouter,
-  notifitionsRouter,
+  notificationsRouter,
   postRouter,
   profileRouter,
   reportRouter,
