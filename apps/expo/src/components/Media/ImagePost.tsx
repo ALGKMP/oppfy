@@ -36,7 +36,7 @@ const ImagePost: React.FC<ImagePostProps> = (props: ImagePostProps) => {
           height: "100%",
           justifyContent: "center",
           alignItems: "center",
-          // borderRadius: 20,
+          borderRadius: 20,
           // borderTopLeftRadius: 20,
           // borderTopRightRadius: 20,
         },
