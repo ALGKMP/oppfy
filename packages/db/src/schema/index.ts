@@ -42,7 +42,7 @@ export const eventTypeEnum = pgEnum("event_type", [
   "followRequest",
   "friendRequest",
   "followRequestAccepted",
-  "acceptedFriendRequestAccepted",
+  "friendRequestAccepted",
 ]);
 
 export const entityTypeEnum = pgEnum("entity_type", [
