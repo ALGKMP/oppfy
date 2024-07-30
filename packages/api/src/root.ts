@@ -5,7 +5,7 @@ import {
   contactsRouter,
   followRouter,
   friendRouter,
-  notificationsRouter,
+  notifitionsRouter,
   postRouter,
   profileRouter,
   reportRouter,
@@ -32,7 +32,8 @@ export const appRouter = createTRPCRouter({
 export const openApiDocument = generateOpenApiDocument(appRouter, {
   title: "tRPC OpenAPI",
   version: "1.0.0",
-  baseUrl: "http://localhost:3000/api",
+  // baseUrl: "http://localhost:3000/api",
+  baseUrl: "https://www.oppfy.app/api",
 });
 
 // export type definition of API

@@ -13,6 +13,7 @@ import {
   Image,
   Separator,
   SizableText,
+  Spacer,
   styled,
   Text,
   useTheme,
@@ -226,12 +227,8 @@ const HomeScreen = () => {
                 <RecommendationsCarousel loading />
               ) : (
                 recommendationsData && (
-                  /*  <RecommendationsCarousel
-                    loading={isLoadingRecommendationsData}
-                    reccomendationsData={recommendationsData}
-                  ></RecommendationsCarousel> */
-
                   <PeopleCarousel
+                    showMore={recommendationsData.length > 10}
                     data={recommendationsData}
                     loading={isLoadingRecommendationsData}
                     onItemPress={(curProf) => {
@@ -247,13 +244,22 @@ const HomeScreen = () => {
                       });
                     }}
                     onShowMore={() => {
-                      console.log("showing more");
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Medium,
+                      );
+                      router.navigate({
+                        pathname: "/(recommended)",
+                      });
                     }}
-                    title={"hello this is my carousle"}
+                    // title={"Find friends 🙋‍♂️ 💁‍♀️"}
                     renderExtraItem={() => {
                       return (
                         <TouchableOpacity onPress={() => console.log("hi")}>
-                          <YStack gap="$1.5" alignItems="center">
+                          <YStack
+                            marginLeft={"$2"}
+                            gap="$1.5"
+                            alignItems="center"
+                          >
                             <Avatar circular size="$6" bordered>
                               <Avatar.Fallback backgroundColor={"#F214FF"}>
                                 <XStack
@@ -279,7 +285,6 @@ const HomeScreen = () => {
                   ></PeopleCarousel>
                 )
               )}
-              <Separator />
             </>
           }
           ListFooterComponent={ListFooter}
