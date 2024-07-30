@@ -1,6 +1,7 @@
 import { DomainError, ErrorCode } from "../../errors";
 import { NotificationsRepository } from "../../repositories/user/notifications";
 import type {
+  EntityType,
   EventType,
   NotificationSettings,
   SendNotificationData,
@@ -79,7 +80,7 @@ export class NotificationsService {
     return {
       items: itemsWithProfilePictureUrls.slice(0, pageSize),
       nextCursor:
-        items.length > pageSize
+        items.length > pageSize && nextCursor
           ? { createdAt: nextCursor.createdAt, id: nextCursor.id }
           : null,
     };
@@ -117,13 +118,6 @@ export class NotificationsService {
     );
   }
 
-  async deleteNotification(
-    senderId: string,
-    eventType?: EventType | EventType[],
-  ) {
-    await this.notificationsRepository.deleteNotification(senderId, eventType);
-  }
-
   async sendNotification(
     senderId: string,
     recipientId: string,
@@ -132,9 +126,7 @@ export class NotificationsService {
     const pushTokens =
       await this.notificationsRepository.getPushTokens(recipientId);
 
-    if (pushTokens.length === 0) {
-      throw new DomainError(ErrorCode.PUSH_TOKEN_NOT_FOUND);
-    }
+    if (pushTokens.length === 0) return;
 
     await this.notificationsRepository.sendNotification(
       pushTokens,
@@ -146,5 +138,99 @@ export class NotificationsService {
 
   async storePushToken(userId: string, pushToken: string) {
     await this.notificationsRepository.storePushToken(userId, pushToken);
+  }
+
+  async deleteNotificationById(id: number) {
+    await this.notificationsRepository.deleteNotificationById(id);
+  }
+
+  async deleteAllNotificationsForRecipient(recipientId: string) {
+    await this.notificationsRepository.deleteNotificationsForRecipient(
+      recipientId,
+    );
+  }
+
+  async deleteFollowRequestNotification(senderId: string, recipientId: string) {
+    await this.notificationsRepository.deleteNotificationBetweenUsers(
+      senderId,
+      recipientId,
+      { eventType: "followRequest" },
+    );
+  }
+
+  async deleteFriendRequestNotification(senderId: string, recipientId: string) {
+    await this.notificationsRepository.deleteNotificationBetweenUsers(
+      senderId,
+      recipientId,
+      { eventType: "friendRequest" },
+    );
+  }
+
+  async deleteAllPostNotifications(postId: string) {
+    await this.notificationsRepository.deleteNotificationsForEntity(
+      postId,
+      "post",
+    );
+  }
+
+  async deleteAllCommentNotifications(commentId: string) {
+    await this.notificationsRepository.deleteNotificationsForEntity(
+      commentId,
+      "comment",
+    );
+  }
+
+  async deleteLikeNotification(senderId: string, recipientId: string) {
+    await this.notificationsRepository.deleteNotificationBetweenUsers(
+      senderId,
+      recipientId,
+      { eventType: "like" },
+    );
+  }
+
+  async deleteAllNotificationsFromSender(senderId: string) {
+    await this.notificationsRepository.deleteNotificationsFromSender(senderId);
+  }
+
+  async deleteAllFriendRelatedNotificationsBetweenUsers(
+    userId1: string,
+    userId2: string,
+  ) {
+    await this.notificationsRepository.deleteNotificationBetweenUsers(
+      userId1,
+      userId2,
+      { eventType: ["friendRequest", "friend"] },
+    );
+    await this.notificationsRepository.deleteNotificationBetweenUsers(
+      userId2,
+      userId1,
+      { eventType: ["friendRequest", "friend"] },
+    );
+  }
+
+  async deleteSpecificNotificationsForRecipient(
+    recipientId: string,
+    options: {
+      eventType?: EventType | EventType[];
+      entityType?: EntityType;
+    },
+  ) {
+    await this.notificationsRepository.deleteNotificationsForRecipient(
+      recipientId,
+      options,
+    );
+  }
+
+  async deleteSpecificNotificationsFromSender(
+    senderId: string,
+    options: {
+      eventType?: EventType | EventType[];
+      entityType?: EntityType;
+    },
+  ) {
+    await this.notificationsRepository.deleteNotificationsFromSender(
+      senderId,
+      options,
+    );
   }
 }

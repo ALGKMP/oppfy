@@ -1,23 +1,13 @@
+import type { PgDelete } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 
-import {
-  aliasedTable,
-  and,
-  asc,
-  db,
-  desc,
-  eq,
-  gt,
-  lt,
-  or,
-  schema,
-  sql,
-} from "@oppfy/db";
+import { and, db, desc, eq, inArray, lt, or, schema, sql } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
 
-import { DomainError, ErrorCode, handleDatabaseErrors } from "../../errors";
+import type { entityTypeEnum } from "../../../../db/src/schema";
+import { handleDatabaseErrors } from "../../errors";
 
 export type EventType = z.infer<
   typeof sharedValidators.notifications.eventType
@@ -38,6 +28,8 @@ export type SnsNotificationData = z.infer<
 export type NotificationSettings = z.infer<
   typeof trpcValidators.input.notifications.updateNotificationSettings
 >;
+
+export type EntityType = (typeof entityTypeEnum.enumValues)[number];
 
 export class NotificationsRepository {
   private db = db;
@@ -160,31 +152,6 @@ export class NotificationsRepository {
     });
   }
 
-  @handleDatabaseErrors
-  async deleteNotification(
-    senderId: string,
-    eventType?: EventType | EventType[],
-  ) {
-    const eventTypes = Array.isArray(eventType)
-      ? eventType
-      : eventType
-        ? [eventType]
-        : [];
-
-    await this.db
-      .delete(schema.notifications)
-      .where(
-        and(
-          eq(schema.notifications.senderId, senderId),
-          or(
-            ...eventTypes.map((eventType) =>
-              eq(schema.notifications.eventType, eventType),
-            ),
-          ),
-        ),
-      );
-  }
-
   async sendNotification(
     pushTokens: string[],
     senderId: string,
@@ -217,5 +184,115 @@ export class NotificationsRepository {
     });
 
     return possiblePushTokens.map((pushToken) => pushToken.token);
+  }
+
+  async deleteNotificationById(id: number) {
+    await this.db
+      .delete(schema.notifications)
+      .where(eq(schema.notifications.id, id));
+  }
+
+  async deleteNotificationsForRecipient(
+    recipientId: string,
+    options?: {
+      eventType?: EventType | EventType[];
+      entityType?: EntityType;
+    },
+  ) {
+    let query = this.db.delete(schema.notifications).$dynamic();
+    query = query.where(eq(schema.notifications.recipientId, recipientId));
+
+    if (options?.eventType) {
+      if (Array.isArray(options.eventType)) {
+        query = query.where(
+          inArray(schema.notifications.eventType, options.eventType),
+        );
+      } else {
+        query = query.where(
+          eq(schema.notifications.eventType, options.eventType),
+        );
+      }
+    }
+
+    if (options?.entityType) {
+      query = query.where(
+        eq(schema.notifications.entityType, options.entityType),
+      );
+    }
+
+    await query;
+  }
+
+  async deleteNotificationsFromSender(
+    senderId: string,
+    options?: {
+      eventType?: EventType | EventType[];
+      entityType?: EntityType;
+    },
+  ) {
+    let query = this.db.delete(schema.notifications).$dynamic();
+    query = query.where(eq(schema.notifications.senderId, senderId));
+
+    if (options?.eventType) {
+      if (Array.isArray(options.eventType)) {
+        query = query.where(
+          inArray(schema.notifications.eventType, options.eventType),
+        );
+      } else {
+        query = query.where(
+          eq(schema.notifications.eventType, options.eventType),
+        );
+      }
+    }
+
+    if (options?.entityType) {
+      query = query.where(
+        eq(schema.notifications.entityType, options.entityType),
+      );
+    }
+
+    await query;
+  }
+
+  async deleteNotificationsForEntity(entityId: string, entityType: EntityType) {
+    await this.db
+      .delete(schema.notifications)
+      .where(
+        and(
+          eq(schema.notifications.entityId, entityId),
+          eq(schema.notifications.entityType, entityType),
+        ),
+      );
+  }
+
+  async deleteNotificationBetweenUsers(
+    senderId: string,
+    recipientId: string,
+    options: {
+      eventType: EventType | EventType[];
+      entityType?: EntityType;
+    },
+  ) {
+    let query = this.db.delete(schema.notifications).$dynamic();
+    query = query.where(eq(schema.notifications.senderId, senderId));
+    query = query.where(eq(schema.notifications.recipientId, recipientId));
+
+    if (Array.isArray(options.eventType)) {
+      query = query.where(
+        inArray(schema.notifications.eventType, options.eventType),
+      );
+    } else {
+      query = query.where(
+        eq(schema.notifications.eventType, options.eventType),
+      );
+    }
+
+    if (options.entityType) {
+      query = query.where(
+        eq(schema.notifications.entityType, options.entityType),
+      );
+    }
+
+    await query;
   }
 }
