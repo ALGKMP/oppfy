@@ -136,16 +136,21 @@ function PeopleCarousel<T extends PersonItem>({
             </TouchableOpacity>
           )}
           ListFooterComponent={
-            showMore ? (
-              <View
-                marginRight={-100}
-                justifyContent="center"
-                alignItems="center"
-              >
-                <SizableText color="#F214FF" fontWeight="600">
-                  See more
-                </SizableText>
-              </View>
+            renderExtraItem ? (
+              <>
+                {renderExtraItem()}
+                {showMore && (
+                  <View
+                    marginRight={-100}
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <SizableText color="#F214FF" fontWeight="600">
+                      See more
+                    </SizableText>
+                  </View>
+                )}
+              </>
             ) : null
           }
           /*           ListHeaderComponent={
