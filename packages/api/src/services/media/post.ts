@@ -460,15 +460,6 @@ export class PostService {
   async deleteComment(commentId: number, postId: number) {
     await this.commentRepository.removeComment(commentId);
     await this.postStatsRepository.decrementCommentsCount(postId);
-
-    const post = await this.getPost(postId);
-
-    // // delete noti
-    // todo: implement some sort of tracking for interaction ids
-    // await this.notificationsService.deleteNotification(
-    //   post.recipientId,
-    //   userId,
-    // );
   }
 
   async paginateComments(

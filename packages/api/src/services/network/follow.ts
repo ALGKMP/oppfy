@@ -10,7 +10,7 @@ import { UserService } from "../user/user";
 export class FollowService {
   private followRepository = new FollowRepository();
   private profileRepository = new ProfileRepository();
-  private friendRespository = new FriendRepository();
+  private friendRepository = new FriendRepository();
 
   private userService = new UserService();
   private notificationsService = new NotificationsService();
@@ -120,24 +120,46 @@ export class FollowService {
       );
     }
 
-    const friendship = await this.friendRespository.getFriendship(
+    const friendship = await this.friendRepository.getFriendship(
       senderId,
       recipientId,
     );
 
     if (friendship) {
-      throw new DomainError(
-        ErrorCode.CANNOT_UNFOLLOW_FRIENDS,
-        "Cannot unfollow a friend.",
+      await this.notificationsService.deleteNotificationFromSenderToRecipient(
+        senderId,
+        recipientId,
+        {
+          eventType: ["friend", "friendRequest"],
+          entityType: "profile",
+        },
       );
+      await this.notificationsService.deleteNotificationFromSenderToRecipient(
+        recipientId,
+        senderId,
+        {
+          eventType: ["friend", "friendRequest"],
+          entityType: "profile",
+        },
+      );
+      await this.friendRepository.removeFriend(senderId, recipientId);
     }
 
     await this.followRepository.removeFollower(senderId, recipientId);
+
     await this.notificationsService.deleteNotificationFromSenderToRecipient(
       senderId,
       recipientId,
       {
-        eventType: ["follow", "followRequest"],
+        eventType: ["follow", "followRequest", "friend", "friendRequest"],
+        entityType: "profile",
+      },
+    );
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      recipientId,
+      senderId,
+      {
+        eventType: ["friend", "friendRequest", "followRequestAccepted"],
         entityType: "profile",
       },
     );
@@ -171,10 +193,25 @@ export class FollowService {
       );
     }
 
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      senderId,
+      recipientId,
+      {
+        eventType: ["followRequest"],
+        entityType: "profile",
+      },
+    );
+
     await this.notificationsService.storeNotification(recipientId, senderId, {
-      eventType: "follow",
+      eventType: "followRequestAccepted",
       entityType: "profile",
       entityId: recipient.id,
+    });
+
+    await this.notificationsService.storeNotification(senderId, recipientId, {
+      eventType: "follow",
+      entityType: "profile",
+      entityId: senderId,
     });
 
     const { followRequests } =
@@ -209,6 +246,15 @@ export class FollowService {
     await this.followRepository.removeFollowRequest(
       requestSenderId,
       requestRecipientId,
+    );
+
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      requestSenderId,
+      requestRecipientId,
+      {
+        eventType: ["followRequest"],
+        entityType: "profile",
+      },
     );
   }
 
@@ -248,7 +294,32 @@ export class FollowService {
       );
     }
 
-    return await this.followRepository.removeFollower(followerToRemove, userId);
+    await this.followRepository.removeFollower(followerToRemove, userId);
+
+    // Check if there's a friendship and remove it if exists
+    const friendship = await this.friendRepository.getFriendship(
+      userId,
+      followerToRemove,
+    );
+    if (friendship) {
+      await this.friendRepository.removeFriend(userId, followerToRemove);
+    }
+
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      followerToRemove,
+      userId,
+      {
+        eventType: ["follow", "followRequestAccepted", "friend"],
+        entityType: "profile",
+      },
+    );
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      userId,
+      followerToRemove,
+      {
+        eventType: ["friend", "followRequestAccepted"],
+      },
+    );
   }
 
   public async determineFollowState(
