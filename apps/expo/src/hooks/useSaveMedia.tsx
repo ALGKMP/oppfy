@@ -129,13 +129,13 @@ const useSaveMedia = () => {
         const itemPath = `${cacheDir}${item}`;
         try {
           await FileSystem.deleteAsync(itemPath, { idempotent: true });
-          console.log(`Deleted: ${itemPath}`);
+          // console.log(`Deleted: ${itemPath}`);
         } catch (error) {
           console.error(`Error deleting ${itemPath}:`, error);
         }
       }
 
-      console.log("Cache directory cleanup completed");
+      // console.log("Cache directory cleanup completed");
     } catch (error) {
       console.error("Error cleaning up cache directory:", error);
     }
