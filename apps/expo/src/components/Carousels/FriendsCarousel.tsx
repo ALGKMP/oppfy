@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
@@ -45,6 +45,8 @@ type FriendsCarouselProps = LoadingProps | FriendsLoadedProps;
 
 const FriendsCarousel = (props: FriendsCarouselProps) => {
   const router = useRouter();
+  const segments = useSegments();
+  const currentSegment = segments[segments.length - 3];
 
   const showMore =
     !props.loading &&
@@ -56,7 +58,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   }: RecemmendationItem) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
-      pathname: "/profile/[userId]/",
+      pathname: `${currentSegment}/profile/[userId]/`,
       params: { userId, username },
     });
   };
@@ -64,7 +66,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   const handleFriendProfileClicked = ({ userId, username }: FriendItem) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
-      pathname: "/profile/[userId]/",
+      pathname: `${currentSegment}/profile/[userId]/`,
       params: { userId, username },
     });
   };

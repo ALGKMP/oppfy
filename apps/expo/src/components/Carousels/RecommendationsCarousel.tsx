@@ -50,7 +50,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
       pathname: "/profile/[userId]/",
-      params: { userId: userId }, // TODO: @oxy we need to pass in username now
+      params: { userId }, // TODO: @oxy we need to pass in username now
     });
   };
 
@@ -72,7 +72,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
   };
 
   const throttledHandleAction = useRef(
-    throttle(handleShowMoreRecs, 300, { leading: true, trailing: false }),
+    throttle(handleShowMoreRecs, 500, { leading: true, trailing: false }),
   ).current;
 
   const handleScroll = useCallback(
@@ -117,6 +117,7 @@ const RecommendationsCarousel = (props: RecommendationsCarouselProps) => {
       backgroundColor={"$background"}
       borderRadius={0}
       paddingLeft={0}
+      paddingRight={0}
     >
       <YStack gap="$2">
         <FlashList
