@@ -46,6 +46,7 @@ const Profile = () => {
     isLoading: isLoadingPostData,
     isFetchingNextPage,
     fetchNextPage,
+    refetch: refetchPosts,
     hasNextPage,
   } = api.post.paginatePostsOfUserOther.useInfiniteQuery(
     { userId: userId ?? "", pageSize: 10 },
@@ -111,6 +112,7 @@ const Profile = () => {
           posts={posts}
           isLoadingPostData={isLoadingPostData}
           isFetchingNextPage={isFetchingNextPage}
+          refetchPosts={refetchPosts}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage ?? false}
         />

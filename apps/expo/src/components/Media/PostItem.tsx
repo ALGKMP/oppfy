@@ -52,7 +52,6 @@ interface PostItemProps {
 }
 
 const PostItem = React.memo((props: PostItemProps) => {
-  console.log("PostItem RE-Rendering");
   const { post, isSelfPost, isViewable } = props;
   const [isMuted, setIsMuted] = useState(false);
   const [status, _setStatus] = useState<"success" | "loading" | "error">(
@@ -106,14 +105,12 @@ const PostItem = React.memo((props: PostItemProps) => {
   }, [hasLiked]);
 
   const likePost = api.post.likePost.useMutation({
-    // TODO: Handle this bitch
     onError: (err) => {
       console.log(err);
     },
   });
 
   const unlikePost = api.post.unlikePost.useMutation({
-    // TODO: Handle this bitch
     onError: (err) => {
       console.log(err);
     },

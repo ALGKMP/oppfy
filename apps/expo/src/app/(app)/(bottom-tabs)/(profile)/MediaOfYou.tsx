@@ -42,6 +42,7 @@ interface MediaOfYouProps {
   posts: PostData["items"];
   isLoadingPostData: boolean;
   isFetchingNextPage: boolean;
+  refetchPosts: () => Promise<any>;
   // fetchNextPage: () => Promise<PostData>;
   fetchNextPage: () => Promise<any>;
 
@@ -68,6 +69,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     posts,
     isLoadingPostData,
     isFetchingNextPage,
+    refetchPosts,
     fetchNextPage,
     hasNextPage,
   } = props;
@@ -100,6 +102,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       refetchProfileData(),
       refetchFriendsData(),
       refetchRecommendationsData(),
+      refetchPosts(),
     ]);
     setRefreshing(false);
   }, [refetchFriendsData, refetchProfileData, refetchRecommendationsData]);
