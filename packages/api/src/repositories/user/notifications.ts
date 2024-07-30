@@ -70,7 +70,7 @@ export class NotificationsRepository {
   @handleDatabaseErrors
   async paginateNotifications(
     userId: string,
-    cursor: { createdAt: Date; id: string } | null = null,
+    cursor: { createdAt: Date; id: number } | null = null,
     pageSize = 10,
   ) {
     const notifications = await this.db
@@ -192,105 +192,48 @@ export class NotificationsRepository {
       .where(eq(schema.notifications.id, id));
   }
 
-  async deleteNotificationsForRecipient(
-    recipientId: string,
-    options?: {
-      eventType?: EventType | EventType[];
-      entityType?: EntityType;
-    },
-  ) {
-    let query = this.db.delete(schema.notifications).$dynamic();
-    query = query.where(eq(schema.notifications.recipientId, recipientId));
+  async deleteNotifications(options: {
+    senderId?: string;
+    recipientId?: string;
+    eventType?: EventType | EventType[];
+    entityType?: EntityType;
+    entityId?: string;
+  }) {
+    console.log(
+      "Deleting notifications with options:",
+      JSON.stringify(options, null, 2),
+    );
 
-    if (options?.eventType) {
+    let query = this.db.delete(schema.notifications).$dynamic();
+
+    const conditions = [];
+
+    if (options.senderId) {
+      conditions.push(eq(schema.notifications.senderId, options.senderId));
+    }
+    if (options.recipientId) {
+      conditions.push(
+        eq(schema.notifications.recipientId, options.recipientId),
+      );
+    }
+    if (options.eventType) {
       if (Array.isArray(options.eventType)) {
-        query = query.where(
+        conditions.push(
           inArray(schema.notifications.eventType, options.eventType),
         );
       } else {
-        query = query.where(
-          eq(schema.notifications.eventType, options.eventType),
-        );
+        conditions.push(eq(schema.notifications.eventType, options.eventType));
       }
     }
-
-    if (options?.entityType) {
-      query = query.where(
-        eq(schema.notifications.entityType, options.entityType),
-      );
-    }
-
-    await query;
-  }
-
-  async deleteNotificationsFromSender(
-    senderId: string,
-    options?: {
-      eventType?: EventType | EventType[];
-      entityType?: EntityType;
-    },
-  ) {
-    let query = this.db.delete(schema.notifications).$dynamic();
-    query = query.where(eq(schema.notifications.senderId, senderId));
-
-    if (options?.eventType) {
-      if (Array.isArray(options.eventType)) {
-        query = query.where(
-          inArray(schema.notifications.eventType, options.eventType),
-        );
-      } else {
-        query = query.where(
-          eq(schema.notifications.eventType, options.eventType),
-        );
-      }
-    }
-
-    if (options?.entityType) {
-      query = query.where(
-        eq(schema.notifications.entityType, options.entityType),
-      );
-    }
-
-    await query;
-  }
-
-  async deleteNotificationsForEntity(entityId: string, entityType: EntityType) {
-    await this.db
-      .delete(schema.notifications)
-      .where(
-        and(
-          eq(schema.notifications.entityId, entityId),
-          eq(schema.notifications.entityType, entityType),
-        ),
-      );
-  }
-
-  async deleteNotificationBetweenUsers(
-    senderId: string,
-    recipientId: string,
-    options: {
-      eventType: EventType | EventType[];
-      entityType?: EntityType;
-    },
-  ) {
-    let query = this.db.delete(schema.notifications).$dynamic();
-    query = query.where(eq(schema.notifications.senderId, senderId));
-    query = query.where(eq(schema.notifications.recipientId, recipientId));
-
-    if (Array.isArray(options.eventType)) {
-      query = query.where(
-        inArray(schema.notifications.eventType, options.eventType),
-      );
-    } else {
-      query = query.where(
-        eq(schema.notifications.eventType, options.eventType),
-      );
-    }
-
     if (options.entityType) {
-      query = query.where(
-        eq(schema.notifications.entityType, options.entityType),
-      );
+      conditions.push(eq(schema.notifications.entityType, options.entityType));
+    }
+    if (options.entityId) {
+      conditions.push(eq(schema.notifications.entityId, options.entityId));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
 
     await query;

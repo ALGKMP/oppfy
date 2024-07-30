@@ -25,7 +25,7 @@ export const notificationsRouter = createTRPCRouter({
         cursor: z
           .object({
             createdAt: z.date(),
-            id: z.string(),
+            id: z.number(),
           })
           .optional(),
         pageSize: z.number().optional(),

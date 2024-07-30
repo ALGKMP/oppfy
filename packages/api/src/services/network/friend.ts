@@ -10,10 +10,15 @@ import { UserService } from "../user/user";
 export class FriendService {
   private friendRepository = new FriendRepository();
   private profileRepository = new ProfileRepository();
-  private followRespository = new FollowRepository();
+  private followRepository = new FollowRepository();
 
   private userService = new UserService();
   private notificationsService = new NotificationsService();
+
+  async isFollowing(senderId: string, recipientId: string) {
+    if (senderId === recipientId) return true; // Temporary fix
+    return !!(await this.followRepository.getFollower(senderId, recipientId));
+  }
 
   async sendFriendRequest(senderId: string, recipientId: string) {
     if (senderId === recipientId) {
@@ -38,9 +43,88 @@ export class FriendService {
       );
     }
 
-    await this.friendRepository.createFriendRequest(senderId, recipientId);
+    const isFollowing = await this.isFollowing(senderId, recipientId);
 
     const sender = await this.userService.getUser(senderId);
+    const recipient = await this.userService.getUser(recipientId);
+
+    if (!isFollowing) {
+      const senderProfile = await this.profileRepository.getProfile(
+        sender.profileId,
+      );
+
+      if (senderProfile === undefined) {
+        throw new DomainError(
+          ErrorCode.PROFILE_NOT_FOUND,
+          `Profile not found for user ID "${senderId}"`,
+        );
+      }
+
+      if (recipient.privacySetting === "private") {
+        await this.followRepository.createFollowRequest(senderId, recipientId);
+        await this.notificationsService.storeNotification(
+          sender.id,
+          recipient.id,
+          {
+            eventType: "followRequest",
+            entityType: "profile",
+            entityId: sender.id,
+          },
+        );
+
+        const { followRequests } =
+          await this.notificationsService.getNotificationSettings(recipient.id);
+
+        if (followRequests) {
+          await this.notificationsService.sendNotification(
+            sender.id,
+            recipient.id,
+            {
+              title: "Follow Request",
+              body: `${senderProfile.username} has sent you a follow request.`,
+
+              entityType: "profile",
+              entityId: sender.id,
+            },
+          );
+        }
+        return;
+      }
+
+      await this.followRepository.createFollower(senderId, recipientId);
+
+      await this.notificationsService.storeNotification(
+        sender.id,
+        recipient.id,
+        {
+          eventType: "follow",
+          entityType: "profile",
+          entityId: sender.id,
+        },
+      );
+
+      const { followRequests } =
+        await this.notificationsService.getNotificationSettings(recipient.id);
+
+      if (!followRequests) {
+        return;
+      }
+
+      await this.notificationsService.sendNotification(
+        sender.id,
+        recipient.id,
+        {
+          title: "New follower",
+          body: `${senderProfile.username} is now following you.`,
+
+          entityType: "profile",
+          entityId: sender.id,
+        },
+      );
+    }
+
+    await this.friendRepository.createFriendRequest(senderId, recipientId);
+
     const profile = await this.profileRepository.getProfile(sender.profileId);
 
     if (profile === undefined) {
@@ -85,25 +169,6 @@ export class FriendService {
       );
     }
 
-    await this.friendRepository.createFriend(senderId, recipientId);
-
-    const senderFollowsRecipient = await this.followRespository.getFollower(
-      senderId,
-      recipientId,
-    );
-    const recipientFollowsSender = await this.followRespository.getFollower(
-      recipientId,
-      senderId,
-    );
-
-    if (!senderFollowsRecipient) {
-      await this.followRespository.createFollower(senderId, recipientId);
-    }
-
-    if (!recipientFollowsSender) {
-      await this.followRespository.createFollower(recipientId, senderId);
-    }
-
     const recipient = await this.userService.getUser(recipientId);
     const recipientProfile = await this.profileRepository.getProfile(
       recipient.profileId,
@@ -116,8 +181,62 @@ export class FriendService {
       );
     }
 
-    await this.notificationsService.deleteSpecificNotificationsFromSender(
+    await this.friendRepository.createFriend(senderId, recipientId);
+
+    const senderFollowsRecipient = await this.followRepository.getFollower(
       senderId,
+      recipientId,
+    );
+    const recipientFollowsSender = await this.followRepository.getFollower(
+      recipientId,
+      senderId,
+    );
+
+    if (!senderFollowsRecipient) {
+      await this.followRepository.createFollower(senderId, recipientId);
+    }
+
+    if (!recipientFollowsSender) {
+      await this.followRepository.createFollower(recipientId, senderId);
+
+      // Send follow notification
+      const sender = await this.userService.getUser(senderId);
+      const senderProfile = await this.profileRepository.getProfile(
+        sender.profileId,
+      );
+
+      if (senderProfile) {
+        await this.notificationsService.storeNotification(
+          recipientId,
+          senderId,
+          {
+            eventType: "follow",
+            entityType: "profile",
+            entityId: recipientId,
+          },
+        );
+
+        const { followRequests } =
+          await this.notificationsService.getNotificationSettings(senderId);
+
+        if (followRequests) {
+          await this.notificationsService.sendNotification(
+            recipientId,
+            senderId,
+            {
+              title: "New follower",
+              body: `${recipientProfile.username} is now following you.`,
+              entityType: "profile",
+              entityId: recipientId,
+            },
+          );
+        }
+      }
+    }
+
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      senderId,
+      recipientId,
       {
         eventType: ["friendRequest"],
         entityType: "profile",
@@ -163,8 +282,18 @@ export class FriendService {
     }
 
     await this.friendRepository.deleteFriendRequest(senderId, recipientId);
-    await this.notificationsService.deleteSpecificNotificationsFromSender(
+
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      recipientId,
       senderId,
+      {
+        eventType: ["friendRequest"],
+        entityType: "profile",
+      },
+    );
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      senderId,
+      recipientId,
       {
         eventType: ["friendRequest"],
         entityType: "profile",
@@ -184,10 +313,11 @@ export class FriendService {
       );
     }
 
-    await this.notificationsService.deleteSpecificNotificationsFromSender(
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
       senderId,
+      recipientId,
       {
-        eventType: ["friendRequest"],
+        eventType: "friendRequest",
         entityType: "profile",
       },
     );
@@ -224,9 +354,21 @@ export class FriendService {
       );
     }
 
-    await this.notificationsService.deleteAllFriendRelatedNotificationsBetweenUsers(
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
       targetUserId,
       otherUserId,
+      {
+        eventType: ["friend", "friendRequest"],
+        entityType: "profile",
+      },
+    );
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
+      otherUserId,
+      targetUserId,
+      {
+        eventType: ["friend", "friendRequest"],
+        entityType: "profile",
+      },
     );
     return await this.friendRepository.removeFriend(targetUserId, otherUserId);
   }

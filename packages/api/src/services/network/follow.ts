@@ -133,8 +133,9 @@ export class FollowService {
     }
 
     await this.followRepository.removeFollower(senderId, recipientId);
-    await this.notificationsService.deleteSpecificNotificationsFromSender(
+    await this.notificationsService.deleteNotificationFromSenderToRecipient(
       senderId,
+      recipientId,
       {
         eventType: ["follow", "followRequest"],
         entityType: "profile",
