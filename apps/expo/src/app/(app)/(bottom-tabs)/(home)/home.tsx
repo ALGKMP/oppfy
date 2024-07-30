@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { FlashList, ViewToken } from "@shopify/flash-list";
-import { Camera } from "@tamagui/lucide-icons";
+import { Camera, UserRoundPlus } from "@tamagui/lucide-icons";
 import {
+  Avatar,
   Button,
   Circle,
   Image,
@@ -249,6 +250,32 @@ const HomeScreen = () => {
                       console.log("showing more");
                     }}
                     title={"hello this is my carousle"}
+                    renderExtraItem={() => {
+                      return (
+                        <TouchableOpacity onPress={() => console.log("hi")}>
+                          <YStack gap="$1.5" alignItems="center">
+                            <Avatar circular size="$6" bordered>
+                              <Avatar.Fallback backgroundColor={"#F214FF"}>
+                                <XStack
+                                  flex={1}
+                                  alignItems="center"
+                                  justifyContent="center"
+                                >
+                                  <UserRoundPlus
+                                    marginLeft={4}
+                                    bg={"$colorTransparent"}
+                                    color="white"
+                                  />
+                                </XStack>
+                              </Avatar.Fallback>
+                            </Avatar>
+                            <Text fontWeight="600" textAlign="center">
+                              Invite
+                            </Text>
+                          </YStack>
+                        </TouchableOpacity>
+                      );
+                    }}
                   ></PeopleCarousel>
                 )
               )}

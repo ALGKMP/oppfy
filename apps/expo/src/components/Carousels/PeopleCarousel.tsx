@@ -30,7 +30,7 @@ interface PeopleCarouselProps<T extends PersonItem> {
   showMore?: boolean;
   onItemPress: (item: T) => void;
   onShowMore: () => void;
-  renderExtraItem?: () => React.ReactNode;
+  renderExtraItem?: () => React.ReactElement; // Change from React.ReactNode to React.ReactElement
 }
 
 const ListFooter: React.FC<{ showMore: boolean }> = ({ showMore }) => {
@@ -53,7 +53,6 @@ function PeopleCarousel<T extends PersonItem>({
   onShowMore,
   renderExtraItem,
 }: PeopleCarouselProps<T>) {
-
   const throttledHandleShowMore = useRef(
     throttle(onShowMore, 300, { leading: true, trailing: false }),
   ).current;
@@ -79,7 +78,12 @@ function PeopleCarousel<T extends PersonItem>({
 
   if (loading) {
     return (
-      <CardContainer>
+      <CardContainer
+        backgroundColor={"$background"}
+        borderRadius={0}
+        paddingLeft={0}
+        paddingRight={0}
+      >
         <YStack gap="$2">
           {title && (
             <Text paddingLeft="$3" fontWeight="600">
@@ -103,7 +107,7 @@ function PeopleCarousel<T extends PersonItem>({
   }
 
   return (
-    <CardContainer paddingHorizontal={0}>
+    <CardContainer paddingHorizontal={0} backgroundColor={"$background"}>
       <YStack gap="$2">
         {title && (
           <TouchableOpacity onPress={onShowMore}>
@@ -131,13 +135,17 @@ function PeopleCarousel<T extends PersonItem>({
               </YStack>
             </TouchableOpacity>
           )}
-/*           ListFooterComponent={
-            showMore ? (
+          ListFooterComponent={
+            // render the extra element if thats a thign then the see more if thats a thing also
+            renderExtraItem ? (
+              <>
+                {renderExtraItem()}
+                <ListFooter showMore={showMore} />
+              </>
+            ) : (
               <ListFooter showMore={showMore} />
-            ) : renderExtraItem ? (
-              renderExtraItem()
-            ) : null
-          } */
+            )
+          }
           ItemSeparatorComponent={() => <Spacer size="$2" />}
           contentContainerStyle={{
             paddingHorizontal: getToken("$3", "space") as number,
