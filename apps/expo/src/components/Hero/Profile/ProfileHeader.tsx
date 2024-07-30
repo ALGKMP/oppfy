@@ -1,4 +1,4 @@
-import { Separator, Text, View, YStack } from "tamagui";
+import { Separator, Spacer, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
 
 import type { trpcValidators } from "@oppfy/validators";
@@ -89,7 +89,8 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
           reccomendationsData={recommendationsData}
         />
       </YStack>
-      <Separator />
+      {/* <Separator /> */}
+      <Spacer size="$1" />
     </YStack>
   );
 };
