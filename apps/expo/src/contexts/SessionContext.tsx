@@ -61,8 +61,17 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   }, []);
 
   const signInWithPhoneNumber = async (phoneNumber: string) => {
-    const result = await auth().signInWithPhoneNumber(phoneNumber);
-    setConfirmation(result);
+    // const result = await auth().signInWithPhoneNumber(phoneNumber);
+    const result = await auth()
+      .signInWithPhoneNumber(phoneNumber)
+      .then((confirmResult) => {
+        setConfirmation(confirmResult);
+        return confirmResult;
+      })
+      .catch((err) => {
+        console.log("err", err.message);
+        return null;
+      });
 
     return result;
   };
@@ -72,7 +81,16 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
       throw new Error("No confirmation result available for OTP verification.");
     }
 
-    return await confirmation.confirm(otp);
+    return await confirmation
+      .confirm(otp)
+      .then((userCredential) => {
+        console.log("Phone authentication successful", userCredential);
+        return userCredential;
+      })
+      .catch((err) => {
+        console.log("Phone authentication failed", err.message);
+        return null;
+      });
   };
 
   const signOut = async () => {
