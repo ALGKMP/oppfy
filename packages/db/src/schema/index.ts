@@ -39,9 +39,6 @@ export const eventTypeEnum = pgEnum("event_type", [
   "comment",
   "follow",
   "friend",
-  "followRequest",
-  "friendRequest",
-  "followRequestAccepted",
 ]);
 
 export const entityTypeEnum = pgEnum("entity_type", [
@@ -304,6 +301,7 @@ export const notifications = pgTable("notifications", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   read: boolean("read").default(false).notNull(),
+  active: boolean("active").default(true).notNull(),
   eventType: eventTypeEnum("event_type").notNull(),
   entityId: text("entity_id"),
   entityType: entityTypeEnum("entity_type"),

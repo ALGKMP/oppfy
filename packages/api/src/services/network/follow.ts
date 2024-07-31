@@ -126,43 +126,10 @@ export class FollowService {
     );
 
     if (friendship) {
-      await this.notificationsService.deleteNotificationFromSenderToRecipient(
-        senderId,
-        recipientId,
-        {
-          eventType: ["friend", "friendRequest"],
-          entityType: "profile",
-        },
-      );
-      await this.notificationsService.deleteNotificationFromSenderToRecipient(
-        recipientId,
-        senderId,
-        {
-          eventType: ["friend", "friendRequest"],
-          entityType: "profile",
-        },
-      );
       await this.friendRepository.removeFriend(senderId, recipientId);
     }
 
     await this.followRepository.removeFollower(senderId, recipientId);
-
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      senderId,
-      recipientId,
-      {
-        eventType: ["follow", "followRequest", "friend", "friendRequest"],
-        entityType: "profile",
-      },
-    );
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      recipientId,
-      senderId,
-      {
-        eventType: ["friend", "friendRequest", "followRequestAccepted"],
-        entityType: "profile",
-      },
-    );
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
@@ -192,15 +159,6 @@ export class FollowService {
         `Profile not found for user ID "${recipientId}"`,
       );
     }
-
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      senderId,
-      recipientId,
-      {
-        eventType: ["followRequest"],
-        entityType: "profile",
-      },
-    );
 
     await this.notificationsService.storeNotification(recipientId, senderId, {
       eventType: "followRequestAccepted",
@@ -246,15 +204,6 @@ export class FollowService {
     await this.followRepository.removeFollowRequest(
       requestSenderId,
       requestRecipientId,
-    );
-
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      requestSenderId,
-      requestRecipientId,
-      {
-        eventType: ["followRequest"],
-        entityType: "profile",
-      },
     );
   }
 
@@ -304,22 +253,6 @@ export class FollowService {
     if (friendship) {
       await this.friendRepository.removeFriend(userId, followerToRemove);
     }
-
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      followerToRemove,
-      userId,
-      {
-        eventType: ["follow", "followRequestAccepted", "friend"],
-        entityType: "profile",
-      },
-    );
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      userId,
-      followerToRemove,
-      {
-        eventType: ["friend", "followRequestAccepted"],
-      },
-    );
   }
 
   public async determineFollowState(
