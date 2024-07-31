@@ -6,11 +6,10 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Circle, Paragraph, SizableText, View, XStack, YStack } from "tamagui";
 
-import { abbreviatedTimeAgo } from "@oppfy/utils";
-
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
+import { TimeAgo } from "~/components/Texts";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -149,7 +148,7 @@ const Inbox = () => {
       </CardContainer>
 
       <CardContainer>
-        {PLACEHOLDER_DATA.map((item, index) => (
+        {PLACEHOLDER_DATA.map((_, index) => (
           <VirtualizedListItem
             key={index}
             loading
@@ -221,7 +220,15 @@ const Inbox = () => {
                 loading={false}
                 title={item.username}
                 subtitle={item.message}
-                subtitle2={abbreviatedTimeAgo(item.createdAt)}
+                subtitle2={
+                  <TimeAgo
+                    size="$2"
+                    date={item.createdAt}
+                    format={({ value, unit }) =>
+                      `${value}${unit.charAt(0)} ago`
+                    }
+                  />
+                }
                 button={{
                   ...buttonProps,
                   disabled: buttonDisabled,
