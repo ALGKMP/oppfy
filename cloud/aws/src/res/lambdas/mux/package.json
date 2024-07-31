@@ -15,6 +15,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.564.0",
     "@opensearch-project/opensearch": "^2.8.0",
+    "@oppfy/sns": "workspace:*",
     "@oppfy/db": "workspace:*",
     "@oppfy/mux": "workspace:*",
     "@oppfy/utils": "workspace:*",

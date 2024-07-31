@@ -671,6 +671,9 @@ importers:
       '@oppfy/mux':
         specifier: workspace:*
         version: link:../../../../../../packages/mux
+      '@oppfy/sns':
+        specifier: workspace:*
+        version: link:../../../../../../packages/sns
       '@oppfy/utils':
         specifier: workspace:*
         version: link:../../../../../../packages/utils
@@ -714,6 +717,12 @@ importers:
       '@oppfy/db':
         specifier: workspace:*
         version: link:../../../../../../packages/db
+      '@oppfy/s3':
+        specifier: workspace:*
+        version: link:../../../../../../packages/s3
+      '@oppfy/sns':
+        specifier: workspace:*
+        version: link:../../../../../../packages/sns
       '@oppfy/utils':
         specifier: workspace:*
         version: link:../../../../../../packages/utils
