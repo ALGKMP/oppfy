@@ -170,18 +170,13 @@ const PostItem = React.memo((props: PostItemProps) => {
       void (async () => {
         try {
           if (ignoreIfSameAsCurrentState) {
-            console.log(
-              `ignoring because the user is fucking spamming the like button on post ${post.postId}`,
-            );
             return;
           }
           if (newIsLiked) {
             console.log(newIsLiked);
             await likePost.mutateAsync({ postId: post.postId });
-            console.log(`liked post: ${post.postId}`);
           } else {
             await unlikePost.mutateAsync({ postId: post.postId });
-            console.log(`unliked post: ${post.postId}`);
           }
 
           howManyTimesDidTheMfHitTheLikeButton.current = 0;
@@ -240,7 +235,6 @@ const PostItem = React.memo((props: PostItemProps) => {
 
   // TODO: Not sure what I wanna do. Either pause the video, or make the video full screen
   const longHold = Gesture.LongPress().onEnd(() => {
-    console.log("long hold");
   });
 
   const postInteractions = Gesture.Exclusive(doubleTap, tapGesture, longHold);

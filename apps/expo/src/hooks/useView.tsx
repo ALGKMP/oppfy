@@ -33,7 +33,6 @@ const useView = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (viewedItems.length > 0) {
-        console.log("sending View Data")
         sendViewedData();
       }
     }, DEBOUNCE_DELAY);

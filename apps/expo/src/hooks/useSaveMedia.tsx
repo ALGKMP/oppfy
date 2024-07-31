@@ -79,11 +79,6 @@ const useSaveMedia = () => {
         presignedUrl,
         fileUri,
       );
-      console.log("File downloaded to cache dir:", uri);
-      console.log("File MIME type:", mimeType);
-      console.log("File headers:", headers);
-      console.log("File status:", status);
-
       return uri;
     } catch (error) {
       console.error("Error downloading file:", error);
@@ -165,7 +160,6 @@ const useSaveMedia = () => {
 
       if (mediaType === "image") {
         const watermarkedUri = await addWatermark(uri);
-        console.log("watermarkedUri", watermarkedUri);
         if (watermarkedUri) {
           await MediaLibrary.createAssetAsync(watermarkedUri);
           await FileSystem.deleteAsync(watermarkedUri);
@@ -193,7 +187,6 @@ const useSaveMedia = () => {
     mediaType: MediaType;
   }) => {
     setSaveState("saving");
-    console.log("uri", uri);
 
     const hasPermission = await requestMediaLibraryPermission();
 

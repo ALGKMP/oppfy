@@ -61,11 +61,8 @@ const PhoneNumber = () => {
 
   const onSubmit = async () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
-    console.log("signing in with phone number", e164PhoneNumber);
 
     await signInWithPhoneNumber(e164PhoneNumber);
-
-    console.log("trying to sign in with phone number");
 
     router.push({
       params: {

@@ -45,12 +45,7 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)/misc/permissions" />;
   }
 
-  // if (profileData && profileData.profileStats.posts < 3) {
-  //   console.log("Routing TO POST GUIDE");
-  //   return <Redirect href="/(locked)/invite" />;
-
   if (profileData && profileData.profileStats.posts < 0) {
-    console.log("Routing TO POST GUIDE");
     return <Redirect href="/(locked)/invite" />;
   }
 

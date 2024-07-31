@@ -57,8 +57,6 @@ const PhoneNumberOTP = () => {
       phoneNumber,
     });
 
-    console.log("after that");
-
     router.replace("/user-info/welcome");
   };
 

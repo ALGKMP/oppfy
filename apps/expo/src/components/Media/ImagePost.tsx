@@ -14,12 +14,8 @@ const ImagePost: React.FC<ImagePostProps> = (props: ImagePostProps) => {
   const postKey = postId.toString();
 
   useEffect(() => {
-    console.log("IMAGE URL", imageUrl);
-    // hit the image url here and see if it works
-
     const fn = async () => {
       const res = await fetch(imageUrl);
-      console.log("RES", res);
     };
 
     void fn();

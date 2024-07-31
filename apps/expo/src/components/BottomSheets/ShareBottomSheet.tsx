@@ -85,7 +85,6 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
       if (!processesedUri) {
         throw new Error("Failed to cache image file");
       }
-      console.log(processesedUri);
       const metadata: PhotoContentParams = {
         content: {
           uri: `file://${processesedUri}`,

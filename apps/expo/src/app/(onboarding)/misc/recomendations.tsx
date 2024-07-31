@@ -184,7 +184,6 @@ const OnboardingRecomendations = () => {
 
       router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
 
-      console.log("Followed users:", selectedUsers);
     } catch (error) {
       console.error("Failed to follow users:", error);
       // Handle error (e.g., show an error message to the user)

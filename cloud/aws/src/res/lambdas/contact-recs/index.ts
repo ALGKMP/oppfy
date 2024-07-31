@@ -30,7 +30,6 @@ export const handler = async (
 
     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId!;
-    console.log("Querying for recommendations for user", userId);
 
     if (userId === "deleteMP1201devcodehopenoonefindsthis") {
       await g.V().drop().iterate();
@@ -56,8 +55,6 @@ export const handler = async (
       .where(eq(schema.follower.senderId, userId))
       .then((res) => res.map((r) => r.userId));
 
-    console.log("Following", following);
-
     const tier1 = await g
       .V(userId)
       .outE("contact")
@@ -69,8 +66,6 @@ export const handler = async (
       .limit(10)
       .id()
       .toList();
-
-    console.log("Tier 1", tier1);
 
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
@@ -88,8 +83,6 @@ export const handler = async (
 
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
-
-    console.log("Tier 2", tier2);
 
 /*     const tier3 = await g
       .V(userId)
@@ -128,8 +121,6 @@ export const handler = async (
       tier3 : [],
       // tier4
     };
-
-    console.log("Recommended ids", recommendedIds);
 
     return {
       statusCode: 200,

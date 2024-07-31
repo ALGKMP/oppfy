@@ -91,7 +91,6 @@ const MediaOfYou = (props: MediaOfYouProps) => {
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
-      console.log("fetching next page");
       await fetchNextPage();
     }
   };

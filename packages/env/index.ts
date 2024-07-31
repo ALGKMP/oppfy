@@ -33,8 +33,8 @@ declare global {
 
       EXPO_PUBLIC_API_URL: string;
 
-      SENTRY_AUTH_TOKEN: string;
-      SENTRY_DSN: string;
+      EXPO_PUBLIC_SENTRY_AUTH_TOKEN: string;
+      EXPO_PUBLIC_SENTRY_DSN: string;
 
       CLOUDFRONT_PUBLIC_KEY: string;
       CLOUDFRONT_PUBLIC_KEY_ID: string;

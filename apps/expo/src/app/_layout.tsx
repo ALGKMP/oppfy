@@ -29,7 +29,7 @@ import SessionProvider from "../contexts/SessionContext";
 const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
 
 Sentry.init({
-  dsn: env.SENTRY_DSN,
+  dsn: env.EXPO_PUBLIC_SENTRY_DSN,
   debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
   integrations: [
     new Sentry.ReactNativeTracing({

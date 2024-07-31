@@ -58,8 +58,6 @@ export class PostRepository {
     const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
     const follower = aliasedTable(schema.follower, "follower");
 
-    console.log("in here");
-
     // Subquery to get the latest post for each followed user
     const latestPosts = this.db
       .select({

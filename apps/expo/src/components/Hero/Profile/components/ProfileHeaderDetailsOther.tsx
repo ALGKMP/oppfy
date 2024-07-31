@@ -51,12 +51,6 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     optimisticallyUpdate: true,
   });
 
-  useEffect(() => {
-    if (!props.loading) {
-      console.log(props.isRestricted);
-    }
-  }, [props.loading, props]);
-
   const onFollowingListPress = () => {
     if (props.loading || (props.isRestricted && !props.loading)) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

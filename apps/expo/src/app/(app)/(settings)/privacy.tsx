@@ -28,7 +28,6 @@ const Privacy = () => {
 
   const updatePrivacySetting = api.user.updatePrivacySetting.useMutation({
     onMutate: async (newPrivacySettings) => {
-      console.log(newPrivacySettings);
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.user.getPrivacySetting.cancel();
 

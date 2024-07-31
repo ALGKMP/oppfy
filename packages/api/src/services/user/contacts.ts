@@ -127,8 +127,6 @@ export class ContactService {
 
     const recommendationsIds = await this.getRecommendationsIds(userId);
 
-    console.log("Recommendations", recommendationsIds);
-
     const allRecommendations = [
       ...recommendationsIds.tier1,
       ...recommendationsIds.tier2,
@@ -164,8 +162,6 @@ export class ContactService {
     const userId = user.id;
 
     const recommendationsIds = await this.getRecommendationsIds(userId);
-
-    console.log("Recommendations", recommendationsIds);
 
     const allRecommendations = [
       ...recommendationsIds.tier1,

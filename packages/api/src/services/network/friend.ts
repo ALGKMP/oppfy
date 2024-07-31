@@ -244,16 +244,10 @@ export class FriendService {
   }
 
   async getFriendRequest(userId: string, targetUserId: string) {
-    const friendRequests = await this.friendRepository.getFriendRequest(
+    return await this.friendRepository.getFriendRequest(
       userId,
       targetUserId,
     );
-    if (!friendRequests) {
-      console.log(
-        `No friend request found between ${userId} and ${targetUserId}`,
-      );
-    }
-    return friendRequests;
   }
 
   async removeFriend(targetUserId: string, otherUserId: string) {

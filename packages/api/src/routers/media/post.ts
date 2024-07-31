@@ -208,17 +208,14 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfUserOther(
           input.userId,
           input.cursor,
           input.pageSize,
         );
 
-        console.log("TRPC getPosts result before validation: ", result);
         const parsedResult =
           trpcValidators.output.post.paginatedPosts.parse(result);
-        console.log("TRPC getPosts result after validation: ", parsedResult);
         return parsedResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
@@ -240,16 +237,13 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfUserSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        console.log("TRPC getPosts result before validation: ", result);
         const parsedResult =
           trpcValidators.output.post.paginatedPosts.parse(result);
-        console.log("TRPC getPosts result after validation: ", parsedResult);
         return parsedResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
@@ -271,16 +265,13 @@ export const postRouter = createTRPCRouter({
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        console.log("TRPC getPosts input: ", input);
         const result = await ctx.services.post.paginatePostsOfUserOther(
           input.userId,
           input.cursor,
           input.pageSize,
         );
-        console.log("TRPC getPosts result before validation: ", result);
         const parsedResult =
           trpcValidators.output.post.paginatedPosts.parse(result);
-        console.log("TRPC getPosts result after validation: ", parsedResult);
         return parsedResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);

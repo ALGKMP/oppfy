@@ -32,7 +32,6 @@ const ScanQr: React.FC = () => {
     onCodeScanned: (codes) => {
       if (codes.length > 0) {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        console.log("Scanned QR code:", codes[0]?.value);
         router.push(`/scanned-result?code=${codes[0]?.value}`);
       }
     },

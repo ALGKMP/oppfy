@@ -54,7 +54,6 @@ const CommentsBottomSheet = React.memo(
     modalVisible,
     setModalVisible,
   }: CommentsModalProps) => {
-    console.log("RE-RENDERING THIS BITCH ASS CommentsBottomSheet");
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
     const utils = api.useUtils();
     const sheetRef = useRef<BottomSheet>(null);
@@ -94,7 +93,6 @@ const CommentsBottomSheet = React.memo(
     const commentOnPost = api.post.createComment.useMutation({
       onMutate: async (newComment) => {
         // Cancel any outgoing refetches to avoid overwriting optimistic update
-        console.log("Running onMutate");
         await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
         if (isSelfPost) {
           await utils.post.paginatePostsOfUserSelf.cancel({ pageSize: 10 });
@@ -130,7 +128,6 @@ const CommentsBottomSheet = React.memo(
                   // check if it's postId
                   page.items.map((item) => {
                     if (item?.postId === postId) {
-                      console.log("adding extra count");
                       item.commentsCount += 1;
                     }
                   });
@@ -150,7 +147,6 @@ const CommentsBottomSheet = React.memo(
                   // check if it's postId
                   page.items.map((item) => {
                     if (item?.postId === postId) {
-                      console.log("adding extra count");
                       item.commentsCount += 1;
                     }
                   });
@@ -199,7 +195,7 @@ const CommentsBottomSheet = React.memo(
       },
       onError: (err, _newData, ctx) => {
         // Rollback to the previous value on error
-        console.log(err);
+        console.error(err);
         if (ctx?.prevCommentsData) {
           utils.post.paginateComments.setInfiniteData(
             { postId, pageSize: 10 },
