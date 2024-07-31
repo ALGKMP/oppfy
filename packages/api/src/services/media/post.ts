@@ -376,6 +376,16 @@ export class PostService {
 
       const post = await this.getPost(postId);
 
+      await this.notificationsService.storeNotification(
+        userId,
+        post.recipientId,
+        {
+          eventType: "like",
+          entityId: postId.toString(),
+          entityType: "post",
+        },
+      );
+
       const { likes } = await this.notificationsService.getNotificationSettings(
         post.recipientId,
       );
