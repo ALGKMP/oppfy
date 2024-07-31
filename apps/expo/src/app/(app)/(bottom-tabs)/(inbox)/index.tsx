@@ -1,10 +1,19 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Circle, Paragraph, SizableText, View, XStack, YStack } from "tamagui";
+import {
+  Circle,
+  getToken,
+  Paragraph,
+  SizableText,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -20,6 +29,8 @@ type NotificationItem =
 
 const Inbox = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const utils = api.useUtils();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -257,7 +268,7 @@ const Inbox = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <YStack gap="$4">
+      <YStack flex={1} gap="$4" paddingBottom={insets.bottom}>
         {renderFollowRequests()}
         {renderNotifications()}
       </YStack>
