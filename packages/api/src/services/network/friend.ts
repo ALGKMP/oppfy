@@ -88,9 +88,9 @@ export class FriendService {
             },
           );
         }
+      } else {
+        await this.followRepository.createFollower(senderId, recipientId);
       }
-
-      await this.followRepository.createFollower(senderId, recipientId);
 
       await this.notificationsService.storeNotification(
         sender.id,

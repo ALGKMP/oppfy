@@ -859,7 +859,7 @@ const FriendButton = ({
           {networkStatus.targetUserFriendState === "Friends"
             ? "Remove Friend"
             : networkStatus.targetUserFriendState === "OutboundRequest"
-              ? "Cancel Request"
+              ? "Cancel Friend Request"
               : "Add Friend"}
         </Text>
         {isLoading && <Spinner size="small" color="$color" />}
