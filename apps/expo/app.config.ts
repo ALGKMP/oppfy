@@ -1,5 +1,7 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
+import { env } from "@oppfy/env";
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "oppfy",
@@ -127,5 +129,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ["react-native-image-marker"],
+    [
+      "@sentry/react-native/expo",
+      {
+        organization: "oppfy",
+        project: "oppfy-app",
+      },
+    ],
   ],
 });

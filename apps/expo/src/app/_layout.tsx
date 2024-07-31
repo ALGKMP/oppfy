@@ -3,6 +3,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import { Modak_400Regular } from "@expo-google-fonts/modak";
+import * as Sentry from "@sentry/react-native";
 import Inter_900Black from "@tamagui/font-inter/otf/Inter-Black.otf";
 import Inter_700Bold from "@tamagui/font-inter/otf/Inter-Bold.otf";
 import Inter_800ExtraBold from "@tamagui/font-inter/otf/Inter-ExtraBold.otf";

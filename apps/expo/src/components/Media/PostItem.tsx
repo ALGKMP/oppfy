@@ -475,7 +475,7 @@ const PostItem = React.memo((props: PostItemProps) => {
               }}
             >
               <Text>
-                <Text fontWeight="bold">{post.authorUsername} </Text>
+                <Text fontWeight="bold">{post.authorUsername}  </Text>
                 <Text numberOfLines={isExpanded ? 0 : 2}>
                   {renderCaption()}
                   {showViewMore && !isExpanded && (

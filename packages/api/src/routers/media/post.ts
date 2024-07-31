@@ -18,8 +18,10 @@ export const postRouter = createTRPCRouter({
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
 
         const { contentLength, contentType, ...metadata } = input;
-        const caption = punycode.encode(metadata.caption);
-        console.log("caption: ", caption);
+        const encodedCaption = punycode.encode(metadata.caption);
+        console.log("caption: ", encodedCaption);
+        const decodedCaption = punycode.decode(encodedCaption);
+        console.log("caption decoded", decodedCaption);
 
         const presignedUrl =
           await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({

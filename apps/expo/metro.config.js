@@ -4,8 +4,10 @@ const { FileStore } = require("metro-cache");
 
 const path = require("path");
 
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
+
 module.exports = withTurborepoManagedCache(
-  withMonorepoPaths(getDefaultConfig(__dirname)),
+  withMonorepoPaths(getSentryExpoConfig(__dirname)),
 );
 
 /**
