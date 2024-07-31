@@ -6,10 +6,13 @@ import type { z } from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
+import { api } from "~/utils/api";
+
 type EntityData = z.infer<typeof sharedValidators.notifications.entityData>;
 
 const useNotificationObserver = () => {
   const router = useRouter();
+  const utils = api.useUtils();
 
   useEffect(() => {
     let isMounted = true;
@@ -40,24 +43,42 @@ const useNotificationObserver = () => {
       }
     };
 
+    const invalidateData = () => {
+      void utils.request.countRequests.invalidate();
+      void utils.notifications.paginateNotifications.invalidate();
+    };
+
     void Notifications.getLastNotificationResponseAsync().then((response) => {
       if (!isMounted || !response?.notification) {
         return;
       }
       redirect(response.notification);
+      invalidateData();
     });
 
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
+    const responseSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
         redirect(response.notification);
+        invalidateData();
+      });
+
+    // Add a new listener for received notifications
+    const receivedSubscription = Notifications.addNotificationReceivedListener(
+      () => {
+        invalidateData();
       },
     );
 
     return () => {
       isMounted = false;
-      subscription.remove();
+      responseSubscription.remove();
+      receivedSubscription.remove();
     };
-  }, [router]);
+  }, [
+    router,
+    utils.notifications.paginateNotifications,
+    utils.request.countRequests,
+  ]);
 };
 
 export default useNotificationObserver;
