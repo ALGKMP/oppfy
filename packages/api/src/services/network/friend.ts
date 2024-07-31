@@ -182,6 +182,20 @@ export class FriendService {
 
     await this.friendRepository.createFriend(senderId, recipientId);
 
+    const senderFollowRequestToRecipient =
+      await this.followRepository.getFollowRequest(senderId, recipientId);
+
+    const recipientFollowRequestToSender =
+      await this.followRepository.getFollowRequest(recipientId, senderId);
+
+    if (senderFollowRequestToRecipient) {
+      await this.followRepository.removeFollowRequest(senderId, recipientId);
+    }
+
+    if (recipientFollowRequestToSender) {
+      await this.followRepository.removeFollowRequest(recipientId, senderId);
+    }
+
     const senderFollowsRecipient = await this.followRepository.getFollower(
       senderId,
       recipientId,
