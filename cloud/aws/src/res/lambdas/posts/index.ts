@@ -186,10 +186,10 @@ const lambdaHandler = async (
       entityType: "post",
     });
   } else {
-    await db.insert(schema.postOfUserNotOnApp).values({
-      ...data,
-      phoneNumber: metadata.number,
-    });
+    // await db.insert(schema.postOfUserNotOnApp).values({
+    //   ...data,
+    //   phoneNumber: metadata.number,
+    // });
   }
 };
 
