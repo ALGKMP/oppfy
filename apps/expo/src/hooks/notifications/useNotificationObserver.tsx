@@ -21,9 +21,22 @@ const useNotificationObserver = () => {
       switch (entityType) {
         case "profile":
           router.navigate({
-            pathname: "/(search)/profile/[userId]",
+            pathname: "/(home)/profile/[userId]",
             params: { userId: entityId },
           });
+          break;
+        case "post":
+          router.navigate({
+            pathname: "/(home)/post/[postId]",
+            params: { postId: entityId },
+          });
+          break;
+        case "comment":
+          router.navigate({
+            pathname: "/(home)/post/[postId]",
+            params: { postId: entityId },
+          });
+          break;
       }
     };
 
