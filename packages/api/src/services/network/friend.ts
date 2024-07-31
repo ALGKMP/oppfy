@@ -88,7 +88,6 @@ export class FriendService {
             },
           );
         }
-        return;
       }
 
       await this.followRepository.createFollower(senderId, recipientId);
