@@ -158,6 +158,12 @@ const lambdaHandler = async (
       return post;
     });
 
+    await storeNotification(metadata.author, metadata.recipient, {
+      eventType: "post",
+      entityType: "post",
+      entityId: postId.toString(),
+    });
+
     const { posts } = await getNotificationSettings(metadata.recipient);
     if (!posts) return;
 
