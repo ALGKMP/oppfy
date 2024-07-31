@@ -1,3 +1,4 @@
+import * as punycode from "node:punycode";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -17,6 +18,8 @@ export const postRouter = createTRPCRouter({
         const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
 
         const { contentLength, contentType, ...metadata } = input;
+        const caption = punycode.encode(metadata.caption);
+        console.log("caption: ", caption);
 
         const presignedUrl =
           await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({

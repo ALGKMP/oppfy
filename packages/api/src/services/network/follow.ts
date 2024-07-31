@@ -56,15 +56,6 @@ export class FollowService {
 
     if (recipient.privacySetting === "private") {
       await this.followRepository.createFollowRequest(senderId, recipientId);
-      await this.notificationsService.storeNotification(
-        sender.id,
-        recipient.id,
-        {
-          eventType: "followRequest",
-          entityType: "profile",
-          entityId: sender.id,
-        },
-      );
 
       const { followRequests } =
         await this.notificationsService.getNotificationSettings(recipient.id);
@@ -87,26 +78,28 @@ export class FollowService {
 
     await this.followRepository.createFollower(senderId, recipientId);
 
-    // await this.notificationsService.storeNotification(sender.id, recipient.id, {
-    //   eventType: "follow",
-    //   entityType: "profile",
-    //   entityId: sender.id,
-    // });
+    await this.notificationsService.storeNotification(sender.id, recipient.id, {
+      eventType: "follow",
+      entityType: "profile",
+      entityId: sender.id,
+    });
 
-    // const { followRequests } =
-    //   await this.notificationsService.getNotificationSettings(recipient.id);
+    const { followRequests } =
+      await this.notificationsService.getNotificationSettings(recipient.id);
 
-    // if (!followRequests) {
-    //   return;
-    // }
+    if (followRequests) {
+      await this.notificationsService.sendNotification(
+        sender.id,
+        recipient.id,
+        {
+          title: "New follower",
+          body: `${senderProfile.username} is now following you.`,
 
-    // await this.notificationsService.sendNotification(sender.id, recipient.id, {
-    //   title: "New follower",
-    //   body: `${senderProfile.username} is now following you.`,
-
-    //   entityType: "profile",
-    //   entityId: sender.id,
-    // });
+          entityType: "profile",
+          entityId: sender.id,
+        },
+      );
+    }
   }
 
   async unfollowUser(senderId: string, recipientId: string) {
@@ -159,12 +152,6 @@ export class FollowService {
         `Profile not found for user ID "${recipientId}"`,
       );
     }
-
-    await this.notificationsService.storeNotification(recipientId, senderId, {
-      eventType: "followRequestAccepted",
-      entityType: "profile",
-      entityId: recipient.id,
-    });
 
     await this.notificationsService.storeNotification(senderId, recipientId, {
       eventType: "follow",

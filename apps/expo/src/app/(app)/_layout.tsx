@@ -3,12 +3,16 @@ import { Redirect } from "expo-router";
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
-import { usePushNotifications } from "~/hooks/notifications";
+import {
+  useNotificationObserver,
+  usePushNotifications,
+} from "~/hooks/notifications";
 import { Stack } from "~/layouts";
 import { api } from "~/utils/api";
 
 const AppLayout = () => {
   usePushNotifications();
+  useNotificationObserver();
   // useContacts(true);
 
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
@@ -32,7 +36,7 @@ const AppLayout = () => {
   if (onboardingComplete === false) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
-  
+
   if (onboardingComplete === undefined) {
     return <Redirect href="/(onboarding)" />;
   }
@@ -44,7 +48,7 @@ const AppLayout = () => {
   // if (profileData && profileData.profileStats.posts < 3) {
   //   console.log("Routing TO POST GUIDE");
   //   return <Redirect href="/(locked)/invite" />;
-  
+
   if (profileData && profileData.profileStats.posts < 0) {
     console.log("Routing TO POST GUIDE");
     return <Redirect href="/(locked)/invite" />;

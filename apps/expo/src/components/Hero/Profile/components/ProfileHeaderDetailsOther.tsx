@@ -693,7 +693,8 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             <FollowButton
               networkStatus={profileData.networkStatus}
               onFollowPress={onFollowPress}
-              isLoading={isFollowLoading}
+              isLoadingFollow={isFollowLoading}
+              isLoadingFriend={isFriendLoading}
             />
           )}
         />
@@ -708,7 +709,8 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             <FriendButton
               networkStatus={networkStatus}
               onFriendPress={onFriendPress}
-              isLoading={isFriendLoading}
+              isLoadingFriend={isFriendLoading}
+              isLoadingFollow={isFollowLoading}
             />
           )}
         />
@@ -741,11 +743,13 @@ const Stat = (props: StatProps) => (
 const FollowButton = ({
   networkStatus,
   onFollowPress,
-  isLoading,
+  isLoadingFollow,
+  isLoadingFriend,
 }: {
   networkStatus: ProfileData["networkStatus"];
   onFollowPress: () => void;
-  isLoading: boolean;
+  isLoadingFollow: boolean;
+  isLoadingFriend: boolean;
 }) => {
   const followState = networkStatus.targetUserFollowState;
   const friendState = networkStatus.targetUserFriendState;
@@ -779,11 +783,11 @@ const FollowButton = ({
       borderRadius={20}
       onPress={onFollowPress}
       backgroundColor={followState === "NotFollowing" ? "#F214FF" : "$primary"}
-      disabled={isLoading}
+      disabled={isLoadingFollow || isLoadingFriend}
     >
       <XStack gap="$2" alignItems="center">
         <Text>{buttonText}</Text>
-        {isLoading && <Spinner size="small" color="$color" />}
+        {isLoadingFollow && <Spinner size="small" color="$color" />}
       </XStack>
     </Button>
   );
@@ -792,11 +796,13 @@ const FollowButton = ({
 const FriendButton = ({
   networkStatus,
   onFriendPress,
-  isLoading,
+  isLoadingFriend,
+  isLoadingFollow,
 }: {
   networkStatus: ProfileData["networkStatus"];
   onFriendPress: (action?: "accept" | "reject") => void;
-  isLoading: boolean;
+  isLoadingFriend: boolean;
+  isLoadingFollow: boolean;
 }) => {
   const friendState = networkStatus.targetUserFriendState;
   if (networkStatus.targetUserFriendState === "IncomingRequest") {
@@ -852,7 +858,7 @@ const FriendButton = ({
       borderRadius={20}
       onPress={() => onFriendPress()}
       backgroundColor={friendState === "NotFriends" ? "#F214FF" : "$primary"}
-      disabled={isLoading}
+      disabled={isLoadingFriend || isLoadingFollow}
     >
       <XStack gap="$2" alignItems="center">
         <Text>
@@ -862,7 +868,7 @@ const FriendButton = ({
               ? "Cancel Friend Request"
               : "Add Friend"}
         </Text>
-        {isLoading && <Spinner size="small" color="$color" />}
+        {isLoadingFriend && <Spinner size="small" color="$color" />}
       </XStack>
     </Button>
   );

@@ -21,7 +21,7 @@ const Index = () => {
   }
 
   return isSignedIn ? (
-    <Redirect href="/(app)/(bottom-tabs)/(home)/home" />
+    <Redirect href="/(app)/(bottom-tabs)/(home)" />
   ) : (
     <Redirect href="/(onboarding)" />
   );

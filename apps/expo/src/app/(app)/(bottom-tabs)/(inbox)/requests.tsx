@@ -80,6 +80,7 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFriendRequests.invalidate();
+      checkAndNavigateBack();
     },
   });
   const acceptFollowRequest = api.request.acceptFollowRequest.useMutation({
@@ -114,6 +115,7 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFollowRequests.invalidate();
+      checkAndNavigateBack();
     },
   });
 
@@ -149,6 +151,7 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFriendRequests.invalidate();
+      checkAndNavigateBack();
     },
   });
   const declineFollowRequest = api.request.declineFollowRequest.useMutation({
@@ -183,8 +186,17 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFollowRequests.invalidate();
+      checkAndNavigateBack();
     },
   });
+
+  const checkAndNavigateBack = () => {
+    const totalRequestsLeft =
+      friendRequestItems.length + followRequestItems.length;
+    if (totalRequestsLeft <= 1) {
+      router.back();
+    }
+  };
 
   const friendRequestItems = useMemo(
     () => friendRequestsData?.pages.flatMap((page) => page.items) ?? [],

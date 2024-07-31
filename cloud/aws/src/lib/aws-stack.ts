@@ -732,6 +732,10 @@ EOF`;
       new subs.LambdaSubscription(pushNotificationsLambda),
     );
 
+    // Give post lambdas perms to publish to the topic
+    pushNotificationsTopic.grantPublish(postLambda);
+    pushNotificationsTopic.grantPublish(muxWebhookLambda);
+
     // Output the SNS Topic ARN
     new cdk.CfnOutput(this, "PushNotificationsTopicArn", {
       value: pushNotificationsTopic.topicArn,
