@@ -62,52 +62,8 @@ export class FriendService {
 
       if (recipient.privacySetting === "private") {
         await this.followRepository.createFollowRequest(senderId, recipientId);
-
-        const { followRequests } =
-          await this.notificationsService.getNotificationSettings(recipient.id);
-
-        if (followRequests) {
-          await this.notificationsService.sendNotification(
-            sender.id,
-            recipient.id,
-            {
-              title: "Follow Request",
-              body: `${senderProfile.username} has sent you a follow request.`,
-
-              entityType: "profile",
-              entityId: sender.id,
-            },
-          );
-        }
       } else {
         await this.followRepository.createFollower(senderId, recipientId);
-      }
-
-      await this.notificationsService.storeNotification(
-        sender.id,
-        recipient.id,
-        {
-          eventType: "follow",
-          entityType: "profile",
-          entityId: sender.id,
-        },
-      );
-
-      const { followRequests } =
-        await this.notificationsService.getNotificationSettings(recipient.id);
-
-      if (followRequests) {
-        await this.notificationsService.sendNotification(
-          sender.id,
-          recipient.id,
-          {
-            title: "New follower",
-            body: `${senderProfile.username} is now following you.`,
-
-            entityType: "profile",
-            entityId: sender.id,
-          },
-        );
       }
     }
 
