@@ -17,7 +17,7 @@ import {
 import { api } from "~/utils/api";
 
 // ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = true;
+// auth().settings.appVerificationDisabledForTesting = true;
 
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
@@ -50,10 +50,15 @@ const PhoneNumberOTP = () => {
       return;
     }
 
+    console.log("truign this");
+
     await createUser.mutateAsync({
       userId,
       phoneNumber,
     });
+
+    console.log("after that");
+
     router.replace("/user-info/welcome");
   };
 
@@ -62,7 +67,7 @@ const PhoneNumberOTP = () => {
       await userOnboardingCompletedMutation.mutateAsync();
 
     userOnboardingCompleted
-      ? router.replace("/(app)/(bottom-tabs)/(home)/home")
+      ? router.replace("/(app)/(bottom-tabs)/(home)")
       : router.replace("/user-info/welcome");
   };
 

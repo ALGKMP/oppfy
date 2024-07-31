@@ -17,14 +17,11 @@ import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { TamaguiProvider, View } from "tamagui";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
-import { useNotificationObserver } from "~/hooks/notifications";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
 
 const RootLayout = () => {
-  useNotificationObserver();
-
   const [fontsLoaded] = useFonts({
     Modak: Modak_400Regular,
 
