@@ -1,7 +1,9 @@
+import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { isRunningInExpoGo } from "expo";
 import { useFonts } from "expo-font";
-import { Slot } from "expo-router";
+import { Slot, useNavigationContainerRef } from "expo-router";
 import { Modak_400Regular } from "@expo-google-fonts/modak";
 import * as Sentry from "@sentry/react-native";
 import Inter_900Black from "@tamagui/font-inter/otf/Inter-Black.otf";
@@ -16,10 +18,28 @@ import Inter_100Thin from "@tamagui/font-inter/otf/Inter-Thin.otf";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { TamaguiProvider, View } from "tamagui";
 
+import { env } from "@oppfy/env";
+
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
+
+// Construct a new instrumentation instance. This is needed to communicate between the integration and React
+const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
+
+Sentry.init({
+  dsn: env.SENTRY_DSN,
+  debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
+  integrations: [
+    new Sentry.ReactNativeTracing({
+      // Pass instrumentation to be used as `routingInstrumentation`
+      routingInstrumentation,
+      enableNativeFramesTracking: !isRunningInExpoGo(),
+      // ...
+    }),
+  ],
+});
 
 const RootLayout = () => {
   const [fontsLoaded] = useFonts({
@@ -35,6 +55,15 @@ const RootLayout = () => {
     InterExtraBold: Inter_800ExtraBold,
     InterBlack: Inter_900Black,
   });
+
+  // Capture the NavigationContainer ref and register it with the instrumentation.
+  const ref = useNavigationContainerRef();
+
+  React.useEffect(() => {
+    if (ref) {
+      routingInstrumentation.registerNavigationContainer(ref);
+    }
+  }, [ref]);
 
   if (!fontsLoaded) {
     return null;
@@ -62,4 +91,4 @@ const RootLayout = () => {
   );
 };
 
-export default RootLayout;
+export default Sentry.wrap(RootLayout);
