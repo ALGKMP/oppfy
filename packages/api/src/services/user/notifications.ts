@@ -62,12 +62,6 @@ export class NotificationsService {
             return `${username} started following you!`;
           case "friend":
             return `${username} is now your friend!`;
-          case "followRequest":
-            return `${username} wants to follow you!`;
-          case "friendRequest":
-            return `${username} sent you a friend request!`;
-          case "followRequestAccepted":
-            return `${username} accepted your follow request!`;
         }
       })();
 

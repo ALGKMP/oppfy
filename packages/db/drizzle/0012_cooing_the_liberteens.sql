@@ -1,0 +1,1 @@
+ALTER TABLE "notifications" ADD COLUMN "active" boolean DEFAULT true NOT NULL;

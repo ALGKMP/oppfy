@@ -233,15 +233,6 @@ export class FriendService {
       }
     }
 
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      senderId,
-      recipientId,
-      {
-        eventType: ["friendRequest"],
-        entityType: "profile",
-      },
-    );
-
     await this.notificationsService.storeNotification(recipientId, senderId, {
       eventType: "friend",
       entityType: "profile",
@@ -281,23 +272,6 @@ export class FriendService {
     }
 
     await this.friendRepository.deleteFriendRequest(senderId, recipientId);
-
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      recipientId,
-      senderId,
-      {
-        eventType: ["friendRequest"],
-        entityType: "profile",
-      },
-    );
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      senderId,
-      recipientId,
-      {
-        eventType: ["friendRequest"],
-        entityType: "profile",
-      },
-    );
   }
 
   async cancelFriendRequest(senderId: string, recipientId: string) {
@@ -311,15 +285,6 @@ export class FriendService {
         `Friend request from "${senderId}" to "${recipientId}" not found`,
       );
     }
-
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      senderId,
-      recipientId,
-      {
-        eventType: "friendRequest",
-        entityType: "profile",
-      },
-    );
 
     return await this.friendRepository.deleteFriendRequest(
       senderId,
@@ -353,22 +318,6 @@ export class FriendService {
       );
     }
 
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      targetUserId,
-      otherUserId,
-      {
-        eventType: ["friend", "friendRequest"],
-        entityType: "profile",
-      },
-    );
-    await this.notificationsService.deleteNotificationFromSenderToRecipient(
-      otherUserId,
-      targetUserId,
-      {
-        eventType: ["friend", "friendRequest"],
-        entityType: "profile",
-      },
-    );
     return await this.friendRepository.removeFriend(targetUserId, otherUserId);
   }
 
