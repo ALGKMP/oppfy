@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Circle, Paragraph, SizableText, View, XStack, YStack } from "tamagui";
@@ -40,6 +41,12 @@ const Inbox = () => {
   } = api.notifications.paginateNotifications.useInfiniteQuery(
     { pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      void refetchRequestCount();
+    }, [refetchRequestCount]),
   );
 
   const totalRequestCount =
