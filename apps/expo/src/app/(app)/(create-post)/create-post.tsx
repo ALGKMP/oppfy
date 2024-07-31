@@ -134,7 +134,7 @@ We can't wait to see you there! 😊
       : await uploadVideoMutation.mutateAsync(input);
 
     router.dismissAll();
-    router.navigate("/(home)/home");
+    router.navigate("/(home)");
   });
 
   return (

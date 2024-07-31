@@ -34,7 +34,7 @@ const Permissions = () => {
 
   const onPress = () => {
     isSignedIn
-      ? router.push("/(app)/(bottom-tabs)/(home)/home")
+      ? router.push("/(app)/(bottom-tabs)/(home)")
       : router.push("/auth/phone-number");
   };
 
