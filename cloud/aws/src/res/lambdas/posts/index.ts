@@ -1,14 +1,13 @@
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { S3Schema } from "@aws-lambda-powertools/parser/schemas";
-import { HeadObjectCommand } from "@aws-sdk/client-s3";
+import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
-import { s3 } from "@oppfy/s3";
-import { PublishCommand, sns } from "@oppfy/sns";
 import { sharedValidators } from "@oppfy/validators";
 
 type SnsNotificationData = z.infer<
@@ -30,6 +29,14 @@ const env = createEnv({
     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
   },
   runtimeEnv: process.env,
+});
+
+const s3 = new S3Client({
+  region: "us-east-1",
+});
+
+const sns = new SNSClient({
+  region: "us-east-1",
 });
 
 const sendNotification = async (

@@ -1,12 +1,12 @@
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { APIGatewayProxyEventV2Schema } from "@aws-lambda-powertools/parser/schemas";
+import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
 import { mux } from "@oppfy/mux";
-import { PublishCommand, sns } from "@oppfy/sns";
 import { sharedValidators } from "@oppfy/validators";
 
 type SnsNotificationData = z.infer<
@@ -28,6 +28,10 @@ const env = createEnv({
     SNS_PUSH_NOTIFICATION_TOPIC_ARN: z.string().min(1),
   },
   runtimeEnv: process.env,
+});
+
+const sns = new SNSClient({
+  region: "us-east-1",
 });
 
 const sendNotification = async (
