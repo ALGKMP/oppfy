@@ -8,6 +8,9 @@ import { throttle } from "lodash";
 import {
   Avatar,
   getToken,
+  H4,
+  H5,
+  H6,
   ListItemTitle,
   SizableText,
   Spacer,
@@ -112,11 +115,12 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
   );
 
   const renderSuggestions = (data: RecemmendationItem[]) => (
-    <CardContainer borderRadius={0} paddingLeft={0} margin={1}>
+    <CardContainer paddingLeft={0} margin={1}>
       <YStack gap="$2">
-        <Text paddingLeft="$3" fontWeight="600">
-          🙋‍♂️💁‍♀️ D‍iscover People
-        </Text>
+        <H5 paddingLeft="$3" theme="alt1">
+          Discover People🔥
+        </H5>
+
         <FlashList
           data={data}
           horizontal

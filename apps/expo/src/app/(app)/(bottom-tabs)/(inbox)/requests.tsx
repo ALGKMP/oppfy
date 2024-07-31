@@ -1,11 +1,12 @@
 import React, { useMemo } from "react";
 import { useRouter } from "expo-router";
-import { Button, ListItemTitle, Spacer, YStack } from "tamagui";
+import { Button, H6, Spacer, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { BaseScreenView } from "~/components/Views";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const PAGE_SIZE = 5;
@@ -52,17 +53,21 @@ const Requests = () => {
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.request.paginateFriendRequests.cancel();
+      await utils.request.paginateFollowRequests.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.request.paginateFriendRequests.getInfiniteData();
-      if (prevData === undefined) return;
+      const prevFriendData =
+        utils.request.paginateFriendRequests.getInfiniteData();
+      const prevFollowData =
+        utils.request.paginateFollowRequests.getInfiniteData();
+      if (prevFriendData === undefined || prevFollowData === undefined) return;
 
       // Optimistically update the data
       utils.request.paginateFriendRequests.setInfiniteData(
         {},
         {
-          ...prevData,
-          pages: prevData.pages.map((page) => ({
+          ...prevFriendData,
+          pages: prevFriendData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
               (item) => item.userId !== newData.senderId,
@@ -71,16 +76,37 @@ const Requests = () => {
         },
       );
 
-      return { prevData };
+      // Optimistically update the follow requests data
+      utils.request.paginateFollowRequests.setInfiniteData(
+        {},
+        {
+          ...prevFollowData,
+          pages: prevFollowData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (item) => item.userId !== newData.senderId,
+            ),
+          })),
+        },
+      );
+
+      return { prevFriendData, prevFollowData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.request.paginateFriendRequests.setInfiniteData({}, ctx.prevData);
+      utils.request.paginateFriendRequests.setInfiniteData(
+        {},
+        ctx.prevFriendData,
+      );
+      utils.request.paginateFollowRequests.setInfiniteData(
+        {},
+        ctx.prevFollowData,
+      );
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFriendRequests.invalidate();
-      checkAndNavigateBack();
+      await utils.request.paginateFollowRequests.invalidate();
     },
   });
   const acceptFollowRequest = api.request.acceptFollowRequest.useMutation({
@@ -115,7 +141,6 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFollowRequests.invalidate();
-      checkAndNavigateBack();
     },
   });
 
@@ -125,15 +150,18 @@ const Requests = () => {
       await utils.request.paginateFriendRequests.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.request.paginateFriendRequests.getInfiniteData();
-      if (prevData === undefined) return;
+      const prevFriendData =
+        utils.request.paginateFriendRequests.getInfiniteData();
+      const prevFollowData =
+        utils.request.paginateFollowRequests.getInfiniteData();
+      if (prevFriendData === undefined || prevFollowData === undefined) return;
 
       // Optimistically update the data
       utils.request.paginateFriendRequests.setInfiniteData(
         {},
         {
-          ...prevData,
-          pages: prevData.pages.map((page) => ({
+          ...prevFriendData,
+          pages: prevFriendData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
               (item) => item.userId !== newData.senderId,
@@ -142,16 +170,31 @@ const Requests = () => {
         },
       );
 
-      return { prevData };
+      // Optimistically update the follow requests data
+      utils.request.paginateFollowRequests.setInfiniteData(
+        {},
+        {
+          ...prevFollowData,
+        },
+      );
+
+      return { prevFriendData, prevFollowData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.request.paginateFriendRequests.setInfiniteData({}, ctx.prevData);
+      utils.request.paginateFriendRequests.setInfiniteData(
+        {},
+        ctx.prevFriendData,
+      );
+      utils.request.paginateFollowRequests.setInfiniteData(
+        {},
+        ctx.prevFollowData,
+      );
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFriendRequests.invalidate();
-      checkAndNavigateBack();
+      await utils.request.paginateFollowRequests.invalidate();
     },
   });
   const declineFollowRequest = api.request.declineFollowRequest.useMutation({
@@ -186,17 +229,8 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.request.paginateFollowRequests.invalidate();
-      checkAndNavigateBack();
     },
   });
-
-  const checkAndNavigateBack = () => {
-    const totalRequestsLeft =
-      friendRequestItems.length + followRequestItems.length;
-    if (totalRequestsLeft <= 1) {
-      router.back();
-    }
-  };
 
   const friendRequestItems = useMemo(
     () => friendRequestsData?.pages.flatMap((page) => page.items) ?? [],
@@ -275,7 +309,7 @@ const Requests = () => {
 
   const renderFriendRequests = () => (
     <CardContainer>
-      <ListItemTitle>Friend Requests</ListItemTitle>
+      <H6 theme="alt1">Friend Requests</H6>
 
       {friendRequestItems.map((item, index) => (
         <VirtualizedListItem
@@ -286,7 +320,7 @@ const Requests = () => {
           imageUrl={item.profilePictureUrl}
           button={{
             text: "Accept",
-            theme: "blue",
+            backgroundColor: "#F214FF",
             onPress: () => void onAcceptFriendRequest(item.userId),
           }}
           button2={{
@@ -313,6 +347,8 @@ const Requests = () => {
 
   const renderFollowRequests = () => (
     <CardContainer>
+      <H6 theme="alt1">Follow Requests</H6>
+
       {followRequestItems.map((item, index) => (
         <VirtualizedListItem
           key={index}
@@ -322,6 +358,7 @@ const Requests = () => {
           imageUrl={item.profilePictureUrl}
           button={{
             text: "Accept",
+            backgroundColor: "#F214FF",
             onPress: () => void onAcceptFollowRequest(item.userId),
           }}
           button2={{

@@ -43,7 +43,16 @@ const useNotificationObserver = () => {
       }
     };
 
-    const invalidateData = () => {
+    const invalidateData = (notification?: Notification) => {
+      if (notification) {
+        const { entityId, entityType } = notification.request.content
+          .data as EntityData;
+        if (entityType === "profile") {
+          void utils.profile.getFullProfileOther.invalidate({
+            userId: entityId,
+          });
+        }
+      }
       void utils.request.countRequests.invalidate();
       void utils.notifications.paginateNotifications.invalidate();
     };
@@ -53,21 +62,24 @@ const useNotificationObserver = () => {
         return;
       }
       redirect(response.notification);
-      invalidateData();
+      invalidateData(response.notification);
     });
 
     const responseSubscription =
       Notifications.addNotificationResponseReceivedListener((response) => {
         redirect(response.notification);
-        invalidateData();
+        invalidateData(response.notification);
       });
 
     // Add a new listener for received notifications
     const receivedSubscription = Notifications.addNotificationReceivedListener(
-      () => {
-        invalidateData();
+      (notification) => {
+        invalidateData(notification);
       },
     );
+
+    // Invalidate data initially
+    invalidateData();
 
     return () => {
       isMounted = false;
@@ -76,9 +88,9 @@ const useNotificationObserver = () => {
     };
   }, [
     router,
+    utils.profile.getFullProfileOther,
     utils.notifications.paginateNotifications,
     utils.request.countRequests,
   ]);
 };
-
 export default useNotificationObserver;
