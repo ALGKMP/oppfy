@@ -373,6 +373,43 @@ export class PostService {
       }
       await this.likeRepository.addLike(postId, userId);
       await this.postStatsRepository.incrementLikesCount(postId);
+
+      const post = await this.getPost(postId);
+
+      await this.notificationsService.storeNotification(
+        userId,
+        post.recipientId,
+        {
+          eventType: "like",
+          entityId: postId.toString(),
+          entityType: "post",
+        },
+      );
+
+      const { likes } = await this.notificationsService.getNotificationSettings(
+        post.recipientId,
+      );
+
+      if (likes) {
+        const user = await this.profileRepository.getUserProfile(userId);
+
+        if (user === undefined) {
+          throw new DomainError(ErrorCode.USER_NOT_FOUND);
+        }
+
+        const { profile } = user;
+
+        await this.notificationsService.sendNotification(
+          userId,
+          post.recipientId,
+          {
+            title: "New like",
+            body: `${profile.username} liked your post`,
+            entityType: "post",
+            entityId: postId.toString(),
+          },
+        );
+      }
     } catch (error) {
       console.error(
         `Error in likePost for userId: ${userId}, postId: ${postId}: `,
@@ -440,21 +477,30 @@ export class PostService {
       },
     );
 
-    const user = await this.profileRepository.getUserProfile(userId);
+    const { comments } =
+      await this.notificationsService.getNotificationSettings(post.recipientId);
 
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
+    if (comments) {
+      const user = await this.profileRepository.getUserProfile(userId);
+
+      if (user === undefined) {
+        throw new DomainError(ErrorCode.USER_NOT_FOUND);
+      }
+
+      const { profile } = user;
+
+      await this.notificationsService.sendNotification(
+        userId,
+        post.recipientId,
+        {
+          title: "New Comment",
+          body: `${profile.username} commented on your post`,
+
+          entityId: postId.toString(),
+          entityType: "post",
+        },
+      );
     }
-
-    const { profile } = user;
-
-    await this.notificationsService.sendNotification(userId, post.recipientId, {
-      title: "New Comment",
-      body: `${profile.username} commented on your post`,
-
-      entityId: postId.toString(),
-      entityType: "post",
-    });
   }
 
   async deleteComment(commentId: number, postId: number) {

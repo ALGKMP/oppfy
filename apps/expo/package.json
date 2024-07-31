@@ -15,6 +15,7 @@
     "prebuild:clean": "expo prebuild --clean",
     "open:ios": "open -a \"Xcode\" ios",
     "open:android": "open -a \"Android Studio\" android",
+    "generate-themes": "tamagui generate-themes ./theme-builder.ts ./theme-output.ts",
     "lint": "eslint",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "typecheck": "tsc --noEmit",

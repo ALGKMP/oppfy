@@ -62,15 +62,6 @@ export class FriendService {
 
       if (recipient.privacySetting === "private") {
         await this.followRepository.createFollowRequest(senderId, recipientId);
-        await this.notificationsService.storeNotification(
-          sender.id,
-          recipient.id,
-          {
-            eventType: "followRequest",
-            entityType: "profile",
-            entityId: sender.id,
-          },
-        );
 
         const { followRequests } =
           await this.notificationsService.getNotificationSettings(recipient.id);
@@ -105,21 +96,19 @@ export class FriendService {
       const { followRequests } =
         await this.notificationsService.getNotificationSettings(recipient.id);
 
-      if (!followRequests) {
-        return;
+      if (followRequests) {
+        await this.notificationsService.sendNotification(
+          sender.id,
+          recipient.id,
+          {
+            title: "New follower",
+            body: `${senderProfile.username} is now following you.`,
+
+            entityType: "profile",
+            entityId: sender.id,
+          },
+        );
       }
-
-      await this.notificationsService.sendNotification(
-        sender.id,
-        recipient.id,
-        {
-          title: "New follower",
-          body: `${senderProfile.username} is now following you.`,
-
-          entityType: "profile",
-          entityId: sender.id,
-        },
-      );
     }
 
     await this.friendRepository.createFriendRequest(senderId, recipientId);
@@ -133,26 +122,18 @@ export class FriendService {
       );
     }
 
-    await this.notificationsService.storeNotification(senderId, recipientId, {
-      eventType: "friendRequest",
-      entityType: "profile",
-      entityId: sender.id,
-    });
-
     const { friendRequests } =
       await this.notificationsService.getNotificationSettings(recipientId);
 
-    if (!friendRequests) {
-      return;
+    if (friendRequests) {
+      await this.notificationsService.sendNotification(senderId, recipientId, {
+        title: "Friend Request",
+        body: `${profile.username} has sent you a friend request`,
+
+        entityType: "profile",
+        entityId: sender.id,
+      });
     }
-
-    await this.notificationsService.sendNotification(senderId, recipientId, {
-      title: "Friend Request",
-      body: `${profile.username} has sent you a friend request`,
-
-      entityType: "profile",
-      entityId: sender.id,
-    });
   }
 
   async acceptFriendRequest(senderId: string, recipientId: string) {
