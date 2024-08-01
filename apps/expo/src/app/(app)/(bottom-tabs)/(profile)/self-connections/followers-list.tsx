@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, Input, SizableText, View, YStack } from "tamagui";
+import { Button, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -21,6 +22,8 @@ type FollowerItem =
 const FollowerList = () => {
   const router = useRouter();
   const utils = api.useUtils();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
@@ -88,6 +91,12 @@ const FollowerList = () => {
 
   const handleRemoveFollower = async (userId: string) =>
     await removeFollower.mutateAsync({ userId });
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
@@ -175,7 +184,12 @@ const FollowerList = () => {
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <YStack gap="$4">
         <SearchInput
           placeholder="Search followers..."
