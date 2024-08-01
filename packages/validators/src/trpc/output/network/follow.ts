@@ -53,7 +53,7 @@ const trpcFollowOutputSchema = {
         profileId: z.number(),
         username: z.string(),
         name: z.string(),
-        profilePictureUrl: z.string(),
+        profilePictureUrl: z.string().optional(),
         privacy: z.enum(["public", "private"]),
         relationshipState: z.enum([
           "following",

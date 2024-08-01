@@ -8,7 +8,7 @@ const trpcFriendOutputSchema = {
         profileId: z.number(),
         username: z.string(),
         name: z.string(),
-        profilePictureUrl: z.string(),
+        profilePictureUrl: z.string().nullable(),
         privacy: z.enum(["public", "private"]),
       }),
     ),
