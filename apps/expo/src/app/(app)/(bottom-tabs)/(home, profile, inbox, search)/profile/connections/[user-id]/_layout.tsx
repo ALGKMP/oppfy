@@ -26,9 +26,6 @@ const ConnectionsLayout = () => {
       tabBar={(props) => <TopTabBar {...props} />}
       backBehavior="none"
       initialRouteName={initialRouteName}
-      screenOptions={{
-        lazy: true,
-      }}
       sceneContainerStyle={{
         backgroundColor: theme.background.val,
       }}
