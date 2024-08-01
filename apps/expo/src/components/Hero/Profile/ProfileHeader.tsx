@@ -1,4 +1,3 @@
-import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { Separator, Spacer, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
@@ -25,6 +24,11 @@ type RecommendedProfiles = z.infer<
   typeof trpcValidators.output.recommendations.recommededProfiles
 >;
 
+interface NavigateProfileParams {
+  userId: string;
+  username: string;
+}
+
 interface ProfileHeaderProps {
   isSelfProfile: boolean;
   isLoadingProfileData: boolean;
@@ -35,6 +39,7 @@ interface ProfileHeaderProps {
   recommendationsData: RecommendedProfiles | undefined;
   isRestricted: boolean;
   isBlocked: boolean;
+  navigateToProfile: (params: NavigateProfileParams) => void;
 }
 
 function isOtherProfile(
@@ -77,22 +82,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
 
   const hasFriends = profileData.friendCount > 0;
 
-  const onPersonClick = ({
-    userId,
-    username,
-  }: {
-    userId: string;
-    username: string;
-  }) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push({
-      pathname: "/profile/[userId]/",
-      params: {
-        userId,
-        username,
-      },
-    });
-  };
+
 
   return (
     <YStack gap="$5">
@@ -120,7 +110,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
             data={friendsData}
             title="Friends🔥"
             showMore={friendsData.length < profileData.friendCount}
-            onItemPress={onPersonClick}
+            onItemPress={props.navigateToProfile}
             onShowMore={() => {
               // Handle show more friends
             }}
@@ -131,7 +121,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
             data={recommendationsData}
             title="Discover People🔥"
             showMore={recommendationsData.length > 0}
-            onItemPress={onPersonClick}
+            onItemPress={props.navigateToProfile}
             onShowMore={() => {
               // Handle show more recommendations
             }}
