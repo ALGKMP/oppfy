@@ -189,9 +189,7 @@ export const profile = pgTable("profile", {
   fullName: text("full_name"),
   dateOfBirth: dateType("date_of_birth"),
   bio: text("bio"),
-  profilePictureKey: text("profile_picture_key")
-    .default("profile-pictures/default.jpg")
-    .notNull(),
+  profilePictureKey: text("profile_picture_key"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
