@@ -15,6 +15,7 @@ const Profile = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const [isActionSheetVisible, setIsActionSheetVisible] = React.useState(false);
+  const utils = api.useUtils();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -61,8 +62,97 @@ const Profile = () => {
   );
 
   // block user
-  const blockUser = api.block.blockUser.useMutation();
-  const unblockUser = api.block.unblockUser.useMutation();
+  const blockUser = api.block.blockUser.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+
+      if (!userId) return;
+
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId: userId,
+      });
+
+      if (prevData === undefined || !userId) {
+        console.log(prevData === undefined);
+        return;
+      }
+
+      utils.profile.getFullProfileOther.setData(
+        {
+          userId: userId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            blocked: true,
+          },
+        },
+      );
+      console.log("Done optimistic shit");
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (isLoadingProfileData || !userId) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getFullProfileOther.setData(
+        { userId: userId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (isLoadingProfileData || !userId) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getFullProfileOther.invalidate();
+    },
+  });
+
+  const unblockUser = api.block.unblockUser.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+
+      if (!userId) return;
+
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId: userId,
+      });
+
+      if (prevData === undefined) return;
+
+      utils.profile.getFullProfileOther.setData(
+        {
+          userId: userId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            blocked: false,
+          },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (isLoadingProfileData || !userId) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getFullProfileOther.setData(
+        { userId: userId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (isLoadingProfileData || !userId) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getFullProfileOther.invalidate();
+    },
+  });
 
   const handleBlockUser = async (userId: string) => {
     await blockUser.mutateAsync({ blockUserId: userId });
