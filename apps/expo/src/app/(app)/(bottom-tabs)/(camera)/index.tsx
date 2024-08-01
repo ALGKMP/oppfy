@@ -297,6 +297,15 @@ const CameraPage = () => {
             >
               <Ionicons name="qr-code-outline" color="white" size={24} />
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { position: "absolute", top: 60, left: 16 },
+              ]}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="close" color="white" size={24} />
+            </TouchableOpacity>
           </View>
         </View>
 
