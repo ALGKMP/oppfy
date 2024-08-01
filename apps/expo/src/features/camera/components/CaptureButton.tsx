@@ -28,8 +28,8 @@ type FailOffset = [failOffsetXStart: number, failOffsetXEnd: number];
 
 const CAPTURE_BUTTON_SIZE = 100;
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+const SCREEN_WIDTH = Dimensions.get("screen").width;
+const SCREEN_HEIGHT = Dimensions.get("screen").height;
 
 const PAN_GESTURE_HANDLER_FAIL_X = [
   -SCREEN_WIDTH,

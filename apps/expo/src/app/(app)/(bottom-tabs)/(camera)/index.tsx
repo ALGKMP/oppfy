@@ -54,8 +54,8 @@ const MAX_ZOOM_FACTOR = 10;
 const CONTENT_SPACING = 15;
 const CONTROL_BUTTON_SIZE = 40;
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+const SCREEN_WIDTH = Dimensions.get("screen").width;
+const SCREEN_HEIGHT = Dimensions.get("screen").height;
 
 const SCALE_FULL_ZOOM = 3;
 
