@@ -77,6 +77,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
   const [isRestricted, setIsRestricted] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
 
   useEffect(() => {
     if (profileData && !isSelfProfile && "networkStatus" in profileData) {
@@ -85,6 +86,9 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         privacy === "public" ||
         profileData.networkStatus.targetUserFollowState === "Following" ||
         profileData.networkStatus.targetUserFriendState === "Friends";
+
+      const isBlocked = profileData.networkStatus.blocked;
+      setIsBlocked(isBlocked);
       setIsRestricted(!canView);
     }
   }, [profileData, isSelfProfile]);
@@ -104,7 +108,12 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       refetchPosts(),
     ]);
     setRefreshing(false);
-  }, [refetchFriendsData, refetchProfileData, refetchRecommendationsData, refetchPosts]);
+  }, [
+    refetchFriendsData,
+    refetchProfileData,
+    refetchRecommendationsData,
+    refetchPosts,
+  ]);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -132,6 +141,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         profileData={profileData}
         friendsData={friends}
         isRestricted={isRestricted}
+        isBlocked={isBlocked}
         recommendationsData={recommendations}
       />
     );
@@ -144,6 +154,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     profileData,
     isRestricted,
     recommendations,
+    isBlocked,
   ]);
 
   return (
@@ -151,7 +162,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       <FlashList
         numColumns={1}
         nestedScrollEnabled={true}
-        data={isRestricted ? [] : posts}
+        data={isRestricted || isBlocked ? [] : posts}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
@@ -185,7 +196,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
               paddingHorizontal="$8"
               aspectRatio={9 / 6}
             >
-              {isRestricted ? (
+              {isRestricted || isBlocked ? (
                 <>
                   <Lock size="$9" color="$gray12" />
                   <SizableText size="$7" fontWeight="bold">

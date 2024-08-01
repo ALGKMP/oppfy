@@ -1,9 +1,12 @@
-import React, { useLayoutEffect } from "react";
+import React, { useCallback, useLayoutEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { Text, View, XStack } from "tamagui";
+import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { fromPairs } from "lodash";
+import { View } from "tamagui";
 
+import { ActionSheet } from "~/components/Sheets";
+import type { ButtonOption } from "~/components/Sheets";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import MediaOfYou from "../../(profile)/MediaOfYou";
@@ -11,6 +14,7 @@ import MediaOfYou from "../../(profile)/MediaOfYou";
 const Profile = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const [isActionSheetVisible, setIsActionSheetVisible] = React.useState(false);
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -56,46 +60,56 @@ const Profile = () => {
     },
   );
 
+  // block user
+  const blockUser = api.block.blockUser.useMutation();
+
+  const handleBlockUser = async (userId: string) => {
+    await blockUser.mutateAsync({ blockUserId: userId });
+    setIsActionSheetVisible(false);
+  };
+
+  const handleOnPress = useCallback(() => {
+    setIsActionSheetVisible(true);
+  }, []);
+
   const posts = postsData?.pages.flatMap((page) => page.items) ?? [];
   const friends = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: username ?? profileData?.username,
-    });
-  }, [navigation, username, profileData]);
-
-  return (
-    <BaseScreenView padding={0}>
-      {/* <XStack
-        paddingVertical="$2"
-        paddingHorizontal="$4"
-        alignItems="center"
-        justifyContent="space-between"
-        backgroundColor="$background"
-      >
-        {router.canGoBack() ? (
-          <View minWidth="$2" alignItems="flex-start">
-            <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View minWidth="$2" alignItems="flex-start" />
-        )}
-
-        <View alignItems="center">
-          <Text fontSize="$5" fontWeight="bold">
-            Profile
-          </Text>
-        </View>
-
-        <View minWidth="$2" alignItems="flex-end">
-          <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
+      headerRight: () => (
+        <View>
+          <TouchableOpacity
+            onPress={() => {
+              if (userId) {
+                handleOnPress();
+              }
+            }}
+          >
             <MoreHorizontal />
           </TouchableOpacity>
         </View>
-      </XStack> */}
+      ),
+      title: username ?? profileData?.username,
+    });
+  }, [navigation, username, profileData, handleOnPress, userId]);
+
+  const title = "Block user";
+  const subtitle = "Are you sure you want to block this user?";
+  const buttonOptions = [
+    {
+      text: "Block",
+      textProps: {
+        color: "$red9",
+      },
+      onPress: () => {
+        if (userId) void handleBlockUser(userId);
+      },
+    },
+  ] satisfies ButtonOption[];
+
+  return (
+    <BaseScreenView padding={0}>
       {userId && (
         <MediaOfYou
           userId={userId}
@@ -117,6 +131,12 @@ const Profile = () => {
           hasNextPage={hasNextPage ?? false}
         />
       )}
+      <ActionSheet
+        title={title}
+        isVisible={isActionSheetVisible}
+        subtitle={subtitle}
+        buttonOptions={buttonOptions}
+      />
     </BaseScreenView>
   );
 };
