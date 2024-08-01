@@ -1,33 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCallback, useMemo, useState } from "react";
+import { Dimensions, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
-import { FlashList, ViewToken } from "@shopify/flash-list";
-import { Camera, UserRoundPlus } from "@tamagui/lucide-icons";
+import type { ViewToken } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
+import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
   Avatar,
   Button,
   Circle,
   Image,
-  Separator,
-  SizableText,
-  Spacer,
   styled,
   Text,
-  useTheme,
-  View,
   XStack,
   YStack,
 } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import RecommendationsCarousel from "~/components/Carousels/RecommendationsCarousel";
+import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
-import useShare from "~/hooks/useShare";
+import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { profile } from "../../../../../../../packages/db/src/schema";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -125,15 +121,17 @@ const EmptyHomeScreen = () => {
   );
 };
 
+interface TokenItem {
+  postId?: number | undefined;
+}
+
+type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
+
 const HomeScreen = () => {
-  const [status, setStatus] = useState<"success" | "loading" | "error">(
-    "loading",
-  );
-  const [refreshing, setRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<number[]>([]);
   const router = useRouter();
 
-  const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
+  const [viewableItems, setViewableItems] = useState<number[]>([]);
 
   const {
     data: postData,
@@ -151,23 +149,22 @@ const HomeScreen = () => {
     },
   );
 
-  // Recommendations data
-  const selfRecommendationsQuery =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
-  const isLoadingRecommendationsData = selfRecommendationsQuery.isLoading;
-  const recommendationsData = selfRecommendationsQuery.data;
-  const refetchRecommendationsData = selfRecommendationsQuery.refetch;
+  const {
+    isLoading: isLoadingRecommendationsData,
+    data: recommendationsData,
+    refetch: refetchRecommendationsData,
+  } = api.contacts.getRecommendationProfilesSelf.useQuery();
+
+  const postItems = useMemo(
+    () => postData?.pages.flatMap((page) => page.items).filter(Boolean) ?? [],
+    [postData],
+  );
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
   };
-
-  const posts = useMemo(
-    () => postData?.pages.flatMap((page) => page.items).filter(Boolean) || [],
-    [postData],
-  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -179,124 +176,124 @@ const HomeScreen = () => {
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
-        .map((token) => token.item?.postId)
-        .filter((id): id is number => id !== undefined);
+        .map((token) => (token.item as TokenItem).postId)
+        .filter((id) => id !== undefined);
       setViewableItems(visibleItemIds);
     },
     [],
   );
 
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 40,
-  };
+  const renderPost = useCallback(
+    (item: PostItem) => {
+      if (item === undefined) return null;
 
-  return (recommendationsData?.length ?? 0) > 0 || posts.length > 0 ? (
-    <View flex={1} width="100%" height="100%">
-      {isLoadingPostData ? (
-        <YStack gap="$5" padding="$5">
-          <Camera size={48} />
-          <SizableText size="$3">Loading posts...</SizableText>
-        </YStack>
-      ) : (
-        <FlashList
-          nestedScrollEnabled={true}
-          data={posts}
-          refreshing={refreshing}
-          showsVerticalScrollIndicator={false}
-          onRefresh={onRefresh}
-          numColumns={1}
-          onEndReached={handleOnEndReached}
-          keyExtractor={(item) => {
-            return "home_" + item?.postId.toString();
-          }}
-          renderItem={({ item }) => {
-            if (item === undefined) {
-              return null;
-            }
-            return (
-              <PostItem
-                post={item}
-                isSelfPost={false}
-                isViewable={viewableItems.includes(item.postId)}
-              />
-            );
-          }}
-          ListHeaderComponent={
-            <>
-              {isLoadingRecommendationsData ? (
-                <RecommendationsCarousel loading />
-              ) : (
-                recommendationsData && (
-                  <PeopleCarousel
-                    showMore={recommendationsData.length > 10}
-                    data={recommendationsData}
-                    loading={isLoadingRecommendationsData}
-                    onItemPress={(curProf) => {
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Medium,
-                      );
-                      router.navigate({
-                        pathname: "/profile/[userId]/",
-                        params: {
-                          userId: curProf.userId,
-                          username: curProf.username,
-                        }, // TODO: @oxy we need to pass in username now
-                      });
-                    }}
-                    onShowMore={() => {
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Medium,
-                      );
-                      router.navigate({
-                        pathname: "/(recommended)",
-                      });
-                    }}
-                    // title={"Find friends 🙋‍♂️ 💁‍♀️"}
-                    renderExtraItem={() => {
-                      return (
-                        <TouchableOpacity onPress={() => console.log("hi")}>
-                          <YStack
-                            marginLeft={"$2"}
-                            gap="$1.5"
-                            alignItems="center"
-                          >
-                            <Avatar circular size="$6" bordered>
-                              <Avatar.Fallback backgroundColor={"#F214FF"}>
-                                <XStack
-                                  flex={1}
-                                  alignItems="center"
-                                  justifyContent="center"
-                                >
-                                  <UserRoundPlus
-                                    marginLeft={4}
-                                    bg={"$colorTransparent"}
-                                    color="white"
-                                  />
-                                </XStack>
-                              </Avatar.Fallback>
-                            </Avatar>
-                            <Text fontWeight="600" textAlign="center">
-                              Invite
-                            </Text>
-                          </YStack>
-                        </TouchableOpacity>
-                      );
-                    }}
-                  ></PeopleCarousel>
-                )
-              )}
-            </>
-          }
-          ListFooterComponent={ListFooter}
-          estimatedItemSize={screenWidth}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={viewableItems}
+      return (
+        <PostItem
+          post={item}
+          isSelfPost={false}
+          isViewable={viewableItems.includes(item.postId)}
         />
-      )}
-    </View>
-  ) : (
-    <EmptyHomeScreen />
+      );
+    },
+    [viewableItems],
+  );
+
+  const renderSuggestions = useMemo(() => {
+    if (recommendationsData?.length === 0 || recommendationsData === undefined)
+      return null;
+
+    return (
+      <PeopleCarousel
+        showMore={recommendationsData.length > 10}
+        data={recommendationsData}
+        loading={isLoadingRecommendationsData}
+        onItemPress={(profile) => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          router.navigate({
+            pathname: "/profile/[userId]/",
+            params: {
+              userId: profile.userId,
+              username: profile.username,
+            },
+          });
+        }}
+        onShowMore={() => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          router.navigate({
+            pathname: "/(recommended)",
+          });
+        }}
+        renderExtraItem={() => {
+          return (
+            <TouchableOpacity onPress={() => console.log("hi")}>
+              <YStack marginLeft="$2" gap="$1.5" alignItems="center">
+                <Avatar circular size="$6" bordered>
+                  <Avatar.Fallback backgroundColor="#F214FF">
+                    <XStack
+                      flex={1}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <UserRoundPlus
+                        marginLeft={4}
+                        color="white"
+                        backgroundColor="transparent"
+                      />
+                    </XStack>
+                  </Avatar.Fallback>
+                </Avatar>
+                <Text fontWeight="600" textAlign="center">
+                  Invite
+                </Text>
+              </YStack>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    );
+  }, [recommendationsData, isLoadingRecommendationsData]);
+
+  if (isLoadingRecommendationsData || isLoadingPostData) {
+    return (
+      <BaseScreenView padding={0} scrollable>
+        <YStack gap="$4">
+          <RecommendationsCarousel loading />
+          {PLACEHOLDER_DATA.map(() => (
+            <Skeleton
+              radius={16}
+              width={screenWidth}
+              height={screenWidth * 1.5}
+            />
+          ))}
+        </YStack>
+      </BaseScreenView>
+    );
+  }
+
+  if (recommendationsData?.length === 0 && postItems.length === 0) {
+    return <EmptyHomeScreen />;
+  }
+
+  return (
+    <BaseScreenView padding={0}>
+      <FlashList
+        nestedScrollEnabled={true}
+        data={postItems}
+        refreshing={refreshing}
+        showsVerticalScrollIndicator={false}
+        onRefresh={onRefresh}
+        numColumns={1}
+        onEndReached={handleOnEndReached}
+        keyExtractor={(item) => "home_" + item?.postId.toString()}
+        renderItem={({ item }) => renderPost(item)}
+        ListHeaderComponent={renderSuggestions}
+        ListFooterComponent={ListFooter}
+        estimatedItemSize={screenWidth}
+        extraData={viewableItems}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+      />
+    </BaseScreenView>
   );
 };
 
