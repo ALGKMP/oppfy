@@ -41,6 +41,21 @@ export class BlockService {
       await this.friendRepository.removeFriend(userId, userIdBeingBlocked);
     }
 
+    const isBlocked = await this.blockRepository.getBlockedUser(
+      userId,
+      userIdBeingBlocked,
+    );
+
+    if (isBlocked) {
+      console.error(
+        `SERVICE ERROR: User "${userId}" already blocked user "${userIdBeingBlocked}"`,
+      );
+      throw new DomainError(
+        ErrorCode.RELATIONSHIP_ALREADY_EXISTS,
+        "User already blocked",
+      );
+    }
+
     await this.blockRepository.blockUser(userId, userIdBeingBlocked);
   }
 

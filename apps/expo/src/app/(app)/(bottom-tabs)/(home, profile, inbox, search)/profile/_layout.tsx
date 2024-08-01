@@ -4,8 +4,8 @@ import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { Text, useTheme, View } from "tamagui";
+import { ChevronLeft } from "@tamagui/lucide-icons";
+import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 
@@ -25,15 +25,6 @@ const ProfileLayout = () => {
         options={{
           header: (props) => <Header {...props} />,
           headerLeft: (props) => <HeaderLeft {...props} />,
-          headerRight: () => (
-            <View>
-              <TouchableOpacity
-                onPress={() => router.push("/(app)/(settings)")}
-              >
-                <MoreHorizontal />
-              </TouchableOpacity>
-            </View>
-          ),
         }}
       />
       <Stack.Screen
