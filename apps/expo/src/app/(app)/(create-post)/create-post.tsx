@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
-import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as SMS from "expo-sms";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import { Button, ScrollView, Text, TextArea, View, YStack } from "tamagui";
 import { z } from "zod";
 
-import { AlertDialog } from "~/components/Dialogs";
 import { BaseScreenView } from "~/components/Views";
 import { useUploadMedia } from "~/hooks/media";
 
@@ -47,10 +44,6 @@ const CreatePost = () => {
 
   const [thumbnail, setThumbnail] = useState<string | null>(null);
 
-  const [cancelledDialogVisible, setCancelledDialogVisible] = useState(false);
-  const [smsNotAvailableDialogVisible, setSmsNotAvailableDialogVisible] =
-    useState(false);
-
   const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
 
   const {
@@ -62,53 +55,6 @@ const CreatePost = () => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    setCancelledDialogVisible(false);
-    setSmsNotAvailableDialogVisible(false);
-
-    if (params.userType === "notOnApp") {
-      const isAvailable = await SMS.isAvailableAsync();
-
-      if (!isAvailable) {
-        setSmsNotAvailableDialogVisible(true);
-        return;
-      }
-
-      // Get a content URI for the file
-      const contentUri = await FileSystem.getContentUriAsync(uri ?? "");
-
-      const attachment = {
-        uri: contentUri,
-        mimeType: type === "photo" ? "image/jpeg" : "video/mp4", // Adjust as needed
-        filename: `shared_${type}.${type === "photo" ? "jpg" : "mp4"}`, // Adjust as needed
-      } satisfies SMS.SMSAttachment;
-
-      const inviteMessage = `
-Hey there! 👋
-
-Your friend has shared an amazing ${type} with you on Oppfy! 🎉
-
-Check out the attached ${type}!
-
-To join the fun and see more great content, download our app:
-https://oppfy.com
-
-We can't wait to see you there! 😊
-      `.trim();
-
-      const { result } = await SMS.sendSMSAsync(
-        [params.number ?? ""],
-        inviteMessage,
-        {
-          attachments: [attachment],
-        },
-      );
-
-      if (result === "cancelled") {
-        setCancelledDialogVisible(true);
-        return;
-      }
-    }
-
     const baseData = {
       uri: uri ?? "",
       width: Number(width),
@@ -176,21 +122,6 @@ We can't wait to see you there! 😊
       >
         Continue
       </Button>
-
-      <AlertDialog
-        title="Invite not sent"
-        subtitle="You must send the SMS for the post to be uploaded."
-        onAccept={onSubmit}
-        isVisible={cancelledDialogVisible}
-        onCancel={() => setCancelledDialogVisible(false)}
-      />
-
-      <AlertDialog
-        title="SMS not available"
-        subtitle="SMS is not available on this device."
-        isVisible={smsNotAvailableDialogVisible}
-        onCancel={() => setSmsNotAvailableDialogVisible(false)}
-      />
     </BaseScreenView>
   );
 };
