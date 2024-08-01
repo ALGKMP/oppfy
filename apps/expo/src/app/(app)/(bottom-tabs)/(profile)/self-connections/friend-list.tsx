@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -20,6 +21,8 @@ type FriendItem = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][0];
 const FriendList = () => {
   const router = useRouter();
   const utils = api.useUtils();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const removeFriend = api.friend.removeFriend.useMutation({
     onMutate: async (newData) => {
@@ -89,6 +92,12 @@ const FriendList = () => {
 
   const handleRemoveFriend = async (userId: string) =>
     await removeFriend.mutateAsync({ recipientId: userId });
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
@@ -176,7 +185,12 @@ const FriendList = () => {
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <YStack gap="$4">
         <SearchInput
           value={searchQuery}

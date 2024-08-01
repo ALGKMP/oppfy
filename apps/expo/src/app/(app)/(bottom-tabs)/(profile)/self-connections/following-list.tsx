@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -21,6 +22,8 @@ type FollowingItem =
 const FollowingList = () => {
   const router = useRouter();
   const utils = api.useUtils();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
@@ -185,6 +188,12 @@ const FollowingList = () => {
   const handleCancelFollowRequest = async (senderId: string) =>
     await cancelFollowRequest.mutateAsync({ recipientId: senderId });
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
   const renderLoadingSkeletons = () => (
     <CardContainer>
       {PLACEHOLDER_DATA.map((_, index) => (
@@ -277,7 +286,12 @@ const FollowingList = () => {
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <YStack gap="$4">
         <SearchInput
           placeholder="Search following..."
