@@ -46,15 +46,9 @@ export class BlockRepository {
   @handleDatabaseErrors
   async getBlockedUser(userId: string, blockedUserId: string) {
     return await this.db.query.block.findFirst({
-      where: or(
-        and(
-          eq(schema.block.userId, userId),
-          eq(schema.block.blockedUserId, blockedUserId),
-        ),
-        and(
-          eq(schema.block.blockedUserId, userId),
-          eq(schema.block.userId, blockedUserId),
-        ),
+      where: and(
+        eq(schema.block.userId, userId),
+        eq(schema.block.blockedUserId, blockedUserId),
       ),
     });
   }
