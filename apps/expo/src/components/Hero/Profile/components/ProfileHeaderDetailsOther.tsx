@@ -781,7 +781,12 @@ const FollowButton = ({
       borderRadius={20}
       onPress={onFollowPress}
       backgroundColor={followState === "NotFollowing" ? "#F214FF" : "$primary"}
-      disabled={isLoadingFollow || isLoadingFriend || networkStatus.blocked}
+      disabled={
+        isLoadingFollow ||
+        isLoadingFriend ||
+        networkStatus.isOtherUserBlocked ||
+        networkStatus.isTargetUserBlocked
+      }
     >
       <XStack gap="$2" alignItems="center">
         <Text>{buttonText}</Text>
@@ -856,7 +861,12 @@ const FriendButton = ({
       borderRadius={20}
       onPress={() => onFriendPress()}
       backgroundColor={friendState === "NotFriends" ? "#F214FF" : "$primary"}
-      disabled={isLoadingFriend || isLoadingFollow || networkStatus.blocked}
+      disabled={
+        isLoadingFollow ||
+        isLoadingFriend ||
+        networkStatus.isOtherUserBlocked ||
+        networkStatus.isTargetUserBlocked
+      }
     >
       <XStack gap="$2" alignItems="center">
         <Text>

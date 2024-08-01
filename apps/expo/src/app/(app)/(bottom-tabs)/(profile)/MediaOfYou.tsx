@@ -77,7 +77,8 @@ const MediaOfYou = (props: MediaOfYouProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
   const [isRestricted, setIsRestricted] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false); // Blocked by the profile being viewed
+  const [hasBlocked, setHasBlocked] = useState(false); // Current user blocked the profile being viewed
 
   useEffect(() => {
     if (profileData && !isSelfProfile && "networkStatus" in profileData) {
@@ -87,7 +88,8 @@ const MediaOfYou = (props: MediaOfYouProps) => {
         profileData.networkStatus.targetUserFollowState === "Following" ||
         profileData.networkStatus.targetUserFriendState === "Friends";
 
-      const isBlocked = profileData.networkStatus.blocked;
+      const isBlocked = profileData.networkStatus.isTargetUserBlocked;
+      const hasBlocked = profileData.networkStatus.isOtherUserBlocked;
       setIsBlocked(isBlocked);
       setIsRestricted(!canView);
     }
