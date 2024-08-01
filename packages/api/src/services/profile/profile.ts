@@ -6,6 +6,7 @@ import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
 import { profileStats } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
+  BlockRepository,
   FollowRepository,
   FriendRepository,
   ProfileRepository,
@@ -44,6 +45,7 @@ export class ProfileService {
   private s3Repository = new S3Repository();
   private followRepository = new FollowRepository();
   private friendsRepository = new FriendRepository();
+  private blockRepository = new BlockRepository();
   private viewRepository = new ViewRepository();
 
   private friendService = new FriendService();
@@ -249,17 +251,31 @@ export class ProfileService {
       otherUserId,
       currentUserId,
     );
+    const isTargetUserBlocked = (await this.blockRepository.getBlockedUser(
+      currentUserId,
+      otherUserId,
+    ))
+      ? true
+      : false;
+    const isOtherUserBlocked = (await this.blockRepository.getBlockedUser(
+      otherUserId,
+      currentUserId,
+    ))
+      ? true
+      : false;
 
-    const profileStatus = {
+    const networkStates = {
       privacy: otherUser.privacySetting,
       blocked,
       targetUserFollowState,
       otherUserFollowState,
       targetUserFriendState,
       otherUserFriendState,
+      isTargetUserBlocked,
+      isOtherUserBlocked,
     };
 
-    return PrivacyStatus.parse(profileStatus);
+    return PrivacyStatus.parse(networkStates);
   }
 
   async viewMultipleProfiles({

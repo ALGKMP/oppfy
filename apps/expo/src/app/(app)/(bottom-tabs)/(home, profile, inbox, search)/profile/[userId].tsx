@@ -15,6 +15,7 @@ const Profile = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const [isActionSheetVisible, setIsActionSheetVisible] = React.useState(false);
+  const utils = api.useUtils();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -61,8 +62,97 @@ const Profile = () => {
   );
 
   // block user
-  const blockUser = api.block.blockUser.useMutation();
-  const unblockUser = api.block.unblockUser.useMutation();
+  const blockUser = api.block.blockUser.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+
+      if (!userId) return;
+
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId: userId,
+      });
+
+      if (prevData === undefined || !userId) {
+        console.log(prevData === undefined);
+        return;
+      }
+
+      utils.profile.getFullProfileOther.setData(
+        {
+          userId: userId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            isTargetUserBlocked: true,
+          },
+        },
+      );
+      console.log("Done optimistic shit");
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (isLoadingProfileData || !userId) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getFullProfileOther.setData(
+        { userId: userId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (isLoadingProfileData || !userId) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getFullProfileOther.invalidate();
+    },
+  });
+
+  const unblockUser = api.block.unblockUser.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+
+      if (!userId) return;
+
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId: userId,
+      });
+
+      if (prevData === undefined) return;
+
+      utils.profile.getFullProfileOther.setData(
+        {
+          userId: userId,
+        },
+        {
+          ...prevData,
+          networkStatus: {
+            ...prevData.networkStatus,
+            isTargetUserBlocked: false,
+          },
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (isLoadingProfileData || !userId) return;
+      if (ctx === undefined) return;
+
+      utils.profile.getFullProfileOther.setData(
+        { userId: userId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      if (isLoadingProfileData || !userId) return;
+
+      // Sync with server once mutation has settled
+      await utils.profile.getFullProfileOther.invalidate();
+    },
+  });
 
   const handleBlockUser = async (userId: string) => {
     await blockUser.mutateAsync({ blockUserId: userId });
@@ -100,21 +190,23 @@ const Profile = () => {
     });
   }, [navigation, username, profileData, handleOnPress, userId]);
 
-  const title = profileData?.networkStatus.blocked
+  const title = profileData?.networkStatus.isTargetUserBlocked
     ? "Unblock user"
     : "Block user";
-  const subtitle = profileData?.networkStatus.blocked
+  const subtitle = profileData?.networkStatus.isTargetUserBlocked
     ? "Are you sure you want to unblock this user?"
     : "Are you sure you want to block this user?";
   const buttonOptions = [
     {
-      text: profileData?.networkStatus.blocked ? "Unblock" : "Block",
+      text: profileData?.networkStatus.isTargetUserBlocked
+        ? "Unblock"
+        : "Block",
       textProps: {
         color: "$red9",
       },
       onPress: () => {
         if (userId) {
-          if (profileData?.networkStatus.blocked) {
+          if (profileData?.networkStatus.isTargetUserBlocked) {
             void handleUnblockUser(userId);
           } else {
             void handleBlockUser(userId);

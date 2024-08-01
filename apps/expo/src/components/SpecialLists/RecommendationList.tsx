@@ -3,6 +3,7 @@ import { Button, Text, YStack } from "tamagui";
 
 import { RouterOutputs } from "@oppfy/api";
 
+import { api } from "~/utils/api";
 import { VirtualizedListItem } from "../ListItems";
 
 type RecommendationItem =
@@ -15,6 +16,8 @@ interface RecommendationListProps {
 }
 
 const RecommendationList = (props: RecommendationListProps) => {
+  const followUserMutation = api.follow.followUser.useMutation();
+
   return (
     <YStack>
       <Text fontWeight="bold" fontSize={16} padding={10}>
@@ -22,7 +25,16 @@ const RecommendationList = (props: RecommendationListProps) => {
       </Text>
       {props.recommendationsData.map((recommendation, index) => (
         <VirtualizedListItem
-          button={<Button color={"#F214FF"}>Follow</Button>}
+          button={
+            <Button
+              onPress={() => {
+                followUserMutation.mutate({ userId: recommendation.userId });
+              }}
+              backgroundColor={"#F214FF"}
+            >
+              Follow
+            </Button>
+          }
           onPress={() =>
             props.handleProfileClicked(
               recommendation.userId,
