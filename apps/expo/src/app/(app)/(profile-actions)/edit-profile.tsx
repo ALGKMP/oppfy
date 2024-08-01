@@ -235,7 +235,7 @@ const EditProfile = () => {
           <Text fontSize="$3" color="$gray10">
             {description}
           </Text>
-          {errors[field] && <Text color="$red8">{errors[field]?.message}</Text>}
+          {errors[field] && <Text color="$red8">{errors[field].message}</Text>}
         </YStack>
       );
     },
