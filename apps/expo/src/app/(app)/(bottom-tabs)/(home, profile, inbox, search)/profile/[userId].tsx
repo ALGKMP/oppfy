@@ -85,7 +85,7 @@ const Profile = () => {
           ...prevData,
           networkStatus: {
             ...prevData.networkStatus,
-            blocked: true,
+            isTargetUserBlocked: true,
           },
         },
       );
@@ -130,7 +130,7 @@ const Profile = () => {
           ...prevData,
           networkStatus: {
             ...prevData.networkStatus,
-            blocked: false,
+            isTargetUserBlocked: false,
           },
         },
       );
@@ -190,21 +190,23 @@ const Profile = () => {
     });
   }, [navigation, username, profileData, handleOnPress, userId]);
 
-  const title = profileData?.networkStatus.blocked
+  const title = profileData?.networkStatus.isTargetUserBlocked
     ? "Unblock user"
     : "Block user";
-  const subtitle = profileData?.networkStatus.blocked
+  const subtitle = profileData?.networkStatus.isTargetUserBlocked
     ? "Are you sure you want to unblock this user?"
     : "Are you sure you want to block this user?";
   const buttonOptions = [
     {
-      text: profileData?.networkStatus.blocked ? "Unblock" : "Block",
+      text: profileData?.networkStatus.isTargetUserBlocked
+        ? "Unblock"
+        : "Block",
       textProps: {
         color: "$red9",
       },
       onPress: () => {
         if (userId) {
-          if (profileData?.networkStatus.blocked) {
+          if (profileData?.networkStatus.isTargetUserBlocked) {
             void handleUnblockUser(userId);
           } else {
             void handleBlockUser(userId);

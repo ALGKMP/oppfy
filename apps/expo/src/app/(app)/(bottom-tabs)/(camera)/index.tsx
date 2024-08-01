@@ -1,10 +1,7 @@
 import * as React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  StyleSheet,
-  TouchableOpacity,
-  useWindowDimensions,
-} from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useEffect } from "react";
+import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolation,
@@ -13,7 +10,7 @@ import Reanimated, {
   useAnimatedProps,
   useSharedValue,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type {
   CameraProps,
   PhotoFile,
@@ -43,34 +40,62 @@ import {
 import useIsForeground from "~/hooks/useIsForeground";
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
-Reanimated.addWhitelistedNativeProps({ zoom: true });
+Reanimated.addWhitelistedNativeProps({
+  zoom: true,
+});
 
 const MAX_ZOOM_FACTOR = 10;
-const SCALE_FULL_ZOOM = 3;
+
+const CONTENT_SPACING = 15;
 const CONTROL_BUTTON_SIZE = 40;
 
+const SCREEN_WIDTH = Dimensions.get("screen").width;
+const SCREEN_HEIGHT = Dimensions.get("screen").height;
+
+const SCALE_FULL_ZOOM = 3;
+
 const CameraPage = () => {
-  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+
+  const SAFE_AREA_PADDING = {
+    paddingLeft: insets.left,
+    paddingTop: insets.top,
+    paddingRight: insets.right,
+    paddingBottom: insets.bottom,
+  };
+
   const camera = useRef<Camera>(null);
 
   const location = useLocationPermission();
   const microphone = useMicrophonePermission();
 
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
+
   const { animations, addAnimation } = useFocusAnimations();
 
   const zoom = useSharedValue(1);
   const startZoom = useSharedValue(zoom.value);
+
   const isPressingButton = useSharedValue(false);
 
+  const setIsPressingButton = useCallback(
+    (newIsPressingButton: boolean) => {
+      isPressingButton.value = newIsPressingButton;
+    },
+    [isPressingButton],
+  );
+
+  // check if camera page is active
   const isFocussed = useIsFocused();
   const isForeground = useIsForeground();
   const isActive = isFocussed && isForeground;
 
   const [targetFps, setTargetFps] = useState(60);
+
   const [enableHdr, setEnableHdr] = useState(false);
   const [enableNightMode, setEnableNightMode] = useState(false);
+
   const [flash, setFlash] = useState<"off" | "on">("off");
   const [position, setPosition] = useState<"front" | "back">("back");
 
@@ -109,11 +134,18 @@ const CameraPage = () => {
   const onMediaCaptured = useCallback(
     async (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
+
       const asset = await MediaLibrary.createAssetAsync(uri);
       const { width, height } = await MediaLibrary.getAssetInfoAsync(asset);
+
       router.push({
         pathname: "/preview",
-        params: { type, uri, width, height },
+        params: {
+          type,
+          uri,
+          width,
+          height,
+        },
       });
     },
     [router],
@@ -126,8 +158,12 @@ const CameraPage = () => {
       mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
 
-    if (!result.canceled && result.assets[0]) {
-      const { uri, width, height, type } = result.assets[0];
+    if (!result.canceled) {
+      const imagePickerAsset = result.assets[0];
+      if (imagePickerAsset === undefined) return;
+
+      const { uri, width, height, type } = imagePickerAsset;
+
       router.navigate({
         pathname: "/preview",
         params: {
@@ -151,7 +187,7 @@ const CameraPage = () => {
   const onFocus = useCallback(
     (point: Point) => {
       addAnimation(point);
-      camera.current?.focus(point);
+      void camera.current?.focus(point);
     },
     [addAnimation],
   );
@@ -175,12 +211,16 @@ const CameraPage = () => {
       );
     });
 
-  const flipCameraGesture = Gesture.Tap()
-    .numberOfTaps(2)
-    .maxDuration(250)
-    .onEnd(() => {
-      runOnJS(onFlipCameraPressed)();
-    });
+  const flipCameraGesture = React.useMemo(
+    () =>
+      Gesture.Tap()
+        .numberOfTaps(2)
+        .maxDuration(250)
+        .onEnd(() => {
+          runOnJS(onFlipCameraPressed)();
+        }),
+    [onFlipCameraPressed],
+  );
 
   const focusGesture = Gesture.Tap()
     .maxDuration(250)
@@ -195,26 +235,34 @@ const CameraPage = () => {
     Gesture.Race(supportsFocus ? focusGesture : Gesture.Tap(), zoomGesture),
   );
 
-  const cameraAnimatedProps = useAnimatedProps<CameraProps>(
-    () => ({
-      zoom: Math.max(Math.min(zoom.value, maxZoom), minZoom),
-    }),
-    [maxZoom, minZoom, zoom],
-  );
+  const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => {
+    const z = Math.max(Math.min(zoom.value, maxZoom), minZoom);
+    return {
+      zoom: z,
+    };
+  }, [maxZoom, minZoom, zoom]);
 
   useEffect(() => {
+    // Reset zoom to it's default everytime the `device` changes.
     zoom.value = device?.neutralZoom ?? 1;
   }, [zoom, device]);
 
   if (device === undefined) return <NoCameraDeviceError />;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View flex={1}>
       <GestureDetector gesture={composedGesture}>
-        <View style={styles.cameraContainer}>
+        <View
+          width={SCREEN_WIDTH}
+          height={(SCREEN_WIDTH * 16) / 9}
+          borderRadius={20}
+          overflow="hidden"
+          alignSelf="center"
+          position="absolute"
+          top={SAFE_AREA_PADDING.paddingTop}
+        >
           <ReanimatedCamera
             ref={camera}
-            style={StyleSheet.absoluteFill}
             device={device}
             isActive={isActive}
             onInitialized={onInitialized}
@@ -231,165 +279,138 @@ const CameraPage = () => {
             video={true}
             audio={microphone.hasPermission}
             enableLocation={location.hasPermission}
+            style={{
+              flex: 1,
+            }}
           />
+
           {animations.map(({ id, point }) => (
             <FocusIcon key={id} x={point.x} y={point.y} />
           ))}
         </View>
       </GestureDetector>
 
-      <View style={styles.controlsContainer}>
-        <View style={styles.controlsContainer}>
-          <View style={styles.topControls}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={onFlipCameraPressed}
-            >
-              <Ionicons name="camera-reverse" color="white" size={24} />
-            </TouchableOpacity>
-            {supportsFlash && (
-              <TouchableOpacity style={styles.button} onPress={onFlashPressed}>
-                <Ionicons
-                  name={flash === "on" ? "flash" : "flash-off"}
-                  color="white"
-                  size={24}
-                />
-              </TouchableOpacity>
-            )}
-            {supports60Fps && (
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setTargetFps((t) => (t === 30 ? 60 : 30))}
-              >
-                <SizableText
-                  size="$1"
-                  textAlign="center"
-                >{`${targetFps}\nFPS`}</SizableText>
-              </TouchableOpacity>
-            )}
-            {supportsHdr && (
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setEnableHdr((h) => !h)}
-              >
-                <MaterialIcons
-                  name={enableHdr ? "hdr-on" : "hdr-off"}
-                  color="white"
-                  size={24}
-                />
-              </TouchableOpacity>
-            )}
-            {supportsNightMode && (
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setEnableNightMode(!enableNightMode)}
-              >
-                <Ionicons
-                  name={enableNightMode ? "moon" : "moon-outline"}
-                  color="white"
-                  size={24}
-                />
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => router.navigate("/scanner")}
-            >
-              <Ionicons name="qr-code-outline" color="white" size={24} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      <View style={styles.bottomControls}>
-        <TouchableOpacity
-          style={styles.mediaPickerButton}
-          onPress={onOpenMediaPicker}
-        >
-          <Ionicons name="images" color="white" size={32} />
-        </TouchableOpacity>
-        <CaptureButton
-          camera={camera}
-          onMediaCaptured={onMediaCaptured}
-          cameraZoom={zoom}
-          minZoom={minZoom}
-          maxZoom={maxZoom}
-          flash={supportsFlash ? flash : "off"}
-          enabled={isCameraInitialized && isActive}
-          setIsPressingButton={(newIsPressingButton) => {
-            isPressingButton.value = newIsPressingButton;
-          }}
-        />
-        <View style={styles.spacer} />
-      </View>
+      <CaptureButton
+        style={{
+          position: "absolute",
+          alignSelf: "center",
+          bottom: SAFE_AREA_PADDING.paddingBottom + 36,
+        }}
+        camera={camera}
+        onMediaCaptured={onMediaCaptured}
+        cameraZoom={zoom}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+        flash={supportsFlash ? flash : "off"}
+        enabled={isCameraInitialized && isActive}
+        setIsPressingButton={setIsPressingButton}
+      />
 
       <TouchableOpacity
-        style={[styles.button, { position: "absolute", top: 60, left: 16 }]}
-        onPress={() => router.back()}
+        style={{
+          position: "absolute",
+          bottom: SAFE_AREA_PADDING.paddingBottom + 36,
+          left: SAFE_AREA_PADDING.paddingLeft + 36,
+        }}
+        onPress={onOpenMediaPicker}
       >
-        <Ionicons name="close" color="white" size={24} />
+        <Ionicons name="images" color="white" size={32} />
       </TouchableOpacity>
-    </SafeAreaView>
+
+      <View
+        style={{
+          position: "absolute",
+          top: SAFE_AREA_PADDING.paddingTop + 12,
+          left: SAFE_AREA_PADDING.paddingLeft + 12,
+        }}
+      >
+        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+          <Ionicons name="close" color="white" size={24} />
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={{
+          position: "absolute",
+          top: SAFE_AREA_PADDING.paddingTop + 12,
+          right: SAFE_AREA_PADDING.paddingRight + 12,
+        }}
+      >
+        <TouchableOpacity style={styles.button} onPress={onFlipCameraPressed}>
+          <Ionicons name="camera-reverse" color="white" size={24} />
+        </TouchableOpacity>
+        {supportsFlash && (
+          <TouchableOpacity style={styles.button} onPress={onFlashPressed}>
+            <Ionicons
+              name={flash === "on" ? "flash" : "flash-off"}
+              color="white"
+              size={24}
+            />
+          </TouchableOpacity>
+        )}
+        {supports60Fps && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setTargetFps((t) => (t === 30 ? 60 : 30))}
+          >
+            <SizableText size="$1" textAlign="center">
+              {`${targetFps}\nFPS`}
+            </SizableText>
+          </TouchableOpacity>
+        )}
+        {supportsHdr && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setEnableHdr((h) => !h)}
+          >
+            <MaterialIcons
+              name={enableHdr ? "hdr-on" : "hdr-off"}
+              color="white"
+              size={24}
+            />
+          </TouchableOpacity>
+        )}
+        {supportsNightMode && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setEnableNightMode(!enableNightMode)}
+          >
+            <Ionicons
+              name={enableNightMode ? "moon" : "moon-outline"}
+              color="white"
+              size={24}
+            />
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.navigate("/scanner")}
+        >
+          <Ionicons name="qr-code-outline" color="white" size={24} />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
-const NoCameraDeviceError = () => (
-  <BaseScreenView justifyContent="center" alignItems="center">
-    <Text>No camera device found</Text>
-  </BaseScreenView>
-);
+const NoCameraDeviceError = () => {
+  return (
+    <BaseScreenView justifyContent="center" alignItems="center">
+      <Text>No camera device found</Text>
+    </BaseScreenView>
+  );
+};
+
+export default CameraPage;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "black",
-  },
-  cameraContainer: {
-    flex: 1,
-  },
-  controlsContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "space-between",
-  },
-  topControls: {
-    position: "absolute",
-    right: 16,
-    top: 60,
-    flexDirection: "column",
-    alignItems: "flex-end",
-  },
-  rightButtonRow: {
-    flexDirection: "row",
-  },
-  bottomControls: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-  },
   button: {
+    marginBottom: CONTENT_SPACING,
     width: CONTROL_BUTTON_SIZE,
     height: CONTROL_BUTTON_SIZE,
     borderRadius: CONTROL_BUTTON_SIZE / 2,
     backgroundColor: "rgba(140, 140, 140, 0.3)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
-  },
-  mediaPickerButton: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  spacer: {
-    width: 32,
   },
 });
-
-export default CameraPage;
