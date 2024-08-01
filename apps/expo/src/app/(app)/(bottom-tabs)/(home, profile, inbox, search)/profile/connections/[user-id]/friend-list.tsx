@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
@@ -19,6 +20,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const FriendList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const headerHeight = useHeaderHeight();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
     userId: userId ?? "",
@@ -56,6 +59,12 @@ const FriendList = () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
   };
 
   const renderLoadingSkeletons = () => (
@@ -117,7 +126,12 @@ const FriendList = () => {
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <YStack gap="$4">
         <SearchInput
           placeholder="Search friends..."
