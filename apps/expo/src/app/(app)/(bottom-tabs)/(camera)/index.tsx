@@ -1,6 +1,10 @@
 import * as React from "react";
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, useWindowDimensions } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolation,
@@ -10,7 +14,12 @@ import Reanimated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import type { CameraProps, PhotoFile, Point, VideoFile } from "react-native-vision-camera";
+import type {
+  CameraProps,
+  PhotoFile,
+  Point,
+  VideoFile,
+} from "react-native-vision-camera";
 import {
   Camera,
   useCameraDevice,
@@ -186,9 +195,12 @@ const CameraPage = () => {
     Gesture.Race(supportsFocus ? focusGesture : Gesture.Tap(), zoomGesture),
   );
 
-  const cameraAnimatedProps = useAnimatedProps<CameraProps>(() => ({
-    zoom: Math.max(Math.min(zoom.value, maxZoom), minZoom),
-  }), [maxZoom, minZoom, zoom]);
+  const cameraAnimatedProps = useAnimatedProps<CameraProps>(
+    () => ({
+      zoom: Math.max(Math.min(zoom.value, maxZoom), minZoom),
+    }),
+    [maxZoom, minZoom, zoom],
+  );
 
   useEffect(() => {
     zoom.value = device?.neutralZoom ?? 1;
@@ -227,42 +239,72 @@ const CameraPage = () => {
       </GestureDetector>
 
       <View style={styles.controlsContainer}>
-        <View style={styles.topControls}>
-          <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-            <Ionicons name="close" color="white" size={24} />
-          </TouchableOpacity>
-          <View style={styles.rightButtonRow}>
-            <TouchableOpacity style={styles.button} onPress={onFlipCameraPressed}>
+        <View style={styles.controlsContainer}>
+          <View style={styles.topControls}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={onFlipCameraPressed}
+            >
               <Ionicons name="camera-reverse" color="white" size={24} />
             </TouchableOpacity>
             {supportsFlash && (
               <TouchableOpacity style={styles.button} onPress={onFlashPressed}>
-                <Ionicons name={flash === "on" ? "flash" : "flash-off"} color="white" size={24} />
+                <Ionicons
+                  name={flash === "on" ? "flash" : "flash-off"}
+                  color="white"
+                  size={24}
+                />
               </TouchableOpacity>
             )}
             {supports60Fps && (
-              <TouchableOpacity style={styles.button} onPress={() => setTargetFps((t) => (t === 30 ? 60 : 30))}>
-                <SizableText size="$1" textAlign="center">{`${targetFps}\nFPS`}</SizableText>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setTargetFps((t) => (t === 30 ? 60 : 30))}
+              >
+                <SizableText
+                  size="$1"
+                  textAlign="center"
+                >{`${targetFps}\nFPS`}</SizableText>
               </TouchableOpacity>
             )}
             {supportsHdr && (
-              <TouchableOpacity style={styles.button} onPress={() => setEnableHdr((h) => !h)}>
-                <MaterialIcons name={enableHdr ? "hdr-on" : "hdr-off"} color="white" size={24} />
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setEnableHdr((h) => !h)}
+              >
+                <MaterialIcons
+                  name={enableHdr ? "hdr-on" : "hdr-off"}
+                  color="white"
+                  size={24}
+                />
               </TouchableOpacity>
             )}
             {supportsNightMode && (
-              <TouchableOpacity style={styles.button} onPress={() => setEnableNightMode(!enableNightMode)}>
-                <Ionicons name={enableNightMode ? "moon" : "moon-outline"} color="white" size={24} />
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setEnableNightMode(!enableNightMode)}
+              >
+                <Ionicons
+                  name={enableNightMode ? "moon" : "moon-outline"}
+                  color="white"
+                  size={24}
+                />
               </TouchableOpacity>
             )}
-            <TouchableOpacity style={styles.button} onPress={() => router.navigate("/scanner")}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.navigate("/scanner")}
+            >
               <Ionicons name="qr-code-outline" color="white" size={24} />
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.bottomControls}>
-          <TouchableOpacity style={styles.mediaPickerButton} onPress={onOpenMediaPicker}>
+          <TouchableOpacity
+            style={styles.mediaPickerButton}
+            onPress={onOpenMediaPicker}
+          >
             <Ionicons name="images" color="white" size={32} />
           </TouchableOpacity>
           <CaptureButton
@@ -293,31 +335,33 @@ const NoCameraDeviceError = () => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: "black",
   },
   cameraContainer: {
     flex: 1,
   },
   controlsContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   topControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
+    position: "absolute",
+    right: 16,
+    top: 60,
+    flexDirection: "column",
+    alignItems: "flex-end",
   },
   rightButtonRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   bottomControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
   },
   button: {
@@ -327,11 +371,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(140, 140, 140, 0.3)",
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 8,
+    marginBottom: 16,
   },
   mediaPickerButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   spacer: {
     width: 32,
