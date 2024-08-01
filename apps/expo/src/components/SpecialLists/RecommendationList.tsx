@@ -1,5 +1,6 @@
+import { FlashList } from "@shopify/flash-list";
 import { Router } from "@trpc/server";
-import { Button, Text, YStack } from "tamagui";
+import { Button, Text, View, YStack } from "tamagui";
 
 import { RouterOutputs } from "@oppfy/api";
 
@@ -19,36 +20,39 @@ const RecommendationList = (props: RecommendationListProps) => {
   const followUserMutation = api.follow.followUser.useMutation();
 
   return (
-    <YStack>
-      <Text fontWeight="bold" fontSize={16} padding={10}>
-        Suggested for you
-      </Text>
-      {props.recommendationsData.map((recommendation, index) => (
-        <VirtualizedListItem
-          button={
-            <Button
-              onPress={() => {
-                followUserMutation.mutate({ userId: recommendation.userId });
+    <View
+      paddingVertical="$2"
+      paddingHorizontal="$3"
+      borderRadius="$6"
+      backgroundColor="$gray2"
+    >
+      <FlashList
+        data={props.recommendationsData}
+        estimatedItemSize={75}
+        // onEndReached={handleOnEndReached}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => {
+          return (
+            <VirtualizedListItem
+              loading={false}
+              title={item.fullName ?? item.username}
+              subtitle={item.fullName ? item.username : ""}
+              button={{
+                // disabledStyle: { opacity: 0.5 },
+                text: "Follow",
+                onPress: () => {
+                  void followUserMutation.mutateAsync({ userId: item.userId });
+                },
               }}
-              backgroundColor={"#F214FF"}
-            >
-              Follow
-            </Button>
-          }
-          onPress={() =>
-            props.handleProfileClicked(
-              recommendation.userId,
-              recommendation.username,
-            )
-          }
-          key={index}
-          imageUrl={recommendation.profilePictureUrl}
-          loading={props.loading}
-          title={recommendation.fullName ?? recommendation.username}
-          subtitle={recommendation.fullName ? recommendation.username : ""}
-        />
-      ))}
-    </YStack>
+              imageUrl={item.profilePictureUrl}
+              onPress={() => {
+                props.handleProfileClicked(item.userId, item.username);
+              }}
+            />
+          );
+        }}
+      />
+    </View>
   );
 };
 
