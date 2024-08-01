@@ -1,8 +1,11 @@
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import { Separator, Spacer, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
 
 import type { trpcValidators } from "@oppfy/validators";
 
+import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import FriendsCarousel from "../../Carousels/FriendsCarousel";
 import ProfileHeaderDetailsOther from "./components/ProfileHeaderDetailsOther";
 import ProfileHeaderDetailsSelf from "./components/ProfileHeaderDetailsSelf";
@@ -52,6 +55,9 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     isRestricted,
     isBlocked,
   } = props;
+
+  const router = useRouter();
+
   if (
     isLoadingProfileData ||
     isLoadingFriendsData ||
@@ -64,9 +70,30 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
       <YStack gap="$5">
         <ProfileHeaderDetailsSelf loading />
         <FriendsCarousel loading />
+        {/* <PeopleCarousel loading /> */}
       </YStack>
     );
   }
+
+  const hasFriends = profileData.friendCount > 0;
+
+  const onPersonClick = ({
+    userId,
+    username,
+  }: {
+    userId: string;
+    username: string;
+  }) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: "/profile/[userId]/",
+      params: {
+        userId,
+        username,
+      },
+    });
+  };
+
   return (
     <YStack gap="$5">
       <YStack gap="$5">
@@ -87,14 +114,29 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
             <Text>Error because of some dumb shit</Text>
           </View>
         )}
-        <FriendsCarousel
-          loading={false}
-          friendsData={{
-            friendCount: profileData.friendCount,
-            friendItems: friendsData,
-          }}
-          reccomendationsData={recommendationsData}
-        />
+        {hasFriends ? (
+          <PeopleCarousel
+            loading={false}
+            data={friendsData}
+            title="Friends🔥"
+            showMore={friendsData.length < profileData.friendCount}
+            onItemPress={onPersonClick}
+            onShowMore={() => {
+              // Handle show more friends
+            }}
+          />
+        ) : (
+          <PeopleCarousel
+            loading={false}
+            data={recommendationsData}
+            title="Discover People🔥"
+            showMore={recommendationsData.length > 0}
+            onItemPress={onPersonClick}
+            onShowMore={() => {
+              // Handle show more recommendations
+            }}
+          />
+        )}
       </YStack>
       {/* <Separator /> */}
       <Spacer size="$1" />
