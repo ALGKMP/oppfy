@@ -54,6 +54,8 @@ const PreviewScreen = () => {
 
   const { saveState, saveToCameraRoll } = useSaveVideo();
 
+  console.log("PreviewScreen", { uri, type, width, height });
+
   const router = useRouter();
 
   const onContinue = () => {
@@ -94,10 +96,13 @@ const PreviewScreen = () => {
     >
       <View flex={1}>
         <View
-          style={[
-            styles.contentWrapper,
-            { height: contentHeight, top: topPosition },
-          ]}
+          width={SCREEN_WIDTH}
+          borderRadius={20}
+          overflow="hidden"
+          alignSelf="center"
+          position="absolute"
+          height={contentHeight}
+          top={topPosition}
         >
           {type === "photo" ? (
             <PreviewImage uri={uri ?? ""} />
@@ -106,8 +111,23 @@ const PreviewScreen = () => {
           )}
         </View>
 
-        <View style={styles.leftButtonRow}>
-          <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+        <View
+          position="absolute"
+          top={SAFE_AREA_PADDING.paddingTop + 12}
+          left={SAFE_AREA_PADDING.paddingLeft + 12}
+        >
+          <TouchableOpacity
+            style={{
+              marginBottom: CONTENT_SPACING,
+              width: CONTROL_BUTTON_SIZE,
+              height: CONTROL_BUTTON_SIZE,
+              borderRadius: CONTROL_BUTTON_SIZE / 2,
+              backgroundColor: "rgba(140, 140, 140, 0.3)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onPress={() => router.back()}
+          >
             <Ionicons name="close" color="white" size={24} />
           </TouchableOpacity>
         </View>
@@ -205,14 +225,23 @@ const PreviewVideo = ({ uri }: PreviewProps) => {
         ref={videoRef}
         source={{ uri }}
         resizeMode={ResizeMode.COVER}
-        style={{ flex: 1 }}
         isLooping
         shouldPlay
+        style={{ flex: 1 }}
         onPlaybackStatusUpdate={(status) => setStatus(status)}
       />
       {showControls && (
         <Animated.View
-          style={[styles.playButton, { opacity: controlFadeAnim }]}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: [{ translateX: -24 }, { translateY: -24 }],
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            borderRadius: 48,
+            padding: 10,
+            opacity: controlFadeAnim,
+          }}
         >
           <Ionicons
             name={status?.isLoaded && status.isPlaying ? "pause" : "play"}
@@ -224,38 +253,5 @@ const PreviewVideo = ({ uri }: PreviewProps) => {
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  contentWrapper: {
-    width: SCREEN_WIDTH,
-    borderRadius: 20,
-    overflow: "hidden",
-    alignSelf: "center",
-    position: "absolute",
-  },
-  playButton: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: [{ translateX: -24 }, { translateY: -24 }],
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 48,
-    padding: 10,
-  },
-  button: {
-    marginBottom: CONTENT_SPACING,
-    width: CONTROL_BUTTON_SIZE,
-    height: CONTROL_BUTTON_SIZE,
-    borderRadius: CONTROL_BUTTON_SIZE / 2,
-    backgroundColor: "rgba(140, 140, 140, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  leftButtonRow: {
-    position: "absolute",
-    top: SAFE_AREA_PADDING.paddingTop + 12,
-    left: SAFE_AREA_PADDING.paddingLeft + 12,
-  },
-});
 
 export default PreviewScreen;

@@ -1,8 +1,10 @@
+import { useRouter } from "expo-router";
 import { Separator, Spacer, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
 
 import type { trpcValidators } from "@oppfy/validators";
 
+import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import FriendsCarousel from "../../Carousels/FriendsCarousel";
 import ProfileHeaderDetailsOther from "./components/ProfileHeaderDetailsOther";
 import ProfileHeaderDetailsSelf from "./components/ProfileHeaderDetailsSelf";
@@ -22,6 +24,11 @@ type RecommendedProfiles = z.infer<
   typeof trpcValidators.output.recommendations.recommededProfiles
 >;
 
+interface NavigateProfileParams {
+  userId: string;
+  username: string;
+}
+
 interface ProfileHeaderProps {
   isSelfProfile: boolean;
   isLoadingProfileData: boolean;
@@ -32,6 +39,7 @@ interface ProfileHeaderProps {
   recommendationsData: RecommendedProfiles | undefined;
   isRestricted: boolean;
   isBlocked: boolean;
+  navigateToProfile: (params: NavigateProfileParams) => void;
 }
 
 function isOtherProfile(
@@ -52,6 +60,9 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     isRestricted,
     isBlocked,
   } = props;
+
+  const router = useRouter();
+
   if (
     isLoadingProfileData ||
     isLoadingFriendsData ||
@@ -64,9 +75,15 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
       <YStack gap="$5">
         <ProfileHeaderDetailsSelf loading />
         <FriendsCarousel loading />
+        {/* <PeopleCarousel loading /> */}
       </YStack>
     );
   }
+
+  const hasFriends = profileData.friendCount > 0;
+
+
+
   return (
     <YStack gap="$5">
       <YStack gap="$5">
@@ -87,14 +104,29 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
             <Text>Error because of some dumb shit</Text>
           </View>
         )}
-        <FriendsCarousel
-          loading={false}
-          friendsData={{
-            friendCount: profileData.friendCount,
-            friendItems: friendsData,
-          }}
-          reccomendationsData={recommendationsData}
-        />
+        {hasFriends ? (
+          <PeopleCarousel
+            loading={false}
+            data={friendsData}
+            title="Friends🔥"
+            showMore={friendsData.length < profileData.friendCount}
+            onItemPress={props.navigateToProfile}
+            onShowMore={() => {
+              // Handle show more friends
+            }}
+          />
+        ) : (
+          <PeopleCarousel
+            loading={false}
+            data={recommendationsData}
+            title="Discover People🔥"
+            showMore={recommendationsData.length > 0}
+            onItemPress={props.navigateToProfile}
+            onShowMore={() => {
+              // Handle show more recommendations
+            }}
+          />
+        )}
       </YStack>
       {/* <Separator /> */}
       <Spacer size="$1" />

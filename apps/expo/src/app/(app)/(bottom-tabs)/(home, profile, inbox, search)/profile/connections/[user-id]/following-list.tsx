@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { SizableText, View, YStack } from "tamagui";
@@ -18,7 +18,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const FollowingList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const headerHeight = useHeaderHeight();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
     userId: userId ?? "",
@@ -56,6 +57,12 @@ const FollowingList = () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
   };
 
   const renderLoadingSkeletons = () => (
@@ -97,7 +104,7 @@ const FollowingList = () => {
   );
 
   const renderNoResults = () => (
-    <View flex={1} justifyContent="center" bottom={headerHeight}>
+    <View flex={1} justifyContent="center">
       <EmptyPlaceholder
         title="Following"
         subtitle="Once you follow someone, you'll see them here."
@@ -117,7 +124,12 @@ const FollowingList = () => {
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <YStack gap="$4">
         <SearchInput
           placeholder="Search following..."
