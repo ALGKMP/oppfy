@@ -48,7 +48,7 @@ const trpcPostInputSchema = {
 
   updatePost: z.object({
     postId: z.number(),
-    caption: z.string().max(2000).default(""),
+    caption: z.string().max(255).default(""),
   }),
 
   deletePost: z.object({

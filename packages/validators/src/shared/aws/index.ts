@@ -5,7 +5,7 @@ export const userTypeEnum = z.enum(["onApp", "notOnApp"]);
 const baseSchema = z
   .object({
     author: z.string(),
-    caption: z.string().default(""),
+    caption: z.string().max(255).default(""),
     height: z.string(),
     width: z.string(),
   })

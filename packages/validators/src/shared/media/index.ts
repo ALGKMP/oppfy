@@ -12,7 +12,7 @@ export const post = z.object({
   recipientProfileId: z.number(),
   recipientUsername: z.string().nullable(),
   recipientProfilePicture: z.string(), // Corrected typo
-  caption: z.string().default(""),
+  caption: z.string().max(255).default(""),
   imageUrl: z.string(),
   height: z.number(),
   width: z.number(),
