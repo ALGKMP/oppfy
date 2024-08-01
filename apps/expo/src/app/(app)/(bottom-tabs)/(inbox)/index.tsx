@@ -18,6 +18,7 @@ import {
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
+import RecommendationList from "~/components/SpecialLists/RecommendationList";
 import { TimeAgo } from "~/components/Texts";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -40,6 +41,12 @@ const Inbox = () => {
     isLoading: isCountRequestsLoading,
     refetch: refetchRequestCount,
   } = api.request.countRequests.useQuery();
+
+  const {
+    data: recommendationsData,
+    isLoading: isRecommendationsLoading,
+    refetch: refetchRecommendations,
+  } = api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const {
     data: notificationsData,
@@ -131,9 +138,13 @@ const Inbox = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refetchNotifications(), refetchRequestCount()]);
+    await Promise.all([
+      refetchNotifications(),
+      refetchRequestCount(),
+      refetchRecommendations(),
+    ]);
     setRefreshing(false);
-  }, [refetchNotifications, refetchRequestCount]);
+  }, [refetchNotifications, refetchRequestCount, refetchRecommendations]);
 
   const renderRequestCount = () =>
     totalRequestCount > 99 ? (
@@ -271,6 +282,18 @@ const Inbox = () => {
       <YStack flex={1} gap="$4" paddingBottom={insets.bottom}>
         {renderFollowRequests()}
         {renderNotifications()}
+        {recommendationsData && (
+          <RecommendationList
+            handleProfileClicked={(userId, username) => {
+              router.navigate({
+                pathname: "/(inbox)/profile/[userId]/",
+                params: { userId, username },
+              });
+            }}
+            loading={isRecommendationsLoading}
+            recommendationsData={recommendationsData}
+          />
+        )}
       </YStack>
     </BaseScreenView>
   );
