@@ -28,10 +28,186 @@ import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const StyledImage = styled(Image, {
-  width: "100%",
-  height: "100%",
-});
+type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
+type Profile = RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
+
+interface TokenItem {
+  postId?: number | undefined;
+}
+
+const HomeScreen = () => {
+  const router = useRouter();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [viewableItems, setViewableItems] = useState<number[]>([]);
+
+  const {
+    data: postData,
+    isLoading: isLoadingPostData,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch: refetchPosts,
+  } = api.post.paginatePostsForFeed.useInfiniteQuery(
+    {
+      pageSize: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+
+  const {
+    isLoading: isLoadingRecommendationsData,
+    data: recommendationsData,
+    refetch: refetchRecommendationsData,
+  } = api.contacts.getRecommendationProfilesSelf.useQuery();
+
+  const postItems = useMemo(
+    () => postData?.pages.flatMap((page) => page.items).filter(Boolean) ?? [],
+    [postData],
+  );
+
+  const handleOnEndReached = async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([refetchRecommendationsData(), refetchPosts()]);
+    setRefreshing(false);
+  }, [refetchRecommendationsData, refetchPosts]);
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const visibleItemIds = viewableItems
+        .filter((token) => token.isViewable)
+        .map((token) => (token.item as TokenItem).postId)
+        .filter((id) => id !== undefined);
+      setViewableItems(visibleItemIds);
+    },
+    [],
+  );
+
+  const renderPost = useCallback(
+    (item: PostItem) => {
+      if (item === undefined) return null;
+
+      return (
+        <PostItem
+          post={item}
+          isSelfPost={false}
+          isViewable={viewableItems.includes(item.postId)}
+        />
+      );
+    },
+    [viewableItems],
+  );
+
+  const renderSuggestions = useMemo(() => {
+    const handleProfilePress = (profile: Profile) => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      router.navigate({
+        pathname: "/profile/[userId]/",
+        params: {
+          userId: profile.userId,
+          username: profile.username,
+        },
+      });
+    };
+
+    const handleShowMore = () => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      router.navigate({
+        pathname: "/(recommended)",
+      });
+    };
+
+    if (recommendationsData?.length === 0 || recommendationsData === undefined)
+      return null;
+
+    return (
+      <PeopleCarousel
+        showMore={recommendationsData.length > 10}
+        data={recommendationsData}
+        loading={isLoadingRecommendationsData}
+        onItemPress={handleProfilePress}
+        onShowMore={handleShowMore}
+        renderExtraItem={() => {
+          return (
+            <TouchableOpacity onPress={() => console.log("hi")}>
+              <YStack marginLeft="$2" gap="$1.5" alignItems="center">
+                <Avatar circular size="$6" bordered>
+                  <Avatar.Fallback backgroundColor="#F214FF">
+                    <XStack
+                      flex={1}
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <UserRoundPlus
+                        marginLeft={4}
+                        color="white"
+                        backgroundColor="transparent"
+                      />
+                    </XStack>
+                  </Avatar.Fallback>
+                </Avatar>
+                <Text fontWeight="600" textAlign="center">
+                  Invite
+                </Text>
+              </YStack>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    );
+  }, [recommendationsData, isLoadingRecommendationsData, router]);
+
+  if (isLoadingRecommendationsData || isLoadingPostData) {
+    return (
+      <BaseScreenView padding={0} scrollable>
+        <YStack gap="$4">
+          <RecommendationsCarousel loading />
+          {PLACEHOLDER_DATA.map(() => (
+            <Skeleton
+              radius={16}
+              width={screenWidth}
+              height={screenWidth * 1.5}
+            />
+          ))}
+        </YStack>
+      </BaseScreenView>
+    );
+  }
+
+  if (recommendationsData?.length === 0 && postItems.length === 0) {
+    return <EmptyHomeScreen />;
+  }
+
+  return (
+    <BaseScreenView padding={0}>
+      <FlashList
+        nestedScrollEnabled={true}
+        data={postItems}
+        refreshing={refreshing}
+        showsVerticalScrollIndicator={false}
+        onRefresh={onRefresh}
+        numColumns={1}
+        onEndReached={handleOnEndReached}
+        keyExtractor={(item) => "home_" + item?.postId.toString()}
+        renderItem={({ item }) => renderPost(item)}
+        ListHeaderComponent={renderSuggestions}
+        ListFooterComponent={ListFooter}
+        estimatedItemSize={screenWidth}
+        extraData={viewableItems}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+      />
+    </BaseScreenView>
+  );
+};
 
 const ListFooter = () => {
   return (
@@ -121,180 +297,9 @@ const EmptyHomeScreen = () => {
   );
 };
 
-interface TokenItem {
-  postId?: number | undefined;
-}
-
-type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
-
-const HomeScreen = () => {
-  const router = useRouter();
-
-  const [refreshing, setRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<number[]>([]);
-
-  const {
-    data: postData,
-    isLoading: isLoadingPostData,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch: refetchPosts,
-  } = api.post.paginatePostsForFeed.useInfiniteQuery(
-    {
-      pageSize: 10,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
-  );
-
-  const {
-    isLoading: isLoadingRecommendationsData,
-    data: recommendationsData,
-    refetch: refetchRecommendationsData,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery();
-
-  const postItems = useMemo(
-    () => postData?.pages.flatMap((page) => page.items).filter(Boolean) ?? [],
-    [postData],
-  );
-
-  const handleOnEndReached = async () => {
-    if (!isFetchingNextPage && hasNextPage) {
-      await fetchNextPage();
-    }
-  };
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([refetchRecommendationsData(), refetchPosts()]);
-    setRefreshing(false);
-  }, [refetchRecommendationsData, refetchPosts]);
-
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      const visibleItemIds = viewableItems
-        .filter((token) => token.isViewable)
-        .map((token) => (token.item as TokenItem).postId)
-        .filter((id) => id !== undefined);
-      setViewableItems(visibleItemIds);
-    },
-    [],
-  );
-
-  const renderPost = useCallback(
-    (item: PostItem) => {
-      if (item === undefined) return null;
-
-      return (
-        <PostItem
-          post={item}
-          isSelfPost={false}
-          isViewable={viewableItems.includes(item.postId)}
-        />
-      );
-    },
-    [viewableItems],
-  );
-
-  const renderSuggestions = useMemo(() => {
-    if (recommendationsData?.length === 0 || recommendationsData === undefined)
-      return null;
-
-    return (
-      <PeopleCarousel
-        showMore={recommendationsData.length > 10}
-        data={recommendationsData}
-        loading={isLoadingRecommendationsData}
-        onItemPress={(profile) => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          router.navigate({
-            pathname: "/profile/[userId]/",
-            params: {
-              userId: profile.userId,
-              username: profile.username,
-            },
-          });
-        }}
-        onShowMore={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          router.navigate({
-            pathname: "/(recommended)",
-          });
-        }}
-        renderExtraItem={() => {
-          return (
-            <TouchableOpacity onPress={() => console.log("hi")}>
-              <YStack marginLeft="$2" gap="$1.5" alignItems="center">
-                <Avatar circular size="$6" bordered>
-                  <Avatar.Fallback backgroundColor="#F214FF">
-                    <XStack
-                      flex={1}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <UserRoundPlus
-                        marginLeft={4}
-                        color="white"
-                        backgroundColor="transparent"
-                      />
-                    </XStack>
-                  </Avatar.Fallback>
-                </Avatar>
-                <Text fontWeight="600" textAlign="center">
-                  Invite
-                </Text>
-              </YStack>
-            </TouchableOpacity>
-          );
-        }}
-      />
-    );
-  }, [recommendationsData, isLoadingRecommendationsData]);
-
-  if (isLoadingRecommendationsData || isLoadingPostData) {
-    return (
-      <BaseScreenView padding={0} scrollable>
-        <YStack gap="$4">
-          <RecommendationsCarousel loading />
-          {PLACEHOLDER_DATA.map(() => (
-            <Skeleton
-              radius={16}
-              width={screenWidth}
-              height={screenWidth * 1.5}
-            />
-          ))}
-        </YStack>
-      </BaseScreenView>
-    );
-  }
-
-  if (recommendationsData?.length === 0 && postItems.length === 0) {
-    return <EmptyHomeScreen />;
-  }
-
-  return (
-    <BaseScreenView padding={0}>
-      <FlashList
-        nestedScrollEnabled={true}
-        data={postItems}
-        refreshing={refreshing}
-        showsVerticalScrollIndicator={false}
-        onRefresh={onRefresh}
-        numColumns={1}
-        onEndReached={handleOnEndReached}
-        keyExtractor={(item) => "home_" + item?.postId.toString()}
-        renderItem={({ item }) => renderPost(item)}
-        ListHeaderComponent={renderSuggestions}
-        ListFooterComponent={ListFooter}
-        estimatedItemSize={screenWidth}
-        extraData={viewableItems}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-      />
-    </BaseScreenView>
-  );
-};
+const StyledImage = styled(Image, {
+  width: "100%",
+  height: "100%",
+});
 
 export default HomeScreen;
