@@ -178,7 +178,7 @@ export class PaginationService {
           // Can just return itemds without nextCursor
           throw new DomainError(
             ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-            "Failed to get profile picture URLs",
+            "Failed to get profile picture URLs while processing paginated data",
           );
         }
 

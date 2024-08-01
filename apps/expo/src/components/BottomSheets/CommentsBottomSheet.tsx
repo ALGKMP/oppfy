@@ -379,7 +379,7 @@ const CommentsBottomSheet = React.memo(
                 flex: 1,
                 fontWeight: "normal",
                 justifyContent: "center",
-                // borderColor: "gray",
+                // borderColor: "gray",a // TODO: Border this later
                 // borderWidth: 0.25,
                 borderRadius: 20,
                 paddingLeft: 10,
