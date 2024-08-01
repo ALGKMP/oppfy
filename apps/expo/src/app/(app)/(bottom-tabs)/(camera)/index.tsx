@@ -299,29 +299,29 @@ const CameraPage = () => {
             </TouchableOpacity>
           </View>
         </View>
-
-        <View style={styles.bottomControls}>
-          <TouchableOpacity
-            style={styles.mediaPickerButton}
-            onPress={onOpenMediaPicker}
-          >
-            <Ionicons name="images" color="white" size={32} />
-          </TouchableOpacity>
-          <CaptureButton
-            camera={camera}
-            onMediaCaptured={onMediaCaptured}
-            cameraZoom={zoom}
-            minZoom={minZoom}
-            maxZoom={maxZoom}
-            flash={supportsFlash ? flash : "off"}
-            enabled={isCameraInitialized && isActive}
-            setIsPressingButton={(newIsPressingButton) => {
-              isPressingButton.value = newIsPressingButton;
-            }}
-          />
-          <View style={styles.spacer} />
-        </View>
       </View>
+      <View style={styles.bottomControls}>
+        <TouchableOpacity
+          style={styles.mediaPickerButton}
+          onPress={onOpenMediaPicker}
+        >
+          <Ionicons name="images" color="white" size={32} />
+        </TouchableOpacity>
+        <CaptureButton
+          camera={camera}
+          onMediaCaptured={onMediaCaptured}
+          cameraZoom={zoom}
+          minZoom={minZoom}
+          maxZoom={maxZoom}
+          flash={supportsFlash ? flash : "off"}
+          enabled={isCameraInitialized && isActive}
+          setIsPressingButton={(newIsPressingButton) => {
+            isPressingButton.value = newIsPressingButton;
+          }}
+        />
+        <View style={styles.spacer} />
+      </View>
+
       <TouchableOpacity
         style={[styles.button, { position: "absolute", top: 60, left: 16 }]}
         onPress={() => router.back()}
@@ -365,6 +365,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   bottomControls: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
