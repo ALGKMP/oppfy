@@ -341,12 +341,6 @@ const CommentsBottomSheet = React.memo(
             />
           )
         }
-        {/* <CommentInput
-          isSelfPost={isSelfPost}
-          postId={postId}
-          profile={profile}
-          userIdOfPostRecipient={userIdOfPostRecipient}
-        /> */}
         <XStack
           borderTopColor="$gray5"
           borderTopWidth="$0.25"
@@ -373,35 +367,35 @@ const CommentsBottomSheet = React.memo(
           backgroundColor="$gray4"
         >
           <MemoizedAvatar src={profile?.profilePictureUrl ?? ""} />
-          <View style={{ flex: 5 }}>
+          <View flex={5}>
             <BottomSheetTextInput
               placeholder="add a comment..."
               maxLength={100}
               value={inputValue}
               numberOfLines={4}
               onChangeText={handleChangeText}
-              style={{
-                fontWeight: "normal",
-                justifyContent: "flex-start",
-                borderWidth: 10,
-                borderColor: "#2E2E2E",
-                borderRadius: 20,
-                backgroundColor: "#2E2E2E",
-                color: "#fff",
-              }}
+              // style={{
+              //   fontWeight: "normal",
+              //   justifyContent: "flex-start",
+              //   borderWidth: 10,
+              //   borderColor: "#2E2E2E",
+              //   borderRadius: 20,
+              //   backgroundColor: "#2E2E2E",
+              //   color: "#fff",
+              // }}
             />
           </View>
           <TouchableOpacity
             onPress={handlePostComment}
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 7,
-              backgroundColor: "rgb(1,145,255)",
-              borderRadius: 20,
-              borderWidth: 0,
-            }}
+            // style={{
+            //   flex: 1,
+            //   justifyContent: "center",
+            //   alignItems: "center",
+            //   padding: 7,
+            //   backgroundColor: "rgb(1,145,255)",
+            //   borderRadius: 20,
+            //   borderWidth: 0,
+            // }}
           >
             <SendHorizontal color="$gray12" />
           </TouchableOpacity>
