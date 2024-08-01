@@ -95,6 +95,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
+
     return this._processPaginatedData(data, pageSize);
   }
 
@@ -152,7 +153,11 @@ export class PaginationService {
   }
 
   private _processPaginatedData<
-    T extends { profilePictureUrl: string; profileId: number; createdAt: Date },
+    T extends {
+      profilePictureUrl: string | null;
+      profileId: number;
+      createdAt: Date;
+    },
   >(data: T[], pageSize: number) {
     try {
       if (data.length === 0) {
@@ -162,12 +167,13 @@ export class PaginationService {
         };
       }
       const items = data.map((item) => {
-        const profilePicturePresignedUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.profilePictureUrl,
-          );
-
-        item.profilePictureUrl = profilePicturePresignedUrl;
+        if (item.profilePictureUrl) {
+          const profilePicturePresignedUrl =
+            this.cloudFrontService.getSignedUrlForProfilePicture(
+              item.profilePictureUrl,
+            );
+          item.profilePictureUrl = profilePicturePresignedUrl;
+        }
         return item;
       });
 

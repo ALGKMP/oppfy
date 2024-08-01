@@ -234,8 +234,7 @@ const PostItem = React.memo((props: PostItemProps) => {
   });
 
   // TODO: Not sure what I wanna do. Either pause the video, or make the video full screen
-  const longHold = Gesture.LongPress().onEnd(() => {
-  });
+  const longHold = Gesture.LongPress().onEnd(() => {});
 
   const postInteractions = Gesture.Exclusive(doubleTap, tapGesture, longHold);
 
@@ -469,7 +468,7 @@ const PostItem = React.memo((props: PostItemProps) => {
               }}
             >
               <Text>
-                <Text fontWeight="bold">{post.authorUsername}  </Text>
+                <Text fontWeight="bold">{post.authorUsername} </Text>
                 <Text numberOfLines={isExpanded ? 0 : 2}>
                   {renderCaption()}
                   {showViewMore && !isExpanded && (

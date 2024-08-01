@@ -8,13 +8,14 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { Image } from "expo-image";
 import { router } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import {
   Button,
-  Image,
   ScrollView,
   Spacer,
   Text,
@@ -51,7 +52,7 @@ const AnimatedUserProfile = ({
     userId: string;
     fullName: string | null;
     username: string;
-    profilePictureUrl: string;
+    profilePictureUrl: string | null;
   };
   index: number;
   onUserSelected: (userId: string, added: boolean) => void;
@@ -108,10 +109,8 @@ const AnimatedUserProfile = ({
         <View style={{ position: "relative", width: 80, height: 80 }}>
           <Animated.View style={animatedStyle}>
             <Image
-              source={{ uri: user.profilePictureUrl }}
-              width={80}
-              height={80}
-              borderRadius={40}
+              source={user.profilePictureUrl ?? DefaultProfilePicture}
+              style={{ width: 80, height: 80, borderRadius: 40 }}
             />
           </Animated.View>
           <Animated.View

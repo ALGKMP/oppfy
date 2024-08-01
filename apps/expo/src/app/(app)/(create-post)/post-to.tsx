@@ -223,7 +223,7 @@ const PostTo = () => {
             loading={false}
             title={item.username}
             subtitle={item.name}
-            imageUrl={item.profilePictureUrl}
+            imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
             button={<ChevronRight size={24} color="$gray10" />}
             onPress={() => onFriendSelected(item.userId)}
           />

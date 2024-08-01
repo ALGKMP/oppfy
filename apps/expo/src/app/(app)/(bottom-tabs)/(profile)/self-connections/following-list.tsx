@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Input, SizableText, View, YStack } from "tamagui";
@@ -240,7 +241,7 @@ const FollowingList = () => {
       loading={false}
       title={item.username}
       subtitle={item.name}
-      imageUrl={item.profilePictureUrl}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       button={renderButton(item)}
       onPress={() =>
         router.push({

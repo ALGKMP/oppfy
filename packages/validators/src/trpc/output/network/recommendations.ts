@@ -3,7 +3,7 @@ import { z } from "zod";
 const trpcReccomendationsOutputSchema = {
   recommededProfiles: z.array(
     z.object({
-      profilePictureUrl: z.string(),
+      profilePictureUrl: z.string().nullable(),
       userId: z.string(),
       username: z.string(),
       profileId: z.number(),
