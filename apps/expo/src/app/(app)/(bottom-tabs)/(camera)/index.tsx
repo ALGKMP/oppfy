@@ -1,7 +1,12 @@
 import * as React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useEffect } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Dimensions,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolation,
@@ -10,6 +15,7 @@ import Reanimated, {
   useAnimatedProps,
   useSharedValue,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type {
   CameraProps,
   PhotoFile,
@@ -28,17 +34,9 @@ import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
-import { Button, SizableText, Text, View } from "tamagui";
+import { SizableText, Text, View } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
-import {
-  CONTENT_SPACING,
-  CONTROL_BUTTON_SIZE,
-  MAX_ZOOM_FACTOR,
-  SAFE_AREA_PADDING,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
-} from "~/constants/camera";
 import {
   CaptureButton,
   FocusIcon,
@@ -51,10 +49,26 @@ Reanimated.addWhitelistedNativeProps({
   zoom: true,
 });
 
+const MAX_ZOOM_FACTOR = 10;
+
+const CONTENT_SPACING = 15;
+const CONTROL_BUTTON_SIZE = 40;
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
 const SCALE_FULL_ZOOM = 3;
 
 const CameraPage = () => {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+
+  const SAFE_AREA_PADDING = {
+    paddingLeft: insets.left,
+    paddingTop: insets.top,
+    paddingRight: insets.right,
+    paddingBottom: insets.bottom,
+  };
 
   const camera = useRef<Camera>(null);
 
@@ -126,7 +140,6 @@ const CameraPage = () => {
     async (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
 
-      // todo: reminder to check if react-native-vision-camera resolved the incorrect width/height issues
       const asset = await MediaLibrary.createAssetAsync(uri);
       const { width, height } = await MediaLibrary.getAssetInfoAsync(asset);
 
@@ -244,7 +257,9 @@ const CameraPage = () => {
   return (
     <View style={styles.container}>
       <GestureDetector gesture={composedGesture}>
-        <View style={styles.cameraWrapper}>
+        <View
+          style={[styles.cameraWrapper, { top: SAFE_AREA_PADDING.paddingTop }]}
+        >
           <ReanimatedCamera
             ref={camera}
             device={device}
@@ -273,7 +288,10 @@ const CameraPage = () => {
       </GestureDetector>
 
       <CaptureButton
-        style={styles.captureButton}
+        style={[
+          styles.captureButton,
+          { bottom: SAFE_AREA_PADDING.paddingBottom + 36 },
+        ]}
         camera={camera}
         onMediaCaptured={onMediaCaptured}
         cameraZoom={zoom}
@@ -285,19 +303,41 @@ const CameraPage = () => {
       />
 
       <TouchableOpacity
-        style={styles.mediaPickerButton}
+        style={[
+          styles.mediaPickerButton,
+          {
+            bottom: SAFE_AREA_PADDING.paddingBottom + 36,
+            left: SAFE_AREA_PADDING.paddingLeft + 36,
+          },
+        ]}
         onPress={onOpenMediaPicker}
       >
         <Ionicons name="images" color="white" size={32} />
       </TouchableOpacity>
 
-      <View style={styles.leftButtonRow}>
+      <View
+        style={[
+          styles.leftButtonRow,
+          {
+            top: SAFE_AREA_PADDING.paddingTop + 12,
+            left: SAFE_AREA_PADDING.paddingLeft + 12,
+          },
+        ]}
+      >
         <TouchableOpacity style={styles.button} onPress={() => router.back()}>
           <Ionicons name="close" color="white" size={24} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.rightButtonRow}>
+      <View
+        style={[
+          styles.rightButtonRow,
+          {
+            top: SAFE_AREA_PADDING.paddingTop + 12,
+            right: SAFE_AREA_PADDING.paddingRight + 12,
+          },
+        ]}
+      >
         <TouchableOpacity style={styles.button} onPress={onFlipCameraPressed}>
           <Ionicons name="camera-reverse" color="white" size={24} />
         </TouchableOpacity>
@@ -376,20 +416,16 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignSelf: "center",
     position: "absolute",
-    top: SAFE_AREA_PADDING.paddingTop,
   },
   camera: {
     flex: 1,
   },
   mediaPickerButton: {
     position: "absolute",
-    bottom: SAFE_AREA_PADDING.paddingBottom + 12,
-    left: SAFE_AREA_PADDING.paddingLeft + 36,
   },
   captureButton: {
     position: "absolute",
     alignSelf: "center",
-    bottom: SAFE_AREA_PADDING.paddingBottom,
   },
   button: {
     marginBottom: CONTENT_SPACING,
@@ -402,12 +438,8 @@ const styles = StyleSheet.create({
   },
   leftButtonRow: {
     position: "absolute",
-    top: SAFE_AREA_PADDING.paddingTop + 12,
-    left: SAFE_AREA_PADDING.paddingLeft + 12,
   },
   rightButtonRow: {
     position: "absolute",
-    top: SAFE_AREA_PADDING.paddingTop + 12,
-    right: SAFE_AREA_PADDING.paddingRight + 12,
   },
 });

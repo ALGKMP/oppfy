@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 import React, { useCallback, useRef } from "react";
 import type { ViewProps } from "react-native";
-import { StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import type {
   GestureStateChangeEvent,
   GestureUpdateEvent,
@@ -16,7 +16,6 @@ import Reanimated, {
   Extrapolation,
   interpolate,
   runOnJS,
-  runOnUI,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -25,13 +24,12 @@ import Reanimated, {
 } from "react-native-reanimated";
 import type { Camera, PhotoFile, VideoFile } from "react-native-vision-camera";
 
-import {
-  CAPTURE_BUTTON_SIZE,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
-} from "~/constants/camera";
-
 type FailOffset = [failOffsetXStart: number, failOffsetXEnd: number];
+
+const CAPTURE_BUTTON_SIZE = 100;
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 const PAN_GESTURE_HANDLER_FAIL_X = [
   -SCREEN_WIDTH,
