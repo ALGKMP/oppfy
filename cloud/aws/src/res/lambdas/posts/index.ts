@@ -71,7 +71,7 @@ const lambdaHandler = async (
     author: metadata.author,
     height: parseInt(metadata.height),
     width: parseInt(metadata.width),
-    caption: metadata.caption,
+    caption: decodeURIComponent(metadata.caption),
   };
 
   if (metadata.type === "onApp") {
@@ -113,10 +113,10 @@ const lambdaHandler = async (
       entityType: "post",
     });
   } else {
-    await db.insert(schema.postOfUserNotOnApp).values({
-      ...data,
-      phoneNumber: metadata.number,
-    });
+    // await db.insert(schema.postOfUserNotOnApp).values({
+    //   ...data,
+    //   phoneNumber: metadata.number,
+    // });
   }
 };
 

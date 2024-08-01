@@ -104,7 +104,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       refetchPosts(),
     ]);
     setRefreshing(false);
-  }, [refetchFriendsData, refetchProfileData, refetchRecommendationsData]);
+  }, [refetchFriendsData, refetchProfileData, refetchRecommendationsData, refetchPosts]);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {

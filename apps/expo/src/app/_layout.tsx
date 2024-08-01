@@ -30,6 +30,7 @@ const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
 
 Sentry.init({
   dsn: env.EXPO_PUBLIC_SENTRY_DSN,
+  enabled: !__DEV__, // Disable Sentry in development mode
   debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
   integrations: [
     new Sentry.ReactNativeTracing({
