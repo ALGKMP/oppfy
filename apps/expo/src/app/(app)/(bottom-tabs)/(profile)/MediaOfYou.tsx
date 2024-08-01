@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Camera, Lock } from "@tamagui/lucide-icons";
@@ -74,6 +76,8 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     hasNextPage,
   } = props;
 
+  const router = useRouter();
+
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
   const [isRestricted, setIsRestricted] = useState(false);
@@ -129,6 +133,23 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     [],
   );
 
+  const onPersonClick = ({
+    userId,
+    username,
+  }: {
+    userId: string;
+    username: string;
+  }) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: "profile/[userId]/",
+      params: {
+        userId,
+        username,
+      },
+    });
+  };
+
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 40,
   };
@@ -136,6 +157,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
   const memoizedProfileHeader = useMemo(() => {
     return (
       <ProfileHeader
+        navigateToProfile={onPersonClick}
         isSelfProfile={isSelfProfile}
         isLoadingProfileData={isLoadingProfileData}
         isLoadingFriendsData={isLoadingFriendsData}
