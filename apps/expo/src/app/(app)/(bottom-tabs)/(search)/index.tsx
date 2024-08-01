@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { ListItemTitle, SizableText, Text, View, YStack } from "tamagui";
+import { H6, ListItemTitle, SizableText, Text, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -92,7 +92,7 @@ const Search = () => {
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={Keyboard.dismiss}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={<ListItemTitle>Suggested profiles</ListItemTitle>}
+        ListHeaderComponent={<H6 theme="alt1">Suggestions</H6>}
         renderItem={({ item }) => (
           <VirtualizedListItem
             loading={false}
