@@ -18,7 +18,6 @@ import Inter_100Thin from "@tamagui/font-inter/otf/Inter-Thin.otf";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { TamaguiProvider, View } from "tamagui";
 
-
 import { env } from "@oppfy/env";
 
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
@@ -29,11 +28,9 @@ import SessionProvider from "../contexts/SessionContext";
 // Construct a new instrumentation instance. This is needed to communicate between the integration and React
 const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
 
-console.log("IS RUNNING IN expo GO", isRunningInExpoGo());
-
 Sentry.init({
   dsn: env.EXPO_PUBLIC_SENTRY_DSN,
-  enabled: !__DEV__,
+  enabled: !__DEV__, // Disable Sentry in development mode
   debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
   integrations: [
     new Sentry.ReactNativeTracing({
