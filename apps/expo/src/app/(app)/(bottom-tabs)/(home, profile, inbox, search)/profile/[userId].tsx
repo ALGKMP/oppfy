@@ -62,9 +62,15 @@ const Profile = () => {
 
   // block user
   const blockUser = api.block.blockUser.useMutation();
+  const unblockUser = api.block.unblockUser.useMutation();
 
   const handleBlockUser = async (userId: string) => {
     await blockUser.mutateAsync({ blockUserId: userId });
+    setIsActionSheetVisible(false);
+  };
+
+  const handleUnblockUser = async (userId: string) => {
+    await unblockUser.mutateAsync({ blockedUserId: userId });
     setIsActionSheetVisible(false);
   };
 
@@ -94,16 +100,26 @@ const Profile = () => {
     });
   }, [navigation, username, profileData, handleOnPress, userId]);
 
-  const title = "Block user";
-  const subtitle = "Are you sure you want to block this user?";
+  const title = profileData?.networkStatus.blocked
+    ? "Unblock user"
+    : "Block user";
+  const subtitle = profileData?.networkStatus.blocked
+    ? "Are you sure you want to unblock this user?"
+    : "Are you sure you want to block this user?";
   const buttonOptions = [
     {
-      text: "Block",
+      text: profileData?.networkStatus.blocked ? "Unblock" : "Block",
       textProps: {
         color: "$red9",
       },
       onPress: () => {
-        if (userId) void handleBlockUser(userId);
+        if (userId) {
+          if (profileData?.networkStatus.blocked) {
+            void handleUnblockUser(userId);
+          } else {
+            void handleBlockUser(userId);
+          }
+        }
       },
     },
   ] satisfies ButtonOption[];

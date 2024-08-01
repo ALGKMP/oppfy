@@ -348,7 +348,7 @@ const PostItem = React.memo((props: PostItemProps) => {
                   📸
                 </SizableText>
                 <SizableText size="$1" lineHeight={15}>
-                  posted by:
+                  posted by
                 </SizableText>
 
                 <SizableText
