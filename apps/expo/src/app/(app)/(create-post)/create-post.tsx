@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { Pressable, View as RNView, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,7 +13,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowBigRight, Minus } from "@tamagui/lucide-icons";
+import { ArrowBigRight, ChevronRight, Minus } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import {
   Button,
@@ -28,14 +28,10 @@ import {
 } from "tamagui";
 import { z } from "zod";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { BaseScreenView } from "~/components/Views";
+import { SCREEN_WIDTH } from "~/constants/camera";
 import { useUploadMedia } from "~/hooks/media";
-import {
-  CONTENT_SPACING,
-  SAFE_AREA_PADDING,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
-} from "~/constants/camera";
 
 const postSchema = z.object({
   caption: z.optional(z.string().max(255)),
@@ -60,7 +56,7 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
   userType: "notOnApp";
 }
 
-const TARGET_ASPECT_RATIO = 9 / 16; // Assuming portrait orientation
+const TARGET_ASPECT_RATIO = 9 / 16;
 const MAX_CONTENT_HEIGHT = SCREEN_WIDTH / TARGET_ASPECT_RATIO;
 
 const CreatePost = () => {
@@ -131,6 +127,7 @@ const CreatePost = () => {
     setInputValue(watch("caption") ?? "");
     setIsFieldChanged(false);
     bottomSheetRef.current?.expand();
+    inputRef.current?.focus();
   };
 
   const clearInput = () => {
@@ -184,85 +181,92 @@ const CreatePost = () => {
   const handleSheetClose = () => {
     setInputValue("");
     setIsFieldChanged(false);
+    inputRef.current?.blur();
   };
 
-  // Calculate the aspect ratio of the content
+  // Calculate the preview size (1/3 of the original size)
   const contentAspectRatio =
     parseFloat(width ?? "0") / parseFloat(height ?? "0");
-
-  // Determine the actual content height, constrained by MAX_CONTENT_HEIGHT
   const contentHeight = Math.min(
     SCREEN_WIDTH / contentAspectRatio,
     MAX_CONTENT_HEIGHT,
   );
-
-  // Calculate the preview size (1/3 of the original size)
   const previewWidth = SCREEN_WIDTH / 3;
   const previewHeight = contentHeight / 3;
 
   return (
     <>
       <BaseScreenView safeAreaEdges={["bottom"]}>
-        <View flex={1}>
-          <ScrollView flex={1} keyboardDismissMode="interactive">
-            <YStack flex={1} gap="$4">
-              <View alignItems="center">
-                {type === "photo" ? (
-                  <Image
-                    source={{ uri }}
+        <ScrollView>
+          <YStack gap="$5">
+            <YStack gap="$4" alignItems="center">
+              {type === "photo" ? (
+                <Image
+                  source={{ uri }}
+                  style={[
+                    styles.media,
+                    { width: previewWidth, height: previewHeight },
+                  ]}
+                />
+              ) : (
+                <Pressable
+                  onPress={togglePlayback}
+                  style={[
+                    styles.mediaContainer,
+                    { width: previewWidth, height: previewHeight },
+                  ]}
+                >
+                  <Video
+                    ref={videoRef}
+                    source={{ uri: uri ?? "" }}
                     style={[
                       styles.media,
                       { width: previewWidth, height: previewHeight },
                     ]}
+                    resizeMode={ResizeMode.COVER}
+                    isLooping
+                    shouldPlay={false}
                   />
-                ) : (
-                  <View
-                    style={[
-                      styles.mediaContainer,
-                      { width: previewWidth, height: previewHeight },
-                    ]}
-                  >
-                    <Video
-                      ref={videoRef}
-                      source={{ uri: uri ?? "" }}
-                      style={[
-                        styles.media,
-                        { width: previewWidth, height: previewHeight },
-                      ]}
-                      resizeMode={ResizeMode.COVER}
-                      isLooping
-                      shouldPlay={false}
-                    />
-                    <Pressable
-                      onPress={togglePlayback}
-                      style={styles.playButtonContainer}
-                    >
-                      <View style={styles.playButton}>
-                        <Ionicons
-                          name={isPlaying ? "pause" : "play"}
-                          size={24}
-                          color="white"
-                        />
-                      </View>
-                    </Pressable>
+                  <View style={styles.playButtonContainer}>
+                    <View style={styles.playButton}>
+                      <Ionicons
+                        name={isPlaying ? "pause" : "play"}
+                        size={24}
+                        color="white"
+                      />
+                    </View>
                   </View>
-                )}
-              </View>
-              <YStack flex={1} gap="$2">
-                <TouchableOpacity onPress={openBottomSheet}>
-                  <XStack justifyContent="space-between" alignItems="center">
-                    <H5>{watch("caption") ? "Edit caption" : "Add caption"}</H5>
+                </Pressable>
+              )}
+            </YStack>
+
+            <CardContainer padding="$4" paddingBottom="$5">
+              <YStack gap="$3">
+                <H5>Post Details</H5>
+                <XStack
+                  justifyContent="space-between"
+                  alignItems="center"
+                  onPress={openBottomSheet}
+                >
+                  <XStack flex={1} alignItems="center" gap="$3" mr="$4">
                     <Ionicons
-                      name="chevron-forward"
+                      name="chatbubble-outline"
                       size={24}
                       color={theme.gray10.val}
                     />
+                    <View flex={1}>
+                      <Text fontSize="$5" fontWeight="500">
+                        {watch("caption") ? watch("caption") : "Add caption"}
+                      </Text>
+                    </View>
                   </XStack>
-                </TouchableOpacity>
+                  <ChevronRight size={24} color="$gray10" />
+                </XStack>
               </YStack>
-            </YStack>
-          </ScrollView>
-        </View>
+            </CardContainer>
+          </YStack>
+        </ScrollView>
+
         <Button
           size="$5"
           borderRadius="$7"
@@ -272,6 +276,7 @@ const CreatePost = () => {
           Continue
         </Button>
       </BaseScreenView>
+
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
@@ -305,16 +310,9 @@ const CreatePost = () => {
             control={control}
             name="caption"
             render={({ field: { onBlur } }) => (
-              <View
-                onLayout={() => {
-                  if (inputRef.current) {
-                    inputRef.current.focus();
-                  }
-                }}
-              >
+              <RNView>
                 <BottomSheetTextInput
                   ref={inputRef}
-                  autoFocus
                   placeholder="Write a caption..."
                   onBlur={onBlur}
                   value={inputValue}
@@ -333,7 +331,7 @@ const CreatePost = () => {
                     borderRadius: 20,
                   }}
                 />
-              </View>
+              </RNView>
             )}
           />
           {errors.caption && (

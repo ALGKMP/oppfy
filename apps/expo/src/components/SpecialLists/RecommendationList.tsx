@@ -22,7 +22,7 @@ const RecommendationList = (props: RecommendationListProps) => {
       </Text>
       {props.recommendationsData.map((recommendation, index) => (
         <VirtualizedListItem
-          button={<Button color={"$blue10"}>Follow</Button>}
+          button={<Button color={"#F214FF"}>Follow</Button>}
           onPress={() =>
             props.handleProfileClicked(
               recommendation.userId,
