@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
@@ -17,6 +18,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const FollowersList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
     userId: userId ?? "",
@@ -52,6 +55,12 @@ const FollowersList = () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
   };
 
   const renderLoadingSkeletons = () => (
@@ -113,7 +122,12 @@ const FollowersList = () => {
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <YStack gap="$4">
         <SearchInput
           placeholder="Search followers..."
