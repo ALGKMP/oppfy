@@ -27,7 +27,7 @@ const trpcFriendOutputSchema = {
         profileId: z.number(),
         username: z.string(),
         name: z.string(),
-        profilePictureUrl: z.string(),
+        profilePictureUrl: z.string().nullable(),
         privacy: z.enum(["public", "private"]),
         relationshipState: z.enum([
           "following",
@@ -51,7 +51,7 @@ const trpcFriendOutputSchema = {
       profileId: z.number(),
       username: z.string(),
       name: z.string(),
-      profilePictureUrl: z.string(),
+      profilePictureUrl: z.string().nullable(),
       privacy: z.enum(["public", "private"]),
     }),
   ),
@@ -61,7 +61,7 @@ const trpcFriendOutputSchema = {
       profileId: z.number(),
       username: z.string(),
       name: z.string(),
-      profilePictureUrl: z.string(),
+      profilePictureUrl: z.string().nullable(),
       relationshipState: z.enum([
         "following",
         "followRequestSent",

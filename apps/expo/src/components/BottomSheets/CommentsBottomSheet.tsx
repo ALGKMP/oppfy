@@ -8,6 +8,8 @@ import React, {
 import { TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
@@ -366,7 +368,7 @@ const CommentsBottomSheet = React.memo(
           alignItems="center"
           backgroundColor="$gray4"
         >
-          <MemoizedAvatar src={profile?.profilePictureUrl ?? ""} />
+          <MemoizedAvatar src={profile?.profilePictureUrl} />
           <View flex={5}>
             <BottomSheetTextInput
               placeholder="add a comment..."
@@ -405,12 +407,14 @@ const CommentsBottomSheet = React.memo(
   },
 );
 
-const MemoizedAvatar = React.memo(({ src }: { src: string }) => (
-  <Avatar circular size="$4" flex={1}>
-    <Avatar.Image accessibilityLabel="User Avatar" src={src} />
-    <Avatar.Fallback backgroundColor="$blue10" />
-  </Avatar>
-));
+const MemoizedAvatar = React.memo(
+  ({ src }: { src: string | null | undefined }) => (
+    <Image
+      source={src ?? DefaultProfilePicture}
+      style={{ width: 40, height: 40, borderRadius: 20 }}
+    />
+  ),
+);
 
 interface CommentProps {
   comment: Comment;

@@ -3,6 +3,8 @@ import { View as RNView } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
@@ -302,10 +304,12 @@ const EditProfile = () => {
           <TouchableOpacity onPress={pickAndUploadImage}>
             <YStack alignItems="center" gap="$3">
               <View position="relative">
-                <Avatar size="$12" circular bordered>
-                  <Avatar.Image src={defaultValues?.profilePictureUrl} />
-                  <Avatar.Fallback backgroundColor="$blue5" />
-                </Avatar>
+                <Image
+                  source={
+                    defaultValues?.profilePictureUrl ?? DefaultProfilePicture
+                  }
+                  style={{ width: 150, height: 150, borderRadius: 75 }}
+                />
                 <View
                   position="absolute"
                   bottom={0}

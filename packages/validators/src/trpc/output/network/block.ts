@@ -7,7 +7,7 @@ const trpcBlockOutputSchema = {
         userId: z.string(),
         username: z.string(),
         name: z.string(),
-        profilePictureUrl: z.string(),
+        profilePictureUrl: z.string().nullable(),
       }),
     ),
     nextCursor: z

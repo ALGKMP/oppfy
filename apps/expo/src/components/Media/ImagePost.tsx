@@ -23,8 +23,7 @@ const ImagePost: React.FC<ImagePostProps> = (props: ImagePostProps) => {
 
   return (
     <Image
-      source={{ uri: imageUrl }}
-      onError={(err) => console.error("ERROR", err)}
+      source={imageUrl}
       recyclingKey={postKey}
       style={[
         {

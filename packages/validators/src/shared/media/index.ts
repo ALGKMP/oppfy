@@ -26,7 +26,7 @@ export const comment = z.object({
   commentId: z.number(),
   userId: z.string(),
   username: z.string().nullable(),
-  profilePictureUrl: z.string(),
+  profilePictureUrl: z.string().nullable(),
   postId: z.number(),
   body: z.string(),
   createdAt: z.date(),

@@ -69,7 +69,7 @@ const trpcProfileOutputSchema = {
     followerCount: z.number(),
     followingCount: z.number(),
     friendCount: z.number(),
-    profilePictureUrl: z.string(),
+    profilePictureUrl: z.string().nullable(),
     profileStats: z.object({
       createdAt: z.date(),
       profileId: z.number(),
@@ -90,7 +90,7 @@ const trpcProfileOutputSchema = {
     name: z.string(),
     bio: z.union([z.string(), z.null()]),
     privacy: z.enum(["public", "private"]),
-    profilePictureUrl: z.string(),
+    profilePictureUrl: z.string().nullable(),
     followerCount: z.number(),
     followingCount: z.number(),
     friendCount: z.number(),
