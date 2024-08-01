@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Button, H6, Spacer, YStack } from "tamagui";
@@ -64,14 +65,19 @@ const Requests = () => {
 
       // Get the data from the queryCache
       const prevFriendData =
-        utils.request.paginateFriendRequests.getInfiniteData();
+        utils.request.paginateFriendRequests.getInfiniteData({
+          pageSize: 20,
+        });
       const prevFollowData =
-        utils.request.paginateFollowRequests.getInfiniteData();
+        utils.request.paginateFollowRequests.getInfiniteData({
+          pageSize: 20,
+        });
+
       if (prevFriendData === undefined || prevFollowData === undefined) return;
 
       // Optimistically update the data
       utils.request.paginateFriendRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         {
           ...prevFriendData,
           pages: prevFriendData.pages.map((page) => ({
@@ -85,7 +91,7 @@ const Requests = () => {
 
       // Optimistically update the follow requests data
       utils.request.paginateFollowRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         {
           ...prevFollowData,
           pages: prevFollowData.pages.map((page) => ({
@@ -122,12 +128,14 @@ const Requests = () => {
       await utils.request.paginateFollowRequests.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.request.paginateFollowRequests.getInfiniteData();
+      const prevData = utils.request.paginateFollowRequests.getInfiniteData({
+        pageSize: 20,
+      });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.request.paginateFollowRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -165,7 +173,7 @@ const Requests = () => {
 
       // Optimistically update the data
       utils.request.paginateFriendRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         {
           ...prevFriendData,
           pages: prevFriendData.pages.map((page) => ({
@@ -179,7 +187,7 @@ const Requests = () => {
 
       // Optimistically update the follow requests data
       utils.request.paginateFollowRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         {
           ...prevFollowData,
         },
@@ -190,11 +198,11 @@ const Requests = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       utils.request.paginateFriendRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         ctx.prevFriendData,
       );
       utils.request.paginateFollowRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         ctx.prevFollowData,
       );
     },
@@ -215,7 +223,7 @@ const Requests = () => {
 
       // Optimistically update the data
       utils.request.paginateFollowRequests.setInfiniteData(
-        {},
+        { pageSize: 20 },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -231,7 +239,10 @@ const Requests = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.request.paginateFollowRequests.setInfiniteData({}, ctx.prevData);
+      utils.request.paginateFollowRequests.setInfiniteData(
+        { pageSize: 20 },
+        ctx.prevData,
+      );
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
