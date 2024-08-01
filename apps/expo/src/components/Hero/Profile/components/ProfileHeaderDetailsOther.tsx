@@ -36,6 +36,7 @@ interface ProfileLoadedProps {
   loading: false;
   data: ProfileData;
   isRestricted: boolean;
+  isBlocked: boolean;
 }
 type ProfileProps = LoadingProps | ProfileLoadedProps;
 
@@ -43,6 +44,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
   const segments = useSegments();
+
   const currentSegment = segments[segments.length - 3];
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [isFriendLoading, setIsFriendLoading] = useState(false);
@@ -52,7 +54,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   });
 
   const onFollowingListPress = () => {
-    if (props.loading || (props.isRestricted && !props.loading)) return;
+    if (props.loading || props.isRestricted) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
       pathname: `${currentSegment}/profile/connections/[user-id]/following-list`,
@@ -61,7 +63,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   };
 
   const onFollowerListPress = () => {
-    if (props.loading || (props.isRestricted && !props.loading)) return;
+    if (props.loading || props.isRestricted) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.navigate({
       pathname: `${currentSegment}/profile/connections/[user-id]/followers-list`,
@@ -653,7 +655,9 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             successComponent={(count) => (
               <TouchableOpacity
                 onPress={onFollowingListPress}
-                disabled={!props.loading ? props.isRestricted : true}
+                disabled={
+                  !props.loading ? props.isRestricted || props.isBlocked : true
+                }
               >
                 <Stat label="Following" value={abbreviatedNumber(count)} />
               </TouchableOpacity>
@@ -777,7 +781,7 @@ const FollowButton = ({
       borderRadius={20}
       onPress={onFollowPress}
       backgroundColor={followState === "NotFollowing" ? "#F214FF" : "$primary"}
-      disabled={isLoadingFollow || isLoadingFriend}
+      disabled={isLoadingFollow || isLoadingFriend || networkStatus.blocked}
     >
       <XStack gap="$2" alignItems="center">
         <Text>{buttonText}</Text>
@@ -852,7 +856,7 @@ const FriendButton = ({
       borderRadius={20}
       onPress={() => onFriendPress()}
       backgroundColor={friendState === "NotFriends" ? "#F214FF" : "$primary"}
-      disabled={isLoadingFriend || isLoadingFollow}
+      disabled={isLoadingFriend || isLoadingFollow || networkStatus.blocked}
     >
       <XStack gap="$2" alignItems="center">
         <Text>
