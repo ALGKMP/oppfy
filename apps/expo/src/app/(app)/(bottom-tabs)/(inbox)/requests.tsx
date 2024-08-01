@@ -1,4 +1,5 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Button, H6, Spacer, YStack } from "tamagui";
 
@@ -9,7 +10,7 @@ import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 20;
 
 type FriendRequestItem =
   RouterOutputs["request"]["paginateFriendRequests"]["items"][0];
@@ -18,7 +19,11 @@ type FollowRequestItem =
 
 const Requests = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const utils = api.useUtils();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const {
     data: friendRequestsData,
@@ -26,6 +31,7 @@ const Requests = () => {
     hasNextPage: friendRequestsHasNextPage,
     fetchNextPage: fetchNextFriendRequestsPage,
     isFetchingNextPage: friendRequestsIsFetchingNextPage,
+    refetch: refetchFriendRequests,
   } = api.request.paginateFriendRequests.useInfiniteQuery(
     {
       pageSize: PAGE_SIZE,
@@ -40,6 +46,7 @@ const Requests = () => {
     hasNextPage: followRequestsHasNextPage,
     fetchNextPage: fetchNextFollowRequestsPage,
     isFetchingNextPage: followRequestsIsFetchingNextPage,
+    refetch: refetchFollowRequests,
   } = api.request.paginateFollowRequests.useInfiniteQuery(
     {
       pageSize: PAGE_SIZE,
@@ -286,6 +293,12 @@ const Requests = () => {
     });
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([refetchFriendRequests(), refetchFollowRequests()]);
+    setRefreshing(false);
+  };
+
   const isLoading = followRequestsIsLoading || friendRequestsIsLoading;
 
   const renderLoadingSkeletons = () => (
@@ -390,8 +403,13 @@ const Requests = () => {
   }
 
   return (
-    <BaseScreenView scrollable paddingBottom={0}>
-      <YStack flex={1} gap="$4">
+    <BaseScreenView
+      scrollable
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <YStack flex={1} gap="$4" paddingBottom={insets.bottom}>
         {friendRequestItems.length > 0 && renderFriendRequests()}
         {followRequestItems.length > 0 && renderFollowRequests()}
       </YStack>

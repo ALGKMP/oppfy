@@ -1,16 +1,24 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Circle, Paragraph, SizableText, View, XStack, YStack } from "tamagui";
-
-import { abbreviatedTimeAgo } from "@oppfy/utils";
+import {
+  Circle,
+  getToken,
+  Paragraph,
+  SizableText,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
+import { TimeAgo } from "~/components/Texts";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -21,6 +29,8 @@ type NotificationItem =
 
 const Inbox = () => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   const utils = api.useUtils();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -149,7 +159,7 @@ const Inbox = () => {
       </CardContainer>
 
       <CardContainer>
-        {PLACEHOLDER_DATA.map((item, index) => (
+        {PLACEHOLDER_DATA.map((_, index) => (
           <VirtualizedListItem
             key={index}
             loading
@@ -221,7 +231,15 @@ const Inbox = () => {
                 loading={false}
                 title={item.username}
                 subtitle={item.message}
-                subtitle2={abbreviatedTimeAgo(item.createdAt)}
+                subtitle2={
+                  <TimeAgo
+                    size="$2"
+                    date={item.createdAt}
+                    format={({ value, unit }) =>
+                      `${value}${unit.charAt(0)} ago`
+                    }
+                  />
+                }
                 button={{
                   ...buttonProps,
                   disabled: buttonDisabled,
@@ -250,7 +268,7 @@ const Inbox = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <YStack gap="$4">
+      <YStack flex={1} gap="$4" paddingBottom={insets.bottom}>
         {renderFollowRequests()}
         {renderNotifications()}
       </YStack>
