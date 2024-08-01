@@ -5,15 +5,7 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import {
-  Circle,
-  getToken,
-  Paragraph,
-  SizableText,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Circle, H6, Paragraph, SizableText, XStack, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -210,12 +202,9 @@ const Inbox = () => {
 
   const renderNotifications = () =>
     notificationItems.length > 0 && (
-      <View
-        paddingVertical="$2"
-        paddingHorizontal="$3"
-        borderRadius="$6"
-        backgroundColor="$gray2"
-      >
+      <CardContainer>
+        <H6 theme="alt1">Recents</H6>
+
         <FlashList
           data={notificationItems}
           estimatedItemSize={75}
@@ -263,7 +252,7 @@ const Inbox = () => {
             );
           }}
         />
-      </View>
+      </CardContainer>
     );
 
   if (isCountRequestsLoading || isNotificationsLoading) {
