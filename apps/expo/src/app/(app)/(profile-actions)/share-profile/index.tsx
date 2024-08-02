@@ -21,11 +21,12 @@ const ShareProfile = () => {
   const utils = api.useUtils();
   const toast = useToastController();
 
+  const userId = utils.profile.getFullProfileSelf.getData()?.userId ?? "";
   const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
+
   const qrValue = new URL(
-    `/profile?username=${username}`,
-    /* env.EXPO_PUBLIC_API_URL, */
-    "https://www.oppfy.app/"
+    `/profile?username=${username}&userId=${userId}`,
+    env.EXPO_PUBLIC_API_URL,
   ).toString();
 
   const handleShare = async () => {
