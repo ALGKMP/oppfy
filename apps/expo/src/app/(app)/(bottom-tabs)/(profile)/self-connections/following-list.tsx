@@ -67,7 +67,7 @@ const FollowingList = () => {
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      // await utils.follow.paginateFollowingSelf.invalidate();
+      await utils.follow.paginateFollowingSelf.invalidate();
     },
   });
 
@@ -106,7 +106,7 @@ const FollowingList = () => {
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      // await utils.follow.paginateFollowingSelf.invalidate();
+      await utils.follow.paginateFollowingSelf.invalidate();
     },
   });
 
@@ -145,7 +145,7 @@ const FollowingList = () => {
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      // await utils.follow.paginateFollowingSelf.invalidate();
+      await utils.follow.paginateFollowingSelf.invalidate();
     },
   });
 

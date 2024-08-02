@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import React, { useCallback, useEffect, useState } from "react";
-import type { ButtonProps } from "react-native";
+import type { ButtonProps, ImageSourcePropType } from "react-native";
 import { Animated, Easing, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -23,7 +23,7 @@ export interface ButtonOption {
 }
 
 export interface ActionSheetProps {
-  imageUrl?: string;
+  imageUrl?: string | ImageSourcePropType;
 
   title: string;
   titleProps?: SizableTextProps;
@@ -144,10 +144,12 @@ const ActionSheet = ({
                   backgroundColor="$color4"
                   gap="$2"
                 >
-                  <Image
-                    source={imageUrl ?? DefaultProfilePicture}
-                    style={{ width: 100, height: 100, borderRadius: 50 }}
-                  />
+                  {imageUrl && (
+                    <Image
+                      source={imageUrl}
+                      style={{ width: 100, height: 100, borderRadius: 50 }}
+                    />
+                  )}
                   <YStack alignItems="center">
                     <SizableText size="$5" fontWeight="bold" {...titleProps}>
                       {title}
