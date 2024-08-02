@@ -82,7 +82,7 @@ function PeopleCarousel<T extends PersonItem>({
   if (loading) {
     return (
       <CardContainer
-        backgroundColor={"$background"}
+        backgroundColor="$background"
         borderRadius={0}
         paddingLeft={0}
         paddingRight={0}
@@ -133,7 +133,7 @@ function PeopleCarousel<T extends PersonItem>({
                   source={item.profilePictureUrl ?? DefaultProfilePicture}
                   style={{ width: 70, height: 70, borderRadius: 35 }}
                 />
-                <Text fontWeight="600" textAlign="center">
+                <Text textAlign="center" fontWeight="600" theme="alt1">
                   {item.username}
                 </Text>
               </YStack>

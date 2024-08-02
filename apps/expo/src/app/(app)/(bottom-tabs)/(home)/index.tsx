@@ -133,6 +133,7 @@ const HomeScreen = () => {
 
     return (
       <PeopleCarousel
+        title="Suggestions"
         showMore={recommendationsData.length > 10}
         data={recommendationsData}
         loading={isLoadingRecommendationsData}
@@ -142,22 +143,11 @@ const HomeScreen = () => {
           return (
             <TouchableOpacity onPress={() => console.log("hi")}>
               <YStack marginLeft="$2" gap="$1.5" alignItems="center">
-                <Avatar circular size="$6" bordered>
-                  <Avatar.Fallback backgroundColor="#F214FF">
-                    <XStack
-                      flex={1}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <UserRoundPlus
-                        marginLeft={4}
-                        color="white"
-                        backgroundColor="transparent"
-                      />
-                    </XStack>
-                  </Avatar.Fallback>
-                </Avatar>
-                <Text fontWeight="600" textAlign="center">
+                <Circle size={70} backgroundColor="#F214FF">
+                  <UserRoundPlus size="$3" marginLeft={3} color="white" />
+                </Circle>
+
+                <Text textAlign="center" fontWeight="600" theme="alt1">
                   Invite
                 </Text>
               </YStack>
