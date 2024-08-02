@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Camera, Lock } from "@tamagui/lucide-icons";
+import { set } from "lodash";
 import { SizableText, Text, View, YStack } from "tamagui";
 
 import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
@@ -95,6 +96,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       const isBlocked = profileData.networkStatus.isTargetUserBlocked;
       const hasBlocked = profileData.networkStatus.isOtherUserBlocked;
       setIsBlocked(isBlocked);
+      setHasBlocked(hasBlocked);
       setIsRestricted(!canView);
     }
   }, [profileData, isSelfProfile]);
@@ -133,22 +135,19 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     [],
   );
 
-  const onPersonClick = ({
-    userId,
-    username,
-  }: {
-    userId: string;
-    username: string;
-  }) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push({
-      pathname: "profile/[userId]/",
-      params: {
-        userId,
-        username,
-      },
-    });
-  };
+  const onPersonClick = useCallback(
+    ({ userId, username }: { userId: string; username: string }) => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      router.push({
+        pathname: "profile/[userId]/",
+        params: {
+          userId,
+          username,
+        },
+      });
+    },
+    [router],
+  );
 
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 40,
@@ -179,6 +178,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
     isRestricted,
     recommendations,
     isBlocked,
+    onPersonClick,
   ]);
 
   return (
@@ -186,7 +186,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
       <FlashList
         numColumns={1}
         nestedScrollEnabled={true}
-        data={isRestricted || isBlocked ? [] : posts}
+        data={isRestricted || isBlocked || hasBlocked ? [] : posts}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
@@ -222,7 +222,7 @@ const MediaOfYou = (props: MediaOfYouProps) => {
               paddingHorizontal="$8"
               aspectRatio={9 / 6}
             >
-              {isRestricted || isBlocked ? (
+              {isRestricted || isBlocked || hasBlocked ? (
                 <>
                   <Lock size="$9" color="$gray12" />
                   <SizableText size="$7" fontWeight="bold">
