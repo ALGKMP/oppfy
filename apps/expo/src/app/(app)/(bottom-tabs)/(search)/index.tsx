@@ -16,6 +16,7 @@ import {
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
+import RecommendationList from "~/components/SpecialLists/RecommendationList";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -94,32 +95,17 @@ const Search = () => {
     </CardContainer>
   );
 
-  const renderRecommendations = (recs: RecommendationsData) => (
-    <CardContainer>
-      <FlashList
-        data={recs}
-        estimatedItemSize={75}
-        showsVerticalScrollIndicator={false}
-        onScrollBeginDrag={Keyboard.dismiss}
-        keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={<H5 theme="alt1">Suggestions</H5>}
-        renderItem={({ item }) => (
-          <VirtualizedListItem
-            loading={false}
-            title={item.username}
-            subtitle={item.fullName ?? ""}
-            imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-            onPress={() => {
-              if (!item.userId) return;
-              router.navigate({
-                pathname: "/(search)/profile/[userId]/",
-                params: { userId: item.userId, username: item.username },
-              });
-            }}
-          />
-        )}
-      />
-    </CardContainer>
+  const renderRecommendations = (recommendationsData: RecommendationsData) => (
+    <RecommendationList
+      handleProfileClicked={(userId, username) => {
+        router.navigate({
+          pathname: "/(inbox)/profile/[userId]/",
+          params: { userId, username },
+        });
+      }}
+      loading={isLoadingRecommendationsData}
+      recommendationsData={recommendationsData}
+    />
   );
 
   return (

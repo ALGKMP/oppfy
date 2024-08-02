@@ -117,7 +117,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     <CardContainer paddingLeft={0} margin={1}>
       <YStack gap="$2">
         <H5 paddingLeft="$3" theme="alt1">
-          Discover People🔥
+          Suggestions
         </H5>
 
         <FlashList
@@ -172,7 +172,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
       <YStack gap="$2">
         <TouchableOpacity onPress={handleShowMoreFriends}>
           <H5 paddingLeft="$3" theme="alt1">
-            Friends🔥
+            Friends
           </H5>
         </TouchableOpacity>
 

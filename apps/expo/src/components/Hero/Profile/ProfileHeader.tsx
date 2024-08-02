@@ -106,7 +106,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
           <PeopleCarousel
             loading={false}
             data={friendsData}
-            title="Friends🔥"
+            title="Friends"
             showMore={friendsData.length < profileData.friendCount}
             onItemPress={props.navigateToProfile}
             onShowMore={() => {
@@ -117,7 +117,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
           <PeopleCarousel
             loading={false}
             data={recommendationsData}
-            title="Discover People🔥"
+            title="Suggestions"
             showMore={recommendationsData.length > 0}
             onItemPress={props.navigateToProfile}
             onShowMore={() => {
