@@ -84,7 +84,7 @@ const RecommendationList = (props: RecommendationListProps) => {
   return (
     props.recommendationsData.length > 0 && (
       <CardContainer>
-        <H5 theme="alt1">Suggestions</H5>
+        <H5 theme="alt1">Suggestions 🔥</H5>
         <FlashList
           data={props.recommendationsData}
           estimatedItemSize={75}

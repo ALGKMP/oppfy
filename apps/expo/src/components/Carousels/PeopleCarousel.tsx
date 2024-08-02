@@ -13,6 +13,7 @@ import {
   Spacer,
   Text,
   View,
+  XStack,
   YStack,
 } from "tamagui";
 
@@ -30,6 +31,7 @@ interface PeopleCarouselProps<T extends PersonItem> {
   loading: boolean;
   data: T[];
   title?: string;
+  emoji?: string;
   showMore?: boolean;
   onItemPress: (item: T) => void;
   onShowMore: () => void;
@@ -51,6 +53,7 @@ function PeopleCarousel<T extends PersonItem>({
   loading,
   data,
   title,
+  emoji,
   showMore = false,
   onItemPress,
   onShowMore,
@@ -89,9 +92,11 @@ function PeopleCarousel<T extends PersonItem>({
       >
         <YStack gap="$2">
           {title && (
-            <Text paddingLeft="$3" fontWeight="600">
-              {title}
-            </Text>
+            <XStack>
+              <Text paddingLeft="$3" fontWeight="600">
+                {title}
+              </Text>
+            </XStack>
           )}
           <FlashList
             data={PLACEHOLDER_DATA}
@@ -114,9 +119,12 @@ function PeopleCarousel<T extends PersonItem>({
       <YStack gap="$2">
         {title && (
           <TouchableOpacity onPress={onShowMore}>
-            <H5 paddingLeft="$3" theme="alt1">
-              {title}
-            </H5>
+            <XStack>
+              <H5 paddingLeft="$3" theme="alt1">
+                {title}
+              </H5>
+              {emoji && <Text fontSize="$3"> {emoji}</Text>}
+            </XStack>
           </TouchableOpacity>
         )}
 

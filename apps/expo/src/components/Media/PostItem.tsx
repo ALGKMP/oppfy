@@ -23,6 +23,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Avatar, SizableText, Text, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
+import { abbreviatedNumber } from "@oppfy/utils";
 import type { sharedValidators } from "@oppfy/validators";
 
 import {
@@ -443,7 +444,7 @@ const PostItem = React.memo((props: PostItemProps) => {
                     color="white"
                     marginTop="$1"
                   >
-                    {likeCount}
+                    {abbreviatedNumber(likeCount)}
                   </SizableText>
                 )}
               </YStack>

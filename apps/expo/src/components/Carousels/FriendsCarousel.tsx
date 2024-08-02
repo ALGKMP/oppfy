@@ -117,7 +117,7 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
     <CardContainer paddingLeft={0} margin={1}>
       <YStack gap="$2">
         <H5 paddingLeft="$3" theme="alt1">
-          Suggestions
+          Suggestions 
         </H5>
 
         <FlashList
