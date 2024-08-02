@@ -60,9 +60,10 @@ const TARGET_ASPECT_RATIO = 9 / 16;
 const MAX_CONTENT_HEIGHT = SCREEN_WIDTH / TARGET_ASPECT_RATIO;
 
 const CreatePost = () => {
-  const router = useRouter();
   const theme = useTheme();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
+
   const { type, uri, height, width, ...params } = useLocalSearchParams<
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
