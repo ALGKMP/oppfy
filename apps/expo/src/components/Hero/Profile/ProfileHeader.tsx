@@ -60,8 +60,6 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     isBlocked,
   } = props;
 
-  const router = useRouter();
-
   if (
     isLoadingProfileData ||
     isLoadingFriendsData ||
