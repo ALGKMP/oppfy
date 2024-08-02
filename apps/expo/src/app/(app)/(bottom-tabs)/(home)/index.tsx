@@ -132,29 +132,31 @@ const HomeScreen = () => {
       return null;
 
     return (
-      <PeopleCarousel
-        title="Suggestions"
-        showMore={recommendationsData.length > 10}
-        data={recommendationsData}
-        loading={isLoadingRecommendationsData}
-        onItemPress={handleProfilePress}
-        onShowMore={handleShowMore}
-        renderExtraItem={() => {
-          return (
-            <TouchableOpacity onPress={() => console.log("hi")}>
-              <YStack marginLeft="$2" gap="$1.5" alignItems="center">
-                <Circle size={70} backgroundColor="#F214FF">
-                  <UserRoundPlus size="$3" marginLeft={3} color="white" />
-                </Circle>
+      <View paddingTop="$4">
+        <PeopleCarousel
+          title="Suggestions"
+          showMore={recommendationsData.length > 10}
+          data={recommendationsData}
+          loading={isLoadingRecommendationsData}
+          onItemPress={handleProfilePress}
+          onShowMore={handleShowMore}
+          renderExtraItem={() => {
+            return (
+              <TouchableOpacity onPress={() => console.log("hi")}>
+                <YStack marginLeft="$2" gap="$1.5" alignItems="center">
+                  <Circle size={70} backgroundColor="#F214FF">
+                    <UserRoundPlus size="$3" marginLeft={3} color="white" />
+                  </Circle>
 
-                <Text textAlign="center" fontWeight="600" theme="alt1">
-                  Invite
-                </Text>
-              </YStack>
-            </TouchableOpacity>
-          );
-        }}
-      />
+                  <Text textAlign="center" fontWeight="600" theme="alt1">
+                    Invite
+                  </Text>
+                </YStack>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
@@ -180,7 +182,7 @@ const HomeScreen = () => {
   }
 
   return (
-    <BaseScreenView paddingHorizontal={0} paddingBottom={0}>
+    <BaseScreenView padding={0}>
       <FlashList
         nestedScrollEnabled={true}
         data={postItems}
