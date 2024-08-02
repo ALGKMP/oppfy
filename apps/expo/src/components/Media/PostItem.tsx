@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import PagerView from "react-native-pager-view";
 import Animated, {
   ReduceMotion,
   runOnJS,
@@ -10,6 +9,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { Path, Svg } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter, useSegments } from "expo-router";
@@ -413,51 +413,70 @@ const PostItem = React.memo((props: PostItemProps) => {
               </View>
             </VideoPost>
           )}
+          {/* New vertically aligned icons */}
+          <View
+            position="absolute"
+            bottom={16}
+            right={16}
+            backgroundColor="$backgroundTransparent"
+            borderRadius="$4"
+            padding="$2"
+          >
+            <YStack gap="$3" alignItems="center">
+              <YStack alignItems="center">
+                <TouchableOpacity
+                  onPress={() => handleLikeToggle({ doubleTap: false })}
+                >
+                  <Animated.View style={[heartButtonAnimatedStyle]}>
+                    <Heart
+                      size="$2"
+                      color={isLiked ? "red" : "white"}
+                      fill="red"
+                      fillOpacity={isLiked ? 1 : 0}
+                    />
+                  </Animated.View>
+                </TouchableOpacity>
+                {likeCount > 0 && (
+                  <SizableText
+                    size="$2"
+                    fontWeight="bold"
+                    color="white"
+                    marginTop="$1"
+                  >
+                    {likeCount}
+                  </SizableText>
+                )}
+              </YStack>
+
+              <TouchableOpacity
+                onPress={() => setCommentsBottomSheetVisible(true)}
+              >
+                <MessageCircle size="$2" color="white" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => shareImage({ uri: post.imageUrl })}
+              >
+                <Svg
+                  width={28}
+                  height={28 * (108.3 / 122.88)}
+                  viewBox="0 0 122.88 108.3"
+                  style={{
+                    marginTop: 5,
+                  }}
+                >
+                  <Path
+                    d="M96.14,12.47l-76.71-1.1,28.3,27.85L96.14,12.47ZM53.27,49l9.88,39.17L102.1,22,53.27,49ZM117,1.6a5.59,5.59,0,0,1,4.9,8.75L66.06,105.21a5.6,5.6,0,0,1-10.44-1.15L41.74,49,1.67,9.57A5.59,5.59,0,0,1,5.65,0L117,1.6Z"
+                    fill="white"
+                  />
+                </Svg>
+              </TouchableOpacity>
+            </YStack>
+          </View>
         </View>
       </GestureDetector>
       {/* Under Post */}
       <View flex={1} alignSelf="stretch" padding="$2.5" paddingTop="$3">
-        <XStack gap="$4" alignItems="center" marginBottom="$2">
-          {/* Like Button */}
-          <TouchableOpacity
-            onPress={() => handleLikeToggle({ doubleTap: false })}
-          >
-            <Animated.View style={[heartButtonAnimatedStyle]}>
-              <Heart
-                size="$2"
-                padding="$3"
-                color={isLiked ? "red" : "$gray12"}
-                fill="red"
-                fillOpacity={isLiked ? 1 : 0}
-              />
-            </Animated.View>
-          </TouchableOpacity>
-
-          {/* Comment Button */}
-          <TouchableOpacity onPress={() => setCommentsBottomSheetVisible(true)}>
-            <MessageCircle size="$2" color="$gray12" />
-          </TouchableOpacity>
-
-          {/* Share Button */}
-          <TouchableOpacity
-            onPress={() => shareImage({ uri: post.imageUrl })} // TODO: Add loading spinner on this
-            // setIsShareModalVisible(true)}
-          >
-            <Send size={26} color="$gray12" marginLeft="$-1.5" />
-          </TouchableOpacity>
-        </XStack>
-
-        {/* Likes Count */}
-        {likeCount > 0 && (
-          <TouchableOpacity>
-            <SizableText size="$3" fontWeight="bold" marginBottom="$1">
-              {likeCount > 0
-                ? `${likeCount} ${likeCount === 1 ? "like" : "likes"}`
-                : ""}
-            </SizableText>
-          </TouchableOpacity>
-        )}
-
         {/* Caption */}
         {post.caption && (
           <View flex={1} alignItems="flex-start">
