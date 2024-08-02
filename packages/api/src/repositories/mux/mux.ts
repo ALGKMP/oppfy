@@ -8,7 +8,7 @@ export class MuxRepository {
     return await mux.video.uploads.create({
       cors_origin: "*",
       new_asset_settings: {
-        test: true,
+        // test: true,
         encoding_tier: "smart",
         mp4_support: "standard",
         playback_policy: ["public"],

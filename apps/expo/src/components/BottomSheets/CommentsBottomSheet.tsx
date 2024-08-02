@@ -344,12 +344,12 @@ const CommentsBottomSheet = React.memo(
           )
         }
         <XStack
-          borderTopColor="$gray5"
-          borderTopWidth="$0.25"
+          borderTopWidth="$0.5"
           justifyContent="space-evenly"
           alignItems="center"
           paddingTop="$3"
-          backgroundColor="$gray4"
+          backgroundColor="$gray"
+          borderTopColor="$gray6"
         >
           {emojiList.map((emoji) => (
             <TouchableOpacity
@@ -372,34 +372,40 @@ const CommentsBottomSheet = React.memo(
           <View flex={5}>
             <BottomSheetTextInput
               placeholder="add a comment..."
-              maxLength={100}
+              maxLength={250}
+              // multiline={true}
               value={inputValue}
-              numberOfLines={4}
+              // numberOfLines={4}
               onChangeText={handleChangeText}
-              // style={{
-              //   fontWeight: "normal",
-              //   justifyContent: "flex-start",
-              //   borderWidth: 10,
-              //   borderColor: "#2E2E2E",
-              //   borderRadius: 20,
-              //   backgroundColor: "#2E2E2E",
-              //   color: "#fff",
-              // }}
+              style={{
+                flex: 1,
+                fontWeight: "normal",
+                justifyContent: "center",
+                // borderColor: "gray",a // TODO: Border this later
+                // borderWidth: 0.25,
+                borderRadius: 20,
+                paddingLeft: 10,
+                paddingRight: 50,
+                // paddingVertical: 6,
+                backgroundColor: "#2E2E2E",
+                color: "#fff",
+                textAlignVertical: "center",
+              }}
             />
           </View>
           <TouchableOpacity
             onPress={handlePostComment}
-            // style={{
-            //   flex: 1,
-            //   justifyContent: "center",
-            //   alignItems: "center",
-            //   padding: 7,
-            //   backgroundColor: "rgb(1,145,255)",
-            //   borderRadius: 20,
-            //   borderWidth: 0,
-            // }}
+            style={{
+              // flex: 1,
+              position: "absolute",
+              right: 20,
+              top: 19,
+              padding: 7,
+              borderRadius: 20,
+              borderWidth: 0,
+            }}
           >
-            <SendHorizontal color="$gray12" />
+            <SendHorizontal color="$gray12" marginHorizontal="$2" />
           </TouchableOpacity>
         </XStack>
       </BottomSheetWrapper>
