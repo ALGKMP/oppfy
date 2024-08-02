@@ -608,7 +608,13 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
                     source={
                       profileData.profilePictureUrl ?? DefaultProfilePicture
                     }
-                    style={{ width: 160, height: 160, borderRadius: 80 }}
+                    style={{
+                      width: 160,
+                      height: 160,
+                      borderRadius: 80,
+                      borderColor: "#F214FF",
+                      borderWidth: 2,
+                    }}
                   />
                 </TouchableOpacity>
               ) : (

@@ -308,7 +308,13 @@ const EditProfile = () => {
                   source={
                     defaultValues?.profilePictureUrl ?? DefaultProfilePicture
                   }
-                  style={{ width: 150, height: 150, borderRadius: 75 }}
+                  style={{
+                    width: 160,
+                    height: 160,
+                    borderRadius: 80,
+                    borderColor: "#F214FF",
+                    borderWidth: 2,
+                  }}
                 />
                 <View
                   position="absolute"

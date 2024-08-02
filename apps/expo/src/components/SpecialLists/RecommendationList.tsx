@@ -50,7 +50,7 @@ const RecommendationList = (props: RecommendationListProps) => {
 
   const renderItem = useCallback(
     ({ item }: { item: RecommendationItem }) => {
-      const isFollowing = followingState[item.userId] || false;
+      const isFollowing = followingState[item.userId] ?? false;
       const buttonProps = {
         text: isFollowing ? "Following" : "Follow",
         icon: isFollowing ? (
