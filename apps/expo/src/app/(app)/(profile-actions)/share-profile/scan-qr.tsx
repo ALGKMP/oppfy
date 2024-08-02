@@ -6,40 +6,55 @@ import {
   useCodeScanner,
 } from "react-native-vision-camera";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "@tamagui/linear-gradient";
 import { Text, View } from "tamagui";
 
 const { width } = Dimensions.get("window");
 
-const ScanQr: React.FC = () => {
+const ScanQr = () => {
   const router = useRouter();
-
   const device = useCameraDevice("back");
   const [hasPermission, setHasPermission] = useState(false);
+  const [isScanning, setIsScanning] = useState(true);
 
   useEffect(() => {
     const checkPermissions = async () => {
       const status = await Camera.requestCameraPermission();
       setHasPermission(status === "granted");
     };
-
     void checkPermissions();
+
+    // Reset scanning state when component mounts
+    setIsScanning(true);
+
+    // Clean up function to reset state when component unmounts
+    return () => {
+      setIsScanning(true);
+    };
   }, []);
 
   const codeScanner = useCodeScanner({
     codeTypes: ["qr"],
     onCodeScanned: (codes) => {
-      if (codes.length > 0) {
+      if (isScanning && codes.length > 0 && codes[0]?.value) {
+        setIsScanning(false);
+        const url = new URL(codes[0].value);
+        const userId = url.searchParams.get("userId");
+        const username = url.searchParams.get("username");
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        router.push(`/scanned-result?code=${codes[0]?.value}`);
+        setTimeout(() => {
+          router.push(`(profile)/profile/${userId}?username=${username}`);
+          // Reset scanning state after navigation
+          setIsScanning(true);
+        }, 100);
       }
     },
   });
 
   if (!hasPermission) {
     return (
-      <View style={styles.centered}>
+      <View flex={1} alignItems="center" justifyContent="center">
         <Text>No access to camera</Text>
       </View>
     );
@@ -47,7 +62,7 @@ const ScanQr: React.FC = () => {
 
   if (device === undefined) {
     return (
-      <View style={styles.centered}>
+      <View flex={1} alignItems="center" justifyContent="center">
         <Text>Camera not available</Text>
       </View>
     );
@@ -58,104 +73,73 @@ const ScanQr: React.FC = () => {
       <Camera
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={true}
+        isActive={isScanning}
         codeScanner={codeScanner}
       />
       <LinearGradient
         colors={["rgba(0,0,0,0.8)", "transparent", "rgba(0,0,0,0.8)"]}
-        style={styles.gradient}
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        zIndex={1}
       />
-      <View style={styles.frameContainer}>
-        <View style={styles.frameCornerTopLeft} />
-        <View style={styles.frameCornerTopRight} />
-        <View style={styles.frameCornerBottomLeft} />
-        <View style={styles.frameCornerBottomRight} />
+      <View
+        position="absolute"
+        top="35%"
+        left="20%"
+        width={width * 0.6}
+        height={width * 0.6}
+        zIndex={2}
+      >
+        <View
+          position="absolute"
+          top={0}
+          left={0}
+          width={30}
+          height={30}
+          borderTopWidth={5}
+          borderLeftWidth={5}
+          borderColor="rgba(128,128,128,0.9)"
+          borderTopLeftRadius={14}
+        />
+        <View
+          position="absolute"
+          top={0}
+          right={0}
+          width={30}
+          height={30}
+          borderTopWidth={5}
+          borderRightWidth={5}
+          borderColor="rgba(128,128,128,0.9)"
+          borderTopRightRadius={14}
+        />
+        <View
+          position="absolute"
+          bottom={0}
+          left={0}
+          width={30}
+          height={30}
+          borderBottomWidth={5}
+          borderLeftWidth={5}
+          borderColor="rgba(128,128,128,0.9)"
+          borderBottomLeftRadius={14}
+        />
+        <View
+          position="absolute"
+          bottom={0}
+          right={0}
+          width={30}
+          height={30}
+          borderBottomWidth={5}
+          borderRightWidth={5}
+          borderColor="rgba(128,128,128,0.9)"
+          borderBottomRightRadius={14}
+        />
       </View>
     </View>
   );
 };
-
-const frameSize = width * 0.6;
-const cornerSize = 30;
-const borderRadius = 14;
-const borderColor = "rgba(128,128,128,0.9)";
-
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 1,
-  },
-  frameContainer: {
-    position: "absolute",
-    top: "35%",
-    left: "20%",
-    width: frameSize,
-    height: frameSize,
-    zIndex: 2,
-  },
-  frameCornerTopLeft: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: cornerSize,
-    height: cornerSize,
-    borderTopWidth: 5,
-    borderLeftWidth: 5,
-    borderColor,
-    borderTopLeftRadius: borderRadius,
-  },
-  frameCornerTopRight: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: cornerSize,
-    height: cornerSize,
-    borderTopWidth: 5,
-    borderRightWidth: 5,
-    borderColor,
-    borderTopRightRadius: borderRadius,
-  },
-  frameCornerBottomLeft: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: cornerSize,
-    height: cornerSize,
-    borderBottomWidth: 5,
-    borderLeftWidth: 5,
-    borderColor,
-    borderBottomLeftRadius: borderRadius,
-  },
-  frameCornerBottomRight: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: cornerSize,
-    height: cornerSize,
-    borderBottomWidth: 5,
-    borderRightWidth: 5,
-    borderColor,
-    borderBottomRightRadius: borderRadius,
-  },
-  overlay: {
-    position: "absolute",
-    bottom: 50,
-    width: "100%",
-    alignItems: "center",
-    zIndex: 2,
-  },
-  text: {
-    color: "white",
-    fontSize: 18,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 10,
-    borderRadius: 5,
-  },
-});
 
 export default ScanQr;
