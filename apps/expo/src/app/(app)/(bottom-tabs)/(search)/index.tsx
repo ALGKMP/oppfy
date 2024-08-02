@@ -3,7 +3,15 @@ import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
-import { H5, H6, ListItemTitle, SizableText, Text, View, YStack } from "tamagui";
+import {
+  H5,
+  H6,
+  ListItemTitle,
+  SizableText,
+  Text,
+  View,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";

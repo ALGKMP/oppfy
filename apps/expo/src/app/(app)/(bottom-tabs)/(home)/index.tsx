@@ -13,6 +13,7 @@ import {
   Image,
   styled,
   Text,
+  View,
   XStack,
   YStack,
 } from "tamagui";
@@ -96,11 +97,13 @@ const HomeScreen = () => {
       if (item === undefined) return null;
 
       return (
-        <PostItem
-          post={item}
-          isSelfPost={false}
-          isViewable={viewableItems.includes(item.postId)}
-        />
+        <View paddingTop="$4">
+          <PostItem
+            post={item}
+            isSelfPost={false}
+            isViewable={viewableItems.includes(item.postId)}
+          />
+        </View>
       );
     },
     [viewableItems],
@@ -211,7 +214,7 @@ const HomeScreen = () => {
 
 const ListFooter = () => {
   return (
-    <YStack padding="$5" alignItems="center" space="$4">
+    <YStack padding="$5" alignItems="center" gap="$4">
       <XStack justifyContent="center" alignItems="center">
         <Circle
           size={60}
