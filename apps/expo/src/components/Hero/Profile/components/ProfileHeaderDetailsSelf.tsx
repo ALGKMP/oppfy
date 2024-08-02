@@ -3,12 +3,14 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import Feather from "@expo/vector-icons/Feather";
 import {
   Avatar,
   Button,
   Paragraph,
   SizableText,
   Text,
+  useTheme,
   View,
   XStack,
   YStack,
@@ -37,6 +39,7 @@ type ProfileProps = LoadingProps | ProfileLoadedProps;
 const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
   const router = useRouter();
   const { user } = useSession();
+  const theme = useTheme();
 
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
@@ -78,18 +81,36 @@ const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
             <>
               {user?.uid === profileData.userId ? (
                 <TouchableOpacity onPress={pickAndUploadImage}>
-                  <Image
-                    source={
-                      profileData.profilePictureUrl ?? DefaultProfilePicture
-                    }
-                    style={{
-                      width: 160,
-                      height: 160,
-                      borderRadius: 80,
-                      borderColor: "#F214FF",
-                      borderWidth: 2,
-                    }}
-                  />
+                  <View position="relative">
+                    <Image
+                      source={
+                        profileData.profilePictureUrl ?? DefaultProfilePicture
+                      }
+                      style={{
+                        width: 160,
+                        height: 160,
+                        borderRadius: 80,
+                        borderColor: "#F214FF",
+                        borderWidth: 2,
+                      }}
+                    />
+                    <View
+                      position="absolute"
+                      bottom={0}
+                      right={0}
+                      borderRadius={40}
+                      borderWidth="$2"
+                      borderColor={theme.background.val}
+                      backgroundColor="$gray5"
+                      padding="$2"
+                    >
+                      <Feather
+                        name="edit-3"
+                        size={24}
+                        color={theme.blue9.val}
+                      />
+                    </View>
+                  </View>
                 </TouchableOpacity>
               ) : (
                 <Image

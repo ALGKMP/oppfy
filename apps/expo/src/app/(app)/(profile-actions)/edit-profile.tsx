@@ -320,7 +320,9 @@ const EditProfile = () => {
                   position="absolute"
                   bottom={0}
                   right={0}
-                  borderRadius={20}
+                  borderRadius={40}
+                  borderWidth="$2"
+                  borderColor={theme.background.val}
                   backgroundColor="$gray5"
                   padding="$2"
                 >
