@@ -18,29 +18,30 @@ const useNotificationObserver = () => {
     let isMounted = true;
 
     const redirect = (notification: Notification) => {
-      const { entityId, entityType } = notification.request.content
-        .data as EntityData;
+      // const { entityId, entityType } = notification.request.content
+      //   .data as EntityData;
 
-      switch (entityType) {
-        case "profile":
-          router.navigate({
-            pathname: "/(home)/profile/[userId]",
-            params: { userId: entityId },
-          });
-          break;
-        case "post":
-          router.navigate({
-            pathname: "/(home)/post/[postId]",
-            params: { postId: entityId },
-          });
-          break;
-        case "comment":
-          router.navigate({
-            pathname: "/(home)/post/[postId]",
-            params: { postId: entityId },
-          });
-          break;
-      }
+      // switch (entityType) {
+      //   case "profile":
+      //     router.navigate({
+      //       pathname: "/(home)/profile/[userId]",
+      //       params: { userId: entityId },
+      //     });
+      //     break;
+      //   case "post":
+      //     router.navigate({
+      //       pathname: "/(home)/post/[postId]",
+      //       params: { postId: entityId },
+      //     });
+      //     break;
+      //   case "comment":
+      //     router.navigate({
+      //       pathname: "/(home)/post/[postId]",
+      //       params: { postId: entityId },
+      //     });
+      //     break;
+      // }
+      router.navigate("/(inbox)");
     };
 
     const invalidateData = (notification?: Notification) => {
