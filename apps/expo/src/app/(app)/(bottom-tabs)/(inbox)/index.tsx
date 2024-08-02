@@ -223,11 +223,21 @@ const Inbox = () => {
             const buttonProps = (() => {
               switch (item.relationshipState) {
                 case "notFollowing":
-                  return { text: "Follow", icon: UserRoundPlus };
+                  return {
+                    text: "Follow",
+                    icon: <UserRoundPlus size="$1" />,
+                    backgroundColor: "#F214FF",
+                  };
                 case "following":
-                  return { text: "Following", icon: UserRoundCheck };
+                  return {
+                    text: "Followed",
+                    icon: <UserRoundCheck size="$1" />,
+                  };
                 case "followRequestSent":
-                  return { text: "Requested", icon: UserRoundCheck };
+                  return {
+                    text: "Sent",
+                    icon: <UserRoundCheck size="$1" />,
+                  };
               }
             })();
 

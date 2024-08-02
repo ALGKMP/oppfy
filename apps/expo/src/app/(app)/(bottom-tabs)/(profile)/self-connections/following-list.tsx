@@ -217,20 +217,19 @@ const FollowingList = () => {
       case "followRequestSent":
         return {
           text: "Sent",
-          icon: Send,
+          icon: <Send size="$1" />,
           onPress: () => void handleCancelFollowRequest(item.userId),
         };
       case "following":
         return {
           text: "Unfollow",
-          icon: UserRoundMinus,
+          icon: <UserRoundMinus size="$1" />,
           onPress: () => void handleUnfollow(item.userId),
         };
       case "notFollowing":
         return {
           text: "Follow",
-          icon: UserRoundPlus,
-          theme: "blue",
+          icon: <UserRoundPlus size="$1" />,
           onPress: () => void handleFollow(item.userId),
         };
     }

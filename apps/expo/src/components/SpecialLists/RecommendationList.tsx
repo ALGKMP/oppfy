@@ -53,7 +53,12 @@ const RecommendationList = (props: RecommendationListProps) => {
       const isFollowing = followingState[item.userId] || false;
       const buttonProps = {
         text: isFollowing ? "Following" : "Follow",
-        icon: isFollowing ? UserRoundCheck : UserRoundPlus,
+        icon: isFollowing ? (
+          <UserRoundCheck size="$1" />
+        ) : (
+          <UserRoundPlus size="$1" />
+        ),
+        backgroundColor: isFollowing ? "#F214FF" : "#F214FF",
       };
 
       return (

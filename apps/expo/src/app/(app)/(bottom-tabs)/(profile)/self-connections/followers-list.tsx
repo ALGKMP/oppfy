@@ -128,7 +128,7 @@ const FollowerList = () => {
           subtitle={`Are you sure you want to remove ${item.username} from your followers?`}
           imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           trigger={
-            <Button size="$3" icon={<UserRoundMinus size="$1" />}>
+            <Button size="$3.5" icon={<UserRoundMinus size="$1" />}>
               Remove
             </Button>
           }
