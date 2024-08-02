@@ -82,11 +82,9 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
 
   const hasFriends = profileData.friendCount > 0;
 
-
-
   return (
-    <YStack gap="$5">
-      <YStack gap="$5">
+    <YStack>
+      <YStack gap="$4">
         {isSelfProfile ? (
           <ProfileHeaderDetailsSelf
             loading={false}

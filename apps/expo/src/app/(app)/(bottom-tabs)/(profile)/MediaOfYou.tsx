@@ -204,11 +204,13 @@ const MediaOfYou = (props: MediaOfYouProps) => {
             return null;
           }
           return (
-            <PostItem
-              post={item}
-              isSelfPost={isSelfProfile}
-              isViewable={viewableItems.includes(item.postId)}
-            />
+            <View paddingTop="$4">
+              <PostItem
+                post={item}
+                isSelfPost={isSelfProfile}
+                isViewable={viewableItems.includes(item.postId)}
+              />
+            </View>
           );
         }}
         ListEmptyComponent={() => {
