@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import type { ButtonProps } from "react-native";
 import { Animated, Easing, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
 import {
   Avatar,
@@ -142,11 +144,10 @@ const ActionSheet = ({
                   backgroundColor="$color4"
                   gap="$2"
                 >
-                  {imageUrl && (
-                    <Avatar circular bordered size="$6">
-                      <Avatar.Image src={imageUrl} />
-                    </Avatar>
-                  )}
+                  <Image
+                    source={imageUrl ?? DefaultProfilePicture}
+                    style={{ width: 100, height: 100, borderRadius: 50 }}
+                  />
                   <YStack alignItems="center">
                     <SizableText size="$5" fontWeight="bold" {...titleProps}>
                       {title}

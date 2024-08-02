@@ -45,8 +45,11 @@ export class NotificationsService {
     const itemsWithProfilePictureUrls = items.map((notification) => {
       const { profilePictureKey, eventType, ...rest } = notification;
 
-      const profilePictureUrl =
-        this.cloudFrontService.getSignedUrlForProfilePicture(profilePictureKey);
+      const profilePictureUrl = profilePictureKey
+        ? this.cloudFrontService.getSignedUrlForProfilePicture(
+            profilePictureKey,
+          )
+        : null;
 
       const { username } = rest;
 

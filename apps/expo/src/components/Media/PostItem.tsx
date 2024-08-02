@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { useRouter, useSegments } from "expo-router";
 import {
   Heart,
@@ -298,19 +299,19 @@ const PostItem = React.memo((props: PostItemProps) => {
         alignContent="center"
       >
         <XStack gap="$2.5">
-          <Avatar circular size="$3">
-            <Avatar.Image
-              accessibilityLabel="Cam"
-              src={post.recipientProfilePicture}
-              onPress={() =>
-                handleRouteToNewUser(
-                  post.recipientId,
-                  post.recipientUsername ?? "",
-                )
-              }
+          <TouchableOpacity
+            onPress={() =>
+              handleRouteToNewUser(
+                post.recipientId,
+                post.recipientUsername ?? "",
+              )
+            }
+          >
+            <Image
+              source={post.recipientProfilePicture}
+              style={{ width: 40, height: 40, borderRadius: 20 }}
             />
-            <Avatar.Fallback backgroundColor="$blue10" />
-          </Avatar>
+          </TouchableOpacity>
           <YStack gap="$0.5" justifyContent="center">
             <TouchableOpacity
               onPress={() =>

@@ -1,15 +1,12 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
-
-import {
-  Heart,
-
-  Send,
-} from "@tamagui/lucide-icons";
+import { Image } from "expo-image";
+import { Heart, Send } from "@tamagui/lucide-icons";
 import { Avatar, SizableText, View, XStack, YStack } from "tamagui";
 import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
+
 import ImagePost from "./ImagePost";
 import VideoPost from "./VideoPost";
 
@@ -42,18 +39,14 @@ const PostItem = (props: PostItemProps) => {
         alignContent="center"
       >
         <XStack gap="$2.5">
-          <Avatar circular size="$3">
-            <Avatar.Image
-              accessibilityLabel="Cam"
-              src={post.recipientProfilePicture}
-              onPress={() => null}
+          <TouchableOpacity onPress={() => null}>
+            <Image
+              source={post.recipientProfilePicture}
+              style={{ width: 30, height: 30, borderRadius: 15 }}
             />
-            <Avatar.Fallback backgroundColor="$blue10" />
-          </Avatar>
+          </TouchableOpacity>
           <YStack gap="$0.5" justifyContent="center">
-            <TouchableOpacity
-              onPress={() => null}
-            >
+            <TouchableOpacity onPress={() => null}>
               <SizableText
                 size="$2"
                 lineHeight={14}
@@ -98,39 +91,37 @@ const PostItem = (props: PostItemProps) => {
         </XStack>
       </XStack>
 
-        <View
-          width="100%"
-          aspectRatio={Math.max(post.width / post.height, 9 / 12)}
-        >
-          {post.mediaType === "image" ? (
-            <ImagePost postId={post.postId} imageUrl={post.imageUrl}>
-              <View></View>
-            </ImagePost>
-          ) : (
-            <VideoPost
-              videoSource={post.imageUrl}
-              isViewable={isViewable}
-              isMuted={true}
-              setIsMuted={() => true}
-            >
-              <View></View>
-            </VideoPost>
-          )}
-        </View>
+      <View
+        width="100%"
+        aspectRatio={Math.max(post.width / post.height, 9 / 12)}
+      >
+        {post.mediaType === "image" ? (
+          <ImagePost postId={post.postId} imageUrl={post.imageUrl}>
+            <View></View>
+          </ImagePost>
+        ) : (
+          <VideoPost
+            videoSource={post.imageUrl}
+            isViewable={isViewable}
+            isMuted={true}
+            setIsMuted={() => true}
+          >
+            <View></View>
+          </VideoPost>
+        )}
+      </View>
       {/* Under Post */}
       <View flex={1} alignSelf="stretch" padding="$2.5" paddingTop="$3">
         <XStack gap="$4" alignItems="center" marginBottom="$2">
           {/* Like Button */}
-          <TouchableOpacity
-            onPress={() => null}
-          >
-              <Heart
-                size={24}
-                padding="$3"
-                color={true ? "red" : "$gray12"}
-                fill="red"
-                fillOpacity={true ? 1 : 0}
-              />
+          <TouchableOpacity onPress={() => null}>
+            <Heart
+              size={24}
+              padding="$3"
+              color={true ? "red" : "$gray12"}
+              fill="red"
+              fillOpacity={true ? 1 : 0}
+            />
           </TouchableOpacity>
 
           {/* Share Button */}
@@ -146,9 +137,7 @@ const PostItem = (props: PostItemProps) => {
         {5 > 0 && (
           <TouchableOpacity>
             <SizableText size="$3" fontWeight="bold" marginBottom="$1">
-              {9 > 0
-                ? `${3} ${1 === 1 ? "like" : "likes"}`
-                : ""}
+              {9 > 0 ? `${3} ${1 === 1 ? "like" : "likes"}` : ""}
             </SizableText>
           </TouchableOpacity>
         )}

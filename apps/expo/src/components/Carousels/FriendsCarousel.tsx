@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { useRouter, useSegments } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
@@ -132,9 +134,10 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
               onPress={() => handleSuggestionsProfileClicked(item)}
             >
               <YStack gap="$1.5">
-                <Avatar circular size="$6" bordered>
-                  <Avatar.Image src={item.profilePictureUrl} />
-                </Avatar>
+                <Image
+                  source={item.profilePictureUrl}
+                  style={{ width: 70, height: 70, borderRadius: 35 }}
+                />
                 <Text fontWeight="600" textAlign="center">
                   {item.username}
                 </Text>
@@ -185,9 +188,10 @@ const FriendsCarousel = (props: FriendsCarouselProps) => {
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleFriendProfileClicked(item)}>
               <YStack gap="$1.5">
-                <Avatar circular size="$6" bordered>
-                  <Avatar.Image src={item.profilePictureUrl} />
-                </Avatar>
+                <Image
+                  source={item.profilePictureUrl ?? DefaultProfilePicture}
+                  style={{ width: 70, height: 70, borderRadius: 35 }}
+                />
                 <Text fontWeight="600" textAlign="center">
                   {item.username}
                 </Text>

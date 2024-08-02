@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -246,7 +247,7 @@ const Inbox = () => {
                   disabledStyle: { opacity: 0.5 },
                   onPress: () => void onFollowUser(item.userId),
                 }}
-                imageUrl={item.profilePictureUrl}
+                imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
                 onPress={() => onUserSelected(item)}
               />
             );

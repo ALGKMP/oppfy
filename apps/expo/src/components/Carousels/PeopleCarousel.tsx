@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import { Image } from "expo-image";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
@@ -20,7 +22,7 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 interface PersonItem {
   userId: string;
   username: string;
-  profilePictureUrl: string;
+  profilePictureUrl: string | null;
 }
 
 interface PeopleCarouselProps<T extends PersonItem> {
@@ -126,9 +128,10 @@ function PeopleCarousel<T extends PersonItem>({
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
               <YStack gap="$1.5">
-                <Avatar circular size="$6" bordered>
-                  <Avatar.Image src={item.profilePictureUrl} />
-                </Avatar>
+                <Image
+                  source={item.profilePictureUrl ?? DefaultProfilePicture}
+                  style={{ width: 70, height: 70, borderRadius: 35 }}
+                />
                 <Text fontWeight="600" textAlign="center">
                   {item.username}
                 </Text>

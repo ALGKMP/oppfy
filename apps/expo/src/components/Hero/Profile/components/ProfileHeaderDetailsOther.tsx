@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { useRouter, useSegments } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { UserPlus2, UserRoundCheck } from "@tamagui/lucide-icons";
 import {
   Adapt,
@@ -602,16 +604,20 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             <>
               {user?.uid === profileData.userId ? (
                 <TouchableOpacity onPress={pickAndUploadImage}>
-                  <Avatar circular size={160} bordered>
-                    <Avatar.Image src={profileData.profilePictureUrl} />
-                    <Avatar.Fallback />
-                  </Avatar>
+                  <Image
+                    source={
+                      profileData.profilePictureUrl ?? DefaultProfilePicture
+                    }
+                    style={{ width: 160, height: 160, borderRadius: 80 }}
+                  />
                 </TouchableOpacity>
               ) : (
-                <Avatar circular size={160} bordered>
-                  <Avatar.Image src={profileData.profilePictureUrl} />
-                  <Avatar.Fallback />
-                </Avatar>
+                <Image
+                  source={
+                    profileData.profilePictureUrl ?? DefaultProfilePicture
+                  }
+                  style={{ width: 160, height: 160, borderRadius: 80 }}
+                />
               )}
             </>
           )}
