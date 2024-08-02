@@ -8,9 +8,14 @@ import {
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "@tamagui/linear-gradient";
+import { CameraOff } from "@tamagui/lucide-icons";
 import { Text, View } from "tamagui";
 
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+
 const { width } = Dimensions.get("window");
+
+const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
 
 const ScanQr = () => {
   const router = useRouter();
@@ -63,7 +68,11 @@ const ScanQr = () => {
   if (device === undefined) {
     return (
       <View flex={1} alignItems="center" justifyContent="center">
-        <Text>Camera not available</Text>
+        <EmptyPlaceholder
+          title="Camera not available"
+          subtitle="Please check your camera permissions"
+          icon={<CameraOff />}
+        />
       </View>
     );
   }
@@ -77,13 +86,13 @@ const ScanQr = () => {
         codeScanner={codeScanner}
       />
       <LinearGradient
-        colors={["rgba(0,0,0,0.8)", "transparent", "rgba(0,0,0,0.8)"]}
         position="absolute"
         top={0}
         left={0}
         right={0}
         bottom={0}
         zIndex={1}
+        colors={GRADIENT_COLORS.map((color) => `${color}30`)}
       />
       <View
         position="absolute"

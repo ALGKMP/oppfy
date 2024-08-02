@@ -1,5 +1,4 @@
 import React from "react";
-import type { ViewStyle } from "react-native";
 import { TouchableOpacity } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
@@ -7,7 +6,7 @@ import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
-import { ToastViewport, useToastController } from "@tamagui/toast";
+import { useToastController } from "@tamagui/toast";
 import { H4, styled, Text, Theme, XStack, YStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
@@ -106,11 +105,7 @@ const GradientText = ({ children }: GradientTextProps) => {
         </H4>
       }
     >
-      <LinearGradient
-        colors={GRADIENT_COLORS}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
+      <LinearGradient colors={GRADIENT_COLORS}>
         <H4 color="transparent" fontFamily="$silkscreen" fontSize={24}>
           @{children}
         </H4>
@@ -126,7 +121,6 @@ interface MaskedQRCodeProps {
 const MaskedQRCode = ({ value }: MaskedQRCodeProps) => {
   return (
     <MaskedView
-      style={{ height: 200, width: 200 }}
       maskElement={
         <QRCode
           value={value}
@@ -135,6 +129,7 @@ const MaskedQRCode = ({ value }: MaskedQRCodeProps) => {
           backgroundColor="transparent"
         />
       }
+      style={{ height: 200, width: 200 }}
     >
       <LinearGradient
         colors={GRADIENT_COLORS}
@@ -160,15 +155,11 @@ const ActionButton = ({ onPress, icon, text }: ActionButtonProps) => (
         borderRadius="$6"
         alignItems="center"
         backgroundColor="white"
-        style={
-          {
-            shadowColor: "rgba(0, 0, 0, 0.1)",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 2,
-          } as ViewStyle
-        }
+        shadowColor="rgba(0, 0, 0, 0.1)"
+        shadowOffset={{ width: 0, height: 4 }}
+        shadowOpacity={0.1}
+        shadowRadius={8}
+        elevation={2}
         gap="$2"
       >
         {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */}
