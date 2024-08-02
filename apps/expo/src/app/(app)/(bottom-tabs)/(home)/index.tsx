@@ -180,7 +180,7 @@ const HomeScreen = () => {
   }
 
   return (
-    <BaseScreenView padding={0}>
+    <BaseScreenView paddingHorizontal={0} paddingBottom={0}>
       <FlashList
         nestedScrollEnabled={true}
         data={postItems}
