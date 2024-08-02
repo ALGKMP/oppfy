@@ -1,56 +1,48 @@
-import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import type { StackProps } from "tamagui";
-import { Text, useTheme, View, XStack } from "tamagui";
+import React, { useMemo } from "react";
+import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { StackProps, ViewProps } from "tamagui";
+import { styled, Text, useTheme, View, XStack } from "tamagui";
 
 interface HeaderProps {
   title?: string;
   HeaderLeft?: React.ReactNode;
   HeaderRight?: React.ReactNode;
   HeaderTitle?: React.ReactNode;
-
   containerProps?: StackProps;
 }
+
+const HEADER_HEIGHT = Platform.OS === "ios" ? 44 : 56;
 
 const StackHeader = ({
   title,
   HeaderLeft,
   HeaderRight,
   HeaderTitle = title ? <DefaultHeaderTitle title={title} /> : null,
-
   containerProps,
 }: HeaderProps) => {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const containerStyle = useMemo<ViewProps>(
+    () => ({
+      paddingTop: insets.top,
+      backgroundColor:
+        containerProps?.backgroundColor === "transparent"
+          ? "transparent"
+          : theme.background.val,
+    }),
+    [insets.top, containerProps?.backgroundColor, theme.background.val],
+  );
 
   return (
-    <SafeAreaView
-      edges={["top"]}
-      style={{
-        backgroundColor:
-          containerProps?.backgroundColor === "transparent"
-            ? "transparent"
-            : theme.background.val,
-      }}
-    >
-      <XStack
-        paddingVertical="$2"
-        paddingHorizontal="$4"
-        alignItems="center"
-        justifyContent="space-between"
-        backgroundColor="$background"
-        {...containerProps}
-      >
-        <View minWidth="$2" alignItems="flex-start">
-          {HeaderLeft}
-        </View>
-
+    <View {...containerStyle}>
+      <HeaderContainer {...containerProps}>
+        <SideContainer alignItems="flex-start">{HeaderLeft}</SideContainer>
         <View alignItems="center">{HeaderTitle}</View>
-
-        <View minWidth="$2" alignItems="flex-end">
-          {HeaderRight}
-        </View>
-      </XStack>
-    </SafeAreaView>
+        <SideContainer alignItems="flex-end">{HeaderRight}</SideContainer>
+      </HeaderContainer>
+    </View>
   );
 };
 
@@ -58,10 +50,24 @@ interface DefaultHeaderTitleProps {
   title: string;
 }
 
-const DefaultHeaderTitle = ({ title }: DefaultHeaderTitleProps) => (
-  <Text fontSize="$5" fontWeight="bold">
-    {title}
-  </Text>
-);
+const DefaultHeaderTitle = React.memo(({ title }: DefaultHeaderTitleProps) => (
+  <StyledHeaderTitle>{title}</StyledHeaderTitle>
+));
 
-export default StackHeader;
+const HeaderContainer = styled(XStack, {
+  height: HEADER_HEIGHT,
+  paddingHorizontal: "$4",
+  alignItems: "center",
+  justifyContent: "space-between",
+});
+
+const SideContainer = styled(View, {
+  minWidth: "$2",
+});
+
+const StyledHeaderTitle = styled(Text, {
+  fontSize: "$5",
+  fontWeight: "bold",
+});
+
+export default React.memo(StackHeader);
