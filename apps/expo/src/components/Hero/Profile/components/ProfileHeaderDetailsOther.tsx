@@ -637,7 +637,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             loadingComponent={<Skeleton width={80} height={20} />}
             successComponent={(name) => (
               <SizableText
-                size="$5"
+                size="$8"
                 fontWeight="bold"
                 textAlign="left"
                 lineHeight={0}
