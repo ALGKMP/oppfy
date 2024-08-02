@@ -19,7 +19,6 @@ import {
 } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
-import RecommendationsCarousel from "~/components/Carousels/RecommendationsCarousel";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -164,7 +163,7 @@ const HomeScreen = () => {
     return (
       <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
         <YStack gap="$4">
-          <RecommendationsCarousel loading />
+          {/* <RecommendationsCarousel loading /> */}
           {PLACEHOLDER_DATA.map(() => (
             <Skeleton
               radius={16}
