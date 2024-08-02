@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import React, { useMemo } from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import debounce from "lodash/debounce";
 import type { ButtonProps as BaseButtonProps, ViewProps } from "tamagui";
-import { Avatar, Button, SizableText, Spacer, XStack, YStack } from "tamagui";
+import { Button, SizableText, Spacer, XStack, YStack } from "tamagui";
 
 import { Skeleton } from "~/components/Skeletons";
 import StatusRenderer from "../StatusRenderer";
@@ -95,13 +96,10 @@ const VirtualizedListItem = (props: VirtualizedListItemProps) => {
             data={!props.loading && props.imageUrl ? props.imageUrl : undefined}
             loadingComponent={<Skeleton circular size={56} />}
             successComponent={(imageUrl) => (
-              <Avatar circular size={56}>
-                <Avatar.Image
-                  source={
-                    typeof imageUrl === "string" ? { uri: imageUrl } : imageUrl
-                  }
-                />
-              </Avatar>
+              <Image
+                source={imageUrl}
+                style={{ width: 56, height: 56, borderRadius: 28 }}
+              />
             )}
           />
         )}

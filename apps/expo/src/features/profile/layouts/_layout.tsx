@@ -1,11 +1,13 @@
 import { useCallback, useLayoutEffect, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import {
   useLocalSearchParams,
   useNavigation,
   useRouter,
   useSegments,
 } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { Camera, Grid3x3 } from "@tamagui/lucide-icons";
 import { Skeleton } from "moti/skeleton";
 import {
@@ -46,7 +48,7 @@ const ProfileLayout = () => {
     refetch,
   } = api.profile.getFullProfileOther.useQuery(
     {
-      userId: userId ?? ""
+      userId: userId ?? "",
     },
     {
       enabled: userId !== undefined,
@@ -584,14 +586,22 @@ const Profile = (props: ProfileProps) => {
             style={{ alignItems: "center" }}
             disabled={props.loading}
           >
-            <Avatar circular size="$10" bordered>
+            {/* <Avatar circular size="$10" bordered>
               <Avatar.Image
                 {...(props.loading
                   ? {}
                   : { src: props.data.profilePictureUrl })}
               />
               <Avatar.Fallback />
-            </Avatar>
+            </Avatar> */}
+            <Image
+              source={
+                !props.loading
+                  ? props.data.profilePictureUrl
+                  : DefaultProfilePicture
+              }
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+            />
           </TouchableOpacity>
         </Skeleton>
 

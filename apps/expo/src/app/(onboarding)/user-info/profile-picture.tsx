@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import defaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { Avatar, H1, Spinner, YStack } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
@@ -55,14 +56,10 @@ const ProfilePicture = () => {
               style={{ alignItems: "center" }}
               onPress={pickAndUploadImage}
             >
-              <Avatar circular size="$14" bordered>
-                <Avatar.Image
-                  {...(imageUri
-                    ? { src: imageUri }
-                    : { source: defaultProfilePicture })}
-                />
-                <Avatar.Fallback />
-              </Avatar>
+              <Image
+                source={imageUri ?? DefaultProfilePicture}
+                style={{ width: 200, height: 200, borderRadius: 100 }}
+              />
             </TouchableOpacity>
 
             <DisclaimerText>
