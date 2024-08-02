@@ -283,11 +283,11 @@ const PostItem = React.memo((props: PostItemProps) => {
   return (
     <View
       flex={1}
-      bg="$gray2"
+      borderRadius={20}
+      overflow="hidden"
       alignItems="center"
       justifyContent="center"
-      overflow="hidden"
-      borderRadius={20}
+      backgroundColor="$gray2"
     >
       <XStack
         flex={1}
