@@ -101,18 +101,11 @@ export class ProfileService {
       );
     }
 
-    const profilePictureUrl =
-      this.cloudFrontService.getSignedUrlForProfilePicture(
-        user.profile.profilePictureKey,
-      );
-
-    if (!profilePictureUrl) {
-      throw new DomainError(
-        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-        "Failed to get profile picture URL.",
-        `SERVICE ERROR: Failed to get profile picture for user ID "${userId}"`,
-      );
-    }
+    const profilePictureUrl = user.profile.profilePictureKey
+      ? this.cloudFrontService.getSignedUrlForProfilePicture(
+          user.profile.profilePictureKey,
+        )
+      : null;
 
     return trpcValidators.output.profile.fullProfileSelf.parse({
       userId: user.id,
@@ -145,18 +138,11 @@ export class ProfileService {
       );
     }
 
-    const profilePictureUrl =
-      this.cloudFrontService.getSignedUrlForProfilePicture(
-        user.profile.profilePictureKey,
-      );
-
-    if (!profilePictureUrl) {
-      throw new DomainError(
-        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
-        "Failed to get profile picture URL.",
-        `SERVICE ERROR: Failed to get profile picture for user ID "${user.id}"`,
-      );
-    }
+    const profilePictureUrl = user.profile.profilePictureKey
+      ? this.cloudFrontService.getSignedUrlForProfilePicture(
+          user.profile.profilePictureKey,
+        )
+      : null;
 
     const networkStatus = await this.getNetworkConnectionStatesBetweenUsers({
       currentUserId,
