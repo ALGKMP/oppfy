@@ -160,7 +160,7 @@ const HomeScreen = () => {
 
   if (isLoadingRecommendationsData || isLoadingPostData) {
     return (
-      <BaseScreenView padding={0} scrollable>
+      <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
         <YStack gap="$4">
           <RecommendationsCarousel loading />
           {PLACEHOLDER_DATA.map(() => (
