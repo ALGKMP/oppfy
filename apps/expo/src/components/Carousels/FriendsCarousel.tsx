@@ -8,12 +8,9 @@ import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
-  Avatar,
   getToken,
-  H4,
   H5,
   H6,
-  ListItemTitle,
   SizableText,
   Spacer,
   Text,

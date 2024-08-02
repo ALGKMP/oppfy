@@ -8,6 +8,7 @@ import { throttle } from "lodash";
 import {
   Avatar,
   getToken,
+  H5,
   SizableText,
   Spacer,
   Text,
@@ -109,13 +110,13 @@ function PeopleCarousel<T extends PersonItem>({
   }
 
   return (
-    <CardContainer paddingHorizontal={0} backgroundColor={"$background"}>
+    <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
         {title && (
           <TouchableOpacity onPress={onShowMore}>
-            <Text paddingLeft="$3" fontWeight="600">
+            <H5 paddingLeft="$3" theme="alt1">
               {title}
-            </Text>
+            </H5>
           </TouchableOpacity>
         )}
 

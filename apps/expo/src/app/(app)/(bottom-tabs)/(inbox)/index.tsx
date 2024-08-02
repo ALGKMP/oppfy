@@ -6,7 +6,15 @@ import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Circle, H6, Paragraph, SizableText, XStack, YStack } from "tamagui";
+import {
+  Circle,
+  H5,
+  H6,
+  Paragraph,
+  SizableText,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -204,7 +212,7 @@ const Inbox = () => {
   const renderNotifications = () =>
     notificationItems.length > 0 && (
       <CardContainer>
-        <H6 theme="alt1">Recents</H6>
+        <H5 theme="alt1">Recents</H5>
 
         <FlashList
           data={notificationItems}

@@ -1,5 +1,6 @@
 import React from "react";
 import { useRouter, useSegments } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
@@ -53,7 +54,7 @@ const ListItem = ({
         loading={false}
         title={item.username}
         subtitle={item.name}
-        imageUrl={item.profilePictureUrl}
+        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
         button={renderButton(item)}
         onPress={() =>
           router.push({

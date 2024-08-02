@@ -1,11 +1,13 @@
 import React, { useCallback, useState } from "react";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Text, View } from "tamagui";
+import { H5, Text, View } from "tamagui";
 
 import { RouterOutputs } from "@oppfy/api";
 
 import { api } from "~/utils/api";
+import CardContainer from "../Containers/CardContainer";
 import { VirtualizedListItem } from "../ListItems";
 
 type RecommendationItem =
@@ -64,42 +66,28 @@ const RecommendationList = (props: RecommendationListProps) => {
             ...buttonProps,
             onPress: () => void handleFollowToggle(item.userId),
           }}
-          imageUrl={item.profilePictureUrl}
+          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           onPress={() => {
             props.handleProfileClicked(item.userId, item.username);
           }}
         />
       );
     },
-    [
-      followingState,
-      props.loading,
-      handleFollowToggle,
-      props.handleProfileClicked,
-    ],
+    [followingState, props, handleFollowToggle],
   );
 
   return (
     props.recommendationsData.length > 0 && (
-      <View>
-        <Text fontSize="$5" fontWeight="bold" marginBottom="$2" marginLeft="$3">
-          Suggested for you
-        </Text>
-        <View
-          paddingVertical="$2"
-          paddingHorizontal="$3"
-          borderRadius="$6"
-          backgroundColor="$gray2"
-        >
-          <FlashList
-            data={props.recommendationsData}
-            estimatedItemSize={75}
-            showsVerticalScrollIndicator={false}
-            renderItem={renderItem}
-            extraData={followingState} // Force re-render when followingState changes
-          />
-        </View>
-      </View>
+      <CardContainer>
+        <H5 theme="alt1">Suggested for you</H5>
+        <FlashList
+          data={props.recommendationsData}
+          estimatedItemSize={75}
+          showsVerticalScrollIndicator={false}
+          renderItem={renderItem}
+          extraData={followingState} // Force re-render when followingState changes
+        />
+      </CardContainer>
     )
   );
 };

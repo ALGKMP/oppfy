@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Button, Input, SizableText, View, YStack } from "tamagui";
@@ -121,12 +122,12 @@ const FriendList = () => {
       loading={false}
       title={item.username}
       subtitle={item.name}
-      imageUrl={item.profilePictureUrl}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       button={
         <ActionSheet
           title="Remove Friend"
           subtitle={`Are you sure you want to remove ${item.username} from your friends?`}
-          imageUrl={item.profilePictureUrl}
+          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           trigger={
             <Button size="$3" icon={<UserRoundMinus size="$1" />}>
               Remove

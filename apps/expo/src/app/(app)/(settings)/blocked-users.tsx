@@ -12,6 +12,7 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 
 type BlockedUserItem =
   RouterOutputs["block"]["paginateBlockedUsers"]["items"][0];
@@ -113,12 +114,12 @@ const BlockedUsers = () => {
       loading={false}
       title={item.username}
       subtitle={item.name}
-      imageUrl={item.profilePictureUrl}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       button={
         <ActionSheet
           title={`Unblock ${item.username}`}
           subtitle={`Are you sure you want to unblock ${item.username}?`}
-          imageUrl={item.profilePictureUrl}
+          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           trigger={
             <Button size="$3" icon={<UserRoundX size="$1" />}>
               Unblock

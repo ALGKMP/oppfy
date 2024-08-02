@@ -12,6 +12,7 @@ import { parsePhoneNumber } from "libphonenumber-js";
 import {
   Button,
   getToken,
+  H5,
   H6,
   Separator,
   Spacer,
@@ -176,7 +177,7 @@ const PostTo = () => {
 
   const renderContacts = () => (
     <CardContainer>
-      <H6>Contacts</H6>
+      <H5 theme="alt1">Contacts</H5>
 
       {visibleContacts.map((contact, index) => (
         <VirtualizedListItem
@@ -210,7 +211,7 @@ const PostTo = () => {
 
   const renderFriends = () => (
     <CardContainer>
-      <H6>Friends</H6>
+      <H5 theme="alt1">Friends</H5>
 
       <FlashList
         data={friendItems}

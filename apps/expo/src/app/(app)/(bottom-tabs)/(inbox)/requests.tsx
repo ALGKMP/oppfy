@@ -2,7 +2,8 @@ import React, { useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Button, H6, Spacer, YStack } from "tamagui";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import { Button, H5, H6, Spacer, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -333,7 +334,7 @@ const Requests = () => {
 
   const renderFriendRequests = () => (
     <CardContainer>
-      <H6 theme="alt1">Friend Requests</H6>
+      <H5 theme="alt1">Friend Requests</H5>
 
       {friendRequestItems.map((item, index) => (
         <VirtualizedListItem
@@ -341,7 +342,7 @@ const Requests = () => {
           loading={false}
           title={item.username}
           subtitle={item.name}
-          imageUrl={item.profilePictureUrl}
+          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           button={{
             text: "Accept",
             backgroundColor: "#F214FF",
@@ -371,7 +372,7 @@ const Requests = () => {
 
   const renderFollowRequests = () => (
     <CardContainer>
-      <H6 theme="alt1">Follow Requests</H6>
+      <H5 theme="alt1">Follow Requests</H5>
 
       {followRequestItems.map((item, index) => (
         <VirtualizedListItem
@@ -379,7 +380,7 @@ const Requests = () => {
           loading={false}
           title={item.username}
           subtitle={item.name}
-          imageUrl={item.profilePictureUrl}
+          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           button={{
             text: "Accept",
             backgroundColor: "#F214FF",

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
-import { H6, ListItemTitle, SizableText, Text, View, YStack } from "tamagui";
+import { H5, H6, ListItemTitle, SizableText, Text, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -12,11 +13,12 @@ import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
+type SearchResultsData = RouterOutputs["search"]["profilesByUsername"];
+
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<
-    RouterOutputs["search"]["profilesByUsername"]
-  >([]);
+  const [searchResults, setSearchResults] = useState<SearchResultsData>([]);
+
   type RecommendationsData =
     RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
 
@@ -71,7 +73,7 @@ const Search = () => {
             loading={false}
             title={item.username}
             subtitle={item.fullName}
-            imageUrl={item.profilePictureUrl}
+            imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
             onPress={() => {
               router.navigate({
                 pathname: "/(search)/profile/[userId]/",
@@ -92,13 +94,13 @@ const Search = () => {
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={Keyboard.dismiss}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={<H6 theme="alt1">Suggestions</H6>}
+        ListHeaderComponent={<H5 theme="alt1">Suggestions</H5>}
         renderItem={({ item }) => (
           <VirtualizedListItem
             loading={false}
             title={item.username}
             subtitle={item.fullName ?? ""}
-            imageUrl={item.profilePictureUrl}
+            imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
             onPress={() => {
               if (!item.userId) return;
               router.navigate({
