@@ -5,7 +5,6 @@ import type { z } from "zod";
 import type { trpcValidators } from "@oppfy/validators";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
-import FriendsCarousel from "../../Carousels/FriendsCarousel";
 import ProfileHeaderDetailsOther from "./components/ProfileHeaderDetailsOther";
 import ProfileHeaderDetailsSelf from "./components/ProfileHeaderDetailsSelf";
 
@@ -61,8 +60,6 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     isBlocked,
   } = props;
 
-  const router = useRouter();
-
   if (
     isLoadingProfileData ||
     isLoadingFriendsData ||
@@ -74,8 +71,12 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     return (
       <YStack gap="$5">
         <ProfileHeaderDetailsSelf loading />
-        <FriendsCarousel loading />
-        {/* <PeopleCarousel loading /> */}
+        <PeopleCarousel
+          loading
+          data={[]}
+          onItemPress={() => {}}
+          onShowMore={() => {}}
+        />
       </YStack>
     );
   }
