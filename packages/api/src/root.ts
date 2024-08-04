@@ -33,7 +33,7 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
   title: "tRPC OpenAPI",
   version: "1.0.0",
   // baseUrl: "http://localhost:3000/api",
-  baseUrl: "https://www.oppfy.app/api",
+  baseUrl: "https://app.oppfy.app/api",
 });
 
 // export type definition of API

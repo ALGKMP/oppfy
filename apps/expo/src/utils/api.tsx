@@ -45,11 +45,7 @@ const getBaseUrl = () => {
   const localhost = debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    return "https://www.oppfy.app";
-    // return "https://turbo.t3.gg";
-    // throw new Error(
-    //   "Failed to get localhost. Please point to your production server.",
-    // );
+    return "https://app.oppfy.app"; 
   }
   return `http://${localhost}:3000`;
 };
