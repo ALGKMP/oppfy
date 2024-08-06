@@ -25,6 +25,8 @@ import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
 
+const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
+
 Sentry.init({
   debug: __DEV__,
   enabled: !__DEV__,
@@ -36,8 +38,6 @@ Sentry.init({
     }),
   ],
 });
-
-const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
 
 const RootLayout = () => {
   const [fontsLoaded] = useFonts({
