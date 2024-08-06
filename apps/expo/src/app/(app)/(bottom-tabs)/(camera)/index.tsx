@@ -132,14 +132,13 @@ const CameraPage = () => {
   }, []);
 
   const onMediaCaptured = useCallback(
-    async (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      console.log("Media captured", media);
-      const { path: uri } = media;
+    (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+      const { path: uri, width: dimension1, height: dimension2 } = media;
 
-      const asset = await MediaLibrary.createAssetAsync(uri);
-      const { width, height } = await MediaLibrary.getAssetInfoAsync(asset);
-
-      console.log("Asset created", asset);
+      const [width, height] =
+        dimension1 < dimension2
+          ? [dimension1, dimension2]
+          : [dimension2, dimension1];
 
       router.push({
         pathname: "/preview",
@@ -150,8 +149,6 @@ const CameraPage = () => {
           height,
         },
       });
-
-      console.log("Navigated to preview");
     },
     [router],
   );
