@@ -1,116 +1,145 @@
-import React, { useMemo } from "react";
-import { TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import type {
-  BottomTabBarProps,
-  BottomTabNavigationOptions,
-} from "@react-navigation/bottom-tabs";
-import { useTheme, XStack, YStack } from "tamagui";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import type { ViewStyle } from "react-native";
+import { Animated, Dimensions, StyleSheet } from "react-native";
+import type { MaterialTopTabBarProps } from "@react-navigation/material-top-tabs";
+import { styled, useTheme, XStack, YStack } from "tamagui";
 
-const BottomTabBar = ({
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+interface NonTamaguiStyles {
+  indicator: ViewStyle;
+}
+
+const TopTabBar: React.FC<MaterialTopTabBarProps> = ({
   state,
   descriptors,
   navigation,
-}: BottomTabBarProps) => {
+  position,
+}) => {
   const theme = useTheme();
+  const tabCount = state.routes.length;
+  const indicatorWidth = SCREEN_WIDTH / tabCount;
 
-  const shouldHideTabBar = useMemo(() => {
-    const currentRoute = state.routes[state.index];
-    if (!currentRoute) return false;
+  const nonTamaguiStyles = useMemo<NonTamaguiStyles>(
+    () => createNonTamaguiStyles(),
+    [],
+  );
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { options } = descriptors[currentRoute.key]!;
-    return (options.tabBarStyle as { display?: string }).display === "none";
-  }, [state.routes, state.index, descriptors]);
+  const translateX = useMemo(
+    () =>
+      position.interpolate({
+        inputRange: [0, tabCount - 1],
+        outputRange: [0, indicatorWidth * (tabCount - 1)],
+        extrapolate: "clamp",
+      }),
+    [position, tabCount, indicatorWidth],
+  );
 
-  if (shouldHideTabBar) {
-    return null;
-  }
+  // ! Fix for "Sending onAnimatedValueUpdate with no listeners registered"
+  // ! occasionally check if this is still needed
+  const animatedListenerRef = useRef<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    animatedListenerRef.current = position.addListener(() => {});
+    return () => {
+      if (animatedListenerRef.current !== null) {
+        position.removeListener(animatedListenerRef.current);
+      }
+    };
+  }, [position]);
+
+  const renderTab = useCallback(
+    (route: { key: string; name: string }, index: number) => {
+      const descriptor = descriptors[route.key];
+      if (!descriptor) return null;
+
+      const { options } = descriptor;
+      const label = options.tabBarLabel ?? options.title ?? route.name;
+      const isFocused = state.index === index;
+
+      const onPress = () => {
+        const event = navigation.emit({
+          type: "tabPress",
+          target: route.key,
+          canPreventDefault: true,
+        });
+
+        if (!isFocused && !event.defaultPrevented) {
+          navigation.navigate(route.name);
+        }
+      };
+
+      const onLongPress = () => {
+        navigation.emit({
+          type: "tabLongPress",
+          target: route.key,
+        });
+      };
+
+      const opacity = position.interpolate({
+        inputRange: [index - 1, index, index + 1],
+        outputRange: [0.5, 1, 0.5],
+        extrapolate: "clamp",
+      });
+
+      return (
+        <StyledTabItem
+          key={route.key}
+          role="button"
+          aria-selected={isFocused}
+          aria-label={options.tabBarAccessibilityLabel}
+          testID={options.tabBarTestID}
+          onPress={onPress}
+          onLongPress={onLongPress}
+        >
+          <Animated.Text
+            style={{ opacity, color: "white", fontWeight: "bold" }}
+          >
+            {typeof label === "function"
+              ? label({ focused: isFocused, color: "white", children: "" })
+              : label}
+          </Animated.Text>
+        </StyledTabItem>
+      );
+    },
+    [descriptors, navigation, position, state.index],
+  );
 
   return (
-    <SafeAreaView
-      edges={["bottom"]}
-      style={{ backgroundColor: theme.background.val }}
-    >
-      <XStack height="$6" borderTopWidth={1} borderTopColor="$gray2">
-        {state.routes.map((route, index) => {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const { options } = descriptors[route.key]!;
-          const isFocused = state.index === index;
-
-          const onPress = () => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
-            }
-          };
-
-          const onLongPress = () => {
-            navigation.emit({
-              type: "tabLongPress",
-              target: route.key,
-            });
-          };
-
-          return (
-            <TabButton
-              key={route.key}
-              route={route}
-              isFocused={isFocused}
-              options={options}
-              onPress={onPress}
-              onLongPress={onLongPress}
-            />
-          );
-        })}
-      </XStack>
-    </SafeAreaView>
+    <StyledTabBar backgroundColor={theme.background}>
+      <XStack flex={1}>{state.routes.map(renderTab)}</XStack>
+      <Animated.View
+        style={[
+          nonTamaguiStyles.indicator,
+          {
+            width: indicatorWidth,
+            transform: [{ translateX }],
+          },
+        ]}
+      />
+    </StyledTabBar>
   );
 };
 
-interface TabButtonProps {
-  route: BottomTabBarProps["state"]["routes"][number];
-  isFocused: boolean;
-  options: BottomTabNavigationOptions;
-  onPress: () => void;
-  onLongPress: () => void;
-}
+const StyledTabBar = styled(YStack, {
+  height: 50,
+  elevation: 5,
+});
 
-const TabButton = ({
-  isFocused,
-  options,
-  onPress,
-  onLongPress,
-}: TabButtonProps) => {
-  const TabBarIcon = options.tabBarIcon;
+const StyledTabItem = styled(YStack, {
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+});
 
-  const iconElement = useMemo(() => {
-    if (TabBarIcon) {
-      return <TabBarIcon focused={isFocused} color="white" size={24} />;
-    }
-    return null;
-  }, [TabBarIcon, isFocused]);
+const createNonTamaguiStyles = (): NonTamaguiStyles =>
+  StyleSheet.create({
+    indicator: {
+      position: "absolute",
+      bottom: 0,
+      height: 2,
+      backgroundColor: "white",
+    },
+  });
 
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      accessibilityState={isFocused ? { selected: true } : {}}
-      accessibilityLabel={options.tabBarAccessibilityLabel}
-      testID={options.tabBarTestID}
-      onPress={onPress}
-      onLongPress={onLongPress}
-      style={{ flex: 1 }}
-    >
-      <YStack flex={1} alignItems="center" justifyContent="center">
-        {iconElement}
-      </YStack>
-    </TouchableOpacity>
-  );
-};
-
-export default React.memo(BottomTabBar);
+export default React.memo(TopTabBar);
