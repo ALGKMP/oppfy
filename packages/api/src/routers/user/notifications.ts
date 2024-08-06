@@ -19,6 +19,16 @@ export const notificationsRouter = createTRPCRouter({
       }
     }),
 
+  getUnreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.notifications.getUnreadNotificationsCount(
+        ctx.session.uid,
+      );
+    } catch (err) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
+
   paginateNotifications: protectedProcedure
     .input(
       z.object({
