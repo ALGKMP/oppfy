@@ -18,6 +18,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   updates: {
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/68175593-c314-48a6-8892-7afeeb66ab9f",
+  },
+  runtimeVersion: {
+    policy: "nativeVersion",
   },
   assetBundlePatterns: ["**/*"],
   ios: {
