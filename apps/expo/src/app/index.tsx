@@ -9,15 +9,8 @@ const Index = () => {
   const { isLoading: sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: permissionsIsLoading } = usePermissions();
 
-  useEffect(() => {
-    // When loading is complete, hide the splash screen
-    if (!sessionIsLoading && !permissionsIsLoading) {
-      void SplashScreen.hideAsync();
-    }
-  }, [sessionIsLoading, permissionsIsLoading]);
-
   if (sessionIsLoading || permissionsIsLoading) {
-    return <LoadingIndicatorOverlay />;
+    return null;
   }
 
   return isSignedIn ? (
