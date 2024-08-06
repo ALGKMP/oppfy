@@ -5,6 +5,16 @@ const trpcNotificationsInputSchema = {
     pushToken: z.string(),
   }),
 
+  paginateNotifications: z.object({
+    cursor: z
+      .object({
+        createdAt: z.date(),
+        id: z.number(),
+      })
+      .optional(),
+    pageSize: z.number().optional(),
+  }),
+
   updateNotificationSettings: z.object({
     posts: z.boolean().optional(),
     likes: z.boolean().optional(),

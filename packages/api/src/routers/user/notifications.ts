@@ -30,17 +30,7 @@ export const notificationsRouter = createTRPCRouter({
   }),
 
   paginateNotifications: protectedProcedure
-    .input(
-      z.object({
-        cursor: z
-          .object({
-            createdAt: z.date(),
-            id: z.number(),
-          })
-          .optional(),
-        pageSize: z.number().optional(),
-      }),
-    )
+    .input(trpcValidators.input.notifications.paginateNotifications)
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.notifications.paginateNotifications(
