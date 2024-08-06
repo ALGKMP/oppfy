@@ -17,8 +17,8 @@ interface TabButtonProps {
   onLongPress: () => void;
 }
 
-const TabButton: React.FC<TabButtonProps> = React.memo(
-  ({ isFocused, options, onPress, onLongPress }) => {
+const TabButton = React.memo(
+  ({ isFocused, options, onPress, onLongPress }: TabButtonProps) => {
     const TabBarIcon = options.tabBarIcon;
 
     const iconElement = useMemo(() => {
@@ -48,11 +48,11 @@ const TabButton: React.FC<TabButtonProps> = React.memo(
 
 TabButton.displayName = "TabButton";
 
-const BottomTabBar: React.FC<BottomTabBarProps> = ({
+const BottomTabBar = ({
   state,
   descriptors,
   navigation,
-}) => {
+}: BottomTabBarProps) => {
   const theme = useTheme();
 
   const createTabPressHandler = useCallback(
