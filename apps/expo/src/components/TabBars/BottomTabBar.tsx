@@ -1,7 +1,11 @@
-import { StyleSheet, TouchableOpacity, ViewStyle } from "react-native";
+import React, { useMemo } from "react";
+import { TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Text, useTheme, View, XStack } from "tamagui";
+import type {
+  BottomTabBarProps,
+  BottomTabNavigationOptions,
+} from "@react-navigation/bottom-tabs";
+import { useTheme, XStack, YStack } from "tamagui";
 
 const BottomTabBar = ({
   state,
@@ -10,33 +14,15 @@ const BottomTabBar = ({
 }: BottomTabBarProps) => {
   const theme = useTheme();
 
-  // Check if state and routes are defined
-  if (!state || !state.routes || state.routes.length === 0) {
-    return null;
-  }
-
-  // Determine if the current screen should hide the tab bar
-  const shouldHideTabBar = state.routes[state.index]
-    ? (
-        descriptors[state.routes[state.index]!.key]?.options
-          ?.tabBarStyle as ViewStyle
-      )?.display === "none"
-    : false;
-
-  if (shouldHideTabBar) {
-    return null;
-  }
-
   return (
     <SafeAreaView
       edges={["bottom"]}
-      style={{
-        backgroundColor: theme.background.val,
-      }}
+      style={{ backgroundColor: theme.background.val }}
     >
-      <XStack height="$5" borderTopWidth={1} borderTopColor="$gray2">
+      <XStack height="$6" borderTopWidth={1} borderTopColor="$gray2">
         {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key] || {};
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const { options } = descriptors[route.key]!;
           const isFocused = state.index === index;
 
           const onPress = () => {
@@ -45,8 +31,9 @@ const BottomTabBar = ({
               target: route.key,
               canPreventDefault: true,
             });
+
             if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
+              navigation.navigate(route.name, route.params);
             }
           };
 
@@ -57,40 +44,15 @@ const BottomTabBar = ({
             });
           };
 
-          const TabBarIcon = options?.tabBarIcon;
-          const iconElement = TabBarIcon ? (
-            <TabBarIcon focused={isFocused} color="white" size={24} />
-          ) : null;
-
-          const isCamera = route.name === "(camera)";
-
           return (
-            <TouchableOpacity
+            <TabButton
               key={route.key}
+              route={route}
+              isFocused={isFocused}
+              options={options}
               onPress={onPress}
               onLongPress={onLongPress}
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/*               {isCamera && !isFocused && (
-                <View
-                  position="absolute"
-                  top={-50}
-                  backgroundColor="#F214FF"
-                  paddingHorizontal="$2"
-                  paddingVertical="$1"
-                  borderRadius="$2"
-                >
-                  <Text fontSize="$5" color="$color">
-                    Some shit
-                  </Text>
-                </View>
-              )} */}
-              {iconElement}
-            </TouchableOpacity>
+            />
           );
         })}
       </XStack>
@@ -98,4 +60,44 @@ const BottomTabBar = ({
   );
 };
 
-export default BottomTabBar;
+interface TabButtonProps {
+  route: BottomTabBarProps["state"]["routes"][number];
+  isFocused: boolean;
+  options: BottomTabNavigationOptions;
+  onPress: () => void;
+  onLongPress: () => void;
+}
+
+const TabButton = ({
+  isFocused,
+  options,
+  onPress,
+  onLongPress,
+}: TabButtonProps) => {
+  const TabBarIcon = options.tabBarIcon;
+
+  const iconElement = useMemo(() => {
+    if (TabBarIcon) {
+      return <TabBarIcon focused={isFocused} color="white" size={24} />;
+    }
+    return null;
+  }, [TabBarIcon, isFocused]);
+
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityState={isFocused ? { selected: true } : {}}
+      accessibilityLabel={options.tabBarAccessibilityLabel}
+      testID={options.tabBarTestID}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      style={{ flex: 1 }}
+    >
+      <YStack flex={1} alignItems="center" justifyContent="center">
+        {iconElement}
+      </YStack>
+    </TouchableOpacity>
+  );
+};
+
+export default React.memo(BottomTabBar);
