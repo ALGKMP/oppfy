@@ -10,7 +10,15 @@ import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
-import { Text, useTheme, View, YStack } from "tamagui";
+import {
+  Circle,
+  SizableText,
+  Text,
+  useTheme,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
@@ -26,6 +34,9 @@ interface TabBarIconProps {
 const BottomTabsLayout = () => {
   const theme = useTheme();
   const utils = api.useUtils();
+
+  const { data: unreadNotificationsCount } =
+    api.notifications.getUnreadNotificationsCount.useQuery();
 
   useEffect(() => {
     const prefetch = async () => {
@@ -76,7 +87,6 @@ const BottomTabsLayout = () => {
         options={{
           header: () => null,
           tabBarIcon: getTabBarIcon(Camera),
-          // tabBarIcon: CameraTabIcon,
         }}
       />
 
@@ -84,7 +94,32 @@ const BottomTabsLayout = () => {
         name="(inbox)"
         options={{
           header: () => null,
-          tabBarIcon: getTabBarIcon(Inbox),
+          tabBarIcon: ({ focused, ...props }) => (
+            <YStack>
+              <Inbox strokeWidth={focused ? 3 : 1.5} {...props} />
+              {(unreadNotificationsCount ?? 0) > 0 && (
+                <Circle
+                  size={16}
+                  backgroundColor="$red9"
+                  style={{
+                    position: "absolute",
+                    top: -6,
+                    right: -6,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                />
+              )}
+            </YStack>
+          ),
+        }}
+        listeners={{
+          focus: () => {
+            void utils.notifications.getUnreadNotificationsCount.setData(
+              undefined,
+              0,
+            );
+          },
         }}
       />
 
