@@ -10,12 +10,12 @@ interface NonTamaguiStyles {
   indicator: ViewStyle;
 }
 
-const TopTabBar: React.FC<MaterialTopTabBarProps> = ({
+const TopTabBar = ({
   state,
   descriptors,
   navigation,
   position,
-}) => {
+}: MaterialTopTabBarProps) => {
   const theme = useTheme();
   const tabCount = state.routes.length;
   const indicatorWidth = SCREEN_WIDTH / tabCount;
