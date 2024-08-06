@@ -10,15 +10,7 @@ import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
-import {
-  Circle,
-  SizableText,
-  Text,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Circle, Text, useTheme, View, YStack } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";

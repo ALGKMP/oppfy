@@ -2,7 +2,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, View } from "react-native";
 import Animated, {
   Easing,
-  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -150,14 +149,6 @@ const Start = () => {
       withTiming(0, { duration: 500 }),
     );
 
-    // colorAnimation.value = withSequence(
-    //   withTiming(1, { duration: 500 }),
-    //   withTiming(2, { duration: 500 }),
-    //   withTiming(3, { duration: 500 }),
-    //   withTiming(4, { duration: 500 }),
-    //   withTiming(5, { duration: 500 }),
-    // );
-
     subtitleOpacity.value = withDelay(1800, withTiming(1, { duration: 800 }));
     subtitleTranslateY.value = withDelay(
       1800,
@@ -177,11 +168,6 @@ const Start = () => {
       { rotate: `${rotate.value}deg` },
       { translateY: translateY.value },
     ],
-    // color: interpolateColor(
-    //   colorAnimation.value,
-    //   [0, 1, 2, 3, 4, 5],
-    //   ["#FFFFFF", "#00FFFF", "#ff1100", "#FFFF00", "#FF8000", "#FFFFFF"]
-    // ),
   }));
 
   const animatedSubtitleStyle = useAnimatedStyle(() => ({
