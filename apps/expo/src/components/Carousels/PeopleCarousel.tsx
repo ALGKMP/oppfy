@@ -84,32 +84,18 @@ function PeopleCarousel<T extends PersonItem>({
 
   if (loading) {
     return (
-      <CardContainer
-        backgroundColor="$background"
-        borderRadius={0}
-        paddingLeft={0}
-        paddingRight={0}
-      >
-        <YStack gap="$2">
-          {title && (
-            <XStack>
-              <Text paddingLeft="$3" fontWeight="600">
-                {title}
-              </Text>
-            </XStack>
-          )}
-          <FlashList
-            data={PLACEHOLDER_DATA}
-            horizontal
-            estimatedItemSize={70}
-            showsHorizontalScrollIndicator={false}
-            renderItem={() => <Skeleton circular size={70} />}
-            ItemSeparatorComponent={() => <Spacer size="$2" />}
-            contentContainerStyle={{
-              paddingHorizontal: getToken("$3", "space") as number,
-            }}
-          />
-        </YStack>
+      <CardContainer paddingLeft={0} paddingRight={0}>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          horizontal
+          estimatedItemSize={70}
+          showsHorizontalScrollIndicator={false}
+          renderItem={() => <Skeleton circular size={70} />}
+          ItemSeparatorComponent={() => <Spacer size="$2" />}
+          contentContainerStyle={{
+            paddingHorizontal: getToken("$3", "space") as number,
+          }}
+        />
       </CardContainer>
     );
   }
