@@ -1,5 +1,6 @@
-import React, { useLayoutEffect } from "react";
-import { useNavigation } from "expo-router";
+import React, { useCallback, useLayoutEffect } from "react";
+import * as Haptics from "expo-haptics";
+import { useNavigation, useRouter } from "expo-router";
 
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
@@ -8,6 +9,7 @@ import MediaOfYou from "./MediaOfYou";
 const SelfProfile = () => {
   const utils = api.useUtils();
   const navigation = useNavigation();
+  const router = useRouter();
 
   const { data: profileData } = api.profile.getFullProfileSelf.useQuery(
     undefined,
@@ -52,9 +54,24 @@ const SelfProfile = () => {
     });
   }, [navigation, profileData?.username]);
 
+  const navigateToProfile = ({
+    userId,
+    username,
+  }: {
+    userId: string;
+    username: string;
+  }) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.navigate({
+      pathname: "/profile/[userId]/",
+      params: { userId, username },
+    });
+  };
+
   return (
     <BaseScreenView padding={0}>
       <MediaOfYou
+        navigateToProfile={navigateToProfile}
         isSelfProfile={true}
         profileData={profileData}
         isLoadingProfileData={false}
