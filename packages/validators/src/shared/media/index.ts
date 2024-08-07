@@ -7,11 +7,11 @@ export const post = z.object({
   authorId: z.string(),
   authorProfileId: z.number(),
   authorUsername: z.string().nullable(),
-  authorProfilePicture: z.string(),
+  authorProfilePicture: z.string().nullable(),
   recipientId: z.string(),
   recipientProfileId: z.number(),
   recipientUsername: z.string().nullable(),
-  recipientProfilePicture: z.string(), // Corrected typo
+  recipientProfilePicture: z.string().nullable(), // Corrected typo
   caption: z.string().max(255).default(""),
   imageUrl: z.string(),
   height: z.number(),

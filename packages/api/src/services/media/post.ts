@@ -614,21 +614,19 @@ export class PostService {
   ): PaginatedResponse<Post> {
     const items = data.map((item) => {
       try {
-        // Update author profile picture URL
-        const authorPresignedUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.authorProfilePicture,
-          );
+        if (item.authorProfilePicture !== null) {
+          item.authorProfilePicture =
+            this.cloudFrontService.getSignedUrlForProfilePicture(
+              item.authorProfilePicture,
+            );
+        }
 
-        item.authorProfilePicture = authorPresignedUrl;
-
-        // Update recipient profile picture URL
-        const recipientPresignedUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.recipientProfilePicture,
-          );
-
-        item.recipientProfilePicture = recipientPresignedUrl;
+        if (item.recipientProfilePicture !== null) {
+          item.recipientProfilePicture =
+            this.cloudFrontService.getSignedUrlForProfilePicture(
+              item.recipientProfilePicture,
+            );
+        }
 
         if (item.mediaType === "image") {
           const imageUrl = this.cloudFrontService.getSignedUrlForPost(
