@@ -255,7 +255,11 @@ const ListFooter = () => {
         color="white"
         borderRadius={20}
         paddingHorizontal={20}
-        pressStyle={{ opacity: 0.8 }}
+        pressStyle={{
+          opacity: 0.8,
+          borderWidth: 0,
+          backgroundColor: "#F214FF",
+        }}
         onPress={async () => {
           // expo share open app store
           await Sharing.shareAsync("https://google.com", {
