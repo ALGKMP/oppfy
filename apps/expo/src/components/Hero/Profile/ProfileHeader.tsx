@@ -70,12 +70,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     return (
       <YStack gap="$5">
         <ProfileHeaderDetailsSelf loading />
-        <PeopleCarousel
-          loading
-          data={[]}
-          onItemPress={() => {}}
-          onShowMore={() => {}}
-        />
+        <PeopleCarousel loading />
       </YStack>
     );
   }
