@@ -630,8 +630,8 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
         />
       </View>
 
-      <XStack justifyContent="space-between" alignItems="center" width="100%">
-        <YStack alignItems="flex-start" gap="$2">
+      <XStack justifyContent="space-between" alignItems="flex-end" width="100%">
+        <YStack alignItems="flex-start" gap="$2" flex={1}>
           <StatusRenderer
             data={!props.loading ? props.data.name : undefined}
             loadingComponent={<Skeleton width={80} height={20} />}
@@ -647,17 +647,22 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             )}
           />
 
-          {!props.loading && props.data.bio && (
-            <StatusRenderer
-              data={props.data.bio}
-              loadingComponent={<Skeleton width={150} height={20} />}
-              successComponent={(bio) => (
-                <Paragraph theme="alt1" textAlign="left" lineHeight={0}>
+          <StatusRenderer
+            data={!props.loading ? props.data.bio ?? "" : undefined}
+            loadingComponent={<Skeleton width={150} height={20} />}
+            successComponent={(bio) =>
+              bio.length ? (
+                <Paragraph
+                  theme="alt1"
+                  maxWidth="90%"
+                  textAlign="left"
+                  lineHeight={0}
+                >
                   {bio}
                 </Paragraph>
-              )}
-            />
-          )}
+              ) : null
+            }
+          />
         </YStack>
 
         <YStack alignItems="flex-end" gap="$2">
