@@ -227,7 +227,7 @@ const Profile = () => {
     ({ userId, username }: { userId: string; username: string }) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push({
-        pathname: `${segments[2]}/profile/[userId]/`,
+        pathname: `${segments[2]}/profile/[userId]/`, // TODO: will break, fix this
         params: { userId, username },
       });
     },
