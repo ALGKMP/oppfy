@@ -19,6 +19,7 @@ import {
 } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
+import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";

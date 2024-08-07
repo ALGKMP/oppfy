@@ -98,18 +98,18 @@ const MediaOfYou = ({
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
-      await fetchNextPage();
+      fetchNextPage();
     }
   };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([
-      refetchProfileData(),
-      refetchFriendsData(),
-      refetchRecommendationsData(),
-      refetchPosts(),
-    ]);
+
+    refetchPosts();
+    refetchProfileData();
+    refetchFriendsData();
+    refetchRecommendationsData();
+
     setRefreshing(false);
   }, [
     refetchFriendsData,

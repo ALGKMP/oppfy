@@ -294,8 +294,8 @@ importers:
         specifier: ^3.5.2
         version: 3.5.2(react-native-pager-view@6.3.3)(react-native@0.74.2)(react@18.2.0)
       react-native-vision-camera:
-        specifier: ^4.3.2
-        version: 4.5.1(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
+        specifier: 4.3.2
+        version: 4.3.2(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
       superjson:
         specifier: 2.2.0
         version: 2.2.0
@@ -1321,7 +1321,7 @@ importers:
         version: 0.0.0
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-26f2496093-20240514(eslint@9.8.0)
+        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.8.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.18.0(eslint@9.8.0)(typescript@5.5.4)
@@ -13034,8 +13034,8 @@ packages:
     resolution: {integrity: sha512-ICamVGuuHqQRBOkfjhUBzyzkLGfGiVHaZdSvAtTkHMMBwkdHjNYyp0ngoBI732mvuhkRI1V2tmoG8092oj2VwQ==}
     dev: false
 
-  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.8.0):
-    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
+  /eslint-plugin-react-hooks@5.1.0-beta-94eed63c49-20240425(eslint@9.8.0):
+    resolution: {integrity: sha512-9DabNOh93nRDoBbYYO7kS5QqJdbA1Jh9XNDh7MebrDAYctyGQaHSg29TGoNEieX3iLSSfiKToPcvsLowrAtFRA==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -18868,8 +18868,8 @@ packages:
       react-native: 0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3)(@types/react@18.3.3)(react@18.2.0)
     dev: false
 
-  /react-native-vision-camera@4.5.1(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
-    resolution: {integrity: sha512-ob7gfBYin4lG2zlzRr5y4rYJN3NCCyJotFX1z3ul8V0N2GwkCGh31cko6hF9DXG4VocSPVYKt+K5W0CWLp3y0g==}
+  /react-native-vision-camera@4.3.2(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-zrMWS+I5kIV9UShryRBOjV0PfOvKIH1LlvnQKw8n4D2NOuT6d3dTZ1KtwmktorwrPxRPf3FRktSn2Gv6F1kmWQ==}
     peerDependencies:
       '@shopify/react-native-skia': '*'
       react: '*'

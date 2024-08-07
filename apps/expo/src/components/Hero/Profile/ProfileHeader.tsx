@@ -54,7 +54,7 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     isLoadingRecommendationsData,
     profileData,
     friendsData,
-    recommendationsData: recommendationsData,
+    recommendationsData,
     isRestricted,
     isBlocked,
   } = props;
