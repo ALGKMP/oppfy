@@ -9,7 +9,12 @@ const SelfProfile = () => {
   const utils = api.useUtils();
   const navigation = useNavigation();
 
-  const profileData = utils.profile.getFullProfileSelf.getData();
+  const { data: profileData } = api.profile.getFullProfileSelf.useQuery(
+    undefined,
+    {
+      staleTime: 1000 * 5,
+    },
+  );
 
   const {
     data: recommendationsData,
