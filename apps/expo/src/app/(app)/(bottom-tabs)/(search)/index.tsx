@@ -109,7 +109,7 @@ const Search = () => {
   );
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView scrollable keyboardDismissMode="interactive">
       <YStack gap="$4">
         <SearchInput
           value={searchTerm}
@@ -132,7 +132,9 @@ const Search = () => {
           ) : searchResults.length ? (
             renderSearchResults()
           ) : (
-            <SizableText lineHeight={0}>No Users Found</SizableText>
+            <H6 theme="alt1" lineHeight={0}>
+              No Users Found
+            </H6>
           )}
         </View>
       </YStack>
