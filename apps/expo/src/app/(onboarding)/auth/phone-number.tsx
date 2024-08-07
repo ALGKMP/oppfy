@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Keyboard, Modal, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
@@ -224,8 +225,11 @@ const CountriesFlashList = ({
   selectedCountryCode,
   data,
 }: CountriesFlastListProps) => {
+  const insets = useSafeAreaInsets();
+
   return (
     <FlashList
+      contentContainerStyle={{ paddingBottom: insets.bottom }}
       data={data}
       onScrollBeginDrag={Keyboard.dismiss}
       showsVerticalScrollIndicator={false}
