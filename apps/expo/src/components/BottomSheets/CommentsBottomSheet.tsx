@@ -421,8 +421,6 @@ const MemoizedAvatar = React.memo(
         width: size,
         height: size,
         borderRadius: size / 2,
-        borderWidth: 2,
-        borderColor: "#F214FF",
       }}
     />
   ),
