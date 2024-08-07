@@ -10,7 +10,9 @@ import {
   Avatar,
   Button,
   Circle,
+  H5,
   Image,
+  SizableText,
   styled,
   Text,
   View,
@@ -19,6 +21,7 @@ import {
 } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
+import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -244,9 +247,9 @@ const ListFooter = () => {
           />
         </Circle>
       </XStack>
-      <Text color="white" textAlign="center">
+      <SizableText textAlign="center">
         Invite some friends you want to use Oppfy with
-      </Text>
+      </SizableText>
       <Button
         backgroundColor="#F214FF"
         color="white"
@@ -260,7 +263,7 @@ const ListFooter = () => {
           });
         }}
       >
-        ✨ Share Invites
+        <H5>✨ Share Invites ✨</H5>
       </Button>
     </YStack>
   );

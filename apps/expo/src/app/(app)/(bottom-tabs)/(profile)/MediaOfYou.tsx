@@ -45,6 +45,14 @@ interface MediaOfYouProps {
   fetchNextPage: () => void;
 
   hasNextPage: boolean;
+
+  navigateToProfile: ({
+    username,
+    userId,
+  }: {
+    username: string;
+    userId: string;
+  }) => void;
 }
 
 const MediaOfYou = ({
@@ -70,6 +78,7 @@ const MediaOfYou = ({
   fetchNextPage,
   hasNextPage,
 
+  navigateToProfile,
   ...props
 }: MediaOfYouProps) => {
   const router = useRouter();
@@ -98,18 +107,18 @@ const MediaOfYou = ({
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
-      await fetchNextPage();
+      fetchNextPage();
     }
   };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([
-      refetchProfileData(),
-      refetchFriendsData(),
-      refetchRecommendationsData(),
-      refetchPosts(),
-    ]);
+
+    refetchPosts();
+    refetchProfileData();
+    refetchFriendsData();
+    refetchRecommendationsData();
+
     setRefreshing(false);
   }, [
     refetchFriendsData,
@@ -130,20 +139,6 @@ const MediaOfYou = ({
     [],
   );
 
-  const onPersonClick = useCallback(
-    ({ userId, username }: { userId: string; username: string }) => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push({
-        pathname: "profile/[userId]/",
-        params: {
-          userId,
-          username,
-        },
-      });
-    },
-    [router],
-  );
-
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 40,
   };
@@ -151,7 +146,7 @@ const MediaOfYou = ({
   const memoizedProfileHeader = useMemo(() => {
     return (
       <ProfileHeader
-        navigateToProfile={onPersonClick}
+        navigateToProfile={navigateToProfile}
         isSelfProfile={isSelfProfile}
         isLoadingProfileData={isLoadingProfileData}
         isLoadingFriendsData={isLoadingFriendsData}
@@ -173,7 +168,7 @@ const MediaOfYou = ({
     isRestricted,
     recommendations,
     isBlocked,
-    onPersonClick,
+    navigateToProfile,
   ]);
 
   return (

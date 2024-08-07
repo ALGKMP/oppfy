@@ -1,9 +1,5 @@
 lockfileVersion: '9.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 importers:
 
   .:
@@ -294,8 +290,8 @@ importers:
         specifier: ^3.5.2
         version: 3.5.2(react-native-pager-view@6.3.3(react-native@0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0))(react@18.2.0))(react-native@0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0))(react@18.2.0)
       react-native-vision-camera:
-        specifier: 4.3.2
-        version: 4.3.2(react-native-reanimated@3.10.1(@babel/core@7.25.2)(react-native@0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0))(react@18.2.0))(react-native@0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0))(react@18.2.0)
+        specifier: ^4.3.2
+        version: 4.5.1(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0)
       superjson:
         specifier: 2.2.0
         version: 2.2.0
@@ -1321,7 +1317,7 @@ importers:
         version: 0.0.0
       eslint-plugin-react-hooks:
         specifier: beta
-        version: 5.1.0-beta-26f2496093-20240514(eslint@9.8.0)
+        version: 5.1.0-beta-94eed63c49-20240425(eslint@9.8.0)
       typescript-eslint:
         specifier: ^7.8.0
         version: 7.18.0(eslint@9.8.0)(typescript@5.5.4)
@@ -18888,7 +18884,11 @@ snapshots:
 
   eslint-plugin-react-compiler@0.0.0: {}
 
-  eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.8.0):
+  /eslint-plugin-react-hooks@5.1.0-beta-26f2496093-20240514(eslint@9.8.0):
+    resolution: {integrity: sha512-nCZD93/KYY5hNAWGhfvvrEXvLFIXJCMu2St7ciHeiWUp/lnS2RVgWawp2kNQamr9Y23C9lUA03TmDRNgbm05vg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
     dependencies:
       eslint: 9.8.0
 
@@ -22528,7 +22528,21 @@ snapshots:
       react: 18.2.0
       react-native: 0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0)
 
-  react-native-vision-camera@4.3.2(react-native-reanimated@3.10.1(@babel/core@7.25.2)(react-native@0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0))(react@18.2.0))(react-native@0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0))(react@18.2.0):
+  /react-native-vision-camera@4.5.1(react-native-reanimated@3.10.1)(react-native@0.74.2)(react@18.2.0):
+    resolution: {integrity: sha512-ob7gfBYin4lG2zlzRr5y4rYJN3NCCyJotFX1z3ul8V0N2GwkCGh31cko6hF9DXG4VocSPVYKt+K5W0CWLp3y0g==}
+    peerDependencies:
+      '@shopify/react-native-skia': '*'
+      react: '*'
+      react-native: '*'
+      react-native-reanimated: '*'
+      react-native-worklets-core: '*'
+    peerDependenciesMeta:
+      '@shopify/react-native-skia':
+        optional: true
+      react-native-reanimated:
+        optional: true
+      react-native-worklets-core:
+        optional: true
     dependencies:
       react: 18.2.0
       react-native: 0.74.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.3.3)(react@18.2.0)
@@ -24465,3 +24479,5 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.3
       react: 18.2.0
+      use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
