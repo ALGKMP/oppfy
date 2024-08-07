@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { TouchableOpacity } from "react-native";
+import { Keyboard, StyleSheet, TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -19,12 +19,16 @@ import {
 } from "@tamagui/lucide-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
+import { size } from "lodash";
 import { input } from "node_modules/@oppfy/validators/src/trpc";
 import {
   Avatar,
+  getToken,
   SizableText,
   Spinner,
   Text,
+  TextArea,
+  useTheme,
   View,
   XStack,
   YStack,
@@ -60,6 +64,7 @@ const CommentsBottomSheet = React.memo(
     const utils = api.useUtils();
     const sheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ["100%"], []);
+    const theme = useTheme();
     const insets = useSafeAreaInsets();
 
     const profile = utils.profile.getFullProfileSelf.getData();
@@ -343,81 +348,82 @@ const CommentsBottomSheet = React.memo(
             />
           )
         }
-        <XStack
-          borderTopWidth="$0.5"
-          justifyContent="space-evenly"
-          alignItems="center"
-          paddingTop="$3"
-          backgroundColor="$gray"
-          borderTopColor="$gray6"
+        <YStack
+          padding="$4"
+          paddingBottom={(insets.bottom + getToken("$0.5", "space")) as number}
+          borderColor="$gray6"
+          borderTopWidth={StyleSheet.hairlineWidth}
+          gap="$4"
         >
-          {emojiList.map((emoji) => (
-            <TouchableOpacity
-              key={emoji}
-              onPress={() => handleEmojiPress(emoji)}
-            >
-              <SizableText size="$8">{emoji}</SizableText>
-            </TouchableOpacity>
-          ))}
-        </XStack>
-        <XStack
-          padding="$3.5"
-          paddingBottom="$6"
-          gap="$2.5"
-          justifyContent="center"
-          alignItems="center"
-          backgroundColor="$gray4"
-        >
-          <MemoizedAvatar src={profile?.profilePictureUrl} />
-          <View flex={5}>
-            <BottomSheetTextInput
-              placeholder="add a comment..."
-              maxLength={250}
-              // multiline={true}
-              value={inputValue}
-              // numberOfLines={4}
-              onChangeText={handleChangeText}
-              style={{
-                flex: 1,
-                fontWeight: "normal",
-                justifyContent: "center",
-                // borderColor: "gray",a // TODO: Border this later
-                // borderWidth: 0.25,
-                borderRadius: 20,
-                paddingLeft: 10,
-                paddingRight: 50,
-                // paddingVertical: 6,
-                backgroundColor: "#2E2E2E",
-                color: "#fff",
-                textAlignVertical: "center",
-              }}
-            />
-          </View>
-          <TouchableOpacity
-            onPress={handlePostComment}
-            style={{
-              // flex: 1,
-              position: "absolute",
-              right: 20,
-              top: 19,
-              padding: 7,
-              borderRadius: 20,
-              borderWidth: 0,
-            }}
-          >
-            <SendHorizontal color="$gray12" marginHorizontal="$2" />
-          </TouchableOpacity>
-        </XStack>
+          <XStack justifyContent="space-between">
+            {emojiList.map((emoji) => (
+              <TouchableOpacity
+                key={emoji}
+                onPress={() => handleEmojiPress(emoji)}
+              >
+                <SizableText size="$8">{emoji}</SizableText>
+              </TouchableOpacity>
+            ))}
+          </XStack>
+          <XStack alignItems="flex-end" gap="$3">
+            <MemoizedAvatar src={profile?.profilePictureUrl} size={46} />
+            <View style={{ flex: 1, position: "relative" }}>
+              <BottomSheetTextInput
+                placeholder="Add a comment..."
+                maxLength={250}
+                multiline={true}
+                value={inputValue}
+                onChangeText={handleChangeText}
+                textAlignVertical="center"
+                style={{
+                  minHeight: 46,
+                  color: theme.color.val,
+                  backgroundColor: theme.gray5.val,
+                  textAlignVertical: "center",
+                  padding: getToken("$3", "space") as number,
+                  paddingRight: 64,
+                  borderRadius: getToken("$6", "radius") as number,
+                  borderWidth: StyleSheet.hairlineWidth,
+                  borderColor: theme.gray6.val,
+                }}
+              />
+              <View
+                position="absolute"
+                bottom={4}
+                right={4}
+                paddingVertical="$2"
+                paddingHorizontal="$3.5"
+                borderRadius="$6"
+                backgroundColor="#F214FF"
+                disabled={inputValue.length === 0}
+                disabledStyle={{
+                  opacity: 0.5,
+                  backgroundColor: "$gray6",
+                }}
+              >
+                <TouchableOpacity onPress={handlePostComment}>
+                  <SendHorizontal />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </XStack>
+        </YStack>
       </BottomSheetWrapper>
     );
   },
 );
 
 const MemoizedAvatar = React.memo(
-  ({ src }: { src: string | null | undefined }) => (
+  ({ src, size }: { src: string | null | undefined; size: number }) => (
     <Image
       source={src ?? DefaultProfilePicture}
-      style={{ width: 40, height: 40, borderRadius: 20 }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: 2,
+        borderColor: "#F214FF",
+      }}
     />
   ),
 );
@@ -606,7 +612,7 @@ const Comment = React.memo(
       >
         <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
           <XStack gap="$3" alignItems="center">
-            <MemoizedAvatar src={comment.profilePictureUrl} />
+            <MemoizedAvatar src={comment.profilePictureUrl} size={46} />
             <YStack gap="$2" width="100%" flex={1}>
               <XStack gap="$2">
                 <Text fontWeight="bold">{comment.username}</Text>
