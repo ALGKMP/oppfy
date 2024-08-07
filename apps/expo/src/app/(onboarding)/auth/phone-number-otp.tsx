@@ -192,7 +192,7 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
 const OTPBox = styled(View, {
   width: 50,
   height: 60,
-  borderRadius: "$4",
+  borderRadius: "$6",
   backgroundColor: "$gray3",
   justifyContent: "center",
   alignItems: "center",
