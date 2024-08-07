@@ -251,10 +251,8 @@ const ListFooter = () => {
         Invite some friends you want to use Oppfy with
       </SizableText>
       <Button
+        borderRadius="$8"
         backgroundColor="#F214FF"
-        color="white"
-        borderRadius={20}
-        paddingHorizontal={20}
         pressStyle={{
           opacity: 0.8,
           borderWidth: 0,
