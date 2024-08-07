@@ -3,7 +3,7 @@ import { RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { H5, SizableText, View, YStack } from "tamagui";
+import { H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -125,6 +125,7 @@ const FollowersList = () => {
   return (
     <BaseScreenView
       scrollable
+      keyboardDismissMode="interactive"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
@@ -140,7 +141,9 @@ const FollowersList = () => {
         {filteredItems.length > 0 ? (
           renderFriends()
         ) : (
-          <SizableText lineHeight={0}>No Users Found</SizableText>
+          <H6 theme="alt1" lineHeight={0}>
+            No Users Found
+          </H6>
         )}
       </YStack>
     </BaseScreenView>

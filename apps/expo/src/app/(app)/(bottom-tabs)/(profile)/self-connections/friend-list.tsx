@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, H5, Input, SizableText, View, YStack } from "tamagui";
+import { Button, H5, H6, Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -189,6 +189,7 @@ const FriendList = () => {
   return (
     <BaseScreenView
       scrollable
+      keyboardDismissMode="interactive"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
@@ -204,7 +205,9 @@ const FriendList = () => {
         {filteredItems.length > 0 ? (
           renderFriends()
         ) : (
-          <SizableText lineHeight={0}>No Users Found</SizableText>
+          <H6 theme="alt1" lineHeight={0}>
+            No Users Found
+          </H6>
         )}
       </YStack>
     </BaseScreenView>
