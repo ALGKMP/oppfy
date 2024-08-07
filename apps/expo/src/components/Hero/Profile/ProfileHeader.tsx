@@ -61,10 +61,6 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
     isBlocked,
   } = props;
 
-  useEffect(() => {
-    console.log("navateToProfile at profileHeader", props.navigateToProfile);
-  }, [props.navigateToProfile]);
-
   if (
     isLoadingProfileData ||
     isLoadingFriendsData ||

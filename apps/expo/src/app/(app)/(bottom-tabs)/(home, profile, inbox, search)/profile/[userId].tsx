@@ -1,6 +1,12 @@
-import React, { useCallback, useLayoutEffect } from "react";
+import React, { useCallback, useEffect, useLayoutEffect } from "react";
 import { TouchableOpacity } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
+import {
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { fromPairs } from "lodash";
 import { View } from "tamagui";
@@ -16,6 +22,7 @@ const Profile = () => {
   const navigation = useNavigation();
   const [isActionSheetVisible, setIsActionSheetVisible] = React.useState(false);
   const utils = api.useUtils();
+  const segments = useSegments();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -216,10 +223,27 @@ const Profile = () => {
     },
   ] satisfies ButtonOption[];
 
+  useEffect(() => {
+    // print segments
+    console.log(segments);
+  }, [segments]);
+
+  const navigateToProfile = useCallback(
+    ({ userId, username }: { userId: string; username: string }) => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      router.push({
+        pathname: `${segments[2]}/profile/[userId]/`,
+        params: { userId, username },
+      });
+    },
+    [router, segments],
+  );
+
   return (
     <BaseScreenView padding={0}>
       {userId && (
         <MediaOfYou
+          navigateToProfile={navigateToProfile}
           userId={userId}
           isSelfProfile={false}
           profileData={profileData}

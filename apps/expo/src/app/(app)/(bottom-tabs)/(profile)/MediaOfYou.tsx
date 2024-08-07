@@ -144,28 +144,10 @@ const MediaOfYou = ({
     itemVisiblePercentThreshold: 40,
   };
 
-  const navigateToProfileReal = useCallback(
-    ({ userId, username }: { userId: string; username: string }) => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      if (segments.includes("inbox")) {
-        router.push({
-          pathname: "(inbox)/(profile)/profile/[userId]/",
-          params: { userId, username },
-        });
-      } else {
-        router.push({
-          pathname: "(profile)/profile/[userId]/",
-          params: { userId, username },
-        });
-      }
-    },
-    [router, segments],
-  );
-
   const memoizedProfileHeader = useMemo(() => {
     return (
       <ProfileHeader
-        navigateToProfile={navigateToProfileReal}
+        navigateToProfile={navigateToProfile}
         isSelfProfile={isSelfProfile}
         isLoadingProfileData={isLoadingProfileData}
         isLoadingFriendsData={isLoadingFriendsData}
