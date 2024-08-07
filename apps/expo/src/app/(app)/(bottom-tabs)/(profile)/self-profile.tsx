@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect } from "react";
+import React, { useCallback, useEffect, useLayoutEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 
@@ -54,19 +54,16 @@ const SelfProfile = () => {
     });
   }, [navigation, profileData?.username]);
 
-  const navigateToProfile = ({
-    userId,
-    username,
-  }: {
-    userId: string;
-    username: string;
-  }) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.navigate({
-      pathname: "/profile/[userId]/",
-      params: { userId, username },
-    });
-  };
+  const navigateToProfile = useCallback(
+    ({ userId, username }: { userId: string; username: string }) => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      router.push({
+        pathname: "(profile)/profile/[userId]/",
+        params: { userId, username },
+      });
+    },
+    [router],
+  );
 
   return (
     <BaseScreenView padding={0}>

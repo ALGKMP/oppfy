@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { Image } from "expo-image";
+import { usePathname, useSegments } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
@@ -117,6 +118,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
+          // keyExtractor={(item, index) => item.userId + index + pathname}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
               <YStack gap="$1.5">

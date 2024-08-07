@@ -99,7 +99,7 @@ const Search = () => {
     <RecommendationList
       handleProfileClicked={(userId, username) => {
         router.navigate({
-          pathname: "/(inbox)/profile/[userId]/",
+          pathname: "/(search)/profile/[userId]/",
           params: { userId, username },
         });
       }}
@@ -125,9 +125,7 @@ const Search = () => {
               renderRecommendations(recommendationsData)
             ) : (
               // TODO: Implement
-              <Text>
-              Testing updates
-              </Text>
+              <Text>Testing updates</Text>
             )
           ) : isLoading ? (
             renderLoadingSkeletons()
