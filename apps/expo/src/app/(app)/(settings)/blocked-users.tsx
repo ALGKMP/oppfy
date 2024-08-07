@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Button, Input, SizableText, View, YStack } from "tamagui";
+import { Button, H5, Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -12,7 +13,6 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
 
 type BlockedUserItem =
   RouterOutputs["block"]["paginateBlockedUsers"]["items"][0];
@@ -94,6 +94,7 @@ const BlockedUsers = () => {
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
+      <H5 theme="alt1">Blocked</H5>
       {PLACEHOLDER_DATA.map((_, index) => (
         <VirtualizedListItem
           key={index}
