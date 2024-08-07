@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Input, SizableText, View, YStack } from "tamagui";
+import { H5, Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -253,6 +253,7 @@ const FollowingList = () => {
 
   const renderFollowing = () => (
     <CardContainer>
+      <H5 theme="alt1">Following</H5>
       <FlashList
         data={filteredItems}
         onRefresh={refetch}

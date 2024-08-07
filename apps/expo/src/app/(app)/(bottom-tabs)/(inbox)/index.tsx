@@ -212,7 +212,7 @@ const Inbox = () => {
   const renderNotifications = () =>
     notificationItems.length > 0 && (
       <CardContainer>
-        <H5 theme="alt1">Recents</H5>
+        <H5 theme="alt1">Notifications</H5>
 
         <FlashList
           data={notificationItems}

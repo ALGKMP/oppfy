@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, Input, SizableText, View, YStack } from "tamagui";
+import { Button, H5, Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -129,7 +129,7 @@ const FriendList = () => {
           subtitle={`Are you sure you want to remove ${item.username} from your friends?`}
           imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           trigger={
-            <Button size="$3" icon={<UserRoundMinus size="$1" />}>
+            <Button size="$3.5" icon={<UserRoundMinus size="$1" />}>
               Remove
             </Button>
           }
@@ -153,6 +153,7 @@ const FriendList = () => {
 
   const renderFriends = () => (
     <CardContainer>
+      <H5 theme="alt1">Friends</H5>
       <FlashList
         data={filteredItems}
         onRefresh={refetch}
