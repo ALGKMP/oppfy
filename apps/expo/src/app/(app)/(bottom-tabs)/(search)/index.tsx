@@ -126,8 +126,7 @@ const Search = () => {
             ) : (
               // TODO: Implement
               <Text>
-                let users invite contacts not on the app. or maybe even let them
-                post to people not on the app
+              Testing updates
               </Text>
             )
           ) : isLoading ? (
