@@ -223,11 +223,6 @@ const Profile = () => {
     },
   ] satisfies ButtonOption[];
 
-  useEffect(() => {
-    // print segments
-    console.log(segments);
-  }, [segments]);
-
   const navigateToProfile = useCallback(
     ({ userId, username }: { userId: string; username: string }) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
