@@ -189,7 +189,7 @@ const CountryPicker = ({
       <TouchableOpacity
         style={{
           height: 76,
-          borderRadius: getToken("$10", "radius") as number,
+          borderRadius: getToken("$8", "radius") as number,
           backgroundColor: theme.gray4.val,
           paddingLeft: getToken("$3", "space") as number,
           paddingRight: getToken("$3", "space") as number,
