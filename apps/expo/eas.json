@@ -5,6 +5,7 @@
   "build": {
     "base": {
       "node": "18.19.1",
+      "pnpm": "8.5.0",
       "ios": {
         "resourceClass": "m-medium"
       },
