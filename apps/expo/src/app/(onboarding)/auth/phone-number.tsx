@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
@@ -64,6 +65,7 @@ const PhoneNumber = () => {
 
     await signInWithPhoneNumber(e164PhoneNumber);
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
       params: {
         phoneNumber: e164PhoneNumber,
@@ -201,7 +203,10 @@ const CountryPicker = ({
           borderTopRightRadius: 0,
           borderBottomRightRadius: 0,
         }}
-        onPress={() => setModalVisible(true)}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          setModalVisible(true);
+        }}
       >
         <XStack alignItems="center" gap="$1.5">
           <Text fontSize="$9">{selectedCountryData?.flag}</Text>

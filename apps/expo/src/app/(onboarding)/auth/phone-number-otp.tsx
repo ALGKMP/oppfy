@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
@@ -64,6 +65,7 @@ const PhoneNumberOTP = () => {
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     userOnboardingCompleted
       ? router.replace("/(app)/(bottom-tabs)/(home)")
       : router.replace("/user-info/welcome");
@@ -107,7 +109,13 @@ const PhoneNumberOTP = () => {
           <YStack paddingHorizontal="$4" gap="$6">
             <H1 textAlign="center">Enter your{"\n"}verification code</H1>
 
-            <OTPInput value={phoneNumberOTP} onChange={setPhoneNumberOTP} />
+            <OTPInput
+              value={phoneNumberOTP}
+              onChange={(value) => {
+                setPhoneNumberOTP(value);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+            />
 
             {error ? (
               <DisclaimerText color="$red9">{error}</DisclaimerText>

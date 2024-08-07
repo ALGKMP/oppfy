@@ -9,6 +9,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
 import Icon from "@assets/icon.png";
@@ -103,6 +104,7 @@ const Start = () => {
   const buttonTranslateY = useSharedValue(50);
 
   const onSubmit = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     requiredPermissions
       ? router.push("/auth/phone-number")
       : router.push("/misc/permissions");
