@@ -6,7 +6,6 @@ import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
-  Avatar,
   getToken,
   H5,
   SizableText,
@@ -27,38 +26,52 @@ interface PersonItem {
   profilePictureUrl: string | null;
 }
 
-interface PeopleCarouselProps<T extends PersonItem> {
-  loading: boolean;
+interface LoadingProps {
+  loading: true;
+}
+
+interface LoadedProps<T extends PersonItem> {
+  loading: false;
   data: T[];
   title?: string;
   emoji?: string;
   showMore?: boolean;
   onItemPress: (item: T) => void;
   onShowMore: () => void;
-  renderExtraItem?: () => React.ReactElement; // Change from React.ReactNode to React.ReactElement
+  renderExtraItem?: () => React.ReactElement;
 }
 
-const ListFooter: React.FC<{ showMore: boolean }> = ({ showMore }) => {
-  if (!showMore) return null;
-  return (
-    <View marginRight={-100} justifyContent="center" alignItems="center">
-      <SizableText color="$blue7" fontWeight="600">
-        See more
-      </SizableText>
-    </View>
-  );
-};
+type PeopleCarouselProps<T extends PersonItem> = LoadingProps | LoadedProps<T>;
 
-function PeopleCarousel<T extends PersonItem>({
-  loading,
-  data,
-  title,
-  emoji,
-  showMore = false,
-  onItemPress,
-  onShowMore,
-  renderExtraItem,
-}: PeopleCarouselProps<T>) {
+function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
+  if (props.loading) {
+    return (
+      <CardContainer paddingLeft={0} paddingRight={0}>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          horizontal
+          estimatedItemSize={70}
+          showsHorizontalScrollIndicator={false}
+          renderItem={() => <Skeleton circular size={70} />}
+          ItemSeparatorComponent={() => <Spacer size="$2" />}
+          contentContainerStyle={{
+            paddingHorizontal: getToken("$3", "space") as number,
+          }}
+        />
+      </CardContainer>
+    );
+  }
+
+  const {
+    data,
+    title,
+    emoji,
+    showMore = false,
+    onItemPress,
+    onShowMore,
+    renderExtraItem,
+  } = props;
+
   const throttledHandleShowMore = useRef(
     throttle(onShowMore, 300, { leading: true, trailing: false }),
   ).current;
@@ -81,24 +94,6 @@ function PeopleCarousel<T extends PersonItem>({
   );
 
   useEffect(() => throttledHandleShowMore.cancel(), [throttledHandleShowMore]);
-
-  if (loading) {
-    return (
-      <CardContainer paddingLeft={0} paddingRight={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          horizontal
-          estimatedItemSize={70}
-          showsHorizontalScrollIndicator={false}
-          renderItem={() => <Skeleton circular size={70} />}
-          ItemSeparatorComponent={() => <Spacer size="$2" />}
-          contentContainerStyle={{
-            paddingHorizontal: getToken("$3", "space") as number,
-          }}
-        />
-      </CardContainer>
-    );
-  }
 
   return (
     <CardContainer paddingHorizontal={0}>
@@ -151,25 +146,6 @@ function PeopleCarousel<T extends PersonItem>({
               </>
             ) : null
           }
-          /*           ListHeaderComponent={
-            renderExtraItem ? (
-              <>
-                {renderExtraItem()}
-                <ListFooter showMore={showMore} />
-              </>
-            ) : null
-          } */
-          /*           ListFooterComponent={
-            // render the extra element if thats a thign then the see more if thats a thing also
-            renderExtraItem ? (
-              <>
-                {renderExtraItem()}
-                <ListFooter showMore={showMore} />
-              </>
-            ) : (
-              <ListFooter showMore={showMore} />
-            )
-          } */
           ItemSeparatorComponent={() => <Spacer size="$2" />}
           contentContainerStyle={{
             paddingHorizontal: getToken("$3", "space") as number,
