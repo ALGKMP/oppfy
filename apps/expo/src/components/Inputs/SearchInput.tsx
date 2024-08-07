@@ -51,7 +51,7 @@ const SearchInput = (props: SearchInputProps) => {
   return (
     <XStack
       alignItems="center"
-      borderRadius="$4"
+      borderRadius="$6"
       paddingHorizontal="$2.5"
       backgroundColor="$gray2"
     >

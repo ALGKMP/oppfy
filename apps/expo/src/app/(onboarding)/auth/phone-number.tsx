@@ -1,14 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { Keyboard, Modal, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import {
   getToken,
   H1,
+  H6,
   ListItem,
-  SizableText,
   Text,
   useTheme,
   View,
@@ -35,7 +34,7 @@ import useSearch from "~/hooks/useSearch";
 
 const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
-) as CountryData[];
+);
 
 const PhoneNumber = () => {
   const router = useRouter();
@@ -127,7 +126,6 @@ const CountryPicker = ({
 }: CountryPickerProps) => {
   const theme = useTheme();
 
-  const insets = useSafeAreaInsets();
   const [modalVisible, setModalVisible] = useState(false);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
@@ -156,13 +154,7 @@ const CountryPicker = ({
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View
-          flex={1}
-          backgroundColor="$background"
-          paddingTop={insets.top}
-          paddingLeft={insets.left}
-          paddingRight={insets.right}
-        >
+        <View flex={1} backgroundColor="$background">
           <Header
             title="Select Country"
             HeaderLeft={
@@ -175,7 +167,7 @@ const CountryPicker = ({
             }
           />
           <View flex={1} padding="$4" paddingBottom={0}>
-            <YStack flex={1} gap="$4">
+            <YStack flex={1} gap="$2">
               <SearchInput
                 value={searchQuery}
                 placeholder="Search countries"
@@ -242,10 +234,8 @@ const CountriesFlashList = ({
         if (typeof item === "string") {
           // Render header
           return (
-            <View marginVertical={8}>
-              <SizableText size="$1" theme="alt1">
-                {item}
-              </SizableText>
+            <View paddingVertical={8}>
+              <H6 theme="alt1">{item}</H6>
             </View>
           );
         } else {
@@ -257,6 +247,8 @@ const CountriesFlashList = ({
           const isLastInGroup =
             index === data.length - 1 || typeof data[index + 1] === "string";
 
+          const borderRadius = getToken("$6", "radius") as number;
+
           return (
             <ListItem
               size="$4.5"
@@ -264,20 +256,24 @@ const CountriesFlashList = ({
               borderBottomWidth={1}
               backgroundColor="$gray2"
               {...(isFirstInGroup && {
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
+                borderTopLeftRadius: borderRadius,
+                borderTopRightRadius: borderRadius,
               })}
               {...(isLastInGroup && {
                 borderBottomWidth: 0,
-                borderBottomLeftRadius: 10,
-                borderBottomRightRadius: 10,
+                borderBottomLeftRadius: borderRadius,
+                borderBottomRightRadius: borderRadius,
               })}
               pressStyle={{
                 backgroundColor: "$gray3",
               }}
               onPress={() => onSelect && onSelect(item)}
             >
-              <XStack flex={1} justifyContent="space-between">
+              <XStack
+                flex={1}
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <XStack alignItems="center" gap="$2">
                   <Text fontSize="$8">{item.flag}</Text>
                   <Text fontSize="$5">{item.name}</Text>
