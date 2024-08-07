@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
-import { Redirect, SplashScreen } from "expo-router";
+import React from "react";
+import { Redirect } from "expo-router";
 
-import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 
@@ -9,15 +8,8 @@ const Index = () => {
   const { isLoading: sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: permissionsIsLoading } = usePermissions();
 
-  useEffect(() => {
-    // When loading is complete, hide the splash screen
-    if (!sessionIsLoading && !permissionsIsLoading) {
-      void SplashScreen.hideAsync();
-    }
-  }, [sessionIsLoading, permissionsIsLoading]);
-
   if (sessionIsLoading || permissionsIsLoading) {
-    return <LoadingIndicatorOverlay />;
+    return null;
   }
 
   return isSignedIn ? (

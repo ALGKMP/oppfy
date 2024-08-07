@@ -2,7 +2,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, View } from "react-native";
 import Animated, {
   Easing,
-  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -10,8 +9,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { useRouter } from "expo-router";
-import { Text, YStack } from "tamagui";
+import { Image } from "expo-image";
+import { SplashScreen, useRouter } from "expo-router";
+import Icon from "@assets/icon.png";
+import { H4 } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
@@ -83,7 +84,7 @@ const Camera = memo(() => {
   );
 });
 
-const AnimatedText = Animated.createAnimatedComponent(Text);
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 const Start = () => {
   const router = useRouter();
@@ -96,7 +97,6 @@ const Start = () => {
   const scale = useSharedValue(1);
   const rotate = useSharedValue(0);
   const translateY = useSharedValue(0);
-  // const colorAnimation = useSharedValue(0);
   const subtitleOpacity = useSharedValue(0);
   const subtitleTranslateY = useSharedValue(20);
   const buttonOpacity = useSharedValue(0);
@@ -134,54 +134,50 @@ const Start = () => {
   }, [addCamera, cameras.length, isInitialSpawn]);
 
   useEffect(() => {
-    scale.value = withSequence(
-      withTiming(1.2, { duration: 500, easing: Easing.bounce }),
-      withTiming(1, { duration: 300 }),
-    );
+    const fn = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await SplashScreen.hideAsync();
 
-    rotate.value = withSequence(
-      withTiming(10, { duration: 100 }),
-      withTiming(-10, { duration: 100 }),
-      withTiming(0, { duration: 100 }),
-    );
+      scale.value = withSequence(
+        withTiming(0.9, { duration: 1500, easing: Easing.bounce }),
+        withTiming(1, { duration: 300 }),
+      );
 
-    translateY.value = withSequence(
-      withTiming(-50, { duration: 500 }),
-      withTiming(0, { duration: 500 }),
-    );
+      rotate.value = withSequence(
+        withTiming(10, { duration: 100 }),
+        withTiming(-10, { duration: 100 }),
+        withTiming(0, { duration: 100 }),
+      );
 
-    // colorAnimation.value = withSequence(
-    //   withTiming(1, { duration: 500 }),
-    //   withTiming(2, { duration: 500 }),
-    //   withTiming(3, { duration: 500 }),
-    //   withTiming(4, { duration: 500 }),
-    //   withTiming(5, { duration: 500 }),
-    // );
+      translateY.value = withSequence(
+        withTiming(-30, { duration: 500 }),
+        withTiming(0, { duration: 500 }),
+      );
 
-    subtitleOpacity.value = withDelay(1800, withTiming(1, { duration: 800 }));
-    subtitleTranslateY.value = withDelay(
-      1800,
-      withTiming(0, { duration: 800, easing: Easing.out(Easing.back(2)) }),
-    );
+      subtitleOpacity.value = withDelay(1800, withTiming(1, { duration: 800 }));
+      subtitleTranslateY.value = withDelay(
+        1800,
+        withTiming(0, { duration: 800, easing: Easing.out(Easing.back(2)) }),
+      );
 
-    buttonOpacity.value = withDelay(2200, withTiming(1, { duration: 500 }));
-    buttonTranslateY.value = withDelay(
-      2200,
-      withTiming(0, { duration: 500, easing: Easing.out(Easing.back(2)) }),
-    );
+      buttonOpacity.value = withDelay(2200, withTiming(1, { duration: 500 }));
+      buttonTranslateY.value = withDelay(
+        2200,
+        withTiming(0, { duration: 500, easing: Easing.out(Easing.back(2)) }),
+      );
+    };
+
+    void fn();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const animatedTextStyle = useAnimatedStyle(() => ({
+  const animatedIconStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: scale.value },
       { rotate: `${rotate.value}deg` },
       { translateY: translateY.value },
     ],
-    // color: interpolateColor(
-    //   colorAnimation.value,
-    //   [0, 1, 2, 3, 4, 5],
-    //   ["#FFFFFF", "#00FFFF", "#ff1100", "#FFFF00", "#FF8000", "#FFFFFF"]
-    // ),
   }));
 
   const animatedSubtitleStyle = useAnimatedStyle(() => ({
@@ -201,44 +197,51 @@ const Start = () => {
 
   return (
     <BaseScreenView
-      safeAreaEdges={["top", "bottom"]}
-      paddingHorizontal={0}
+      padding={0}
       backgroundColor="#F214FF"
+      safeAreaEdges={["top", "bottom"]}
       bottomSafeAreaStyle={{ backgroundColor: "#F214FF" }}
       topSafeAreaStyle={{ backgroundColor: "#F214FF" }}
     >
-      <YStack
-        flex={1}
-        alignItems="center"
-        justifyContent="space-between"
-        paddingHorizontal="$4"
-        paddingVertical="$8"
-      >
+      <View style={{ flex: 1 }}>
         <View style={{ position: "absolute", width: "100%", height: "100%" }}>
           {renderedCameras}
         </View>
 
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <AnimatedText
-            fontFamily="$modak"
-            fontSize={96}
-            margin={-34}
-            style={animatedTextStyle}
-          >
-            OPPFY
-          </AnimatedText>
-          <Animated.View style={animatedSubtitleStyle}>
-            <Text fontSize={24} color="white">
+          <AnimatedImage
+            source={Icon}
+            style={[
+              {
+                width: "100%",
+                aspectRatio: 4,
+                resizeMode: "contain",
+              },
+              animatedIconStyle,
+            ]}
+            contentFit="contain"
+          />
+          <Animated.View style={[animatedSubtitleStyle]}>
+            <H4 fontSize={24} color="white" textAlign="center">
               Other people post for you
-            </Text>
+            </H4>
           </Animated.View>
         </View>
-      </YStack>
-      <Animated.View style={animatedButtonStyle}>
-        <OnboardingButton onPress={onSubmit}>Welcome</OnboardingButton>
-      </Animated.View>
+
+        <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
+          <Animated.View style={animatedButtonStyle}>
+            <OnboardingButton onPress={onSubmit}>Welcome</OnboardingButton>
+          </Animated.View>
+        </View>
+      </View>
     </BaseScreenView>
   );
 };

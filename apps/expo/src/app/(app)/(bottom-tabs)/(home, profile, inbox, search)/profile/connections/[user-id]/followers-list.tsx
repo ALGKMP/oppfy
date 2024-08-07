@@ -3,7 +3,7 @@ import { RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { SizableText, View, YStack } from "tamagui";
+import { H5, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -82,6 +82,7 @@ const FollowersList = () => {
 
   const renderFriends = () => (
     <CardContainer>
+      <H5 theme="alt1">Followers</H5>
       <FlashList
         data={filteredItems}
         onRefresh={refetch}

@@ -19,18 +19,18 @@ export const notificationsRouter = createTRPCRouter({
       }
     }),
 
+  getUnreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.notifications.getUnreadNotificationsCount(
+        ctx.session.uid,
+      );
+    } catch (err) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+    }
+  }),
+
   paginateNotifications: protectedProcedure
-    .input(
-      z.object({
-        cursor: z
-          .object({
-            createdAt: z.date(),
-            id: z.number(),
-          })
-          .optional(),
-        pageSize: z.number().optional(),
-      }),
-    )
+    .input(trpcValidators.input.notifications.paginateNotifications)
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.notifications.paginateNotifications(

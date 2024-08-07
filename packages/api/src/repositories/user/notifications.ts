@@ -1,7 +1,18 @@
 import type { PgDelete } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 
-import { and, db, desc, eq, inArray, lt, or, schema, sql } from "@oppfy/db";
+import {
+  and,
+  count,
+  db,
+  desc,
+  eq,
+  inArray,
+  lt,
+  or,
+  schema,
+  sql,
+} from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { PublishCommand, sns } from "@oppfy/sns";
 import type { sharedValidators, trpcValidators } from "@oppfy/validators";
@@ -68,26 +79,46 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
+  async getUnreadNotificationsCount(userId: string) {
+    const result = await this.db
+      .select({
+        count: count(),
+      })
+      .from(schema.notifications)
+      .where(
+        and(
+          eq(schema.notifications.recipientId, userId),
+          eq(schema.notifications.read, false),
+        ),
+      );
+
+    const unreadNotificationsCount = result[0]?.count ?? 0;
+    return unreadNotificationsCount;
+  }
+
+  @handleDatabaseErrors
   async paginateNotifications(
     userId: string,
     cursor: { createdAt: Date; id: number } | null = null,
     pageSize = 10,
   ) {
-    const notifications = await this.db
-      .select({
-        id: schema.notifications.id, // Add this line to select the notification id
-        userId: schema.user.id,
-        profileId: schema.profile.id,
-        username: schema.profile.username,
-        profilePictureKey: schema.profile.profilePictureKey,
-        eventType: schema.notifications.eventType,
-        entityId: schema.notifications.entityId,
-        entityType: schema.notifications.entityType,
-        createdAt: schema.notifications.createdAt,
-        privacySetting: schema.user.privacySetting,
-        relationshipState: sql<
-          "following" | "followRequestSent" | "notFollowing"
-        >`
+    const notifications = await this.db.transaction(async (tx) => {
+      const fetchedNotifications = await tx
+        .select({
+          id: schema.notifications.id,
+          userId: schema.user.id,
+          profileId: schema.profile.id,
+          username: schema.profile.username,
+          profilePictureKey: schema.profile.profilePictureKey,
+          eventType: schema.notifications.eventType,
+          entityId: schema.notifications.entityId,
+          entityType: schema.notifications.entityType,
+          createdAt: schema.notifications.createdAt,
+          read: schema.notifications.read,
+          privacySetting: schema.user.privacySetting,
+          relationshipState: sql<
+            "following" | "followRequestSent" | "notFollowing"
+          >`
       CASE
         WHEN EXISTS (
           SELECT 1 FROM ${schema.follower}
@@ -100,29 +131,49 @@ export class NotificationsRepository {
         ELSE 'notFollowing'
       END
     `,
-      })
-      .from(schema.notifications)
-      .innerJoin(schema.user, eq(schema.notifications.senderId, schema.user.id))
-      .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
-      .where(
-        and(
-          eq(schema.notifications.recipientId, userId),
-          cursor
-            ? or(
-                lt(schema.notifications.createdAt, cursor.createdAt),
-                and(
-                  eq(schema.notifications.createdAt, cursor.createdAt),
-                  lt(schema.notifications.id, cursor.id),
-                ),
-              )
-            : undefined,
-        ),
-      )
-      .orderBy(
-        desc(schema.notifications.createdAt),
-        desc(schema.notifications.id),
-      )
-      .limit(pageSize + 1);
+        })
+        .from(schema.notifications)
+        .innerJoin(
+          schema.user,
+          eq(schema.notifications.senderId, schema.user.id),
+        )
+        .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+        .where(
+          and(
+            eq(schema.notifications.recipientId, userId),
+            cursor
+              ? or(
+                  lt(schema.notifications.createdAt, cursor.createdAt),
+                  and(
+                    eq(schema.notifications.createdAt, cursor.createdAt),
+                    lt(schema.notifications.id, cursor.id),
+                  ),
+                )
+              : undefined,
+          ),
+        )
+        .orderBy(
+          desc(schema.notifications.createdAt),
+          desc(schema.notifications.id),
+        )
+        .limit(pageSize + 1);
+
+      // Mark notis as read
+      const notificationIds = fetchedNotifications.map((n) => n.id);
+      await tx
+        .update(schema.notifications)
+        .set({ read: true })
+        .where(
+          and(
+            eq(schema.notifications.recipientId, userId),
+            inArray(schema.notifications.id, notificationIds),
+            eq(schema.notifications.read, false),
+          ),
+        );
+
+      return fetchedNotifications;
+    });
+
     return notifications;
   }
 

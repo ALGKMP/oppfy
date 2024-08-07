@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { isRunningInExpoGo } from "expo";
@@ -25,19 +25,16 @@ import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
 
-// Construct a new instrumentation instance. This is needed to communicate between the integration and React
 const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
 
 Sentry.init({
+  debug: __DEV__,
+  enabled: !__DEV__,
   dsn: env.EXPO_PUBLIC_SENTRY_DSN,
-  enabled: !__DEV__, // Disable Sentry in development mode
-  debug: true, // If `true`, Sentry will try to print out useful debugging information if something goes wrong with sending the event. Set it to `false` in production
   integrations: [
     new Sentry.ReactNativeTracing({
-      // Pass instrumentation to be used as `routingInstrumentation`
       routingInstrumentation,
       enableNativeFramesTracking: !isRunningInExpoGo(),
-      // ...
     }),
   ],
 });
@@ -57,14 +54,12 @@ const RootLayout = () => {
     InterBlack: Inter_900Black,
   });
 
-  // Capture the NavigationContainer ref and register it with the instrumentation.
   const ref = useNavigationContainerRef();
 
-  React.useEffect(() => {
-    if (ref) {
-      routingInstrumentation.registerNavigationContainer(ref);
-    }
-  }, [ref]);
+  useEffect(
+    () => routingInstrumentation.registerNavigationContainer(ref),
+    [ref],
+  );
 
   if (!fontsLoaded) {
     return null;

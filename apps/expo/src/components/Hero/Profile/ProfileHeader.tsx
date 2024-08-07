@@ -1,5 +1,4 @@
-import { useRouter } from "expo-router";
-import { Separator, Spacer, Text, View, YStack } from "tamagui";
+import { Spacer, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
 
 import type { trpcValidators } from "@oppfy/validators";

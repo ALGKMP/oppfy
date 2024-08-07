@@ -1,17 +1,15 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Camera, Lock } from "@tamagui/lucide-icons";
-import { set } from "lodash";
 import { SizableText, Text, View, YStack } from "tamagui";
 
 import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 
 type ProfileDataSelf = RouterOutputs["profile"]["getFullProfileSelf"];
 type profileDataOther = RouterOutputs["profile"]["getFullProfileOther"];
@@ -29,54 +27,51 @@ interface MediaOfYouProps {
 
   profileData: ProfileData | undefined;
   isLoadingProfileData: boolean;
-  // refetchProfileData: () => Promise<ProfileData>;
-  refetchProfileData: () => Promise<any>;
+
+  refetchProfileData: () => void;
 
   recommendations: RecommendationsData; // Replace 'any' with the actual type
   isLoadingRecommendationsData: boolean;
-  // refetchRecommendationsData: () => Promise<RecommendationsData>;
-  refetchRecommendationsData: () => Promise<any>;
+  refetchRecommendationsData: () => void;
 
   friends: FriendsData["items"];
   isLoadingFriendsData: boolean;
-  // refetchFriendsData: () => Promise<FriendsData>;
-  refetchFriendsData: () => Promise<any>;
+  refetchFriendsData: () => void;
 
   posts: PostData["items"];
   isLoadingPostData: boolean;
   isFetchingNextPage: boolean;
-  refetchPosts: () => Promise<any>;
-  // fetchNextPage: () => Promise<PostData>;
-  fetchNextPage: () => Promise<any>;
+  refetchPosts: () => void;
+  fetchNextPage: () => void;
 
   hasNextPage: boolean;
 }
 
-const MediaOfYou = (props: MediaOfYouProps) => {
-  const {
-    userId,
-    isSelfProfile,
+const MediaOfYou = ({
+  userId,
+  isSelfProfile,
 
-    profileData,
-    isLoadingProfileData,
-    refetchProfileData,
+  profileData,
+  isLoadingProfileData,
+  refetchProfileData,
 
-    recommendations,
-    isLoadingRecommendationsData,
-    refetchRecommendationsData,
+  recommendations,
+  isLoadingRecommendationsData,
+  refetchRecommendationsData,
 
-    friends,
-    isLoadingFriendsData,
-    refetchFriendsData,
+  friends,
+  isLoadingFriendsData,
+  refetchFriendsData,
 
-    posts,
-    isLoadingPostData,
-    isFetchingNextPage,
-    refetchPosts,
-    fetchNextPage,
-    hasNextPage,
-  } = props;
+  posts,
+  isLoadingPostData,
+  isFetchingNextPage,
+  refetchPosts,
+  fetchNextPage,
+  hasNextPage,
 
+  ...props
+}: MediaOfYouProps) => {
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);

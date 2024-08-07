@@ -25,11 +25,10 @@ import {
   useMicrophonePermission,
 } from "react-native-vision-camera";
 import * as ImagePicker from "expo-image-picker";
-import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
-import { SizableText, Text, View } from "tamagui";
+import { Text, View } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import {
@@ -45,9 +44,6 @@ Reanimated.addWhitelistedNativeProps({
 });
 
 const MAX_ZOOM_FACTOR = 10;
-
-const CONTENT_SPACING = 15;
-const CONTROL_BUTTON_SIZE = 40;
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
@@ -91,7 +87,7 @@ const CameraPage = () => {
   const isForeground = useIsForeground();
   const isActive = isFocussed && isForeground;
 
-  const [targetFps, setTargetFps] = useState(60);
+  const [targetFps, _setTargetFps] = useState(60);
 
   const [enableHdr, setEnableHdr] = useState(false);
   const [enableNightMode, setEnableNightMode] = useState(false);
@@ -110,7 +106,7 @@ const CameraPage = () => {
     { photoResolution: "max" },
   ]);
 
-  const fps = Math.min(format?.maxFps ?? 1, targetFps);
+  const _fps = Math.min(format?.maxFps ?? 1, targetFps);
 
   const minZoom = device?.minZoom ?? 1;
   const maxZoom = Math.min(device?.maxZoom ?? 1, MAX_ZOOM_FACTOR);
@@ -122,7 +118,7 @@ const CameraPage = () => {
   const supportsFlash = device?.hasFlash ?? false;
   const supportsFocus = device?.supportsFocus ?? false;
   const supportsNightMode = device?.supportsLowLightBoost ?? false;
-  const supports60Fps = useMemo(
+  const _supports60Fps = useMemo(
     () => device?.formats.some((format) => format.maxFps >= 60),
     [device?.formats],
   );
@@ -132,14 +128,13 @@ const CameraPage = () => {
   }, []);
 
   const onMediaCaptured = useCallback(
-    async (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      console.log("Media captured", media);
-      const { path: uri } = media;
+    (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+      const { path: uri, width: dimension1, height: dimension2 } = media;
 
-      const asset = await MediaLibrary.createAssetAsync(uri);
-      const { width, height } = await MediaLibrary.getAssetInfoAsync(asset);
-
-      console.log("Asset created", asset);
+      const [width, height] =
+        dimension1 < dimension2
+          ? [dimension1, dimension2]
+          : [dimension2, dimension1];
 
       router.push({
         pathname: "/preview",
@@ -150,8 +145,6 @@ const CameraPage = () => {
           height,
         },
       });
-
-      console.log("Navigated to preview");
     },
     [router],
   );
@@ -272,7 +265,7 @@ const CameraPage = () => {
             isActive={isActive}
             onInitialized={onInitialized}
             format={format}
-            fps={fps}
+            fps={30}
             photoHdr={photoHdr}
             videoHdr={videoHdr}
             outputOrientation="portrait"
@@ -353,16 +346,6 @@ const CameraPage = () => {
             />
           </TouchableOpacity>
         )}
-        {supports60Fps && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => setTargetFps((t) => (t === 30 ? 60 : 30))}
-          >
-            <SizableText size="$1" textAlign="center">
-              {`${targetFps}\nFPS`}
-            </SizableText>
-          </TouchableOpacity>
-        )}
         {supportsHdr && (
           <TouchableOpacity
             style={styles.button}
@@ -387,12 +370,6 @@ const CameraPage = () => {
             />
           </TouchableOpacity>
         )}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.navigate("/scanner")}
-        >
-          <Ionicons name="qr-code-outline" color="white" size={24} />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -407,6 +384,9 @@ const NoCameraDeviceError = () => {
 };
 
 export default CameraPage;
+
+const CONTENT_SPACING = 15;
+const CONTROL_BUTTON_SIZE = 40;
 
 const styles = StyleSheet.create({
   button: {

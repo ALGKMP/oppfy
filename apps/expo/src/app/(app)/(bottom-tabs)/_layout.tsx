@@ -9,36 +9,122 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import {
-  Camera,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Circle,
-  Home,
-  Inbox,
-  Search,
-  User2,
-} from "@tamagui/lucide-icons";
-import {
-  Button,
-  Paragraph,
-  Text,
-  Tooltip,
-  TooltipGroup,
-  TooltipProps,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
+import { Circle, Text, useTheme, View, YStack } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
-import { useSession } from "~/contexts/SessionContext";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
+
+interface TabBarIconProps {
+  focused: boolean;
+  color: string;
+  size: number;
+}
+
+const BottomTabsLayout = () => {
+  const theme = useTheme();
+  const utils = api.useUtils();
+
+  const { data: unreadNotificationsCount } =
+    api.notifications.getUnreadNotificationsCount.useQuery();
+
+  useEffect(() => {
+    const prefetch = async () => {
+      await utils.profile.getFullProfileSelf.prefetch();
+    };
+    void prefetch();
+  }, [utils.profile.getFullProfileSelf]);
+
+  const getTabBarIcon =
+    (IconComponent: React.ElementType) =>
+    ({ focused, ...props }: TabBarIconProps) => (
+      <IconComponent strokeWidth={focused ? 3 : 1.5} {...props} />
+    );
+
+  return (
+    <BottomTabs
+      tabBar={(props) => <BottomTabBar {...props} />}
+      screenOptions={{
+        header: (props) => <Header {...props} />,
+      }}
+      sceneContainerStyle={{
+        backgroundColor: theme.background.val,
+      }}
+      screenListeners={{
+        tabPress: () =>
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+      }}
+      backBehavior="history"
+    >
+      <BottomTabs.Screen
+        name="(home)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(Home),
+        }}
+      />
+
+      <BottomTabs.Screen
+        name="(search)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(Search),
+        }}
+      />
+
+      <BottomTabs.Screen
+        name="(camera)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(Camera),
+        }}
+      />
+
+      <BottomTabs.Screen
+        name="(inbox)"
+        options={{
+          header: () => null,
+          tabBarIcon: ({ focused, ...props }) => (
+            <YStack>
+              <Inbox strokeWidth={focused ? 3 : 1.5} {...props} />
+              {(unreadNotificationsCount ?? 0) > 0 && (
+                <Circle
+                  size={16}
+                  backgroundColor="$red9"
+                  style={{
+                    position: "absolute",
+                    top: -6,
+                    right: -6,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                />
+              )}
+            </YStack>
+          ),
+        }}
+        listeners={{
+          focus: () => {
+            void utils.notifications.getUnreadNotificationsCount.setData(
+              undefined,
+              0,
+            );
+          },
+        }}
+      />
+
+      <BottomTabs.Screen
+        name="(profile)"
+        options={{
+          header: () => null,
+          tabBarIcon: getTabBarIcon(User2),
+        }}
+      />
+    </BottomTabs>
+  );
+};
 
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
@@ -98,7 +184,7 @@ const CameraTabIcon = ({ focused }: { focused: boolean }) => {
       -1,
       true,
     );
-  }, [focused]);
+  }, [focused, gradientX1, gradientX2, gradientY1, gradientY2, pulseScale]);
 
   const animatedGradientProps = useAnimatedProps(() => ({
     x1: `${gradientX1.value * 100}%`,
@@ -158,85 +244,6 @@ const CameraTabIcon = ({ focused }: { focused: boolean }) => {
       )}
       <Camera strokeWidth={focused ? 3 : 1.5} />
     </YStack>
-  );
-};
-
-const BottomTabsLayout = () => {
-  const theme = useTheme();
-  const { user } = useSession();
-  const utils = api.useUtils();
-
-  useEffect(() => {
-    const prefetch = async () => {
-      await utils.profile.getFullProfileSelf.prefetch();
-    };
-    void prefetch();
-  }, [utils.profile.getFullProfileSelf]);
-
-  const thing = utils.profile.getFullProfileSelf.getData();
-
-  const getTabBarIcon =
-    (IconComponent: React.ElementType) =>
-    ({ focused }: { focused: boolean }) => (
-      <IconComponent strokeWidth={focused ? 3 : 1.5} />
-    );
-
-  return (
-    <BottomTabs
-      tabBar={(props) => <BottomTabBar {...props} />}
-      screenOptions={{
-        header: (props) => <Header {...props} />,
-      }}
-      sceneContainerStyle={{
-        backgroundColor: theme.background.val,
-      }}
-      screenListeners={{
-        tabPress: () =>
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
-      }}
-      backBehavior="history"
-    >
-      <BottomTabs.Screen
-        name="(home)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Home),
-        }}
-      />
-
-      <BottomTabs.Screen
-        name="(search)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Search),
-        }}
-      />
-
-      <BottomTabs.Screen
-        name="(camera)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Camera),
-          // tabBarIcon: CameraTabIcon,
-        }}
-      />
-
-      <BottomTabs.Screen
-        name="(inbox)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Inbox),
-        }}
-      />
-
-      <BottomTabs.Screen
-        name="(profile)"
-        options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(User2),
-        }}
-      />
-    </BottomTabs>
   );
 };
 
