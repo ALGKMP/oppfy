@@ -95,7 +95,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
 
   useEffect(() => throttledHandleShowMore.cancel(), [throttledHandleShowMore]);
 
-  if (data.length === 0) return null;
+  if (data.length === 0 /* || onItemPress == null */) return null;
 
   return (
     <CardContainer paddingHorizontal={0}>
