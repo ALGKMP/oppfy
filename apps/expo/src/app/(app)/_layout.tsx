@@ -1,4 +1,5 @@
-import { Redirect } from "expo-router";
+import { useEffect } from "react";
+import { Redirect, SplashScreen } from "expo-router";
 
 import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
@@ -9,6 +10,8 @@ import {
 } from "~/hooks/notifications";
 import { Stack } from "~/layouts";
 import { api } from "~/utils/api";
+
+const DELAY_TO_HIDE_SPLASH_SCREEN = 250;
 
 const AppLayout = () => {
   usePushNotifications();
@@ -25,6 +28,15 @@ const AppLayout = () => {
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
+  useEffect(
+    () =>
+      void setTimeout(
+        () => void SplashScreen.hideAsync(),
+        DELAY_TO_HIDE_SPLASH_SCREEN,
+      ),
+    [],
+  );
+
   if (onboardingCompleteIsLoading || profileDataLoading) {
     return <LoadingIndicatorOverlay />;
   }
@@ -33,12 +45,8 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)" />;
   }
 
-  if (onboardingComplete === false) {
+  if (!onboardingComplete) {
     return <Redirect href="/(onboarding)/user-info/welcome" />;
-  }
-
-  if (onboardingComplete === undefined) {
-    return <Redirect href="/(onboarding)" />;
   }
 
   if (!requiredPermissions) {
