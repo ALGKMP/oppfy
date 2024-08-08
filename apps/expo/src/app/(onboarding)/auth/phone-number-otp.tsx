@@ -37,7 +37,7 @@ const PhoneNumberOTP = () => {
 
   const createUser = api.user.createUser.useMutation();
   const userOnboardingCompletedMutation =
-    api.user.checkOnboardingComplete.useMutation();
+    api.user.onboardingComplete.useMutation();
 
   const isValidPhoneNumberOTP = useMemo(
     () =>
