@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Modal, StyleSheet } from "react-native";
+import { ImageSourcePropType, Modal, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   Extrapolate,
@@ -34,7 +34,7 @@ export interface ButtonOption {
 }
 
 export interface ActionSheetProps {
-  imageUrl?: string;
+  imageUrl?: string | ImageSourcePropType;
   title: string;
   titleProps?: SizableTextProps;
   subtitle?: string;
@@ -136,7 +136,7 @@ const ActionSheet = ({
               >
                 {imageUrl && (
                   <Image
-                    source={{ uri: imageUrl }}
+                    source={imageUrl}
                     style={{ width: 100, height: 100, borderRadius: 50 }}
                   />
                 )}

@@ -122,7 +122,7 @@ const BlockedUsers = () => {
           subtitle={`Are you sure you want to unblock ${item.username}?`}
           imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           trigger={
-            <Button size="$3" icon={<UserRoundX size="$1" />}>
+            <Button size="$3.5" icon={<UserRoundX size="$1" />}>
               Unblock
             </Button>
           }
@@ -140,6 +140,7 @@ const BlockedUsers = () => {
 
   const renderBlockedUsers = () => (
     <CardContainer>
+      <H5 theme="alt1">Blocked</H5>
       <FlashList
         data={filteredItems}
         onRefresh={refetch}
@@ -184,9 +185,7 @@ const BlockedUsers = () => {
         {filteredItems.length > 0 ? (
           renderBlockedUsers()
         ) : (
-          <H6 theme="alt1" lineHeight={0}>
-            No Users Found
-          </H6>
+          <H5 theme="alt1">No Users Found</H5>
         )}
       </YStack>
     </BaseScreenView>

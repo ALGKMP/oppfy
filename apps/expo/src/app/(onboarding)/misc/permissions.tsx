@@ -23,7 +23,7 @@ interface AlertDialogState
   isVisible: boolean;
 }
 
-const Permissions: React.FC = () => {
+const Permissions = () => {
   const router = useRouter();
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
