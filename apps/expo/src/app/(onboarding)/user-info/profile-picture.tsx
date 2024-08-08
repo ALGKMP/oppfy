@@ -42,11 +42,13 @@ const ProfilePicture = () => {
   // };
 
   const onSubmit = () => {
+    utils.user.onboardingComplete.refetch();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
   };
 
   const onSkip = () => {
+    utils.user.onboardingComplete.refetch();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
   };

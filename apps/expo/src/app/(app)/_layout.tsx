@@ -21,32 +21,18 @@ const AppLayout = () => {
   const { isLoading: _sessionIsLoading, isSignedIn } = useSession();
   const { isLoading: _permissionsIsLoading, permissions } = usePermissions();
 
-  const { isLoading: onboardingCompleteIsLoading, data: onboardingComplete } =
-    api.user.onboardingComplete.useQuery();
-
   const requiredPermissions = permissions.camera && permissions.contacts;
 
-  useEffect(
-    () =>
-      void setTimeout(
-        () => void SplashScreen.hideAsync(),
-        DELAY_TO_HIDE_SPLASH_SCREEN,
-      ),
-    [],
-  );
-
-  if (onboardingCompleteIsLoading) {
-    return <LoadingIndicatorOverlay />;
-  }
+  useEffect(() => {
+    void setTimeout(
+      () => void SplashScreen.hideAsync(),
+      DELAY_TO_HIDE_SPLASH_SCREEN,
+    );
+  }, []);
 
   if (!isSignedIn) {
     console.log("!isSignedIn");
     return <Redirect href="/(onboarding)" />;
-  }
-
-  if (!onboardingComplete) {
-    console.log("!onboardingComplete");
-    return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 
   if (!requiredPermissions) {

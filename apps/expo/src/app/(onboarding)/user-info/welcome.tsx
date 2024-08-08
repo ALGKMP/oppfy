@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { SplashScreen, useRouter } from "expo-router";
 import { H4, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
@@ -15,6 +15,8 @@ const Welcome = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/user-info/full-name");
   };
+
+  useEffect(() => void SplashScreen.hideAsync(), []);
 
   return (
     <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
