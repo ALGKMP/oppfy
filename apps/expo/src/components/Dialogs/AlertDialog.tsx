@@ -155,9 +155,9 @@ const AlertDialog = ({
                 </Paragraph>
               )}
             </YStack>
-            <YStack>
+            <YStack backgroundColor="$gray2">
               <Separator />
-              <XStack backgroundColor="$gray2">
+              <XStack>
                 <TouchableOpacity
                   onPress={() => {
                     handleCancel();
