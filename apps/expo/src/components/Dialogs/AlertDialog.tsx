@@ -13,13 +13,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import type { ButtonProps, ParagraphProps, SizableTextProps } from "tamagui";
+import type { ParagraphProps, SizableTextProps } from "tamagui";
 import {
-  Button,
+  getToken,
   Paragraph,
   Separator,
   SizableText,
-  View,
+  useTheme,
   XStack,
   YStack,
 } from "tamagui";
@@ -41,7 +41,7 @@ export interface AlertDialogProps {
   acceptTextProps?: SizableTextProps;
 }
 
-const AlertDialog: React.FC<AlertDialogProps> = ({
+const AlertDialog = ({
   title,
   titleProps,
   subtitle,
@@ -54,7 +54,9 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   acceptText = "Accept",
   cancelTextProps,
   acceptTextProps,
-}) => {
+}: AlertDialogProps) => {
+  const theme = useTheme();
+
   const [showModal, setShowModal] = useState(false);
   const animation = useSharedValue(0);
 
@@ -129,12 +131,17 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           <BlurView intensity={10} style={StyleSheet.absoluteFill} />
           <AnimatedYStack
             width={300}
+            overflow="hidden"
             borderRadius="$6"
             alignItems="center"
-            backgroundColor="$background"
             style={containerStyle}
           >
-            <YStack paddingHorizontal="$6" paddingVertical="$4" gap>
+            <YStack
+              backgroundColor="$background"
+              paddingHorizontal="$6"
+              paddingVertical="$4"
+              gap
+            >
               <SizableText
                 size="$6"
                 fontWeight="bold"
@@ -159,9 +166,9 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
                   }}
                   style={{
                     width: 150,
-                    padding: 12,
-                    borderRadius: 4,
                     alignItems: "center",
+                    backgroundColor: theme.gray1.val,
+                    padding: getToken("$3", "space") as number,
                   }}
                 >
                   <SizableText size="$5" color="$blue9" {...cancelTextProps}>
@@ -176,9 +183,9 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
                   }}
                   style={{
                     width: 150,
-                    padding: 12,
-                    borderRadius: 4,
                     alignItems: "center",
+                    backgroundColor: theme.gray1.val,
+                    padding: getToken("$3", "space") as number,
                   }}
                 >
                   <SizableText
