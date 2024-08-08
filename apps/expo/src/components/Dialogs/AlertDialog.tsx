@@ -37,8 +37,8 @@ export interface AlertDialogProps {
   onAccept?: () => void;
   cancelText?: string;
   acceptText?: string;
-  cancelButtonProps?: ButtonProps;
-  acceptButtonProps?: ButtonProps;
+  cancelTextProps?: SizableTextProps;
+  acceptTextProps?: SizableTextProps;
 }
 
 const AlertDialog: React.FC<AlertDialogProps> = ({
@@ -52,8 +52,8 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   onAccept,
   cancelText = "Cancel",
   acceptText = "Accept",
-  cancelButtonProps,
-  acceptButtonProps,
+  cancelTextProps,
+  acceptTextProps,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const animation = useSharedValue(0);
@@ -164,7 +164,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
                     alignItems: "center",
                   }}
                 >
-                  <SizableText size="$4" color="$blue9">
+                  <SizableText size="$5" color="$blue9" {...cancelTextProps}>
                     {cancelText}
                   </SizableText>
                 </TouchableOpacity>
@@ -181,7 +181,12 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
                     alignItems: "center",
                   }}
                 >
-                  <SizableText size="$4" color="$red9">
+                  <SizableText
+                    size="$5"
+                    color="$red9"
+                    fontWeight="bold"
+                    {...acceptTextProps}
+                  >
                     {acceptText}
                   </SizableText>
                 </TouchableOpacity>
