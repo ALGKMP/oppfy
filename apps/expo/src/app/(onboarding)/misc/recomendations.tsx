@@ -9,20 +9,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import {
-  Button,
-  Image,
-  ScrollView,
-  Text,
-  useTheme,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Button, ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import { OnboardingButton } from "~/features/onboarding/components";
