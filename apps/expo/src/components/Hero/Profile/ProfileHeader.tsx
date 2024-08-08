@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Spacer, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
 
@@ -22,11 +23,6 @@ type RecommendedProfiles = z.infer<
   typeof trpcValidators.output.recommendations.recommededProfiles
 >;
 
-interface NavigateProfileParams {
-  userId: string;
-  username: string;
-}
-
 interface ProfileHeaderProps {
   isSelfProfile: boolean;
   isLoadingProfileData: boolean;
@@ -37,7 +33,13 @@ interface ProfileHeaderProps {
   recommendationsData: RecommendedProfiles | undefined;
   isRestricted: boolean;
   isBlocked: boolean;
-  navigateToProfile: (params: NavigateProfileParams) => void;
+  navigateToProfile: ({
+    userId,
+    username,
+  }: {
+    userId: string;
+    username: string;
+  }) => void;
 }
 
 function isOtherProfile(

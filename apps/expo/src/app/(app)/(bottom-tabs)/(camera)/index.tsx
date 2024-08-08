@@ -268,7 +268,7 @@ const CameraPage = () => {
             fps={30}
             photoHdr={photoHdr}
             videoHdr={videoHdr}
-            outputOrientation="portrait"
+            // outputOrientation="portrait"
             photoQualityBalance="quality"
             lowLightBoost={device.supportsLowLightBoost && enableNightMode}
             enableZoomGesture={false}
@@ -321,11 +321,7 @@ const CameraPage = () => {
           top: SAFE_AREA_PADDING.paddingTop + 12,
           left: SAFE_AREA_PADDING.paddingLeft + 12,
         }}
-      >
-        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-          <Ionicons name="close" color="white" size={24} />
-        </TouchableOpacity>
-      </View>
+      ></View>
 
       <View
         style={{

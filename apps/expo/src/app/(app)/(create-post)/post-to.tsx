@@ -250,7 +250,8 @@ const PostTo = () => {
         gap="$4"
         paddingBottom={(insets.bottom + getToken("$4", "space")) as number}
       >
-        {contacts.length > 0 && renderContacts()}
+        {/* ! Disabled temporarily */}
+        {/* {contacts.length > 0 && renderContacts()} */}
         {itemCount > 0 && renderFriends()}
       </YStack>
     </BaseScreenView>

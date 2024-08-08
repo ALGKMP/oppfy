@@ -158,6 +158,10 @@ export class NotificationsRepository {
         )
         .limit(pageSize + 1);
 
+      if (fetchedNotifications.length === 0) {
+        return [];
+      }
+
       // Mark notis as read
       const notificationIds = fetchedNotifications.map((n) => n.id);
       await tx

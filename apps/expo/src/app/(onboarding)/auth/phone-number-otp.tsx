@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
@@ -50,8 +51,6 @@ const PhoneNumberOTP = () => {
       return;
     }
 
-    console.log("truign this");
-
     await createUser.mutateAsync({
       userId,
       phoneNumber,
@@ -70,6 +69,8 @@ const PhoneNumberOTP = () => {
   };
 
   const onSubmit = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     let userCredential: FirebaseAuthTypes.UserCredential | null = null;
 
     try {
@@ -107,7 +108,13 @@ const PhoneNumberOTP = () => {
           <YStack paddingHorizontal="$4" gap="$6">
             <H1 textAlign="center">Enter your{"\n"}verification code</H1>
 
-            <OTPInput value={phoneNumberOTP} onChange={setPhoneNumberOTP} />
+            <OTPInput
+              value={phoneNumberOTP}
+              onChange={(value) => {
+                setPhoneNumberOTP(value);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+            />
 
             {error ? (
               <DisclaimerText color="$red9">{error}</DisclaimerText>

@@ -24,7 +24,7 @@ const SIZE = 80;
 const STROKE_WIDTH = 2;
 const ANIMATION_DURATION = 300;
 
-const FocusIcon: React.FC<FocusIconProps> = ({ x, y }) => {
+const FocusIcon = ({ x, y }: FocusIconProps) => {
   const progress = useSharedValue(0);
 
   useEffect(() => {

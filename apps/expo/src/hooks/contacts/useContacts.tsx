@@ -78,11 +78,14 @@ const useContacts = (syncNow = false): ContactFns => {
   const getDeviceContactsNotOnApp = async () => {
     const { data } = await Contacts.getContactsAsync({
       fields: [
-        Contacts.Fields.Name,
-        Contacts.Fields.Image,
         Contacts.Fields.PhoneNumbers,
+        Contacts.Fields.Image,
+        Contacts.Fields.Name,
+        Contacts.Fields.Birthday,
+        Contacts.Fields.Addresses,
       ],
     });
+
     const phoneNumbers = data
       .map((contact) => {
         const number = contact.phoneNumbers?.[0]?.number;
@@ -97,13 +100,11 @@ const useContacts = (syncNow = false): ContactFns => {
       })
       .filter((number): number is string => number !== null);
 
-    // Now phoneNumbers is of type string[]
     const phoneNumbersNotOnApp = await filterContactsOnApp.mutateAsync({
       phoneNumbers,
     });
 
-    // build up the object again using phoneNumbersNotOnApp
-    const contacts = phoneNumbersNotOnApp
+    const contactsNotOnApp = phoneNumbersNotOnApp
       .map((phoneNumber) => {
         return data.find((contact) => {
           const number = contact.phoneNumbers?.[0]?.number;
@@ -121,9 +122,25 @@ const useContacts = (syncNow = false): ContactFns => {
           }
         });
       })
-      .filter((contact) => contact !== undefined);
+      .filter((contact): contact is Contact => contact !== undefined);
 
-    return contacts.filter((contact): contact is Contact => contact !== undefined);
+    // Sort contacts based on criteria
+    const sortedContacts = contactsNotOnApp.sort((a, b) => {
+      const aScore = getContactScore(a);
+      const bScore = getContactScore(b);
+      return bScore - aScore; // Higher score first
+    });
+
+    return sortedContacts;
+  };
+
+  // Helper function to calculate contact score
+  const getContactScore = (contact: Contact): number => {
+    let score = 0;
+    if (contact.imageAvailable) score += 4; // Highest priority
+    if (contact.addresses?.length) score += 3;
+    if (contact.birthday) score += 2;
+    return score;
   };
 
   const getRecomendedContacts = async () => {

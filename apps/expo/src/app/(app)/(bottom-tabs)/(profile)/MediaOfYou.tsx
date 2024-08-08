@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Camera, Lock } from "@tamagui/lucide-icons";
@@ -82,6 +82,7 @@ const MediaOfYou = ({
   ...props
 }: MediaOfYouProps) => {
   const router = useRouter();
+  const segments = useSegments();
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
@@ -168,7 +169,6 @@ const MediaOfYou = ({
     isRestricted,
     recommendations,
     isBlocked,
-    navigateToProfile,
   ]);
 
   return (

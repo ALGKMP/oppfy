@@ -13,6 +13,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter, useSegments } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import {
   Heart,
   MessageCircle,
@@ -307,7 +308,7 @@ const PostItem = React.memo((props: PostItemProps) => {
             }
           >
             <Image
-              source={post.recipientProfilePicture}
+              source={post.recipientProfilePicture ?? DefaultProfilePicture}
               style={{ width: 40, height: 40, borderRadius: 20 }}
             />
           </TouchableOpacity>

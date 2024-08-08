@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Button, H5, Input, SizableText, View, YStack } from "tamagui";
+import { Button, H5, H6, Input, SizableText, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -122,7 +122,7 @@ const BlockedUsers = () => {
           subtitle={`Are you sure you want to unblock ${item.username}?`}
           imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           trigger={
-            <Button size="$3" icon={<UserRoundX size="$1" />}>
+            <Button size="$3.5" icon={<UserRoundX size="$1" />}>
               Unblock
             </Button>
           }
@@ -140,6 +140,7 @@ const BlockedUsers = () => {
 
   const renderBlockedUsers = () => (
     <CardContainer>
+      <H5 theme="alt1">Blocked</H5>
       <FlashList
         data={filteredItems}
         onRefresh={refetch}
@@ -184,7 +185,7 @@ const BlockedUsers = () => {
         {filteredItems.length > 0 ? (
           renderBlockedUsers()
         ) : (
-          <SizableText lineHeight={0}>No Users Found</SizableText>
+          <H5 theme="alt1">No Users Found</H5>
         )}
       </YStack>
     </BaseScreenView>

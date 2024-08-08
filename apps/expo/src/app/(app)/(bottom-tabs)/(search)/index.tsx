@@ -99,7 +99,7 @@ const Search = () => {
     <RecommendationList
       handleProfileClicked={(userId, username) => {
         router.navigate({
-          pathname: "/(inbox)/profile/[userId]/",
+          pathname: "/(search)/profile/[userId]/",
           params: { userId, username },
         });
       }}
@@ -109,7 +109,7 @@ const Search = () => {
   );
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView scrollable keyboardDismissMode="interactive">
       <YStack gap="$4">
         <SearchInput
           value={searchTerm}
@@ -125,16 +125,16 @@ const Search = () => {
               renderRecommendations(recommendationsData)
             ) : (
               // TODO: Implement
-              <Text>
-              Testing updates
-              </Text>
+              <Text>Testing updates</Text>
             )
           ) : isLoading ? (
             renderLoadingSkeletons()
           ) : searchResults.length ? (
             renderSearchResults()
           ) : (
-            <SizableText lineHeight={0}>No Users Found</SizableText>
+            <H6 theme="alt1" lineHeight={0}>
+              No Users Found
+            </H6>
           )}
         </View>
       </YStack>

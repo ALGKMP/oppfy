@@ -1,98 +1,93 @@
-import React from "react";
-import { Alert, Linking } from "react-native";
+import React, { useState } from "react";
+import { Linking } from "react-native";
 import * as Contacts from "expo-contacts";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { Check } from "@tamagui/lucide-icons";
-import {
-  Button,
-  Checkbox,
-  Separator,
-  Text,
-  XStack,
-  YGroup,
-  YStack,
-} from "tamagui";
+import { Checkbox, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
+import { AlertDialog } from "~/components/Dialogs";
+import { AlertDialogProps } from "~/components/Dialogs/AlertDialog";
 import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
+import { OnboardingButton } from "~/features/onboarding/components";
+
+type PermissionType = "Camera" | "Contacts" | "Notifications";
+
+interface AlertDialogState
+  extends Pick<AlertDialogProps, "title" | "subtitle"> {
+  isVisible: boolean;
+}
 
 const Permissions = () => {
   const router = useRouter();
-
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
+  const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogState>({
+    isVisible: false,
+    title: "",
+    subtitle: "",
+  });
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
-  const openSettings = async () => {
+  const openSettings = async (): Promise<void> => {
     await Linking.openSettings();
   };
 
-  const onPress = () => {
+  const onPress = (): void => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     isSignedIn
       ? router.push("/(app)/(bottom-tabs)/(home)")
       : router.push("/auth/phone-number");
   };
 
-  const requestCameraPermission = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== PermissionStatus.GRANTED) {
-      Alert.alert(
-        "Camera Permission",
-        "Camera permission is required for this app. Please enable it in your device settings.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Open Settings", onPress: void openSettings },
-        ],
-      );
+  const showPermissionAlert = (permissionType: PermissionType): void => {
+    setAlertDialogProps({
+      isVisible: true,
+      title: `${permissionType} Permission`,
+      subtitle: `${permissionType} permission is required for this app. Please enable it in your device settings.`,
+    });
+  };
+
+  const requestPermission = async (
+    permissionType: PermissionType,
+    requestFunction: () => Promise<{ status: PermissionStatus }>,
+  ): Promise<void> => {
+    try {
+      const { status } = await requestFunction();
+      if (status !== PermissionStatus.GRANTED) {
+        showPermissionAlert(permissionType);
+      }
+    } catch (error) {
+      showPermissionAlert(permissionType);
     }
     await checkPermissions();
   };
 
-  const requestContactsPermission = async () => {
-    const { status } = await Contacts.requestPermissionsAsync();
-    if (status !== PermissionStatus.GRANTED) {
-      Alert.alert(
-        "Contacts Permission",
-        "Contacts permission is required for this app. Please enable it in your device settings.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Open Settings", onPress: void openSettings },
-        ],
-      );
-    }
-    await checkPermissions();
-  };
+  const requestCameraPermission = (): Promise<void> =>
+    requestPermission("Camera", ImagePicker.requestCameraPermissionsAsync);
 
-  const requestNotificationsPermission = async () => {
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== PermissionStatus.GRANTED) {
-      Alert.alert(
-        "Notifications Permission",
-        "Notifications permission is required for this app. Please enable it in your device settings.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Open Settings", onPress: void openSettings },
-        ],
-      );
-    }
-    await checkPermissions();
-  };
+  const requestContactsPermission = (): Promise<void> =>
+    requestPermission("Contacts", Contacts.requestPermissionsAsync);
+
+  const requestNotificationsPermission = (): Promise<void> =>
+    requestPermission("Notifications", Notifications.requestPermissionsAsync);
 
   return (
-    <BaseScreenView safeAreaEdges={["bottom"]}>
-      <YStack flex={1} gap="$8">
+    <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
+      <YStack flex={1} paddingHorizontal="$4" gap="$8">
         <Text
           alignSelf="center"
           textAlign="center"
           color="$gray9"
           fontWeight="bold"
         >
-          We&apos;ll just need a few permissions to get started.
+          We'll just need a few permissions to get started.
         </Text>
 
         <YGroup gap="$4">
@@ -162,15 +157,30 @@ const Permissions = () => {
         </YGroup>
       </YStack>
 
-      <Button
-        onPress={onPress}
-        disabled={!requiredPermissions}
-        disabledStyle={{
-          opacity: 0.5,
-        }}
-      >
+      <OnboardingButton onPress={onPress} disabled={!requiredPermissions}>
         Continue
-      </Button>
+      </OnboardingButton>
+
+      <AlertDialog
+        isVisible={alertDialogProps.isVisible}
+        title={alertDialogProps.title}
+        subtitle={alertDialogProps.subtitle}
+        onCancel={() => {
+          setAlertDialogProps({ ...alertDialogProps, isVisible: false });
+          openSettings();
+        }}
+        onAccept={() =>
+          setAlertDialogProps({ ...alertDialogProps, isVisible: false })
+        }
+        cancelText="Settings"
+        acceptText="OK"
+        cancelTextProps={{
+          color: "$blue9",
+        }}
+        acceptTextProps={{
+          color: "$blue9",
+        }}
+      />
     </BaseScreenView>
   );
 };

@@ -1,20 +1,31 @@
-import type { ReactElement } from "react";
 import React, { useCallback, useEffect, useState } from "react";
-import type { ButtonProps, ImageSourcePropType } from "react-native";
-import { Animated, Easing, Modal } from "react-native";
+import { ImageSourcePropType, Modal, StyleSheet } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import Animated, {
+  Extrapolate,
+  Extrapolation,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
 import {
-  Avatar,
-  Button,
+  getToken,
   Paragraph,
   Separator,
   SizableText,
-  View,
+  useTheme,
   YStack,
 } from "tamagui";
+
+const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 
 export interface ButtonOption {
   text: string;
@@ -24,176 +35,184 @@ export interface ButtonOption {
 
 export interface ActionSheetProps {
   imageUrl?: string | ImageSourcePropType;
-
   title: string;
   titleProps?: SizableTextProps;
-
   subtitle?: string;
   subtitleProps?: ParagraphProps;
-
   buttonOptions: ButtonOption[];
-
   isVisible?: boolean;
-  trigger?: ReactElement<ButtonProps>;
-
+  trigger?: React.ReactElement;
   onCancel?: () => void;
 }
 
 const ActionSheet = ({
   imageUrl,
-
   title,
   titleProps,
-
   subtitle,
   subtitleProps,
-
   buttonOptions,
-
   trigger,
   isVisible,
   onCancel,
 }: ActionSheetProps) => {
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
-
   const [showModal, setShowModal] = useState(false);
-  const [slideAnimation] = useState(new Animated.Value(300));
-  const [backgroundOpacity] = useState(new Animated.Value(0));
+  const animation = useSharedValue(0);
 
   const openModal = useCallback(() => {
     setShowModal(true);
-    Animated.parallel([
-      Animated.timing(backgroundOpacity, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnimation, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [backgroundOpacity, slideAnimation]);
+    animation.value = withSpring(1, { damping: 15, stiffness: 200 });
+  }, [animation]);
 
   const closeModal = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(backgroundOpacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-        easing: Easing.in(Easing.ease),
-      }),
-      Animated.timing(slideAnimation, {
-        toValue: 300,
-        duration: 200,
-        useNativeDriver: true,
-        easing: Easing.in(Easing.ease),
-      }),
-    ]).start(() => {
-      setShowModal(false);
-      onCancel?.(); // Call onCancel callback if provided
+    animation.value = withTiming(0, { duration: 250 }, (finished) => {
+      if (finished) {
+        runOnJS(setShowModal)(false);
+        onCancel && runOnJS(onCancel)();
+      }
     });
-  }, [backgroundOpacity, slideAnimation, onCancel]);
+  }, [animation, onCancel]);
 
   useEffect(() => {
-    isVisible ? openModal() : closeModal();
+    if (isVisible) {
+      openModal();
+    } else {
+      closeModal();
+    }
   }, [isVisible, openModal, closeModal]);
 
+  const backgroundStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolate.CLAMP),
+  }));
+
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      animation.value,
+      [0, 0.5, 1],
+      [0, 0, 1],
+      Extrapolation.CLAMP,
+    ),
+    transform: [
+      {
+        translateY: interpolate(
+          animation.value,
+          [0, 1],
+          [300, 0],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+  }));
+
   const TriggerElement = trigger
-    ? React.cloneElement(trigger, {
-        onPress: openModal,
-      })
+    ? React.cloneElement(trigger, { onPress: openModal })
     : null;
 
   return (
     <>
       {TriggerElement}
       <Modal
-        animationType="none"
         transparent={true}
         visible={showModal}
         onRequestClose={closeModal}
+        statusBarTranslucent
       >
-        <Animated.View
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            opacity: backgroundOpacity,
-          }}
-        >
-          <Animated.View
-            style={{
-              transform: [{ translateY: slideAnimation }],
-            }}
+        <Animated.View style={[styles.overlay, backgroundStyle]}>
+          <BlurView intensity={10} style={StyleSheet.absoluteFill} />
+          <AnimatedYStack
+            width="100%"
+            paddingHorizontal="$2"
+            paddingBottom={insets.bottom}
+            style={containerStyle}
           >
-            <YStack
-              paddingHorizontal="$2"
-              paddingBottom={insets.bottom}
-              gap="$3"
-            >
+            <YStack borderRadius="$6" overflow="hidden">
               <YStack
-                borderRadius={9}
-                overflow="hidden"
                 backgroundColor="$background"
+                padding="$4"
+                alignItems="center"
+                gap="$2"
               >
-                <YStack
-                  padding="$4"
-                  alignItems="center"
-                  backgroundColor="$color4"
-                  gap="$2"
+                {imageUrl && (
+                  <Image
+                    source={imageUrl}
+                    style={{ width: 100, height: 100, borderRadius: 50 }}
+                  />
+                )}
+                <SizableText
+                  size="$6"
+                  fontWeight="bold"
+                  textAlign="center"
+                  {...titleProps}
                 >
-                  {imageUrl && (
-                    <Image
-                      source={imageUrl}
-                      style={{ width: 100, height: 100, borderRadius: 50 }}
-                    />
-                  )}
-                  <YStack alignItems="center">
-                    <SizableText size="$5" fontWeight="bold" {...titleProps}>
-                      {title}
-                    </SizableText>
-                    {subtitle && (
-                      <Paragraph
-                        textAlign="center"
-                        theme="alt2"
-                        {...subtitleProps}
-                      >
-                        {subtitle}
-                      </Paragraph>
-                    )}
-                  </YStack>
-                </YStack>
-                {buttonOptions.map((option, index) => (
-                  <View key={index}>
-                    <Separator />
-                    <View>
-                      <Button
-                        size="$5"
-                        borderRadius={0}
-                        onPress={() => {
-                          option.onPress?.();
-                          closeModal();
-                        }}
-                      >
-                        <SizableText size="$5" {...option.textProps}>
-                          {option.text}
-                        </SizableText>
-                      </Button>
-                    </View>
-                  </View>
-                ))}
+                  {title}
+                </SizableText>
+                {subtitle && (
+                  <Paragraph textAlign="center" theme="alt2" {...subtitleProps}>
+                    {subtitle}
+                  </Paragraph>
+                )}
               </YStack>
-              <Button size="$5" color="$blue9" onPress={closeModal}>
-                Cancel
-              </Button>
+              {buttonOptions.map((option, index) => (
+                <React.Fragment key={index}>
+                  <Separator />
+                  <TouchableOpacity
+                    onPress={() => {
+                      option.onPress?.();
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      closeModal();
+                    }}
+                    style={[
+                      styles.optionButton,
+                      {
+                        backgroundColor: theme.gray1.val,
+                      },
+                    ]}
+                  >
+                    <SizableText size="$5" {...option.textProps}>
+                      {option.text}
+                    </SizableText>
+                  </TouchableOpacity>
+                </React.Fragment>
+              ))}
             </YStack>
-          </Animated.View>
+            <TouchableOpacity
+              onPress={closeModal}
+              style={[
+                styles.cancelButton,
+                {
+                  backgroundColor: theme.gray2.val,
+                  borderRadius: getToken("$6", "radius") as number,
+                },
+              ]}
+            >
+              <SizableText size="$5" color="$blue9">
+                Cancel
+              </SizableText>
+            </TouchableOpacity>
+          </AnimatedYStack>
         </Animated.View>
       </Modal>
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  optionButton: {
+    padding: 16,
+    alignItems: "center",
+  },
+  cancelButton: {
+    marginTop: 8,
+    padding: 16,
+    alignItems: "center",
+  },
+});
 
 export default ActionSheet;
