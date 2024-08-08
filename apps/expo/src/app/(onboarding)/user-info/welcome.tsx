@@ -20,8 +20,7 @@ const Welcome = () => {
     <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
       <YStack flex={1} paddingHorizontal="$4" gap="$6">
         <DisclaimerText>
-          Welcome to OPPFY - where your friends get to be your embarrassing OPs
-          (and you get to be theirs)!
+          Welcome to OPPFY, a place where roles are reversed.
         </DisclaimerText>
         <YGroup gap="$4">
           <YGroup.Item>

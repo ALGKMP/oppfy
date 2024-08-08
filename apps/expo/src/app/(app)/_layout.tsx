@@ -40,14 +40,17 @@ const AppLayout = () => {
   }
 
   if (!isSignedIn) {
+    console.log("!isSignedIn");
     return <Redirect href="/(onboarding)" />;
   }
 
   if (!onboardingComplete) {
+    console.log("!onboardingComplete");
     return <Redirect href="/(onboarding)/user-info/welcome" />;
   }
 
   if (!requiredPermissions) {
+    console.log("!requiredPermissions");
     return <Redirect href="/(onboarding)/misc/permissions" />;
   }
 
