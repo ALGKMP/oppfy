@@ -184,7 +184,8 @@ const HomeScreen = () => {
   }
 
   return (
-    <BaseScreenView padding={0}>
+    // ! dont remove the paddingBottom 0, it actually does something
+    <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
         nestedScrollEnabled={true}
         data={postItems}
