@@ -192,12 +192,7 @@ interface ListItemProps {
   checkbox: React.ReactNode;
 }
 
-const ListItem: React.FC<ListItemProps> = ({
-  emoji,
-  title,
-  subTitle,
-  checkbox,
-}) => {
+const ListItem = ({ emoji, title, subTitle, checkbox }: ListItemProps) => {
   return (
     <XStack alignItems="center" gap="$2">
       <Text fontSize="$10">{emoji}</Text>
