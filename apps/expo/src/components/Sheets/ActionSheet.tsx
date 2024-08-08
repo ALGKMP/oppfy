@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ImageSourcePropType, Modal, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
-  Extrapolate,
   Extrapolation,
   interpolate,
   runOnJS,
@@ -84,7 +83,7 @@ const ActionSheet = ({
   }, [isVisible, openModal, closeModal]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolate.CLAMP),
+    opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
   }));
 
   const containerStyle = useAnimatedStyle(() => ({
