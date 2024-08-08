@@ -105,7 +105,7 @@ const HeaderRight = (_: HeaderRightProps) => (
   <TouchableOpacity
     hitSlop={10}
     onPress={() => {
-      void Linking.openURL("https://www.oppfy.com");
+      void Linking.openURL("https://www.oppfy.app");
     }}
   >
     <Info />

@@ -6,9 +6,11 @@ import * as StoreReview from "expo-store-review";
 import {
   BellRing,
   ChevronRight,
+  FileLock2,
   Hammer,
   Info,
   LifeBuoy,
+  NotepadText,
   Share2,
   ShieldCheck,
   Star,
@@ -24,8 +26,8 @@ import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 
 enum WEBSITE_URL {
-  HELP = "https://oppfy/help.com",
-  ABOUT = "https://oppfy/about.com",
+  PRIVACY = "https://oppfy/privacy.app",
+  TERMS = "https://oppfy/terms.app",
 }
 
 const Settings = () => {
@@ -37,9 +39,9 @@ const Settings = () => {
   // TODO: Update details
   const handleShare = async () => {
     await Share.share({
-      title: "Share Oppfy",
-      message: "Check out Oppfy, it's a great app!",
-      url: "https://oppfy.com",
+      title: "OPPFY",
+      message: "Become an OPP!",
+      url: "https://oppfy.app",
     });
   };
 
@@ -101,16 +103,16 @@ const Settings = () => {
           onPress: () => void handleRate(),
         },
         {
-          title: "Help",
-          icon: <LifeBuoy />,
+          title: "Privacy Policy",
+          icon: <FileLock2 />,
           iconAfter: <ChevronRight />,
-          onPress: () => void Linking.openURL(WEBSITE_URL.HELP),
+          onPress: () => void Linking.openURL(WEBSITE_URL.PRIVACY),
         },
         {
-          title: "About",
-          icon: <Info />,
+          title: "Terms and Conditions",
+          icon: <NotepadText />,
           iconAfter: <ChevronRight />,
-          onPress: () => void Linking.openURL(WEBSITE_URL.ABOUT),
+          onPress: () => void Linking.openURL(WEBSITE_URL.TERMS),
         },
       ],
     },
@@ -127,13 +129,13 @@ const Settings = () => {
         >
           Logout
         </Button>
-        <Button
+        {/* <Button
           size="$4.5"
           color="$yellow10Dark"
           onPress={() => router.push("/_sitemap")}
         >
           Sitemap
-        </Button>
+        </Button> */}
       </YStack>
 
       <ActionSheet

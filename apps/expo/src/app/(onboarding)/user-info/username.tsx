@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Haptics } from "expo";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { H1, YStack } from "tamagui";
 
