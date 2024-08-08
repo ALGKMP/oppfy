@@ -129,13 +129,13 @@ const Settings = () => {
         >
           Logout
         </Button>
-        <Button
+        {/* <Button
           size="$4.5"
           color="$yellow10Dark"
           onPress={() => router.push("/_sitemap")}
         >
           Sitemap
-        </Button>
+        </Button> */}
       </YStack>
 
       <ActionSheet
