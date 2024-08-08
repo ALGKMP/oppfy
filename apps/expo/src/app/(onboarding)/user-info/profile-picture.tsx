@@ -32,20 +32,21 @@ const ProfilePicture = () => {
     });
   }, []);
 
-  const onSubmit = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("misc/recomendations");
-  };
-  const onSkip = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("misc/recomendations");
-  };
-  /*   const onSubmit = () =>
+  // const onSubmit = () => {
+  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  //   router.replace("misc/recomendations");
+  // };
+  // const onSkip = () => {
+  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  //   router.replace("misc/recomendations");
+  // };
+
+  const onSubmit = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
 
   const onSkip = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
- */
+
   return (
     <KeyboardSafeView>
       <BaseScreenView
