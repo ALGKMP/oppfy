@@ -23,8 +23,6 @@ const AppLayout = () => {
 
   const { isLoading: onboardingCompleteIsLoading, data: onboardingComplete } =
     api.user.onboardingComplete.useQuery();
-  const { isLoading: profileDataLoading, data: profileData } =
-    api.profile.getFullProfileSelf.useQuery();
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -37,7 +35,7 @@ const AppLayout = () => {
     [],
   );
 
-  if (onboardingCompleteIsLoading || profileDataLoading) {
+  if (onboardingCompleteIsLoading) {
     return <LoadingIndicatorOverlay />;
   }
 
@@ -53,9 +51,9 @@ const AppLayout = () => {
     return <Redirect href="/(onboarding)/misc/permissions" />;
   }
 
-  if (profileData && profileData.profileStats.posts < 0) {
-    return <Redirect href="/(locked)/invite" />;
-  }
+  // if (profileData && profileData.profileStats.posts < 0) {
+  //   return <Redirect href="/(locked)/invite" />;
+  // }
 
   return (
     <Stack
