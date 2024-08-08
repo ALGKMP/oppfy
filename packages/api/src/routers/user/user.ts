@@ -48,6 +48,18 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
+  checkOnboardingComplete: publicProcedure.mutation(async ({ ctx }) => {
+    try {
+      return await ctx.services.user.checkOnboardingComplete(ctx.session?.uid);
+    } catch (err) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to check if user has completed the onboarding process",
+        cause: err,
+      });
+    }
+  }),
+
   isNewUser: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.user.isNewUser(ctx.session.uid);

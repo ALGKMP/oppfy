@@ -58,9 +58,7 @@ export class UserService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
 
-    if (user.profile === undefined) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, "Profile not found");
-    }
+    if (user.profile === undefined) return false;
 
     return [
       user.profile.dateOfBirth,

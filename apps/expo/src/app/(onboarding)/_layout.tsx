@@ -54,6 +54,7 @@ const OnboardingLayout = () => {
         name="user-info/welcome"
         options={{
           animation: "fade",
+          gestureEnabled: false,
           headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
         }}
       />
