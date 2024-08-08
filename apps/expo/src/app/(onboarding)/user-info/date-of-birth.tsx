@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import DatePicker from "react-native-date-picker";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { H1, YStack } from "tamagui";
 
@@ -29,6 +30,8 @@ const DateOfBirth = () => {
   );
 
   const onSubmit = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     if (dateOfBirth === null) return;
 
     await updateProfile.mutateAsync({

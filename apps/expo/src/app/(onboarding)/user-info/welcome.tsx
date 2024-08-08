@@ -1,4 +1,5 @@
 import React from "react";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { H4, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
@@ -12,14 +13,12 @@ const Welcome = () => {
   const router = useRouter();
 
   const onSubmit = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/user-info/full-name");
   };
 
   return (
-    <BaseScreenView
-      safeAreaEdges={["bottom"]}
-      paddingHorizontal={0}
-    >
+    <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
       <YStack flex={1} paddingHorizontal="$4" gap="$8">
         <DisclaimerText>
           Welcome to OPPFY, a place where roles are reversed.

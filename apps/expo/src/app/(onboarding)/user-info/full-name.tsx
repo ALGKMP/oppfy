@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { H1, YStack } from "tamagui";
 
@@ -26,9 +27,12 @@ const FullName = () => {
   );
 
   const onSubmit = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     await updateProfile.mutateAsync({
       fullName,
     });
+
     router.push("/user-info/date-of-birth");
   };
 

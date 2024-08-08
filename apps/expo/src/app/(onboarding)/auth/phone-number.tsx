@@ -61,11 +61,12 @@ const PhoneNumber = () => {
   );
 
   const onSubmit = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     await signInWithPhoneNumber(e164PhoneNumber);
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
       params: {
         phoneNumber: e164PhoneNumber,

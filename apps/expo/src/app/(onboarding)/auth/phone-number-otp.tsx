@@ -51,8 +51,6 @@ const PhoneNumberOTP = () => {
       return;
     }
 
-    console.log("truign this");
-
     await createUser.mutateAsync({
       userId,
       phoneNumber,
@@ -65,13 +63,14 @@ const PhoneNumberOTP = () => {
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     userOnboardingCompleted
       ? router.replace("/(app)/(bottom-tabs)/(home)")
       : router.replace("/user-info/welcome");
   };
 
   const onSubmit = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     let userCredential: FirebaseAuthTypes.UserCredential | null = null;
 
     try {

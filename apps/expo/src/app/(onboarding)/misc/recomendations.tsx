@@ -8,6 +8,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { useRoute } from "@react-navigation/native";
@@ -175,6 +176,8 @@ const OnboardingRecomendations = () => {
   };
 
   const onDone = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     // if (selectedUsers.length >= requiredUsers) {
     try {
       void followMultipleUsersMutation.mutateAsync({

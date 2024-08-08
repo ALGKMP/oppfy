@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Linking } from "react-native";
 import * as Contacts from "expo-contacts";
+import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
@@ -39,6 +40,7 @@ const Permissions: React.FC = () => {
   };
 
   const onPress = (): void => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     isSignedIn
       ? router.push("/(app)/(bottom-tabs)/(home)")
       : router.push("/auth/phone-number");

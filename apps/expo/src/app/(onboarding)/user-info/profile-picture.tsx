@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { TouchableOpacity } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
@@ -31,9 +32,14 @@ const ProfilePicture = () => {
     });
   }, []);
 
-  const onSubmit = () => router.replace("misc/recomendations");
-  const onSkip = () => router.replace("misc/recomendations");
-
+  const onSubmit = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.replace("misc/recomendations");
+  };
+  const onSkip = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.replace("misc/recomendations");
+  };
   /*   const onSubmit = () =>
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
 
