@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Modal, StyleSheet } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Modal, StyleSheet, TouchableOpacity } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -136,9 +135,10 @@ const AlertDialog = ({
             style={containerStyle}
           >
             <YStack
-              backgroundColor="$background"
-              paddingHorizontal="$6"
+              width={"100%"}
               paddingVertical="$4"
+              paddingHorizontal="$6"
+              backgroundColor="$background"
               gap
             >
               <SizableText
@@ -157,7 +157,7 @@ const AlertDialog = ({
             </YStack>
             <YStack>
               <Separator />
-              <XStack>
+              <XStack backgroundColor="$gray2">
                 <TouchableOpacity
                   onPress={() => {
                     handleCancel();
