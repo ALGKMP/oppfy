@@ -18,7 +18,7 @@ import {
 import { api } from "~/utils/api";
 
 // ! This is for testing purposes only, do not use in production
-// auth().settings.appVerificationDisabledForTesting = true;
+auth().settings.appVerificationDisabledForTesting = true;
 
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
