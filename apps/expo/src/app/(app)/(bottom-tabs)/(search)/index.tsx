@@ -3,15 +3,7 @@ import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
 import { FlashList } from "@shopify/flash-list";
-import {
-  H5,
-  H6,
-  ListItemTitle,
-  SizableText,
-  Text,
-  View,
-  YStack,
-} from "tamagui";
+import { H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -76,7 +68,7 @@ const Search = () => {
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={Keyboard.dismiss}
         keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={<ListItemTitle>Search Results</ListItemTitle>}
+        ListHeaderComponent={<H5 theme="alt1">Search Results</H5>}
         renderItem={({ item }) => (
           <VirtualizedListItem
             loading={false}
