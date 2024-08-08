@@ -12,7 +12,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
-import Icon from "@assets/icon.png";
+import Splash from "@assets/splash.png";
 import { H4 } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
@@ -220,7 +220,7 @@ const Start = () => {
           }}
         >
           <AnimatedImage
-            source={Icon}
+            source={Splash}
             style={[
               {
                 width: "100%",
