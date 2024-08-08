@@ -125,7 +125,7 @@ const Search = () => {
               renderRecommendations(recommendationsData)
             ) : (
               // TODO: Implement
-              <Text>Testing updates</Text>
+              <></>
             )
           ) : isLoading ? (
             renderLoadingSkeletons()
