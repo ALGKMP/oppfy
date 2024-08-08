@@ -51,6 +51,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         <FlashList
           data={PLACEHOLDER_DATA}
           horizontal
+          ListEmptyComponent={null}
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
           renderItem={() => <Skeleton circular size={70} />}
