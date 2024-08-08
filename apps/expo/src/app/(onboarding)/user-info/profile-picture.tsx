@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.png";
-import { Avatar, H1, Spinner, YStack } from "tamagui";
+import { H1, Spinner, YStack } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import {
@@ -17,9 +17,9 @@ import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
   const router = useRouter();
-  // sync the contacts
-  const { syncContacts } = useContacts();
   const utils = api.useUtils();
+
+  const { syncContacts } = useContacts();
 
   const { imageUri, pickAndUploadImage, uploadStatus } =
     useUploadProfilePicture({
@@ -41,11 +41,15 @@ const ProfilePicture = () => {
   //   router.replace("misc/recomendations");
   // };
 
-  const onSubmit = () =>
+  const onSubmit = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
+  };
 
-  const onSkip = () =>
+  const onSkip = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
+  };
 
   return (
     <KeyboardSafeView>
