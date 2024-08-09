@@ -221,6 +221,7 @@ const Start = () => {
         >
           <AnimatedImage
             source={Splash}
+            contentFit="contain"
             style={[
               {
                 width: "100%",
@@ -229,7 +230,6 @@ const Start = () => {
               },
               animatedIconStyle,
             ]}
-            contentFit="contain"
           />
           <Animated.View style={[animatedSubtitleStyle]}>
             <H4 fontSize={24} color="white" textAlign="center">
