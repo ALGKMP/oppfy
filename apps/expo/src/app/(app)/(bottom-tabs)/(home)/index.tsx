@@ -138,7 +138,7 @@ const HomeScreen = () => {
       return null;
 
     return (
-      <View paddingTop="$4">
+      <View paddingTop="$4" paddingHorizontal="$1">
         <PeopleCarousel
           title="Suggestions"
           showMore={recommendationsData.length > 10}
