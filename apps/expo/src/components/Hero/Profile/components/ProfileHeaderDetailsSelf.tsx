@@ -143,7 +143,7 @@ const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
           />
 
           <StatusRenderer
-            data={!props.loading ? props.data.bio ?? "" : undefined}
+            data={!props.loading ? (props.data.bio ?? "") : undefined}
             loadingComponent={<Skeleton width={150} height={20} />}
             successComponent={(bio) =>
               bio.length ? (

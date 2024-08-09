@@ -69,7 +69,13 @@ const ProfilePicture = () => {
             >
               <Image
                 source={imageUri ?? DefaultProfilePicture}
-                style={{ width: 200, height: 200, borderRadius: 100 }}
+                style={{
+                  width: 200,
+                  height: 200,
+                  borderRadius: 100,
+                  borderColor: "#F214FF",
+                  borderWidth: 2,
+                }}
               />
             </TouchableOpacity>
 
