@@ -45,7 +45,7 @@ const getBaseUrl = () => {
   const localhost = debuggerHost?.split(":")[0];
 
   if (!localhost) {
-    return "https://app.oppfy.app"; 
+    return "https://app.oppfy.app";
   }
   return `http://${localhost}:3000`;
 };
@@ -78,8 +78,6 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
       ],
     }),
   );
-
-  // useReactQueryDevTools(queryClient);
 
   return (
     <api.Provider client={trpcClient} queryClient={queryClient}>

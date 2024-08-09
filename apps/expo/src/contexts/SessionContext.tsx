@@ -30,6 +30,8 @@ type Status = "loading" | "success" | "error";
 const AuthContext = createContext<SessionContextType | undefined>(undefined);
 
 const SessionProvider = ({ children }: SessionProviderProps) => {
+  const utils = api.useUtils();
+
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
   const [confirmation, setConfirmation] =
@@ -87,6 +89,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const signOut = async () => {
     await auth().signOut();
     setUser(null);
+    router.replace("/(onboarding)");
   };
 
   const deleteAccount = async () => {

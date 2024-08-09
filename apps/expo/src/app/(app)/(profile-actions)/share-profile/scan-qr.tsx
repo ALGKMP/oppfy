@@ -60,9 +60,13 @@ const ScanQr = () => {
 
   if (!hasPermission) {
     return (
-      <View flex={1} alignItems="center" justifyContent="center">
-        <Text>No access to camera</Text>
-      </View>
+      <BaseScreenView justifyContent="center" alignItems="center">
+        <EmptyPlaceholder
+          title="No camera device found"
+          subtitle="Please check your camera settings and try again."
+          icon={<CameraOff />}
+        />
+      </BaseScreenView>
     );
   }
 

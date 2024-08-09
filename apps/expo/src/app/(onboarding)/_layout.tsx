@@ -151,12 +151,10 @@ const Header = ({ navigation, options }: HeaderProps) => (
 );
 
 const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
-  const router = useRouter();
   const { signOut } = useSession();
 
   const onSubmit = async () => {
     await signOut();
-    router.replace("/(onboarding)");
   };
 
   return (
