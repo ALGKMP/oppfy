@@ -232,7 +232,7 @@ const ListFooter = () => {
           overflow="hidden"
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
+            source={{ uri: "https://randomuser.me/api/portraits/women/28.jpg" }}
           />
         </Circle>
         <Circle
@@ -246,7 +246,7 @@ const ListFooter = () => {
           marginRight={-15}
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/women/1.jpg" }}
+            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
           />
         </Circle>
         <Circle
@@ -257,7 +257,7 @@ const ListFooter = () => {
           overflow="hidden"
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/men/2.jpg" }}
+            source={{ uri: "https://randomuser.me/api/portraits/women/64.jpg" }}
           />
         </Circle>
       </XStack>
