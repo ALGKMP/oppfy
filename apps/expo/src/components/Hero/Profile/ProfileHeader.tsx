@@ -115,7 +115,6 @@ const ProfileHeader = (props: ProfileHeaderProps) => {
             loading={false}
             data={recommendationsData}
             title="Suggestions"
-            emoji="🔥"
             showMore={recommendationsData.length > 0}
             onItemPress={props.navigateToProfile}
             onShowMore={() => {
