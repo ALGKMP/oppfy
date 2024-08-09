@@ -28,8 +28,10 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
+import { CameraOff } from "@tamagui/lucide-icons";
 import { Text, View } from "tamagui";
 
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import {
   CaptureButton,
@@ -374,7 +376,11 @@ const CameraPage = () => {
 const NoCameraDeviceError = () => {
   return (
     <BaseScreenView justifyContent="center" alignItems="center">
-      <Text>No camera device found</Text>
+      <EmptyPlaceholder
+        title="No camera device found"
+        subtitle="Please check your camera settings and try again."
+        icon={<CameraOff />}
+      />
     </BaseScreenView>
   );
 };

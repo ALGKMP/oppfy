@@ -12,6 +12,7 @@ import { CameraOff } from "@tamagui/lucide-icons";
 import { Text, View } from "tamagui";
 
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import { BaseScreenView } from "~/components/Views";
 
 const { width } = Dimensions.get("window");
 
@@ -67,13 +68,13 @@ const ScanQr = () => {
 
   if (device === undefined) {
     return (
-      <View flex={1} alignItems="center" justifyContent="center">
+      <BaseScreenView justifyContent="center" alignItems="center">
         <EmptyPlaceholder
-          title="Camera not available"
-          subtitle="Please check your camera permissions"
+          title="No camera device found"
+          subtitle="Please check your camera settings and try again."
           icon={<CameraOff />}
         />
-      </View>
+      </BaseScreenView>
     );
   }
 
