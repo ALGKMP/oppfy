@@ -81,16 +81,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
       throw new Error("No confirmation result available for OTP verification.");
     }
 
-    return await confirmation
-      .confirm(otp)
-      .then((userCredential) => {
-        console.log("Phone authentication successful", userCredential);
-        return userCredential;
-      })
-      .catch((err) => {
-        console.log("Phone authentication failed", err.message);
-        return null;
-      });
+    return await confirmation.confirm(otp);
   };
 
   const signOut = async () => {
