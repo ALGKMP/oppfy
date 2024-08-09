@@ -1,4 +1,4 @@
-import { and, db, eq, or, schema } from "@oppfy/db";
+import { and, db, eq, inArray, or, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
 
 import { handleDatabaseErrors } from "../../errors";
@@ -13,12 +13,12 @@ export class ContactsRepository {
         where: eq(schema.userContact.userId, userId),
       });
 
-      // contacts to delete
-      const contactsToDelete = oldContacts.filter(
-        (contact) => !hashedPhoneNumbers.includes(contact.contactId),
-      );
+      // Find contacts to delete
+      const contactsToDelete = oldContacts
+        .filter((contact) => !hashedPhoneNumbers.includes(contact.contactId))
+        .map((contact) => contact.contactId);
 
-      // contacts to add
+      // Find contacts to add
       const contactsToAdd = hashedPhoneNumbers.filter(
         (hashedPhoneNumber) =>
           !oldContacts.some(
@@ -26,50 +26,45 @@ export class ContactsRepository {
           ),
       );
 
-      // delete contacts
-      await tx
-        .delete(schema.userContact)
-        .where(
-          and(
-            eq(schema.userContact.userId, userId),
-            or(
-              ...contactsToDelete.map((contact) =>
-                eq(schema.userContact.contactId, contact.contactId),
-              ),
+      // Batch delete contacts
+      if (contactsToDelete.length > 0) {
+        await tx
+          .delete(schema.userContact)
+          .where(
+            and(
+              eq(schema.userContact.userId, userId),
+              inArray(schema.userContact.contactId, contactsToDelete),
             ),
-          ),
+          );
+      }
+
+      // Batch insert contacts into `contact` table if they don't exist
+      if (contactsToAdd.length > 0) {
+        const existingContacts = await tx.query.contact.findMany({
+          where: inArray(schema.contact.id, contactsToAdd),
+        });
+
+        const newContactsToInsert = contactsToAdd.filter(
+          (contact) =>
+            !existingContacts.some((existing) => existing.id === contact),
         );
 
-      // add contacts, if the contact is not in the contact table add it there firs then add it to the userContact table
-      for (const contact of contactsToAdd) {
-        const contactId = await tx.query.contact.findFirst({
-          where: eq(schema.contact.id, contact),
-        });
-
-        if (!contactId) {
-          await tx.insert(schema.contact).values({ id: contact });
+        if (newContactsToInsert.length > 0) {
+          await tx
+            .insert(schema.contact)
+            .values(newContactsToInsert.map((id) => ({ id })));
         }
 
-        // Check if the user_contact entry already exists
-        const userContactExists = await tx.query.userContact.findFirst({
-          where: and(
-            eq(schema.userContact.userId, userId),
-            eq(schema.userContact.contactId, contact),
-          ),
-        });
+        // Batch insert into `userContact` table
+        const userContactsToInsert = contactsToAdd.map((contact) => ({
+          userId,
+          contactId: contact,
+        }));
 
-        if (!userContactExists) {
-          try {
-            await tx.insert(schema.userContact).values({
-              userId,
-              contactId: contact,
-            });
-          } catch (error) {
-            // error here is going to be duplicate if that happens for some reason,
-            // just catching it here and ignoring it is faster than actually checking
-            // if there's a collision on every single one lol
-          }
-        }
+        await tx
+          .insert(schema.userContact)
+          .values(userContactsToInsert)
+          .onConflictDoNothing();
       }
     });
   }

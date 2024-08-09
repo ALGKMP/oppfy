@@ -72,50 +72,13 @@ export const handler = async (
       })
       .where(eq(schema.profile.id, user.profileId));
 
-    // Search for existing document
-    const searchResult = await openSearch.search<
-      OpenSearchResponse<OpenSearchProfileIndexResult>
-    >({
-      index: OpenSearchIndex.PROFILE,
-      body: {
-        query: {
-          term: { id: user.id },
-        },
-      },
+    console.log("USER ID: ", user.id);
+
+    await upsertProfile(user.id, {
+      profilePictureKey: objectKey,
     });
 
     await createCloudFrontInvalidation(objectKey);
-
-    if (searchResult.body.hits.hits.length === 0) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "OpenSearch profile index missing.",
-        }),
-      };
-    }
-
-    const documentId = searchResult.body.hits.hits[0]?._id;
-
-    if (documentId === undefined) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "DocumentId not found.",
-        }),
-      };
-    }
-
-    await openSearch.update({
-      index: OpenSearchIndex.PROFILE,
-      id: documentId,
-      body: {
-        doc: {
-          profilePictureKey: objectKey,
-          id: user.id, // Ensure the id is always included
-        },
-      },
-    });
 
     return {
       statusCode: 200,
@@ -132,7 +95,7 @@ export const handler = async (
   }
 };
 
-async function createCloudFrontInvalidation(objectKey: string) {
+const createCloudFrontInvalidation = async (objectKey: string) => {
   const params = {
     DistributionId: CLOUDFRONT_DISTRIBUTION_ID,
     InvalidationBatch: {
@@ -145,12 +108,41 @@ async function createCloudFrontInvalidation(objectKey: string) {
   };
 
   const command = new CreateInvalidationCommand(params);
+  return cloudFrontClient.send(command);
+};
 
-  try {
-    const response = await cloudFrontClient.send(command);
-    console.log("CloudFront invalidation created:", response);
-  } catch (error) {
-    console.error("Error creating CloudFront invalidation:", error);
-    throw error;
+const upsertProfile = async (
+  userId: string,
+  newProfileData: Partial<OpenSearchProfileIndexResult>,
+) => {
+  const userWithProfile = await db.query.user.findFirst({
+    where: eq(schema.user.id, userId),
+    with: {
+      profile: {
+        columns: {
+          username: true,
+          fullName: true,
+          bio: true,
+          dateOfBirth: true,
+          profilePictureKey: true,
+        },
+      },
+    },
+  });
+
+  if (userWithProfile === undefined) {
+    throw new Error("Profile not found");
   }
-}
+  const profileData = userWithProfile.profile;
+
+  const documentBody = {
+    ...profileData,
+    ...newProfileData,
+  };
+
+  await openSearch.index({
+    index: OpenSearchIndex.PROFILE,
+    id: userId,
+    body: documentBody,
+  });
+};

@@ -80,7 +80,7 @@ const Permissions = () => {
 
   return (
     <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
-      <YStack flex={1} paddingHorizontal="$4" gap="$8">
+      <YStack flex={1} paddingHorizontal="$4" gap="$6">
         <Text
           alignSelf="center"
           textAlign="center"

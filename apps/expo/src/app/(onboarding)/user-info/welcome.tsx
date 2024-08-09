@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { SplashScreen, useRouter } from "expo-router";
 import { H4, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
@@ -11,71 +11,62 @@ import {
 
 const Welcome = () => {
   const router = useRouter();
-
   const onSubmit = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/user-info/full-name");
   };
 
+  useEffect(() => void SplashScreen.hideAsync(), []);
+
   return (
     <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
-      <YStack flex={1} paddingHorizontal="$4" gap="$8">
+      <YStack flex={1} paddingHorizontal="$4" gap="$6">
         <DisclaimerText>
           Welcome to OPPFY, a place where roles are reversed.
         </DisclaimerText>
-
         <YGroup gap="$4">
           <YGroup.Item>
             <ListItem
-              emoji="👋"
-              title="Quick Connect"
-              subTitle="Dive into a world of ideas trends, and friends waiting one swipe away!"
+              emoji="🤝"
+              title="Mutual OP-eration"
+              subTitle="Embrace the chaos as you and your friends take turns posting for each other."
             />
           </YGroup.Item>
-
           <Separator />
-
           <YGroup.Item>
             <ListItem
-              emoji="📣"
-              title="Speak Up, Stand Out"
-              subTitle="Your posts matter. Post, share, and engage make your posts seen."
+              emoji="📷"
+              title="Unfiltered Exposure"
+              subTitle="Let your squad capture your most real, unedited moments - no filters needed!"
             />
           </YGroup.Item>
-
           <Separator />
-
           <YGroup.Item>
             <ListItem
-              emoji="🔒"
-              title="Privacy First"
-              subTitle="Your space, your rules. Enjoy a safe and respectful community."
+              emoji="💬"
+              title="Authentic Engagement"
+              subTitle="Comment, react, and vibe with your friends' posts to keep the conversation flowing."
             />
           </YGroup.Item>
-
           <Separator />
-
           <YGroup.Item>
             <ListItem
               emoji="🎉"
-              title="Ever-Evolving Fun"
-              subTitle="Fresh features and cool updates always on the horizon."
+              title="Living on the Edge"
+              subTitle="From embarrassing bloopers to epic adventures, your feed will be a rollercoaster ride."
             />
           </YGroup.Item>
-
           <Separator />
-
           <YGroup.Item>
             <ListItem
-              emoji="🤝"
-              title="We’re Here For You"
-              subTitle="Got a question? Our support team’s got your back."
+              emoji="👥"
+              title="Build Your Tribe"
+              subTitle="Curate a circle of friends who'll keep you entertained (and keep you on your toes)."
             />
           </YGroup.Item>
         </YGroup>
       </YStack>
-
-      <OnboardingButton onPress={onSubmit}>Continue</OnboardingButton>
+      <OnboardingButton onPress={onSubmit}>Become an OP</OnboardingButton>
     </BaseScreenView>
   );
 };
@@ -90,7 +81,6 @@ const ListItem = ({ emoji, title, subTitle }: ListItemProp) => {
   return (
     <XStack alignItems="center" gap="$3">
       <Text fontSize="$10">{emoji}</Text>
-
       <YStack flex={1} gap>
         <H4>{title}</H4>
         <DisclaimerText textAlign="left">{subTitle}</DisclaimerText>

@@ -2,8 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import auth from "@react-native-firebase/auth";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { H1, styled, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
@@ -23,8 +22,32 @@ auth().settings.appVerificationDisabledForTesting = true;
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
   ERROR_SENDING_CODE = "Error sending code. Try again later.",
+  INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
+  QUOTA_EXCEEDED = "SMS quota exceeded. Please try again later.",
+  CODE_EXPIRED = "The verification code has expired. Please request a new code.",
+  MISSING_VERIFICATION_CODE = "Verification code is missing. Please enter the code.",
+  NETWORK_REQUEST_FAILED = "Network error. Please check your connection and try again.",
+  TOO_MANY_REQUESTS = "Too many attempts. Please try again later.",
   UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
 }
+
+const FirebaseErrorCodes = {
+  INVALID_VERIFICATION_CODE: "auth/invalid-verification-code",
+  TOO_MANY_REQUESTS: "auth/too-many-requests",
+  INVALID_PHONE_NUMBER: "auth/invalid-phone-number",
+  QUOTA_EXCEEDED: "auth/quota-exceeded",
+  CODE_EXPIRED: "auth/code-expired",
+  MISSING_VERIFICATION_CODE: "auth/missing-verification-code",
+  NETWORK_REQUEST_FAILED: "auth/network-request-failed",
+};
+
+const isFirebaseError = (
+  err: unknown,
+): err is FirebaseAuthTypes.NativeFirebaseAuthError => {
+  return (err as FirebaseAuthTypes.NativeFirebaseAuthError).code.startsWith(
+    "auth/",
+  );
+};
 
 const PhoneNumberOTP = () => {
   const router = useRouter();
@@ -75,13 +98,38 @@ const PhoneNumberOTP = () => {
 
     try {
       userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
-    } catch (err) {
-      setError(Error.INCORRECT_CODE);
-      return;
+    } catch (error) {
+      if (!isFirebaseError(error)) {
+        setError(Error.UNKNOWN_ERROR);
+        return;
+      }
+
+      switch (error.code) {
+        case FirebaseErrorCodes.INVALID_VERIFICATION_CODE:
+          setError(Error.INCORRECT_CODE);
+          break;
+        case FirebaseErrorCodes.TOO_MANY_REQUESTS:
+          setError(Error.TOO_MANY_REQUESTS);
+          break;
+        case FirebaseErrorCodes.INVALID_PHONE_NUMBER:
+          setError(Error.INVALID_PHONE_NUMBER);
+          break;
+        case FirebaseErrorCodes.QUOTA_EXCEEDED:
+          setError(Error.QUOTA_EXCEEDED);
+          break;
+        case FirebaseErrorCodes.CODE_EXPIRED:
+          setError(Error.CODE_EXPIRED);
+          break;
+        case FirebaseErrorCodes.MISSING_VERIFICATION_CODE:
+          setError(Error.MISSING_VERIFICATION_CODE);
+          break;
+        case FirebaseErrorCodes.NETWORK_REQUEST_FAILED:
+          setError(Error.NETWORK_REQUEST_FAILED);
+          break;
+      }
     }
 
     if (!userCredential) {
-      setError(Error.UNKNOWN_ERROR);
       return;
     }
 

@@ -1,6 +1,8 @@
 import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import Splash from "@assets/splash.png";
 import type {
   HeaderBackButtonProps,
   HeaderButtonProps,
@@ -52,6 +54,7 @@ const OnboardingLayout = () => {
         name="user-info/welcome"
         options={{
           animation: "fade",
+          gestureEnabled: false,
           headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
         }}
       />
@@ -84,9 +87,11 @@ type HeaderRightProps = HeaderButtonProps;
 type HeaderProps = NativeStackHeaderProps;
 
 const HeaderTitle = (_: HeaderTitleProps) => (
-  <Text fontFamily="$modak" fontSize="$9">
-    OPPFY
-  </Text>
+  <Image
+    source={Splash}
+    contentFit="contain"
+    style={{ width: 110, height: 110 }}
+  />
 );
 
 const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {

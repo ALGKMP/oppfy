@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
+import Splash from "@assets/splash.png";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
@@ -10,8 +12,10 @@ import {
   Avatar,
   Button,
   Circle,
+  H1,
+  H3,
   H5,
-  Image,
+  H6,
   SizableText,
   styled,
   Text,
@@ -180,11 +184,16 @@ const HomeScreen = () => {
   }
 
   if (recommendationsData?.length === 0 && postItems.length === 0) {
-    return <EmptyHomeScreen />;
+    return (
+      <BaseScreenView>
+        <EmptyHomeScreen />
+      </BaseScreenView>
+    );
   }
 
   return (
-    <BaseScreenView padding={0}>
+    // ! dont remove the paddingBottom 0, it actually does something
+    <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
         nestedScrollEnabled={true}
         data={postItems}
@@ -208,7 +217,12 @@ const HomeScreen = () => {
 
 const ListFooter = () => {
   return (
-    <YStack padding="$5" alignItems="center" gap="$4">
+    <YStack
+      paddingVertical="$8"
+      paddingHorizontal="$4"
+      alignItems="center"
+      gap="$4"
+    >
       <XStack justifyContent="center" alignItems="center">
         <Circle
           size={60}
@@ -218,7 +232,7 @@ const ListFooter = () => {
           overflow="hidden"
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
+            source={{ uri: "https://randomuser.me/api/portraits/women/28.jpg" }}
           />
         </Circle>
         <Circle
@@ -232,7 +246,7 @@ const ListFooter = () => {
           marginRight={-15}
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/women/1.jpg" }}
+            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
           />
         </Circle>
         <Circle
@@ -243,12 +257,12 @@ const ListFooter = () => {
           overflow="hidden"
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/men/2.jpg" }}
+            source={{ uri: "https://randomuser.me/api/portraits/women/64.jpg" }}
           />
         </Circle>
       </XStack>
-      <SizableText textAlign="center">
-        Invite some friends you want to use Oppfy with
+      <SizableText size="$5" textAlign="center">
+        Invite some friends to use OPPFY with
       </SizableText>
       <Button
         borderRadius="$8"
@@ -273,25 +287,25 @@ const ListFooter = () => {
 
 const EmptyHomeScreen = () => {
   return (
-    <YStack justifyContent="center" alignItems="center" gap="$4" padding="$5">
-      <ListFooter></ListFooter>
-      <YStack
-        alignItems="center"
-        gap="$2"
-        marginTop="$4"
-        paddingHorizontal="$5"
-      >
-        <Text color="white" fontSize={32} fontWeight="bold">
-          Welcome to
-        </Text>
-        <Text color="white" fontSize={32} fontWeight="bold">
-          OPPFY🎉
-        </Text>
-        <Text color="white" textAlign="center">
-          When you follow people, you'll see who gets opped here the second it
+    <YStack flex={1} justifyContent="space-between">
+      <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
+        <H1>Welcome to</H1>
+        <Image
+          source={Splash}
+          contentFit="contain"
+          style={{
+            width: "100%",
+            aspectRatio: 4,
+            resizeMode: "contain",
+            tintColor: "#F214FF",
+          }}
+        />
+        <SizableText size="$5" fontWeight="bold" textAlign="center">
+          Once you follow people, you'll see who gets opped here the moment it
           happens!
-        </Text>
+        </SizableText>
       </YStack>
+      <ListFooter />
     </YStack>
   );
 };

@@ -3,7 +3,6 @@ import {
   bigint,
   boolean,
   customType,
-  date,
   integer,
   pgEnum,
   pgTable,
@@ -21,7 +20,7 @@ const dateType = customType<{ data: Date | null; driverData: string | null }>({
     return "date";
   },
   toDriver(value: Date | null): string | null {
-    return value ? value.toISOString().split("T")[0] ?? null : null;
+    return value ? (value.toISOString().split("T")[0] ?? null) : null;
   },
   fromDriver(value: string | null): Date | null {
     return value ? new Date(value) : null;
@@ -198,7 +197,7 @@ export const profile = pgTable("profile", {
     .notNull(),
 });
 
-export const profileRelations = relations(profile, ({ one, many }) => ({
+export const profileRelations = relations(profile, ({ one }) => ({
   user: one(user, {
     fields: [profile.id],
     references: [user.profileId],

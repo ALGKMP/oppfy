@@ -36,9 +36,9 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  onboardingComplete: protectedProcedure.query(async ({ ctx }) => {
+  onboardingComplete: publicProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.services.user.checkOnboardingComplete(ctx.session.uid);
+      return await ctx.services.user.checkOnboardingComplete(ctx.session?.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
@@ -48,9 +48,9 @@ export const userRouter = createTRPCRouter({
     }
   }),
 
-  checkOnboardingComplete: protectedProcedure.mutation(async ({ ctx }) => {
+  checkOnboardingComplete: publicProcedure.mutation(async ({ ctx }) => {
     try {
-      return await ctx.services.user.checkOnboardingComplete(ctx.session.uid);
+      return await ctx.services.user.checkOnboardingComplete(ctx.session?.uid);
     } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

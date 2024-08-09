@@ -231,11 +231,19 @@ const Inbox = () => {
                 case "following":
                   return {
                     text: "Followed",
+                    disabled: true,
+                    disabledStyle: {
+                      opacity: 0.5,
+                    },
                     icon: <UserRoundCheck size="$1" />,
                   };
                 case "followRequestSent":
                   return {
                     text: "Sent",
+                    disabled: true,
+                    disabledStyle: {
+                      opacity: 0.5,
+                    },
                     icon: <UserRoundCheck size="$1" />,
                   };
               }

@@ -49,16 +49,22 @@ export class UserService {
     await this.searchRepository.deleteProfile(userId);
   }
 
-  async checkOnboardingComplete(userId: string) {
+  async checkOnboardingComplete(userId: string | undefined) {
+    if (userId === undefined) return false;
+
     const user = await this.profileRepository.getUserProfile(userId);
-    if (!user?.profile) {
-      throw new DomainError(ErrorCode.PROFILE_NOT_FOUND, "Profile not found");
+
+    if (user === undefined) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND);
     }
-    return (
-      !!user.profile.dateOfBirth &&
-      !!user.profile.fullName &&
-      !!user.profile.username
-    );
+
+    if (user.profile === undefined) return false;
+
+    return [
+      user.profile.dateOfBirth,
+      user.profile.fullName,
+      user.profile.username,
+    ].every((field) => !!field);
   }
 
   async isNewUser(uid: string) {

@@ -21,6 +21,7 @@ import {
   Separator,
   SizableText,
   useTheme,
+  View,
   YStack,
 } from "tamagui";
 
@@ -125,6 +126,7 @@ const ActionSheet = ({
             paddingHorizontal="$2"
             paddingBottom={insets.bottom}
             style={containerStyle}
+            gap="$2"
           >
             <YStack borderRadius="$6" overflow="hidden">
               <YStack
@@ -176,20 +178,25 @@ const ActionSheet = ({
                 </React.Fragment>
               ))}
             </YStack>
-            <TouchableOpacity
-              onPress={closeModal}
-              style={[
-                styles.cancelButton,
-                {
-                  backgroundColor: theme.gray2.val,
-                  borderRadius: getToken("$6", "radius") as number,
-                },
-              ]}
+            <View
+              backgroundColor="$background"
+              overflow="hidden"
+              borderRadius="$6"
             >
-              <SizableText size="$5" color="$blue9">
-                Cancel
-              </SizableText>
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={closeModal}
+                style={[
+                  styles.cancelButton,
+                  {
+                    backgroundColor: theme.gray2.val,
+                  },
+                ]}
+              >
+                <SizableText size="$5" color="$blue9">
+                  Cancel
+                </SizableText>
+              </TouchableOpacity>
+            </View>
           </AnimatedYStack>
         </Animated.View>
       </Modal>
@@ -208,7 +215,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    marginTop: 8,
     padding: 16,
     alignItems: "center",
   },
