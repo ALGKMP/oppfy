@@ -26,7 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     googleServicesFile: "./GoogleService-Info.plist",
-    supportsTablet: true,
+    supportsTablet: false,
     bundleIdentifier: "app.oppfy",
     entitlements: {
       "aps-environment": "development",
