@@ -24,6 +24,7 @@ import {
   useLocationPermission,
   useMicrophonePermission,
 } from "react-native-vision-camera";
+import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -287,88 +288,71 @@ const CameraPage = () => {
           {animations.map(({ id, point }) => (
             <FocusIcon key={id} x={point.x} y={point.y} />
           ))}
+
+          <CaptureButton
+            style={{
+              position: "absolute",
+              alignSelf: "center",
+              bottom: 36,
+            }}
+            camera={camera}
+            onMediaCaptured={onMediaCaptured}
+            cameraZoom={zoom}
+            minZoom={minZoom}
+            maxZoom={maxZoom}
+            flash={supportsFlash ? flash : "off"}
+            enabled={isCameraInitialized && isActive}
+            setIsPressingButton={setIsPressingButton}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.iconButton,
+              {
+                position: "absolute",
+                bottom: 12,
+                left: 12,
+              },
+            ]}
+            onPress={onOpenMediaPicker}
+          >
+            <BlurView intensity={50} style={styles.blurView}>
+              <Ionicons name="images" color="white" size={24} />
+            </BlurView>
+          </TouchableOpacity>
+
+          <View
+            position="absolute"
+            top={12}
+            right={12}
+            flexDirection="column"
+            gap={"$2"}
+          >
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={onFlipCameraPressed}
+            >
+              <BlurView intensity={50} style={styles.blurView}>
+                <Ionicons name="camera-reverse" color="white" size={24} />
+              </BlurView>
+            </TouchableOpacity>
+            {supportsFlash && (
+              <TouchableOpacity
+                style={[styles.iconButton]}
+                onPress={onFlashPressed}
+              >
+                <BlurView intensity={50} style={styles.blurView}>
+                  <Ionicons
+                    name={flash === "on" ? "flash" : "flash-off"}
+                    color="white"
+                    size={24}
+                  />
+                </BlurView>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </GestureDetector>
-
-      <CaptureButton
-        style={{
-          position: "absolute",
-          alignSelf: "center",
-          bottom: SAFE_AREA_PADDING.paddingBottom + 36,
-        }}
-        camera={camera}
-        onMediaCaptured={onMediaCaptured}
-        cameraZoom={zoom}
-        minZoom={minZoom}
-        maxZoom={maxZoom}
-        flash={supportsFlash ? flash : "off"}
-        enabled={isCameraInitialized && isActive}
-        setIsPressingButton={setIsPressingButton}
-      />
-
-      <TouchableOpacity
-        style={{
-          position: "absolute",
-          bottom: SAFE_AREA_PADDING.paddingBottom + 36,
-          left: SAFE_AREA_PADDING.paddingLeft + 36,
-        }}
-        onPress={onOpenMediaPicker}
-      >
-        <Ionicons name="images" color="white" size={32} />
-      </TouchableOpacity>
-
-      <View
-        style={{
-          position: "absolute",
-          top: SAFE_AREA_PADDING.paddingTop + 12,
-          left: SAFE_AREA_PADDING.paddingLeft + 12,
-        }}
-      ></View>
-
-      <View
-        style={{
-          position: "absolute",
-          top: SAFE_AREA_PADDING.paddingTop + 12,
-          right: SAFE_AREA_PADDING.paddingRight + 12,
-        }}
-      >
-        <TouchableOpacity style={styles.button} onPress={onFlipCameraPressed}>
-          <Ionicons name="camera-reverse" color="white" size={24} />
-        </TouchableOpacity>
-        {supportsFlash && (
-          <TouchableOpacity style={styles.button} onPress={onFlashPressed}>
-            <Ionicons
-              name={flash === "on" ? "flash" : "flash-off"}
-              color="white"
-              size={24}
-            />
-          </TouchableOpacity>
-        )}
-        {supportsHdr && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => setEnableHdr((h) => !h)}
-          >
-            <MaterialIcons
-              name={enableHdr ? "hdr-on" : "hdr-off"}
-              color="white"
-              size={24}
-            />
-          </TouchableOpacity>
-        )}
-        {supportsNightMode && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => setEnableNightMode(!enableNightMode)}
-          >
-            <Ionicons
-              name={enableNightMode ? "moon" : "moon-outline"}
-              color="white"
-              size={24}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
     </View>
   );
 };
@@ -387,17 +371,20 @@ const NoCameraDeviceError = () => {
 
 export default CameraPage;
 
-const CONTENT_SPACING = 15;
-const CONTROL_BUTTON_SIZE = 40;
-
 const styles = StyleSheet.create({
-  button: {
-    marginBottom: CONTENT_SPACING,
-    width: CONTROL_BUTTON_SIZE,
-    height: CONTROL_BUTTON_SIZE,
-    borderRadius: CONTROL_BUTTON_SIZE / 2,
-    backgroundColor: "rgba(140, 140, 140, 0.3)",
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 25,
+    overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
+  },
+  blurView: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(64, 64, 64, 0.4)",
   },
 });
