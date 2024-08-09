@@ -262,28 +262,31 @@ const CameraPage = () => {
         top={SAFE_AREA_PADDING.paddingTop}
       >
         <GestureDetector gesture={composedGesture}>
-          <ReanimatedCamera
-            ref={camera}
-            device={device}
-            isActive={isActive}
-            onInitialized={onInitialized}
-            format={format}
-            fps={30}
-            photoHdr={photoHdr}
-            videoHdr={videoHdr}
-            // outputOrientation="portrait"
-            photoQualityBalance="quality"
-            lowLightBoost={device.supportsLowLightBoost && enableNightMode}
-            enableZoomGesture={false}
-            animatedProps={cameraAnimatedProps}
-            photo={true}
-            video={true}
-            audio={microphone.hasPermission}
-            enableLocation={location.hasPermission}
-            style={{
-              flex: 1,
-            }}
-          />
+          {/* Do not delete this View, its needed to pass touch events to the camera */}
+          <View flex={1}>
+            <ReanimatedCamera
+              ref={camera}
+              device={device}
+              isActive={isActive}
+              onInitialized={onInitialized}
+              format={format}
+              fps={30}
+              photoHdr={photoHdr}
+              videoHdr={videoHdr}
+              // outputOrientation="portrait"
+              photoQualityBalance="quality"
+              lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+              enableZoomGesture={false}
+              animatedProps={cameraAnimatedProps}
+              photo={true}
+              video={true}
+              audio={microphone.hasPermission}
+              enableLocation={location.hasPermission}
+              style={{
+                flex: 1,
+              }}
+            />
+          </View>
         </GestureDetector>
 
         {animations.map(({ id, point }) => (
