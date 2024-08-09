@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Keyboard } from "react-native";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -90,7 +91,8 @@ const Search = () => {
   const renderRecommendations = (recommendationsData: RecommendationsData) => (
     <RecommendationList
       handleProfileClicked={(userId, username) => {
-        router.navigate({
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        router.push({
           pathname: "/(search)/profile/[userId]/",
           params: { userId, username },
         });
