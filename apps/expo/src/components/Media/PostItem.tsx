@@ -13,7 +13,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter, useSegments } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import {
   Heart,
   MessageCircle,

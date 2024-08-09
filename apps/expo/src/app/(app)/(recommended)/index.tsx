@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";

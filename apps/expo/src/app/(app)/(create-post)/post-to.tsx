@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
 import { Button, H5, H6, Input, SizableText, View, YStack } from "tamagui";

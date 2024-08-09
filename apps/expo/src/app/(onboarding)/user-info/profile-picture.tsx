@@ -3,7 +3,7 @@ import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { H1, Spinner, YStack } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";

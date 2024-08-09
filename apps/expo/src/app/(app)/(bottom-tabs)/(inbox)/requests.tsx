@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Button, H5, H6, Spacer, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";

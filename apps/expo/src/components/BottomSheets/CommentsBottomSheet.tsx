@@ -9,7 +9,7 @@ import { Keyboard, StyleSheet, TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,

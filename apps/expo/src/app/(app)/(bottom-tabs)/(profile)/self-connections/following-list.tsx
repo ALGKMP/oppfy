@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { H5, H6, Input, SizableText, View, YStack } from "tamagui";

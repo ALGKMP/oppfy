@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Keyboard } from "react-native";
 import { router } from "expo-router";
-import DefaultProfilePicture from "@assets/default-profile-picture.png";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { H5, H6, View, YStack } from "tamagui";
 
