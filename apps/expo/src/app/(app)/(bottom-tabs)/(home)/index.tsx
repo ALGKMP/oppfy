@@ -282,8 +282,8 @@ const ListFooter = () => {
 
 const EmptyHomeScreen = () => {
   return (
-    <YStack flex={1}>
-      <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
+    <YStack flex={1} paddingVertical="$6" justifyContent="space-between">
+      <YStack alignItems="center" justifyContent="center" gap="$3">
         <H1>Welcome to</H1>
         <Image
           source={Splash}
