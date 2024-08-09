@@ -30,12 +30,20 @@ const ListItem = ({
         return {
           text: "Sent",
           icon: <Send size="$1" />,
+          disabled: true,
+          disabledStyle: {
+            opacity: 0.5,
+          },
           onPress: () => void handleCancelFollowRequest(item.userId),
         };
       case "following":
         return {
-          text: "Unfollow",
+          text: "Followed",
           icon: <UserRoundMinus size="$1" />,
+          disabled: true,
+          disabledStyle: {
+            opacity: 0.5,
+          },
           onPress: () => void handleUnfollow(item.userId),
         };
       case "notFollowing":
