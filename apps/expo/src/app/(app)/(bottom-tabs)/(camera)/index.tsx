@@ -252,16 +252,16 @@ const CameraPage = () => {
 
   return (
     <View flex={1}>
-      <GestureDetector gesture={composedGesture}>
-        <View
-          width={SCREEN_WIDTH}
-          height={(SCREEN_WIDTH * 16) / 9}
-          borderRadius={20}
-          overflow="hidden"
-          alignSelf="center"
-          position="absolute"
-          top={SAFE_AREA_PADDING.paddingTop}
-        >
+      <View
+        width={SCREEN_WIDTH}
+        height={(SCREEN_WIDTH * 16) / 9}
+        borderRadius={20}
+        overflow="hidden"
+        alignSelf="center"
+        position="absolute"
+        top={SAFE_AREA_PADDING.paddingTop}
+      >
+        <GestureDetector gesture={composedGesture}>
           <ReanimatedCamera
             ref={camera}
             device={device}
@@ -284,75 +284,75 @@ const CameraPage = () => {
               flex: 1,
             }}
           />
+        </GestureDetector>
 
-          {animations.map(({ id, point }) => (
-            <FocusIcon key={id} x={point.x} y={point.y} />
-          ))}
+        {animations.map(({ id, point }) => (
+          <FocusIcon key={id} x={point.x} y={point.y} />
+        ))}
 
-          <CaptureButton
-            style={{
+        <CaptureButton
+          style={{
+            position: "absolute",
+            alignSelf: "center",
+            bottom: 36,
+          }}
+          camera={camera}
+          onMediaCaptured={onMediaCaptured}
+          cameraZoom={zoom}
+          minZoom={minZoom}
+          maxZoom={maxZoom}
+          flash={supportsFlash ? flash : "off"}
+          enabled={isCameraInitialized && isActive}
+          setIsPressingButton={setIsPressingButton}
+        />
+
+        <TouchableOpacity
+          style={[
+            styles.iconButton,
+            {
               position: "absolute",
-              alignSelf: "center",
-              bottom: 36,
-            }}
-            camera={camera}
-            onMediaCaptured={onMediaCaptured}
-            cameraZoom={zoom}
-            minZoom={minZoom}
-            maxZoom={maxZoom}
-            flash={supportsFlash ? flash : "off"}
-            enabled={isCameraInitialized && isActive}
-            setIsPressingButton={setIsPressingButton}
-          />
+              bottom: 12,
+              left: 12,
+            },
+          ]}
+          onPress={onOpenMediaPicker}
+        >
+          <BlurView intensity={50} style={styles.blurView}>
+            <Ionicons name="images" color="white" size={24} />
+          </BlurView>
+        </TouchableOpacity>
 
+        <View
+          position="absolute"
+          top={12}
+          right={12}
+          flexDirection="column"
+          gap={"$2"}
+        >
           <TouchableOpacity
-            style={[
-              styles.iconButton,
-              {
-                position: "absolute",
-                bottom: 12,
-                left: 12,
-              },
-            ]}
-            onPress={onOpenMediaPicker}
+            style={styles.iconButton}
+            onPress={onFlipCameraPressed}
           >
             <BlurView intensity={50} style={styles.blurView}>
-              <Ionicons name="images" color="white" size={24} />
+              <Ionicons name="camera-reverse" color="white" size={24} />
             </BlurView>
           </TouchableOpacity>
-
-          <View
-            position="absolute"
-            top={12}
-            right={12}
-            flexDirection="column"
-            gap={"$2"}
-          >
+          {supportsFlash && (
             <TouchableOpacity
-              style={styles.iconButton}
-              onPress={onFlipCameraPressed}
+              style={[styles.iconButton]}
+              onPress={onFlashPressed}
             >
               <BlurView intensity={50} style={styles.blurView}>
-                <Ionicons name="camera-reverse" color="white" size={24} />
+                <Ionicons
+                  name={flash === "on" ? "flash" : "flash-off"}
+                  color="white"
+                  size={24}
+                />
               </BlurView>
             </TouchableOpacity>
-            {supportsFlash && (
-              <TouchableOpacity
-                style={[styles.iconButton]}
-                onPress={onFlashPressed}
-              >
-                <BlurView intensity={50} style={styles.blurView}>
-                  <Ionicons
-                    name={flash === "on" ? "flash" : "flash-off"}
-                    color="white"
-                    size={24}
-                  />
-                </BlurView>
-              </TouchableOpacity>
-            )}
-          </View>
+          )}
         </View>
-      </GestureDetector>
+      </View>
     </View>
   );
 };
