@@ -22,6 +22,7 @@ import {
   ScrollView,
   Separator,
   SizableText,
+  Spacer,
   Text,
   useTheme,
   View,
@@ -391,6 +392,7 @@ const EditProfile = () => {
               <Separator />
 
               <XStack
+                paddingBottom="$2"
                 justifyContent="space-between"
                 alignItems="center"
                 onPress={() => openBottomSheet("bio")}
