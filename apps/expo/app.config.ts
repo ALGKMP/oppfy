@@ -1,7 +1,5 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
-import { env } from "@oppfy/env";
-
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "oppfy",
