@@ -65,10 +65,6 @@ const FollowingList = () => {
       if (ctx === undefined) return;
       utils.follow.paginateFollowingSelf.setInfiniteData({}, ctx.prevData);
     },
-    onSettled: async () => {
-      // Sync with server once mutation has settled
-      await utils.follow.paginateFollowingSelf.invalidate();
-    },
   });
 
   const unfollowMutation = api.follow.unfollowUser.useMutation({
@@ -104,10 +100,6 @@ const FollowingList = () => {
       if (ctx === undefined) return;
       utils.follow.paginateFollowingSelf.setInfiniteData({}, ctx.prevData);
     },
-    onSettled: async () => {
-      // Sync with server once mutation has settled
-      await utils.follow.paginateFollowingSelf.invalidate();
-    },
   });
 
   const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
@@ -142,10 +134,6 @@ const FollowingList = () => {
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
       utils.follow.paginateFollowingSelf.setInfiniteData({}, ctx.prevData);
-    },
-    onSettled: async () => {
-      // Sync with server once mutation has settled
-      await utils.follow.paginateFollowingSelf.invalidate();
     },
   });
 
