@@ -119,7 +119,20 @@ const FollowersList = () => {
   }
 
   if (followerItems.length === 0) {
-    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
+    return (
+      <BaseScreenView
+        scrollable
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        {renderNoResults()}
+      </BaseScreenView>
+    );
   }
 
   return (
