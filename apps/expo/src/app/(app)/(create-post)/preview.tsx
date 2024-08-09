@@ -8,16 +8,15 @@ import {
 } from "react-native";
 import type { AVPlaybackStatus } from "expo-av";
 import { ResizeMode, Video } from "expo-av";
+import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { ArrowBigRight, Download } from "@tamagui/lucide-icons";
+import { ArrowBigRight, Download, X } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import {
-  CONTENT_SPACING,
-  CONTROL_BUTTON_SIZE,
   SAFE_AREA_PADDING,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
@@ -109,27 +108,17 @@ const PreviewScreen = () => {
           ) : (
             <PreviewVideo uri={uri ?? ""} />
           )}
-        </View>
 
-        <View
-          position="absolute"
-          top={SAFE_AREA_PADDING.paddingTop + 12}
-          left={SAFE_AREA_PADDING.paddingLeft + 12}
-        >
-          <TouchableOpacity
-            style={{
-              marginBottom: CONTENT_SPACING,
-              width: CONTROL_BUTTON_SIZE,
-              height: CONTROL_BUTTON_SIZE,
-              borderRadius: CONTROL_BUTTON_SIZE / 2,
-              backgroundColor: "rgba(140, 140, 140, 0.3)",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="close" color="white" size={24} />
-          </TouchableOpacity>
+          <View position="absolute" top={12} left={12}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => router.back()}
+            >
+              <BlurView intensity={50} style={styles.blurView}>
+                <X />
+              </BlurView>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -253,5 +242,23 @@ const PreviewVideo = ({ uri }: PreviewProps) => {
     </Pressable>
   );
 };
+
+const styles = StyleSheet.create({
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 25,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  blurView: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(64, 64, 64, 0.4)",
+  },
+});
 
 export default PreviewScreen;
