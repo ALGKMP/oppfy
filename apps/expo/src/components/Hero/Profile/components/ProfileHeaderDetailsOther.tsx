@@ -58,7 +58,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const onFollowingListPress = () => {
     if (props.loading || props.isRestricted) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.navigate({
+    router.push({
       pathname: `${currentSegment}/profile/connections/[user-id]/following-list`,
       params: { userId: props.data.userId, username: props.data.username },
     });
@@ -67,7 +67,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
   const onFollowerListPress = () => {
     if (props.loading || props.isRestricted) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.navigate({
+    router.push({
       pathname: `${currentSegment}/profile/connections/[user-id]/followers-list`,
       params: { userId: props.data.userId, username: props.data.username },
     });
@@ -648,7 +648,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
           />
 
           <StatusRenderer
-            data={!props.loading ? props.data.bio ?? "" : undefined}
+            data={!props.loading ? (props.data.bio ?? "") : undefined}
             loadingComponent={<Skeleton width={150} height={20} />}
             successComponent={(bio) =>
               bio.length ? (
