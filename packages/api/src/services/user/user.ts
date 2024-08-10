@@ -54,10 +54,7 @@ export class UserService {
 
     const user = await this.profileRepository.getUserProfile(userId);
 
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND);
-    }
-
+    if (user === undefined) return false;
     if (user.profile === undefined) return false;
 
     return [
