@@ -3,7 +3,7 @@ import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { H1, styled, Text, View, XStack, YStack } from "tamagui";
+import { H1, Spinner, styled, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -59,6 +59,7 @@ const PhoneNumberOTP = () => {
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const createUser = api.user.createUser.useMutation();
   const userOnboardingCompletedMutation =
@@ -95,13 +96,14 @@ const PhoneNumberOTP = () => {
 
   const onSubmit = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsLoading(true);
+    setError(null);
 
     let userCredential: FirebaseAuthTypes.UserCredential | null = null;
 
     try {
       userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
     } catch (error) {
-      console.error("error", error);
       if (!isFirebaseError(error)) {
         setError(Error.UNKNOWN_ERROR);
         return;
@@ -130,6 +132,8 @@ const PhoneNumberOTP = () => {
           setError(Error.NETWORK_REQUEST_FAILED);
           break;
       }
+
+      setIsLoading(false);
     }
 
     if (!userCredential) {
@@ -145,6 +149,7 @@ const PhoneNumberOTP = () => {
     }
 
     isNewUser ? await handleNewUser(userId) : await handleExistingUser();
+    setIsLoading(false);
   };
 
   return (
@@ -178,9 +183,9 @@ const PhoneNumberOTP = () => {
 
           <OnboardingButton
             onPress={onSubmit}
-            disabled={!isValidPhoneNumberOTP}
+            disabled={!isValidPhoneNumberOTP || isLoading}
           >
-            Verify Code
+            {isLoading ? <Spinner /> : "Verify Code"}
           </OnboardingButton>
         </YStack>
       </BaseScreenView>
