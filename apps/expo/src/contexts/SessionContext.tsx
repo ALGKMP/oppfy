@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
@@ -30,6 +31,7 @@ type Status = "loading" | "success" | "error";
 const AuthContext = createContext<SessionContextType | undefined>(undefined);
 
 const SessionProvider = ({ children }: SessionProviderProps) => {
+  const router = useRouter();
   const utils = api.useUtils();
 
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
