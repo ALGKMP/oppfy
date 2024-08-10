@@ -65,18 +65,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   }, []);
 
   const signInWithPhoneNumber = async (phoneNumber: string) => {
-    // const result = await auth().signInWithPhoneNumber(phoneNumber);
-    const result = await auth()
-      .signInWithPhoneNumber(phoneNumber)
-      .then((confirmResult) => {
-        setConfirmation(confirmResult);
-        return confirmResult;
-      })
-      .catch((err) => {
-        console.log("err", err.message);
-        return null;
-      });
-
+    const result = await auth().signInWithPhoneNumber(phoneNumber);
+    setConfirmation(result);
     return result;
   };
 

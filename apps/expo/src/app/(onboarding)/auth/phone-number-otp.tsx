@@ -44,8 +44,13 @@ const FirebaseErrorCodes = {
 const isFirebaseError = (
   err: unknown,
 ): err is FirebaseAuthTypes.NativeFirebaseAuthError => {
-  return (err as FirebaseAuthTypes.NativeFirebaseAuthError).code.startsWith(
-    "auth/",
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    typeof (err as FirebaseAuthTypes.NativeFirebaseAuthError).code ===
+      "string" &&
+    (err as FirebaseAuthTypes.NativeFirebaseAuthError).code.startsWith("auth/")
   );
 };
 
@@ -99,6 +104,7 @@ const PhoneNumberOTP = () => {
     try {
       userCredential = await verifyPhoneNumberOTP(phoneNumberOTP);
     } catch (error) {
+      console.error("error", error);
       if (!isFirebaseError(error)) {
         setError(Error.UNKNOWN_ERROR);
         return;

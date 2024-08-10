@@ -65,7 +65,12 @@ const PhoneNumber = () => {
 
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
-    await signInWithPhoneNumber(e164PhoneNumber);
+    try {
+      await signInWithPhoneNumber(e164PhoneNumber);
+    } catch (err) {
+      // TODO: Proper error handling
+      console.log("err", err);
+    }
 
     router.push({
       params: {
