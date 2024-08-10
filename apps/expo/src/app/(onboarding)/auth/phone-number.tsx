@@ -11,6 +11,7 @@ import {
   H1,
   H6,
   ListItem,
+  Spinner,
   Text,
   useTheme,
   View,
@@ -94,8 +95,12 @@ const PhoneNumber = () => {
 
   const [error, setError] = useState<Error | null>(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const onSubmit = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsLoading(true);
+    setError(null);
 
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
@@ -109,10 +114,9 @@ const PhoneNumber = () => {
         pathname: "/auth/phone-number-otp",
       });
     } catch (err) {
-      console.error("Error sending verification code:", err);
-
       if (!isFirebaseError(err)) {
         setError(Error.UNKNOWN_ERROR);
+        setIsLoading(false);
         return;
       }
 
@@ -133,6 +137,8 @@ const PhoneNumber = () => {
           setError(Error.UNKNOWN_ERROR);
       }
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -178,8 +184,11 @@ const PhoneNumber = () => {
             )}
           </YStack>
 
-          <OnboardingButton onPress={onSubmit} disabled={!isValidPhoneNumber}>
-            Send Verification Text
+          <OnboardingButton
+            onPress={onSubmit}
+            disabled={!isValidPhoneNumber || isLoading}
+          >
+            {isLoading ? <Spinner /> : "Send Verification Text"}
           </OnboardingButton>
         </YStack>
       </BaseScreenView>
