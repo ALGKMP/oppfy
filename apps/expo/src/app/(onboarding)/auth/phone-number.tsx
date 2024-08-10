@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { Keyboard, Modal, TouchableOpacity } from "react-native";
+import { Alert, Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import {
@@ -10,6 +11,7 @@ import {
   H1,
   H6,
   ListItem,
+  Spinner,
   Text,
   useTheme,
   View,
@@ -38,6 +40,37 @@ const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
 );
 
+// ! This is for testing purposes only, do not use in production
+auth().settings.appVerificationDisabledForTesting = true;
+
+enum Error {
+  INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
+  QUOTA_EXCEEDED = "SMS quota exceeded. Please try again later.",
+  NETWORK_REQUEST_FAILED = "Network error. Please check your connection and try again.",
+  TOO_MANY_REQUESTS = "Too many attempts. Please try again later.",
+  UNKNOWN_ERROR = "An unknown error occurred. Please try again later.",
+}
+
+const FirebaseErrorCodes = {
+  INVALID_PHONE_NUMBER: "auth/invalid-phone-number",
+  QUOTA_EXCEEDED: "auth/quota-exceeded",
+  NETWORK_REQUEST_FAILED: "auth/network-request-failed",
+  TOO_MANY_REQUESTS: "auth/too-many-requests",
+};
+
+const isFirebaseError = (
+  err: unknown,
+): err is FirebaseAuthTypes.NativeFirebaseAuthError => {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    typeof (err as FirebaseAuthTypes.NativeFirebaseAuthError).code ===
+      "string" &&
+    (err as FirebaseAuthTypes.NativeFirebaseAuthError).code.startsWith("auth/")
+  );
+};
+
 const PhoneNumber = () => {
   const router = useRouter();
 
@@ -60,24 +93,53 @@ const PhoneNumber = () => {
     [phoneNumber, countryData.countryCode],
   );
 
+  const [error, setError] = useState<Error | null>(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const onSubmit = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    setIsLoading(true);
+    setError(null);
 
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     try {
       await signInWithPhoneNumber(e164PhoneNumber);
+
+      router.push({
+        params: {
+          phoneNumber: e164PhoneNumber,
+        },
+        pathname: "/auth/phone-number-otp",
+      });
     } catch (err) {
-      // TODO: Proper error handling
-      console.log("err", err);
+      if (!isFirebaseError(err)) {
+        setError(Error.UNKNOWN_ERROR);
+        setIsLoading(false);
+        return;
+      }
+
+      switch (err.code) {
+        case FirebaseErrorCodes.INVALID_PHONE_NUMBER:
+          setError(Error.INVALID_PHONE_NUMBER);
+          break;
+        case FirebaseErrorCodes.QUOTA_EXCEEDED:
+          setError(Error.QUOTA_EXCEEDED);
+          break;
+        case FirebaseErrorCodes.NETWORK_REQUEST_FAILED:
+          setError(Error.NETWORK_REQUEST_FAILED);
+          break;
+        case FirebaseErrorCodes.TOO_MANY_REQUESTS:
+          setError(Error.TOO_MANY_REQUESTS);
+          break;
+        default:
+          setError(Error.UNKNOWN_ERROR);
+      }
     }
 
-    router.push({
-      params: {
-        phoneNumber: e164PhoneNumber,
-      },
-      pathname: "/auth/phone-number-otp",
-    });
+    setIsLoading(false);
   };
 
   return (
@@ -99,7 +161,10 @@ const PhoneNumber = () => {
               />
               <OnboardingInput
                 value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                onChangeText={(text) => {
+                  setPhoneNumber(text);
+                  setError(null);
+                }}
                 placeholder="Your number here"
                 keyboardType="phone-pad"
                 autoFocus
@@ -109,14 +174,22 @@ const PhoneNumber = () => {
               />
             </InputWrapper>
 
-            <DisclaimerText>
-              By Continuing you agree to our <BoldText>Privacy Policy</BoldText>{" "}
-              and <BoldText>Terms of Service</BoldText>.
-            </DisclaimerText>
+            {error ? (
+              <DisclaimerText color="$red9">{error}</DisclaimerText>
+            ) : (
+              <DisclaimerText>
+                By Continuing you agree to our{" "}
+                <BoldText>Privacy Policy</BoldText> and{" "}
+                <BoldText>Terms of Service</BoldText>.
+              </DisclaimerText>
+            )}
           </YStack>
 
-          <OnboardingButton onPress={onSubmit} disabled={!isValidPhoneNumber}>
-            Send Verification Text
+          <OnboardingButton
+            onPress={onSubmit}
+            disabled={!isValidPhoneNumber || isLoading}
+          >
+            {isLoading ? <Spinner /> : "Send Verification Text"}
           </OnboardingButton>
         </YStack>
       </BaseScreenView>
