@@ -286,6 +286,10 @@ const CameraPage = () => {
               source={{ uri: "https://cdn.discordapp.com/attachments/1191423406902612010/1271956949092798495/IMG_2702.jpg?ex=66b939b8&is=66b7e838&hm=436d445ada531355e1a0c15e4ac6b55e2720fb4c993c24cf07f7cc81fb80831e&" }}
               style={{
                 flex: 1,
+                // move the image up by 100
+                marginTop: -100,
+                // move the image left by 100
+                marginRight: -70,
               }}
             />
           </View>
