@@ -122,7 +122,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           // keyExtractor={(item, index) => item.userId + index + pathname}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
-              <YStack gap="$1.5">
+              <YStack width={70} gap="$1.5" alignItems="center">
                 <Image
                   source={item.profilePictureUrl ?? DefaultProfilePicture}
                   style={{ width: 70, height: 70, borderRadius: 35 }}

@@ -19,7 +19,7 @@ const Welcome = () => {
   useEffect(() => void SplashScreen.hideAsync(), []);
 
   return (
-    <BaseScreenView safeAreaEdges={["bottom"]} paddingHorizontal={0}>
+    <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
       <YStack flex={1} paddingHorizontal="$4" gap="$6">
         <DisclaimerText>
           Welcome to OPPFY, a place where roles are reversed.
@@ -54,14 +54,6 @@ const Welcome = () => {
               emoji="🎉"
               title="Living on the Edge"
               subTitle="From embarrassing bloopers to epic adventures, your feed will be a rollercoaster ride."
-            />
-          </YGroup.Item>
-          <Separator />
-          <YGroup.Item>
-            <ListItem
-              emoji="👥"
-              title="Build Your Tribe"
-              subTitle="Curate a circle of friends who'll keep you entertained (and keep you on your toes)."
             />
           </YGroup.Item>
         </YGroup>
