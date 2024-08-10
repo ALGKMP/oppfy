@@ -82,8 +82,8 @@ const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
       onOpen={openModal}
       snapPoints={
         isSelfPost
-          ? [`${bottomInsetPercentage + 35}%`]
-          : [`${bottomInsetPercentage + 30}%`]
+          ? [`${bottomInsetPercentage + 28}%`]
+          : [`${bottomInsetPercentage + 23}%`]
       }
       topInset={insets.top}
       handleComponent={renderHeader}
@@ -96,18 +96,6 @@ const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
         borderTopWidth="$0.25"
       >
         <YStack borderRadius="$7" backgroundColor="rgba(63, 63, 62, 0.3)">
-          <TouchableOpacity>
-            <XStack
-              gap="$4"
-              padding="$4"
-              alignItems="center"
-              justifyContent="flex-start"
-            >
-              <QrCode />
-              <Text>QR Code</Text>
-            </XStack>
-            <Separator borderColor="white" borderWidth={0.5} opacity={0.3} />
-          </TouchableOpacity>
           <TouchableOpacity
             onPress={async () => {
               await saveToCameraRoll({
