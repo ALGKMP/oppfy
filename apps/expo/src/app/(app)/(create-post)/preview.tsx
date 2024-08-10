@@ -55,8 +55,13 @@ const PreviewScreen = () => {
 
   const router = useRouter();
 
-  const onContinue = () => {
-    router.navigate({
+  const videoRef = useRef<Video>(null);
+
+  const onContinue = async () => {
+    if (type === "video" && videoRef.current) {
+      await videoRef.current.pauseAsync();
+    }
+        router.navigate({
       pathname: "/post-to",
       params: {
         uri,
@@ -104,7 +109,7 @@ const PreviewScreen = () => {
           {type === "photo" ? (
             <PreviewImage uri={uri ?? ""} />
           ) : (
-            <PreviewVideo uri={uri ?? ""} />
+            <PreviewVideo uri={uri ?? ""} videoRef={videoRef} />
           )}
 
           <View position="absolute" top={12} left={12}>
@@ -163,12 +168,15 @@ interface PreviewProps {
   uri: string;
 }
 
+interface PreviewVideoProps extends PreviewProps {
+  videoRef: React.RefObject<Video>;
+}
+
 const PreviewImage = ({ uri }: PreviewProps) => (
   <Image source={{ uri }} style={StyleSheet.absoluteFill} />
 );
 
-const PreviewVideo = ({ uri }: PreviewProps) => {
-  const videoRef = useRef<Video>(null);
+const PreviewVideo = ({ uri, videoRef }: PreviewVideoProps) => {
 
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
