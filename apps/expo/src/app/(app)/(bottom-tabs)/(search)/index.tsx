@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { H5, H6, View, YStack } from "tamagui";
+import { H5, H6, Text, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -119,7 +119,7 @@ const Search = () => {
               renderRecommendations(recommendationsData)
             ) : (
               // TODO: Implement
-              <></>
+              <Text>Testing over the air updates</Text>
             )
           ) : isLoading ? (
             renderLoadingSkeletons()

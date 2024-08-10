@@ -28,7 +28,7 @@ const Welcome = () => {
           <YGroup.Item>
             <ListItem
               emoji="🤝"
-              title="Mutual OP-eration"
+              title="Mutual OPP-eration"
               subTitle="Embrace the chaos as you and your friends take turns posting for each other."
             />
           </YGroup.Item>
@@ -66,7 +66,7 @@ const Welcome = () => {
           </YGroup.Item>
         </YGroup>
       </YStack>
-      <OnboardingButton onPress={onSubmit}>Become an OP</OnboardingButton>
+      <OnboardingButton onPress={onSubmit}>Become an OPP!</OnboardingButton>
     </BaseScreenView>
   );
 };
