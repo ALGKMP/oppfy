@@ -687,7 +687,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             successComponent={(count) => (
               <TouchableOpacity
                 onPress={onFollowerListPress}
-                disabled={!props.loading ? props.isRestricted : true}
+                disabled={!props.loading ? props.isRestricted || props.isBlocked: true}
               >
                 <Stat label="Followers" value={abbreviatedNumber(count)} />
               </TouchableOpacity>
