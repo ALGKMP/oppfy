@@ -367,7 +367,7 @@ const CommentsBottomSheet = React.memo(
           </XStack>
           <XStack alignItems="flex-end" gap="$3">
             <MemoizedAvatar src={profile?.profilePictureUrl} size={46} />
-            <View style={{ flex: 1, position: "relative" }}>
+            <View flex={1} position="relative">
               <BottomSheetTextInput
                 placeholder="Add a comment..."
                 maxLength={250}
