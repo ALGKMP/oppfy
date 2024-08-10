@@ -9,6 +9,7 @@ import superjson from "superjson";
 // import {useReactQueryDevTools} from "@dev-plugins/react-query";
 
 import type { AppRouter } from "@oppfy/api";
+import { env } from "@oppfy/env";
 
 /**
  * A set of typesafe hooks for consuming your API.

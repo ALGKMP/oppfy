@@ -25,7 +25,7 @@ const ShareProfile = () => {
 
   const qrValue = new URL(
     `/profile?username=${username}&userId=${userId}`,
-    env.EXPO_PUBLIC_API_URL,
+    "https://app.oppfy.app",
   ).toString();
 
   const handleShare = async () => {
