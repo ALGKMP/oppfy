@@ -99,6 +99,7 @@ const PhoneNumber = () => {
 
   const onSubmit = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     setIsLoading(true);
     setError(null);
 

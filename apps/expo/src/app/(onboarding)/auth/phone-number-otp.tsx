@@ -96,6 +96,7 @@ const PhoneNumberOTP = () => {
 
   const onSubmit = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     setIsLoading(true);
     setError(null);
 
@@ -149,7 +150,6 @@ const PhoneNumberOTP = () => {
     }
 
     isNewUser ? await handleNewUser(userId) : await handleExistingUser();
-    setIsLoading(false);
   };
 
   return (
