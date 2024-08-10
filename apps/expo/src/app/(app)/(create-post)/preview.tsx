@@ -53,8 +53,6 @@ const PreviewScreen = () => {
 
   const { saveState, saveToCameraRoll } = useSaveVideo();
 
-  console.log("PreviewScreen", { uri, type, width, height });
-
   const router = useRouter();
 
   const onContinue = () => {

@@ -19,6 +19,7 @@ import type {
 } from "react-native-vision-camera";
 import {
   Camera,
+  Templates,
   useCameraDevice,
   useCameraFormat,
   useLocationPermission,
@@ -47,9 +48,10 @@ Reanimated.addWhitelistedNativeProps({
 });
 
 const MAX_ZOOM_FACTOR = 10;
+const MEDIA_ASPECT_RATIO = 16 / 9;
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
-const SCREEN_HEIGHT = Dimensions.get("screen").height;
+const _SCREEN_HEIGHT = Dimensions.get("screen").height;
 
 const SCALE_FULL_ZOOM = 3;
 
@@ -90,23 +92,22 @@ const CameraPage = () => {
   const isForeground = useIsForeground();
   const isActive = isFocussed && isForeground;
 
-  const [targetFps, _setTargetFps] = useState(60);
+  const [targetFps, _setTargetFps] = useState(30);
 
-  const [enableHdr, setEnableHdr] = useState(false);
-  const [enableNightMode, setEnableNightMode] = useState(false);
+  const [enableHdr, _setEnableHdr] = useState(false);
+  const [enableNightMode, _setEnableNightMode] = useState(false);
 
   const [flash, setFlash] = useState<"off" | "on">("off");
   const [position, setPosition] = useState<"front" | "back">("back");
 
   const device = useCameraDevice(position);
 
-  const screenAspectRatio = SCREEN_HEIGHT / SCREEN_WIDTH;
   const format = useCameraFormat(device, [
     { fps: targetFps },
-    { videoAspectRatio: screenAspectRatio },
-    { videoResolution: "max" },
-    { photoAspectRatio: screenAspectRatio },
-    { photoResolution: "max" },
+    { videoAspectRatio: MEDIA_ASPECT_RATIO },
+    { videoResolution: { height: 1920, width: 1080 } },
+    { photoAspectRatio: MEDIA_ASPECT_RATIO },
+    { photoResolution: { height: 1920, width: 1080 } },
   ]);
 
   const _fps = Math.min(format?.maxFps ?? 1, targetFps);
@@ -117,10 +118,10 @@ const CameraPage = () => {
   const videoHdr = format?.supportsVideoHdr && enableHdr;
   const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr;
 
-  const supportsHdr = format?.supportsPhotoHdr;
+  const _supportsHdr = format?.supportsPhotoHdr;
   const supportsFlash = device?.hasFlash ?? false;
   const supportsFocus = device?.supportsFocus ?? false;
-  const supportsNightMode = device?.supportsLowLightBoost ?? false;
+  const _supportsNightMode = device?.supportsLowLightBoost ?? false;
   const _supports60Fps = useMemo(
     () => device?.formats.some((format) => format.maxFps >= 60),
     [device?.formats],
@@ -132,20 +133,15 @@ const CameraPage = () => {
 
   const onMediaCaptured = useCallback(
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
-      const { path: uri, width: dimension1, height: dimension2 } = media;
-
-      const [width, height] =
-        dimension1 < dimension2
-          ? [dimension1, dimension2]
-          : [dimension2, dimension1];
+      const { path: uri } = media;
 
       router.push({
         pathname: "/preview",
         params: {
           type,
           uri,
-          width,
-          height,
+          width: "1080",
+          height: "1920",
         },
       });
     },
