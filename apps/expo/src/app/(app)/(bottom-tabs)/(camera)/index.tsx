@@ -31,7 +31,7 @@ import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { CameraOff } from "@tamagui/lucide-icons";
-import { Text, View } from "tamagui";
+import { Image, Text, View } from "tamagui";
 
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
@@ -244,7 +244,7 @@ const CameraPage = () => {
     zoom.value = device?.neutralZoom ?? 1;
   }, [zoom, device]);
 
-  if (device === undefined) return <NoCameraDeviceError />;
+  // if (device === undefined) return <NoCameraDeviceError />;
 
   return (
     <View flex={1}>
@@ -260,7 +260,7 @@ const CameraPage = () => {
         <GestureDetector gesture={composedGesture}>
           {/* Do not delete this View, its needed to pass touch events to the camera */}
           <View flex={1}>
-            <ReanimatedCamera
+            {/* <ReanimatedCamera
               ref={camera}
               device={device}
               isActive={isActive}
@@ -278,6 +278,12 @@ const CameraPage = () => {
               video={true}
               audio={microphone.hasPermission}
               enableLocation={location.hasPermission}
+              style={{
+                flex: 1,
+              }}
+            /> */}
+            <Image
+              source={{ uri: "https://cdn.discordapp.com/attachments/1191423406902612010/1271956949092798495/IMG_2702.jpg?ex=66b939b8&is=66b7e838&hm=436d445ada531355e1a0c15e4ac6b55e2720fb4c993c24cf07f7cc81fb80831e&" }}
               style={{
                 flex: 1,
               }}
@@ -301,7 +307,8 @@ const CameraPage = () => {
           minZoom={minZoom}
           maxZoom={maxZoom}
           flash={supportsFlash ? flash : "off"}
-          enabled={isCameraInitialized && isActive}
+          // enabled={isCameraInitialized && isActive}
+          enabled={true}
           setIsPressingButton={setIsPressingButton}
         />
 
