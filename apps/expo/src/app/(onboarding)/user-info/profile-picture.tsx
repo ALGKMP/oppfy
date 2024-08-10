@@ -32,15 +32,6 @@ const ProfilePicture = () => {
     });
   }, []);
 
-  // const onSubmit = () => {
-  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  //   router.replace("misc/recomendations");
-  // };
-  // const onSkip = () => {
-  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  //   router.replace("misc/recomendations");
-  // };
-
   const onSubmit = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");

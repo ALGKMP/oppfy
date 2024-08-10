@@ -32,7 +32,6 @@ const AuthContext = createContext<SessionContextType | undefined>(undefined);
 
 const SessionProvider = ({ children }: SessionProviderProps) => {
   const router = useRouter();
-  const utils = api.useUtils();
 
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
@@ -52,8 +51,8 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     }
   };
 
-  const isLoading = status === "loading";
   const isSignedIn = !!user;
+  const isLoading = status === "loading";
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authUser) => {
