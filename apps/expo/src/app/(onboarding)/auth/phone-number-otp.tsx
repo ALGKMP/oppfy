@@ -16,6 +16,9 @@ import {
 } from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
+// ! This is for testing purposes only, do not use in production
+auth().settings.appVerificationDisabledForTesting = false;
+
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
   ERROR_SENDING_CODE = "Error sending code. Try again later.",
