@@ -3,6 +3,7 @@ import { Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import {
@@ -37,6 +38,9 @@ import useSearch from "~/hooks/useSearch";
 const countriesWithoutSections = countriesData.filter(
   (item) => typeof item !== "string",
 );
+
+// ! This is for testing purposes only, do not use in production
+auth().settings.appVerificationDisabledForTesting = true;
 
 const PhoneNumber = () => {
   const router = useRouter();
