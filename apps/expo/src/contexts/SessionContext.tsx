@@ -85,6 +85,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const deleteAccount = async () => {
     await deleteUser.mutateAsync();
+    await auth().currentUser?.reload();
     setUser(null);
   };
 
