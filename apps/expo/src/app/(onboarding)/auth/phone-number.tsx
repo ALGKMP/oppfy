@@ -132,9 +132,6 @@ const PhoneNumber = () => {
         default:
           setError(Error.UNKNOWN_ERROR);
       }
-
-      // Display error in an alert
-      Alert.alert("Error", error || Error.UNKNOWN_ERROR);
     }
   };
 
