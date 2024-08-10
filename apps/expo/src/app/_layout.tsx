@@ -30,7 +30,6 @@ const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
 Sentry.init({
   debug: __DEV__,
   enabled: !__DEV__,
-  dsn: "https://55ede8542c3606c6e90656eec2d9c6c8@o4507697000611840.ingest.us.sentry.io/4507697356603392env.EXPO_PUBLIC_SENTRY_DSN",
   dsn: "https://55ede8542c3606c6e90656eec2d9c6c8@o4507697000611840.ingest.us.sentry.io/4507697356603392",
   integrations: [
     new Sentry.ReactNativeTracing({
