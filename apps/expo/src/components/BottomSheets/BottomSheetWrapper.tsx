@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect } from "react";
 import { Dimensions, Modal } from "react-native";
-
 import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import BottomSheet, { type BottomSheetProps } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetScrollView,
+  type BottomSheetProps,
+} from "@gorhom/bottom-sheet";
 import { Minus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
@@ -15,12 +17,11 @@ interface BottomSheetWrapperProps extends Partial<BottomSheetProps> {
   modalVisible: boolean;
   onOpen: () => void;
   onClose: () => void;
-  snapPoints: string[];
+  snapPoints?: string[];
   children: React.ReactNode;
 }
 
 const screenHeight = Dimensions.get("window").height;
-
 
 const BottomSheetWrapper = (props: BottomSheetWrapperProps) => {
   const {
@@ -55,11 +56,7 @@ const BottomSheetWrapper = (props: BottomSheetWrapperProps) => {
 
   const renderHeader = useCallback(() => {
     return (
-      <View
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-      >
+      <View flex={1} justifyContent="center" alignItems="center">
         <Minus size="$4" />
       </View>
     );
@@ -68,20 +65,41 @@ const BottomSheetWrapper = (props: BottomSheetWrapperProps) => {
   return (
     <Modal visible={modalVisible} transparent={true}>
       <Animated.View style={[{ flex: 1 }, animatedOverlayStyle]}>
-        <BottomSheet
-          ref={sheetRef}
-          onClose={onClose}
-          enablePanDownToClose
-          snapPoints={snapPoints}
-          animatedPosition={animatedPosition}
-          handleComponent={renderHeader}
-          backgroundStyle={{
-            backgroundColor: "#282828",
-          }}
-          {...bottomSheetProps}
-        >
-          {children}
-        </BottomSheet>
+        {snapPoints ? (
+          <BottomSheet
+            ref={sheetRef}
+            snapPoints={snapPoints}
+            onClose={onClose}
+            enablePanDownToClose
+            animatedPosition={animatedPosition}
+            handleComponent={renderHeader}
+            backgroundStyle={{
+              backgroundColor: "#282828",
+            }}
+            {...bottomSheetProps}
+          >
+            <BottomSheetScrollView scrollEnabled={false}>
+              {children}
+            </BottomSheetScrollView>
+          </BottomSheet>
+        ) : (
+          <BottomSheet
+            ref={sheetRef}
+            enableDynamicSizing={true}
+            onClose={onClose}
+            enablePanDownToClose
+            animatedPosition={animatedPosition}
+            handleComponent={renderHeader}
+            backgroundStyle={{
+              backgroundColor: "#282828",
+            }}
+            {...bottomSheetProps}
+          >
+            <BottomSheetScrollView scrollEnabled={false}>
+              {children}
+            </BottomSheetScrollView>
+          </BottomSheet>
+        )}
       </Animated.View>
     </Modal>
   );

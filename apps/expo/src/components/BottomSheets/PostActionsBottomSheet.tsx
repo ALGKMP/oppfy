@@ -80,11 +80,6 @@ const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
       modalVisible={modalVisible}
       onClose={closeModal}
       onOpen={openModal}
-      snapPoints={
-        isSelfPost
-          ? [`${bottomInsetPercentage + 28}%`]
-          : [`${bottomInsetPercentage + 23}%`]
-      }
       topInset={insets.top}
       handleComponent={renderHeader}
     >
@@ -92,6 +87,7 @@ const PostActionsBottomSheet = (props: PostActionBottomSheetProps) => {
         flex={1}
         marginHorizontal="$4"
         gap="$4"
+        paddingBottom={insets.bottom !== 0 ? insets.bottom : "$4"}
         borderTopColor="$gray5"
         borderTopWidth="$0.25"
       >
