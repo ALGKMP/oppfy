@@ -90,4 +90,9 @@ export class ProfileRepository {
 
     return fullProfiles;
   }
+
+  @handleDatabaseErrors
+  async deleteProfile(profileId: number) {
+    await this.db.delete(schema.profile).where(eq(schema.profile.id, profileId));
+  }
 }
