@@ -51,7 +51,7 @@ const MAX_ZOOM_FACTOR = 10;
 const MEDIA_ASPECT_RATIO = 16 / 9;
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
-const _SCREEN_HEIGHT = Dimensions.get("screen").height;
+const SCREEN_HEIGHT = Dimensions.get("screen").height;
 
 const SCALE_FULL_ZOOM = 3;
 
@@ -250,7 +250,10 @@ const CameraPage = () => {
     <View flex={1}>
       <View
         width={SCREEN_WIDTH}
-        height={(SCREEN_WIDTH * 16) / 9}
+        height={Math.min(
+          (SCREEN_WIDTH * 16) / 9,
+          SCREEN_HEIGHT - insets.top - insets.bottom - 70,
+        )}
         borderRadius={20}
         overflow="hidden"
         alignSelf="center"
@@ -282,14 +285,6 @@ const CameraPage = () => {
                 flex: 1,
               }}
             />
-            {/* <Image
-              source={{ uri: "https://cdn.discordapp.com/attachments/1191423406902612010/1271956949092798495/IMG_2702.jpg?ex=66b939b8&is=66b7e838&hm=436d445ada531355e1a0c15e4ac6b55e2720fb4c993c24cf07f7cc81fb80831e&" }}
-              style={{
-                flex: 1,
-                // marginTop: ,
-                marginRight: -20,
-              }}
-            /> */}
           </View>
         </GestureDetector>
 
