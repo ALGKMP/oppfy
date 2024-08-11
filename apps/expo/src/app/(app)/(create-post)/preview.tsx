@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  Dimensions,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -61,7 +62,7 @@ const PreviewScreen = () => {
     if (type === "video" && videoRef.current) {
       await videoRef.current.pauseAsync();
     }
-        router.navigate({
+    router.navigate({
       pathname: "/post-to",
       params: {
         uri,
@@ -76,19 +77,21 @@ const PreviewScreen = () => {
   const contentAspectRatio =
     parseFloat(width ?? "0") / parseFloat(height ?? "0");
 
-  // Determine the actual content height, constrained by MAX_CONTENT_HEIGHT
+  // Determine the actual content height, constrained by available space
+  const availableHeight =
+    SCREEN_HEIGHT -
+    SAFE_AREA_PADDING.paddingTop -
+    SAFE_AREA_PADDING.paddingBottom -
+    70;
   const contentHeight = Math.min(
     SCREEN_WIDTH / contentAspectRatio,
+    availableHeight,
     MAX_CONTENT_HEIGHT,
   );
 
-  // Check if the content is considered "tall" (more than 60% of screen height)
-  const isContentTall = contentHeight > SCREEN_HEIGHT * 0.6;
-
   // Calculate the top position for the content
-  const topPosition = isContentTall
-    ? SAFE_AREA_PADDING.paddingTop // If tall, position at the top of the safe area
-    : (SCREEN_HEIGHT - contentHeight) / 2; // If not tall, center vertically
+  const topPosition =
+    (availableHeight - contentHeight) / 2 + SAFE_AREA_PADDING.paddingTop;
 
   return (
     <BaseScreenView
@@ -177,7 +180,6 @@ const PreviewImage = ({ uri }: PreviewProps) => (
 );
 
 const PreviewVideo = ({ uri, videoRef }: PreviewVideoProps) => {
-
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
 
