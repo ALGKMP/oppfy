@@ -223,9 +223,9 @@ const CommentsBottomSheet = React.memo(
           }
         }
       },
-      // onSettled: async () => {
-      //   await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
-      // },
+      onSettled: async () => {
+        await utils.post.paginateComments.invalidate({ postId, pageSize: 10 });
+      },
     });
 
     const handlePostComment = useCallback(async () => {
