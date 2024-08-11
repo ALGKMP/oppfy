@@ -28,8 +28,6 @@ import type { sharedValidators } from "@oppfy/validators";
 
 import {
   CommentsBottomSheet,
-  CommentsTestBottomSheet,
-  CommentsTestBottomSheet2,
   PostActionsBottomSheet,
 } from "~/components/BottomSheets";
 import GradientHeart, {
@@ -505,19 +503,6 @@ const PostItem = React.memo((props: PostItemProps) => {
           modalVisible={commentsBottomSheetVisible}
           setModalVisible={setCommentsBottomSheetVisible}
         />
-        // <CommentsTestBottomSheet2
-        //   isSelfPost={isSelfPost}
-        //   userIdOfPostRecipient={post.recipientId}
-        //   postId={post.postId}
-        //   modalVisible={commentsBottomSheetVisible}
-        //   setModalVisible={setCommentsBottomSheetVisible}
-        // />
-
-        // <CommentsTestBottomSheet
-        //   postId={post.postId}
-        //   modalVisible={commentsBottomSheetVisible}
-        //   setModalVisible={setCommentsBottomSheetVisible}
-        // />
       )}
 
       {postActionsBottomSheetVisible && (
