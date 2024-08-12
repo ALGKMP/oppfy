@@ -115,7 +115,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-contacts",
       {
         contactsPermission:
-          "$(PRODUCT_NAME) accesses your contacts to help you find friends using the app.",
+          "$(PRODUCT_NAME) would like to upload your contacts to our server to help you find your friends",
       },
     ],
     [
