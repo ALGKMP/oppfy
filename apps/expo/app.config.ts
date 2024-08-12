@@ -54,68 +54,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
   },
   plugins: [
-    // Custom plugins
-    [
-      "./snapchat-plugin",
-      { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" },
-    ],
-
+    "expo-av",
     "expo-font",
     "expo-video",
     "expo-router",
+    "react-native-image-marker",
     "@react-native-firebase/app",
     "@react-native-firebase/auth",
     "@react-native-firebase/perf",
     "@react-native-firebase/crashlytics",
-    [
-      "react-native-vision-camera",
-      {
-        cameraPermissionText:
-          "$(PRODUCT_NAME) would like to access your camera to capture photos and videos to share with friends",
-        microphonePermissionText:
-          "$(PRODUCT_NAME) would like to access your microphone to capture audio to share with friends",
-        enableMicrophonePermission: true,
-        enableCodeScanner: true,
-      },
-    ],
-    [
-      "expo-location",
-      {
-        locationWhenInUsePermission:
-          "Allow $(PRODUCT_NAME) to use your location.",
-      },
-    ],
-    [
-      "expo-contacts",
-      {
-        contactsPermission:
-          "$(PRODUCT_NAME) would like to upload your contacts to our server so you can find your friends",
-      },
-    ],
-    [
-      "expo-media-library",
-      {
-        photosPermission:
-          "$(PRODUCT_NAME) would like to access your photos so you can pick photos to share with friends",
-        savePhotosPermission:
-          "$(PRODUCT_NAME) would like to save photos so you can have them on your phone",
-        isAccessMediaLocationEnabled: true,
-      },
-    ],
-    [
-      "expo-image-picker",
-      {
-        photosPermission:
-          "The app accesses your photos to let you share them with your friends.",
-      },
-    ],
-    [
-      "expo-av",
-      {
-        microphonePermission:
-          "$(PRODUCT_NAME) would like to access your microphone to record audio to share with friends",
-      },
-    ],
     [
       "expo-build-properties",
       {
@@ -135,12 +82,57 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         assets: ["./assets"],
       },
     ],
-    ["react-native-image-marker"],
     [
       "@sentry/react-native/expo",
       {
         organization: "oppfy",
         project: "oppfy-app",
+      },
+    ],
+    [
+      "./snapchat-plugin",
+      { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" },
+    ],
+    [
+      "react-native-vision-camera",
+      {
+        cameraPermissionText:
+          "$(PRODUCT_NAME) would like to access your camera to take photos and videos to share with friends",
+        microphonePermissionText:
+          "$(PRODUCT_NAME) would like to access your microphone to record audio when recording videos to share with friends",
+        enableMicrophonePermission: true,
+        enableCodeScanner: true,
+      },
+    ],
+    // [
+    //   "expo-location",
+    //   {
+    //     locationWhenInUsePermission:
+    //       "$(PRODUCT_NAME) uses your location to tag photos with where they were taken.",
+    //   },
+    // ],
+    [
+      "expo-contacts",
+      {
+        contactsPermission:
+          "$(PRODUCT_NAME) accesses your contacts to help you find friends using the app.",
+      },
+    ],
+    [
+      "expo-media-library",
+      {
+        photosPermission:
+          "$(PRODUCT_NAME) would like to access your photos so you can pick photos and videos to share with friends",
+        savePhotosPermission:
+          "$(PRODUCT_NAME) needs permission to save photos and videos to your device.",
+        isAccessMediaLocationEnabled: true,
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "$(PRODUCT_NAME) would like to access your photos so you can pick photos and videos to share with friends",
       },
     ],
   ],
