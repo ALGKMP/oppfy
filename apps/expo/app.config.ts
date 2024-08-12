@@ -2,7 +2,7 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "oppfy",
+  name: "Oppfy",
   slug: "oppfy",
   scheme: "oppfy",
   version: "1.0.0",
@@ -70,9 +70,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "react-native-vision-camera",
       {
-        cameraPermissionText: "$(PRODUCT_NAME) needs access to your Camera.",
+        cameraPermissionText:
+          "$(PRODUCT_NAME) would like to access your camera to capture photos and videos to share with friends",
         microphonePermissionText:
-          "$(PRODUCT_NAME) needs access to your Microphone.",
+          "$(PRODUCT_NAME) would like to access your microphone to capture audio to share with friends",
         enableMicrophonePermission: true,
         enableCodeScanner: true,
       },
@@ -87,14 +88,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-contacts",
       {
-        contactsPermission: "Allow $(PRODUCT_NAME) to access your contacts.",
+        contactsPermission:
+          "$(PRODUCT_NAME) would like to upload your contacts to our server so you can find your friends",
       },
     ],
     [
       "expo-media-library",
       {
-        photosPermission: "Allow $(PRODUCT_NAME) to access your photos.",
-        savePhotosPermission: "Allow $(PRODUCT_NAME) to save photos.",
+        photosPermission:
+          "$(PRODUCT_NAME) would like to access your photos so you can pick photos to share with friends",
+        savePhotosPermission:
+          "$(PRODUCT_NAME) would like to save photos so you can have them on your phone",
         isAccessMediaLocationEnabled: true,
       },
     ],
@@ -109,7 +113,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-av",
       {
         microphonePermission:
-          "Allow $(PRODUCT_NAME) to access your microphone.",
+          "$(PRODUCT_NAME) would like to access your microphone to record audio to share with friends",
       },
     ],
     [
