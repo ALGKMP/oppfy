@@ -141,12 +141,15 @@ export class ContactService {
       await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
     // Fetch presigned URLs for profile pictures in parallel
     const profilesWithUrls = profiles.map((profile) => {
-      const presignedUrl = this.cloudFrontService.getSignedUrlForProfilePicture(
-        profile.profilePictureKey,
-      );
-
       const { profilePictureKey, ...profileWithoutKey } = profile;
-      return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
+      return {
+        ...profileWithoutKey,
+        profilePictureUrl: profilePictureKey
+          ? this.cloudFrontService.getSignedUrlForProfilePicture(
+              profilePictureKey,
+            )
+          : null,
+      };
     });
 
     // Filter out any rejected promises and return the successful ones
@@ -177,11 +180,15 @@ export class ContactService {
       await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
     // Fetch presigned URLs for profile pictures in parallel
     const profilesWithUrls = profiles.map((profile) => {
-      const presignedUrl = this.cloudFrontService.getSignedUrlForProfilePicture(
-        profile.profilePictureKey,
-      );
       const { profilePictureKey, ...profileWithoutKey } = profile;
-      return { ...profileWithoutKey, profilePictureUrl: presignedUrl };
+      return {
+        ...profileWithoutKey,
+        profilePictureUrl: profilePictureKey
+          ? this.cloudFrontService.getSignedUrlForProfilePicture(
+              profilePictureKey,
+            )
+          : null,
+      };
     });
 
     // Filter out any rejected promises and return the successful ones
