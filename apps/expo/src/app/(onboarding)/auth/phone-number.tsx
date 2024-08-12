@@ -41,7 +41,7 @@ const countriesWithoutSections = countriesData.filter(
 );
 
 // ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = true;
+auth().settings.appVerificationDisabledForTesting = false;
 
 enum Error {
   INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
