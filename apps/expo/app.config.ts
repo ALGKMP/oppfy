@@ -99,7 +99,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         cameraPermissionText:
           "$(PRODUCT_NAME) would like to access your camera to take photos and videos to share with friends",
         microphonePermissionText:
-          "$(PRODUCT_NAME) needs microphone access to record audio for videos.",
+          "$(PRODUCT_NAME) needs microphone access to record audio for videos to share with friends",
         enableMicrophonePermission: true,
         enableCodeScanner: true,
       },
