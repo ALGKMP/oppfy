@@ -78,9 +78,7 @@ const BottomSheetWrapper = (props: BottomSheetWrapperProps) => {
             }}
             {...bottomSheetProps}
           >
-            <BottomSheetScrollView scrollEnabled={false}>
               {children}
-            </BottomSheetScrollView>
           </BottomSheet>
         ) : (
           <BottomSheet

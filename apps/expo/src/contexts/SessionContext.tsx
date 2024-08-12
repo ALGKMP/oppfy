@@ -79,6 +79,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const signOut = async () => {
     await auth().signOut();
+    await auth().currentUser?.reload();
     setUser(null);
     router.replace("/(onboarding)");
   };
