@@ -25,6 +25,7 @@ import {
 } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
+import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
@@ -166,17 +167,29 @@ const HomeScreen = () => {
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
-  if (isLoadingRecommendationsData || isLoadingPostData) {
+  if (isLoadingRecommendationsData || isLoadingPostData || true) {
     return (
       <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
+        {renderPost(postData?.pages[0]?.items[0])}
         <YStack gap="$4">
-          {/* <RecommendationsCarousel loading /> */}
           {PLACEHOLDER_DATA.map(() => (
-            <Skeleton
-              radius={16}
-              width={screenWidth}
-              height={screenWidth * 1.5}
-            />
+            <CardContainer padding={0}>
+              <YStack>
+                <XStack padding="$2" gap="$2">
+                  <Skeleton circular size={46} />
+                  <YStack justifyContent="center" gap>
+                    <Skeleton width={60} height={16} />
+                    <Skeleton width={120} height={16} />
+                  </YStack>
+                </XStack>
+
+                <Skeleton
+                  radius={16}
+                  width={"100%"}
+                  height={screenWidth * 1.5}
+                />
+              </YStack>
+            </CardContainer>
           ))}
         </YStack>
       </BaseScreenView>
