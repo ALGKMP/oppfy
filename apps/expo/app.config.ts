@@ -2,7 +2,7 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Oppfy",
+  name: "oppfy",
   slug: "oppfy",
   scheme: "oppfy",
   version: "1.0.0",
@@ -97,9 +97,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "react-native-vision-camera",
       {
         cameraPermissionText:
-          "$(PRODUCT_NAME) would like to access your camera to take photos and videos to share with friends",
+          "Oppfy would like to access your camera to take photos and videos to share with friends",
         microphonePermissionText:
-          "$(PRODUCT_NAME) needs microphone access to record audio for videos to share with friends",
+          "Oppfy needs microphone access to record audio for videos to share with friends",
         enableMicrophonePermission: true,
         enableCodeScanner: true,
       },
@@ -115,16 +115,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-contacts",
       {
         contactsPermission:
-          "$(PRODUCT_NAME) would like to upload your contacts to our server to help you find your friends",
+          "Oppfy would like to upload your contacts to our server to help you find your friends",
       },
     ],
     [
       "expo-media-library",
       {
         photosPermission:
-          "$(PRODUCT_NAME) would like to access your photos so you can pick photos and videos to share with friends",
+          "Oppfy would like to access your photos so you can pick photos and videos to share with friends",
         savePhotosPermission:
-          "$(PRODUCT_NAME) needs permission to save photos and videos to your device.",
+          "Oppfy needs permission to save photos and videos to your device.",
         isAccessMediaLocationEnabled: true,
       },
     ],
@@ -132,7 +132,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-image-picker",
       {
         photosPermission:
-          "$(PRODUCT_NAME) would like to access your photos so you can pick photos and videos to share with friends",
+          "Oppfy would like to access your photos so you can pick photos and videos to share with friends",
       },
     ],
   ],
