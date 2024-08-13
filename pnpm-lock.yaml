@@ -187,7 +187,11 @@ importers:
         version: 13.0.2(expo@51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2)))
       expo-linking:
         specifier: ~6.3.1
+<<<<<<< HEAD
         version: 6.3.1(expo@51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2)))
+=======
+        version: 6.3.1(expo@51.0.24)
+>>>>>>> 18afd6e4b347fe5ee6b1ab6e117a0b3bddc8acb2
       expo-media-library:
         specifier: ^16.0.4
         version: 16.0.4(expo@51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2)))
@@ -19054,8 +19058,17 @@ snapshots:
     transitivePeerDependencies:
       - expo
       - supports-color
+<<<<<<< HEAD
 
   expo-manifests@0.14.3(expo@51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))):
+=======
+    dev: false
+
+  /expo-manifests@0.14.3(expo@51.0.24):
+    resolution: {integrity: sha512-L3b5/qocBPiQjbW0cpOHfnqdKZbTJS7sA3mgeDJT+mWga/xYsdpma1EfNmsuvrOzjLGjStr1k1fceM9Bl49aqQ==}
+    peerDependencies:
+      expo: '*'
+>>>>>>> 18afd6e4b347fe5ee6b1ab6e117a0b3bddc8acb2
     dependencies:
       '@expo/config': 9.0.3
       expo: 51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))

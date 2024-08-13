@@ -24,6 +24,7 @@ import { input } from "node_modules/@oppfy/validators/src/trpc";
 import {
   Avatar,
   getToken,
+  ScrollView,
   SizableText,
   Spinner,
   Text,
@@ -37,7 +38,9 @@ import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
+import { Skeleton } from "~/components/Skeletons";
 import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { ReportPostActionSheet } from "../Sheets";
 import BottomSheetWrapper from "./BottomSheetWrapper";
@@ -324,9 +327,17 @@ const CommentsBottomSheet = React.memo(
         handleComponent={renderHeader}
       >
         {commentsLoading && (
-          <View flex={1} justifyContent="center" alignItems="center">
-            <Spinner size="large" color="white" />
-          </View>
+          <ScrollView>
+            {PLACEHOLDER_DATA.map((_, index) => (
+              <XStack key={index} padding="$3.5" gap="$2.5">
+                <Skeleton circular size={46} />
+                <YStack flex={1} gap="$2">
+                  <Skeleton width={"40%"} height={20} />
+                  <Skeleton width={"100%"} height={20} />
+                </YStack>
+              </XStack>
+            ))}
+          </ScrollView>
         )}
         {
           // if there are no comments render a message
