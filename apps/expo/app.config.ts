@@ -104,13 +104,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         enableCodeScanner: true,
       },
     ],
-    // [
-    //   "expo-location",
-    //   {
-    //     locationWhenInUsePermission:
-    //       "$(PRODUCT_NAME) uses your location to tag photos with where they were taken.",
-    //   },
-    // ],
+    [
+      "expo-location",
+      {
+        locationWhenInUsePermission:
+          "$(PRODUCT_NAME) uses your location to tag photos with where they were taken.",
+      },
+    ],
     [
       "expo-contacts",
       {
