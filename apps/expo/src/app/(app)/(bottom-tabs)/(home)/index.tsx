@@ -167,10 +167,9 @@ const HomeScreen = () => {
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
-  if (isLoadingRecommendationsData || isLoadingPostData || true) {
+  if (isLoadingRecommendationsData || isLoadingPostData) {
     return (
       <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
-        {renderPost(postData?.pages[0]?.items[0])}
         <YStack gap="$4">
           {PLACEHOLDER_DATA.map(() => (
             <CardContainer padding={0}>
