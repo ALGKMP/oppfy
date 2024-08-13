@@ -188,9 +188,6 @@ importers:
       expo-linking:
         specifier: ~6.3.1
         version: 6.3.1(expo@51.0.24)
-      expo-location:
-        specifier: ^17.0.1
-        version: 17.0.1(expo@51.0.24)
       expo-media-library:
         specifier: ^16.0.4
         version: 16.0.4(expo@51.0.24)
@@ -13442,14 +13439,6 @@ packages:
     transitivePeerDependencies:
       - expo
       - supports-color
-    dev: false
-
-  /expo-location@17.0.1(expo@51.0.24):
-    resolution: {integrity: sha512-m+OzotzlAXO3ZZ1uqW5GC25nXW868zN+ROyBA1V4VF6jGay1ZEs4URPglCVUDzZby2F5wt24cMzqDKw2IX6nRw==}
-    peerDependencies:
-      expo: '*'
-    dependencies:
-      expo: 51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.25.3)
     dev: false
 
   /expo-manifests@0.14.3(expo@51.0.24):
