@@ -96,21 +96,24 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "react-native-vision-camera",
       {
+        enableLocation: true,
+        enableCodeScanner: true,
+        enableMicrophonePermission: true,
         cameraPermissionText:
           "Oppfy would like to access your camera to take photos and videos to share with friends",
         microphonePermissionText:
           "Oppfy needs microphone access to record audio for videos to share with friends",
-        enableMicrophonePermission: true,
-        enableCodeScanner: true,
+        locationPermissionText:
+          "Oppfy uses your location to tag photos with where they were taken.",
       },
     ],
-    [
-      "expo-location",
-      {
-        locationWhenInUsePermission:
-          "$(PRODUCT_NAME) uses your location to tag photos with where they were taken.",
-      },
-    ],
+    // [
+    //   "expo-location",
+    //   {
+    //     locationWhenInUsePermission:
+    //       "Oppfy uses your location to tag photos with where they were taken.",
+    //   },
+    // ],
     [
       "expo-contacts",
       {
