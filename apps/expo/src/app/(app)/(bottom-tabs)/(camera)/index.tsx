@@ -272,7 +272,7 @@ const CameraPage = () => {
               fps={30}
               photoHdr={photoHdr}
               videoHdr={videoHdr}
-              // outputOrientation="portrait"
+              outputOrientation="portrait"
               photoQualityBalance="quality"
               lowLightBoost={device.supportsLowLightBoost && enableNightMode}
               enableZoomGesture={false}
