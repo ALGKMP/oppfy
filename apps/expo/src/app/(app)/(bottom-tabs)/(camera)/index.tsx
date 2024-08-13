@@ -22,7 +22,7 @@ import {
   Templates,
   useCameraDevice,
   useCameraFormat,
-  useLocationPermission,
+  // useLocationPermission,
   useMicrophonePermission,
 } from "react-native-vision-camera";
 import { BlurView } from "expo-blur";
@@ -68,7 +68,7 @@ const CameraPage = () => {
 
   const camera = useRef<Camera>(null);
 
-  const location = useLocationPermission();
+  // const location = useLocationPermission();
   const microphone = useMicrophonePermission();
 
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
@@ -280,7 +280,7 @@ const CameraPage = () => {
               photo={true}
               video={true}
               audio={microphone.hasPermission}
-              enableLocation={location.hasPermission}
+              // enableLocation={location.hasPermission}
               style={{
                 flex: 1,
               }}
