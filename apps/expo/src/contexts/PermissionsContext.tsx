@@ -10,7 +10,7 @@ import * as Notifications from "expo-notifications";
 interface PermissionsStatus {
   media: boolean;
   camera: boolean;
-  // location: boolean;
+  location: boolean;
   contacts: boolean;
   notifications: boolean;
 }
