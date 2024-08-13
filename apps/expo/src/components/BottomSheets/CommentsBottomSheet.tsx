@@ -17,7 +17,6 @@ import {
   SendHorizontal,
   Trash2,
 } from "@tamagui/lucide-icons";
-import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { size } from "lodash";
 import { input } from "node_modules/@oppfy/validators/src/trpc";
@@ -39,6 +38,7 @@ import type z from "zod";
 import type { sharedValidators } from "@oppfy/validators";
 
 import { Skeleton } from "~/components/Skeletons";
+import { TimeAgo } from "~/components/Texts";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { BlurContextMenuWrapper } from "../ContextMenu";
@@ -446,8 +446,6 @@ interface CommentProps {
 
 const Comment = React.memo(
   ({ comment, isSelfPost, postId, userIdOfPostRecipient }: CommentProps) => {
-    TimeAgo.addLocale(en);
-    const timeAgo = new TimeAgo("en-US");
     const utils = api.useUtils();
 
     const profile = utils.profile.getFullProfileSelf.getData();
@@ -625,9 +623,11 @@ const Comment = React.memo(
             <YStack gap="$2" width="100%" flex={1}>
               <XStack gap="$2">
                 <Text fontWeight="bold">{comment.username}</Text>
-                <Text color="$gray10">
-                  {timeAgo.format(new Date(comment.createdAt))}
-                </Text>
+                <TimeAgo
+                  size="$2"
+                  date={comment.createdAt}
+                  format={({ value, unit }) => `${value}${unit.charAt(0)} ago`}
+                />
               </XStack>
               <Text>{comment.body}</Text>
             </YStack>
