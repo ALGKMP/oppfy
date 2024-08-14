@@ -48,16 +48,46 @@ export class NotificationsRepository {
 
   @handleDatabaseErrors
   async storePushToken(userId: string, pushToken: string) {
-    await this.db
-      .insert(schema.pushToken)
-      .values({ userId, token: pushToken })
-      .onConflictDoUpdate({
-        target: schema.pushToken.token,
-        set: {
-          token: pushToken,
-          updatedAt: sql`CURRENT_TIMESTAMP`,
-        },
+    await this.db.transaction(async (tx) => {
+      const pushTokenData = await tx.query.pushToken.findFirst({
+        where: and(
+          eq(schema.pushToken.userId, userId),
+          eq(schema.pushToken.token, pushToken),
+        ),
       });
+
+      if (pushTokenData === undefined) {
+        await tx.insert(schema.pushToken).values({
+          userId,
+          token: pushToken,
+        });
+        return;
+      }
+
+      await tx
+        .update(schema.pushToken)
+        .set({
+          updatedAt: sql`CURRENT_TIMESTAMP`,
+        })
+        .where(
+          and(
+            eq(schema.pushToken.userId, userId),
+            eq(schema.pushToken.token, pushToken),
+          ),
+        );
+    });
+  }
+
+  @handleDatabaseErrors
+  async deletePushToken(userId: string, pushToken: string) {
+    await this.db
+      .delete(schema.pushToken)
+      .where(
+        and(
+          eq(schema.pushToken.userId, userId),
+          eq(schema.pushToken.token, pushToken),
+        ),
+      );
   }
 
   @handleDatabaseErrors
