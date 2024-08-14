@@ -196,7 +196,7 @@ const Permissions = () => {
 
       <Dialog
         title="Your privacy matters to us"
-        subtitle="We use your contacts so you can find and share snaps easier with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security."
+        subtitle="We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security."
         isVisible={learnMoreDialogVisible}
         onAccept={() => setLearnMoreDialogVisible(false)}
         acceptText="Got it"
