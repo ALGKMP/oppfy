@@ -1,15 +1,23 @@
 import React, { useState } from "react";
-import { Linking } from "react-native";
+import { Linking, TouchableOpacity } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
-import { Check } from "@tamagui/lucide-icons";
-import { Checkbox, Separator, Text, XStack, YGroup, YStack } from "tamagui";
+import { Check, Info } from "@tamagui/lucide-icons";
+import {
+  Checkbox,
+  Separator,
+  Text,
+  View,
+  XStack,
+  YGroup,
+  YStack,
+} from "tamagui";
 
-import { AlertDialog } from "~/components/Dialogs";
+import { AlertDialog, Dialog } from "~/components/Dialogs";
 import { AlertDialogProps } from "~/components/Dialogs/AlertDialog";
 import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
@@ -32,6 +40,7 @@ const Permissions = () => {
     title: "",
     subtitle: "",
   });
+  const [learnMoreDialogVisible, setLearnMoreDialogVisible] = useState(false);
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -130,9 +139,23 @@ const Permissions = () => {
                   </Checkbox.Indicator>
                 </Checkbox>
               }
+              underText={
+                <View marginTop="$2">
+                  <TouchableOpacity
+                    onPress={() => setLearnMoreDialogVisible(true)}
+                    // style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <XStack alignItems="center" gap="$2">
+                      <Info size="$1" />
+                      <Text color="$blue9" fontWeight="bold">
+                        Learn more
+                      </Text>
+                    </XStack>
+                  </TouchableOpacity>
+                </View>
+              }
             />
           </YGroup.Item>
-
           <Separator />
 
           <YGroup.Item>
@@ -160,6 +183,17 @@ const Permissions = () => {
       <OnboardingButton onPress={onPress} disabled={!requiredPermissions}>
         Continue
       </OnboardingButton>
+
+      <Dialog
+        title="Your privacy matters to us"
+        subtitle="We use your contacts so you can find and share snaps easier with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security."
+        isVisible={learnMoreDialogVisible}
+        onAccept={() => setLearnMoreDialogVisible(false)}
+        acceptText="Got it"
+        acceptTextProps={{
+          color: "$blue9",
+        }}
+      />
 
       <AlertDialog
         isVisible={alertDialogProps.isVisible}
@@ -190,9 +224,16 @@ interface ListItemProps {
   title: string;
   subTitle: string;
   checkbox: React.ReactNode;
+  underText?: React.ReactNode;
 }
 
-const ListItem = ({ emoji, title, subTitle, checkbox }: ListItemProps) => {
+const ListItem = ({
+  emoji,
+  title,
+  subTitle,
+  checkbox,
+  underText,
+}: ListItemProps) => {
   return (
     <XStack alignItems="center" gap="$2">
       <Text fontSize="$10">{emoji}</Text>
@@ -202,6 +243,7 @@ const ListItem = ({ emoji, title, subTitle, checkbox }: ListItemProps) => {
           {title}
         </Text>
         <Text color="$gray9">{subTitle}</Text>
+        {underText}
       </YStack>
 
       {checkbox}
