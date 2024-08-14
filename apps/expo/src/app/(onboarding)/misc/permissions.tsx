@@ -175,6 +175,16 @@ const Permissions = () => {
                   </Checkbox.Indicator>
                 </Checkbox>
               }
+              underText={
+                <View marginTop="$2">
+                  <XStack alignItems="center" gap="$2">
+                    <Info size="$1" />
+                    <Text color="$gray9" fontWeight="bold">
+                      Optional
+                    </Text>
+                  </XStack>
+                </View>
+              }
             />
           </YGroup.Item>
         </YGroup>
