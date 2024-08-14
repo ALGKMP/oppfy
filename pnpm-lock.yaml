@@ -188,9 +188,6 @@ importers:
       expo-linking:
         specifier: ~6.3.1
         version: 6.3.1(expo@51.0.24)
-      expo-location:
-        specifier: ^17.0.1
-        version: 17.0.1(expo@51.0.24)
       expo-media-library:
         specifier: ^16.0.4
         version: 16.0.4(expo@51.0.24)
@@ -233,9 +230,6 @@ importers:
       fuse.js:
         specifier: ^7.0.0
         version: 7.0.0
-      javascript-time-ago:
-        specifier: ^2.5.10
-        version: 2.5.10
       libphonenumber-js:
         specifier: ^1.10.61
         version: 1.11.5
@@ -1016,7 +1010,7 @@ importers:
         version: link:../../tooling/typescript
       drizzle-kit:
         specifier: ^0.21.1
-        version: 0.21.4
+        version: 0.21.1
       eslint:
         specifier: ^9.2.0
         version: 9.2.0
@@ -12259,8 +12253,8 @@ packages:
       wordwrap: 1.0.0
     dev: true
 
-  /drizzle-kit@0.21.4:
-    resolution: {integrity: sha512-Nxcc1ONJLRgbhmR+azxjNF9Ly9privNLEIgW53c92whb4xp8jZLH1kMCh/54ci1mTMuYxPdOukqLwJ8wRudNwA==}
+  /drizzle-kit@0.21.1:
+    resolution: {integrity: sha512-Sp7OnCdROiE2ebMuHsAfrnRoHVGYCvErQxUh7/0l6R1caHssZu9oZu/hW9rLU19xnTK4/y3iSe3sL0Cc530wCg==}
     hasBin: true
     dependencies:
       '@esbuild-kit/esm-loader': 2.6.5
@@ -13514,14 +13508,6 @@ packages:
     transitivePeerDependencies:
       - expo
       - supports-color
-    dev: false
-
-  /expo-location@17.0.1(expo@51.0.24):
-    resolution: {integrity: sha512-m+OzotzlAXO3ZZ1uqW5GC25nXW868zN+ROyBA1V4VF6jGay1ZEs4URPglCVUDzZby2F5wt24cMzqDKw2IX6nRw==}
-    peerDependencies:
-      expo: '*'
-    dependencies:
-      expo: 51.0.24(@babel/core@7.25.2)(@babel/preset-env@7.25.3)
     dev: false
 
   /expo-manifests@0.14.3(expo@51.0.24):
@@ -15494,12 +15480,6 @@ packages:
       filelist: 1.0.4
       minimatch: 3.1.2
     dev: true
-
-  /javascript-time-ago@2.5.10:
-    resolution: {integrity: sha512-EUxp4BP74QH8xiYHyeSHopx1XhMMJ9qEX4rcBdFtpVWmKRdzpxbNzz2GSbuekZr5wt0rmLehuyp0PE34EAJT9g==}
-    dependencies:
-      relative-time-format: 1.1.6
-    dev: false
 
   /jest-changed-files@29.7.0:
     resolution: {integrity: sha512-fEArFiwf1BpQ+4bXSprcDc3/x4HSzL4al2tozwVpDFpsxALjLYdyiIK4e5Vz66GQJIbXJ82+35PtysofptNX2w==}
@@ -19276,10 +19256,6 @@ packages:
     hasBin: true
     dependencies:
       jsesc: 0.5.0
-
-  /relative-time-format@1.1.6:
-    resolution: {integrity: sha512-aCv3juQw4hT1/P/OrVltKWLlp15eW1GRcwP1XdxHrPdZE9MtgqFpegjnTjLhi2m2WI9MT/hQQtE+tjEWG1hgkQ==}
-    dev: false
 
   /remarkable@2.0.1:
     resolution: {integrity: sha512-YJyMcOH5lrR+kZdmB0aJJ4+93bEojRZ1HGDn9Eagu6ibg7aVZhc3OWbbShRid+Q5eAfsEqWxpe+g5W5nYNfNiA==}

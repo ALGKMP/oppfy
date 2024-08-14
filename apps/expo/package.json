@@ -90,7 +90,6 @@
     "expo-video-thumbnails": "~8.0.0",
     "expo-web-browser": "^13.0.3",
     "fuse.js": "^7.0.0",
-    "javascript-time-ago": "^2.5.10",
     "libphonenumber-js": "^1.10.61",
     "lodash": "^4.17.21",
     "nativewind": "^4.0.36",

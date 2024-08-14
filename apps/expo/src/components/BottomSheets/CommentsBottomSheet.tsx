@@ -17,13 +17,13 @@ import {
   SendHorizontal,
   Trash2,
 } from "@tamagui/lucide-icons";
-import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
 import { size } from "lodash";
 import { input } from "node_modules/@oppfy/validators/src/trpc";
 import {
   Avatar,
   getToken,
+  ScrollView,
   SizableText,
   Spinner,
   Text,
@@ -37,7 +37,10 @@ import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
 
+import { Skeleton } from "~/components/Skeletons";
+import { TimeAgo } from "~/components/Texts";
 import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { ReportPostActionSheet } from "../Sheets";
 import BottomSheetWrapper from "./BottomSheetWrapper";
@@ -324,9 +327,17 @@ const CommentsBottomSheet = React.memo(
         handleComponent={renderHeader}
       >
         {commentsLoading && (
-          <View flex={1} justifyContent="center" alignItems="center">
-            <Spinner size="large" color="white" />
-          </View>
+          <ScrollView>
+            {PLACEHOLDER_DATA.map((_, index) => (
+              <XStack key={index} padding="$3.5" gap="$2.5">
+                <Skeleton circular size={46} />
+                <YStack flex={1} gap="$2">
+                  <Skeleton width={"40%"} height={20} />
+                  <Skeleton width={"100%"} height={20} />
+                </YStack>
+              </XStack>
+            ))}
+          </ScrollView>
         )}
         {
           // if there are no comments render a message
@@ -435,8 +446,6 @@ interface CommentProps {
 
 const Comment = React.memo(
   ({ comment, isSelfPost, postId, userIdOfPostRecipient }: CommentProps) => {
-    TimeAgo.addLocale(en);
-    const timeAgo = new TimeAgo("en-US");
     const utils = api.useUtils();
 
     const profile = utils.profile.getFullProfileSelf.getData();
@@ -614,9 +623,11 @@ const Comment = React.memo(
             <YStack gap="$2" width="100%" flex={1}>
               <XStack gap="$2">
                 <Text fontWeight="bold">{comment.username}</Text>
-                <Text color="$gray10">
-                  {timeAgo.format(new Date(comment.createdAt))}
-                </Text>
+                <TimeAgo
+                  size="$2"
+                  date={comment.createdAt}
+                  format={({ value, unit }) => `${value}${unit.charAt(0)} ago`}
+                />
               </XStack>
               <Text>{comment.body}</Text>
             </YStack>
