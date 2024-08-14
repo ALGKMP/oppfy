@@ -143,7 +143,6 @@ const Permissions = () => {
                 <View marginTop="$2">
                   <TouchableOpacity
                     onPress={() => setLearnMoreDialogVisible(true)}
-                    // style={{ flexDirection: "row", alignItems: "center" }}
                   >
                     <XStack alignItems="center" gap="$2">
                       <Info size="$1" />
@@ -162,7 +161,7 @@ const Permissions = () => {
             <ListItem
               emoji="🔔"
               title="Notifications"
-              subTitle="So you know when your friends have snapped a pic of you"
+              subTitle="So you don't miss out on what's happening"
               checkbox={
                 <Checkbox
                   size="$6"
@@ -245,7 +244,7 @@ const ListItem = ({
   underText,
 }: ListItemProps) => {
   return (
-    <XStack alignItems="center" gap="$2">
+    <XStack alignItems="center" gap="$4">
       <Text fontSize="$10">{emoji}</Text>
 
       <YStack flex={1} gap>

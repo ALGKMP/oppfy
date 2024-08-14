@@ -89,14 +89,14 @@ const BottomTabsLayout = () => {
           tabBarIcon: ({ focused, ...props }) => (
             <YStack>
               <Inbox strokeWidth={focused ? 3 : 1.5} {...props} />
-              {(unreadNotificationsCount ?? 0) > 0 && (
+              {(unreadNotificationsCount ?? 0) > -1 && (
                 <Circle
-                  size={16}
+                  size={12}
                   backgroundColor="$red9"
                   style={{
                     position: "absolute",
-                    top: -6,
-                    right: -6,
+                    top: -3,
+                    right: -3,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
