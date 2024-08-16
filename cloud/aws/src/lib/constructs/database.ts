@@ -44,7 +44,7 @@ export class Database extends Construct {
       publiclyAccessible: true,
       securityGroups: [securityGroup],
       credentials: rds.Credentials.fromSecret(credentials),
-      databaseName: "database",
+      databaseName: "oppfy_database",
       allocatedStorage: 20,
       maxAllocatedStorage: 20,
       backupRetention: cdk.Duration.days(1),
