@@ -21,7 +21,7 @@ export class LambdaFunction extends Construct {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: props.entry,
       handler: "handler",
-      timeout: cdk.Duration.minutes(3),
+      timeout: cdk.Duration.seconds(30),
       bundling: {
         format: lambdaNodeJs.OutputFormat.ESM,
         mainFields: ["module", "main"],
