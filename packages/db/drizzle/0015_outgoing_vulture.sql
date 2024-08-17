@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_push_token" ON "push_token" ("token");
