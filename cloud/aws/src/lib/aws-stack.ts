@@ -115,6 +115,7 @@ export class AwsStack extends cdk.Stack {
       this,
       "PublicPostDistribution",
       {
+        isPrivate: false,
         bucket: postBucket.bucket,
         accessControlLambda: accessControlLambdaVersion,
       },
@@ -124,6 +125,7 @@ export class AwsStack extends cdk.Stack {
       this,
       "PrivatePostDistribution",
       {
+        isPrivate: true,
         bucket: postBucket.bucket,
       },
     );
@@ -132,6 +134,7 @@ export class AwsStack extends cdk.Stack {
       this,
       "ProfileDistribution",
       {
+        isPrivate: true,
         bucket: profileBucket.bucket,
       },
     );
@@ -273,6 +276,19 @@ export class AwsStack extends cdk.Stack {
       tier: ssm.ParameterTier.STANDARD,
       description: "Database configuration for the application",
     });
+
+    const ssmParameterArn = ssm.StringParameter.fromStringParameterName(
+      this,
+      "DbConfigParameterArn",
+      "/oppfy/db-config",
+    ).parameterArn;
+
+    accessControlLambda.function.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [ssmParameterArn],
+      }),
+    );
 
     // Outputs
     new cdk.CfnOutput(this, "PublicPostDistributionUrl", {
