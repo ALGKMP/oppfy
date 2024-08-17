@@ -9,6 +9,7 @@ import { env } from "@oppfy/env";
 export interface CloudFrontProps {
   bucket: s3.Bucket;
   accessControlLambda?: lambda.Version;
+  isPrivate: boolean;
 }
 
 export class CloudFrontDistribution extends Construct {
@@ -26,25 +27,25 @@ export class CloudFrontDistribution extends Construct {
       items: [publicKey],
     });
 
-    this.distribution = new cloudfront.Distribution(this, "Distribution", {
-      defaultBehavior: {
-        origin: new origins.S3Origin(props.bucket),
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-        trustedKeyGroups: [keyGroup],
-      },
-    });
+    const defaultBehavior: cloudfront.BehaviorOptions = {
+      origin: new origins.S3Origin(props.bucket),
+      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+      trustedKeyGroups: props.isPrivate ? [keyGroup] : [],
+      edgeLambdas:
+        props.accessControlLambda && !props.isPrivate
+          ? [
+              {
+                functionVersion: props.accessControlLambda,
+                eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
+              },
+            ]
+          : [],
+    };
 
-    if (props.accessControlLambda) {
-      this.distribution.addBehavior("/*", new origins.S3Origin(props.bucket), {
-        edgeLambdas: [
-          {
-            functionVersion: props.accessControlLambda,
-            eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
-          },
-        ],
-      });
-    }
+    this.distribution = new cloudfront.Distribution(this, "Distribution", {
+      defaultBehavior: defaultBehavior,
+    });
   }
 }
