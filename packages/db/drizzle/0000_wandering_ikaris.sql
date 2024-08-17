@@ -5,7 +5,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."event_type" AS ENUM('like', 'post', 'comment', 'follow', 'friend', 'followRequest', 'friendRequest');
+ CREATE TYPE "public"."event_type" AS ENUM('like', 'post', 'comment', 'follow', 'friend');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "comment" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "contact" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" varchar(128) PRIMARY KEY NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS "notifications" (
 	"sender_id" text NOT NULL,
 	"recipient_id" text NOT NULL,
 	"read" boolean DEFAULT false NOT NULL,
+	"active" boolean DEFAULT true NOT NULL,
 	"event_type" "event_type" NOT NULL,
 	"entity_id" text,
 	"entity_type" "entity_type",
@@ -121,6 +122,20 @@ CREATE TABLE IF NOT EXISTS "post" (
 	"author" text NOT NULL,
 	"recipient" text NOT NULL,
 	"caption" text DEFAULT '' NOT NULL,
+	"key" text NOT NULL,
+	"width" integer DEFAULT 500 NOT NULL,
+	"height" integer DEFAULT 500 NOT NULL,
+	"media_type" "media_type" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "postOfUserNotOnApp" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"phone_number" text NOT NULL,
+	"author" text NOT NULL,
+	"caption" text DEFAULT '' NOT NULL,
+	"recipient" uuid NOT NULL,
 	"key" text NOT NULL,
 	"width" integer DEFAULT 500 NOT NULL,
 	"height" integer DEFAULT 500 NOT NULL,
@@ -139,16 +154,43 @@ CREATE TABLE IF NOT EXISTS "post_stats" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "post_view" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"post_id" bigint NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "profile" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"username" text NOT NULL,
 	"full_name" text,
 	"date_of_birth" date,
 	"bio" text,
-	"profile_picture_key" text DEFAULT 'profile-pictures/default.jpg' NOT NULL,
+	"profile_picture_key" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "profile_username_unique" UNIQUE("username")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "profile_stats" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"profile_id" bigint NOT NULL,
+	"followers" integer DEFAULT 0 NOT NULL,
+	"following" integer DEFAULT 0 NOT NULL,
+	"friends" integer DEFAULT 0 NOT NULL,
+	"posts" integer DEFAULT 0 NOT NULL,
+	"views" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "profile_view" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"viewer_user_id" text NOT NULL,
+	"viewed_user_id" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "push_token" (
@@ -195,9 +237,17 @@ CREATE TABLE IF NOT EXISTS "user" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_contact" (
 	"user_id" text NOT NULL,
-	"contact_id" text NOT NULL,
+	"contact_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "user_contact_user_id_contact_id_pk" PRIMARY KEY("user_id","contact_id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "userNotOnApp" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"phone_number" text NOT NULL,
+	"profile_picture_key" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -297,7 +347,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "post" ADD CONSTRAINT "post_author_user_id_fk" FOREIGN KEY ("author") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "post" ADD CONSTRAINT "post_author_user_id_fk" FOREIGN KEY ("author") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -309,7 +359,49 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "postOfUserNotOnApp" ADD CONSTRAINT "postOfUserNotOnApp_author_user_id_fk" FOREIGN KEY ("author") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "postOfUserNotOnApp" ADD CONSTRAINT "postOfUserNotOnApp_recipient_userNotOnApp_id_fk" FOREIGN KEY ("recipient") REFERENCES "public"."userNotOnApp"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "post_stats" ADD CONSTRAINT "post_stats_post_id_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."post"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "post_view" ADD CONSTRAINT "post_view_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "post_view" ADD CONSTRAINT "post_view_post_id_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."post"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "profile_stats" ADD CONSTRAINT "profile_stats_profile_id_profile_id_fk" FOREIGN KEY ("profile_id") REFERENCES "public"."profile"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "profile_view" ADD CONSTRAINT "profile_view_viewer_user_id_user_id_fk" FOREIGN KEY ("viewer_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "profile_view" ADD CONSTRAINT "profile_view_viewed_user_id_user_id_fk" FOREIGN KEY ("viewed_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

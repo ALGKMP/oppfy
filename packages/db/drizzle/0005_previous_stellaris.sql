@@ -1,1 +1,0 @@
-ALTER TABLE "post" ALTER COLUMN "media_type" DROP DEFAULT;
