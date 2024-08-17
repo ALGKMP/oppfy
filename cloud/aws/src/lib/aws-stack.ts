@@ -1,6 +1,5 @@
 import * as cdk from "aws-cdk-lib";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
-import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -113,141 +112,50 @@ export class AwsStack extends cdk.Stack {
     const accessControlLambdaVersion =
       accessControlLambda.function.currentVersion;
 
-    // const publicKey = new cloudfront.PublicKey(this, "CloudFrontPublicKey", {
-    //   encodedKey: env.CLOUDFRONT_PUBLIC_KEY,
-    //   comment: "Key for signing CloudFront URLs",
-    // });
-
-    // const keyGroup = new cloudfront.KeyGroup(this, "CloudFrontKeyGroup", {
-    //   items: [publicKey],
-    // });
-
-    // const oai = new cloudfront.OriginAccessIdentity(this, "CloudFrontOAI");
-    // profileBucket.bucket.grantRead(oai);
-
-    // Create a public key
-    const publicKey = new cloudfront.PublicKey(this, "MyPublicKey", {
+    const publicKey = new cloudfront.PublicKey(this, "CloudFrontPublicKey", {
       encodedKey: env.CLOUDFRONT_PUBLIC_KEY,
       comment: "Key for signing CloudFront URLs",
     });
 
-    // Create a key group
-    const cfKeyGroup = new cloudfront.KeyGroup(this, "MyKeyGroup", {
+    const keyGroup = new cloudfront.KeyGroup(this, "CloudFrontKeyGroup", {
       items: [publicKey],
     });
 
-    const privatePostDistribution = new cloudfront.Distribution(
+    const oai = new cloudfront.OriginAccessIdentity(this, "CloudFrontOAI");
+    profileBucket.bucket.grantRead(oai);
+
+    const publicPostDistribution = new CloudFrontDistribution(
       this,
-      "PrivatePostsDistribution",
+      "PublicPostDistribution",
       {
-        defaultBehavior: {
-          origin: new origins.S3Origin(postBucket.bucket),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-          trustedKeyGroups: [cfKeyGroup],
-        },
+        isPrivate: false,
+        bucket: postBucket.bucket,
+        accessControlLambda: accessControlLambdaVersion,
+        oai,
       },
     );
 
-    const publicPostDistribution = new cloudfront.Distribution(
+    const privatePostDistribution = new CloudFrontDistribution(
       this,
-      "PublicPostsDistribution",
+      "PrivatePostDistribution",
       {
-        defaultBehavior: {
-          origin: new origins.S3Origin(postBucket.bucket),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-          edgeLambdas: [
-            {
-              functionVersion: accessControlLambdaVersion,
-              eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
-            },
-          ],
-        },
+        isPrivate: true,
+        bucket: postBucket.bucket,
+        oai,
+        keyGroup,
       },
     );
 
-    // CloudFront distribution for profile bucket
-    const profileDistribution = new cloudfront.Distribution(
+    const profileDistribution = new CloudFrontDistribution(
       this,
       "ProfileDistribution",
       {
-        defaultBehavior: {
-          origin: new origins.S3Origin(profileBucket.bucket),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-          trustedKeyGroups: [cfKeyGroup],
-        },
+        isPrivate: true,
+        bucket: profileBucket.bucket,
+        oai,
+        keyGroup,
       },
     );
-
-    const cloudfrontOriginAccessIdentity = new cloudfront.OriginAccessIdentity(
-      this,
-      "CloudFrontOAI",
-    );
-
-    postBucket.bucket.addToResourcePolicy(
-      new iam.PolicyStatement({
-        actions: ["s3:GetObject"],
-        resources: [postBucket.bucket.arnForObjects("*")],
-        principals: [
-          new iam.CanonicalUserPrincipal(
-            cloudfrontOriginAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
-          ),
-        ],
-      }),
-    );
-
-    profileBucket.bucket.addToResourcePolicy(
-      new iam.PolicyStatement({
-        actions: ["s3:GetObject"],
-        resources: [profileBucket.bucket.arnForObjects("*")],
-        principals: [
-          new iam.CanonicalUserPrincipal(
-            cloudfrontOriginAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
-          ),
-        ],
-      }),
-    );
-
-    // const publicPostDistribution = new CloudFrontDistribution(
-    //   this,
-    //   "PublicPostDistribution",
-    //   {
-    //     isPrivate: false,
-    //     bucket: postBucket.bucket,
-    //     accessControlLambda: accessControlLambdaVersion,
-    //     oai,
-    //   },
-    // );
-
-    // const privatePostDistribution = new CloudFrontDistribution(
-    //   this,
-    //   "PrivatePostDistribution",
-    //   {
-    //     isPrivate: true,
-    //     bucket: postBucket.bucket,
-    //     oai,
-    //     keyGroup,
-    //   },
-    // );
-
-    // const profileDistribution = new CloudFrontDistribution(
-    //   this,
-    //   "ProfileDistribution",
-    //   {
-    //     isPrivate: true,
-    //     bucket: profileBucket.bucket,
-    //     oai,
-    //     keyGroup,
-    //   },
-    // );
 
     const postLambda = new LambdaFunction(this, "PostLambda", {
       entry: "src/res/lambdas/posts/index.ts",
@@ -400,18 +308,18 @@ export class AwsStack extends cdk.Stack {
       }),
     );
 
-    // // Outputs
-    // new cdk.CfnOutput(this, "PublicPostDistributionUrl", {
-    //   value: `https://${publicPostDistribution.distribution.distributionDomainName}`,
-    // });
+    // Outputs
+    new cdk.CfnOutput(this, "PublicPostDistributionUrl", {
+      value: `https://${publicPostDistribution.distribution.distributionDomainName}`,
+    });
 
-    // new cdk.CfnOutput(this, "PrivatePostDistributionUrl", {
-    //   value: `https://${privatePostDistribution.distribution.distributionDomainName}`,
-    // });
+    new cdk.CfnOutput(this, "PrivatePostDistributionUrl", {
+      value: `https://${privatePostDistribution.distribution.distributionDomainName}`,
+    });
 
-    // new cdk.CfnOutput(this, "ProfileDistributionUrl", {
-    //   value: `https://${profileDistribution.distribution.distributionDomainName}`,
-    // });
+    new cdk.CfnOutput(this, "ProfileDistributionUrl", {
+      value: `https://${profileDistribution.distribution.distributionDomainName}`,
+    });
 
     new cdk.CfnOutput(this, "MuxWebhookUrl", {
       value: muxWebhookUrl.url,
