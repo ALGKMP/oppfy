@@ -21,7 +21,6 @@ import { Queue } from "./constructs/queue";
 import { SNSTopic } from "./constructs/sns";
 
 const environment = {
-  // TODO: These should be passed on a case by case basis
   SNS_PUSH_NOTIFICATION_TOPIC_ARN: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
 
   S3_POST_BUCKET: env.S3_POST_BUCKET,
@@ -159,23 +158,12 @@ export class AwsStack extends cdk.Stack {
 
     const postLambda = new LambdaFunction(this, "PostLambda", {
       entry: "src/res/lambdas/posts/index.ts",
-      environment: {
-        // SNS_PUSH_NOTIFICATION_TOPIC_ARN: env.SNS_PUSH_NOTIFICATION_TOPIC_ARN,
-        // S3_POST_BUCKET: env.S3_POST_BUCKET,
-        // S3_PROFILE_BUCKET: env.S3_PROFILE_BUCKET,
-        // ... (add other environment variables)
-        ...environment,
-      },
+      environment,
     });
 
     const profileLambda = new LambdaFunction(this, "ProfileLambda", {
       entry: "src/res/lambdas/profile-picture/index.ts",
-      environment: {
-        // CLOUDFRONT_PROFILE_DISTRIBUTION_ID:
-        // env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
-        // ... (add other environment variables)
-        ...environment,
-      },
+      environment,
     });
 
     profileLambda.function.addToRolePolicy(
@@ -200,10 +188,7 @@ export class AwsStack extends cdk.Stack {
 
     const muxWebhookLambda = new LambdaFunction(this, "MuxWebhookLambda", {
       entry: "src/res/lambdas/mux/index.ts",
-      environment: {
-        // ... (add MUX-specific environment variables)
-        ...environment,
-      },
+      environment,
     });
 
     const muxWebhookUrl = muxWebhookLambda.function.addFunctionUrl({
@@ -229,10 +214,7 @@ export class AwsStack extends cdk.Stack {
       entry: "src/res/lambdas/contact-recs/index.ts",
       vpc,
       securityGroups: [lambdaSecurityGroup],
-      environment: {
-        // NEPTUNE_ENDPOINT: neptune.cluster.clusterReadEndpoint.socketAddress,
-        ...environment,
-      },
+      environment,
     });
 
     const contactRecLambdaUrl = contactRecLambda.function.addFunctionUrl({
@@ -243,10 +225,7 @@ export class AwsStack extends cdk.Stack {
       entry: "src/res/lambdas/contact-sync/index.ts",
       vpc,
       securityGroups: [lambdaSecurityGroup],
-      environment: {
-        // NEPTUNE_ENDPOINT: neptune.cluster.clusterEndpoint.socketAddress,
-        ...environment,
-      },
+      environment,
     });
 
     const contactSyncQueue = new Queue(this, "ContactSync");
@@ -267,9 +246,7 @@ export class AwsStack extends cdk.Stack {
       "PushNotificationsLambda",
       {
         entry: "src/res/lambdas/push-notifications/index.ts",
-        environment: {
-          ...environment,
-        },
+        environment,
       },
     );
 
