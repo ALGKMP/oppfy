@@ -3,6 +3,8 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import type { Construct } from "constructs";
 
@@ -48,6 +50,23 @@ const environment = {
 };
 
 export class AwsStack extends cdk.Stack {
+  private setupBucketLambdaIntegration(
+    bucket: s3.Bucket,
+    lambdaFunction: LambdaFunction,
+    permissionId: string,
+  ) {
+    bucket.grantRead(lambdaFunction.function);
+    lambdaFunction.function.addPermission(permissionId, {
+      action: "lambda:InvokeFunction",
+      principal: new iam.ServicePrincipal("s3.amazonaws.com"),
+      sourceArn: bucket.bucketArn,
+    });
+    bucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(lambdaFunction.function),
+    );
+  }
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, {
       env: {
@@ -145,6 +164,17 @@ export class AwsStack extends cdk.Stack {
           `arn:aws:cloudfront::${env.AWS_ACCOUNT_ID}:distribution/${env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID}`,
         ],
       }),
+    );
+
+    this.setupBucketLambdaIntegration(
+      postBucket.bucket,
+      postLambda,
+      "AllowPostS3Invocation",
+    );
+    this.setupBucketLambdaIntegration(
+      profileBucket.bucket,
+      profileLambda,
+      "AllowProfileS3Invocation",
     );
 
     const muxWebhookLambda = new LambdaFunction(this, "MuxWebhookLambda", {
