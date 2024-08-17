@@ -4,15 +4,22 @@ import type * as lambda from "aws-cdk-lib/aws-lambda";
 import type * as s3 from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 
-import { env } from "@oppfy/env";
-
-export interface CloudFrontProps {
+interface BaseCloudFrontProps {
   bucket: s3.Bucket;
-  accessControlLambda?: lambda.Version;
-  isPrivate: boolean;
-  keyGroup?: cloudfront.IKeyGroup;
   oai: cloudfront.IOriginAccessIdentity;
 }
+
+interface PrivateCloudFrontProps extends BaseCloudFrontProps {
+  isPrivate: true;
+  keyGroup: cloudfront.IKeyGroup;
+}
+
+interface PublicCloudFrontProps extends BaseCloudFrontProps {
+  isPrivate: false;
+  accessControlLambda?: lambda.Version;
+}
+
+export type CloudFrontProps = PrivateCloudFrontProps | PublicCloudFrontProps;
 
 export class CloudFrontDistribution extends Construct {
   public readonly distribution: cloudfront.Distribution;
@@ -27,17 +34,16 @@ export class CloudFrontDistribution extends Construct {
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
       cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-      trustedKeyGroups:
-        props.isPrivate && props.keyGroup ? [props.keyGroup] : [],
+      trustedKeyGroups: props.isPrivate ? [props.keyGroup] : undefined,
       edgeLambdas:
-        props.accessControlLambda && !props.isPrivate
+        !props.isPrivate && props.accessControlLambda
           ? [
               {
                 functionVersion: props.accessControlLambda,
                 eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
               },
             ]
-          : [],
+          : undefined,
     };
 
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
