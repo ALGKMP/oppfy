@@ -10,6 +10,8 @@ export interface CloudFrontProps {
   bucket: s3.Bucket;
   accessControlLambda?: lambda.Version;
   isPrivate: boolean;
+  keyGroup?: cloudfront.IKeyGroup;
+  oai: cloudfront.IOriginAccessIdentity;
 }
 
 export class CloudFrontDistribution extends Construct {
@@ -18,21 +20,15 @@ export class CloudFrontDistribution extends Construct {
   constructor(scope: Construct, id: string, props: CloudFrontProps) {
     super(scope, id);
 
-    const publicKey = new cloudfront.PublicKey(this, "PublicKey", {
-      encodedKey: env.CLOUDFRONT_PUBLIC_KEY,
-      comment: "Key for signing CloudFront URLs",
-    });
-
-    const keyGroup = new cloudfront.KeyGroup(this, "KeyGroup", {
-      items: [publicKey],
-    });
-
     const defaultBehavior: cloudfront.BehaviorOptions = {
-      origin: new origins.S3Origin(props.bucket),
+      origin: new origins.S3Origin(props.bucket, {
+        originAccessIdentity: props.oai,
+      }),
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
       cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-      trustedKeyGroups: props.isPrivate ? [keyGroup] : [],
+      trustedKeyGroups:
+        props.isPrivate && props.keyGroup ? [props.keyGroup] : [],
       edgeLambdas:
         props.accessControlLambda && !props.isPrivate
           ? [
