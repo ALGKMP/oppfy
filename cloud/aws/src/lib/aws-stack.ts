@@ -92,12 +92,20 @@ export class AwsStack extends cdk.Stack {
     const accessControlLambdaVersion =
       accessControlLambda.function.currentVersion;
 
-    const postDistribution = new CloudFrontDistribution(
+    const publicPostDistribution = new CloudFrontDistribution(
       this,
-      "PostDistribution",
+      "PublicPostDistribution",
       {
         bucket: postBucket.bucket,
         accessControlLambda: accessControlLambdaVersion,
+      },
+    );
+
+    const privatePostDistribution = new CloudFrontDistribution(
+      this,
+      "PrivatePostDistribution",
+      {
+        bucket: postBucket.bucket,
       },
     );
 
@@ -234,8 +242,12 @@ export class AwsStack extends cdk.Stack {
     });
 
     // Outputs
-    new cdk.CfnOutput(this, "PostDistributionUrl", {
-      value: `https://${postDistribution.distribution.distributionDomainName}`,
+    new cdk.CfnOutput(this, "PublicPostDistributionUrl", {
+      value: `https://${publicPostDistribution.distribution.distributionDomainName}`,
+    });
+
+    new cdk.CfnOutput(this, "PrivatePostDistributionUrl", {
+      value: `https://${privatePostDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "ProfileDistributionUrl", {
