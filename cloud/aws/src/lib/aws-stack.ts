@@ -216,6 +216,9 @@ export class AwsStack extends cdk.Stack {
       "PushNotificationsLambda",
       {
         entry: "src/res/lambdas/push-notifications/index.ts",
+        environment: {
+          ...environment,
+        },
       },
     );
 
