@@ -117,10 +117,7 @@ const Search = () => {
               renderLoadingSkeletons()
             ) : recommendationsData?.length ? (
               renderRecommendations(recommendationsData)
-            ) : (
-              // TODO: Implement
-              <Text>Testing over the air updates</Text>
-            )
+            ) : null
           ) : isLoading ? (
             renderLoadingSkeletons()
           ) : searchResults.length ? (
