@@ -29,7 +29,7 @@
     "@turbo/gen": "^2.0.4",
     "turbo": "^2.0.6",
     "prettier": "^3.2.5",
-    "typescript": "^5.5"
+    "typescript": "^5.4"
   },
   "prettier": "@oppfy/prettier-config"
 }
