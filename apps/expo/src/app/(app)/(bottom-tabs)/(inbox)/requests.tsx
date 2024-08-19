@@ -290,7 +290,7 @@ const Requests = () => {
     username,
   }: FriendRequestItem) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[userId]/",
+      pathname: "/(inbox)/profile/[userId]",
       params: { userId, username },
     });
   };
@@ -300,7 +300,7 @@ const Requests = () => {
     username,
   }: FollowRequestItem) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[userId]/",
+      pathname: "/(inbox)/profile/[userId]",
       params: { userId, username },
     });
   };
