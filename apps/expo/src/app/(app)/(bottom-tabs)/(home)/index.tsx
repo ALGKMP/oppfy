@@ -113,28 +113,27 @@ const HomeScreen = () => {
               isViewable={viewableItems.includes(item.postId)}
             />
             <Post
-              post={{
-                id: item.postId,
-                authorUsername: item.authorUsername,
-
-                recipientUsername: item.recipientUsername,
-                recipientProfilePicture: item.recipientProfilePicture,
-
-                mediaType: item.mediaType,
-                mediaUrl: item.imageUrl,
-                mediaDimensions: {
+              id={item.postId}
+              createdAt={item.createdAt}
+              caption={item.caption}
+              author={{
+                username: item.authorUsername,
+              }}
+              recipient={{
+                username: item.recipientUsername,
+                profilePicture: item.recipientProfilePicture,
+              }}
+              media={{
+                type: item.mediaType,
+                url: item.imageUrl,
+                dimensions: {
                   width: item.width,
                   height: item.height,
                 },
-
-                stats: {
-                  likes: item.likesCount,
-                  comments: item.commentsCount,
-                },
-
-                caption: item.caption,
-
-                createdAt: item.createdAt,
+              }}
+              stats={{
+                likes: item.likesCount,
+                comments: item.commentsCount,
               }}
             />
           </YStack>

@@ -17,39 +17,42 @@ import { getToken, SizableText, View, XStack, YStack } from "tamagui";
 import { TimeAgo } from "~/components/Texts";
 import CardContainer from "./Containers/CardContainer";
 
-interface Stats {
-  likes: number;
-  comments: number;
+type MediaType = "image" | "video";
+
+interface Author {
+  username: string;
 }
 
-type MediaType = "image" | "video";
+interface Recipient {
+  username: string;
+  profilePicture: ImageSourcePropType | string | null;
+}
 
 interface MediaDimensions {
   width: number;
   height: number;
 }
 
-interface PostData {
-  id: number;
+interface Media {
+  type: MediaType;
+  url: string;
+  dimensions: MediaDimensions;
+}
 
-  authorUsername: string;
-
-  recipientUsername: string;
-  recipientProfilePicture: ImageSourcePropType | string | null;
-
-  mediaType: MediaType;
-  mediaUrl: string;
-  mediaDimensions: MediaDimensions;
-
-  stats: Stats;
-
-  caption: string;
-
-  createdAt: Date;
+interface Stats {
+  likes: number;
+  comments: number;
 }
 
 interface PostProps {
-  post: PostData;
+  id: number;
+  createdAt: Date;
+
+  caption: string;
+  author: Author;
+  recipient: Recipient;
+  media: Media;
+  stats: Stats;
 }
 
 const ASPECT_RATIO = 3 / 4;
@@ -58,7 +61,7 @@ const Post = (props: PostProps) => {
   const renderMedia = (
     type: MediaType,
     url: string,
-    dimensions: MediaDimensions,
+    _dimensions: MediaDimensions,
   ) => {
     const style = {
       borderRadius: getToken("$8", "radius") as number,
@@ -79,18 +82,18 @@ const Post = (props: PostProps) => {
       <YStack gap="$3">
         <XStack alignItems="center" justifyContent="space-between">
           <XStack alignItems="center" gap="$3">
-            <Avatar url={props.post.recipientProfilePicture} />
+            <Avatar url={props.recipient.profilePicture} />
 
             <YStack gap="$1">
               <SizableText fontWeight="bold" lineHeight={0}>
-                {props.post.recipientUsername}
+                {props.recipient.username}
               </SizableText>
 
               <TouchableOpacity>
                 <SizableText theme="alt1" lineHeight={0}>
                   Posted by{" "}
-                  <SizableText fontWeight="bold" color="$blue9">
-                    {props.post.authorUsername}
+                  <SizableText fontWeight="bold" color="$primary">
+                    {props.author.username}
                   </SizableText>
                 </SizableText>
               </TouchableOpacity>
@@ -102,9 +105,9 @@ const Post = (props: PostProps) => {
 
         <View marginHorizontal="$-3">
           {renderMedia(
-            props.post.mediaType,
-            props.post.mediaUrl,
-            props.post.mediaDimensions,
+            props.media.type,
+            props.media.url,
+            props.media.dimensions,
           )}
         </View>
 
@@ -115,7 +118,7 @@ const Post = (props: PostProps) => {
             <Send size="$2" />
           </XStack>
 
-          {props.post.stats.comments === 0 && (
+          {props.stats.comments === 0 && (
             <SizableText size="$4" lineHeight={0} theme="alt1">
               Be the first to comment
             </SizableText>
@@ -125,7 +128,7 @@ const Post = (props: PostProps) => {
             size="$3"
             lineHeight={0}
             theme="alt1"
-            date={props.post.createdAt}
+            date={props.createdAt}
             format={formatTimeAgo}
           />
         </YStack>
