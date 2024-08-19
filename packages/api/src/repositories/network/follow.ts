@@ -200,7 +200,7 @@ export class FollowRepository {
   @handleDatabaseErrors
   async paginateFollowersSelf(
     forUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     const data = await this.db
@@ -240,7 +240,7 @@ export class FollowRepository {
     // todo: remove when drizzle fixes the return type for isNotNull
     return data as {
       userId: string;
-      profileId: number;
+      profileId: string;
       name: string;
       username: string;
       profilePictureUrl: string;
@@ -253,7 +253,7 @@ export class FollowRepository {
   async paginateFollowersOthers(
     forUserId: string,
     currentUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     const followers = await this.db
@@ -311,7 +311,7 @@ export class FollowRepository {
       username: string;
       name: string;
       profilePictureUrl: string;
-      profileId: number;
+      profileId: string;
       privacy: "public" | "private";
       relationshipState: "following" | "followRequestSent" | "notFollowing";
       createdAt: Date;
@@ -331,7 +331,7 @@ export class FollowRepository {
   @handleDatabaseErrors
   async paginateFollowingSelf(
     userId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     const following = await this.db
@@ -386,7 +386,7 @@ export class FollowRepository {
     // todo: remove when drizzle fixes the return type for isNotNull
     return following as {
       userId: string;
-      profileId: number;
+      profileId: string;
       username: string;
       name: string;
       privacy: "public" | "private";
@@ -400,7 +400,7 @@ export class FollowRepository {
   async paginateFollowingOthers(
     forUserId: string,
     currentUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     const followers = await this.db
@@ -455,7 +455,7 @@ export class FollowRepository {
     // todo: remove when drizzle fixes the return type for isNotNull
     return followers as {
       userId: string;
-      profileId: number;
+      profileId: string;
       username: string;
       name: string;
       privacy: "public" | "private";
@@ -468,7 +468,7 @@ export class FollowRepository {
   @handleDatabaseErrors
   async paginateFollowRequests(
     forUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     return await this.db
