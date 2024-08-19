@@ -4,7 +4,6 @@ import trpcBlockOutputSchema from "./network/block";
 import trpcFriendOutputSchema from "./network/friend";
 import trpcRequestOutputSchema from "./network/request";
 import trpcPostOutputSchema from "./post/post";
-import trpcReccomendationsOutputSchema from "./network/recommendations";
 
 export const output = {
   profile: trpcProfileOutputSchema,
@@ -13,5 +12,4 @@ export const output = {
   post: trpcPostOutputSchema,
   block: trpcBlockOutputSchema,
   request: trpcRequestOutputSchema,
-  recommendations: trpcReccomendationsOutputSchema,
 };
