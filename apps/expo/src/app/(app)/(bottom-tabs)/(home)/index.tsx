@@ -106,23 +106,38 @@ const HomeScreen = () => {
 
       return (
         <View paddingTop="$4">
-          <PostItem
-            post={item}
-            isSelfPost={false}
-            isViewable={viewableItems.includes(item.postId)}
-          />
-          <Post
-            post={{
-              
-              authorUsername: item.authorUsername,
-              recipientUsername: item.recipientUsername,
-              recipientProfilePicture: item.recipientProfilePicture,
-              mediaType: item.mediaType,
-              mediaUrl: item.imageUrl,
-              caption: item.caption,
-              // url: item.,
-            }}
-          />
+          <YStack gap="$4">
+            <PostItem
+              post={item}
+              isSelfPost={false}
+              isViewable={viewableItems.includes(item.postId)}
+            />
+            <Post
+              post={{
+                id: item.postId,
+                authorUsername: item.authorUsername,
+
+                recipientUsername: item.recipientUsername,
+                recipientProfilePicture: item.recipientProfilePicture,
+
+                mediaType: item.mediaType,
+                mediaUrl: item.imageUrl,
+                mediaDimensions: {
+                  width: item.width,
+                  height: item.height,
+                },
+
+                stats: {
+                  likes: item.likesCount,
+                  comments: item.commentsCount,
+                },
+
+                caption: item.caption,
+
+                createdAt: item.createdAt,
+              }}
+            />
+          </YStack>
         </View>
       );
     },
