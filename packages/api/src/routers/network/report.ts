@@ -7,7 +7,12 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const reportRouter = createTRPCRouter({
   reportUser: protectedProcedure
-    .input(trpcValidators.input.report.reportUser)
+    .input(
+      z.object({
+        targetUserId: z.string(),
+        reason: sharedValidators.report.reportUserOptions,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         const { targetUserId, reason } = input;
@@ -26,7 +31,12 @@ export const reportRouter = createTRPCRouter({
     }),
 
   reportPost: protectedProcedure
-    .input(trpcValidators.input.report.reportPost)
+    .input(
+      z.object({
+        postId: z.string(),
+        reason: sharedValidators.report.reportPostOptions,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         const { postId, reason } = input;
@@ -45,7 +55,12 @@ export const reportRouter = createTRPCRouter({
     }),
 
   reportComment: protectedProcedure
-    .input(trpcValidators.input.report.reportComment)
+    .input(
+      z.object({
+        commentId: z.string(),
+        reason: sharedValidators.report.reportCommentOptions,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         const { commentId, reason } = input;
