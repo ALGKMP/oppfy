@@ -9,13 +9,10 @@ import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
-  Avatar,
   Button,
   Circle,
   H1,
-  H3,
   H5,
-  H6,
   SizableText,
   styled,
   Text,
@@ -26,7 +23,6 @@ import {
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
-import { VirtualizedListItem } from "~/components/ListItems";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -94,7 +90,7 @@ const HomeScreen = () => {
         .filter((token) => token.isViewable)
         .map((token) => (token.item as TokenItem).postId)
         .filter((id) => id !== undefined);
-      setViewableItems(visibleItemIds);
+      setViewableItems(visibleItemIds as number[]);
     },
     [],
   );
