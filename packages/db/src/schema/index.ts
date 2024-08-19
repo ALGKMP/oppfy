@@ -92,12 +92,6 @@ export const userRelations = relations(user, ({ one, many }) => ({
     references: [notificationSettings.id],
   }),
   postViews: many(postView),
-  viewerProfileViews: many(profileView, {
-    relationName: "viewerProfileViews",
-  }),
-  viewedProfileViews: many(profileView, {
-    relationName: "viewedProfileViews",
-  }),
   receivedNotifications: many(notifications, {
     relationName: "notificationRecipient",
   }),
@@ -228,35 +222,6 @@ export const profileStatsRelations = relations(profileStats, ({ one }) => ({
   profile: one(profile, {
     fields: [profileStats.profileId],
     references: [profile.id],
-  }),
-}));
-
-export const profileView = pgTable("profile_view", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  viewerUserId: uuid("viewer_user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  viewedUserId: uuid("viewed_user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-export const profileViewRelations = relations(profileView, ({ one }) => ({
-  viewer: one(user, {
-    relationName: "viewerProfileViews",
-    fields: [profileView.viewerUserId],
-    references: [user.id],
-  }),
-  viewedProfile: one(user, {
-    relationName: "viewedProfileViews",
-    fields: [profileView.viewedUserId],
-    references: [user.id],
   }),
 }));
 
