@@ -63,7 +63,7 @@ export const reportUserReasonEnum = pgEnum("report_user_reason", [
 ]);
 
 export const user = pgTable("user", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey(),
   profileId: uuid("profile_id")
     .notNull()
     .references(() => profile.id, { onDelete: "cascade" }),
