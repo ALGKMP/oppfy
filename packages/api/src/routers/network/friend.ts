@@ -1,13 +1,21 @@
 import { TRPCError } from "@trpc/server";
-
-import { trpcValidators } from "@oppfy/validators";
+import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const friendRouter = createTRPCRouter({
   paginateFriendsSelf: protectedProcedure
-    .input(trpcValidators.input.friend.paginateFriendsSelf)
-    .output(trpcValidators.output.friend.paginateFriendSelf)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFriendsSelf(
@@ -21,8 +29,18 @@ export const friendRouter = createTRPCRouter({
     }),
 
   paginateFriendsOthers: protectedProcedure
-    .input(trpcValidators.input.friend.paginateFriendsOther)
-    .output(trpcValidators.output.friend.paginateFriendsOthers)
+    .input(
+      z.object({
+        userId: z.string(),
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFriendsOthers(
@@ -37,8 +55,18 @@ export const friendRouter = createTRPCRouter({
     }),
 
   paginateFriendsOthersByProfileId: protectedProcedure
-    .input(trpcValidators.input.friend.paginateFriendsOtherByProfileId)
-    .output(trpcValidators.output.friend.paginateFriendsOthers)
+    .input(
+      z.object({
+        userId: z.string(),
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFriendsOthers(
@@ -63,7 +91,11 @@ export const friendRouter = createTRPCRouter({
   }),
 
   sendFriendRequest: protectedProcedure
-    .input(trpcValidators.input.request.sendFriendRequest)
+    .input(
+      z.object({
+        recipientId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.sendFriendRequest(
@@ -76,7 +108,11 @@ export const friendRouter = createTRPCRouter({
     }),
 
   cancelFriendRequest: protectedProcedure
-    .input(trpcValidators.input.request.cancelFriendRequest)
+    .input(
+      z.object({
+        recipientId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.friend.cancelFriendRequest(
@@ -89,7 +125,11 @@ export const friendRouter = createTRPCRouter({
     }),
 
   removeFriend: protectedProcedure
-    .input(trpcValidators.input.friend.removeFriend)
+    .input(
+      z.object({
+        recipientId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.friend.removeFriend(
