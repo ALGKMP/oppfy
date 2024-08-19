@@ -3,9 +3,9 @@ import { z } from "zod";
 
 import { eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import { trpcValidators } from "@oppfy/validators";
+import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
-import { ErrorCode, DomainError } from "../../errors";
+import { DomainError, ErrorCode } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const profileRouter = createTRPCRouter({
@@ -46,7 +46,11 @@ export const profileRouter = createTRPCRouter({
     }),
 
   generatePresignedUrlForProfilePicture: protectedProcedure
-    .input(trpcValidators.input.profile.generatePresignedUrlForProfilePicture)
+    .input(
+      z.object({
+        contentLength: z.number().refine((size) => size < 5 * 1024 * 1024),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const key = `profile-pictures/${ctx.session.uid}.jpg`;
 
@@ -77,7 +81,14 @@ export const profileRouter = createTRPCRouter({
   }),
 
   updateProfile: protectedProcedure
-    .input(trpcValidators.input.profile.updateProfile)
+    .input(
+      z.object({
+        fullName: sharedValidators.user.fullName.optional(),
+        username: sharedValidators.user.username.optional(),
+        bio: sharedValidators.user.bio.optional(),
+        dateOfBirth: sharedValidators.user.dateOfBirth.optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.profile.updateProfile(ctx.session.uid, input);
@@ -100,28 +111,28 @@ export const profileRouter = createTRPCRouter({
 
   getBatchProfiles: protectedProcedure
     .input(z.array(z.string()).nonempty())
-    .output(z.array(trpcValidators.output.profile.compactProfile))
     .query(async ({ ctx, input }) => {
       return await ctx.services.profile.getBatchProfiles(input);
     }),
 
-  getFullProfileSelf: protectedProcedure
-    .output(trpcValidators.output.profile.fullProfileSelf)
-    .query(async ({ ctx }) => {
-      try {
-        return await ctx.services.profile.getFullProfileSelf(ctx.session.uid);
-      } catch (err) {
-        console.error(err);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-        });
-      }
-    }),
+  getFullProfileSelf: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.profile.getFullProfileSelf(ctx.session.uid);
+    } catch (err) {
+      console.error(err);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  }),
 
   // TRPC Procedure for getting a full user profile
   getFullProfileOther: protectedProcedure
-    .input(trpcValidators.input.profile.getFullProfileOther)
-    .output(trpcValidators.output.profile.fullProfileOther)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.profile.getFullProfileOther({
