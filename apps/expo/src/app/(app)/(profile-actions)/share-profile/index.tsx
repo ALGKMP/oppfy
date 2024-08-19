@@ -10,8 +10,6 @@ import { useToastController } from "@tamagui/toast";
 import { H4, styled, Text, Theme, XStack, YStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
-import { env } from "@oppfy/env";
-
 import { api } from "~/utils/api";
 
 const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
