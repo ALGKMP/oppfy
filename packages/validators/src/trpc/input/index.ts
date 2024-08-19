@@ -8,10 +8,8 @@ import trpcProfileInputSchema from "./profile/profile";
 import trpcContactsInputSchema from "./user/contacts";
 import trpcNotificationsInputSchema from "./user/notifications";
 import trpcSearchInputSchema from "./user/search";
-import trpcUserInputSchema from "./user/user";
 
 export const input = {
-  user: trpcUserInputSchema,
   post: trpcPostInputSchema,
   profile: trpcProfileInputSchema,
   search: trpcSearchInputSchema,
