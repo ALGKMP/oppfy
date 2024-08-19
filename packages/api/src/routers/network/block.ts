@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { sharedValidators, trpcValidators } from "@oppfy/validators";
 
@@ -6,12 +7,16 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const blockRouter = createTRPCRouter({
   blockUser: protectedProcedure
-    .input(trpcValidators.input.block.blockUser)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.block.blockUser(
           ctx.session.uid,
-          input.blockUserId,
+          input.userId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -19,12 +24,16 @@ export const blockRouter = createTRPCRouter({
     }),
 
   isUserBlocked: protectedProcedure
-    .input(trpcValidators.input.block.isUserBlocked)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.block.areEitherUsersBlocked(
           ctx.session.uid,
-          input.blockedUserId,
+          input.userId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -32,12 +41,16 @@ export const blockRouter = createTRPCRouter({
     }),
 
   unblockUser: protectedProcedure
-    .input(trpcValidators.input.block.unblockUser)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.block.unblockUser(
           ctx.session.uid,
-          input.blockedUserId,
+          input.userId,
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
@@ -45,8 +58,17 @@ export const blockRouter = createTRPCRouter({
     }),
 
   paginateBlockedUsers: protectedProcedure
-    .input(trpcValidators.input.block.paginateBlockedUsers)
-    .output(trpcValidators.output.block.paginateBlocked)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.paginate.paginateBlocked(
