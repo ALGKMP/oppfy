@@ -29,6 +29,13 @@ const modakFont = createFont({
 
 const tamaguiConfig = createTamagui({
   ...config,
+  tokens: {
+    ...config.tokens,
+    color: {
+      ...config.tokens.color,
+      primary: "#F214FF",
+    },
+  },
   fonts: {
     ...config.fonts,
     modak: modakFont,
