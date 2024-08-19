@@ -135,20 +135,4 @@ export const profileRouter = createTRPCRouter({
         });
       }
     }),
-
-  viewMultipleProfiles: protectedProcedure
-    .input(z.object({ profileIds: z.array(z.number()) }))
-    .mutation(async ({ ctx, input }) => {
-      try {
-        await ctx.services.profile.viewMultipleProfiles({
-          viewerUserId: ctx.session.uid,
-          viewedProfileIds: input.profileIds,
-        });
-      } catch (err) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Failed to view multiple profiles`,
-        });
-      }
-    }),
 });
