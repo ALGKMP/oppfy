@@ -129,7 +129,7 @@ const Inbox = () => {
 
   const onUserSelected = ({ userId, username }: NotificationItem) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[userId]/",
+      pathname: "/(inbox)/profile/[userId]",
       params: { userId, username },
     });
   };
@@ -302,9 +302,9 @@ const Inbox = () => {
         {recommendationsData && (
           <RecommendationList
             handleProfileClicked={(userId, username) => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               router.navigate({
-                pathname: "/(inbox)/profile/[userId]/",
+                pathname: "/(inbox)/profile/[userId]",
                 params: { userId, username },
               });
             }}
