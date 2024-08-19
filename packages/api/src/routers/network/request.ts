@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { trpcValidators } from "@oppfy/validators";
 
@@ -6,8 +7,17 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const requestRouter = createTRPCRouter({
   paginateFriendRequests: protectedProcedure
-    .input(trpcValidators.input.request.paginateFriendRequests)
-    .output(trpcValidators.output.request.paginateFriendRequests)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         const { items, nextCursor } =
@@ -26,8 +36,17 @@ export const requestRouter = createTRPCRouter({
     }),
 
   paginateFollowRequests: protectedProcedure
-    .input(trpcValidators.input.request.paginateFollowRequests)
-    .output(trpcValidators.output.request.paginateFollowRequests)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         const { items, nextCursor } =
@@ -46,7 +65,12 @@ export const requestRouter = createTRPCRouter({
     }),
 
   countRequests: protectedProcedure
-    .output(trpcValidators.output.request.countRequests)
+    .output(
+      z.object({
+        followRequestCount: z.number(),
+        friendRequestCount: z.number(),
+      }),
+    )
     .query(async ({ ctx }) => {
       try {
         const followRequestCount =
@@ -64,7 +88,11 @@ export const requestRouter = createTRPCRouter({
     }),
 
   sendFriendRequest: protectedProcedure
-    .input(trpcValidators.input.request.sendFriendRequest)
+    .input(
+      z.object({
+        recipientId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.sendFriendRequest(
@@ -77,7 +105,11 @@ export const requestRouter = createTRPCRouter({
     }),
 
   acceptFriendRequest: protectedProcedure
-    .input(trpcValidators.input.request.acceptFriendRequest)
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.acceptFriendRequest(
@@ -90,7 +122,11 @@ export const requestRouter = createTRPCRouter({
     }),
 
   declineFriendRequest: protectedProcedure
-    .input(trpcValidators.input.request.rejectFriendRequest)
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.declineFriendRequest(
@@ -103,7 +139,11 @@ export const requestRouter = createTRPCRouter({
     }),
 
   cancelFriendRequest: protectedProcedure
-    .input(trpcValidators.input.request.cancelFriendRequest)
+    .input(
+      z.object({
+        recipientId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.friend.cancelFriendRequest(
@@ -116,7 +156,11 @@ export const requestRouter = createTRPCRouter({
     }),
 
   acceptFollowRequest: protectedProcedure
-    .input(trpcValidators.input.request.acceptFollowRequest)
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.acceptFollowRequest(
@@ -129,7 +173,11 @@ export const requestRouter = createTRPCRouter({
     }),
 
   declineFollowRequest: protectedProcedure
-    .input(trpcValidators.input.request.rejectFollowRequest)
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.declineFollowRequest(
@@ -142,7 +190,11 @@ export const requestRouter = createTRPCRouter({
     }),
 
   cancelFollowRequest: protectedProcedure
-    .input(trpcValidators.input.request.cancelFollowRequest)
+    .input(
+      z.object({
+        recipientId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.follow.cancelFollowRequest(
