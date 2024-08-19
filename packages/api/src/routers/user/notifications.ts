@@ -7,7 +7,11 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const notificationsRouter = createTRPCRouter({
   storePushToken: protectedProcedure
-    .input(trpcValidators.input.notifications.storePushToken)
+    .input(
+      z.object({
+        pushToken: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.notifications.storePushToken(
@@ -30,7 +34,17 @@ export const notificationsRouter = createTRPCRouter({
   }),
 
   paginateNotifications: protectedProcedure
-    .input(trpcValidators.input.notifications.paginateNotifications)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            id: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.notifications.paginateNotifications(
@@ -54,7 +68,16 @@ export const notificationsRouter = createTRPCRouter({
   }),
 
   updateNotificationSettings: protectedProcedure
-    .input(trpcValidators.input.notifications.updateNotificationSettings)
+    .input(
+      z.object({
+        posts: z.boolean().optional(),
+        likes: z.boolean().optional(),
+        mentions: z.boolean().optional(),
+        comments: z.boolean().optional(),
+        followRequests: z.boolean().optional(),
+        friendRequests: z.boolean().optional(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.notifications.updateNotificationSettings(
