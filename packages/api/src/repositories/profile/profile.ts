@@ -8,7 +8,7 @@ export class ProfileRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async getProfile(profileId: number) {
+  async getProfile(profileId: string) {
     return await this.db.query.profile.findFirst({
       where: eq(schema.profile.id, profileId),
     });
@@ -39,7 +39,7 @@ export class ProfileRepository {
 
   @handleDatabaseErrors
   async updateProfile(
-    profileId: number,
+    profileId: string,
     update: Partial<typeof schema.profile.$inferInsert>,
   ) {
     return await this.db
@@ -49,7 +49,7 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  async updateProfilePicture(profileId: number, newKey: string) {
+  async updateProfilePicture(profileId: string, newKey: string) {
     await this.db
       .update(schema.profile)
       .set({ profilePictureKey: newKey })
@@ -57,7 +57,7 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  async removeProfilePicture(profileId: number) {
+  async removeProfilePicture(profileId: string) {
     await this.db
       .update(schema.profile)
       .set({ profilePictureKey: "profile-pictures/default.jpg" })
@@ -92,7 +92,7 @@ export class ProfileRepository {
   }
 
   @handleDatabaseErrors
-  async deleteProfile(profileId: number) {
+  async deleteProfile(profileId: string) {
     await this.db.delete(schema.profile).where(eq(schema.profile.id, profileId));
   }
 }
