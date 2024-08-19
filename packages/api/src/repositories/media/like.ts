@@ -8,7 +8,7 @@ export class LikeRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addLike(postId: number, userId: string) {
+  async addLike(postId: string, userId: string) {
     return await this.db.insert(schema.like).values({
       postId: postId,
       user: userId,
@@ -17,14 +17,14 @@ export class LikeRepository {
   }
 
   @handleDatabaseErrors
-  async removeLike(postId: number, userId: string) {
+  async removeLike(postId: string, userId: string) {
     return await this.db
       .delete(schema.like)
       .where(and(eq(schema.like.postId, postId), eq(schema.like.user, userId)));
   }
 
   @handleDatabaseErrors
-  async findLike(postId: number, userId: string) {
+  async findLike(postId: string, userId: string) {
     return await this.db.query.like.findFirst({
       where: and(eq(schema.like.postId, postId), eq(schema.like.user, userId)),
     });
