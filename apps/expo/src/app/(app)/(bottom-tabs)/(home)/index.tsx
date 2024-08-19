@@ -23,7 +23,7 @@ import {
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
-import Post from "~/components/Post";
+import Post from "~/components/NewPostTesting/Post";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -237,7 +237,7 @@ const HomeScreen = () => {
         onRefresh={onRefresh}
         numColumns={1}
         onEndReached={handleOnEndReached}
-        keyExtractor={(item) => "home_" + item?.postId.toString()}
+        keyExtractor={(item) => "home_" + item.postId.toString()}
         renderItem={({ item }) => renderPost(item)}
         ListHeaderComponent={renderSuggestions}
         ListFooterComponent={ListFooter}

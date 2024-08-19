@@ -1,6 +1,7 @@
-import React from "react";
-import { TouchableOpacity } from "react-native";
-import type { ImageSourcePropType } from "react-native";
+import React, { useCallback } from "react";
+import { TouchableOpacity, type ImageSourcePropType } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { runOnJS } from "react-native-reanimated";
 import { Video } from "expo-av";
 import { Image } from "expo-image";
 import defaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -15,7 +16,8 @@ import {
 import { getToken, SizableText, View, XStack, YStack } from "tamagui";
 
 import { TimeAgo } from "~/components/Texts";
-import CardContainer from "./Containers/CardContainer";
+import CardContainer from "../Containers/CardContainer";
+import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 
 type MediaType = "image" | "video";
 
@@ -58,6 +60,17 @@ interface PostProps {
 const ASPECT_RATIO = 3 / 4;
 
 const Post = (props: PostProps) => {
+  const { hearts, addHeart } = useHeartAnimations();
+
+  const addHeartJS = useCallback(
+    (x: number, y: number) => addHeart(x, y),
+    [addHeart],
+  );
+
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
+
   const renderMedia = (
     type: MediaType,
     url: string,
@@ -104,16 +117,27 @@ const Post = (props: PostProps) => {
         </XStack>
 
         <View marginHorizontal="$-3">
-          {renderMedia(
-            props.media.type,
-            props.media.url,
-            props.media.dimensions,
-          )}
+          <GestureDetector gesture={doubleTap}>
+            <View>
+              {renderMedia(
+                props.media.type,
+                props.media.url,
+                props.media.dimensions,
+              )}
+              {hearts.map((heart) => (
+                <GradientHeart
+                  key={heart.id}
+                  gradient={heart.gradient}
+                  position={heart.position}
+                />
+              ))}
+            </View>
+          </GestureDetector>
         </View>
 
         <YStack gap="$2">
           <XStack gap="$3">
-            <Heart size="$2" />
+            <Heart size="$2" onPress={() => addHeartJS(20, 20)} />
             <MessageCircle size="$2" />
             <Send size="$2" />
           </XStack>
