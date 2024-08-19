@@ -5,12 +5,15 @@ import {
   SearchRepository,
 } from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
+import { auth } from "@oppfy/firebase";
 
 export class UserService {
   private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
   private postRepository = new PostRepository();
   private profileRepository = new ProfileRepository();
+  private auth = auth;
+
 
   async createUser(userId: string, phoneNumber: string) {
     let username;
@@ -51,6 +54,7 @@ export class UserService {
     }
     await this.profileRepository.deleteProfile(user.profileId);
     await this.searchRepository.deleteProfile(userId);
+    await this.auth.deleteUser(userId);
   }
 
   async checkOnboardingComplete(userId: string | undefined) {
