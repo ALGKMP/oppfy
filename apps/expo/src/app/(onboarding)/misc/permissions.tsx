@@ -59,7 +59,7 @@ const Permissions = () => {
     setAlertDialogProps({
       isVisible: true,
       title: `${permissionType} Permission`,
-      subtitle: `${permissionType} permission is required for this app. Please enable it in your device settings.`,
+      subtitle: `Oppfy uses ${permissionType} to offer users the best experience. You can enable or disable this permission at any time in the settings.`,
     });
   };
 
