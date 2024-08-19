@@ -23,12 +23,14 @@ import {
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
+import Post from "~/components/Post";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import PostItem from "../../../../components/Media/PostItem";
+import Other from "../../(settings)/other";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -99,12 +101,27 @@ const HomeScreen = () => {
     (item: PostItem) => {
       if (item === undefined) return null;
 
+      if (item.authorUsername === null) return null;
+      if (item.recipientUsername === null) return null;
+
       return (
         <View paddingTop="$4">
           <PostItem
             post={item}
             isSelfPost={false}
             isViewable={viewableItems.includes(item.postId)}
+          />
+          <Post
+            post={{
+              
+              authorUsername: item.authorUsername,
+              recipientUsername: item.recipientUsername,
+              recipientProfilePicture: item.recipientProfilePicture,
+              mediaType: item.mediaType,
+              mediaUrl: item.imageUrl,
+              caption: item.caption,
+              // url: item.,
+            }}
           />
         </View>
       );

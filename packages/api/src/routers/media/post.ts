@@ -172,19 +172,14 @@ export const postRouter = createTRPCRouter({
 
   paginatePostsForFeed: protectedProcedure
     .input(trpcValidators.input.post.paginatePostsForFeed)
-    .output(trpcValidators.output.post.paginatedFeedPosts)
+    // .output(trpcValidators.output.post.paginatedFeedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginatePostsForFeed(
+        return await ctx.services.post.paginatePostsForFeed(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-
-        const parsedFollowingResult =
-          trpcValidators.output.post.paginatedFeedPosts.parse(result);
-
-        return parsedFollowingResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
