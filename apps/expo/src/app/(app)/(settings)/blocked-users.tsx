@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Button, H5, H6, Input, SizableText, View, YStack } from "tamagui";
+import { Button, H5, Input, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
