@@ -7,7 +7,7 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const contactsRouter = createTRPCRouter({
   syncContacts: protectedProcedure
-    .input(trpcValidators.input.contacts.syncContacts)
+    .input(z.array(z.string()))
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.contact.syncContacts(ctx.session.uid, input);
@@ -36,8 +36,11 @@ export const contactsRouter = createTRPCRouter({
     }
   }),
   getRecommendationProfilesOther: protectedProcedure
-    .input(trpcValidators.input.contacts.getRecommendationProfilesOther)
-    .output(trpcValidators.output.recommendations.recommededProfiles)
+    .input(
+      z.object({
+        profileId: z.string(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.contact.getRecommendationProfilesOtherByProfileId(
@@ -52,7 +55,6 @@ export const contactsRouter = createTRPCRouter({
     }),
 
   getRecommendationProfilesSelf: protectedProcedure
-    .output(trpcValidators.output.recommendations.recommededProfiles)
     .query(async ({ ctx }) => {
       try {
         return await ctx.services.contact.getRecommendationProfilesSelf(
