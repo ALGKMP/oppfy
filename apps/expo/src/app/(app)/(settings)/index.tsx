@@ -129,7 +129,7 @@ const Settings = () => {
 
         {__DEV__ && (
           <Button
-            size="$4.5"
+            size="$5"
             color="$yellow10Dark"
             onPress={() => router.push("/_sitemap")}
           >
