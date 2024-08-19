@@ -3,7 +3,7 @@ import { FriendState } from "@oppfy/validators";
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories";
 import { FriendRepository } from "../../repositories/network/friend";
-import { ProfileRepository } from "../../repositories/profile/profile";
+import { ProfileRepository } from "../../repositories/user/profile";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
@@ -244,10 +244,7 @@ export class FriendService {
   }
 
   async getFriendRequest(userId: string, targetUserId: string) {
-    return await this.friendRepository.getFriendRequest(
-      userId,
-      targetUserId,
-    );
+    return await this.friendRepository.getFriendRequest(userId, targetUserId);
   }
 
   async removeFriend(targetUserId: string, otherUserId: string) {

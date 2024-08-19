@@ -3,7 +3,7 @@ import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
-import { ProfileRepository } from "../../repositories/profile/profile";
+import { ProfileRepository } from "../../repositories/user/profile";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 

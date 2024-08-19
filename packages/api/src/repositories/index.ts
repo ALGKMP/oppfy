@@ -6,7 +6,7 @@ export { UserRepository } from "./user/user";
 export { BlockRepository } from "./network/block";
 export { FollowRepository } from "./network/follow";
 export { FriendRepository } from "./network/friend";
-export { ProfileRepository } from "./profile/profile";
+export { ProfileRepository } from "./user/profile";
 export { PostRepository } from "./media/post";
 export { MuxRepository } from "./mux/mux";
 export { ContactsRepository } from "./user/contacts";
