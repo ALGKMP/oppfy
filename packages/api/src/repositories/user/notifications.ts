@@ -91,7 +91,7 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async getNotificationSettings(notificationSettingId: number) {
+  async getNotificationSettings(notificationSettingId: string) {
     const possibleNotificationSettings =
       await this.db.query.notificationSettings.findFirst({
         where: eq(schema.notificationSettings.id, notificationSettingId),
@@ -129,7 +129,7 @@ export class NotificationsRepository {
   @handleDatabaseErrors
   async paginateNotifications(
     userId: string,
-    cursor: { createdAt: Date; id: number } | null = null,
+    cursor: { createdAt: Date; id: string } | null = null,
     pageSize = 10,
   ) {
     const notifications = await this.db.transaction(async (tx) => {
@@ -213,7 +213,7 @@ export class NotificationsRepository {
 
   @handleDatabaseErrors
   async updateNotificationSettings(
-    notificationSettingsId: number,
+    notificationSettingsId: string,
     notificationSettings: NotificationSettings,
   ) {
     await this.db
@@ -271,7 +271,7 @@ export class NotificationsRepository {
     return possiblePushTokens.map((pushToken) => pushToken.token);
   }
 
-  async deleteNotificationById(id: number) {
+  async deleteNotificationById(id: string) {
     await this.db
       .delete(schema.notifications)
       .where(eq(schema.notifications.id, id));
