@@ -10,7 +10,7 @@ export class ReportRepository {
   @handleDatabaseErrors
   async createCommentReport(
     reason: z.infer<typeof sharedValidators.report.reportCommentOptions>,
-    commentId: number,
+    commentId: string,
     reporterUserId: string,
   ) {
     const reportComment = await db.insert(schema.reportComment).values({
@@ -26,7 +26,7 @@ export class ReportRepository {
   @handleDatabaseErrors
   async createPostReport(
     reason: z.infer<typeof sharedValidators.report.reportPostOptions>,
-    postId: number,
+    postId: string,
     reporterUserId: string,
   ) {
     const reportComment = await db.insert(schema.reportPost).values({
