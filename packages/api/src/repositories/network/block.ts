@@ -10,7 +10,7 @@ export class BlockRepository {
   @handleDatabaseErrors
   async getPaginatedBlockedUsers(
     forUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     return await this.db
