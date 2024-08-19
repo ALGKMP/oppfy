@@ -3,57 +3,44 @@ import { z } from "zod";
 import { env } from "@oppfy/env";
 import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
 
-import { profileStats } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
-  FollowRepository,
-  FriendRepository,
   ProfileRepository,
   S3Repository,
   SearchRepository,
   UserRepository,
-  ViewRepository,
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
+import { sharedValidators } from "@oppfy/validators";
 
-type UpdateProfile = z.infer<typeof trpcValidators.input.profile.updateProfile>;
+const updateProfile = z.object({
+  fullName: sharedValidators.user.fullName.optional(),
+  username: sharedValidators.user.username.optional(),
+  bio: sharedValidators.user.bio.optional(),
+  dateOfBirth: sharedValidators.user.dateOfBirth.optional(),
+})
 
 type PublicFollowState = "NotFollowing" | "Following";
 type PrivateFollowState = "NotFollowing" | "Requested" | "Following";
 type FriendState = "NotFriends" | "Requested" | "Friends";
-
-interface PublicProfileStatus {
-  privacy: "public";
-  followState: PublicFollowState;
-  friendState: FriendState;
-}
-
-interface PrivateProfileStatus {
-  privacy: "private";
-  followState: PrivateFollowState;
-  friendState: FriendState;
-}
 
 export class ProfileService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private searchRepository = new SearchRepository();
   private s3Repository = new S3Repository();
-  private followRepository = new FollowRepository();
-  private friendsRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
-  private viewRepository = new ViewRepository();
 
   private friendService = new FriendService();
   private followService = new FollowService();
   private blockService = new BlockService();
   private cloudFrontService = new CloudFrontService();
 
-  async updateProfile(userId: string, newData: UpdateProfile): Promise<void> {
+  async updateProfile(userId: string, newData: z.infer<typeof updateProfile>): Promise<void> {
     const userWithProfile = await this.profileRepository.getUserProfile(userId);
 
     if (userWithProfile === undefined) {
