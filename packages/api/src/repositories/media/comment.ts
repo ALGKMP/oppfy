@@ -8,7 +8,7 @@ export class CommentRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addComment(postId: number, userId: string, body: string) {
+  async addComment({ postId, userId, body }: { postId: string; userId: string; body: string }) {
     return await this.db.insert(schema.comment).values({
       post: postId,
       user: userId,
@@ -17,14 +17,14 @@ export class CommentRepository {
   }
 
   @handleDatabaseErrors
-  async removeComment(commentId: number) {
+  async removeComment(commentId: string) {
     return await this.db
       .delete(schema.comment)
       .where(eq(schema.comment.id, commentId));
   }
 
   @handleDatabaseErrors
-  async countComments(postId: number) {
+  async countComments(postId: string) {
     const result = await this.db
       .select({ count: count() })
       .from(schema.comment)
@@ -34,8 +34,8 @@ export class CommentRepository {
 
   @handleDatabaseErrors
   async paginateComments(
-    postId: number,
-    cursor: { createdAt: Date; commentId: number } | null = null,
+    postId: string,
+    cursor: { createdAt: Date; commentId: string } | null = null,
     pageSize = 10,
   ) {
     return await db
