@@ -122,20 +122,20 @@ const Settings = () => {
     <BaseScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
-        <Button
-          size="$4.5"
-          color="$red9"
-          onPress={() => setIsModalVisible(true)}
-        >
+
+        <Button size="$5" color="$red9" onPress={() => setIsModalVisible(true)}>
           Logout
         </Button>
-        {/* <Button
-          size="$4.5"
-          color="$yellow10Dark"
-          onPress={() => router.push("/_sitemap")}
-        >
-          Sitemap
-        </Button> */}
+
+        {__DEV__ && (
+          <Button
+            size="$4.5"
+            color="$yellow10Dark"
+            onPress={() => router.push("/_sitemap")}
+          >
+            Sitemap
+          </Button>
+        )}
       </YStack>
 
       <ActionSheet
