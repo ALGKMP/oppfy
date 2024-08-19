@@ -83,12 +83,6 @@ export class ProfileService {
     });
   }
 
-  // ! if something like this ever gets used dont forget to sync with opensearch
-  // async updateProfilePicture(userId: string, key: string) {
-  //   const profile = await this._getUserProfile(userId);
-  //   await this.profileRepository.updateProfilePicture(profile.id, key);
-  // }
-
   async getFullProfileSelf(userId: string) {
     const user = await this.profileRepository.getUserFullProfile(userId);
 
@@ -262,26 +256,5 @@ export class ProfileService {
     };
 
     return PrivacyStatus.parse(networkStates);
-  }
-
-  async viewMultipleProfiles({
-    viewerUserId,
-    viewedProfileIds,
-  }: {
-    viewerUserId: string;
-    viewedProfileIds: number[];
-  }): Promise<void> {
-    try {
-      await this.viewRepository.viewMultipleProfiles({
-        viewerUserId,
-        viewedProfileIds,
-      });
-    } catch (err) {
-      throw new DomainError(
-        ErrorCode.FAILED_TO_CREATE_VIEW,
-        "Failed to create profile views for the user.",
-        `SERVICE ERROR: Failed to create profile views for user ID "${viewerUserId}" viewing profiles "${viewedProfileIds}"`,
-      );
-    }
   }
 }
