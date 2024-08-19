@@ -9,7 +9,7 @@ const trpcNotificationsInputSchema = {
     cursor: z
       .object({
         createdAt: z.date(),
-        id: z.number(),
+        id: z.string(),
       })
       .optional(),
     pageSize: z.number().optional(),
