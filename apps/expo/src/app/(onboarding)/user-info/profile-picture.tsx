@@ -27,18 +27,23 @@ const ProfilePicture = () => {
     });
 
   useEffect(() => {
-    void syncContacts().then(() => {
-      utils.contacts.getRecommendationProfilesSelf.prefetch();
-    });
+    const fn = async () => {
+      await syncContacts();
+      await utils.contacts.getRecommendationProfilesSelf.prefetch();
+    };
+
+    void fn();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSubmit = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
   };
 
   const onSkip = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
   };
 

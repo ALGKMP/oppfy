@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { Alert, Keyboard, Modal, TouchableOpacity } from "react-native";
+import { Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
 import {
@@ -98,7 +99,7 @@ const PhoneNumber = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     setIsLoading(true);
     setError(null);
@@ -212,7 +213,7 @@ const CountryPicker = ({
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
     {
-      data: countriesWithoutSections,
+      data: countriesWithoutSections as CountryData[],
       keys: ["name", "dialingCode", "countryCode"],
     },
   );
@@ -283,7 +284,7 @@ const CountryPicker = ({
           borderBottomRightRadius: 0,
         }}
         onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           setModalVisible(true);
         }}
       >

@@ -27,7 +27,7 @@ const FullName = () => {
   );
 
   const onSubmit = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     await updateProfile.mutateAsync({
       fullName,
