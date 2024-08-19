@@ -19,7 +19,6 @@ import type {
 } from "react-native-vision-camera";
 import {
   Camera,
-  Templates,
   useCameraDevice,
   useCameraFormat,
   useLocationPermission,
@@ -28,10 +27,10 @@ import {
 import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { CameraOff } from "@tamagui/lucide-icons";
-import { Image, Text, View } from "tamagui";
+import { View } from "tamagui";
 
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
