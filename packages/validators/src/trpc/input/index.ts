@@ -7,12 +7,10 @@ import trpcRequestInputSchema from "./network/request";
 import trpcProfileInputSchema from "./profile/profile";
 import trpcContactsInputSchema from "./user/contacts";
 import trpcNotificationsInputSchema from "./user/notifications";
-import trpcSearchInputSchema from "./user/search";
 
 export const input = {
   post: trpcPostInputSchema,
   profile: trpcProfileInputSchema,
-  search: trpcSearchInputSchema,
   block: trpcBlockInputSchema,
   follow: trpcFollowInputSchema,
   friend: trpcFriendInputSchema,
