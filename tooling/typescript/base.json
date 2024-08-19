@@ -19,7 +19,7 @@
     "checkJs": true,
     "disableSizeLimit": true,
 
-    "module": "Preserve",
+    "module": "ES2020",
     "moduleResolution": "Bundler",
     "noEmit": true
   },
