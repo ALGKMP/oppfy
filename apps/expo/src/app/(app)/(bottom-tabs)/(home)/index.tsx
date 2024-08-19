@@ -120,7 +120,7 @@ const HomeScreen = () => {
     const handleProfilePress = (profile: Profile) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.navigate({
-        pathname: "/profile/[userId]/",
+        pathname: "/profile/[userId]",
         params: {
           userId: profile.userId,
           username: profile.username,
@@ -182,11 +182,7 @@ const HomeScreen = () => {
                   </YStack>
                 </XStack>
 
-                <Skeleton
-                  radius={16}
-                  width={"100%"}
-                  height={screenWidth * 1.5}
-                />
+                <Skeleton radius={16} width="100%" height={screenWidth * 1.5} />
               </YStack>
             </CardContainer>
           ))}

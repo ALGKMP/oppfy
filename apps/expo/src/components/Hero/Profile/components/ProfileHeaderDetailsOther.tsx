@@ -648,7 +648,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
           />
 
           <StatusRenderer
-            data={!props.loading ? (props.data.bio ?? "") : undefined}
+            data={!props.loading ? props.data.bio ?? "" : undefined}
             loadingComponent={<Skeleton width={150} height={20} />}
             successComponent={(bio) =>
               bio.length ? (
@@ -687,7 +687,9 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             successComponent={(count) => (
               <TouchableOpacity
                 onPress={onFollowerListPress}
-                disabled={!props.loading ? props.isRestricted || props.isBlocked: true}
+                disabled={
+                  !props.loading ? props.isRestricted || props.isBlocked : true
+                }
               >
                 <Stat label="Followers" value={abbreviatedNumber(count)} />
               </TouchableOpacity>
