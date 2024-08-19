@@ -156,7 +156,7 @@ export class ContactService {
     return profilesWithUrls;
   }
 
-  async getRecommendationProfilesOtherByProfileId(profileId: number) {
+  async getRecommendationProfilesOtherByProfileId(profileId: string) {
     const user = await this.userRepository.getUserByProfileId(profileId);
 
     if (user === undefined) {
