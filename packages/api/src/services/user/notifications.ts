@@ -37,7 +37,7 @@ export class NotificationsService {
 
   async paginateNotifications(
     userId: string,
-    cursor: { createdAt: Date; id: number } | null = null,
+    cursor: { createdAt: Date; id: string } | null = null,
     pageSize = 10,
   ) {
     const items = await this.notificationsRepository.paginateNotifications(
@@ -143,7 +143,7 @@ export class NotificationsService {
     await this.notificationsRepository.storePushToken(userId, pushToken);
   }
 
-  async deleteNotification(id: number) {
+  async deleteNotification(id: string) {
     await this.notificationsRepository.deleteNotificationById(id);
   }
 
