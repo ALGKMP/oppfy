@@ -62,7 +62,7 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getUserByProfileId(profileId: number) {
+  async getUserByProfileId(profileId: string) {
     return await this.db.query.user.findFirst({
       where: eq(schema.user.profileId, profileId),
     });
