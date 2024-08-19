@@ -26,8 +26,8 @@ import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 
 enum WEBSITE_URL {
-  PRIVACY = "https://oppfy/privacy.app",
-  TERMS = "https://oppfy/terms.app",
+  PRIVACY = "https://oppfy.app/privacy",
+  TERMS = "https://oppfy.app/terms",
 }
 
 const Settings = () => {
