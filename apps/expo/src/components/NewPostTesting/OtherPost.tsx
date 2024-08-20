@@ -1,14 +1,21 @@
 import React, { useState } from "react";
+import { Position } from "react-native-image-marker";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import watermark from "@assets/watermark.png";
+import { useToastController } from "@tamagui/toast";
 
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import PostCard from "./PostCard";
 import type { PostData as PostCardProps } from "./PostCard";
+import { useSaveMedia } from "./useSaveMedia";
 
 const OtherPost = (props: PostCardProps) => {
   const router = useRouter();
+  const toast = useToastController();
+
+  const { saveMedia, isSaving } = useSaveMedia();
 
   const [isActionSheetVisible, setIsActionSheetVisible] = useState(false);
 
@@ -35,27 +42,30 @@ const OtherPost = (props: PostCardProps) => {
     setIsActionSheetVisible(false);
   };
 
-  const handleSavePost = () => {
+  const handleSavePost = async () => {
+    toast.show("Post Saved");
     console.log("Saving post");
-    setIsActionSheetVisible(false);
+    await saveMedia(props.media.url, {
+      image: watermark,
+      position: Position.bottomRight,
+    });
   };
 
   const handleReportPost = () => {
     console.log("Reporting post");
-    setIsActionSheetVisible(false);
   };
 
   const buttonOptions: ButtonOption[] = [
     {
       text: "Save Post",
-      onPress: handleSavePost,
+      onPress: () => void handleSavePost(),
     },
     {
       text: "Report Post",
       textProps: {
         color: "$red9",
       },
-      onPress: handleReportPost,
+      onPress: () => void handleReportPost(),
     },
   ];
 

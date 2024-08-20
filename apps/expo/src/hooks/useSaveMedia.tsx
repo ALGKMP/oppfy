@@ -4,6 +4,7 @@ import Marker, { Position } from "react-native-image-marker";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { PermissionStatus } from "expo-media-library";
+import watermark from "@assets/watermark.png";
 
 type SaveState = "idle" | "saving" | "saved";
 type MediaType = "image" | "video";
@@ -20,7 +21,7 @@ const useSaveMedia = () => {
         },
         watermarkImages: [
           {
-            src: require("assets/watermark.png"),
+            src: watermark,
             position: {
               position: Position.bottomRight,
             },

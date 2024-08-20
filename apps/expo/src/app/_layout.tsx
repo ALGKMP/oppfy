@@ -21,7 +21,7 @@ const RootLayout = () => {
               <PermissionsProvider>
                 <SafeAreaProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
-                    <ToastProvider>
+                    <ToastProvider native={true}>
                       <View flex={1} backgroundColor="$background">
                         <Slot />
                       </View>

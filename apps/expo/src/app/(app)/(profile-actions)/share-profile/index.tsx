@@ -40,10 +40,7 @@ const ShareProfile = () => {
   const handleCopyLink = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await Clipboard.setStringAsync(qrValue);
-    toast.show("Link copied", {
-      native: true,
-      duration: 1000,
-    });
+    toast.show("Link copied");
   };
 
   return (
