@@ -4,9 +4,9 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import watermark from "@assets/watermark.png";
 import { useToastController } from "@tamagui/toast";
-import { useTheme } from "tamagui";
 
-import { api, RouterInputs } from "~/utils/api";
+import type { RouterInputs } from "~/utils/api";
+import { api } from "~/utils/api";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import PostCard from "./PostCard";
@@ -14,6 +14,8 @@ import type { PostData as OtherPostProps } from "./PostCard";
 import { useSaveMedia } from "./useSaveMedia";
 
 type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
+
+type SheetState = "closed" | "moreOptions" | "reportOptions";
 
 const OtherPost = (postProps: OtherPostProps) => {
   const router = useRouter();
@@ -23,10 +25,7 @@ const OtherPost = (postProps: OtherPostProps) => {
 
   const reportPost = api.report.reportPost.useMutation();
 
-  const [isMoreOptionsSheetVisible, setIsMoreOptionsSheetVisible] =
-    useState(false);
-  const [isReportOptionsSheetVisible, setIsReportOptionsSheetVisible] =
-    useState(false);
+  const [sheetState, setSheetState] = useState<SheetState>("closed");
 
   const handleLike = () => {
     // Implement self post like logic
@@ -44,22 +43,19 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handleOpenMoreOptionsSheet = () => {
-    setIsMoreOptionsSheetVisible(true);
+    setSheetState("moreOptions");
   };
 
   const handleCloseMoreOptionsSheet = () => {
-    setIsMoreOptionsSheetVisible(false);
+    setSheetState("closed");
   };
 
   const handleOpenReportOptionsSheet = () => {
-    handleCloseMoreOptionsSheet();
-    setTimeout(() => {
-      setIsReportOptionsSheetVisible(true);
-    }, 300);
+    setTimeout(() => setSheetState("reportOptions"), 400);
   };
 
   const handleCloseReportOptionsSheet = () => {
-    setIsReportOptionsSheetVisible(false);
+    setSheetState("closed");
   };
 
   const handleRecipientPress = () => {
@@ -90,13 +86,12 @@ const OtherPost = (postProps: OtherPostProps) => {
       position: Position.bottomRight,
       scale: 0.7,
     });
-    setIsMoreOptionsSheetVisible(false);
     toast.show("Post Saved");
+    setSheetState("closed");
   };
 
   const handleReportPost = async (reason: ReportPostReason) => {
     await reportPost.mutateAsync({ postId: postProps.id, reason });
-    setIsReportOptionsSheetVisible(false);
     toast.show("Post Reported");
   };
 
@@ -106,6 +101,8 @@ const OtherPost = (postProps: OtherPostProps) => {
       textProps: {
         color: isSaving ? "$gray9" : undefined,
       },
+      autoClose: false,
+      disabled: isSaving,
       onPress: () => void handleSavePost(),
     },
     {
@@ -113,6 +110,7 @@ const OtherPost = (postProps: OtherPostProps) => {
       textProps: {
         color: "$red9",
       },
+      disabled: isSaving,
       onPress: handleOpenReportOptionsSheet,
     },
   ] satisfies ButtonOption[];
@@ -163,12 +161,12 @@ const OtherPost = (postProps: OtherPostProps) => {
       />
 
       <ActionSheet
-        isVisible={isReportOptionsSheetVisible}
+        isVisible={sheetState === "reportOptions"}
         buttonOptions={reportPostOptionsButtonOptions}
         onCancel={handleCloseReportOptionsSheet}
       />
       <ActionSheet
-        isVisible={isMoreOptionsSheetVisible}
+        isVisible={sheetState === "moreOptions"}
         buttonOptions={moreOptionsButtonOptions}
         onCancel={handleCloseMoreOptionsSheet}
       />

@@ -33,6 +33,7 @@ export interface ButtonOption {
   onPress?: () => void;
   disabled?: boolean;
   icon?: React.ReactNode;
+  autoClose?: boolean; 
 }
 
 export interface ActionSheetProps {
@@ -84,7 +85,7 @@ const ActionSheet = ({
     } else if (!isVisible && showModal) {
       closeModal();
     }
-  }, [closeModal, isVisible, openModal, showModal]);
+  }, [isVisible, showModal]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
@@ -183,7 +184,9 @@ const ActionSheet = ({
                         void Haptics.impactAsync(
                           Haptics.ImpactFeedbackStyle.Light,
                         );
-                        closeModal();
+                        if (option.autoClose !== false) { // Check autoClose prop
+                          closeModal();
+                        }
                       }
                     }}
                     style={[
