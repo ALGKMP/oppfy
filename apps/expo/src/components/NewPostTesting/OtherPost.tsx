@@ -1,28 +1,29 @@
 import React, { useState } from "react";
-import { ActivityIndicator } from "react-native";
 import { Position } from "react-native-image-marker";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import watermark from "@assets/watermark.png";
-import { Ionicons } from "@expo/vector-icons";
 import { useToastController } from "@tamagui/toast";
 import { useTheme } from "tamagui";
 
-import { LoadingIndicatorOverlay } from "../Overlays";
+import { api, RouterInputs } from "~/utils/api";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import PostCard from "./PostCard";
-import type { PostData as PostCardProps } from "./PostCard";
+import type { PostData as OtherPostProps } from "./PostCard";
 import { useSaveMedia } from "./useSaveMedia";
 
-const OtherPost = (props: PostCardProps) => {
-  const theme = useTheme();
+type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
+
+const OtherPost = (postProps: OtherPostProps) => {
   const router = useRouter();
   const toast = useToastController();
 
   const { saveMedia, isSaving } = useSaveMedia();
 
-  const [isActionSheetVisible, setIsActionSheetVisible] = useState(false);
+  const reportPost = api.report.reportPost.useMutation();
+
+  const [activeSheet, setActiveSheet] = useState<'none' | 'moreOptions' | 'reportOptions'>('none');
 
   const handleLike = () => {
     // Implement self post like logic
@@ -39,12 +40,20 @@ const OtherPost = (props: PostCardProps) => {
     console.log("Sharing self post");
   };
 
-  const handleMoreOptions = () => {
-    setIsActionSheetVisible(true);
+  const handleOpenMoreOptionsSheet = () => {
+    setActiveSheet('moreOptions');
   };
 
-  const handleCloseActionSheet = () => {
-    setIsActionSheetVisible(false);
+  const handleCloseMoreOptionsSheet = () => {
+    setActiveSheet('none');
+  };
+
+  const handleOpenReportOptionsSheet = () => {
+    setActiveSheet('reportOptions');
+  };
+
+  const handleCloseReportOptionsSheet = () => {
+    setActiveSheet('none');
   };
 
   const handleRecipientPress = () => {
@@ -52,8 +61,8 @@ const OtherPost = (props: PostCardProps) => {
     router.push({
       pathname: `/profile/[userId]`,
       params: {
-        userId: props.recipient.id,
-        username: props.recipient.username,
+        userId: postProps.recipient.id,
+        username: postProps.recipient.username,
       },
     });
   };
@@ -62,57 +71,101 @@ const OtherPost = (props: PostCardProps) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
       pathname: `/profile/[userId]`,
-      params: { userId: props.author.id, username: props.author.username },
+      params: {
+        userId: postProps.author.id,
+        username: postProps.author.username,
+      },
     });
   };
 
   const handleSavePost = async () => {
-    await saveMedia(props.media.url, {
+    await saveMedia(postProps.media.url, {
       image: watermark,
       position: Position.bottomRight,
       scale: 0.7,
     });
+    setActiveSheet('none');
     toast.show("Post Saved");
   };
 
-  const handleReportPost = () => {
-    console.log("Reporting post");
+  const handleReportPost = async (reason: ReportPostReason) => {
+    await reportPost.mutateAsync({ postId: postProps.id, reason });
+    setActiveSheet('none');
+    toast.show("Post Reported");
   };
 
-  const buttonOptions: ButtonOption[] = [
+  const moreOptionsButtonOptions = [
     {
       text: isSaving ? "Saving" : "Save Post",
       textProps: {
         color: isSaving ? "$gray9" : undefined,
       },
       onPress: () => void handleSavePost(),
-      disabled: isSaving,
     },
     {
       text: "Report Post",
       textProps: {
         color: "$red9",
       },
-      onPress: () => void handleReportPost(),
+      onPress: handleOpenReportOptionsSheet,
     },
-  ];
+  ] satisfies ButtonOption[];
+
+  const reportPostOptionsButtonOptions = [
+    {
+      text: "Violent or abusive",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportPost("Violent or abusive"),
+    },
+    {
+      text: "Sexually explicit or predatory",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportPost("Sexually explicit or predatory"),
+    },
+    {
+      text: "Hate, harassment, or bullying",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportPost("Hate, harassment or bullying"),
+    },
+    {
+      text: "Suicide and self-harm",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportPost("Suicide and self-harm"),
+    },
+    {
+      text: "Scam or spam",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportPost("Spam or scam"),
+    },
+    {
+      text: "Other",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportPost("Other"),
+    },
+  ] satisfies ButtonOption[];
 
   return (
     <>
       <PostCard
-        {...props}
+        {...postProps}
         onLike={handleLike}
         onComment={handleComment}
         onShare={handleShare}
-        onMoreOptions={handleMoreOptions}
+        onMoreOptions={handleOpenMoreOptionsSheet}
         onAuthorPress={handleAuthorPress}
         onRecipientPress={handleRecipientPress}
       />
 
       <ActionSheet
-        isVisible={isActionSheetVisible}
-        buttonOptions={buttonOptions}
-        onCancel={handleCloseActionSheet}
+        isVisible={activeSheet === 'moreOptions'}
+        buttonOptions={moreOptionsButtonOptions}
+        onCancel={handleCloseMoreOptionsSheet}
+      />
+
+      <ActionSheet
+        isVisible={activeSheet === 'reportOptions'}
+        buttonOptions={reportPostOptionsButtonOptions}
+        onCancel={handleCloseReportOptionsSheet}
       />
     </>
   );
