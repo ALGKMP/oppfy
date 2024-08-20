@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import PostCard from "./PostCard";
 import type { PostData as PostCardProps } from "./PostCard";
 
+
 const SelfPost = (props: PostCardProps) => {
   const router = useRouter();
 

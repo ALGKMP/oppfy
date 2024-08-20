@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
-import { Modal, StyleSheet } from "react-native";
+import { ActivityIndicator, Modal, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -31,6 +31,8 @@ export interface ButtonOption {
   text: string;
   textProps?: SizableTextProps;
   onPress?: () => void;
+  disabled?: boolean;
+  icon?: React.ReactNode;
 }
 
 export interface ActionSheetProps {
@@ -175,22 +177,31 @@ const ActionSheet = ({
                   {index > 0 && <Separator />}
                   <TouchableOpacity
                     onPress={() => {
-                      option.onPress?.();
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Light,
-                      );
-                      closeModal();
+                      if (!option.disabled) {
+                        option.onPress?.();
+                        void Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Light,
+                        );
+                        closeModal();
+                      }
                     }}
                     style={[
                       styles.optionButton,
                       {
                         backgroundColor: theme.gray1.val,
+                        opacity: option.disabled ? 0.5 : 1,
                       },
                     ]}
+                    disabled={option.disabled}
                   >
-                    <SizableText size="$5" {...option.textProps}>
-                      {option.text}
-                    </SizableText>
+                    <View style={styles.buttonContent}>
+                      {option.icon && (
+                        <View style={styles.iconContainer}>{option.icon}</View>
+                      )}
+                      <SizableText size="$5" {...option.textProps}>
+                        {option.text}
+                      </SizableText>
+                    </View>
                   </TouchableOpacity>
                 </React.Fragment>
               ))}
@@ -234,6 +245,17 @@ const styles = StyleSheet.create({
   cancelButton: {
     padding: 16,
     alignItems: "center",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconContainer: {
+    marginRight: 8,
+  },
+  loadingIndicator: {
+    marginLeft: 8,
   },
 });
 

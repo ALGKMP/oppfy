@@ -1,10 +1,14 @@
 import React, { useState } from "react";
+import { ActivityIndicator } from "react-native";
 import { Position } from "react-native-image-marker";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import watermark from "@assets/watermark.png";
+import { Ionicons } from "@expo/vector-icons";
 import { useToastController } from "@tamagui/toast";
+import { useTheme } from "tamagui";
 
+import { LoadingIndicatorOverlay } from "../Overlays";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import PostCard from "./PostCard";
@@ -12,6 +16,7 @@ import type { PostData as PostCardProps } from "./PostCard";
 import { useSaveMedia } from "./useSaveMedia";
 
 const OtherPost = (props: PostCardProps) => {
+  const theme = useTheme();
   const router = useRouter();
   const toast = useToastController();
 
@@ -42,33 +47,6 @@ const OtherPost = (props: PostCardProps) => {
     setIsActionSheetVisible(false);
   };
 
-  const handleSavePost = async () => {
-    toast.show("Post Saved");
-    console.log("Saving post");
-    await saveMedia(props.media.url, {
-      image: watermark,
-      position: Position.bottomRight,
-    });
-  };
-
-  const handleReportPost = () => {
-    console.log("Reporting post");
-  };
-
-  const buttonOptions: ButtonOption[] = [
-    {
-      text: "Save Post",
-      onPress: () => void handleSavePost(),
-    },
-    {
-      text: "Report Post",
-      textProps: {
-        color: "$red9",
-      },
-      onPress: () => void handleReportPost(),
-    },
-  ];
-
   const handleRecipientPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
@@ -87,6 +65,37 @@ const OtherPost = (props: PostCardProps) => {
       params: { userId: props.author.id, username: props.author.username },
     });
   };
+
+  const handleSavePost = async () => {
+    await saveMedia(props.media.url, {
+      image: watermark,
+      position: Position.bottomRight,
+      scale: 0.7,
+    });
+    toast.show("Post Saved");
+  };
+
+  const handleReportPost = () => {
+    console.log("Reporting post");
+  };
+
+  const buttonOptions: ButtonOption[] = [
+    {
+      text: isSaving ? "Saving" : "Save Post",
+      textProps: {
+        color: isSaving ? "$gray9" : undefined,
+      },
+      onPress: () => void handleSavePost(),
+      disabled: isSaving,
+    },
+    {
+      text: "Report Post",
+      textProps: {
+        color: "$red9",
+      },
+      onPress: () => void handleReportPost(),
+    },
+  ];
 
   return (
     <>

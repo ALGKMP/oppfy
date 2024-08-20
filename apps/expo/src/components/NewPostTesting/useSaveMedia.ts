@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { ImageSourcePropType } from "react-native";
-import ImageMarker, { Position } from "react-native-image-marker";
+import Marker, { Position } from "react-native-image-marker";
+import { randomUUID } from "expo-crypto";
+import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 
 interface WatermarkOptions {
@@ -39,16 +41,25 @@ const ensurePermissions = async () => {
 };
 
 const addWatermark = async (mediaUrl: string, watermark: WatermarkOptions) => {
-  return ImageMarker.markImage({
-    backgroundImage: { src: mediaUrl, scale: 1 },
+  const fileUri =
+    FileSystem.cacheDirectory + "temp_image" + randomUUID() + ".jpg";
+  await FileSystem.downloadAsync(mediaUrl, fileUri);
+
+  const markedImage = await Marker.markImage({
+    backgroundImage: { src: fileUri, scale: 1 },
     watermarkImages: [
       {
-        src: watermark,
+        src: watermark.image,
         position: {
           position: watermark.position ?? Position.bottomRight,
         },
-        scale: watermark.scale ?? 1,
+        scale: watermark.scale,
       },
     ],
   });
+  console.log("watermark", watermark);
+
+  await FileSystem.deleteAsync(fileUri);
+
+  return markedImage;
 };
