@@ -23,7 +23,10 @@ const OtherPost = (postProps: OtherPostProps) => {
 
   const reportPost = api.report.reportPost.useMutation();
 
-  const [activeSheet, setActiveSheet] = useState<'none' | 'moreOptions' | 'reportOptions'>('none');
+  const [isMoreOptionsSheetVisible, setIsMoreOptionsSheetVisible] =
+    useState(false);
+  const [isReportOptionsSheetVisible, setIsReportOptionsSheetVisible] =
+    useState(false);
 
   const handleLike = () => {
     // Implement self post like logic
@@ -41,19 +44,22 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handleOpenMoreOptionsSheet = () => {
-    setActiveSheet('moreOptions');
+    setIsMoreOptionsSheetVisible(true);
   };
 
   const handleCloseMoreOptionsSheet = () => {
-    setActiveSheet('none');
+    setIsMoreOptionsSheetVisible(false);
   };
 
   const handleOpenReportOptionsSheet = () => {
-    setActiveSheet('reportOptions');
+    handleCloseMoreOptionsSheet();
+    setTimeout(() => {
+      setIsReportOptionsSheetVisible(true);
+    }, 300);
   };
 
   const handleCloseReportOptionsSheet = () => {
-    setActiveSheet('none');
+    setIsReportOptionsSheetVisible(false);
   };
 
   const handleRecipientPress = () => {
@@ -84,13 +90,13 @@ const OtherPost = (postProps: OtherPostProps) => {
       position: Position.bottomRight,
       scale: 0.7,
     });
-    setActiveSheet('none');
+    setIsMoreOptionsSheetVisible(false);
     toast.show("Post Saved");
   };
 
   const handleReportPost = async (reason: ReportPostReason) => {
     await reportPost.mutateAsync({ postId: postProps.id, reason });
-    setActiveSheet('none');
+    setIsReportOptionsSheetVisible(false);
     toast.show("Post Reported");
   };
 
@@ -157,15 +163,14 @@ const OtherPost = (postProps: OtherPostProps) => {
       />
 
       <ActionSheet
-        isVisible={activeSheet === 'moreOptions'}
-        buttonOptions={moreOptionsButtonOptions}
-        onCancel={handleCloseMoreOptionsSheet}
-      />
-
-      <ActionSheet
-        isVisible={activeSheet === 'reportOptions'}
+        isVisible={isReportOptionsSheetVisible}
         buttonOptions={reportPostOptionsButtonOptions}
         onCancel={handleCloseReportOptionsSheet}
+      />
+      <ActionSheet
+        isVisible={isMoreOptionsSheetVisible}
+        buttonOptions={moreOptionsButtonOptions}
+        onCancel={handleCloseMoreOptionsSheet}
       />
     </>
   );
