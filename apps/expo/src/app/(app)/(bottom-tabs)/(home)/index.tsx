@@ -23,7 +23,8 @@ import {
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
-import Post from "~/components/NewPostTesting/Post";
+import OtherPost from "~/components/NewPostTesting/OtherPost";
+import PostCard from "~/components/NewPostTesting/PostCard";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
@@ -112,14 +113,16 @@ const HomeScreen = () => {
               isSelfPost={false}
               isViewable={viewableItems.includes(item.postId)}
             />
-            <Post
+            <OtherPost
               id={item.postId}
               createdAt={item.createdAt}
               caption={item.caption}
               author={{
+                id: item.authorId,
                 username: item.authorUsername,
               }}
               recipient={{
+                id: item.recipientId,
                 username: item.recipientUsername,
                 profilePicture: item.recipientProfilePicture,
               }}

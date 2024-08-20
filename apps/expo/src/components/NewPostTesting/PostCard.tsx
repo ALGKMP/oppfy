@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { TouchableOpacity, type ImageSourcePropType } from "react-native";
+import { TouchableOpacity } from "react-native";
+import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { Video } from "expo-av";
@@ -22,10 +23,12 @@ import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 type MediaType = "image" | "video";
 
 interface Author {
+  id: string;
   username: string;
 }
 
 interface Recipient {
+  id: string;
   username: string;
   profilePicture: ImageSourcePropType | string | null;
 }
@@ -46,7 +49,7 @@ interface Stats {
   comments: number;
 }
 
-interface PostProps {
+export interface PostData {
   id: number;
   createdAt: Date;
 
@@ -57,14 +60,28 @@ interface PostProps {
   stats: Stats;
 }
 
+interface PostCallbacks {
+  onLike: () => void;
+  onComment: () => void;
+  onShare: () => void;
+  onMoreOptions: () => void;
+  onAuthorPress: () => void;
+  onRecipientPress: () => void;
+}
+
+type PostCardProps = PostData & PostCallbacks;
+
 const ASPECT_RATIO = 3 / 4;
 
-const Post = (props: PostProps) => {
+const PostCard = (props: PostCardProps) => {
   const { hearts, addHeart } = useHeartAnimations();
 
   const addHeartJS = useCallback(
-    (x: number, y: number) => addHeart(x, y),
-    [addHeart],
+    (x: number, y: number) => {
+      addHeart(x, y);
+      props.onLike();
+    },
+    [addHeart, props],
   );
 
   const doubleTap = Gesture.Tap()
@@ -95,14 +112,17 @@ const Post = (props: PostProps) => {
       <YStack gap="$3">
         <XStack alignItems="center" justifyContent="space-between">
           <XStack alignItems="center" gap="$3">
-            <Avatar url={props.recipient.profilePicture} />
+            <TouchableOpacity onPress={props.onAuthorPress}>
+              <Avatar url={props.recipient.profilePicture} />
+            </TouchableOpacity>
 
             <YStack gap="$1">
-              <SizableText fontWeight="bold" lineHeight={0}>
-                {props.recipient.username}
-              </SizableText>
-
-              <TouchableOpacity>
+              <TouchableOpacity onPress={props.onRecipientPress}>
+                <SizableText fontWeight="bold" lineHeight={0}>
+                  {props.recipient.username}
+                </SizableText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={props.onAuthorPress}>
                 <SizableText theme="alt1" lineHeight={0}>
                   Posted by{" "}
                   <SizableText fontWeight="bold" color="$primary">
@@ -113,7 +133,9 @@ const Post = (props: PostProps) => {
             </YStack>
           </XStack>
 
-          <MoreHorizontal />
+          <TouchableOpacity onPress={props.onMoreOptions}>
+            <MoreHorizontal />
+          </TouchableOpacity>
         </XStack>
 
         <View marginHorizontal="$-3">
@@ -137,9 +159,15 @@ const Post = (props: PostProps) => {
 
         <YStack gap="$2">
           <XStack gap="$3">
-            <Heart size="$2" onPress={() => addHeartJS(20, 20)} />
-            <MessageCircle size="$2" />
-            <Send size="$2" />
+            <TouchableOpacity onPress={props.onLike}>
+              <Heart size="$2" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={props.onComment}>
+              <MessageCircle size="$2" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={props.onShare}>
+              <Send size="$2" />
+            </TouchableOpacity>
           </XStack>
 
           {props.stats.comments === 0 && (
@@ -178,4 +206,4 @@ const Avatar = (props: AvatarProps) => (
   />
 );
 
-export default Post;
+export default PostCard;
