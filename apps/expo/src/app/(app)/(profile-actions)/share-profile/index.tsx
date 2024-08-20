@@ -28,13 +28,7 @@ const ShareProfile = () => {
 
   const handleShare = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    try {
-      await Sharing.shareAsync(qrValue);
-      toast.show("Profile shared");
-    } catch (error) {
-      console.error("Error sharing profile:", error);
-    }
+    await Sharing.shareAsync(qrValue);
   };
 
   const handleCopyLink = async () => {

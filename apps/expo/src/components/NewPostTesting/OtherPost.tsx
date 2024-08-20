@@ -42,22 +42,6 @@ const OtherPost = (postProps: OtherPostProps) => {
     console.log("Sharing self post");
   };
 
-  const handleOpenMoreOptionsSheet = () => {
-    setSheetState("moreOptions");
-  };
-
-  const handleCloseMoreOptionsSheet = () => {
-    setSheetState("closed");
-  };
-
-  const handleOpenReportOptionsSheet = () => {
-    setTimeout(() => setSheetState("reportOptions"), 400);
-  };
-
-  const handleCloseReportOptionsSheet = () => {
-    setSheetState("closed");
-  };
-
   const handleRecipientPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
@@ -87,12 +71,27 @@ const OtherPost = (postProps: OtherPostProps) => {
       scale: 0.7,
     });
     toast.show("Post Saved");
-    setSheetState("closed");
   };
 
   const handleReportPost = async (reason: ReportPostReason) => {
     await reportPost.mutateAsync({ postId: postProps.id, reason });
     toast.show("Post Reported");
+  };
+
+  const handleOpenMoreOptionsSheet = () => {
+    setSheetState("moreOptions");
+  };
+
+  const handleCloseMoreOptionsSheet = () => {
+    setSheetState("closed");
+  };
+
+  const handleOpenReportOptionsSheet = () => {
+    setTimeout(() => setSheetState("reportOptions"), 400);
+  };
+
+  const handleCloseReportOptionsSheet = () => {
+    setSheetState("closed");
   };
 
   const moreOptionsButtonOptions = [
