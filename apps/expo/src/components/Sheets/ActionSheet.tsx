@@ -78,12 +78,12 @@ const ActionSheet = ({
   }, [animation, onCancel]);
 
   useEffect(() => {
-    if (isVisible) {
+    if (isVisible && !showModal) {
       openModal();
-    } else {
+    } else if (!isVisible && showModal) {
       closeModal();
     }
-  }, [isVisible, openModal, closeModal]);
+  }, [closeModal, isVisible, openModal, showModal]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
