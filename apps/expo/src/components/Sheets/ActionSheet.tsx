@@ -35,7 +35,7 @@ export interface ButtonOption {
 
 export interface ActionSheetProps {
   imageUrl?: string | ImageSourcePropType;
-  title: string;
+  title?: string;
   titleProps?: SizableTextProps;
   subtitle?: string;
   subtitleProps?: ParagraphProps;
@@ -133,35 +133,42 @@ const ActionSheet = ({
               backgroundColor="$gray2"
               overflow="hidden"
             >
-              <YStack
-                backgroundColor="$background"
-                padding="$4"
-                alignItems="center"
-                gap="$2"
-              >
-                {imageUrl && (
-                  <Image
-                    source={imageUrl}
-                    style={{ width: 100, height: 100, borderRadius: 50 }}
-                  />
-                )}
-                <SizableText
-                  size="$6"
-                  fontWeight="bold"
-                  textAlign="center"
-                  {...titleProps}
-                >
-                  {title}
-                </SizableText>
-                {subtitle && (
-                  <Paragraph textAlign="center" theme="alt2" {...subtitleProps}>
-                    {subtitle}
-                  </Paragraph>
-                )}
-              </YStack>
+              {(imageUrl || title || subtitle) && (
+                <>
+                  <YStack
+                    backgroundColor="$background"
+                    padding="$4"
+                    alignItems="center"
+                    gap="$2"
+                  >
+                    {imageUrl && (
+                      <Image
+                        source={imageUrl}
+                        style={{ width: 100, height: 100, borderRadius: 50 }}
+                      />
+                    )}
+                    {title && (
+                      <SizableText
+                        size="$6"
+                        fontWeight="bold"
+                        textAlign="center"
+                        {...titleProps}
+                      >
+                        {title}
+                      </SizableText>
+                    )}
+                    {subtitle && (
+                      <Paragraph textAlign="center" theme="alt2" {...subtitleProps}>
+                        {subtitle}
+                      </Paragraph>
+                    )}
+                  </YStack>
+                  <Separator />
+                </>
+              )}
               {buttonOptions.map((option, index) => (
                 <React.Fragment key={index}>
-                  <Separator />
+                  {index > 0 && <Separator />}
                   <TouchableOpacity
                     onPress={() => {
                       option.onPress?.();
