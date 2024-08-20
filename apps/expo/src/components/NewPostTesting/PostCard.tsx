@@ -6,14 +6,7 @@ import { runOnJS } from "react-native-reanimated";
 import { Video } from "expo-av";
 import { Image } from "expo-image";
 import defaultProfilePicture from "@assets/default-profile-picture.jpg";
-import {
-  Heart,
-  MessageCircle,
-  MoreHorizontal,
-  Send,
-  Share,
-  Share2,
-} from "@tamagui/lucide-icons";
+import { Heart, MessageCircle, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, SizableText, View, XStack, YStack } from "tamagui";
 
 import { TimeAgo } from "~/components/Texts";
@@ -61,7 +54,8 @@ export interface PostData {
 }
 
 interface PostCallbacks {
-  onLike: () => void;
+  onLikePressed: () => void;
+  onLikeDoubleTapped: () => void;
   onComment: () => void;
   onShare: () => void;
   onMoreOptions: () => void;
@@ -69,7 +63,7 @@ interface PostCallbacks {
   onRecipientPress: () => void;
 }
 
-type PostCardProps = PostData & PostCallbacks;
+type PostCardProps = PostData & PostCallbacks & { hasLiked: boolean };
 
 const ASPECT_RATIO = 3 / 4;
 
@@ -79,7 +73,7 @@ const PostCard = (props: PostCardProps) => {
   const addHeartJS = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
-      props.onLike();
+      props.onLikeDoubleTapped();
     },
     [addHeart, props],
   );
@@ -159,15 +153,17 @@ const PostCard = (props: PostCardProps) => {
 
         <YStack gap="$2">
           <XStack gap="$3">
-            <TouchableOpacity onPress={props.onLike}>
-              <Heart size="$2" />
+            <TouchableOpacity onPress={props.onLikePressed}>
+              <Heart
+                size="$2"
+                {...(props.hasLiked
+                  ? { color: "red", fill: "red" }
+                  : undefined)}
+              />
             </TouchableOpacity>
             <TouchableOpacity onPress={props.onComment}>
               <MessageCircle size="$2" />
             </TouchableOpacity>
-            {/* <TouchableOpacity onPress={props.onShare}>
-              <Send size="$2" />
-            </TouchableOpacity> */}
           </XStack>
 
           {props.stats.comments === 0 && (

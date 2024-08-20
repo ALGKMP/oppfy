@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Position } from "react-native-image-marker";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import * as Sharing from "expo-sharing";
 import watermark from "@assets/watermark.png";
 import { useToastController } from "@tamagui/toast";
 
@@ -20,27 +19,104 @@ type SheetState = "closed" | "moreOptions" | "reportOptions";
 
 const OtherPost = (postProps: OtherPostProps) => {
   const router = useRouter();
+  const utils = api.useUtils();
   const toast = useToastController();
 
   const { saveMedia, isSaving } = useSaveMedia();
 
-  const reportPost = api.report.reportPost.useMutation();
-
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
-  const handleLike = () => {
-    // Implement self post like logic
-    console.log("Self post liked");
+  const reportPost = api.report.reportPost.useMutation();
+
+  const { data: hasLiked } = api.post.hasliked.useQuery(
+    {
+      postId: postProps.id,
+    },
+    { initialData: false },
+  );
+
+  const likePost = api.post.likePost.useMutation({
+    onMutate: async (newHasLikedData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.post.hasliked.cancel();
+
+      // Get the data from the query cache
+      const prevData = utils.post.hasliked.getData({
+        postId: newHasLikedData.postId,
+      });
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.post.hasliked.setData(
+        { postId: newHasLikedData.postId },
+        !prevData,
+      );
+
+      // Return the previous data so we can revert if something goes wrong
+      return { prevData };
+    },
+    onError: (_err, newHasLikedData, ctx) => {
+      if (ctx === undefined) return;
+
+      // If the mutation fails, use the context-value from onMutate
+      utils.post.hasliked.setData(
+        { postId: newHasLikedData.postId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.post.hasliked.invalidate();
+    },
+  });
+
+  const unlikePost = api.post.unlikePost.useMutation({
+    onMutate: async (newHasLikedData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.post.hasliked.cancel();
+
+      // Get the data from the query cache
+      const prevData = utils.post.hasliked.getData({
+        postId: newHasLikedData.postId,
+      });
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.post.hasliked.setData({ postId: newHasLikedData.postId }, false);
+
+      // Return the previous data so we can revert if something goes wrong
+      return { prevData };
+    },
+    onError: (_err, newHasLikedData, ctx) => {
+      if (ctx === undefined) return;
+
+      // If the mutation fails, use the context-value from onMutate
+      utils.post.hasliked.setData(
+        { postId: newHasLikedData.postId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.post.hasliked.invalidate();
+    },
+  });
+
+  const handleLikePressed = async () => {
+    hasLiked
+      ? await unlikePost.mutateAsync({ postId: postProps.id })
+      : await likePost.mutateAsync({ postId: postProps.id });
+  };
+
+  const handleLikeDoubleTapped = async () => {
+    await likePost.mutateAsync({ postId: postProps.id });
   };
 
   const handleComment = () => {
-    // Implement self post comment logic
     console.log("Commenting on self post");
   };
 
-  const handleShare = () => {
-    console.log("Sharing post");
-  };
+  const handleShare = () => {};
 
   const handleRecipientPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -152,7 +228,9 @@ const OtherPost = (postProps: OtherPostProps) => {
     <>
       <PostCard
         {...postProps}
-        onLike={handleLike}
+        hasLiked={hasLiked}
+        onLikePressed={handleLikePressed}
+        onLikeDoubleTapped={handleLikeDoubleTapped}
         onComment={handleComment}
         onShare={handleShare}
         onMoreOptions={handleOpenMoreOptionsSheet}

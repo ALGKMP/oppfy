@@ -138,6 +138,9 @@ const HomeScreen = () => {
                 likes: item.likesCount,
                 comments: item.commentsCount,
               }}
+              postInfo={{
+                caption: item.caption,
+              }}
             />
           </YStack>
         </View>
