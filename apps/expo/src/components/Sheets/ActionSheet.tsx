@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ImageSourcePropType, Modal, StyleSheet } from "react-native";
+import type { ImageSourcePropType } from "react-native";
+import { Modal, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -16,7 +17,6 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
 import {
-  getToken,
   Paragraph,
   Separator,
   SizableText,
@@ -133,7 +133,7 @@ const ActionSheet = ({
               backgroundColor="$gray2"
               overflow="hidden"
             >
-              {(imageUrl || title || subtitle) && (
+              {(imageUrl ?? title ?? subtitle) && (
                 <>
                   <YStack
                     backgroundColor="$background"
@@ -158,7 +158,11 @@ const ActionSheet = ({
                       </SizableText>
                     )}
                     {subtitle && (
-                      <Paragraph textAlign="center" theme="alt2" {...subtitleProps}>
+                      <Paragraph
+                        textAlign="center"
+                        theme="alt2"
+                        {...subtitleProps}
+                      >
                         {subtitle}
                       </Paragraph>
                     )}
@@ -172,7 +176,9 @@ const ActionSheet = ({
                   <TouchableOpacity
                     onPress={() => {
                       option.onPress?.();
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Light,
+                      );
                       closeModal();
                     }}
                     style={[
