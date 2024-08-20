@@ -128,7 +128,11 @@ const ActionSheet = ({
             style={containerStyle}
             gap="$2"
           >
-            <YStack borderRadius="$6" overflow="hidden">
+            <YStack
+              borderRadius="$6"
+              backgroundColor="$gray2"
+              overflow="hidden"
+            >
               <YStack
                 backgroundColor="$background"
                 padding="$4"
