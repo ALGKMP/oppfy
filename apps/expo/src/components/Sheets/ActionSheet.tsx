@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
-import { ActivityIndicator, Modal, StyleSheet } from "react-native";
+import { Modal, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -60,8 +60,9 @@ const ActionSheet = ({
 }: ActionSheetProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [showModal, setShowModal] = useState(false);
+
   const animation = useSharedValue(0);
+  const [showModal, setShowModal] = useState(false);
 
   const openModal = useCallback(() => {
     setShowModal(true);
