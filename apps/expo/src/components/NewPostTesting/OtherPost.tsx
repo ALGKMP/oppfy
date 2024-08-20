@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Position } from "react-native-image-marker";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import * as Sharing from "expo-sharing";
 import watermark from "@assets/watermark.png";
 import { useToastController } from "@tamagui/toast";
 
@@ -38,8 +39,7 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handleShare = () => {
-    // Implement self post share logic
-    console.log("Sharing self post");
+    console.log("Sharing post");
   };
 
   const handleRecipientPress = () => {
@@ -70,6 +70,7 @@ const OtherPost = (postProps: OtherPostProps) => {
       position: Position.bottomRight,
       scale: 0.7,
     });
+    setSheetState("closed");
     toast.show("Post Saved");
   };
 

@@ -165,9 +165,9 @@ const PostCard = (props: PostCardProps) => {
             <TouchableOpacity onPress={props.onComment}>
               <MessageCircle size="$2" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={props.onShare}>
+            {/* <TouchableOpacity onPress={props.onShare}>
               <Send size="$2" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </XStack>
 
           {props.stats.comments === 0 && (
