@@ -10,6 +10,8 @@ import type { PostData as PostCardProps } from "./PostCard";
 const OtherPost = (props: PostCardProps) => {
   const router = useRouter();
 
+  const [isActionSheetVisible, setIsActionSheetVisible] = useState(false);
+
   const handleLike = () => {
     // Implement self post like logic
     console.log("Self post liked");
@@ -33,12 +35,21 @@ const OtherPost = (props: PostCardProps) => {
     setIsActionSheetVisible(false);
   };
 
+  const handleSavePost = () => {
+    console.log("Saving post");
+    setIsActionSheetVisible(false);
+  };
+
   const handleReportPost = () => {
     console.log("Reporting post");
     setIsActionSheetVisible(false);
   };
 
   const buttonOptions: ButtonOption[] = [
+    {
+      text: "Save Post",
+      onPress: handleSavePost,
+    },
     {
       text: "Report Post",
       textProps: {
@@ -67,8 +78,6 @@ const OtherPost = (props: PostCardProps) => {
     });
   };
 
-  const [isActionSheetVisible, setIsActionSheetVisible] = useState(false);
-
   return (
     <>
       <PostCard
@@ -83,8 +92,6 @@ const OtherPost = (props: PostCardProps) => {
 
       <ActionSheet
         isVisible={isActionSheetVisible}
-        title="More Options"
-        subtitle="Choose an action for this post"
         buttonOptions={buttonOptions}
         onCancel={handleCloseActionSheet}
       />
