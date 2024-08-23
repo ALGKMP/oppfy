@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import { Dimensions, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  cancelAnimation,
   Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
@@ -28,17 +30,24 @@ interface BlurContextMenuWrapperProps {
 
 const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const [isVisible, setIsVisible] = useState(false);
-
   const scale = useSharedValue(1);
+  const animationState = useSharedValue(0);
 
   const longPressGesture = Gesture.LongPress()
     .minDuration(500)
-    .onBegin(() => {
-      scale.value = withTiming(1.05, {
-        duration: 500,
-        easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
-      });
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+    .onTouchesDown(() => {
+      animationState.value = withDelay(
+        200,
+        withTiming(1, { duration: 0 }, (finished) => {
+          if (finished) {
+            scale.value = withTiming(1.05, {
+              duration: 500,
+              easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
+            });
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+          }
+        }),
+      );
     })
     .onStart(() => {
       runOnJS(setIsVisible)(true);
@@ -49,6 +58,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
       runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium);
     })
     .onFinalize(() => {
+      cancelAnimation(animationState);
       scale.value = withTiming(1, {
         duration: 250,
         easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
