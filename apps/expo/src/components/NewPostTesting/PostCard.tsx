@@ -4,6 +4,7 @@ import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { Video } from "expo-av";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import {
   Heart,
@@ -76,6 +77,7 @@ const PostCard = (props: PostCardProps) => {
 
   const addHeartJS = useCallback(
     (x: number, y: number) => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       addHeart(x, y);
       props.onLikeDoubleTapped();
     },
@@ -116,17 +118,32 @@ const PostCard = (props: PostCardProps) => {
       <YStack gap="$3">
         <XStack alignItems="center" justifyContent="space-between">
           <XStack alignItems="center" gap="$3">
-            <TouchableOpacity onPress={props.onAuthorPress}>
+            <TouchableOpacity
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                props.onAuthorPress();
+              }}
+            >
               <Avatar source={props.recipient.profilePicture} />
             </TouchableOpacity>
 
             <YStack gap="$1">
-              <TouchableOpacity onPress={props.onRecipientPress}>
+              <TouchableOpacity
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  props.onRecipientPress();
+                }}
+              >
                 <SizableText fontWeight="bold" lineHeight={0}>
                   {props.recipient.username}
                 </SizableText>
               </TouchableOpacity>
-              <TouchableOpacity onPress={props.onAuthorPress}>
+              <TouchableOpacity
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  props.onAuthorPress();
+                }}
+              >
                 <SizableText theme="alt1" lineHeight={0}>
                   Posted by{" "}
                   <SizableText fontWeight="bold" color="$primary">
@@ -144,7 +161,12 @@ const PostCard = (props: PostCardProps) => {
             </YStack>
           </XStack>
 
-          <TouchableOpacity onPress={props.onMoreOptions}>
+          <TouchableOpacity
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              props.onMoreOptions();
+            }}
+          >
             <MoreHorizontal />
           </TouchableOpacity>
         </XStack>
@@ -179,7 +201,10 @@ const PostCard = (props: PostCardProps) => {
                   />
                 }
                 borderRadius="$8"
-                onPress={props.onLikePressed}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  props.onLikePressed();
+                }}
               >
                 <SizableText color={props.hasLiked ? "$red10" : "$gray10"}>
                   {props.stats.likes}
@@ -188,7 +213,10 @@ const PostCard = (props: PostCardProps) => {
               <Button
                 icon={<MessageCircle size={20} color="$gray10" />}
                 borderRadius="$8"
-                onPress={props.onComment}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  props.onComment();
+                }}
               >
                 <SizableText color="$gray10">
                   {props.stats.comments}
@@ -198,7 +226,10 @@ const PostCard = (props: PostCardProps) => {
             <Button
               icon={<Share2 size={20} color="$gray10" />}
               borderRadius="$8"
-              onPress={props.onShare}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                props.onShare();
+              }}
             />
           </XStack>
 

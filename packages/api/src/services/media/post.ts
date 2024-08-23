@@ -675,10 +675,11 @@ export class PostService {
   ): PaginatedResponse<CommentProfile> {
     const items = data.map((item) => {
       try {
-        const profilePictureUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.profilePictureUrl,
-          );
+        const profilePictureUrl = item.profilePictureUrl
+          ? this.cloudFrontService.getSignedUrlForProfilePicture(
+              item.profilePictureUrl,
+            )
+          : null;
         item.profilePictureUrl = profilePictureUrl;
       } catch (error) {
         console.error(

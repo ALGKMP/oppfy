@@ -1,20 +1,11 @@
 import type { ForwardRefRenderFunction } from "react";
-import React, {
-  forwardRef,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import React, { forwardRef, useCallback, useState } from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   Minus,
@@ -35,6 +26,8 @@ import {
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
+import BottomSheetBackdrop from "./BottomSheetBackdrop";
+import BottomSheetHeader from "./BottomSheetHeader";
 
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
@@ -85,48 +78,6 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
     [onDeleteComment, onReportComment],
   );
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        opacity={0.5}
-        {...props}
-      />
-    ),
-    [],
-  );
-
-  const renderHeader = useCallback(
-    () => (
-      <YStack
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-        position="relative"
-      >
-        <Minus size="$4" />
-        <View justifyContent="center" alignItems="center">
-          <SizableText
-            size="$5"
-            textAlign="center"
-            color="$white"
-            fontWeight="bold"
-          >
-            Comments
-          </SizableText>
-        </View>
-        <View
-          width="95%"
-          borderColor="$gray8"
-          borderWidth="$0.25"
-          marginTop="$3"
-        />
-      </YStack>
-    ),
-    [],
-  );
-
   const content = (
     <YStack flex={1}>
       {isLoading ? (
@@ -139,6 +90,7 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
           renderItem={renderComment}
           onEndReached={onEndReached}
           itemLayoutAnimation={LinearTransition}
+          showsVerticalScrollIndicator={false}
         />
       )}
 
@@ -155,9 +107,8 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
       snapPoints={["100%"]}
       topInset={insets.top}
       enablePanDownToClose
-      keyboardBlurBehavior="restore"
-      handleComponent={renderHeader}
-      backdropComponent={renderBackdrop}
+      handleComponent={() => <BottomSheetHeader title="Comments" />}
+      backdropComponent={BottomSheetBackdrop}
       backgroundStyle={{ backgroundColor: theme.gray4.val }}
     >
       {content}
@@ -179,10 +130,10 @@ interface CommentInputProps {
   currentUserProfilePicture: string | null;
 }
 
-const CommentInput: React.FC<CommentInputProps> = ({
+const CommentInput = ({
   onPostComment,
   currentUserProfilePicture,
-}) => {
+}: CommentInputProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -247,7 +198,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
             opacity={inputValue.length === 0 ? 0.5 : 1}
           >
             <TouchableOpacity
-              onPress={handlePostComment}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                handlePostComment();
+              }}
               disabled={inputValue.length === 0}
             >
               <SendHorizontal color="white" />
@@ -265,11 +219,7 @@ interface CommentItemProps {
   onReport: () => void;
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({
-  comment,
-  onDelete,
-  onReport,
-}) => (
+const CommentItem = ({ comment, onDelete, onReport }: CommentItemProps) => (
   <BlurContextMenuWrapper
     options={[
       {

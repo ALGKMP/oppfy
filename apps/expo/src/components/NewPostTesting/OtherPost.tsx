@@ -1,18 +1,12 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Position } from "react-native-image-marker";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import watermark from "@assets/watermark.png";
-import BottomSheet, {
-  BottomSheetModal,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useToastController } from "@tamagui/toast";
 
 import type { RouterInputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import BottomSheetWrapper from "../BottomSheets/BottomSheetWrapper";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import CommentsBottomSheet from "./CommentsBottomSheet";
@@ -128,7 +122,6 @@ const OtherPost = (postProps: OtherPostProps) => {
   const handleShare = () => {};
 
   const handleRecipientPress = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
       pathname: `/profile/[userId]`,
       params: {
@@ -139,7 +132,6 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handleAuthorPress = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
       pathname: `/profile/[userId]`,
       params: {
@@ -235,19 +227,32 @@ const OtherPost = (postProps: OtherPostProps) => {
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  const { data: comments, isLoading: isLoadingComments } =
-    api.post.paginateComments.useQuery({
+  const {
+    data: comments,
+    isLoading: isLoadingComments,
+    hasNextPage: commentsHasNextPage,
+    isFetchingNextPage: commentsIsFetchingNextPage,
+    fetchNextPage: fetchNextCommentsPage,
+  } = api.post.paginateComments.useInfiniteQuery(
+    {
       postId: postProps.id,
-    });
+      pageSize: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
 
   const commentItems =
-    comments?.items.map((comment) => ({
-      id: comment.commentId,
-      body: comment.body,
-      username: comment.username ?? "",
-      profilePictureUrl: comment.profilePictureUrl,
-      createdAt: comment.createdAt,
-    })) ?? [];
+    comments?.pages
+      .flatMap((page) => page.items)
+      .map((comment) => ({
+        id: comment.commentId,
+        body: comment.body,
+        username: comment.username ?? "",
+        profilePictureUrl: comment.profilePictureUrl,
+        createdAt: comment.createdAt,
+      })) ?? [];
 
   const postComment = api.post.createComment.useMutation({
     onMutate: async (newCommentData) => {
@@ -274,10 +279,10 @@ const OtherPost = (postProps: OtherPostProps) => {
             items: [
               {
                 ...newCommentData,
+                commentId: 5,
                 userId: "temp",
                 username: "temp",
-                commentId: 5,
-                profilePictureUrl: "temp",
+                profilePictureUrl: null,
                 createdAt: new Date(),
               },
               ...page.items,
@@ -301,11 +306,25 @@ const OtherPost = (postProps: OtherPostProps) => {
     },
   });
 
+  const handleLoadMoreComments = async () => {
+    if (commentsHasNextPage && !commentsIsFetchingNextPage) {
+      await fetchNextCommentsPage();
+    }
+  };
+
   const handlePostComment = async (comment: string) => {
     await postComment.mutateAsync({
       postId: postProps.id,
       body: comment,
     });
+  };
+
+  const handleDeleteComment = () => {
+    console.log("delete comment");
+  };
+
+  const handleReportComment = () => {
+    console.log("report comment");
   };
 
   return (
@@ -322,6 +341,17 @@ const OtherPost = (postProps: OtherPostProps) => {
         onRecipientPress={handleRecipientPress}
       />
 
+      <CommentsBottomSheet
+        ref={bottomSheetModalRef}
+        comments={commentItems}
+        isLoading={isLoadingComments}
+        onEndReached={handleLoadMoreComments}
+        onPostComment={handlePostComment}
+        onDeleteComment={handleDeleteComment}
+        onReportComment={handleReportComment}
+        currentUserProfilePicture={null}
+      />
+
       <ActionSheet
         isVisible={sheetState === "reportOptions"}
         buttonOptions={reportPostOptionsButtonOptions}
@@ -331,17 +361,6 @@ const OtherPost = (postProps: OtherPostProps) => {
         isVisible={sheetState === "moreOptions"}
         buttonOptions={moreOptionsButtonOptions}
         onCancel={handleCloseMoreOptionsSheet}
-      />
-
-      <CommentsBottomSheet
-        ref={bottomSheetModalRef}
-        comments={commentItems}
-        isLoading={isLoadingComments}
-        // onEndReached={handleLoadMoreComments}
-        onPostComment={handlePostComment}
-        // onDeleteComment={handleDeleteComment}
-        // onReportComment={handleReportComment}
-        currentUserProfilePicture="https://picsum.photos/200/300"
       />
     </>
   );
