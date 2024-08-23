@@ -150,6 +150,8 @@ export const useComments = (postId: number) => {
       });
       if (prevData === undefined) return;
 
+      const currentUser = utils.profile.getFullProfileSelf.getData();
+
       // Optimistically update the data
       utils.post.paginateComments.setInfiniteData(
         { postId: newCommentData.postId, pageSize: 10 },
@@ -161,9 +163,9 @@ export const useComments = (postId: number) => {
               {
                 ...newCommentData,
                 commentId: new Date().getTime(),
-                userId: "temp",
-                username: "temp",
-                profilePictureUrl: null,
+                userId: currentUser?.userId ?? "",
+                username: currentUser?.username ?? "",
+                profilePictureUrl: currentUser?.profilePictureUrl ?? "",
                 createdAt: new Date(),
               },
               ...page.items,
