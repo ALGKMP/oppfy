@@ -6,8 +6,13 @@ import { runOnJS } from "react-native-reanimated";
 import { Video } from "expo-av";
 import { Image } from "expo-image";
 import defaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { Heart, MessageCircle, MoreHorizontal } from "@tamagui/lucide-icons";
-import { getToken, SizableText, View, XStack, YStack } from "tamagui";
+import {
+  Heart,
+  MessageCircle,
+  MoreHorizontal,
+  Share2,
+} from "@tamagui/lucide-icons";
+import { Button, getToken, SizableText, View, XStack, YStack } from "tamagui";
 
 import { TimeAgo } from "~/components/Texts";
 import CardContainer from "../Containers/CardContainer";
@@ -45,7 +50,6 @@ interface Stats {
 export interface PostData {
   id: number;
   createdAt: Date;
-
   caption: string;
   author: Author;
   recipient: Recipient;
@@ -101,6 +105,12 @@ const PostCard = (props: PostCardProps) => {
     }
   };
 
+  const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
+    if (value === 0 && unit === "second") return "Just now";
+    const pluralS = value !== 1 ? "s" : "";
+    return `${value} ${unit}${pluralS} ago`;
+  };
+
   return (
     <CardContainer>
       <YStack gap="$3">
@@ -123,6 +133,13 @@ const PostCard = (props: PostCardProps) => {
                     {props.author.username}
                   </SizableText>
                 </SizableText>
+                <TimeAgo
+                  size="$2"
+                  theme="alt2"
+                  lineHeight={0}
+                  date={props.createdAt}
+                  format={formatTimeAgo}
+                />
               </TouchableOpacity>
             </YStack>
           </XStack>
@@ -152,43 +169,48 @@ const PostCard = (props: PostCardProps) => {
         </View>
 
         <YStack gap="$2">
-          <XStack gap="$3">
-            <TouchableOpacity onPress={props.onLikePressed}>
-              <Heart
-                size="$2"
-                {...(props.hasLiked
-                  ? { color: "red", fill: "red" }
-                  : undefined)}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={props.onComment}>
-              <MessageCircle size="$2" />
-            </TouchableOpacity>
+          <XStack justifyContent="space-between" alignItems="center">
+            <XStack gap="$2">
+              <Button
+                icon={
+                  <Heart
+                    size={20}
+                    color={props.hasLiked ? "$red10" : "$gray10"}
+                  />
+                }
+                borderRadius="$8"
+                onPress={props.onLikePressed}
+              >
+                <SizableText color={props.hasLiked ? "$red10" : "$gray10"}>
+                  {props.stats.likes}
+                </SizableText>
+              </Button>
+              <Button
+                icon={<MessageCircle size={20} color="$gray10" />}
+                borderRadius="$8"
+                onPress={props.onComment}
+              >
+                <SizableText color="$gray10">
+                  {props.stats.comments}
+                </SizableText>
+              </Button>
+            </XStack>
+            <Button
+              icon={<Share2 size={20} color="$gray10" />}
+              borderRadius="$8"
+              onPress={props.onShare}
+            />
           </XStack>
 
           {props.stats.comments === 0 && (
-            <SizableText size="$4" lineHeight={0} theme="alt1">
-              Be the first to comment
-            </SizableText>
+            <Button onPress={props.onComment}>
+              <SizableText>Be the first to comment</SizableText>
+            </Button>
           )}
-
-          <TimeAgo
-            size="$3"
-            lineHeight={0}
-            theme="alt1"
-            date={props.createdAt}
-            format={formatTimeAgo}
-          />
         </YStack>
       </YStack>
     </CardContainer>
   );
-};
-
-const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
-  if (value === 0 && unit === "second") return "Just now";
-  const pluralS = value !== 1 ? "s" : "";
-  return `About ${value} ${unit}${pluralS} ago`;
 };
 
 interface AvatarProps {
