@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { LayoutAnimation, StyleSheet } from "react-native";
+import { ImageSourcePropType, LayoutAnimation, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -31,6 +31,8 @@ import BottomSheetHeader from "./BottomSheetHeader";
 
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
+type ProfilePicture = ImageSourcePropType | string | null;
+
 interface Comment {
   userId: string;
   id: number;
@@ -47,7 +49,7 @@ interface CommentsBottomSheetProps {
   onPostComment: (comment: string) => void;
   onDeleteComment: (commentId: number) => void;
   onReportComment: (commentId: number) => void;
-  currentUserProfilePicture: string | null;
+  currentUserProfilePicture: ProfilePicture;
   onPressProfilePicture: (userId: string, username: string) => void;
   onPressUsername: (userId: string, username: string) => void;
 }
@@ -245,7 +247,7 @@ const CommentInput = React.memo(
           ))}
         </XStack>
         <XStack alignItems="flex-end" gap="$3">
-          <Avatar source={currentUserProfilePicture} size={46} />
+          <Avatar source={currentUserProfilePicture} size={46} bordered />
           <View flex={1} position="relative">
             <BottomSheetTextInput
               placeholder="Add a comment..."

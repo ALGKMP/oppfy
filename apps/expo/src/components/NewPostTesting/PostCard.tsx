@@ -21,6 +21,14 @@ import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 
 type MediaType = "image" | "video";
 
+type ProfilePicture = ImageSourcePropType | string | null;
+
+interface Self {
+  id: string;
+  username: string;
+  profilePicture: ProfilePicture;
+}
+
 interface Author {
   id: string;
   username: string;
@@ -29,7 +37,7 @@ interface Author {
 interface Recipient {
   id: string;
   username: string;
-  profilePicture: ImageSourcePropType | string | null;
+  profilePicture: ProfilePicture;
 }
 
 interface MediaDimensions {
@@ -52,6 +60,7 @@ export interface PostData {
   id: number;
   createdAt: Date;
   caption: string;
+  self: Self;
   author: Author;
   recipient: Recipient;
   media: Media;
@@ -124,7 +133,7 @@ const PostCard = (props: PostCardProps) => {
                 props.onAuthorPress();
               }}
             >
-              <Avatar source={props.recipient.profilePicture} />
+              <Avatar source={props.recipient.profilePicture} bordered />
             </TouchableOpacity>
 
             <YStack gap="$1">

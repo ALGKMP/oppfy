@@ -6,6 +6,7 @@ import { useTheme } from "tamagui";
 interface AvatarProps {
   source: ImageSourcePropType | string | null;
   size?: number;
+  bordered?: boolean;
 }
 
 const Avatar = (props: AvatarProps) => {
@@ -18,7 +19,7 @@ const Avatar = (props: AvatarProps) => {
         width: props.size ?? 46,
         height: props.size ?? 46,
         borderRadius: props.size ? props.size / 2 : 23,
-        borderWidth: 2,
+        borderWidth: props.bordered ? 2 : 0,
         borderColor: theme.primary.val as string,
       }}
     />

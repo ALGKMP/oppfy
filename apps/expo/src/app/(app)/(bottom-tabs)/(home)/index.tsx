@@ -24,19 +24,18 @@ import {
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
-import PostCard from "~/components/NewPostTesting/PostCard";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
+import type { Profile } from "~/hooks/useProfile";
+import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import PostItem from "../../../../components/Media/PostItem";
-import Other from "../../(settings)/other";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
-type Profile = RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
 
 interface TokenItem {
   postId?: number | undefined;
@@ -47,6 +46,8 @@ const HomeScreen = () => {
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
+
+  const { profile, isLoading: isLoadingProfile } = useProfile();
 
   const {
     data: postData,
@@ -99,7 +100,7 @@ const HomeScreen = () => {
   );
 
   const renderPost = useCallback(
-    (item: PostItem) => {
+    (item: PostItem, profile: Profile) => {
       if (item.authorUsername === null) return null;
       if (item.recipientUsername === null) return null;
 
@@ -115,6 +116,11 @@ const HomeScreen = () => {
               id={item.postId}
               createdAt={item.createdAt}
               caption={item.caption}
+              self={{
+                id: profile.userId,
+                username: profile.username,
+                profilePicture: profile.profilePictureUrl,
+              }}
               author={{
                 id: item.authorId,
                 username: item.authorUsername,
@@ -163,7 +169,7 @@ const HomeScreen = () => {
       });
     };
 
-    if (recommendationsData?.length === 0 || recommendationsData === undefined)
+    if (recommendationsData === undefined || recommendationsData.length === 0)
       return null;
 
     return (
@@ -195,7 +201,7 @@ const HomeScreen = () => {
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
-  if (isLoadingRecommendationsData || isLoadingPostData) {
+  if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
     return (
       <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
         <YStack gap="$4">
@@ -219,7 +225,10 @@ const HomeScreen = () => {
     );
   }
 
-  if (recommendationsData?.length === 0 && postItems.length === 0) {
+  if (
+    profile === undefined ||
+    (recommendationsData?.length === 0 && postItems.length === 0)
+  ) {
     return (
       <BaseScreenView>
         <EmptyHomeScreen />
@@ -231,15 +240,15 @@ const HomeScreen = () => {
     // ! dont remove the paddingBottom 0, it actually does something
     <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
-        nestedScrollEnabled={true}
         data={postItems}
         refreshing={refreshing}
-        showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
-        numColumns={1}
         onEndReached={handleOnEndReached}
+        nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        numColumns={1}
         keyExtractor={(item) => "home_" + item.postId.toString()}
-        renderItem={({ item }) => renderPost(item)}
+        renderItem={({ item }) => renderPost(item, profile)}
         ListHeaderComponent={renderSuggestions}
         ListFooterComponent={ListFooter}
         estimatedItemSize={screenWidth}
