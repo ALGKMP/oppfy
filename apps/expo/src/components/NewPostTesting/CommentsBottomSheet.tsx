@@ -85,8 +85,6 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
     [onDeleteComment, onReportComment],
   );
 
-  const memoizedComments = useMemo(() => comments, [comments]);
-
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -137,9 +135,8 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
         <EmptyCommentsView />
       ) : (
         <Animated.FlatList
-          data={memoizedComments}
+          data={comments}
           renderItem={renderComment}
-          keyExtractor={(item) => item.id.toString()}
           onEndReached={onEndReached}
           itemLayoutAnimation={LinearTransition}
         />
@@ -179,7 +176,7 @@ const EmptyCommentsView = () => (
 
 interface CommentInputProps {
   onPostComment: (comment: string) => void;
-  currentUserProfilePicture: string;
+  currentUserProfilePicture: string | null;
 }
 
 const CommentInput: React.FC<CommentInputProps> = ({

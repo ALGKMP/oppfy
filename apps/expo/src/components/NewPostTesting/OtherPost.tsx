@@ -117,6 +117,7 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handleLikeDoubleTapped = async () => {
+    if (hasLiked) return;
     await likePost.mutateAsync({ postId: postProps.id });
   };
 
@@ -251,17 +252,21 @@ const OtherPost = (postProps: OtherPostProps) => {
   const postComment = api.post.createComment.useMutation({
     onMutate: async (newCommentData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.post.paginateComments.cancel();
+      await utils.post.paginateComments.cancel({
+        postId: newCommentData.postId,
+        pageSize: 10,
+      });
 
       // Get the data from the query cache
       const prevData = utils.post.paginateComments.getInfiniteData({
         postId: newCommentData.postId,
+        pageSize: 10,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.post.paginateComments.setInfiniteData(
-        { postId: newCommentData.postId },
+        { postId: newCommentData.postId, pageSize: 10 },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -271,7 +276,7 @@ const OtherPost = (postProps: OtherPostProps) => {
                 ...newCommentData,
                 userId: "temp",
                 username: "temp",
-                commentId: 432,
+                commentId: 5,
                 profilePictureUrl: "temp",
                 createdAt: new Date(),
               },

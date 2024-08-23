@@ -133,14 +133,14 @@ const PostCard = (props: PostCardProps) => {
                     {props.author.username}
                   </SizableText>
                 </SizableText>
-                <TimeAgo
-                  size="$2"
-                  theme="alt2"
-                  lineHeight={0}
-                  date={props.createdAt}
-                  format={formatTimeAgo}
-                />
               </TouchableOpacity>
+              <TimeAgo
+                size="$2"
+                theme="alt2"
+                lineHeight={0}
+                date={props.createdAt}
+                format={formatTimeAgo}
+              />
             </YStack>
           </XStack>
 
