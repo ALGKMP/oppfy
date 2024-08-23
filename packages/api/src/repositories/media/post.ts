@@ -304,10 +304,10 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async updatePost(postId: string, newCaption: string) {
+  async updatePost({ postId, caption }: { postId: string; caption: string }) {
     await this.db
       .update(schema.post)
-      .set({ caption: newCaption })
+      .set({ caption })
       .where(eq(schema.post.id, postId));
   }
 
