@@ -15,6 +15,7 @@ import type { PostData as OtherPostProps } from "./PostCard";
 import { useSaveMedia } from "./useSaveMedia";
 
 type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
+type ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];
 
 type SheetState = "closed" | "moreOptions" | "reportOptions";
 
@@ -110,16 +111,18 @@ export const useReportPost = (postId: number) => {
   const toast = useToastController();
   const reportPost = api.report.reportPost.useMutation();
 
-  const handleReportPost = (reason: ReportPostReason) => {
+  const handleReportPost = async (reason: ReportPostReason) => {
+    await reportPost.mutateAsync({ postId, reason });
     toast.show("Post Reported");
-    void reportPost.mutateAsync({ postId, reason });
   };
 
   return { handleReportPost };
 };
 
 export const useComments = (postId: number) => {
+  const toast = useToastController();
   const utils = api.useUtils();
+
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -183,6 +186,51 @@ export const useComments = (postId: number) => {
     },
   });
 
+  const deleteComment = api.post.deleteComment.useMutation({
+    onMutate: async (newCommentData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
+
+      // Get the data from the query cache
+      const prevData = utils.post.paginateComments.getInfiniteData({
+        postId,
+        pageSize: 10,
+      });
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.post.paginateComments.setInfiniteData(
+        { postId, pageSize: 10 },
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter(
+              (comment) => comment.commentId !== newCommentData.commentId,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, newCommentData, ctx) => {
+      if (ctx === undefined) return;
+
+      // If the mutation fails, revert to the previous data
+      utils.post.paginateComments.setInfiniteData(
+        { postId, pageSize: 10 },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      // Sync with server once mutation has settled
+      await utils.post.paginateComments.invalidate();
+    },
+  });
+
+  const reportComment = api.report.reportComment.useMutation();
+
   const handleLoadMoreComments = async () => {
     if (commentsHasNextPage && !commentsIsFetchingNextPage) {
       await fetchNextCommentsPage();
@@ -191,6 +239,15 @@ export const useComments = (postId: number) => {
 
   const handlePostComment = async (comment: string) => {
     await postComment.mutateAsync({ postId, body: comment });
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    await deleteComment.mutateAsync({ postId, commentId });
+  };
+
+  const handleReportComment = async (commentId: number) => {
+    await reportComment.mutateAsync({ commentId, reason: "Other" });
+    toast.show("Comment Reported");
   };
 
   const commentItems =
@@ -209,6 +266,8 @@ export const useComments = (postId: number) => {
     isLoadingComments,
     handleLoadMoreComments,
     handlePostComment,
+    handleDeleteComment,
+    handleReportComment,
   };
 };
 
@@ -357,19 +416,23 @@ const ReportOptionsSheet = ({
 };
 
 const OtherPost = (postProps: OtherPostProps) => {
-  const [sheetState, setSheetState] = useState<SheetState>("closed");
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [sheetState, setSheetState] = useState<SheetState>("closed");
 
   const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost(
     postProps.id,
   );
   const { handleReportPost } = useReportPost(postProps.id);
+
   const {
     commentItems,
     isLoadingComments,
     handleLoadMoreComments,
     handlePostComment,
+    handleDeleteComment,
+    handleReportComment,
   } = useComments(postProps.id);
+
   const {
     handleSavePost,
     handleShare,
@@ -396,14 +459,6 @@ const OtherPost = (postProps: OtherPostProps) => {
 
   const handleCloseReportOptionsSheet = () => {
     setSheetState("closed");
-  };
-
-  const handleDeleteComment = () => {
-    console.log("delete comment");
-  };
-
-  const handleReportComment = () => {
-    console.log("report comment");
   };
 
   return (
