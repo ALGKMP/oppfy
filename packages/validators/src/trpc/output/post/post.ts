@@ -31,7 +31,7 @@ const trpcPostOutputSchema = {
       .optional(),
   }),
   paginatedComments: z.object({
-    items: z.array(comment.optional()),
+    items: z.array(comment),
     nextCursor: z
       .object({
         createdAt: z.date(),

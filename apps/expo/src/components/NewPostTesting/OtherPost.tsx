@@ -232,6 +232,8 @@ const OtherPost = (postProps: OtherPostProps) => {
     },
   ] satisfies ButtonOption[];
 
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
   const { data: comments, isLoading: isLoadingComments } =
     api.post.paginateComments.useQuery({
       postId: postProps.id,
@@ -239,15 +241,67 @@ const OtherPost = (postProps: OtherPostProps) => {
 
   const commentItems =
     comments?.items.map((comment) => ({
-      id: comment?.commentId,
-      body: comment?.body,
-      createdAt: comment?.createdAt,
-      author: comment?.userId,
-      username: comment?.username,
-      profilePictureUrl: comment?.profilePictureUrl,
+      id: comment.commentId,
+      body: comment.body,
+      username: comment.username ?? "",
+      profilePictureUrl: comment.profilePictureUrl,
+      createdAt: comment.createdAt,
     })) ?? [];
 
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const postComment = api.post.createComment.useMutation({
+    onMutate: async (newCommentData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.post.paginateComments.cancel();
+
+      // Get the data from the query cache
+      const prevData = utils.post.paginateComments.getInfiniteData({
+        postId: newCommentData.postId,
+      });
+      if (prevData === undefined) return;
+
+      // Optimistically update the data
+      utils.post.paginateComments.setInfiniteData(
+        { postId: newCommentData.postId },
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: [
+              {
+                ...newCommentData,
+                userId: "temp",
+                username: "temp",
+                commentId: 432,
+                profilePictureUrl: "temp",
+                createdAt: new Date(),
+              },
+              ...page.items,
+            ],
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, newCommentData, ctx) => {
+      if (ctx === undefined) return;
+
+      utils.post.paginateComments.setInfiniteData(
+        { postId: newCommentData.postId },
+        ctx.prevData,
+      );
+    },
+    onSettled: async () => {
+      await utils.post.paginateComments.invalidate();
+    },
+  });
+
+  const handlePostComment = async (comment: string) => {
+    await postComment.mutateAsync({
+      postId: postProps.id,
+      body: comment,
+    });
+  };
 
   return (
     <>
@@ -279,7 +333,7 @@ const OtherPost = (postProps: OtherPostProps) => {
         comments={commentItems}
         isLoading={isLoadingComments}
         // onEndReached={handleLoadMoreComments}
-        // onPostComment={handlePostComment}
+        onPostComment={handlePostComment}
         // onDeleteComment={handleDeleteComment}
         // onReportComment={handleReportComment}
         currentUserProfilePicture="https://picsum.photos/200/300"

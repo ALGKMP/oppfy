@@ -42,7 +42,7 @@ interface Comment {
   id: number;
   body: string;
   username: string;
-  profilePictureUrl: string;
+  profilePictureUrl: string | null;
   createdAt: Date;
 }
 
@@ -53,7 +53,7 @@ interface CommentsBottomSheetProps {
   onPostComment: (comment: string) => void;
   onDeleteComment: (commentId: number) => void;
   onReportComment: (commentId: number) => void;
-  currentUserProfilePicture: string;
+  currentUserProfilePicture: string | null;
 }
 
 const CommentsBottomSheet: ForwardRefRenderFunction<
