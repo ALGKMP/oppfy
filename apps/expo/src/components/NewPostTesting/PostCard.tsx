@@ -5,7 +5,6 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { Video } from "expo-av";
 import { Image } from "expo-image";
-import defaultProfilePicture from "@assets/default-profile-picture.jpg";
 import {
   Heart,
   MessageCircle,
@@ -15,6 +14,7 @@ import {
 import { Button, getToken, SizableText, View, XStack, YStack } from "tamagui";
 
 import { TimeAgo } from "~/components/Texts";
+import Avatar from "../Avatar";
 import CardContainer from "../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 
@@ -117,7 +117,7 @@ const PostCard = (props: PostCardProps) => {
         <XStack alignItems="center" justifyContent="space-between">
           <XStack alignItems="center" gap="$3">
             <TouchableOpacity onPress={props.onAuthorPress}>
-              <Avatar url={props.recipient.profilePicture} />
+              <Avatar source={props.recipient.profilePicture} />
             </TouchableOpacity>
 
             <YStack gap="$1">
@@ -212,16 +212,5 @@ const PostCard = (props: PostCardProps) => {
     </CardContainer>
   );
 };
-
-interface AvatarProps {
-  url: ImageSourcePropType | string | null;
-}
-
-const Avatar = (props: AvatarProps) => (
-  <Image
-    source={props.url ?? defaultProfilePicture}
-    style={{ width: 46, height: 46, borderRadius: 23 }}
-  />
-);
 
 export default PostCard;
