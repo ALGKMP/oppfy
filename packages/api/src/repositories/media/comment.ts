@@ -8,11 +8,11 @@ export class CommentRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async addComment({ postId, userId, body }: { postId: string; userId: string; body: string }) {
+  async addComment({ postId, userId, comment }: { postId: string; userId: string; comment: string }) {
     return await this.db.insert(schema.comment).values({
       post: postId,
       user: userId,
-      body: body,
+      body: comment,
     });
   }
 
