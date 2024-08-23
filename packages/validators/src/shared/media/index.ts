@@ -3,13 +3,13 @@ import { z } from "zod";
 export const postContentType = z.enum(["image/jpeg", "image/png"]);
 
 export const post = z.object({
-  postId: z.number(),
+  postId: z.string(),
   authorId: z.string(),
-  authorProfileId: z.number(),
+  authorProfileId: z.string(),
   authorUsername: z.string().nullable(),
   authorProfilePicture: z.string().nullable(),
   recipientId: z.string(),
-  recipientProfileId: z.number(),
+  recipientProfileId: z.string(),
   recipientUsername: z.string().nullable(),
   recipientProfilePicture: z.string().nullable(), // Corrected typo
   caption: z.string().max(255).default(""),
@@ -23,11 +23,11 @@ export const post = z.object({
 });
 
 export const comment = z.object({
-  commentId: z.number(),
+  commentId: z.string(),
   userId: z.string(),
   username: z.string().nullable(),
   profilePictureUrl: z.string().nullable(),
-  postId: z.number(),
+  postId: z.string(),
   body: z.string(),
   createdAt: z.date(),
 });
