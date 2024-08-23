@@ -120,6 +120,7 @@ export const useReportPost = (postId: number) => {
 };
 
 export const useComments = (postId: number) => {
+  const router = useRouter();
   const toast = useToastController();
   const utils = api.useUtils();
 
@@ -250,10 +251,25 @@ export const useComments = (postId: number) => {
     toast.show("Comment Reported");
   };
 
+  const handlePressProfilePicture = (userId: number, username: string) => {
+    router.push({
+      pathname: `/profile/[userId]`,
+      params: { userId, username },
+    });
+  };
+
+  const handlePressUsername = (userId: number, username: string) => {
+    router.push({
+      pathname: `/profile/[userId]`,
+      params: { userId, username },
+    });
+  };
+
   const commentItems =
     comments?.pages
       .flatMap((page) => page.items)
       .map((comment) => ({
+        userId: comment.userId,
         id: comment.commentId,
         body: comment.body,
         username: comment.username ?? "",
@@ -268,6 +284,8 @@ export const useComments = (postId: number) => {
     handlePostComment,
     handleDeleteComment,
     handleReportComment,
+    handlePressProfilePicture,
+    handlePressUsername,
   };
 };
 
@@ -431,6 +449,8 @@ const OtherPost = (postProps: OtherPostProps) => {
     handlePostComment,
     handleDeleteComment,
     handleReportComment,
+    handlePressProfilePicture,
+    handlePressUsername,
   } = useComments(postProps.id);
 
   const {
@@ -483,6 +503,14 @@ const OtherPost = (postProps: OtherPostProps) => {
         onPostComment={handlePostComment}
         onDeleteComment={handleDeleteComment}
         onReportComment={handleReportComment}
+        onPressProfilePicture={(userId, username) => {
+          bottomSheetModalRef.current?.close();
+          handlePressProfilePicture(userId, username);
+        }}
+        onPressUsername={(userId, username) => {
+          bottomSheetModalRef.current?.close();
+          handlePressUsername(userId, username);
+        }}
         currentUserProfilePicture={null}
       />
 

@@ -14,7 +14,6 @@ import { BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { AlertCircle, SendHorizontal, Trash2 } from "@tamagui/lucide-icons";
 import {
-  getToken,
   ScrollView,
   SizableText,
   Text,
@@ -33,6 +32,7 @@ import BottomSheetHeader from "./BottomSheetHeader";
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
 interface Comment {
+  userId: string;
   id: number;
   body: string;
   username: string;
@@ -48,6 +48,8 @@ interface CommentsBottomSheetProps {
   onDeleteComment: (commentId: number) => void;
   onReportComment: (commentId: number) => void;
   currentUserProfilePicture: string | null;
+  onPressProfilePicture: (userId: string, username: string) => void;
+  onPressUsername: (userId: string, username: string) => void;
 }
 
 const CommentsBottomSheet = forwardRef<
@@ -62,6 +64,8 @@ const CommentsBottomSheet = forwardRef<
       onPostComment,
       onDeleteComment,
       onReportComment,
+      onPressProfilePicture,
+      onPressUsername,
       currentUserProfilePicture,
     },
     ref,
@@ -95,11 +99,30 @@ const CommentsBottomSheet = forwardRef<
         <CommentItem
           key={item.id}
           comment={item}
-          onDelete={() => handleDeleteComment(item.id)}
-          onReport={() => onReportComment(item.id)}
+          onDelete={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            handleDeleteComment(item.id);
+          }}
+          onReport={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onReportComment(item.id);
+          }}
+          onPressProfilePicture={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onPressProfilePicture(item.userId, item.username);
+          }}
+          onPressUsername={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onPressUsername(item.userId, item.username);
+          }}
         />
       ),
-      [handleDeleteComment, onReportComment],
+      [
+        handleDeleteComment,
+        onPressProfilePicture,
+        onPressUsername,
+        onReportComment,
+      ],
     );
 
     const ListEmptyComponent = useMemo(
@@ -270,10 +293,18 @@ interface CommentItemProps {
   comment: Comment;
   onDelete: () => void;
   onReport: () => void;
+  onPressProfilePicture: () => void;
+  onPressUsername: () => void;
 }
 
 const CommentItem = React.memo(
-  ({ comment, onDelete, onReport }: CommentItemProps) => (
+  ({
+    comment,
+    onDelete,
+    onReport,
+    onPressProfilePicture,
+    onPressUsername,
+  }: CommentItemProps) => (
     <BlurContextMenuWrapper
       options={[
         {
@@ -298,10 +329,14 @@ const CommentItem = React.memo(
     >
       <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
         <XStack gap="$3" alignItems="center">
-          <Avatar source={comment.profilePictureUrl} size={46} />
+          <TouchableOpacity onPress={onPressProfilePicture}>
+            <Avatar source={comment.profilePictureUrl} size={46} />
+          </TouchableOpacity>
           <YStack gap="$2" width="100%" flex={1}>
             <XStack gap="$2">
-              <Text fontWeight="bold">{comment.username}</Text>
+              <TouchableOpacity onPress={onPressUsername}>
+                <Text fontWeight="bold">{comment.username}</Text>
+              </TouchableOpacity>
               <TimeAgo
                 size="$2"
                 date={comment.createdAt}
