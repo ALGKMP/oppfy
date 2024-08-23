@@ -14,16 +14,6 @@ export const FriendState = z.enum([
   "IncomingRequest",
 ]);
 
-export const BlockStates = z.object({});
-
-// TODO: Reference this when you re-write. Maybe formatting it like this is nicer.
-// export const ForFutureReference = z.object({
-//   privacy: z.literal("public"),
-//   blockedStates,
-//   followStates,
-//   friendStates
-// });
-
 export const PublicProfileStatus = z.object({
   privacy: z.literal("public"),
   isTargetUserBlocked: z.boolean(),
