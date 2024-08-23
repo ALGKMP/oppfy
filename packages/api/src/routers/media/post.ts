@@ -9,62 +9,97 @@ import { DomainError } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
-  createPresignedUrlForImagePost: protectedProcedure
-    .input(trpcValidators.input.post.createPresignedUrlForImagePost)
-    .output(z.string())
+  uploadPicturePostForUserOnApp: protectedProcedure
+    .input(
+      z.object({
+        author: z.string(),
+        recipient: z.string(),
+        caption: z.string().max(255).default(""),
+        height: z.string(),
+        width: z.string(),
+        contentLength: z.number(),
+        contentType: z.enum(["image/jpeg", "image/png"]),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
+      const {
+        author,
+        recipient,
+        caption,
+        height,
+        width,
+        contentLength,
+        contentType,
+      } = input;
       try {
-        const currentDate = Date.now();
-        const objectKey = `posts/${currentDate}-${ctx.session.uid}`;
-
-        const { contentLength, contentType, ...metadata } = input;
-        metadata.caption = encodeURIComponent(metadata.caption);
-
-        const presignedUrl =
-          await ctx.services.s3.putObjectPresignedUrlWithPostMetadata({
-            Bucket: env.S3_POST_BUCKET,
-            Key: objectKey,
-            ContentLength: contentLength,
-            ContentType: contentType,
-            Metadata: {
-              ...metadata,
-              author: ctx.session.uid,
-            },
-          });
-
-        return presignedUrl;
+        return await ctx.services.s3.uploadPostForUserOnAppUrl({
+          author,
+          recipient,
+          caption,
+          height,
+          width,
+          contentLength,
+          contentType,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create presigned URL for post upload.",
+          message: "Failed to retrieve presigned URL for post upload.",
         });
       }
     }),
 
-  createPresignedUrlForVideoPost: protectedProcedure
-    .input(trpcValidators.input.post.createPresignedUrlForVideoPost)
+  uploadPicturePostForUserNotOnApp: protectedProcedure
+    .input(
+      z.object({
+        author: z.string(),
+        recipientPhoneNumber: z.string(),
+        caption: z.string().max(255).default(""),
+        height: z.string(),
+        width: z.string(),
+        contentLength: z.number(),
+        contentType: z.enum(["image/jpeg", "image/png"]),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
+      const {
+        author,
+        recipientPhoneNumber,
+        caption,
+        height,
+        width,
+        contentLength,
+        contentType,
+      } = input;
       try {
-        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
-          ...input,
-          author: ctx.session.uid,
+        await ctx.services.s3.uploadPostForUserNotOnAppUrl({
+          author,
+          number: recipientPhoneNumber,
+          caption,
+          height,
+          width,
+          contentLength,
+          contentType,
         });
-
-        return url;
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message:
-            "Failed to create presigned URL for video upload. Please check your network connection and try again.",
+          message: "Failed to retrieve presigned URL for post upload.",
         });
       }
     }),
 
   editPost: protectedProcedure
-    .input(trpcValidators.input.post.updatePost)
+    .input(
+      z.object({
+        postId: z.string(),
+        caption: z.string().max(255).default(""),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
+      const { postId, caption } = input;
       try {
-        await ctx.services.post.editPost(input.postId, input.caption);
+        await ctx.services.post.editPost({ postId, caption });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -74,7 +109,11 @@ export const postRouter = createTRPCRouter({
     }),
 
   deletePost: protectedProcedure
-    .input(trpcValidators.input.post.deletePost)
+    .input(
+      z.object({
+        postId: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.deletePost(input.postId);
@@ -87,7 +126,17 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsOfUserSelf: protectedProcedure
-    .input(trpcValidators.input.post.paginatePostsOfUserSelf)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            postId: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().nonnegative().optional(),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
@@ -115,7 +164,17 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsOfFollowing: protectedProcedure
-    .input(trpcValidators.input.post.paginatePostsOfFollowing)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            followerId: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().nonnegative().optional(),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
@@ -143,7 +202,17 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsOfRecommended: protectedProcedure
-    .input(trpcValidators.input.post.paginatePostsOfRecommended)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            postId: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().nonnegative().optional(),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
@@ -171,7 +240,29 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsForFeed: protectedProcedure
-    .input(trpcValidators.input.post.paginatePostsForFeed)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            doneFollowing: z.boolean(),
+            followingCursor: z
+              .object({
+                createdAt: z.date(),
+                followerId: z.string(),
+              })
+              .optional(),
+            recomendedCursor: z
+              .object({
+                createdAt: z.date(),
+                postId: z.string(),
+              })
+              .optional(),
+          })
+          .optional(),
+
+        pageSize: z.number().nonnegative().optional(),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedFeedPosts)
     .query(async ({ ctx, input }) => {
       try {
@@ -201,7 +292,18 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsOfUserOther: protectedProcedure
-    .input(trpcValidators.input.post.paginatePostsOfUserOther)
+    .input(
+      z.object({
+        userId: z.string(),
+        cursor: z
+          .object({
+            postId: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().nonnegative().optional(),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
@@ -230,7 +332,17 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsByUserSelf: protectedProcedure
-    .input(trpcValidators.input.post.paginatePostsByUserSelf)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            postId: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().nonnegative().optional(),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
@@ -258,7 +370,18 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginatePostsByUserOther: protectedProcedure
-    .input(trpcValidators.input.post.paginatePostsByUserOther)
+    .input(
+      z.object({
+        userId: z.string(),
+        cursor: z
+          .object({
+            postId: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().nonnegative().optional(),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
@@ -286,7 +409,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   getPost: protectedProcedure
-    .input(z.object({ postId: z.number() }))
+    .input(z.object({ postId: z.string() }))
     .output(sharedValidators.media.post)
     .query(async ({ ctx, input }) => {
       try {
@@ -302,12 +425,13 @@ export const postRouter = createTRPCRouter({
   likePost: protectedProcedure
     .input(
       z.object({
-        postId: z.number(),
+        postId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { postId } = input;
       try {
-        await ctx.services.post.likePost(ctx.session.uid, input.postId);
+        await ctx.services.post.likePost({ userId: ctx.session.uid, postId });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -319,16 +443,17 @@ export const postRouter = createTRPCRouter({
   hasliked: protectedProcedure
     .input(
       z.object({
-        postId: z.number(),
+        postId: z.string(),
       }),
     )
     .output(z.boolean())
     .query(async ({ ctx, input }) => {
+      const { postId } = input;
       try {
-        return !!(await ctx.services.post.getLike(
-          ctx.session.uid,
-          input.postId,
-        ));
+        return !!(await ctx.services.post.getLike({
+          userId: ctx.session.uid,
+          postId,
+        }));
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -340,12 +465,13 @@ export const postRouter = createTRPCRouter({
   unlikePost: protectedProcedure
     .input(
       z.object({
-        postId: z.number(),
+        postId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { postId } = input;
       try {
-        await ctx.services.post.unlikePost(ctx.session.uid, input.postId);
+        await ctx.services.post.unlikePost({ userId: ctx.session.uid, postId });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -357,17 +483,18 @@ export const postRouter = createTRPCRouter({
   createComment: protectedProcedure
     .input(
       z.object({
-        postId: z.number(),
-        body: z.string(),
+        postId: z.string(),
+        comment: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { postId, comment } = input;
       try {
-        await ctx.services.post.commentOnPost(
-          ctx.session.uid,
-          input.postId,
-          input.body,
-        );
+        await ctx.services.post.commentOnPost({
+          userId: ctx.session.uid,
+          postId,
+          comment,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -379,13 +506,15 @@ export const postRouter = createTRPCRouter({
   deleteComment: protectedProcedure
     .input(
       z.object({
-        commentId: z.number(),
-        postId: z.number(),
+        commentId: z.string(),
+        postId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { commentId, postId } = input;
+
       try {
-        await ctx.services.post.deleteComment(input.commentId, input.postId);
+        await ctx.services.post.deleteComment({ commentId, postId });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -395,7 +524,18 @@ export const postRouter = createTRPCRouter({
     }),
 
   paginateComments: protectedProcedure
-    .input(trpcValidators.input.post.paginateComments)
+    .input(
+      z.object({
+        postId: z.string(),
+        cursor: z
+          .object({
+            commentId: z.string(),
+            createdAt: z.date(),
+          })
+          .optional(),
+        pageSize: z.number().nonnegative().optional().default(10),
+      }),
+    )
     .output(trpcValidators.output.post.paginatedComments)
     .query(async ({ ctx, input }) => {
       try {
@@ -417,7 +557,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   viewPost: protectedProcedure
-    .input(z.object({ postId: z.number() }))
+    .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.viewPost({
@@ -433,7 +573,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   viewMultiplePosts: protectedProcedure
-    .input(z.object({ postIds: z.array(z.number()) }))
+    .input(z.object({ postIds: z.array(z.string()) }))
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.post.viewMultiplePosts({

@@ -1,7 +1,9 @@
 import type { z } from "zod";
 
+import { env } from "@oppfy/env";
 import type { sharedValidators } from "@oppfy/validators";
 
+import { DomainError, ErrorCode } from "../../errors";
 import { S3Repository } from "../../repositories/aws/s3";
 
 type ContentType = z.infer<typeof sharedValidators.media.postContentType>;
@@ -40,20 +42,125 @@ export type ProfilePictureMetadata = z.infer<
 export class S3Service {
   private s3Repository = new S3Repository();
 
+  async uploadProfilePictureUrl({
+    userId,
+    contentLength,
+  }: {
+    userId: string;
+    contentLength: number;
+  }) {
+    const key = `profile-pictures/${userId}.jpg`;
+
+    const metadata = {
+      user: userId,
+    };
+
+    return await this.s3Repository.putObjectPresignedUrl({
+      Key: key,
+      Bucket: env.S3_PROFILE_BUCKET,
+      ContentLength: contentLength,
+      ContentType: "image/jpeg",
+      Metadata: metadata,
+    });
+  }
+
+  // Post for user on app
+  async uploadPostForUserOnAppUrl({
+    author,
+    recipient,
+    caption,
+    height,
+    width,
+    contentLength,
+    contentType,
+  }: {
+    author: string;
+    recipient: string;
+    caption: string;
+    height: string;
+    width: string;
+    contentLength: number;
+    contentType: ContentType;
+  }) {
+    try {
+      const currentDate = Date.now();
+      const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
+
+      caption = encodeURIComponent(caption);
+
+      const presignedUrl = await this.s3Repository.putObjectPresignedUrl({
+        Bucket: env.S3_POST_BUCKET,
+        Key: objectKey,
+        ContentLength: contentLength,
+        ContentType: contentType,
+        Metadata: {
+          author,
+          recipient,
+          caption,
+          height,
+          width,
+        },
+      });
+
+      return presignedUrl;
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.S3_FAILED_TO_UPLOAD,
+        "S3 failed while trying to upload post",
+      );
+    }
+  }
+
+  // post for user not on app
+  async uploadPostForUserNotOnAppUrl({
+    author,
+    number,
+    caption,
+    height,
+    width,
+    contentLength,
+    contentType,
+  }: {
+    author: string;
+    number: string;
+    caption: string;
+    height: string;
+    width: string;
+    contentLength: number;
+    contentType: ContentType;
+  }) {
+    try {
+      const currentDate = Date.now();
+      const objectKey = `posts/${currentDate}-${number}-${author}.jpg`;
+
+      caption = encodeURIComponent(caption);
+
+      const presignedUrl = await this.s3Repository.putObjectPresignedUrl({
+        Bucket: env.S3_POST_BUCKET,
+        Key: objectKey,
+        ContentLength: contentLength,
+        ContentType: contentType,
+        Metadata: {
+          author,
+          number,
+          caption,
+          height,
+          width,
+        },
+      });
+
+      return presignedUrl;
+    } catch (err) {
+      throw new DomainError(
+        ErrorCode.S3_FAILED_TO_UPLOAD,
+        "S3 failed while trying to upload post",
+      );
+    }
+  }
+
+
   async putObjectPresignedUrl(
     putObjectCommandInput: PutObjectPresignedUrlInput,
-  ) {
-    return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
-  }
-
-  async putObjectPresignedUrlWithPostMetadata(
-    putObjectCommandInput: BasePutObjectPresignedUrlWithMetadataInput<PostMetadata>,
-  ) {
-    return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
-  }
-
-  async putObjectPresignedUrlWithProfilePictureMetadata(
-    putObjectCommandInput: BasePutObjectPresignedUrlWithMetadataInput<ProfilePictureMetadata>,
   ) {
     return await this.s3Repository.putObjectPresignedUrl(putObjectCommandInput);
   }

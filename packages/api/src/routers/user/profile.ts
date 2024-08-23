@@ -52,21 +52,10 @@ export const profileRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const key = `profile-pictures/${ctx.session.uid}.jpg`;
-
-      const metadata = {
-        user: ctx.session.uid,
-      };
-
-      return await ctx.services.s3.putObjectPresignedUrlWithProfilePictureMetadata(
-        {
-          Key: key,
-          Bucket: env.S3_PROFILE_BUCKET,
-          ContentLength: input.contentLength,
-          ContentType: "image/jpeg",
-          Metadata: metadata,
-        },
-      );
+      return await ctx.services.s3.uploadProfilePictureUrl({
+        userId: ctx.session.uid,
+        contentLength: input.contentLength,
+      });
     }),
 
   removeProfilePicture: protectedProcedure.mutation(async ({ ctx }) => {
