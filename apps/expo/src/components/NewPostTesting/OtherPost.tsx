@@ -15,7 +15,7 @@ import type { PostData as OtherPostProps } from "./PostCard";
 import { useSaveMedia } from "./useSaveMedia";
 
 type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
-type ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];
+type _ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];
 
 type SheetState = "closed" | "moreOptions" | "reportOptions";
 
@@ -159,7 +159,7 @@ export const useComments = (postId: number) => {
             items: [
               {
                 ...newCommentData,
-                commentId: 5,
+                commentId: new Date().getTime(),
                 userId: "temp",
                 username: "temp",
                 profilePictureUrl: null,
@@ -286,7 +286,7 @@ export const usePostActions = (postProps: OtherPostProps) => {
   };
 
   const handleShare = () => {
-    // Implement share functionality
+    // TODO: Implement sharing
   };
 
   const handleRecipientPress = () => {

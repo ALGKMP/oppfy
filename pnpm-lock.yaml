@@ -97,7 +97,7 @@ importers:
         version: 0.4.0(react-native@0.74.5)(react@18.2.0)
       '@tamagui/babel-plugin':
         specifier: 1.95.3
-        version: 1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3)
+        version: 1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.2)
       '@tamagui/config':
         specifier: 1.95.3
         version: 1.95.3(react-dom@18.2.0)(react-native-reanimated@3.10.1)(react-native@0.74.5)(react@18.2.0)
@@ -196,7 +196,7 @@ importers:
         version: 0.28.15(expo@51.0.28)
       expo-router:
         specifier: ~3.5.23
-        version: 3.5.23(@react-navigation/drawer@6.6.15)(expo-constants@16.0.2)(expo-linking@6.3.1)(expo-modules-autolinking@1.11.2)(expo-status-bar@1.12.1)(expo@51.0.28)(react-native-reanimated@3.10.1)(react-native-safe-area-context@4.10.5)(react-native-screens@3.31.1)(react-native@0.74.5)(react@18.2.0)(typescript@5.3.3)
+        version: 3.5.23(@react-navigation/drawer@6.6.15)(expo-constants@16.0.2)(expo-linking@6.3.1)(expo-modules-autolinking@1.11.2)(expo-status-bar@1.12.1)(expo@51.0.28)(react-native-reanimated@3.10.1)(react-native-safe-area-context@4.10.5)(react-native-screens@3.31.1)(react-native@0.74.5)(react@18.2.0)(typescript@5.4.2)
       expo-sharing:
         specifier: ~12.0.1
         version: 12.0.1(expo@51.0.28)
@@ -324,9 +324,6 @@ importers:
       '@oppfy/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@oppfy/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -343,8 +340,8 @@ importers:
         specifier: ^3.2.5
         version: 3.2.5
       typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
+        specifier: ^5.4
+        version: 5.4.2
 
   apps/nextjs:
     dependencies:
@@ -1196,27 +1193,6 @@ importers:
       sqs-producer:
         specifier: ^5.0.0
         version: 5.0.0(@aws-sdk/client-sqs@3.598.0)
-    devDependencies:
-      '@oppfy/eslint-config':
-        specifier: workspace:*
-        version: link:../../tooling/eslint
-      '@oppfy/prettier-config':
-        specifier: workspace:*
-        version: link:../../tooling/prettier
-      '@oppfy/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      eslint:
-        specifier: ^9.2.0
-        version: 9.2.0
-      prettier:
-        specifier: ^3.2.5
-        version: 3.2.5
-      typescript:
-        specifier: ^5.4
-        version: 5.4.2
-
-  packages/types:
     devDependencies:
       '@oppfy/eslint-config':
         specifier: workspace:*
@@ -6462,10 +6438,10 @@ packages:
     resolution: {integrity: sha512-Doz2bfiPndXYFPMRwPyGa1k5QaKDVpY806UJj570epIiMzWaYyCtobasyfC++qfIXVb5Ocy7r3tP9d62hAQ7IQ==}
     dev: false
 
-  /@expo/server@0.4.4(typescript@5.3.3):
+  /@expo/server@0.4.4(typescript@5.4.2):
     resolution: {integrity: sha512-q9ADBzMN5rZ/fgQ2mz5YIJuZ8gelQlhG2CQqToD+UvBLZvbaHCNxTTSs2KI1LzJvAaW5CWgWMatGvGF6iUQ0LA==}
     dependencies:
-      '@remix-run/node': 2.11.2(typescript@5.3.3)
+      '@remix-run/node': 2.11.2(typescript@5.4.2)
       abort-controller: 3.0.0
       debug: 4.3.6
       source-map-support: 0.5.21
@@ -8082,7 +8058,7 @@ packages:
       warn-once: 0.1.1
     dev: false
 
-  /@remix-run/node@2.11.2(typescript@5.3.3):
+  /@remix-run/node@2.11.2(typescript@5.4.2):
     resolution: {integrity: sha512-gRNFM61EOYWNmYgf+pvBt6MrirWlkDz1G6RQsJNowtRqbYoy05AdDe5HiHGF5w8ZMAZVeXnZiwbL0Nt7ykYBCA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -8091,13 +8067,13 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@remix-run/server-runtime': 2.11.2(typescript@5.3.3)
+      '@remix-run/server-runtime': 2.11.2(typescript@5.4.2)
       '@remix-run/web-fetch': 4.4.2
       '@web3-storage/multipart-parser': 1.0.0
       cookie-signature: 1.2.1
       source-map-support: 0.5.21
       stream-slice: 0.1.2
-      typescript: 5.3.3
+      typescript: 5.4.2
       undici: 6.19.7
     dev: false
 
@@ -8106,7 +8082,7 @@ packages:
     engines: {node: '>=14.0.0'}
     dev: false
 
-  /@remix-run/server-runtime@2.11.2(typescript@5.3.3):
+  /@remix-run/server-runtime@2.11.2(typescript@5.4.2):
     resolution: {integrity: sha512-abG6ENj0X3eHqDxqO2thWM2NSEiPnqyt58z1BbiQCv+t8g0Zuqd5QHbB4wzdNvfS0vKhg+jJiigcJneAc4sZzw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -8122,7 +8098,7 @@ packages:
       set-cookie-parser: 2.7.0
       source-map: 0.7.4
       turbo-stream: 2.3.0
-      typescript: 5.3.3
+      typescript: 5.4.2
     dev: false
 
   /@remix-run/web-blob@3.1.0:
@@ -10020,14 +9996,14 @@ packages:
       react-native: 0.74.5(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.79)(react@18.2.0)
     dev: false
 
-  /@tamagui/babel-plugin@1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3):
+  /@tamagui/babel-plugin@1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.2):
     resolution: {integrity: sha512-eYcsa8+O1Op/eY50+RE6qHoaqaFoB53l3V88VY3/Rx08xOql9JVf9ykgyeHZaW8HgVw+rKyApuy2Z3v7OYi1/Q==}
     dependencies:
       '@babel/generator': 7.25.0
       '@babel/helper-plugin-utils': 7.24.8
       '@babel/template': 7.25.0
       '@babel/traverse': 7.25.3
-      '@tamagui/static': 1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3)
+      '@tamagui/static': 1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.2)
     transitivePeerDependencies:
       - encoding
       - react
@@ -10036,7 +10012,7 @@ packages:
       - typescript
     dev: false
 
-  /@tamagui/build@1.95.3(typescript@5.3.3):
+  /@tamagui/build@1.95.3(typescript@5.4.2):
     resolution: {integrity: sha512-YL3C8LlfoeURz9HCnnXB92L21Z7C6s1lp+/B+1vVe3Qr/WshtqcBgSVE39zWacO3fqd8UwTKJmQw6w+rOxy2rw==}
     hasBin: true
     peerDependencies:
@@ -10054,7 +10030,7 @@ packages:
       fs-extra: 11.2.0
       get-tsconfig: 4.7.6
       lodash.debounce: 4.0.8
-      typescript: 5.3.3
+      typescript: 5.4.2
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -10848,7 +10824,7 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@tamagui/static@1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3):
+  /@tamagui/static@1.95.3(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.2):
     resolution: {integrity: sha512-b9ws5IQGVB8ynpezY1lMJXugn812kGA3Xi5Fl8DkASqVNXZ88czXjN5gg1024FZl2evPmm19k98j7sp+/GhcUQ==}
     dependencies:
       '@babel/core': 7.24.4
@@ -10859,7 +10835,7 @@ packages:
       '@babel/runtime': 7.24.4
       '@babel/traverse': 7.25.3
       '@babel/types': 7.25.2
-      '@tamagui/build': 1.95.3(typescript@5.3.3)
+      '@tamagui/build': 1.95.3(typescript@5.4.2)
       '@tamagui/cli-color': 1.95.3
       '@tamagui/config-default': 1.95.3(react@18.2.0)
       '@tamagui/core': 1.95.3(react@18.2.0)
@@ -15079,7 +15055,7 @@ packages:
       - supports-color
     dev: false
 
-  /expo-router@3.5.23(@react-navigation/drawer@6.6.15)(expo-constants@16.0.2)(expo-linking@6.3.1)(expo-modules-autolinking@1.11.2)(expo-status-bar@1.12.1)(expo@51.0.28)(react-native-reanimated@3.10.1)(react-native-safe-area-context@4.10.5)(react-native-screens@3.31.1)(react-native@0.74.5)(react@18.2.0)(typescript@5.3.3):
+  /expo-router@3.5.23(@react-navigation/drawer@6.6.15)(expo-constants@16.0.2)(expo-linking@6.3.1)(expo-modules-autolinking@1.11.2)(expo-status-bar@1.12.1)(expo@51.0.28)(react-native-reanimated@3.10.1)(react-native-safe-area-context@4.10.5)(react-native-screens@3.31.1)(react-native@0.74.5)(react@18.2.0)(typescript@5.4.2):
     resolution: {integrity: sha512-Re2kYcxov67hWrcjuu0+3ovsLxYn79PuX6hgtYN20MgigY5ttX79KOIBEVGTO3F3y9dxSrGHyy5Z14BcO+usGQ==}
     peerDependencies:
       '@react-navigation/drawer': ^6.5.8
@@ -15100,7 +15076,7 @@ packages:
         optional: true
     dependencies:
       '@expo/metro-runtime': 3.2.3(react-native@0.74.5)
-      '@expo/server': 0.4.4(typescript@5.3.3)
+      '@expo/server': 0.4.4(typescript@5.4.2)
       '@radix-ui/react-slot': 1.0.1(react@18.2.0)
       '@react-navigation/bottom-tabs': 6.5.20(@react-navigation/native@6.1.17)(react-native-safe-area-context@4.10.5)(react-native-screens@3.31.1)(react-native@0.74.5)(react@18.2.0)
       '@react-navigation/drawer': 6.6.15(@react-navigation/native@6.1.17)(react-native-gesture-handler@2.16.2)(react-native-reanimated@3.10.1)(react-native-safe-area-context@4.10.5)(react-native-screens@3.31.1)(react-native@0.74.5)(react@18.2.0)
@@ -22523,11 +22499,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
-
-  /typescript@5.3.3:
-    resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
-    engines: {node: '>=14.17'}
-    hasBin: true
 
   /typescript@5.4.2:
     resolution: {integrity: sha512-+2/g0Fds1ERlP6JsakQQDXjZdZMM+rqpamFZJEKh4kwTIn3iDkgKtby0CeNd5ATNZ4Ry1ax15TMx0W2V+miizQ==}
