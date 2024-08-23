@@ -18,20 +18,10 @@ type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
 
 type SheetState = "closed" | "moreOptions" | "reportOptions";
 
-const OtherPost = (postProps: OtherPostProps) => {
-  const router = useRouter();
-  const toast = useToastController();
-
+export const useLikePost = (postId: number) => {
   const utils = api.useUtils();
-
-  const { saveMedia, isSaving } = useSaveMedia();
-
-  const [sheetState, setSheetState] = useState<SheetState>("closed");
-
   const { data: hasLiked } = api.post.hasliked.useQuery(
-    {
-      postId: postProps.id,
-    },
+    { postId },
     { initialData: false },
   );
 
@@ -102,131 +92,34 @@ const OtherPost = (postProps: OtherPostProps) => {
     },
   });
 
-  const reportPost = api.report.reportPost.useMutation();
-
   const handleLikePressed = async () => {
     hasLiked
-      ? await unlikePost.mutateAsync({ postId: postProps.id })
-      : await likePost.mutateAsync({ postId: postProps.id });
+      ? await unlikePost.mutateAsync({ postId })
+      : await likePost.mutateAsync({ postId });
   };
 
   const handleLikeDoubleTapped = async () => {
     if (hasLiked) return;
-    await likePost.mutateAsync({ postId: postProps.id });
+    await likePost.mutateAsync({ postId });
   };
 
-  const handleComment = () => {
-    bottomSheetModalRef.current?.present();
-  };
+  return { hasLiked, handleLikePressed, handleLikeDoubleTapped };
+};
 
-  const handleShare = () => {};
+export const useReportPost = (postId: number) => {
+  const toast = useToastController();
+  const reportPost = api.report.reportPost.useMutation();
 
-  const handleRecipientPress = () => {
-    router.push({
-      pathname: `/profile/[userId]`,
-      params: {
-        userId: postProps.recipient.id,
-        username: postProps.recipient.username,
-      },
-    });
-  };
-
-  const handleAuthorPress = () => {
-    router.push({
-      pathname: `/profile/[userId]`,
-      params: {
-        userId: postProps.author.id,
-        username: postProps.author.username,
-      },
-    });
-  };
-
-  const handleSavePost = async () => {
-    await saveMedia(postProps.media.url, {
-      image: watermark,
-      position: Position.bottomRight,
-      scale: 0.7,
-    });
-    setSheetState("closed");
-    toast.show("Post Saved");
-  };
-
-  const handleReportPost = async (reason: ReportPostReason) => {
-    await reportPost.mutateAsync({ postId: postProps.id, reason });
+  const handleReportPost = (reason: ReportPostReason) => {
     toast.show("Post Reported");
+    void reportPost.mutateAsync({ postId, reason });
   };
 
-  const handleOpenMoreOptionsSheet = () => {
-    setSheetState("moreOptions");
-  };
+  return { handleReportPost };
+};
 
-  const handleCloseMoreOptionsSheet = () => {
-    setSheetState("closed");
-  };
-
-  const handleOpenReportOptionsSheet = () => {
-    setTimeout(() => setSheetState("reportOptions"), 400);
-  };
-
-  const handleCloseReportOptionsSheet = () => {
-    setSheetState("closed");
-  };
-
-  const moreOptionsButtonOptions = [
-    {
-      text: isSaving ? "Saving" : "Save Post",
-      textProps: {
-        color: isSaving ? "$gray9" : undefined,
-      },
-      autoClose: false,
-      disabled: isSaving,
-      onPress: () => void handleSavePost(),
-    },
-    {
-      text: "Report Post",
-      textProps: {
-        color: "$red9",
-      },
-      disabled: isSaving,
-      onPress: handleOpenReportOptionsSheet,
-    },
-  ] satisfies ButtonOption[];
-
-  const reportPostOptionsButtonOptions = [
-    {
-      text: "Violent or abusive",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportPost("Violent or abusive"),
-    },
-    {
-      text: "Sexually explicit or predatory",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportPost("Sexually explicit or predatory"),
-    },
-    {
-      text: "Hate, harassment, or bullying",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportPost("Hate, harassment or bullying"),
-    },
-    {
-      text: "Suicide and self-harm",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportPost("Suicide and self-harm"),
-    },
-    {
-      text: "Scam or spam",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportPost("Spam or scam"),
-    },
-    {
-      text: "Other",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportPost("Other"),
-    },
-  ] satisfies ButtonOption[];
-
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
+export const useComments = (postId: number) => {
+  const utils = api.useUtils();
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -234,25 +127,9 @@ const OtherPost = (postProps: OtherPostProps) => {
     isFetchingNextPage: commentsIsFetchingNextPage,
     fetchNextPage: fetchNextCommentsPage,
   } = api.post.paginateComments.useInfiniteQuery(
-    {
-      postId: postProps.id,
-      pageSize: 10,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    { postId, pageSize: 10 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
-
-  const commentItems =
-    comments?.pages
-      .flatMap((page) => page.items)
-      .map((comment) => ({
-        id: comment.commentId,
-        body: comment.body,
-        username: comment.username ?? "",
-        profilePictureUrl: comment.profilePictureUrl,
-        createdAt: comment.createdAt,
-      })) ?? [];
 
   const postComment = api.post.createComment.useMutation({
     onMutate: async (newCommentData) => {
@@ -313,10 +190,212 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handlePostComment = async (comment: string) => {
-    await postComment.mutateAsync({
-      postId: postProps.id,
-      body: comment,
+    await postComment.mutateAsync({ postId, body: comment });
+  };
+
+  const commentItems =
+    comments?.pages
+      .flatMap((page) => page.items)
+      .map((comment) => ({
+        id: comment.commentId,
+        body: comment.body,
+        username: comment.username ?? "",
+        profilePictureUrl: comment.profilePictureUrl,
+        createdAt: comment.createdAt,
+      })) ?? [];
+
+  return {
+    commentItems,
+    isLoadingComments,
+    handleLoadMoreComments,
+    handlePostComment,
+  };
+};
+
+export const usePostActions = (postProps: OtherPostProps) => {
+  const router = useRouter();
+  const toast = useToastController();
+  const { saveMedia, isSaving } = useSaveMedia();
+
+  const handleSavePost = async () => {
+    await saveMedia(postProps.media.url, {
+      image: watermark,
+      position: Position.bottomRight,
+      scale: 0.7,
     });
+    toast.show("Post Saved");
+  };
+
+  const handleShare = () => {
+    // Implement share functionality
+  };
+
+  const handleRecipientPress = () => {
+    router.push({
+      pathname: `/profile/[userId]`,
+      params: {
+        userId: postProps.recipient.id,
+        username: postProps.recipient.username,
+      },
+    });
+  };
+
+  const handleAuthorPress = () => {
+    router.push({
+      pathname: `/profile/[userId]`,
+      params: {
+        userId: postProps.author.id,
+        username: postProps.author.username,
+      },
+    });
+  };
+
+  return {
+    handleSavePost,
+    handleShare,
+    handleRecipientPress,
+    handleAuthorPress,
+    isSaving,
+  };
+};
+
+interface MoreOptionsSheetProps {
+  isVisible: boolean;
+  onClose: () => void;
+  onSavePost: () => void;
+  onReportPost: () => void;
+  isSaving: boolean;
+}
+
+const MoreOptionsSheet = ({
+  isVisible,
+  onClose,
+  onSavePost,
+  onReportPost,
+  isSaving,
+}: MoreOptionsSheetProps) => {
+  const moreOptionsButtonOptions = [
+    {
+      text: isSaving ? "Saving" : "Save Post",
+      textProps: {
+        color: isSaving ? "$gray9" : undefined,
+      },
+      autoClose: false,
+      disabled: isSaving,
+      onPress: onSavePost,
+    },
+    {
+      text: "Report Post",
+      textProps: {
+        color: "$red9",
+      },
+      disabled: isSaving,
+      onPress: onReportPost,
+    },
+  ] satisfies ButtonOption[];
+
+  return (
+    <ActionSheet
+      isVisible={isVisible}
+      buttonOptions={moreOptionsButtonOptions}
+      onCancel={onClose}
+    />
+  );
+};
+
+interface ReportOptionsSheetProps {
+  isVisible: boolean;
+  onClose: () => void;
+  onReportPost: (reason: ReportPostReason) => void;
+}
+
+const ReportOptionsSheet = ({
+  isVisible,
+  onClose,
+  onReportPost,
+}: ReportOptionsSheetProps) => {
+  const reportPostOptionsButtonOptions = [
+    {
+      text: "Violent or abusive",
+      textProps: { color: "$blue9" },
+      onPress: () => void onReportPost("Violent or abusive"),
+    },
+    {
+      text: "Sexually explicit or predatory",
+      textProps: { color: "$blue9" },
+      onPress: () => void onReportPost("Sexually explicit or predatory"),
+    },
+    {
+      text: "Hate, harassment, or bullying",
+      textProps: { color: "$blue9" },
+      onPress: () => void onReportPost("Hate, harassment or bullying"),
+    },
+    {
+      text: "Suicide and self-harm",
+      textProps: { color: "$blue9" },
+      onPress: () => void onReportPost("Suicide and self-harm"),
+    },
+    {
+      text: "Scam or spam",
+      textProps: { color: "$blue9" },
+      onPress: () => void onReportPost("Spam or scam"),
+    },
+    {
+      text: "Other",
+      textProps: { color: "$blue9" },
+      onPress: () => void onReportPost("Other"),
+    },
+  ] satisfies ButtonOption[];
+
+  return (
+    <ActionSheet
+      isVisible={isVisible}
+      buttonOptions={reportPostOptionsButtonOptions}
+      onCancel={onClose}
+    />
+  );
+};
+
+const OtherPost = (postProps: OtherPostProps) => {
+  const [sheetState, setSheetState] = useState<SheetState>("closed");
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost(
+    postProps.id,
+  );
+  const { handleReportPost } = useReportPost(postProps.id);
+  const {
+    commentItems,
+    isLoadingComments,
+    handleLoadMoreComments,
+    handlePostComment,
+  } = useComments(postProps.id);
+  const {
+    handleSavePost,
+    handleShare,
+    handleRecipientPress,
+    handleAuthorPress,
+    isSaving,
+  } = usePostActions(postProps);
+
+  const handleComment = () => {
+    bottomSheetModalRef.current?.present();
+  };
+
+  const handleOpenMoreOptionsSheet = () => {
+    setSheetState("moreOptions");
+  };
+
+  const handleCloseMoreOptionsSheet = () => {
+    setSheetState("closed");
+  };
+
+  const handleOpenReportOptionsSheet = () => {
+    setTimeout(() => setSheetState("reportOptions"), 400);
+  };
+
+  const handleCloseReportOptionsSheet = () => {
+    setSheetState("closed");
   };
 
   const handleDeleteComment = () => {
@@ -352,15 +431,18 @@ const OtherPost = (postProps: OtherPostProps) => {
         currentUserProfilePicture={null}
       />
 
-      <ActionSheet
+      <ReportOptionsSheet
         isVisible={sheetState === "reportOptions"}
-        buttonOptions={reportPostOptionsButtonOptions}
-        onCancel={handleCloseReportOptionsSheet}
+        onClose={handleCloseReportOptionsSheet}
+        onReportPost={handleReportPost}
       />
-      <ActionSheet
+
+      <MoreOptionsSheet
         isVisible={sheetState === "moreOptions"}
-        buttonOptions={moreOptionsButtonOptions}
-        onCancel={handleCloseMoreOptionsSheet}
+        onClose={handleCloseMoreOptionsSheet}
+        onSavePost={handleSavePost}
+        onReportPost={handleOpenReportOptionsSheet}
+        isSaving={isSaving}
       />
     </>
   );
