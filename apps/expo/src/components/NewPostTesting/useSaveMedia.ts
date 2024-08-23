@@ -57,7 +57,6 @@ const addWatermark = async (mediaUrl: string, watermark: WatermarkOptions) => {
       },
     ],
   });
-  console.log("watermark", watermark);
 
   await FileSystem.deleteAsync(fileUri);
 

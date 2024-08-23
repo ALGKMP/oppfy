@@ -1,6 +1,12 @@
 import type { ForwardRefRenderFunction } from "react";
-import React, { forwardRef, useCallback, useMemo, useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import React, {
+  forwardRef,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
@@ -29,6 +35,8 @@ import {
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
+
+const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
 interface Comment {
   id: number;
@@ -65,18 +73,6 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
 ) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-
-  const [inputValue, setInputValue] = useState("");
-
-  const handleChangeText = useCallback((text: string) => {
-    setInputValue(text);
-  }, []);
-
-  const handlePostComment = useCallback(() => {
-    if (inputValue.trim().length === 0) return;
-    onPostComment(inputValue);
-    setInputValue("");
-  }, [inputValue, onPostComment]);
 
   const renderComment = useCallback(
     ({ item }: { item: Comment }) => (
@@ -133,11 +129,6 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
     [],
   );
 
-  const emojiList = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
-  const handleEmojiPress = useCallback((emoji: string) => {
-    setInputValue((prev) => prev + emoji);
-  }, []);
-
   const content = (
     <YStack flex={1}>
       {isLoading ? (
@@ -155,12 +146,8 @@ const CommentsBottomSheet: ForwardRefRenderFunction<
       )}
 
       <CommentInput
-        inputValue={inputValue}
-        onChangeText={handleChangeText}
-        onPostComment={handlePostComment}
+        onPostComment={onPostComment}
         currentUserProfilePicture={currentUserProfilePicture}
-        emojiList={emojiList}
-        onEmojiPress={handleEmojiPress}
       />
     </YStack>
   );
@@ -191,24 +178,33 @@ const EmptyCommentsView = () => (
 );
 
 interface CommentInputProps {
-  inputValue: string;
-  onChangeText: (text: string) => void;
-  onPostComment: () => void;
+  onPostComment: (comment: string) => void;
   currentUserProfilePicture: string;
-  emojiList: string[];
-  onEmojiPress: (emoji: string) => void;
 }
 
 const CommentInput: React.FC<CommentInputProps> = ({
-  inputValue,
-  onChangeText,
   onPostComment,
   currentUserProfilePicture,
-  emojiList,
-  onEmojiPress,
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+
+  const [inputValue, setInputValue] = useState("");
+
+  const handleChangeText = useCallback((text: string) => {
+    setInputValue(text);
+  }, []);
+
+  const handlePostComment = useCallback(() => {
+    if (inputValue.trim().length === 0) return;
+
+    onPostComment(inputValue);
+    setInputValue("");
+  }, [inputValue, onPostComment]);
+
+  const handleEmojiPress = useCallback((emoji: string) => {
+    setInputValue((prev) => prev + emoji);
+  }, []);
 
   return (
     <YStack
@@ -219,8 +215,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
       gap="$4"
     >
       <XStack justifyContent="space-between">
-        {emojiList.map((emoji) => (
-          <TouchableOpacity key={emoji} onPress={() => onEmojiPress(emoji)}>
+        {EMOJI_LIST.map((emoji) => (
+          <TouchableOpacity key={emoji} onPress={() => handleEmojiPress(emoji)}>
             <SizableText size="$8">{emoji}</SizableText>
           </TouchableOpacity>
         ))}
@@ -233,7 +229,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
             maxLength={250}
             multiline={true}
             value={inputValue}
-            onChangeText={onChangeText}
+            onChangeText={handleChangeText}
             style={[
               styles.input,
               {
@@ -254,7 +250,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
             opacity={inputValue.length === 0 ? 0.5 : 1}
           >
             <TouchableOpacity
-              onPress={onPostComment}
+              onPress={handlePostComment}
               disabled={inputValue.length === 0}
             >
               <SendHorizontal color="white" />

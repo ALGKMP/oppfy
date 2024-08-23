@@ -282,7 +282,7 @@ const OtherPost = (postProps: OtherPostProps) => {
         // onPostComment={handlePostComment}
         // onDeleteComment={handleDeleteComment}
         // onReportComment={handleReportComment}
-        currentUserProfilePicture={"https://picsum.photos/200/300"}
+        currentUserProfilePicture="https://picsum.photos/200/300"
       />
     </>
   );

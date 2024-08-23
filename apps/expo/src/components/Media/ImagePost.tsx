@@ -13,14 +13,6 @@ const ImagePost: React.FC<ImagePostProps> = (props: ImagePostProps) => {
   const { postId, imageUrl, children } = props;
   const postKey = postId.toString();
 
-  useEffect(() => {
-    const fn = async () => {
-      const res = await fetch(imageUrl);
-    };
-
-    void fn();
-  }, [imageUrl]);
-
   return (
     <Image
       source={imageUrl}
