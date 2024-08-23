@@ -100,8 +100,6 @@ const HomeScreen = () => {
 
   const renderPost = useCallback(
     (item: PostItem) => {
-      if (item === undefined) return null;
-
       if (item.authorUsername === null) return null;
       if (item.recipientUsername === null) return null;
 
@@ -137,9 +135,6 @@ const HomeScreen = () => {
               stats={{
                 likes: item.likesCount,
                 comments: item.commentsCount,
-              }}
-              postInfo={{
-                caption: item.caption,
               }}
             />
           </YStack>

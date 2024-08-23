@@ -1,6 +1,7 @@
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Slot } from "expo-router";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { TamaguiProvider, View } from "tamagui";
 
@@ -21,12 +22,14 @@ const RootLayout = () => {
               <PermissionsProvider>
                 <SafeAreaProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
-                    <ToastProvider native={true}>
-                      <View flex={1} backgroundColor="$background">
-                        <Slot />
-                      </View>
-                      <ToastViewport />
-                    </ToastProvider>
+                    <BottomSheetModalProvider>
+                      <ToastProvider native={true}>
+                        <View flex={1} backgroundColor="$background">
+                          <Slot />
+                        </View>
+                        <ToastViewport />
+                      </ToastProvider>
+                    </BottomSheetModalProvider>
                   </GestureHandlerRootView>
                 </SafeAreaProvider>
               </PermissionsProvider>

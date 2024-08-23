@@ -1,14 +1,21 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Position } from "react-native-image-marker";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import watermark from "@assets/watermark.png";
+import BottomSheet, {
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import { useToastController } from "@tamagui/toast";
 
 import type { RouterInputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import BottomSheetWrapper from "../BottomSheets/BottomSheetWrapper";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
+import CommentsBottomSheet from "./CommentsBottomSheet";
 import PostCard from "./PostCard";
 import type { PostData as OtherPostProps } from "./PostCard";
 import { useSaveMedia } from "./useSaveMedia";
@@ -19,14 +26,13 @@ type SheetState = "closed" | "moreOptions" | "reportOptions";
 
 const OtherPost = (postProps: OtherPostProps) => {
   const router = useRouter();
-  const utils = api.useUtils();
   const toast = useToastController();
+
+  const utils = api.useUtils();
 
   const { saveMedia, isSaving } = useSaveMedia();
 
   const [sheetState, setSheetState] = useState<SheetState>("closed");
-
-  const reportPost = api.report.reportPost.useMutation();
 
   const { data: hasLiked } = api.post.hasliked.useQuery(
     {
@@ -102,6 +108,8 @@ const OtherPost = (postProps: OtherPostProps) => {
     },
   });
 
+  const reportPost = api.report.reportPost.useMutation();
+
   const handleLikePressed = async () => {
     hasLiked
       ? await unlikePost.mutateAsync({ postId: postProps.id })
@@ -113,7 +121,7 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handleComment = () => {
-    console.log("Commenting on self post");
+    bottomSheetModalRef.current?.present();
   };
 
   const handleShare = () => {};
@@ -224,6 +232,23 @@ const OtherPost = (postProps: OtherPostProps) => {
     },
   ] satisfies ButtonOption[];
 
+  const { data: comments, isLoading: isLoadingComments } =
+    api.post.paginateComments.useQuery({
+      postId: postProps.id,
+    });
+
+  const commentItems =
+    comments?.items.map((comment) => ({
+      id: comment?.commentId,
+      body: comment?.body,
+      createdAt: comment?.createdAt,
+      author: comment?.userId,
+      username: comment?.username,
+      profilePictureUrl: comment?.profilePictureUrl,
+    })) ?? [];
+
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
   return (
     <>
       <PostCard
@@ -247,6 +272,17 @@ const OtherPost = (postProps: OtherPostProps) => {
         isVisible={sheetState === "moreOptions"}
         buttonOptions={moreOptionsButtonOptions}
         onCancel={handleCloseMoreOptionsSheet}
+      />
+
+      <CommentsBottomSheet
+        ref={bottomSheetModalRef}
+        comments={commentItems}
+        isLoading={isLoadingComments}
+        // onEndReached={handleLoadMoreComments}
+        // onPostComment={handlePostComment}
+        // onDeleteComment={handleDeleteComment}
+        // onReportComment={handleReportComment}
+        currentUserProfilePicture={"https://picsum.photos/200/300"}
       />
     </>
   );
