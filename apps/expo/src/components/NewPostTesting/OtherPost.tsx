@@ -513,7 +513,8 @@ const OtherPost = (postProps: OtherPostProps) => {
           bottomSheetModalRef.current?.close();
           handlePressUsername(userId, username);
         }}
-        currentUserProfilePicture={postProps.self.profilePicture}
+        selfUserId={postProps.self.id}
+        selfProfilePicture={postProps.self.profilePicture}
       />
 
       <ReportOptionsSheet

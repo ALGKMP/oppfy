@@ -5,7 +5,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ImageSourcePropType, LayoutAnimation, StyleSheet } from "react-native";
+import type { ImageSourcePropType } from "react-native";
+import { LayoutAnimation, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -49,7 +50,8 @@ interface CommentsBottomSheetProps {
   onPostComment: (comment: string) => void;
   onDeleteComment: (commentId: number) => void;
   onReportComment: (commentId: number) => void;
-  currentUserProfilePicture: ProfilePicture;
+  selfUserId: string;
+  selfProfilePicture: ProfilePicture;
   onPressProfilePicture: (userId: string, username: string) => void;
   onPressUsername: (userId: string, username: string) => void;
 }
@@ -68,7 +70,8 @@ const CommentsBottomSheet = forwardRef<
       onReportComment,
       onPressProfilePicture,
       onPressUsername,
-      currentUserProfilePicture,
+      selfUserId,
+      selfProfilePicture,
     },
     ref,
   ) => {
@@ -101,6 +104,7 @@ const CommentsBottomSheet = forwardRef<
         <CommentItem
           key={item.id}
           comment={item}
+          selfUserId={selfUserId}
           onDelete={() => {
             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             handleDeleteComment(item.id);
@@ -124,6 +128,7 @@ const CommentsBottomSheet = forwardRef<
         onPressProfilePicture,
         onPressUsername,
         onReportComment,
+        selfUserId,
       ],
     );
 
@@ -154,7 +159,7 @@ const CommentsBottomSheet = forwardRef<
           />
           <CommentInput
             onPostComment={handlePostComment}
-            currentUserProfilePicture={currentUserProfilePicture}
+            selfProfilePicture={selfProfilePicture}
           />
         </YStack>
       ),
@@ -165,7 +170,7 @@ const CommentsBottomSheet = forwardRef<
         keyExtractor,
         ListEmptyComponent,
         handlePostComment,
-        currentUserProfilePicture,
+        selfProfilePicture,
       ],
     );
 
@@ -205,11 +210,14 @@ const EmptyCommentsView = React.memo(() => (
 
 interface CommentInputProps {
   onPostComment: (comment: string) => void;
-  currentUserProfilePicture: string | null;
+  selfProfilePicture: ProfilePicture;
 }
 
 const CommentInput = React.memo(
-  ({ onPostComment, currentUserProfilePicture }: CommentInputProps) => {
+  ({
+    onPostComment,
+    selfProfilePicture: currentUserProfilePicture,
+  }: CommentInputProps) => {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const [inputValue, setInputValue] = useState("");
@@ -293,6 +301,7 @@ const CommentInput = React.memo(
 
 interface CommentItemProps {
   comment: Comment;
+  selfUserId: string;
   onDelete: () => void;
   onReport: () => void;
   onPressProfilePicture: () => void;
@@ -302,55 +311,63 @@ interface CommentItemProps {
 const CommentItem = React.memo(
   ({
     comment,
+    selfUserId,
     onDelete,
     onReport,
     onPressProfilePicture,
     onPressUsername,
-  }: CommentItemProps) => (
-    <BlurContextMenuWrapper
-      options={[
-        {
-          label: (
-            <Text color="white" marginLeft="$2" fontSize="$5">
-              Delete
-            </Text>
-          ),
-          icon: <Trash2 size="$1.5" color="white" />,
-          onPress: onDelete,
-        },
-        {
-          label: (
-            <Text color="red" marginLeft="$2" fontSize="$5">
-              Report
-            </Text>
-          ),
-          icon: <AlertCircle size="$1.5" color="red" />,
-          onPress: onReport,
-        },
-      ]}
-    >
-      <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
-        <XStack gap="$3" alignItems="center">
-          <TouchableOpacity onPress={onPressProfilePicture}>
-            <Avatar source={comment.profilePictureUrl} size={46} />
-          </TouchableOpacity>
-          <YStack gap="$2" width="100%" flex={1}>
-            <XStack gap="$2">
-              <TouchableOpacity onPress={onPressUsername}>
-                <Text fontWeight="bold">{comment.username}</Text>
-              </TouchableOpacity>
-              <TimeAgo
-                size="$2"
-                date={comment.createdAt}
-                format={({ value, unit }) => `${value}${unit.charAt(0)} ago`}
-              />
-            </XStack>
-            <Text>{comment.body}</Text>
-          </YStack>
-        </XStack>
-      </View>
-    </BlurContextMenuWrapper>
-  ),
+  }: CommentItemProps) => {
+    const isSelfComment = comment.userId === selfUserId;
+
+    const contextMenuOptions = isSelfComment
+      ? [
+          {
+            label: (
+              <SizableText size="$5" color="$red10">
+                Delete
+              </SizableText>
+            ),
+            icon: <Trash2 size="$1.5" color="$red10" />,
+            onPress: onDelete,
+          },
+        ]
+      : [
+          {
+            label: (
+              <SizableText size="$5" color="$red10">
+                Report
+              </SizableText>
+            ),
+            icon: <AlertCircle size="$1.5" color="$red10" />,
+            onPress: onReport,
+          },
+        ];
+
+    return (
+      <BlurContextMenuWrapper options={contextMenuOptions}>
+        <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
+          <XStack gap="$3" alignItems="center">
+            <TouchableOpacity onPress={onPressProfilePicture}>
+              <Avatar source={comment.profilePictureUrl} size={46} />
+            </TouchableOpacity>
+            <YStack gap="$2" width="100%" flex={1}>
+              <XStack gap="$2">
+                <TouchableOpacity onPress={onPressUsername}>
+                  <Text fontWeight="bold">{comment.username}</Text>
+                </TouchableOpacity>
+                <TimeAgo
+                  size="$2"
+                  date={comment.createdAt}
+                  format={({ value, unit }) => `${value}${unit.charAt(0)} ago`}
+                />
+              </XStack>
+              <Text>{comment.body}</Text>
+            </YStack>
+          </XStack>
+        </View>
+      </BlurContextMenuWrapper>
+    );
+  },
 );
 
 const styles = StyleSheet.create({

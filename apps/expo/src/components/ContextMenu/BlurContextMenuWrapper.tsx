@@ -1,117 +1,97 @@
-import type { ReactNode } from "react";
-import React, { useState } from "react";
-import { Dimensions, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useCallback } from "react";
+import { Dimensions, Modal, StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  cancelAnimation,
-  Easing,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withTiming,
+  Easing,
+  runOnJS,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { Stack, View, XStack, YStack } from "tamagui";
+import { Stack, YStack, XStack, Text, View } from "tamagui";
 
 const { width, height } = Dimensions.get("window");
 
 interface Option {
-  label: ReactNode;
-  icon: ReactNode;
+  label: string;
+  icon: React.ReactNode;
   onPress: () => void;
 }
 
 interface BlurContextMenuWrapperProps {
-  children: ReactNode;
+  children: React.ReactNode;
   options: Option[];
 }
 
-const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
+const BlurContextMenuWrapper: React.FC<BlurContextMenuWrapperProps> = ({ children, options }) => {
   const [isVisible, setIsVisible] = useState(false);
   const scale = useSharedValue(1);
-  const animationState = useSharedValue(0);
+
+  const showContextMenu = useCallback(() => {
+    setIsVisible(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
+  const hideContextMenu = useCallback(() => {
+    setIsVisible(false);
+    scale.value = withTiming(1, { duration: 250, easing: Easing.bezier(0.82, 0.06, 0.42, 1.01) });
+  }, [scale]);
 
   const longPressGesture = Gesture.LongPress()
     .minDuration(500)
-    .onTouchesDown(() => {
-      animationState.value = withDelay(
-        200,
-        withTiming(1, { duration: 0 }, (finished) => {
-          if (finished) {
-            scale.value = withTiming(1.05, {
-              duration: 500,
-              easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
-            });
-            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
-          }
-        }),
-      );
-    })
     .onStart(() => {
-      runOnJS(setIsVisible)(true);
-      scale.value = withTiming(1, {
-        duration: 250,
-        easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
+      scale.value = withTiming(1.05, {
+        duration: 300,
+        easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
       });
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium);
+      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
     })
     .onFinalize(() => {
-      cancelAnimation(animationState);
-      scale.value = withTiming(1, {
-        duration: 250,
-        easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
-      });
+      runOnJS(showContextMenu)();
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
-  const hideContextMenu = () => setIsVisible(false);
-
   return (
     <View>
       <GestureDetector gesture={longPressGesture}>
         <Animated.View style={animatedStyle}>
-          <Stack>{props.children}</Stack>
+          <Stack>{children}</Stack>
         </Animated.View>
       </GestureDetector>
 
-      <Modal transparent={true} visible={isVisible} animationType="fade">
-        <BlurView
-          intensity={50}
-          style={styles.blurView}
-          tint="light"
-          onTouchEnd={hideContextMenu}
-        >
-          <YStack flex={1}>
-            <View flex={1} justifyContent="center" margin="$4" gap="$4">
-              {props.children}
-              <YStack
-                borderRadius="$5"
-                backgroundColor="rgba(63, 63, 62, 0.8)"
-                marginHorizontal="$6"
-              >
-                {props.options.map((option, index) => (
-                  <TouchableOpacity key={index} onPress={option.onPress}>
-                    <XStack
-                      paddingVertical="$3"
-                      paddingHorizontal="$4"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      borderTopWidth={index === 0 ? 0 : 0.3}
-                      borderTopColor="white"
-                    >
-                      {option.label}
-                      {option.icon}
-                    </XStack>
-                  </TouchableOpacity>
+      <Modal transparent visible={isVisible} animationType="fade">
+        <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill}>
+          <Stack flex={1} justifyContent="center" padding="$4" gap="$4">
+            <Stack>{children}</Stack>
+            <BlurView intensity={30} tint="dark" style={styles.menuBackground}>
+              <YStack overflow="hidden">
+                {options.map((option, index) => (
+                  <XStack
+                    key={index}
+                    paddingVertical="$3.5"
+                    paddingHorizontal="$4"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    borderTopWidth={index === 0 ? 0 : StyleSheet.hairlineWidth}
+                    borderTopColor="$borderColor"
+                    pressStyle={{ opacity: 0.7 }}
+                    onPress={() => {
+                      option.onPress();
+                      hideContextMenu();
+                    }}
+                  >
+                    <Text color="$color">{option.label}</Text>
+                    {option.icon}
+                  </XStack>
                 ))}
               </YStack>
-            </View>
-          </YStack>
+            </BlurView>
+          </Stack>
         </BlurView>
       </Modal>
     </View>
@@ -119,15 +99,10 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
 };
 
 const styles = StyleSheet.create({
-  blurView: {
-    position: "absolute",
-    width,
-    height,
-  },
-  background: {
-    position: "absolute",
-    width,
-    height,
+  menuBackground: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginHorizontal: 24,
   },
 });
 
