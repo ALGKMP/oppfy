@@ -1,4 +1,5 @@
-import React, { ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import React, { useState } from "react";
 import { Dimensions, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -9,6 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { Stack, View, XStack, YStack } from "tamagui";
 
 const { width, height } = Dimensions.get("window");
@@ -36,6 +38,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
         duration: 500,
         easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
       });
+      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
     })
     .onStart(() => {
       runOnJS(setIsVisible)(true);
@@ -43,6 +46,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
         duration: 250,
         easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
       });
+      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium);
     })
     .onFinalize(() => {
       scale.value = withTiming(1, {

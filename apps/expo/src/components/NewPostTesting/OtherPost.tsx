@@ -251,14 +251,14 @@ export const useComments = (postId: number) => {
     toast.show("Comment Reported");
   };
 
-  const handlePressProfilePicture = (userId: number, username: string) => {
+  const handlePressProfilePicture = (userId: string, username: string) => {
     router.push({
       pathname: `/profile/[userId]`,
       params: { userId, username },
     });
   };
 
-  const handlePressUsername = (userId: number, username: string) => {
+  const handlePressUsername = (userId: string, username: string) => {
     router.push({
       pathname: `/profile/[userId]`,
       params: { userId, username },
