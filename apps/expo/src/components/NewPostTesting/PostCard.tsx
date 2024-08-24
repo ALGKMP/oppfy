@@ -10,6 +10,8 @@ import {
   Heart,
   MessageCircle,
   MoreHorizontal,
+  Send,
+  SendHorizontal,
   Share2,
 } from "@tamagui/lucide-icons";
 import {
@@ -244,7 +246,7 @@ const PostCard = (props: PostCardProps) => {
               </Button>
             </XStack>
             <Button
-              icon={<Share2 size={20} color="$gray10" />}
+              icon={<SendHorizontal size={20} color="$gray10" />}
               borderRadius="$8"
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
