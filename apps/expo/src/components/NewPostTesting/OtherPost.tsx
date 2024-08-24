@@ -19,7 +19,7 @@ type _ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];
 
 type SheetState = "closed" | "moreOptions" | "reportOptions";
 
-export const useLikePost = (postId: number) => {
+export const useLikePost = (postId: string) => {
   const utils = api.useUtils();
   const { data: hasLiked } = api.post.hasliked.useQuery(
     { postId },
@@ -107,7 +107,7 @@ export const useLikePost = (postId: number) => {
   return { hasLiked, handleLikePressed, handleLikeDoubleTapped };
 };
 
-export const useReportPost = (postId: number) => {
+export const useReportPost = (postId: string) => {
   const toast = useToastController();
   const reportPost = api.report.reportPost.useMutation();
 
@@ -119,7 +119,7 @@ export const useReportPost = (postId: number) => {
   return { handleReportPost };
 };
 
-export const useComments = (postId: number) => {
+export const useComments = (postId: string) => {
   const router = useRouter();
   const toast = useToastController();
   const utils = api.useUtils();
@@ -132,7 +132,7 @@ export const useComments = (postId: number) => {
     fetchNextPage: fetchNextCommentsPage,
   } = api.post.paginateComments.useInfiniteQuery(
     { postId, pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor, },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
   const postComment = api.post.createComment.useMutation({
@@ -161,8 +161,9 @@ export const useComments = (postId: number) => {
             ...page,
             items: [
               {
-                ...newCommentData,
-                commentId: new Date().getTime(),
+                postId: newCommentData.postId,
+                commentId: new Date().getTime().toString(),
+                body: newCommentData.comment,
                 userId: currentUser?.userId ?? "",
                 username: currentUser?.username ?? "",
                 profilePictureUrl: currentUser?.profilePictureUrl ?? "",
@@ -217,7 +218,7 @@ export const useComments = (postId: number) => {
 
       return { prevData };
     },
-    onError: (_err, newCommentData, ctx) => {
+    onError: (_err, _newCommentData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, revert to the previous data
@@ -241,14 +242,14 @@ export const useComments = (postId: number) => {
   };
 
   const handlePostComment = async (comment: string) => {
-    await postComment.mutateAsync({ postId, body: comment });
+    await postComment.mutateAsync({ postId, comment });
   };
 
-  const handleDeleteComment = async (commentId: number) => {
+  const handleDeleteComment = async (commentId: string) => {
     await deleteComment.mutateAsync({ postId, commentId });
   };
 
-  const handleReportComment = async (commentId: number) => {
+  const handleReportComment = async (commentId: string) => {
     await reportComment.mutateAsync({ commentId, reason: "Other" });
     toast.show("Comment Reported");
   };
@@ -436,6 +437,7 @@ const ReportOptionsSheet = ({
 };
 
 const OtherPost = (postProps: OtherPostProps) => {
+  console.log("postProps", postProps.id);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 

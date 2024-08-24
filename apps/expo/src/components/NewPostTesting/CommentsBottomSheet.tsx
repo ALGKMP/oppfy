@@ -44,7 +44,7 @@ type ProfilePicture = ImageSourcePropType | string | null;
 
 interface Comment {
   userId: string;
-  id: number;
+  id: string;
   body: string;
   username: string;
   profilePictureUrl: string | null;
@@ -56,8 +56,8 @@ interface CommentsBottomSheetProps {
   isLoading: boolean;
   onEndReached: () => void;
   onPostComment: (comment: string) => void;
-  onDeleteComment: (commentId: number) => void;
-  onReportComment: (commentId: number) => void;
+  onDeleteComment: (commentId: string) => void;
+  onReportComment: (commentId: string) => void;
   selfUserId: string;
   selfProfilePicture: ProfilePicture;
   onPressProfilePicture: (userId: string, username: string) => void;
@@ -74,7 +74,7 @@ const CommentsBottomSheet = forwardRef<
   const snapPoints = useMemo(() => ["100%"], []);
 
   const handleDeleteComment = useCallback(
-    (commentId: number) => {
+    (commentId: string) => {
       listRef.current?.prepareForLayoutAnimationRender();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       props.onDeleteComment(commentId);

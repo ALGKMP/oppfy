@@ -68,7 +68,7 @@ interface Stats {
 }
 
 export interface PostData {
-  id: number;
+  id: string;
   createdAt: Date;
   caption: string;
   self: Self;
