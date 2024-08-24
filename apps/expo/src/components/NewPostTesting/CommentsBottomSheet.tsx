@@ -15,7 +15,6 @@ import { BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import {
   AlertCircle,
-  MessageCircle,
   MessageCircleOff,
   SendHorizontal,
   Trash2,
@@ -68,131 +67,115 @@ interface CommentsBottomSheetProps {
 const CommentsBottomSheet = forwardRef<
   BottomSheetModal,
   CommentsBottomSheetProps
->(
-  (
-    {
-      comments,
-      isLoading,
-      onEndReached,
-      onPostComment,
-      onDeleteComment,
-      onReportComment,
-      onPressProfilePicture,
-      onPressUsername,
-      selfUserId,
-      selfProfilePicture,
+>((props, ref) => {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const listRef = useRef<FlashList<Comment> | null>(null);
+  const snapPoints = useMemo(() => ["100%"], []);
+
+  const handleDeleteComment = useCallback(
+    (commentId: number) => {
+      listRef.current?.prepareForLayoutAnimationRender();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      props.onDeleteComment(commentId);
     },
-    ref,
-  ) => {
-    const theme = useTheme();
-    const insets = useSafeAreaInsets();
-    const listRef = useRef<FlashList<Comment> | null>(null);
-    const snapPoints = useMemo(() => ["100%"], []);
+    [props],
+  );
 
-    const handleDeleteComment = useCallback(
-      (commentId: number) => {
-        listRef.current?.prepareForLayoutAnimationRender();
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        onDeleteComment(commentId);
-      },
-      [onDeleteComment],
-    );
+  const handlePostComment = useCallback(
+    (comment: string) => {
+      listRef.current?.prepareForLayoutAnimationRender();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      props.onPostComment(comment);
+    },
+    [props],
+  );
 
-    const handlePostComment = useCallback(
-      (comment: string) => {
-        listRef.current?.prepareForLayoutAnimationRender();
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        onPostComment(comment);
-      },
-      [onPostComment],
-    );
+  const keyExtractor = useCallback((item: Comment) => item.id.toString(), []);
 
-    const keyExtractor = useCallback((item: Comment) => item.id.toString(), []);
+  const renderComment = useCallback(
+    ({ item }: { item: Comment }) => (
+      <CommentItem
+        key={item.id}
+        comment={item}
+        selfUserId={props.selfUserId}
+        onDelete={() => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          handleDeleteComment(item.id);
+        }}
+        onReport={() => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          props.onReportComment(item.id);
+        }}
+        onPressProfilePicture={() => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          props.onPressProfilePicture(item.userId, item.username);
+        }}
+        onPressUsername={() => {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          props.onPressUsername(item.userId, item.username);
+        }}
+      />
+    ),
+    [handleDeleteComment, props],
+  );
 
-    const renderComment = useCallback(
-      ({ item }: { item: Comment }) => (
-        <CommentItem
-          key={item.id}
-          comment={item}
-          selfUserId={selfUserId}
-          onDelete={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            handleDeleteComment(item.id);
-          }}
-          onReport={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onReportComment(item.id);
-          }}
-          onPressProfilePicture={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onPressProfilePicture(item.userId, item.username);
-          }}
-          onPressUsername={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onPressUsername(item.userId, item.username);
-          }}
-        />
-      ),
-      [
-        handleDeleteComment,
-        onPressProfilePicture,
-        onPressUsername,
-        onReportComment,
-        selfUserId,
-      ],
-    );
-
-    const ListContent = useMemo(() => {
-      if (isLoading) return <LoadingView />;
-      if (comments.length === 0) return <EmptyCommentsView />;
-
-      return (
-        <FlashList
-          ref={listRef}
-          data={comments}
-          renderItem={renderComment}
-          estimatedItemSize={100}
-          onEndReached={onEndReached}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={keyExtractor}
-        />
-      );
-    }, [isLoading, comments, renderComment, onEndReached, keyExtractor]);
-
-    const content = useMemo(
-      () => <YStack flex={1}>{ListContent}</YStack>,
-      [ListContent],
-    );
-
-    const handleComponent = useCallback(
-      () => <BottomSheetHeader title="Comments" />,
-      [],
-    );
-
-    const backdropComponent = useCallback(
-      (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />,
-      [],
-    );
+  const ListContent = useMemo(() => {
+    if (props.isLoading) return <LoadingView />;
+    if (props.comments.length === 0) return <EmptyCommentsView />;
 
     return (
-      <BottomSheetModal
-        ref={ref}
-        snapPoints={snapPoints}
-        topInset={insets.top}
-        enablePanDownToClose
-        handleComponent={handleComponent}
-        backdropComponent={backdropComponent}
-        backgroundStyle={{ backgroundColor: theme.gray4.val }}
-      >
-        {content}
-        <CommentInput
-          onPostComment={handlePostComment}
-          selfProfilePicture={selfProfilePicture}
-        />
-      </BottomSheetModal>
+      <FlashList
+        ref={listRef}
+        data={props.comments}
+        renderItem={renderComment}
+        estimatedItemSize={100}
+        onEndReached={props.onEndReached}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={keyExtractor}
+      />
     );
-  },
-);
+  }, [
+    props.isLoading,
+    props.comments,
+    renderComment,
+    props.onEndReached,
+    keyExtractor,
+  ]);
+
+  const content = useMemo(
+    () => <YStack flex={1}>{ListContent}</YStack>,
+    [ListContent],
+  );
+
+  const handleComponent = useCallback(
+    () => <BottomSheetHeader title="Comments" />,
+    [],
+  );
+
+  const backdropComponent = useCallback(
+    (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />,
+    [],
+  );
+
+  return (
+    <BottomSheetModal
+      ref={ref}
+      snapPoints={snapPoints}
+      topInset={insets.top}
+      enablePanDownToClose
+      handleComponent={handleComponent}
+      backdropComponent={backdropComponent}
+      backgroundStyle={{ backgroundColor: theme.gray4.val }}
+    >
+      {content}
+      <CommentInput
+        onPostComment={handlePostComment}
+        selfProfilePicture={props.selfProfilePicture}
+      />
+    </BottomSheetModal>
+  );
+});
 
 const LoadingView = React.memo(() => (
   <ScrollView>
