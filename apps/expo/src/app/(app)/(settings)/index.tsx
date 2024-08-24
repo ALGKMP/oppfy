@@ -8,14 +8,11 @@ import {
   ChevronRight,
   FileLock2,
   Hammer,
-  Info,
-  LifeBuoy,
   NotepadText,
   Share2,
   ShieldCheck,
   Star,
 } from "@tamagui/lucide-icons";
-import { reportRouter } from "node_modules/@oppfy/api/src/routers";
 import { Button, YStack } from "tamagui";
 
 import type { SettingsGroupInput } from "~/components/Settings";
@@ -26,21 +23,21 @@ import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 
 enum WEBSITE_URL {
-  PRIVACY = "https://oppfy/privacy.app",
-  TERMS = "https://oppfy/terms.app",
+  PRIVACY = "https://oppfy.app/privacy",
+  TERMS = "https://oppfy.app/terms",
 }
 
 const Settings = () => {
-  const { signOut } = useSession();
   const router = useRouter();
+  const { signOut } = useSession();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // TODO: Update details
   const handleShare = async () => {
     await Share.share({
-      title: "OPPFY",
-      message: "Become an OPP!",
+      title: "Join me on Oppfy!",
+      message:
+        "Check out Oppfy - the social media app where your friends capture your best moments! Download now:",
       url: "https://oppfy.app",
     });
   };
@@ -122,20 +119,20 @@ const Settings = () => {
     <BaseScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsGroup)}
-        <Button
-          size="$4.5"
-          color="$red9"
-          onPress={() => setIsModalVisible(true)}
-        >
+
+        <Button size="$5" color="$red9" onPress={() => setIsModalVisible(true)}>
           Logout
         </Button>
-        {/* <Button
-          size="$4.5"
-          color="$yellow10Dark"
-          onPress={() => router.push("/_sitemap")}
-        >
-          Sitemap
-        </Button> */}
+
+        {__DEV__ && (
+          <Button
+            size="$5"
+            color="$yellow10Dark"
+            onPress={() => router.push("/_sitemap")}
+          >
+            Sitemap
+          </Button>
+        )}
       </YStack>
 
       <ActionSheet

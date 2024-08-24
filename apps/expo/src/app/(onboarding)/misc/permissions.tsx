@@ -18,7 +18,7 @@ import {
 } from "tamagui";
 
 import { AlertDialog, Dialog } from "~/components/Dialogs";
-import { AlertDialogProps } from "~/components/Dialogs/AlertDialog";
+import type { AlertDialogProps } from "~/components/Dialogs/AlertDialog";
 import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
@@ -49,7 +49,7 @@ const Permissions = () => {
   };
 
   const onPress = (): void => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     isSignedIn
       ? router.push("/(app)/(bottom-tabs)/(home)")
       : router.push("/auth/phone-number");
@@ -210,7 +210,7 @@ const Permissions = () => {
         subtitle={alertDialogProps.subtitle}
         onCancel={() => {
           setAlertDialogProps({ ...alertDialogProps, isVisible: false });
-          openSettings();
+          void openSettings();
         }}
         onAccept={() =>
           setAlertDialogProps({ ...alertDialogProps, isVisible: false })

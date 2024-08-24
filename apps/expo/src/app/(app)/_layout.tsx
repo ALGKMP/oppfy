@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Redirect, SplashScreen } from "expo-router";
 
-import { LoadingIndicatorOverlay } from "~/components/Overlays";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 import {
@@ -9,7 +8,6 @@ import {
   usePushNotifications,
 } from "~/hooks/notifications";
 import { Stack } from "~/layouts";
-import { api } from "~/utils/api";
 
 const DELAY_TO_HIDE_SPLASH_SCREEN = 250;
 

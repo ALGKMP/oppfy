@@ -10,8 +10,6 @@ import { useToastController } from "@tamagui/toast";
 import { H4, styled, Text, Theme, XStack, YStack } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
-import { env } from "@oppfy/env";
-
 import { api } from "~/utils/api";
 
 const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
@@ -30,22 +28,13 @@ const ShareProfile = () => {
 
   const handleShare = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    try {
-      await Sharing.shareAsync(qrValue);
-      toast.show("Profile shared");
-    } catch (error) {
-      console.error("Error sharing profile:", error);
-    }
+    await Sharing.shareAsync(qrValue);
   };
 
   const handleCopyLink = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await Clipboard.setStringAsync(qrValue);
-    toast.show("Link copied", {
-      native: true,
-      duration: 1000,
-    });
+    toast.show("Link copied");
   };
 
   return (

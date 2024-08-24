@@ -9,13 +9,10 @@ import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
-  Avatar,
   Button,
   Circle,
   H1,
-  H3,
   H5,
-  H6,
   SizableText,
   styled,
   Text,
@@ -26,9 +23,11 @@ import {
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
-import { VirtualizedListItem } from "~/components/ListItems";
+import OtherPost from "~/components/NewPostTesting/OtherPost";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
+import type { Profile } from "~/hooks/useProfile";
+import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
@@ -37,7 +36,6 @@ import PostItem from "../../../../components/Media/PostItem";
 const { width: screenWidth } = Dimensions.get("window");
 
 type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
-type Profile = RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
 
 interface TokenItem {
   postId?: number | undefined;
@@ -48,6 +46,8 @@ const HomeScreen = () => {
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<number[]>([]);
+
+  const { profile, isLoading: isLoadingProfile } = useProfile();
 
   const {
     data: postData,
@@ -94,22 +94,56 @@ const HomeScreen = () => {
         .filter((token) => token.isViewable)
         .map((token) => (token.item as TokenItem).postId)
         .filter((id) => id !== undefined);
-      setViewableItems(visibleItemIds);
+      setViewableItems(visibleItemIds as number[]);
     },
     [],
   );
 
   const renderPost = useCallback(
-    (item: PostItem) => {
-      if (item === undefined) return null;
+    (item: PostItem, profile: Profile) => {
+      if (item.authorUsername === null) return null;
+      if (item.recipientUsername === null) return null;
 
       return (
         <View paddingTop="$4">
-          <PostItem
-            post={item}
-            isSelfPost={false}
-            isViewable={viewableItems.includes(item.postId)}
-          />
+          <YStack gap="$4">
+            <PostItem
+              post={item}
+              isSelfPost={false}
+              isViewable={viewableItems.includes(item.postId)}
+            />
+            <OtherPost
+              id={item.postId}
+              createdAt={item.createdAt}
+              caption={item.caption}
+              self={{
+                id: profile.userId,
+                username: profile.username,
+                profilePicture: profile.profilePictureUrl,
+              }}
+              author={{
+                id: item.authorId,
+                username: item.authorUsername,
+              }}
+              recipient={{
+                id: item.recipientId,
+                username: item.recipientUsername,
+                profilePicture: item.recipientProfilePicture,
+              }}
+              media={{
+                type: item.mediaType,
+                url: item.imageUrl,
+                dimensions: {
+                  width: item.width,
+                  height: item.height,
+                },
+              }}
+              stats={{
+                likes: item.likesCount,
+                comments: item.commentsCount,
+              }}
+            />
+          </YStack>
         </View>
       );
     },
@@ -120,7 +154,7 @@ const HomeScreen = () => {
     const handleProfilePress = (profile: Profile) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.navigate({
-        pathname: "/profile/[userId]/",
+        pathname: "/profile/[userId]",
         params: {
           userId: profile.userId,
           username: profile.username,
@@ -135,7 +169,7 @@ const HomeScreen = () => {
       });
     };
 
-    if (recommendationsData?.length === 0 || recommendationsData === undefined)
+    if (recommendationsData === undefined || recommendationsData.length === 0)
       return null;
 
     return (
@@ -167,7 +201,7 @@ const HomeScreen = () => {
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
-  if (isLoadingRecommendationsData || isLoadingPostData) {
+  if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
     return (
       <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
         <YStack gap="$4">
@@ -182,11 +216,7 @@ const HomeScreen = () => {
                   </YStack>
                 </XStack>
 
-                <Skeleton
-                  radius={16}
-                  width={"100%"}
-                  height={screenWidth * 1.5}
-                />
+                <Skeleton radius={16} width="100%" height={screenWidth * 1.5} />
               </YStack>
             </CardContainer>
           ))}
@@ -195,7 +225,10 @@ const HomeScreen = () => {
     );
   }
 
-  if (recommendationsData?.length === 0 && postItems.length === 0) {
+  if (
+    profile === undefined ||
+    (recommendationsData?.length === 0 && postItems.length === 0)
+  ) {
     return (
       <BaseScreenView>
         <EmptyHomeScreen />
@@ -207,15 +240,15 @@ const HomeScreen = () => {
     // ! dont remove the paddingBottom 0, it actually does something
     <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
-        nestedScrollEnabled={true}
         data={postItems}
         refreshing={refreshing}
-        showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
-        numColumns={1}
         onEndReached={handleOnEndReached}
-        keyExtractor={(item) => "home_" + item?.postId.toString()}
-        renderItem={({ item }) => renderPost(item)}
+        nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        numColumns={1}
+        keyExtractor={(item) => "home_" + item.postId.toString()}
+        renderItem={({ item }) => renderPost(item, profile)}
         ListHeaderComponent={renderSuggestions}
         ListFooterComponent={ListFooter}
         estimatedItemSize={screenWidth}

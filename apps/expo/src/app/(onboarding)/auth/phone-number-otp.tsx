@@ -2,7 +2,8 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth from "@react-native-firebase/auth";
 import { H1, Spinner, styled, Text, View, XStack, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
@@ -98,7 +99,7 @@ const PhoneNumberOTP = () => {
   };
 
   const onSubmit = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     setIsLoading(true);
     setError(null);
@@ -171,7 +172,7 @@ const PhoneNumberOTP = () => {
               value={phoneNumberOTP}
               onChange={(value) => {
                 setPhoneNumberOTP(value);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
             />
 

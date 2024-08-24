@@ -11,7 +11,10 @@ const Index = () => {
   const { isLoading: onboardingCompleteIsLoading, data: onboardingComplete } =
     api.user.onboardingComplete.useQuery();
 
-  if (sessionIsLoading || permissionsIsLoading || onboardingCompleteIsLoading) {
+  const isLoading =
+    sessionIsLoading || permissionsIsLoading || onboardingCompleteIsLoading;
+
+  if (isLoading) {
     return null;
   }
 

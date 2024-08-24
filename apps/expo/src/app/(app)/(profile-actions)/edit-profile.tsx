@@ -16,14 +16,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, Minus } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import {
-  Avatar,
   Button,
-  getToken,
   H3,
   ScrollView,
   Separator,
   SizableText,
-  Spacer,
   Text,
   useTheme,
   View,
@@ -239,7 +236,7 @@ const EditProfile = () => {
           <Text fontSize="$3" color="$gray10">
             {description}
           </Text>
-          {errors[field] && <Text color="$red8">{errors[field].message}</Text>}
+          {errors[field] && <Text color="$red8">{errors[field]?.message}</Text>}
         </YStack>
       );
     },

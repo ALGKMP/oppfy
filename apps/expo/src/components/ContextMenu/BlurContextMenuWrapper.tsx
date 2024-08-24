@@ -1,17 +1,19 @@
-import React, { ReactNode, useState } from "react";
-import { Dimensions, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import type { ReactNode } from "react";
+import React, { useCallback, useState } from "react";
+import { Modal, Platform, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  cancelAnimation,
   Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { Stack, View, XStack, YStack } from "tamagui";
-
-const { width, height } = Dimensions.get("window");
 
 interface Option {
   label: ReactNode;
@@ -26,16 +28,26 @@ interface BlurContextMenuWrapperProps {
 
 const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const [isVisible, setIsVisible] = useState(false);
-
   const scale = useSharedValue(1);
+  const animationState = useSharedValue(0);
+
+  const hideContextMenu = useCallback(() => setIsVisible(false), []);
 
   const longPressGesture = Gesture.LongPress()
-    .minDuration(500)
-    .onBegin(() => {
-      scale.value = withTiming(1.05, {
-        duration: 500,
-        easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
-      });
+    .minDuration(350)
+    .onTouchesDown(() => {
+      animationState.value = withDelay(
+        200,
+        withTiming(1, { duration: 0 }, (finished) => {
+          if (finished) {
+            scale.value = withTiming(1.05, {
+              duration: 500,
+              easing: Easing.bezier(0.31, 0.04, 0.03, 1.04),
+            });
+            runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
+          }
+        }),
+      );
     })
     .onStart(() => {
       runOnJS(setIsVisible)(true);
@@ -43,8 +55,10 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
         duration: 250,
         easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
       });
+      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium);
     })
     .onFinalize(() => {
+      cancelAnimation(animationState);
       scale.value = withTiming(1, {
         duration: 250,
         easing: Easing.bezier(0.82, 0.06, 0.42, 1.01),
@@ -55,8 +69,6 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
     transform: [{ scale: scale.value }],
   }));
 
-  const hideContextMenu = () => setIsVisible(false);
-
   return (
     <View>
       <GestureDetector gesture={longPressGesture}>
@@ -65,38 +77,46 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
         </Animated.View>
       </GestureDetector>
 
-      <Modal transparent={true} visible={isVisible} animationType="fade">
+      <Modal transparent visible={isVisible} animationType="fade">
         <BlurView
-          intensity={50}
+          intensity={80}
+          tint="dark"
           style={styles.blurView}
-          tint="light"
           onTouchEnd={hideContextMenu}
         >
-          <YStack flex={1}>
-            <View flex={1} justifyContent="center" margin="$4" gap="$4">
+          <YStack flex={1} justifyContent="center" margin="$4" gap="$4">
+            <View
+              shadowColor="black"
+              shadowOffset={{ width: 0, height: 2 }}
+              shadowOpacity={0.1}
+              shadowRadius={4}
+              elevationAndroid={5}
+            >
               {props.children}
-              <YStack
-                borderRadius="$5"
-                backgroundColor="rgba(63, 63, 62, 0.8)"
-                marginHorizontal="$6"
-              >
-                {props.options.map((option, index) => (
-                  <TouchableOpacity key={index} onPress={option.onPress}>
-                    <XStack
-                      paddingVertical="$3"
-                      paddingHorizontal="$4"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      borderTopWidth={index === 0 ? 0 : 0.3}
-                      borderTopColor="white"
-                    >
-                      {option.label}
-                      {option.icon}
-                    </XStack>
-                  </TouchableOpacity>
-                ))}
-              </YStack>
             </View>
+            <BlurView intensity={100} tint="dark" style={styles.menuBackground}>
+              {props.options.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    option.onPress();
+                    hideContextMenu();
+                  }}
+                >
+                  <XStack
+                    paddingVertical="$3"
+                    paddingHorizontal="$4"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    borderTopWidth={index === 0 ? 0 : StyleSheet.hairlineWidth}
+                    borderTopColor="rgba(255, 255, 255, 0.2)"
+                  >
+                    {option.label}
+                    {option.icon}
+                  </XStack>
+                </TouchableOpacity>
+              ))}
+            </BlurView>
           </YStack>
         </BlurView>
       </Modal>
@@ -106,14 +126,23 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
 
 const styles = StyleSheet.create({
   blurView: {
-    position: "absolute",
-    width,
-    height,
+    ...StyleSheet.absoluteFillObject,
   },
-  background: {
-    position: "absolute",
-    width,
-    height,
+  menuBackground: {
+    overflow: "hidden",
+    borderRadius: 16,
+    marginHorizontal: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
 });
 

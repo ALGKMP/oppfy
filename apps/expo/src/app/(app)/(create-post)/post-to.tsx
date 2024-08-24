@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -13,7 +12,6 @@ import {
   Button,
   getToken,
   H5,
-  H6,
   Separator,
   Spacer,
   useTheme,
@@ -46,7 +44,7 @@ const PostTo = () => {
     width: string;
   }>();
 
-  const filterContactsOnApp =
+  const _filterContactsOnApp =
     api.contacts.filterOutPhoneNumbersOnApp.useMutation();
 
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -175,7 +173,7 @@ const PostTo = () => {
     </BaseScreenView>;
   };
 
-  const renderContacts = () => (
+  const _renderContacts = () => (
     <CardContainer>
       <H5 theme="alt1">Contacts</H5>
 

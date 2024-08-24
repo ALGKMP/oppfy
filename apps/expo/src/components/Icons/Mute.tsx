@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import Animated, {
   ReduceMotion,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSpring,
   withTiming,
-  type SharedValue,
 } from "react-native-reanimated";
 import { Volume2, VolumeX } from "@tamagui/lucide-icons";
-import { Avatar, View } from "tamagui";
+import { Avatar } from "tamagui";
 
 const ANIMATION_DURATION = 400;
 const ANIMATION_END_DELAY = 150;
@@ -58,12 +56,7 @@ const Mute = ({ muted }: { muted: boolean }) => {
         },
       ]}
     >
-      <Avatar
-        circular
-        size="$5"
-        backgroundColor="$gray7"
-        flex={1}
-      >
+      <Avatar circular size="$5" backgroundColor="$gray7" flex={1}>
         {muted ? <VolumeX size="$2" /> : <Volume2 size="$2" />}
       </Avatar>
     </Animated.View>
