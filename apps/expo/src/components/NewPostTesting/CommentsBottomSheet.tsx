@@ -13,7 +13,13 @@ import * as Haptics from "expo-haptics";
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
-import { AlertCircle, SendHorizontal, Trash2 } from "@tamagui/lucide-icons";
+import {
+  AlertCircle,
+  MessageCircle,
+  MessageCircleOff,
+  SendHorizontal,
+  Trash2,
+} from "@tamagui/lucide-icons";
 import {
   ScrollView,
   SizableText,
@@ -27,6 +33,7 @@ import {
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
+import { EmptyPlaceholder } from "../UIPlaceholders";
 import BottomSheetBackdrop from "./BottomSheetBackdrop";
 import BottomSheetHeader from "./BottomSheetHeader";
 
@@ -78,6 +85,7 @@ const CommentsBottomSheet = forwardRef<
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const listRef = useRef<FlashList<Comment> | null>(null);
+    const snapPoints = useMemo(() => ["100%"], []);
 
     const handleDeleteComment = useCallback(
       (commentId: number) => {
@@ -187,7 +195,7 @@ const CommentsBottomSheet = forwardRef<
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={["100%"]}
+        snapPoints={snapPoints}
         topInset={insets.top}
         enablePanDownToClose
         handleComponent={handleComponent}
@@ -201,10 +209,11 @@ const CommentsBottomSheet = forwardRef<
 );
 const EmptyCommentsView = React.memo(() => (
   <View flex={1} justifyContent="center" alignItems="center">
-    <SizableText size="$7" fontWeight="bold">
-      No comments yet
-    </SizableText>
-    <Text color="$gray10">Be the first to comment</Text>
+    <EmptyPlaceholder
+      title="No comments yet"
+      subtitle="Be the first to comment"
+      icon={<MessageCircleOff />}
+    />
   </View>
 ));
 
@@ -372,11 +381,11 @@ const CommentItem = React.memo(
 
 const styles = StyleSheet.create({
   input: {
-    minHeight: 46,
-    textAlignVertical: "center",
     padding: 14,
+    minHeight: 46,
     paddingRight: 64,
     borderRadius: 16,
+    textAlignVertical: "center",
     borderWidth: StyleSheet.hairlineWidth,
   },
 });

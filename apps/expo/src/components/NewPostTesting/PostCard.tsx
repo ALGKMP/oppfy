@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -12,7 +12,16 @@ import {
   MoreHorizontal,
   Share2,
 } from "@tamagui/lucide-icons";
-import { Button, getToken, SizableText, View, XStack, YStack } from "tamagui";
+import {
+  Button,
+  getToken,
+  Paragraph,
+  SizableText,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import { TimeAgo } from "~/components/Texts";
 import Avatar from "../Avatar";
@@ -83,6 +92,8 @@ const ASPECT_RATIO = 3 / 4;
 
 const PostCard = (props: PostCardProps) => {
   const { hearts, addHeart } = useHeartAnimations();
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const addHeartJS = useCallback(
     (x: number, y: number) => {
@@ -242,11 +253,23 @@ const PostCard = (props: PostCardProps) => {
             />
           </XStack>
 
-          {props.stats.comments === 0 && (
-            <Button onPress={props.onComment}>
-              <SizableText>Be the first to comment</SizableText>
-            </Button>
-          )}
+          <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
+            <Paragraph color="$gray10">
+              {isExpanded ? (
+                props.caption
+              ) : (
+                <>
+                  {props.caption.slice(0, 110)}
+                  {props.caption.length > 110 && (
+                    <>
+                      ...
+                      <Text color="$gray8"> more</Text>
+                    </>
+                  )}
+                </>
+              )}
+            </Paragraph>
+          </TouchableOpacity>
         </YStack>
       </YStack>
     </CardContainer>
