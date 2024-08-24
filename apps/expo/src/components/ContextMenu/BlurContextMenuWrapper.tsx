@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import React, { useState } from "react";
-import { Modal, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useCallback, useState } from "react";
+import { Modal, Platform, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   cancelAnimation,
@@ -31,8 +31,10 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const scale = useSharedValue(1);
   const animationState = useSharedValue(0);
 
+  const hideContextMenu = useCallback(() => setIsVisible(false), []);
+
   const longPressGesture = Gesture.LongPress()
-    .minDuration(500)
+    .minDuration(350)
     .onTouchesDown(() => {
       animationState.value = withDelay(
         200,
@@ -67,8 +69,6 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
     transform: [{ scale: scale.value }],
   }));
 
-  const hideContextMenu = () => setIsVisible(false);
-
   return (
     <View>
       <GestureDetector gesture={longPressGesture}>
@@ -77,9 +77,14 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
         </Animated.View>
       </GestureDetector>
 
-      <Modal transparent={true} visible={isVisible} animationType="fade">
-        <BlurView style={styles.blurView} onTouchEnd={hideContextMenu}>
-          <View flex={1} justifyContent="center" margin="$4" gap="$4">
+      <Modal transparent visible={isVisible} animationType="fade">
+        <BlurView
+          intensity={80}
+          tint="dark"
+          style={styles.blurView}
+          onTouchEnd={hideContextMenu}
+        >
+          <YStack flex={1} justifyContent="center" margin="$4" gap="$4">
             <View
               shadowColor="black"
               shadowOffset={{ width: 0, height: 2 }}
@@ -88,16 +93,22 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
             >
               {props.children}
             </View>
-            <BlurView tint="dark" style={styles.menuBackground}>
+            <BlurView intensity={100} tint="dark" style={styles.menuBackground}>
               {props.options.map((option, index) => (
-                <TouchableOpacity key={index} onPress={option.onPress}>
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    option.onPress();
+                    hideContextMenu();
+                  }}
+                >
                   <XStack
                     paddingVertical="$3"
                     paddingHorizontal="$4"
                     alignItems="center"
                     justifyContent="space-between"
-                    borderTopWidth={index === 0 ? 0 : 0.3}
-                    borderTopColor="white"
+                    borderTopWidth={index === 0 ? 0 : StyleSheet.hairlineWidth}
+                    borderTopColor="rgba(255, 255, 255, 0.2)"
                   >
                     {option.label}
                     {option.icon}
@@ -105,7 +116,7 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
                 </TouchableOpacity>
               ))}
             </BlurView>
-          </View>
+          </YStack>
         </BlurView>
       </Modal>
     </View>
@@ -114,17 +125,23 @@ const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
 
 const styles = StyleSheet.create({
   blurView: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-  },
-  background: {
-    position: "absolute",
+    ...StyleSheet.absoluteFillObject,
   },
   menuBackground: {
     overflow: "hidden",
     borderRadius: 16,
     marginHorizontal: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
 });
 
