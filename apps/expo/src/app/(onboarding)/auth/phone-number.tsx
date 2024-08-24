@@ -249,22 +249,26 @@ const CountryPicker = ({
               </TouchableOpacity>
             }
           />
-          <View flex={1} padding="$4" paddingBottom={0}>
-            <YStack flex={1} gap="$2">
-              <SearchInput
-                value={searchQuery}
-                placeholder="Search countries"
-                onChangeText={setSearchQuery}
-                onClear={() => setSearchQuery("")}
-              />
+          <YStack
+            flex={1}
+            padding="$4"
+            paddingBottom={0}
+            gap={searchQuery ? "$4" : "$2"}
+          >
+            <SearchInput
+              value={searchQuery}
+              placeholder="Search countries"
+              onChangeText={setSearchQuery}
+              onClear={() => setSearchQuery("")}
+            />
 
-              <CountriesFlashList
-                data={displayData}
-                onSelect={onCountrySelect}
-                selectedCountryCode={selectedCountryData?.countryCode}
-              />
-            </YStack>
-          </View>
+            <CountriesFlashList
+              data={displayData}
+              onSelect={onCountrySelect}
+              selectedCountryCode={selectedCountryData?.countryCode}
+            />
+          </YStack>
+          {/* </View> */}
         </View>
       </Modal>
 
@@ -317,8 +321,9 @@ const CountriesFlashList = ({
       contentContainerStyle={{ paddingBottom: insets.bottom }}
       data={data}
       onScrollBeginDrag={Keyboard.dismiss}
-      showsVerticalScrollIndicator={false}
       estimatedItemSize={43}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
       renderItem={({ item, index }) => {
         if (typeof item === "string") {
           // Render header
