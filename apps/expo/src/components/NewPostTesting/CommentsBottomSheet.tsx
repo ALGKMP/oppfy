@@ -30,8 +30,10 @@ import {
   YStack,
 } from "tamagui";
 
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
+import { Skeleton } from "../Skeletons";
 import { TimeAgo } from "../Texts";
 import { EmptyPlaceholder } from "../UIPlaceholders";
 import BottomSheetBackdrop from "./BottomSheetBackdrop";
@@ -140,46 +142,26 @@ const CommentsBottomSheet = forwardRef<
       ],
     );
 
-    const ListEmptyComponent = useMemo(
-      () =>
-        isLoading ? (
-          <ScrollView>{/* Render skeletons here */}</ScrollView>
-        ) : (
-          <EmptyCommentsView />
-        ),
-      [isLoading],
-    );
+    const ListContent = useMemo(() => {
+      if (isLoading) return <LoadingView />;
+      if (comments.length === 0) return <EmptyCommentsView />;
 
-    const memoizedComments = useMemo(() => comments, [comments]);
+      return (
+        <FlashList
+          ref={listRef}
+          data={comments}
+          renderItem={renderComment}
+          estimatedItemSize={100}
+          onEndReached={onEndReached}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={keyExtractor}
+        />
+      );
+    }, [isLoading, comments, renderComment, onEndReached, keyExtractor]);
 
     const content = useMemo(
-      () => (
-        <YStack flex={1}>
-          <FlashList
-            ref={listRef}
-            data={memoizedComments}
-            renderItem={renderComment}
-            estimatedItemSize={100}
-            onEndReached={onEndReached}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={keyExtractor}
-            ListEmptyComponent={ListEmptyComponent}
-          />
-          <CommentInput
-            onPostComment={handlePostComment}
-            selfProfilePicture={selfProfilePicture}
-          />
-        </YStack>
-      ),
-      [
-        memoizedComments,
-        renderComment,
-        onEndReached,
-        keyExtractor,
-        ListEmptyComponent,
-        handlePostComment,
-        selfProfilePicture,
-      ],
+      () => <YStack flex={1}>{ListContent}</YStack>,
+      [ListContent],
     );
 
     const handleComponent = useCallback(
@@ -203,10 +185,29 @@ const CommentsBottomSheet = forwardRef<
         backgroundStyle={{ backgroundColor: theme.gray4.val }}
       >
         {content}
+        <CommentInput
+          onPostComment={handlePostComment}
+          selfProfilePicture={selfProfilePicture}
+        />
       </BottomSheetModal>
     );
   },
 );
+
+const LoadingView = React.memo(() => (
+  <ScrollView>
+    {PLACEHOLDER_DATA.map((_, index) => (
+      <XStack key={index} padding="$3.5" gap="$2.5">
+        <Skeleton circular size={46} />
+        <YStack flex={1} gap="$2">
+          <Skeleton width="40%" height={20} />
+          <Skeleton width="100%" height={20} />
+        </YStack>
+      </XStack>
+    ))}
+  </ScrollView>
+));
+
 const EmptyCommentsView = React.memo(() => (
   <View flex={1} justifyContent="center" alignItems="center">
     <EmptyPlaceholder

@@ -132,7 +132,7 @@ export const useComments = (postId: number) => {
     fetchNextPage: fetchNextCommentsPage,
   } = api.post.paginateComments.useInfiniteQuery(
     { postId, pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor, },
   );
 
   const postComment = api.post.createComment.useMutation({
