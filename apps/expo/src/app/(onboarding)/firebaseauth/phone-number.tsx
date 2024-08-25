@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Alert, Keyboard, Modal, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
@@ -76,7 +76,10 @@ const PhoneNumber = () => {
 
   const { signInWithPhoneNumber } = useSession();
 
+  const [hasNavigated, setHasNavigated] = useState(false);
+
   const [phoneNumber, setPhoneNumber] = useState("");
+
   const [countryData, setCountryData] = useState<CountryData>({
     name: "United States",
     countryCode: "US",
@@ -97,6 +100,14 @@ const PhoneNumber = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        setHasNavigated(false);
+      };
+    }, [])
+  );
+
   const onSubmit = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
@@ -106,14 +117,17 @@ const PhoneNumber = () => {
     const e164PhoneNumber = `${countryData.dialingCode}${phoneNumber}`;
 
     try {
-      await signInWithPhoneNumber(e164PhoneNumber);
+      const recaptchaShown = await signInWithPhoneNumber(e164PhoneNumber);
 
-      router.push({
-        params: {
-          phoneNumber: e164PhoneNumber,
-        },
-        pathname: "/auth/phone-number-otp",
-      });
+      if (!recaptchaShown && !hasNavigated) {
+        setHasNavigated(true);
+        router.push({
+          params: {
+            phoneNumber: e164PhoneNumber,
+          },
+          pathname: "/firebaseauth/link",
+        });
+      }
     } catch (err) {
       if (!isFirebaseError(err)) {
         setError(Error.UNKNOWN_ERROR);

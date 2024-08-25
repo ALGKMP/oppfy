@@ -17,7 +17,7 @@ interface SessionContextType {
 
   signInWithPhoneNumber: (
     phoneNumber: string,
-  ) => Promise<FirebaseAuthTypes.ConfirmationResult | null>;
+  ) => Promise<boolean>;
   verifyPhoneNumberOTP: (
     otp: string,
   ) => Promise<FirebaseAuthTypes.UserCredential | null>;
@@ -64,9 +64,10 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   }, []);
 
   const signInWithPhoneNumber = async (phoneNumber: string) => {
-    const result = await auth().signInWithPhoneNumber(phoneNumber);
-    setConfirmation(result);
-    return result;
+    // Existing code...
+    const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+    setConfirmation(confirmation);
+    return confirmation.verificationId !== null; // Returns true if reCAPTCHA was shown
   };
 
   const verifyPhoneNumberOTP = async (otp: string) => {
