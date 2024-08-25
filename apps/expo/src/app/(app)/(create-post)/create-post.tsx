@@ -91,7 +91,7 @@ const CreatePost = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     const baseData = {
-      uri: uri ?? "",
+      uri: uri,
       width: Number(width),
       height: Number(height),
       caption: data.caption,
@@ -100,12 +100,12 @@ const CreatePost = () => {
       params.userType === "onApp"
         ? {
             ...baseData,
-            recipient: params.recipient ?? "",
+            recipient: params.recipient,
             type: "onApp" as const,
           }
         : {
             ...baseData,
-            number: params.number ?? "",
+            number: params.number,
             type: "notOnApp" as const,
           };
     type === "photo"

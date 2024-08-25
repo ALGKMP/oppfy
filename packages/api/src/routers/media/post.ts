@@ -12,7 +12,6 @@ export const postRouter = createTRPCRouter({
   uploadPicturePostForUserOnApp: protectedProcedure
     .input(
       z.object({
-        author: z.string(),
         recipient: z.string(),
         caption: z.string().max(255).default(""),
         height: z.string(),
@@ -22,24 +21,10 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const {
-        author,
-        recipient,
-        caption,
-        height,
-        width,
-        contentLength,
-        contentType,
-      } = input;
       try {
         return await ctx.services.s3.uploadPostForUserOnAppUrl({
-          author,
-          recipient,
-          caption,
-          height,
-          width,
-          contentLength,
-          contentType,
+          author: ctx.session.uid,
+          ...input,
         });
       } catch (err) {
         throw new TRPCError({
@@ -52,8 +37,7 @@ export const postRouter = createTRPCRouter({
   uploadPicturePostForUserNotOnApp: protectedProcedure
     .input(
       z.object({
-        author: z.string(),
-        recipientPhoneNumber: z.string(),
+        number: z.string(),
         caption: z.string().max(255).default(""),
         height: z.string(),
         width: z.string(),
@@ -62,24 +46,10 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const {
-        author,
-        recipientPhoneNumber,
-        caption,
-        height,
-        width,
-        contentLength,
-        contentType,
-      } = input;
       try {
         await ctx.services.s3.uploadPostForUserNotOnAppUrl({
-          author,
-          number: recipientPhoneNumber,
-          caption,
-          height,
-          width,
-          contentLength,
-          contentType,
+          author: ctx.session.uid,
+          ...input,
         });
       } catch (err) {
         throw new TRPCError({

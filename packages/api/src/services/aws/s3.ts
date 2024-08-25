@@ -131,7 +131,7 @@ export class S3Service {
   }) {
     try {
       const currentDate = Date.now();
-      const objectKey = `posts/${currentDate}-${number}-${author}.jpg`;
+      const objectKey = `posts/${currentDate}-${recipientNumber}-${author}.jpg`;
 
       caption = encodeURIComponent(caption);
 
@@ -142,10 +142,10 @@ export class S3Service {
         ContentType: contentType,
         Metadata: {
           author,
-          number,
           caption,
           height,
           width,
+          number,
         },
       });
 
@@ -157,7 +157,6 @@ export class S3Service {
       );
     }
   }
-
 
   async putObjectPresignedUrl(
     putObjectCommandInput: PutObjectPresignedUrlInput,

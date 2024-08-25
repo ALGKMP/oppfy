@@ -27,8 +27,12 @@ type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
 const useUploadMedia = () => {
   const createPresignedUrlForVideoPost =
     api.post.createPresignedUrlForVideoPost.useMutation();
-  const createPresignedUrlForImagePost =
-    api.post.createPresignedUrlForImagePost.useMutation();
+  // const createPresignedUrlForImagePost =
+  //   api.post.createPresignedUrlForImagePost.useMutation();
+  const uploadPicturePostForUserOnApp =
+    api.post.uploadPicturePostForUserOnApp.useMutation();
+  const uploadPicturePostForUserNotOnApp =
+    api.post.uploadPicturePostForUserNotOnApp.useMutation();
 
   const getMediaBlob = async (uri: string) => {
     const response = await fetch(uri);
@@ -95,14 +99,12 @@ const useUploadMedia = () => {
 
     const presignedUrl =
       input.type === "onApp"
-        ? await createPresignedUrlForImagePost.mutateAsync({
+        ? await uploadPicturePostForUserOnApp.mutateAsync({
             ...baseData,
-            type: "onApp",
             recipient: input.recipient,
           })
-        : await createPresignedUrlForImagePost.mutateAsync({
+        : await uploadPicturePostForUserNotOnApp.mutateAsync({
             ...baseData,
-            type: "notOnApp",
             number: input.number,
           });
 
