@@ -92,8 +92,8 @@ const CreatePost = () => {
   const onSubmit = handleSubmit(async (data) => {
     const baseData = {
       uri: uri,
-      width: Number(width),
-      height: Number(height),
+      width: parseInt(width),
+      height: parseInt(height),
       caption: data.caption,
     };
     const input =
@@ -186,8 +186,7 @@ const CreatePost = () => {
   };
 
   // Calculate the preview size (1/3 of the original size)
-  const contentAspectRatio =
-    parseFloat(width ?? "0") / parseFloat(height ?? "0");
+  const contentAspectRatio = parseInt(width) / parseInt(height);
   const contentHeight = Math.min(
     SCREEN_WIDTH / contentAspectRatio,
     MAX_CONTENT_HEIGHT,
