@@ -63,7 +63,7 @@ export const reportUserReasonEnum = pgEnum("report_user_reason", [
 ]);
 
 export const user = pgTable("user", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id", { length: 255 }).primaryKey(),
   profileId: uuid("profile_id")
     .notNull()
     .references(() => profile.id, { onDelete: "cascade" }),
@@ -104,7 +104,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
 export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
   id: uuid("id").primaryKey().defaultRandom(),
   phoneNumber: text("phone_number").notNull(),
-  author: uuid("author")
+  author: varchar("author", { length: 255 })
     .notNull()
     .references(() => user.id),
   caption: text("caption").notNull().default(""),
@@ -121,7 +121,7 @@ export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
 });
 
 export const contact = pgTable("contact", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: varchar("id", { length: 128 }).primaryKey(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -130,10 +130,10 @@ export const contact = pgTable("contact", {
 export const userContact = pgTable(
   "user_contact",
   {
-    userId: uuid("user_id")
+    userId: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    contactId: uuid("contact_id")
+    contactId: varchar("contact_id", { length: 128 })
       .notNull()
       .references(() => contact.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -200,7 +200,7 @@ export const pushToken = pgTable(
   "push_token",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    userId: varchar("user_id", { length: 255 })
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     token: text("token").notNull(),
@@ -225,10 +225,10 @@ export const pushTokenRelations = relations(pushToken, ({ one }) => ({
 
 export const notifications = pgTable("notifications", {
   id: uuid("id").primaryKey().defaultRandom(),
-  senderId: uuid("sender_id")
+  senderId: varchar("sender_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  recipientId: uuid("recipient_id")
+  recipientId: varchar("recipient_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   read: boolean("read").default(false).notNull(),
@@ -275,10 +275,10 @@ export const notificationSettings = pgTable("notification_settings", {
 
 export const post = pgTable("post", {
   id: uuid("id").primaryKey().defaultRandom(),
-  authorId: uuid("author")
+  authorId: varchar("author", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  recipientId: uuid("recipient")
+  recipientId: varchar("recipient", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   caption: text("caption").notNull().default(""),
@@ -316,7 +316,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
 
 export const postView = pgTable("post_view", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  userId: varchar("user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   postId: uuid("post_id")
@@ -367,7 +367,7 @@ export const like = pgTable("like", {
   postId: uuid("post_id")
     .notNull()
     .references(() => post.id, { onDelete: "cascade" }),
-  user: uuid("user")
+  user: varchar("user", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -388,7 +388,7 @@ export const likeRelations = relations(like, ({ one }) => ({
 
 export const comment = pgTable("comment", {
   id: uuid("id").primaryKey().defaultRandom(),
-  user: uuid("user")
+  user: varchar("user", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   post: uuid("post_id")
@@ -416,10 +416,10 @@ export const commentRelations = relations(comment, ({ one }) => ({
 
 export const follower = pgTable("follower", {
   id: uuid("id").primaryKey().defaultRandom(),
-  senderId: uuid("sender_id")
+  senderId: varchar("sender_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  recipientId: uuid("recipient_id")
+  recipientId: varchar("recipient_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -442,10 +442,10 @@ export const followerRelations = relations(follower, ({ one }) => ({
 
 export const friendRequest = pgTable("friend_request", {
   id: uuid("id").primaryKey().defaultRandom(),
-  senderId: uuid("sender_id")
+  senderId: varchar("sender_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  recipientId: uuid("recipient_id")
+  recipientId: varchar("recipient_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -471,10 +471,10 @@ export const friendRequestRelations = relations(friendRequest, ({ one }) => ({
 
 export const followRequest = pgTable("follow_request", {
   id: uuid("id").primaryKey().defaultRandom(),
-  senderId: uuid("sender_id")
+  senderId: varchar("sender_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  recipientId: uuid("recipient_id")
+  recipientId: varchar("recipient_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -500,10 +500,10 @@ export const followRequestRelations = relations(followRequest, ({ one }) => ({
 
 export const friend = pgTable("friend", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId1: uuid("user_id_1")
+  userId1: varchar("user_id_1", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  userId2: uuid("user_id_2")
+  userId2: varchar("user_id_2", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -526,10 +526,10 @@ export const friendRelations = relations(friend, ({ one }) => ({
 
 export const block = pgTable("blocked", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
+  userId: varchar("user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  blockedUserId: uuid("blocked_user_id")
+  blockedUserId: varchar("blocked_user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -555,7 +555,7 @@ export const reportComment = pgTable("report_comment", {
   commentId: uuid("comment_id")
     .notNull()
     .references(() => comment.id, { onDelete: "cascade" }),
-  reporterUserId: uuid("reporter_user_id")
+  reporterUserId: varchar("reporter_user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   reason: reportReasonEnum("reason").notNull(),
@@ -569,7 +569,7 @@ export const reportPost = pgTable("report_post", {
   postId: uuid("post_id")
     .notNull()
     .references(() => post.id, { onDelete: "cascade" }),
-  reporterUserId: uuid("reporter_user_id")
+  reporterUserId: varchar("reporter_user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   reason: reportReasonEnum("reason").notNull(),
@@ -580,10 +580,10 @@ export const reportPost = pgTable("report_post", {
 
 export const reportUser = pgTable("report_profile", {
   id: uuid("id").primaryKey().defaultRandom(),
-  targetUserId: uuid("target_user_id")
+  targetUserId: varchar("target_user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  reporterUserId: uuid("reporter_user_id")
+  reporterUserId: varchar("reporter_user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   reason: reportUserReasonEnum("reason").notNull(),
