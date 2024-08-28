@@ -35,16 +35,16 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "blocked" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
-	"blocked_user_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" varchar(255) NOT NULL,
+	"blocked_user_id" varchar(255) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "comment" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"user" text NOT NULL,
-	"post_id" bigint NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user" varchar(255) NOT NULL,
+	"post_id" uuid NOT NULL,
 	"body" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -56,44 +56,44 @@ CREATE TABLE IF NOT EXISTS "contact" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "follow_request" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"sender_id" text NOT NULL,
-	"recipient_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"sender_id" varchar(255) NOT NULL,
+	"recipient_id" varchar(255) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "follower" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"sender_id" text NOT NULL,
-	"recipient_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"sender_id" varchar(255) NOT NULL,
+	"recipient_id" varchar(255) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "friend" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"user_id_1" text NOT NULL,
-	"user_id_2" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id_1" varchar(255) NOT NULL,
+	"user_id_2" varchar(255) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "friend_request" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"sender_id" text NOT NULL,
-	"recipient_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"sender_id" varchar(255) NOT NULL,
+	"recipient_id" varchar(255) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "like" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"post_id" bigint NOT NULL,
-	"user" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"post_id" uuid NOT NULL,
+	"user" varchar(255) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "notification_settings" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"posts" boolean DEFAULT true NOT NULL,
 	"likes" boolean DEFAULT true NOT NULL,
 	"mentions" boolean DEFAULT true NOT NULL,
@@ -105,22 +105,22 @@ CREATE TABLE IF NOT EXISTS "notification_settings" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "notifications" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"sender_id" text NOT NULL,
-	"recipient_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"sender_id" varchar(255) NOT NULL,
+	"recipient_id" varchar(255) NOT NULL,
 	"read" boolean DEFAULT false NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
 	"event_type" "event_type" NOT NULL,
-	"entity_id" text,
+	"entity_id" uuid,
 	"entity_type" "entity_type",
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "post" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"author" text NOT NULL,
-	"recipient" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"author" varchar(255) NOT NULL,
+	"recipient" varchar(255) NOT NULL,
 	"caption" text DEFAULT '' NOT NULL,
 	"key" text NOT NULL,
 	"width" integer DEFAULT 500 NOT NULL,
@@ -133,9 +133,8 @@ CREATE TABLE IF NOT EXISTS "post" (
 CREATE TABLE IF NOT EXISTS "postOfUserNotOnApp" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"phone_number" text NOT NULL,
-	"author" text NOT NULL,
+	"author" varchar(255) NOT NULL,
 	"caption" text DEFAULT '' NOT NULL,
-	"recipient" uuid NOT NULL,
 	"key" text NOT NULL,
 	"width" integer DEFAULT 500 NOT NULL,
 	"height" integer DEFAULT 500 NOT NULL,
@@ -145,8 +144,8 @@ CREATE TABLE IF NOT EXISTS "postOfUserNotOnApp" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "post_stats" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"post_id" bigint NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"post_id" uuid NOT NULL,
 	"likes" integer DEFAULT 0 NOT NULL,
 	"comments" integer DEFAULT 0 NOT NULL,
 	"views" integer DEFAULT 0 NOT NULL,
@@ -155,14 +154,14 @@ CREATE TABLE IF NOT EXISTS "post_stats" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "post_view" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
-	"post_id" bigint NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" varchar(255) NOT NULL,
+	"post_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "profile" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"username" text NOT NULL,
 	"full_name" text,
 	"date_of_birth" date,
@@ -174,8 +173,8 @@ CREATE TABLE IF NOT EXISTS "profile" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "profile_stats" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"profile_id" bigint NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"profile_id" uuid NOT NULL,
 	"followers" integer DEFAULT 0 NOT NULL,
 	"following" integer DEFAULT 0 NOT NULL,
 	"friends" integer DEFAULT 0 NOT NULL,
@@ -185,50 +184,42 @@ CREATE TABLE IF NOT EXISTS "profile_stats" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "profile_view" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"viewer_user_id" text NOT NULL,
-	"viewed_user_id" text NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "push_token" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" varchar(255) NOT NULL,
 	"token" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "report_comment" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"comment_id" bigint NOT NULL,
-	"reporter_user_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"comment_id" uuid NOT NULL,
+	"reporter_user_id" varchar(255) NOT NULL,
 	"reason" "report_reason" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "report_post" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"post_id" bigint NOT NULL,
-	"reporter_user_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"post_id" uuid NOT NULL,
+	"reporter_user_id" varchar(255) NOT NULL,
 	"reason" "report_reason" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "report_profile" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"target_user_id" text NOT NULL,
-	"reporter_user_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"target_user_id" varchar(255) NOT NULL,
+	"reporter_user_id" varchar(255) NOT NULL,
 	"reason" "report_user_reason" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user" (
-	"id" text PRIMARY KEY NOT NULL,
-	"profile_id" bigint NOT NULL,
-	"notification_settings_id" bigint NOT NULL,
+	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"profile_id" uuid NOT NULL,
+	"notification_settings_id" uuid NOT NULL,
 	"privacy_setting" "privacy_setting" DEFAULT 'public' NOT NULL,
 	"phone_number" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -236,18 +227,10 @@ CREATE TABLE IF NOT EXISTS "user" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_contact" (
-	"user_id" text NOT NULL,
+	"user_id" varchar(255) NOT NULL,
 	"contact_id" varchar(128) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "user_contact_user_id_contact_id_pk" PRIMARY KEY("user_id","contact_id")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "userNotOnApp" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"phone_number" text NOT NULL,
-	"profile_picture_key" text,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -359,13 +342,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "postOfUserNotOnApp" ADD CONSTRAINT "postOfUserNotOnApp_author_user_id_fk" FOREIGN KEY ("author") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "postOfUserNotOnApp" ADD CONSTRAINT "postOfUserNotOnApp_recipient_userNotOnApp_id_fk" FOREIGN KEY ("recipient") REFERENCES "public"."userNotOnApp"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "postOfUserNotOnApp" ADD CONSTRAINT "postOfUserNotOnApp_author_user_id_fk" FOREIGN KEY ("author") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -390,18 +367,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "profile_stats" ADD CONSTRAINT "profile_stats_profile_id_profile_id_fk" FOREIGN KEY ("profile_id") REFERENCES "public"."profile"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "profile_view" ADD CONSTRAINT "profile_view_viewer_user_id_user_id_fk" FOREIGN KEY ("viewer_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "profile_view" ADD CONSTRAINT "profile_view_viewed_user_id_user_id_fk" FOREIGN KEY ("viewed_user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

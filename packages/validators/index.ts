@@ -3,7 +3,7 @@ import * as sharedMediaSchema from "./src/shared/media";
 import * as sharedNotificationsSchema from "./src/shared/notifications";
 import * as sharedReportSchema from "./src/shared/report";
 import * as sharedUserSchema from "./src/shared/user";
-import { input, output } from "./src/trpc";
+import { output } from "./src/trpc";
 
 export {
   PublicFollowState,
@@ -13,7 +13,6 @@ export {
 } from "./src/trpc/output/profile/profile";
 
 const trpcValidators = {
-  input,
   output,
 };
 

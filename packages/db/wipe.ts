@@ -1,9 +1,15 @@
+import fs from "fs";
+import path from "path";
 import readline from "readline";
+import { fileURLToPath } from "url";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import { env } from "@oppfy/env";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const queryClient = postgres(env.DATABASE_URL);
 
@@ -60,9 +66,19 @@ const wipeDatabase = async () => {
       END $$;
     `);
 
-    console.log("Database wiped successfully.");
+    // Delete drizzle/meta directory
+    const drizzlePath = path.join(__dirname, "drizzle");
+    if (fs.existsSync(drizzlePath)) {
+      fs.rmSync(drizzlePath, { recursive: true, force: true });
+      fs.mkdirSync(drizzlePath);
+      console.log("Drizzle meta directory deleted successfully.");
+    } else {
+      console.log("Drizzle meta directory not found.");
+    }
+
+    console.log("Database wiped and meta directory deleted successfully.");
   } catch (error) {
-    console.error("Error wiping database:", error);
+    console.error("Error during wipe process:", error);
   } finally {
     rl.close();
     await queryClient.end();

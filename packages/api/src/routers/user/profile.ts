@@ -2,8 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { eq, schema } from "@oppfy/db";
-import { env } from "@oppfy/env";
-import { sharedValidators, trpcValidators } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
