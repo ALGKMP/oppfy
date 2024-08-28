@@ -9,7 +9,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { CameraOff } from "@tamagui/lucide-icons";
-import { Text, View } from "tamagui";
+import { View } from "tamagui";
 
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";

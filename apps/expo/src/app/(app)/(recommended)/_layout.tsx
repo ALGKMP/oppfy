@@ -23,7 +23,6 @@ const SettingsLayout = () => {
         }}
       />
 
-      {/* <Stack.Screen name="notifications" options={{ title: "Notifications" }} /> */}
     </Stack>
   );
 };

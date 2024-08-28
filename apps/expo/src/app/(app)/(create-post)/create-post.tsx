@@ -218,7 +218,7 @@ const CreatePost = () => {
                 >
                   <Video
                     ref={videoRef}
-                    source={{ uri: uri ?? "" }}
+                    source={{ uri }}
                     style={[
                       styles.media,
                       { width: previewWidth, height: previewHeight },

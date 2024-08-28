@@ -73,8 +73,7 @@ const PreviewScreen = () => {
   };
 
   // Calculate the aspect ratio of the content
-  const contentAspectRatio =
-    parseFloat(width ?? "0") / parseFloat(height ?? "0");
+  const contentAspectRatio = parseInt(width) / parseInt(height);
 
   // Determine the actual content height, constrained by available space
   const availableHeight =
@@ -109,9 +108,9 @@ const PreviewScreen = () => {
           top={topPosition}
         >
           {type === "photo" ? (
-            <PreviewImage uri={uri ?? ""} />
+            <PreviewImage uri={uri} />
           ) : (
-            <PreviewVideo uri={uri ?? ""} videoRef={videoRef} />
+            <PreviewVideo uri={uri} videoRef={videoRef} />
           )}
 
           <View position="absolute" top={12} left={12}>
@@ -135,7 +134,7 @@ const PreviewScreen = () => {
           icon={saveState === "idle" ? Download : undefined}
           onPress={() =>
             saveToCameraRoll({
-              uri: uri ?? "",
+              uri,
               isNetworkUrl: false,
               mediaType: type == "photo" ? "image" : "video",
             })
