@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect } from "react";
+import React, { useCallback, useLayoutEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 
@@ -58,7 +58,7 @@ const SelfProfile = () => {
     ({ userId, username }: { userId: string; username: string }) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push({
-        pathname: "(profile)/profile/[userId]/",
+        pathname: "/(profile)/profile/[userId]",
         params: { userId, username },
       });
     },

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect } from "react";
+import React, { useCallback, useLayoutEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import {
@@ -8,7 +8,6 @@ import {
   useSegments,
 } from "expo-router";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
-import { fromPairs } from "lodash";
 import { View } from "tamagui";
 
 import { ActionSheet } from "~/components/Sheets";
@@ -35,7 +34,7 @@ const Profile = () => {
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
   } = api.profile.getFullProfileOther.useQuery(
-    { userId: userId ?? "" },
+    { userId },
     { enabled: !!userId },
   );
 
@@ -45,7 +44,7 @@ const Profile = () => {
     isLoading: isLoadingFriendsData,
     refetch: refetchFriendsData,
   } = api.friend.paginateFriendsOthers.useInfiniteQuery(
-    { userId: userId ?? "", pageSize: 10 },
+    { userId, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: !!userId,
@@ -61,7 +60,7 @@ const Profile = () => {
     refetch: refetchPosts,
     hasNextPage,
   } = api.post.paginatePostsOfUserOther.useInfiniteQuery(
-    { userId: userId ?? "", pageSize: 10 },
+    { userId, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: !!userId,
@@ -180,6 +179,7 @@ const Profile = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      title: username,
       headerRight: () => (
         <View>
           <TouchableOpacity
@@ -193,7 +193,6 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
       ),
-      title: username ?? profileData?.username,
     });
   }, [navigation, username, profileData, handleOnPress, userId]);
 
@@ -227,7 +226,7 @@ const Profile = () => {
     ({ userId, username }: { userId: string; username: string }) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push({
-        pathname: `${segments[2]}/profile/[userId]/`, // TODO: will break, fix this
+        pathname: `${segments[2]}/profile/[userId]/`,
         params: { userId, username },
       });
     },

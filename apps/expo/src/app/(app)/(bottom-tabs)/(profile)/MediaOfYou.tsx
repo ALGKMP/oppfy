@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import * as Haptics from "expo-haptics";
 import { useRouter, useSegments } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -9,7 +8,6 @@ import { SizableText, Text, View, YStack } from "tamagui";
 import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
 import type { RouterOutputs } from "~/utils/api";
-import { api } from "~/utils/api";
 
 type ProfileDataSelf = RouterOutputs["profile"]["getFullProfileSelf"];
 type profileDataOther = RouterOutputs["profile"]["getFullProfileOther"];

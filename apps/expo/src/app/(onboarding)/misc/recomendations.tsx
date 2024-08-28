@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Dimensions, TouchableOpacity, View } from "react-native";
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -12,44 +11,35 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
+import { Text, useTheme, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import { OnboardingButton } from "~/features/onboarding/components";
-import { api, RouterOutputs } from "~/utils/api";
-
-const placeholderUsers = [
-  { fullName: "Michael", username: "michaelyyz" },
-  { fullName: "Ben Archer", username: "benarcher" },
-  { fullName: "Nebula", username: "nebula1600" },
-  { fullName: "kareem", username: "6kaleio" },
-  { fullName: "ayaaniqbal", username: "ayaaniqbal" },
-  { fullName: "Ali", username: "aliy45" },
-  { fullName: "itsalianna", username: "itsaliannaaa" },
-  { fullName: "Bautista", username: "bautista12" },
-  // Add more users if needed
-];
+import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");
 const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, considering margin and padding
 
-const AnimatedUserProfile = ({
-  user,
-  index,
-  onUserSelected,
-}: {
-  user: {
-    userId: string;
-    fullName: string | null;
-    username: string;
-    profilePictureUrl: string | null;
-  };
+interface User {
+  userId: string;
+  fullName: string | null;
+  username: string;
+  profilePictureUrl: string | null;
+}
+
+interface UserProfileProps {
+  user: User;
   index: number;
   onUserSelected: (userId: string, added: boolean) => void;
-}) => {
+}
+
+const AnimatedUserProfile = ({
+  user,
+  onUserSelected,
+  index: _index,
+}: UserProfileProps) => {
   const [isAdded, setIsAdded] = useState(false);
   const opacity = useSharedValue(1);
   const checkmarkOpacity = useSharedValue(0);
@@ -157,7 +147,7 @@ const OnboardingRecomendations = () => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const requiredUsers = 5;
 
-  const { data: recommendations, isLoading } =
+  const { data: recommendations } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const followMultipleUsersMutation = api.follow.followUsers.useMutation();
@@ -169,20 +159,14 @@ const OnboardingRecomendations = () => {
   };
 
   const onDone = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     // if (selectedUsers.length >= requiredUsers) {
-    try {
-      void followMultipleUsersMutation.mutateAsync({
-        userIds: selectedUsers,
-      });
+    await followMultipleUsersMutation.mutateAsync({
+      userIds: selectedUsers,
+    });
 
-      router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
-    } catch (error) {
-      console.error("Failed to follow users:", error);
-      // Handle error (e.g., show an error message to the user)
-    }
-    // }
+    router.replace("/(app)/(bottom-tabs)/(profile)/self-profile");
   };
   const remainingUsers = Math.max(0, requiredUsers - selectedUsers.length);
 
@@ -195,11 +179,11 @@ const OnboardingRecomendations = () => {
     >
       <Text
         fontSize="$6"
-        fontWeight="bold"
-        color="white"
-        backgroundColor={"transparent"}
-        textAlign="center"
         marginVertical="$4"
+        backgroundColor="transparent"
+        color="white"
+        fontWeight="bold"
+        textAlign="center"
       >
         Recommendations
       </Text>

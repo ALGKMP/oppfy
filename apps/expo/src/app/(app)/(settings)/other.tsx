@@ -32,16 +32,11 @@ const Other = () => {
   const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
     useState(false);
 
-  const handleClearCache = async () => {
+  const handleClearCache = () => {
     if (FileSystem.cacheDirectory === null) return;
-
-    try {
-      await FileSystem.deleteAsync(FileSystem.cacheDirectory, {
-        idempotent: true,
-      });
-    } catch {
-      /* empty */
-    }
+    void FileSystem.deleteAsync(FileSystem.cacheDirectory, {
+      idempotent: true,
+    });
   };
 
   const clearCachetitle = "Clear Cache";

@@ -36,9 +36,7 @@ const BlockedUsers = () => {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter(
-              (item) => item.userId !== newData.blockedUserId,
-            ),
+            items: page.items.filter((item) => item.userId !== newData.userId),
           })),
         },
       );
@@ -86,9 +84,9 @@ const BlockedUsers = () => {
     }
   };
 
-  const handleUnblock = async (blockedUserId: string) => {
+  const handleUnblock = async (userId: string) => {
     await unblockUser.mutateAsync({
-      blockedUserId,
+      userId,
     });
   };
 

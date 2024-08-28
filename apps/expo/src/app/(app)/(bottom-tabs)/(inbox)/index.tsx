@@ -7,15 +7,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import {
-  Circle,
-  H5,
-  H6,
-  Paragraph,
-  SizableText,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Circle, H5, Paragraph, SizableText, XStack, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
