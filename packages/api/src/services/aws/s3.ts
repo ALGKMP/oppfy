@@ -131,7 +131,7 @@ export class S3Service {
   }) {
     try {
       const currentDate = Date.now();
-      const objectKey = `posts/${currentDate}-${recipientNumber}-${author}.jpg`;
+      const objectKey = `posts/${currentDate}-${number}-${author}.jpg`;
 
       caption = encodeURIComponent(caption);
 
