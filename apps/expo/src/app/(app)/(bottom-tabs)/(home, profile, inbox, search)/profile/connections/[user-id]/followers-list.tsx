@@ -22,7 +22,7 @@ const FollowersList = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
-    userId: userId ?? "",
+    userId: userId,
     queryToOptimisticallyUpdate: "follow.paginateFollowersOthers",
     queriesToInvalidate: [
       "follow.paginateFollowingOthers",
@@ -39,7 +39,7 @@ const FollowersList = () => {
     hasNextPage,
     refetch,
   } = api.follow.paginateFollowersOthers.useInfiniteQuery(
-    { userId: userId ?? "", pageSize: 20 },
+    { userId: userId, pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 

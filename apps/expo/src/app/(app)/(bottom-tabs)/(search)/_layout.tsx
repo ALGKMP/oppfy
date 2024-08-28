@@ -1,11 +1,5 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import type {
-  HeaderBackButtonProps,
-  NativeStackHeaderProps,
-} from "@react-navigation/native-stack/src/types";
-import { ChevronLeft } from "@tamagui/lucide-icons";
+import type { NativeStackHeaderProps } from "@react-navigation/native-stack/src/types";
 import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";

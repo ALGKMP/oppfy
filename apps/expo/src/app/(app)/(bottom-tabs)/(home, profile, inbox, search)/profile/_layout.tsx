@@ -11,7 +11,6 @@ import { Header as BaseHeader } from "~/components/Headers";
 
 const ProfileLayout = () => {
   const theme = useTheme();
-  const router = useRouter();
 
   return (
     <Stack

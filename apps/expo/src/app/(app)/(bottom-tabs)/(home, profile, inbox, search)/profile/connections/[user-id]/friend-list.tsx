@@ -3,7 +3,7 @@ import { RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { H5, H6, SizableText, View, YStack } from "tamagui";
+import { H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -22,7 +22,7 @@ const FriendList = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
-    userId: userId ?? "",
+    userId,
     queryToOptimisticallyUpdate: "friend.paginateFriendsOthers",
     queriesToInvalidate: [
       "follow.paginateFollowingOthers",
@@ -39,7 +39,7 @@ const FriendList = () => {
     hasNextPage,
     refetch,
   } = api.friend.paginateFriendsOthers.useInfiniteQuery(
-    { userId: userId ?? "", pageSize: 20 },
+    { userId, pageSize: 20 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
