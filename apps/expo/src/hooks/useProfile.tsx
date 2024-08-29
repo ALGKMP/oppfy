@@ -4,6 +4,7 @@ import { api } from "~/utils/api";
 const STALE_TIME = 20 * 60 * 1000; // 20 minutes
 
 export type Profile = RouterOutputs["profile"]["getFullProfileSelf"];
+export type RecommendationProfile = RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
 
 const useProfile = () => {
   const {

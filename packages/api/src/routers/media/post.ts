@@ -233,7 +233,6 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional(),
       }),
     )
-    // .output(trpcValidators.output.post.paginatedFeedPosts)
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.post.paginatePostsForFeed(
@@ -449,16 +448,16 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         postId: z.string(),
-        comment: z.string(),
+        body: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { postId, comment } = input;
+      const { postId, body } = input;
       try {
         await ctx.services.post.commentOnPost({
           userId: ctx.session.uid,
           postId,
-          comment,
+          body,
         });
       } catch (err) {
         throw new TRPCError({

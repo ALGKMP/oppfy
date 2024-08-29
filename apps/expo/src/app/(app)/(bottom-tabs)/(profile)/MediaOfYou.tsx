@@ -83,7 +83,7 @@ const MediaOfYou = ({
   const segments = useSegments();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<number[]>([]);
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
   const [isRestricted, setIsRestricted] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false); // Blocked by the profile being viewed
   const [hasBlocked, setHasBlocked] = useState(false); // Current user blocked the profile being viewed
@@ -131,7 +131,7 @@ const MediaOfYou = ({
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
         .map((token) => token.item?.postId)
-        .filter((id): id is number => id !== undefined);
+        .filter((id): id is string => id !== undefined);
 
       setViewableItems(visibleItemIds);
     },

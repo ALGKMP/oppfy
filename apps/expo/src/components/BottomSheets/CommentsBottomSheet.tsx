@@ -5,7 +5,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Keyboard, StyleSheet, TouchableOpacity } from "react-native";
+import { v4 as uuidv4 } from 'uuid';
+import { StyleSheet, TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -17,9 +18,6 @@ import {
   SendHorizontal,
   Trash2,
 } from "@tamagui/lucide-icons";
-import en from "javascript-time-ago/locale/en";
-import { size } from "lodash";
-import { input } from "node_modules/@oppfy/validators/src/trpc";
 import {
   Avatar,
   getToken,
@@ -46,7 +44,7 @@ import { ReportPostActionSheet } from "../Sheets";
 import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface CommentsModalProps {
-  postId: number;
+  postId: string;
   userIdOfPostRecipient: string;
   isSelfPost: boolean;
   modalVisible: boolean;
@@ -167,7 +165,7 @@ const CommentsBottomSheet = React.memo(
           );
         }
 
-        const temporaryId = Math.random();
+        const temporaryId = uuidv4();
 
         // Optimistically update to the new value
         utils.post.paginateComments.setInfiniteData(
@@ -440,7 +438,7 @@ const MemoizedAvatar = React.memo(
 interface CommentProps {
   comment: Comment;
   isSelfPost: boolean;
-  postId: number;
+  postId: string;
   userIdOfPostRecipient: string;
 }
 

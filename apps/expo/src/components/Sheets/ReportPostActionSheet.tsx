@@ -6,7 +6,7 @@ import ActionSheet, { ButtonOption } from "../Sheets/ActionSheet";
 interface ReportPostActionSheetProps {
   title: string;
   subtitle: string;
-  postId: number;
+  postId: string;
   isVisible: boolean;
   onCancel: () => void;
 }

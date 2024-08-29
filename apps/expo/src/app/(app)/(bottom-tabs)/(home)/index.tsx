@@ -26,7 +26,7 @@ import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
-import type { Profile } from "~/hooks/useProfile";
+import type { Profile, RecommendationProfile } from "~/hooks/useProfile";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -38,14 +38,14 @@ const { width: screenWidth } = Dimensions.get("window");
 type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
 
 interface TokenItem {
-  postId?: number | undefined;
+  postId?: string | undefined;
 }
 
 const HomeScreen = () => {
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<number[]>([]);
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const { profile, isLoading: isLoadingProfile } = useProfile();
 
@@ -94,7 +94,7 @@ const HomeScreen = () => {
         .filter((token) => token.isViewable)
         .map((token) => (token.item as TokenItem).postId)
         .filter((id) => id !== undefined);
-      setViewableItems(visibleItemIds as number[]);
+      setViewableItems(visibleItemIds as string[]);
     },
     [],
   );
@@ -151,7 +151,7 @@ const HomeScreen = () => {
   );
 
   const renderSuggestions = useMemo(() => {
-    const handleProfilePress = (profile: Profile) => {
+    const handleProfilePress = (profile: RecommendationProfile) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.navigate({
         pathname: "/profile/[userId]",

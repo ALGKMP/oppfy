@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { PersonStanding } from "@tamagui/lucide-icons";
 
 interface ImagePostProps {
-  postId: number;
+  postId: string;
   imageUrl: string;
   children: React.ReactNode;
 }

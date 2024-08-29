@@ -463,13 +463,13 @@ export class PostService {
   async commentOnPost({
     userId,
     postId,
-    comment,
+    body,
   }: {
     userId: string;
     postId: string;
-    comment: string;
+    body: string;
   }) {
-    await this.commentRepository.addComment({ postId, userId, comment });
+    await this.commentRepository.addComment({ postId, userId, body });
     await this.postStatsRepository.incrementCommentsCount(postId);
 
     const post = await this.getPost(postId);

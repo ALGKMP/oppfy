@@ -51,7 +51,7 @@ const trpcProfileOutputSchema = {
 
   fullProfileSelf: z.object({
     userId: z.string(),
-    profileId: z.number(),
+    profileId: z.string(),
     username: z.string(),
     name: z.string(),
     bio: z.union([z.string(), z.null()]),
@@ -62,7 +62,7 @@ const trpcProfileOutputSchema = {
     profilePictureUrl: z.string().nullable(),
     profileStats: z.object({
       createdAt: z.date(),
-      profileId: z.number(),
+      profileId: z.string(),
       posts: z.number(),
       following: z.number(),
       id: z.number(),

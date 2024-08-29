@@ -163,7 +163,7 @@ export const useComments = (postId: string) => {
               {
                 postId: newCommentData.postId,
                 commentId: new Date().getTime().toString(),
-                body: newCommentData.comment,
+                body: newCommentData.body,
                 userId: currentUser?.userId ?? "",
                 username: currentUser?.username ?? "",
                 profilePictureUrl: currentUser?.profilePictureUrl ?? "",
@@ -241,8 +241,8 @@ export const useComments = (postId: string) => {
     }
   };
 
-  const handlePostComment = async (comment: string) => {
-    await postComment.mutateAsync({ postId, comment });
+  const handlePostComment = async (body: string) => {
+    await postComment.mutateAsync({ postId, body });
   };
 
   const handleDeleteComment = async (commentId: string) => {
