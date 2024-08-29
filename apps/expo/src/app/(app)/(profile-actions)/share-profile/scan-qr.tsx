@@ -44,13 +44,19 @@ const ScanQr = () => {
     codeTypes: ["qr"],
     onCodeScanned: (codes) => {
       if (isScanning && codes.length > 0 && codes[0]?.value) {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
         setIsScanning(false);
         const url = new URL(codes[0].value);
-        const userId = url.searchParams.get("userId");
-        const username = url.searchParams.get("username");
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+        const userId = url.searchParams.get("userId") ?? "";
+        const username = url.searchParams.get("username") ?? "";
+
         setTimeout(() => {
-          router.push(`(profile)/profile/${userId}?username=${username}`);
+          router.push({
+            pathname: "/(profile)/profile/[userId]",
+            params: { userId, username },
+          });
           // Reset scanning state after navigation
           setIsScanning(true);
         }, 100);
