@@ -107,17 +107,13 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional(),
       }),
     )
-    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginatePostsOfUserSelf(
+        return await ctx.services.post.paginatePostsOfUserSelf(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result);
-        return parsedResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -145,17 +141,13 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional(),
       }),
     )
-    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginatePostsOfFollowing(
+        return await ctx.services.post.paginatePostsOfFollowing(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result);
-        return parsedResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -183,17 +175,13 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional(),
       }),
     )
-    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginatePostsOfRecommended(
+        return await ctx.services.post.paginatePostsOfRecommended(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result);
-        return parsedResult;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -268,7 +256,6 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional(),
       }),
     )
-    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.post.paginatePostsOfUserOther(
@@ -277,9 +264,7 @@ export const postRouter = createTRPCRouter({
           input.pageSize,
         );
 
-        const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result);
-        return parsedResult;
+        return result;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -307,7 +292,6 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional(),
       }),
     )
-    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.post.paginatePostsOfUserSelf(
@@ -315,9 +299,7 @@ export const postRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result);
-        return parsedResult;
+        return result;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -346,7 +328,6 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional(),
       }),
     )
-    .output(trpcValidators.output.post.paginatedPosts)
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.post.paginatePostsOfUserOther(
@@ -354,9 +335,7 @@ export const postRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        const parsedResult =
-          trpcValidators.output.post.paginatedPosts.parse(result);
-        return parsedResult;
+        return result;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
         if (err instanceof DomainError) {
@@ -374,7 +353,6 @@ export const postRouter = createTRPCRouter({
 
   getPost: protectedProcedure
     .input(z.object({ postId: z.string() }))
-    .output(sharedValidators.media.post)
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.post.getPost(input.postId);
@@ -410,7 +388,6 @@ export const postRouter = createTRPCRouter({
         postId: z.string(),
       }),
     )
-    .output(z.boolean())
     .query(async ({ ctx, input }) => {
       const { postId } = input;
       try {
@@ -500,7 +477,6 @@ export const postRouter = createTRPCRouter({
         pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
-    // .output(trpcValidators.output.post.paginatedComments)
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.post.paginateComments(
@@ -508,9 +484,7 @@ export const postRouter = createTRPCRouter({
           input.cursor,
           input.pageSize,
         );
-        const parsedResult =
-          trpcValidators.output.post.paginatedComments.parse(result);
-        return parsedResult;
+        return result;
       } catch (err) {
         console.error("TRPC paginateComments error: ", err);
         throw new TRPCError({

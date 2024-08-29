@@ -71,12 +71,11 @@ export const blockRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.paginate.paginateBlocked(
+        return await ctx.services.paginate.paginateBlocked(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
         );
-        return trpcValidators.output.block.paginateBlocked.parse(result);
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }

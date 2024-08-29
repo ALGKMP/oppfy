@@ -5,13 +5,6 @@ import * as sharedReportSchema from "./src/shared/report";
 import * as sharedUserSchema from "./src/shared/user";
 import { output } from "./src/trpc";
 
-export {
-  PublicFollowState,
-  PrivateFollowState,
-  FriendState,
-  PrivacyStatus,
-} from "./src/trpc/output/profile/profile";
-
 const trpcValidators = {
   output,
 };

@@ -1,4 +1,5 @@
-import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
+
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories";
@@ -258,21 +259,21 @@ export class FollowService {
 
     if (privacySetting === "public") {
       return isFollowing
-        ? PublicFollowState.Enum.Following
-        : PublicFollowState.Enum.NotFollowing;
+        ? sharedValidators.user.PublicFollowState.Enum.Following
+        : sharedValidators.user.PublicFollowState.Enum.NotFollowing;
     } else {
       if (isFollowing) {
-        return PrivateFollowState.Enum.Following;
+        return sharedValidators.user.PrivateFollowState.Enum.Following;
       } else if (followRequest) {
-        return PrivateFollowState.Enum.OutboundRequest;
+        return sharedValidators.user.PrivateFollowState.Enum.OutboundRequest;
       } else {
         const incomingRequest = await this.followRepository.getFollowRequest(
           targetUserId,
           userId,
         );
         return incomingRequest
-          ? PrivateFollowState.Enum.IncomingRequest
-          : PrivateFollowState.Enum.NotFollowing;
+          ? sharedValidators.user.PrivateFollowState.Enum.IncomingRequest
+          : sharedValidators.user.PrivateFollowState.Enum.NotFollowing;
       }
     }
   }

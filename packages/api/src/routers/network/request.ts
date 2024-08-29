@@ -26,10 +26,10 @@ export const requestRouter = createTRPCRouter({
             input.cursor,
             input.pageSize,
           );
-        return trpcValidators.output.request.paginateFriendRequests.parse({
+        return {
           items,
           nextCursor,
-        });
+        };
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
@@ -55,22 +55,16 @@ export const requestRouter = createTRPCRouter({
             input.cursor,
             input.pageSize,
           );
-        return trpcValidators.output.request.paginateFollowRequests.parse({
+        return {
           items,
           nextCursor,
-        });
+        };
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
     }),
 
   countRequests: protectedProcedure
-    .output(
-      z.object({
-        followRequestCount: z.number(),
-        friendRequestCount: z.number(),
-      }),
-    )
     .query(async ({ ctx }) => {
       try {
         const followRequestCount =

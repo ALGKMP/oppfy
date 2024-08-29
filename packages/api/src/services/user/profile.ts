@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 import { env } from "@oppfy/env";
-import { PrivacyStatus, trpcValidators } from "@oppfy/validators";
+import {
+  sharedValidators,
+} from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -15,18 +17,13 @@ import { CloudFrontService } from "../aws/cloudfront";
 import { BlockService } from "../network/block";
 import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
-import { sharedValidators } from "@oppfy/validators";
 
 const updateProfile = z.object({
   fullName: sharedValidators.user.fullName.optional(),
   username: sharedValidators.user.username.optional(),
   bio: sharedValidators.user.bio.optional(),
   dateOfBirth: sharedValidators.user.dateOfBirth.optional(),
-})
-
-type PublicFollowState = "NotFollowing" | "Following";
-type PrivateFollowState = "NotFollowing" | "Requested" | "Following";
-type FriendState = "NotFriends" | "Requested" | "Friends";
+});
 
 export class ProfileService {
   private userRepository = new UserRepository();
@@ -40,7 +37,10 @@ export class ProfileService {
   private blockService = new BlockService();
   private cloudFrontService = new CloudFrontService();
 
-  async updateProfile(userId: string, newData: z.infer<typeof updateProfile>): Promise<void> {
+  async updateProfile(
+    userId: string,
+    newData: z.infer<typeof updateProfile>,
+  ): Promise<void> {
     const userWithProfile = await this.profileRepository.getUserProfile(userId);
 
     if (userWithProfile === undefined) {
@@ -88,7 +88,7 @@ export class ProfileService {
         )
       : null;
 
-    return trpcValidators.output.profile.fullProfileSelf.parse({
+    return {
       userId: user.id,
       profileId: user.profile.id,
       privacy: user.privacySetting,
@@ -100,7 +100,7 @@ export class ProfileService {
       friendCount: user.profile.profileStats.friends,
       profilePictureUrl,
       profileStats: user.profile.profileStats,
-    });
+    };
   }
 
   async getFullProfileOther({
@@ -109,7 +109,7 @@ export class ProfileService {
   }: {
     currentUserId: string;
     otherUserId: string;
-  }): Promise<z.infer<typeof trpcValidators.output.profile.fullProfileOther>> {
+  }) {
     const user = await this.profileRepository.getUserFullProfile(otherUserId);
     if (!user) {
       throw new DomainError(
@@ -130,7 +130,7 @@ export class ProfileService {
       otherUserId,
     });
 
-    const profileData = {
+    return {
       userId: user.id,
       profileId: user.profile.id,
       privacy: user.privacySetting,
@@ -143,17 +143,10 @@ export class ProfileService {
       profilePictureUrl,
       networkStatus,
     };
-
-    return trpcValidators.output.profile.fullProfileOther.parse(profileData);
   }
 
   async getBatchProfiles(userIds: string[]) {
-    const batchProfiles =
-      await this.profileRepository.getBatchProfiles(userIds);
-
-    return z
-      .array(trpcValidators.output.profile.compactProfile)
-      .parse(batchProfiles);
+    return await this.profileRepository.getBatchProfiles(userIds);
   }
 
   async removeProfilePicture(userId: string) {
@@ -177,7 +170,7 @@ export class ProfileService {
   }: {
     currentUserId: string;
     otherUserId: string;
-  }): Promise<z.infer<typeof PrivacyStatus>> {
+  }) {
     const targetUser = await this.userRepository.getUser(currentUserId);
     if (!targetUser) {
       throw new DomainError(
@@ -231,7 +224,7 @@ export class ProfileService {
       ? true
       : false;
 
-    const networkStates = {
+    return {
       privacy: otherUser.privacySetting,
       blocked,
       targetUserFollowState,
@@ -241,7 +234,5 @@ export class ProfileService {
       isTargetUserBlocked,
       isOtherUserBlocked,
     };
-
-    return PrivacyStatus.parse(networkStates);
   }
 }

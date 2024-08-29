@@ -1,4 +1,4 @@
-import { FriendState } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories";
@@ -273,13 +273,13 @@ export class FriendService {
     const incomingRequest = await this.getFriendRequest(targetUserId, userId);
 
     if (friendshipExists) {
-      return FriendState.Enum.Friends;
+      return sharedValidators.user.FriendState.Enum.Friends;
     } else if (friendRequest) {
-      return FriendState.Enum.OutboundRequest;
+      return sharedValidators.user.FriendState.Enum.OutboundRequest;
     } else if (incomingRequest) {
-      return FriendState.Enum.IncomingRequest;
+      return sharedValidators.user.FriendState.Enum.IncomingRequest;
     } else {
-      return FriendState.Enum.NotFriends;
+      return sharedValidators.user.FriendState.Enum.NotFriends;
     }
   }
 
