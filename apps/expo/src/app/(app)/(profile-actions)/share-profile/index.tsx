@@ -26,14 +26,14 @@ const ShareProfile = () => {
     "https://app.oppfy.app",
   ).toString();
 
-  const handleShare = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await Sharing.shareAsync(qrValue);
+  const handleShare = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    void Sharing.shareAsync(qrValue);
   };
 
-  const handleCopyLink = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await Clipboard.setStringAsync(qrValue);
+  const handleCopyLink = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    void Clipboard.setStringAsync(qrValue);
     toast.show("Link copied");
   };
 
