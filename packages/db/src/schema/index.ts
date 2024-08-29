@@ -18,7 +18,7 @@ const dateType = customType<{ data: Date | null; driverData: string | null }>({
     return "date";
   },
   toDriver(value: Date | null): string | null {
-    return value ? (value.toISOString().split("T")[0] ?? null) : null;
+    return value ? value.toISOString().split("T")[0] ?? null : null;
   },
   fromDriver(value: string | null): Date | null {
     return value ? new Date(value) : null;
@@ -196,25 +196,19 @@ export const profileStatsRelations = relations(profileStats, ({ one }) => ({
   }),
 }));
 
-export const pushToken = pgTable(
-  "push_token",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userId: varchar("user_id", { length: 255 })
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    token: text("token").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-  },
-  (table) => ({
-    uniquePushToken: uniqueIndex("unique_push_token").on(table.token),
-  }),
-);
+export const pushToken = pgTable("push_token", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  token: text("token").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 export const pushTokenRelations = relations(pushToken, ({ one }) => ({
   user: one(user, {
@@ -360,7 +354,6 @@ export const postStatsRelations = relations(postStats, ({ one }) => ({
     references: [post.id],
   }),
 }));
-
 
 export const like = pgTable("like", {
   id: uuid("id").primaryKey().defaultRandom(),
