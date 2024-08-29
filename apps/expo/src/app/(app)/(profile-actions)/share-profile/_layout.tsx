@@ -24,7 +24,7 @@ const ShareProfileLayout = () => {
           headerTransparent: true,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <X />
+              <ChevronLeft />
             </TouchableOpacity>
           ),
           headerRight: () => (
@@ -47,7 +47,7 @@ const ShareProfileLayout = () => {
           headerTransparent: true,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft />
+              <X />
             </TouchableOpacity>
           ),
         }}
