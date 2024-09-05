@@ -53,6 +53,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           horizontal
           ListEmptyComponent={null}
           estimatedItemSize={70}
+          keyExtractor={(item) => "people_carousel_" + item}
           showsHorizontalScrollIndicator={false}
           renderItem={() => <Skeleton circular size={70} />}
           ItemSeparatorComponent={() => <Spacer size="$2" />}
@@ -119,7 +120,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
-          // keyExtractor={(item, index) => item.userId + index + pathname}
+          keyExtractor={(item) => "people_carousel_" + item.userId}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
               <YStack width={70} gap="$1.5" alignItems="center">

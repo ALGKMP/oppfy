@@ -87,6 +87,7 @@ const FollowersList = () => {
         data={filteredItems}
         onRefresh={refetch}
         refreshing={isLoading}
+        keyExtractor={(item) => "followers_list_" + item.userId}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}

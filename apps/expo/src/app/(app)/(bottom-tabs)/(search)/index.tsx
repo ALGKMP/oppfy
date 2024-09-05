@@ -68,6 +68,7 @@ const Search = () => {
         estimatedItemSize={75}
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={Keyboard.dismiss}
+        keyExtractor={(item) => "search_results_" + item.userId}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={<H5 theme="alt1">Search Results</H5>}
         renderItem={({ item }) => (
@@ -129,6 +130,9 @@ const Search = () => {
           )}
         </View>
       </YStack>
+      <View>
+
+      </View>
     </BaseScreenView>
   );
 };

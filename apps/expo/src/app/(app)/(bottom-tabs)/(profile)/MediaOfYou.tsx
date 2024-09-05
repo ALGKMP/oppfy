@@ -178,6 +178,7 @@ const MediaOfYou = ({
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
+        keyExtractor={(item) => "media_of_you_" + item.postId}
         onEndReached={handleOnEndReached}
         estimatedItemSize={600}
         onViewableItemsChanged={onViewableItemsChanged}

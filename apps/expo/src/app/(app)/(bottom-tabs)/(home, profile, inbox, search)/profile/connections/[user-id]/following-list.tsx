@@ -88,6 +88,7 @@ const FollowingList = () => {
       <FlashList
         data={filteredItems}
         onRefresh={refetch}
+        keyExtractor={(item) => "following_list_" + item.userId}
         refreshing={isLoading}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}

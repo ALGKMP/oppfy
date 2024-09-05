@@ -246,6 +246,7 @@ const FollowingList = () => {
         data={filteredItems}
         onRefresh={refetch}
         refreshing={isLoading}
+        keyExtractor={(item) => "following_list_" + item.userId}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}

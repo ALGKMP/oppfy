@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -76,6 +76,12 @@ const HomeScreen = () => {
     () => postData?.pages.flatMap((page) => page.items).filter(Boolean) ?? [],
     [postData],
   );
+
+
+  useEffect(() => {
+    console.log("postItems", postItems.length);
+    console.log("recommendationsData", recommendationsData?.length);
+  }, [postItems, recommendationsData]);
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -175,7 +181,7 @@ const HomeScreen = () => {
 
     return (
       <View paddingTop="$4" paddingHorizontal="$1">
-        {/* <PeopleCarousel
+        <PeopleCarousel
           title="Suggestions"
           showMore={recommendationsData.length > 10}
           data={recommendationsData}
@@ -197,7 +203,7 @@ const HomeScreen = () => {
               </TouchableOpacity>
             );
           }}
-        /> */}
+        />
       </View>
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
@@ -206,8 +212,8 @@ const HomeScreen = () => {
     return (
       <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
         <YStack gap="$4">
-          {PLACEHOLDER_DATA.map(() => (
-            <CardContainer padding={0}>
+          {PLACEHOLDER_DATA.map((_, index) => (
+            <CardContainer padding={0} key={index}>
               <YStack>
                 <XStack padding="$2" gap="$2">
                   <Skeleton circular size={46} />
@@ -239,7 +245,10 @@ const HomeScreen = () => {
 
   return (
     // ! dont remove the paddingBottom 0, it actually does something
-    <BaseScreenView padding={0} paddingBottom={0}>
+    <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={postItems.length == 0}>
+      <View>
+        
+      </View>
       <FlashList
         data={postItems}
         refreshing={refreshing}
@@ -248,10 +257,10 @@ const HomeScreen = () => {
         nestedScrollEnabled={true}
         showsVerticalScrollIndicator={false}
         numColumns={1}
-        keyExtractor={(item) => "home_" + item.postId.toString()}
+        keyExtractor={(item) => "home_" + item.postId}
         renderItem={({ item }) => renderPost(item, profile)}
         ListHeaderComponent={renderSuggestions}
-        ListFooterComponent={ListFooter}
+        ListFooterComponent={Footer}
         estimatedItemSize={screenWidth}
         extraData={viewableItems}
         onViewableItemsChanged={onViewableItemsChanged}
@@ -261,7 +270,7 @@ const HomeScreen = () => {
   );
 };
 
-const ListFooter = () => {
+const Footer = () => {
   return (
     <YStack
       paddingVertical="$8"
@@ -351,7 +360,7 @@ const EmptyHomeScreen = () => {
           happens!
         </SizableText>
       </YStack>
-      <ListFooter />
+      <Footer />
     </YStack>
   );
 };

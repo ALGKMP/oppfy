@@ -88,6 +88,7 @@ const FriendList = () => {
       <FlashList
         data={filteredItems}
         onRefresh={refetch}
+        keyExtractor={(item) => "friend_list_" + item.userId}
         refreshing={isLoading}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
