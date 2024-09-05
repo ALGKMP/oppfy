@@ -1,26 +1,4 @@
 {
-  "name": "@oppfy/expo",
-  "version": "0.1.0",
-  "private": true,
-  "main": "index.tsx",
-  "scripts": {
-    "clean": "git clean -xdf .expo .gitignore .turbo node_modules",
-    "dev": "pnpm with-env expo start",
-    "dev:ios": "pnpm with-env expo start --ios",
-    "dev:android": "pnpm with-env expo start --android",
-    "ios": "pnpm with-env expo run:ios",
-    "build:ios": "pnpm with-env expo build:ios",
-    "android": "pnpm with-env expo run:android",
-    "prebuild": "expo prebuild",
-    "prebuild:clean": "expo prebuild --clean",
-    "open:ios": "open -a \"Xcode\" ios",
-    "open:android": "open -a \"Android Studio\" android",
-    "generate-themes": "tamagui generate-themes ./theme-builder.ts ./theme-output.ts",
-    "lint": "eslint",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
-  },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo-google-fonts/modak": "^0.2.3",
@@ -131,5 +109,27 @@
     "prettier": "^3.2.5",
     "typescript": "^5.4"
   },
-  "prettier": "@oppfy/prettier-config"
+  "main": "index.tsx",
+  "name": "@oppfy/expo",
+  "prettier": "@oppfy/prettier-config",
+  "private": true,
+  "scripts": {
+    "android": "pnpm with-env expo run:android",
+    "build:ios": "pnpm with-env expo build:ios",
+    "clean": "git clean -xdf .expo .gitignore .turbo node_modules",
+    "dev": "pnpm with-env expo start",
+    "dev:android": "pnpm with-env expo start --android",
+    "dev:ios": "pnpm with-env expo start --ios",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "generate-themes": "tamagui generate-themes ./theme-builder.ts ./theme-output.ts",
+    "ios": "pnpm with-env expo run:ios",
+    "lint": "eslint",
+    "open:android": "open -a \"Android Studio\" android",
+    "open:ios": "open -a \"Xcode\" ios",
+    "prebuild": "expo prebuild",
+    "prebuild:clean": "expo prebuild --clean",
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "version": "0.1.0"
 }

@@ -1,16 +1,4 @@
 {
-  "name": "@oppfy/tailwind-config",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "exports": {
-    ".": "./index.ts"
-  },
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "typecheck": "tsc --noEmit"
-  },
   "dependencies": {
     "autoprefixer": "^10.4.19",
     "tailwindcss": "3.3.5"
@@ -22,5 +10,17 @@
     "prettier": "^3.2.5",
     "typescript": "^5.4"
   },
-  "prettier": "@oppfy/prettier-config"
+  "exports": {
+    ".": "./index.ts"
+  },
+  "name": "@oppfy/tailwind-config",
+  "prettier": "@oppfy/prettier-config",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }

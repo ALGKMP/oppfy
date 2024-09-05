@@ -1,27 +1,14 @@
 {
-  "name": "@oppfy/mux-lambda",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "typecheck": "tsc --noEmit"
-  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.564.0",
     "@aws-sdk/client-sns": "^3.592.0",
+    "@mux/mux-node": "^8.5.1",
     "@opensearch-project/opensearch": "^2.8.0",
     "@oppfy/db": "workspace:*",
     "@oppfy/mux": "workspace:*",
     "@oppfy/utils": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@t3-oss/env-core": "^0.10.1",
-    "@mux/mux-node": "^8.5.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -32,5 +19,18 @@
     "prettier": "^3.2.5",
     "typescript": "^5.4"
   },
-  "prettier": "@oppfy/prettier-config"
+  "license": "MIT",
+  "main": "./index.ts",
+  "name": "@oppfy/mux-lambda",
+  "prettier": "@oppfy/prettier-config",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "types": "./index.ts",
+  "version": "0.1.0"
 }
