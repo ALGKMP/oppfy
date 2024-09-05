@@ -1,4 +1,3 @@
-import type { PgDelete } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 
 import {
@@ -15,7 +14,7 @@ import {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { PublishCommand, sns } from "@oppfy/sns";
-import type { sharedValidators, trpcValidators } from "@oppfy/validators";
+import type { sharedValidators } from "@oppfy/validators";
 
 import type { entityTypeEnum } from "../../../../db/src/schema";
 import { handleDatabaseErrors } from "../../errors";
@@ -37,7 +36,7 @@ export type SnsNotificationData = z.infer<
 >;
 
 export type NotificationSettings = z.infer<
-  typeof trpcValidators.input.notifications.updateNotificationSettings
+  typeof sharedValidators.notifications.updateNotificationSettings
 >;
 
 export type EntityType = (typeof entityTypeEnum.enumValues)[number];

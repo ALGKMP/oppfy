@@ -1,8 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { trpcValidators } from "@oppfy/validators";
-
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const requestRouter = createTRPCRouter({

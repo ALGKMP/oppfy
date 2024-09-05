@@ -3,11 +3,6 @@ import * as sharedMediaSchema from "./src/shared/media";
 import * as sharedNotificationsSchema from "./src/shared/notifications";
 import * as sharedReportSchema from "./src/shared/report";
 import * as sharedUserSchema from "./src/shared/user";
-import { output } from "./src/trpc";
-
-const trpcValidators = {
-  output,
-};
 
 const sharedValidators = {
   user: sharedUserSchema,
@@ -17,4 +12,4 @@ const sharedValidators = {
   aws: sharedAwsSchema,
 };
 
-export { trpcValidators, sharedValidators };
+export { sharedValidators };

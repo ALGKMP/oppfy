@@ -139,3 +139,14 @@ export const friendItemsOther = z.array(
       privacy: z.enum(["public", "private"]),
   }),
 );
+
+export const recommededProfiles= z.array(
+  z.object({
+    profilePictureUrl: z.string().nullable(),
+    userId: z.string(),
+    username: z.string(),
+    profileId: z.number(),
+    privacy: z.enum(["public", "private"]),
+    fullName: z.string().nullable(),
+  }),
+);
