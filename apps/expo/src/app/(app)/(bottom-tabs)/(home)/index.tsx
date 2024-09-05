@@ -35,7 +35,8 @@ import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
+// type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
+type PostItem = RouterOutputs["post"]["paginatePostsOfRecommended"]["items"][0];
 
 interface TokenItem {
   postId?: string | undefined;
@@ -56,7 +57,7 @@ const HomeScreen = () => {
     fetchNextPage,
     hasNextPage,
     refetch: refetchPosts,
-  } = api.post.paginatePostsForFeed.useInfiniteQuery(
+  } = api.post.paginatePostsOfRecommended.useInfiniteQuery(
     {
       pageSize: 10,
     },
@@ -174,7 +175,7 @@ const HomeScreen = () => {
 
     return (
       <View paddingTop="$4" paddingHorizontal="$1">
-        <PeopleCarousel
+        {/* <PeopleCarousel
           title="Suggestions"
           showMore={recommendationsData.length > 10}
           data={recommendationsData}
@@ -196,7 +197,7 @@ const HomeScreen = () => {
               </TouchableOpacity>
             );
           }}
-        />
+        /> */}
       </View>
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);

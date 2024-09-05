@@ -46,6 +46,7 @@ export class PostRepository {
       .limit(1);
   }
 
+  // TODO: This shit doesn't work
   @handleDatabaseErrors
   async paginatePostsOfFollowing(
     userId: string,
@@ -61,14 +62,15 @@ export class PostRepository {
     // Subquery to get the latest post for each followed user
     const latestPosts = this.db
       .select({
-        postId: sql<number>`max(${schema.post.id})`.as("latest_post_id"),
+        postId: schema.post.id,
         authorId: schema.post.authorId,
         followerId: follower.id,
+        createdAt: schema.post.createdAt,
       })
       .from(schema.post)
       .innerJoin(follower, eq(follower.recipientId, schema.post.recipientId))
       .where(eq(follower.senderId, userId))
-      .groupBy(schema.post.authorId, follower.id)
+      .orderBy(desc(schema.post.createdAt))
       .as("latest_posts");
 
     return await this.db

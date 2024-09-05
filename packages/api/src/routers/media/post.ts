@@ -1,9 +1,5 @@
-import * as punycode from "node:punycode";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
-import { env } from "@oppfy/env";
-import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError } from "../../errors";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
@@ -110,40 +106,6 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         return await ctx.services.post.paginatePostsOfUserSelf(
-          ctx.session.uid,
-          input.cursor,
-          input.pageSize,
-        );
-      } catch (err) {
-        console.error("TRPC getPosts error: ", err);
-        if (err instanceof DomainError) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: err.message,
-          });
-        }
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to paginate posts.",
-        });
-      }
-    }),
-
-  paginatePostsOfFollowing: protectedProcedure
-    .input(
-      z.object({
-        cursor: z
-          .object({
-            followerId: z.string(),
-            createdAt: z.date(),
-          })
-          .optional(),
-        pageSize: z.number().nonnegative().optional(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      try {
-        return await ctx.services.post.paginatePostsOfFollowing(
           ctx.session.uid,
           input.cursor,
           input.pageSize,
