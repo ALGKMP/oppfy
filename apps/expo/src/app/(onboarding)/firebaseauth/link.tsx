@@ -113,7 +113,7 @@ const PhoneNumber = () => {
         params: {
           phoneNumber: e164PhoneNumber,
         },
-        pathname: "/auth/phone-number-otp",
+        pathname: "/firebaseauth/phone-number-otp",
       });
     } catch (err) {
       if (!isFirebaseError(err)) {

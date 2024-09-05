@@ -52,7 +52,7 @@ const Permissions = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     isSignedIn
       ? router.push("/(app)/(bottom-tabs)/(home)")
-      : router.push("/auth/phone-number");
+      : router.push("/firebaseauth/link");
   };
 
   const showPermissionAlert = (permissionType: PermissionType): void => {

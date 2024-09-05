@@ -1,5 +1,5 @@
 {
-  "id": "242dfaf5-bb56-4f2e-ab72-cb282a7c927b",
+  "id": "30fe7251-316d-4fc2-bee0-5a8b254e746a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -1196,15 +1196,7 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "unique_push_token": {
-          "name": "unique_push_token",
-          "columns": [
-            "token"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "push_token_user_id_user_id_fk": {
           "name": "push_token_user_id_user_id_fk",
