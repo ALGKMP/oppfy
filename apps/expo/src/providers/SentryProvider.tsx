@@ -1,5 +1,5 @@
-// SentryProvider.tsx
-import React from "react";
+import type { ReactNode } from "react";
+import React, { useEffect } from "react";
 import { isRunningInExpoGo } from "expo";
 import { useNavigationContainerRef } from "expo-router";
 import * as Sentry from "@sentry/react-native";
@@ -19,13 +19,13 @@ Sentry.init({
 });
 
 interface SentryProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const SentryProvider: React.FC<SentryProviderProps> = ({ children }) => {
+const SentryProvider = ({ children }: SentryProviderProps) => {
   const ref = useNavigationContainerRef();
 
-  React.useEffect(
+  useEffect(
     () => routingInstrumentation.registerNavigationContainer(ref),
     [ref],
   );

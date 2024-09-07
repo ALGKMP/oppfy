@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import React from "react";
 import { useFonts } from "expo-font";
 import { Modak_400Regular } from "@expo-google-fonts/modak";
@@ -12,10 +13,10 @@ import Inter_600SemiBold from "@tamagui/font-inter/otf/Inter-SemiBold.otf";
 import Inter_100Thin from "@tamagui/font-inter/otf/Inter-Thin.otf";
 
 interface FontProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const FontProvider: React.FC<FontProviderProps> = ({ children }) => {
+const FontProvider = ({ children }: FontProviderProps) => {
   const [fontsLoaded] = useFonts({
     Modak: Modak_400Regular,
     InterThin: Inter_100Thin,

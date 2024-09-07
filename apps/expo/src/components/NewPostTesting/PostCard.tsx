@@ -10,9 +10,7 @@ import {
   Heart,
   MessageCircle,
   MoreHorizontal,
-  Send,
   SendHorizontal,
-  Share2,
 } from "@tamagui/lucide-icons";
 import {
   Button,
