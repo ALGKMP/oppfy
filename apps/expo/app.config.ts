@@ -90,10 +90,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     [
-      "./snapchat-plugin",
-      { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" },
-    ],
-    [
       "react-native-vision-camera",
       {
         enableLocation: true,
