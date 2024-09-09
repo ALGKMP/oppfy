@@ -99,6 +99,7 @@ export class S3Service {
           caption,
           height,
           width,
+          type: "onApp",
         },
       });
 
