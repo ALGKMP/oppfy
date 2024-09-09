@@ -328,7 +328,7 @@ const Footer = () => {
           backgroundColor: "#F214FF",
         }}
         onPress={async () => {
-          // expo share open app store
+          // TODO: share appstore link
           await Sharing.shareAsync("https://google.com", {
             dialogTitle: "Share to...",
           });
