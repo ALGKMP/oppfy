@@ -2,6 +2,7 @@ import React, { useCallback, useLayoutEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 
+import ProfileHeaderDetails from "~/components/NewProfileTesting/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 import MediaOfYou from "./MediaOfYou";
@@ -67,6 +68,29 @@ const SelfProfile = () => {
 
   return (
     <BaseScreenView padding={0}>
+      <ProfileHeaderDetails
+        loading={false}
+        data={profileData}
+        editableProfilePicture={false}
+        onProfilePicturePress={() => {}}
+        onFollowingPress={() => {}}
+        onFollowersPress={() => {}}
+        actions={[
+          {
+            label: "Edit Profile",
+            onPress: () => {
+              router.push("/edit-profile");
+            },
+          },
+          {
+            label: "Settings",
+            onPress: () => {
+              router.push("/(settings)");
+            },
+          },
+        ]}
+        profilePictureOverlay={null}
+      />
       <MediaOfYou
         navigateToProfile={navigateToProfile}
         isSelfProfile={true}

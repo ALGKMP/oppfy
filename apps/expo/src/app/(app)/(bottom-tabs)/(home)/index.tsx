@@ -77,7 +77,6 @@ const HomeScreen = () => {
     [postData],
   );
 
-
   useEffect(() => {
     console.log("postItems", postItems.length);
     console.log("recommendationsData", recommendationsData?.length);
@@ -245,10 +244,11 @@ const HomeScreen = () => {
 
   return (
     // ! dont remove the paddingBottom 0, it actually does something
-    <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={postItems.length == 0}>
-      <View>
-        
-      </View>
+    <BaseScreenView
+      padding={0}
+      paddingBottom={0}
+      scrollEnabled={postItems.length == 0}
+    >
       <FlashList
         data={postItems}
         refreshing={refreshing}
