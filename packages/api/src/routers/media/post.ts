@@ -43,7 +43,7 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.s3.uploadPostForUserNotOnAppUrl({
+        return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
           author: ctx.session.uid,
           ...input,
         });
@@ -55,7 +55,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  createPresignedUrlForVideoPostOnApp: protectedProcedure
+  uploadVideoPostForUserOnApp: protectedProcedure
     .input(
       z.object({
         recipient: z.string(),
@@ -70,6 +70,33 @@ export const postRouter = createTRPCRouter({
           ...input,
           author: ctx.session.uid,
           type: "onApp",
+        });
+
+        return url;
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Failed to create presigned URL for video upload. Please check your network connection and try again.",
+        });
+      }
+    }),
+
+  uploadVideoPostForUserNotOnApp: protectedProcedure
+    .input(
+      z.object({
+        number: z.string(),
+        caption: z.string().max(255).default(""),
+        height: z.string(),
+        width: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
+          ...input,
+          author: ctx.session.uid,
+          type: "notOnApp",
         });
 
         return url;
