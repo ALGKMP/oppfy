@@ -104,7 +104,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
 export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
   id: uuid("id").primaryKey().defaultRandom(),
   phoneNumber: text("phone_number").notNull(),
-  author: varchar("author", { length: 255 })
+  authorId: varchar("author_id", { length: 255 })
     .notNull()
     .references(() => user.id),
   caption: text("caption").notNull().default(""),
