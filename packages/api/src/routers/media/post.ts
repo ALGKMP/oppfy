@@ -55,6 +55,33 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
+  createPresignedUrlForVideoPostOnApp: protectedProcedure
+    .input(
+      z.object({
+        recipient: z.string(),
+        caption: z.string().max(255).default(""),
+        height: z.string(),
+        width: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
+          ...input,
+          author: ctx.session.uid,
+          type: "onApp",
+        });
+
+        return url;
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "Failed to create presigned URL for video upload. Please check your network connection and try again.",
+        });
+      }
+    }),
+
   editPost: protectedProcedure
     .input(
       z.object({
