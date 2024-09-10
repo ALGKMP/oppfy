@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
@@ -93,6 +93,8 @@ export class ProfileRepository {
 
   @handleDatabaseErrors
   async deleteProfile(profileId: string) {
-    await this.db.delete(schema.profile).where(eq(schema.profile.id, profileId));
+    await this.db
+      .delete(schema.profile)
+      .where(eq(schema.profile.id, profileId));
   }
 }

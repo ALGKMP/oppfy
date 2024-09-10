@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm"; // Add inArray import
+import { eq, inArray, sql } from "drizzle-orm"; // Add inArray import
 
 import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
@@ -90,6 +90,17 @@ export class UserRepository {
       .update(schema.user)
       .set({ privacySetting: newPrivacySetting })
       .where(eq(schema.user.id, userId));
+  }
+
+  @handleDatabaseErrors
+  async getRandomActiveProfiles(limit: number) {
+    return await db
+      .select({
+        userId: schema.user.id,
+      })
+      .from(schema.user)
+      .orderBy(sql`RANDOM()`)
+      .limit(limit);
   }
 
   @handleDatabaseErrors

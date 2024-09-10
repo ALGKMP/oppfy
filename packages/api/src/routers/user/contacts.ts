@@ -33,24 +33,6 @@ export const contactsRouter = createTRPCRouter({
       });
     }
   }),
-  getRecommendationProfilesOther: protectedProcedure
-    .input(
-      z.object({
-        profileId: z.string(),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.contact.getRecommendationProfilesOtherByProfileId(
-          input.profileId,
-        );
-      } catch (err) {
-        console.error(err);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-        });
-      }
-    }),
 
   getRecommendationProfilesSelf: protectedProcedure
     .query(async ({ ctx }) => {
