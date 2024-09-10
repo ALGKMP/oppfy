@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Modal, TouchableOpacity } from "react-native";
+import React from "react";
+import { TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import {
@@ -31,7 +31,6 @@ export interface ProfileData {
 interface ProfileAction {
   label: string;
   onPress: () => void;
-  icon?: React.ReactNode;
   disabled?: boolean;
   loading?: boolean;
 }
@@ -51,12 +50,6 @@ const ProfileHeaderDetails: React.FC<ProfileHeaderDetailsProps> = ({
   onFollowersPress,
   actions = [],
 }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const handleProfilePicturePress = () => {
-    setIsModalVisible(true);
-  };
-
   return (
     <YStack
       padding="$4"
@@ -70,16 +63,14 @@ const ProfileHeaderDetails: React.FC<ProfileHeaderDetailsProps> = ({
           data={!loading ? data : undefined}
           loadingComponent={<Skeleton circular size={160} />}
           successComponent={(profileData) => (
-            <TouchableOpacity onPress={handleProfilePicturePress}>
-              <Image
-                source={profileData.profilePictureUrl ?? DefaultProfilePicture}
-                style={{
-                  width: 160,
-                  height: 160,
-                  borderRadius: 80,
-                }}
-              />
-            </TouchableOpacity>
+            <Image
+              source={profileData.profilePictureUrl ?? DefaultProfilePicture}
+              style={{
+                width: 160,
+                height: 160,
+                borderRadius: 80,
+              }}
+            />
           )}
         />
       </View>
@@ -157,7 +148,6 @@ const ProfileHeaderDetails: React.FC<ProfileHeaderDetailsProps> = ({
                 borderRadius={20}
                 onPress={action.onPress}
                 disabled={action.disabled}
-                icon={action.icon}
               >
                 <XStack gap="$2" alignItems="center">
                   <Text>{action.label}</Text>
@@ -168,31 +158,6 @@ const ProfileHeaderDetails: React.FC<ProfileHeaderDetailsProps> = ({
           />
         ))}
       </XStack>
-
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={() => setIsModalVisible(false)}
-        >
-          <Image
-            source={data?.profilePictureUrl ?? DefaultProfilePicture}
-            style={{
-              width: "100%",
-              height: "100%",
-              resizeMode: "contain",
-            }}
-          />
-        </TouchableOpacity>
-      </Modal>
     </YStack>
   );
 };
