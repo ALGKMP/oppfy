@@ -22,179 +22,26 @@ const useProfileActions = (userId: string) => {
   const utils = api.useUtils();
 
   const followUser = api.follow.followUser.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId,
-      });
-      if (prevData) {
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            followerCount: prevData.followerCount + 1,
-            networkStatus: {
-              ...prevData.networkStatus,
-              targetUserFollowState:
-                prevData.networkStatus.privacy === "public"
-                  ? "Following"
-                  : "OutboundRequest",
-            },
-          },
-        );
-      }
-      return { prevData };
-    },
-    onError: (_, __, context) => {
-      if (context?.prevData) {
-        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
-      }
-    },
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
   const unfollowUser = api.follow.unfollowUser.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId,
-      });
-      if (prevData) {
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            followerCount: prevData.followerCount - 1,
-            networkStatus: {
-              ...prevData.networkStatus,
-              targetUserFollowState: "NotFollowing",
-            },
-          },
-        );
-      }
-      return { prevData };
-    },
-    onError: (_, __, context) => {
-      if (context?.prevData) {
-        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
-      }
-    },
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
   const addFriend = api.friend.sendFriendRequest.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId,
-      });
-      if (prevData) {
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            networkStatus: {
-              ...prevData.networkStatus,
-              targetUserFriendState:
-                prevData.networkStatus.targetUserFriendState ===
-                "IncomingRequest"
-                  ? "Friends"
-                  : "OutboundRequest",
-            },
-          },
-        );
-      }
-      return { prevData };
-    },
-    onError: (_, __, context) => {
-      if (context?.prevData) {
-        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
-      }
-    },
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
   const removeFriend = api.friend.removeFriend.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId,
-      });
-      if (prevData) {
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            networkStatus: {
-              ...prevData.networkStatus,
-              targetUserFriendState: "NotFriends",
-            },
-          },
-        );
-      }
-      return { prevData };
-    },
-    onError: (_, __, context) => {
-      if (context?.prevData) {
-        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
-      }
-    },
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
   const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId,
-      });
-      if (prevData) {
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            networkStatus: {
-              ...prevData.networkStatus,
-              targetUserFollowState: "NotFollowing",
-            },
-          },
-        );
-      }
-      return { prevData };
-    },
-    onError: (_, __, context) => {
-      if (context?.prevData) {
-        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
-      }
-    },
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
   const cancelFriendRequest = api.request.cancelFriendRequest.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId,
-      });
-      if (prevData) {
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            networkStatus: {
-              ...prevData.networkStatus,
-              targetUserFriendState: "NotFriends",
-            },
-          },
-        );
-      }
-      return { prevData };
-    },
-    onError: (_, __, context) => {
-      if (context?.prevData) {
-        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
-      }
-    },
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
@@ -223,6 +70,24 @@ const useProfileActions = (userId: string) => {
     [cancelFriendRequest, userId],
   );
 
+  const isAnyActionLoading = useMemo(() => {
+    return (
+      followUser.isLoading ||
+      unfollowUser.isLoading ||
+      addFriend.isLoading ||
+      removeFriend.isLoading ||
+      cancelFollowRequest.isLoading ||
+      cancelFriendRequest.isLoading
+    );
+  }, [
+    followUser,
+    unfollowUser,
+    addFriend,
+    removeFriend,
+    cancelFollowRequest,
+    cancelFriendRequest,
+  ]);
+
   return {
     handleFollow,
     handleUnfollow,
@@ -236,6 +101,7 @@ const useProfileActions = (userId: string) => {
     isRemoveFriendLoading: removeFriend.isLoading,
     isCancelFollowRequestLoading: cancelFollowRequest.isLoading,
     isCancelFriendRequestLoading: cancelFriendRequest.isLoading,
+    isAnyActionLoading,
   };
 };
 
@@ -263,6 +129,7 @@ const OtherProfile = () => {
     isRemoveFriendLoading,
     isCancelFollowRequestLoading,
     isCancelFriendRequestLoading,
+    isAnyActionLoading,
   } = useProfileActions(userId);
 
   const {
@@ -402,6 +269,7 @@ const OtherProfile = () => {
       profileData.networkStatus;
 
     console.log(privacy, targetUserFollowState, targetUserFriendState);
+    console.log(isAnyActionLoading);
 
     const buttonCombinations: Record<string, ProfileAction[]> = {
       public_NotFollowing_NotFriends: [
@@ -465,11 +333,13 @@ const OtherProfile = () => {
           label: "Cancel Follow Request",
           onPress: handleCancelFollowRequest,
           loading: isCancelFollowRequestLoading,
+          disabled: isAnyActionLoading,
         },
         {
           label: "Add Friend",
           onPress: handleAddFriend,
           loading: isAddFriendLoading,
+          disabled: isAnyActionLoading,
         },
       ],
       private_Following_NotFriends: [
@@ -477,11 +347,13 @@ const OtherProfile = () => {
           label: "Unfollow",
           onPress: handleUnfollow,
           loading: isUnfollowLoading,
+          disabled: isAnyActionLoading,
         },
         {
           label: "Add Friend",
           onPress: handleAddFriend,
           loading: isAddFriendLoading,
+          disabled: isAnyActionLoading,
         },
       ],
       private_OutboundRequest_OutboundRequest: [
@@ -489,11 +361,13 @@ const OtherProfile = () => {
           label: "Cancel Follow Request",
           onPress: handleCancelFollowRequest,
           loading: isCancelFollowRequestLoading,
+          disabled: isAnyActionLoading,
         },
         {
           label: "Cancel Friend Request",
           onPress: handleCancelFriendRequest,
           loading: isCancelFriendRequestLoading,
+          disabled: isAnyActionLoading,
         },
       ],
       private_Following_OutboundRequest: [
@@ -501,11 +375,13 @@ const OtherProfile = () => {
           label: "Unfollow",
           onPress: handleUnfollow,
           loading: isUnfollowLoading,
+          disabled: isAnyActionLoading,
         },
         {
           label: "Cancel Friend Request",
           onPress: handleCancelFriendRequest,
           loading: isCancelFriendRequestLoading,
+          disabled: isAnyActionLoading,
         },
       ],
       private_NotFollowing_OutboundRequest: [
@@ -513,6 +389,7 @@ const OtherProfile = () => {
           label: "Cancel Friend Request",
           onPress: handleCancelFriendRequest,
           loading: isCancelFriendRequestLoading,
+          disabled: isAnyActionLoading,
         },
       ],
       private_Following_Friends: [
@@ -520,11 +397,13 @@ const OtherProfile = () => {
           label: "Unfollow",
           onPress: handleUnfollow,
           loading: isUnfollowLoading,
+          disabled: isAnyActionLoading,
         },
         {
           label: "Remove Friend",
           onPress: handleRemoveFriend,
           loading: isRemoveFriendLoading,
+          disabled: isAnyActionLoading,
         },
       ],
     };
@@ -534,17 +413,18 @@ const OtherProfile = () => {
   }, [
     profileData,
     handleFollow,
-    handleUnfollow,
-    handleAddFriend,
-    handleRemoveFriend,
-    handleCancelFollowRequest,
-    handleCancelFriendRequest,
     isFollowLoading,
-    isUnfollowLoading,
+    handleAddFriend,
     isAddFriendLoading,
-    isRemoveFriendLoading,
-    isCancelFollowRequestLoading,
+    handleUnfollow,
+    isUnfollowLoading,
+    handleCancelFriendRequest,
     isCancelFriendRequestLoading,
+    handleRemoveFriend,
+    isRemoveFriendLoading,
+    handleCancelFollowRequest,
+    isCancelFollowRequestLoading,
+    isAnyActionLoading,
   ]);
 
   const renderHeader = useCallback(
@@ -606,9 +486,19 @@ const OtherProfile = () => {
       isLoadingFriendsData,
       isLoadingRecommendationsData,
       navigateToProfile,
-      profileData,
+      profileData?.bio,
+      profileData?.followerCount,
+      profileData?.followingCount,
+      profileData?.friendCount,
+      profileData?.name,
+      profileData?.profilePictureUrl,
+      profileData?.userId,
+      profileData?.username,
       recommendationsData,
+      renderActionButtons,
       router,
+      userId,
+      username,
     ],
   );
 
