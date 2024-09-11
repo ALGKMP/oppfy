@@ -249,11 +249,11 @@ const PostCard = (props: PostCardProps) => {
                       }}
                     >
                       <XStack alignItems="center" gap="$2">
-                        <Avatar
+                        {/* <Avatar
                           source={props.author.profilePicture}
                           size={20}
                           // bordered
-                        />
+                        /> */}
                         <SizableText size="$2" fontWeight="bold" lineHeight={0}>
                           Opped by{" "}
                           <SizableText fontWeight="bold" color="$primary">
