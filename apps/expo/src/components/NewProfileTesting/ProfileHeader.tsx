@@ -23,7 +23,7 @@ export interface ProfileData {
   username: string;
   name: string;
   bio: string | null;
-  profilePictureUrl: string | null;
+  profilePictureUrl: string | undefined | null;
   followingCount: number;
   followerCount: number;
 }

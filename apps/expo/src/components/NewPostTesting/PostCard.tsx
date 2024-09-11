@@ -30,7 +30,7 @@ import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 
 type MediaType = "image" | "video";
 
-type ProfilePicture = ImageSourcePropType | string | null;
+type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
 interface Self {
   id: string;
