@@ -130,10 +130,8 @@ export class FollowService {
     } else if (friendship) {
       console.log("friendship");
       await this.friendRepository.removeFriend(senderId, recipientId);
-    } else {
-      console.log("follower");
-      await this.followRepository.removeFollower(senderId, recipientId);
-    }
+    } 
+    await this.followRepository.removeFollower(senderId, recipientId);
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
