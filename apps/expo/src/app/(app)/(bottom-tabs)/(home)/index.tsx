@@ -228,10 +228,7 @@ const HomeScreen = () => {
     );
   }
 
-  if (
-    profile === undefined ||
-    (recommendationsData?.length === 0 && postItems.length === 0)
-  ) {
+  if (profile === undefined || postItems.length === 0) {
     return (
       <BaseScreenView>
         <EmptyHomeScreen />
