@@ -30,11 +30,11 @@ import {
 } from "tamagui";
 
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import Avatar from "../Avatar";
-import { BlurContextMenuWrapper } from "../ContextMenu";
-import { Skeleton } from "../Skeletons";
-import { TimeAgo } from "../Texts";
-import { EmptyPlaceholder } from "../UIPlaceholders";
+import Avatar from "../../Avatar";
+import { BlurContextMenuWrapper } from "../../ContextMenu";
+import { Skeleton } from "../../Skeletons";
+import { TimeAgo } from "../../Texts";
+import { EmptyPlaceholder } from "../../UIPlaceholders";
 import BottomSheetBackdrop from "./BottomSheetBackdrop";
 import BottomSheetHeader from "./BottomSheetHeader";
 

@@ -7,12 +7,12 @@ import { useToastController } from "@tamagui/toast";
 
 import type { RouterInputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import type { ButtonOption } from "../Sheets";
-import { ActionSheet } from "../Sheets";
-import CommentsBottomSheet from "./CommentsBottomSheet";
-import PostCard from "./PostCard";
-import type { PostData as OtherPostProps } from "./PostCard";
-import { useSaveMedia } from "./useSaveMedia";
+import type { ButtonOption } from "../../Sheets";
+import { ActionSheet } from "../../Sheets";
+import CommentsBottomSheet from "../ui/CommentsBottomSheet";
+import PostCard from "../ui/PostCard";
+import type { PostData as OtherPostProps } from "../ui/PostCard";
+import { useSaveMedia } from "../useSaveMedia";
 
 type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
 type _ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];

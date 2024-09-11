@@ -4,10 +4,11 @@ import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { getToken, Spacer } from "tamagui";
 
-import OtherPost from "~/components/NewPostTesting/OtherPost";
-import ProfileHeaderDetails from "~/components/NewProfileTesting/ProfileHeader";
+import OtherPost from "~/components/NewPostTesting/smart/OtherPost";
+import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 import MediaOfYou from "./MediaOfYou";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];

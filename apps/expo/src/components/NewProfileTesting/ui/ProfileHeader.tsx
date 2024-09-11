@@ -35,7 +35,7 @@ interface ProfileAction {
   loading?: boolean;
 }
 
-interface ProfileHeaderDetailsProps {
+export interface ProfileHeaderDetailsProps {
   loading: boolean;
   data?: ProfileData;
   onFollowingPress?: () => void;

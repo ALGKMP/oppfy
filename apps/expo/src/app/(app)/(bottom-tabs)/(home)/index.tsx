@@ -23,7 +23,7 @@ import {
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
-import OtherPost from "~/components/NewPostTesting/OtherPost";
+import OtherPost from "~/components/NewPostTesting/smart/OtherPost";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { Profile, RecommendationProfile } from "~/hooks/useProfile";

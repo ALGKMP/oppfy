@@ -24,11 +24,9 @@ import {
 } from "tamagui";
 
 import { TimeAgo } from "~/components/Texts";
-import Avatar from "../Avatar";
-import CardContainer from "../Containers/CardContainer";
-import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
-
-const DEFAULT_PROFILE_PICTURE = require("assets/default-profile-picture.jpg");
+import Avatar from "../../Avatar";
+import CardContainer from "../../Containers/CardContainer";
+import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 
 type MediaType = "image" | "video";
 
