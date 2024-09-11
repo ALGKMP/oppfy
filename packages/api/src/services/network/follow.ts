@@ -1,6 +1,5 @@
 import { sharedValidators } from "@oppfy/validators";
 
-
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
@@ -119,18 +118,23 @@ export class FollowService {
       recipientId,
     );
 
-    const outboundRequest = await this.followRepository.getFollowRequest(
+    const outboundFollowRequest = await this.followRepository.getFollowRequest(
       senderId,
       recipientId,
     );
 
-    if (outboundRequest) {
-      console.log("outboundRequest");
+    const outboundFriendRequest = await this.friendRepository.getFriendRequest(
+      senderId,
+      recipientId,
+    );
+
+    if (outboundFollowRequest) {
       await this.followRepository.removeFollowRequest(senderId, recipientId);
     } else if (friendship) {
-      console.log("friendship");
       await this.friendRepository.removeFriend(senderId, recipientId);
-    } 
+    } else if (outboundFriendRequest) {
+      await this.friendRepository.deleteFriendRequest(senderId, recipientId);
+    }
     await this.followRepository.removeFollower(senderId, recipientId);
   }
 
