@@ -134,13 +134,7 @@ const PostCard = (props: PostCardProps) => {
     .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
 
   const buttonLikeScale = useSharedValue(1);
-  const buttonLikeScale = useSharedValue(1);
 
-  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: buttonLikeScale.value }],
-    };
-  });
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: buttonLikeScale.value }],
