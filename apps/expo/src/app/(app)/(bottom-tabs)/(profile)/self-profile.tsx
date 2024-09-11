@@ -1,11 +1,16 @@
 import React, { useCallback, useLayoutEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
+import { getToken, Spacer } from "tamagui";
 
+import OtherPost from "~/components/NewPostTesting/OtherPost";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
-import { api } from "~/utils/api";
+import { api, RouterOutputs } from "~/utils/api";
 import MediaOfYou from "./MediaOfYou";
+
+type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
 const SelfProfile = () => {
   const utils = api.useUtils();
@@ -66,15 +71,52 @@ const SelfProfile = () => {
     [router],
   );
 
-  return (
-    <BaseScreenView padding={0}>
+  const renderItem = useCallback(
+    (item: Post) => (
+      <OtherPost
+        key={item.postId}
+        id={item.postId}
+        createdAt={item.createdAt}
+        caption={item.caption}
+        self={{
+          id: profileData?.userId ?? "",
+          username: profileData?.username ?? "",
+          profilePicture: profileData?.profilePictureUrl ?? "",
+        }}
+        author={{
+          id: item.authorId,
+          username: item.authorUsername ?? "",
+        }}
+        recipient={{
+          id: item.recipientId,
+          username: item.recipientUsername ?? "",
+          profilePicture: item.recipientProfilePicture,
+        }}
+        media={{
+          type: item.mediaType,
+          url: item.imageUrl,
+          dimensions: {
+            width: item.width,
+            height: item.height,
+          },
+        }}
+        stats={{
+          likes: item.likesCount,
+          comments: item.commentsCount,
+        }}
+      />
+    ),
+    [profileData],
+  );
+
+  const renderHeader = useCallback(
+    () => (
       <ProfileHeaderDetails
         loading={false}
         data={profileData}
         editableProfilePicture={false}
-        onProfilePicturePress={() => {}}
-        onFollowingPress={() => {}}
-        onFollowersPress={() => {}}
+        onFollowingPress={() => router.push("/self-connections/following-list")}
+        onFollowersPress={() => router.push("/self-connections/followers-list")}
         actions={[
           {
             label: "Edit Profile",
@@ -83,32 +125,35 @@ const SelfProfile = () => {
             },
           },
           {
-            label: "Settings",
+            label: "Share Profile",
             onPress: () => {
-              router.push("/(settings)");
+              router.push("/share-profile");
             },
           },
         ]}
         profilePictureOverlay={null}
       />
-      <MediaOfYou
-        navigateToProfile={navigateToProfile}
-        isSelfProfile={true}
-        profileData={profileData}
-        isLoadingProfileData={false}
-        refetchProfileData={() => utils.profile.getFullProfileSelf.refetch()}
-        recommendations={recommendationsData ?? []}
-        isLoadingRecommendationsData={isLoadingRecommendationsData}
-        refetchRecommendationsData={refetchRecommendationsData}
-        friends={friends}
-        isLoadingFriendsData={isLoadingFriendsData}
-        refetchFriendsData={refetchFriendsData}
-        posts={posts}
-        isLoadingPostData={isLoadingPostData}
-        isFetchingNextPage={isFetchingNextPage}
-        refetchPosts={refetchPosts}
-        fetchNextPage={fetchNextPage}
-        hasNextPage={hasNextPage ?? false}
+    ),
+    [profileData, router],
+  );
+
+  return (
+    <BaseScreenView padding={0} paddingBottom={0}>
+      <FlashList
+        data={posts}
+        renderItem={({ item }) => renderItem(item)}
+        ListHeaderComponent={renderHeader}
+        estimatedItemSize={300}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            void fetchNextPage();
+          }
+        }}
+        onRefresh={refetchPosts}
+        refreshing={isLoadingPostData}
+        ListHeaderComponentStyle={{
+          marginBottom: getToken("$4", "space") as number,
+        }}
       />
     </BaseScreenView>
   );
