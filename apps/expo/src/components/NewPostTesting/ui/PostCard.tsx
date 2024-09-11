@@ -122,7 +122,9 @@ const PostCard = (props: PostCardProps) => {
   const addHeartJS = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
-      handleLikePress(); // Trigger the like animation on double tap
+      if (!props.hasLiked) {
+        handleLikePress();
+      }
       props.onLikeDoubleTapped();
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     },
@@ -156,7 +158,13 @@ const PostCard = (props: PostCardProps) => {
       case "image":
         return <Image source={{ uri: url }} style={style} contentFit="cover" />;
       case "video":
-        return <Video source={{ uri: url }} style={style} resizeMode={ResizeMode.COVER} />;
+        return (
+          <Video
+            source={{ uri: url }}
+            style={style}
+            resizeMode={ResizeMode.COVER}
+          />
+        );
     }
   };
 
