@@ -27,6 +27,8 @@ import { TimeAgo } from "~/components/Texts";
 import Avatar from "../Avatar";
 import CardContainer from "../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
+const DEFAULT_PROFILE_PICTURE = require('assets/default-profile-picture.jpg');
+
 
 type MediaType = "image" | "video";
 
@@ -136,61 +138,6 @@ const PostCard = (props: PostCardProps) => {
   return (
     <CardContainer>
       <YStack gap="$3">
-        <XStack alignItems="center" justifyContent="space-between">
-          <XStack alignItems="center" gap="$3">
-            <TouchableOpacity
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                props.onAuthorPress();
-              }}
-            >
-              <Avatar source={props.recipient.profilePicture} bordered />
-            </TouchableOpacity>
-
-            <YStack gap="$1">
-              <TouchableOpacity
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  props.onRecipientPress();
-                }}
-              >
-                <SizableText fontWeight="bold" lineHeight={0}>
-                  {props.recipient.username}
-                </SizableText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  props.onAuthorPress();
-                }}
-              >
-                <SizableText theme="alt1" lineHeight={0}>
-                  Posted by{" "}
-                  <SizableText fontWeight="bold" color="$primary">
-                    {props.author.username}
-                  </SizableText>
-                </SizableText>
-              </TouchableOpacity>
-              <TimeAgo
-                size="$2"
-                theme="alt2"
-                lineHeight={0}
-                date={props.createdAt}
-                format={formatTimeAgo}
-              />
-            </YStack>
-          </XStack>
-
-          <TouchableOpacity
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              props.onMoreOptions();
-            }}
-          >
-            <MoreHorizontal />
-          </TouchableOpacity>
-        </XStack>
-
         <View marginHorizontal="$-3">
           <GestureDetector gesture={doubleTap}>
             <View>
@@ -206,6 +153,63 @@ const PostCard = (props: PostCardProps) => {
                   position={heart.position}
                 />
               ))}
+              <View style={{ position: 'absolute', bottom: 10, left: 10 }}>
+                <XStack alignItems="center" gap="$3">
+                  <TouchableOpacity
+                    onPress={() => {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      props.onAuthorPress();
+                    }}
+                  >
+                    <Avatar
+                      source={props.recipient.profilePicture}
+                      bordered
+                    />
+                  </TouchableOpacity>
+
+                  <YStack gap="$1">
+                    <TouchableOpacity
+                      onPress={() => {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        props.onRecipientPress();
+                      }}
+                    >
+                      <SizableText fontWeight="bold" lineHeight={0}>
+                        {props.recipient.username}
+                      </SizableText>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        props.onAuthorPress();
+                      }}
+                    >
+                      <SizableText theme="alt1" lineHeight={0}>
+                        Posted by{" "}
+                        <SizableText fontWeight="bold" color="$primary">
+                          {props.author.username}
+                        </SizableText>
+                      </SizableText>
+                    </TouchableOpacity>
+                    {/* <TimeAgo
+                      size="$2"
+                      theme="alt2"
+                      lineHeight={0}
+                      date={props.createdAt}
+                      format={formatTimeAgo}
+                    /> */}
+                  </YStack>
+                </XStack>
+              </View>
+              <TouchableOpacity
+                style={{ position: 'absolute', bottom: 10, right: 10 }}
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  props.onMoreOptions();
+                }}
+              >
+                <MoreHorizontal />
+              </TouchableOpacity>
             </View>
           </GestureDetector>
         </View>
