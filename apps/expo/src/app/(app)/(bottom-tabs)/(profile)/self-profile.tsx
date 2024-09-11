@@ -2,8 +2,10 @@ import React, { useCallback, useLayoutEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { getToken, Spacer } from "tamagui";
+import { getToken, Spacer, YStack } from "tamagui";
 
+import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
+import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/smart/OtherPost";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
@@ -113,36 +115,65 @@ const SelfProfile = () => {
 
   const renderHeader = useCallback(
     () => (
-      <ProfileHeaderDetails
-        loading={false}
-        data={{
-          userId: profileData?.userId ?? "",
-          username: profileData?.username ?? "",
-          name: profileData?.name ?? "",
-          bio: profileData?.bio ?? "",
-          followerCount: profileData?.followerCount ?? 0,
-          followingCount: profileData?.followingCount ?? 0,
-          profilePictureUrl: profileData?.profilePictureUrl,
-        }}
-        onFollowingPress={() => router.push("/self-connections/following-list")}
-        onFollowersPress={() => router.push("/self-connections/followers-list")}
-        actions={[
-          {
-            label: "Edit Profile",
-            onPress: () => {
-              router.push("/edit-profile");
+      <YStack gap="$4">
+        <ProfileHeaderDetails
+          loading={false}
+          data={{
+            userId: profileData?.userId ?? "",
+            username: profileData?.username ?? "",
+            name: profileData?.name ?? "",
+            bio: profileData?.bio ?? "",
+            followerCount: profileData?.followerCount ?? 0,
+            followingCount: profileData?.followingCount ?? 0,
+            profilePictureUrl: profileData?.profilePictureUrl,
+          }}
+          onFollowingPress={() =>
+            router.push("/self-connections/following-list")
+          }
+          onFollowersPress={() =>
+            router.push("/self-connections/followers-list")
+          }
+          actions={[
+            {
+              label: "Edit Profile",
+              onPress: () => {
+                router.push("/edit-profile");
+              },
             },
-          },
-          {
-            label: "Share Profile",
-            onPress: () => {
-              router.push("/share-profile");
+            {
+              label: "Share Profile",
+              onPress: () => {
+                router.push("/share-profile");
+              },
             },
-          },
-        ]}
-      />
+          ]}
+        />
+
+        <PeopleCarousel
+          loading={false}
+          data={friends}
+          title="Friends 🔥"
+          showMore={friends.length < (profileData?.friendCount ?? 0)}
+          onItemPress={navigateToProfile}
+          onShowMore={() => {
+            // Handle show more friends
+          }}
+        />
+      </YStack>
     ),
-    [profileData, router],
+    [
+      friends,
+      navigateToProfile,
+      profileData?.bio,
+      profileData?.followerCount,
+      profileData?.followingCount,
+      profileData?.friendCount,
+      profileData?.name,
+      profileData?.profilePictureUrl,
+      profileData?.userId,
+      profileData?.username,
+      router,
+    ],
   );
 
   return (
