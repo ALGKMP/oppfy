@@ -6,7 +6,7 @@ import { getToken, Spacer, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
-import OtherPost from "~/components/NewPostTesting/smart/OtherPost";
+import OtherPost from "~/components/NewPostTesting/OtherPost";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";

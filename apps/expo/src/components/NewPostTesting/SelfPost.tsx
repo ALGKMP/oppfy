@@ -1,8 +1,8 @@
 import React from "react";
 import { useRouter } from "expo-router";
 
-import PostCard from "../ui/PostCard";
-import type { PostData as PostCardProps } from "../ui/PostCard";
+import PostCard from "./ui/PostCard";
+import type { PostData as PostCardProps } from "./ui/PostCard";
 
 const SelfPost = (props: PostCardProps) => {
   const router = useRouter();
