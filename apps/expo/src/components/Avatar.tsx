@@ -4,7 +4,7 @@ import defaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useTheme } from "tamagui";
 
 interface AvatarProps {
-  source: ImageSourcePropType | string | null;
+  source: ImageSourcePropType | string | null | undefined;
   size?: number;
   bordered?: boolean;
 }
