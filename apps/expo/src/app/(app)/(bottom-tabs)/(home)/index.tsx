@@ -107,9 +107,6 @@ const HomeScreen = () => {
 
   const renderPost = useCallback(
     (item: PostItem, profile: Profile) => {
-      if (item.authorUsername === null) return null;
-      if (item.recipientUsername === null) return null;
-
       return (
         <View paddingTop="$4">
           <YStack gap="$4">
@@ -129,11 +126,11 @@ const HomeScreen = () => {
               }}
               author={{
                 id: item.authorId,
-                username: item.authorUsername,
+                username: item.authorUsername ?? "",
               }}
               recipient={{
                 id: item.recipientId,
-                username: item.recipientUsername,
+                username: item.recipientUsername ?? "",
                 profilePicture: item.recipientProfilePicture,
               }}
               media={{
