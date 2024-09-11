@@ -27,8 +27,8 @@ import { TimeAgo } from "~/components/Texts";
 import Avatar from "../Avatar";
 import CardContainer from "../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
-const DEFAULT_PROFILE_PICTURE = require('assets/default-profile-picture.jpg');
 
+const DEFAULT_PROFILE_PICTURE = require("assets/default-profile-picture.jpg");
 
 type MediaType = "image" | "video";
 
@@ -43,6 +43,7 @@ interface Self {
 interface Author {
   id: string;
   username: string;
+  profilePicture: ProfilePicture;
 }
 
 interface Recipient {
@@ -153,24 +154,29 @@ const PostCard = (props: PostCardProps) => {
                   position={heart.position}
                 />
               ))}
-              <View style={{ position: 'absolute', bottom: 10, left: 10 }}>
+              <View style={{ position: "absolute", bottom: 15, left: 15 }}>
                 <XStack alignItems="center" gap="$3">
                   <TouchableOpacity
                     onPress={() => {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Light,
+                      );
                       props.onAuthorPress();
                     }}
                   >
                     <Avatar
                       source={props.recipient.profilePicture}
-                      bordered
+                      size={40}
+                      // bordered
                     />
                   </TouchableOpacity>
 
                   <YStack gap="$1">
                     <TouchableOpacity
                       onPress={() => {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        void Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Light,
+                        );
                         props.onRecipientPress();
                       }}
                     >
@@ -180,16 +186,25 @@ const PostCard = (props: PostCardProps) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        void Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Light,
+                        );
                         props.onAuthorPress();
                       }}
                     >
-                      <SizableText theme="alt1" lineHeight={0}>
-                        Posted by{" "}
-                        <SizableText fontWeight="bold" color="$primary">
-                          {props.author.username}
+                      <XStack alignItems="center" gap="$2">
+                        <Avatar
+                          source={props.author.profilePicture}
+                          size={20}
+                          // bordered
+                        />
+                        <SizableText size="$2" fontWeight="bold" lineHeight={0}>
+                          Opped by{" "}
+                          <SizableText fontWeight="bold" color="$primary">
+                            {props.author.username}
+                          </SizableText>
                         </SizableText>
-                      </SizableText>
+                      </XStack>
                     </TouchableOpacity>
                     {/* <TimeAgo
                       size="$2"
@@ -202,7 +217,7 @@ const PostCard = (props: PostCardProps) => {
                 </XStack>
               </View>
               <TouchableOpacity
-                style={{ position: 'absolute', bottom: 10, right: 10 }}
+                style={{ position: "absolute", bottom: 15, right: 15 }}
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   props.onMoreOptions();
