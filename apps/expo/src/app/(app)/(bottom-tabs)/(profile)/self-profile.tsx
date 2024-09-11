@@ -1,8 +1,10 @@
 import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { getToken, Spacer, YStack } from "tamagui";
+import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { getToken, Spacer, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -72,12 +74,6 @@ const SelfProfile = () => {
     return isLoadingProfileData || isLoadingFriendsData || isLoadingPostData;
   }, [isLoadingProfileData, isLoadingFriendsData, isLoadingPostData]);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: profileData?.username,
-    });
-  }, [navigation, profileData?.username]);
-
   const navigateToProfile = useCallback(
     ({ userId, username }: { userId: string; username: string }) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -88,6 +84,19 @@ const SelfProfile = () => {
     },
     [router],
   );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: profileData?.username,
+      headerRight: () => (
+        <View>
+          <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
+            <MoreHorizontal />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation, profileData?.username, router]);
 
   const renderPost = useCallback(
     (item: Post) => (

@@ -13,7 +13,6 @@ import { Stack } from "~/layouts";
 
 const SearchLayout = () => {
   const theme = useTheme();
-  const router = useRouter();
 
   return (
     <Stack
@@ -26,15 +25,6 @@ const SearchLayout = () => {
         name="self-profile"
         options={{
           header: (props) => <Header {...props} />,
-          headerRight: () => (
-            <View>
-              <TouchableOpacity
-                onPress={() => router.push("/(app)/(settings)")}
-              >
-                <MoreHorizontal />
-              </TouchableOpacity>
-            </View>
-          ),
         }}
       />
       <Stack.Screen

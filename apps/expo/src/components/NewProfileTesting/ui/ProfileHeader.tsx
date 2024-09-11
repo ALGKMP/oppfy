@@ -135,13 +135,19 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
         </YStack>
 
         <YStack alignItems="flex-end" gap="$2">
-          <TouchableOpacity onPress={onFollowingPress}>
+          <TouchableOpacity
+            onPress={onFollowingPress}
+            disabled={!onFollowingPress}
+          >
             <Stat
               label="Following"
               value={abbreviatedNumber(data.followingCount)}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onFollowersPress}>
+          <TouchableOpacity
+            onPress={onFollowersPress}
+            disabled={!onFollowersPress}
+          >
             <Stat
               label="Followers"
               value={abbreviatedNumber(data.followerCount)}

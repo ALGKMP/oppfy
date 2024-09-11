@@ -198,7 +198,7 @@ const PostCard = (props: PostCardProps) => {
 
   return (
     <CardContainer paddingTop={0}>
-      <YStack>
+      <YStack gap="$3">
         <View marginHorizontal="$-3">
           <GestureDetector gesture={doubleTap}>
             <View>
@@ -279,8 +279,8 @@ const PostCard = (props: PostCardProps) => {
         </View>
 
         {/* Under post */}
-        <View flex={1} alignSelf="stretch" padding="$2.5" paddingTop="$3">
-          <XStack gap="$4" alignItems="center" marginBottom="$2">
+        <YStack flex={1} paddingHorizontal="$1" gap="$1">
+          <XStack gap="$3.5" alignItems="center">
             {/* Like Button */}
             <TouchableOpacity onPress={handleLikePress}>
               <Animated.View style={[heartButtonAnimatedStyle]}>
@@ -301,14 +301,14 @@ const PostCard = (props: PostCardProps) => {
 
             {/* Share Button */}
             <TouchableOpacity onPress={() => props.onShare()}>
-              <Send size={26} color="$gray12" marginLeft="$-1.5" />
+              <Send size={26} color="$gray12" />
             </TouchableOpacity>
           </XStack>
 
           {/* Likes Count */}
           {props.stats.likes > 0 && (
             <TouchableOpacity>
-              <SizableText size="$3" fontWeight="bold" marginBottom="$1">
+              <SizableText size="$3" fontWeight="bold">
                 {props.stats.likes > 0
                   ? `${props.stats.likes} ${props.stats.likes === 1 ? "like" : "likes"}`
                   : ""}
@@ -354,7 +354,7 @@ const PostCard = (props: PostCardProps) => {
               format={formatTimeAgo}
             />
           </SizableText>
-        </View>
+        </YStack>
       </YStack>
     </CardContainer>
   );

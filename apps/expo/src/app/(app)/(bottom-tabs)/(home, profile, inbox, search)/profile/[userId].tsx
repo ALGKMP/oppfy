@@ -1,34 +1,32 @@
-import React, { useCallback, useLayoutEffect } from "react";
-import { TouchableOpacity } from "react-native";
+import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import { TouchableOpacity, View } from "react-native";
 import * as Haptics from "expo-haptics";
-import {
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-  useSegments,
-} from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
-import { View } from "tamagui";
+import { getToken, Spacer, YStack } from "tamagui";
 
-import { ActionSheet } from "~/components/Sheets";
-import type { ButtonOption } from "~/components/Sheets";
+import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
+import OtherPost from "~/components/NewPostTesting/OtherPost";
+import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
+import useProfile from "~/hooks/useProfile";
+import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import MediaOfYou from "../../(profile)/MediaOfYou";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-const Profile = () => {
+type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
+
+const OtherProfile = () => {
   const router = useRouter();
   const navigation = useNavigation();
-  const [isActionSheetVisible, setIsActionSheetVisible] = React.useState(false);
-  const utils = api.useUtils();
-  const segments = useSegments();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
     username: string;
   }>();
 
-  // Profile data query
   const {
     data: profileData,
     isLoading: isLoadingProfileData,
@@ -38,7 +36,9 @@ const Profile = () => {
     { enabled: !!userId },
   );
 
-  // Friends data query
+  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
+
   const {
     data: friendsData,
     isLoading: isLoadingFriendsData,
@@ -51,7 +51,6 @@ const Profile = () => {
     },
   );
 
-  // Posts data query
   const {
     data: postsData,
     isLoading: isLoadingPostData,
@@ -67,204 +66,218 @@ const Profile = () => {
     },
   );
 
-  // block user
-  const blockUser = api.block.blockUser.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-      if (!userId) return;
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await refetchPosts();
+    setIsRefreshing(false);
+  }, [refetchPosts]);
 
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId: userId,
+  const handleOnEndReached = useCallback(async () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      await fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const postItems = useMemo(
+    () => postsData?.pages.flatMap((page) => page.items) ?? [],
+    [postsData],
+  );
+
+  const friendItems = useMemo(
+    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
+    [friendsData],
+  );
+
+  const isLoadingData = useMemo(() => {
+    return isLoadingProfileData || isLoadingFriendsData || isLoadingPostData;
+  }, [isLoadingProfileData, isLoadingFriendsData, isLoadingPostData]);
+
+  const navigateToProfile = useCallback(
+    ({ userId, username }: { userId: string; username: string }) => {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      router.push({
+        pathname: "/(profile)/profile/[userId]",
+        params: { userId, username },
       });
-
-      if (prevData === undefined || !userId) {
-        console.log(prevData === undefined);
-        return;
-      }
-
-      utils.profile.getFullProfileOther.setData(
-        {
-          userId: userId,
-        },
-        {
-          ...prevData,
-          networkStatus: {
-            ...prevData.networkStatus,
-            isTargetUserBlocked: true,
-          },
-        },
-      );
-      console.log("Done optimistic shit");
-
-      return { prevData };
     },
-    onError: (_err, _newData, ctx) => {
-      if (isLoadingProfileData || !userId) return;
-      if (ctx === undefined) return;
-
-      utils.profile.getFullProfileOther.setData(
-        { userId: userId },
-        ctx.prevData,
-      );
-    },
-    onSettled: async () => {
-      if (isLoadingProfileData || !userId) return;
-
-      // Sync with server once mutation has settled
-      await utils.profile.getFullProfileOther.invalidate();
-    },
-  });
-
-  const unblockUser = api.block.unblockUser.useMutation({
-    onMutate: async () => {
-      await utils.profile.getFullProfileOther.cancel();
-
-      if (!userId) return;
-
-      const prevData = utils.profile.getFullProfileOther.getData({
-        userId: userId,
-      });
-
-      if (prevData === undefined) return;
-
-      utils.profile.getFullProfileOther.setData(
-        {
-          userId: userId,
-        },
-        {
-          ...prevData,
-          networkStatus: {
-            ...prevData.networkStatus,
-            isTargetUserBlocked: false,
-          },
-        },
-      );
-
-      return { prevData };
-    },
-    onError: (_err, _newData, ctx) => {
-      if (isLoadingProfileData || !userId) return;
-      if (ctx === undefined) return;
-
-      utils.profile.getFullProfileOther.setData(
-        { userId: userId },
-        ctx.prevData,
-      );
-    },
-    onSettled: async () => {
-      if (isLoadingProfileData || !userId) return;
-
-      // Sync with server once mutation has settled
-      await utils.profile.getFullProfileOther.invalidate();
-    },
-  });
-
-  const handleBlockUser = async (userId: string) => {
-    await blockUser.mutateAsync({ blockUserId: userId });
-    setIsActionSheetVisible(false);
-  };
-
-  const handleUnblockUser = async (userId: string) => {
-    await unblockUser.mutateAsync({ blockedUserId: userId });
-    setIsActionSheetVisible(false);
-  };
-
-  const handleOnPress = useCallback(() => {
-    setIsActionSheetVisible(true);
-  }, []);
-
-  const posts = postsData?.pages.flatMap((page) => page.items) ?? [];
-  const friends = friendsData?.pages.flatMap((page) => page.items) ?? [];
+    [router],
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: username,
       headerRight: () => (
         <View>
-          <TouchableOpacity
-            onPress={() => {
-              if (userId) {
-                handleOnPress();
-              }
-            }}
-          >
+          <TouchableOpacity onPress={() => {}}>
             <MoreHorizontal />
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation, username, profileData, handleOnPress, userId]);
+  }, [navigation, username, profileData]);
 
-  const title = profileData?.networkStatus.isTargetUserBlocked
-    ? "Unblock user"
-    : "Block user";
-  const subtitle = profileData?.networkStatus.isTargetUserBlocked
-    ? "Are you sure you want to unblock this user?"
-    : "Are you sure you want to block this user?";
-  const buttonOptions = [
-    {
-      text: profileData?.networkStatus.isTargetUserBlocked
-        ? "Unblock"
-        : "Block",
-      textProps: {
-        color: "$red9",
-      },
-      onPress: () => {
-        if (userId) {
-          if (profileData?.networkStatus.isTargetUserBlocked) {
-            void handleUnblockUser(userId);
-          } else {
-            void handleBlockUser(userId);
-          }
-        }
-      },
-    },
-  ] satisfies ButtonOption[];
-
-  const navigateToProfile = useCallback(
-    ({ userId, username }: { userId: string; username: string }) => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push({
-        pathname: `${segments[2]}/profile/[userId]/`,
-        params: { userId, username },
-      });
-    },
-    [router, segments],
+  const renderPost = useCallback(
+    (item: Post) => (
+      <OtherPost
+        key={item.postId}
+        id={item.postId}
+        createdAt={item.createdAt}
+        caption={item.caption}
+        self={{
+          id: profileData?.userId ?? "",
+          username: profileData?.username ?? "",
+          profilePicture: profileData?.profilePictureUrl,
+        }}
+        author={{
+          id: item.authorId,
+          username: item.authorUsername ?? "",
+          profilePicture: item.authorProfilePicture,
+        }}
+        recipient={{
+          id: item.recipientId,
+          username: item.recipientUsername ?? "",
+          profilePicture: item.recipientProfilePicture,
+        }}
+        media={{
+          type: item.mediaType,
+          url: item.imageUrl,
+          dimensions: {
+            width: item.width,
+            height: item.height,
+          },
+        }}
+        stats={{
+          likes: item.likesCount,
+          comments: item.commentsCount,
+        }}
+      />
+    ),
+    [profileData],
   );
 
-  return (
-    <BaseScreenView padding={0}>
-      {userId && (
-        <MediaOfYou
-          navigateToProfile={navigateToProfile}
-          userId={userId}
-          isSelfProfile={false}
-          profileData={profileData}
-          isLoadingProfileData={isLoadingProfileData}
-          refetchProfileData={refetchProfileData}
-          recommendations={[]} // We don't fetch recommendations for other users
-          isLoadingRecommendationsData={false}
-          refetchRecommendationsData={() => Promise.resolve()}
-          friends={friends}
-          isLoadingFriendsData={isLoadingFriendsData}
-          refetchFriendsData={refetchFriendsData}
-          posts={posts}
-          isLoadingPostData={isLoadingPostData}
-          isFetchingNextPage={isFetchingNextPage}
-          refetchPosts={refetchPosts}
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage ?? false}
+  const renderHeader = useCallback(
+    () => (
+      <YStack gap="$4">
+        <ProfileHeaderDetails
+          loading={false}
+          data={{
+            userId: profileData?.userId ?? "",
+            username: profileData?.username ?? "",
+            name: profileData?.name ?? "",
+            bio: profileData?.bio ?? "",
+            followerCount: profileData?.followerCount ?? 0,
+            followingCount: profileData?.followingCount ?? 0,
+            profilePictureUrl: profileData?.profilePictureUrl,
+          }}
+          onFollowingPress={() =>
+            router.push({
+              pathname: "/profile/connections/[userId]/following-list",
+              params: { userId, username },
+            })
+          }
+          onFollowersPress={() =>
+            router.push({
+              pathname: "/profile/connections/[userId]/followers-list",
+              params: { userId, username },
+            })
+          }
+          actions={[
+            {
+              label: "Edit Profile",
+              onPress: () => {
+                router.push("/edit-profile");
+              },
+            },
+            {
+              label: "Share Profile",
+              onPress: () => {
+                router.push("/share-profile");
+              },
+            },
+          ]}
         />
-      )}
-      <ActionSheet
-        title={title}
-        isVisible={isActionSheetVisible}
-        subtitle={subtitle}
-        buttonOptions={buttonOptions}
+
+        {friendItems.length > 0 ? (
+          <PeopleCarousel
+            loading={isLoadingFriendsData}
+            data={friendItems}
+            title="Friends 🔥"
+            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
+            onItemPress={navigateToProfile}
+            onShowMore={() => {
+              // Handle show more friends
+            }}
+          />
+        ) : (
+          <PeopleCarousel
+            loading={isLoadingRecommendationsData}
+            data={recommendationsData ?? []}
+            title="Recommended Friends 👥"
+            showMore={false}
+            onItemPress={navigateToProfile}
+            onShowMore={() => {
+              // Handle show more recommendations
+            }}
+          />
+        )}
+      </YStack>
+    ),
+    [
+      friendItems,
+      isLoadingFriendsData,
+      isLoadingRecommendationsData,
+      navigateToProfile,
+      profileData,
+      recommendationsData,
+      router,
+    ],
+  );
+
+  if (isLoadingData) {
+    return (
+      <BaseScreenView padding={0} paddingBottom={0}>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          renderItem={() => <PostCard loading />}
+          ListHeaderComponent={() => (
+            <YStack gap="$4">
+              <ProfileHeaderDetails loading />
+              <PeopleCarousel loading />
+            </YStack>
+          )}
+          estimatedItemSize={300}
+          keyExtractor={(_, index) => `loading-${index}`}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListHeaderComponentStyle={{
+            marginBottom: getToken("$4", "space") as number,
+          }}
+        />
+      </BaseScreenView>
+    );
+  }
+
+  return (
+    <BaseScreenView padding={0} paddingBottom={0}>
+      <FlashList
+        data={postItems}
+        renderItem={({ item }) => renderPost(item)}
+        ListHeaderComponent={renderHeader}
+        keyExtractor={(item) => `self-profile-post-${item.postId}`}
+        estimatedItemSize={300}
+        showsVerticalScrollIndicator={false}
+        onEndReached={handleOnEndReached}
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
+        ItemSeparatorComponent={() => <Spacer size="$4" />}
+        ListHeaderComponentStyle={{
+          marginBottom: getToken("$4", "space") as number,
+        }}
       />
     </BaseScreenView>
   );
 };
 
-export default Profile;
+export default OtherProfile;
