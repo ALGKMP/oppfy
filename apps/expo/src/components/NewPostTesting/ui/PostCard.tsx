@@ -134,7 +134,13 @@ const PostCard = (props: PostCardProps) => {
     .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
 
   const buttonLikeScale = useSharedValue(1);
+  const buttonLikeScale = useSharedValue(1);
 
+  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonLikeScale.value }],
+    };
+  });
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: buttonLikeScale.value }],
@@ -266,6 +272,7 @@ const PostCard = (props: PostCardProps) => {
 
             {/* Comment Button */}
             <TouchableOpacity onPress={() => props.onComment()}>
+            <TouchableOpacity onPress={() => props.onComment()}>
               <MessageCircle size="$2" color="$gray12" />
             </TouchableOpacity>
 
@@ -301,6 +308,7 @@ const PostCard = (props: PostCardProps) => {
                   <Text fontWeight="bold">{props.author.username} </Text>
                   <Text numberOfLines={isExpanded ? 0 : 2}>
                     {props.caption}
+                    {isExpanded && <Text color="$gray10"> more</Text>}
                     {isExpanded && <Text color="$gray10"> more</Text>}
                   </Text>
                 </Text>
