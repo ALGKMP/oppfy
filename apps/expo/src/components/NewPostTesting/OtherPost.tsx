@@ -437,7 +437,6 @@ const ReportOptionsSheet = ({
 };
 
 const OtherPost = (postProps: OtherPostProps) => {
-  console.log("postProps", postProps.id);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 

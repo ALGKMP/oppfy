@@ -253,26 +253,28 @@ const PostCard = (props: PostCardProps) => {
             />
           </XStack>
 
-          <TouchableOpacity
-            disabled={isExpanded}
-            onPress={() => setIsExpanded(!isExpanded)}
-          >
-            <Paragraph color="$gray10">
-              {isExpanded ? (
-                props.caption
-              ) : (
-                <>
-                  {props.caption.slice(0, 110)}
-                  {props.caption.length > 110 && (
-                    <>
-                      ...
-                      <Text color="$gray8"> more</Text>
-                    </>
-                  )}
-                </>
-              )}
-            </Paragraph>
-          </TouchableOpacity>
+          {props.caption && (
+            <TouchableOpacity
+              disabled={isExpanded}
+              onPress={() => setIsExpanded(!isExpanded)}
+            >
+              <Paragraph color="$gray10">
+                {isExpanded ? (
+                  props.caption
+                ) : (
+                  <>
+                    {props.caption.slice(0, 110)}
+                    {props.caption.length > 110 && (
+                      <>
+                        ...
+                        <Text color="$gray8"> more</Text>
+                      </>
+                    )}
+                  </>
+                )}
+              </Paragraph>
+            </TouchableOpacity>
+          )}
         </YStack>
       </YStack>
     </CardContainer>
