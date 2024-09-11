@@ -40,7 +40,7 @@ export const useLikePost = (postId: string) => {
       // Optimistically update the data
       utils.post.hasliked.setData(
         { postId: newHasLikedData.postId },
-        !prevData,
+        true,
       );
 
       // Return the previous data so we can revert if something goes wrong

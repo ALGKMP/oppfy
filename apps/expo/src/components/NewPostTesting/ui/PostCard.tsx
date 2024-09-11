@@ -2,7 +2,12 @@ import React, { useCallback, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 import { Video } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -97,39 +102,44 @@ const PostCard = (props: PostCardProps) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleLikePress = useCallback(() => {
+    props.onLikePressed();
+    buttonLikeScale.value = withSpring(
+      1.2,
+      {
+        damping: 10,
+        stiffness: 200,
+      },
+      () => {
+        buttonLikeScale.value = withSpring(1, {
+          damping: 10,
+          stiffness: 200,
+        });
+      },
+    );
+  }, [props.hasLiked, props.onLikePressed, props.onLikeDoubleTapped]);
+
   const addHeartJS = useCallback(
     (x: number, y: number) => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       addHeart(x, y);
+      handleLikePress(); // Trigger the like animation on double tap
       props.onLikeDoubleTapped();
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     },
-    [addHeart, props],
+    [addHeart, handleLikePress, props],
   );
 
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
     .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
 
-    const buttonLikeScale = useSharedValue(1);
+  const buttonLikeScale = useSharedValue(1);
 
-    const heartButtonAnimatedStyle = useAnimatedStyle(() => {
-      return {
-        transform: [{ scale: buttonLikeScale.value }],
-      };
-    });
-
-  const handleLikePress = useCallback(() => {
-    buttonLikeScale.value = withSpring(1.2, {
-      damping: 10,
-      stiffness: 200,
-    }, () => {
-      buttonLikeScale.value = withSpring(1, {
-        damping: 10,
-        stiffness: 200,
-      });
-    });
-    props.onLikePressed();
-  }, [props.onLikePressed]);
+  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonLikeScale.value }],
+    };
+  });
 
   const renderMedia = (
     type: MediaType,
@@ -255,9 +265,7 @@ const PostCard = (props: PostCardProps) => {
             </TouchableOpacity>
 
             {/* Comment Button */}
-            <TouchableOpacity
-              onPress={() => props.onComment()}
-            >
+            <TouchableOpacity onPress={() => props.onComment()}>
               <MessageCircle size="$2" color="$gray12" />
             </TouchableOpacity>
 
@@ -293,9 +301,7 @@ const PostCard = (props: PostCardProps) => {
                   <Text fontWeight="bold">{props.author.username} </Text>
                   <Text numberOfLines={isExpanded ? 0 : 2}>
                     {props.caption}
-                    {isExpanded && (
-                      <Text color="$gray10"> more</Text>
-                    )}
+                    {isExpanded && <Text color="$gray10"> more</Text>}
                   </Text>
                 </Text>
               </TouchableOpacity>
@@ -322,7 +328,6 @@ const PostCard = (props: PostCardProps) => {
             />
           </SizableText>
         </View>
-
       </YStack>
     </CardContainer>
   );
