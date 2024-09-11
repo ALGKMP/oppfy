@@ -5,7 +5,6 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, Spacer, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
-import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
@@ -14,35 +13,24 @@ import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import MediaOfYou from "./MediaOfYou";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
 const SelfProfile = () => {
-  const utils = api.useUtils();
   const navigation = useNavigation();
   const router = useRouter();
 
-  const {
-    profile: profileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfile,
-  } = useProfile();
+  const { profile: profileData, isLoading: isLoadingProfileData } =
+    useProfile();
 
-  const {
-    data: recommendationsData,
-    isLoading: isLoadingRecommendationsData,
-    refetch: refetchRecommendationsData,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery();
+  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
 
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    { pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
-  );
+  const { data: friendsData, isLoading: isLoadingFriendsData } =
+    api.friend.paginateFriendsSelf.useInfiniteQuery(
+      { pageSize: 10 },
+      { getNextPageParam: (lastPage) => lastPage.nextCursor },
+    );
 
   const {
     data: postsData,
@@ -63,6 +51,12 @@ const SelfProfile = () => {
     await refetchPosts();
     setIsRefreshing(false);
   }, [refetchPosts]);
+
+  const handleOnEndReached = useCallback(async () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      await fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const postItems = useMemo(
     () => postsData?.pages.flatMap((page) => page.items) ?? [],
@@ -95,7 +89,7 @@ const SelfProfile = () => {
     [router],
   );
 
-  const renderItem = useCallback(
+  const renderPost = useCallback(
     (item: Post) => (
       <OtherPost
         key={item.postId}
@@ -207,23 +201,19 @@ const SelfProfile = () => {
   );
 
   if (isLoadingData) {
-    const renderLoadingItem = () => <PostCard loading />;
-
-    const renderLoadingHeader = () => (
-      <YStack gap="$4">
-        <ProfileHeaderDetails loading />
-        <PeopleCarousel loading />
-      </YStack>
-    );
-
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <FlashList
           data={PLACEHOLDER_DATA}
-          renderItem={renderLoadingItem}
-          ListHeaderComponent={renderLoadingHeader}
+          renderItem={() => <PostCard loading />}
+          ListHeaderComponent={() => (
+            <YStack gap="$4">
+              <ProfileHeaderDetails loading />
+              <PeopleCarousel loading />
+            </YStack>
+          )}
           estimatedItemSize={300}
-          keyExtractor={(_item, index) => `loading-${index}`}
+          keyExtractor={(_, index) => `loading-${index}`}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
           ListHeaderComponentStyle={{
@@ -238,15 +228,11 @@ const SelfProfile = () => {
     <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
         data={postItems}
-        renderItem={({ item }) => renderItem(item)}
+        renderItem={({ item }) => renderPost(item)}
         ListHeaderComponent={renderHeader}
         estimatedItemSize={300}
         showsVerticalScrollIndicator={false}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) {
-            void fetchNextPage();
-          }
-        }}
+        onEndReached={handleOnEndReached}
         onRefresh={handleRefresh}
         refreshing={isRefreshing}
         ItemSeparatorComponent={() => <Spacer size="$4" />}
