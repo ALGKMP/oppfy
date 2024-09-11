@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { Video } from "expo-av";
+import { ResizeMode, Video } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import {
@@ -156,7 +156,7 @@ const PostCard = (props: PostCardProps) => {
       case "image":
         return <Image source={{ uri: url }} style={style} contentFit="cover" />;
       case "video":
-        return <Video source={{ uri: url }} style={style} />;
+        return <Video source={{ uri: url }} style={style} resizeMode={ResizeMode.COVER} />;
     }
   };
 
@@ -168,7 +168,7 @@ const PostCard = (props: PostCardProps) => {
 
   return (
     <CardContainer>
-      <YStack gap="$3">
+      <YStack>
         <View marginHorizontal="$-3">
           <GestureDetector gesture={doubleTap}>
             <View>
