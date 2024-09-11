@@ -251,6 +251,21 @@ const OtherProfile = () => {
   }>();
 
   const {
+    handleFollow,
+    handleUnfollow,
+    handleAddFriend,
+    handleRemoveFriend,
+    handleCancelFollowRequest,
+    handleCancelFriendRequest,
+    isFollowLoading,
+    isUnfollowLoading,
+    isAddFriendLoading,
+    isRemoveFriendLoading,
+    isCancelFollowRequestLoading,
+    isCancelFriendRequestLoading,
+  } = useProfileActions(userId);
+
+  const {
     data: profileData,
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
@@ -386,52 +401,151 @@ const OtherProfile = () => {
     const { privacy, targetUserFollowState, targetUserFriendState } =
       profileData.networkStatus;
 
+    console.log(privacy, targetUserFollowState, targetUserFriendState);
+
     const buttonCombinations: Record<string, ProfileAction[]> = {
       public_NotFollowing_NotFriends: [
-        { label: "Follow", onPress: () => {} },
-        { label: "Add Friend", onPress: () => {} },
+        { label: "Follow", onPress: handleFollow, loading: isFollowLoading },
+        {
+          label: "Add Friend",
+          onPress: handleAddFriend,
+          loading: isAddFriendLoading,
+        },
       ],
       public_Following_NotFriends: [
-        { label: "Unfollow", onPress: () => {} },
-        { label: "Add Friend", onPress: () => {} },
+        {
+          label: "Unfollow",
+          onPress: handleUnfollow,
+          loading: isUnfollowLoading,
+        },
+        {
+          label: "Add Friend",
+          onPress: handleAddFriend,
+          loading: isAddFriendLoading,
+        },
       ],
       public_Following_OutboundRequest: [
-        { label: "Unfollow", onPress: () => {} },
-        { label: "Cancel Friend Request", onPress: () => {} },
+        {
+          label: "Unfollow",
+          onPress: handleUnfollow,
+          loading: isUnfollowLoading,
+        },
+        {
+          label: "Cancel Friend Request",
+          onPress: handleCancelFriendRequest,
+          loading: isCancelFriendRequestLoading,
+        },
       ],
       public_Following_Friends: [
-        { label: "Unfollow", onPress: () => {} },
-        { label: "Remove Friend", onPress: () => {} },
+        {
+          label: "Unfollow",
+          onPress: handleUnfollow,
+          loading: isUnfollowLoading,
+        },
+        {
+          label: "Remove Friend",
+          onPress: handleRemoveFriend,
+          loading: isRemoveFriendLoading,
+        },
       ],
       private_NotFollowing_NotFriends: [
-        { label: "Request Follow", onPress: () => {} },
-        { label: "Add Friend", onPress: () => {} },
+        {
+          label: "Request Follow",
+          onPress: handleFollow,
+          loading: isFollowLoading,
+        },
+        {
+          label: "Add Friend",
+          onPress: handleAddFriend,
+          loading: isAddFriendLoading,
+        },
       ],
       private_OutboundRequest_NotFriends: [
-        { label: "Cancel Follow Request", onPress: () => {} },
-        { label: "Add Friend", onPress: () => {} },
+        {
+          label: "Cancel Follow Request",
+          onPress: handleCancelFollowRequest,
+          loading: isCancelFollowRequestLoading,
+        },
+        {
+          label: "Add Friend",
+          onPress: handleAddFriend,
+          loading: isAddFriendLoading,
+        },
       ],
       private_Following_NotFriends: [
-        { label: "Unfollow", onPress: () => {} },
-        { label: "Add Friend", onPress: () => {} },
+        {
+          label: "Unfollow",
+          onPress: handleUnfollow,
+          loading: isUnfollowLoading,
+        },
+        {
+          label: "Add Friend",
+          onPress: handleAddFriend,
+          loading: isAddFriendLoading,
+        },
       ],
       private_OutboundRequest_OutboundRequest: [
-        { label: "Cancel Follow Request", onPress: () => {} },
-        { label: "Cancel Friend Request", onPress: () => {} },
+        {
+          label: "Cancel Follow Request",
+          onPress: handleCancelFollowRequest,
+          loading: isCancelFollowRequestLoading,
+        },
+        {
+          label: "Cancel Friend Request",
+          onPress: handleCancelFriendRequest,
+          loading: isCancelFriendRequestLoading,
+        },
       ],
       private_Following_OutboundRequest: [
-        { label: "Unfollow", onPress: () => {} },
-        { label: "Cancel Friend Request", onPress: () => {} },
+        {
+          label: "Unfollow",
+          onPress: handleUnfollow,
+          loading: isUnfollowLoading,
+        },
+        {
+          label: "Cancel Friend Request",
+          onPress: handleCancelFriendRequest,
+          loading: isCancelFriendRequestLoading,
+        },
+      ],
+      private_NotFollowing_OutboundRequest: [
+        {
+          label: "Cancel Friend Request",
+          onPress: handleCancelFriendRequest,
+          loading: isCancelFriendRequestLoading,
+        },
       ],
       private_Following_Friends: [
-        { label: "Unfollow", onPress: () => {} },
-        { label: "Remove Friend", onPress: () => {} },
+        {
+          label: "Unfollow",
+          onPress: handleUnfollow,
+          loading: isUnfollowLoading,
+        },
+        {
+          label: "Remove Friend",
+          onPress: handleRemoveFriend,
+          loading: isRemoveFriendLoading,
+        },
       ],
     };
 
     const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
     return buttonCombinations[key] ?? [];
-  }, [profileData]);
+  }, [
+    profileData,
+    handleFollow,
+    handleUnfollow,
+    handleAddFriend,
+    handleRemoveFriend,
+    handleCancelFollowRequest,
+    handleCancelFriendRequest,
+    isFollowLoading,
+    isUnfollowLoading,
+    isAddFriendLoading,
+    isRemoveFriendLoading,
+    isCancelFollowRequestLoading,
+    isCancelFriendRequestLoading,
+  ]);
 
   const renderHeader = useCallback(
     () => (
