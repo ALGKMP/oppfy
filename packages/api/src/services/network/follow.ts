@@ -125,10 +125,13 @@ export class FollowService {
     );
 
     if (outboundRequest) {
+      console.log("outboundRequest");
       await this.followRepository.removeFollowRequest(senderId, recipientId);
     } else if (friendship) {
+      console.log("friendship");
       await this.friendRepository.removeFriend(senderId, recipientId);
     } else {
+      console.log("follower");
       await this.followRepository.removeFollower(senderId, recipientId);
     }
   }
