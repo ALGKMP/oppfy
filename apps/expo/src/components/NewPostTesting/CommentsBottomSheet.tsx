@@ -40,7 +40,7 @@ import BottomSheetHeader from "./BottomSheetHeader";
 
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
-type ProfilePicture = ImageSourcePropType | string | null;
+type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
 interface Comment {
   userId: string;
