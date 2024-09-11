@@ -230,6 +230,7 @@ const SelfProfile = () => {
         data={postItems}
         renderItem={({ item }) => renderPost(item)}
         ListHeaderComponent={renderHeader}
+        keyExtractor={(item) => `self-profile-post-${item.postId}`}
         estimatedItemSize={300}
         showsVerticalScrollIndicator={false}
         onEndReached={handleOnEndReached}
