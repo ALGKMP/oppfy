@@ -29,6 +29,7 @@ import {
   YStack,
 } from "tamagui";
 
+import Skeleton from "~/components/Skeletons/Skeleton";
 import { TimeAgo } from "~/components/Texts";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
@@ -93,7 +94,14 @@ interface PostCallbacks {
   onRecipientPress: () => void;
 }
 
-type PostCardProps = PostData & PostCallbacks & { hasLiked: boolean };
+type LoadedPostCardProps = PostData &
+  PostCallbacks & { hasLiked: boolean; loading: false };
+
+interface LoadingPostCardProps {
+  loading: true;
+}
+
+type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
 
 const ASPECT_RATIO = 3 / 4;
 
@@ -101,6 +109,38 @@ const PostCard = (props: PostCardProps) => {
   const { hearts, addHeart } = useHeartAnimations();
 
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const buttonLikeScale = useSharedValue(1);
+
+  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonLikeScale.value }],
+    };
+  });
+
+  if (props.loading) {
+    return (
+      <CardContainer paddingVertical={0}>
+        <YStack>
+          <View marginHorizontal="$-3">
+            <Skeleton width="100%" height={600} radius={8} />
+            <View style={{ position: "absolute", bottom: 15, left: 15 }}>
+              <XStack alignItems="center" gap="$3">
+                <Skeleton size={40} circular />
+                <YStack gap="$1">
+                  <Skeleton width={100} height={16} />
+                  <XStack alignItems="center" gap="$2">
+                    <Skeleton size={20} circular />
+                    <Skeleton width={80} height={12} />
+                  </XStack>
+                </YStack>
+              </XStack>
+            </View>
+          </View>
+        </YStack>
+      </CardContainer>
+    );
+  }
 
   const handleLikePress = useCallback(() => {
     props.onLikePressed();
@@ -135,14 +175,6 @@ const PostCard = (props: PostCardProps) => {
     .numberOfTaps(2)
     .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
 
-  const buttonLikeScale = useSharedValue(1);
-
-  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: buttonLikeScale.value }],
-    };
-  });
-
   const renderMedia = (
     type: MediaType,
     url: string,
@@ -175,7 +207,7 @@ const PostCard = (props: PostCardProps) => {
   };
 
   return (
-    <CardContainer>
+    <CardContainer paddingTop={0}>
       <YStack>
         <View marginHorizontal="$-3">
           <GestureDetector gesture={doubleTap}>
@@ -278,10 +310,7 @@ const PostCard = (props: PostCardProps) => {
             </TouchableOpacity>
 
             {/* Share Button */}
-            <TouchableOpacity
-              onPress={() => props.onShare()}
-              // setIsShareModalVisible(true)}
-            >
+            <TouchableOpacity onPress={() => props.onShare()}>
               <Send size={26} color="$gray12" marginLeft="$-1.5" />
             </TouchableOpacity>
           </XStack>
@@ -309,8 +338,7 @@ const PostCard = (props: PostCardProps) => {
                   <Text fontWeight="bold">{props.author.username} </Text>
                   <Text numberOfLines={isExpanded ? 0 : 2}>
                     {props.caption}
-                    {isExpanded && <Text color="$gray10"> more</Text>}
-                    {isExpanded && <Text color="$gray10"> more</Text>}
+                    {!isExpanded && <Text color="$gray10"> more</Text>}
                   </Text>
                 </Text>
               </TouchableOpacity>

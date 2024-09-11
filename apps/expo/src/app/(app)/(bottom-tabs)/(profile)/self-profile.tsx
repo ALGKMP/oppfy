@@ -7,11 +7,13 @@ import { getToken, Spacer, YStack } from "tamagui";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
+import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import MediaOfYou from "./MediaOfYou";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
@@ -200,19 +202,37 @@ const SelfProfile = () => {
     ],
   );
 
-  // if anything is loading, show a loading indicator
   if (
     isLoadingProfileData ||
     isLoadingFriendsData ||
     isLoadingRecommendationsData ||
-    isLoadingPostData
-    //  || true
+    isLoadingPostData ||
+    true
   ) {
-    return (
-      <YStack gap="$5">
+    const renderLoadingItem = () => <PostCard loading />;
+
+    const renderLoadingHeader = () => (
+      <YStack gap="$4">
         <ProfileHeaderDetails loading />
         <PeopleCarousel loading />
       </YStack>
+    );
+
+    return (
+      <BaseScreenView padding={0} paddingBottom={0}>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          renderItem={renderLoadingItem}
+          ListHeaderComponent={renderLoadingHeader}
+          estimatedItemSize={300}
+          keyExtractor={(_item, index) => `loading-${index}`}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListHeaderComponentStyle={{
+            marginBottom: getToken("$4", "space") as number,
+          }}
+        />
+      </BaseScreenView>
     );
   }
 
@@ -223,6 +243,7 @@ const SelfProfile = () => {
         renderItem={({ item }) => renderItem(item)}
         ListHeaderComponent={renderHeader}
         estimatedItemSize={300}
+        showsVerticalScrollIndicator={false}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
             void fetchNextPage();
@@ -230,6 +251,7 @@ const SelfProfile = () => {
         }}
         onRefresh={handleRefresh}
         refreshing={isRefreshing}
+        ItemSeparatorComponent={() => <Spacer size="$4" />}
         ListHeaderComponentStyle={{
           marginBottom: getToken("$4", "space") as number,
         }}

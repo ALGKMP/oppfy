@@ -82,6 +82,9 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
           <View flex={1}>
             <Skeleton width="100%" height={44} radius={20} />
           </View>
+          <View flex={1}>
+            <Skeleton width="100%" height={44} radius={20} />
+          </View>
         </XStack>
       </YStack>
     );
