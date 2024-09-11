@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { Video } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -10,6 +10,7 @@ import {
   Heart,
   MessageCircle,
   MoreHorizontal,
+  Send,
   SendHorizontal,
 } from "@tamagui/lucide-icons";
 import {
@@ -108,6 +109,27 @@ const PostCard = (props: PostCardProps) => {
     .numberOfTaps(2)
     .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
 
+    const buttonLikeScale = useSharedValue(1);
+
+    const heartButtonAnimatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [{ scale: buttonLikeScale.value }],
+      };
+    });
+
+  const handleLikePress = useCallback(() => {
+    buttonLikeScale.value = withSpring(1.2, {
+      damping: 10,
+      stiffness: 200,
+    }, () => {
+      buttonLikeScale.value = withSpring(1, {
+        damping: 10,
+        stiffness: 200,
+      });
+    });
+    props.onLikePressed();
+  }, [props.onLikePressed]);
+
   const renderMedia = (
     type: MediaType,
     url: string,
@@ -198,13 +220,6 @@ const PostCard = (props: PostCardProps) => {
                         </SizableText>
                       </XStack>
                     </TouchableOpacity>
-                    {/* <TimeAgo
-                      size="$2"
-                      theme="alt2"
-                      lineHeight={0}
-                      date={props.createdAt}
-                      format={formatTimeAgo}
-                    /> */}
                   </YStack>
                 </XStack>
               </View>
@@ -221,72 +236,90 @@ const PostCard = (props: PostCardProps) => {
           </GestureDetector>
         </View>
 
-        <YStack gap="$2">
-          <XStack justifyContent="space-between" alignItems="center">
-            <XStack gap="$2">
-              <Button
-                icon={
-                  <Heart
-                    size={20}
-                    color={props.hasLiked ? "$red10" : "$gray10"}
-                  />
-                }
-                borderRadius="$8"
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  props.onLikePressed();
-                }}
-              >
-                <SizableText color={props.hasLiked ? "$red10" : "$gray10"}>
-                  {props.stats.likes}
-                </SizableText>
-              </Button>
-              <Button
-                icon={<MessageCircle size={20} color="$gray10" />}
-                borderRadius="$8"
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  props.onComment();
-                }}
-              >
-                <SizableText color="$gray10">
-                  {props.stats.comments}
-                </SizableText>
-              </Button>
-            </XStack>
-            <Button
-              icon={<SendHorizontal size={20} color="$gray10" />}
-              borderRadius="$8"
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                props.onShare();
-              }}
-            />
+        {/* Under post */}
+        <View flex={1} alignSelf="stretch" padding="$2.5" paddingTop="$3">
+          <XStack gap="$4" alignItems="center" marginBottom="$2">
+            {/* Like Button */}
+            <TouchableOpacity onPress={handleLikePress}>
+              <Animated.View style={[heartButtonAnimatedStyle]}>
+                <Heart
+                  size="$2"
+                  padding="$3"
+                  color={props.hasLiked ? "red" : "$gray12"}
+                  fill="red"
+                  fillOpacity={props.hasLiked ? 1 : 0}
+                />
+              </Animated.View>
+            </TouchableOpacity>
+
+            {/* Comment Button */}
+            <TouchableOpacity
+              onPress={() => props.onComment()}
+            >
+              <MessageCircle size="$2" color="$gray12" />
+            </TouchableOpacity>
+
+            {/* Share Button */}
+            <TouchableOpacity
+              onPress={() => props.onShare()}
+              // setIsShareModalVisible(true)}
+            >
+              <Send size={26} color="$gray12" marginLeft="$-1.5" />
+            </TouchableOpacity>
           </XStack>
 
-          {props.caption && (
-            <TouchableOpacity
-              disabled={isExpanded}
-              onPress={() => setIsExpanded(!isExpanded)}
-            >
-              <Paragraph color="$gray10">
-                {isExpanded ? (
-                  props.caption
-                ) : (
-                  <>
-                    {props.caption.slice(0, 110)}
-                    {props.caption.length > 110 && (
-                      <>
-                        ...
-                        <Text color="$gray8"> more</Text>
-                      </>
-                    )}
-                  </>
-                )}
-              </Paragraph>
+          {/* Likes Count */}
+          {props.stats.likes > 0 && (
+            <TouchableOpacity>
+              <SizableText size="$3" fontWeight="bold" marginBottom="$1">
+                {props.stats.likes > 0
+                  ? `${props.stats.likes} ${props.stats.likes === 1 ? "like" : "likes"}`
+                  : ""}
+              </SizableText>
             </TouchableOpacity>
           )}
-        </YStack>
+
+          {/* Caption */}
+          {props.caption && (
+            <View flex={1} alignItems="flex-start">
+              <TouchableOpacity
+                onPress={() => {
+                  setIsExpanded(!isExpanded);
+                }}
+              >
+                <Text>
+                  <Text fontWeight="bold">{props.author.username} </Text>
+                  <Text numberOfLines={isExpanded ? 0 : 2}>
+                    {props.caption}
+                    {isExpanded && (
+                      <Text color="$gray10"> more</Text>
+                    )}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Comments Count */}
+          <TouchableOpacity onPress={() => props.onComment()}>
+            <SizableText size="$3" color="$gray10" marginTop="$1">
+              {props.stats.comments > 0
+                ? `View ${props.stats.comments > 1 ? "all " : ""}${props.stats.comments} ${props.stats.comments === 1 ? "comment" : "comments"}`
+                : "Be the first to comment"}
+            </SizableText>
+          </TouchableOpacity>
+
+          {/* Post Date */}
+          <SizableText size="$2" color="$gray10" marginTop="$1">
+            <TimeAgo
+              size="$2"
+              theme="alt2"
+              lineHeight={0}
+              date={props.createdAt}
+              format={formatTimeAgo}
+            />
+          </SizableText>
+        </View>
       </YStack>
     </CardContainer>
   );
