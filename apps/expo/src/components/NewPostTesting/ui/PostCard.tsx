@@ -2,7 +2,12 @@ import React, { useCallback, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 import { Video } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -24,6 +29,7 @@ import {
   YStack,
 } from "tamagui";
 
+import { TimeAgo } from "~/components/Texts";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
@@ -109,26 +115,30 @@ const PostCard = (props: PostCardProps) => {
     .numberOfTaps(2)
     .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
 
-    const buttonLikeScale = useSharedValue(1);
+  const buttonLikeScale = useSharedValue(1);
 
-    const heartButtonAnimatedStyle = useAnimatedStyle(() => {
-      return {
-        transform: [{ scale: buttonLikeScale.value }],
-      };
-    });
+  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonLikeScale.value }],
+    };
+  });
 
   const handleLikePress = useCallback(() => {
-    buttonLikeScale.value = withSpring(1.2, {
-      damping: 10,
-      stiffness: 200,
-    }, () => {
-      buttonLikeScale.value = withSpring(1, {
+    buttonLikeScale.value = withSpring(
+      1.2,
+      {
         damping: 10,
         stiffness: 200,
-      });
-    });
+      },
+      () => {
+        buttonLikeScale.value = withSpring(1, {
+          damping: 10,
+          stiffness: 200,
+        });
+      },
+    );
     props.onLikePressed();
-  }, [props.onLikePressed]);
+  }, [buttonLikeScale, props]);
 
   const renderMedia = (
     type: MediaType,
@@ -149,7 +159,7 @@ const PostCard = (props: PostCardProps) => {
     }
   };
 
-  const _formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
+  const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
     if (value === 0 && unit === "second") return "Just now";
     const pluralS = value !== 1 ? "s" : "";
     return `${value} ${unit}${pluralS} ago`;
@@ -253,9 +263,7 @@ const PostCard = (props: PostCardProps) => {
             </TouchableOpacity>
 
             {/* Comment Button */}
-            <TouchableOpacity
-              onPress={() => props.onComment()}
-            >
+            <TouchableOpacity onPress={() => props.onComment()}>
               <MessageCircle size="$2" color="$gray12" />
             </TouchableOpacity>
 
@@ -291,9 +299,7 @@ const PostCard = (props: PostCardProps) => {
                   <Text fontWeight="bold">{props.author.username} </Text>
                   <Text numberOfLines={isExpanded ? 0 : 2}>
                     {props.caption}
-                    {isExpanded && (
-                      <Text color="$gray10"> more</Text>
-                    )}
+                    {isExpanded && <Text color="$gray10"> more</Text>}
                   </Text>
                 </Text>
               </TouchableOpacity>
