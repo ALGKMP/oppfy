@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -9,12 +10,234 @@ import { getToken, Spacer, YStack } from "tamagui";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+
+const useProfileActions = (userId: string) => {
+  const utils = api.useUtils();
+
+  const followUser = api.follow.followUser.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId,
+      });
+      if (prevData) {
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            followerCount: prevData.followerCount + 1,
+            networkStatus: {
+              ...prevData.networkStatus,
+              targetUserFollowState:
+                prevData.networkStatus.privacy === "public"
+                  ? "Following"
+                  : "OutboundRequest",
+            },
+          },
+        );
+      }
+      return { prevData };
+    },
+    onError: (_, __, context) => {
+      if (context?.prevData) {
+        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
+      }
+    },
+    onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
+  });
+
+  const unfollowUser = api.follow.unfollowUser.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId,
+      });
+      if (prevData) {
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            followerCount: prevData.followerCount - 1,
+            networkStatus: {
+              ...prevData.networkStatus,
+              targetUserFollowState: "NotFollowing",
+            },
+          },
+        );
+      }
+      return { prevData };
+    },
+    onError: (_, __, context) => {
+      if (context?.prevData) {
+        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
+      }
+    },
+    onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
+  });
+
+  const addFriend = api.friend.sendFriendRequest.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId,
+      });
+      if (prevData) {
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            networkStatus: {
+              ...prevData.networkStatus,
+              targetUserFriendState:
+                prevData.networkStatus.targetUserFriendState ===
+                "IncomingRequest"
+                  ? "Friends"
+                  : "OutboundRequest",
+            },
+          },
+        );
+      }
+      return { prevData };
+    },
+    onError: (_, __, context) => {
+      if (context?.prevData) {
+        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
+      }
+    },
+    onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
+  });
+
+  const removeFriend = api.friend.removeFriend.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId,
+      });
+      if (prevData) {
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            networkStatus: {
+              ...prevData.networkStatus,
+              targetUserFriendState: "NotFriends",
+            },
+          },
+        );
+      }
+      return { prevData };
+    },
+    onError: (_, __, context) => {
+      if (context?.prevData) {
+        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
+      }
+    },
+    onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
+  });
+
+  const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId,
+      });
+      if (prevData) {
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            networkStatus: {
+              ...prevData.networkStatus,
+              targetUserFollowState: "NotFollowing",
+            },
+          },
+        );
+      }
+      return { prevData };
+    },
+    onError: (_, __, context) => {
+      if (context?.prevData) {
+        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
+      }
+    },
+    onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
+  });
+
+  const cancelFriendRequest = api.request.cancelFriendRequest.useMutation({
+    onMutate: async () => {
+      await utils.profile.getFullProfileOther.cancel();
+      const prevData = utils.profile.getFullProfileOther.getData({
+        userId,
+      });
+      if (prevData) {
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            networkStatus: {
+              ...prevData.networkStatus,
+              targetUserFriendState: "NotFriends",
+            },
+          },
+        );
+      }
+      return { prevData };
+    },
+    onError: (_, __, context) => {
+      if (context?.prevData) {
+        utils.profile.getFullProfileOther.setData({ userId }, context.prevData);
+      }
+    },
+    onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
+  });
+
+  const handleFollow = useCallback(
+    () => followUser.mutate({ userId: userId }),
+    [followUser, userId],
+  );
+  const handleUnfollow = useCallback(
+    () => unfollowUser.mutate({ userId: userId }),
+    [unfollowUser, userId],
+  );
+  const handleAddFriend = useCallback(
+    () => addFriend.mutate({ recipientId: userId }),
+    [addFriend, userId],
+  );
+  const handleRemoveFriend = useCallback(
+    () => removeFriend.mutate({ recipientId: userId }),
+    [removeFriend, userId],
+  );
+  const handleCancelFollowRequest = useCallback(
+    () => cancelFollowRequest.mutate({ recipientId: userId }),
+    [cancelFollowRequest, userId],
+  );
+  const handleCancelFriendRequest = useCallback(
+    () => cancelFriendRequest.mutate({ recipientId: userId }),
+    [cancelFriendRequest, userId],
+  );
+
+  return {
+    handleFollow,
+    handleUnfollow,
+    handleAddFriend,
+    handleRemoveFriend,
+    handleCancelFollowRequest,
+    handleCancelFriendRequest,
+    isFollowLoading: followUser.isLoading,
+    isUnfollowLoading: unfollowUser.isLoading,
+    isAddFriendLoading: addFriend.isLoading,
+    isRemoveFriendLoading: removeFriend.isLoading,
+    isCancelFollowRequestLoading: cancelFollowRequest.isLoading,
+    isCancelFriendRequestLoading: cancelFriendRequest.isLoading,
+  };
+};
 
 type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 
@@ -157,6 +380,59 @@ const OtherProfile = () => {
     [profileData],
   );
 
+  const renderActionButtons = useCallback((): ProfileAction[] => {
+    if (!profileData) return [];
+
+    const { privacy, targetUserFollowState, targetUserFriendState } =
+      profileData.networkStatus;
+
+    const buttonCombinations: Record<string, ProfileAction[]> = {
+      public_NotFollowing_NotFriends: [
+        { label: "Follow", onPress: () => {} },
+        { label: "Add Friend", onPress: () => {} },
+      ],
+      public_Following_NotFriends: [
+        { label: "Unfollow", onPress: () => {} },
+        { label: "Add Friend", onPress: () => {} },
+      ],
+      public_Following_OutboundRequest: [
+        { label: "Unfollow", onPress: () => {} },
+        { label: "Cancel Friend Request", onPress: () => {} },
+      ],
+      public_Following_Friends: [
+        { label: "Unfollow", onPress: () => {} },
+        { label: "Remove Friend", onPress: () => {} },
+      ],
+      private_NotFollowing_NotFriends: [
+        { label: "Request Follow", onPress: () => {} },
+        { label: "Add Friend", onPress: () => {} },
+      ],
+      private_OutboundRequest_NotFriends: [
+        { label: "Cancel Follow Request", onPress: () => {} },
+        { label: "Add Friend", onPress: () => {} },
+      ],
+      private_Following_NotFriends: [
+        { label: "Unfollow", onPress: () => {} },
+        { label: "Add Friend", onPress: () => {} },
+      ],
+      private_OutboundRequest_OutboundRequest: [
+        { label: "Cancel Follow Request", onPress: () => {} },
+        { label: "Cancel Friend Request", onPress: () => {} },
+      ],
+      private_Following_OutboundRequest: [
+        { label: "Unfollow", onPress: () => {} },
+        { label: "Cancel Friend Request", onPress: () => {} },
+      ],
+      private_Following_Friends: [
+        { label: "Unfollow", onPress: () => {} },
+        { label: "Remove Friend", onPress: () => {} },
+      ],
+    };
+
+    const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
+    return buttonCombinations[key] ?? [];
+  }, [profileData]);
+
   const renderHeader = useCallback(
     () => (
       <YStack gap="$4">
@@ -183,20 +459,7 @@ const OtherProfile = () => {
               params: { userId, username },
             })
           }
-          actions={[
-            {
-              label: "Edit Profile",
-              onPress: () => {
-                router.push("/edit-profile");
-              },
-            },
-            {
-              label: "Share Profile",
-              onPress: () => {
-                router.push("/share-profile");
-              },
-            },
-          ]}
+          actions={renderActionButtons()}
         />
 
         {friendItems.length > 0 ? (
