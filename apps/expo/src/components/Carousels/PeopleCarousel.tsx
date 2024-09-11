@@ -53,7 +53,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           horizontal
           ListEmptyComponent={null}
           estimatedItemSize={70}
-          keyExtractor={(item) => "people_carousel_" + item}
           showsHorizontalScrollIndicator={false}
           renderItem={() => <Skeleton circular size={70} />}
           ItemSeparatorComponent={() => <Spacer size="$2" />}

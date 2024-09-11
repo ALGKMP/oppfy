@@ -1,24 +1,24 @@
+import type { UseQueryResult } from "@tanstack/react-query";
+
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
-const STALE_TIME = 20 * 60 * 1000; // 20 minutes
+const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
 export type Profile = RouterOutputs["profile"]["getFullProfileSelf"];
-export type RecommendationProfile = RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
+export type RecommendationProfile =
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
 
-const useProfile = () => {
-  const {
-    data: profile,
-    isLoading,
-    error,
-  } = api.profile.getFullProfileSelf.useQuery(undefined, {
+const useProfile = (): UseQueryResult<Profile, unknown> & {
+  profile: Profile | undefined;
+} => {
+  const query = api.profile.getFullProfileSelf.useQuery(undefined, {
     staleTime: STALE_TIME,
   });
 
   return {
-    profile,
-    isLoading,
-    error,
+    ...query,
+    profile: query.data,
   };
 };
 
