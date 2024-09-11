@@ -266,7 +266,6 @@ const PostCard = (props: PostCardProps) => {
 
             {/* Comment Button */}
             <TouchableOpacity onPress={() => props.onComment()}>
-            <TouchableOpacity onPress={() => props.onComment()}>
               <MessageCircle size="$2" color="$gray12" />
             </TouchableOpacity>
 
