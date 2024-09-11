@@ -74,6 +74,10 @@ const SelfProfile = () => {
     [friendsData],
   );
 
+  const isLoadingData = useMemo(() => {
+    return isLoadingProfileData || isLoadingFriendsData || isLoadingPostData;
+  }, [isLoadingProfileData, isLoadingFriendsData, isLoadingPostData]);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: profileData?.username,
@@ -202,13 +206,7 @@ const SelfProfile = () => {
     ],
   );
 
-  if (
-    isLoadingProfileData ||
-    isLoadingFriendsData ||
-    isLoadingRecommendationsData ||
-    isLoadingPostData ||
-    true
-  ) {
+  if (isLoadingData) {
     const renderLoadingItem = () => <PostCard loading />;
 
     const renderLoadingHeader = () => (

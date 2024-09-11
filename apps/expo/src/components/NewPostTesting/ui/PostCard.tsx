@@ -16,18 +16,8 @@ import {
   MessageCircle,
   MoreHorizontal,
   Send,
-  SendHorizontal,
 } from "@tamagui/lucide-icons";
-import {
-  Button,
-  getToken,
-  Paragraph,
-  SizableText,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { getToken, SizableText, Text, View, XStack, YStack } from "tamagui";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
 import { TimeAgo } from "~/components/Texts";
@@ -107,9 +97,7 @@ const ASPECT_RATIO = 3 / 4;
 
 const PostCard = (props: PostCardProps) => {
   const { hearts, addHeart } = useHeartAnimations();
-
   const [isExpanded, setIsExpanded] = useState(false);
-
   const buttonLikeScale = useSharedValue(1);
 
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
@@ -118,31 +106,8 @@ const PostCard = (props: PostCardProps) => {
     };
   });
 
-  if (props.loading) {
-    return (
-      <CardContainer paddingVertical={0}>
-        <YStack>
-          <View marginHorizontal="$-3">
-            <Skeleton width="100%" height={600} radius={8} />
-            <View style={{ position: "absolute", bottom: 15, left: 15 }}>
-              <XStack alignItems="center" gap="$3">
-                <Skeleton size={40} circular />
-                <YStack gap="$1">
-                  <Skeleton width={100} height={16} />
-                  <XStack alignItems="center" gap="$2">
-                    <Skeleton size={20} circular />
-                    <Skeleton width={80} height={12} />
-                  </XStack>
-                </YStack>
-              </XStack>
-            </View>
-          </View>
-        </YStack>
-      </CardContainer>
-    );
-  }
-
   const handleLikePress = useCallback(() => {
+    if (props.loading) return;
     props.onLikePressed();
     buttonLikeScale.value = withSpring(
       1.2,
@@ -157,10 +122,11 @@ const PostCard = (props: PostCardProps) => {
         });
       },
     );
-  }, [props.hasLiked, props.onLikePressed, props.onLikeDoubleTapped]);
+  }, [props, buttonLikeScale]);
 
   const addHeartJS = useCallback(
     (x: number, y: number) => {
+      if (props.loading) return;
       addHeart(x, y);
       if (!props.hasLiked) {
         handleLikePress();
@@ -205,6 +171,30 @@ const PostCard = (props: PostCardProps) => {
     const pluralS = value !== 1 ? "s" : "";
     return `${value} ${unit}${pluralS} ago`;
   };
+
+  if (props.loading) {
+    return (
+      <CardContainer paddingVertical={0}>
+        <YStack>
+          <View marginHorizontal="$-3">
+            <Skeleton width="100%" height={600} radius={8} />
+            <View style={{ position: "absolute", bottom: 15, left: 15 }}>
+              <XStack alignItems="center" gap="$3">
+                <Skeleton size={40} circular />
+                <YStack gap="$1">
+                  <Skeleton width={100} height={16} />
+                  <XStack alignItems="center" gap="$2">
+                    <Skeleton size={20} circular />
+                    <Skeleton width={80} height={12} />
+                  </XStack>
+                </YStack>
+              </XStack>
+            </View>
+          </View>
+        </YStack>
+      </CardContainer>
+    );
+  }
 
   return (
     <CardContainer paddingTop={0}>
