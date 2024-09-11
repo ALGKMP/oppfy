@@ -27,7 +27,7 @@ export interface ProfileData {
   followerCount: number;
 }
 
-interface ProfileAction {
+export interface ProfileAction {
   label: string;
   onPress: () => void;
   disabled?: boolean;
