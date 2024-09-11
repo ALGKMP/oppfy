@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect } from "react";
+import React, { useCallback, useLayoutEffect, useMemo } from "react";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -54,8 +54,15 @@ const SelfProfile = () => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const posts = postsData?.pages.flatMap((page) => page.items) ?? [];
-  const friends = friendsData?.pages.flatMap((page) => page.items) ?? [];
+  const postItems = useMemo(
+    () => postsData?.pages.flatMap((page) => page.items) ?? [],
+    [postsData],
+  );
+
+  const friendItems = useMemo(
+    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
+    [friendsData],
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -149,20 +156,35 @@ const SelfProfile = () => {
           ]}
         />
 
-        <PeopleCarousel
-          loading={false}
-          data={friends}
-          title="Friends 🔥"
-          showMore={friends.length < (profileData?.friendCount ?? 0)}
-          onItemPress={navigateToProfile}
-          onShowMore={() => {
-            // Handle show more friends
-          }}
-        />
+        {friendItems.length > 0 ? (
+          <PeopleCarousel
+            loading={isLoadingFriendsData}
+            data={friendItems}
+            title="Friends 🔥"
+            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
+            onItemPress={navigateToProfile}
+            onShowMore={() => {
+              // Handle show more friends
+            }}
+          />
+        ) : (
+          <PeopleCarousel
+            loading={isLoadingRecommendationsData}
+            data={recommendationsData ?? []}
+            title="Recommended Friends 👥"
+            showMore={false}
+            onItemPress={navigateToProfile}
+            onShowMore={() => {
+              // Handle show more recommendations
+            }}
+          />
+        )}
       </YStack>
     ),
     [
-      friends,
+      friendItems,
+      isLoadingFriendsData,
+      isLoadingRecommendationsData,
       navigateToProfile,
       profileData?.bio,
       profileData?.followerCount,
@@ -172,6 +194,7 @@ const SelfProfile = () => {
       profileData?.profilePictureUrl,
       profileData?.userId,
       profileData?.username,
+      recommendationsData,
       router,
     ],
   );
@@ -179,7 +202,7 @@ const SelfProfile = () => {
   return (
     <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
-        data={posts}
+        data={postItems}
         renderItem={({ item }) => renderItem(item)}
         ListHeaderComponent={renderHeader}
         estimatedItemSize={300}
