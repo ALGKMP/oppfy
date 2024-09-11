@@ -86,6 +86,7 @@ const SelfProfile = () => {
         author={{
           id: item.authorId,
           username: item.authorUsername ?? "",
+          profilePicture: item.authorProfilePicture,
         }}
         recipient={{
           id: item.recipientId,
