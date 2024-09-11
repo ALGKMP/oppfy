@@ -211,7 +211,7 @@ const Inbox = () => {
           data={notificationItems}
           estimatedItemSize={75}
           onEndReached={handleOnEndReached}
-          keyExtractor={(item) => "notification_" + item.userId}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
             const buttonProps = (() => {
