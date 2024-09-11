@@ -119,11 +119,18 @@ export class FollowService {
       recipientId,
     );
 
-    if (friendship) {
-      await this.friendRepository.removeFriend(senderId, recipientId);
-    }
+    const outboundRequest = await this.followRepository.getFollowRequest(
+      senderId,
+      recipientId,
+    );
 
-    await this.followRepository.removeFollower(senderId, recipientId);
+    if (outboundRequest) {
+      await this.followRepository.removeFollowRequest(senderId, recipientId);
+    } else if (friendship) {
+      await this.friendRepository.removeFriend(senderId, recipientId);
+    } else {
+      await this.followRepository.removeFollower(senderId, recipientId);
+    }
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
