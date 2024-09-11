@@ -81,7 +81,7 @@ const SelfProfile = () => {
         self={{
           id: profileData?.userId ?? "",
           username: profileData?.username ?? "",
-          profilePicture: profileData?.profilePictureUrl ?? "",
+          profilePicture: profileData?.profilePictureUrl,
         }}
         author={{
           id: item.authorId,
@@ -113,8 +113,15 @@ const SelfProfile = () => {
     () => (
       <ProfileHeaderDetails
         loading={false}
-        data={profileData}
-        editableProfilePicture={false}
+        data={{
+          userId: profileData?.userId ?? "",
+          username: profileData?.username ?? "",
+          name: profileData?.name ?? "",
+          bio: profileData?.bio ?? "",
+          followerCount: profileData?.followerCount ?? 0,
+          followingCount: profileData?.followingCount ?? 0,
+          profilePictureUrl: profileData?.profilePictureUrl,
+        }}
         onFollowingPress={() => router.push("/self-connections/following-list")}
         onFollowersPress={() => router.push("/self-connections/followers-list")}
         actions={[
@@ -131,7 +138,6 @@ const SelfProfile = () => {
             },
           },
         ]}
-        profilePictureOverlay={null}
       />
     ),
     [profileData, router],
