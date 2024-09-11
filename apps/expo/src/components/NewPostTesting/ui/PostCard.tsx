@@ -23,7 +23,6 @@ import {
   YStack,
 } from "tamagui";
 
-import { TimeAgo } from "~/components/Texts";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
@@ -128,14 +127,14 @@ const PostCard = (props: PostCardProps) => {
     }
   };
 
-  const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
+  const _formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
     if (value === 0 && unit === "second") return "Just now";
     const pluralS = value !== 1 ? "s" : "";
     return `${value} ${unit}${pluralS} ago`;
   };
 
   return (
-    <CardContainer>
+    <CardContainer paddingTop={0}>
       <YStack gap="$3">
         <View marginHorizontal="$-3">
           <GestureDetector gesture={doubleTap}>
@@ -162,11 +161,7 @@ const PostCard = (props: PostCardProps) => {
                       props.onAuthorPress();
                     }}
                   >
-                    <Avatar
-                      source={props.recipient.profilePicture}
-                      size={40}
-                      // bordered
-                    />
+                    <Avatar source={props.recipient.profilePicture} size={40} />
                   </TouchableOpacity>
 
                   <YStack gap="$1">
@@ -192,9 +187,8 @@ const PostCard = (props: PostCardProps) => {
                     >
                       <XStack alignItems="center" gap="$2">
                         <Avatar
-                          source={props.author.profilePicture}
                           size={20}
-                          // bordered
+                          source={props.author.profilePicture}
                         />
                         <SizableText size="$2" fontWeight="bold" lineHeight={0}>
                           Opped by{" "}
