@@ -2,12 +2,7 @@ import React, { useCallback, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { Video } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -123,23 +118,6 @@ const PostCard = (props: PostCardProps) => {
     };
   });
 
-  const handleLikePress = useCallback(() => {
-    buttonLikeScale.value = withSpring(
-      1.2,
-      {
-        damping: 10,
-        stiffness: 200,
-      },
-      () => {
-        buttonLikeScale.value = withSpring(1, {
-          damping: 10,
-          stiffness: 200,
-        });
-      },
-    );
-    props.onLikePressed();
-  }, [buttonLikeScale, props]);
-
   const renderMedia = (
     type: MediaType,
     url: string,
@@ -166,7 +144,7 @@ const PostCard = (props: PostCardProps) => {
   };
 
   return (
-    <CardContainer paddingTop={0}>
+    <CardContainer>
       <YStack gap="$3">
         <View marginHorizontal="$-3">
           <GestureDetector gesture={doubleTap}>
@@ -219,8 +197,9 @@ const PostCard = (props: PostCardProps) => {
                     >
                       <XStack alignItems="center" gap="$2">
                         <Avatar
-                          size={20}
                           source={props.author.profilePicture}
+                          size={20}
+                          // bordered
                         />
                         <SizableText size="$2" fontWeight="bold" lineHeight={0}>
                           Opped by{" "}
@@ -250,7 +229,9 @@ const PostCard = (props: PostCardProps) => {
         <View flex={1} alignSelf="stretch" padding="$2.5" paddingTop="$3">
           <XStack gap="$4" alignItems="center" marginBottom="$2">
             {/* Like Button */}
-            <TouchableOpacity onPress={handleLikePress}>
+            <TouchableOpacity
+              onPress={() => props.onLikePressed()}
+            >
               <Animated.View style={[heartButtonAnimatedStyle]}>
                 <Heart
                   size="$2"
@@ -326,6 +307,7 @@ const PostCard = (props: PostCardProps) => {
             />
           </SizableText>
         </View>
+
       </YStack>
     </CardContainer>
   );
