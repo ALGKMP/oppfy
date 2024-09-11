@@ -16,7 +16,6 @@ import {
 import { abbreviatedNumber } from "@oppfy/utils";
 
 import { Skeleton } from "~/components/Skeletons";
-import StatusRenderer from "~/components/StatusRenderer";
 
 export interface ProfileData {
   userId: string;
@@ -35,21 +34,61 @@ interface ProfileAction {
   loading?: boolean;
 }
 
-export interface ProfileHeaderDetailsProps {
-  loading: boolean;
-  data?: ProfileData;
+interface LoadingProps {
+  loading: true;
+}
+
+interface LoadedProps {
+  loading: false;
+  data: ProfileData;
   onFollowingPress?: () => void;
   onFollowersPress?: () => void;
   actions?: ProfileAction[];
 }
 
-const ProfileHeaderDetails: React.FC<ProfileHeaderDetailsProps> = ({
-  loading,
-  data,
-  onFollowingPress,
-  onFollowersPress,
-  actions = [],
-}) => {
+type ProfileHeaderDetailsProps = LoadingProps | LoadedProps;
+
+const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
+  if (props.loading) {
+    return (
+      <YStack
+        padding="$4"
+        paddingBottom={0}
+        alignItems="center"
+        backgroundColor="$background"
+        gap="$4"
+      >
+        <View alignItems="center" marginBottom={-30}>
+          <Skeleton circular size={160} />
+        </View>
+
+        <XStack
+          justifyContent="space-between"
+          alignItems="flex-end"
+          width="100%"
+        >
+          <YStack alignItems="flex-start" gap="$2" flex={1}>
+            <Skeleton width={80} height={20} />
+            <Skeleton width={150} height={20} />
+          </YStack>
+
+          <YStack alignItems="flex-end" gap="$2">
+            <Skeleton width={80} height={20} />
+            <Skeleton width={150} height={20} />
+          </YStack>
+        </XStack>
+
+        <XStack gap="$4">
+          <View flex={1}>
+            <Skeleton width="100%" height={44} radius={20} />
+          </View>
+        </XStack>
+      </YStack>
+    );
+  }
+
+  const { data, onFollowingPress, onFollowersPress, actions = [] } = props;
+
   return (
     <YStack
       padding="$4"
@@ -59,103 +98,69 @@ const ProfileHeaderDetails: React.FC<ProfileHeaderDetailsProps> = ({
       gap="$4"
     >
       <View alignItems="center" marginBottom={-30}>
-        <StatusRenderer
-          data={!loading ? data : undefined}
-          loadingComponent={<Skeleton circular size={160} />}
-          successComponent={(profileData) => (
-            <Image
-              source={profileData.profilePictureUrl ?? DefaultProfilePicture}
-              style={{
-                width: 160,
-                height: 160,
-                borderRadius: 80,
-              }}
-            />
-          )}
+        <Image
+          source={data.profilePictureUrl ?? DefaultProfilePicture}
+          style={{
+            width: 160,
+            height: 160,
+            borderRadius: 80,
+          }}
         />
       </View>
 
       <XStack justifyContent="space-between" alignItems="flex-end" width="100%">
         <YStack alignItems="flex-start" gap="$2" flex={1}>
-          <StatusRenderer
-            data={!loading ? data?.name : undefined}
-            loadingComponent={<Skeleton width={80} height={20} />}
-            successComponent={(name) => (
-              <SizableText
-                size="$8"
-                fontWeight="bold"
-                textAlign="left"
-                lineHeight={0}
-              >
-                {name}
-              </SizableText>
-            )}
-          />
+          <SizableText
+            size="$8"
+            fontWeight="bold"
+            textAlign="left"
+            lineHeight={0}
+          >
+            {data.name}
+          </SizableText>
 
-          <StatusRenderer
-            data={!loading ? data?.bio ?? "" : undefined}
-            loadingComponent={<Skeleton width={150} height={20} />}
-            successComponent={(bio) =>
-              bio.length ? (
-                <Paragraph
-                  theme="alt1"
-                  maxWidth="90%"
-                  textAlign="left"
-                  lineHeight={0}
-                >
-                  {bio}
-                </Paragraph>
-              ) : null
-            }
-          />
+          {data.bio && (
+            <Paragraph
+              theme="alt1"
+              maxWidth="90%"
+              textAlign="left"
+              lineHeight={0}
+            >
+              {data.bio}
+            </Paragraph>
+          )}
         </YStack>
 
         <YStack alignItems="flex-end" gap="$2">
-          <StatusRenderer
-            data={!loading ? data?.followingCount : undefined}
-            loadingComponent={<Skeleton width={80} height={20} />}
-            successComponent={(count) => (
-              <TouchableOpacity onPress={onFollowingPress}>
-                <Stat label="Following" value={abbreviatedNumber(count)} />
-              </TouchableOpacity>
-            )}
-          />
-          <StatusRenderer
-            data={!loading ? data?.followerCount : undefined}
-            loadingComponent={<Skeleton width={150} height={20} />}
-            successComponent={(count) => (
-              <TouchableOpacity onPress={onFollowersPress}>
-                <Stat label="Followers" value={abbreviatedNumber(count)} />
-              </TouchableOpacity>
-            )}
-          />
+          <TouchableOpacity onPress={onFollowingPress}>
+            <Stat
+              label="Following"
+              value={abbreviatedNumber(data.followingCount)}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onFollowersPress}>
+            <Stat
+              label="Followers"
+              value={abbreviatedNumber(data.followerCount)}
+            />
+          </TouchableOpacity>
         </YStack>
       </XStack>
 
       <XStack gap="$4">
         {actions.map((action, index) => (
-          <StatusRenderer
+          <Button
             key={index}
-            data={!loading ? data?.username : undefined}
-            loadingComponent={
-              <View flex={1}>
-                <Skeleton width="100%" height={44} radius={20} />
-              </View>
-            }
-            successComponent={() => (
-              <Button
-                flex={1}
-                borderRadius={20}
-                onPress={action.onPress}
-                disabled={action.disabled}
-              >
-                <XStack gap="$2" alignItems="center">
-                  <Text>{action.label}</Text>
-                  {action.loading && <Spinner size="small" color="$color" />}
-                </XStack>
-              </Button>
-            )}
-          />
+            flex={1}
+            borderRadius={20}
+            onPress={action.onPress}
+            disabled={action.disabled}
+          >
+            <XStack gap="$2" alignItems="center">
+              <Text>{action.label}</Text>
+              {action.loading && <Spinner size="small" color="$color" />}
+            </XStack>
+          </Button>
         ))}
       </XStack>
     </YStack>

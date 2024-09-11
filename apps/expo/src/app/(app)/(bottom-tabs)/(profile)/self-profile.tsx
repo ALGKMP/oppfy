@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useMemo } from "react";
+import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -9,6 +9,7 @@ import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/smart/OtherPost";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
+import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import MediaOfYou from "./MediaOfYou";
@@ -20,12 +21,11 @@ const SelfProfile = () => {
   const navigation = useNavigation();
   const router = useRouter();
 
-  const { data: profileData } = api.profile.getFullProfileSelf.useQuery(
-    undefined,
-    {
-      staleTime: 1000 * 5,
-    },
-  );
+  const {
+    profile: profileData,
+    isLoading: isLoadingProfileData,
+    refetch: refetchProfile,
+  } = useProfile();
 
   const {
     data: recommendationsData,
@@ -53,6 +53,14 @@ const SelfProfile = () => {
     { pageSize: 10 },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await refetchPosts();
+    setIsRefreshing(false);
+  }, [refetchPosts]);
 
   const postItems = useMemo(
     () => postsData?.pages.flatMap((page) => page.items) ?? [],
@@ -186,18 +194,27 @@ const SelfProfile = () => {
       isLoadingFriendsData,
       isLoadingRecommendationsData,
       navigateToProfile,
-      profileData?.bio,
-      profileData?.followerCount,
-      profileData?.followingCount,
-      profileData?.friendCount,
-      profileData?.name,
-      profileData?.profilePictureUrl,
-      profileData?.userId,
-      profileData?.username,
+      profileData,
       recommendationsData,
       router,
     ],
   );
+
+  // if anything is loading, show a loading indicator
+  if (
+    isLoadingProfileData ||
+    isLoadingFriendsData ||
+    isLoadingRecommendationsData ||
+    isLoadingPostData
+    //  || true
+  ) {
+    return (
+      <YStack gap="$5">
+        <ProfileHeaderDetails loading />
+        <PeopleCarousel loading />
+      </YStack>
+    );
+  }
 
   return (
     <BaseScreenView padding={0} paddingBottom={0}>
@@ -211,8 +228,8 @@ const SelfProfile = () => {
             void fetchNextPage();
           }
         }}
-        onRefresh={refetchPosts}
-        refreshing={isLoadingPostData}
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
         ListHeaderComponentStyle={{
           marginBottom: getToken("$4", "space") as number,
         }}
