@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -11,21 +11,29 @@ import Animated, {
 import { ResizeMode, Video } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
+import { useFocusEffect } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
 import {
   Heart,
   MessageCircle,
   MoreHorizontal,
   Send,
 } from "@tamagui/lucide-icons";
-import { getToken, SizableText, Text, View, XStack, YStack } from "tamagui";
+import {
+  getToken,
+  SizableText,
+  Text,
+  View,
+  ViewProps,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
 import { TimeAgo } from "~/components/Texts";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
-
-type MediaType = "image" | "video";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -53,8 +61,9 @@ interface MediaDimensions {
 }
 
 interface Media {
-  type: MediaType;
+  type: "image" | "video";
   url: string;
+  isViewable: boolean;
   dimensions: MediaDimensions;
 }
 
@@ -141,28 +150,19 @@ const PostCard = (props: PostCardProps) => {
     .numberOfTaps(2)
     .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
 
-  const renderMedia = (
-    type: MediaType,
-    url: string,
-    _dimensions: MediaDimensions,
-  ) => {
+  const renderMedia = (media: Media) => {
     const style = {
       borderRadius: getToken("$8", "radius") as number,
       width: "100%" as const,
       aspectRatio: ASPECT_RATIO,
     };
 
-    switch (type) {
-      case "image":
-        return <Image source={{ uri: url }} style={style} contentFit="cover" />;
-      case "video":
-        return (
-          <Video
-            source={{ uri: url }}
-            style={style}
-            resizeMode={ResizeMode.COVER}
-          />
-        );
+    if (media.type === "image") {
+      return (
+        <Image source={{ uri: media.url }} style={style} contentFit="cover" />
+      );
+    } else {
+      return <VideoPlayer {...media} />;
     }
   };
 
@@ -202,11 +202,7 @@ const PostCard = (props: PostCardProps) => {
         <View marginHorizontal="$-3">
           <GestureDetector gesture={doubleTap}>
             <View>
-              {renderMedia(
-                props.media.type,
-                props.media.url,
-                props.media.dimensions,
-              )}
+              {renderMedia(props.media)}
               {hearts.map((heart) => (
                 <GradientHeart
                   key={heart.id}
@@ -357,6 +353,63 @@ const PostCard = (props: PostCardProps) => {
         </YStack>
       </YStack>
     </CardContainer>
+  );
+};
+
+const VideoPlayer = (props: Media) => {
+  const videoRef = useRef<VideoView>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const player = useVideoPlayer(props.url, (player) => {
+    player.loop = true;
+    player.staysActiveInBackground = false;
+    setIsPlayerReady(true);
+  });
+  const safePlayPause = useCallback(
+    (shouldPlay: boolean) => {
+      if (!isPlayerReady) return;
+
+      try {
+        if (shouldPlay && !isPlaying) {
+          player.play();
+          setIsPlaying(true);
+        } else if (!shouldPlay && isPlaying) {
+          player.pause();
+          setIsPlaying(false);
+        }
+      } catch (error) {
+        console.error("Error in safePlayPause:", error);
+      }
+    },
+    [isPlayerReady, player, isPlaying],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isPlayerReady) {
+        safePlayPause(true);
+      }
+
+      return () => {
+        if (isPlayerReady) {
+          safePlayPause(false);
+        }
+      };
+    }, [isPlayerReady, safePlayPause]),
+  );
+
+  return (
+    <VideoView
+      ref={videoRef}
+      style={{
+        width: "100%",
+        aspectRatio: props.dimensions.width / props.dimensions.height,
+        borderRadius: getToken("$8", "radius") as number,
+      }}
+      contentFit="cover"
+      player={player}
+      nativeControls={false}
+    />
   );
 };
 
