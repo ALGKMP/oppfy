@@ -268,9 +268,6 @@ const OtherProfile = () => {
     const { privacy, targetUserFollowState, targetUserFriendState } =
       profileData.networkStatus;
 
-    console.log(privacy, targetUserFollowState, targetUserFriendState);
-    console.log(isAnyActionLoading);
-
     const buttonCombinations: Record<string, ProfileAction[]> = {
       public_NotFollowing_NotFriends: [
         { label: "Follow", onPress: handleFollow, loading: isFollowLoading },
@@ -294,22 +291,12 @@ const OtherProfile = () => {
       ],
       public_Following_OutboundRequest: [
         {
-          label: "Unfollow",
-          onPress: handleUnfollow,
-          loading: isUnfollowLoading,
-        },
-        {
           label: "Cancel Friend Request",
           onPress: handleCancelFriendRequest,
           loading: isCancelFriendRequestLoading,
         },
       ],
       public_Following_Friends: [
-        {
-          label: "Unfollow",
-          onPress: handleUnfollow,
-          loading: isUnfollowLoading,
-        },
         {
           label: "Remove Friend",
           onPress: handleRemoveFriend,
@@ -318,7 +305,7 @@ const OtherProfile = () => {
       ],
       private_NotFollowing_NotFriends: [
         {
-          label: "Request Follow",
+          label: "Follow",
           onPress: handleFollow,
           loading: isFollowLoading,
         },
@@ -358,12 +345,6 @@ const OtherProfile = () => {
       ],
       private_OutboundRequest_OutboundRequest: [
         {
-          label: "Cancel Follow Request",
-          onPress: handleCancelFollowRequest,
-          loading: isCancelFollowRequestLoading,
-          disabled: isAnyActionLoading,
-        },
-        {
           label: "Cancel Friend Request",
           onPress: handleCancelFriendRequest,
           loading: isCancelFriendRequestLoading,
@@ -372,20 +353,6 @@ const OtherProfile = () => {
       ],
       private_Following_OutboundRequest: [
         {
-          label: "Unfollow",
-          onPress: handleUnfollow,
-          loading: isUnfollowLoading,
-          disabled: isAnyActionLoading,
-        },
-        {
-          label: "Cancel Friend Request",
-          onPress: handleCancelFriendRequest,
-          loading: isCancelFriendRequestLoading,
-          disabled: isAnyActionLoading,
-        },
-      ],
-      private_NotFollowing_OutboundRequest: [
-        {
           label: "Cancel Friend Request",
           onPress: handleCancelFriendRequest,
           loading: isCancelFriendRequestLoading,
@@ -393,12 +360,6 @@ const OtherProfile = () => {
         },
       ],
       private_Following_Friends: [
-        {
-          label: "Unfollow",
-          onPress: handleUnfollow,
-          loading: isUnfollowLoading,
-          disabled: isAnyActionLoading,
-        },
         {
           label: "Remove Friend",
           onPress: handleRemoveFriend,
