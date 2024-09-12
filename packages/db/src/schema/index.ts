@@ -228,7 +228,7 @@ export const notifications = pgTable("notifications", {
   read: boolean("read").default(false).notNull(),
   active: boolean("active").default(true).notNull(),
   eventType: eventTypeEnum("event_type").notNull(),
-  entityId: uuid("entity_id"),
+  entityId: varchar("entity_id", { length: 255 }),
   entityType: entityTypeEnum("entity_type"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
