@@ -1,19 +1,13 @@
 import React, { useRef, useState } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
-
-import { api } from "~/utils/api";
-import type { RouterInputs } from "~/utils/api";
-import { Dialog } from "../Dialogs";
 import AlertDialog from "../Dialogs/Dialog";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
-import PostCard from "./ui/PostCard";
-import type { PostData as OtherPostProps } from "./ui/PostCard";
+import PostCard, { PostData } from "./ui/PostCard";
 import { useComments } from "./useComments";
 import { useLikePost } from "./useLikePost";
 import { usePostActions } from "./usePostActions";
-import { useReportPost } from "./useReportPost";
 import { useDeletePost } from "./useDeletePost";
 
 type SheetState = "closed" | "moreOptions" | "confirmDelete";
@@ -64,7 +58,7 @@ const MoreOptionsSheet = ({
   );
 };
 
-const SelfPost = (postProps: OtherPostProps) => {
+const SelfPost = (postProps: PostData) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
