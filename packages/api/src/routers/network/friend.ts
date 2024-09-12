@@ -90,6 +90,36 @@ export const friendRouter = createTRPCRouter({
     }
   }),
 
+  paginateFriendRequests: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      try {
+        const { items, nextCursor } =
+          await ctx.services.paginate.paginateFriendRequests(
+            ctx.session.uid,
+            input.cursor,
+            input.pageSize,
+          );
+        return {
+          items,
+          nextCursor,
+        };
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
+
+
   sendFriendRequest: protectedProcedure
     .input(
       z.object({
@@ -104,6 +134,40 @@ export const friendRouter = createTRPCRouter({
         );
       } catch (err) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  acceptFriendRequest: protectedProcedure
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.friend.acceptFriendRequest(
+          input.senderId,
+          ctx.session.uid,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
+
+  declineFriendRequest: protectedProcedure
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.friend.declineFriendRequest(
+          input.senderId,
+          ctx.session.uid,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
       }
     }),
 

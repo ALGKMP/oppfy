@@ -309,7 +309,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     },
   });
 
-  const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     // onMutate: async (_newData) => {
     //   if (props.loading) return;
 
@@ -399,7 +399,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     },
   });
 
-  const acceptFriendRequest = api.request.acceptFriendRequest.useMutation({
+  const acceptFriendRequest = api.friend.acceptFriendRequest.useMutation({
     // onMutate: async (_newData) => {
     //   if (props.loading) return;
 
@@ -446,7 +446,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     },
   });
 
-  const declineFriendRequest = api.request.declineFriendRequest.useMutation({
+  const declineFriendRequest = api.friend.declineFriendRequest.useMutation({
     // onMutate: async (_newData) => {
     //   if (props.loading) return;
 
