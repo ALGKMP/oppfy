@@ -4,6 +4,7 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
@@ -11,7 +12,8 @@ import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
-import { ActionSheet, ButtonOption } from "~/components/Sheets";
+import type { ButtonOption } from "~/components/Sheets";
+import { ActionSheet } from "~/components/Sheets";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -109,6 +111,8 @@ type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 const OtherProfile = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const toast = useToastController();
+
   const utils = api.useUtils();
 
   const { userId, username } = useLocalSearchParams<{
@@ -237,6 +241,7 @@ const OtherProfile = () => {
 
   const handleBlockUser = async () => {
     await blockUser.mutateAsync({ userId });
+    toast.show("User Blocked");
     handleCloseMoreOptionsSheet();
   };
 
@@ -248,7 +253,7 @@ const OtherProfile = () => {
       },
       autoClose: false,
       disabled: isBlocking,
-      onPress: handleBlockUser,
+      onPress: () => void handleBlockUser(),
     },
   ];
 

@@ -1,3 +1,4 @@
+import type { ReactElement, ReactNode } from "react";
 import React, { useCallback, useEffect, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
 import { Modal, StyleSheet } from "react-native";
@@ -32,8 +33,8 @@ export interface ButtonOption {
   textProps?: SizableTextProps;
   onPress?: () => void;
   disabled?: boolean;
-  icon?: React.ReactNode;
-  autoClose?: boolean; 
+  icon?: ReactNode;
+  autoClose?: boolean;
 }
 
 export interface ActionSheetProps {
@@ -43,7 +44,7 @@ export interface ActionSheetProps {
   subtitle?: string;
   subtitleProps?: ParagraphProps;
   buttonOptions: ButtonOption[];
-  trigger?: React.ReactElement;
+  trigger?: ReactElement;
   isVisible?: boolean;
   onCancel?: () => void;
 }
@@ -64,7 +65,7 @@ const ActionSheet = ({
 
   const animation = useSharedValue(0);
   const [internalIsVisible, setInternalIsVisible] = useState(false);
-  
+
   const isVisible = controlledIsVisible ?? internalIsVisible;
 
   const openModal = useCallback(() => {
@@ -186,7 +187,8 @@ const ActionSheet = ({
                         void Haptics.impactAsync(
                           Haptics.ImpactFeedbackStyle.Light,
                         );
-                        if (option.autoClose !== false) { // Check autoClose prop
+                        if (option.autoClose !== false) {
+                          // Check autoClose prop
                           closeModal();
                         }
                       }
