@@ -3,7 +3,8 @@ import { TouchableOpacity, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
+import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
@@ -11,7 +12,9 @@ import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
-import { ActionSheet, ButtonOption } from "~/components/Sheets";
+import type { ButtonOption } from "~/components/Sheets";
+import { ActionSheet } from "~/components/Sheets";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -88,19 +91,38 @@ const useProfileActions = (userId: string) => {
   ]);
 
   return {
-    handleFollow,
-    handleUnfollow,
-    handleAddFriend,
-    handleRemoveFriend,
-    handleCancelFollowRequest,
-    handleCancelFriendRequest,
-    isFollowLoading: followUser.isLoading,
-    isUnfollowLoading: unfollowUser.isLoading,
-    isAddFriendLoading: addFriend.isLoading,
-    isRemoveFriendLoading: removeFriend.isLoading,
-    isCancelFollowRequestLoading: cancelFollowRequest.isLoading,
-    isCancelFriendRequestLoading: cancelFriendRequest.isLoading,
-    isAnyActionLoading,
+    actions: {
+      follow: {
+        handler: handleFollow,
+        loading: followUser.isLoading,
+        disabled: isAnyActionLoading,
+      },
+      unfollow: {
+        handler: handleUnfollow,
+        loading: unfollowUser.isLoading,
+        disabled: isAnyActionLoading,
+      },
+      addFriend: {
+        handler: handleAddFriend,
+        loading: addFriend.isLoading,
+        disabled: isAnyActionLoading,
+      },
+      removeFriend: {
+        handler: handleRemoveFriend,
+        loading: removeFriend.isLoading,
+        disabled: isAnyActionLoading,
+      },
+      cancelFollowRequest: {
+        handler: handleCancelFollowRequest,
+        loading: cancelFollowRequest.isLoading,
+        disabled: isAnyActionLoading,
+      },
+      cancelFriendRequest: {
+        handler: handleCancelFriendRequest,
+        loading: cancelFriendRequest.isLoading,
+        disabled: isAnyActionLoading,
+      },
+    },
   };
 };
 
@@ -109,6 +131,7 @@ type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 const OtherProfile = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const toast = useToastController();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -116,26 +139,16 @@ const OtherProfile = () => {
   }>();
 
   const {
-    handleFollow,
-    handleUnfollow,
-    handleAddFriend,
-    handleRemoveFriend,
-    handleCancelFollowRequest,
-    handleCancelFriendRequest,
-    isFollowLoading,
-    isUnfollowLoading,
-    isAddFriendLoading,
-    isRemoveFriendLoading,
-    isCancelFollowRequestLoading,
-    isCancelFriendRequestLoading,
-    isAnyActionLoading,
-  } = useProfileActions(userId);
-
-  const {
     data: profileData,
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
   } = api.profile.getFullProfileOther.useQuery({ userId });
+
+  const isBlocked = profileData?.networkStatus.blocked ?? false;
+  const isPrivate = profileData?.networkStatus.privacy === "private";
+  const isFollowing =
+    profileData?.networkStatus.targetUserFollowState === "Following";
+  const canViewContent = !isBlocked && (!isPrivate || isFollowing);
 
   const {
     data: recommendationsData,
@@ -169,12 +182,6 @@ const OtherProfile = () => {
       enabled: !!userId,
     },
   );
-
-  const blockUser = api.block.blockUser.useMutation({
-    onMutate: async () => {
-      await utils.
-    }
-  })
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -225,6 +232,13 @@ const OtherProfile = () => {
     [router],
   );
 
+  const [sheetState, setSheetState] = useState<
+    "closed" | "moreOptions" | "reportOptions"
+  >("closed");
+
+  const { isLoading: isBlocking, ...blockUser } =
+    api.block.blockUser.useMutation();
+
   const handleOpenMoreOptionsSheet = () => {
     setSheetState("moreOptions");
   };
@@ -233,22 +247,10 @@ const OtherProfile = () => {
     setSheetState("closed");
   };
 
-  const handleOpenReportOptionsSheet = () => {
-    setTimeout(() => setSheetState("reportOptions"), 400);
-  };
-
-  const handleCloseReportOptionsSheet = () => {
-    setSheetState("closed");
-  };
-
   const handleBlockUser = async () => {
-    await blockUser(userId);
+    await blockUser.mutateAsync({ userId });
+    toast.show("User Blocked");
     handleCloseMoreOptionsSheet();
-  };
-
-  const handleReportUser = async (reason: string) => {
-    await reportUser(userId, reason);
-    handleCloseReportOptionsSheet();
   };
 
   const moreOptionsButtonOptions: ButtonOption[] = [
@@ -259,38 +261,7 @@ const OtherProfile = () => {
       },
       autoClose: false,
       disabled: isBlocking,
-      onPress: handleBlockUser,
-    },
-    {
-      text: "Report User",
-      textProps: {
-        color: "$red9",
-      },
-      disabled: isBlocking,
-      onPress: handleOpenReportOptionsSheet,
-    },
-  ];
-
-  const reportOptionsButtonOptions: ButtonOption[] = [
-    {
-      text: "Impersonation",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Impersonation"),
-    },
-    {
-      text: "Inappropriate content",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Inappropriate content"),
-    },
-    {
-      text: "Spam",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Spam"),
-    },
-    {
-      text: "Other",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Other"),
+      onPress: () => void handleBlockUser(),
     },
   ];
 
@@ -299,7 +270,7 @@ const OtherProfile = () => {
       title: username,
       headerRight: () => (
         <View>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={handleOpenMoreOptionsSheet}>
             <MoreHorizontal />
           </TouchableOpacity>
         </View>
@@ -346,131 +317,64 @@ const OtherProfile = () => {
     [profileData],
   );
 
+  const { actions } = useProfileActions(userId);
+
   const renderActionButtons = useCallback((): ProfileAction[] => {
-    if (profileData === undefined) return [];
+    if (!profileData) return [];
 
     const { privacy, targetUserFollowState, targetUserFriendState } =
       profileData.networkStatus;
 
-    const buttonCombinations: Record<string, ProfileAction[]> = {
-      public_NotFollowing_NotFriends: [
-        { label: "Follow", onPress: handleFollow, loading: isFollowLoading },
-        {
-          label: "Add Friend",
-          onPress: handleAddFriend,
-          loading: isAddFriendLoading,
-        },
-      ],
-      public_Following_NotFriends: [
-        {
-          label: "Unfollow",
-          onPress: handleUnfollow,
-          loading: isUnfollowLoading,
-        },
-        {
-          label: "Add Friend",
-          onPress: handleAddFriend,
-          loading: isAddFriendLoading,
-        },
-      ],
-      public_Following_OutboundRequest: [
-        {
-          label: "Cancel Friend Request",
-          onPress: handleCancelFriendRequest,
-          loading: isCancelFriendRequestLoading,
-        },
-      ],
-      public_Following_Friends: [
-        {
-          label: "Remove Friend",
-          onPress: handleRemoveFriend,
-          loading: isRemoveFriendLoading,
-        },
-      ],
-      private_NotFollowing_NotFriends: [
-        {
-          label: "Follow",
-          onPress: handleFollow,
-          loading: isFollowLoading,
-        },
-        {
-          label: "Add Friend",
-          onPress: handleAddFriend,
-          loading: isAddFriendLoading,
-        },
-      ],
-      private_OutboundRequest_NotFriends: [
-        {
-          label: "Cancel Follow Request",
-          onPress: handleCancelFollowRequest,
-          loading: isCancelFollowRequestLoading,
-          disabled: isAnyActionLoading,
-        },
-        {
-          label: "Add Friend",
-          onPress: handleAddFriend,
-          loading: isAddFriendLoading,
-          disabled: isAnyActionLoading,
-        },
-      ],
-      private_Following_NotFriends: [
-        {
-          label: "Unfollow",
-          onPress: handleUnfollow,
-          loading: isUnfollowLoading,
-          disabled: isAnyActionLoading,
-        },
-        {
-          label: "Add Friend",
-          onPress: handleAddFriend,
-          loading: isAddFriendLoading,
-          disabled: isAnyActionLoading,
-        },
-      ],
-      private_OutboundRequest_OutboundRequest: [
-        {
-          label: "Cancel Friend Request",
-          onPress: handleCancelFriendRequest,
-          loading: isCancelFriendRequestLoading,
-          disabled: isAnyActionLoading,
-        },
-      ],
-      private_Following_OutboundRequest: [
-        {
-          label: "Cancel Friend Request",
-          onPress: handleCancelFriendRequest,
-          loading: isCancelFriendRequestLoading,
-          disabled: isAnyActionLoading,
-        },
-      ],
-      private_Following_Friends: [
-        {
-          label: "Remove Friend",
-          onPress: handleRemoveFriend,
-          loading: isRemoveFriendLoading,
-          disabled: isAnyActionLoading,
-        },
-      ],
+    const buttonConfigs = {
+      follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
+      unfollow: { label: "Unfollow", action: "unfollow" },
+      friend: {
+        label: "Friend",
+        action: "addFriend",
+        backgroundColor: "#F214FF",
+      },
+      removeFriend: { label: "Remove Friend", action: "removeFriend" },
+      cancelFollowRequest: {
+        label: "Cancel Follow Request",
+        action: "cancelFollowRequest",
+      },
+      cancelFriendRequest: {
+        label: "Cancel Friend Request",
+        action: "cancelFriendRequest",
+      },
+    };
+
+    const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
+      public_NotFollowing_NotFriends: ["follow", "friend"],
+      public_Following_NotFriends: ["unfollow", "friend"],
+      public_Following_OutboundRequest: ["cancelFriendRequest"],
+      public_Following_Friends: ["removeFriend"],
+      private_NotFollowing_NotFriends: ["follow", "friend"],
+      private_OutboundRequest_NotFriends: ["cancelFollowRequest", "friend"],
+      private_Following_NotFriends: ["unfollow", "friend"],
+      private_OutboundRequest_OutboundRequest: ["cancelFriendRequest"],
+      private_Following_OutboundRequest: ["cancelFriendRequest"],
+      private_Following_Friends: ["removeFriend"],
     };
 
     const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
-    return buttonCombinations[key] ?? [];
-  }, [
-    profileData,
-    handleFollow,
-    isFollowLoading,
-    handleAddFriend,
-    isAddFriendLoading,
-    handleUnfollow,
-    isUnfollowLoading,
-    handleCancelFriendRequest,
-    isCancelFriendRequestLoading,
-    handleRemoveFriend,
-    isRemoveFriendLoading,
-    handleCancelFollowRequest,
-    isCancelFollowRequestLoading,
-    isAnyActionLoading,
-  ]);
+    const buttonKeys = buttonCombinations[key] ?? [];
+
+    return buttonKeys.map((buttonKey) => {
+      const config = buttonConfigs[buttonKey];
+      const { handler, loading, disabled } =
+        actions[config.action as keyof typeof actions];
+
+      return {
+        label: config.label,
+        onPress: handler,
+        loading,
+        disabled,
+        backgroundColor:
+          "backgroundColor" in config ? config.backgroundColor : undefined,
+      };
+    });
+  }, [profileData, actions]);
 
   const renderHeader = useCallback(
     () => (
@@ -486,17 +390,23 @@ const OtherProfile = () => {
             followingCount: profileData?.followingCount ?? 0,
             profilePictureUrl: profileData?.profilePictureUrl,
           }}
-          onFollowingPress={() =>
-            router.push({
-              pathname: "/profile/connections/[userId]/following-list",
-              params: { userId, username },
-            })
+          onFollowingPress={
+            canViewContent
+              ? () =>
+                  router.push({
+                    pathname: "/profile/connections/[userId]/following-list",
+                    params: { userId, username },
+                  })
+              : undefined
           }
-          onFollowersPress={() =>
-            router.push({
-              pathname: "/profile/connections/[userId]/followers-list",
-              params: { userId, username },
-            })
+          onFollowersPress={
+            canViewContent
+              ? () =>
+                  router.push({
+                    pathname: "/profile/connections/[userId]/followers-list",
+                    params: { userId, username },
+                  })
+              : undefined
           }
           actions={renderActionButtons()}
         />
@@ -527,6 +437,7 @@ const OtherProfile = () => {
       </YStack>
     ),
     [
+      canViewContent,
       friendItems,
       isLoadingFriendsData,
       isLoadingRecommendationsData,
@@ -546,6 +457,30 @@ const OtherProfile = () => {
       username,
     ],
   );
+
+  const renderContent = useCallback(() => {
+    if (isBlocked) {
+      return (
+        <EmptyPlaceholder
+          icon={<UserX size="$10" />}
+          title="This user has been blocked"
+          subtitle="You cannot view their content or interact with them."
+        />
+      );
+    }
+
+    if (isPrivate && !isFollowing) {
+      return (
+        <EmptyPlaceholder
+          icon={<Lock size="$10" />}
+          title="This account is private"
+          subtitle="Follow this account to see their photos and videos."
+        />
+      );
+    }
+
+    return null; // Return null here as we'll render posts in the FlashList
+  }, [isBlocked, isPrivate, isFollowing]);
 
   if (isLoadingData) {
     return (
@@ -578,6 +513,7 @@ const OtherProfile = () => {
           data={postItems}
           renderItem={({ item }) => renderPost(item)}
           ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderContent}
           keyExtractor={(item) => `self-profile-post-${item.postId}`}
           estimatedItemSize={300}
           showsVerticalScrollIndicator={false}
@@ -595,12 +531,6 @@ const OtherProfile = () => {
         isVisible={sheetState === "moreOptions"}
         buttonOptions={moreOptionsButtonOptions}
         onCancel={handleCloseMoreOptionsSheet}
-      />
-
-      <ActionSheet
-        isVisible={sheetState === "reportOptions"}
-        buttonOptions={reportOptionsButtonOptions}
-        onCancel={handleCloseReportOptionsSheet}
       />
     </>
   );

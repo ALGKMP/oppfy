@@ -1,3 +1,4 @@
+import type { ReactElement, ReactNode } from "react";
 import React, { useCallback, useEffect, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
 import { Modal, StyleSheet } from "react-native";
@@ -32,8 +33,8 @@ export interface ButtonOption {
   textProps?: SizableTextProps;
   onPress?: () => void;
   disabled?: boolean;
-  icon?: React.ReactNode;
-  autoClose?: boolean; 
+  icon?: ReactNode;
+  autoClose?: boolean;
 }
 
 export interface ActionSheetProps {
@@ -43,8 +44,8 @@ export interface ActionSheetProps {
   subtitle?: string;
   subtitleProps?: ParagraphProps;
   buttonOptions: ButtonOption[];
+  trigger?: ReactElement;
   isVisible?: boolean;
-  trigger?: React.ReactElement;
   onCancel?: () => void;
 }
 
@@ -56,36 +57,38 @@ const ActionSheet = ({
   subtitleProps,
   buttonOptions,
   trigger,
-  isVisible,
+  isVisible: controlledIsVisible,
   onCancel,
 }: ActionSheetProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
   const animation = useSharedValue(0);
-  const [showModal, setShowModal] = useState(false);
+  const [internalIsVisible, setInternalIsVisible] = useState(false);
+
+  const isVisible = controlledIsVisible ?? internalIsVisible;
 
   const openModal = useCallback(() => {
-    setShowModal(true);
+    setInternalIsVisible(true);
     animation.value = withSpring(1, { damping: 15, stiffness: 200 });
   }, [animation]);
 
   const closeModal = useCallback(() => {
     animation.value = withTiming(0, { duration: 250 }, (finished) => {
       if (finished) {
-        runOnJS(setShowModal)(false);
+        runOnJS(setInternalIsVisible)(false);
         onCancel && runOnJS(onCancel)();
       }
     });
   }, [animation, onCancel]);
 
   useEffect(() => {
-    if (isVisible && !showModal) {
+    if (isVisible) {
       openModal();
-    } else if (!isVisible && showModal) {
+    } else {
       closeModal();
     }
-  }, [isVisible, showModal]);
+  }, [isVisible, openModal, closeModal]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
@@ -119,7 +122,7 @@ const ActionSheet = ({
       {TriggerElement}
       <Modal
         transparent={true}
-        visible={showModal}
+        visible={isVisible}
         onRequestClose={closeModal}
         statusBarTranslucent
       >
@@ -184,7 +187,8 @@ const ActionSheet = ({
                         void Haptics.impactAsync(
                           Haptics.ImpactFeedbackStyle.Light,
                         );
-                        if (option.autoClose !== false) { // Check autoClose prop
+                        if (option.autoClose !== false) {
+                          // Check autoClose prop
                           closeModal();
                         }
                       }

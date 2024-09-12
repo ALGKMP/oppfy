@@ -243,7 +243,7 @@ export class FollowRepository {
       profileId: string;
       name: string;
       username: string;
-      profilePictureUrl: string;
+      profilePictureUrl: string | null;
       privacy: "public" | "private";
       createdAt: Date;
     }[];
@@ -310,7 +310,7 @@ export class FollowRepository {
       userId: string;
       username: string;
       name: string;
-      profilePictureUrl: string;
+      profilePictureUrl: string | null;
       profileId: string;
       privacy: "public" | "private";
       relationshipState: "following" | "followRequestSent" | "notFollowing";
@@ -390,7 +390,7 @@ export class FollowRepository {
       username: string;
       name: string;
       privacy: "public" | "private";
-      profilePictureUrl: string;
+      profilePictureUrl: string | null;
       relationshipState: "following" | "followRequestSent" | "notFollowing";
       createdAt: Date;
     }[];
@@ -459,7 +459,7 @@ export class FollowRepository {
       username: string;
       name: string;
       privacy: "public" | "private";
-      profilePictureUrl: string;
+      profilePictureUrl: string | null;
       relationshipState: "following" | "followRequestSent" | "notFollowing";
       createdAt: Date;
     }[];

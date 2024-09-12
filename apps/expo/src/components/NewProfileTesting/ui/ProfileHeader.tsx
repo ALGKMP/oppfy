@@ -1,4 +1,5 @@
 import React from "react";
+import type { ColorValue } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -31,6 +32,7 @@ export interface ProfileAction {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  backgroundColor?: ColorValue | undefined;
   loading?: boolean;
 }
 
@@ -135,24 +137,32 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
         </YStack>
 
         <YStack alignItems="flex-end" gap="$2">
-          <TouchableOpacity
-            onPress={onFollowingPress}
-            disabled={!onFollowingPress}
-          >
+          {onFollowingPress ? (
+            <TouchableOpacity onPress={onFollowingPress}>
+              <Stat
+                label="Following"
+                value={abbreviatedNumber(data.followingCount)}
+              />
+            </TouchableOpacity>
+          ) : (
             <Stat
               label="Following"
               value={abbreviatedNumber(data.followingCount)}
             />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onFollowersPress}
-            disabled={!onFollowersPress}
-          >
+          )}
+          {onFollowersPress ? (
+            <TouchableOpacity onPress={onFollowersPress}>
+              <Stat
+                label="Followers"
+                value={abbreviatedNumber(data.followerCount)}
+              />
+            </TouchableOpacity>
+          ) : (
             <Stat
               label="Followers"
               value={abbreviatedNumber(data.followerCount)}
             />
-          </TouchableOpacity>
+          )}
         </YStack>
       </XStack>
 
@@ -162,6 +172,7 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
             key={index}
             flex={1}
             borderRadius={20}
+            backgroundColor={action.backgroundColor}
             onPress={action.onPress}
             disabled={action.disabled}
           >
