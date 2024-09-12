@@ -142,6 +142,12 @@ const OtherProfile = () => {
     refetch: refetchProfileData,
   } = api.profile.getFullProfileOther.useQuery({ userId });
 
+  const isBlocked = profileData?.networkStatus.blocked ?? false;
+  const isPrivate = profileData?.networkStatus.privacy === "private";
+  const isFollowing =
+    profileData?.networkStatus.targetUserFollowState === "Following";
+  const canViewContent = !isBlocked && (!isPrivate || isFollowing);
+
   const {
     data: recommendationsData,
     isLoading: isLoadingRecommendationsData,
@@ -449,17 +455,23 @@ const OtherProfile = () => {
             followingCount: profileData?.followingCount ?? 0,
             profilePictureUrl: profileData?.profilePictureUrl,
           }}
-          onFollowingPress={() =>
-            router.push({
-              pathname: "/profile/connections/[userId]/following-list",
-              params: { userId, username },
-            })
+          onFollowingPress={
+            canViewContent
+              ? () =>
+                  router.push({
+                    pathname: "/profile/connections/[userId]/following-list",
+                    params: { userId, username },
+                  })
+              : undefined
           }
-          onFollowersPress={() =>
-            router.push({
-              pathname: "/profile/connections/[userId]/followers-list",
-              params: { userId, username },
-            })
+          onFollowersPress={
+            canViewContent
+              ? () =>
+                  router.push({
+                    pathname: "/profile/connections/[userId]/followers-list",
+                    params: { userId, username },
+                  })
+              : undefined
           }
           actions={renderActionButtons()}
         />
@@ -490,6 +502,7 @@ const OtherProfile = () => {
       </YStack>
     ),
     [
+      canViewContent,
       friendItems,
       isLoadingFriendsData,
       isLoadingRecommendationsData,
