@@ -279,13 +279,7 @@ export class FollowService {
       } else if (followRequest) {
         return sharedValidators.user.PrivateFollowState.Enum.OutboundRequest;
       } else {
-        const incomingRequest = await this.followRepository.getFollowRequest(
-          targetUserId,
-          userId,
-        );
-        return incomingRequest
-          ? sharedValidators.user.PrivateFollowState.Enum.IncomingRequest
-          : sharedValidators.user.PrivateFollowState.Enum.NotFollowing;
+        return sharedValidators.user.PrivateFollowState.Enum.NotFollowing;
       }
     }
   }

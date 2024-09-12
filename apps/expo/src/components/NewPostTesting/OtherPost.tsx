@@ -13,14 +13,13 @@ import PostCard from "./ui/PostCard";
 import type { PostData as OtherPostProps } from "./ui/PostCard";
 import { useComments } from "./useComments";
 import { useLikePost } from "./useLikePost";
-import { useSaveMedia } from "./useSaveMedia";
 import { useReportPost } from "./useReportPost";
+import { useSaveMedia } from "./useSaveMedia";
 
 type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
 type _ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];
 
 type SheetState = "closed" | "moreOptions" | "reportOptions";
-
 
 export const usePostActions = (postProps: OtherPostProps) => {
   const router = useRouter();
@@ -218,6 +217,7 @@ const OtherPost = (postProps: OtherPostProps) => {
     <>
       <PostCard
         {...postProps}
+        loading={false}
         hasLiked={hasLiked}
         onLikePressed={handleLikePressed}
         onLikeDoubleTapped={handleLikeDoubleTapped}

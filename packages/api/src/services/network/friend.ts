@@ -270,14 +270,11 @@ export class FriendService {
   public async determineFriendState(userId: string, targetUserId: string) {
     const friendshipExists = await this.friendshipExists(userId, targetUserId);
     const friendRequest = await this.getFriendRequest(userId, targetUserId);
-    const incomingRequest = await this.getFriendRequest(targetUserId, userId);
 
     if (friendshipExists) {
       return sharedValidators.user.FriendState.Enum.Friends;
     } else if (friendRequest) {
       return sharedValidators.user.FriendState.Enum.OutboundRequest;
-    } else if (incomingRequest) {
-      return sharedValidators.user.FriendState.Enum.IncomingRequest;
     } else {
       return sharedValidators.user.FriendState.Enum.NotFriends;
     }
