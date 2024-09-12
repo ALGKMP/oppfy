@@ -11,9 +11,11 @@ import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
   Button,
   Circle,
+  getToken,
   H1,
   H5,
   SizableText,
+  Spacer,
   styled,
   Text,
   View,
@@ -24,6 +26,7 @@ import {
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
+import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { Profile, RecommendationProfile } from "~/hooks/useProfile";
@@ -206,24 +209,22 @@ const HomeScreen = () => {
 
   if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
     return (
-      <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
-        <YStack gap="$4">
-          {PLACEHOLDER_DATA.map((_, index) => (
-            <CardContainer padding={0} key={index}>
-              <YStack>
-                <XStack padding="$2" gap="$2">
-                  <Skeleton circular size={46} />
-                  <YStack justifyContent="center" gap>
-                    <Skeleton width={60} height={16} />
-                    <Skeleton width={120} height={16} />
-                  </YStack>
-                </XStack>
-
-                <Skeleton radius={16} width="100%" height={screenWidth * 1.5} />
-              </YStack>
-            </CardContainer>
-          ))}
-        </YStack>
+      <BaseScreenView padding={0} paddingBottom={0}>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          renderItem={() => <PostCard loading />}
+          ListHeaderComponent={() => (
+            <YStack gap="$4">
+              <PeopleCarousel loading />
+            </YStack>
+          )}
+          estimatedItemSize={screenWidth}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListHeaderComponentStyle={{
+            marginBottom: getToken("$4", "space") as number,
+          }}
+        />
       </BaseScreenView>
     );
   }
