@@ -367,7 +367,7 @@ const VideoPlayer = (props: Media) => {
   });
   const safePlayPause = useCallback(
     (shouldPlay: boolean) => {
-      if (!isPlayerReady) return;
+      if (!isPlayerReady || !props.isViewable) return; // Check if the media is viewable
 
       try {
         if (shouldPlay && !isPlaying) {
@@ -381,12 +381,12 @@ const VideoPlayer = (props: Media) => {
         console.error("Error in safePlayPause:", error);
       }
     },
-    [isPlayerReady, player, isPlaying],
+    [isPlayerReady, player, isPlaying, props.isViewable], // Add props.isViewable to dependencies
   );
 
   useFocusEffect(
     useCallback(() => {
-      if (isPlayerReady) {
+      if (isPlayerReady && props.isViewable) {
         safePlayPause(true);
       }
 
@@ -395,7 +395,7 @@ const VideoPlayer = (props: Media) => {
           safePlayPause(false);
         }
       };
-    }, [isPlayerReady, safePlayPause]),
+    }, [isPlayerReady, safePlayPause, props.isViewable]), // Add props.isViewable to dependencies
   );
 
   return (

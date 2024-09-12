@@ -2,7 +2,7 @@ import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, ViewToken } from "@shopify/flash-list";
 import { Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, YStack } from "tamagui";
@@ -278,8 +278,26 @@ const OtherProfile = () => {
     });
   }, [navigation, username, profileData]);
 
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const visibleItemIds = viewableItems
+        .filter((token) => token.isViewable)
+        .map((token) => token.item?.postId)
+        .filter((id): id is string => id !== undefined);
+
+      setViewableItems(visibleItemIds);
+    },
+    [],
+  );
+
+  const viewabilityConfig = useMemo(() => ({
+    itemVisiblePercentThreshold: 40,
+  }), []);
+
   const renderPost = useCallback(
-    (item: Post) => (
+    (item: Post, isViewable: boolean) => (
       <OtherPost
         key={item.postId}
         id={item.postId}
@@ -303,6 +321,7 @@ const OtherProfile = () => {
         media={{
           type: item.mediaType,
           url: item.imageUrl,
+          isViewable: isViewable,
           dimensions: {
             width: item.width,
             height: item.height,
@@ -511,7 +530,7 @@ const OtherProfile = () => {
       <BaseScreenView padding={0} paddingBottom={0}>
         <FlashList
           data={postItems}
-          renderItem={({ item }) => renderPost(item)}
+          renderItem={({ item }) => renderPost(item, viewableItems.includes(item.postId))}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderContent}
           keyExtractor={(item) => `self-profile-post-${item.postId}`}
@@ -519,6 +538,9 @@ const OtherProfile = () => {
           showsVerticalScrollIndicator={false}
           onEndReached={handleOnEndReached}
           onRefresh={handleRefresh}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={{ viewableItems, postItems }}
           refreshing={isRefreshing}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
           ListHeaderComponentStyle={{

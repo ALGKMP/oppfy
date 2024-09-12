@@ -2,7 +2,7 @@ import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, ViewToken } from "@shopify/flash-list";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
@@ -113,8 +113,27 @@ const SelfProfile = () => {
     });
   }, [navigation, profileData?.username, router]);
 
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const visibleItemIds = viewableItems
+        .filter((token) => token.isViewable)
+        .map((token) => token.item?.postId)
+        .filter((id): id is string => id !== undefined);
+
+      setViewableItems(visibleItemIds);
+    },
+    [],
+  );
+
+  const viewabilityConfig = useMemo(() => ({
+    itemVisiblePercentThreshold: 40,
+  }), []);
+
+
   const renderPost = useCallback(
-    (item: Post) => (
+    (item: Post, isViewable: boolean) => (
       <SelfPost
         key={item.postId}
         id={item.postId}
@@ -138,6 +157,7 @@ const SelfProfile = () => {
         media={{
           type: item.mediaType,
           url: item.imageUrl,
+          isViewable: isViewable,
           dimensions: {
             width: item.width,
             height: item.height,
@@ -230,6 +250,8 @@ const SelfProfile = () => {
         <FlashList
           data={PLACEHOLDER_DATA}
           renderItem={() => <PostCard loading />}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
           ListHeaderComponent={() => (
             <YStack gap="$4">
               <ProfileHeaderDetails loading />
@@ -252,14 +274,17 @@ const SelfProfile = () => {
     <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
         data={postItems}
-        renderItem={({ item }) => renderPost(item)}
+        renderItem={({ item }) => renderPost(item, viewableItems.includes(item.postId))}
         ListHeaderComponent={renderHeader}
         keyExtractor={(item) => `self-profile-post-${item.postId}`}
-        estimatedItemSize={300}
+        estimatedItemSize={600}
         showsVerticalScrollIndicator={false}
         onEndReached={handleOnEndReached}
         onRefresh={handleRefresh}
         refreshing={isRefreshing}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        extraData={{ viewableItems, postItems }}
         ItemSeparatorComponent={() => <Spacer size="$4" />}
         ListHeaderComponentStyle={{
           marginBottom: getToken("$4", "space") as number,
