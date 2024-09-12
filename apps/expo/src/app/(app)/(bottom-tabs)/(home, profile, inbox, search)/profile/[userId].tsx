@@ -11,6 +11,7 @@ import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
+import { ActionSheet } from "~/components/Sheets";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -220,6 +221,75 @@ const OtherProfile = () => {
     },
     [router],
   );
+
+  const handleOpenMoreOptionsSheet = () => {
+    setSheetState("moreOptions");
+  };
+
+  const handleCloseMoreOptionsSheet = () => {
+    setSheetState("closed");
+  };
+
+  const handleOpenReportOptionsSheet = () => {
+    setTimeout(() => setSheetState("reportOptions"), 400);
+  };
+
+  const handleCloseReportOptionsSheet = () => {
+    setSheetState("closed");
+  };
+
+  const handleBlockUser = async () => {
+    await blockUser(userId);
+    handleCloseMoreOptionsSheet();
+  };
+
+  const handleReportUser = async (reason: string) => {
+    await reportUser(userId, reason);
+    handleCloseReportOptionsSheet();
+  };
+
+  const moreOptionsButtonOptions: ButtonOption[] = [
+    {
+      text: isBlocking ? "Blocking..." : "Block User",
+      textProps: {
+        color: isBlocking ? "$gray9" : "$red9",
+      },
+      autoClose: false,
+      disabled: isBlocking,
+      onPress: handleBlockUser,
+    },
+    {
+      text: "Report User",
+      textProps: {
+        color: "$red9",
+      },
+      disabled: isBlocking,
+      onPress: handleOpenReportOptionsSheet,
+    },
+  ];
+
+  const reportOptionsButtonOptions: ButtonOption[] = [
+    {
+      text: "Impersonation",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportUser("Impersonation"),
+    },
+    {
+      text: "Inappropriate content",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportUser("Inappropriate content"),
+    },
+    {
+      text: "Spam",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportUser("Spam"),
+    },
+    {
+      text: "Other",
+      textProps: { color: "$blue9" },
+      onPress: () => void handleReportUser("Other"),
+    },
+  ];
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -499,23 +569,37 @@ const OtherProfile = () => {
   }
 
   return (
-    <BaseScreenView padding={0} paddingBottom={0}>
-      <FlashList
-        data={postItems}
-        renderItem={({ item }) => renderPost(item)}
-        ListHeaderComponent={renderHeader}
-        keyExtractor={(item) => `self-profile-post-${item.postId}`}
-        estimatedItemSize={300}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleOnEndReached}
-        onRefresh={handleRefresh}
-        refreshing={isRefreshing}
-        ItemSeparatorComponent={() => <Spacer size="$4" />}
-        ListHeaderComponentStyle={{
-          marginBottom: getToken("$4", "space") as number,
-        }}
+    <>
+      <BaseScreenView padding={0} paddingBottom={0}>
+        <FlashList
+          data={postItems}
+          renderItem={({ item }) => renderPost(item)}
+          ListHeaderComponent={renderHeader}
+          keyExtractor={(item) => `self-profile-post-${item.postId}`}
+          estimatedItemSize={300}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleOnEndReached}
+          onRefresh={handleRefresh}
+          refreshing={isRefreshing}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListHeaderComponentStyle={{
+            marginBottom: getToken("$4", "space") as number,
+          }}
+        />
+      </BaseScreenView>
+
+      <ActionSheet
+        isVisible={sheetState === "moreOptions"}
+        buttonOptions={moreOptionsButtonOptions}
+        onCancel={handleCloseMoreOptionsSheet}
       />
-    </BaseScreenView>
+
+      <ActionSheet
+        isVisible={sheetState === "reportOptions"}
+        buttonOptions={reportOptionsButtonOptions}
+        onCancel={handleCloseReportOptionsSheet}
+      />
+    </>
   );
 };
 
