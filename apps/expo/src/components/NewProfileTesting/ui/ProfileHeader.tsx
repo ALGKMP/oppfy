@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { ColorValue, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import {
@@ -31,6 +31,7 @@ export interface ProfileAction {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  backgroundColor?: ColorValue | undefined;
   loading?: boolean;
 }
 
@@ -170,6 +171,7 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
             key={index}
             flex={1}
             borderRadius={20}
+            backgroundColor={action.backgroundColor}
             onPress={action.onPress}
             disabled={action.disabled}
           >
