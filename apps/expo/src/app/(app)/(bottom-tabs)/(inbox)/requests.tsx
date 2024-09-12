@@ -15,7 +15,7 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const PAGE_SIZE = 20;
 
 type FriendRequestItem =
-  RouterOutputs["request"]["paginateFriendRequests"]["items"][0];
+  RouterOutputs["friend"]["paginateFriendRequests"]["items"][0];
 type FollowRequestItem =
   RouterOutputs["request"]["paginateFollowRequests"]["items"][0];
 
@@ -34,7 +34,7 @@ const Requests = () => {
     fetchNextPage: fetchNextFriendRequestsPage,
     isFetchingNextPage: friendRequestsIsFetchingNextPage,
     refetch: refetchFriendRequests,
-  } = api.request.paginateFriendRequests.useInfiniteQuery(
+  } = api.friend.paginateFriendRequests.useInfiniteQuery(
     {
       pageSize: PAGE_SIZE,
     },
@@ -58,15 +58,15 @@ const Requests = () => {
     },
   );
 
-  const acceptFriendRequest = api.request.acceptFriendRequest.useMutation({
+  const acceptFriendRequest = api.friend.acceptFriendRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.request.paginateFriendRequests.cancel();
+      await utils.friend.paginateFriendRequests.cancel();
       await utils.request.paginateFollowRequests.cancel();
 
       // Get the data from the queryCache
       const prevFriendData =
-        utils.request.paginateFriendRequests.getInfiniteData({
+        utils.friend.paginateFriendRequests.getInfiniteData({
           pageSize: 20,
         });
       const prevFollowData =
@@ -77,7 +77,7 @@ const Requests = () => {
       if (prevFriendData === undefined || prevFollowData === undefined) return;
 
       // Optimistically update the data
-      utils.request.paginateFriendRequests.setInfiniteData(
+      utils.friend.paginateFriendRequests.setInfiniteData(
         { pageSize: 20 },
         {
           ...prevFriendData,
@@ -108,7 +108,7 @@ const Requests = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.request.paginateFriendRequests.setInfiniteData(
+      utils.friend.paginateFriendRequests.setInfiniteData(
         {},
         ctx.prevFriendData,
       );
@@ -119,7 +119,7 @@ const Requests = () => {
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.request.paginateFriendRequests.invalidate();
+      await utils.friend.paginateFriendRequests.invalidate();
       await utils.request.paginateFollowRequests.invalidate();
     },
   });
@@ -160,20 +160,20 @@ const Requests = () => {
     },
   });
 
-  const declineFriendRequest = api.request.declineFriendRequest.useMutation({
+  const declineFriendRequest = api.friend.declineFriendRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.request.paginateFriendRequests.cancel();
+      await utils.friend.paginateFriendRequests.cancel();
 
       // Get the data from the queryCache
       const prevFriendData =
-        utils.request.paginateFriendRequests.getInfiniteData();
+        utils.friend.paginateFriendRequests.getInfiniteData();
       const prevFollowData =
         utils.request.paginateFollowRequests.getInfiniteData();
       if (prevFriendData === undefined || prevFollowData === undefined) return;
 
       // Optimistically update the data
-      utils.request.paginateFriendRequests.setInfiniteData(
+      utils.friend.paginateFriendRequests.setInfiniteData(
         { pageSize: 20 },
         {
           ...prevFriendData,
@@ -198,7 +198,7 @@ const Requests = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.request.paginateFriendRequests.setInfiniteData(
+      utils.friend.paginateFriendRequests.setInfiniteData(
         { pageSize: 20 },
         ctx.prevFriendData,
       );
@@ -209,7 +209,7 @@ const Requests = () => {
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.request.paginateFriendRequests.invalidate();
+      await utils.friend.paginateFriendRequests.invalidate();
       await utils.request.paginateFollowRequests.invalidate();
     },
   });

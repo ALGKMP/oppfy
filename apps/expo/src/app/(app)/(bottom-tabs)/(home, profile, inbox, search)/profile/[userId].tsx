@@ -39,7 +39,7 @@ const useProfileActions = (userId: string) => {
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
-  const cancelFriendRequest = api.request.cancelFriendRequest.useMutation({
+  const cancelFriendRequest = api.friend.cancelFriendRequest.useMutation({
     onSettled: () => utils.profile.getFullProfileOther.invalidate({ userId }),
   });
 
