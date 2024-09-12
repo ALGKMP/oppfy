@@ -3,7 +3,7 @@ import { TouchableOpacity, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, YStack } from "tamagui";
 
@@ -14,6 +14,7 @@ import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHea
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -523,6 +524,30 @@ const OtherProfile = () => {
     ],
   );
 
+  const renderContent = useCallback(() => {
+    if (isBlocked) {
+      return (
+        <EmptyPlaceholder
+          icon={<UserX size="$10" />}
+          title="This user has been blocked"
+          subtitle="You cannot view their content or interact with them."
+        />
+      );
+    }
+
+    if (isPrivate && !isFollowing) {
+      return (
+        <EmptyPlaceholder
+          icon={<Lock size="$10" />}
+          title="This account is private"
+          subtitle="Follow this account to see their photos and videos."
+        />
+      );
+    }
+
+    return null; // Return null here as we'll render posts in the FlashList
+  }, [isBlocked, isPrivate, isFollowing]);
+
   if (isLoadingData) {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
@@ -554,6 +579,7 @@ const OtherProfile = () => {
           data={postItems}
           renderItem={({ item }) => renderPost(item)}
           ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderContent}
           keyExtractor={(item) => `self-profile-post-${item.postId}`}
           estimatedItemSize={300}
           showsVerticalScrollIndicator={false}
