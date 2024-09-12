@@ -1,38 +1,8 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const requestRouter = createTRPCRouter({
-
-  paginateFollowRequests: protectedProcedure
-    .input(
-      z.object({
-        cursor: z
-          .object({
-            createdAt: z.date(),
-            profileId: z.string(),
-          })
-          .optional(),
-        pageSize: z.number().optional(),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      try {
-        const { items, nextCursor } =
-          await ctx.services.paginate.paginateFollowRequests(
-            ctx.session.uid,
-            input.cursor,
-            input.pageSize,
-          );
-        return {
-          items,
-          nextCursor,
-        };
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
-      }
-    }),
 
   countRequests: protectedProcedure
     .query(async ({ ctx }) => {
@@ -51,55 +21,4 @@ export const requestRouter = createTRPCRouter({
       }
     }),
 
-
-  acceptFollowRequest: protectedProcedure
-    .input(
-      z.object({
-        senderId: z.string(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.follow.acceptFollowRequest(
-          input.senderId,
-          ctx.session.uid,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
-  declineFollowRequest: protectedProcedure
-    .input(
-      z.object({
-        senderId: z.string(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.services.follow.declineFollowRequest(
-          input.senderId,
-          ctx.session.uid,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
-
-  cancelFollowRequest: protectedProcedure
-    .input(
-      z.object({
-        recipientId: z.string(),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      try {
-        await ctx.services.follow.cancelFollowRequest(
-          ctx.session.uid,
-          input.recipientId,
-        );
-      } catch (err) {
-        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      }
-    }),
 });

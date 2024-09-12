@@ -102,7 +102,7 @@ const FollowingList = () => {
     },
   });
 
-  const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.follow.paginateFollowingSelf.cancel();

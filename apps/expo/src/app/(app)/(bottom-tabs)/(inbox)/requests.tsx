@@ -17,7 +17,7 @@ const PAGE_SIZE = 20;
 type FriendRequestItem =
   RouterOutputs["friend"]["paginateFriendRequests"]["items"][0];
 type FollowRequestItem =
-  RouterOutputs["request"]["paginateFollowRequests"]["items"][0];
+  RouterOutputs["follow"]["paginateFollowRequests"]["items"][0];
 
 const Requests = () => {
   const router = useRouter();
@@ -49,7 +49,7 @@ const Requests = () => {
     fetchNextPage: fetchNextFollowRequestsPage,
     isFetchingNextPage: followRequestsIsFetchingNextPage,
     refetch: refetchFollowRequests,
-  } = api.request.paginateFollowRequests.useInfiniteQuery(
+  } = api.follow.paginateFollowRequests.useInfiniteQuery(
     {
       pageSize: PAGE_SIZE,
     },
@@ -62,7 +62,7 @@ const Requests = () => {
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.friend.paginateFriendRequests.cancel();
-      await utils.request.paginateFollowRequests.cancel();
+      await utils.follow.paginateFollowRequests.cancel();
 
       // Get the data from the queryCache
       const prevFriendData =
@@ -70,7 +70,7 @@ const Requests = () => {
           pageSize: 20,
         });
       const prevFollowData =
-        utils.request.paginateFollowRequests.getInfiniteData({
+        utils.follow.paginateFollowRequests.getInfiniteData({
           pageSize: 20,
         });
 
@@ -91,7 +91,7 @@ const Requests = () => {
       );
 
       // Optimistically update the follow requests data
-      utils.request.paginateFollowRequests.setInfiniteData(
+      utils.follow.paginateFollowRequests.setInfiniteData(
         { pageSize: 20 },
         {
           ...prevFollowData,
@@ -112,7 +112,7 @@ const Requests = () => {
         {},
         ctx.prevFriendData,
       );
-      utils.request.paginateFollowRequests.setInfiniteData(
+      utils.follow.paginateFollowRequests.setInfiniteData(
         {},
         ctx.prevFollowData,
       );
@@ -120,22 +120,22 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.friend.paginateFriendRequests.invalidate();
-      await utils.request.paginateFollowRequests.invalidate();
+      await utils.follow.paginateFollowRequests.invalidate();
     },
   });
-  const acceptFollowRequest = api.request.acceptFollowRequest.useMutation({
+  const acceptFollowRequest = api.follow.acceptFollowRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.request.paginateFollowRequests.cancel();
+      await utils.follow.paginateFollowRequests.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.request.paginateFollowRequests.getInfiniteData({
+      const prevData = utils.follow.paginateFollowRequests.getInfiniteData({
         pageSize: 20,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.request.paginateFollowRequests.setInfiniteData(
+      utils.follow.paginateFollowRequests.setInfiniteData(
         { pageSize: 20 },
         {
           ...prevData,
@@ -152,11 +152,11 @@ const Requests = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.request.paginateFollowRequests.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowRequests.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.request.paginateFollowRequests.invalidate();
+      await utils.follow.paginateFollowRequests.invalidate();
     },
   });
 
@@ -169,7 +169,7 @@ const Requests = () => {
       const prevFriendData =
         utils.friend.paginateFriendRequests.getInfiniteData();
       const prevFollowData =
-        utils.request.paginateFollowRequests.getInfiniteData();
+        utils.follow.paginateFollowRequests.getInfiniteData();
       if (prevFriendData === undefined || prevFollowData === undefined) return;
 
       // Optimistically update the data
@@ -187,7 +187,7 @@ const Requests = () => {
       );
 
       // Optimistically update the follow requests data
-      utils.request.paginateFollowRequests.setInfiniteData(
+      utils.follow.paginateFollowRequests.setInfiniteData(
         { pageSize: 20 },
         {
           ...prevFollowData,
@@ -202,7 +202,7 @@ const Requests = () => {
         { pageSize: 20 },
         ctx.prevFriendData,
       );
-      utils.request.paginateFollowRequests.setInfiniteData(
+      utils.follow.paginateFollowRequests.setInfiniteData(
         { pageSize: 20 },
         ctx.prevFollowData,
       );
@@ -210,20 +210,20 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.friend.paginateFriendRequests.invalidate();
-      await utils.request.paginateFollowRequests.invalidate();
+      await utils.follow.paginateFollowRequests.invalidate();
     },
   });
-  const declineFollowRequest = api.request.declineFollowRequest.useMutation({
+  const declineFollowRequest = api.follow.declineFollowRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.request.paginateFollowRequests.cancel();
+      await utils.follow.paginateFollowRequests.cancel();
 
       // Get the data from the queryCache
-      const prevData = utils.request.paginateFollowRequests.getInfiniteData();
+      const prevData = utils.follow.paginateFollowRequests.getInfiniteData();
       if (prevData === undefined) return;
 
       // Optimistically update the data
-      utils.request.paginateFollowRequests.setInfiniteData(
+      utils.follow.paginateFollowRequests.setInfiniteData(
         { pageSize: 20 },
         {
           ...prevData,
@@ -240,14 +240,14 @@ const Requests = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.request.paginateFollowRequests.setInfiniteData(
+      utils.follow.paginateFollowRequests.setInfiniteData(
         { pageSize: 20 },
         ctx.prevData,
       );
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.request.paginateFollowRequests.invalidate();
+      await utils.follow.paginateFollowRequests.invalidate();
     },
   });
 
