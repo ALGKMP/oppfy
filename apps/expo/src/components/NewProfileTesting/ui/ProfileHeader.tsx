@@ -1,5 +1,6 @@
 import React from "react";
-import { ColorValue, TouchableOpacity } from "react-native";
+import type { ColorValue } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import {
