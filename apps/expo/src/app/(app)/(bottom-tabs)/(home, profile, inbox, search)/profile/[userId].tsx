@@ -109,6 +109,7 @@ type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 const OtherProfile = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const utils = api.useUtils();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -170,12 +171,6 @@ const OtherProfile = () => {
     },
   );
 
-  const blockUser = api.block.blockUser.useMutation({
-    onMutate: async () => {
-      await utils.
-    }
-  })
-
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = useCallback(async () => {
@@ -225,6 +220,13 @@ const OtherProfile = () => {
     [router],
   );
 
+  const [sheetState, setSheetState] = useState<
+    "closed" | "moreOptions" | "reportOptions"
+  >("closed");
+
+  const { isLoading: isBlocking, ...blockUser } =
+    api.block.blockUser.useMutation();
+
   const handleOpenMoreOptionsSheet = () => {
     setSheetState("moreOptions");
   };
@@ -233,22 +235,9 @@ const OtherProfile = () => {
     setSheetState("closed");
   };
 
-  const handleOpenReportOptionsSheet = () => {
-    setTimeout(() => setSheetState("reportOptions"), 400);
-  };
-
-  const handleCloseReportOptionsSheet = () => {
-    setSheetState("closed");
-  };
-
   const handleBlockUser = async () => {
-    await blockUser(userId);
+    await blockUser.mutateAsync({ userId });
     handleCloseMoreOptionsSheet();
-  };
-
-  const handleReportUser = async (reason: string) => {
-    await reportUser(userId, reason);
-    handleCloseReportOptionsSheet();
   };
 
   const moreOptionsButtonOptions: ButtonOption[] = [
@@ -261,37 +250,6 @@ const OtherProfile = () => {
       disabled: isBlocking,
       onPress: handleBlockUser,
     },
-    {
-      text: "Report User",
-      textProps: {
-        color: "$red9",
-      },
-      disabled: isBlocking,
-      onPress: handleOpenReportOptionsSheet,
-    },
-  ];
-
-  const reportOptionsButtonOptions: ButtonOption[] = [
-    {
-      text: "Impersonation",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Impersonation"),
-    },
-    {
-      text: "Inappropriate content",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Inappropriate content"),
-    },
-    {
-      text: "Spam",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Spam"),
-    },
-    {
-      text: "Other",
-      textProps: { color: "$blue9" },
-      onPress: () => void handleReportUser("Other"),
-    },
   ];
 
   useLayoutEffect(() => {
@@ -299,7 +257,7 @@ const OtherProfile = () => {
       title: username,
       headerRight: () => (
         <View>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={handleOpenMoreOptionsSheet}>
             <MoreHorizontal />
           </TouchableOpacity>
         </View>
@@ -595,12 +553,6 @@ const OtherProfile = () => {
         isVisible={sheetState === "moreOptions"}
         buttonOptions={moreOptionsButtonOptions}
         onCancel={handleCloseMoreOptionsSheet}
-      />
-
-      <ActionSheet
-        isVisible={sheetState === "reportOptions"}
-        buttonOptions={reportOptionsButtonOptions}
-        onCancel={handleCloseReportOptionsSheet}
       />
     </>
   );
