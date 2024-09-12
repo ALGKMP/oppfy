@@ -43,8 +43,8 @@ export interface ActionSheetProps {
   subtitle?: string;
   subtitleProps?: ParagraphProps;
   buttonOptions: ButtonOption[];
-  isVisible?: boolean;
   trigger?: React.ReactElement;
+  isVisible?: boolean;
   onCancel?: () => void;
 }
 
@@ -56,36 +56,38 @@ const ActionSheet = ({
   subtitleProps,
   buttonOptions,
   trigger,
-  isVisible,
+  isVisible: controlledIsVisible,
   onCancel,
 }: ActionSheetProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
   const animation = useSharedValue(0);
-  const [showModal, setShowModal] = useState(false);
+  const [internalIsVisible, setInternalIsVisible] = useState(false);
+  
+  const isVisible = controlledIsVisible ?? internalIsVisible;
 
   const openModal = useCallback(() => {
-    setShowModal(true);
+    setInternalIsVisible(true);
     animation.value = withSpring(1, { damping: 15, stiffness: 200 });
   }, [animation]);
 
   const closeModal = useCallback(() => {
     animation.value = withTiming(0, { duration: 250 }, (finished) => {
       if (finished) {
-        runOnJS(setShowModal)(false);
+        runOnJS(setInternalIsVisible)(false);
         onCancel && runOnJS(onCancel)();
       }
     });
   }, [animation, onCancel]);
 
   useEffect(() => {
-    if (isVisible && !showModal) {
+    if (isVisible) {
       openModal();
-    } else if (!isVisible && showModal) {
+    } else {
       closeModal();
     }
-  }, [isVisible, showModal]);
+  }, [isVisible, openModal, closeModal]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
@@ -119,7 +121,7 @@ const ActionSheet = ({
       {TriggerElement}
       <Modal
         transparent={true}
-        visible={showModal}
+        visible={isVisible}
         onRequestClose={closeModal}
         statusBarTranslucent
       >
