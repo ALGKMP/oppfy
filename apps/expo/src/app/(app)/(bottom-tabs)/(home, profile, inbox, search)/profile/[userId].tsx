@@ -498,7 +498,13 @@ const OtherProfile = () => {
       );
     }
 
-    return null; // Return null here as we'll render posts in the FlashList
+    return (
+      <EmptyPlaceholder
+        icon={<Lock size="$10" />}
+        title="No posts yet"
+        subtitle="Check back later!"
+      />
+    );
   }, [isBlocked, isPrivate, isFollowing]);
 
   if (isLoadingData) {
@@ -514,7 +520,6 @@ const OtherProfile = () => {
             </YStack>
           )}
           estimatedItemSize={300}
-          keyExtractor={(_, index) => `loading-${index}_${userId}`}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
           ListHeaderComponentStyle={{
