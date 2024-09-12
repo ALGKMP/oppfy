@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -13,7 +12,6 @@ import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
-import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
@@ -141,8 +139,11 @@ const OtherProfile = () => {
     { enabled: !!userId },
   );
 
-  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
+  const {
+    data: recommendationsData,
+    isLoading: isLoadingRecommendationsData,
+    refetch: refetchRecommendationsData,
+  } = api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const {
     data: friendsData,
@@ -175,9 +176,19 @@ const OtherProfile = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await refetchPosts();
+    await Promise.all([
+      refetchProfileData(),
+      refetchRecommendationsData(),
+      refetchFriendsData(),
+      refetchPosts(),
+    ]);
     setIsRefreshing(false);
-  }, [refetchPosts]);
+  }, [
+    refetchFriendsData,
+    refetchPosts,
+    refetchProfileData,
+    refetchRecommendationsData,
+  ]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -263,7 +274,7 @@ const OtherProfile = () => {
   );
 
   const renderActionButtons = useCallback((): ProfileAction[] => {
-    if (!profileData) return [];
+    if (profileData === undefined) return [];
 
     const { privacy, targetUserFollowState, targetUserFriendState } =
       profileData.networkStatus;

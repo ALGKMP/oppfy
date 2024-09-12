@@ -23,17 +23,26 @@ const SelfProfile = () => {
   const navigation = useNavigation();
   const router = useRouter();
 
-  const { profile: profileData, isLoading: isLoadingProfileData } =
-    useProfile();
+  const {
+    profile: profileData,
+    isLoading: isLoadingProfileData,
+    refetch: refetchProfile,
+  } = useProfile();
 
-  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
+  const {
+    data: recommendationsData,
+    isLoading: isLoadingRecommendationsData,
+    refetch: refetchRecommendations,
+  } = api.contacts.getRecommendationProfilesSelf.useQuery();
 
-  const { data: friendsData, isLoading: isLoadingFriendsData } =
-    api.friend.paginateFriendsSelf.useInfiniteQuery(
-      { pageSize: 10 },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor },
-    );
+  const {
+    data: friendsData,
+    isLoading: isLoadingFriendsData,
+    refetch: refetchFriends,
+  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
+    { pageSize: 10 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+  );
 
   const {
     data: postsData,
@@ -51,9 +60,14 @@ const SelfProfile = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await refetchPosts();
+    await Promise.all([
+      refetchProfile(),
+      refetchRecommendations(),
+      refetchFriends(),
+      refetchPosts(),
+    ]);
     setIsRefreshing(false);
-  }, [refetchPosts]);
+  }, [refetchProfile, refetchRecommendations, refetchFriends, refetchPosts]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {

@@ -87,7 +87,7 @@
     "react-native-shared-element": "^0.8.9",
     "react-native-svg": "^15.2.0",
     "react-native-tab-view": "^3.5.2",
-    "react-native-vision-camera": "^4.5.1",
+    "react-native-vision-camera": "^4.5.3",
     "superjson": "2.2.0",
     "tamagui": "1.95.3",
     "uuid": "3.4.0",
