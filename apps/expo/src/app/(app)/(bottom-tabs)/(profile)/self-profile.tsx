@@ -15,6 +15,7 @@ import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import SelfPost from "~/components/NewPostTesting/SelfPost";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -100,7 +101,7 @@ const SelfProfile = () => {
 
   const renderPost = useCallback(
     (item: Post) => (
-      <OtherPost
+      <SelfPost
         key={item.postId}
         id={item.postId}
         createdAt={item.createdAt}
