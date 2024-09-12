@@ -161,12 +161,12 @@ const Profile = () => {
   });
 
   const handleBlockUser = async (userId: string) => {
-    await blockUser.mutateAsync({ blockUserId: userId });
+    await blockUser.mutateAsync({ userId });
     setIsActionSheetVisible(false);
   };
 
   const handleUnblockUser = async (userId: string) => {
-    await unblockUser.mutateAsync({ blockedUserId: userId });
+    await unblockUser.mutateAsync({ userId });
     setIsActionSheetVisible(false);
   };
 
