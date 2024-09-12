@@ -11,7 +11,7 @@ import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
-import { ActionSheet } from "~/components/Sheets";
+import { ActionSheet, ButtonOption } from "~/components/Sheets";
 import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -135,10 +135,7 @@ const OtherProfile = () => {
     data: profileData,
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
-  } = api.profile.getFullProfileOther.useQuery(
-    { userId },
-    { enabled: !!userId },
-  );
+  } = api.profile.getFullProfileOther.useQuery({ userId });
 
   const {
     data: recommendationsData,
@@ -172,6 +169,12 @@ const OtherProfile = () => {
       enabled: !!userId,
     },
   );
+
+  const blockUser = api.block.blockUser.useMutation({
+    onMutate: async () => {
+      await utils.
+    }
+  })
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
