@@ -291,7 +291,7 @@ export class FriendRepository {
       userId: string;
       username: string;
       name: string;
-      profilePictureUrl: string;
+      profilePictureUrl: string | null;
       profileId: string;
       privacy: "public" | "private";
       relationshipState: "following" | "followRequestSent" | "notFollowing";
