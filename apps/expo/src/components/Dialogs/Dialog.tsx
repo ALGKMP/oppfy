@@ -36,7 +36,7 @@ export interface DialogProps {
   acceptTextProps?: SizableTextProps;
 }
 
-const AlertDialog = ({
+const Dialog = ({
   title,
   titleProps,
   subtitle,
@@ -187,4 +187,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AlertDialog;
+export default Dialog;

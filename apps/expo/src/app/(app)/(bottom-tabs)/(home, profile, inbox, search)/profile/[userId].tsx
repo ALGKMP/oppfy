@@ -141,8 +141,11 @@ const OtherProfile = () => {
     { enabled: !!userId },
   );
 
-  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
+  const {
+    data: recommendationsData,
+    isLoading: isLoadingRecommendationsData,
+    refetch: refetchRecommendationsData,
+  } = api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const {
     data: friendsData,
@@ -175,9 +178,14 @@ const OtherProfile = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await refetchPosts();
+    await Promise.all([
+      refetchProfileData(),
+      refetchRecommendationsData(),
+      refetchFriendsData(),
+      refetchPosts(),
+    ]);
     setIsRefreshing(false);
-  }, [refetchPosts]);
+  }, [refetchFriendsData, refetchPosts, refetchProfileData]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
