@@ -479,7 +479,13 @@ const OtherProfile = () => {
       );
     }
 
-    return null; // Return null here as we'll render posts in the FlashList
+    return (
+      <EmptyPlaceholder
+        icon={<Lock size="$10" />}
+        title="No posts yet"
+        subtitle="Check back later!"
+      />
+    );
   }, [isBlocked, isPrivate, isFollowing]);
 
   if (isLoadingData) {
