@@ -1,9 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Position } from "react-native-image-marker";
-import { useRouter } from "expo-router";
-import watermark from "@assets/watermark.png";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useToastController } from "@tamagui/toast";
 
 import type { RouterInputs } from "~/utils/api";
 import type { ButtonOption } from "../Sheets";
@@ -14,59 +10,12 @@ import type { PostData as OtherPostProps } from "./ui/PostCard";
 import { useComments } from "./useComments";
 import { useLikePost } from "./useLikePost";
 import { useReportPost } from "./useReportPost";
-import { useSaveMedia } from "./useSaveMedia";
+import { usePostActions } from "./usePostActions";
 
 type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
 type _ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];
 
 type SheetState = "closed" | "moreOptions" | "reportOptions";
-
-export const usePostActions = (postProps: OtherPostProps) => {
-  const router = useRouter();
-  const toast = useToastController();
-  const { saveMedia, isSaving } = useSaveMedia();
-
-  const handleSavePost = async () => {
-    await saveMedia(postProps.media.url, {
-      image: watermark,
-      position: Position.bottomRight,
-      scale: 0.7,
-    });
-    toast.show("Post Saved");
-  };
-
-  const handleShare = () => {
-    // TODO: Implement sharing
-  };
-
-  const handleRecipientPress = () => {
-    router.push({
-      pathname: `/profile/[userId]`,
-      params: {
-        userId: postProps.recipient.id,
-        username: postProps.recipient.username,
-      },
-    });
-  };
-
-  const handleAuthorPress = () => {
-    router.push({
-      pathname: `/profile/[userId]`,
-      params: {
-        userId: postProps.author.id,
-        username: postProps.author.username,
-      },
-    });
-  };
-
-  return {
-    handleSavePost,
-    handleShare,
-    handleRecipientPress,
-    handleAuthorPress,
-    isSaving,
-  };
-};
 
 interface MoreOptionsSheetProps {
   isVisible: boolean;
