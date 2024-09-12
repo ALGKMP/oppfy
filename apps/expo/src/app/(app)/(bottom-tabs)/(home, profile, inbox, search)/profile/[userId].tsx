@@ -557,7 +557,7 @@ const OtherProfile = () => {
             </YStack>
           )}
           estimatedItemSize={300}
-          keyExtractor={(_, index) => `loading-${index}`}
+          keyExtractor={(_, index) => `loading-${index}_${userId}`}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
           ListHeaderComponentStyle={{
