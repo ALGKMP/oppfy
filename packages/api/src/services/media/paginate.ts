@@ -18,7 +18,7 @@ export interface PaginatedResponse<T> {
 
 interface Cursor {
   createdAt: Date;
-  profileId: number;
+  profileId: string;
 }
 
 export class PaginationService {
@@ -155,7 +155,7 @@ export class PaginationService {
   private _processPaginatedData<
     T extends {
       profilePictureUrl: string | null;
-      profileId: number;
+      profileId: string;
       createdAt: Date;
     },
   >(data: T[], pageSize: number) {

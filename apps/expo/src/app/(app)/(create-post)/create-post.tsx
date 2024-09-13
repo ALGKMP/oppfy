@@ -91,21 +91,21 @@ const CreatePost = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     const baseData = {
-      uri: uri ?? "",
-      width: Number(width),
-      height: Number(height),
+      uri: uri,
+      width: parseInt(width),
+      height: parseInt(height),
       caption: data.caption,
     };
     const input =
       params.userType === "onApp"
         ? {
             ...baseData,
-            recipient: params.recipient ?? "",
+            recipient: params.recipient,
             type: "onApp" as const,
           }
         : {
             ...baseData,
-            number: params.number ?? "",
+            number: params.number,
             type: "notOnApp" as const,
           };
     type === "photo"
@@ -186,8 +186,7 @@ const CreatePost = () => {
   };
 
   // Calculate the preview size (1/3 of the original size)
-  const contentAspectRatio =
-    parseFloat(width ?? "0") / parseFloat(height ?? "0");
+  const contentAspectRatio = parseInt(width) / parseInt(height);
   const contentHeight = Math.min(
     SCREEN_WIDTH / contentAspectRatio,
     MAX_CONTENT_HEIGHT,
@@ -219,7 +218,7 @@ const CreatePost = () => {
                 >
                   <Video
                     ref={videoRef}
-                    source={{ uri: uri ?? "" }}
+                    source={{ uri }}
                     style={[
                       styles.media,
                       { width: previewWidth, height: previewHeight },

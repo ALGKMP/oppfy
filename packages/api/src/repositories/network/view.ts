@@ -7,57 +7,9 @@ import { handleDatabaseErrors } from "../../errors";
 export class ViewRepository {
   private db = db;
 
-  @handleDatabaseErrors
-  async viewProfile({
-    viewerUserId,
-    viewedProfileId,
-  }: {
-    viewerUserId: string;
-    viewedProfileId: number;
-  }) {
-    return await this.db.transaction(async (tx) => {
-      // Create a new profile view
-      await tx.insert(schema.profileView).values({
-        viewerUserId,
-        viewedProfileId,
-      });
-
-      // Increment the views count in profile stats
-      await tx
-        .update(schema.profileStats)
-        .set({ views: sql`${schema.profileStats.views} + 1` })
-        .where(eq(schema.profileStats.profileId, viewedProfileId));
-    });
-  }
-
-  @handleDatabaseErrors
-  async viewMultipleProfiles({
-    viewerUserId,
-    viewedProfileIds,
-  }: {
-    viewerUserId: string;
-    viewedProfileIds: number[];
-  }) {
-    return await this.db.transaction(async (tx) => {
-      for (const viewedProfileId of viewedProfileIds) {
-        // Create a new profile view for each viewedProfileId
-        await tx.insert(schema.profileView).values({
-          viewerUserId,
-          viewedProfileId,
-        });
-
-        // Increment the views count in profile stats for each viewedProfileId
-        await tx
-          .update(schema.profileStats)
-          .set({ views: sql`${schema.profileStats.views} + 1` })
-          .where(eq(schema.profileStats.profileId, viewedProfileId));
-      }
-    });
-  }
-
   // View post (create post view)
   @handleDatabaseErrors
-  async viewPost({ userId, postId }: { userId: string; postId: number }) {
+  async viewPost({ userId, postId }: { userId: string; postId: string }) {
     return await this.db.transaction(async (tx) => {
       // Create a new post view
       await tx.insert(schema.postView).values({
@@ -80,7 +32,7 @@ export class ViewRepository {
     postIds,
   }: {
     userId: string;
-    postIds: number[];
+    postIds: string[];
   }) {
     return await this.db.transaction(async (tx) => {
       for (const postId of postIds) {

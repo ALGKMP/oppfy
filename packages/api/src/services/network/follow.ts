@@ -1,9 +1,9 @@
-import { PrivateFollowState, PublicFollowState } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FriendRepository } from "../../repositories";
 import { FollowRepository } from "../../repositories/network/follow";
-import { ProfileRepository } from "../../repositories/profile/profile";
+import { ProfileRepository } from "../../repositories/user/profile";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
@@ -118,10 +118,23 @@ export class FollowService {
       recipientId,
     );
 
-    if (friendship) {
-      await this.friendRepository.removeFriend(senderId, recipientId);
-    }
+    const outboundFollowRequest = await this.followRepository.getFollowRequest(
+      senderId,
+      recipientId,
+    );
 
+    const outboundFriendRequest = await this.friendRepository.getFriendRequest(
+      senderId,
+      recipientId,
+    );
+
+    if (outboundFollowRequest) {
+      await this.followRepository.removeFollowRequest(senderId, recipientId);
+    } else if (friendship) {
+      await this.friendRepository.removeFriend(senderId, recipientId);
+    } else if (outboundFriendRequest) {
+      await this.friendRepository.deleteFriendRequest(senderId, recipientId);
+    }
     await this.followRepository.removeFollower(senderId, recipientId);
   }
 
@@ -258,21 +271,15 @@ export class FollowService {
 
     if (privacySetting === "public") {
       return isFollowing
-        ? PublicFollowState.Enum.Following
-        : PublicFollowState.Enum.NotFollowing;
+        ? sharedValidators.user.PublicFollowState.Enum.Following
+        : sharedValidators.user.PublicFollowState.Enum.NotFollowing;
     } else {
       if (isFollowing) {
-        return PrivateFollowState.Enum.Following;
+        return sharedValidators.user.PrivateFollowState.Enum.Following;
       } else if (followRequest) {
-        return PrivateFollowState.Enum.OutboundRequest;
+        return sharedValidators.user.PrivateFollowState.Enum.OutboundRequest;
       } else {
-        const incomingRequest = await this.followRepository.getFollowRequest(
-          targetUserId,
-          userId,
-        );
-        return incomingRequest
-          ? PrivateFollowState.Enum.IncomingRequest
-          : PrivateFollowState.Enum.NotFollowing;
+        return sharedValidators.user.PrivateFollowState.Enum.NotFollowing;
       }
     }
   }

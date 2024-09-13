@@ -8,20 +8,20 @@ export class PostStatsRepository {
   private db = db;
 
   @handleDatabaseErrors
-  async getPostStats(postId: number) {
+  async getPostStats(postId: string) {
     return await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
   }
 
   @handleDatabaseErrors
-  async createPostStats(postId: number) {
+  async createPostStats(postId: string) {
     const result = await this.db.insert(schema.postStats).values({ postId });
     return result;
   }
 
   @handleDatabaseErrors
-  async incrementCommentsCount(postId: number) {
+  async incrementCommentsCount(postId: string) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
@@ -35,7 +35,7 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async decrementCommentsCount(postId: number) {
+  async decrementCommentsCount(postId: string) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
@@ -49,7 +49,7 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async incrementLikesCount(postId: number) {
+  async incrementLikesCount(postId: string) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
@@ -63,7 +63,7 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async decrementLikesCount(postId: number) {
+  async decrementLikesCount(postId: string) {
     const currentStats = await this.db.query.postStats.findFirst({
       where: eq(schema.postStats.postId, postId),
     });
@@ -78,10 +78,7 @@ export class PostStatsRepository {
 
   @handleDatabaseErrors
   async updatePostStats(
-    postId: number,
-    likes: number,
-    comments: number,
-    views: number,
+    { postId, likes, comments, views }: { postId: string; likes: number; comments: number; views: number }
   ) {
     await this.db
       .update(schema.postStats)
@@ -94,7 +91,7 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async deletePostStats(postId: number) {
+  async deletePostStats(postId: string) {
     await this.db
       .delete(schema.postStats)
       .where(eq(schema.postStats.postId, postId));

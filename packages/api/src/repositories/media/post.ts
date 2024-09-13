@@ -10,7 +10,7 @@ export class PostRepository {
   private contactsRepository = new ContactsRepository();
 
   @handleDatabaseErrors
-  async getPost(postId: number) {
+  async getPost(postId: string) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -19,11 +19,11 @@ export class PostRepository {
     return await this.db
       .selectDistinct({
         postId: schema.post.id,
-        authorId: schema.post.author,
+        authorId: schema.post.authorId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipient,
+        recipientId: schema.post.recipientId,
         recipientProfileId: recipientProfile.id,
         recipientUsername: recipientProfile.username,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -38,18 +38,19 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
-      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(eq(schema.post.id, postId))
       .limit(1);
   }
 
+  // TODO: This shit doesn't work
   @handleDatabaseErrors
   async paginatePostsOfFollowing(
     userId: string,
-    cursor: { createdAt: Date; followerId: number } | null = null,
+    cursor: { createdAt: Date; followerId: string } | null = null,
     pageSize = 10,
   ) {
     const author = aliasedTable(schema.user, "author");
@@ -61,24 +62,25 @@ export class PostRepository {
     // Subquery to get the latest post for each followed user
     const latestPosts = this.db
       .select({
-        postId: sql<number>`max(${schema.post.id})`.as("latest_post_id"),
-        authorId: schema.post.author,
+        postId: schema.post.id,
+        authorId: schema.post.authorId,
         followerId: follower.id,
+        createdAt: schema.post.createdAt,
       })
       .from(schema.post)
-      .innerJoin(follower, eq(follower.recipientId, schema.post.recipient))
+      .innerJoin(follower, eq(follower.recipientId, schema.post.recipientId))
       .where(eq(follower.senderId, userId))
-      .groupBy(schema.post.author, follower.id)
+      .orderBy(desc(schema.post.createdAt))
       .as("latest_posts");
 
     return await this.db
       .select({
         postId: schema.post.id,
-        authorId: schema.post.author,
+        authorId: schema.post.authorId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipient,
+        recipientId: schema.post.recipientId,
         recipientUsername: recipientProfile.username,
         recipientProfileId: recipientProfile.id,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -95,9 +97,9 @@ export class PostRepository {
       .from(latestPosts)
       .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
-      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(
         cursor
@@ -117,7 +119,7 @@ export class PostRepository {
   @handleDatabaseErrors
   async paginatePostsOfRecommended(
     userId: string,
-    cursor: { createdAt: Date; postId: number } | null = null,
+    cursor: { createdAt: Date; postId: string } | null = null,
     pageSize = 10,
   ) {
     const author = aliasedTable(schema.user, "author");
@@ -141,21 +143,21 @@ export class PostRepository {
     const latestPosts = this.db
       .select({
         postId: sql<number>`max(${schema.post.id})`.as("latest_post_id"),
-        authorId: schema.post.author,
+        authorId: schema.post.authorId,
       })
       .from(schema.post)
-      .where(inArray(schema.post.author, recommendedUserIds))
-      .groupBy(schema.post.author)
+      .where(inArray(schema.post.authorId, recommendedUserIds))
+      .groupBy(schema.post.authorId)
       .as("latest_posts");
 
     return await this.db
       .select({
         postId: schema.post.id,
-        authorId: schema.post.author,
+        authorId: schema.post.authorId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipient,
+        recipientId: schema.post.recipientId,
         recipientUsername: recipientProfile.username,
         recipientProfileId: recipientProfile.id,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -171,9 +173,9 @@ export class PostRepository {
       .from(latestPosts)
       .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
-      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(
         cursor
@@ -193,7 +195,7 @@ export class PostRepository {
   @handleDatabaseErrors
   async paginatePostsOfUser(
     userId: string,
-    cursor: { createdAt: Date; postId: number } | null = null,
+    cursor: { createdAt: Date; postId: string } | null = null,
     pageSize = 10,
   ) {
     const author = aliasedTable(schema.user, "author");
@@ -204,11 +206,11 @@ export class PostRepository {
     return await this.db
       .select({
         postId: schema.post.id,
-        authorId: schema.post.author,
+        authorId: schema.post.authorId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipient,
+        recipientId: schema.post.recipientId,
         recipientProfileId: recipientProfile.id,
         recipientUsername: recipientProfile.username,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -223,13 +225,13 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
-      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
-      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(
         and(
-          eq(schema.post.recipient, userId),
+          eq(schema.post.recipientId, userId),
           cursor
             ? or(
                 lt(schema.post.createdAt, cursor.createdAt),
@@ -248,7 +250,7 @@ export class PostRepository {
   @handleDatabaseErrors
   async paginatePostsByUser(
     userId: string,
-    cursor: { createdAt: Date; postId: number } | null = null,
+    cursor: { createdAt: Date; postId: string } | null = null,
     pageSize = 10,
   ) {
     const author = aliasedTable(schema.user, "author");
@@ -259,11 +261,11 @@ export class PostRepository {
     return await this.db
       .select({
         postId: schema.post.id,
-        authorId: schema.post.author,
+        authorId: schema.post.authorId,
         authorUsername: authorProfile.username,
         authorProfileId: authorProfile.id,
         authorProfilePicture: authorProfile.profilePictureKey,
-        recipientId: schema.post.recipient,
+        recipientId: schema.post.recipientId,
         recipientUsername: recipientProfile.username,
         recipientProfileId: recipientProfile.id,
         recipientProfilePicture: recipientProfile.profilePictureKey,
@@ -278,13 +280,13 @@ export class PostRepository {
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))
-      .innerJoin(author, eq(schema.post.author, author.id))
+      .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
-      .innerJoin(recipient, eq(schema.post.recipient, recipient.id))
+      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(
         and(
-          eq(schema.post.author, userId),
+          eq(schema.post.authorId, userId),
           cursor
             ? or(
                 gt(schema.post.createdAt, cursor.createdAt),
@@ -304,20 +306,20 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async updatePost(postId: number, newCaption: string) {
+  async updatePost({ postId, caption }: { postId: string; caption: string }) {
     await this.db
       .update(schema.post)
-      .set({ caption: newCaption })
+      .set({ caption })
       .where(eq(schema.post.id, postId));
   }
 
   @handleDatabaseErrors
-  async createPostStats(postId: number) {
+  async createPostStats(postId: string) {
     return await this.db.insert(schema.postStats).values({ postId });
   }
 
   @handleDatabaseErrors
-  async deletePost(postId: number) {
+  async deletePost(postId: string) {
     await this.db.delete(schema.post).where(eq(schema.post.id, postId));
   }
 
@@ -328,7 +330,7 @@ export class PostRepository {
         count: sql<number>`count(*)`.as("count"),
       })
       .from(schema.postOfUserNotOnApp)
-      .where(eq(schema.post.author, userId))
+      .where(eq(schema.post.authorId, userId))
       .limit(1);
   }
 }

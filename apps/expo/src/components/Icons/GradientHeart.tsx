@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import Animated, {
   ReduceMotion,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSpring,
   withTiming,
-  type SharedValue,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 

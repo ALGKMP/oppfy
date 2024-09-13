@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { H5, H6, Text, View, YStack } from "tamagui";
+import { H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -68,6 +68,7 @@ const Search = () => {
         estimatedItemSize={75}
         showsVerticalScrollIndicator={false}
         onScrollBeginDrag={Keyboard.dismiss}
+        keyExtractor={(item) => "search_results_" + item.userId}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={<H5 theme="alt1">Search Results</H5>}
         renderItem={({ item }) => (
@@ -78,7 +79,7 @@ const Search = () => {
             imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
             onPress={() => {
               router.navigate({
-                pathname: "/(search)/profile/[userId]/",
+                pathname: "/(search)/profile/[userId]",
                 params: { userId: item.userId, username: item.username },
               });
             }}
@@ -91,9 +92,9 @@ const Search = () => {
   const renderRecommendations = (recommendationsData: RecommendationsData) => (
     <RecommendationList
       handleProfileClicked={(userId, username) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         router.push({
-          pathname: "/(search)/profile/[userId]/",
+          pathname: "/(search)/profile/[userId]",
           params: { userId, username },
         });
       }}
@@ -129,6 +130,9 @@ const Search = () => {
           )}
         </View>
       </YStack>
+      <View>
+
+      </View>
     </BaseScreenView>
   );
 };

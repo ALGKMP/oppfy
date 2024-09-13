@@ -73,22 +73,18 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
   const key = body.data.playback_ids[0].id;
   const metadata = body.data.passthrough;
 
-  const data = {
-    key,
-    mediaType: "video" as const,
-    author: metadata.author,
-    height: parseInt(metadata.height),
-    width: parseInt(metadata.width),
-    caption: metadata.caption,
-  };
-
   if (metadata.type === "onApp") {
     const { insertId: postId } = await db.transaction(async (tx) => {
       const [post] = await tx
         .insert(schema.post)
         .values({
-          ...data,
-          recipient: metadata.recipient,
+          key,
+          mediaType: "video" as const,
+          authorId: metadata.author,
+          height: parseInt(metadata.height),
+          width: parseInt(metadata.width),
+          caption: metadata.caption,
+          recipientId: metadata.recipient,
         })
         .returning({ insertId: schema.post.id });
 
@@ -122,7 +118,12 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
     });
   } else {
     await db.insert(schema.postOfUserNotOnApp).values({
-      ...data,
+      key,
+      mediaType: "video" as const,
+      authorId: metadata.author,
+      height: parseInt(metadata.height),
+      width: parseInt(metadata.width),
+      caption: metadata.caption,
       phoneNumber: metadata.number,
     });
   }

@@ -2,25 +2,19 @@ import { useEffect } from "react";
 import { Spacer, Text, View, YStack } from "tamagui";
 import type { z } from "zod";
 
-import type { trpcValidators } from "@oppfy/validators";
+import type { sharedValidators } from "@oppfy/validators";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import ProfileHeaderDetailsOther from "./components/ProfileHeaderDetailsOther";
 import ProfileHeaderDetailsSelf from "./components/ProfileHeaderDetailsSelf";
 
 // Define types at the top of the file
-type FullProfileOther = z.infer<
-  typeof trpcValidators.output.profile.fullProfileOther
->;
-type FullProfileSelf = z.infer<
-  typeof trpcValidators.output.profile.fullProfileSelf
->;
-type FriendItems = z.infer<typeof trpcValidators.output.friend.friendItems>;
-type FriendItemsOther = z.infer<
-  typeof trpcValidators.output.friend.friendItemsOther
->;
+type FullProfileOther = z.infer<typeof sharedValidators.user.fullProfileOther>;
+type FullProfileSelf = z.infer<typeof sharedValidators.user.fullProfileSelf>;
+type FriendItems = z.infer<typeof sharedValidators.user.friendItems>;
+type FriendItemsOther = z.infer<typeof sharedValidators.user.friendItemsOther>;
 type RecommendedProfiles = z.infer<
-  typeof trpcValidators.output.recommendations.recommededProfiles
+  typeof sharedValidators.user.recommededProfiles
 >;
 
 interface ProfileHeaderProps {

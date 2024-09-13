@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import * as Haptics from "expo-haptics";
 import { useRouter, useSegments } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -9,7 +8,6 @@ import { SizableText, Text, View, YStack } from "tamagui";
 import ProfileHeader from "~/components/Hero/Profile/ProfileHeader";
 import PostItem from "~/components/Media/PostItem";
 import type { RouterOutputs } from "~/utils/api";
-import { api } from "~/utils/api";
 
 type ProfileDataSelf = RouterOutputs["profile"]["getFullProfileSelf"];
 type profileDataOther = RouterOutputs["profile"]["getFullProfileOther"];
@@ -85,7 +83,7 @@ const MediaOfYou = ({
   const segments = useSegments();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<number[]>([]);
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
   const [isRestricted, setIsRestricted] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false); // Blocked by the profile being viewed
   const [hasBlocked, setHasBlocked] = useState(false); // Current user blocked the profile being viewed
@@ -133,7 +131,7 @@ const MediaOfYou = ({
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
         .map((token) => token.item?.postId)
-        .filter((id): id is number => id !== undefined);
+        .filter((id): id is string => id !== undefined);
 
       setViewableItems(visibleItemIds);
     },
@@ -180,6 +178,7 @@ const MediaOfYou = ({
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
+        keyExtractor={(item) => "media_of_you_" + item.postId}
         onEndReached={handleOnEndReached}
         estimatedItemSize={600}
         onViewableItemsChanged={onViewableItemsChanged}

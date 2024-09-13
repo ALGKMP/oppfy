@@ -1,8 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { trpcValidators } from "@oppfy/validators";
-
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -11,7 +9,12 @@ import {
 
 export const userRouter = createTRPCRouter({
   createUser: publicProcedure
-    .input(trpcValidators.input.user.createUser)
+    .input(
+      z.object({
+        userId: z.string(),
+        phoneNumber: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         await ctx.services.user.createUser(input.userId, input.phoneNumber);
@@ -85,7 +88,11 @@ export const userRouter = createTRPCRouter({
   }),
 
   updatePrivacySetting: protectedProcedure
-    .input(trpcValidators.input.user.updatePrivacySetting)
+    .input(
+      z.object({
+        privacy: z.enum(["public", "private"]),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.privacy.updatePrivacySettings(

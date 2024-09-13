@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -9,14 +9,13 @@ import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
-  Avatar,
   Button,
   Circle,
+  getToken,
   H1,
-  H3,
   H5,
-  H6,
   SizableText,
+  Spacer,
   styled,
   Text,
   View,
@@ -26,9 +25,12 @@ import {
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import CardContainer from "~/components/Containers/CardContainer";
-import { VirtualizedListItem } from "~/components/ListItems";
+import OtherPost from "~/components/NewPostTesting/OtherPost";
+import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
+import type { Profile, RecommendationProfile } from "~/hooks/useProfile";
+import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
@@ -36,18 +38,20 @@ import PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
-type Profile = RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
+// type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
+type PostItem = RouterOutputs["post"]["paginatePostsOfRecommended"]["items"][0];
 
 interface TokenItem {
-  postId?: number | undefined;
+  postId?: string | undefined;
 }
 
 const HomeScreen = () => {
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<number[]>([]);
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
+
+  const { profile, isLoading: isLoadingProfile } = useProfile();
 
   const {
     data: postData,
@@ -56,7 +60,7 @@ const HomeScreen = () => {
     fetchNextPage,
     hasNextPage,
     refetch: refetchPosts,
-  } = api.post.paginatePostsForFeed.useInfiniteQuery(
+  } = api.post.paginatePostsOfRecommended.useInfiniteQuery(
     {
       pageSize: 10,
     },
@@ -76,6 +80,11 @@ const HomeScreen = () => {
     [postData],
   );
 
+  useEffect(() => {
+    console.log("postItems", postItems.length);
+    console.log("recommendationsData", recommendationsData?.length);
+  }, [postItems, recommendationsData]);
+
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
@@ -94,22 +103,53 @@ const HomeScreen = () => {
         .filter((token) => token.isViewable)
         .map((token) => (token.item as TokenItem).postId)
         .filter((id) => id !== undefined);
-      setViewableItems(visibleItemIds);
+      setViewableItems(visibleItemIds as string[]);
     },
     [],
   );
 
   const renderPost = useCallback(
-    (item: PostItem) => {
-      if (item === undefined) return null;
-
+    (item: PostItem, profile: Profile) => {
       return (
         <View paddingTop="$4">
-          <PostItem
-            post={item}
-            isSelfPost={false}
-            isViewable={viewableItems.includes(item.postId)}
-          />
+          <YStack gap="$4">
+            <PostItem
+              post={item}
+              isSelfPost={false}
+              isViewable={viewableItems.includes(item.postId)}
+            />
+            <OtherPost
+              id={item.postId}
+              createdAt={item.createdAt}
+              caption={item.caption}
+              self={{
+                id: profile.userId,
+                username: profile.username,
+                profilePicture: profile.profilePictureUrl,
+              }}
+              author={{
+                id: item.authorId,
+                username: item.authorUsername ?? "",
+              }}
+              recipient={{
+                id: item.recipientId,
+                username: item.recipientUsername ?? "",
+                profilePicture: item.recipientProfilePicture,
+              }}
+              media={{
+                type: item.mediaType,
+                url: item.imageUrl,
+                dimensions: {
+                  width: item.width,
+                  height: item.height,
+                },
+              }}
+              stats={{
+                likes: item.likesCount,
+                comments: item.commentsCount,
+              }}
+            />
+          </YStack>
         </View>
       );
     },
@@ -117,10 +157,10 @@ const HomeScreen = () => {
   );
 
   const renderSuggestions = useMemo(() => {
-    const handleProfilePress = (profile: Profile) => {
+    const handleProfilePress = (profile: RecommendationProfile) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.navigate({
-        pathname: "/profile/[userId]/",
+        pathname: "/profile/[userId]",
         params: {
           userId: profile.userId,
           username: profile.username,
@@ -135,7 +175,7 @@ const HomeScreen = () => {
       });
     };
 
-    if (recommendationsData?.length === 0 || recommendationsData === undefined)
+    if (recommendationsData === undefined || recommendationsData.length === 0)
       return null;
 
     return (
@@ -167,35 +207,29 @@ const HomeScreen = () => {
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
-  if (isLoadingRecommendationsData || isLoadingPostData) {
+  if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
     return (
-      <BaseScreenView paddingHorizontal={0} paddingBottom={0} scrollable>
-        <YStack gap="$4">
-          {PLACEHOLDER_DATA.map(() => (
-            <CardContainer padding={0}>
-              <YStack>
-                <XStack padding="$2" gap="$2">
-                  <Skeleton circular size={46} />
-                  <YStack justifyContent="center" gap>
-                    <Skeleton width={60} height={16} />
-                    <Skeleton width={120} height={16} />
-                  </YStack>
-                </XStack>
-
-                <Skeleton
-                  radius={16}
-                  width={"100%"}
-                  height={screenWidth * 1.5}
-                />
-              </YStack>
-            </CardContainer>
-          ))}
-        </YStack>
+      <BaseScreenView padding={0} paddingBottom={0}>
+        <FlashList
+          data={PLACEHOLDER_DATA}
+          renderItem={() => <PostCard loading />}
+          ListHeaderComponent={() => (
+            <YStack gap="$4">
+              <PeopleCarousel loading />
+            </YStack>
+          )}
+          estimatedItemSize={screenWidth}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListHeaderComponentStyle={{
+            marginBottom: getToken("$4", "space") as number,
+          }}
+        />
       </BaseScreenView>
     );
   }
 
-  if (recommendationsData?.length === 0 && postItems.length === 0) {
+  if (profile === undefined || postItems.length === 0) {
     return (
       <BaseScreenView>
         <EmptyHomeScreen />
@@ -205,19 +239,23 @@ const HomeScreen = () => {
 
   return (
     // ! dont remove the paddingBottom 0, it actually does something
-    <BaseScreenView padding={0} paddingBottom={0}>
+    <BaseScreenView
+      padding={0}
+      paddingBottom={0}
+      scrollEnabled={postItems.length == 0}
+    >
       <FlashList
-        nestedScrollEnabled={true}
         data={postItems}
         refreshing={refreshing}
-        showsVerticalScrollIndicator={false}
         onRefresh={onRefresh}
-        numColumns={1}
         onEndReached={handleOnEndReached}
-        keyExtractor={(item) => "home_" + item?.postId.toString()}
-        renderItem={({ item }) => renderPost(item)}
+        nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        numColumns={1}
+        keyExtractor={(item) => "home_" + item.postId}
+        renderItem={({ item }) => renderPost(item, profile)}
         ListHeaderComponent={renderSuggestions}
-        ListFooterComponent={ListFooter}
+        ListFooterComponent={Footer}
         estimatedItemSize={screenWidth}
         extraData={viewableItems}
         onViewableItemsChanged={onViewableItemsChanged}
@@ -227,7 +265,7 @@ const HomeScreen = () => {
   );
 };
 
-const ListFooter = () => {
+const Footer = () => {
   return (
     <YStack
       paddingVertical="$8"
@@ -285,7 +323,7 @@ const ListFooter = () => {
           backgroundColor: "#F214FF",
         }}
         onPress={async () => {
-          // expo share open app store
+          // TODO: share appstore link
           await Sharing.shareAsync("https://google.com", {
             dialogTitle: "Share to...",
           });
@@ -317,7 +355,7 @@ const EmptyHomeScreen = () => {
           happens!
         </SizableText>
       </YStack>
-      <ListFooter />
+      <Footer />
     </YStack>
   );
 };

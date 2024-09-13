@@ -1,10 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Button, H5, H6, Input, SizableText, View, YStack } from "tamagui";
+import { Button, H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -19,6 +21,7 @@ type BlockedUserItem =
 
 const BlockedUsers = () => {
   const utils = api.useUtils();
+  const [refreshing, setRefreshing] = useState(false);
 
   const unblockUser = api.block.unblockUser.useMutation({
     onMutate: async (newData) => {
@@ -36,9 +39,7 @@ const BlockedUsers = () => {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter(
-              (item) => item.userId !== newData.blockedUserId,
-            ),
+            items: page.items.filter((item) => item.userId !== newData.userId),
           })),
         },
       );
@@ -86,10 +87,16 @@ const BlockedUsers = () => {
     }
   };
 
-  const handleUnblock = async (blockedUserId: string) => {
+  const handleUnblock = async (userId: string) => {
     await unblockUser.mutateAsync({
-      blockedUserId,
+      userId,
     });
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
   };
 
   const renderLoadingSkeletons = () => (
@@ -170,22 +177,44 @@ const BlockedUsers = () => {
   }
 
   if (blockedUsersItems.length === 0) {
-    return <BaseScreenView>{renderNoResults()}</BaseScreenView>;
+    return (
+      <BaseScreenView
+        scrollable
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        {renderNoResults()}
+      </BaseScreenView>
+    );
   }
 
   return (
-    <BaseScreenView scrollable>
+    <BaseScreenView
+      scrollable
+      keyboardDismissMode="interactive"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
       <YStack gap="$4">
-        <Input
+        <SearchInput
           placeholder="Search blocked users..."
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
         />
 
         {filteredItems.length > 0 ? (
           renderBlockedUsers()
         ) : (
-          <H5 theme="alt1">No Users Found</H5>
+          <H6 theme="alt1" lineHeight={0}>
+            No Users Found
+          </H6>
         )}
       </YStack>
     </BaseScreenView>

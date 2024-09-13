@@ -1,12 +1,17 @@
 import { TRPCError } from "@trpc/server";
 
-import { trpcValidators } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc"; // Import TRPC utilities
+import { z } from "zod";
 
 export const searchRouter = createTRPCRouter({
   profilesByUsername: protectedProcedure
-    .input(trpcValidators.input.search.profilesByUsername)
+    .input(
+      z.object({
+        username: sharedValidators.user.username,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       try {
         return ctx.services.search.profilesByUsername(

@@ -118,7 +118,7 @@ const useFollowHandlers = ({
   });
 
   const cancelFollowRequestMutation =
-    api.request.cancelFollowRequest.useMutation({
+    api.follow.cancelFollowRequest.useMutation({
       onMutate: async (newData) => {
         const query = getQueryByKey(queryToOptimisticallyUpdate);
 

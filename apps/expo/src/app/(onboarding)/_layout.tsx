@@ -44,9 +44,9 @@ const OnboardingLayout = () => {
 
       <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
 
-      <Stack.Screen name="auth/phone-number" options={{ animation: "fade" }} />
+      <Stack.Screen name="firebaseauth/link" options={{ animation: "fade" }} />
       <Stack.Screen
-        name="auth/phone-number-otp"
+        name="firebaseauth/phone-number-otp"
         options={{ animation: "fade" }}
       />
 
@@ -73,6 +73,27 @@ const OnboardingLayout = () => {
         options={{ animation: "fade" }}
       />
     </Stack>
+  );
+};
+
+const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
+  const { signOut } = useSession();
+
+  const onSubmit = async () => {
+    await signOut();
+  };
+
+  return (
+    <AlertDialog
+      title="Exit Onboarding"
+      subtitle="Are you sure you want to quit? You'll lose any changes you've made."
+      trigger={
+        <TouchableOpacity hitSlop={10}>
+          <X />
+        </TouchableOpacity>
+      }
+      onAccept={onSubmit}
+    />
   );
 };
 
@@ -149,26 +170,5 @@ const Header = ({ navigation, options }: HeaderProps) => (
     }
   />
 );
-
-const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
-  const { signOut } = useSession();
-
-  const onSubmit = async () => {
-    await signOut();
-  };
-
-  return (
-    <AlertDialog
-      title="Exit Onboarding"
-      subtitle="Are you sure you want to quit? You'll lose any changes you've made."
-      trigger={
-        <TouchableOpacity hitSlop={10}>
-          <X />
-        </TouchableOpacity>
-      }
-      onAccept={onSubmit}
-    />
-  );
-};
 
 export default OnboardingLayout;

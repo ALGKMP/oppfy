@@ -325,7 +325,7 @@ const Profile = (props: ProfileProps) => {
     },
   });
 
-  const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     onMutate: async (_newData) => {
       if (props.loading) return;
 

@@ -1,9 +1,9 @@
-import { FriendState } from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { FollowRepository } from "../../repositories";
 import { FriendRepository } from "../../repositories/network/friend";
-import { ProfileRepository } from "../../repositories/profile/profile";
+import { ProfileRepository } from "../../repositories/user/profile";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
@@ -244,10 +244,7 @@ export class FriendService {
   }
 
   async getFriendRequest(userId: string, targetUserId: string) {
-    return await this.friendRepository.getFriendRequest(
-      userId,
-      targetUserId,
-    );
+    return await this.friendRepository.getFriendRequest(userId, targetUserId);
   }
 
   async removeFriend(targetUserId: string, otherUserId: string) {
@@ -273,16 +270,13 @@ export class FriendService {
   public async determineFriendState(userId: string, targetUserId: string) {
     const friendshipExists = await this.friendshipExists(userId, targetUserId);
     const friendRequest = await this.getFriendRequest(userId, targetUserId);
-    const incomingRequest = await this.getFriendRequest(targetUserId, userId);
 
     if (friendshipExists) {
-      return FriendState.Enum.Friends;
+      return sharedValidators.user.FriendState.Enum.Friends;
     } else if (friendRequest) {
-      return FriendState.Enum.OutboundRequest;
-    } else if (incomingRequest) {
-      return FriendState.Enum.IncomingRequest;
+      return sharedValidators.user.FriendState.Enum.OutboundRequest;
     } else {
-      return FriendState.Enum.NotFriends;
+      return sharedValidators.user.FriendState.Enum.NotFriends;
     }
   }
 

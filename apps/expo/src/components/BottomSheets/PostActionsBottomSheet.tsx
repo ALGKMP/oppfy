@@ -15,7 +15,7 @@ import useSaveVideo from "~/hooks/useSaveMedia";
 import BottomSheetWrapper from "./BottomSheetWrapper";
 
 interface PostActionBottomSheetProps {
-  postId: number;
+  postId: string;
   isSelfPost: boolean;
   url: string;
   mediaType: "image" | "video";

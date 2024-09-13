@@ -1,6 +1,5 @@
 import type {
   ExpoPushMessage,
-  ExpoPushMessage,
   ExpoPushTicket,
 } from "expo-server-sdk";
 import { Expo } from "expo-server-sdk";

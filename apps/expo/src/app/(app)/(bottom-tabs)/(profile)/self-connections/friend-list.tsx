@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, H5, H6, Input, SizableText, View, YStack } from "tamagui";
+import { Button, H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -158,6 +158,7 @@ const FriendList = () => {
         data={filteredItems}
         onRefresh={refetch}
         refreshing={isLoading}
+        keyExtractor={(item) => "friend_list_" + item.userId}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}

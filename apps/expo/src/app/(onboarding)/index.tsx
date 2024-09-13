@@ -104,7 +104,7 @@ const Start = () => {
   const buttonTranslateY = useSharedValue(50);
 
   const onSubmit = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     requiredPermissions
       ? router.push("/firebaseauth/link")
       : router.push("/misc/permissions");

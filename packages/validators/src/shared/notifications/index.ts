@@ -53,3 +53,12 @@ export const snsNotificationData = z.union([
   entitySnsNotificationData,
   baseSnsNotificationData,
 ]);
+
+export const updateNotificationSettings = z.object({
+  posts: z.boolean().optional(),
+  likes: z.boolean().optional(),
+  mentions: z.boolean().optional(),
+  comments: z.boolean().optional(),
+  followRequests: z.boolean().optional(),
+  friendRequests: z.boolean().optional(),
+});

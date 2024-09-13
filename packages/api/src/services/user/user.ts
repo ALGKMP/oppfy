@@ -39,7 +39,7 @@ export class UserService {
     return user;
   }
 
-  async getUserByProfileId(profileId: number) {
+  async getUserByProfileId(profileId: string) {
     const user = await this.userRepository.getUserByProfileId(profileId);
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");

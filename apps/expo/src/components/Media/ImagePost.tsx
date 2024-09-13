@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { PersonStanding } from "@tamagui/lucide-icons";
 
 interface ImagePostProps {
-  postId: number;
+  postId: string;
   imageUrl: string;
   children: React.ReactNode;
 }
@@ -12,14 +12,6 @@ interface ImagePostProps {
 const ImagePost: React.FC<ImagePostProps> = (props: ImagePostProps) => {
   const { postId, imageUrl, children } = props;
   const postKey = postId.toString();
-
-  useEffect(() => {
-    const fn = async () => {
-      const res = await fetch(imageUrl);
-    };
-
-    void fn();
-  }, [imageUrl]);
 
   return (
     <Image

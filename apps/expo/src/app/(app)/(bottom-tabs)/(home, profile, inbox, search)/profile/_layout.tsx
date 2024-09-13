@@ -11,7 +11,6 @@ import { Header as BaseHeader } from "~/components/Headers";
 
 const ProfileLayout = () => {
   const theme = useTheme();
-  const router = useRouter();
 
   return (
     <Stack
@@ -28,7 +27,7 @@ const ProfileLayout = () => {
         }}
       />
       <Stack.Screen
-        name="connections/[user-id]"
+        name="connections/[userId]"
         options={{
           header: (props) => <Header {...props} />,
           headerLeft: (props) => <HeaderLeft {...props} />,

@@ -1,5 +1,7 @@
+import type { ReactElement, ReactNode } from "react";
 import React, { useCallback, useEffect, useState } from "react";
-import { ImageSourcePropType, Modal, StyleSheet } from "react-native";
+import type { ImageSourcePropType } from "react-native";
+import { Modal, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -16,7 +18,6 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
 import {
-  getToken,
   Paragraph,
   Separator,
   SizableText,
@@ -31,17 +32,20 @@ export interface ButtonOption {
   text: string;
   textProps?: SizableTextProps;
   onPress?: () => void;
+  disabled?: boolean;
+  icon?: ReactNode;
+  autoClose?: boolean;
 }
 
 export interface ActionSheetProps {
   imageUrl?: string | ImageSourcePropType;
-  title: string;
+  title?: string;
   titleProps?: SizableTextProps;
   subtitle?: string;
   subtitleProps?: ParagraphProps;
   buttonOptions: ButtonOption[];
+  trigger?: ReactElement;
   isVisible?: boolean;
-  trigger?: React.ReactElement;
   onCancel?: () => void;
 }
 
@@ -53,23 +57,26 @@ const ActionSheet = ({
   subtitleProps,
   buttonOptions,
   trigger,
-  isVisible,
+  isVisible: controlledIsVisible,
   onCancel,
 }: ActionSheetProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [showModal, setShowModal] = useState(false);
+
   const animation = useSharedValue(0);
+  const [internalIsVisible, setInternalIsVisible] = useState(false);
+
+  const isVisible = controlledIsVisible ?? internalIsVisible;
 
   const openModal = useCallback(() => {
-    setShowModal(true);
+    setInternalIsVisible(true);
     animation.value = withSpring(1, { damping: 15, stiffness: 200 });
   }, [animation]);
 
   const closeModal = useCallback(() => {
     animation.value = withTiming(0, { duration: 250 }, (finished) => {
       if (finished) {
-        runOnJS(setShowModal)(false);
+        runOnJS(setInternalIsVisible)(false);
         onCancel && runOnJS(onCancel)();
       }
     });
@@ -115,7 +122,7 @@ const ActionSheet = ({
       {TriggerElement}
       <Modal
         transparent={true}
-        visible={showModal}
+        visible={isVisible}
         onRequestClose={closeModal}
         statusBarTranslucent
       >
@@ -128,52 +135,81 @@ const ActionSheet = ({
             style={containerStyle}
             gap="$2"
           >
-            <YStack borderRadius="$6" overflow="hidden">
-              <YStack
-                backgroundColor="$background"
-                padding="$4"
-                alignItems="center"
-                gap="$2"
-              >
-                {imageUrl && (
-                  <Image
-                    source={imageUrl}
-                    style={{ width: 100, height: 100, borderRadius: 50 }}
-                  />
-                )}
-                <SizableText
-                  size="$6"
-                  fontWeight="bold"
-                  textAlign="center"
-                  {...titleProps}
-                >
-                  {title}
-                </SizableText>
-                {subtitle && (
-                  <Paragraph textAlign="center" theme="alt2" {...subtitleProps}>
-                    {subtitle}
-                  </Paragraph>
-                )}
-              </YStack>
+            <YStack
+              borderRadius="$6"
+              backgroundColor="$gray2"
+              overflow="hidden"
+            >
+              {(imageUrl ?? title ?? subtitle) && (
+                <>
+                  <YStack
+                    backgroundColor="$background"
+                    padding="$4"
+                    alignItems="center"
+                    gap="$2"
+                  >
+                    {imageUrl && (
+                      <Image
+                        source={imageUrl}
+                        style={{ width: 100, height: 100, borderRadius: 50 }}
+                      />
+                    )}
+                    {title && (
+                      <SizableText
+                        size="$6"
+                        fontWeight="bold"
+                        textAlign="center"
+                        {...titleProps}
+                      >
+                        {title}
+                      </SizableText>
+                    )}
+                    {subtitle && (
+                      <Paragraph
+                        textAlign="center"
+                        theme="alt2"
+                        {...subtitleProps}
+                      >
+                        {subtitle}
+                      </Paragraph>
+                    )}
+                  </YStack>
+                  <Separator />
+                </>
+              )}
               {buttonOptions.map((option, index) => (
                 <React.Fragment key={index}>
-                  <Separator />
+                  {index > 0 && <Separator />}
                   <TouchableOpacity
                     onPress={() => {
-                      option.onPress?.();
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      closeModal();
+                      if (!option.disabled) {
+                        option.onPress?.();
+                        void Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Light,
+                        );
+                        if (option.autoClose !== false) {
+                          // Check autoClose prop
+                          closeModal();
+                        }
+                      }
                     }}
                     style={[
                       styles.optionButton,
                       {
                         backgroundColor: theme.gray1.val,
+                        opacity: option.disabled ? 0.5 : 1,
                       },
                     ]}
+                    disabled={option.disabled}
                   >
-                    <SizableText size="$5" {...option.textProps}>
-                      {option.text}
-                    </SizableText>
+                    <View style={styles.buttonContent}>
+                      {option.icon && (
+                        <View style={styles.iconContainer}>{option.icon}</View>
+                      )}
+                      <SizableText size="$5" {...option.textProps}>
+                        {option.text}
+                      </SizableText>
+                    </View>
                   </TouchableOpacity>
                 </React.Fragment>
               ))}
@@ -217,6 +253,17 @@ const styles = StyleSheet.create({
   cancelButton: {
     padding: 16,
     alignItems: "center",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconContainer: {
+    marginRight: 8,
+  },
+  loadingIndicator: {
+    marginLeft: 8,
   },
 });
 

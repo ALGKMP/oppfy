@@ -33,7 +33,7 @@ const Username = () => {
   );
 
   const onSubmit = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
       await updateProfile.mutateAsync({

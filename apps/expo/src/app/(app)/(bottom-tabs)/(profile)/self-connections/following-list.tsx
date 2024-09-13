@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { H5, H6, Input, SizableText, View, YStack } from "tamagui";
+import { H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -102,7 +102,7 @@ const FollowingList = () => {
     },
   });
 
-  const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.follow.paginateFollowingSelf.cancel();
@@ -246,6 +246,7 @@ const FollowingList = () => {
         data={filteredItems}
         onRefresh={refetch}
         refreshing={isLoading}
+        keyExtractor={(item) => "following_list_" + item.userId}
         estimatedItemSize={75}
         onEndReached={handleOnEndReached}
         showsVerticalScrollIndicator={false}

@@ -22,12 +22,12 @@ export interface PaginatedResponse<T> {
 
 interface PostCursor {
   createdAt: Date;
-  postId: number;
+  postId: string;
 }
 
 interface FollowingPostCursor {
   createdAt: Date;
-  followerId: number;
+  followerId: string;
 }
 
 /* interface FeedCursor {
@@ -43,7 +43,7 @@ interface FeedCursor {
 
 interface CommentCursor {
   createdAt: Date;
-  commentId: number;
+  commentId: string;
 }
 
 type CommentProfile = z.infer<typeof sharedValidators.media.comment>;
@@ -236,42 +236,6 @@ export class PostService {
     return parsedFollowingResult;
   }
 
-  /*   async paginatePostsForFeed(
-    userId: string,
-    cursor: PostCursor | null = null,
-    pageSize?: number,
-  ) {
-    console.log("TRPC getPosts input: ", input);
-    const result = await ctx.services.post.paginatePostsOfFollowing(
-      ctx.session.uid,
-      input.cursor?.followingCursor,
-      input.pageSize,
-    );
-
-    const parsedFollowingResult =
-      trpcValidators.output.post.paginatedFeedPosts.parse(result);
-
-    if (parsedFollowingResult.items.length < input.pageSize!) {
-      const result = await ctx.services.post.paginatePostsOfRecommended(
-        ctx.session.uid,
-        input.cursor?.recomendedCursor,
-        input.pageSize! - parsedFollowingResult.items.length,
-      );
-
-      const parsedRecommendedResult =
-        trpcValidators.output.post.paginatedFeedPosts.parse(result);
-
-      parsedRecommendedResult.items = [
-        ...parsedFollowingResult.items,
-        ...parsedRecommendedResult.items,
-      ];
-
-      return parsedRecommendedResult;
-    }
-
-    return parsedFollowingResult;
-  } */
-
   async paginatePostsByUserSelf(
     userId: string,
     cursor: PostCursor | null = null,
@@ -294,7 +258,7 @@ export class PostService {
   }
 
   async paginatePostsByUserOther(
-    profileId: number,
+    profileId: string,
     cursor: PostCursor | null = null,
     pageSize?: number,
   ): Promise<PaginatedResponse<Post>> {
@@ -318,7 +282,7 @@ export class PostService {
     }
   }
 
-  async getPost(postId: number): Promise<Post> {
+  async getPost(postId: string): Promise<Post> {
     try {
       const post = await this.postRepository.getPost(postId);
       if (!post[0]) {
@@ -338,9 +302,9 @@ export class PostService {
     }
   }
 
-  async editPost(postId: number, newCaption: string) {
+  async editPost({ postId, caption }: { postId: string; caption: string }) {
     try {
-      await this.postRepository.updatePost(postId, newCaption);
+      await this.postRepository.updatePost({ postId, caption });
     } catch (error) {
       console.error(`Error in editPost for postId: ${postId}: `, error);
       throw new DomainError(
@@ -350,7 +314,7 @@ export class PostService {
     }
   }
 
-  async deletePost(postId: number) {
+  async deletePost(postId: string) {
     try {
       await this.postRepository.deletePost(postId);
     } catch (error) {
@@ -362,9 +326,9 @@ export class PostService {
     }
   }
 
-  async likePost(userId: string, postId: number) {
+  async likePost({ userId, postId }: { userId: string; postId: string }) {
     try {
-      const like = await this.likeRepository.findLike(postId, userId);
+      const like = await this.likeRepository.findLike({ postId, userId });
       if (like) {
         throw new DomainError(
           ErrorCode.FAILED_TO_LIKE_POST,
@@ -422,16 +386,16 @@ export class PostService {
     }
   }
 
-  async unlikePost(userId: string, postId: number) {
+  async unlikePost({ userId, postId }: { userId: string; postId: string }) {
     try {
-      const like = await this.likeRepository.findLike(postId, userId);
+      const like = await this.likeRepository.findLike({ postId, userId });
       if (!like) {
         throw new DomainError(
           ErrorCode.FAILED_TO_UNLIKE_POST,
           "Tried to unlike a post that was not liked.",
         );
       }
-      await this.likeRepository.removeLike(postId, userId);
+      await this.likeRepository.removeLike({ postId, userId });
       await this.postStatsRepository.decrementLikesCount(postId);
     } catch (error) {
       console.error(
@@ -445,9 +409,9 @@ export class PostService {
     }
   }
 
-  async getLike(userId: string, postId: number) {
+  async getLike({ userId, postId }: { userId: string; postId: string }) {
     try {
-      return await this.likeRepository.findLike(postId, userId);
+      return await this.likeRepository.findLike({ postId, userId });
     } catch (error) {
       console.error(
         `Error in hasLiked for userId: ${userId}, postId: ${postId}: `,
@@ -460,8 +424,16 @@ export class PostService {
     }
   }
 
-  async commentOnPost(userId: string, postId: number, commentBody: string) {
-    await this.commentRepository.addComment(postId, userId, commentBody);
+  async commentOnPost({
+    userId,
+    postId,
+    body,
+  }: {
+    userId: string;
+    postId: string;
+    body: string;
+  }) {
+    await this.commentRepository.addComment({ postId, userId, body });
     await this.postStatsRepository.incrementCommentsCount(postId);
 
     const post = await this.getPost(postId);
@@ -503,13 +475,19 @@ export class PostService {
     }
   }
 
-  async deleteComment(commentId: number, postId: number) {
+  async deleteComment({
+    commentId,
+    postId,
+  }: {
+    commentId: string;
+    postId: string;
+  }) {
     await this.commentRepository.removeComment(commentId);
     await this.postStatsRepository.decrementCommentsCount(postId);
   }
 
   async paginateComments(
-    postId: number,
+    postId: string,
     cursor: CommentCursor | null = null,
     pageSize: number,
   ): Promise<PaginatedResponse<CommentProfile>> {
@@ -533,7 +511,7 @@ export class PostService {
     }
   }
 
-  async viewPost({ userId, postId }: { userId: string; postId: number }) {
+  async viewPost({ userId, postId }: { userId: string; postId: string }) {
     try {
       await this.viewRepository.viewPost({ userId, postId });
     } catch (error) {
@@ -553,7 +531,7 @@ export class PostService {
     postIds,
   }: {
     userId: string;
-    postIds: number[];
+    postIds: string[];
   }) {
     try {
       await this.viewRepository.viewMultiplePosts({ userId, postIds });
@@ -572,20 +550,19 @@ export class PostService {
   private _processPostData(data: Post): Post {
     try {
       // Update author profile picture URL
-      const authorPresignedUrl =
-        this.cloudFrontService.getSignedUrlForProfilePicture(
-          data.authorProfilePicture,
-        );
+      if (data.authorProfilePicture !== null) {
+        data.authorProfilePicture =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            data.authorProfilePicture,
+          );
+      }
 
-      data.authorProfilePicture = authorPresignedUrl;
-
-      // Update recipient profile picture URL
-      const recipientPresignedUrl =
-        this.cloudFrontService.getSignedUrlForProfilePicture(
-          data.recipientProfilePicture,
-        );
-
-      data.recipientProfilePicture = recipientPresignedUrl;
+      if (data.recipientProfilePicture !== null) {
+        data.recipientProfilePicture =
+          this.cloudFrontService.getSignedUrlForProfilePicture(
+            data.recipientProfilePicture,
+          );
+      }
 
       if (data.mediaType === "image") {
         const imageUrl = this.cloudFrontService.getSignedUrlForPost(
@@ -675,11 +652,12 @@ export class PostService {
   ): PaginatedResponse<CommentProfile> {
     const items = data.map((item) => {
       try {
-        const profilePictureUrl =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
-            item.profilePictureUrl,
-          );
-        item.profilePictureUrl = profilePictureUrl;
+        if (item.profilePictureUrl !== null) {
+          item.profilePictureUrl =
+            this.cloudFrontService.getSignedUrlForProfilePicture(
+              item.profilePictureUrl,
+            );
+        }
       } catch (error) {
         console.error(
           `Error updating profile picture URL for commentId: ${item.commentId}, userId: ${item.userId}: `,

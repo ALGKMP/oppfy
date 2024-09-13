@@ -1,4 +1,3 @@
-import type { PgDelete } from "drizzle-orm/pg-core";
 import type { z } from "zod";
 
 import {
@@ -15,7 +14,7 @@ import {
 } from "@oppfy/db";
 import { env } from "@oppfy/env";
 import { PublishCommand, sns } from "@oppfy/sns";
-import type { sharedValidators, trpcValidators } from "@oppfy/validators";
+import type { sharedValidators } from "@oppfy/validators";
 
 import type { entityTypeEnum } from "../../../../db/src/schema";
 import { handleDatabaseErrors } from "../../errors";
@@ -37,7 +36,7 @@ export type SnsNotificationData = z.infer<
 >;
 
 export type NotificationSettings = z.infer<
-  typeof trpcValidators.input.notifications.updateNotificationSettings
+  typeof sharedValidators.notifications.updateNotificationSettings
 >;
 
 export type EntityType = (typeof entityTypeEnum.enumValues)[number];
@@ -91,7 +90,7 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
-  async getNotificationSettings(notificationSettingId: number) {
+  async getNotificationSettings(notificationSettingId: string) {
     const possibleNotificationSettings =
       await this.db.query.notificationSettings.findFirst({
         where: eq(schema.notificationSettings.id, notificationSettingId),
@@ -129,7 +128,7 @@ export class NotificationsRepository {
   @handleDatabaseErrors
   async paginateNotifications(
     userId: string,
-    cursor: { createdAt: Date; id: number } | null = null,
+    cursor: { createdAt: Date; id: string } | null = null,
     pageSize = 10,
   ) {
     const notifications = await this.db.transaction(async (tx) => {
@@ -213,7 +212,7 @@ export class NotificationsRepository {
 
   @handleDatabaseErrors
   async updateNotificationSettings(
-    notificationSettingsId: number,
+    notificationSettingsId: string,
     notificationSettings: NotificationSettings,
   ) {
     await this.db
@@ -271,7 +270,7 @@ export class NotificationsRepository {
     return possiblePushTokens.map((pushToken) => pushToken.token);
   }
 
-  async deleteNotificationById(id: number) {
+  async deleteNotificationById(id: string) {
     await this.db
       .delete(schema.notifications)
       .where(eq(schema.notifications.id, id));

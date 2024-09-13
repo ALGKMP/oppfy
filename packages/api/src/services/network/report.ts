@@ -13,7 +13,7 @@ export class ReportService {
     reporterUserId,
     reason,
   }: {
-    postId: number;
+    postId: string;
     reporterUserId: string;
     reason: z.infer<typeof sharedValidators.report.reportPostOptions>;
   }) {
@@ -34,7 +34,7 @@ export class ReportService {
     reporterUserId,
     reason,
   }: {
-    commentId: number;
+    commentId: string;
     reporterUserId: string;
     reason: z.infer<typeof sharedValidators.report.reportCommentOptions>;
   }) {

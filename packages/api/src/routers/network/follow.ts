@@ -1,14 +1,22 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
-import { trpcValidators } from "@oppfy/validators";
-
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { DomainError } from "../../errors";
+import { createTRPCRouter, protectedProcedure } from "../../trpc";
 
 export const followRouter = createTRPCRouter({
   paginateFollowersSelf: protectedProcedure
-    .input(trpcValidators.input.follow.paginateFollowersSelf)
-    .output(trpcValidators.output.follow.paginateFollowersSelf)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFollowersSelf(
@@ -22,8 +30,18 @@ export const followRouter = createTRPCRouter({
     }),
 
   paginateFollowersOthers: protectedProcedure
-    .input(trpcValidators.input.follow.paginateFollowersOthers)
-    .output(trpcValidators.output.follow.paginateFollowersOthers)
+    .input(
+      z.object({
+        userId: z.string(),
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFollowersOthers(
@@ -38,8 +56,17 @@ export const followRouter = createTRPCRouter({
     }),
 
   paginateFollowingSelf: protectedProcedure
-    .input(trpcValidators.input.follow.paginateFollowingSelf)
-    .output(trpcValidators.output.follow.paginateFollowingSelf)
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFollowingSelf(
@@ -53,8 +80,18 @@ export const followRouter = createTRPCRouter({
     }),
 
   paginateFollowingOthers: protectedProcedure
-    .input(trpcValidators.input.follow.paginateFollowingOthers)
-    .output(trpcValidators.output.follow.paginateFollowingOthers)
+    .input(
+      z.object({
+        userId: z.string(),
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.paginate.paginateFollowingOthers(
@@ -68,8 +105,92 @@ export const followRouter = createTRPCRouter({
       }
     }),
 
+  paginateFollowRequests: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.date(),
+            profileId: z.string(),
+          })
+          .optional(),
+        pageSize: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      try {
+        const { items, nextCursor } =
+          await ctx.services.paginate.paginateFollowRequests(
+            ctx.session.uid,
+            input.cursor,
+            input.pageSize,
+          );
+        return {
+          items,
+          nextCursor,
+        };
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
+
+  acceptFollowRequest: protectedProcedure
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.follow.acceptFollowRequest(
+          input.senderId,
+          ctx.session.uid,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  declineFollowRequest: protectedProcedure
+    .input(
+      z.object({
+        senderId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        return await ctx.services.follow.declineFollowRequest(
+          input.senderId,
+          ctx.session.uid,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
+  cancelFollowRequest: protectedProcedure
+    .input(
+      z.object({
+        recipientId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await ctx.services.follow.cancelFollowRequest(
+          ctx.session.uid,
+          input.recipientId,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
   followUser: protectedProcedure
-    .input(trpcValidators.input.follow.followUser)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.followUser(
@@ -83,7 +204,11 @@ export const followRouter = createTRPCRouter({
     }),
 
   followUsers: protectedProcedure
-    .input(trpcValidators.input.follow.followUsers)
+    .input(
+      z.object({
+        userIds: z.array(z.string()),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.followUsers(
@@ -97,7 +222,11 @@ export const followRouter = createTRPCRouter({
     }),
 
   unfollowUser: protectedProcedure
-    .input(trpcValidators.input.follow.unfollowUser)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.unfollowUser(
@@ -119,7 +248,11 @@ export const followRouter = createTRPCRouter({
     }),
 
   removeFollower: protectedProcedure
-    .input(trpcValidators.input.follow.removeFollower)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       try {
         await ctx.services.follow.removeFollower(ctx.session.uid, input.userId);
@@ -129,8 +262,11 @@ export const followRouter = createTRPCRouter({
     }),
 
   isFollowingSelf: protectedProcedure
-    .input(trpcValidators.input.follow.isFollowingSelf)
-    .output(trpcValidators.output.follow.isFollowingSelf)
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       try {
         return await ctx.services.follow.isFollowing(

@@ -162,7 +162,7 @@ export class FriendRepository {
   @handleDatabaseErrors
   async paginateFriendsSelf(
     forUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     const friends = await this.db
@@ -215,7 +215,7 @@ export class FriendRepository {
       username: string;
       name: string;
       profilePictureUrl: string | null;
-      profileId: number;
+      profileId: string;
       privacy: "public" | "private";
       createdAt: Date;
     }[];
@@ -225,7 +225,7 @@ export class FriendRepository {
   async paginateFriendsOther(
     forUserId: string,
     currentUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     const friends = await this.db
@@ -291,8 +291,8 @@ export class FriendRepository {
       userId: string;
       username: string;
       name: string;
-      profilePictureUrl: string;
-      profileId: number;
+      profilePictureUrl: string | null;
+      profileId: string;
       privacy: "public" | "private";
       relationshipState: "following" | "followRequestSent" | "notFollowing";
       createdAt: Date;
@@ -302,7 +302,7 @@ export class FriendRepository {
   @handleDatabaseErrors
   async paginateFriendRequests(
     forUserId: string,
-    cursor: { createdAt: Date; profileId: number } | null = null,
+    cursor: { createdAt: Date; profileId: string } | null = null,
     pageSize = 10,
   ) {
     return await this.db

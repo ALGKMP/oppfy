@@ -12,7 +12,7 @@ import {
 const Welcome = () => {
   const router = useRouter();
   const onSubmit = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/user-info/full-name");
   };
 

@@ -309,7 +309,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     },
   });
 
-  const cancelFollowRequest = api.request.cancelFollowRequest.useMutation({
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     // onMutate: async (_newData) => {
     //   if (props.loading) return;
 
@@ -399,7 +399,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     },
   });
 
-  const acceptFriendRequest = api.request.acceptFriendRequest.useMutation({
+  const acceptFriendRequest = api.friend.acceptFriendRequest.useMutation({
     // onMutate: async (_newData) => {
     //   if (props.loading) return;
 
@@ -446,7 +446,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
     },
   });
 
-  const declineFriendRequest = api.request.declineFriendRequest.useMutation({
+  const declineFriendRequest = api.friend.declineFriendRequest.useMutation({
     // onMutate: async (_newData) => {
     //   if (props.loading) return;
 
@@ -648,7 +648,7 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
           />
 
           <StatusRenderer
-            data={!props.loading ? (props.data.bio ?? "") : undefined}
+            data={!props.loading ? props.data.bio ?? "" : undefined}
             loadingComponent={<Skeleton width={150} height={20} />}
             successComponent={(bio) =>
               bio.length ? (
@@ -687,7 +687,9 @@ const ProfileHeaderDetailsOther = (props: ProfileProps) => {
             successComponent={(count) => (
               <TouchableOpacity
                 onPress={onFollowerListPress}
-                disabled={!props.loading ? props.isRestricted || props.isBlocked: true}
+                disabled={
+                  !props.loading ? props.isRestricted || props.isBlocked : true
+                }
               >
                 <Stat label="Followers" value={abbreviatedNumber(count)} />
               </TouchableOpacity>

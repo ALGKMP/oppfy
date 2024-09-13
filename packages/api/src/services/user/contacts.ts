@@ -127,57 +127,19 @@ export class ContactService {
 
     const recommendationsIds = await this.getRecommendationsIds(userId);
 
-    const allRecommendations = [
+    let allRecommendations = [
       ...recommendationsIds.tier1,
       ...recommendationsIds.tier2,
       ...recommendationsIds.tier3,
     ];
     if (allRecommendations.length === 0) {
-      return [];
+      const randomProfiles = await this.userRepository.getRandomActiveProfiles(10);
+      allRecommendations = randomProfiles.map(profile => profile.userId).filter(id => id !== userId);
     }
 
     // start a transaction to get all the usernames and profilePhotos
     const profiles =
-      await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
-    // Fetch presigned URLs for profile pictures in parallel
-    const profilesWithUrls = profiles.map((profile) => {
-      const { profilePictureKey, ...profileWithoutKey } = profile;
-      return {
-        ...profileWithoutKey,
-        profilePictureUrl: profilePictureKey
-          ? this.cloudFrontService.getSignedUrlForProfilePicture(
-              profilePictureKey,
-            )
-          : null,
-      };
-    });
-
-    // Filter out any rejected promises and return the successful ones
-    return profilesWithUrls;
-  }
-
-  async getRecommendationProfilesOtherByProfileId(profileId: number) {
-    const user = await this.userRepository.getUserByProfileId(profileId);
-
-    if (user === undefined) {
-      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
-    }
-    const userId = user.id;
-
-    const recommendationsIds = await this.getRecommendationsIds(userId);
-
-    const allRecommendations = [
-      ...recommendationsIds.tier1,
-      ...recommendationsIds.tier2,
-      ...recommendationsIds.tier3,
-    ];
-    if (allRecommendations.length === 0) {
-      return [];
-    }
-
-    // start a transaction to get all the usernames and profilePhotos
-    const profiles =
-      await this.profileRepository.getBatchProfiles(allRecommendations); // TODO: You can use the service function from profile here
+      await this.profileRepository.getBatchProfiles(allRecommendations);
     // Fetch presigned URLs for profile pictures in parallel
     const profilesWithUrls = profiles.map((profile) => {
       const { profilePictureKey, ...profileWithoutKey } = profile;
