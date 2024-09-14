@@ -1,12 +1,12 @@
 import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
-import { getToken, Spacer, YStack } from "tamagui";
+import { getToken, Spacer, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -489,30 +489,36 @@ const OtherProfile = () => {
   const renderContent = useCallback(() => {
     if (isBlocked) {
       return (
-        <EmptyPlaceholder
-          icon={<UserX size="$10" />}
-          title="This user has been blocked"
-          subtitle="You cannot view their content or interact with them."
-        />
+        <View paddingTop="$6">
+          <EmptyPlaceholder
+            icon={<UserX size="$10" />}
+            title="This user has been blocked"
+            subtitle="You cannot view their content or interact with them."
+          />
+        </View>
       );
     }
 
     if (isPrivate && !isFollowing) {
       return (
-        <EmptyPlaceholder
-          icon={<Lock size="$10" />}
-          title="This account is private"
-          subtitle="Follow this account to see their photos and videos."
-        />
+        <View paddingTop="$6">
+          <EmptyPlaceholder
+            icon={<Lock size="$10" />}
+            title="This account is private"
+            subtitle="Follow this account to see their photos and videos."
+          />
+        </View>
       );
     }
 
     return (
-      <EmptyPlaceholder
-        icon={<Lock size="$10" />}
-        title="No posts yet"
-        subtitle="Check back later!"
-      />
+      <View paddingTop="$6">
+        <EmptyPlaceholder
+          icon={<Lock size="$10" />}
+          title="No posts yet"
+          subtitle="Check back later!"
+        />
+      </View>
     );
   }, [isBlocked, isPrivate, isFollowing]);
 
