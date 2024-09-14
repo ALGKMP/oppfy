@@ -6,7 +6,10 @@ import { View } from "tamagui";
 
 import { VirtualizedListItem } from "~/components/ListItems";
 import type { ButtonProps } from "~/components/ListItems/VirtualizedListItem";
-import type { UserItem } from "../types";
+import type { RouterOutputs } from "~/utils/api";
+
+export type UserItem =
+  RouterOutputs["follow"]["paginateFollowingOthers"]["items"][0];
 
 interface ListItemProps {
   item: UserItem;

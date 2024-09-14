@@ -1,14 +1,16 @@
 import React, { useRef, useState } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+
 import AlertDialog from "../Dialogs/Dialog";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
-import PostCard, { PostData } from "./ui/PostCard";
+import type { PostData } from "./ui/PostCard";
+import PostCard from "./ui/PostCard";
 import { useComments } from "./useComments";
+import { useDeletePost } from "./useDeletePost";
 import { useLikePost } from "./useLikePost";
 import { usePostActions } from "./usePostActions";
-import { useDeletePost } from "./useDeletePost";
 
 type SheetState = "closed" | "moreOptions" | "confirmDelete";
 
@@ -96,10 +98,8 @@ const SelfPost = (postProps: PostData) => {
   };
 
   const handleOpenConfirmDeleteDialog = () => {
-    setSheetState("closed"); // Close the MoreOptionsSheet first
-    setTimeout(() => {
-      setSheetState("confirmDelete"); // Then open the AlertDialog
-    }, 500); // Add a slight delay to ensure the sheet is closed before opening the dialog
+    setSheetState("closed");
+    setTimeout(() => setSheetState("confirmDelete"), 500);
   };
 
   const handleCloseMoreOptionsSheet = () => {

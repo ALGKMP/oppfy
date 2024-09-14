@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -8,7 +8,6 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { ResizeMode, Video } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
@@ -19,15 +18,7 @@ import {
   MoreHorizontal,
   Send,
 } from "@tamagui/lucide-icons";
-import {
-  getToken,
-  SizableText,
-  Text,
-  View,
-  ViewProps,
-  XStack,
-  YStack,
-} from "tamagui";
+import { getToken, SizableText, Text, View, XStack, YStack } from "tamagui";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
 import { TimeAgo } from "~/components/Texts";
@@ -217,7 +208,7 @@ const PostCard = (props: PostCardProps) => {
                       void Haptics.impactAsync(
                         Haptics.ImpactFeedbackStyle.Light,
                       );
-                      props.onAuthorPress();
+                      props.onRecipientPress();
                     }}
                   >
                     <Avatar source={props.recipient.profilePicture} size={40} />
