@@ -130,9 +130,6 @@ const Search = () => {
           )}
         </View>
       </YStack>
-      <View>
-
-      </View>
     </BaseScreenView>
   );
 };
