@@ -147,18 +147,22 @@ const OtherPost = (postProps: OtherPostProps) => {
   };
 
   const handleOpenMoreOptionsSheet = () => {
+    console.log("Opening More Options Sheet");
     setSheetState("moreOptions");
   };
 
   const handleCloseMoreOptionsSheet = () => {
+    console.log("Closing More Options Sheet");
     setSheetState("closed");
   };
 
   const handleOpenReportOptionsSheet = () => {
+    console.log("Opening Report Options Sheet");
     setTimeout(() => setSheetState("reportOptions"), 400);
   };
 
   const handleCloseReportOptionsSheet = () => {
+    console.log("Closing Report Options Sheet");
     setSheetState("closed");
   };
 
