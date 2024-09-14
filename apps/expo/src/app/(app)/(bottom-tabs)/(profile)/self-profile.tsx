@@ -8,6 +8,7 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
+import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import { BaseScreenView } from "~/components/Views";
@@ -15,7 +16,6 @@ import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import SelfPost from "~/components/NewPostTesting/SelfPost";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -127,10 +127,12 @@ const SelfProfile = () => {
     [],
   );
 
-  const viewabilityConfig = useMemo(() => ({
-    itemVisiblePercentThreshold: 40,
-  }), []);
-
+  const viewabilityConfig = useMemo(
+    () => ({
+      itemVisiblePercentThreshold: 40,
+    }),
+    [],
+  );
 
   const renderPost = useCallback(
     (item: Post, isViewable: boolean) => (
@@ -223,7 +225,7 @@ const SelfProfile = () => {
           <PeopleCarousel
             loading={isLoadingRecommendationsData}
             data={recommendationsData ?? []}
-            title="Recommended Friends 👥"
+            title="Suggestions 🔥"
             showMore={false}
             onItemPress={navigateToProfile}
             onShowMore={() => {
@@ -274,7 +276,9 @@ const SelfProfile = () => {
     <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
         data={postItems}
-        renderItem={({ item }) => renderPost(item, viewableItems.includes(item.postId))}
+        renderItem={({ item }) =>
+          renderPost(item, viewableItems.includes(item.postId))
+        }
         ListHeaderComponent={renderHeader}
         keyExtractor={(item) => `self-profile-post-${item.postId}`}
         estimatedItemSize={600}

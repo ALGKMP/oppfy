@@ -445,7 +445,7 @@ const OtherProfile = () => {
           <PeopleCarousel
             loading={isLoadingRecommendationsData}
             data={recommendationsData ?? []}
-            title="Recommended Friends 👥"
+            title="Suggestions 🔥"
             showMore={false}
             onItemPress={navigateToProfile}
             onShowMore={() => {
