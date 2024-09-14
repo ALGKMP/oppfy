@@ -18,7 +18,15 @@ import {
   MoreHorizontal,
   Send,
 } from "@tamagui/lucide-icons";
-import { getToken, SizableText, Text, View, XStack, YStack } from "tamagui";
+import {
+  getToken,
+  Paragraph,
+  SizableText,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
 import { TimeAgo } from "~/components/Texts";
@@ -305,26 +313,32 @@ const PostCard = (props: PostCardProps) => {
 
           {/* Caption */}
           {props.caption && (
-            <View flex={1} alignItems="flex-start">
-              <TouchableOpacity
-                onPress={() => {
-                  setIsExpanded(!isExpanded);
-                }}
-              >
-                <Text>
-                  <Text fontWeight="bold">{props.author.username} </Text>
-                  <Text numberOfLines={isExpanded ? 0 : 2}>
-                    {props.caption}
-                    {!isExpanded && <Text color="$gray10"> more</Text>}
-                  </Text>
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              disabled={isExpanded}
+              onPress={() => setIsExpanded(!isExpanded)}
+            >
+              <Paragraph color="$gray10">
+                <Text fontWeight="bold">{props.author.username} </Text>
+                {isExpanded ? (
+                  props.caption
+                ) : (
+                  <>
+                    {props.caption.slice(0, 110)}
+                    {props.caption.length > 110 && (
+                      <>
+                        ...
+                        <Text color="$gray8"> more</Text>
+                      </>
+                    )}
+                  </>
+                )}
+              </Paragraph>
+            </TouchableOpacity>
           )}
 
           {/* Comments Count */}
           <TouchableOpacity onPress={() => props.onComment()}>
-            <SizableText size="$3" color="$gray10" marginTop="$1">
+            <SizableText size="$3" color="$gray10">
               {props.stats.comments > 0
                 ? `View ${props.stats.comments > 1 ? "all " : ""}${props.stats.comments} ${props.stats.comments === 1 ? "comment" : "comments"}`
                 : "Be the first to comment"}
@@ -332,7 +346,7 @@ const PostCard = (props: PostCardProps) => {
           </TouchableOpacity>
 
           {/* Post Date */}
-          <SizableText size="$2" color="$gray10" marginTop="$1">
+          <SizableText size="$2" color="$gray10">
             <TimeAgo
               size="$2"
               theme="alt2"
