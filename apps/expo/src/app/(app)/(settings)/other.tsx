@@ -70,7 +70,7 @@ const Other = () => {
 
   const deleteContactsTitle = "Delete Contacts";
   const deleteContactsSubtitle =
-    "Are you sure you want to delete your synced contacts? This will negatively affect reccomendations.";
+    "Are you sure you want to delete your synced contacts? This will negatively affect recommendations.";
   const deleteContactsButtonOptions = [
     {
       text: "Delete Contacts",
