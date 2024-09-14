@@ -244,6 +244,8 @@ const OtherProfile = () => {
 
   const { isLoading: isBlocking, ...blockUser } =
     api.block.blockUser.useMutation();
+  const { isLoading: isUnblocking, ...unblockUser } =
+    api.block.unblockUser.useMutation();
 
   const handleOpenMoreOptionsSheet = () => {
     setSheetState("moreOptions");
@@ -253,23 +255,43 @@ const OtherProfile = () => {
     setSheetState("closed");
   };
 
-  const handleBlockUser = async () => {
+  const handleBlockUser = useCallback(async () => {
     await blockUser.mutateAsync({ userId });
     toast.show("User Blocked");
-    handleCloseMoreOptionsSheet();
-  };
+  }, [blockUser, userId, toast]);
 
-  const moreOptionsButtonOptions: ButtonOption[] = [
-    {
-      text: isBlocking ? "Blocking..." : "Block User",
-      textProps: {
-        color: isBlocking ? "$gray9" : "$red9",
+  const handleUnblockUser = useCallback(async () => {
+    await unblockUser.mutateAsync({ userId });
+    toast.show("User Unblocked");
+  }, [unblockUser, userId, toast]);
+
+  const moreOptionsButtonOptions: ButtonOption[] = useMemo(() => {
+    const isBlocked = profileData?.networkStatus.blocked ?? false;
+
+    return [
+      {
+        text: isBlocked
+          ? isUnblocking
+            ? "Unblocking..."
+            : "Unblock User"
+          : isBlocking
+            ? "Blocking..."
+            : "Block User",
+        textProps: {
+          color: isBlocking || isUnblocking ? "$gray9" : "$red9",
+        },
+        autoClose: false,
+        disabled: isBlocking || isUnblocking,
+        onPress: isBlocked ? handleUnblockUser : handleBlockUser,
       },
-      autoClose: false,
-      disabled: isBlocking,
-      onPress: () => void handleBlockUser(),
-    },
-  ];
+    ];
+  }, [
+    profileData?.networkStatus.blocked,
+    isUnblocking,
+    isBlocking,
+    handleUnblockUser,
+    handleBlockUser,
+  ]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -350,7 +372,7 @@ const OtherProfile = () => {
   const renderActionButtons = useCallback((): ProfileAction[] => {
     if (!profileData) return [];
 
-    const { privacy, targetUserFollowState, targetUserFriendState } =
+    const { privacy, blocked, targetUserFollowState, targetUserFriendState } =
       profileData.networkStatus;
 
     const buttonConfigs = {
@@ -397,7 +419,7 @@ const OtherProfile = () => {
         label: config.label,
         onPress: handler,
         loading,
-        disabled,
+        disabled: disabled || blocked,
         backgroundColor:
           "backgroundColor" in config ? config.backgroundColor : undefined,
       };
