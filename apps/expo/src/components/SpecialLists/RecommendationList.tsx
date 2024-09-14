@@ -4,7 +4,7 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { H5 } from "tamagui";
 
-import { RouterOutputs } from "@oppfy/api";
+import type { RouterOutputs } from "@oppfy/api";
 
 import { api } from "~/utils/api";
 import CardContainer from "../Containers/CardContainer";
