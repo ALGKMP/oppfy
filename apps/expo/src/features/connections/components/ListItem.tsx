@@ -1,5 +1,5 @@
 import React from "react";
-import { useRouter, useSegments } from "expo-router";
+import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
@@ -22,7 +22,6 @@ const ListItem = ({
   handleCancelFollowRequest,
 }: ListItemProps) => {
   const router = useRouter();
-  const segments = useSegments();
 
   const renderButton = (item: UserItem): ButtonProps => {
     switch (item.relationshipState) {
@@ -66,7 +65,7 @@ const ListItem = ({
         button={renderButton(item)}
         onPress={() =>
           router.push({
-            pathname: `/${segments[2]}/profile/[userId]`,
+            pathname: `/profile/[userId]`,
             params: { userId: item.userId, username: item.username },
           })
         }
