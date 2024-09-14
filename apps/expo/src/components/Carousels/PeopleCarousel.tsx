@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { Image } from "expo-image";
-import { usePathname, useSegments } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";

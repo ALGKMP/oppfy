@@ -178,7 +178,7 @@ const PostCard = (props: PostCardProps) => {
         <YStack>
           <View marginHorizontal="$-3">
             <Skeleton width="100%" height={600} radius={8} />
-            <View style={{ position: "absolute", bottom: 15, left: 15 }}>
+            <View position="absolute" bottom={15} left={15}>
               <XStack alignItems="center" gap="$3">
                 <Skeleton size={40} circular />
                 <YStack gap="$1">
@@ -210,7 +210,7 @@ const PostCard = (props: PostCardProps) => {
                   position={heart.position}
                 />
               ))}
-              <View style={{ position: "absolute", bottom: 15, left: 15 }}>
+              <View position="absolute" bottom={15} left={15}>
                 <XStack alignItems="center" gap="$3">
                   <TouchableOpacity
                     onPress={() => {
