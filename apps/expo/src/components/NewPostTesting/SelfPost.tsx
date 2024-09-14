@@ -145,14 +145,16 @@ const SelfPost = (postProps: PostData) => {
         selfProfilePicture={postProps.self.profilePicture}
       />
 
-      <MoreOptionsSheet
-        isVisible={sheetState === "moreOptions"}
-        onClose={handleCloseMoreOptionsSheet}
-        onSavePost={handleSavePost}
-        isSaving={isSaving}
-        isDeleting={isDeleting}
-        onDeletePost={handleOpenConfirmDeleteDialog}
-      />
+      {sheetState === "moreOptions" && (
+        <MoreOptionsSheet
+          isVisible={true}
+          onClose={handleCloseMoreOptionsSheet}
+          onSavePost={handleSavePost}
+          isSaving={isSaving}
+          isDeleting={isDeleting}
+          onDeletePost={handleOpenConfirmDeleteDialog}
+        />
+      )}
 
       <AlertDialog
         isVisible={sheetState === "confirmDelete"}

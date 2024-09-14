@@ -197,19 +197,23 @@ const OtherPost = (postProps: OtherPostProps) => {
         selfProfilePicture={postProps.self.profilePicture}
       />
 
-      <ReportOptionsSheet
-        isVisible={sheetState === "reportOptions"}
-        onClose={handleCloseReportOptionsSheet}
-        onReportPost={handleReportPost}
-      />
+      {sheetState === "moreOptions" && (
+        <MoreOptionsSheet
+          isVisible={true}
+          onClose={handleCloseMoreOptionsSheet}
+          onSavePost={handleSavePost}
+          onReportPost={handleOpenReportOptionsSheet}
+          isSaving={isSaving}
+        />
+      )}
 
-      <MoreOptionsSheet
-        isVisible={sheetState === "moreOptions"}
-        onClose={handleCloseMoreOptionsSheet}
-        onSavePost={handleSavePost}
-        onReportPost={handleOpenReportOptionsSheet}
-        isSaving={isSaving}
-      />
+      {sheetState === "reportOptions" && (
+        <ReportOptionsSheet
+          isVisible={true}
+          onClose={handleCloseReportOptionsSheet}
+          onReportPost={handleReportPost}
+        />
+      )}
     </>
   );
 };
