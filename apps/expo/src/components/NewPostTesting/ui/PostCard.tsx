@@ -314,10 +314,10 @@ const PostCard = (props: PostCardProps) => {
           {/* Caption */}
           {props.caption && (
             <TouchableOpacity
-              disabled={isExpanded}
+              disabled={isExpanded || props.caption.length <= 110}
               onPress={() => setIsExpanded(!isExpanded)}
             >
-              <Paragraph color="$gray10">
+              <Paragraph>
                 <Text fontWeight="bold">{props.author.username} </Text>
                 {isExpanded ? (
                   props.caption
