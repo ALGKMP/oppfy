@@ -61,8 +61,6 @@ const useNotificationObserver = () => {
       if (!isMounted || !response?.notification) {
         return;
       }
-      redirect(response.notification);
-      invalidateData(response.notification);
     });
 
     const responseSubscription =
