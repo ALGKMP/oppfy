@@ -139,6 +139,10 @@ export class FollowService {
   }
 
   async acceptFollowRequest(senderId: string, recipientId: string) {
+    if (senderId === recipientId) {
+      throw new DomainError(ErrorCode.CANNOT_FOLLOW_SELF);
+    }
+
     const followRequest = await this.followRepository.getFollowRequest(
       senderId,
       recipientId,

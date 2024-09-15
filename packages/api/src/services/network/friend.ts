@@ -93,6 +93,10 @@ export class FriendService {
   }
 
   async acceptFriendRequest(senderId: string, recipientId: string) {
+    if (senderId === recipientId) {
+      throw new DomainError(ErrorCode.CANNOT_FRIEND_SELF);
+    }
+
     const friendRequest = await this.friendRepository.getFriendRequest(
       senderId,
       recipientId,
