@@ -50,9 +50,12 @@ const Mute = ({ muted }: { muted: boolean }) => {
         muteAnimatedStyle,
         {
           position: "absolute",
-          top: "50%", // Temporary because the animation shifts if the timing isn't perfect when using flex
-          left: "45%",
-          // transform: [{ translateX: -20 }, { translateY: -20 }],
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          justifyContent: "center",
+          alignItems: "center",
         },
       ]}
     >

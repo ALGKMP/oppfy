@@ -30,9 +30,11 @@ import {
 
 import Skeleton from "~/components/Skeletons/Skeleton";
 import { TimeAgo } from "~/components/Texts";
+import { useAudio } from "~/contexts/AudioContext";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
+import Mute, { useMuteAnimations } from "../../Icons/Mute";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -101,10 +103,7 @@ interface LoadingPostCardProps {
 
 type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
 
-const ASPECT_RATIO = 3 / 4;
-
 const PostCard = (props: PostCardProps) => {
-  const { hearts, addHeart } = useHeartAnimations();
   const [isExpanded, setIsExpanded] = useState(false);
   const buttonLikeScale = useSharedValue(1);
 
@@ -132,37 +131,20 @@ const PostCard = (props: PostCardProps) => {
     );
   }, [props, buttonLikeScale]);
 
-  const addHeartJS = useCallback(
-    (x: number, y: number) => {
-      if (props.loading) return;
-      addHeart(x, y);
-      if (!props.hasLiked) {
-        handleLikePress();
-      }
-      props.onLikeDoubleTapped();
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    },
-    [addHeart, handleLikePress, props],
-  );
-
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart((event) => runOnJS(addHeartJS)(event.x, event.y));
-
   const renderMedia = (media: Media) => {
-    const style = {
-      borderRadius: getToken("$8", "radius") as number,
-      width: "100%" as const,
-      aspectRatio: ASPECT_RATIO,
-    };
+    if (props.loading) return;
 
-    if (media.type === "image") {
-      return (
-        <Image source={{ uri: media.url }} style={style} contentFit="cover" />
-      );
-    } else {
-      return <VideoPlayer {...media} />;
-    }
+    return media.type === "image" ? (
+      <ImageComponent
+        media={media}
+        onLikeDoubleTapped={props.onLikeDoubleTapped}
+      />
+    ) : (
+      <VideoPlayer
+        media={media}
+        onLikeDoubleTapped={props.onLikeDoubleTapped}
+      />
+    );
   };
 
   const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
@@ -199,18 +181,20 @@ const PostCard = (props: PostCardProps) => {
     <CardContainer paddingTop={0}>
       <YStack gap="$3">
         <View marginHorizontal="$-3">
-          <GestureDetector gesture={doubleTap}>
-            <View>
-              {renderMedia(props.media)}
-              {hearts.map((heart) => (
-                <GradientHeart
-                  key={heart.id}
-                  gradient={heart.gradient}
-                  position={heart.position}
-                />
-              ))}
-              <View position="absolute" bottom={15} left={15}>
-                <XStack alignItems="center" gap="$3">
+          <View>
+            {renderMedia(props.media)}
+            <View position="absolute" bottom={15} left={15}>
+              <XStack alignItems="center" gap="$3">
+                <TouchableOpacity
+                  onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    props.onRecipientPress();
+                  }}
+                >
+                  <Avatar source={props.recipient.profilePicture} size={40} />
+                </TouchableOpacity>
+
+                <YStack gap="$1">
                   <TouchableOpacity
                     onPress={() => {
                       void Haptics.impactAsync(
@@ -219,58 +203,40 @@ const PostCard = (props: PostCardProps) => {
                       props.onRecipientPress();
                     }}
                   >
-                    <Avatar source={props.recipient.profilePicture} size={40} />
+                    <SizableText fontWeight="bold" lineHeight={0}>
+                      {props.recipient.username}
+                    </SizableText>
                   </TouchableOpacity>
-
-                  <YStack gap="$1">
-                    <TouchableOpacity
-                      onPress={() => {
-                        void Haptics.impactAsync(
-                          Haptics.ImpactFeedbackStyle.Light,
-                        );
-                        props.onRecipientPress();
-                      }}
-                    >
-                      <SizableText fontWeight="bold" lineHeight={0}>
-                        {props.recipient.username}
-                      </SizableText>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        void Haptics.impactAsync(
-                          Haptics.ImpactFeedbackStyle.Light,
-                        );
-                        props.onAuthorPress();
-                      }}
-                    >
-                      <XStack alignItems="center" gap="$2">
-                        {/* <Avatar
-                          source={props.author.profilePicture}
-                          size={20}
-                          // bordered
-                        /> */}
-                        <SizableText size="$2" fontWeight="bold" lineHeight={0}>
-                          Opped by{" "}
-                          <SizableText fontWeight="bold" color="$primary">
-                            {props.author.username}
-                          </SizableText>
+                  <TouchableOpacity
+                    onPress={() => {
+                      void Haptics.impactAsync(
+                        Haptics.ImpactFeedbackStyle.Light,
+                      );
+                      props.onAuthorPress();
+                    }}
+                  >
+                    <XStack alignItems="center" gap="$2">
+                      <SizableText size="$2" fontWeight="bold" lineHeight={0}>
+                        Opped by{" "}
+                        <SizableText fontWeight="bold" color="$primary">
+                          {props.author.username}
                         </SizableText>
-                      </XStack>
-                    </TouchableOpacity>
-                  </YStack>
-                </XStack>
-              </View>
-              <TouchableOpacity
-                style={{ position: "absolute", bottom: 15, right: 15 }}
-                onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  props.onMoreOptions();
-                }}
-              >
-                <MoreHorizontal />
-              </TouchableOpacity>
+                      </SizableText>
+                    </XStack>
+                  </TouchableOpacity>
+                </YStack>
+              </XStack>
             </View>
-          </GestureDetector>
+            <TouchableOpacity
+              style={{ position: "absolute", bottom: 15, right: 15 }}
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                props.onMoreOptions();
+              }}
+            >
+              <MoreHorizontal />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Under post */}
@@ -361,21 +327,80 @@ const PostCard = (props: PostCardProps) => {
   );
 };
 
-const VideoPlayer = (props: Media) => {
+interface ImageComponentProps {
+  media: Media;
+  onLikeDoubleTapped: () => void;
+}
+
+const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
+  const { hearts, addHeart } = useHeartAnimations();
+
+  const handleDoubleTap = useCallback(
+    (x: number, y: number) => {
+      addHeart(x, y);
+      onLikeDoubleTapped();
+    },
+    [addHeart, onLikeDoubleTapped],
+  );
+
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .onStart((event) => {
+      runOnJS(handleDoubleTap)(event.x, event.y);
+    });
+
+  return (
+    <GestureDetector gesture={doubleTap}>
+      <View>
+        <Image
+          source={{ uri: media.url }}
+          style={{
+            width: "100%",
+            aspectRatio: media.dimensions.width / media.dimensions.height,
+            borderRadius: getToken("$8", "radius") as number,
+          }}
+          contentFit="cover"
+        />
+        {hearts.map((heart) => (
+          <GradientHeart
+            key={heart.id}
+            gradient={heart.gradient}
+            position={heart.position}
+          />
+        ))}
+      </View>
+    </GestureDetector>
+  );
+};
+
+interface VideoPlayerProps {
+  media: Media;
+  onLikeDoubleTapped: () => void;
+}
+
+export const VideoPlayer = ({
+  media,
+  onLikeDoubleTapped,
+}: VideoPlayerProps) => {
   const videoRef = useRef<VideoView>(null);
+  const { isMuted, toggleMute } = useAudio();
+  const { muteIcons, addMute } = useMuteAnimations();
+  const { hearts, addHeart } = useHeartAnimations();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
 
-  const player = useVideoPlayer(props.url, (player) => {
+  const player = useVideoPlayer(media.url, (player) => {
     player.loop = true;
     player.staysActiveInBackground = false;
+    player.muted = isMuted;
+    player.play();
     setIsPlayerReady(true);
   });
 
   const safePlayPause = useCallback(
     (shouldPlay: boolean) => {
-      if (!isPlayerReady || !props.isViewable) return;
+      if (!isPlayerReady || !media.isViewable) return;
 
       if (shouldPlay && !isPlaying) {
         player.play();
@@ -385,12 +410,12 @@ const VideoPlayer = (props: Media) => {
         setIsPlaying(false);
       }
     },
-    [isPlayerReady, player, isPlaying, props.isViewable],
+    [isPlayerReady, player, isPlaying, media.isViewable],
   );
 
   useFocusEffect(
     useCallback(() => {
-      if (isPlayerReady && props.isViewable) {
+      if (isPlayerReady && media.isViewable) {
         safePlayPause(true);
       }
 
@@ -399,21 +424,61 @@ const VideoPlayer = (props: Media) => {
           safePlayPause(false);
         }
       };
-    }, [isPlayerReady, safePlayPause, props.isViewable]),
+    }, [isPlayerReady, safePlayPause, media.isViewable]),
   );
 
+  const handleMute = useCallback(() => {
+    toggleMute();
+    addMute(!isMuted);
+    player.muted = !isMuted;
+  }, [toggleMute, addMute, isMuted, player]);
+
+  const handleDoubleTap = useCallback(
+    (x: number, y: number) => {
+      addHeart(x, y);
+      onLikeDoubleTapped();
+    },
+    [addHeart, onLikeDoubleTapped],
+  );
+
+  const singleTap = Gesture.Tap().onStart(() => {
+    runOnJS(handleMute)();
+  });
+
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .onStart((event) => {
+      runOnJS(handleDoubleTap)(event.x, event.y);
+    });
+
+  const gestures = Gesture.Exclusive(doubleTap, singleTap);
+
   return (
-    <VideoView
-      ref={videoRef}
-      style={{
-        width: "100%",
-        aspectRatio: props.dimensions.width / props.dimensions.height,
-        borderRadius: getToken("$8", "radius") as number,
-      }}
-      contentFit="cover"
-      player={player}
-      nativeControls={false}
-    />
+    <GestureDetector gesture={gestures}>
+      <View>
+        <VideoView
+          ref={videoRef}
+          style={{
+            width: "100%",
+            aspectRatio: media.dimensions.width / media.dimensions.height,
+            borderRadius: getToken("$8", "radius") as number,
+          }}
+          contentFit="cover"
+          player={player}
+          nativeControls={false}
+        />
+        {muteIcons.map((muteIcon) => (
+          <Mute key={muteIcon.id} muted={muteIcon.muted} />
+        ))}
+        {hearts.map((heart) => (
+          <GradientHeart
+            key={heart.id}
+            gradient={heart.gradient}
+            position={heart.position}
+          />
+        ))}
+      </View>
+    </GestureDetector>
   );
 };
 
