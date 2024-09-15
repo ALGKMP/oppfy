@@ -56,8 +56,16 @@ const Inbox = () => {
 
   useFocusEffect(
     useCallback(() => {
-      void refetchRequestCount();
-    }, [refetchRequestCount]),
+      const refetchAndInvalidate = async () => {
+        await Promise.all([refetchRequestCount(), refetchNotifications()]);
+        await utils.notifications.getUnreadNotificationsCount.invalidate();
+      };
+      void refetchAndInvalidate();
+    }, [
+      refetchRequestCount,
+      refetchNotifications,
+      utils.notifications.getUnreadNotificationsCount,
+    ]),
   );
 
   const totalRequestCount =

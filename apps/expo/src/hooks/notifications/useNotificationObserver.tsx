@@ -17,7 +17,7 @@ const useNotificationObserver = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const redirect = (notification: Notification) => {
+    const redirect = (_notification: Notification) => {
       // const { entityId, entityType } = notification.request.content
       //   .data as EntityData;
 
@@ -91,6 +91,7 @@ const useNotificationObserver = () => {
     utils.profile.getFullProfileOther,
     utils.notifications.paginateNotifications,
     utils.request.countRequests,
+    utils.notifications.getUnreadNotificationsCount,
   ]);
 };
 export default useNotificationObserver;

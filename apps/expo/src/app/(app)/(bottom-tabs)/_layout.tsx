@@ -136,13 +136,9 @@ const BottomTabsLayout = () => {
         name="(inbox)"
         options={{
           header: () => null,
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: (props) => (
             <View>
-              <Inbox
-                strokeWidth={focused ? 3 : 1.5}
-                color={color}
-                size={size}
-              />
+              {getTabBarIcon(Inbox)(props)}
               {(unreadNotificationsCount ?? 0) > 0 && (
                 <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
