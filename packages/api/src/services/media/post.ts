@@ -340,39 +340,43 @@ export class PostService {
 
       const post = await this.getPost(postId);
 
-      await this.notificationsService.storeNotification(
-        userId,
-        post.recipientId,
-        {
-          eventType: "like",
-          entityId: postId.toString(),
-          entityType: "post",
-        },
-      );
-
-      const { likes } = await this.notificationsService.getNotificationSettings(
-        post.recipientId,
-      );
-
-      if (likes) {
-        const user = await this.profileRepository.getUserProfile(userId);
-
-        if (user === undefined) {
-          throw new DomainError(ErrorCode.USER_NOT_FOUND);
-        }
-
-        const { profile } = user;
-
-        await this.notificationsService.sendNotification(
+      // Only store and send notification if the liker is not the post owner
+      if (userId !== post.recipientId) {
+        await this.notificationsService.storeNotification(
           userId,
           post.recipientId,
           {
-            title: "New like",
-            body: `${profile.username} liked your post`,
-            entityType: "post",
+            eventType: "like",
             entityId: postId.toString(),
+            entityType: "post",
           },
         );
+
+        const { likes } =
+          await this.notificationsService.getNotificationSettings(
+            post.recipientId,
+          );
+
+        if (likes) {
+          const user = await this.profileRepository.getUserProfile(userId);
+
+          if (user === undefined) {
+            throw new DomainError(ErrorCode.USER_NOT_FOUND);
+          }
+
+          const { profile } = user;
+
+          await this.notificationsService.sendNotification(
+            userId,
+            post.recipientId,
+            {
+              title: "New like",
+              body: `${profile.username} liked your post`,
+              entityType: "post",
+              entityId: postId.toString(),
+            },
+          );
+        }
       }
     } catch (error) {
       console.error(
@@ -438,40 +442,43 @@ export class PostService {
 
     const post = await this.getPost(postId);
 
-    await this.notificationsService.storeNotification(
-      userId,
-      post.recipientId,
-      {
-        eventType: "comment",
-
-        entityId: postId.toString(),
-        entityType: "post",
-      },
-    );
-
-    const { comments } =
-      await this.notificationsService.getNotificationSettings(post.recipientId);
-
-    if (comments) {
-      const user = await this.profileRepository.getUserProfile(userId);
-
-      if (user === undefined) {
-        throw new DomainError(ErrorCode.USER_NOT_FOUND);
-      }
-
-      const { profile } = user;
-
-      await this.notificationsService.sendNotification(
+    // Only store and send notification if the commenter is not the post owner
+    if (userId !== post.recipientId) {
+      await this.notificationsService.storeNotification(
         userId,
         post.recipientId,
         {
-          title: "New Comment",
-          body: `${profile.username} commented on your post`,
-
+          eventType: "comment",
           entityId: postId.toString(),
           entityType: "post",
         },
       );
+
+      const { comments } =
+        await this.notificationsService.getNotificationSettings(
+          post.recipientId,
+        );
+
+      if (comments) {
+        const user = await this.profileRepository.getUserProfile(userId);
+
+        if (user === undefined) {
+          throw new DomainError(ErrorCode.USER_NOT_FOUND);
+        }
+
+        const { profile } = user;
+
+        await this.notificationsService.sendNotification(
+          userId,
+          post.recipientId,
+          {
+            title: "New Comment",
+            body: `${profile.username} commented on your post`,
+            entityId: postId.toString(),
+            entityType: "post",
+          },
+        );
+      }
     }
   }
 
