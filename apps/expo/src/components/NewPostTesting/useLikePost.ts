@@ -12,7 +12,6 @@ export const useLikePost = (postId: string) => {
 
   const likePost = api.post.likePost.useMutation({
     onMutate: async (newHasLikedData) => {
-      console.log("likePost onMutate");
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.post.hasliked.cancel();
 
@@ -45,7 +44,6 @@ export const useLikePost = (postId: string) => {
 
   const unlikePost = api.post.unlikePost.useMutation({
     onMutate: async (newHasLikedData) => {
-      console.log("unlikePost onMutate");
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.post.hasliked.cancel();
 
