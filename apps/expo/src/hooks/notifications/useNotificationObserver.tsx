@@ -54,8 +54,6 @@ const useNotificationObserver = () => {
           });
         }
       }
-      void utils.request.countRequests.invalidate();
-      void utils.notifications.paginateNotifications.invalidate();
       void utils.notifications.getUnreadNotificationsCount.invalidate();
     };
 

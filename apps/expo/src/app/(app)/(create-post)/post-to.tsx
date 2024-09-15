@@ -248,7 +248,7 @@ const PostTo = () => {
         gap="$4"
         paddingBottom={(insets.bottom + getToken("$4", "space")) as number}
       >
-        {/* ! Disabled temporarily */}
+        // TODO: Uncomment this when we have contacts posting working
         {/* {contacts.length > 0 && renderContacts()} */}
         {itemCount > 0 && renderFriends()}
       </YStack>
@@ -271,7 +271,11 @@ const PostTo = () => {
     return renderLoadingSkeletons();
   }
 
-  if (itemCount === 0 && contacts.length === 0) {
+  if (
+    itemCount === 0
+    // TODO: Uncomment this when we have contacts posting working
+    // && contacts.length === 0
+  ) {
     return renderNoResults();
   }
 

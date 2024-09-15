@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { ElementType, useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -7,9 +8,11 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
+import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
+import { MotiView } from "moti";
 import { Circle, Text, useTheme, View, YStack } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
@@ -38,10 +41,57 @@ const BottomTabsLayout = () => {
   }, [utils.profile.getFullProfileSelf]);
 
   const getTabBarIcon =
-    (IconComponent: React.ElementType) =>
+    (IconComponent: ElementType) =>
     ({ focused, ...props }: TabBarIconProps) => (
       <IconComponent strokeWidth={focused ? 3 : 1.5} {...props} />
     );
+
+  const NotificationBadge = ({ count }: { count: number }) => {
+    return (
+      <MotiView
+        from={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          type: "timing",
+          duration: 300,
+        }}
+        style={{
+          position: "absolute",
+          top: -6,
+          right: -6,
+          minWidth: 18,
+          height: 18,
+          borderRadius: 9,
+          overflow: "hidden",
+        }}
+      >
+        <BlurView
+          intensity={100}
+          tint="dark"
+          style={{ ...StyleSheet.absoluteFillObject }}
+        />
+        <View
+          backgroundColor="$red8"
+          opacity={0.8}
+          style={{
+            ...StyleSheet.absoluteFillObject,
+          }}
+        />
+        <Text
+          color="white"
+          fontSize={10}
+          fontWeight="bold"
+          textAlign="center"
+          style={{
+            paddingHorizontal: 4,
+            lineHeight: 18,
+          }}
+        >
+          {count > 99 ? "99+" : count}
+        </Text>
+      </MotiView>
+    );
+  };
 
   return (
     <BottomTabs
@@ -86,32 +136,18 @@ const BottomTabsLayout = () => {
         name="(inbox)"
         options={{
           header: () => null,
-          tabBarIcon: ({ focused, ...props }) => (
-            <YStack>
-              <Inbox strokeWidth={focused ? 3 : 1.5} {...props} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <View>
+              <Inbox
+                strokeWidth={focused ? 3 : 1.5}
+                color={color}
+                size={size}
+              />
               {(unreadNotificationsCount ?? 0) > 0 && (
-                <Circle
-                  size={12}
-                  backgroundColor="$red9"
-                  style={{
-                    position: "absolute",
-                    top: -3,
-                    right: -3,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                />
+                <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
-            </YStack>
+            </View>
           ),
-        }}
-        listeners={{
-          focus: () => {
-            void utils.notifications.getUnreadNotificationsCount.setData(
-              undefined,
-              0,
-            );
-          },
         }}
       />
 

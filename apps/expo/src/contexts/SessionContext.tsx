@@ -71,9 +71,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   };
 
   const signOut = async () => {
-    await auth().signOut();
-    await auth().currentUser?.reload();
-
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
 
@@ -85,7 +82,10 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
       projectId: Constants.expoConfig?.extra?.eas.projectId as string,
     });
 
-    void deletePushToken.mutateAsync({ pushToken: token.data });
+    await deletePushToken.mutateAsync({ pushToken: token.data });
+
+    await auth().signOut();
+    await auth().currentUser?.reload();
 
     setUser(null);
     router.replace("/(onboarding)");

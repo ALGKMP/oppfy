@@ -191,6 +191,8 @@ export class NotificationsRepository {
         return [];
       }
 
+      console.log("MARKING NOTIS AS READ:", fetchedNotifications);
+
       // Mark notis as read
       const notificationIds = fetchedNotifications.map((n) => n.id);
       await tx
