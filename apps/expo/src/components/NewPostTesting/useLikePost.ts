@@ -1,3 +1,6 @@
+import { useCallback, useRef } from "react";
+import throttle from "lodash/throttle"; // Change debounce to throttle
+
 import { api } from "~/utils/api";
 
 export const useLikePost = (postId: string) => {
@@ -9,6 +12,7 @@ export const useLikePost = (postId: string) => {
 
   const likePost = api.post.likePost.useMutation({
     onMutate: async (newHasLikedData) => {
+      console.log("likePost onMutate");
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.post.hasliked.cancel();
 
@@ -41,6 +45,7 @@ export const useLikePost = (postId: string) => {
 
   const unlikePost = api.post.unlikePost.useMutation({
     onMutate: async (newHasLikedData) => {
+      console.log("unlikePost onMutate");
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.post.hasliked.cancel();
 
@@ -71,11 +76,52 @@ export const useLikePost = (postId: string) => {
     },
   });
 
-  const handleLikePressed = async () => {
-    hasLiked
-      ? await unlikePost.mutateAsync({ postId })
-      : await likePost.mutateAsync({ postId });
-  };
+  // const handleLikePressed = async () => {
+  // Optimistically update the cache
+  // if (hasLiked) {
+  //   utils.post.hasliked.setData({ postId }, false);
+  // } else {
+  //   utils.post.hasliked.setData({ postId }, true);
+  // }
+
+  // Throttled function to send the actual request
+  // await throttledLikeRequest(hasLiked);
+  // };
+
+  const throttledRef = useRef<((currentHasLiked: boolean) => void) | null>(
+    null,
+  );
+  const clickCount = useRef(0);
+
+  // Initialize the throttled function only once
+  if (!throttledRef.current) {
+    clickCount.current = 0;
+    throttledRef.current = throttle(
+      (currentHasLiked: boolean) => {
+        (async () => {
+          if (clickCount.current % 2 === 0) return;
+          currentHasLiked
+            ? await unlikePost.mutateAsync({ postId })
+            : await likePost.mutateAsync({ postId });
+        })().catch((error) => {
+          console.error("Error in throttledLikeRequest:", error);
+        });
+      },
+      5000,
+      { leading: false, trailing: true },
+    );
+  }
+
+  const handleLikePressed = useCallback(() => {
+    // Optimistically update the UI
+    utils.post.hasliked.setData({ postId }, !hasLiked);
+
+    // Call the throttled function
+    if (throttledRef.current) {
+      clickCount.current++;
+      throttledRef.current(hasLiked);
+    }
+  }, [hasLiked, postId, utils.post.hasliked]);
 
   const handleLikeDoubleTapped = async () => {
     if (hasLiked) return;
