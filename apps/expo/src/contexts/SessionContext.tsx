@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import Constants from "expo-constants";
+import { PermissionStatus } from "expo-modules-core";
+import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
@@ -7,7 +10,6 @@ import { api } from "~/utils/api";
 
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
-  getCurrentUserProfileId: () => Promise<number | undefined>;
 
   isLoading: boolean;
   isSignedIn: boolean;
@@ -15,9 +17,7 @@ interface SessionContextType {
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
 
-  signInWithPhoneNumber: (
-    phoneNumber: string,
-  ) => Promise<boolean>;
+  signInWithPhoneNumber: (phoneNumber: string) => Promise<boolean>;
   verifyPhoneNumberOTP: (
     otp: string,
   ) => Promise<FirebaseAuthTypes.UserCredential | null>;
@@ -41,15 +41,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const [status, setStatus] = useState<Status>("loading");
 
   const deleteUser = api.user.deleteUser.useMutation();
-
-  const profileMutation = api.profile.getProfileId.useMutation();
-  const getCurrentUserProfileId = async () => {
-    if (user) {
-      return await profileMutation.mutateAsync();
-    } else {
-      return undefined;
-    }
-  };
+  const deletePushToken = api.notifications.deletePushToken.useMutation();
 
   const isSignedIn = !!user;
   const isLoading = status === "loading";
@@ -81,6 +73,20 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const signOut = async () => {
     await auth().signOut();
     await auth().currentUser?.reload();
+
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+
+    if (existingStatus !== PermissionStatus.GRANTED) return;
+
+    const token = await Notifications.getExpoPushTokenAsync({
+      // this is passed in by expo
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      projectId: Constants.expoConfig?.extra?.eas.projectId as string,
+    });
+
+    void deletePushToken.mutateAsync({ pushToken: token.data });
+
     setUser(null);
     router.replace("/(onboarding)");
   };
@@ -95,7 +101,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
     <AuthContext.Provider
       value={{
         user,
-        getCurrentUserProfileId,
         isLoading,
         isSignedIn,
         deleteAccount,

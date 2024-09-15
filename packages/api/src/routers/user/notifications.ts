@@ -21,6 +21,19 @@ export const notificationsRouter = createTRPCRouter({
       }
     }),
 
+  deletePushToken: protectedProcedure
+    .input(z.object({ pushToken: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        await ctx.services.notifications.deletePushToken(
+          ctx.session.uid,
+          input.pushToken,
+        );
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
+    }),
+
   getUnreadNotificationsCount: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.services.notifications.getUnreadNotificationsCount(

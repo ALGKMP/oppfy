@@ -143,6 +143,10 @@ export class NotificationsService {
     await this.notificationsRepository.storePushToken(userId, pushToken);
   }
 
+  async deletePushToken(userId: string, pushToken: string) {
+    await this.notificationsRepository.deletePushToken(userId, pushToken);
+  }
+
   async deleteNotification(id: string) {
     await this.notificationsRepository.deleteNotificationById(id);
   }
