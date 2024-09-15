@@ -389,13 +389,15 @@ export const VideoPlayer = ({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const player = useVideoPlayer(media.url, (player) => {
     player.loop = true;
-    player.staysActiveInBackground = false;
     player.muted = isMuted;
     player.play();
+
     setIsPlayerReady(true);
+    setIsPlaying(true);
   });
 
   const safePlayPause = useCallback(
@@ -430,6 +432,7 @@ export const VideoPlayer = ({
   const handleMute = useCallback(() => {
     toggleMute();
     addMute(!isMuted);
+    // eslint-disable-next-line react-compiler/react-compiler
     player.muted = !isMuted;
   }, [toggleMute, addMute, isMuted, player]);
 
@@ -441,6 +444,28 @@ export const VideoPlayer = ({
     [addHeart, onLikeDoubleTapped],
   );
 
+  const handleHold = useCallback(() => {
+    if (isPlaying) {
+      player.pause();
+      setIsPaused(true);
+    }
+  }, [isPlaying, player]);
+
+  const handleRelease = useCallback(() => {
+    if (isPaused) {
+      player.play();
+      setIsPaused(false);
+    }
+  }, [isPaused, player]);
+
+  const longPress = Gesture.LongPress()
+    .onStart(() => {
+      runOnJS(handleHold)();
+    })
+    .onEnd(() => {
+      runOnJS(handleRelease)();
+    });
+
   const singleTap = Gesture.Tap().onStart(() => {
     runOnJS(handleMute)();
   });
@@ -451,7 +476,10 @@ export const VideoPlayer = ({
       runOnJS(handleDoubleTap)(event.x, event.y);
     });
 
-  const gestures = Gesture.Exclusive(doubleTap, singleTap);
+  const gestures = Gesture.Exclusive(
+    doubleTap,
+    Gesture.Race(longPress, singleTap),
+  );
 
   return (
     <GestureDetector gesture={gestures}>
