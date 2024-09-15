@@ -3,8 +3,8 @@ import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { FlashList, ViewToken } from "@shopify/flash-list";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
-import { getToken, Spacer, View, YStack } from "tamagui";
+import { CameraOff, MoreHorizontal } from "@tamagui/lucide-icons";
+import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -246,6 +246,20 @@ const SelfProfile = () => {
     ],
   );
 
+  const renderEmptyState = useCallback(() => {
+    return (
+      <YStack
+        alignItems="center"
+        justifyContent="center"
+        flex={1}
+        paddingVertical="$10"
+      >
+        <CameraOff size={100} color="gray" />
+        <Text fontSize="$6">No posts yet</Text>
+      </YStack>
+    );
+  }, []);
+
   if (isLoadingData) {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
@@ -293,6 +307,7 @@ const SelfProfile = () => {
         ListHeaderComponentStyle={{
           marginBottom: getToken("$4", "space") as number,
         }}
+        ListEmptyComponent={renderEmptyState}
       />
     </BaseScreenView>
   );
