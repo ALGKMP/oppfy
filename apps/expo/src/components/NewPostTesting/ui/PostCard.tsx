@@ -363,30 +363,29 @@ const PostCard = (props: PostCardProps) => {
 
 const VideoPlayer = (props: Media) => {
   const videoRef = useRef<VideoView>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+
   const player = useVideoPlayer(props.url, (player) => {
     player.loop = true;
     player.staysActiveInBackground = false;
     setIsPlayerReady(true);
   });
+
   const safePlayPause = useCallback(
     (shouldPlay: boolean) => {
-      if (!isPlayerReady || !props.isViewable) return; // Check if the media is viewable
+      if (!isPlayerReady || !props.isViewable) return;
 
-      try {
-        if (shouldPlay && !isPlaying) {
-          player.play();
-          setIsPlaying(true);
-        } else if (!shouldPlay && isPlaying) {
-          player.pause();
-          setIsPlaying(false);
-        }
-      } catch (error) {
-        console.error("Error in safePlayPause:", error);
+      if (shouldPlay && !isPlaying) {
+        player.play();
+        setIsPlaying(true);
+      } else if (!shouldPlay && isPlaying) {
+        player.pause();
+        setIsPlaying(false);
       }
     },
-    [isPlayerReady, player, isPlaying, props.isViewable], // Add props.isViewable to dependencies
+    [isPlayerReady, player, isPlaying, props.isViewable],
   );
 
   useFocusEffect(
@@ -400,7 +399,7 @@ const VideoPlayer = (props: Media) => {
           safePlayPause(false);
         }
       };
-    }, [isPlayerReady, safePlayPause, props.isViewable]), // Add props.isViewable to dependencies
+    }, [isPlayerReady, safePlayPause, props.isViewable]),
   );
 
   return (

@@ -11,6 +11,7 @@ import SentryProvider from "~/providers/SentryProvider";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
+import { AudioProvider } from "~/contexts/AudioContext";
 
 const RootLayout = () => {
   return (
@@ -20,18 +21,20 @@ const RootLayout = () => {
           <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
             <SessionProvider>
               <PermissionsProvider>
-                <SafeAreaProvider>
-                  <GestureHandlerRootView style={{ flex: 1 }}>
-                    <BottomSheetModalProvider>
-                      <ToastProvider native={true}>
-                        <View flex={1} backgroundColor="$background">
-                          <Slot />
-                        </View>
-                        <ToastViewport />
-                      </ToastProvider>
-                    </BottomSheetModalProvider>
-                  </GestureHandlerRootView>
-                </SafeAreaProvider>
+                <AudioProvider>
+                  <SafeAreaProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                      <BottomSheetModalProvider>
+                        <ToastProvider native={true}>
+                          <View flex={1} backgroundColor="$background">
+                            <Slot />
+                          </View>
+                          <ToastViewport />
+                        </ToastProvider>
+                      </BottomSheetModalProvider>
+                    </GestureHandlerRootView>
+                  </SafeAreaProvider>
+                </AudioProvider>
               </PermissionsProvider>
             </SessionProvider>
           </TamaguiProvider>
