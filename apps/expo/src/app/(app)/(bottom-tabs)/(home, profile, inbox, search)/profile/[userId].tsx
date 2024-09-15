@@ -4,9 +4,9 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
+import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
-import { getToken, Spacer, View, YStack } from "tamagui";
+import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -523,20 +523,22 @@ const OtherProfile = () => {
 
     if (isPrivate && !isFollowing) {
       return (
-        <View paddingTop="$6">
-          <EmptyPlaceholder
-            icon={<Lock size="$10" />}
-            title="This account is private"
-            subtitle="Follow this account to see their photos and videos."
-          />
-        </View>
+        <YStack
+          alignItems="center"
+          justifyContent="center"
+          flex={1}
+          paddingVertical="$10"
+        >
+          <Lock size={100} color="gray" />
+          <Text fontSize="$6">This account is private</Text>
+        </YStack>
       );
     }
 
     return (
       <View paddingTop="$6">
         <EmptyPlaceholder
-          icon={<Lock size="$10" />}
+          icon={<CameraOff size="$10" />}
           title="No posts yet"
           subtitle="Check back later!"
         />

@@ -246,6 +246,20 @@ const SelfProfile = () => {
     ],
   );
 
+  const renderEmptyState = useCallback(() => {
+    return (
+      <YStack
+        alignItems="center"
+        justifyContent="center"
+        flex={1}
+        paddingVertical="$10"
+      >
+        <CameraOff size={100} color="gray" />
+        <Text fontSize="$6">No posts yet</Text>
+      </YStack>
+    );
+  }, []);
+
   if (isLoadingData) {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
@@ -293,17 +307,7 @@ const SelfProfile = () => {
         ListHeaderComponentStyle={{
           marginBottom: getToken("$4", "space") as number,
         }}
-        ListEmptyComponent={() => (
-          <YStack
-            alignItems="center"
-            justifyContent="center"
-            flex={1}
-            paddingVertical="$10"
-          >
-            <CameraOff size={100} color="gray" />
-            <Text fontSize="$6">No posts yet</Text>
-          </YStack>
-        )}
+        ListEmptyComponent={renderEmptyState}
       />
     </BaseScreenView>
   );
