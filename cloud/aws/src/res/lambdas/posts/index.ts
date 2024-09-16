@@ -65,6 +65,9 @@ const lambdaHandler = async (
 
   const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
 
+  // decode the caption
+  metadata.caption = decodeURIComponent(metadata.caption);
+
   if (metadata.type === "onApp") {
     const { insertId: postId } = await db.transaction(async (tx) => {
       const [post] = await tx
