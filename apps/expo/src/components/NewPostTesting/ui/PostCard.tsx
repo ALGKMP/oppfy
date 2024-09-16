@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -388,7 +388,6 @@ export const VideoPlayer = ({
   const { hearts, addHeart } = useHeartAnimations();
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
   const player = useVideoPlayer(media.url, (player) => {
@@ -396,13 +395,12 @@ export const VideoPlayer = ({
     player.muted = isMuted;
     player.play();
 
-    setIsPlayerReady(true);
     setIsPlaying(true);
   });
 
   const safePlayPause = useCallback(
     (shouldPlay: boolean) => {
-      if (!isPlayerReady || !media.isViewable) return;
+      if (!media.isViewable) return;
 
       if (shouldPlay && !isPlaying) {
         player.play();
@@ -412,21 +410,17 @@ export const VideoPlayer = ({
         setIsPlaying(false);
       }
     },
-    [isPlayerReady, player, isPlaying, media.isViewable],
+    [player, isPlaying, media.isViewable],
   );
 
   useFocusEffect(
     useCallback(() => {
-      if (isPlayerReady && media.isViewable) {
-        safePlayPause(true);
-      }
+      if (media.isViewable) safePlayPause(true);
 
       return () => {
-        if (isPlayerReady) {
-          safePlayPause(false);
-        }
+        safePlayPause(false);
       };
-    }, [isPlayerReady, safePlayPause, media.isViewable]),
+    }, [safePlayPause, media.isViewable]),
   );
 
   const handleMute = useCallback(() => {
