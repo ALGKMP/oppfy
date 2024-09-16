@@ -74,17 +74,6 @@ export const useLikePost = (postId: string) => {
     },
   });
 
-  // const handleLikePressed = async () => {
-  // Optimistically update the cache
-  // if (hasLiked) {
-  //   utils.post.hasliked.setData({ postId }, false);
-  // } else {
-  //   utils.post.hasliked.setData({ postId }, true);
-  // }
-
-  // Throttled function to send the actual request
-  // await throttledLikeRequest(hasLiked);
-  // };
 
   const throttledRef = useRef<((currentHasLiked: boolean) => void) | null>(
     null,
