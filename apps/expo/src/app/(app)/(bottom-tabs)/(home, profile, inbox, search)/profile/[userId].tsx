@@ -584,7 +584,7 @@ const OtherProfile = () => {
         <EmptyPlaceholder
           icon={<CameraOff size="$10" />}
           title="No posts yet"
-          subtitle="Check back later!"
+          subtitle="Be the first to post!"
         />
       </View>
     );
