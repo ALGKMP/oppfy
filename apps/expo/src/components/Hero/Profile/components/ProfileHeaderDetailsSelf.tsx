@@ -47,12 +47,12 @@ const ProfileHeaderDetailsSelf = (props: ProfileProps) => {
 
   const onFollowingListPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/self-connections/following-list");
+    router.push("/connections/following-list");
   };
 
   const onFollowerListPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/self-connections/followers-list");
+    router.push("/connections/followers-list");
   };
 
   const onEditProfilePress = () => {

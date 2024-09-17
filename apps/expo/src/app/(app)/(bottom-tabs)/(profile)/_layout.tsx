@@ -22,13 +22,13 @@ const SearchLayout = () => {
       }}
     >
       <Stack.Screen
-        name="self-profile"
+        name="index"
         options={{
           header: (props) => <Header {...props} />,
         }}
       />
       <Stack.Screen
-        name="self-connections"
+        name="connections"
         options={{
           header: (props) => <Header {...props} />,
           headerLeft: (props) => <HeaderLeft {...props} />,

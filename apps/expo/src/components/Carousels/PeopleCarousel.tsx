@@ -36,6 +36,7 @@ interface LoadedProps<T extends PersonItem> {
   title?: string;
   emoji?: string;
   showMore?: boolean;
+  onTitlePress?: () => void;
   onItemPress: (item: T) => void;
   onShowMore?: () => void;
   renderExtraItem?: () => React.ReactElement;
@@ -104,8 +105,8 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     title,
     emoji,
     showMore = false,
+    onTitlePress,
     onItemPress,
-    onShowMore,
     renderExtraItem,
   } = props;
 
@@ -115,7 +116,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
         {title && (
-          <TouchableOpacity onPress={onShowMore}>
+          <TouchableOpacity onPress={onTitlePress} disabled={!onTitlePress}>
             <XStack>
               <H5 paddingLeft="$3" theme="alt1">
                 {title}

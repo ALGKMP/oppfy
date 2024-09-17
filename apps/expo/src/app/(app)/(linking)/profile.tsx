@@ -16,7 +16,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const routeProfile = async () => {
       if (!username) {
-        router.navigate("/(profile)/self-profile");
+        router.navigate("/(profile)/");
         return;
       }
 
@@ -39,7 +39,7 @@ export default function ProfilePage() {
           otherProfileIdResult.status === "rejected" ||
           selfProfileIdResult.status === "rejected"
         ) {
-          router.navigate("/(profile)/self-profile");
+          router.navigate("/(profile)/");
           return;
         }
 
@@ -47,12 +47,12 @@ export default function ProfilePage() {
 
         selfProfileId = selfProfileIdResult.value;
       } catch (error) {
-        router.navigate("/(profile)/self-profile");
+        router.navigate("/(profile)/");
         return;
       }
 
       if (selfProfileId === otherProfileId) {
-        router.navigate("/(profile)/self-profile");
+        router.navigate("/(profile)/");
       }
 
       router.navigate(`/(home)/profile/${username}`);

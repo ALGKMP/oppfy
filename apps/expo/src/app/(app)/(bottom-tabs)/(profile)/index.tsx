@@ -204,10 +204,10 @@ const SelfProfile = () => {
             profilePictureUrl: profileData?.profilePictureUrl,
           }}
           onFollowingPress={() =>
-            router.push("/self-connections/following-list")
+            router.push("/connections/following-list")
           }
           onFollowersPress={() =>
-            router.push("/self-connections/followers-list")
+            router.push("/connections/followers-list")
           }
           actions={[
             {
@@ -232,7 +232,7 @@ const SelfProfile = () => {
             title="Friends 🔥"
             showMore={friendItems.length < (profileData?.friendCount ?? 0)}
             onItemPress={navigateToProfile}
-            onShowMore={() => router.push("/self-connections/friend-list")}
+            onShowMore={() => router.push("/connections/friend-list")}
           />
         ) : (
           <PeopleCarousel
@@ -255,7 +255,6 @@ const SelfProfile = () => {
       profileData?.profilePictureUrl,
       profileData?.userId,
       profileData?.username,
-      recommendationItems.length,
       recommendationsData,
       router,
     ],

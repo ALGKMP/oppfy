@@ -444,7 +444,7 @@ const OtherProfile = () => {
             canViewContent
               ? () =>
                   router.push({
-                    pathname: "/profile/connections/[userId]/following-list",
+                    pathname: "/profile/connections/following-list",
                     params: { userId, username },
                   })
               : undefined
@@ -453,7 +453,7 @@ const OtherProfile = () => {
             canViewContent
               ? () =>
                   router.push({
-                    pathname: "/profile/connections/[userId]/followers-list",
+                    pathname: "/profile/connections/followers-list",
                     params: { userId, username },
                   })
               : undefined
@@ -467,10 +467,16 @@ const OtherProfile = () => {
             data={friendItems}
             title="Friends 🔥"
             showMore={friendItems.length < (profileData?.friendCount ?? 0)}
+            onTitlePress={() =>
+              router.push({
+                pathname: "/profile/connections/following-list",
+                params: { userId, username },
+              })
+            }
             onItemPress={navigateToProfile}
             onShowMore={() =>
               router.push({
-                pathname: "/profile/connections/[userId]/followers-list",
+                pathname: "/profile/connections/friend-list",
                 params: { userId, username },
               })
             }

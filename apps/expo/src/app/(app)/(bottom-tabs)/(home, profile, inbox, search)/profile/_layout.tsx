@@ -27,7 +27,7 @@ const ProfileLayout = () => {
         }}
       />
       <Stack.Screen
-        name="connections/[userId]"
+        name="connections"
         options={{
           header: (props) => <Header {...props} />,
           headerLeft: (props) => <HeaderLeft {...props} />,

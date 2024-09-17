@@ -15,6 +15,8 @@ const ConnectionsLayout = () => {
     initialRouteName: string;
   }>();
 
+  console.log("initialRouteName", initialRouteName);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: username,
@@ -25,7 +27,7 @@ const ConnectionsLayout = () => {
     <TopTabs
       tabBar={(props) => <TopTabBar {...props} />}
       backBehavior="none"
-      initialRouteName={initialRouteName}
+      // initialRouteName={initialRouteName}
       sceneContainerStyle={{
         backgroundColor: theme.background.val,
       }}
