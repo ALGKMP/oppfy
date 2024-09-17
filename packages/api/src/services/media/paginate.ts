@@ -5,6 +5,7 @@ import {
   BlockRepository,
   FollowRepository,
   FriendRepository,
+  UserRepository,
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
 import { S3Service } from "../aws/s3";
@@ -25,8 +26,7 @@ export class PaginationService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
-
-  private awsService = new S3Service();
+  private userRepository = new UserRepository();
   private cloudFrontService = new CloudFrontService();
 
   async paginateFollowersSelf(

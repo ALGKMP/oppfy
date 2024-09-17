@@ -39,8 +39,8 @@ export const useOptimisticUpdatePost = () => {
         );
         break;
       }
-      case "other-profile": {
-        if (!userId) return;
+
+      case "other-profile": { if (!userId) return;
         await utils.post.paginatePostsOfUserOther.cancel();
         const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({userId, pageSize: 10});
         if (!prevData) return;
@@ -60,6 +60,7 @@ export const useOptimisticUpdatePost = () => {
         );
         break;
       }
+
       case "single-post": {
         await utils.post.getPost.cancel();
         const prevData = utils.post.getPost.getData({ postId });
