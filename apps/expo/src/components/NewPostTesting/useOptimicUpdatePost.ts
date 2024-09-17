@@ -122,6 +122,7 @@ export const useOptimisticUpdatePost = () => {
         );
         break;
       }
+
       case "single-post": {
         const prevData = utils.post.getPost.getData({ postId });
         if (!prevData) return;
@@ -137,16 +138,24 @@ export const useOptimisticUpdatePost = () => {
   const invalidatePost = async ({
     postId,
     endpoint,
+    userId,
   }: {
     postId: string;
     endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
+    userId?: string;
   }) => {
     switch (endpoint) {
       case "self-profile":
-        await utils.post.paginatePostsOfUserSelf.invalidate();
+        await utils.post.paginatePostsOfUserSelf.invalidate({
+          pageSize: 10
+        });
         break;
       case "other-profile":
-        await utils.post.paginatePostsOfUserOther.invalidate();
+        if (!userId) return;
+        await utils.post.paginatePostsOfUserOther.invalidate({
+          userId,
+          pageSize: 10
+        });
         break;
       case "home-feed":
         // TODO: Implement this

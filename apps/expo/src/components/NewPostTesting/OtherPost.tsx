@@ -132,7 +132,7 @@ const OtherPost = (postProps: OtherPostProps) => {
     handleReportComment,
     handlePressProfilePicture,
     handlePressUsername,
-  } = useComments(postProps.id);
+  } = useComments({postId: postProps.id, endpoint: "other-profile", userId: postProps.recipient.id});
 
   const {
     handleSavePost,
