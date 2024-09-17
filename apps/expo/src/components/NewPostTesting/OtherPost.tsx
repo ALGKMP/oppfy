@@ -118,9 +118,11 @@ const OtherPost = (postProps: OtherPostProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
-  const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost(
-    {postId: postProps.id, endpoint: "other-profile", userId: postProps.recipient.id}
-  );
+  const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost({
+    postId: postProps.id,
+    endpoint: "other-profile",
+    userId: postProps.recipient.id,
+  });
   const { handleReportPost } = useReportPost(postProps.id);
 
   const {
@@ -132,7 +134,11 @@ const OtherPost = (postProps: OtherPostProps) => {
     handleReportComment,
     handlePressProfilePicture,
     handlePressUsername,
-  } = useComments({postId: postProps.id, endpoint: "other-profile", userId: postProps.recipient.id});
+  } = useComments({
+    postId: postProps.id,
+    endpoint: "other-profile",
+    userId: postProps.recipient.id,
+  });
 
   const {
     handleSavePost,

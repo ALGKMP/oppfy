@@ -18,6 +18,7 @@ import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
@@ -189,16 +190,18 @@ const OtherProfile = () => {
     username: string;
   }>();
 
+  const { data: selfProfileData } = useProfile();
+
   const {
-    data: profileData,
+    data: otherProfileData,
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
   } = api.profile.getFullProfileOther.useQuery({ userId });
 
-  const isBlocked = profileData?.networkStatus.blocked ?? false;
-  const isPrivate = profileData?.networkStatus.privacy === "private";
+  const isBlocked = otherProfileData?.networkStatus.blocked ?? false;
+  const isPrivate = otherProfileData?.networkStatus.privacy === "private";
   const isFollowing =
-    profileData?.networkStatus.targetUserFollowState === "Following";
+    otherProfileData?.networkStatus.targetUserFollowState === "Following";
   const canViewContent = !isBlocked && (!isPrivate || isFollowing);
 
   const {
@@ -377,7 +380,7 @@ const OtherProfile = () => {
   }, [unblockUser, userId, toast]);
 
   const moreOptionsButtonOptions: ButtonOption[] = useMemo(() => {
-    const isBlocked = profileData?.networkStatus.blocked ?? false;
+    const isBlocked = otherProfileData?.networkStatus.blocked ?? false;
 
     return [
       {
@@ -397,7 +400,7 @@ const OtherProfile = () => {
       },
     ];
   }, [
-    profileData?.networkStatus.blocked,
+    otherProfileData?.networkStatus.blocked,
     isUnblocking,
     isBlocking,
     handleUnblockUser,
@@ -415,7 +418,7 @@ const OtherProfile = () => {
         </View>
       ),
     });
-  }, [navigation, username, profileData]);
+  }, [navigation, username, otherProfileData]);
 
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
@@ -446,9 +449,9 @@ const OtherProfile = () => {
         createdAt={item.createdAt}
         caption={item.caption}
         self={{
-          id: profileData?.userId ?? "",
-          username: profileData?.username ?? "",
-          profilePicture: profileData?.profilePictureUrl,
+          id: selfProfileData?.userId ?? "",
+          username: selfProfileData?.username ?? "",
+          profilePicture: selfProfileData?.profilePictureUrl,
         }}
         author={{
           id: item.authorId,
@@ -475,16 +478,20 @@ const OtherProfile = () => {
         }}
       />
     ),
-    [profileData],
+    [
+      selfProfileData?.profilePictureUrl,
+      selfProfileData?.userId,
+      selfProfileData?.username,
+    ],
   );
 
   const { actions } = useProfileActions(userId);
 
   const renderActionButtons = useCallback((): ProfileAction[] => {
-    if (!profileData) return [];
+    if (!otherProfileData) return [];
 
     const { privacy, blocked, targetUserFollowState, targetUserFriendState } =
-      profileData.networkStatus;
+      otherProfileData.networkStatus;
 
     const buttonConfigs = {
       follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
@@ -535,7 +542,7 @@ const OtherProfile = () => {
           "backgroundColor" in config ? config.backgroundColor : undefined,
       };
     });
-  }, [profileData, actions]);
+  }, [otherProfileData, actions]);
 
   const renderHeader = useCallback(
     () => (
@@ -543,13 +550,13 @@ const OtherProfile = () => {
         <ProfileHeaderDetails
           loading={false}
           data={{
-            userId: profileData?.userId ?? "",
-            username: profileData?.username ?? "",
-            name: profileData?.name ?? "",
-            bio: profileData?.bio ?? "",
-            followerCount: profileData?.followerCount ?? 0,
-            followingCount: profileData?.followingCount ?? 0,
-            profilePictureUrl: profileData?.profilePictureUrl,
+            userId: otherProfileData?.userId ?? "",
+            username: otherProfileData?.username ?? "",
+            name: otherProfileData?.name ?? "",
+            bio: otherProfileData?.bio ?? "",
+            followerCount: otherProfileData?.followerCount ?? 0,
+            followingCount: otherProfileData?.followingCount ?? 0,
+            profilePictureUrl: otherProfileData?.profilePictureUrl,
           }}
           onFollowingPress={
             canViewContent
@@ -577,7 +584,7 @@ const OtherProfile = () => {
             loading={false}
             data={friendItems}
             title="Friends 🔥"
-            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
+            showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
             onTitlePress={() =>
               router.push({
                 pathname: "/profile/connections/following-list",
@@ -607,14 +614,14 @@ const OtherProfile = () => {
       friendItems,
       isLoadingRecommendationsData,
       navigateToProfile,
-      profileData?.bio,
-      profileData?.followerCount,
-      profileData?.followingCount,
-      profileData?.friendCount,
-      profileData?.name,
-      profileData?.profilePictureUrl,
-      profileData?.userId,
-      profileData?.username,
+      otherProfileData?.bio,
+      otherProfileData?.followerCount,
+      otherProfileData?.followingCount,
+      otherProfileData?.friendCount,
+      otherProfileData?.name,
+      otherProfileData?.profilePictureUrl,
+      otherProfileData?.userId,
+      otherProfileData?.username,
       recommendationsData,
       renderActionButtons,
       router,
