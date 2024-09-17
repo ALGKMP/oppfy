@@ -270,7 +270,7 @@ const PostItem = React.memo((props: PostItemProps) => {
   const handleRouteToNewUser = (userId: string, username: string) => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (user?.uid === userId) {
-      router.push({ pathname: `/(profile)/` });
+      router.push({ pathname: `/(profile)/self-profile` });
       return;
     }
     router.push({
