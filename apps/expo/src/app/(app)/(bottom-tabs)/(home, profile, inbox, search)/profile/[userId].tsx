@@ -6,7 +6,7 @@ import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
-import { getToken, Spacer, Text, View, YStack } from "tamagui";
+import { getToken, Spacer, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -24,60 +24,93 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 const useProfileActions = (userId: string) => {
   const utils = api.useUtils();
 
-  const invalidateQueries = useCallback(() => {
-    void utils.profile.getFullProfileOther.invalidate({ userId });
-    void utils.contacts.getRecommendationProfilesSelf.invalidate();
-  }, [utils, userId]);
+  // State to track invalidation status per action using action keys
+  const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
+    Record<string, boolean>
+  >({});
 
+  // Helper function to invalidate queries for a specific action
+  const invalidateQueries = useCallback(
+    async (actionKey: string) => {
+      setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
+      await Promise.all([
+        utils.profile.getFullProfileOther.invalidate({ userId }),
+        utils.contacts.getRecommendationProfilesSelf.invalidate(),
+      ]);
+      setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
+    },
+    [utils, userId],
+  );
+
+  // Mutations with onSettled callbacks that trigger invalidation per action
   const followUser = api.follow.followUser.useMutation({
-    onSettled: invalidateQueries,
+    onSettled: () => {
+      void invalidateQueries("follow");
+    },
   });
 
   const unfollowUser = api.follow.unfollowUser.useMutation({
-    onSettled: invalidateQueries,
+    onSettled: () => {
+      void invalidateQueries("unfollow");
+    },
   });
 
   const addFriend = api.friend.sendFriendRequest.useMutation({
-    onSettled: invalidateQueries,
+    onSettled: () => {
+      void invalidateQueries("addFriend");
+    },
   });
 
   const removeFriend = api.friend.removeFriend.useMutation({
-    onSettled: invalidateQueries,
+    onSettled: () => {
+      void invalidateQueries("removeFriend");
+    },
   });
 
   const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
-    onSettled: invalidateQueries,
+    onSettled: () => {
+      void invalidateQueries("cancelFollowRequest");
+    },
   });
 
   const cancelFriendRequest = api.friend.cancelFriendRequest.useMutation({
-    onSettled: invalidateQueries,
+    onSettled: () => {
+      void invalidateQueries("cancelFriendRequest");
+    },
   });
 
+  // Action handlers
   const handleFollow = useCallback(
-    () => followUser.mutate({ userId: userId }),
+    () => followUser.mutate({ userId }),
     [followUser, userId],
   );
+
   const handleUnfollow = useCallback(
-    () => unfollowUser.mutate({ userId: userId }),
+    () => unfollowUser.mutate({ userId }),
     [unfollowUser, userId],
   );
+
   const handleAddFriend = useCallback(
     () => addFriend.mutate({ recipientId: userId }),
     [addFriend, userId],
   );
+
   const handleRemoveFriend = useCallback(
     () => removeFriend.mutate({ recipientId: userId }),
     [removeFriend, userId],
   );
+
   const handleCancelFollowRequest = useCallback(
     () => cancelFollowRequest.mutate({ recipientId: userId }),
     [cancelFollowRequest, userId],
   );
+
   const handleCancelFriendRequest = useCallback(
     () => cancelFriendRequest.mutate({ recipientId: userId }),
     [cancelFriendRequest, userId],
   );
 
+  // Determine if any action is currently loading
   const isAnyActionLoading = useMemo(() => {
     return (
       followUser.isLoading ||
@@ -85,47 +118,56 @@ const useProfileActions = (userId: string) => {
       addFriend.isLoading ||
       removeFriend.isLoading ||
       cancelFollowRequest.isLoading ||
-      cancelFriendRequest.isLoading
+      cancelFriendRequest.isLoading ||
+      Object.values(isInvalidatingByAction).some(
+        (isInvalidating) => isInvalidating,
+      )
     );
   }, [
-    followUser,
-    unfollowUser,
-    addFriend,
-    removeFriend,
-    cancelFollowRequest,
-    cancelFriendRequest,
+    followUser.isLoading,
+    unfollowUser.isLoading,
+    addFriend.isLoading,
+    removeFriend.isLoading,
+    cancelFollowRequest.isLoading,
+    cancelFriendRequest.isLoading,
+    isInvalidatingByAction,
   ]);
 
+  // Return actions with handlers and loading states
   return {
     actions: {
       follow: {
         handler: handleFollow,
-        loading: followUser.isLoading,
+        loading: followUser.isLoading || isInvalidatingByAction.follow,
         disabled: isAnyActionLoading,
       },
       unfollow: {
         handler: handleUnfollow,
-        loading: unfollowUser.isLoading,
+        loading: unfollowUser.isLoading || isInvalidatingByAction.unfollow,
         disabled: isAnyActionLoading,
       },
       addFriend: {
         handler: handleAddFriend,
-        loading: addFriend.isLoading,
+        loading: addFriend.isLoading || isInvalidatingByAction.addFriend,
         disabled: isAnyActionLoading,
       },
       removeFriend: {
         handler: handleRemoveFriend,
-        loading: removeFriend.isLoading,
+        loading: removeFriend.isLoading || isInvalidatingByAction.removeFriend,
         disabled: isAnyActionLoading,
       },
       cancelFollowRequest: {
         handler: handleCancelFollowRequest,
-        loading: cancelFollowRequest.isLoading,
+        loading:
+          cancelFollowRequest.isLoading ||
+          isInvalidatingByAction.cancelFollowRequest,
         disabled: isAnyActionLoading,
       },
       cancelFriendRequest: {
         handler: handleCancelFriendRequest,
-        loading: cancelFriendRequest.isLoading,
+        loading:
+          cancelFriendRequest.isLoading ||
+          isInvalidatingByAction.cancelFriendRequest,
         disabled: isAnyActionLoading,
       },
     },
