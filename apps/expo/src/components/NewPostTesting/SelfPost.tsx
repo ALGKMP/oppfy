@@ -77,7 +77,7 @@ const SelfPost = (postProps: PostData) => {
     handleReportComment,
     handlePressProfilePicture,
     handlePressUsername,
-  } = useComments(postProps.id);
+  } = useComments({postId: postProps.id, endpoint: "self-profile"});
 
   const {
     handleSavePost,

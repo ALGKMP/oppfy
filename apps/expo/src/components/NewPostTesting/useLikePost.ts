@@ -35,7 +35,7 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
       // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
-    onError: (_err, newHasLikedData, ctx) => {
+    onError: async (_err, newHasLikedData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
@@ -43,6 +43,7 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
+      await invalidatePost({endpoint, postId, userId});
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
@@ -67,7 +68,7 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
       // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
-    onError: (_err, newHasLikedData, ctx) => {
+    onError: async (_err, newHasLikedData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
@@ -75,6 +76,7 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
+      await invalidatePost({endpoint, postId});
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
@@ -98,7 +100,7 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
           currentHasLiked
             ? await unlikePost.mutateAsync({ postId })
             : await likePost.mutateAsync({ postId });
-          await invalidatePost({postId, endpoint}) // Use the passed in endpoint
+          await invalidatePost({endpoint, postId});
         })().catch((error) => {
           console.error("Error in throttledLikeRequest:", error);
         });
