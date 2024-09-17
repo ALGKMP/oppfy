@@ -225,7 +225,6 @@ const SelfProfile = () => {
             loading={false}
             data={friendItems}
             title="Friends 🔥"
-            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
             onItemPress={navigateToProfile}
             onShowMore={() => router.push("/self-connections/friend-list")}
           />

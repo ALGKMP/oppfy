@@ -463,25 +463,23 @@ const OtherProfile = () => {
 
         {friendItems.length > 0 ? (
           <PeopleCarousel
-            loading={isLoadingFriendsData}
+            loading={false}
             data={friendItems}
             title="Friends 🔥"
-            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
             onItemPress={navigateToProfile}
-            onShowMore={() => {
-              // Handle show more friends
-            }}
+            onShowMore={() =>
+              router.push({
+                pathname: "/profile/connections/[userId]/followers-list",
+                params: { userId, username },
+              })
+            }
           />
         ) : (
           <PeopleCarousel
             loading={isLoadingRecommendationsData}
             data={recommendationsData ?? []}
             title="Suggestions 🔥"
-            showMore={false}
             onItemPress={navigateToProfile}
-            onShowMore={() => {
-              // Handle show more recommendations
-            }}
           />
         )}
       </YStack>
@@ -489,13 +487,11 @@ const OtherProfile = () => {
     [
       canViewContent,
       friendItems,
-      isLoadingFriendsData,
       isLoadingRecommendationsData,
       navigateToProfile,
       profileData?.bio,
       profileData?.followerCount,
       profileData?.followingCount,
-      profileData?.friendCount,
       profileData?.name,
       profileData?.profilePictureUrl,
       profileData?.userId,
