@@ -47,7 +47,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   const throttledHandleShowMore = useRef(
     throttle(
       () => {
-        if (!props.loading) props.onShowMore();
+        if (!props.loading && 'onShowMore' in props) props.onShowMore();
       },
       300,
       { leading: true, trailing: false },
@@ -64,26 +64,18 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
       const offsetX = contentOffset.x;
       const layoutWidth = layoutMeasurement.width;
 
-      if (offsetX + layoutWidth - 80 >= contentWidth) {
+      if (offsetX + layoutWidth >= contentWidth + 100) {
         throttledHandleShowMore();
       }
     },
-    [props, throttledHandleShowMore],
+    [props.loading, throttledHandleShowMore],
   );
 
   useEffect(() => {
-    if (!props.loading) {
+    return () => {
       throttledHandleShowMore.cancel();
-      throttledHandleShowMore.flush();
-    }
-  }, [props, throttledHandleShowMore]);
-
-  useEffect(() => {
-    if (!props.loading && "onShowMore" in props) {
-      // eslint-disable-next-line react-compiler/react-compiler
-      throttledHandleShowMore.cancel = props.onShowMore;
-    }
-  }, [props, throttledHandleShowMore]);
+    };
+  }, [throttledHandleShowMore]);
 
   if (props.loading) {
     return (
@@ -150,23 +142,20 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
             </TouchableOpacity>
           )}
           ListFooterComponent={
-
-            renderExtraItem ? (
-              <>
-                {renderExtraItem()}
-              </>
-            ) : null
-            {showMore && (
-              <View
-                marginRight={-100}
-                justifyContent="center"
-                alignItems="center"
-              >
-                <SizableText color="#F214FF" fontWeight="600">
-                  See more
-                </SizableText>
-              </View>
-            )}
+            <>
+              {renderExtraItem?.()}
+              {showMore && (
+                <View
+                  marginRight={-100}
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <SizableText color="#F214FF" fontWeight="600">
+                    See more
+                  </SizableText>
+                </View>
+              )}
+            </>
           }
           ItemSeparatorComponent={() => <Spacer size="$2" />}
           contentContainerStyle={{
