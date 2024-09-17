@@ -534,7 +534,7 @@ const OtherProfile = () => {
           paddingVertical="$10"
         >
           <Lock size={100} color="gray" />
-          <Text fontSize="$6">This account is private</Text>
+          <Text fontSize="$6" fontWeight="bold">This account is private</Text>
         </YStack>
       );
     }
