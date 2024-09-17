@@ -2,6 +2,7 @@ import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { utils } from "@react-native-firebase/app";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
@@ -181,6 +182,8 @@ const OtherProfile = () => {
   const navigation = useNavigation();
   const toast = useToastController();
 
+  const utils = api.useUtils();
+
   const { userId, username } = useLocalSearchParams<{
     userId: string;
     username: string;
@@ -285,9 +288,75 @@ const OtherProfile = () => {
   >("closed");
 
   const { isLoading: isBlocking, ...blockUser } =
-    api.block.blockUser.useMutation();
+    api.block.blockUser.useMutation({
+      onMutate: async (_newBlockedUser) => {
+        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+        await utils.profile.getFullProfileOther.cancel();
+
+        // Get the data from the queryCache
+        const prevData = utils.profile.getFullProfileOther.getData({ userId });
+        if (prevData === undefined) return;
+
+        // Optimistically update the data
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            networkStatus: {
+              ...prevData.networkStatus,
+              blocked: true,
+            },
+          },
+        );
+
+        // Return the previous data so we can revert if something goes wrong
+        return { prevData };
+      },
+      onError: (_err, _newBlockedUser, ctx) => {
+        if (ctx === undefined) return;
+
+        // If the mutation fails, use the context-value from onMutate
+        utils.profile.getFullProfileOther.setData({ userId }, ctx.prevData);
+      },
+      onSettled: async () => {
+        await utils.profile.getFullProfileOther.invalidate({ userId });
+      },
+    });
   const { isLoading: isUnblocking, ...unblockUser } =
-    api.block.unblockUser.useMutation();
+    api.block.unblockUser.useMutation({
+      onMutate: async (_newUnblockedUser) => {
+        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+        await utils.profile.getFullProfileOther.cancel();
+
+        // Get the data from the queryCache
+        const prevData = utils.profile.getFullProfileOther.getData({ userId });
+        if (prevData === undefined) return;
+
+        // Optimistically update the data
+        utils.profile.getFullProfileOther.setData(
+          { userId },
+          {
+            ...prevData,
+            networkStatus: {
+              ...prevData.networkStatus,
+              blocked: false,
+            },
+          },
+        );
+
+        // Return the previous data so we can revert if something goes wrong
+        return { prevData };
+      },
+      onError: (_err, _newUnblockedUser, ctx) => {
+        if (ctx === undefined) return;
+
+        // If the mutation fails, use the context-value from onMutate
+        utils.profile.getFullProfileOther.setData({ userId }, ctx.prevData);
+      },
+      onSettled: async () => {
+        await utils.profile.getFullProfileOther.invalidate({ userId });
+      },
+    });
 
   const handleOpenMoreOptionsSheet = () => {
     setSheetState("moreOptions");
