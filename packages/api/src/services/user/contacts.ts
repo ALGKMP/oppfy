@@ -133,8 +133,11 @@ export class ContactService {
       ...recommendationsIds.tier3,
     ];
     if (allRecommendations.length === 0) {
-      const randomProfiles = await this.userRepository.getRandomActiveProfiles(10);
-      allRecommendations = randomProfiles.map(profile => profile.userId).filter(id => id !== userId);
+      const randomProfiles =
+        await this.userRepository.getRandomActiveProfiles(10);
+      allRecommendations = randomProfiles
+        .map((profile) => profile.userId)
+        .filter((id) => id !== userId);
     }
 
     // start a transaction to get all the usernames and profilePhotos

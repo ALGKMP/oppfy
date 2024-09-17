@@ -22,6 +22,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 type NotificationItem =
   RouterOutputs["notifications"]["paginateNotifications"]["items"][0];
 
+const REFETCH_INTERVAL = 1000 * 30;
+
 const Inbox = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -34,13 +36,17 @@ const Inbox = () => {
     data: requestsCount,
     isLoading: isCountRequestsLoading,
     refetch: refetchRequestCount,
-  } = api.request.countRequests.useQuery();
+  } = api.request.countRequests.useQuery(undefined, {
+    refetchInterval: REFETCH_INTERVAL,
+  });
 
   const {
     data: recommendationsData,
     isLoading: isRecommendationsLoading,
     refetch: refetchRecommendations,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery();
+  } = api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+    refetchInterval: REFETCH_INTERVAL,
+  });
 
   const {
     data: notificationsData,
@@ -51,21 +57,10 @@ const Inbox = () => {
     refetch: refetchNotifications,
   } = api.notifications.paginateNotifications.useInfiniteQuery(
     { pageSize: 20 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      const refetchAndInvalidate = async () => {
-        await Promise.all([refetchRequestCount(), refetchNotifications()]);
-        await utils.notifications.getUnreadNotificationsCount.invalidate();
-      };
-      void refetchAndInvalidate();
-    }, [
-      refetchRequestCount,
-      refetchNotifications,
-      utils.notifications.getUnreadNotificationsCount,
-    ]),
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchInterval: REFETCH_INTERVAL,
+    },
   );
 
   const totalRequestCount =
@@ -85,13 +80,17 @@ const Inbox = () => {
 
   const followUser = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.notifications.paginateNotifications.cancel();
+
+      // Get the data from the queryCache
       const prevData =
         utils.notifications.paginateNotifications.getInfiniteData({
           pageSize: 20,
         });
-      if (!prevData) return;
+      if (prevData === undefined) return;
 
+      // Optimistically update the data
       utils.notifications.paginateNotifications.setInfiniteData(
         { pageSize: 20 },
         {
@@ -113,16 +112,20 @@ const Inbox = () => {
         },
       );
 
+      // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
-      if (!ctx) return;
+      if (ctx === undefined) return;
+
+      // If the mutation fails, use the context-value from onMutate
       utils.notifications.paginateNotifications.setInfiniteData(
-        {},
+        { pageSize: 20 },
         ctx.prevData,
       );
     },
     onSettled: async () => {
+      // Sync with server once mutation has settled
       await utils.notifications.paginateNotifications.invalidate();
     },
   });

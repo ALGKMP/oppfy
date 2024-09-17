@@ -5,8 +5,8 @@ import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
 } from "@react-navigation/native-stack/src/types";
-import { ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { Text, useTheme, View } from "tamagui";
+import { ChevronLeft } from "@tamagui/lucide-icons";
+import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";
 import { Stack } from "~/layouts";

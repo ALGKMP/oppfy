@@ -17,15 +17,17 @@ const EmptyPlaceholder = ({ title, subtitle, icon }: EmptyPlaceholderProps) => (
         size: ((icon.props as IconProps).size as string) || "$10",
       })}
 
-    <SizableText textAlign="center" size="$5" fontWeight="bold">
-      {title}
-    </SizableText>
+    <YStack>
+      <SizableText textAlign="center" size="$5" fontWeight="bold">
+        {title}
+      </SizableText>
 
-    {subtitle && (
-      <Paragraph textAlign="center" theme="alt1">
-        {subtitle}
-      </Paragraph>
-    )}
+      {subtitle && (
+        <Paragraph textAlign="center" theme="alt1">
+          {subtitle}
+        </Paragraph>
+      )}
+    </YStack>
   </YStack>
 );
 

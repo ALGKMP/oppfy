@@ -47,18 +47,17 @@ Reanimated.addWhitelistedNativeProps({
 });
 
 const MAX_ZOOM_FACTOR = 10;
-const MEDIA_ASPECT_RATIO = 16 / 9;
+const SCALE_FULL_ZOOM = 3;
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
 const SCREEN_HEIGHT = Dimensions.get("screen").height;
-
-const SCALE_FULL_ZOOM = 3;
+const ASPECT_RATIO = 16 / 9;
 
 const CameraPage = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const SAFE_AREA_PADDING = {
+  const safeAreaPadding = {
     paddingLeft: insets.left,
     paddingTop: insets.top,
     paddingRight: insets.right,
@@ -103,10 +102,10 @@ const CameraPage = () => {
 
   const format = useCameraFormat(device, [
     { fps: targetFps },
-    { videoAspectRatio: MEDIA_ASPECT_RATIO },
-    { videoResolution: { height: 1920, width: 1080 } },
-    { photoAspectRatio: MEDIA_ASPECT_RATIO },
-    { photoResolution: { height: 1920, width: 1080 } },
+    { videoAspectRatio: ASPECT_RATIO },
+    { videoResolution: "max" },
+    { photoAspectRatio: ASPECT_RATIO },
+    { photoResolution: "max" },
   ]);
 
   const _fps = Math.min(format?.maxFps ?? 1, targetFps);
@@ -134,17 +133,35 @@ const CameraPage = () => {
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
 
+      const dimension1 =
+        type === "video" ? format?.videoWidth : format?.photoWidth;
+      const dimension2 =
+        type === "video" ? format?.videoHeight : format?.photoHeight;
+
+      if (dimension1 === undefined || dimension2 === undefined) {
+        throw new Error("Dimension is undefined");
+      }
+
+      const width = Math.min(dimension1, dimension2);
+      const height = Math.max(dimension1, dimension2);
+
       router.push({
         pathname: "/preview",
         params: {
           type,
           uri,
-          width: "1080",
-          height: "1920",
+          width,
+          height,
         },
       });
     },
-    [router],
+    [
+      format?.photoHeight,
+      format?.photoWidth,
+      format?.videoHeight,
+      format?.videoWidth,
+      router,
+    ],
   );
 
   const onOpenMediaPicker = useCallback(async () => {
@@ -246,113 +263,111 @@ const CameraPage = () => {
   if (device === undefined) return <NoCameraDeviceError />;
 
   return (
-    <View flex={1}>
-      <View
-        width={SCREEN_WIDTH}
-        height={Math.min(
-          (SCREEN_WIDTH * 16) / 9,
-          SCREEN_HEIGHT - insets.top - insets.bottom - 70,
-        )}
-        borderRadius={20}
-        overflow="hidden"
-        alignSelf="center"
-        position="absolute"
-        top={SAFE_AREA_PADDING.paddingTop}
-      >
-        <GestureDetector gesture={composedGesture}>
-          {/* Do not delete this View, its needed to pass touch events to the camera */}
-          <View flex={1}>
-            <ReanimatedCamera
-              ref={camera}
-              device={device}
-              isActive={isActive}
-              onInitialized={onInitialized}
-              format={format}
-              fps={30}
-              photoHdr={photoHdr}
-              videoHdr={videoHdr}
-              photoQualityBalance="quality"
-              lowLightBoost={device.supportsLowLightBoost && enableNightMode}
-              enableZoomGesture={false}
-              animatedProps={cameraAnimatedProps}
-              photo={true}
-              video={true}
-              audio={microphone.hasPermission}
-              enableLocation={location.hasPermission}
-              style={{
-                flex: 1,
-              }}
-            />
-          </View>
-        </GestureDetector>
+    <View
+      flex={1}
+      width={SCREEN_WIDTH}
+      height={Math.min(
+        (SCREEN_WIDTH * 16) / 9,
+        SCREEN_HEIGHT - insets.top - insets.bottom - 70,
+      )}
+      borderRadius={20}
+      overflow="hidden"
+      alignSelf="center"
+      position="absolute"
+      top={safeAreaPadding.paddingTop}
+    >
+      <GestureDetector gesture={composedGesture}>
+        {/* Do not delete this View, its needed to pass touch events to the camera */}
+        <View flex={1}>
+          <ReanimatedCamera
+            ref={camera}
+            device={device}
+            isActive={isActive}
+            onInitialized={onInitialized}
+            format={format}
+            fps={30}
+            photoHdr={photoHdr}
+            videoHdr={videoHdr}
+            photoQualityBalance="quality"
+            lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+            enableZoomGesture={false}
+            animatedProps={cameraAnimatedProps}
+            photo={true}
+            video={true}
+            audio={microphone.hasPermission}
+            enableLocation={location.hasPermission}
+            style={{
+              flex: 1,
+            }}
+          />
+        </View>
+      </GestureDetector>
 
-        {animations.map(({ id, point }) => (
-          <FocusIcon key={id} x={point.x} y={point.y} />
-        ))}
+      {animations.map(({ id, point }) => (
+        <FocusIcon key={id} x={point.x} y={point.y} />
+      ))}
 
-        <CaptureButton
-          style={{
+      <CaptureButton
+        style={{
+          position: "absolute",
+          alignSelf: "center",
+          bottom: 36,
+        }}
+        camera={camera}
+        onMediaCaptured={onMediaCaptured}
+        cameraZoom={zoom}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+        flash={supportsFlash ? flash : "off"}
+        enabled={isCameraInitialized && isActive}
+        setIsPressingButton={setIsPressingButton}
+      />
+
+      <TouchableOpacity
+        style={[
+          styles.iconButton,
+          {
             position: "absolute",
-            alignSelf: "center",
-            bottom: 36,
-          }}
-          camera={camera}
-          onMediaCaptured={onMediaCaptured}
-          cameraZoom={zoom}
-          minZoom={minZoom}
-          maxZoom={maxZoom}
-          flash={supportsFlash ? flash : "off"}
-          enabled={isCameraInitialized && isActive}
-          // enabled={true}
-          setIsPressingButton={setIsPressingButton}
-        />
+            bottom: 12,
+            left: 12,
+          },
+        ]}
+        onPress={onOpenMediaPicker}
+      >
+        <BlurView intensity={50} style={styles.blurView}>
+          <Ionicons name="images" color="white" size={24} />
+        </BlurView>
+      </TouchableOpacity>
 
+      <View
+        position="absolute"
+        top={12}
+        right={12}
+        flexDirection="column"
+        gap="$2"
+      >
         <TouchableOpacity
-          style={[
-            styles.iconButton,
-            {
-              position: "absolute",
-              bottom: 12,
-              left: 12,
-            },
-          ]}
-          onPress={onOpenMediaPicker}
+          style={styles.iconButton}
+          onPress={onFlipCameraPressed}
         >
           <BlurView intensity={50} style={styles.blurView}>
-            <Ionicons name="images" color="white" size={24} />
+            <Ionicons name="camera-reverse" color="white" size={24} />
           </BlurView>
         </TouchableOpacity>
-
-        <View
-          position="absolute"
-          top={12}
-          right={12}
-          flexDirection="column"
-          gap={"$2"}
-        >
+        {supportsFlash && (
           <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onFlipCameraPressed}
+            style={[styles.iconButton]}
+            onPress={onFlashPressed}
           >
             <BlurView intensity={50} style={styles.blurView}>
-              <Ionicons name="camera-reverse" color="white" size={24} />
+              <Ionicons
+                name={flash === "on" ? "flash" : "flash-off"}
+                color="white"
+                size={24}
+              />
             </BlurView>
           </TouchableOpacity>
-          {supportsFlash && (
-            <TouchableOpacity
-              style={[styles.iconButton]}
-              onPress={onFlashPressed}
-            >
-              <BlurView intensity={50} style={styles.blurView}>
-                <Ionicons
-                  name={flash === "on" ? "flash" : "flash-off"}
-                  color="white"
-                  size={24}
-                />
-              </BlurView>
-            </TouchableOpacity>
-          )}
-        </View>
+        )}
       </View>
     </View>
   );
