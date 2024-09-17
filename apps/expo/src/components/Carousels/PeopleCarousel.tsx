@@ -37,9 +37,10 @@ interface LoadedProps<T extends PersonItem> {
   emoji?: string;
   showMore?: boolean;
   onItemPress: (item: T) => void;
-  onShowMore: () => void;
+  onShowMore?: () => void;
   renderExtraItem?: () => React.ReactElement;
 }
+import * as Haptics from "expo-haptics";
 
 type PeopleCarouselProps<T extends PersonItem> = LoadingProps | LoadedProps<T>;
 
@@ -47,7 +48,9 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   const throttledHandleShowMore = useRef(
     throttle(
       () => {
-        if (!props.loading && 'onShowMore' in props) props.onShowMore();
+        if (!props.loading && props.onShowMore) {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          props.onShowMore()};
       },
       300,
       { leading: true, trailing: false },
