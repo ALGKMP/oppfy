@@ -14,6 +14,7 @@ import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { CloudFrontService } from "../aws/cloudfront";
 import { NotificationsService } from "../user/notifications";
+import { UserService } from "../user/user";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -61,6 +62,7 @@ export class PostService {
 
   private cloudFrontService = new CloudFrontService();
   private notificationsService = new NotificationsService();
+  private userService = new UserService();
 
   async paginatePostsOfUserSelf(
     userId: string,
@@ -85,11 +87,33 @@ export class PostService {
   }
 
   async paginatePostsOfUserOther(
-    userId: string,
-    cursor: PostCursor | null = null,
-    pageSize?: number,
+    {
+      userId,
+      cursor,
+      pageSize,
+      currentUserId,
+    }: {
+      userId: string;
+      cursor: PostCursor | null;
+      pageSize?: number;
+      currentUserId: string;
+    }
   ): Promise<PaginatedResponse<Post>> {
     try {
+      const canAccess = await this.userService.canAccessUserData({
+        currentUserId,
+        targetUserId: userId,
+      });
+      console.log("Can access FUCK FUCK FUCK FUCK", canAccess);
+      if (!canAccess) {
+        console.log("User cannot access this data");
+        return {
+          items: [],
+          nextCursor: undefined,
+        };
+      }
+      console.log("User is able to access this data");
+
       const data = await this.postRepository.paginatePostsOfUser(
         userId,
         cursor,

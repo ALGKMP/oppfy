@@ -9,6 +9,7 @@ import {
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
 import { S3Service } from "../aws/s3";
+import { UserService } from "../user/user";
 
 // TODO: Move these types into a types file and put the paginated functions into their services.
 
@@ -26,8 +27,9 @@ export class PaginationService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
   private blockRepository = new BlockRepository();
-  private userRepository = new UserRepository();
   private cloudFrontService = new CloudFrontService();
+
+  private userService = new UserService();
 
   async paginateFollowersSelf(
     userId: string,
@@ -48,6 +50,14 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
+    const canAccess = await this.userService.canAccessUserData({currentUserId, targetUserId: userId});
+    if (!canAccess) {
+      return {
+        items: [],
+        nextCursor: undefined,
+      };
+    }
+
     const data = await this.followRepository.paginateFollowersOthers(
       userId,
       currentUserId,
@@ -76,6 +86,15 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
+
+    const canAccess = await this.userService.canAccessUserData({currentUserId, targetUserId: userId});
+    if (!canAccess) {
+      return {
+        items: [],
+        nextCursor: undefined,
+      };
+    }
+
     const data = await this.followRepository.paginateFollowingOthers(
       userId,
       currentUserId,
@@ -105,6 +124,14 @@ export class PaginationService {
     pageSize = 10,
     currentUserId: string,
   ) {
+
+    const canAccess = await this.userService.canAccessUserData({currentUserId, targetUserId: userId});
+    if (!canAccess) {
+      return {
+        items: [],
+        nextCursor: undefined,
+      };
+    }
     const data = await this.friendRepository.paginateFriendsOther(
       userId,
       currentUserId,

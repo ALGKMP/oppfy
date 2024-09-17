@@ -1,5 +1,7 @@
 import { DomainError, ErrorCode } from "../../errors";
 import {
+  BlockRepository,
+  FollowRepository,
   PostRepository,
   ProfileRepository,
   SearchRepository,
@@ -12,6 +14,8 @@ export class UserService {
   private userRepository = new UserRepository();
   private postRepository = new PostRepository();
   private profileRepository = new ProfileRepository();
+  private followRepository = new FollowRepository();
+  private blockRepository = new BlockRepository();
   private auth = auth;
 
 
@@ -63,7 +67,6 @@ export class UserService {
     const user = await this.profileRepository.getUserProfile(userId);
 
     if (user === undefined) return false;
-    if (user.profile === undefined) return false;
 
     return [
       user.profile.dateOfBirth,
@@ -75,10 +78,28 @@ export class UserService {
   async isNewUser(uid: string) {
     const counts = await this.postRepository.getCountOfPostsNotOnApp(uid);
 
-    if (counts === undefined) {
-      return true;
-    }
-
     return counts[0]?.count === 0;
   }
+
+  async canAccessUserData({currentUserId, targetUserId}: {currentUserId: string, targetUserId: string}): Promise<boolean> {
+    if (currentUserId === targetUserId) return true;
+
+    const targetUser = await this.userRepository.getUser(targetUserId);
+    if (!targetUser) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "Target user not found");
+    }
+
+    // Check if the current user is blocked by the target user
+    const isBlocked = await this.blockRepository.getBlockedUser(targetUserId, currentUserId);
+    if (isBlocked) return false;
+
+    if (targetUser.privacySetting === "public") return true;
+
+    const isFollowing = await this.followRepository.getFollower(currentUserId, targetUserId);
+    console.log("isFollowing", isFollowing);
+    if (isFollowing) return true;
+
+    return false;
+  }
+
 }
