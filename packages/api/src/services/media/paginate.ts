@@ -1,14 +1,10 @@
-import { env } from "@oppfy/env";
-
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
   FollowRepository,
   FriendRepository,
-  UserRepository,
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
-import { S3Service } from "../aws/s3";
 import { UserService } from "../user/user";
 
 // TODO: Move these types into a types file and put the paginated functions into their services.
