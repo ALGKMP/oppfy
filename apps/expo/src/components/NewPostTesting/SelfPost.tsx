@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 
-import AlertDialog from "../Dialogs/Dialog";
+import { AlertDialog } from "../Dialogs";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
@@ -64,9 +64,10 @@ const SelfPost = (postProps: PostData) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
-  const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost(
-    {postId: postProps.id, endpoint: "self-profile"}
-  );
+  const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost({
+    postId: postProps.id,
+    endpoint: "self-profile",
+  });
 
   const {
     commentItems,
@@ -77,7 +78,7 @@ const SelfPost = (postProps: PostData) => {
     handleReportComment,
     handlePressProfilePicture,
     handlePressUsername,
-  } = useComments({postId: postProps.id, endpoint: "self-profile"});
+  } = useComments({ postId: postProps.id, endpoint: "self-profile" });
 
   const {
     handleSavePost,
@@ -158,11 +159,11 @@ const SelfPost = (postProps: PostData) => {
 
       <AlertDialog
         isVisible={sheetState === "confirmDelete"}
-        onAccept={handleDeletePost}
         title="Are you sure you want to delete this post?"
         subtitle="This action cannot be undone."
         acceptText="Delete"
         acceptTextProps={{ color: "$red9" }}
+        onAccept={handleDeletePost}
       />
     </>
   );

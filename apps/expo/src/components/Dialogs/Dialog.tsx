@@ -124,7 +124,7 @@ const Dialog = ({
             style={containerStyle}
           >
             <YStack
-              width={"100%"}
+              width="100%"
               paddingVertical="$4"
               paddingHorizontal="$6"
               backgroundColor="$background"
@@ -150,8 +150,8 @@ const Dialog = ({
                 <Separator vertical />
                 <TouchableOpacity
                   onPress={() => {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     handleAccept();
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
                   style={{
                     width: "100%",

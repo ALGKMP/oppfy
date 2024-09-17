@@ -1,9 +1,7 @@
 import { z } from "zod";
 
 import { env } from "@oppfy/env";
-import {
-  sharedValidators,
-} from "@oppfy/validators";
+import { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {

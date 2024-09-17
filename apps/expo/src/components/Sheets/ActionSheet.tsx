@@ -1,8 +1,12 @@
-import type { ReactElement, ReactNode } from "react";
 import React, { useCallback, useEffect, useState } from "react";
+import type { ReactElement, ReactNode } from "react";
 import type { ImageSourcePropType } from "react-native";
-import { Modal, StyleSheet } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -13,7 +17,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import type { ParagraphProps, SizableTextProps } from "tamagui";
@@ -126,13 +129,19 @@ const ActionSheet = ({
         onRequestClose={closeModal}
         statusBarTranslucent
       >
-        <Animated.View style={[styles.overlay, backgroundStyle]}>
-          <BlurView intensity={10} style={StyleSheet.absoluteFill} />
+        <View style={styles.modalContainer}>
+          {/* Animated Backdrop */}
+          <Animated.View style={[styles.backdrop, backgroundStyle]}>
+            <TouchableWithoutFeedback onPress={closeModal}>
+              <View style={StyleSheet.absoluteFill} />
+            </TouchableWithoutFeedback>
+          </Animated.View>
+          {/* Modal Content */}
           <AnimatedYStack
             width="100%"
             paddingHorizontal="$2"
             paddingBottom={insets.bottom}
-            style={containerStyle}
+            style={[containerStyle, styles.modalContent]}
             gap="$2"
           >
             <YStack
@@ -188,7 +197,6 @@ const ActionSheet = ({
                           Haptics.ImpactFeedbackStyle.Light,
                         );
                         if (option.autoClose !== false) {
-                          // Check autoClose prop
                           closeModal();
                         }
                       }
@@ -234,17 +242,23 @@ const ActionSheet = ({
               </TouchableOpacity>
             </View>
           </AnimatedYStack>
-        </Animated.View>
+        </View>
       </Modal>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
+  modalContainer: {
+    flex: 1,
     justifyContent: "flex-end",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  modalContent: {
+    zIndex: 1,
   },
   optionButton: {
     padding: 16,
@@ -261,9 +275,6 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     marginRight: 8,
-  },
-  loadingIndicator: {
-    marginLeft: 8,
   },
 });
 
