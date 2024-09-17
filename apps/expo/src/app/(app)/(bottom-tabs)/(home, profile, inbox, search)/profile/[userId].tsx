@@ -527,15 +527,13 @@ const OtherProfile = () => {
 
     if (isPrivate && !isFollowing) {
       return (
-        <YStack
-          alignItems="center"
-          justifyContent="center"
-          flex={1}
-          paddingVertical="$10"
-        >
-          <Lock size={100} color="gray" />
-          <Text fontSize="$6">This account is private</Text>
-        </YStack>
+        <View paddingTop="$6">
+          <EmptyPlaceholder
+            icon={<Lock size="$10" />}
+            title="This account is private"
+            subtitle="You need to follow this user to view their posts"
+          />
+        </View>
       );
     }
 
