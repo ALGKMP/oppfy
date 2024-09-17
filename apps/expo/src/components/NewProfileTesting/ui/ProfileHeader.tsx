@@ -177,7 +177,7 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
             disabled={action.disabled}
           >
             <XStack gap="$2" alignItems="center">
-              <Text>{action.label}</Text>
+              <Text textAlign="center">{action.label}</Text>
               {action.loading && <Spinner size="small" color="$color" />}
             </XStack>
           </Button>
