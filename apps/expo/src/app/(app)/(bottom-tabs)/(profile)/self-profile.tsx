@@ -2,12 +2,12 @@ import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
-import { FlashList, ViewToken } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
+import type { ViewToken } from "@shopify/flash-list";
 import { CameraOff, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
-import OtherPost from "~/components/NewPostTesting/OtherPost";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";

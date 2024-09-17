@@ -119,7 +119,7 @@ const OtherPost = (postProps: OtherPostProps) => {
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
   const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost(
-    postProps.id,
+    {postId: postProps.id, endpoint: "other-profile", userId: postProps.recipient.id}
   );
   const { handleReportPost } = useReportPost(postProps.id);
 

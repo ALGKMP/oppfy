@@ -2,13 +2,21 @@ import { useCallback, useRef } from "react";
 import throttle from "lodash/throttle"; // Change debounce to throttle
 
 import { api } from "~/utils/api";
+import { useOptimisticUpdatePost } from "./useOptimicUpdatePost";
 
-export const useLikePost = (postId: string) => {
+interface LikePostProps {
+  postId: string;
+  endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
+  userId?: string;
+}
+
+export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
   const utils = api.useUtils();
   const { data: hasLiked } = api.post.hasliked.useQuery(
     { postId },
     { initialData: false },
   );
+  const { changeLikeCount, invalidatePost } = useOptimisticUpdatePost()
 
   const likePost = api.post.likePost.useMutation({
     onMutate: async (newHasLikedData) => {
@@ -90,6 +98,7 @@ export const useLikePost = (postId: string) => {
           currentHasLiked
             ? await unlikePost.mutateAsync({ postId })
             : await likePost.mutateAsync({ postId });
+          await invalidatePost({postId, endpoint}) // Use the passed in endpoint
         })().catch((error) => {
           console.error("Error in throttledLikeRequest:", error);
         });
@@ -99,19 +108,21 @@ export const useLikePost = (postId: string) => {
     );
   }
 
-  const handleLikePressed = useCallback(() => {
+  const handleLikePressed = useCallback(async () => {
     // Optimistically update the UI
     utils.post.hasliked.setData({ postId }, !hasLiked);
+    await changeLikeCount({postId, changeCountBy: hasLiked ? -1 : 1, endpoint, userId}) // Use the passed in endpoint
 
     // Call the throttled function
     if (throttledRef.current) {
       clickCount.current++;
       throttledRef.current(hasLiked);
     }
-  }, [hasLiked, postId, utils.post.hasliked]);
+  }, [hasLiked, postId, utils.post.hasliked, changeLikeCount, endpoint, userId]); // Add endpoint to dependencies
 
   const handleLikeDoubleTapped = async () => {
     if (hasLiked) return;
+    await changeLikeCount({postId, changeCountBy: 1, endpoint, userId}) // Use the passed in endpoint
     await likePost.mutateAsync({ postId });
   };
 
