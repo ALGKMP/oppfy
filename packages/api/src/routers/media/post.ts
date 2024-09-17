@@ -275,9 +275,12 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.post.paginatePostsOfUserOther(
-          input.userId,
-          input.cursor,
-          input.pageSize,
+          {
+            userId: input.userId,
+            cursor: input.cursor ?? null,
+            pageSize: input.pageSize ?? 10,
+            currentUserId: ctx.session.uid,
+          }
         );
 
         return result;
@@ -347,9 +350,12 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.post.paginatePostsOfUserOther(
-          input.userId,
-          input.cursor,
-          input.pageSize,
+          {
+            userId: input.userId,
+            cursor: input.cursor ?? null,
+            pageSize: input.pageSize ?? 10,
+            currentUserId: ctx.session.uid,
+          }
         );
         return result;
       } catch (err) {

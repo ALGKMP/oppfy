@@ -14,7 +14,7 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
   const router = useRouter();
   const toast = useToastController();
   const utils = api.useUtils();
-  const {changeCommentCount, invalidatePost} = useOptimisticUpdatePost()
+  const {changeCommentCount } = useOptimisticUpdatePost()
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -73,14 +73,13 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
 
       return { prevData };
     },
-    onError: async (_err, newCommentData, ctx) => {
+    onError: (_err, newCommentData, ctx) => {
       if (ctx === undefined) return;
 
       utils.post.paginateComments.setInfiniteData(
         { postId: newCommentData.postId },
         ctx.prevData,
       );
-      await invalidatePost({endpoint, postId, userId});
     },
     onSettled: async () => {
       await utils.post.paginateComments.invalidate();
@@ -115,7 +114,7 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
 
       return { prevData };
     },
-    onError: async (_err, _newCommentData, ctx) => {
+    onError: (_err, _newCommentData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, revert to the previous data
@@ -123,7 +122,6 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
         { postId, pageSize: 10 },
         ctx.prevData,
       );
-      await invalidatePost({endpoint, postId, userId});
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
