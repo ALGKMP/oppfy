@@ -71,19 +71,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   };
 
   const signOut = async () => {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-
-    if (existingStatus !== PermissionStatus.GRANTED) return;
-
-    const token = await Notifications.getExpoPushTokenAsync({
-      // this is passed in by expo
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      projectId: Constants.expoConfig?.extra?.eas.projectId as string,
-    });
-
-    await deletePushToken.mutateAsync({ pushToken: token.data });
-
     await auth().signOut();
     await auth().currentUser?.reload();
 

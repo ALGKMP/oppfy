@@ -44,6 +44,47 @@ interface LoadedProps<T extends PersonItem> {
 type PeopleCarouselProps<T extends PersonItem> = LoadingProps | LoadedProps<T>;
 
 function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
+  const throttledHandleShowMore = useRef(
+    throttle(
+      () => {
+        if (!props.loading) props.onShowMore();
+      },
+      300,
+      { leading: true, trailing: false },
+    ),
+  ).current;
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (props.loading) return;
+
+      const { contentSize, contentOffset, layoutMeasurement } =
+        event.nativeEvent;
+      const contentWidth = contentSize.width;
+      const offsetX = contentOffset.x;
+      const layoutWidth = layoutMeasurement.width;
+
+      if (offsetX + layoutWidth - 80 >= contentWidth) {
+        throttledHandleShowMore();
+      }
+    },
+    [props, throttledHandleShowMore],
+  );
+
+  useEffect(() => {
+    if (!props.loading) {
+      throttledHandleShowMore.cancel();
+      throttledHandleShowMore.flush();
+    }
+  }, [props, throttledHandleShowMore]);
+
+  useEffect(() => {
+    if (!props.loading && "onShowMore" in props) {
+      // eslint-disable-next-line react-compiler/react-compiler
+      throttledHandleShowMore.cancel = props.onShowMore;
+    }
+  }, [props, throttledHandleShowMore]);
+
   if (props.loading) {
     return (
       <CardContainer paddingLeft={0} paddingRight={0}>
@@ -73,30 +114,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     renderExtraItem,
   } = props;
 
-  const throttledHandleShowMore = useRef(
-    throttle(onShowMore, 300, { leading: true, trailing: false }),
-  ).current;
-
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (!showMore) return;
-
-      const { contentSize, contentOffset, layoutMeasurement } =
-        event.nativeEvent;
-      const contentWidth = contentSize.width;
-      const offsetX = contentOffset.x;
-      const layoutWidth = layoutMeasurement.width;
-
-      if (offsetX + layoutWidth - 80 >= contentWidth) {
-        throttledHandleShowMore();
-      }
-    },
-    [showMore, throttledHandleShowMore],
-  );
-
-  useEffect(() => throttledHandleShowMore.cancel(), [throttledHandleShowMore]);
-
-  if (data.length === 0 /* || onItemPress == null */) return null;
+  if (data.length === 0) return null;
 
   return (
     <CardContainer paddingHorizontal={0}>
@@ -118,7 +136,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
-          keyExtractor={(item) => "people_carousel_" + item.userId}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
               <YStack width={70} gap="$1.5" alignItems="center">
@@ -133,22 +150,23 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
             </TouchableOpacity>
           )}
           ListFooterComponent={
+
             renderExtraItem ? (
               <>
                 {renderExtraItem()}
-                {showMore && (
-                  <View
-                    marginRight={-100}
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <SizableText color="#F214FF" fontWeight="600">
-                      See more
-                    </SizableText>
-                  </View>
-                )}
               </>
             ) : null
+            {showMore && (
+              <View
+                marginRight={-100}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <SizableText color="#F214FF" fontWeight="600">
+                  See more
+                </SizableText>
+              </View>
+            )}
           }
           ItemSeparatorComponent={() => <Spacer size="$2" />}
           contentContainerStyle={{

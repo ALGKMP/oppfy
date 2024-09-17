@@ -209,6 +209,18 @@ export class FollowService {
       requestSenderId,
       requestRecipientId,
     );
+
+    const friendRequestExists = await this.friendRepository.getFriendRequest(
+      requestSenderId,
+      requestRecipientId,
+    );
+
+    if (friendRequestExists) {
+      await this.friendRepository.deleteFriendRequest(
+        requestSenderId,
+        requestRecipientId,
+      );
+    }
   }
 
   async cancelFollowRequest(senderId: string, recipientId: string) {

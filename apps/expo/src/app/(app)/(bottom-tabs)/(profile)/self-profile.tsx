@@ -224,13 +224,23 @@ const SelfProfile = () => {
         ) : (
           <PeopleCarousel
             loading={isLoadingRecommendationsData}
-            data={recommendationsData ?? []}
+            // data={recommendationsData ?? []}
+            data={(recommendationsData ?? []).flatMap((item) =>
+              Array(5).fill(item),
+            )}
             title="Suggestions 🔥"
-            showMore={false}
+            showMore={true}
             onItemPress={navigateToProfile}
             onShowMore={() => {
               // Handle show more recommendations
             }}
+            renderExtraItem={() => (
+              <TouchableOpacity onPress={() => {
+                // Handle show more recommendations
+              }}>
+                <Text>Show More</Text>
+              </TouchableOpacity>
+            )}
           />
         )}
       </YStack>
