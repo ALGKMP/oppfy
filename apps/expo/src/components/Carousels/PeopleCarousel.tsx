@@ -35,6 +35,7 @@ interface LoadedProps<T extends PersonItem> {
   data: T[];
   title?: string;
   emoji?: string;
+  showMore?: boolean;
   onItemPress: (item: T) => void;
   onShowMore?: () => void;
   renderExtraItem?: () => React.ReactElement;
@@ -102,6 +103,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     data,
     title,
     emoji,
+    showMore = false,
     onItemPress,
     onShowMore,
     renderExtraItem,
@@ -145,7 +147,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           ListFooterComponent={
             <>
               {renderExtraItem?.()}
-              {onShowMore && (
+              {showMore && (
                 <View
                   marginRight={-100}
                   justifyContent="center"

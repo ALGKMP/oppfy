@@ -85,6 +85,11 @@ const SelfProfile = () => {
     [friendsData],
   );
 
+  const recommendationItems = useMemo(
+    () => recommendationsData ?? [],
+    [recommendationsData],
+  );
+
   const isLoadingData = useMemo(() => {
     return (
       isLoadingProfileData ||
@@ -225,6 +230,7 @@ const SelfProfile = () => {
             loading={false}
             data={friendItems}
             title="Friends 🔥"
+            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
             onItemPress={navigateToProfile}
             onShowMore={() => router.push("/self-connections/friend-list")}
           />
@@ -238,7 +244,21 @@ const SelfProfile = () => {
         )}
       </YStack>
     ),
-    [friendItems, navigateToProfile, profileData, recommendationsData, router],
+    [
+      friendItems,
+      navigateToProfile,
+      profileData?.bio,
+      profileData?.followerCount,
+      profileData?.followingCount,
+      profileData?.friendCount,
+      profileData?.name,
+      profileData?.profilePictureUrl,
+      profileData?.userId,
+      profileData?.username,
+      recommendationItems.length,
+      recommendationsData,
+      router,
+    ],
   );
 
   const renderEmptyState = useCallback(() => {

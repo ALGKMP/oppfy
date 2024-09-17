@@ -466,6 +466,7 @@ const OtherProfile = () => {
             loading={false}
             data={friendItems}
             title="Friends 🔥"
+            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
             onItemPress={navigateToProfile}
             onShowMore={() =>
               router.push({
@@ -492,6 +493,7 @@ const OtherProfile = () => {
       profileData?.bio,
       profileData?.followerCount,
       profileData?.followingCount,
+      profileData?.friendCount,
       profileData?.name,
       profileData?.profilePictureUrl,
       profileData?.userId,
