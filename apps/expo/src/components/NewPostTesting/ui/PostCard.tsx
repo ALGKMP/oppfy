@@ -228,6 +228,7 @@ const PostCard = (props: PostCardProps) => {
               </XStack>
             </View>
             <TouchableOpacity
+              hitSlop={20}
               style={{ position: "absolute", bottom: 15, right: 15 }}
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

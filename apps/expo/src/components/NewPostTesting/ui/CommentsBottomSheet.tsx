@@ -207,10 +207,7 @@ interface CommentInputProps {
 }
 
 const CommentInput = React.memo(
-  ({
-    onPostComment,
-    selfProfilePicture: currentUserProfilePicture,
-  }: CommentInputProps) => {
+  ({ onPostComment, selfProfilePicture }: CommentInputProps) => {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const [inputValue, setInputValue] = useState("");
@@ -248,7 +245,7 @@ const CommentInput = React.memo(
           ))}
         </XStack>
         <XStack alignItems="flex-end" gap="$3">
-          <Avatar source={currentUserProfilePicture} size={46} bordered />
+          <Avatar source={selfProfilePicture} size={46} bordered />
           <View flex={1} position="relative">
             <BottomSheetTextInput
               placeholder="Add a comment..."
@@ -311,6 +308,8 @@ const CommentItem = React.memo(
     onPressUsername,
   }: CommentItemProps) => {
     const isSelfComment = comment.userId === selfUserId;
+    console.log("COMMENT: ", comment.userId);
+    console.log("SELF ID: ", selfUserId);
 
     const contextMenuOptions = isSelfComment
       ? [

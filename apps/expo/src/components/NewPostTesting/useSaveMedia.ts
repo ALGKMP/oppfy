@@ -14,13 +14,44 @@ interface WatermarkOptions {
 export const useSaveMedia = () => {
   const [isSaving, setIsSaving] = useState(false);
 
+  const addWatermark = async (
+    mediaUrl: string,
+    watermark: WatermarkOptions,
+  ) => {
+    const fileUri =
+      FileSystem.cacheDirectory + "temp_image" + randomUUID() + ".jpg";
+    await FileSystem.downloadAsync(mediaUrl, fileUri);
+
+    const markedImage = await Marker.markImage({
+      backgroundImage: { src: fileUri, scale: 1 },
+      watermarkImages: [
+        {
+          src: watermark.image,
+          position: {
+            position: watermark.position ?? Position.bottomRight,
+          },
+          scale: watermark.scale,
+        },
+      ],
+    });
+
+    await FileSystem.deleteAsync(fileUri);
+
+    return markedImage;
+  };
+
   const saveMedia = async (
     mediaUrl: string,
     watermark?: WatermarkOptions | undefined,
   ) => {
     setIsSaving(true);
 
-    await ensurePermissions();
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+
+    if (status !== MediaLibrary.PermissionStatus.GRANTED) {
+      setIsSaving(false);
+      throw new Error("Media library permission not granted");
+    }
 
     const manipulatedImage = watermark
       ? await addWatermark(mediaUrl, watermark)
@@ -31,34 +62,4 @@ export const useSaveMedia = () => {
   };
 
   return { saveMedia, isSaving };
-};
-
-const ensurePermissions = async () => {
-  const { status } = await MediaLibrary.requestPermissionsAsync();
-  if (status !== MediaLibrary.PermissionStatus.GRANTED) {
-    throw new Error("Media library permission not granted");
-  }
-};
-
-const addWatermark = async (mediaUrl: string, watermark: WatermarkOptions) => {
-  const fileUri =
-    FileSystem.cacheDirectory + "temp_image" + randomUUID() + ".jpg";
-  await FileSystem.downloadAsync(mediaUrl, fileUri);
-
-  const markedImage = await Marker.markImage({
-    backgroundImage: { src: fileUri, scale: 1 },
-    watermarkImages: [
-      {
-        src: watermark.image,
-        position: {
-          position: watermark.position ?? Position.bottomRight,
-        },
-        scale: watermark.scale,
-      },
-    ],
-  });
-
-  await FileSystem.deleteAsync(fileUri);
-
-  return markedImage;
 };

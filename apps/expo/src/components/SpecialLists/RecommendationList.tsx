@@ -27,7 +27,7 @@ const RecommendationList = (props: RecommendationListProps) => {
     const isFollowed = followedUsers.has(item.userId);
     const buttonProps = isFollowed
       ? {
-          text: "Followed",
+          text: item.privacy === "private" ? "Sent" : "Followed",
           icon: <UserRoundCheck size="$1" />,
         }
       : {
