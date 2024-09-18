@@ -7,13 +7,14 @@ import { useOptimisticUpdatePost } from "./useOptimicUpdatePost";
 interface UseCommentsProps {
   postId: string;
   endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
+  userId?: string;
 }
 
-export const useComments = ({postId, endpoint}: UseCommentsProps) => {
+export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
   const router = useRouter();
   const toast = useToastController();
   const utils = api.useUtils();
-  const {changeCommentCount } = useOptimisticUpdatePost()
+  const { changeCommentCount } = useOptimisticUpdatePost();
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -32,6 +33,7 @@ export const useComments = ({postId, endpoint}: UseCommentsProps) => {
         endpoint,
         changeCountBy: 1,
         postId,
+        userId,
       });
       await utils.post.paginateComments.cancel({
         postId: newCommentData.postId,
@@ -83,6 +85,7 @@ export const useComments = ({postId, endpoint}: UseCommentsProps) => {
         endpoint,
         changeCountBy: -1,
         postId: newCommentData.postId,
+        userId,
       });
     },
     onSettled: async () => {
@@ -96,6 +99,7 @@ export const useComments = ({postId, endpoint}: UseCommentsProps) => {
         endpoint,
         changeCountBy: -1,
         postId: newCommentData.postId,
+        userId,
       });
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
@@ -135,6 +139,7 @@ export const useComments = ({postId, endpoint}: UseCommentsProps) => {
         endpoint,
         changeCountBy: 1,
         postId,
+        userId,
       });
     },
     onSettled: async () => {
