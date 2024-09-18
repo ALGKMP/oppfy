@@ -145,6 +145,16 @@ export class AwsStack extends cdk.Stack {
       },
     );
 
+    const publicProfilePictureDistribution = new CloudFrontDistribution(
+      this,
+      "PublicProfilePictureDistribution",
+      {
+        isPrivate: false,
+        bucket: profileBucket.bucket,
+        oai,
+      },
+    );
+
     const profileDistribution = new CloudFrontDistribution(
       this,
       "ProfileDistribution",
@@ -170,7 +180,7 @@ export class AwsStack extends cdk.Stack {
       new iam.PolicyStatement({
         actions: ["cloudfront:CreateInvalidation"],
         resources: [
-          `arn:aws:cloudfront::${env.AWS_ACCOUNT_ID}:distribution/${env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID}`,
+          `arn:aws:cloudfront::${env.AWS_ACCOUNT_ID}:distribution/${profileDistribution.distribution.distributionId}`,
         ],
       }),
     );
@@ -292,6 +302,10 @@ export class AwsStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, "PrivatePostDistributionUrl", {
       value: `https://${privatePostDistribution.distribution.distributionDomainName}`,
+    });
+
+    new cdk.CfnOutput(this, "PublicProfilePictureDistributionUrl", {
+      value: `https://${publicProfilePictureDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "ProfileDistributionUrl", {
