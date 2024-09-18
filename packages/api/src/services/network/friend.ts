@@ -121,7 +121,12 @@ export class FriendService {
       );
     }
 
-    await this.friendRepository.createFriend(senderId, recipientId);
+    // Determine user1 and user2 based on UUID comparison
+    const [user1, user2] = senderId > recipientId
+      ? [senderId, recipientId]
+      : [recipientId, senderId];
+
+    await this.friendRepository.createFriend(user1, user2);
 
     const senderFollowRequestToRecipient =
       await this.followRepository.getFollowRequest(senderId, recipientId);
@@ -188,13 +193,14 @@ export class FriendService {
       }
     }
 
-    await this.notificationsService.storeNotification(recipientId, senderId, {
+    // Update notification storing to use user1 and user2
+    await this.notificationsService.storeNotification(user2, user1, {
       eventType: "friend",
       entityType: "profile",
       entityId: recipient.id,
     });
 
-    await this.notificationsService.storeNotification(senderId, recipientId, {
+    await this.notificationsService.storeNotification(user1, user2, {
       eventType: "friend",
       entityType: "profile",
       entityId: recipient.id,
