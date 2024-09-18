@@ -10,11 +10,11 @@ interface UseCommentsProps {
   userId?: string;
 }
 
-export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
+export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
   const router = useRouter();
   const toast = useToastController();
   const utils = api.useUtils();
-  const {changeCommentCount } = useOptimisticUpdatePost()
+  const { changeCommentCount } = useOptimisticUpdatePost();
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -29,10 +29,11 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
   const postComment = api.post.createComment.useMutation({
     onMutate: async (newCommentData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      changeCommentCount({
+      await changeCommentCount({
         endpoint,
         changeCountBy: 1,
-        postId: newCommentData.postId,
+        postId,
+        userId,
       });
       await utils.post.paginateComments.cancel({
         postId: newCommentData.postId,
@@ -73,13 +74,19 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
 
       return { prevData };
     },
-    onError: (_err, newCommentData, ctx) => {
+    onError: async (_err, newCommentData, ctx) => {
       if (ctx === undefined) return;
 
       utils.post.paginateComments.setInfiniteData(
         { postId: newCommentData.postId },
         ctx.prevData,
       );
+      await changeCommentCount({
+        endpoint,
+        changeCountBy: -1,
+        postId: newCommentData.postId,
+        userId,
+      });
     },
     onSettled: async () => {
       await utils.post.paginateComments.invalidate();
@@ -88,6 +95,12 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
 
   const deleteComment = api.post.deleteComment.useMutation({
     onMutate: async (newCommentData) => {
+      await changeCommentCount({
+        endpoint,
+        changeCountBy: -1,
+        postId: newCommentData.postId,
+        userId,
+      });
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.post.paginateComments.cancel({ postId, pageSize: 10 });
 
@@ -114,7 +127,7 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
 
       return { prevData };
     },
-    onError: (_err, _newCommentData, ctx) => {
+    onError: async (_err, _newCommentData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, revert to the previous data
@@ -122,6 +135,12 @@ export const useComments = ({postId, endpoint, userId}: UseCommentsProps) => {
         { postId, pageSize: 10 },
         ctx.prevData,
       );
+      await changeCommentCount({
+        endpoint,
+        changeCountBy: 1,
+        postId,
+        userId,
+      });
     },
     onSettled: async () => {
       // Sync with server once mutation has settled

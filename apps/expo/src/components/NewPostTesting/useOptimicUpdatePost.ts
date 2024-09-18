@@ -20,9 +20,7 @@ export const useOptimisticUpdatePost = () => {
       case "self-profile": {
         await utils.post.paginatePostsOfUserSelf.cancel();
         const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({pageSize: 10});
-        console.log("prevData", prevData)
         if (!prevData) return;
-        console.log("this shit is running")
         utils.post.paginatePostsOfUserSelf.setInfiniteData(
           { pageSize: 10 },
           {
@@ -40,9 +38,13 @@ export const useOptimisticUpdatePost = () => {
         break;
       }
 
-      case "other-profile": { if (!userId) return;
+      case "other-profile": {
+        if (!userId) return;
         await utils.post.paginatePostsOfUserOther.cancel();
-        const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({userId, pageSize: 10});
+        const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({
+          userId,
+          pageSize: 10,
+        });
         if (!prevData) return;
         utils.post.paginatePostsOfUserOther.setInfiniteData(
           { userId, pageSize: 10 },
@@ -74,7 +76,7 @@ export const useOptimisticUpdatePost = () => {
     }
   };
 
-  const changeCommentCount = ({
+  const changeCommentCount = async ({
     postId,
     endpoint,
     changeCountBy,
@@ -82,6 +84,7 @@ export const useOptimisticUpdatePost = () => {
   }: IncrementLikeCountProps) => {
     switch (endpoint) {
       case "self-profile": {
+        await utils.post.paginatePostsOfUserSelf.cancel();
         const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({pageSize: 10});
         if (!prevData) return;
         utils.post.paginatePostsOfUserSelf.setInfiniteData(
@@ -102,6 +105,7 @@ export const useOptimisticUpdatePost = () => {
       }
       case "other-profile": {
         if (!userId) return;
+        await utils.post.paginatePostsOfUserOther.cancel();
         const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({userId, pageSize: 10});
         if (!prevData) return;
         utils.post.paginatePostsOfUserOther.setInfiniteData(
@@ -125,6 +129,7 @@ export const useOptimisticUpdatePost = () => {
       }
 
       case "single-post": {
+        await utils.post.getPost.cancel();
         const prevData = utils.post.getPost.getData({ postId });
         if (!prevData) return;
         utils.post.getPost.setData(

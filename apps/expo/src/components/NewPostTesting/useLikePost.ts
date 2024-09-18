@@ -43,6 +43,11 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
+      changeLikeCount({
+        endpoint,
+        changeCountBy: -1,
+        postId,
+      });
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
@@ -75,6 +80,11 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
+      changeLikeCount({
+        endpoint,
+        changeCountBy: 1,
+        postId,
+      });
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
