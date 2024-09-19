@@ -274,14 +274,12 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginatePostsOfUserOther(
-          {
-            userId: input.userId,
-            cursor: input.cursor ?? null,
-            pageSize: input.pageSize ?? 10,
-            currentUserId: ctx.session.uid,
-          }
-        );
+        const result = await ctx.services.post.paginatePostsOfUserOther({
+          userId: input.userId,
+          cursor: input.cursor ?? null,
+          pageSize: input.pageSize ?? 10,
+          currentUserId: ctx.session.uid,
+        });
 
         return result;
       } catch (err) {
@@ -349,14 +347,12 @@ export const postRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       try {
-        const result = await ctx.services.post.paginatePostsOfUserOther(
-          {
-            userId: input.userId,
-            cursor: input.cursor ?? null,
-            pageSize: input.pageSize ?? 10,
-            currentUserId: ctx.session.uid,
-          }
-        );
+        const result = await ctx.services.post.paginatePostsOfUserOther({
+          userId: input.userId,
+          cursor: input.cursor ?? null,
+          pageSize: input.pageSize ?? 10,
+          currentUserId: ctx.session.uid,
+        });
         return result;
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
@@ -474,10 +470,11 @@ export const postRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.uid;
       const { commentId, postId } = input;
 
       try {
-        await ctx.services.post.deleteComment({ commentId, postId });
+        await ctx.services.post.deleteComment({ userId, commentId, postId });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
