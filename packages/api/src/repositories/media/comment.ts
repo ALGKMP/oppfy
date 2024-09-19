@@ -8,6 +8,13 @@ export class CommentRepository {
   private db = db;
 
   @handleDatabaseErrors
+  async getComment(commentId: string) {
+    return await this.db.query.comment.findFirst({
+      where: eq(schema.comment.id, commentId),
+    });
+  }
+
+  @handleDatabaseErrors
   async addComment({
     postId,
     userId,

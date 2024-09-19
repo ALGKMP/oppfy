@@ -49,16 +49,35 @@ export const handler = async (
       };
     }
 
-    const following = await db
-      .select({ userId: schema.follower.recipientId })
-      .from(schema.follower)
-      .where(eq(schema.follower.senderId, userId))
-      .then((res) => res.map((r) => r.userId));
+    const excludeIds = await db.transaction(async (tx) => {
+      const following = await tx
+        .select({ userId: schema.follower.recipientId })
+        .from(schema.follower)
+        .where(eq(schema.follower.senderId, userId));
+
+      const followRequests = await tx
+        .select({ userId: schema.followRequest.recipientId })
+        .from(schema.followRequest)
+        .where(eq(schema.followRequest.senderId, userId));
+
+      const friendRequests = await tx
+        .select({ userId: schema.friendRequest.recipientId })
+        .from(schema.friendRequest)
+        .where(eq(schema.friendRequest.senderId, userId));
+
+      return [
+        ...new Set([
+          ...following.map((r) => r.userId),
+          ...followRequests.map((r) => r.userId),
+          ...friendRequests.map((r) => r.userId),
+        ]),
+      ];
+    });
 
     const tier1 = await g
       .V(userId)
       .outE("contact")
-      .where(__.inV().hasId(P.without(following)))
+      .where(__.inV().hasId(P.without(excludeIds)))
       .inV()
       .dedup()
       .order()
@@ -71,8 +90,7 @@ export const handler = async (
     const tier2 = await g
       .V(userId)
       .inE("contact")
-      .where(__.outV().hasId(P.without(tier1)))
-      .where(__.outV().hasId(P.without(following)))
+      .where(__.outV().hasId(P.without([...tier1, ...excludeIds])))
       .outV()
       .dedup()
       .order()
@@ -84,7 +102,7 @@ export const handler = async (
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
 
-/*     const tier3 = await g
+    /*     const tier3 = await g
       .V(userId)
       .out("contact")
       .aggregate("contacts")
@@ -118,7 +136,7 @@ export const handler = async (
     const recommendedIds = {
       tier1,
       tier2,
-      tier3 : [],
+      tier3: [],
       // tier4
     };
 

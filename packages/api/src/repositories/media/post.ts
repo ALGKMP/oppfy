@@ -46,7 +46,48 @@ export class PostRepository {
       .limit(1);
   }
 
+  @handleDatabaseErrors
+  async getPostFromCommentId(commentId: string) {
+    const author = aliasedTable(schema.user, "author");
+    const recipient = aliasedTable(schema.user, "recipient");
+    const authorProfile = aliasedTable(schema.profile, "authorProfile");
+    const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
+
+    const post = await this.db
+      .selectDistinct({
+        postId: schema.post.id,
+        authorId: schema.post.authorId,
+        authorUsername: authorProfile.username,
+        authorProfileId: authorProfile.id,
+        authorProfilePicture: authorProfile.profilePictureKey,
+        recipientId: schema.post.recipientId,
+        recipientProfileId: recipientProfile.id,
+        recipientUsername: recipientProfile.username,
+        recipientProfilePicture: recipientProfile.profilePictureKey,
+        caption: schema.post.caption,
+        imageUrl: schema.post.key,
+        width: schema.post.width,
+        height: schema.post.height,
+        commentsCount: schema.postStats.comments,
+        likesCount: schema.postStats.likes,
+        mediaType: schema.post.mediaType,
+        createdAt: schema.post.createdAt,
+      })
+      .from(schema.comment)
+      .innerJoin(schema.post, eq(schema.comment.post, schema.post.id))
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
+      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
+      .where(eq(schema.comment.id, commentId))
+      .limit(1);
+
+    return post[0];
+  }
+
   // TODO: This shit doesn't work
+
   @handleDatabaseErrors
   async paginatePostsOfFollowing(
     userId: string,

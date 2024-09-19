@@ -130,6 +130,9 @@ const SelfPost = (postProps: PostData) => {
         ref={bottomSheetModalRef}
         comments={commentItems}
         isLoading={isLoadingComments}
+        postRecipientId={postProps.recipient.id}
+        selfUserId={postProps.self.id}
+        selfProfilePicture={postProps.self.profilePicture}
         onEndReached={handleLoadMoreComments}
         onPostComment={handlePostComment}
         onDeleteComment={handleDeleteComment}
@@ -142,8 +145,6 @@ const SelfPost = (postProps: PostData) => {
           bottomSheetModalRef.current?.close();
           handlePressUsername(userId, username);
         }}
-        selfUserId={postProps.self.id}
-        selfProfilePicture={postProps.self.profilePicture}
       />
 
       {sheetState === "moreOptions" && (

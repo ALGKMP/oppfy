@@ -86,19 +86,17 @@ export class PostService {
     }
   }
 
-  async paginatePostsOfUserOther(
-    {
-      userId,
-      cursor,
-      pageSize,
-      currentUserId,
-    }: {
-      userId: string;
-      cursor: PostCursor | null;
-      pageSize?: number;
-      currentUserId: string;
-    }
-  ): Promise<PaginatedResponse<Post>> {
+  async paginatePostsOfUserOther({
+    userId,
+    cursor,
+    pageSize,
+    currentUserId,
+  }: {
+    userId: string;
+    cursor: PostCursor | null;
+    pageSize?: number;
+    currentUserId: string;
+  }): Promise<PaginatedResponse<Post>> {
     try {
       const canAccess = await this.userService.canAccessUserData({
         currentUserId,
@@ -507,12 +505,31 @@ export class PostService {
   }
 
   async deleteComment({
+    userId,
     commentId,
     postId,
   }: {
+    userId: string;
     commentId: string;
     postId: string;
   }) {
+    // get post data from commentId
+    const post = await this.postRepository.getPostFromCommentId(commentId);
+
+    if (post === undefined) {
+      throw new DomainError(ErrorCode.POST_NOT_FOUND);
+    }
+
+    const comment = await this.commentRepository.getComment(commentId);
+
+    if (comment === undefined) {
+      throw new DomainError(ErrorCode.COMMENT_NOT_FOUND);
+    }
+
+    if (post.authorId !== userId && comment.user !== userId) {
+      throw new DomainError(ErrorCode.UNAUTHORIZED);
+    }
+
     await this.commentRepository.removeComment(commentId);
     await this.postStatsRepository.decrementCommentsCount(postId);
   }

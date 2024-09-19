@@ -54,12 +54,13 @@ interface Comment {
 interface CommentsBottomSheetProps {
   comments: Comment[];
   isLoading: boolean;
+  postRecipientId: string;
+  selfUserId: string;
+  selfProfilePicture: ProfilePicture;
   onEndReached: () => void;
   onPostComment: (comment: string) => void;
   onDeleteComment: (commentId: string) => void;
   onReportComment: (commentId: string) => void;
-  selfUserId: string;
-  selfProfilePicture: ProfilePicture;
   onPressProfilePicture: (userId: string, username: string) => void;
   onPressUsername: (userId: string, username: string) => void;
 }
@@ -98,9 +99,11 @@ const CommentsBottomSheet = forwardRef<
       <CommentItem
         key={item.id}
         comment={item}
-        selfUserId={props.selfUserId}
+        isPostOwner={props.selfUserId === props.postRecipientId}
+        isCommentOwner={item.userId === props.selfUserId}
         onDelete={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
           handleDeleteComment(item.id);
         }}
         onReport={() => {
@@ -291,9 +294,12 @@ const CommentInput = React.memo(
 
 interface CommentItemProps {
   comment: Comment;
-  selfUserId: string;
+  isPostOwner: boolean;
+  isCommentOwner: boolean;
+
   onDelete: () => void;
   onReport: () => void;
+
   onPressProfilePicture: () => void;
   onPressUsername: () => void;
 }
@@ -301,39 +307,59 @@ interface CommentItemProps {
 const CommentItem = React.memo(
   ({
     comment,
-    selfUserId,
+    isPostOwner,
+    isCommentOwner,
     onDelete,
     onReport,
     onPressProfilePicture,
     onPressUsername,
   }: CommentItemProps) => {
-    const isSelfComment = comment.userId === selfUserId;
-    console.log("COMMENT: ", comment.userId);
-    console.log("SELF ID: ", selfUserId);
+    const contextMenuOptions = useMemo(() => {
+      const options = [];
 
-    const contextMenuOptions = isSelfComment
-      ? [
-          {
-            label: (
-              <SizableText size="$5" color="$red10">
-                Delete
-              </SizableText>
-            ),
-            icon: <Trash2 size="$1.5" color="$red10" />,
-            onPress: onDelete,
-          },
-        ]
-      : [
-          {
-            label: (
-              <SizableText size="$5" color="$red10">
-                Report
-              </SizableText>
-            ),
-            icon: <AlertCircle size="$1.5" color="$red10" />,
-            onPress: onReport,
-          },
-        ];
+      if (isPostOwner && !isCommentOwner) {
+        options.push({
+          label: (
+            <SizableText size="$5" color="$red10">
+              Delete
+            </SizableText>
+          ),
+          icon: <Trash2 size="$1.5" color="$red10" />,
+          onPress: onDelete,
+        });
+        options.push({
+          label: (
+            <SizableText size="$5" color="$red10">
+              Report
+            </SizableText>
+          ),
+          icon: <AlertCircle size="$1.5" color="$red10" />,
+          onPress: onReport,
+        });
+      } else if (isCommentOwner) {
+        options.push({
+          label: (
+            <SizableText size="$5" color="$red10">
+              Delete
+            </SizableText>
+          ),
+          icon: <Trash2 size="$1.5" color="$red10" />,
+          onPress: onDelete,
+        });
+      } else {
+        options.push({
+          label: (
+            <SizableText size="$5" color="$red10">
+              Report
+            </SizableText>
+          ),
+          icon: <AlertCircle size="$1.5" color="$red10" />,
+          onPress: onReport,
+        });
+      }
+
+      return options;
+    }, [isPostOwner, isCommentOwner, onDelete, onReport]);
 
     return (
       <BlurContextMenuWrapper options={contextMenuOptions}>
