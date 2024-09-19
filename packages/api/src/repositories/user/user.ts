@@ -94,37 +94,12 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async getRandomActiveProfilesForRecs(userId: string, limit: number) {
-    return await this.db.transaction(async (tx) => {
-      const following = await tx
-        .select({ id: schema.follower.recipientId })
-        .from(schema.follower)
-        .where(eq(schema.follower.senderId, userId));
-
-      const followRequests = await tx
-        .select({ id: schema.followRequest.recipientId })
-        .from(schema.followRequest)
-        .where(eq(schema.followRequest.senderId, userId));
-
-      const friendRequests = await tx
-        .select({ id: schema.friendRequest.recipientId })
-        .from(schema.friendRequest)
-        .where(eq(schema.friendRequest.senderId, userId));
-
-      const excludeIds = [
-        userId,
-        ...following.map((f) => f.id),
-        ...followRequests.map((fr) => fr.id),
-        ...friendRequests.map((fr) => fr.id),
-      ];
-
-      return await tx
-        .select({
-          userId: schema.user.id,
-        })
-        .from(schema.user)
-        .where(notInArray(schema.user.id, excludeIds))
-        .orderBy(sql`RANDOM()`)
-        .limit(limit);
-    });
+    return await this.db
+      .select({
+        userId: schema.user.id,
+      })
+      .from(schema.user)
+      .orderBy(sql`RANDOM()`)
+      .limit(limit);
   }
 }

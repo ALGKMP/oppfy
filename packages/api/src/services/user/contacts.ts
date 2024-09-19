@@ -134,7 +134,7 @@ export class ContactService {
     ];
     if (allRecommendations.length === 0) {
       const randomProfiles =
-        await this.userRepository.getRandomActiveProfilesForRecs(10);
+        await this.userRepository.getRandomActiveProfilesForRecs(userId, 10);
       allRecommendations = randomProfiles
         .map((profile) => profile.userId)
         .filter((id) => id !== userId);
