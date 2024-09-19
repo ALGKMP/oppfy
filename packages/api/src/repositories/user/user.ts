@@ -1,6 +1,6 @@
 import { eq, inArray, sql } from "drizzle-orm"; // Add inArray import
 
-import { db, schema } from "@oppfy/db";
+import { db, notInArray, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 import { auth } from "@oppfy/firebase";
 
@@ -93,26 +93,38 @@ export class UserRepository {
   }
 
   @handleDatabaseErrors
-  async getRandomActiveProfiles(limit: number) {
-    return await db
-      .select({
-        userId: schema.user.id,
-      })
-      .from(schema.user)
-      .orderBy(sql`RANDOM()`)
-      .limit(limit);
-  }
+  async getRandomActiveProfilesForRecs(userId: string, limit: number) {
+    return await this.db.transaction(async (tx) => {
+      const following = await tx
+        .select({ id: schema.follower.recipientId })
+        .from(schema.follower)
+        .where(eq(schema.follower.senderId, userId));
 
-  @handleDatabaseErrors
-  async existingPhoneNumbers(phoneNumbers: string[]) {
-    if (phoneNumbers.length === 0) {
-      return [];
-    }
+      const followRequests = await tx
+        .select({ id: schema.followRequest.recipientId })
+        .from(schema.followRequest)
+        .where(eq(schema.followRequest.senderId, userId));
 
-    const existingNumbers = await this.db.query.user.findMany({
-      where: inArray(schema.user.phoneNumber, phoneNumbers),
+      const friendRequests = await tx
+        .select({ id: schema.friendRequest.recipientId })
+        .from(schema.friendRequest)
+        .where(eq(schema.friendRequest.senderId, userId));
+
+      const excludeIds = [
+        userId,
+        ...following.map((f) => f.id),
+        ...followRequests.map((fr) => fr.id),
+        ...friendRequests.map((fr) => fr.id),
+      ];
+
+      return await tx
+        .select({
+          userId: schema.user.id,
+        })
+        .from(schema.user)
+        .where(notInArray(schema.user.id, excludeIds))
+        .orderBy(sql`RANDOM()`)
+        .limit(limit);
     });
-
-    return existingNumbers.map((user) => user.phoneNumber);
   }
 }
