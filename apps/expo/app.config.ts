@@ -59,13 +59,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-av",
     "expo-font",
-    [
-      "expo-video",
-      {
-        pictureInPictureSupport: false,
-        allowsPictureInPicture: false,
-      },
-    ],
+    "expo-video",
     "expo-router",
     "react-native-image-marker",
     "@react-native-firebase/app",
