@@ -7,6 +7,7 @@ import {
 } from "../../repositories";
 import { FollowService } from "./follow";
 import { FriendService } from "./friend";
+
 export class BlockService {
   private followRepository = new FollowRepository();
   private friendRepository = new FriendRepository();
@@ -17,17 +18,14 @@ export class BlockService {
   private friendService = new FriendService();
 
   async blockUser(userId: string, userIdBeingBlocked: string) {
-
-    // Check if there is already a blocked relationship 
+    // Check if there is already a blocked relationship
     const isBlocked = await this.blockRepository.getBlockedUser(
       userId,
       userIdBeingBlocked,
     );
 
-    const isBlockedByUserBeingBlocked = await this.blockRepository.getBlockedUser(
-      userIdBeingBlocked,
-      userId,
-    );
+    const isBlockedByUserBeingBlocked =
+      await this.blockRepository.getBlockedUser(userIdBeingBlocked, userId);
 
     if (isBlocked ?? isBlockedByUserBeingBlocked) {
       console.error(
@@ -57,6 +55,18 @@ export class BlockService {
       userIdBeingBlocked,
     );
 
+    const userFriendRequestToBlockedUser =
+      await this.friendRepository.getFriendRequest(userId, userIdBeingBlocked);
+
+    const userFollowRequestToBlockedUser =
+      await this.followRepository.getFollower(userId, userIdBeingBlocked);
+
+    const blockedUserFriendRequestToUser =
+      await this.friendRepository.getFriendRequest(userIdBeingBlocked, userId);
+
+    const blockedUserFollowRequestToUser =
+      await this.followRepository.getFollower(userIdBeingBlocked, userId);
+
     // Remove the following relationship
     if (followingUserBeingBlocked) {
       await this.followRepository.removeFollower(userId, userIdBeingBlocked);
@@ -77,6 +87,22 @@ export class BlockService {
         userIdBeingBlocked,
         1,
       );
+    }
+
+    if (userFriendRequestToBlockedUser) {
+      await this.friendRepository.deleteFriendRequest(userId, userIdBeingBlocked);
+    }
+
+    if (userFollowRequestToBlockedUser) {
+      await this.followRepository.removeFollowRequest(userId, userIdBeingBlocked);
+    }
+
+    if (blockedUserFriendRequestToUser) {
+      await this.friendRepository.deleteFriendRequest(userIdBeingBlocked, userId);
+    }
+
+    if (blockedUserFollowRequestToUser) {
+      await this.followRepository.removeFollowRequest(userIdBeingBlocked, userId);
     }
 
     await this.blockRepository.blockUser(userId, userIdBeingBlocked);
