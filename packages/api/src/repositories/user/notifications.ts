@@ -191,20 +191,11 @@ export class NotificationsRepository {
         return [];
       }
 
-      console.log("MARKING NOTIS AS READ:", fetchedNotifications);
-
-      // Mark notis as read
-      const notificationIds = fetchedNotifications.map((n) => n.id);
+      // Mark all notifications as read for this user
       await tx
         .update(schema.notifications)
         .set({ read: true })
-        .where(
-          and(
-            eq(schema.notifications.recipientId, userId),
-            inArray(schema.notifications.id, notificationIds),
-            eq(schema.notifications.read, false),
-          ),
-        );
+        .where(eq(schema.notifications.recipientId, userId));
 
       return fetchedNotifications;
     });
