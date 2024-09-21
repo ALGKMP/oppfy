@@ -60,7 +60,7 @@ const HomeScreen = () => {
     fetchNextPage,
     hasNextPage,
     refetch: refetchPosts,
-  } = api.post.paginatePostsOfRecommended.useInfiniteQuery(
+  } = api.post.paginatePostsForFeed.useInfiniteQuery(
     {
       pageSize: 10,
     },
@@ -112,7 +112,6 @@ const HomeScreen = () => {
     (item: PostItem, profile: Profile) => {
       return (
         <View paddingTop="$4">
-          <YStack gap="$4">
             <OtherPost
               id={item.postId}
               createdAt={item.createdAt}
@@ -136,7 +135,7 @@ const HomeScreen = () => {
                 isViewable: viewableItems.includes(item.postId),
                 type: item.mediaType,
                 url: item.imageUrl,
-
+                isViewable: viewableItems.includes(item.postId),
                 dimensions: {
                   width: item.width,
                   height: item.height,
@@ -147,9 +146,8 @@ const HomeScreen = () => {
                 comments: item.commentsCount,
               }}
             />
-          </YStack>
         </View>
-      );
+      )
     },
     [viewableItems],
   );

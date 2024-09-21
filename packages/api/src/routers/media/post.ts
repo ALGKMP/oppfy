@@ -216,24 +216,35 @@ export const postRouter = createTRPCRouter({
   paginatePostsForFeed: protectedProcedure
     .input(
       z.object({
-        cursor: z
-          .object({
-            doneFollowing: z.boolean(),
-            followingCursor: z
+        cursor: z.union([
+          z.object({
+            type: z.literal("following"),
+            cursor: z
               .object({
                 createdAt: z.date(),
                 followerId: z.string(),
               })
-              .optional(),
-            recomendedCursor: z
+              .nullable(),
+          }),
+          z.object({
+            type: z.literal("recommended"),
+            cursor: z
               .object({
                 createdAt: z.date(),
                 postId: z.string(),
               })
-              .optional(),
-          })
-          .optional(),
-
+              .nullable(),
+          }),
+          z.object({
+            type: z.literal("global"),
+            cursor: z
+              .object({
+                createdAt: z.date(),
+                postId: z.string(),
+              })
+              .nullable(),
+          }),
+        ]).optional(),
         pageSize: z.number().nonnegative().optional(),
       }),
     )

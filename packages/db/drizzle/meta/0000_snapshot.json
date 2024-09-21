@@ -1,5 +1,5 @@
 {
-  "id": "f0007ce4-eaed-4b4b-9256-7896ca643e05",
+  "id": "b216ab09-a984-4465-823e-7618e8f03e41",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -614,7 +614,7 @@
         },
         "entity_id": {
           "name": "entity_id",
-          "type": "uuid",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
@@ -793,8 +793,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "author": {
-          "name": "author",
+        "author_id": {
+          "name": "author_id",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -851,12 +851,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "postOfUserNotOnApp_author_user_id_fk": {
-          "name": "postOfUserNotOnApp_author_user_id_fk",
+        "postOfUserNotOnApp_author_id_user_id_fk": {
+          "name": "postOfUserNotOnApp_author_id_user_id_fk",
           "tableFrom": "postOfUserNotOnApp",
           "tableTo": "user",
           "columnsFrom": [
-            "author"
+            "author_id"
           ],
           "columnsTo": [
             "id"
@@ -1422,6 +1422,36 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.test": {
+      "name": "test",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },

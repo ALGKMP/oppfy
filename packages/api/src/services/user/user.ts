@@ -4,7 +4,9 @@ import {
   FollowRepository,
   PostRepository,
   ProfileRepository,
+  ProfileStatsRepository,
   SearchRepository,
+  PostStatsRepository,
 } from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
 import { auth } from "@oppfy/firebase";
@@ -16,8 +18,9 @@ export class UserService {
   private profileRepository = new ProfileRepository();
   private followRepository = new FollowRepository();
   private blockRepository = new BlockRepository();
+  private profileStatsRepository = new ProfileStatsRepository();
+  private postStatsRepository = new PostStatsRepository();
   private auth = auth;
-
 
   async createUser(userId: string, phoneNumber: string) {
     let username;
@@ -56,6 +59,7 @@ export class UserService {
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
+
     await this.profileRepository.deleteProfile(user.profileId);
     await this.searchRepository.deleteProfile(userId);
     await this.auth.deleteUser(userId);

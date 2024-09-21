@@ -8,7 +8,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -348,12 +347,13 @@ export const postStats = pgTable("post_stats", {
     .notNull(),
 });
 
-export const postStatsRelations = relations(postStats, ({ one }) => ({
-  post: one(post, {
-    fields: [postStats.postId],
-    references: [post.id],
-  }),
-}));
+export const test = pgTable("test", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 export const like = pgTable("like", {
   id: uuid("id").primaryKey().defaultRandom(),

@@ -86,8 +86,6 @@ export class PostRepository {
     return post[0];
   }
 
-  // TODO: This shit doesn't work
-
   @handleDatabaseErrors
   async paginatePostsOfFollowing(
     userId: string,
@@ -100,19 +98,27 @@ export class PostRepository {
     const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
     const follower = aliasedTable(schema.follower, "follower");
 
-    // Subquery to get the latest post for each followed user
-    const latestPosts = this.db
-      .select({
-        postId: schema.post.id,
-        authorId: schema.post.authorId,
-        followerId: follower.id,
-        createdAt: schema.post.createdAt,
-      })
-      .from(schema.post)
-      .innerJoin(follower, eq(follower.recipientId, schema.post.recipientId))
-      .where(eq(follower.senderId, userId))
-      .orderBy(desc(schema.post.createdAt))
-      .as("latest_posts");
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // Get the date one week ago
+
+    // Subquery to get the latest post for each followed user within the past week
+    // const latestPosts = this.db
+    //   .select({
+    //     postId: schema.post.id,
+    //     authorId: schema.post.authorId,
+    //     followerId: follower.id, // Already fully qualified
+    //     createdAt: schema.post.createdAt,
+    //   })
+    //   .from(schema.post)
+    //   .innerJoin(follower, eq(follower.recipientId, schema.post.recipientId))
+    //   .where(
+    //     and(
+    //       eq(follower.senderId, userId),
+    //       gt(schema.post.createdAt, oneWeekAgo), // Filter for posts within the past week
+    //     ),
+    //   )
+    //   .orderBy(desc(schema.post.createdAt))
+    //   .as("latest_posts");
 
     return await this.db
       .select({
@@ -133,10 +139,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        followerId: latestPosts.followerId,
+        followerId: schema.follower.id, // From subquery
       })
-      .from(latestPosts)
-      .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
+      .from(schema.follower)
+      .innerJoin(schema.post, eq(schema.post.recipientId, schema.follower.recipientId))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
@@ -148,12 +154,12 @@ export class PostRepository {
               lt(schema.post.createdAt, cursor.createdAt),
               and(
                 eq(schema.post.createdAt, cursor.createdAt),
-                gt(latestPosts.followerId, cursor.followerId),
+                gt(schema.follower.id, cursor.followerId),
               ),
             )
           : undefined,
       )
-      .orderBy(desc(schema.post.createdAt), asc(latestPosts.followerId))
+      .orderBy(desc(schema.post.createdAt), asc(schema.follower.id))
       .limit(pageSize + 1);
   }
 

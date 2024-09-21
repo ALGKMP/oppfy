@@ -41,7 +41,6 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const [status, setStatus] = useState<Status>("loading");
 
   const deleteUser = api.user.deleteUser.useMutation();
-  const deletePushToken = api.notifications.deletePushToken.useMutation();
 
   const isSignedIn = !!user;
   const isLoading = status === "loading";

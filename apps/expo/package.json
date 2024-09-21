@@ -64,7 +64,7 @@
     "expo-store-review": "^7.0.2",
     "expo-task-manager": "^11.8.2",
     "expo-updates": "~0.25.24",
-    "expo-video": "^1.2.6",
+    "expo-video": "1.2.3",
     "expo-video-thumbnails": "~8.0.0",
     "expo-web-browser": "^13.0.3",
     "fuse.js": "^7.0.0",
