@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { Image } from "expo-image";
+import * as Haptics from "expo-haptics";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
@@ -19,6 +19,7 @@ import {
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import Avatar from "../Avatar";
 
 interface PersonItem {
   userId: string;
@@ -41,7 +42,6 @@ interface LoadedProps<T extends PersonItem> {
   onShowMore?: () => void;
   renderExtraItem?: () => React.ReactElement;
 }
-import * as Haptics from "expo-haptics";
 
 type PeopleCarouselProps<T extends PersonItem> = LoadingProps | LoadedProps<T>;
 
@@ -51,7 +51,8 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
       () => {
         if (!props.loading && props.onShowMore) {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          props.onShowMore()};
+          props.onShowMore();
+        }
       },
       300,
       { leading: true, trailing: false },
@@ -135,9 +136,9 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
               <YStack width={70} gap="$1.5" alignItems="center">
-                <Image
+                <Avatar
                   source={item.profilePictureUrl ?? DefaultProfilePicture}
-                  style={{ width: 70, height: 70, borderRadius: 35 }}
+                  size={70}
                 />
                 <Text textAlign="center" fontWeight="600" theme="alt1">
                   {item.username}

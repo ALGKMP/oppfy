@@ -1,7 +1,6 @@
 import React from "react";
 import type { ColorValue } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import {
   Button,
@@ -16,6 +15,7 @@ import {
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
+import Avatar from "~/components/Avatar";
 import { Skeleton } from "~/components/Skeletons";
 
 export interface ProfileData {
@@ -103,13 +103,9 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
       gap="$4"
     >
       <View alignItems="center" marginBottom={-30}>
-        <Image
+        <Avatar
           source={data.profilePictureUrl ?? DefaultProfilePicture}
-          style={{
-            width: 160,
-            height: 160,
-            borderRadius: 80,
-          }}
+          size={160}
         />
       </View>
 
