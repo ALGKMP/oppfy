@@ -138,8 +138,10 @@ const HomeScreen = () => {
                 profilePicture: item.recipientProfilePicture,
               }}
               media={{
+                isViewable: viewableItems.includes(item.postId),
                 type: item.mediaType,
                 url: item.imageUrl,
+
                 dimensions: {
                   width: item.width,
                   height: item.height,
