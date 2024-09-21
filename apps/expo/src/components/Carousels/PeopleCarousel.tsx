@@ -62,6 +62,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (props.loading) return;
+      if (!props.showMore) return;
 
       const { contentSize, contentOffset, layoutMeasurement } =
         event.nativeEvent;
@@ -73,7 +74,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         throttledHandleShowMore();
       }
     },
-    [props.loading, throttledHandleShowMore],
+    [props.loading, props.showMore, throttledHandleShowMore],
   );
 
   useEffect(() => {
