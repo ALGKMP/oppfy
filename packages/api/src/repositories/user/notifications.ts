@@ -276,11 +276,6 @@ export class NotificationsRepository {
     entityType?: EntityType;
     entityId?: string;
   }) {
-    console.log(
-      "Deleting notifications with options:",
-      JSON.stringify(options, null, 2),
-    );
-
     let query = this.db.delete(schema.notifications).$dynamic();
 
     const conditions = [];
