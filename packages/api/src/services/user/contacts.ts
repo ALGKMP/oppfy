@@ -108,7 +108,7 @@ export class ContactService {
       await this.userRepository.existingPhoneNumbers(phoneNumbers);
 
     return phoneNumbers.filter(
-      (number) => !existingPhoneNumbers.includes(number),
+      (number) => !existingPhoneNumbers.includes({ phoneNumber: number }),
     );
   }
 
