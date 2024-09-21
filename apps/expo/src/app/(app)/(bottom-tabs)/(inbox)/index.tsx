@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { useFocusEffect } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Circle, H5, Paragraph, SizableText, XStack, YStack } from "tamagui";
@@ -38,6 +37,7 @@ const Inbox = () => {
     refetch: refetchRequestCount,
   } = api.request.countRequests.useQuery(undefined, {
     refetchInterval: REFETCH_INTERVAL,
+    refetchOnWindowFocus: true,
   });
 
   const {

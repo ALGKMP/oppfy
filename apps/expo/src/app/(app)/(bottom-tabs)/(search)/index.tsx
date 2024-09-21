@@ -16,19 +16,18 @@ import type { RouterOutputs } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type SearchResultsData = RouterOutputs["search"]["profilesByUsername"];
+type RecommendationsData =
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResultsData>([]);
 
-  type RecommendationsData =
-    RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
+  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const { isLoading, mutateAsync: searchProfilesByUsername } =
     api.search.profilesByUsername.useMutation();
-
-  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const performSearch = async (partialUsername: string) => {
     setSearchTerm(partialUsername);

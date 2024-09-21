@@ -80,10 +80,7 @@ export class CommentRepository {
             : undefined,
         ),
       )
-      .orderBy(
-        desc(schema.comment.createdAt), // Primary order by the creation date
-        desc(schema.comment.id),
-      )
+      .orderBy(desc(schema.comment.createdAt), desc(schema.comment.id))
       .limit(pageSize + 1);
   }
 }
