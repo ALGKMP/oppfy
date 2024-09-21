@@ -100,11 +100,15 @@ export class ContactService {
   }
 
   async filterPhoneNumbersOnApp(phoneNumbers: string[]) {
+    if (phoneNumbers.length === 0) {
+      return [];
+    }
+
     const existingPhoneNumbers =
       await this.userRepository.existingPhoneNumbers(phoneNumbers);
 
     return phoneNumbers.filter(
-      (number) => !existingPhoneNumbers.includes(number),
+      (number) => !existingPhoneNumbers.includes({ phoneNumber: number }),
     );
   }
 
