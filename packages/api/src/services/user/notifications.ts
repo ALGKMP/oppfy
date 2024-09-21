@@ -35,6 +35,18 @@ export class NotificationsService {
     return this.notificationsRepository.getUnreadNotificationsCount(userId);
   }
 
+  async getRecentNotifications(options: {
+    senderId?: string;
+    recipientId?: string;
+    eventType?: EventType;
+    entityId?: string;
+    entityType?: EntityType;
+    minutesThreshold: number;
+    limit: number;
+  }) {
+    return this.notificationsRepository.getRecentNotifications(options);
+  }
+
   async paginateNotifications(
     userId: string,
     cursor: { createdAt: Date; id: string } | null = null,
