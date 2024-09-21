@@ -35,7 +35,7 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
       // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
-    onError: (_err, newHasLikedData, ctx) => {
+    onError: async (_err, newHasLikedData, ctx) => {
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
@@ -43,7 +43,7 @@ export const useLikePost = ({postId, endpoint, userId}: LikePostProps) => {
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
-      changeLikeCount({
+      await changeLikeCount({
         endpoint,
         changeCountBy: -1,
         postId,
