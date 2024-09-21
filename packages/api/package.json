@@ -1,4 +1,18 @@
 {
+  "name": "@oppfy/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "prettier": "@oppfy/prettier-config",
   "dependencies": {
     "@aws-sdk/cloudfront-signer": "^3.609.0",
     "@aws-sdk/s3-request-presigner": "^3.564.0",
@@ -29,19 +43,5 @@
     "eslint": "^9.2.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4"
-  },
-  "exports": {
-    ".": "./index.ts"
-  },
-  "name": "@oppfy/api",
-  "prettier": "@oppfy/prettier-config",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit"
-  },
-  "type": "module",
-  "version": "0.1.0"
+  }
 }

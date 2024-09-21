@@ -1,29 +1,11 @@
 {
-  "dependencies": {
-    "@aws-sdk/client-rds-data": "^3.564.0",
-    "@aws-sdk/credential-providers": "^3.564.0",
-    "@oppfy/env": "workspace:*",
-    "drizzle-orm": "^0.30.10",
-    "drizzle-zod": "^0.5.1",
-    "postgres": "^3.4.4",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@oppfy/firebase": "workspace:*",
-    "@oppfy/eslint-config": "workspace:*",
-    "@oppfy/prettier-config": "workspace:*",
-    "@oppfy/tsconfig": "workspace:*",
-    "drizzle-kit": "^0.21.1",
-    "eslint": "^9.2.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4"
-  },
+  "name": "@oppfy/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
   "exports": {
     ".": "./index.ts"
   },
-  "name": "@oppfy/db",
-  "prettier": "@oppfy/prettier-config",
-  "private": true,
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "format": "prettier --check . --ignore-path ../../.gitignore",
@@ -36,6 +18,24 @@
     "wipe": "pnpm with-env tsx ./wipe.ts",
     "with-env": "dotenv -e ../../.env --"
   },
-  "type": "module",
-  "version": "0.1.0"
+  "prettier": "@oppfy/prettier-config",
+  "dependencies": {
+    "@aws-sdk/client-rds-data": "^3.564.0",
+    "@aws-sdk/credential-providers": "^3.564.0",
+    "@oppfy/env": "workspace:*",
+    "drizzle-orm": "^0.30.10",
+    "drizzle-zod": "^0.5.1",
+    "postgres": "^3.4.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/firebase": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
+    "@oppfy/tsconfig": "workspace:*",
+    "drizzle-kit": "^0.21.1",
+    "eslint": "^9.2.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4"
+  }
 }

@@ -1,4 +1,18 @@
 {
+  "name": "@oppfy/mux-lambda",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "prettier": "@oppfy/prettier-config",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.564.0",
     "@aws-sdk/client-sns": "^3.592.0",
@@ -18,19 +32,5 @@
     "eslint": "^9.2.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4"
-  },
-  "license": "MIT",
-  "main": "./index.ts",
-  "name": "@oppfy/mux-lambda",
-  "prettier": "@oppfy/prettier-config",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf .turbo node_modules",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit"
-  },
-  "type": "module",
-  "types": "./index.ts",
-  "version": "0.1.0"
+  }
 }
