@@ -16,12 +16,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const routeProfile = async () => {
       if (!username) {
-        router.navigate("/(profile)/");
+        router.navigate({ pathname: "/(profile)" });
         return;
       }
 
-      let otherProfileId: number;
-      let selfProfileId: number;
+      let otherProfileId: string;
+      let selfProfileId: string;
 
       try {
         const [otherProfileIdPromise, selfProfileIdPromise] = [
@@ -39,7 +39,7 @@ export default function ProfilePage() {
           otherProfileIdResult.status === "rejected" ||
           selfProfileIdResult.status === "rejected"
         ) {
-          router.navigate("/(profile)/");
+          router.navigate({ pathname: "/(profile)" });
           return;
         }
 
@@ -47,15 +47,15 @@ export default function ProfilePage() {
 
         selfProfileId = selfProfileIdResult.value;
       } catch (error) {
-        router.navigate("/(profile)/");
+        router.navigate({ pathname: "/(profile)" });
         return;
       }
 
       if (selfProfileId === otherProfileId) {
-        router.navigate("/(profile)/");
+        router.navigate({ pathname: "/(profile)" });
       }
 
-      router.navigate(`/(home)/profile/${username}`);
+      router.navigate({ pathname: "/(home)/profile/[userId]", params: { userId: username } });
     };
 
     void routeProfile();
