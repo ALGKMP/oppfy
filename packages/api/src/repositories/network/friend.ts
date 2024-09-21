@@ -13,7 +13,6 @@ export class FriendRepository {
       // Create friend relationship
       await tx.insert(schema.friend).values([
         { userId1: senderId, userId2: recipientId },
-        // { userId1: recipientId, userId2: senderId },
       ]);
 
       // Delete the friend request
