@@ -3,7 +3,17 @@ import type {
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3/dist-types/commands";
 
-import { and, db, eq, ilike, ne, schema } from "@oppfy/db";
+import {
+  and,
+  db,
+  eq,
+  ilike,
+  isNotNull,
+  isNull,
+  ne,
+  or,
+  schema,
+} from "@oppfy/db";
 import type {
   OpenSearchProfileIndexResult,
   OpenSearchResponse,
@@ -69,10 +79,25 @@ export class SearchRepository {
       })
       .from(schema.user)
       .innerJoin(schema.profile, eq(schema.user.profileId, schema.profile.id))
+      .leftJoin(
+        schema.block,
+        or(
+          and(
+            eq(schema.block.userId, currentUserId),
+            eq(schema.block.blockedUserId, schema.user.id),
+          ),
+          and(
+            eq(schema.block.userId, schema.user.id),
+            eq(schema.block.blockedUserId, currentUserId),
+          ),
+        ),
+      )
       .where(
         and(
           ilike(schema.profile.username, `%${username}%`),
           ne(schema.user.id, currentUserId),
+          isNotNull(schema.user.profileId), // Ensure user is onboarded
+          isNull(schema.block.id), // Ensure user is not blocked
         ),
       )
       .limit(limit);

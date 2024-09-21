@@ -6,6 +6,7 @@ import {
   db,
   desc,
   eq,
+  gt,
   inArray,
   lt,
   or,
@@ -126,6 +127,50 @@ export class NotificationsRepository {
   }
 
   @handleDatabaseErrors
+  async getRecentNotifications(options: {
+    senderId?: string;
+    recipientId?: string;
+    eventType?: EventType;
+    entityId?: string;
+    entityType?: EntityType;
+    minutesThreshold: number;
+    limit: number;
+  }) {
+    const {
+      senderId,
+      recipientId,
+      eventType,
+      entityId,
+      entityType,
+      minutesThreshold,
+    } = options;
+
+    let query = this.db.select().from(schema.notifications).$dynamic();
+
+    query = query.where(
+      gt(
+        schema.notifications.createdAt,
+        sql`NOW() - INTERVAL '${minutesThreshold} minutes'`,
+      ),
+    );
+
+    if (senderId)
+      query = query.where(eq(schema.notifications.senderId, senderId));
+    if (recipientId)
+      query = query.where(eq(schema.notifications.recipientId, recipientId));
+    if (eventType)
+      query = query.where(eq(schema.notifications.eventType, eventType));
+    if (entityId)
+      query = query.where(eq(schema.notifications.entityId, entityId));
+    if (entityType)
+      query = query.where(eq(schema.notifications.entityType, entityType));
+
+    query = query.orderBy(desc(schema.notifications.createdAt)).limit(limit);
+
+    return await query;
+  }
+
+  @handleDatabaseErrors
   async paginateNotifications(
     userId: string,
     cursor: { createdAt: Date; id: string } | null = null,
@@ -191,20 +236,11 @@ export class NotificationsRepository {
         return [];
       }
 
-      console.log("MARKING NOTIS AS READ:", fetchedNotifications);
-
-      // Mark notis as read
-      const notificationIds = fetchedNotifications.map((n) => n.id);
+      // Mark all notifications as read for this user
       await tx
         .update(schema.notifications)
         .set({ read: true })
-        .where(
-          and(
-            eq(schema.notifications.recipientId, userId),
-            inArray(schema.notifications.id, notificationIds),
-            eq(schema.notifications.read, false),
-          ),
-        );
+        .where(eq(schema.notifications.recipientId, userId));
 
       return fetchedNotifications;
     });
@@ -285,11 +321,6 @@ export class NotificationsRepository {
     entityType?: EntityType;
     entityId?: string;
   }) {
-    console.log(
-      "Deleting notifications with options:",
-      JSON.stringify(options, null, 2),
-    );
-
     let query = this.db.delete(schema.notifications).$dynamic();
 
     const conditions = [];

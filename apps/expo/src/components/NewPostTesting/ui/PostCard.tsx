@@ -217,7 +217,7 @@ const PostCard = (props: PostCardProps) => {
                   >
                     <XStack alignItems="center" gap="$2">
                       <SizableText size="$2" fontWeight="bold" lineHeight={0}>
-                        Opped by{" "}
+                        opped by{" "}
                         <SizableText fontWeight="bold" color="$primary">
                           {props.author.username}
                         </SizableText>

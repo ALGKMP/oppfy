@@ -105,9 +105,11 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async existingPhoneNumbers(phoneNumbers: string[]) {
-    return await this.db
+    const existingNumbers = await this.db
       .select({ phoneNumber: schema.user.phoneNumber })
       .from(schema.user)
       .where(inArray(schema.user.phoneNumber, phoneNumbers));
+
+    return existingNumbers.map((user) => user.phoneNumber);
   }
 }
