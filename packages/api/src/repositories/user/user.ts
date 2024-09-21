@@ -102,4 +102,14 @@ export class UserRepository {
       .orderBy(sql`RANDOM()`)
       .limit(limit);
   }
+
+  @handleDatabaseErrors
+  async existingPhoneNumbers(phoneNumbers: string[]) {
+    const existingNumbers = await this.db
+      .select({ phoneNumber: schema.user.phoneNumber })
+      .from(schema.user)
+      .where(inArray(schema.user.phoneNumber, phoneNumbers));
+
+    return existingNumbers.map((user) => user.phoneNumber);
+  }
 }

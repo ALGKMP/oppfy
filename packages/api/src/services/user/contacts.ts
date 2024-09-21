@@ -100,6 +100,10 @@ export class ContactService {
   }
 
   async filterPhoneNumbersOnApp(phoneNumbers: string[]) {
+    if (phoneNumbers.length === 0) {
+      return [];
+    }
+
     const existingPhoneNumbers =
       await this.userRepository.existingPhoneNumbers(phoneNumbers);
 
