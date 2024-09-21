@@ -72,7 +72,7 @@ export const user = pgTable("user", {
   privacySetting: privacySettingEnum("privacy_setting")
     .default("public")
     .notNull(),
-  phoneNumber: text("phone_number").notNull(),
+  phoneNumber: text("phone_number").notNull().unique(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

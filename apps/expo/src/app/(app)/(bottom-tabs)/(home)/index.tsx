@@ -112,42 +112,42 @@ const HomeScreen = () => {
     (item: PostItem, profile: Profile) => {
       return (
         <View paddingTop="$4">
-            <OtherPost
-              id={item.postId}
-              createdAt={item.createdAt}
-              caption={item.caption}
-              self={{
-                id: profile.userId,
-                username: profile.username,
-                profilePicture: profile.profilePictureUrl,
-              }}
-              author={{
-                id: item.authorId,
-                username: item.authorUsername ?? "",
-                profilePicture: item.authorProfilePicture,
-              }}
-              recipient={{
-                id: item.recipientId,
-                username: item.recipientUsername ?? "",
-                profilePicture: item.recipientProfilePicture,
-              }}
-              media={{
-                isViewable: viewableItems.includes(item.postId),
-                type: item.mediaType,
-                url: item.imageUrl,
-                isViewable: viewableItems.includes(item.postId),
-                dimensions: {
-                  width: item.width,
-                  height: item.height,
-                },
-              }}
-              stats={{
-                likes: item.likesCount,
-                comments: item.commentsCount,
-              }}
-            />
+          <OtherPost
+            id={item.postId}
+            createdAt={item.createdAt}
+            caption={item.caption}
+            self={{
+              id: profile.userId,
+              username: profile.username,
+              profilePicture: profile.profilePictureUrl,
+            }}
+            author={{
+              id: item.authorId,
+              username: item.authorUsername ?? "",
+              profilePicture: item.authorProfilePicture,
+            }}
+            recipient={{
+              id: item.recipientId,
+              username: item.recipientUsername ?? "",
+              profilePicture: item.recipientProfilePicture,
+            }}
+            media={{
+              isViewable: viewableItems.includes(item.postId),
+              type: item.mediaType,
+              url: item.imageUrl,
+              isViewable: viewableItems.includes(item.postId),
+              dimensions: {
+                width: item.width,
+                height: item.height,
+              },
+            }}
+            stats={{
+              likes: item.likesCount,
+              comments: item.commentsCount,
+            }}
+          />
         </View>
-      )
+      );
     },
     [viewableItems],
   );
