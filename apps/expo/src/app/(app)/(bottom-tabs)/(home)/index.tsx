@@ -113,11 +113,6 @@ const HomeScreen = () => {
       return (
         <View paddingTop="$4">
           <YStack gap="$4">
-            <PostItem
-              post={item}
-              isSelfPost={false}
-              isViewable={viewableItems.includes(item.postId)}
-            />
             <OtherPost
               id={item.postId}
               createdAt={item.createdAt}
