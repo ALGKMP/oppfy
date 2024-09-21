@@ -10,7 +10,7 @@ export class FollowRepository {
   @handleDatabaseErrors
   async createFollower(senderUserId: string, recipientUserId: string) {
     return await this.db.transaction(async (tx) => {
-      const result = await tx
+      await tx
         .insert(schema.follower)
         .values({ recipientId: recipientUserId, senderId: senderUserId });
 
@@ -37,15 +37,13 @@ export class FollowRepository {
         .update(schema.profileStats)
         .set({ followers: sql`${schema.profileStats.followers} + 1` })
         .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
-
-      return result[0];
     });
   }
 
   @handleDatabaseErrors
   async removeFollower(senderId: string, recipientId: string) {
     return await this.db.transaction(async (tx) => {
-      const result = await tx
+      await tx
         .delete(schema.follower)
         .where(
           and(
@@ -78,8 +76,6 @@ export class FollowRepository {
         .update(schema.profileStats)
         .set({ followers: sql`${schema.profileStats.followers} - 1` })
         .where(eq(schema.profileStats.profileId, recipientProfile.profileId));
-
-      return result[0];
     });
   }
 

@@ -21,26 +21,21 @@ export interface PaginatedResponse<T> {
   nextCursor: PostCursor | CommentCursor | undefined;
 }
 
-interface PostCursor {
-  createdAt: Date;
-  postId: string;
-}
-
 interface FollowingPostCursor {
   createdAt: Date;
   followerId: string;
 }
 
-/* interface FeedCursor {
-  followingPostCursor?: FollowingPostCursor;
-  postCursor?: PostCursor;
-} */
-
-interface FeedCursor {
-  doneFollowing: boolean;
-  followingCursor?: FollowingPostCursor;
-  recomendedCursor?: PostCursor;
+interface PostCursor {
+  createdAt: Date;
+  postId: string;
 }
+
+type FeedCursorRewritten =
+  | { type: "following"; cursor: FollowingPostCursor | null }
+  | { type: "recommended"; cursor: PostCursor | null }
+  | { type: "global"; cursor: PostCursor | null }
+  | null;
 
 interface CommentCursor {
   createdAt: Date;
@@ -102,15 +97,12 @@ export class PostService {
         currentUserId,
         targetUserId: userId,
       });
-      console.log("Can access FUCK FUCK FUCK FUCK", canAccess);
       if (!canAccess) {
-        console.log("User cannot access this data");
         return {
           items: [],
           nextCursor: undefined,
         };
       }
-      console.log("User is able to access this data");
 
       const data = await this.postRepository.paginatePostsOfUser(
         userId,
@@ -171,46 +163,48 @@ export class PostService {
 
   async paginatePostsForFeed(
     userId: string,
-    cursor: FeedCursor | null = null,
-    pageSize?: number,
+    cursor: FeedCursorRewritten = null,
+    pageSize = 10,
   ) {
-    if (cursor?.doneFollowing) {
-      const recommendedResult =
-        await this.postRepository.paginatePostsOfRecommended(
-          userId,
-          cursor.recomendedCursor,
-          pageSize,
-        );
 
-      const parsedRecommendedResult = this._processPaginatedPostData(
-        recommendedResult,
-        pageSize,
-      );
+    // if (cursor?.type === "recommended") {
+    //   console.log("Recommended cursor");
+    //   const recommendedResult =
+    //     await this.postRepository.paginatePostsOfRecommended(
+    //       userId,
+    //       cursor.cursor,
+    //       pageSize,
+    //     );
 
-      // spread
-      const { nextCursor, ...rest } = parsedRecommendedResult;
+    //   const parsedRecommendedResult = this._processPaginatedPostData(
+    //     recommendedResult,
+    //     pageSize,
+    //   );
 
-      if (nextCursor === undefined) {
-        // const { nextCursor, ...rest } = parsedRecommendedResult;
+    //   // spread
+    //   const { nextCursor, ...rest } = parsedRecommendedResult;
+    //   console.log("Next cursor", nextCursor);
+    //   console.log("Rest", rest);
 
-        return {
-          ...rest,
-          nextCursor: undefined,
-        };
-      }
+    //   if (nextCursor === undefined) {
+    //     return {
+    //       ...rest,
+    //       nextCursor: undefined,
+    //     };
+    //   }
 
-      return {
-        ...rest,
-        nextCursor: {
-          doneFollowing: true,
-          recomendedCursor: nextCursor,
-        },
-      };
-    }
+    //   return {
+    //     ...rest,
+    //     nextCursor: {
+    //       type: "recommended",
+    //       cursor: nextCursor,
+    //     },
+    //   };
+    // }
 
     const followingResult = await this.postRepository.paginatePostsOfFollowing(
       userId,
-      cursor?.followingCursor,
+      cursor?.type === "following" ? cursor.cursor : null,
       pageSize,
     );
 
@@ -219,43 +213,25 @@ export class PostService {
       pageSize,
     );
 
-    if (parsedFollowingResult.items.length < pageSize!) {
-      const recommendedResult =
-        await this.postRepository.paginatePostsOfRecommended(
-          userId,
-          cursor?.recomendedCursor,
-          pageSize! - parsedFollowingResult.items.length,
-        );
-
-      const parsedRecommendedResult = this._processPaginatedPostData(
-        recommendedResult,
-        pageSize,
-      );
-
-      parsedRecommendedResult.items = [
-        ...parsedFollowingResult.items,
-        ...parsedRecommendedResult.items,
-      ];
-
-      const { nextCursor, ...rest } = parsedRecommendedResult;
-
-      if (nextCursor === undefined) {
-        return {
-          ...rest,
-          nextCursor: undefined,
-        };
-      }
-
-      return {
-        ...rest,
-        nextCursor: {
-          doneFollowing: true,
-          recomendedCursor: nextCursor,
-        },
-      };
-    }
-
     return parsedFollowingResult;
+
+    //   if (nextCursor === undefined) {
+    //     return {
+    //       ...rest,
+    //       nextCursor: undefined,
+    //     };
+    //   }
+
+    //   return {
+    //     ...rest,
+    //     nextCursor: {
+    //       type: "recommended",
+    //       cursor: nextCursor,
+    //     },
+    //   };
+    // }
+
+    // return parsedFollowingResult;
   }
 
   async paginatePostsByUserSelf(

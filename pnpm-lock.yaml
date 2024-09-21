@@ -219,8 +219,8 @@ importers:
         specifier: ~0.25.24
         version: 0.25.24(expo@51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4)))
       expo-video:
-        specifier: ^1.2.6
-        version: 1.2.6(expo@51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4)))
+        specifier: 1.2.3
+        version: 1.2.3(expo@51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4)))
       expo-video-thumbnails:
         specifier: ~8.0.0
         version: 8.0.0(expo@51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4)))
@@ -7220,8 +7220,8 @@ packages:
     peerDependencies:
       expo: '*'
 
-  expo-video@1.2.6:
-    resolution: {integrity: sha512-4xYhE3keNb7Z2ybuiioHfDlxn9B3TRiQA+ThpJInmZj+9hu2kFJMGgbxUOGtvlRNI/HVHI7hZMeiT9s4gF2y1w==}
+  expo-video@1.2.3:
+    resolution: {integrity: sha512-Y9QHxzq2w7H5ASnYSVvE5ArNCfADkp2CbyTTm+4wpWZAnW/ymqXGGjmKAfHvrIAH88LxaFUNN8JLiFn89tz+sg==}
     peerDependencies:
       expo: '*'
 
@@ -20888,7 +20888,7 @@ snapshots:
     dependencies:
       expo: 51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))
 
-  expo-video@1.2.6(expo@51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))):
+  expo-video@1.2.3(expo@51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))):
     dependencies:
       expo: 51.0.32(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))
 
