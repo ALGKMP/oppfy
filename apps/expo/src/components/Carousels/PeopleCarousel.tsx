@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
@@ -49,7 +48,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   const throttledHandleShowMore = useRef(
     throttle(
       () => {
-        if (!props.loading && props.onShowMore) {
+        if ("onShowMore" in props && props.onShowMore) {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           props.onShowMore();
         }
@@ -58,6 +57,12 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
       { leading: true, trailing: false },
     ),
   ).current;
+
+  useEffect(() => {
+    return () => {
+      throttledHandleShowMore.cancel();
+    };
+  }, [throttledHandleShowMore]);
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -74,14 +79,8 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         throttledHandleShowMore();
       }
     },
-    [props.loading, props.showMore, throttledHandleShowMore],
+    [props, throttledHandleShowMore],
   );
-
-  useEffect(() => {
-    return () => {
-      throttledHandleShowMore.cancel();
-    };
-  }, [throttledHandleShowMore]);
 
   if (props.loading) {
     return (
@@ -137,10 +136,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
               <YStack width={70} gap="$1.5" alignItems="center">
-                <Avatar
-                  source={item.profilePictureUrl ?? DefaultProfilePicture}
-                  size={70}
-                />
+                <Avatar source={item.profilePictureUrl} size={70} />
                 <Text textAlign="center" fontWeight="600" theme="alt1">
                   {item.username}
                 </Text>
