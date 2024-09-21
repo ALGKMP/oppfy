@@ -7,6 +7,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import { env } from "@oppfy/env";
+import { auth } from "@oppfy/firebase";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -76,12 +77,26 @@ const wipeDatabase = async () => {
       console.log("Drizzle meta directory not found.");
     }
 
-    console.log("Database wiped and meta directory deleted successfully.");
+    // Wipe Firebase accounts
+    console.log("Wiping Firebase accounts...");
+    const listUsersResult = await auth.listUsers();
+    const users = listUsersResult.users;
+
+    for (const user of users) {
+      await auth.deleteUser(user.uid);
+    }
+
+    console.log(`${users.length} Firebase accounts deleted successfully.`);
+
+    console.log(
+      "Database wiped, meta directory deleted, and Firebase accounts removed successfully.",
+    );
   } catch (error) {
     console.error("Error during wipe process:", error);
   } finally {
     rl.close();
     await queryClient.end();
+    // No need to clean up Firebase Admin SDK here as it's managed elsewhere
   }
 };
 
