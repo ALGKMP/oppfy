@@ -111,8 +111,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     renderExtraItem,
   } = props;
 
-  if (data.length === 0) return null;
-
   return (
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$2">
