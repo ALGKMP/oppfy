@@ -130,6 +130,7 @@ const ActionSheet = ({
         statusBarTranslucent
       >
         <View flex={1} justifyContent="flex-end">
+        <View flex={1} justifyContent="flex-end">
           {/* Animated Backdrop */}
           <Animated.View style={[styles.backdrop, backgroundStyle]}>
             <TouchableWithoutFeedback onPress={closeModal}>
@@ -138,10 +139,11 @@ const ActionSheet = ({
           </Animated.View>
           {/* Modal Content */}
           <AnimatedYStack
+            zIndex={1}
             width="100%"
             paddingHorizontal="$2"
             paddingBottom={insets.bottom}
-            style={[containerStyle, styles.modalContent]}
+            style={containerStyle}
             gap="$2"
           >
             <YStack
@@ -252,9 +254,6 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
-  },
-  modalContent: {
-    zIndex: 1,
   },
   optionButton: {
     padding: 16,
