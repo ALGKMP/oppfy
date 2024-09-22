@@ -97,6 +97,15 @@ export class FriendService {
       throw new DomainError(ErrorCode.CANNOT_FRIEND_SELF);
     }
 
+    const friendshipExists = await this.friendshipExists(senderId, recipientId);
+
+    if (friendshipExists) {
+      throw new DomainError(
+        ErrorCode.USER_ALREADY_FRIENDS,
+        `Users "${senderId}" and "${recipientId}" are already friends`,
+      );
+    }
+
     const friendRequest = await this.friendRepository.getFriendRequest(
       senderId,
       recipientId,
