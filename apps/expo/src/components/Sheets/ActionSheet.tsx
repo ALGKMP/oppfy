@@ -129,7 +129,7 @@ const ActionSheet = ({
         onRequestClose={closeModal}
         statusBarTranslucent
       >
-        <View style={styles.modalContainer}>
+        <View flex={1} justifyContent="flex-end">
           {/* Animated Backdrop */}
           <Animated.View style={[styles.backdrop, backgroundStyle]}>
             <TouchableWithoutFeedback onPress={closeModal}>
@@ -138,10 +138,11 @@ const ActionSheet = ({
           </Animated.View>
           {/* Modal Content */}
           <AnimatedYStack
+            zIndex={1}
             width="100%"
             paddingHorizontal="$2"
             paddingBottom={insets.bottom}
-            style={[containerStyle, styles.modalContent]}
+            style={containerStyle}
             gap="$2"
           >
             <YStack
@@ -210,9 +211,13 @@ const ActionSheet = ({
                     ]}
                     disabled={option.disabled}
                   >
-                    <View style={styles.buttonContent}>
+                    <View
+                      flexDirection="row"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
                       {option.icon && (
-                        <View style={styles.iconContainer}>{option.icon}</View>
+                        <View marginRight={8}>{option.icon}</View>
                       )}
                       <SizableText size="$5" {...option.textProps}>
                         {option.text}
@@ -249,16 +254,9 @@ const ActionSheet = ({
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
-  },
-  modalContent: {
-    zIndex: 1,
   },
   optionButton: {
     padding: 16,
@@ -267,14 +265,6 @@ const styles = StyleSheet.create({
   cancelButton: {
     padding: 16,
     alignItems: "center",
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconContainer: {
-    marginRight: 8,
   },
 });
 
