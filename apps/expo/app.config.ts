@@ -113,10 +113,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     //       "Oppfy uses your location to tag photos with where they were taken.",
     //   },
     // ],
-    // [
-    //   "./snapchat-plugin",
-    //   { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" },
-    // ],
+    [
+      "./snapchat-plugin",
+      { snapchatClientId: "e029e4cb-efc7-43c4-bab3-608dce70c69f" },
+    ],
     [
       "expo-contacts",
       {

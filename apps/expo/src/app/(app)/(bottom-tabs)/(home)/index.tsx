@@ -135,7 +135,6 @@ const HomeScreen = () => {
               isViewable: viewableItems.includes(item.postId),
               type: item.mediaType,
               url: item.imageUrl,
-              isViewable: viewableItems.includes(item.postId),
               dimensions: {
                 width: item.width,
                 height: item.height,
