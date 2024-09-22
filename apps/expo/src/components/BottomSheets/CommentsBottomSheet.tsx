@@ -5,13 +5,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { v4 as uuidv4 } from 'uuid';
 import { StyleSheet, TouchableOpacity } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import BottomSheet, { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import type BottomSheet from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import {
   AlertCircle,
   Minus,
@@ -31,6 +31,7 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import { v4 as uuidv4 } from "uuid";
 import type z from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
@@ -135,7 +136,7 @@ const CommentsBottomSheet = React.memo(
                 pages: prevData.pages.map((page) => {
                   // check if it's postId
                   page.items.map((item) => {
-                    if (item?.postId === postId) {
+                    if (item.postId === postId) {
                       item.commentsCount += 1;
                     }
                   });
@@ -154,7 +155,7 @@ const CommentsBottomSheet = React.memo(
                 pages: prevData.pages.map((page) => {
                   // check if it's postId
                   page.items.map((item) => {
-                    if (item?.postId === postId) {
+                    if (item.postId === postId) {
                       item.commentsCount += 1;
                     }
                   });
@@ -330,8 +331,8 @@ const CommentsBottomSheet = React.memo(
               <XStack key={index} padding="$3.5" gap="$2.5">
                 <Skeleton circular size={46} />
                 <YStack flex={1} gap="$2">
-                  <Skeleton width={"40%"} height={20} />
-                  <Skeleton width={"100%"} height={20} />
+                  <Skeleton width="40%" height={20} />
+                  <Skeleton width="100%" height={20} />
                 </YStack>
               </XStack>
             ))}
@@ -481,7 +482,7 @@ const Comment = React.memo(
                 ...prevData,
                 pages: prevData.pages.map((page) => {
                   page.items.map((item) => {
-                    if (item?.postId === postId) {
+                    if (item.postId === postId) {
                       item.commentsCount -= 1;
                     }
                   });
@@ -501,7 +502,7 @@ const Comment = React.memo(
                 ...prevData,
                 pages: prevData.pages.map((page) => {
                   page.items.map((item) => {
-                    if (item?.postId === postId) {
+                    if (item.postId === postId) {
                       item.commentsCount -= 1;
                     }
                   });
@@ -522,7 +523,7 @@ const Comment = React.memo(
               pages: prevData.pages.map((page) => ({
                 ...page,
                 items: page.items.filter(
-                  (item) => item?.commentId !== newComment.commentId,
+                  (item) => item.commentId !== newComment.commentId,
                 ),
               })),
             };

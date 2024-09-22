@@ -135,7 +135,7 @@ const AlertDialog = ({
             style={containerStyle}
           >
             <YStack
-              width={"100%"}
+              width="100%"
               paddingVertical="$4"
               paddingHorizontal="$6"
               backgroundColor="$background"

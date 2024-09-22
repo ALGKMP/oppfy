@@ -22,7 +22,6 @@ const SettingsLayout = () => {
           title: "Find more friends 💁‍♂️🙋‍♀️",
         }}
       />
-
     </Stack>
   );
 };

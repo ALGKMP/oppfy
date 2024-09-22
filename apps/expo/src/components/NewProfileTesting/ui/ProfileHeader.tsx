@@ -103,10 +103,7 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
       gap="$4"
     >
       <View alignItems="center" marginBottom={-30}>
-        <Avatar
-          source={data.profilePictureUrl ?? DefaultProfilePicture}
-          size={160}
-        />
+        <Avatar source={data.profilePictureUrl} size={160} />
       </View>
 
       <XStack justifyContent="space-between" alignItems="flex-end" width="100%">

@@ -2,7 +2,7 @@ import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
-import { APIGatewayProxyResult, Context } from "aws-lambda";
+import type { APIGatewayProxyResult, Context } from "aws-lambda";
 import gremlin from "gremlin";
 import { z } from "zod";
 
@@ -47,7 +47,7 @@ async function updateContacts(
   const currentTimestamp = Date.now().toString();
 
   // Add or update the user vertex
-  let userResult = await g
+  const userResult = await g
     .mergeV(
       new Map([
         [t.id, userId],
@@ -81,7 +81,7 @@ async function updateContacts(
         .from_("currentUser")
         .property("createdAt", currentTimestamp),
     )
-/*     .property(
+    /*     .property(
       "isFollowing",
       __.choose(
         __.select("contactUser").id().is(P.within(followingIds)),

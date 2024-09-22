@@ -130,7 +130,7 @@ const PostItem = React.memo((props: PostItemProps) => {
           ...prevData,
           pages: prevData.pages.map((page) => ({
             ...page,
-            items: page.items.filter((item) => item?.postId != newData.postId),
+            items: page.items.filter((item) => item.postId != newData.postId),
           })),
         },
       );

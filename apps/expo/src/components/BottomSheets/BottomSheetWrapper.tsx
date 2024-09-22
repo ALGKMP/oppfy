@@ -6,9 +6,10 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import BottomSheet, {
-  BottomSheetScrollView,
-  type BottomSheetProps,
+  BottomSheetScrollView
+  
 } from "@gorhom/bottom-sheet";
+import type {BottomSheetProps} from "@gorhom/bottom-sheet";
 import { Minus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
@@ -78,7 +79,7 @@ const BottomSheetWrapper = (props: BottomSheetWrapperProps) => {
             }}
             {...bottomSheetProps}
           >
-              {children}
+            {children}
           </BottomSheet>
         ) : (
           <BottomSheet

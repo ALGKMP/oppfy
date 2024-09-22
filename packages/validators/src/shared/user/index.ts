@@ -115,32 +115,32 @@ export const fullProfileOther = z.object({
 
 export const friendItems = z.array(
   z.object({
-      userId: z.string(),
-      profileId: z.number(),
-      username: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable(),
-      privacy: z.enum(["public", "private"]),
-    }),
+    userId: z.string(),
+    profileId: z.number(),
+    username: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable(),
+    privacy: z.enum(["public", "private"]),
+  }),
 );
 
 export const friendItemsOther = z.array(
   z.object({
-      userId: z.string(),
-      profileId: z.number(),
-      username: z.string(),
-      name: z.string(),
-      profilePictureUrl: z.string().nullable(),
-      relationshipState: z.enum([
-        "following",
-        "followRequestSent",
-        "notFollowing",
-      ]),
-      privacy: z.enum(["public", "private"]),
+    userId: z.string(),
+    profileId: z.number(),
+    username: z.string(),
+    name: z.string(),
+    profilePictureUrl: z.string().nullable(),
+    relationshipState: z.enum([
+      "following",
+      "followRequestSent",
+      "notFollowing",
+    ]),
+    privacy: z.enum(["public", "private"]),
   }),
 );
 
-export const recommededProfiles= z.array(
+export const recommededProfiles = z.array(
   z.object({
     profilePictureUrl: z.string().nullable(),
     userId: z.string(),

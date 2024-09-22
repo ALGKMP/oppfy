@@ -90,19 +90,31 @@ export class BlockService {
     }
 
     if (userFriendRequestToBlockedUser) {
-      await this.friendRepository.deleteFriendRequest(userId, userIdBeingBlocked);
+      await this.friendRepository.deleteFriendRequest(
+        userId,
+        userIdBeingBlocked,
+      );
     }
 
     if (userFollowRequestToBlockedUser) {
-      await this.followRepository.removeFollowRequest(userId, userIdBeingBlocked);
+      await this.followRepository.removeFollowRequest(
+        userId,
+        userIdBeingBlocked,
+      );
     }
 
     if (blockedUserFriendRequestToUser) {
-      await this.friendRepository.deleteFriendRequest(userIdBeingBlocked, userId);
+      await this.friendRepository.deleteFriendRequest(
+        userIdBeingBlocked,
+        userId,
+      );
     }
 
     if (blockedUserFollowRequestToUser) {
-      await this.followRepository.removeFollowRequest(userIdBeingBlocked, userId);
+      await this.followRepository.removeFollowRequest(
+        userIdBeingBlocked,
+        userId,
+      );
     }
 
     await this.blockRepository.blockUser(userId, userIdBeingBlocked);

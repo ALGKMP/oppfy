@@ -110,8 +110,7 @@ import { api } from "~/utils/api";
 // };
 
 const Post = () => {
-
-  return <View></View>
-}
+  return <View></View>;
+};
 
 export default Post;

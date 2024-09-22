@@ -119,7 +119,6 @@ export const friendRouter = createTRPCRouter({
       }
     }),
 
-
   sendFriendRequest: protectedProcedure
     .input(
       z.object({

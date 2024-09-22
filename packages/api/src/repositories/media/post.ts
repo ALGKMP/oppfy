@@ -142,7 +142,10 @@ export class PostRepository {
         followerId: schema.follower.id, // From subquery
       })
       .from(schema.follower)
-      .innerJoin(schema.post, eq(schema.post.recipientId, schema.follower.recipientId))
+      .innerJoin(
+        schema.post,
+        eq(schema.post.recipientId, schema.follower.recipientId),
+      )
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))

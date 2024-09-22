@@ -1,4 +1,5 @@
-import { ElementType, useEffect, useState } from "react";
+import type { ElementType} from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Easing,

@@ -131,9 +131,10 @@ export class FriendService {
     }
 
     // Determine user1 and user2 based on UUID comparison
-    const [user1, user2] = senderId > recipientId
-      ? [senderId, recipientId]
-      : [recipientId, senderId];
+    const [user1, user2] =
+      senderId > recipientId
+        ? [senderId, recipientId]
+        : [recipientId, senderId];
 
     await this.friendRepository.createFriend(user1, user2);
 

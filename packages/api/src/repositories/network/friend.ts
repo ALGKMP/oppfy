@@ -11,9 +11,9 @@ export class FriendRepository {
   async createFriend(senderId: string, recipientId: string) {
     return await this.db.transaction(async (tx) => {
       // Create friend relationship
-      await tx.insert(schema.friend).values([
-        { userId1: senderId, userId2: recipientId },
-      ]);
+      await tx
+        .insert(schema.friend)
+        .values([{ userId1: senderId, userId2: recipientId }]);
 
       // Delete the friend request
       await tx

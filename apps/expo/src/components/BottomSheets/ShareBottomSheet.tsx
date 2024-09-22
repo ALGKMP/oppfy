@@ -3,11 +3,12 @@ import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import type BottomSheet from "@gorhom/bottom-sheet";
-import {
-  CreativeKit,
+import type {
   MetadataParams,
   PhotoContentParams,
-  VideoContentParams,
+  VideoContentParams} from "@snapchat/snap-kit-react-native";
+import {
+  CreativeKit,
   VideoData,
 } from "@snapchat/snap-kit-react-native";
 import { widths } from "@tamagui/config";
@@ -63,7 +64,9 @@ const ShareBottomSheet = (props: ShareBottomSheetProps) => {
       }
 
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(processesedUri, {dialogTitle: "Share to..."});
+        await Sharing.shareAsync(processesedUri, {
+          dialogTitle: "Share to...",
+        });
       } else {
         Alert.alert("Sharing is not available on your device");
       }

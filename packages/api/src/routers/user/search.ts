@@ -1,9 +1,9 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { createTRPCRouter, protectedProcedure } from "../../trpc"; // Import TRPC utilities
-import { z } from "zod";
 
 export const searchRouter = createTRPCRouter({
   profilesByUsername: protectedProcedure

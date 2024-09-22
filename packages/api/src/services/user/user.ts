@@ -1,15 +1,16 @@
+import { auth } from "@oppfy/firebase";
+
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
   FollowRepository,
   PostRepository,
+  PostStatsRepository,
   ProfileRepository,
   ProfileStatsRepository,
   SearchRepository,
-  PostStatsRepository,
 } from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
-import { auth } from "@oppfy/firebase";
 
 export class UserService {
   private searchRepository = new SearchRepository();
@@ -85,7 +86,13 @@ export class UserService {
     return counts[0]?.count === 0;
   }
 
-  async canAccessUserData({currentUserId, targetUserId}: {currentUserId: string, targetUserId: string}): Promise<boolean> {
+  async canAccessUserData({
+    currentUserId,
+    targetUserId,
+  }: {
+    currentUserId: string;
+    targetUserId: string;
+  }): Promise<boolean> {
     if (currentUserId === targetUserId) return true;
 
     const targetUser = await this.userRepository.getUser(targetUserId);
@@ -94,16 +101,21 @@ export class UserService {
     }
 
     // Check if the current user is blocked by the target user
-    const isBlocked = await this.blockRepository.getBlockedUser(targetUserId, currentUserId);
+    const isBlocked = await this.blockRepository.getBlockedUser(
+      targetUserId,
+      currentUserId,
+    );
     if (isBlocked) return false;
 
     if (targetUser.privacySetting === "public") return true;
 
-    const isFollowing = await this.followRepository.getFollower(currentUserId, targetUserId);
+    const isFollowing = await this.followRepository.getFollower(
+      currentUserId,
+      targetUserId,
+    );
     console.log("isFollowing", isFollowing);
     if (isFollowing) return true;
 
     return false;
   }
-
 }

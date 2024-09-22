@@ -55,7 +55,10 @@ export default function ProfilePage() {
         router.navigate({ pathname: "/(profile)" });
       }
 
-      router.navigate({ pathname: "/(home)/profile/[userId]", params: { userId: username } });
+      router.navigate({
+        pathname: "/(home)/profile/[userId]",
+        params: { userId: username },
+      });
     };
 
     void routeProfile();

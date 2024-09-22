@@ -27,9 +27,6 @@ export class PrivacyService {
     if (!userExists) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
-     await this.userRepository.updatePrivacySetting(
-      userId,
-      newPrivacySetting,
-    );
+    await this.userRepository.updatePrivacySetting(userId, newPrivacySetting);
   }
 }

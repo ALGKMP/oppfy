@@ -1,7 +1,8 @@
 import { sharedValidators } from "@oppfy/validators";
 
 import { api } from "~/utils/api";
-import ActionSheet, { ButtonOption } from "../Sheets/ActionSheet";
+import type { ButtonOption } from "../Sheets/ActionSheet";
+import ActionSheet from "../Sheets/ActionSheet";
 
 interface ReportPostActionSheetProps {
   title: string;
