@@ -149,15 +149,18 @@ export class PostRepository {
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(
-        cursor
-          ? or(
+        and(
+          eq(schema.follower.senderId, userId),
+          cursor
+            ? or(
               lt(schema.post.createdAt, cursor.createdAt),
               and(
                 eq(schema.post.createdAt, cursor.createdAt),
                 gt(schema.follower.id, cursor.followerId),
-              ),
-            )
-          : undefined,
+                ),
+              )
+            : undefined,
+        ),
       )
       .orderBy(desc(schema.post.createdAt), asc(schema.follower.id))
       .limit(pageSize + 1);
