@@ -268,10 +268,10 @@ export const notificationSettings = pgTable("notification_settings", {
 
 export const post = pgTable("post", {
   id: uuid("id").primaryKey().defaultRandom(),
-  authorId: varchar("author", { length: 255 })
+  authorId: varchar("author_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  recipientId: varchar("recipient", { length: 255 })
+  recipientId: varchar("recipient_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   caption: text("caption").notNull().default(""),
@@ -347,14 +347,6 @@ export const postStats = pgTable("post_stats", {
     .notNull(),
 });
 
-export const test = pgTable("test", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
 export const like = pgTable("like", {
   id: uuid("id").primaryKey().defaultRandom(),
   postId: uuid("post_id")
@@ -381,10 +373,10 @@ export const likeRelations = relations(like, ({ one }) => ({
 
 export const comment = pgTable("comment", {
   id: uuid("id").primaryKey().defaultRandom(),
-  user: varchar("user", { length: 255 })
+  userId: varchar("user_id", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  post: uuid("post_id")
+  postId: uuid("post_id")
     .notNull()
     .references(() => post.id, { onDelete: "cascade" }),
   body: text("body").notNull(),
@@ -398,11 +390,11 @@ export const comment = pgTable("comment", {
 
 export const commentRelations = relations(comment, ({ one }) => ({
   post: one(post, {
-    fields: [comment.post],
+    fields: [comment.postId],
     references: [post.id],
   }),
   commentedBy: one(user, {
-    fields: [comment.user],
+    fields: [comment.userId],
     references: [user.id],
   }),
 }));

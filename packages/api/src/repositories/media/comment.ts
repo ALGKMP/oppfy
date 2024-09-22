@@ -1,4 +1,4 @@
-import { and, asc, count, desc, gt, lt, lte } from "drizzle-orm";
+import { and, count, desc, lte } from "drizzle-orm";
 
 import { db, eq, or, schema } from "@oppfy/db";
 
@@ -25,8 +25,8 @@ export class CommentRepository {
     body: string;
   }) {
     return await this.db.insert(schema.comment).values({
-      post: postId,
-      user: userId,
+      postId,
+      userId,
       body,
     });
   }
@@ -43,7 +43,7 @@ export class CommentRepository {
     const result = await this.db
       .select({ count: count() })
       .from(schema.comment)
-      .where(eq(schema.comment.post, postId));
+      .where(eq(schema.comment.postId, postId));
     return result;
   }
 
@@ -53,22 +53,22 @@ export class CommentRepository {
     cursor: { createdAt: Date; commentId: string } | null = null,
     pageSize = 10,
   ) {
-    return await db
+    return await this.db
       .select({
         commentId: schema.comment.id,
-        userId: schema.comment.user,
+        userId: schema.comment.userId,
         username: schema.profile.username,
         profilePictureUrl: schema.profile.profilePictureKey,
-        postId: schema.comment.post,
+        postId: schema.comment.postId,
         body: schema.comment.body,
         createdAt: schema.comment.createdAt,
       })
       .from(schema.comment)
-      .innerJoin(schema.user, eq(schema.user.id, schema.comment.user))
+      .innerJoin(schema.user, eq(schema.user.id, schema.comment.userId))
       .innerJoin(schema.profile, eq(schema.profile.id, schema.user.profileId))
       .where(
         and(
-          eq(schema.comment.post, postId),
+          eq(schema.comment.postId, postId),
           cursor
             ? or(
                 lte(schema.comment.createdAt, cursor.createdAt),
