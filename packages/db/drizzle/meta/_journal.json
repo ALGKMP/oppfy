@@ -8,6 +8,20 @@
       "when": 1726952226258,
       "tag": "0000_magical_professor_monster",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1727036988373,
+      "tag": "0001_slippery_kylun",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1727037893501,
+      "tag": "0002_breezy_nick_fury",
+      "breakpoints": true
     }
   ]
 }

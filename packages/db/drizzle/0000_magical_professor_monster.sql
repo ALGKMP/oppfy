@@ -458,7 +458,7 @@ BEGIN
   WHERE ps.post_id IN (
       SELECT DISTINCT post_id
       FROM "like"
-      WHERE "user" = OLD.id
+      WHERE "user_id" = OLD.id
   );
 
   -- Decrement comments count
@@ -467,7 +467,7 @@ BEGIN
   WHERE ps.post_id IN (
       SELECT DISTINCT post_id
       FROM comment
-      WHERE "user" = OLD.id
+      WHERE "user_id" = OLD.id
   );
 
   -- Decrement views count
