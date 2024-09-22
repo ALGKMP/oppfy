@@ -19,7 +19,9 @@ export const useOptimisticUpdatePost = () => {
     switch (endpoint) {
       case "self-profile": {
         await utils.post.paginatePostsOfUserSelf.cancel();
-        const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({pageSize: 10});
+        const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+          pageSize: 10,
+        });
         if (!prevData) return;
         utils.post.paginatePostsOfUserSelf.setInfiniteData(
           { pageSize: 10 },
@@ -85,7 +87,9 @@ export const useOptimisticUpdatePost = () => {
     switch (endpoint) {
       case "self-profile": {
         await utils.post.paginatePostsOfUserSelf.cancel();
-        const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({pageSize: 10});
+        const prevData = utils.post.paginatePostsOfUserSelf.getInfiniteData({
+          pageSize: 10,
+        });
         if (!prevData) return;
         utils.post.paginatePostsOfUserSelf.setInfiniteData(
           { pageSize: 10 },
@@ -95,7 +99,10 @@ export const useOptimisticUpdatePost = () => {
               ...page,
               items: page.items.map((item) =>
                 item.postId === postId
-                  ? { ...item, commentsCount: item.commentsCount + changeCountBy }
+                  ? {
+                      ...item,
+                      commentsCount: item.commentsCount + changeCountBy,
+                    }
                   : item,
               ),
             })),
@@ -106,7 +113,10 @@ export const useOptimisticUpdatePost = () => {
       case "other-profile": {
         if (!userId) return;
         await utils.post.paginatePostsOfUserOther.cancel();
-        const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({userId, pageSize: 10});
+        const prevData = utils.post.paginatePostsOfUserOther.getInfiniteData({
+          userId,
+          pageSize: 10,
+        });
         if (!prevData) return;
         utils.post.paginatePostsOfUserOther.setInfiniteData(
           { userId, pageSize: 10 },
@@ -134,7 +144,10 @@ export const useOptimisticUpdatePost = () => {
         if (!prevData) return;
         utils.post.getPost.setData(
           { postId },
-          { ...prevData, commentsCount: prevData.commentsCount + changeCountBy },
+          {
+            ...prevData,
+            commentsCount: prevData.commentsCount + changeCountBy,
+          },
         );
         break;
       }
@@ -153,14 +166,14 @@ export const useOptimisticUpdatePost = () => {
     switch (endpoint) {
       case "self-profile":
         await utils.post.paginatePostsOfUserSelf.invalidate({
-          pageSize: 10
+          pageSize: 10,
         });
         break;
       case "other-profile":
         if (!userId) return;
         await utils.post.paginatePostsOfUserOther.invalidate({
           userId,
-          pageSize: 10
+          pageSize: 10,
         });
         break;
       case "home-feed":

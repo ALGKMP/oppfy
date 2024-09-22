@@ -1,7 +1,4 @@
-import type {
-  ExpoPushMessage,
-  ExpoPushTicket,
-} from "expo-server-sdk";
+import type { ExpoPushMessage, ExpoPushTicket } from "expo-server-sdk";
 import { Expo } from "expo-server-sdk";
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { SnsSchema } from "@aws-lambda-powertools/parser/schemas";
@@ -10,8 +7,8 @@ import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
-import { sharedValidators } from "@oppfy/validators";
 import { db, eq, schema } from "@oppfy/db";
+import { sharedValidators } from "@oppfy/validators";
 
 const env = createEnv({
   server: {
@@ -79,19 +76,19 @@ const lambdaHandler = async (
   for (const chunk of chunks) {
     try {
       const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-      handlePushTickets(ticketChunk, chunk)
+      handlePushTickets(ticketChunk, chunk);
     } catch (error) {
       console.error(error);
     }
   }
 };
 
-const handlePushTickets =  (
+const handlePushTickets = (
   tickets: ExpoPushTicket[],
   chunk: ExpoPushMessage[],
 ) => {
-  tickets.forEach( (ticket, index) => {
-    if (ticket.status === "ok") return
+  tickets.forEach((ticket, index) => {
+    if (ticket.status === "ok") return;
     if (ticket.details === undefined) return;
 
     const token = chunk[index]?.to;
@@ -99,16 +96,14 @@ const handlePushTickets =  (
 
     switch (ticket.details.error) {
       case "DeviceNotRegistered":
-        void removeTokenFromDatabase(token)
+        void removeTokenFromDatabase(token);
         break;
     }
   });
 };
 
 const removeTokenFromDatabase = async (token: string) => {
-  await db.delete(schema.pushToken).where(
-    eq(schema.pushToken.token, token),
-  );
+  await db.delete(schema.pushToken).where(eq(schema.pushToken.token, token));
 };
 
 export const handler = middy(lambdaHandler).use(

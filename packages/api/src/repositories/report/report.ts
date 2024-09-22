@@ -1,7 +1,7 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import { db, schema } from "@oppfy/db";
-import { sharedValidators } from "@oppfy/validators";
+import type { sharedValidators } from "@oppfy/validators";
 
 import { handleDatabaseErrors } from "../../errors";
 

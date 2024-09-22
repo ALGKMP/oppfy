@@ -5,13 +5,13 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { TamaguiProvider, View } from "tamagui";
 
+import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import FontProvider from "~/providers/FontProvider";
 import SentryProvider from "~/providers/SentryProvider";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
 import SessionProvider from "../contexts/SessionContext";
-import { AudioProvider } from "~/contexts/AudioContext";
 
 const RootLayout = () => {
   return (

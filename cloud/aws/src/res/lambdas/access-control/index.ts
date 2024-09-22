@@ -19,6 +19,15 @@ interface DbConfig {
 
 const ssmClient = new SSMClient({ region: "us-east-1" });
 
+const isPost = (row: unknown): row is Post => {
+  return (
+    typeof row === "object" &&
+    row !== null &&
+    "privacy_setting" in row &&
+    typeof row.privacy_setting === "string"
+  );
+};
+
 const getDbConfig = async () => {
   const parameterName = "/oppfy/db-config";
   const command = new GetParameterCommand({
@@ -35,7 +44,7 @@ const getDbConfig = async () => {
   }
 };
 
-async function checkIfPublic(postKey: string): Promise<boolean> {
+const checkIfPublic = async (postKey: string): Promise<boolean> => {
   const dbConfig = await getDbConfig();
 
   const client = new Client(dbConfig);
@@ -49,9 +58,9 @@ async function checkIfPublic(postKey: string): Promise<boolean> {
       WHERE p."key" = $1
     `;
     const result = await client.query(query, [`posts/${postKey}`]);
-    const row = result.rows[0] as Post | undefined;
+    const row = result.rows[0] as unknown;
 
-    if (row === undefined) {
+    if (!isPost(row)) {
       return false;
     }
 
@@ -62,7 +71,7 @@ async function checkIfPublic(postKey: string): Promise<boolean> {
   } finally {
     await client.end();
   }
-}
+};
 
 const handler = async (
   event: CloudFrontRequestEvent,

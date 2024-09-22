@@ -34,19 +34,18 @@ export const contactsRouter = createTRPCRouter({
     }
   }),
 
-  getRecommendationProfilesSelf: protectedProcedure
-    .query(async ({ ctx }) => {
-      try {
-        return await ctx.services.contact.getRecommendationProfilesSelf(
-          ctx.session.uid,
-        );
-      } catch (err) {
-        console.error(err);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-        });
-      }
-    }),
+  getRecommendationProfilesSelf: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.services.contact.getRecommendationProfilesSelf(
+        ctx.session.uid,
+      );
+    } catch (err) {
+      console.error(err);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+      });
+    }
+  }),
 
   filterOutPhoneNumbersOnApp: protectedProcedure
     .input(

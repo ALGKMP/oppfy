@@ -72,7 +72,10 @@ const useUploadProfilePicture = ({
       onSettled: () => {
         if (!optimisticallyUpdate) return;
         // Sync with server once mutation has settled
-        setTimeout(() => void utils.profile.getFullProfileSelf.invalidate(), 10000);
+        setTimeout(
+          () => void utils.profile.getFullProfileSelf.invalidate(),
+          10000,
+        );
         // await utils.profile.getFullProfileSelf.invalidate();
       },
     },

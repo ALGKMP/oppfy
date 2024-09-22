@@ -47,7 +47,7 @@ async function updateContacts(
   const currentTimestamp = Date.now().toString();
 
   // Add or update the user vertex
-  let userResult = await g
+  const userResult = await g
     .mergeV(
       new Map([
         [t.id, userId],

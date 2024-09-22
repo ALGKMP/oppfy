@@ -8,10 +8,11 @@ import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
+import type {
+  OpenSearchProfileIndexResult} from "@oppfy/opensearch";
 import {
   openSearch,
   OpenSearchIndex,
-  OpenSearchProfileIndexResult,
   OpenSearchResponse,
 } from "@oppfy/opensearch";
 import { sharedValidators } from "@oppfy/validators";

@@ -77,9 +77,17 @@ export class PostStatsRepository {
   }
 
   @handleDatabaseErrors
-  async updatePostStats(
-    { postId, likes, comments, views }: { postId: string; likes: number; comments: number; views: number }
-  ) {
+  async updatePostStats({
+    postId,
+    likes,
+    comments,
+    views,
+  }: {
+    postId: string;
+    likes: number;
+    comments: number;
+    views: number;
+  }) {
     await this.db
       .update(schema.postStats)
       .set({

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -27,21 +27,24 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
     setIsPlayerReady(true);
   });
 
-  const safePlayPause = useCallback((shouldPlay: boolean) => {
-    if (!isPlayerReady) return;
+  const safePlayPause = useCallback(
+    (shouldPlay: boolean) => {
+      if (!isPlayerReady) return;
 
-    try {
-      if (shouldPlay && !isPlaying) {
-        player.play();
-        setIsPlaying(true);
-      } else if (!shouldPlay && isPlaying) {
-        player.pause();
-        setIsPlaying(false);
+      try {
+        if (shouldPlay && !isPlaying) {
+          player.play();
+          setIsPlaying(true);
+        } else if (!shouldPlay && isPlaying) {
+          player.pause();
+          setIsPlaying(false);
+        }
+      } catch (error) {
+        console.error("Error in safePlayPause:", error);
       }
-    } catch (error) {
-      console.error("Error in safePlayPause:", error);
-    }
-  }, [isPlayerReady, player, isPlaying]);
+    },
+    [isPlayerReady, player, isPlaying],
+  );
 
   useEffect(() => {
     player.muted = isMuted;
@@ -58,7 +61,7 @@ const VideoPost: React.FC<VideoPlayerProps> = ({
           safePlayPause(false);
         }
       };
-    }, [isPlayerReady, isViewable, safePlayPause])
+    }, [isPlayerReady, isViewable, safePlayPause]),
   );
 
   return (

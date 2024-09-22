@@ -8,10 +8,10 @@ import { BlockService } from "./network/block";
 import { FollowService } from "./network/follow";
 import { FriendService } from "./network/friend";
 import { ReportService } from "./network/report";
-import { ProfileService } from "./user/profile";
 import { ContactService } from "./user/contacts";
 import { NotificationsService } from "./user/notifications";
 import { PrivacyService } from "./user/privacy";
+import { ProfileService } from "./user/profile";
 import { UserService } from "./user/user";
 
 export const services = {

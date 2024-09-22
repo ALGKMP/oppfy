@@ -9,11 +9,11 @@
 import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { TRPC_ERROR_CODES_BY_NUMBER } from "@trpc/server/http";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
 import { ZodError } from "zod";
-import { TRPC_ERROR_CODES_BY_NUMBER } from "@trpc/server/http";
 
 import { cloudfront } from "@oppfy/cloudfront";
 import { db } from "@oppfy/db";
@@ -21,8 +21,8 @@ import { auth } from "@oppfy/firebase";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
 
-import { services } from "./services";
 import { DomainError, ErrorCode } from "./errors";
+import { services } from "./services";
 
 /**
  * 1. CONTEXT

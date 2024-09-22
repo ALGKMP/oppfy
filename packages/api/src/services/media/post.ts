@@ -166,7 +166,6 @@ export class PostService {
     cursor: FeedCursorRewritten = null,
     pageSize = 10,
   ) {
-
     // if (cursor?.type === "recommended") {
     //   console.log("Recommended cursor");
     //   const recommendedResult =

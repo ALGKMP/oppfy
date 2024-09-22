@@ -46,7 +46,10 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-    const canAccess = await this.userService.canAccessUserData({currentUserId, targetUserId: userId});
+    const canAccess = await this.userService.canAccessUserData({
+      currentUserId,
+      targetUserId: userId,
+    });
     if (!canAccess) {
       return {
         items: [],
@@ -82,8 +85,10 @@ export class PaginationService {
     cursor: Cursor | null = null,
     pageSize = 10,
   ) {
-
-    const canAccess = await this.userService.canAccessUserData({currentUserId, targetUserId: userId});
+    const canAccess = await this.userService.canAccessUserData({
+      currentUserId,
+      targetUserId: userId,
+    });
     if (!canAccess) {
       return {
         items: [],
@@ -120,8 +125,10 @@ export class PaginationService {
     pageSize = 10,
     currentUserId: string,
   ) {
-
-    const canAccess = await this.userService.canAccessUserData({currentUserId, targetUserId: userId});
+    const canAccess = await this.userService.canAccessUserData({
+      currentUserId,
+      targetUserId: userId,
+    });
     if (!canAccess) {
       return {
         items: [],
