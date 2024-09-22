@@ -129,7 +129,7 @@ const ActionSheet = ({
         onRequestClose={closeModal}
         statusBarTranslucent
       >
-        <View style={styles.modalContainer}>
+        <View flex={1} justifyContent="flex-end">
           {/* Animated Backdrop */}
           <Animated.View style={[styles.backdrop, backgroundStyle]}>
             <TouchableWithoutFeedback onPress={closeModal}>
@@ -210,9 +210,9 @@ const ActionSheet = ({
                     ]}
                     disabled={option.disabled}
                   >
-                    <View style={styles.buttonContent}>
+                    <View flexDirection="row" alignItems="center" justifyContent="center">
                       {option.icon && (
-                        <View style={styles.iconContainer}>{option.icon}</View>
+                        <View marginRight="$2">{option.icon}</View>
                       )}
                       <SizableText size="$5" {...option.textProps}>
                         {option.text}
@@ -249,10 +249,6 @@ const ActionSheet = ({
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -267,14 +263,6 @@ const styles = StyleSheet.create({
   cancelButton: {
     padding: 16,
     alignItems: "center",
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconContainer: {
-    marginRight: 8,
   },
 });
 
