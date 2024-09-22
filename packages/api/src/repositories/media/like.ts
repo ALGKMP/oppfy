@@ -11,7 +11,7 @@ export class LikeRepository {
   async addLike(postId: string, userId: string) {
     return await this.db.insert(schema.like).values({
       postId: postId,
-      user: userId,
+      userId: userId,
       createdAt: new Date(), // Assuming current time is set by default
     });
   }
@@ -20,13 +20,18 @@ export class LikeRepository {
   async removeLike({ postId, userId }: { postId: string; userId: string }) {
     return await this.db
       .delete(schema.like)
-      .where(and(eq(schema.like.postId, postId), eq(schema.like.user, userId)));
+      .where(
+        and(eq(schema.like.postId, postId), eq(schema.like.userId, userId)),
+      );
   }
 
   @handleDatabaseErrors
   async findLike({ postId, userId }: { postId: string; userId: string }) {
     return await this.db.query.like.findFirst({
-      where: and(eq(schema.like.postId, postId), eq(schema.like.user, userId)),
+      where: and(
+        eq(schema.like.postId, postId),
+        eq(schema.like.userId, userId),
+      ),
     });
   }
 }

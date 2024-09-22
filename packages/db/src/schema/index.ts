@@ -275,7 +275,7 @@ export const post = pgTable("post", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   caption: text("caption").notNull().default(""),
-  key: text("key").notNull(),
+  key: text("key").unique().notNull(),
   width: integer("width").notNull().default(500),
   height: integer("height").notNull().default(500),
   mediaType: mediaTypeEnum("media_type").notNull(),
@@ -360,7 +360,7 @@ export const like = pgTable("like", {
   postId: uuid("post_id")
     .notNull()
     .references(() => post.id, { onDelete: "cascade" }),
-  user: varchar("user", { length: 255 })
+  userId: varchar("user", { length: 255 })
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -374,7 +374,7 @@ export const likeRelations = relations(like, ({ one }) => ({
     references: [post.id],
   }),
   likedBy: one(user, {
-    fields: [like.user],
+    fields: [like.userId],
     references: [user.id],
   }),
 }));
