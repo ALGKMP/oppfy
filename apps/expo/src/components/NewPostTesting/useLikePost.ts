@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
-import throttle from "lodash/throttle"; // Change debounce to throttle
 
 import { api } from "~/utils/api";
 import { useOptimisticUpdatePost } from "./useOptimicUpdatePost";
+import { useThrottleWithIncreaseDelay } from "./useThrottleWithIncreaseDelay";
 
 interface LikePostProps {
   postId: string;
@@ -16,10 +16,26 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     { postId },
     { initialData: false },
   );
+
+  const clickCount = useRef(0);
   const { changeLikeCount } = useOptimisticUpdatePost();
+  const throttledLikeRequest = useRef(
+    useThrottleWithIncreaseDelay(async (currentHasLiked: boolean) => {
+      console.log("RUNNING THE LIKE LOGIC");
+      if (clickCount.current % 2 === 0) {
+        clickCount.current = 0;
+        return;
+      }
+      currentHasLiked
+        ? await unlikePost.mutateAsync({ postId })
+        : await likePost.mutateAsync({ postId });
+      clickCount.current = 0;
+    }, 5000),
+  );
 
   const likePost = api.post.likePost.useMutation({
     onMutate: async (newHasLikedData) => {
+      console.log("onMutate is running for likePost");
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.post.hasliked.cancel();
 
@@ -36,6 +52,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
       return { prevData };
     },
     onError: async (_err, newHasLikedData, ctx) => {
+      console.log("onError is running for likePost");
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
@@ -51,6 +68,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
+      console.log("onSettled is running for likePost");
       await utils.post.hasliked.invalidate();
     },
   });
@@ -58,6 +76,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
   const unlikePost = api.post.unlikePost.useMutation({
     onMutate: async (newHasLikedData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      console.log("onMutate is running for unlikePost");
       await utils.post.hasliked.cancel();
 
       // Get the data from the query cache
@@ -72,7 +91,8 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
       // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
-    onError: (_err, newHasLikedData, ctx) => {
+    onError: async (_err, newHasLikedData, ctx) => {
+      console.log("onError is running for unlikePost");
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
@@ -80,7 +100,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
         { postId: newHasLikedData.postId },
         ctx.prevData,
       );
-      changeLikeCount({
+      await changeLikeCount({
         endpoint,
         changeCountBy: 1,
         postId,
@@ -88,36 +108,15 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
+      console.log("onSettled is running for unlikePost");
       await utils.post.hasliked.invalidate();
     },
   });
 
-  const throttledRef = useRef<((currentHasLiked: boolean) => void) | null>(
-    null,
-  );
-  const clickCount = useRef(0);
-
-  // Initialize the throttled function only once
-  if (!throttledRef.current) {
-    clickCount.current = 0;
-    throttledRef.current = throttle(
-      (currentHasLiked: boolean) => {
-        (async () => {
-          if (clickCount.current % 2 === 0) return;
-          currentHasLiked
-            ? await unlikePost.mutateAsync({ postId })
-            : await likePost.mutateAsync({ postId });
-        })().catch((error) => {
-          console.error("Error in throttledLikeRequest:", error);
-        });
-      },
-      5000,
-      { leading: false, trailing: true },
-    );
-  }
 
   const handleLikePressed = useCallback(async () => {
     // Optimistically update the UI
+    await utils.post.hasliked.cancel();
     utils.post.hasliked.setData({ postId }, !hasLiked);
     await changeLikeCount({
       postId,
@@ -127,10 +126,8 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     }); // Use the passed in endpoint
 
     // Call the throttled function
-    if (throttledRef.current) {
-      clickCount.current++;
-      throttledRef.current(hasLiked);
-    }
+    clickCount.current++;
+    throttledLikeRequest.current(hasLiked);
   }, [
     hasLiked,
     postId,
