@@ -19,7 +19,7 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
-const SelfProfile = () => {
+const SelfProfile = React.memo(() => {
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -57,6 +57,7 @@ const SelfProfile = () => {
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -127,8 +128,6 @@ const SelfProfile = () => {
       ),
     });
   }, [navigation, profileData?.username, router]);
-
-  const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -249,14 +248,7 @@ const SelfProfile = () => {
     [
       friendItems,
       navigateToProfile,
-      profileData?.bio,
-      profileData?.followerCount,
-      profileData?.followingCount,
-      profileData?.friendCount,
-      profileData?.name,
-      profileData?.profilePictureUrl,
-      profileData?.userId,
-      profileData?.username,
+      profileData,
       recommendationItems,
       router,
     ],
@@ -327,6 +319,6 @@ const SelfProfile = () => {
       />
     </BaseScreenView>
   );
-};
+});
 
 export default SelfProfile;

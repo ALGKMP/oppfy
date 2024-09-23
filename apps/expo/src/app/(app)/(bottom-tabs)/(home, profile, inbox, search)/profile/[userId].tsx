@@ -135,50 +135,58 @@ const useProfileActions = (userId: string) => {
     isInvalidatingByAction,
   ]);
 
-  // Return actions with handlers and loading states
-  return {
-    actions: {
-      follow: {
-        handler: handleFollow,
-        loading: followUser.isLoading || isInvalidatingByAction.follow,
-        disabled: isAnyActionLoading,
-      },
-      unfollow: {
-        handler: handleUnfollow,
-        loading: unfollowUser.isLoading || isInvalidatingByAction.unfollow,
-        disabled: isAnyActionLoading,
-      },
-      addFriend: {
-        handler: handleAddFriend,
-        loading: addFriend.isLoading || isInvalidatingByAction.addFriend,
-        disabled: isAnyActionLoading,
-      },
-      removeFriend: {
-        handler: handleRemoveFriend,
-        loading: removeFriend.isLoading || isInvalidatingByAction.removeFriend,
-        disabled: isAnyActionLoading,
-      },
-      cancelFollowRequest: {
-        handler: handleCancelFollowRequest,
-        loading:
-          cancelFollowRequest.isLoading ||
-          isInvalidatingByAction.cancelFollowRequest,
-        disabled: isAnyActionLoading,
-      },
-      cancelFriendRequest: {
-        handler: handleCancelFriendRequest,
-        loading:
-          cancelFriendRequest.isLoading ||
-          isInvalidatingByAction.cancelFriendRequest,
-        disabled: isAnyActionLoading,
-      },
+  const actionHandlers = useMemo(() => ({
+    follow: {
+      handler: handleFollow,
+      loading: followUser.isLoading || isInvalidatingByAction.follow,
+      disabled: isAnyActionLoading,
     },
-  };
+    unfollow: {
+      handler: handleUnfollow,
+      loading: unfollowUser.isLoading || isInvalidatingByAction.unfollow,
+      disabled: isAnyActionLoading,
+    },
+    addFriend: {
+      handler: handleAddFriend,
+      loading: addFriend.isLoading || isInvalidatingByAction.addFriend,
+      disabled: isAnyActionLoading,
+    },
+    removeFriend: {
+      handler: handleRemoveFriend,
+      loading: removeFriend.isLoading || isInvalidatingByAction.removeFriend,
+      disabled: isAnyActionLoading,
+    },
+    cancelFollowRequest: {
+      handler: handleCancelFollowRequest,
+      loading:
+        cancelFollowRequest.isLoading ||
+        isInvalidatingByAction.cancelFollowRequest,
+      disabled: isAnyActionLoading,
+    },
+    cancelFriendRequest: {
+      handler: handleCancelFriendRequest,
+      loading:
+        cancelFriendRequest.isLoading ||
+        isInvalidatingByAction.cancelFriendRequest,
+      disabled: isAnyActionLoading,
+    },
+  }), [
+    handleFollow, followUser.isLoading, isInvalidatingByAction.follow,
+    handleUnfollow, unfollowUser.isLoading, isInvalidatingByAction.unfollow,
+    handleAddFriend, addFriend.isLoading, isInvalidatingByAction.addFriend,
+    handleRemoveFriend, removeFriend.isLoading, isInvalidatingByAction.removeFriend,
+    handleCancelFollowRequest, cancelFollowRequest.isLoading, isInvalidatingByAction.cancelFollowRequest,
+    handleCancelFriendRequest, cancelFriendRequest.isLoading, isInvalidatingByAction.cancelFriendRequest,
+    isAnyActionLoading
+  ]);
+
+  return { actions: actionHandlers };
 };
 
 type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 
-const OtherProfile = () => {
+const OtherProfile = React.memo(() => {
+  console.log("Other profile from [userId].tsx re-renders");
   const router = useRouter();
   const navigation = useNavigation();
   const toast = useToastController();
@@ -202,7 +210,10 @@ const OtherProfile = () => {
   const isPrivate = otherProfileData?.networkStatus.privacy === "private";
   const isFollowing =
     otherProfileData?.networkStatus.targetUserFollowState === "Following";
-  const canViewContent = !isBlocked && (!isPrivate || isFollowing);
+  const canViewContent = useMemo(
+    () => !isBlocked && (!isPrivate || isFollowing),
+    [isBlocked, isPrivate, isFollowing],
+  );
 
   const {
     data: recommendationsData,
@@ -361,13 +372,13 @@ const OtherProfile = () => {
       },
     });
 
-  const handleOpenMoreOptionsSheet = () => {
+  const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
-  };
+  }, []);
 
-  const handleCloseMoreOptionsSheet = () => {
+  const handleCloseMoreOptionsSheet = useCallback(() => {
     setSheetState("closed");
-  };
+  }, []);
 
   const handleBlockUser = useCallback(async () => {
     await blockUser.mutateAsync({ userId });
@@ -418,7 +429,7 @@ const OtherProfile = () => {
         </View>
       ),
     });
-  }, [navigation, username, otherProfileData]);
+  }, [navigation, username, otherProfileData, handleOpenMoreOptionsSheet]);
 
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
@@ -488,9 +499,9 @@ const OtherProfile = () => {
 
   const { actions } = useProfileActions(userId);
 
+  // TODO: This shit is causing a re-render of the entire component
   const renderActionButtons = useCallback((): ProfileAction[] => {
     if (!otherProfileData) return [];
-
     const { privacy, blocked, targetUserFollowState, targetUserFriendState } =
       otherProfileData.networkStatus;
 
@@ -513,7 +524,7 @@ const OtherProfile = () => {
       },
     };
 
-    const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
+    const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = ({
       public_NotFollowing_NotFriends: ["follow", "friend"],
       public_Following_NotFriends: ["unfollow", "friend"],
       public_Following_OutboundRequest: ["cancelFriendRequest"],
@@ -524,7 +535,7 @@ const OtherProfile = () => {
       private_OutboundRequest_OutboundRequest: ["cancelFriendRequest"],
       private_Following_OutboundRequest: ["cancelFriendRequest"],
       private_Following_Friends: ["removeFriend"],
-    };
+    });
 
     const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
     const buttonKeys = buttonCombinations[key] ?? [];
@@ -543,86 +554,98 @@ const OtherProfile = () => {
           "backgroundColor" in config ? config.backgroundColor : undefined,
       };
     });
-  }, [otherProfileData, actions]);
+  }, [otherProfileData ]);
+
+  const profileHeaderData = useMemo(
+    () => ({
+      userId: otherProfileData?.userId ?? "",
+      username: otherProfileData?.username ?? "",
+      name: otherProfileData?.name ?? "",
+      bio: otherProfileData?.bio ?? "",
+      followerCount: otherProfileData?.followerCount ?? 0,
+      followingCount: otherProfileData?.followingCount ?? 0,
+      profilePictureUrl: otherProfileData?.profilePictureUrl,
+    }),
+    [
+      otherProfileData?.userId,
+      otherProfileData?.username,
+      otherProfileData?.name,
+      otherProfileData?.bio,
+      otherProfileData?.followerCount,
+      otherProfileData?.followingCount,
+      otherProfileData?.profilePictureUrl,
+    ],
+  );
 
   const renderHeader = useCallback(
     () => (
-      <YStack gap="$4">
-        <ProfileHeaderDetails
-          loading={false}
-          data={{
-            userId: otherProfileData?.userId ?? "",
-            username: otherProfileData?.username ?? "",
-            name: otherProfileData?.name ?? "",
-            bio: otherProfileData?.bio ?? "",
-            followerCount: otherProfileData?.followerCount ?? 0,
-            followingCount: otherProfileData?.followingCount ?? 0,
-            profilePictureUrl: otherProfileData?.profilePictureUrl,
-          }}
-          onFollowingPress={
-            canViewContent
-              ? () =>
-                  router.push({
-                    pathname: "/profile/connections/following-list",
-                    params: { userId, username },
-                  })
-              : undefined
-          }
-          onFollowersPress={
-            canViewContent
-              ? () =>
-                  router.push({
-                    pathname: "/profile/connections/followers-list",
-                    params: { userId, username },
-                  })
-              : undefined
-          }
-          actions={renderActionButtons()}
-        />
-
-        {friendItems.length > 0 ? (
-          <PeopleCarousel
+      console.log("RENDERHEADER re-rendering"),
+      (
+        <YStack gap="$4">
+          <ProfileHeaderDetails
             loading={false}
-            data={friendItems}
-            title="Friends 🔥"
-            showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
-            onTitlePress={() =>
-              router.push({
-                pathname: "/profile/connections/following-list",
-                params: { userId, username },
-              })
+            data={profileHeaderData}
+            onFollowingPress={
+              canViewContent
+                ? () =>
+                    router.push({
+                      pathname: "/profile/connections/following-list",
+                      params: { userId, username },
+                    })
+                : undefined
             }
-            onItemPress={navigateToProfile}
-            onShowMore={() =>
-              router.push({
-                pathname: "/profile/connections/friend-list",
-                params: { userId, username },
-              })
+            onFollowersPress={
+              canViewContent
+                ? () =>
+                    router.push({
+                      pathname: "/profile/connections/followers-list",
+                      params: { userId, username },
+                    })
+                : undefined
             }
+            actions={renderActionButtons()}
           />
-        ) : (
-          <PeopleCarousel
-            loading={isLoadingRecommendationsData}
-            data={recommendationsData ?? []}
-            title="Suggestions 🔥"
-            onItemPress={navigateToProfile}
-          />
-        )}
-      </YStack>
+
+          {friendItems.length > 0 ? (
+            <PeopleCarousel
+              loading={false}
+              data={friendItems}
+              title="Friends 🔥"
+              showMore={
+                friendItems.length < (otherProfileData?.friendCount ?? 0)
+              }
+              onTitlePress={() =>
+                router.push({
+                  pathname: "/profile/connections/following-list",
+                  params: { userId, username },
+                })
+              }
+              onItemPress={navigateToProfile}
+              onShowMore={() =>
+                router.push({
+                  pathname: "/profile/connections/friend-list",
+                  params: { userId, username },
+                })
+              }
+            />
+          ) : (
+            <PeopleCarousel
+              loading={isLoadingRecommendationsData}
+              data={recommendationsData ?? []}
+              title="Suggestions 🔥"
+              onItemPress={navigateToProfile}
+            />
+          )}
+        </YStack>
+      )
     ),
     [
+      profileHeaderData,
       canViewContent,
       friendItems,
       isLoadingRecommendationsData,
       navigateToProfile,
-      otherProfileData?.bio,
-      otherProfileData?.followerCount,
-      otherProfileData?.followingCount,
       otherProfileData?.friendCount,
-      otherProfileData?.name,
-      otherProfileData?.profilePictureUrl,
-      otherProfileData?.userId,
-      otherProfileData?.username,
       recommendationsData,
       renderActionButtons,
       router,
@@ -723,6 +746,6 @@ const OtherProfile = () => {
       />
     </>
   );
-};
+});
 
 export default OtherProfile;
