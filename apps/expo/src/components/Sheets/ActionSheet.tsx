@@ -130,7 +130,6 @@ const ActionSheet = ({
         statusBarTranslucent
       >
         <View flex={1} justifyContent="flex-end">
-        <View flex={1} justifyContent="flex-end">
           {/* Animated Backdrop */}
           <Animated.View style={[styles.backdrop, backgroundStyle]}>
             <TouchableWithoutFeedback onPress={closeModal}>
@@ -214,7 +213,7 @@ const ActionSheet = ({
                   >
                     <View flexDirection="row" alignItems="center" justifyContent="center">
                       {option.icon && (
-                        <View marginRight="$2">{option.icon}</View>
+                        <View marginRight="$0.75">{option.icon}</View>
                       )}
                       <SizableText size="$5" {...option.textProps}>
                         {option.text}
