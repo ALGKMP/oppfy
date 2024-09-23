@@ -143,6 +143,7 @@ export class NotificationsRepository {
       entityId,
       entityType,
       minutesThreshold,
+      limit,
     } = options;
 
     let query = this.db.select().from(schema.notifications).$dynamic();
