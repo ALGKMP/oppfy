@@ -63,6 +63,8 @@ const Requests = () => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.friend.paginateFriendRequests.cancel();
       await utils.follow.paginateFollowRequests.cancel();
+      await utils.profile.getFullProfileSelf.cancel();
+      await utils.friend.paginateFriendsSelf.cancel();
 
       // Get the data from the queryCache
       const prevFriendData =
@@ -121,13 +123,16 @@ const Requests = () => {
       // Sync with server once mutation has settled
       await utils.friend.paginateFriendRequests.invalidate();
       await utils.follow.paginateFollowRequests.invalidate();
+      await utils.profile.getFullProfileSelf.invalidate();
+      await utils.friend.paginateFriendsSelf.invalidate();
     },
   });
   const acceptFollowRequest = api.follow.acceptFollowRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.follow.paginateFollowRequests.cancel();
-
+      await utils.follow.paginateFollowersSelf.cancel();
+      await utils.profile.getFullProfileSelf.cancel();
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowRequests.getInfiniteData({
         pageSize: 20,
@@ -157,6 +162,8 @@ const Requests = () => {
     onSettled: async () => {
       // Sync with server once mutation has settled
       await utils.follow.paginateFollowRequests.invalidate();
+      await utils.follow.paginateFollowersSelf.invalidate();
+      await utils.profile.getFullProfileSelf.invalidate();
     },
   });
 
