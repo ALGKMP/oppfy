@@ -218,6 +218,7 @@ const FollowingList = () => {
         return {
           text: "Follow",
           icon: <UserRoundPlus size="$1" />,
+          backgroundColor: "$primary",
           onPress: () => void handleFollow(item.userId),
         };
     }

@@ -52,7 +52,7 @@ const ListItem = ({
         return {
           text: "Follow",
           icon: <UserRoundPlus size="$1" />,
-          backgroundColor: "#F214FF",
+          backgroundColor: "$primary",
           onPress: () => void handleFollow(item.userId),
         };
     }
