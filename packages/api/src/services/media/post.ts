@@ -18,12 +18,7 @@ import { UserService } from "../user/user";
 
 export interface PaginatedResponse<T> {
   items: T[];
-  nextCursor: PostCursor | CommentCursor | undefined;
-}
-
-interface FollowingPostCursor {
-  createdAt: Date;
-  followerId: string;
+  nextCursor: PostCursor | CommentCursor | FeedCursor | undefined;
 }
 
 interface PostCursor {
@@ -31,11 +26,11 @@ interface PostCursor {
   postId: string;
 }
 
-type FeedCursorRewritten =
-  | { type: "following"; cursor: FollowingPostCursor | null }
-  | { type: "recommended"; cursor: PostCursor | null }
-  | { type: "global"; cursor: PostCursor | null }
-  | null;
+interface FeedCursor {
+  createdAt: Date;
+  postId: string;
+  type: "following" | "recommended";
+}
 
 interface CommentCursor {
   createdAt: Date;
@@ -119,27 +114,6 @@ export class PostService {
     }
   }
 
-  async paginatePostsOfFollowing(
-    userId: string,
-    cursor: FollowingPostCursor | null = null,
-    pageSize?: number,
-  ) {
-    try {
-      const data = await this.postRepository.paginatePostsOfFollowing(
-        userId,
-        cursor,
-      );
-      const updatedData = this._processPaginatedPostData(data, pageSize);
-      return updatedData;
-    } catch (error) {
-      console.error(`Error in getPosts for userId: ${userId}: `, error);
-      throw new DomainError(
-        ErrorCode.FAILED_TO_PAGINATE_POSTS,
-        "Failed to paginate posts.",
-      );
-    }
-  }
-
   async paginatePostsOfRecommended(
     userId: string,
     cursor: PostCursor | null = null,
@@ -163,9 +137,22 @@ export class PostService {
 
   async paginatePostsForFeed(
     userId: string,
-    cursor: FeedCursorRewritten = null,
+    cursor: FeedCursor | null = null,
     pageSize = 10,
-  ) {
+  ): Promise<PaginatedResponse<Post>> {
+    const followingResult = await this.postRepository.paginatePostsOfFollowing(
+      userId,
+      cursor,
+      pageSize,
+    );
+
+    const parsedFollowingResult = this._processPaginatedPostData(
+      followingResult,
+      pageSize,
+    );
+
+    return parsedFollowingResult;
+
     // if (cursor?.type === "recommended") {
     //   console.log("Recommended cursor");
     //   const recommendedResult =
@@ -200,19 +187,6 @@ export class PostService {
     //     },
     //   };
     // }
-
-    const followingResult = await this.postRepository.paginatePostsOfFollowing(
-      userId,
-      cursor?.type === "following" ? cursor.cursor : null,
-      pageSize,
-    );
-
-    const parsedFollowingResult = this._processPaginatedPostData(
-      followingResult,
-      pageSize,
-    );
-
-    return parsedFollowingResult;
 
     //   if (nextCursor === undefined) {
     //     return {
@@ -526,7 +500,7 @@ export class PostService {
       throw new DomainError(ErrorCode.COMMENT_NOT_FOUND);
     }
 
-    if (post.recipientId !== userId && comment.user !== userId) {
+    if (post.recipientId !== userId && comment.userId !== userId) {
       throw new DomainError(ErrorCode.UNAUTHORIZED);
     }
 

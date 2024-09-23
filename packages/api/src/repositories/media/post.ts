@@ -1,3 +1,4 @@
+import { Dashboard } from "aws-cdk-lib/aws-cloudwatch";
 import { aliasedTable, and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
 
 import { db, inArray, schema } from "@oppfy/db";
@@ -74,7 +75,7 @@ export class PostRepository {
         createdAt: schema.post.createdAt,
       })
       .from(schema.comment)
-      .innerJoin(schema.post, eq(schema.comment.post, schema.post.id))
+      .innerJoin(schema.post, eq(schema.comment.postId, schema.post.id))
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
@@ -89,39 +90,16 @@ export class PostRepository {
   @handleDatabaseErrors
   async paginatePostsOfFollowing(
     userId: string,
-    cursor: { createdAt: Date; followerId: string } | null = null,
+    cursor: { createdAt: Date; postId: string } | null = null,
     pageSize = 10,
   ) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
     const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
-    const follower = aliasedTable(schema.follower, "follower");
-
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // Get the date one week ago
-
-    // Subquery to get the latest post for each followed user within the past week
-    // const latestPosts = this.db
-    //   .select({
-    //     postId: schema.post.id,
-    //     authorId: schema.post.authorId,
-    //     followerId: follower.id, // Already fully qualified
-    //     createdAt: schema.post.createdAt,
-    //   })
-    //   .from(schema.post)
-    //   .innerJoin(follower, eq(follower.recipientId, schema.post.recipientId))
-    //   .where(
-    //     and(
-    //       eq(follower.senderId, userId),
-    //       gt(schema.post.createdAt, oneWeekAgo), // Filter for posts within the past week
-    //     ),
-    //   )
-    //   .orderBy(desc(schema.post.createdAt))
-    //   .as("latest_posts");
 
     return await this.db
-      .select({
+      .selectDistinct({
         postId: schema.post.id,
         authorId: schema.post.authorId,
         authorUsername: authorProfile.username,
@@ -139,7 +117,6 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        followerId: schema.follower.id, // From subquery
       })
       .from(schema.follower)
       .innerJoin(
@@ -156,16 +133,16 @@ export class PostRepository {
           eq(schema.follower.senderId, userId),
           cursor
             ? or(
-              lt(schema.post.createdAt, cursor.createdAt),
-              and(
-                eq(schema.post.createdAt, cursor.createdAt),
-                gt(schema.follower.id, cursor.followerId),
+                lt(schema.post.createdAt, cursor.createdAt),
+                and(
+                  eq(schema.post.createdAt, cursor.createdAt),
+                  lt(schema.post.id, cursor.postId),
                 ),
               )
             : undefined,
         ),
       )
-      .orderBy(desc(schema.post.createdAt), asc(schema.follower.id))
+      .orderBy(desc(schema.post.createdAt), desc(schema.post.id))
       .limit(pageSize + 1);
   }
 

@@ -217,35 +217,11 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         cursor: z
-          .union([
-            z.object({
-              type: z.literal("following"),
-              cursor: z
-                .object({
-                  createdAt: z.date(),
-                  followerId: z.string(),
-                })
-                .nullable(),
-            }),
-            z.object({
-              type: z.literal("recommended"),
-              cursor: z
-                .object({
-                  createdAt: z.date(),
-                  postId: z.string(),
-                })
-                .nullable(),
-            }),
-            z.object({
-              type: z.literal("global"),
-              cursor: z
-                .object({
-                  createdAt: z.date(),
-                  postId: z.string(),
-                })
-                .nullable(),
-            }),
-          ])
+          .object({
+            type: z.enum(["following", "recommended"]),
+            createdAt: z.date(),
+            postId: z.string(),
+          })
           .optional(),
         pageSize: z.number().nonnegative().optional(),
       }),
@@ -254,8 +230,8 @@ export const postRouter = createTRPCRouter({
       try {
         return await ctx.services.post.paginatePostsForFeed(
           ctx.session.uid,
-          input.cursor,
-          input.pageSize,
+          input.cursor ?? null,
+          input.pageSize ?? 10,
         );
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
