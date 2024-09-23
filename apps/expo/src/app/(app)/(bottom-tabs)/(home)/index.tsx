@@ -38,7 +38,6 @@ import type PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-// type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
 type PostItem = RouterOutputs["post"]["paginatePostsOfRecommended"]["items"][0];
 
 interface TokenItem {
@@ -116,6 +115,7 @@ const HomeScreen = () => {
             id={item.postId}
             createdAt={item.createdAt}
             caption={item.caption}
+            endpoint="home-feed"
             self={{
               id: profile.userId,
               username: profile.username,
@@ -319,7 +319,7 @@ const Footer = () => {
         }}
         onPress={async () => {
           // TODO: share appstore link
-          await Sharing.shareAsync("https://google.com", {
+          await Sharing.shareAsync("https://oppfy.app", {
             dialogTitle: "Share to...",
           });
         }}

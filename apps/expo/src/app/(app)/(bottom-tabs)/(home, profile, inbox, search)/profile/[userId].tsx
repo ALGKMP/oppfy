@@ -446,6 +446,7 @@ const OtherProfile = () => {
       <OtherPost
         key={item.postId}
         id={item.postId}
+        endpoint="other-profile"
         createdAt={item.createdAt}
         caption={item.caption}
         self={{

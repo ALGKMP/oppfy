@@ -6,7 +6,7 @@ import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 import PostCard from "./ui/PostCard";
-import type { PostData as OtherPostProps } from "./ui/PostCard";
+import type { PostData } from "./ui/PostCard";
 import { useComments } from "./useComments";
 import { useLikePost } from "./useLikePost";
 import { usePostActions } from "./usePostActions";
@@ -114,13 +114,17 @@ const ReportOptionsSheet = ({
   );
 };
 
+interface OtherPostProps extends PostData {
+  endpoint: "other-profile" | "home-feed";
+}
+
 const OtherPost = (postProps: OtherPostProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
   const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost({
     postId: postProps.id,
-    endpoint: "other-profile",
+    endpoint: postProps.endpoint,
     userId: postProps.recipient.id,
   });
   const { handleReportPost } = useReportPost(postProps.id);
@@ -136,7 +140,7 @@ const OtherPost = (postProps: OtherPostProps) => {
     handlePressUsername,
   } = useComments({
     postId: postProps.id,
-    endpoint: "other-profile",
+    endpoint: postProps.endpoint,
     userId: postProps.recipient.id,
   });
 
