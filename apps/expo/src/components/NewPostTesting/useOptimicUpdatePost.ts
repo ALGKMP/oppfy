@@ -1,8 +1,10 @@
 import { api } from "~/utils/api";
 
+export type Endpoint = "self-profile" | "other-profile" | "home-feed" | "single-post";
+
 interface IncrementLikeCountProps {
   postId: string;
-  endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
+  endpoint: Endpoint;
   changeCountBy: number;
   userId?: string;
 }
@@ -74,6 +76,28 @@ export const useOptimisticUpdatePost = () => {
           { ...prevData, likesCount: prevData.likesCount + changeCountBy },
         );
         break;
+      }
+
+      case "home-feed": {
+        await utils.post.paginatePostsForFeed.cancel();
+        const prevData = utils.post.paginatePostsForFeed.getInfiniteData({
+          pageSize: 10,
+        });
+        if (!prevData) return;
+        utils.post.paginatePostsForFeed.setInfiniteData(
+          { pageSize: 10 },
+          {
+            ...prevData,
+            pages: prevData.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) =>
+                item.postId === postId
+                  ? { ...item, likesCount: item.likesCount + changeCountBy }
+                  : item,
+              ),
+            })),
+          },
+        );
       }
     }
   };
@@ -151,6 +175,31 @@ export const useOptimisticUpdatePost = () => {
         );
         break;
       }
+      case "home-feed": {
+        console.log("running home-feeed")
+        await utils.post.paginatePostsForFeed.cancel();
+        const prevData = utils.post.paginatePostsForFeed.getInfiniteData({
+          pageSize: 10,
+        });
+        if (!prevData) return;
+        utils.post.paginatePostsForFeed.setInfiniteData(
+          { pageSize: 10 },
+          {
+            ...prevData,
+            pages: prevData.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) =>
+                item.postId === postId
+                  ? {
+                      ...item,
+                      commentsCount: item.commentsCount + changeCountBy,
+                    }
+                  : item,
+              ),
+            })),
+          },
+        );
+      }
     }
   };
 
@@ -160,7 +209,7 @@ export const useOptimisticUpdatePost = () => {
     userId,
   }: {
     postId: string;
-    endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
+    endpoint: Endpoint;
     userId?: string;
   }) => {
     switch (endpoint) {
@@ -177,7 +226,9 @@ export const useOptimisticUpdatePost = () => {
         });
         break;
       case "home-feed":
-        // TODO: Implement this
+        await utils.post.paginatePostsForFeed.invalidate({
+          pageSize: 10,
+        });
         break;
       case "single-post":
         await utils.post.getPost.invalidate({ postId });

@@ -2,11 +2,12 @@ import { useCallback, useRef } from "react";
 
 import { api } from "~/utils/api";
 import { useOptimisticUpdatePost } from "./useOptimicUpdatePost";
+import type { Endpoint } from "./useOptimicUpdatePost";
 import { useThrottleWithIncreaseDelay } from "./useThrottleWithIncreaseDelay";
 
 interface LikePostProps {
   postId: string;
-  endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
+  endpoint: Endpoint;
   userId?: string;
 }
 
@@ -18,6 +19,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
   );
 
   const clickCount = useRef(0);
+  const isLikingRef = useRef(false);
   const { changeLikeCount } = useOptimisticUpdatePost();
   const throttledLikeRequest = useRef(
     useThrottleWithIncreaseDelay(async (currentHasLiked: boolean) => {
@@ -30,6 +32,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
         ? await unlikePost.mutateAsync({ postId })
         : await likePost.mutateAsync({ postId });
       clickCount.current = 0;
+      isLikingRef.current = false;
     }, 5000),
   );
 
@@ -113,8 +116,9 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     },
   });
 
-
   const handleLikePressed = useCallback(async () => {
+    isLikingRef.current = true;
+
     // Optimistically update the UI
     await utils.post.hasliked.cancel();
     utils.post.hasliked.setData({ postId }, !hasLiked);
@@ -135,12 +139,21 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     changeLikeCount,
     endpoint,
     userId,
-  ]); // Add endpoint to dependencies
+  ]);
 
   const handleLikeDoubleTapped = async () => {
-    if (hasLiked) return;
-    await changeLikeCount({ postId, changeCountBy: 1, endpoint, userId }); // Use the passed in endpoint
-    await likePost.mutateAsync({ postId });
+    if (!hasLiked) {
+      await utils.post.hasliked.cancel();
+      utils.post.hasliked.setData({ postId }, !hasLiked);
+      await changeLikeCount({
+        postId,
+        changeCountBy: 1,
+        endpoint,
+        userId,
+      }); // Use the passed in endpoint
+      clickCount.current++;
+      throttledLikeRequest.current(hasLiked);
+    }
   };
 
   return { hasLiked, handleLikePressed, handleLikeDoubleTapped };
