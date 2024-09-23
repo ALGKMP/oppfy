@@ -16,6 +16,7 @@ interface ListItemProps {
   handleFollow: (userId: string) => Promise<void>;
   handleUnfollow: (userId: string) => Promise<void>;
   handleCancelFollowRequest: (userId: string) => Promise<void>;
+  hideButton?: boolean;
 }
 
 const ListItem = ({
@@ -23,10 +24,13 @@ const ListItem = ({
   handleFollow,
   handleUnfollow,
   handleCancelFollowRequest,
+  hideButton,
 }: ListItemProps) => {
   const router = useRouter();
 
-  const renderButton = (item: UserItem): ButtonProps => {
+  const renderButton = (item: UserItem): ButtonProps | undefined => {
+    if (hideButton) return undefined;
+
     switch (item.relationshipState) {
       case "followRequestSent":
         return {
@@ -52,7 +56,7 @@ const ListItem = ({
         return {
           text: "Follow",
           icon: <UserRoundPlus size="$1" />,
-          backgroundColor: "#F214FF",
+          backgroundColor: "$primary",
           onPress: () => void handleFollow(item.userId),
         };
     }

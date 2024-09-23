@@ -10,6 +10,7 @@ import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import { useSession } from "~/contexts/SessionContext";
 import { ListItem } from "~/features/connections/components";
 import { useFollowHandlers } from "~/features/connections/hooks";
 import useSearch from "~/hooks/useSearch";
@@ -18,6 +19,8 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const FollowersList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
+
+  const { user } = useSession();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -97,6 +100,7 @@ const FollowersList = () => {
             handleFollow={follow}
             handleUnfollow={unfollow}
             handleCancelFollowRequest={cancelFollowRequest}
+            hideButton={item.userId === user?.uid}
           />
         )}
       />
