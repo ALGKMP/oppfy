@@ -52,7 +52,7 @@ const useFollowHandlers = ({
             ...page,
             items: page.items.map((item) =>
               item.userId === newData.userId
-                ? { ...item, isFollowing: true }
+                ? { ...item, relationshipState: "following" }
                 : item,
             ),
           })),
@@ -67,9 +67,10 @@ const useFollowHandlers = ({
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await Promise.all(
-        queriesToInvalidate.map((key) => getQueryByKey(key).invalidate()),
-      );
+      await Promise.all([
+        ...queriesToInvalidate.map((key) => getQueryByKey(key).invalidate()),
+        utils.profile.getFullProfileOther.invalidate({ userId }),
+      ]);
     },
   });
 
@@ -96,7 +97,7 @@ const useFollowHandlers = ({
             ...page,
             items: page.items.map((item) =>
               item.userId === newData.userId
-                ? { ...item, isFollowing: false }
+                ? { ...item, relationshipState: "notFollowing" }
                 : item,
             ),
           })),
@@ -141,7 +142,7 @@ const useFollowHandlers = ({
               ...page,
               items: page.items.map((item) =>
                 item.userId === newData.recipientId
-                  ? { ...item, isFollowing: false }
+                  ? { ...item, relationshipState: "notFollowing" }
                   : item,
               ),
             })),
