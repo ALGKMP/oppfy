@@ -9,7 +9,6 @@ import superjson from "superjson";
 // import {useReactQueryDevTools} from "@dev-plugins/react-query";
 
 import type { AppRouter } from "@oppfy/api";
-import { env } from "@oppfy/env";
 
 /**
  * A set of typesafe hooks for consuming your API.
@@ -56,8 +55,10 @@ const getBaseUrl = () => {
  * Use only in _app.tsx
  */
 
+export const queryClient = new QueryClient();
+
 export function TRPCProvider(props: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  // const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     api.createClient({
       transformer: superjson,
