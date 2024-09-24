@@ -179,7 +179,6 @@ const useProfileActions = (userId: string) => {
 type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 
 const OtherProfile = React.memo(() => {
-  console.log("Other profile from [userId].tsx re-renders");
   const router = useRouter();
   const navigation = useNavigation();
   const toast = useToastController();
@@ -547,7 +546,7 @@ const OtherProfile = React.memo(() => {
           "backgroundColor" in config ? config.backgroundColor : undefined,
       };
     });
-  }, [otherProfileData ]);
+  }, [otherProfileData]);
 
   const profileHeaderData = useMemo(
     () => ({
@@ -572,7 +571,6 @@ const OtherProfile = React.memo(() => {
 
   const renderHeader = useMemo(
     () => (
-      console.log("RENDERHEADER re-rendering"),
       (
         <YStack gap="$4">
           <ProfileHeaderDetails

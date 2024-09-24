@@ -132,7 +132,6 @@ const useSaveMedia = () => {
         }
       }
 
-      // console.log("Cache directory cleanup completed");
     } catch (error) {
       console.error("Error cleaning up cache directory:", error);
     }

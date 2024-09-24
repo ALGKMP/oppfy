@@ -90,8 +90,6 @@ const SelfPost = memo((postProps: PostData) => {
 
   const { deletePost, isDeleting } = useDeletePost();
 
-  console.log("SelfPost presigned url", postProps.media.url)
-
   const handleComment = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);

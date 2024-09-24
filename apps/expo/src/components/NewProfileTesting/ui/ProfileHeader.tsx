@@ -51,7 +51,6 @@ interface LoadedProps {
 type ProfileHeaderDetailsProps = LoadingProps | LoadedProps;
 
 const ProfileHeaderDetails = memo((props: ProfileHeaderDetailsProps) => {
-  console.log("ProfileHeaderDetails re-rendering");
   if (props.loading) {
     return (
       <YStack

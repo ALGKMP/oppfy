@@ -379,10 +379,7 @@ interface VideoPlayerProps {
   onLikeDoubleTapped: () => void;
 }
 
-export const VideoPlayer = ({
-  media,
-  onLikeDoubleTapped,
-}: VideoPlayerProps) => {
+const VideoPlayerComponent = ({ media, onLikeDoubleTapped }: VideoPlayerProps) => {
   const videoRef = useRef<VideoView>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
@@ -504,5 +501,7 @@ export const VideoPlayer = ({
     </GestureDetector>
   );
 };
+
+export const VideoPlayer = React.memo(VideoPlayerComponent);
 
 export default PostCard;
