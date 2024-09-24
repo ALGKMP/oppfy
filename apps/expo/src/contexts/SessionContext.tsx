@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
-import { api } from "~/utils/api";
+import { api, queryClient } from "~/utils/api";
 
 interface SessionContextType {
   user: FirebaseAuthTypes.User | null;
@@ -72,6 +72,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const signOut = async () => {
     await auth().signOut();
     await auth().currentUser?.reload();
+    queryClient.clear();
 
     setUser(null);
     router.replace("/(onboarding)");
@@ -80,6 +81,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   const deleteAccount = async () => {
     await deleteUser.mutateAsync();
     await auth().currentUser?.reload();
+    queryClient.clear();
     setUser(null);
   };
 
