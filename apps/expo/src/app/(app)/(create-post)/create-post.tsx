@@ -227,8 +227,20 @@ const CreatePost = () => {
                     isLooping
                     shouldPlay={false}
                   />
-                  <View style={styles.playButtonContainer}>
-                    <View style={styles.playButton}>
+                  <View
+                    position="absolute"
+                    top="0"
+                    left="0"
+                    right="0"
+                    bottom="0"
+                    justifyContent="center"
+                    alignItems="center"
+                  >
+                    <View
+                      backgroundColor="rgba(0, 0, 0, 0.5)"
+                      borderRadius={24}
+                      padding={8}
+                    >
                       <Ionicons
                         name={isPlaying ? "pause" : "play"}
                         size={24}
@@ -361,20 +373,6 @@ const styles = StyleSheet.create({
   },
   mediaContainer: {
     position: "relative",
-  },
-  playButtonContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  playButton: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 24,
-    padding: 8,
   },
 });
 

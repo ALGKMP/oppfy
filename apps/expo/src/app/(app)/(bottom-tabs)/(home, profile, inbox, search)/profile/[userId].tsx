@@ -599,7 +599,7 @@ const OtherProfile = React.memo(() => {
             actions={renderActionButtons()}
           />
 
-          {/* {friendItems.length > 0 ? (
+          {friendItems.length > 0 ? (
             <PeopleCarousel
               loading={false}
               data={friendItems}
@@ -628,7 +628,7 @@ const OtherProfile = React.memo(() => {
               title="Suggestions 🔥"
               onItemPress={navigateToProfile}
             />
-          )} */}
+          )}
         </YStack>
       )
     ),
