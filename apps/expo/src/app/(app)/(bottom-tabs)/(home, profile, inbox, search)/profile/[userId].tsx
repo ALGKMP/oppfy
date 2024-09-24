@@ -570,7 +570,7 @@ const OtherProfile = React.memo(() => {
     ],
   );
 
-  const renderHeader = useCallback(
+  const renderHeader = useMemo(
     () => (
       console.log("RENDERHEADER re-rendering"),
       (
