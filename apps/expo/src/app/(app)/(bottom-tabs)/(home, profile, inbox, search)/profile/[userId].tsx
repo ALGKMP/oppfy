@@ -135,52 +135,45 @@ const useProfileActions = (userId: string) => {
     isInvalidatingByAction,
   ]);
 
-  const actionHandlers = useMemo(() => ({
-    follow: {
-      handler: handleFollow,
-      loading: followUser.isLoading || isInvalidatingByAction.follow,
-      disabled: isAnyActionLoading,
+  // Return actions with handlers and loading states
+  return {
+    actions: {
+      follow: {
+        handler: handleFollow,
+        loading: followUser.isLoading || isInvalidatingByAction.follow,
+        disabled: isAnyActionLoading,
+      },
+      unfollow: {
+        handler: handleUnfollow,
+        loading: unfollowUser.isLoading || isInvalidatingByAction.unfollow,
+        disabled: isAnyActionLoading,
+      },
+      addFriend: {
+        handler: handleAddFriend,
+        loading: addFriend.isLoading || isInvalidatingByAction.addFriend,
+        disabled: isAnyActionLoading,
+      },
+      removeFriend: {
+        handler: handleRemoveFriend,
+        loading: removeFriend.isLoading || isInvalidatingByAction.removeFriend,
+        disabled: isAnyActionLoading,
+      },
+      cancelFollowRequest: {
+        handler: handleCancelFollowRequest,
+        loading:
+          cancelFollowRequest.isLoading ||
+          isInvalidatingByAction.cancelFollowRequest,
+        disabled: isAnyActionLoading,
+      },
+      cancelFriendRequest: {
+        handler: handleCancelFriendRequest,
+        loading:
+          cancelFriendRequest.isLoading ||
+          isInvalidatingByAction.cancelFriendRequest,
+        disabled: isAnyActionLoading,
+      },
     },
-    unfollow: {
-      handler: handleUnfollow,
-      loading: unfollowUser.isLoading || isInvalidatingByAction.unfollow,
-      disabled: isAnyActionLoading,
-    },
-    addFriend: {
-      handler: handleAddFriend,
-      loading: addFriend.isLoading || isInvalidatingByAction.addFriend,
-      disabled: isAnyActionLoading,
-    },
-    removeFriend: {
-      handler: handleRemoveFriend,
-      loading: removeFriend.isLoading || isInvalidatingByAction.removeFriend,
-      disabled: isAnyActionLoading,
-    },
-    cancelFollowRequest: {
-      handler: handleCancelFollowRequest,
-      loading:
-        cancelFollowRequest.isLoading ||
-        isInvalidatingByAction.cancelFollowRequest,
-      disabled: isAnyActionLoading,
-    },
-    cancelFriendRequest: {
-      handler: handleCancelFriendRequest,
-      loading:
-        cancelFriendRequest.isLoading ||
-        isInvalidatingByAction.cancelFriendRequest,
-      disabled: isAnyActionLoading,
-    },
-  }), [
-    handleFollow, followUser.isLoading, isInvalidatingByAction.follow,
-    handleUnfollow, unfollowUser.isLoading, isInvalidatingByAction.unfollow,
-    handleAddFriend, addFriend.isLoading, isInvalidatingByAction.addFriend,
-    handleRemoveFriend, removeFriend.isLoading, isInvalidatingByAction.removeFriend,
-    handleCancelFollowRequest, cancelFollowRequest.isLoading, isInvalidatingByAction.cancelFollowRequest,
-    handleCancelFriendRequest, cancelFriendRequest.isLoading, isInvalidatingByAction.cancelFriendRequest,
-    isAnyActionLoading
-  ]);
-
-  return { actions: actionHandlers };
+  };
 };
 
 type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
@@ -606,7 +599,7 @@ const OtherProfile = React.memo(() => {
             actions={renderActionButtons()}
           />
 
-          {friendItems.length > 0 ? (
+          {/* {friendItems.length > 0 ? (
             <PeopleCarousel
               loading={false}
               data={friendItems}
@@ -635,7 +628,7 @@ const OtherProfile = React.memo(() => {
               title="Suggestions 🔥"
               onItemPress={navigateToProfile}
             />
-          )}
+          )} */}
         </YStack>
       )
     ),

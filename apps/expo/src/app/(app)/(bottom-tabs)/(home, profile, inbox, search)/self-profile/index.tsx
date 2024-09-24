@@ -7,6 +7,7 @@ import { FlashList } from "@shopify/flash-list";
 import { CameraOff, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
+import Avatar from "~/components/Avatar";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
@@ -188,7 +189,7 @@ const SelfProfile = React.memo(() => {
     [profileData],
   );
 
-  const renderHeader = useCallback(
+  const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
         <ProfileHeaderDetails
@@ -245,13 +246,12 @@ const SelfProfile = React.memo(() => {
         )}
       </YStack>
     ),
-    [
-      friendItems,
-      navigateToProfile,
-      profileData,
-      recommendationItems,
-      router,
-    ],
+    [friendItems, 
+      recommendationItems, 
+      router, 
+      navigateToProfile, 
+      profileData
+      ],
   );
 
   const renderEmptyState = useCallback(() => {
