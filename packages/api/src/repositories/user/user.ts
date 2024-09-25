@@ -115,6 +115,7 @@ export class UserRepository {
 
   @handleDatabaseErrors
   async updateStatsOnUserDelete(userId: string) {
+    console.log("running this bitch ass hoe")
     return await this.db.transaction(async (tx) => {
       // Update post stats
       // Decrement likes count
@@ -122,13 +123,12 @@ export class UserRepository {
         .update(schema.postStats)
         .set({ likes: sql`${schema.postStats.likes} - 1` })
         .where(
-          eq(
+          inArray(
             schema.postStats.postId,
             tx
               .select({ postId: schema.like.postId })
               .from(schema.like)
               .where(eq(schema.like.userId, userId))
-              .as("subquery"),
           ),
         );
 
@@ -137,13 +137,12 @@ export class UserRepository {
         .update(schema.postStats)
         .set({ comments: sql`${schema.postStats.comments} - 1` })
         .where(
-          eq(
+          inArray(
             schema.postStats.postId,
             tx
               .select({ postId: schema.comment.postId })
               .from(schema.comment)
               .where(eq(schema.comment.userId, userId))
-              .as("subquery"),
           ),
         );
 
@@ -170,14 +169,13 @@ export class UserRepository {
         .update(schema.profileStats)
         .set({ followers: sql`${schema.profileStats.followers} - 1` })
         .where(
-          eq(
+          inArray(
             schema.profileStats.profileId,
             tx
               .select({ profileId: schema.user.profileId })
               .from(schema.follower)
               .innerJoin(schema.user, eq(schema.follower.recipientId, schema.user.id))
               .where(eq(schema.follower.senderId, userId))
-              .as("subquery"),
           ),
         );
 
@@ -186,14 +184,13 @@ export class UserRepository {
         .update(schema.profileStats)
         .set({ following: sql`${schema.profileStats.following} - 1` })
         .where(
-          eq(
+          inArray(
             schema.profileStats.profileId,
             tx
               .select({ profileId: schema.user.profileId })
               .from(schema.follower)
               .innerJoin(schema.user, eq(schema.follower.senderId, schema.user.id))
               .where(eq(schema.follower.recipientId, userId))
-              .as("subquery"),
           ),
         );
 
@@ -202,7 +199,7 @@ export class UserRepository {
         .update(schema.profileStats)
         .set({ friends: sql`${schema.profileStats.friends} - 1` })
         .where(
-          eq(
+          inArray(
             schema.profileStats.profileId,
             tx
               .select({ profileId: schema.user.profileId })
@@ -220,7 +217,6 @@ export class UserRepository {
                   )
                 )
               )
-              .as("subquery"),
           ),
         );
     });
