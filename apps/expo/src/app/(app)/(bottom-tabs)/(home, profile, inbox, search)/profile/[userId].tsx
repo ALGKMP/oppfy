@@ -546,7 +546,7 @@ const OtherProfile = React.memo(() => {
           "backgroundColor" in config ? config.backgroundColor : undefined,
       };
     });
-  }, [otherProfileData]);
+  }, [otherProfileData, actions]);
 
   const profileHeaderData = useMemo(
     () => ({
