@@ -89,7 +89,7 @@ const CreatePost = () => {
   const [inputValue, setInputValue] = useState("");
   const [isFieldChanged, setIsFieldChanged] = useState(false);
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit((data) => {
     const baseData = {
       uri: uri,
       width: parseInt(width),
@@ -109,8 +109,8 @@ const CreatePost = () => {
             type: "notOnApp" as const,
           };
     type === "photo"
-      ? await uploadPhotoMutation.mutateAsync(input)
-      : await uploadVideoMutation.mutateAsync(input);
+      ? void uploadPhotoMutation.mutateAsync(input)
+      : void uploadVideoMutation.mutateAsync(input);
     router.dismissAll();
     router.navigate("/(home)");
   });
