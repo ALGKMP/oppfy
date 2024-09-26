@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback, memo } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import { AlertDialog } from "../Dialogs";
@@ -23,7 +23,7 @@ interface MoreOptionsSheetProps {
   onDeletePost: () => void;
 }
 
-const MoreOptionsSheet = ({
+const MoreOptionsSheet = memo(({
   isVisible,
   isSaving,
   isDeleting,
@@ -31,7 +31,7 @@ const MoreOptionsSheet = ({
   onSavePost,
   onDeletePost,
 }: MoreOptionsSheetProps) => {
-  const moreOptionsButtonOptions = [
+  const moreOptionsButtonOptions = React.useMemo(() => [
     {
       text: isSaving ? "Saving" : "Save Post",
       textProps: {
@@ -49,7 +49,7 @@ const MoreOptionsSheet = ({
       disabled: isDeleting,
       onPress: onDeletePost,
     },
-  ] satisfies ButtonOption[];
+  ] satisfies ButtonOption[], [isSaving, isDeleting, onSavePost, onDeletePost]);
 
   return (
     <ActionSheet
@@ -58,9 +58,9 @@ const MoreOptionsSheet = ({
       onCancel={onClose}
     />
   );
-};
+});
 
-const SelfPost = (postProps: PostData) => {
+const SelfPost = memo((postProps: PostData) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
@@ -90,26 +90,36 @@ const SelfPost = (postProps: PostData) => {
 
   const { deletePost, isDeleting } = useDeletePost();
 
-  const handleComment = () => {
+  const handleComment = useCallback(() => {
     bottomSheetModalRef.current?.present();
-  };
+  }, []);
 
-  const handleOpenMoreOptionsSheet = () => {
+  const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
-  };
+  }, []);
 
-  const handleOpenConfirmDeleteDialog = () => {
+  const handleOpenConfirmDeleteDialog = useCallback(() => {
     setSheetState("closed");
     setTimeout(() => setSheetState("confirmDelete"), 500);
-  };
+  }, []);
 
-  const handleCloseMoreOptionsSheet = () => {
+  const handleCloseMoreOptionsSheet = useCallback(() => {
     setSheetState("closed");
-  };
+  }, []);
 
-  const handleDeletePost = () => {
+  const handleDeletePost = useCallback(() => {
     deletePost({ postId: postProps.id });
-  };
+  }, [deletePost, postProps.id]);
+
+  const handlePressProfilePictureCallback = useCallback((userId: string, username: string) => {
+    bottomSheetModalRef.current?.close();
+    handlePressProfilePicture(userId, username);
+  }, [handlePressProfilePicture]);
+
+  const handlePressUsernameCallback = useCallback((userId: string, username: string) => {
+    bottomSheetModalRef.current?.close();
+    handlePressUsername(userId, username);
+  }, [handlePressUsername]);
 
   return (
     <>
@@ -137,14 +147,8 @@ const SelfPost = (postProps: PostData) => {
         onPostComment={handlePostComment}
         onDeleteComment={handleDeleteComment}
         onReportComment={handleReportComment}
-        onPressProfilePicture={(userId, username) => {
-          bottomSheetModalRef.current?.close();
-          handlePressProfilePicture(userId, username);
-        }}
-        onPressUsername={(userId, username) => {
-          bottomSheetModalRef.current?.close();
-          handlePressUsername(userId, username);
-        }}
+        onPressProfilePicture={handlePressProfilePictureCallback}
+        onPressUsername={handlePressUsernameCallback}
       />
 
       {sheetState === "moreOptions" && (
@@ -168,6 +172,6 @@ const SelfPost = (postProps: PostData) => {
       />
     </>
   );
-};
+});
 
 export default SelfPost;

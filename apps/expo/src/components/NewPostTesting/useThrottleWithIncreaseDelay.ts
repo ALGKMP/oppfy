@@ -7,7 +7,6 @@ export const useThrottleWithIncreaseDelay = (fn: (...args: any[]) => void | Prom
 
   const throttledFunction = useCallback((...args: any[]) => {
     const now = Date.now();
-    console.log("Current delay: ", currentDelay.current);
 
     const execute = () => {
       lastRun.current = now;
@@ -24,7 +23,6 @@ export const useThrottleWithIncreaseDelay = (fn: (...args: any[]) => void | Prom
     }
 
     timeoutId.current = setTimeout(() => {
-      console.log("Executing function after timeout");
       execute();
     }, currentDelay.current);
 

@@ -7,6 +7,7 @@ import { FlashList } from "@shopify/flash-list";
 import { CameraOff, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
+import Avatar from "~/components/Avatar";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
@@ -19,7 +20,7 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
-const SelfProfile = () => {
+const SelfProfile = React.memo(() => {
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -57,6 +58,7 @@ const SelfProfile = () => {
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -128,8 +130,6 @@ const SelfProfile = () => {
     });
   }, [navigation, profileData?.username, router]);
 
-  const [viewableItems, setViewableItems] = useState<string[]>([]);
-
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const visibleItemIds = viewableItems
@@ -189,7 +189,7 @@ const SelfProfile = () => {
     [profileData],
   );
 
-  const renderHeader = useCallback(
+  const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
         <ProfileHeaderDetails
@@ -246,20 +246,12 @@ const SelfProfile = () => {
         )}
       </YStack>
     ),
-    [
-      friendItems,
-      navigateToProfile,
-      profileData?.bio,
-      profileData?.followerCount,
-      profileData?.followingCount,
-      profileData?.friendCount,
-      profileData?.name,
-      profileData?.profilePictureUrl,
-      profileData?.userId,
-      profileData?.username,
-      recommendationItems,
-      router,
-    ],
+    [friendItems, 
+      recommendationItems, 
+      router, 
+      navigateToProfile, 
+      profileData
+      ],
   );
 
   const renderEmptyState = useCallback(() => {
@@ -327,6 +319,6 @@ const SelfProfile = () => {
       />
     </BaseScreenView>
   );
-};
+});
 
 export default SelfProfile;

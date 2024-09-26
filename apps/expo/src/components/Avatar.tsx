@@ -25,7 +25,9 @@ const Avatar = ({ source, size = 46, bordered = false }: AvatarProps) => {
     <StyledImage
       source={
         typeof source === "string"
-          ? { uri: source }
+          ? source !== ""
+            ? { uri: source }
+            : defaultProfilePicture
           : source ?? defaultProfilePicture
       }
       width={size}

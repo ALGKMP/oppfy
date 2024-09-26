@@ -496,7 +496,6 @@ const Comment = React.memo(
             { userId: userIdOfPostRecipient, pageSize: 10 },
             (prevData) => {
               // TODO: If prevData is only the first pages, then this should not optimistically update
-              console.log("prevData", prevData);
               if (!prevData) return prevData;
               return {
                 ...prevData,

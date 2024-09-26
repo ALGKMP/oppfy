@@ -609,3 +609,11 @@ export const reportProfileRelations = relations(reportUser, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const test = pgTable("test", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});

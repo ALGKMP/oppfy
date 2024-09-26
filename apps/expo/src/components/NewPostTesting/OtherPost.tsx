@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback, memo } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import type { RouterInputs } from "~/utils/api";
@@ -118,7 +118,7 @@ interface OtherPostProps extends PostData {
   endpoint: "other-profile" | "home-feed";
 }
 
-const OtherPost = (postProps: OtherPostProps) => {
+const OtherPost = memo((postProps: OtherPostProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
@@ -152,25 +152,25 @@ const OtherPost = (postProps: OtherPostProps) => {
     isSaving,
   } = usePostActions(postProps);
 
-  const handleComment = () => {
+  const handleComment = useCallback(() => {
     bottomSheetModalRef.current?.present();
-  };
+  }, []);
 
-  const handleOpenMoreOptionsSheet = () => {
+  const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
-  };
+  }, []);
 
-  const handleCloseMoreOptionsSheet = () => {
+  const handleCloseMoreOptionsSheet = useCallback(() => {
     setSheetState("closed");
-  };
+  }, []);
 
-  const handleOpenReportOptionsSheet = () => {
+  const handleOpenReportOptionsSheet = useCallback(() => {
     setTimeout(() => setSheetState("reportOptions"), 400);
-  };
+  }, []);
 
-  const handleCloseReportOptionsSheet = () => {
+  const handleCloseReportOptionsSheet = useCallback(() => {
     setSheetState("closed");
-  };
+  }, []);
 
   return (
     <>
@@ -227,6 +227,6 @@ const OtherPost = (postProps: OtherPostProps) => {
       )}
     </>
   );
-};
+});
 
 export default OtherPost;

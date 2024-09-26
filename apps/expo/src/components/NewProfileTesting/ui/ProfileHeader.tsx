@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useEffect, useMemo } from "react";
 import type { ColorValue } from "react-native";
 import { TouchableOpacity } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -50,7 +50,7 @@ interface LoadedProps {
 
 type ProfileHeaderDetailsProps = LoadingProps | LoadedProps;
 
-const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
+const ProfileHeaderDetails = memo((props: ProfileHeaderDetailsProps) => {
   if (props.loading) {
     return (
       <YStack
@@ -94,6 +94,76 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
 
   const { data, onFollowingPress, onFollowersPress, actions = [] } = props;
 
+  // Memoize the Avatar component
+  const MemoizedAvatar = useMemo(
+    () => <Avatar source={data.profilePictureUrl} size={160} />,
+    [data.profilePictureUrl],
+  );
+
+  // Memoize the stats
+  const MemoizedStats = useMemo(
+    () => (
+      <YStack alignItems="flex-end" gap="$2">
+        {onFollowingPress ? (
+          <TouchableOpacity onPress={onFollowingPress}>
+            <Stat
+              label="Following"
+              value={abbreviatedNumber(data.followingCount)}
+            />
+          </TouchableOpacity>
+        ) : (
+          <Stat
+            label="Following"
+            value={abbreviatedNumber(data.followingCount)}
+          />
+        )}
+        {onFollowersPress ? (
+          <TouchableOpacity onPress={onFollowersPress}>
+            <Stat
+              label="Followers"
+              value={abbreviatedNumber(data.followerCount)}
+            />
+          </TouchableOpacity>
+        ) : (
+          <Stat
+            label="Followers"
+            value={abbreviatedNumber(data.followerCount)}
+          />
+        )}
+      </YStack>
+    ),
+    [
+      data.followingCount,
+      data.followerCount,
+      onFollowingPress,
+      onFollowersPress,
+    ],
+  );
+
+  // Memoize the action buttons
+  const MemoizedActionButtons = useMemo(
+    () => (
+      <XStack gap="$4">
+        {actions.map((action, index) => (
+          <Button
+            key={index}
+            flex={1}
+            borderRadius={20}
+            backgroundColor={action.backgroundColor}
+            onPress={action.onPress}
+            disabled={action.disabled}
+          >
+            <XStack gap="$2" alignItems="center">
+              <Text textAlign="center">{action.label}</Text>
+              {action.loading && <Spinner size="small" color="$color" />}
+            </XStack>
+          </Button>
+        ))}
+      </XStack>
+    ),
+    [actions],
+  );
+
   return (
     <YStack
       padding="$4"
@@ -103,7 +173,7 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
       gap="$4"
     >
       <View alignItems="center" marginBottom={-30}>
-        <Avatar source={data.profilePictureUrl} size={160} />
+        {MemoizedAvatar}
       </View>
 
       <XStack justifyContent="space-between" alignItems="flex-end" width="100%">
@@ -129,63 +199,20 @@ const ProfileHeaderDetails = (props: ProfileHeaderDetailsProps) => {
           )}
         </YStack>
 
-        <YStack alignItems="flex-end" gap="$2">
-          {onFollowingPress ? (
-            <TouchableOpacity onPress={onFollowingPress}>
-              <Stat
-                label="Following"
-                value={abbreviatedNumber(data.followingCount)}
-              />
-            </TouchableOpacity>
-          ) : (
-            <Stat
-              label="Following"
-              value={abbreviatedNumber(data.followingCount)}
-            />
-          )}
-          {onFollowersPress ? (
-            <TouchableOpacity onPress={onFollowersPress}>
-              <Stat
-                label="Followers"
-                value={abbreviatedNumber(data.followerCount)}
-              />
-            </TouchableOpacity>
-          ) : (
-            <Stat
-              label="Followers"
-              value={abbreviatedNumber(data.followerCount)}
-            />
-          )}
-        </YStack>
+        {MemoizedStats}
       </XStack>
 
-      <XStack gap="$4">
-        {actions.map((action, index) => (
-          <Button
-            key={index}
-            flex={1}
-            borderRadius={20}
-            backgroundColor={action.backgroundColor}
-            onPress={action.onPress}
-            disabled={action.disabled}
-          >
-            <XStack gap="$2" alignItems="center">
-              <Text textAlign="center">{action.label}</Text>
-              {action.loading && <Spinner size="small" color="$color" />}
-            </XStack>
-          </Button>
-        ))}
-      </XStack>
+      {MemoizedActionButtons}
     </YStack>
   );
-};
+});
 
 interface StatProps {
   label: string;
   value: string | number;
 }
 
-const Stat = (props: StatProps) => (
+const Stat = memo((props: StatProps) => (
   <XStack gap="$1">
     <Text theme="alt1" lineHeight={0}>
       {props.label}{" "}
@@ -194,6 +221,6 @@ const Stat = (props: StatProps) => (
       {props.value}
     </Text>
   </XStack>
-);
+));
 
 export default ProfileHeaderDetails;

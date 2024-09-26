@@ -92,9 +92,9 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
           renderItem={() => <Skeleton circular size={70} />}
-          ItemSeparatorComponent={() => <Spacer size="$2" />}
+          ItemSeparatorComponent={() => <Spacer size="$2.5" />}
           contentContainerStyle={{
-            paddingHorizontal: getToken("$3", "space") as number,
+            paddingHorizontal: getToken("$2", "space") as number,
           }}
         />
       </CardContainer>
@@ -133,9 +133,15 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           onScroll={handleScroll}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => onItemPress(item)}>
-              <YStack width={70} gap="$1.5" alignItems="center">
+              <YStack width={70} gap="$2" alignItems="center">
                 <Avatar source={item.profilePictureUrl} size={70} />
-                <Text textAlign="center" fontWeight="600" theme="alt1">
+                <Text 
+                  textAlign="center" 
+                  fontWeight="600" 
+                  // theme="alt1"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {item.username}
                 </Text>
               </YStack>
@@ -145,21 +151,28 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
             <>
               {renderExtraItem?.()}
               {showMore && (
-                <View
-                  marginRight={-100}
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <SizableText color="#F214FF" fontWeight="600">
-                    See more
-                  </SizableText>
-                </View>
+                <TouchableOpacity onPress={throttledHandleShowMore}>
+                  <YStack width={70} gap="$2" alignItems="center">
+                    <View width={70} height={70} justifyContent="center" alignItems="center" borderRadius={35} backgroundColor="$backgroundStrong">
+                      <Text fontSize={24}>👀</Text>
+                    </View>
+                    <Text 
+                      textAlign="center" 
+                      fontWeight="600" 
+                      // theme="alt1"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      See more
+                    </Text>
+                  </YStack>
+                </TouchableOpacity>
               )}
             </>
           }
-          ItemSeparatorComponent={() => <Spacer size="$2" />}
+          ItemSeparatorComponent={() => <Spacer size="$2.5" />}
           contentContainerStyle={{
-            paddingHorizontal: getToken("$3", "space") as number,
+            paddingHorizontal: getToken("$2.5", "space") as number,
           }}
           ListFooterComponentStyle={{
             justifyContent: "center",
