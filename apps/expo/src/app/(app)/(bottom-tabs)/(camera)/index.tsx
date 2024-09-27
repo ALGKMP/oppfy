@@ -260,6 +260,15 @@ const CameraPage = () => {
     zoom.value = device?.neutralZoom ?? 1;
   }, [zoom, device]);
 
+  useEffect(() => {
+    const requestMicrophonePermission = async () => {
+      if (microphone.hasPermission) return;
+      await microphone.requestPermission().catch();
+    };
+
+    void requestMicrophonePermission();
+  }, [microphone]);
+
   if (device === undefined) return <NoCameraDeviceError />;
 
   return (
