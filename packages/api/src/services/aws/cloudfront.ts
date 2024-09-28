@@ -19,6 +19,16 @@ export class CloudFrontService {
     return signedUrl;
   }
 
+  async invalidateUserPosts(userId: string) {
+    const distributionId = env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_ID;
+    // Invalidate posts where the user is the recipient
+    const objectPattern = `/posts/*-${userId}-*.jpg`;
+    await this.cloudFrontRepository.createInvalidation(
+      distributionId,
+      objectPattern,
+    );
+  }
+
   private _getPostDistributionDomainUrlForObject(objectKey: string): string {
     const postDistributionDomain =
       env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN;

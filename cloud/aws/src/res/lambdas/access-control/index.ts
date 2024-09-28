@@ -54,7 +54,7 @@ const checkIfPublic = async (postKey: string): Promise<boolean> => {
     const query = `
       SELECT u."privacy_setting"
       FROM "post" p
-      JOIN "user" u ON p."recipient" = u."id"
+      JOIN "user" u ON p."recipient_id" = u."id"
       WHERE p."key" = $1
     `;
     const result = await client.query(query, [`posts/${postKey}`]);
