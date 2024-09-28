@@ -17,6 +17,7 @@ import { BaseScreenView } from "~/components/Views";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import { useSession } from "~/contexts/SessionContext";
 
 type NotificationItem =
   RouterOutputs["notifications"]["paginateNotifications"]["items"][0];
@@ -26,6 +27,7 @@ const REFETCH_INTERVAL = 1000 * 30;
 const Inbox = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user } = useSession();
 
   const utils = api.useUtils();
 
@@ -131,10 +133,16 @@ const Inbox = () => {
   });
 
   const onUserSelected = ({ userId, username }: NotificationItem) => {
-    router.navigate({
-      pathname: "/(inbox)/profile/[userId]",
-      params: { userId, username },
-    });
+    if (user?.uid === userId) {
+      router.navigate({
+        pathname: "/(inbox)/self-profile",
+      });
+    } else {
+      router.navigate({
+        pathname: "/(inbox)/profile/[userId]",
+        params: { userId, username },
+      });
+    }
   };
 
   const onFollowUser = async (userId: string) => {

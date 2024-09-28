@@ -22,6 +22,7 @@ import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import { useSession } from "~/contexts/SessionContext";
 
 const useProfileActions = (userId: string) => {
   const utils = api.useUtils();
@@ -182,6 +183,7 @@ const OtherProfile = React.memo(() => {
   const router = useRouter();
   const navigation = useNavigation();
   const toast = useToastController();
+  const { user } = useSession();
 
   const utils = api.useUtils();
 
@@ -280,13 +282,19 @@ const OtherProfile = React.memo(() => {
 
   const navigateToProfile = useCallback(
     ({ userId, username }: { userId: string; username: string }) => {
+      if (user?.uid === userId) {
+        router.push({
+          pathname: "/self-profile",
+        });
+      } else {
+        router.push({
+          pathname: "/(profile)/profile/[userId]",
+          params: { userId, username },
+        });
+      }
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push({
-        pathname: "/(profile)/profile/[userId]",
-        params: { userId, username },
-      });
     },
-    [router],
+    [router, user],
   );
 
   const [sheetState, setSheetState] = useState<
