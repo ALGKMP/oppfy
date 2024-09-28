@@ -79,11 +79,6 @@ const HomeScreen = () => {
     [postData],
   );
 
-  useEffect(() => {
-    console.log("postItems", postItems.length);
-    console.log("recommendationsData", recommendationsData?.length);
-  }, [postItems, recommendationsData]);
-
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
@@ -202,19 +197,28 @@ const HomeScreen = () => {
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
+  const renderFooter = useMemo(() => {
+    return (
+      <View paddingTop="$4" paddingHorizontal="$1">
+        {renderSuggestions}
+        <Footer />
+      </View>
+    );
+  }, [renderSuggestions]);
+
   if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <FlashList
           data={PLACEHOLDER_DATA}
           renderItem={() => <PostCard loading />}
-          ListHeaderComponent={() => (
+          estimatedItemSize={screenWidth}
+          showsVerticalScrollIndicator={false}
+          ListFooterComponent={() => (
             <YStack gap="$4">
               <PeopleCarousel loading />
             </YStack>
           )}
-          estimatedItemSize={screenWidth}
-          showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
           ListHeaderComponentStyle={{
             marginBottom: getToken("$4", "space") as number,
@@ -249,9 +253,8 @@ const HomeScreen = () => {
         numColumns={1}
         keyExtractor={(item) => "home_" + item.postId}
         renderItem={({ item }) => renderPost(item, profile)}
-        ListHeaderComponent={renderSuggestions}
-        ListFooterComponent={Footer}
         estimatedItemSize={screenWidth}
+        ListFooterComponent={renderFooter}
         extraData={viewableItems}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
@@ -259,6 +262,7 @@ const HomeScreen = () => {
     </BaseScreenView>
   );
 };
+
 
 const Footer = () => {
   return (
