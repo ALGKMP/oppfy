@@ -108,7 +108,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         {title && (
           <TouchableOpacity onPress={onTitlePress} disabled={!onTitlePress}>
             <XStack>
-              <H5 paddingLeft="$3" fontWeight={"bold"}>
+              <H5 paddingLeft="$3" fontWeight="bold">
                 {title}
               </H5>
               {emoji && <Text fontSize="$3"> {emoji}</Text>}
