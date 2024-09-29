@@ -49,6 +49,7 @@ const checkIfPublic = async (postKey: string): Promise<boolean> => {
 
   const client = new Client(dbConfig);
   await client.connect();
+  console.log("postKey", postKey);
 
   try {
     const query = `
@@ -57,8 +58,11 @@ const checkIfPublic = async (postKey: string): Promise<boolean> => {
       JOIN "user" u ON p."recipient_id" = u."id"
       WHERE p."key" = $1
     `;
-    const result = await client.query(query, [`posts/${postKey}`]);
+    const result = await client.query(query, [`${postKey}`]);
+    console.log("result", result);
     const row = result.rows[0] as unknown;
+
+    console.log("row", row);
 
     if (!isPost(row)) {
       return false;
@@ -81,17 +85,16 @@ const handler = async (
     return { status: "404", statusDescription: "Not Found" };
   }
 
-  const uri = request.uri;
-  const postId = uri.split("/").pop()?.split(".")[0];
-
-  if (postId === undefined) {
-    return { status: "404", statusDescription: "Not Found" };
+  let uri = request.uri;
+  if (uri.startsWith("/")) {
+    uri = uri.slice(1);
   }
+  console.log("uri", uri);
 
   let isPublic = false;
 
   try {
-    isPublic = await checkIfPublic(postId);
+    isPublic = await checkIfPublic(uri);
   } catch (error) {
     console.error("Error:", error);
     return { status: "500", statusDescription: "Internal Server Error" };
