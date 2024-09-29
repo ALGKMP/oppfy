@@ -4,7 +4,17 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
-import { getToken, H5, Spacer, Text, View, XStack, YStack } from "tamagui";
+import {
+  getToken,
+  H4,
+  H5,
+  SizableText,
+  Spacer,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
@@ -104,11 +114,13 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
 
   return (
     <CardContainer paddingHorizontal={0}>
-      <YStack gap="$2">
+      <YStack gap="$3">
         {title && (
           <TouchableOpacity onPress={onTitlePress} disabled={!onTitlePress}>
             <XStack>
-              <H5 paddingLeft="$3">{title}</H5>
+              <H5 theme="alt1" paddingLeft="$3">
+                {title}
+              </H5>
               {emoji && <Text fontSize="$3"> {emoji}</Text>}
             </XStack>
           </TouchableOpacity>
