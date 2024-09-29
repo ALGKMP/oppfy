@@ -1,6 +1,7 @@
 import type { ImageSourcePropType } from "react-native";
+import { Image } from "expo-image";
 import defaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { Image, styled } from "tamagui";
+import { useTheme } from "tamagui";
 
 interface AvatarProps {
   source: ImageSourcePropType | string | null | undefined;
@@ -8,31 +9,19 @@ interface AvatarProps {
   bordered?: boolean;
 }
 
-const StyledImage = styled(Image, {
-  borderRadius: 1000,
-  variants: {
-    bordered: {
-      true: {
-        borderWidth: 2,
-        borderColor: "$primary",
-      },
-    },
-  },
-});
+const Avatar = (props: AvatarProps) => {
+  const theme = useTheme();
 
-const Avatar = ({ source, size = 46, bordered = false }: AvatarProps) => {
   return (
-    <StyledImage
-      source={
-        typeof source === "string"
-          ? source !== ""
-            ? { uri: source }
-            : defaultProfilePicture
-          : source ?? defaultProfilePicture
-      }
-      width={size}
-      height={size}
-      bordered={bordered}
+    <Image
+      source={props.source ?? defaultProfilePicture}
+      style={{
+        width: props.size ?? 46,
+        height: props.size ?? 46,
+        borderRadius: props.size ? props.size / 2 : 23,
+        borderWidth: props.bordered ? 2 : 0,
+        borderColor: theme.primary.val as string,
+      }}
     />
   );
 };
