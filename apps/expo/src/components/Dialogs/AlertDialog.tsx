@@ -161,7 +161,7 @@ const AlertDialog = ({
                 <TouchableOpacity
                   onPress={() => {
                     handleCancel();
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
                   style={{
                     width: 150,

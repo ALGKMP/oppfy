@@ -133,7 +133,7 @@ const ActionSheet = ({
           {/* Animated Backdrop */}
           <Animated.View style={[styles.backdrop, backgroundStyle]}>
             <TouchableWithoutFeedback onPress={closeModal}>
-              <View style={StyleSheet.absoluteFill} />
+              <View position="absolute" top={0} left={0} right={0} bottom={0} />
             </TouchableWithoutFeedback>
           </Animated.View>
           {/* Modal Content */}
@@ -211,7 +211,11 @@ const ActionSheet = ({
                     ]}
                     disabled={option.disabled}
                   >
-                    <View flexDirection="row" alignItems="center" justifyContent="center">
+                    <View
+                      flexDirection="row"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
                       {option.icon && (
                         <View marginRight="$0.75">{option.icon}</View>
                       )}
