@@ -4,15 +4,7 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
-import {
-  getToken,
-  H5,
-  Spacer,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { getToken, H5, Spacer, Text, View, XStack, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
@@ -116,9 +108,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         {title && (
           <TouchableOpacity onPress={onTitlePress} disabled={!onTitlePress}>
             <XStack>
-              <H5 paddingLeft="$3" theme="alt1">
-                {title}
-              </H5>
+              <H5 paddingLeft="$3">{title}</H5>
               {emoji && <Text fontSize="$3"> {emoji}</Text>}
             </XStack>
           </TouchableOpacity>
@@ -135,9 +125,10 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
               <YStack width={70} gap="$2" alignItems="center">
                 <Avatar source={item.profilePictureUrl} size={70} />
                 <Text
-                  textAlign="center"
+                  theme="alt1"
+                  fontSize="$2"
                   fontWeight="600"
-                  // theme="alt1"
+                  textAlign="center"
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
@@ -163,9 +154,10 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
                       <Text fontSize={24}>👀</Text>
                     </View>
                     <Text
-                      textAlign="center"
+                      theme="alt1"
+                      fontSize="$2"
                       fontWeight="600"
-                      // theme="alt1"
+                      textAlign="center"
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
