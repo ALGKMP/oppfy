@@ -58,11 +58,9 @@ const checkIfPublic = async (postKey: string): Promise<boolean> => {
       JOIN "user" u ON p."recipient_id" = u."id"
       WHERE p."key" = $1
     `;
-    const result = await client.query(query, [`${postKey}`]);
-    console.log("result", result);
-    const row = result.rows[0] as unknown;
 
-    console.log("row", row);
+    const result = await client.query(query, [`${postKey}`]);
+    const row = result.rows[0] as unknown;
 
     if (!isPost(row)) {
       return false;
@@ -85,11 +83,7 @@ const handler = async (
     return { status: "404", statusDescription: "Not Found" };
   }
 
-  let uri = request.uri;
-  if (uri.startsWith("/")) {
-    uri = uri.slice(1);
-  }
-  console.log("uri", uri);
+  const uri = request.uri.slice(1);
 
   let isPublic = false;
 
