@@ -414,10 +414,7 @@ const VideoPlayerComponent = ({ media, onLikeDoubleTapped }: VideoPlayerProps) =
   useFocusEffect(
     useCallback(() => {
       if (media.isViewable) safePlayPause(true);
-
-      return () => {
-        safePlayPause(false);
-      };
+      // Don't need to clean up because the video player is controlled by the native driver
     }, [safePlayPause, media.isViewable]),
   );
 
