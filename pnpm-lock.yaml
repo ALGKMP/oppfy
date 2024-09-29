@@ -32,6 +32,15 @@ importers:
       '@expo-google-fonts/modak':
         specifier: ^0.2.3
         version: 0.2.3
+      '@expo-google-fonts/poppins':
+        specifier: ^0.2.3
+        version: 0.2.3
+      '@expo-google-fonts/roboto':
+        specifier: ^0.2.3
+        version: 0.2.3
+      '@expo-google-fonts/roboto-slab':
+        specifier: ^0.2.3
+        version: 0.2.3
       '@expo/metro-config':
         specifier: ~0.18.11
         version: 0.18.11
@@ -6084,6 +6093,18 @@ packages:
 
   /@expo-google-fonts/modak@0.2.3:
     resolution: {integrity: sha512-OmF2bNIFWjaQRhWGHLITxPKJ07qSa5lMsQKw/FYc1fGAlWinPSku//rarn3mjDtlz+fnWkv4CvrcmLoLmPzgVA==}
+    dev: false
+
+  /@expo-google-fonts/poppins@0.2.3:
+    resolution: {integrity: sha512-PXkur1ZY/puy1PwVFYPJx8qiI3dtBzC2ig1bo53swCt7/sI7krCGYRO6hLBNp15M0kcNh2J4cCR9ZQyFxsving==}
+    dev: false
+
+  /@expo-google-fonts/roboto-slab@0.2.3:
+    resolution: {integrity: sha512-CnjetZ1wG0Vp1gH63GvUMo1ly0Agd+9GsKro24oB2cqpPS6hKzKOnT0btsYfGUB2/DqngB5AN7e56F+XLf4MCg==}
+    dev: false
+
+  /@expo-google-fonts/roboto@0.2.3:
+    resolution: {integrity: sha512-PF6S//ZYWeXfpYTwvY2oEe0d5RnqwR5KMsGjuTgg6y9p/CPK/IkWL+wsbkzjfd+Jck1Q1pRlWOoe5uz42sQFRg==}
     dev: false
 
   /@expo/bunyan@4.0.1:
