@@ -1,13 +1,19 @@
-import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
+import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
-import Avatar from "~/components/Avatar";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
@@ -21,6 +27,9 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
 const SelfProfile = React.memo(() => {
+  const scrollRef = useRef(null);
+  useScrollToTop(scrollRef);
+
   const navigation = useNavigation();
   const router = useRouter();
 
@@ -246,12 +255,7 @@ const SelfProfile = React.memo(() => {
         )}
       </YStack>
     ),
-    [friendItems, 
-      recommendationItems, 
-      router, 
-      navigateToProfile, 
-      profileData
-      ],
+    [friendItems, recommendationItems, router, navigateToProfile, profileData],
   );
 
   const renderEmptyState = useCallback(() => {
@@ -297,6 +301,7 @@ const SelfProfile = React.memo(() => {
   return (
     <BaseScreenView padding={0} paddingBottom={0}>
       <FlashList
+        ref={scrollRef}
         data={postItems}
         renderItem={({ item }) =>
           renderPost(item, viewableItems.includes(item.postId))

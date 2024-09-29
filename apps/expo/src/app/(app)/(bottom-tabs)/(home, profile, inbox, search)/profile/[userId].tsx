@@ -1,8 +1,15 @@
-import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { utils } from "@react-native-firebase/app";
+import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
@@ -18,11 +25,11 @@ import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
+import { useSession } from "~/contexts/SessionContext";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { useSession } from "~/contexts/SessionContext";
 
 const useProfileActions = (userId: string) => {
   const utils = api.useUtils();
@@ -180,6 +187,9 @@ const useProfileActions = (userId: string) => {
 type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 
 const OtherProfile = React.memo(() => {
+  const scrollRef = useRef(null);
+  useScrollToTop(scrollRef);
+
   const router = useRouter();
   const navigation = useNavigation();
   const toast = useToastController();
@@ -524,7 +534,7 @@ const OtherProfile = React.memo(() => {
       },
     };
 
-    const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = ({
+    const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
       public_NotFollowing_NotFriends: ["follow", "friend"],
       public_Following_NotFriends: ["unfollow", "friend"],
       public_Following_OutboundRequest: ["cancelFriendRequest"],
@@ -535,7 +545,7 @@ const OtherProfile = React.memo(() => {
       private_OutboundRequest_OutboundRequest: ["cancelFriendRequest"],
       private_Following_OutboundRequest: ["cancelFriendRequest"],
       private_Following_Friends: ["removeFriend"],
-    });
+    };
 
     const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
     const buttonKeys = buttonCombinations[key] ?? [];
@@ -579,64 +589,60 @@ const OtherProfile = React.memo(() => {
 
   const renderHeader = useMemo(
     () => (
-      (
-        <YStack gap="$4">
-          <ProfileHeaderDetails
-            loading={false}
-            data={profileHeaderData}
-            onFollowingPress={
-              canViewContent
-                ? () =>
-                    router.push({
-                      pathname: "/profile/connections/following-list",
-                      params: { userId, username },
-                    })
-                : undefined
-            }
-            onFollowersPress={
-              canViewContent
-                ? () =>
-                    router.push({
-                      pathname: "/profile/connections/followers-list",
-                      params: { userId, username },
-                    })
-                : undefined
-            }
-            actions={renderActionButtons()}
-          />
+      <YStack gap="$4">
+        <ProfileHeaderDetails
+          loading={false}
+          data={profileHeaderData}
+          onFollowingPress={
+            canViewContent
+              ? () =>
+                  router.push({
+                    pathname: "/profile/connections/following-list",
+                    params: { userId, username },
+                  })
+              : undefined
+          }
+          onFollowersPress={
+            canViewContent
+              ? () =>
+                  router.push({
+                    pathname: "/profile/connections/followers-list",
+                    params: { userId, username },
+                  })
+              : undefined
+          }
+          actions={renderActionButtons()}
+        />
 
-          {friendItems.length > 0 ? (
-            <PeopleCarousel
-              loading={false}
-              data={friendItems}
-              title="Friends 🔥"
-              showMore={
-                friendItems.length < (otherProfileData?.friendCount ?? 0)
-              }
-              onTitlePress={() =>
-                router.push({
-                  pathname: "/profile/connections/following-list",
-                  params: { userId, username },
-                })
-              }
-              onItemPress={navigateToProfile}
-              onShowMore={() =>
-                router.push({
-                  pathname: "/profile/connections/friend-list",
-                  params: { userId, username },
-                })
-              }
-            />
-          ) : (
-            <PeopleCarousel
-              loading={isLoadingRecommendationsData}
-              data={recommendationsData ?? []}
-              title="Suggestions 🔥"
-              onItemPress={navigateToProfile}
-            />
-          )}
-        </YStack>
-      )
+        {friendItems.length > 0 ? (
+          <PeopleCarousel
+            loading={false}
+            data={friendItems}
+            title="Friends 🔥"
+            showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
+            onTitlePress={() =>
+              router.push({
+                pathname: "/profile/connections/following-list",
+                params: { userId, username },
+              })
+            }
+            onItemPress={navigateToProfile}
+            onShowMore={() =>
+              router.push({
+                pathname: "/profile/connections/friend-list",
+                params: { userId, username },
+              })
+            }
+          />
+        ) : (
+          <PeopleCarousel
+            loading={isLoadingRecommendationsData}
+            data={recommendationsData ?? []}
+            title="Suggestions 🔥"
+            onItemPress={navigateToProfile}
+          />
+        )}
+      </YStack>
     ),
     [
       profileHeaderData,
@@ -716,6 +722,7 @@ const OtherProfile = React.memo(() => {
     <>
       <BaseScreenView padding={0} paddingBottom={0}>
         <FlashList
+          ref={scrollRef}
           data={postItems}
           renderItem={({ item }) =>
             renderPost(item, viewableItems.includes(item.postId))

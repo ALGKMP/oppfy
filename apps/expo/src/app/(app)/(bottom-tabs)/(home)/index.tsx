@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import Splash from "@assets/splash.png";
+import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
@@ -45,6 +46,9 @@ interface TokenItem {
 }
 
 const HomeScreen = () => {
+  const scrollRef = useRef(null);
+  useScrollToTop(scrollRef);
+
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -244,6 +248,7 @@ const HomeScreen = () => {
       scrollEnabled={postItems.length == 0}
     >
       <FlashList
+        ref={scrollRef}
         data={postItems}
         refreshing={refreshing}
         onRefresh={onRefresh}
@@ -262,7 +267,6 @@ const HomeScreen = () => {
     </BaseScreenView>
   );
 };
-
 
 const Footer = () => {
   return (
