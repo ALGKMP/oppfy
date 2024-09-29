@@ -4,23 +4,15 @@ import {
 } from "@aws-sdk/client-cloudfront";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { APIGatewayProxyResult, Context, S3Event } from "aws-lambda";
-import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
 import { env } from "@oppfy/env";
-import type {
-  OpenSearchProfileIndexResult} from "@oppfy/opensearch";
-import {
-  openSearch,
-  OpenSearchIndex,
-  OpenSearchResponse,
-} from "@oppfy/opensearch";
+import type { OpenSearchProfileIndexResult } from "@oppfy/opensearch";
+import { openSearch, OpenSearchIndex } from "@oppfy/opensearch";
 import { sharedValidators } from "@oppfy/validators";
 
 const s3Client = new S3Client({ region: "us-east-1" });
 const cloudFrontClient = new CloudFrontClient({ region: "us-east-1" });
-
-const CLOUDFRONT_DISTRIBUTION_ID = env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID;
 
 export const handler = async (
   event: S3Event,
@@ -98,7 +90,7 @@ export const handler = async (
 
 const createCloudFrontInvalidation = async (objectKey: string) => {
   const params = {
-    DistributionId: CLOUDFRONT_DISTRIBUTION_ID,
+    DistributionId: env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID,
     InvalidationBatch: {
       CallerReference: Date.now().toString(),
       Paths: {
