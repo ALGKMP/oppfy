@@ -8,13 +8,13 @@ import React, {
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { utils } from "@react-native-firebase/app";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, View, YStack } from "tamagui";
+import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -33,7 +33,6 @@ import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const useProfileActions = (userId: string) => {
   const utils = api.useUtils();
-
   // State to track invalidation status per action using action keys
   const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
     Record<string, boolean>
@@ -190,6 +189,7 @@ const OtherProfile = React.memo(() => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
+  const { routeProfile } = useRouteProfile();
   const router = useRouter();
   const navigation = useNavigation();
   const toast = useToastController();
@@ -292,17 +292,10 @@ const OtherProfile = React.memo(() => {
 
   const navigateToProfile = useCallback(
     ({ userId, username }: { userId: string; username: string }) => {
-      if (user?.uid === userId) {
-        router.push("/self-profile");
-      } else {
-        router.push({
-          pathname: "/profile/[userId]",
-          params: { userId, username },
-        });
-      }
+      routeProfile({ userId, username });
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     },
-    [router, user],
+    [routeProfile],
   );
 
   const [sheetState, setSheetState] = useState<

@@ -1,5 +1,4 @@
 import React from "react";
-import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
@@ -17,6 +16,7 @@ interface ListItemProps {
   handleUnfollow: (userId: string) => Promise<void>;
   handleCancelFollowRequest: (userId: string) => Promise<void>;
   hideButton?: boolean;
+  onProfilePress: () => void;
 }
 
 const ListItem = ({
@@ -25,8 +25,8 @@ const ListItem = ({
   handleUnfollow,
   handleCancelFollowRequest,
   hideButton,
+  onProfilePress,
 }: ListItemProps) => {
-  const router = useRouter();
 
   const renderButton = (item: UserItem): ButtonProps | undefined => {
     if (hideButton) return undefined;
@@ -70,12 +70,7 @@ const ListItem = ({
         subtitle={item.name}
         imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
         button={renderButton(item)}
-        onPress={() =>
-          router.push({
-            pathname: `/profile/[userId]`,
-            params: { userId: item.userId, username: item.username },
-          })
-        }
+        onPress={onProfilePress}
       />
     </View>
   );

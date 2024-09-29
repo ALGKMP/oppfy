@@ -16,10 +16,11 @@ import { useFollowHandlers } from "~/features/connections/hooks";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 const FriendList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-
+  const { routeProfile } = useRouteProfile();
   const { user } = useSession();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -99,6 +100,7 @@ const FriendList = () => {
         renderItem={({ item }) => (
           <ListItem
             item={item}
+            onProfilePress={() => routeProfile({userId: item.userId, username: item.username})}
             handleFollow={follow}
             handleUnfollow={unfollow}
             handleCancelFollowRequest={cancelFollowRequest}

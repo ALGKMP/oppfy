@@ -4,6 +4,7 @@ import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { H5, H6, View, YStack } from "tamagui";
+import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -33,6 +34,8 @@ const FollowersList = () => {
       "friend.paginateFriendsOthers",
     ],
   });
+
+  const { routeProfile } = useRouteProfile();
 
   const {
     data: followersData,
@@ -97,6 +100,7 @@ const FollowersList = () => {
         renderItem={({ item }) => (
           <ListItem
             item={item}
+            onProfilePress={() => routeProfile({userId: item.userId, username: item.username})}
             handleFollow={follow}
             handleUnfollow={unfollow}
             handleCancelFollowRequest={cancelFollowRequest}

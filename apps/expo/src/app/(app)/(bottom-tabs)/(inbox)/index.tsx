@@ -7,6 +7,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Circle, H5, Paragraph, SizableText, XStack, YStack } from "tamagui";
+import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -28,7 +29,7 @@ const Inbox = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useSession();
-
+  const { routeProfile } = useRouteProfile();
   const utils = api.useUtils();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -133,16 +134,7 @@ const Inbox = () => {
   });
 
   const onUserSelected = ({ userId, username }: NotificationItem) => {
-    if (user?.uid === userId) {
-      router.navigate({
-        pathname: "/(inbox)/self-profile",
-      });
-    } else {
-      router.navigate({
-        pathname: "/(inbox)/profile/[userId]",
-        params: { userId, username },
-      });
-    }
+    routeProfile({ userId, username });
   };
 
   const onFollowUser = async (userId: string) => {
