@@ -502,6 +502,6 @@ const VideoPlayerComponent = ({ media, onLikeDoubleTapped }: VideoPlayerProps) =
   );
 };
 
-export const VideoPlayer = React.memo(VideoPlayerComponent);
+const VideoPlayer = React.memo(VideoPlayerComponent);
 
 export default PostCard;
