@@ -39,12 +39,12 @@ const ProfilePicture = () => {
 
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("/(profile)/self-profile");
+    router.replace("/self-profile");
   };
 
   const onSkip = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("/(profile)/self-profile");
+    router.replace("/self-profile");
   };
 
   return (

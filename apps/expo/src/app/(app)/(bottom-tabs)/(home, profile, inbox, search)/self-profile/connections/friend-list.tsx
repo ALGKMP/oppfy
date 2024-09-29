@@ -144,7 +144,7 @@ const FriendList = () => {
       }
       onPress={() =>
         router.push({
-          pathname: "/(profile)/profile/[userId]",
+          pathname: "/profile/[userId]",
           params: { userId: item.userId, username: item.username },
         })
       }

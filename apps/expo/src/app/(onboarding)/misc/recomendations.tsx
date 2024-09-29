@@ -166,7 +166,7 @@ const OnboardingRecomendations = () => {
       userIds: selectedUsers,
     });
 
-    router.replace("/(profile)/self-profile");
+    router.replace("/self-profile");
   };
   const remainingUsers = Math.max(0, requiredUsers - selectedUsers.length);
 

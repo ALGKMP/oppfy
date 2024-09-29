@@ -54,7 +54,7 @@ const ScanQr = () => {
 
         setTimeout(() => {
           router.push({
-            pathname: "/(profile)/profile/[userId]",
+            pathname: "/profile/[userId]",
             params: { userId, username },
           });
           // Reset scanning state after navigation

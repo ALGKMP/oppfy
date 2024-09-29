@@ -7,7 +7,6 @@ import { throttle } from "lodash";
 import {
   getToken,
   H5,
-  SizableText,
   Spacer,
   Text,
   View,
@@ -135,9 +134,9 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
             <TouchableOpacity onPress={() => onItemPress(item)}>
               <YStack width={70} gap="$2" alignItems="center">
                 <Avatar source={item.profilePictureUrl} size={70} />
-                <Text 
-                  textAlign="center" 
-                  fontWeight="600" 
+                <Text
+                  textAlign="center"
+                  fontWeight="600"
                   // theme="alt1"
                   numberOfLines={1}
                   ellipsizeMode="tail"
@@ -153,12 +152,19 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
               {showMore && (
                 <TouchableOpacity onPress={throttledHandleShowMore}>
                   <YStack width={70} gap="$2" alignItems="center">
-                    <View width={70} height={70} justifyContent="center" alignItems="center" borderRadius={35} backgroundColor="$backgroundStrong">
+                    <View
+                      width={70}
+                      height={70}
+                      justifyContent="center"
+                      alignItems="center"
+                      borderRadius={35}
+                      backgroundColor="$backgroundStrong"
+                    >
                       <Text fontSize={24}>👀</Text>
                     </View>
-                    <Text 
-                      textAlign="center" 
-                      fontWeight="600" 
+                    <Text
+                      textAlign="center"
+                      fontWeight="600"
                       // theme="alt1"
                       numberOfLines={1}
                       ellipsizeMode="tail"

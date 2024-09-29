@@ -119,7 +119,7 @@ const SelfProfile = React.memo(() => {
     ({ userId, username }: { userId: string; username: string }) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.push({
-        pathname: "/(profile)/profile/[userId]",
+        pathname: "/profile/[userId]",
         params: { userId, username },
       });
     },
