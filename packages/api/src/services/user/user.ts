@@ -108,7 +108,11 @@ export class UserService {
       targetUserId,
       currentUserId,
     );
-    if (isBlocked) return false;
+    const isBlockedByTargetUser = await this.blockRepository.getBlockedUser(  
+      currentUserId,
+      targetUserId,
+    );
+    if (isBlocked ?? isBlockedByTargetUser) return false;
 
     if (targetUser.privacySetting === "public") return true;
 
