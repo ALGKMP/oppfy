@@ -203,7 +203,7 @@ const HomeScreen = () => {
 
   const renderFooter = useMemo(() => {
     return (
-      <View paddingTop="$4" paddingHorizontal="$1">
+      <View>
         {renderSuggestions}
         <Footer />
       </View>
