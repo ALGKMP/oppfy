@@ -6,6 +6,7 @@ import Animated, {
   withDelay,
   withSpring,
   withTiming,
+  withSequence,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 
@@ -14,14 +15,21 @@ interface GradientHeartProps {
   position: { x: number; y: number };
 }
 
-const ANIMATION_DURATION = 400;
+const ANIMATION_DURATION = 600; // Increased from 400
+const TWIST_DURATION = 400; // Increased from 300
+const MAX_TWIST_ANGLE = 15; // Maximum twist angle in degrees
+const MIN_TWIST_ANGLE = 5; // Minimum twist angle in degrees
+const FADE_OUT_DELAY = 350; // New constant for fade out delay
 
 const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
   const [x1, y1, x2, y2] = gradient;
   const { x, y } = position;
   const scale = useSharedValue(0);
+  const rotation = useSharedValue(0);
 
   useEffect(() => {
+    const twistAngle = (Math.random() * (MAX_TWIST_ANGLE - MIN_TWIST_ANGLE) + MIN_TWIST_ANGLE) * (Math.random() < 0.5 ? -1 : 1);
+
     scale.value = withSpring(
       1,
       {
@@ -34,10 +42,15 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
         reduceMotion: ReduceMotion.System,
       },
       () => {
-        scale.value = withDelay(150, withTiming(0, { duration: 250 }));
+        scale.value = withDelay(FADE_OUT_DELAY, withTiming(0, { duration: 250 }));
       },
     );
-  }, [scale]);
+
+    rotation.value = withSequence(
+      withTiming(0, { duration: TWIST_DURATION / 2 }),
+      withTiming(twistAngle, { duration: TWIST_DURATION / 2 })
+    );
+  }, [scale, rotation]);
 
   const heartImageAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -45,9 +58,10 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
       left: x,
       top: y,
       transform: [
-        { translateX: -60 }, // Changed from -40 to -60
-        { translateY: -60 }, // Changed from -40 to -60
+        { translateX: -60 },
+        { translateY: -60 },
         { scale: scale.value },
+        { rotate: `${rotation.value}deg` },
       ],
     };
   });
@@ -118,7 +132,7 @@ export const useHeartAnimations = () => {
         setHearts((prevHearts) =>
           prevHearts.filter((heart) => heart.id !== newHeart.id),
         );
-      }, ANIMATION_DURATION * 3);
+      }, ANIMATION_DURATION + FADE_OUT_DELAY + 250); // Adjusted timeout
     },
     [getRandomGradient],
   );
