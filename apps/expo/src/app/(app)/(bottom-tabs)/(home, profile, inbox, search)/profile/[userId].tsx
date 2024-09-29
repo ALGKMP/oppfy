@@ -210,13 +210,13 @@ const OtherProfile = React.memo(() => {
     refetch: refetchProfileData,
   } = api.profile.getFullProfileOther.useQuery({ userId });
 
-  const isBlocked = otherProfileData?.networkStatus.blocked ?? false;
+  const blocked = otherProfileData?.networkStatus.blocked ?? false;
   const isPrivate = otherProfileData?.networkStatus.privacy === "private";
   const isFollowing =
     otherProfileData?.networkStatus.targetUserFollowState === "Following";
   const canViewContent = useMemo(
-    () => !isBlocked && (!isPrivate || isFollowing),
-    [isBlocked, isPrivate, isFollowing],
+    () => !blocked && (!isPrivate || isFollowing),
+    [blocked, isPrivate, isFollowing],
   );
 
   const {
@@ -293,12 +293,10 @@ const OtherProfile = React.memo(() => {
   const navigateToProfile = useCallback(
     ({ userId, username }: { userId: string; username: string }) => {
       if (user?.uid === userId) {
-        router.push({
-          pathname: "/self-profile",
-        });
+        router.push("/self-profile");
       } else {
         router.push({
-          pathname: "/(profile)/profile/[userId]",
+          pathname: "/profile/[userId]",
           params: { userId, username },
         });
       }
@@ -509,11 +507,23 @@ const OtherProfile = React.memo(() => {
 
   const { actions } = useProfileActions(userId);
 
-  // TODO: This shit is causing a re-render of the entire component
   const renderActionButtons = useCallback((): ProfileAction[] => {
-    if (!otherProfileData) return [];
+    if (otherProfileData === undefined) return [];
+
     const { privacy, blocked, targetUserFollowState, targetUserFriendState } =
       otherProfileData.networkStatus;
+
+    if (blocked) {
+      return [
+        {
+          label: "Blocked",
+          onPress: () => {},
+          loading: false,
+          disabled: true,
+          backgroundColor: "$gray3",
+        },
+      ];
+    }
 
     const buttonConfigs = {
       follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
@@ -614,7 +624,7 @@ const OtherProfile = React.memo(() => {
           actions={renderActionButtons()}
         />
 
-        {friendItems.length > 0 ? (
+        {friendItems.length > 0 && !blocked ? (
           <PeopleCarousel
             loading={false}
             data={friendItems}
@@ -660,7 +670,7 @@ const OtherProfile = React.memo(() => {
   );
 
   const renderContent = useCallback(() => {
-    if (isBlocked) {
+    if (blocked) {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -693,7 +703,7 @@ const OtherProfile = React.memo(() => {
         />
       </View>
     );
-  }, [isBlocked, isPrivate, isFollowing]);
+  }, [blocked, isPrivate, isFollowing]);
 
   if (isLoadingData) {
     return (
