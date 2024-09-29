@@ -6,9 +6,7 @@ import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import {
   getToken,
-  H4,
   H5,
-  SizableText,
   Spacer,
   Text,
   View,
