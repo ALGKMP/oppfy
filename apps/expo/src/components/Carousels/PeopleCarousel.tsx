@@ -4,15 +4,7 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
-import {
-  getToken,
-  H5,
-  Spacer,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { getToken, H5, Spacer, Text, View, XStack, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
