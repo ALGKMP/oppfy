@@ -45,8 +45,8 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
       left: x,
       top: y,
       transform: [
-        { translateX: -40 },
-        { translateY: -40 },
+        { translateX: -60 }, // Changed from -40 to -60
+        { translateY: -60 }, // Changed from -40 to -60
         { scale: scale.value },
       ],
     };
@@ -54,7 +54,7 @@ const GradientHeart = ({ gradient, position }: GradientHeartProps) => {
 
   return (
     <Animated.View style={heartImageAnimatedStyle}>
-      <Svg height="100" width="100" viewBox="0 0 24 24">
+      <Svg height="120" width="120" viewBox="0 0 24 24"> 
         <Defs>
           <LinearGradient id="grad" x1={x1} y1={y1} x2={x2} y2={y2}>
             {/* TODO: Find better colors */}
