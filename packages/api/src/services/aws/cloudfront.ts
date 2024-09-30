@@ -5,17 +5,15 @@ import { CloudFrontRepository } from "../../repositories/aws/cloudfront";
 export class CloudFrontService {
   private cloudFrontRepository = new CloudFrontRepository();
 
-  getSignedUrlForPost(objectKey: string) {
+  async getSignedUrlForPost(objectKey: string) {
     const url = this._getPostDistributionDomainUrlForObject(`${objectKey}`);
-    const signedUrl = this.cloudFrontRepository.getSignedUrl({ url });
-    // console.log("signedUrlfrom the service", signedUrl);
+    const signedUrl = await this.cloudFrontRepository.getSignedUrl({ url });
     return signedUrl;
   }
 
-  getSignedUrlForProfilePicture(objectKey: string) {
+  async getSignedUrlForProfilePicture(objectKey: string) {
     const url = this._getProfileDistributionDomainUrlForObject(`${objectKey}`);
-    const signedUrl = this.cloudFrontRepository.getSignedUrl({ url });
-    // console.log("signedUrl from the service", signedUrl);
+    const signedUrl = await this.cloudFrontRepository.getSignedUrl({ url });
     return signedUrl;
   }
 

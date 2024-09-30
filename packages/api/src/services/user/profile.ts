@@ -81,7 +81,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = user.profile.profilePictureKey
-      ? this.cloudFrontService.getSignedUrlForProfilePicture(
+      ? await this.cloudFrontService.getSignedUrlForProfilePicture(
           user.profile.profilePictureKey,
         )
       : null;
@@ -118,7 +118,7 @@ export class ProfileService {
     }
 
     const profilePictureUrl = user.profile.profilePictureKey
-      ? this.cloudFrontService.getSignedUrlForProfilePicture(
+      ? await this.cloudFrontService.getSignedUrlForProfilePicture(
           user.profile.profilePictureKey,
         )
       : null;

@@ -14,7 +14,7 @@
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
-    "@aws-sdk/client-cloudfront": "^3.614.0",
+    "@aws-sdk/client-cloudfront": "^3.658.1",
     "@aws-sdk/cloudfront-signer": "^3.609.0",
     "@oppfy/env": "workspace:*"
   },

@@ -65,7 +65,7 @@ export class PostService {
         cursor,
         pageSize,
       );
-      const updatedData = this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -103,7 +103,7 @@ export class PostService {
         userId,
         cursor,
       );
-      const updatedData = this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for profile: ${userId}: `, error);
@@ -124,7 +124,7 @@ export class PostService {
         userId,
         cursor,
       );
-      const updatedData = this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -146,7 +146,7 @@ export class PostService {
       pageSize,
     );
 
-    const parsedFollowingResult = this._processPaginatedPostData(
+    const parsedFollowingResult = await this._processPaginatedPostData(
       followingResult,
       pageSize,
     );
@@ -217,7 +217,7 @@ export class PostService {
         userId,
         cursor,
       );
-      const updatedData = this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for userId: ${userId}: `, error);
@@ -242,7 +242,7 @@ export class PostService {
         user.id,
         cursor,
       );
-      const updatedData = this._processPaginatedPostData(data, pageSize);
+      const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(`Error in getPosts for profile: ${profileId}: `, error);
@@ -262,7 +262,7 @@ export class PostService {
           "Failed to get post.",
         );
       }
-      const updatedPost = this._processPostData(post[0]);
+      const updatedPost = await this._processPostData(post[0]);
       return updatedPost;
     } catch (error) {
       console.error(`Error in getPost for postId: ${postId}: `, error);
@@ -519,7 +519,7 @@ export class PostService {
         cursor,
         pageSize,
       );
-      const updatedData = this._updateProfilePictureUrls2(data, pageSize);
+      const updatedData = await this._updateProfilePictureUrls2(data, pageSize);
       return updatedData;
     } catch (error) {
       console.error(
@@ -569,25 +569,25 @@ export class PostService {
     }
   }
 
-  private _processPostData(data: Post): Post {
+  private async _processPostData(data: Post): Promise<Post> {
     try {
       // Update author profile picture URL
       if (data.authorProfilePicture !== null) {
         data.authorProfilePicture =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
+          await this.cloudFrontService.getSignedUrlForProfilePicture(
             data.authorProfilePicture,
           );
       }
 
       if (data.recipientProfilePicture !== null) {
         data.recipientProfilePicture =
-          this.cloudFrontService.getSignedUrlForProfilePicture(
+          await this.cloudFrontService.getSignedUrlForProfilePicture(
             data.recipientProfilePicture,
           );
       }
 
       if (data.mediaType === "image") {
-        const imageUrl = this.cloudFrontService.getSignedUrlForPost(
+        const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
           data.imageUrl,
         );
         data.imageUrl = imageUrl;
@@ -607,28 +607,28 @@ export class PostService {
     return data;
   }
 
-  private _processPaginatedPostData(
+  private async _processPaginatedPostData(
     data: Post[],
     pageSize = 20,
-  ): PaginatedResponse<Post> {
-    const items = data.map((item) => {
+  ): Promise<PaginatedResponse<Post>> {
+    const items = data.map(async (item) => {
       try {
         if (item.authorProfilePicture !== null) {
           item.authorProfilePicture =
-            this.cloudFrontService.getSignedUrlForProfilePicture(
+            await this.cloudFrontService.getSignedUrlForProfilePicture(
               item.authorProfilePicture,
             );
         }
 
         if (item.recipientProfilePicture !== null) {
           item.recipientProfilePicture =
-            this.cloudFrontService.getSignedUrlForProfilePicture(
+            await this.cloudFrontService.getSignedUrlForProfilePicture(
               item.recipientProfilePicture,
             );
         }
 
         if (item.mediaType === "image") {
-          const imageUrl = this.cloudFrontService.getSignedUrlForPost(
+          const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
             item.imageUrl,
           );
           item.imageUrl = imageUrl;
@@ -650,7 +650,7 @@ export class PostService {
 
     let nextCursor: PostCursor | undefined = undefined;
     if (items.length > pageSize) {
-      const nextItem = items[pageSize];
+      const nextItem = await items[pageSize];
       if (!nextItem) {
         throw new DomainError(
           ErrorCode.FAILED_TO_PAGINATE_POSTS,
@@ -663,20 +663,20 @@ export class PostService {
       };
     }
     return {
-      items,
+      items: await Promise.all(items),
       nextCursor,
     };
   }
 
-  private _updateProfilePictureUrls2(
+  private async _updateProfilePictureUrls2(
     data: CommentProfile[],
     pageSize: number,
-  ): PaginatedResponse<CommentProfile> {
-    const items = data.map((item) => {
+  ): Promise<PaginatedResponse<CommentProfile>> {
+    const items = data.map(async (item) => {
       try {
         if (item.profilePictureUrl !== null) {
           item.profilePictureUrl =
-            this.cloudFrontService.getSignedUrlForProfilePicture(
+            await this.cloudFrontService.getSignedUrlForProfilePicture(
               item.profilePictureUrl,
             );
         }
@@ -695,7 +695,7 @@ export class PostService {
 
     let nextCursor: CommentCursor | undefined = undefined;
     if (items.length > pageSize) {
-      const nextItem = items[pageSize];
+      const nextItem = await items[pageSize];
       if (!nextItem) {
         throw new DomainError(
           ErrorCode.FAILED_TO_PAGINATE_COMMENTS,
@@ -709,7 +709,7 @@ export class PostService {
       };
     }
     return {
-      items,
+      items: await Promise.all(items),
       nextCursor,
     };
   }

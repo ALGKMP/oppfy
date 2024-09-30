@@ -24,10 +24,10 @@ export class SearchService {
     );
 
     // Use Promise.all to get presigned URLs and return profiles with URLs
-    const profilesWithUrls = profiles.map(
-      ({ profilePictureKey, ...restProfile }) => {
+    const profilesWithUrls = await Promise.all(profiles.map(
+      async ({ profilePictureKey, ...restProfile }) => {
         const profilePictureUrl = profilePictureKey
-          ? this.cloudFrontService.getSignedUrlForProfilePicture(
+          ? await this.cloudFrontService.getSignedUrlForProfilePicture(
               profilePictureKey,
             )
           : null;
@@ -36,7 +36,8 @@ export class SearchService {
           ...restProfile,
           profilePictureUrl,
         };
-      },
+        },
+      ),
     );
 
     return profilesWithUrls;

@@ -148,17 +148,18 @@ export class ContactService {
     const profiles =
       await this.profileRepository.getBatchProfiles(allRecommendations);
     // Fetch presigned URLs for profile pictures in parallel
-    const profilesWithUrls = profiles.map((profile) => {
+    const profilesWithUrls = await Promise.all(profiles.map(async (profile) => {
       const { profilePictureKey, ...profileWithoutKey } = profile;
       return {
         ...profileWithoutKey,
         profilePictureUrl: profilePictureKey
-          ? this.cloudFrontService.getSignedUrlForProfilePicture(
+          ? await this.cloudFrontService.getSignedUrlForProfilePicture(
               profilePictureKey,
             )
           : null,
-      };
-    });
+        };
+      }),
+    );
 
     // Filter out any rejected promises and return the successful ones
     return profilesWithUrls;

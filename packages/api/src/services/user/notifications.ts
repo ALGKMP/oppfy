@@ -58,11 +58,11 @@ export class NotificationsService {
       pageSize,
     );
 
-    const itemsWithProfilePictureUrls = items.map((notification) => {
+    const itemsWithProfilePictureUrls = await Promise.all(items.map(async (notification) => {
       const { profilePictureKey, eventType, ...rest } = notification;
 
       const profilePictureUrl = profilePictureKey
-        ? this.cloudFrontService.getSignedUrlForProfilePicture(
+        ? await this.cloudFrontService.getSignedUrlForProfilePicture(
             profilePictureKey,
           )
         : null;
@@ -88,8 +88,9 @@ export class NotificationsService {
         ...rest,
         message,
         profilePictureUrl,
-      };
-    });
+          };
+        }),
+    );
 
     const nextCursor = items[items.length - 1];
     return {
