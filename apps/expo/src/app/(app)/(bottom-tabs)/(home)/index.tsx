@@ -25,10 +25,8 @@ import {
 } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
-import CardContainer from "~/components/Containers/CardContainer";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
-import { Skeleton } from "~/components/Skeletons";
 import { BaseScreenView } from "~/components/Views";
 import type { Profile, RecommendationProfile } from "~/hooks/useProfile";
 import useProfile from "~/hooks/useProfile";
