@@ -35,7 +35,6 @@ import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import type PostItem from "../../../../components/Media/PostItem";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -246,6 +245,7 @@ const HomeScreen = () => {
       padding={0}
       paddingBottom={0}
       scrollEnabled={postItems.length == 0}
+      safeAreaEdges={["top"]}
     >
       <FlashList
         ref={scrollRef}

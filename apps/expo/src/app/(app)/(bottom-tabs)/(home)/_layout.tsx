@@ -17,9 +17,7 @@ const HomeLayout = () => {
       <Stack.Screen
         name="index"
         options={{
-          title: "Home",
-          headerLeft: () => null,
-          header: (props) => <Header {...props} />,
+          header: () => null,
         }}
       />
       <Stack.Screen name="post/[postId]" options={{ header: () => null }} />

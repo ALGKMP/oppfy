@@ -37,7 +37,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowersOthers(
@@ -63,7 +63,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowingSelf(
@@ -76,7 +76,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowingOthers(
@@ -102,7 +102,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
   async paginateFriendsSelf(
@@ -116,7 +116,7 @@ export class PaginationService {
       pageSize,
     );
 
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
   async paginateFriendsOthers(
@@ -141,7 +141,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
   async paginateBlocked(
     userId: string,
@@ -153,7 +153,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
   async paginateFriendRequests(
@@ -166,7 +166,7 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
   async paginateFollowRequests(
@@ -179,10 +179,10 @@ export class PaginationService {
       cursor,
       pageSize,
     );
-    return this._processPaginatedData(data, pageSize);
+    return await this._processPaginatedData(data, pageSize);
   }
 
-  private _processPaginatedData<
+  private async _processPaginatedData<
     T extends {
       profilePictureUrl: string | null;
       profileId: string;
@@ -196,16 +196,17 @@ export class PaginationService {
           nextCursor: undefined,
         };
       }
-      const items = data.map((item) => {
+      const items = await Promise.all(data.map(async (item) => {
         if (item.profilePictureUrl) {
           const profilePicturePresignedUrl =
-            this.cloudFrontService.getSignedUrlForProfilePicture(
+            await this.cloudFrontService.getSignedUrlForProfilePicture(
               item.profilePictureUrl,
             );
           item.profilePictureUrl = profilePicturePresignedUrl;
-        }
-        return item;
-      });
+          }
+          return item;
+        }),
+      );
 
       let nextCursor: Cursor | undefined = undefined;
       if (items.length > pageSize) {
