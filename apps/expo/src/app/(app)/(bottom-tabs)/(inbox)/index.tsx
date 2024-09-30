@@ -7,7 +7,6 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Circle, H5, Paragraph, SizableText, XStack, YStack } from "tamagui";
-import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -16,6 +15,7 @@ import RecommendationList from "~/components/SpecialLists/RecommendationList";
 import { TimeAgo } from "~/components/Texts";
 import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";

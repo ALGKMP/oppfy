@@ -4,7 +4,6 @@ import { useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { H5, H6, View, YStack } from "tamagui";
-import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
@@ -14,6 +13,7 @@ import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import { ListItem } from "~/features/connections/components";
 import { useFollowHandlers } from "~/features/connections/hooks";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
@@ -100,7 +100,9 @@ const FollowersList = () => {
         renderItem={({ item }) => (
           <ListItem
             item={item}
-            onProfilePress={() => routeProfile({userId: item.userId, username: item.username})}
+            onProfilePress={() =>
+              routeProfile({ userId: item.userId, username: item.username })
+            }
             handleFollow={follow}
             handleUnfollow={unfollow}
             handleCancelFollowRequest={cancelFollowRequest}

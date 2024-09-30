@@ -13,10 +13,10 @@ import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import { ListItem } from "~/features/connections/components";
 import { useFollowHandlers } from "~/features/connections/hooks";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 const FollowingList = () => {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -101,7 +101,9 @@ const FollowingList = () => {
         renderItem={({ item }) => (
           <ListItem
             item={item}
-            onProfilePress={() => routeProfile({userId: item.userId, username: item.username})}
+            onProfilePress={() =>
+              routeProfile({ userId: item.userId, username: item.username })
+            }
             handleFollow={follow}
             handleUnfollow={unfollow}
             handleCancelFollowRequest={cancelFollowRequest}

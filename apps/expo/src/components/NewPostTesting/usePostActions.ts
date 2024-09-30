@@ -4,7 +4,7 @@ import watermark from "@assets/watermark.png";
 import { useToastController } from "@tamagui/toast";
 
 import { useSession } from "~/contexts/SessionContext";
-import { useRouteProfile } from "~/hooks/useRouteProfile";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { PostData as OtherPostProps } from "./ui/PostCard";
 import { useSaveMedia } from "./useSaveMedia";
 
@@ -42,28 +42,27 @@ export const usePostActions = (postProps: OtherPostProps) => {
     });
   };
 
-    const handleAuthorPress = () => {
-      if (user?.uid === postProps.author.id) {
-        router.push({
-          pathname: "/self-profile",
-        });
-      } else {
-        router.push({
-          pathname: `/profile/[userId]`,
-          params: {
-            userId: postProps.author.id,
-            username: postProps.author.username,
-          },
-        });
-      }
-    };
-    
+  const handleAuthorPress = () => {
+    if (user?.uid === postProps.author.id) {
+      router.push({
+        pathname: "/self-profile",
+      });
+    } else {
+      router.push({
+        pathname: `/profile/[userId]`,
+        params: {
+          userId: postProps.author.id,
+          username: postProps.author.username,
+        },
+      });
+    }
+  };
 
-    return {
-      handleSavePost,
-      handleShare,
-      handleRecipientPress,
-      handleAuthorPress,
-      isSaving,
-    };
+  return {
+    handleSavePost,
+    handleShare,
+    handleRecipientPress,
+    handleAuthorPress,
+    isSaving,
+  };
 };

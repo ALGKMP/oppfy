@@ -20,7 +20,7 @@ const useRouteProfile = () => {
         });
   };
 
-  return routeProfile;
+  return { routeProfile };
 };
 
 export default useRouteProfile;

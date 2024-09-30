@@ -193,7 +193,6 @@ const OtherProfile = React.memo(() => {
   const router = useRouter();
   const navigation = useNavigation();
   const toast = useToastController();
-  const { user } = useSession();
 
   const utils = api.useUtils();
 
@@ -650,12 +649,13 @@ const OtherProfile = React.memo(() => {
     [
       profileHeaderData,
       canViewContent,
-      friendItems,
-      isLoadingRecommendationsData,
-      navigateToProfile,
-      otherProfileData?.friendCount,
-      recommendationsData,
       renderActionButtons,
+      friendItems,
+      blocked,
+      otherProfileData?.friendCount,
+      navigateToProfile,
+      isLoadingRecommendationsData,
+      recommendationsData,
       router,
       userId,
       username,
