@@ -14,7 +14,6 @@ import { FlashList } from "@shopify/flash-list";
 import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, View, YStack } from "tamagui";
-import { useRouteProfile } from "~/hooks/useRouteProfile";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -27,6 +26,7 @@ import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import useProfile from "~/hooks/useProfile";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";

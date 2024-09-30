@@ -32,6 +32,7 @@ import CardContainer from "~/components/Containers/CardContainer";
 import { BaseScreenView } from "~/components/Views";
 import { SCREEN_WIDTH } from "~/constants/camera";
 import { useUploadMedia } from "~/hooks/media";
+import useStoreReview from "~/hooks/useRating";
 
 const postSchema = z.object({
   caption: z.optional(z.string().max(255)),
@@ -64,6 +65,8 @@ const CreatePost = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  const { promptForReview } = useStoreReview();
+
   const { type, uri, height, width, ...params } = useLocalSearchParams<
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
@@ -89,7 +92,7 @@ const CreatePost = () => {
   const [inputValue, setInputValue] = useState("");
   const [isFieldChanged, setIsFieldChanged] = useState(false);
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit(async (data) => {
     const baseData = {
       uri: uri,
       width: parseInt(width),
@@ -111,6 +114,9 @@ const CreatePost = () => {
     type === "photo"
       ? void uploadPhotoMutation.mutateAsync(input)
       : void uploadVideoMutation.mutateAsync(input);
+
+    await promptForReview();
+
     router.dismissAll();
     router.navigate("/(home)");
   });
