@@ -70,22 +70,34 @@ const Permissions = () => {
     try {
       const { status } = await requestFunction();
       if (status !== PermissionStatus.GRANTED) {
-        showPermissionAlert(permissionType);
+        // Don't show the alert here
       }
     } catch (error) {
-      showPermissionAlert(permissionType);
+      // Don't show the alert here either
+      console.error(`Error requesting ${permissionType} permission:`, error);
     }
     await checkPermissions();
   };
 
+  const handlePermissionRequest = async (
+    permissionType: PermissionType,
+    requestFunction: () => Promise<{ status: PermissionStatus }>,
+  ) => {
+    if (!permissions[permissionType.toLowerCase() as keyof typeof permissions]) {
+      await requestPermission(permissionType, requestFunction);
+    } else {
+      showPermissionAlert(permissionType);
+    }
+  };
+
   const requestCameraPermission = (): Promise<void> =>
-    requestPermission("Camera", ImagePicker.requestCameraPermissionsAsync);
+    handlePermissionRequest("Camera", ImagePicker.requestCameraPermissionsAsync);
 
   const requestContactsPermission = (): Promise<void> =>
-    requestPermission("Contacts", Contacts.requestPermissionsAsync);
+    handlePermissionRequest("Contacts", Contacts.requestPermissionsAsync);
 
   const requestNotificationsPermission = (): Promise<void> =>
-    requestPermission("Notifications", Notifications.requestPermissionsAsync);
+    handlePermissionRequest("Notifications", Notifications.requestPermissionsAsync);
 
   return (
     <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
