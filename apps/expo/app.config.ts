@@ -2,7 +2,7 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "oppfy",
+  name: "Oppfy",
   slug: "oppfy",
   scheme: "oppfy",
   version: "1.0.1",
