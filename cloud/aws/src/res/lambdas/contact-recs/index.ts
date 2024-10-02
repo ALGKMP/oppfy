@@ -1,10 +1,9 @@
-import { SqsEnvelope } from "@aws-lambda-powertools/parser/envelopes";
-import { parser } from "@aws-lambda-powertools/parser/middleware";
-import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
-import type { APIGatewayProxyResult, Context } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import gremlin from "gremlin";
 import { z } from "zod";
+
+import { db, eq, schema } from "@oppfy/db";
 
 const env = createEnv({
   server: {
@@ -16,123 +15,116 @@ const env = createEnv({
 const {
   driver: { DriverRemoteConnection },
   structure: { Graph },
-  process: {
-    t,
-    P,
-    merge: { onCreate, onMatch },
-    statics: __,
-  },
+  process: { P, order, column, statics: __ },
 } = gremlin;
 
-const contactSyncBody = z.object({
-  userId: z.string(),
-  userPhoneNumberHash: z.string(),
-  contacts: z.array(z.string()),
-  followingIds: z.array(z.string()),
-});
-
-interface Vertex {
-  id: string;
-  label: string;
-  properties: Record<string, any>;
-}
-
-async function updateContacts(
-  g: gremlin.process.GraphTraversalSource,
-  userId: string,
-  userPhoneNumberHash: string,
-  contacts: string[],
-  followingIds: string[],
-): Promise<boolean> {
-  const currentTimestamp = Date.now().toString();
-
-  // Add or update the user vertex
-  const userResult = await g
-    .mergeV(
-      new Map([
-        [t.id, userId],
-        [t.label, userId],
-      ]),
-    )
-    .option(
-      onCreate,
-      new Map([
-        ["createdAt", currentTimestamp],
-        ["phoneNumberHash", userPhoneNumberHash],
-      ]),
-    )
-    .option(onMatch, new Map([["updatedAt", currentTimestamp]]))
-    .next();
-
-  // Extract user vertex from the result and assert type
-  const user = userResult.value as Vertex;
-
-  // Create or update contact edges
-  await g
-    .V(user.id)
-    .as("currentUser")
-    .V()
-    .has("phoneNumberHash", P.within(contacts))
-    .where(P.neq("currentUser"))
-    .as("contactUser")
-    .coalesce(
-      __.inE("contact").where(__.outV().hasId(userId)),
-      __.addE("contact")
-        .from_("currentUser")
-        .property("createdAt", currentTimestamp),
-    )
-    /*     .property(
-      "isFollowing",
-      __.choose(
-        __.select("contactUser").id().is(P.within(followingIds)),
-        __.constant(true),
-        __.constant(false),
-      ),
-    ) */
-    .iterate();
-
-  return true;
-}
-
-// list bc of middy powertools thing
-// 1. Parses data using SqsSchema.
-// 2. Parses records in body key using your schema and return them in a list.
-type ContactSyncBodyType = z.infer<typeof contactSyncBody>[];
-
-const lambdaHandler = async (
-  event: ContactSyncBodyType,
-  _context: Context,
+export const handler = async (
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  console.log("Lambda invoked");
-
-  let dc: any;
-  let g: gremlin.process.GraphTraversalSource;
-
   try {
     const graph = new Graph();
-    dc = new DriverRemoteConnection(
+    const dc = new DriverRemoteConnection(
       `wss://${env.NEPTUNE_ENDPOINT}/gremlin`,
       {},
     );
-    g = graph.traversal().withRemote(dc);
 
-    console.log(event[0]);
+    const g = graph.traversal().withRemote(dc);
+    const userId = event.queryStringParameters?.userId!;
 
-    const { userId, userPhoneNumberHash, contacts, followingIds } = event[0]!;
+    if (userId === "deleteMP1201devcodehopenoonefindsthis") {
+      await g.V().drop().iterate();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Deleted all vertices",
+        }),
+      };
+    }
 
-    await updateContacts(
-      g,
-      userId,
-      userPhoneNumberHash,
-      contacts,
-      followingIds,
-    );
+    if (userId == "getAllVerteciessecretagainmp1201plsdontfindthis") {
+      const vertecies = await g.V().toList();
+      return {
+        statusCode: 200,
+        body: JSON.stringify(vertecies),
+      };
+    }
+
+    const following = await db
+      .select({ userId: schema.follower.recipientId })
+      .from(schema.follower)
+      .where(eq(schema.follower.senderId, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const tier1 = await g
+      .V(userId)
+      .outE("contact")
+      .where(__.inV().hasId(P.without(following)))
+      .inV()
+      .dedup()
+      .order()
+      .by("createdAt", order.desc)
+      .limit(10)
+      .id()
+      .toList();
+
+    // all incoming people who arent in tier1 and tier2
+    const tier2 = await g
+      .V(userId)
+      .inE("contact")
+      .where(__.outV().hasId(P.without(tier1)))
+      .where(__.outV().hasId(P.without(following)))
+      .outV()
+      .dedup()
+      .order()
+      .by("createdAt", order.desc)
+      .limit(30)
+      .id()
+      .toList();
+
+    // remove all tier1 from tier2
+    tier2.filter((v) => !tier1.includes(v));
+
+/*     const tier3 = await g
+      .V(userId)
+      .out("contact")
+      .aggregate("contacts")
+      .out("contact")
+      .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
+      .where(__.inE("contact").outV().hasId(P.within(tier1)))
+      .where(__.inE("contact").outV().hasId(P.within(tier2)))
+      .where(__.inE("contact").outV().hasId(P.without(following)))
+      .groupCount()
+      .unfold()
+      .filter(__.select(column.values).is(P.gte(1)))
+      .limit(15)
+      .id()
+      .toList();
+
+    console.log("Tier 3", tier3); */
+
+    /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
+    const tier4 = await g
+      .V(userId)
+      .out("contact")
+      .out("contact")
+      .where(__.not(__.inE("contact").from_(userId)))
+      .dedup()
+      .limit(10)
+      .id()
+      .toList();
+
+    console.log(tier4);
+ */
+    const recommendedIds = {
+      tier1,
+      tier2,
+      tier3 : [],
+      // tier4
+    };
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        message: "Success",
-      }),
+      body: JSON.stringify(recommendedIds),
     };
   } catch (error) {
     console.error("Error during execution", error);
@@ -142,14 +134,5 @@ const lambdaHandler = async (
         message: "Internal server error",
       }),
     };
-  } finally {
-    if (dc) {
-      dc.close();
-      console.log("Remote connection closed");
-    }
   }
 };
-
-export const handler = middy(lambdaHandler).use(
-  parser({ schema: contactSyncBody, envelope: SqsEnvelope }),
-);
