@@ -3,7 +3,7 @@ import { Linking, TouchableOpacity } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import type { PermissionStatus } from "expo-modules-core";
+import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { Check, Info } from "@tamagui/lucide-icons";
@@ -85,19 +85,15 @@ const Permissions = () => {
       canAskAgain: boolean;
     }>,
   ): Promise<void> => {
-    const permissionKey =
-      permissionType.toLowerCase() as keyof typeof permissions;
+    const { canAskAgain, status } = await getStatusFunction();
 
-    if (!permissions[permissionKey]) {
+    if (status !== PermissionStatus.GRANTED && canAskAgain) {
       try {
-        const { status } = await requestFunction();
-        if (status !== PermissionStatus.GRANTED) {
-          showPermissionAlert(permissionType);
-        }
+        await requestFunction();
+        await checkPermissions();
       } catch (error) {
         showPermissionAlert(permissionType);
       }
-      await checkPermissions();
     } else {
       showPermissionAlert(permissionType);
     }
