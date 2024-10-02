@@ -3,7 +3,7 @@ import { Linking, TouchableOpacity } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import { PermissionStatus } from "expo-modules-core";
+import type { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { Check, Info } from "@tamagui/lucide-icons";
@@ -46,11 +46,12 @@ const Permissions = () => {
     title: "",
     subtitle: "",
   });
-  const [learnMoreDialogProps, setLearnMoreDialogProps] = useState<LearnMoreDialogState>({
-    title: "",
-    subtitle: "",
-    isVisible: false,
-  });
+  const [learnMoreDialogProps, setLearnMoreDialogProps] =
+    useState<LearnMoreDialogState>({
+      title: "",
+      subtitle: "",
+      isVisible: false,
+    });
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -77,29 +78,37 @@ const Permissions = () => {
     permissionType: PermissionType,
     requestFunction: () => Promise<{ status: PermissionStatus }>,
   ): Promise<void> => {
-    if (!permissions[permissionType.toLowerCase() as keyof typeof permissions]) {
+    const permissionKey =
+      permissionType.toLowerCase() as keyof typeof permissions;
+
+    if (!permissions[permissionKey]) {
       try {
-        const { status } = await requestFunction();
-        if (status !== PermissionStatus.GRANTED) {
-          showPermissionAlert(permissionType);
-        }
+        await requestFunction();
+        await checkPermissions();
       } catch (error) {
         showPermissionAlert(permissionType);
+        console.error(error);
       }
-      await checkPermissions();
     } else {
+      // If permission is already set (either granted or denied), show the alert
       showPermissionAlert(permissionType);
     }
   };
 
   const requestCameraPermission = (): Promise<void> =>
-    handlePermissionRequest("Camera", ImagePicker.requestCameraPermissionsAsync);
+    handlePermissionRequest(
+      "Camera",
+      ImagePicker.requestCameraPermissionsAsync,
+    );
 
   const requestContactsPermission = (): Promise<void> =>
     handlePermissionRequest("Contacts", Contacts.requestPermissionsAsync);
 
   const requestNotificationsPermission = (): Promise<void> =>
-    handlePermissionRequest("Notifications", Notifications.requestPermissionsAsync);
+    handlePermissionRequest(
+      "Notifications",
+      Notifications.requestPermissionsAsync,
+    );
 
   return (
     <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
@@ -156,11 +165,14 @@ const Permissions = () => {
               underText={
                 <View marginTop="$2">
                   <TouchableOpacity
-                    onPress={() => setLearnMoreDialogProps({
-                      title: "Contacts Permission",
-                      subtitle: "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
-                      isVisible: true,
-                    })}
+                    onPress={() =>
+                      setLearnMoreDialogProps({
+                        title: "Contacts Permission",
+                        subtitle:
+                          "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
+                        isVisible: true,
+                      })
+                    }
                   >
                     <XStack alignItems="center" gap="$2">
                       <Info size="$1" />
