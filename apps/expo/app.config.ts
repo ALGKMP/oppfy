@@ -25,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     googleServicesFile: "./GoogleService-Info.plist",
     supportsTablet: false,
-    bundleIdentifier: "app.oppfy",
+    bundleIdentifier: "com.oppfy.app",
     entitlements: {
       "aps-environment": "development",
     },
@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     googleServicesFile: "./google-services.json",
-    package: "app.oppfy",
+    package: "com.oppfy.app",
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
       backgroundColor: "#1F104A",

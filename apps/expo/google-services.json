@@ -1,34 +1,26 @@
 {
   "project_info": {
-    "project_number": "980786271179",
-    "project_id": "oppfy-d63ef",
-    "storage_bucket": "oppfy-d63ef.appspot.com"
+    "project_number": "664271432377",
+    "project_id": "oppfy-93698",
+    "storage_bucket": "oppfy-93698.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:980786271179:android:12f75608b85d547b051c4e",
+        "mobilesdk_app_id": "1:664271432377:android:a36aa34a36123b17e30968",
         "android_client_info": {
-          "package_name": "app.oppfy"
+          "package_name": "com.oppfy.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAaKQMWFv51_M8QrJaupH3fKd_A-yVCCdE"
+          "current_key": "AIzaSyCuA29dN71zLzK3ipViG6Yr_eiH3_7nyrk"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "980786271179-737gt28lem42ahfiq3qbgg5qsdcecu29.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.algkmp.oppfy"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
