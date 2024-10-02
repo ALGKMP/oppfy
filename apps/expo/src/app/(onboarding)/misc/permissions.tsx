@@ -76,21 +76,29 @@ const Permissions = () => {
 
   const handlePermissionRequest = async (
     permissionType: PermissionType,
-    requestFunction: () => Promise<{ status: PermissionStatus }>,
+    requestFunction: () => Promise<{
+      status: PermissionStatus;
+      canAskAgain: boolean;
+    }>,
+    getStatusFunction: () => Promise<{
+      status: PermissionStatus;
+      canAskAgain: boolean;
+    }>,
   ): Promise<void> => {
     const permissionKey =
       permissionType.toLowerCase() as keyof typeof permissions;
 
     if (!permissions[permissionKey]) {
       try {
-        await requestFunction();
-        await checkPermissions();
+        const { status } = await requestFunction();
+        if (status !== PermissionStatus.GRANTED) {
+          showPermissionAlert(permissionType);
+        }
       } catch (error) {
         showPermissionAlert(permissionType);
-        console.error(error);
       }
+      await checkPermissions();
     } else {
-      // If permission is already set (either granted or denied), show the alert
       showPermissionAlert(permissionType);
     }
   };
@@ -99,15 +107,21 @@ const Permissions = () => {
     handlePermissionRequest(
       "Camera",
       ImagePicker.requestCameraPermissionsAsync,
+      ImagePicker.getCameraPermissionsAsync,
     );
 
   const requestContactsPermission = (): Promise<void> =>
-    handlePermissionRequest("Contacts", Contacts.requestPermissionsAsync);
+    handlePermissionRequest(
+      "Contacts",
+      Contacts.requestPermissionsAsync,
+      Contacts.getPermissionsAsync,
+    );
 
   const requestNotificationsPermission = (): Promise<void> =>
     handlePermissionRequest(
       "Notifications",
       Notifications.requestPermissionsAsync,
+      Notifications.getPermissionsAsync,
     );
 
   return (
@@ -227,7 +241,9 @@ const Permissions = () => {
         title="Your privacy matters to us"
         subtitle="We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security."
         isVisible={learnMoreDialogProps.isVisible}
-        onAccept={() => setLearnMoreDialogProps({ ...learnMoreDialogProps, isVisible: false })}
+        onAccept={() =>
+          setLearnMoreDialogProps({ ...learnMoreDialogProps, isVisible: false })
+        }
         acceptText="Got it"
         acceptTextProps={{
           color: "$blue9",
