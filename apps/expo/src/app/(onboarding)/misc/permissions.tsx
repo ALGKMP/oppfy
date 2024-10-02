@@ -140,6 +140,27 @@ const Permissions = () => {
                   </Checkbox.Indicator>
                 </Checkbox>
               }
+              underText={
+                <View marginTop="$2">
+                  <TouchableOpacity
+                    onPress={() =>
+                      setLearnMoreDialogProps({
+                        title: "Camera Permission",
+                        subtitle:
+                          "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
+                        isVisible: true,
+                      })
+                    }
+                  >
+                    <XStack alignItems="center" gap="$2">
+                      <Info size="$1" />
+                      <Text color="$blue9" fontWeight="bold">
+                        Learn more
+                      </Text>
+                    </XStack>
+                  </TouchableOpacity>
+                </View>
+              }
             />
           </YGroup.Item>
 
@@ -224,8 +245,8 @@ const Permissions = () => {
       </OnboardingButton>
 
       <Dialog
-        title="Your privacy matters to us"
-        subtitle="We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security."
+        title={learnMoreDialogProps.title}
+        subtitle={learnMoreDialogProps.subtitle}
         isVisible={learnMoreDialogProps.isVisible}
         onAccept={() => setLearnMoreDialogProps({ ...learnMoreDialogProps, isVisible: false })}
         acceptText="Got it"
