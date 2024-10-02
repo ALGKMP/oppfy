@@ -11,7 +11,7 @@ import { useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, MoreHorizontal } from "@tamagui/lucide-icons";
+import { CameraOff, ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
@@ -129,6 +129,23 @@ const SelfProfile = React.memo(() => {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: profileData?.username,
+      headerLeft: () => {
+        const firstRoute = !router.canDismiss();
+        if (firstRoute) return null;
+
+        return (
+          <TouchableOpacity
+            hitSlop={10}
+            onPress={() => {
+              if (navigation.canGoBack()) {
+                router.back();
+              }
+            }}
+          >
+            <ChevronLeft />
+          </TouchableOpacity>
+        );
+      },
       headerRight: () => (
         <View>
           <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>

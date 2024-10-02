@@ -1,6 +1,6 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import type {
   HeaderBackButtonProps,
   NativeStackHeaderProps,
@@ -44,6 +44,9 @@ type HeaderProps = NativeStackHeaderProps;
 
 const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
   const router = useRouter();
+  const firstRoute = !router.canDismiss();
+
+  if (firstRoute) return null;
 
   return (
     <TouchableOpacity

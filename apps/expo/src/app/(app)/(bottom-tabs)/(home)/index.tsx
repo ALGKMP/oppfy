@@ -209,7 +209,7 @@ const HomeScreen = () => {
 
   if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
     return (
-      <BaseScreenView padding={0} paddingBottom={0}>
+      <BaseScreenView padding={0} paddingBottom={0} safeAreaEdges={["top"]}>
         <FlashList
           data={PLACEHOLDER_DATA}
           renderItem={() => <PostCard loading />}

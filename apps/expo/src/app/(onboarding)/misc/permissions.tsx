@@ -46,11 +46,12 @@ const Permissions = () => {
     title: "",
     subtitle: "",
   });
-  const [learnMoreDialogProps, setLearnMoreDialogProps] = useState<LearnMoreDialogState>({
-    title: "",
-    subtitle: "",
-    isVisible: false,
-  });
+  const [learnMoreDialogProps, setLearnMoreDialogProps] =
+    useState<LearnMoreDialogState>({
+      title: "",
+      subtitle: "",
+      isVisible: false,
+    });
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -75,31 +76,49 @@ const Permissions = () => {
 
   const handlePermissionRequest = async (
     permissionType: PermissionType,
-    requestFunction: () => Promise<{ status: PermissionStatus }>,
+    requestFunction: () => Promise<{
+      status: PermissionStatus;
+      canAskAgain: boolean;
+    }>,
+    getStatusFunction: () => Promise<{
+      status: PermissionStatus;
+      canAskAgain: boolean;
+    }>,
   ): Promise<void> => {
-    if (!permissions[permissionType.toLowerCase() as keyof typeof permissions]) {
+    const { canAskAgain, status } = await getStatusFunction();
+
+    if (status !== PermissionStatus.GRANTED && canAskAgain) {
       try {
-        const { status } = await requestFunction();
-        if (status !== PermissionStatus.GRANTED) {
-          showPermissionAlert(permissionType);
-        }
+        await requestFunction();
+        await checkPermissions();
       } catch (error) {
         showPermissionAlert(permissionType);
       }
-      await checkPermissions();
     } else {
       showPermissionAlert(permissionType);
     }
   };
 
   const requestCameraPermission = (): Promise<void> =>
-    handlePermissionRequest("Camera", ImagePicker.requestCameraPermissionsAsync);
+    handlePermissionRequest(
+      "Camera",
+      ImagePicker.requestCameraPermissionsAsync,
+      ImagePicker.getCameraPermissionsAsync,
+    );
 
   const requestContactsPermission = (): Promise<void> =>
-    handlePermissionRequest("Contacts", Contacts.requestPermissionsAsync);
+    handlePermissionRequest(
+      "Contacts",
+      Contacts.requestPermissionsAsync,
+      Contacts.getPermissionsAsync,
+    );
 
   const requestNotificationsPermission = (): Promise<void> =>
-    handlePermissionRequest("Notifications", Notifications.requestPermissionsAsync);
+    handlePermissionRequest(
+      "Notifications",
+      Notifications.requestPermissionsAsync,
+      Notifications.getPermissionsAsync,
+    );
 
   return (
     <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
@@ -131,6 +150,27 @@ const Permissions = () => {
                   </Checkbox.Indicator>
                 </Checkbox>
               }
+              underText={
+                <View marginTop="$2">
+                  <TouchableOpacity
+                    onPress={() =>
+                      setLearnMoreDialogProps({
+                        title: "Camera Permission",
+                        subtitle:
+                          "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
+                        isVisible: true,
+                      })
+                    }
+                  >
+                    <XStack alignItems="center" gap="$2">
+                      <Info size="$1" />
+                      <Text color="$blue9" fontWeight="bold">
+                        Learn more
+                      </Text>
+                    </XStack>
+                  </TouchableOpacity>
+                </View>
+              }
             />
           </YGroup.Item>
 
@@ -156,11 +196,14 @@ const Permissions = () => {
               underText={
                 <View marginTop="$2">
                   <TouchableOpacity
-                    onPress={() => setLearnMoreDialogProps({
-                      title: "Contacts Permission",
-                      subtitle: "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
-                      isVisible: true,
-                    })}
+                    onPress={() =>
+                      setLearnMoreDialogProps({
+                        title: "Contacts Permission",
+                        subtitle:
+                          "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
+                        isVisible: true,
+                      })
+                    }
                   >
                     <XStack alignItems="center" gap="$2">
                       <Info size="$1" />
@@ -212,10 +255,12 @@ const Permissions = () => {
       </OnboardingButton>
 
       <Dialog
-        title="Your privacy matters to us"
-        subtitle="We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security."
+        title={learnMoreDialogProps.title}
+        subtitle={learnMoreDialogProps.subtitle}
         isVisible={learnMoreDialogProps.isVisible}
-        onAccept={() => setLearnMoreDialogVisible(false)}
+        onAccept={() =>
+          setLearnMoreDialogProps({ ...learnMoreDialogProps, isVisible: false })
+        }
         acceptText="Got it"
         acceptTextProps={{
           color: "$blue9",
