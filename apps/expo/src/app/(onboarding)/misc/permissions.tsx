@@ -215,7 +215,7 @@ const Permissions = () => {
         title="Your privacy matters to us"
         subtitle="We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security."
         isVisible={learnMoreDialogProps.isVisible}
-        onAccept={() => setLearnMoreDialogVisible(false)}
+        onAccept={() => setLearnMoreDialogProps({ ...learnMoreDialogProps, isVisible: false })}
         acceptText="Got it"
         acceptTextProps={{
           color: "$blue9",
