@@ -11,7 +11,7 @@ import { useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, MoreHorizontal } from "@tamagui/lucide-icons";
+import { CameraOff, ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, Text, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
