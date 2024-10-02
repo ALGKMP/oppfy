@@ -4,7 +4,7 @@
     "details": [
       {
         "appIDs": [
-          "UAYFD9QXLS.app.oppfy"
+          "UAYFD9QXLS.com.oppfy.app"
         ],
         "components": [
           {
@@ -26,12 +26,12 @@
   },
   "activitycontinuation": {
     "apps": [
-      "UAYFD9QXLS.app.oppfy"
+      "UAYFD9QXLS.com.oppfy.app"
     ]
   },
   "webcredentials": {
     "apps": [
-      "UAYFD9QXLS.app.oppfy"
+      "UAYFD9QXLS.com.oppfy.app"
     ]
   }
 }
