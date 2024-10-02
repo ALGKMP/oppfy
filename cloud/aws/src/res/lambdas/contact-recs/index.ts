@@ -55,10 +55,24 @@ export const handler = async (
       .where(eq(schema.follower.senderId, userId))
       .then((res) => res.map((r) => r.userId));
 
+    const blocked = await db
+      .select({ userId: schema.block.blockedUserId })
+      .from(schema.block)
+      .where(eq(schema.block.userId, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const blockedBy = await db
+      .select({ userId: schema.block.userId })
+      .from(schema.block)
+      .where(eq(schema.block.blockedUserId, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const peopleIDontWantToRecommend = [...following, ...blocked, ...blockedBy];
+
     const tier1 = await g
       .V(userId)
       .outE("contact")
-      .where(__.inV().hasId(P.without(following)))
+      .where(__.inV().hasId(P.without(peopleIDontWantToRecommend)))
       .inV()
       .dedup()
       .order()
@@ -72,7 +86,7 @@ export const handler = async (
       .V(userId)
       .inE("contact")
       .where(__.outV().hasId(P.without(tier1)))
-      .where(__.outV().hasId(P.without(following)))
+      .where(__.outV().hasId(P.without(peopleIDontWantToRecommend)))
       .outV()
       .dedup()
       .order()
@@ -84,7 +98,7 @@ export const handler = async (
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
 
-/*     const tier3 = await g
+    /*     const tier3 = await g
       .V(userId)
       .out("contact")
       .aggregate("contacts")
@@ -118,7 +132,7 @@ export const handler = async (
     const recommendedIds = {
       tier1,
       tier2,
-      tier3 : [],
+      tier3: [],
       // tier4
     };
 
