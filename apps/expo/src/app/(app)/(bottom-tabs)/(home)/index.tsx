@@ -206,7 +206,6 @@ const HomeScreen = () => {
       </View>
     );
   }, [renderSuggestions]);
-  ƒ;
 
   if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
     return (
