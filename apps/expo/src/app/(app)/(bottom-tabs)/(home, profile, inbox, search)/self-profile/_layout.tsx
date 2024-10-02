@@ -25,7 +25,6 @@ const SearchLayout = () => {
         name="index"
         options={{
           header: (props) => <Header {...props} />,
-          headerLeft: (props) => <HeaderLeft {...props} />,
         }}
       />
       <Stack.Screen

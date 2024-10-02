@@ -129,6 +129,23 @@ const SelfProfile = React.memo(() => {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: profileData?.username,
+      headerLeft: () => {
+        const firstRoute = !router.canDismiss();
+        if (firstRoute) return null;
+
+        return (
+          <TouchableOpacity
+            hitSlop={10}
+            onPress={() => {
+              if (navigation.canGoBack()) {
+                router.back();
+              }
+            }}
+          >
+            <ChevronLeft />
+          </TouchableOpacity>
+        );
+      },
       headerRight: () => (
         <View>
           <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
