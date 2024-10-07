@@ -641,6 +641,7 @@ const OtherProfile = React.memo(() => {
             loading={isLoadingRecommendationsData}
             data={recommendationsData ?? []}
             title="Suggestions 🔥"
+            uiStyle="suggestions"
             onItemPress={navigateToProfile}
           />
         )}
@@ -662,7 +663,7 @@ const OtherProfile = React.memo(() => {
     ],
   );
 
-  const renderContent = useCallback(() => {
+  const renderNoPosts = useCallback(() => {
     if (blocked) {
       return (
         <View paddingTop="$6">
@@ -692,7 +693,6 @@ const OtherProfile = React.memo(() => {
         <EmptyPlaceholder
           icon={<CameraOff size="$10" />}
           title="No posts yet"
-          subtitle="Be the first to post!"
         />
       </View>
     );
@@ -731,7 +731,7 @@ const OtherProfile = React.memo(() => {
             renderPost(item, viewableItems.includes(item.postId))
           }
           ListHeaderComponent={renderHeader}
-          ListEmptyComponent={renderContent}
+          ListEmptyComponent={renderNoPosts}
           keyExtractor={(item) => `self-profile-post-${item.postId}`}
           estimatedItemSize={300}
           showsVerticalScrollIndicator={false}

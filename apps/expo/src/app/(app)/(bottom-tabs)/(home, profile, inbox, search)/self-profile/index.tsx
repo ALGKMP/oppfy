@@ -23,6 +23,7 @@ import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import EmptyPlaceholder from "~/components/UIPlaceholders/EmptyPlaceholder";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -277,15 +278,12 @@ const SelfProfile = React.memo(() => {
 
   const renderEmptyState = useCallback(() => {
     return (
-      <YStack
-        alignItems="center"
-        justifyContent="center"
-        flex={1}
-        paddingVertical="$10"
-      >
-        <CameraOff size={100} color="gray" />
-        <Text fontSize="$6">No posts yet</Text>
-      </YStack>
+      <View paddingTop="$6">
+        <EmptyPlaceholder
+          icon={<CameraOff size="$10" />}
+          title="No posts yet"
+        />
+      </View>
     );
   }, []);
 
