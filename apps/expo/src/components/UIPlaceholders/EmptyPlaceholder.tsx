@@ -6,7 +6,7 @@ type Icon = JSX.Element;
 
 interface EmptyPlaceholderProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   icon?: Icon;
 }
 
@@ -18,7 +18,7 @@ const EmptyPlaceholder = ({ title, subtitle, icon }: EmptyPlaceholderProps) => (
       })}
 
     <YStack>
-      <SizableText textAlign="center" size="$5" fontWeight="bold">
+      <SizableText textAlign="center" size="$8" fontWeight="bold">
         {title}
       </SizableText>
 
