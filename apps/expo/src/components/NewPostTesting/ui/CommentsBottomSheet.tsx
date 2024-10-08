@@ -364,7 +364,7 @@ const CommentItem = React.memo(
     return (
       <BlurContextMenuWrapper options={contextMenuOptions}>
         <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
-          <XStack gap="$3" alignItems="center">
+          <XStack gap="$3" alignItems="flex-start">
             <TouchableOpacity onPress={onPressProfilePicture}>
               <Avatar source={comment.profilePictureUrl} size={46} />
             </TouchableOpacity>
