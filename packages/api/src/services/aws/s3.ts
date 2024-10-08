@@ -5,6 +5,7 @@ import type { sharedValidators } from "@oppfy/validators";
 
 import { DomainError, ErrorCode } from "../../errors";
 import { S3Repository } from "../../repositories/aws/s3";
+import { CloudFrontService } from "./cloudfront";
 
 type ContentType = z.infer<typeof sharedValidators.media.postContentType>;
 
@@ -41,6 +42,7 @@ export type ProfilePictureMetadata = z.infer<
 
 export class S3Service {
   private s3Repository = new S3Repository();
+  private cloudFrontService = new CloudFrontService();
 
   async uploadProfilePictureUrl({
     userId,
@@ -55,13 +57,18 @@ export class S3Service {
       user: userId,
     };
 
-    return await this.s3Repository.putObjectPresignedUrl({
+    const presignedUrl = await this.s3Repository.putObjectPresignedUrl({
       Key: key,
       Bucket: env.S3_PROFILE_BUCKET,
       ContentLength: contentLength,
       ContentType: "image/jpeg",
       Metadata: metadata,
     });
+
+    // Invalidate the profile picture in CloudFront
+    await this.cloudFrontService.invalidateProfilePicture(userId);
+
+    return presignedUrl;
   }
 
   // Post for user on app
