@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
+import { PermissionStatus } from "expo-contacts";
+
 import * as Crypto from "expo-crypto";
 import { parsePhoneNumber } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
@@ -21,10 +23,10 @@ const useContacts = (syncNow = false): ContactFns => {
   const filterContactsOnApp =
     api.contacts.filterOutPhoneNumbersOnApp.useMutation();
 
-  const syncContacts = async () => {
+  const syncContacts = useCallback(async () => {
     // make sure its allowed
     const { status } = await Contacts.getPermissionsAsync();
-    if (status !== "granted") {
+    if (status !== PermissionStatus.GRANTED) {
       return;
     }
 
@@ -67,7 +69,7 @@ const useContacts = (syncNow = false): ContactFns => {
     );
 
     void syncContactsMutation.mutateAsync(hashedNumbers);
-  };
+  }, [syncContactsMutation]);
 
   const getDeviceContacts = async () => {
     const { data } = await Contacts.getContactsAsync();
@@ -182,11 +184,11 @@ const useContacts = (syncNow = false): ContactFns => {
     ];
   };
 
-  if (syncNow) {
-    useEffect(() => {
+  useEffect(() => {
+    if (syncNow) {
       void syncContacts();
-    }, []);
-  }
+    }
+  }, [syncContacts, syncNow]);
 
   return {
     syncContacts,
