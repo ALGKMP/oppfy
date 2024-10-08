@@ -27,6 +27,15 @@ export class CloudFrontService {
     );
   }
 
+  async invalidateProfilePicture(userId: string) {
+    const distributionId = env.CLOUDFRONT_PROFILE_DISTRIBUTION_ID;
+    const objectPattern = `/profile-pictures/${userId}.jpg`;
+    await this.cloudFrontRepository.createInvalidation(
+      distributionId,
+      objectPattern,
+    );
+  }
+
   private _getPostDistributionDomainUrlForObject(objectKey: string): string {
     const postDistributionDomain =
       env.CLOUDFRONT_PRIVATE_POSTS_DISTRIBUTION_DOMAIN;
