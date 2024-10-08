@@ -247,7 +247,7 @@ const CommentInput = React.memo(
             </TouchableOpacity>
           ))}
         </XStack>
-        <XStack alignItems="flex-end" gap="$3">
+        <XStack alignItems="flex-start" gap="$3">
           <Avatar source={selfProfilePicture} size={46} bordered />
           <View flex={1} position="relative">
             <BottomSheetTextInput
