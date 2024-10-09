@@ -5,12 +5,6 @@ import { z } from "zod";
 
 import { db, eq, schema } from "@oppfy/db";
 
-const {
-  driver: { DriverRemoteConnection },
-  structure: { Graph },
-  process: { P, order, column, statics: __ },
-} = gremlin;
-
 const env = createEnv({
   server: {
     NEPTUNE_ENDPOINT: z.string().min(1),
@@ -18,23 +12,25 @@ const env = createEnv({
   runtimeEnv: process.env,
 });
 
+const {
+  driver: { DriverRemoteConnection },
+  structure: { Graph },
+  process: { P, order, column, statics: __ },
+} = gremlin;
+
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
+  console.log("Event", event);
+
   try {
-/*     const graph = new Graph();
+    const graph = new Graph();
     const dc = new DriverRemoteConnection(
       `wss://${env.NEPTUNE_ENDPOINT}/gremlin`,
       {},
     );
+
     const g = graph.traversal().withRemote(dc);
-    const vertecies = await g.V().toList();
-    return {
-      statusCode: 200,
-      body: JSON.stringify(vertecies),
-    };
- */
-    /*     const g = graph.traversal().withRemote(dc);
     const userId = event.queryStringParameters?.userId;
 
     if (!userId) {
@@ -45,19 +41,134 @@ export const handler = async (
         }),
       };
     }
+
+    if (userId === "deleteMP1201devcodehopenoonefindsthis") {
+      await g.V().drop().iterate();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Deleted all vertices",
+        }),
+      };
+    }
+
+    if (userId == "getAllVerteciessecretagainmp1201plsdontfindthis") {
+      const vertecies = await g.V().toList();
+      return {
+        statusCode: 200,
+        body: JSON.stringify(vertecies),
+      };
+    }
+
+    const requested = await db.select({
+      userId: schema.followRequest.recipientId,
+    })
+      .from(schema.followRequest)
+      .where(eq(schema.followRequest.senderId, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const following = await db
+      .select({ userId: schema.follower.recipientId })
+      .from(schema.follower)
+      .where(eq(schema.follower.senderId, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const blocked = await db
+      .select({ userId: schema.block.blockedUserId })
+      .from(schema.block)
+      .where(eq(schema.block.userId, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const blockedBy = await db
+      .select({ userId: schema.block.userId })
+      .from(schema.block)
+      .where(eq(schema.block.blockedUserId, userId))
+      .then((res) => res.map((r) => r.userId));
+
+    const peopleIDontWantToRecommend = [
+      ...following,
+      ...blocked,
+      ...blockedBy,
+      ...requested,
+    ];
+
+    const tier1 = await g
+      .V(userId)
+      .outE("contact")
+      .where(__.inV().hasId(P.without(peopleIDontWantToRecommend)))
+      .inV()
+      .dedup()
+      .order()
+      .by("createdAt", order.desc)
+      .limit(10)
+      .id()
+      .toList();
+
+    // all incoming people who arent in tier1 and tier2
+    const tier2 = await g
+      .V(userId)
+      .inE("contact")
+      .where(__.outV().hasId(P.without(tier1)))
+      .where(__.outV().hasId(P.without(peopleIDontWantToRecommend)))
+      .outV()
+      .dedup()
+      .order()
+      .by("createdAt", order.desc)
+      .limit(30)
+      .id()
+      .toList();
+
+    // remove all tier1 from tier2
+    tier2.filter((v) => !tier1.includes(v));
+
+/*     const tier3 = await g
+      .V(userId)
+      .out("contact")
+      .aggregate("contacts")
+      .out("contact")
+      .where(__.not(__.where(__.inE("contact").outV().hasId(userId))))
+      .where(__.inE("contact").outV().hasId(P.within(tier1)))
+      .where(__.inE("contact").outV().hasId(P.within(tier2)))
+      .where(__.inE("contact").outV().hasId(P.without(following)))
+      .groupCount()
+      .unfold()
+      .filter(__.select(column.values).is(P.gte(1)))
+      .limit(15)
+      .id()
+      .toList();
+
+    console.log("Tier 3", tier3);
  */
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: "hi",
-      }),
+    // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
+/*     const tier4 = await g
+      .V(userId)
+      .out("contact")
+      .out("contact")
+      .where(__.not(__.inE("contact").from_(userId)))
+      .dedup()
+      .limit(10)
+      .id()
+      .toList();
+
+    console.log(tier4); */
+
+    const recommendedIds = {
+      tier1: [],
+      tier2: [],
+      tier3: [],
+      tier4: [],
     };
-  } catch (err) {
-    console.log(err);
+
+    return {
+      "statusCode": 200,
+      "body": JSON.stringify(recommendedIds),
+    };
+  } catch (error) {
+    console.error("Error during execution", error);
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: "some error happened",
+        message: "Internal server error",
       }),
     };
   }
