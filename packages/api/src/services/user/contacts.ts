@@ -15,6 +15,8 @@ import {
 import { CloudFrontService } from "../aws/cloudfront";
 import { S3Service } from "../aws/s3";
 
+type RelationshipStatus = "notFollowing" | "following" | "requested";
+
 export class ContactService {
   private contactsRepository = new ContactsRepository();
   private followRepository = new FollowRepository();
@@ -148,15 +150,17 @@ export class ContactService {
     const profiles =
       await this.profileRepository.getBatchProfiles(allRecommendations);
     // Fetch presigned URLs for profile pictures in parallel
-    const profilesWithUrls = await Promise.all(profiles.map(async (profile) => {
-      const { profilePictureKey, ...profileWithoutKey } = profile;
-      return {
-        ...profileWithoutKey,
-        profilePictureUrl: profilePictureKey
-          ? await this.cloudFrontService.getSignedUrlForProfilePicture(
-              profilePictureKey,
-            )
-          : null,
+    const profilesWithUrls = await Promise.all(
+      profiles.map(async (profile) => {
+        const { profilePictureKey, ...profileWithoutKey } = profile;
+        return {
+          ...profileWithoutKey,
+          relationshipStatus: "notFollowing" as RelationshipStatus,
+          profilePictureUrl: profilePictureKey
+            ? await this.cloudFrontService.getSignedUrlForProfilePicture(
+                profilePictureKey,
+              )
+            : null,
         };
       }),
     );
