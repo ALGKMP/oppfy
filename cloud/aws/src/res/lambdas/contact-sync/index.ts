@@ -28,13 +28,12 @@ const contactSyncBody = z.object({
   userId: z.string(),
   userPhoneNumberHash: z.string(),
   contacts: z.array(z.string()),
-  followingIds: z.array(z.string()),
 });
 
 interface Vertex {
   id: string;
   label: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
 }
 
 async function updateContacts(
@@ -42,7 +41,6 @@ async function updateContacts(
   userId: string,
   userPhoneNumberHash: string,
   contacts: string[],
-  followingIds: string[],
 ): Promise<boolean> {
   const currentTimestamp = Date.now().toString();
 
@@ -81,14 +79,6 @@ async function updateContacts(
         .from_("currentUser")
         .property("createdAt", currentTimestamp),
     )
-    /*     .property(
-      "isFollowing",
-      __.choose(
-        __.select("contactUser").id().is(P.within(followingIds)),
-        __.constant(true),
-        __.constant(false),
-      ),
-    ) */
     .iterate();
 
   return true;
@@ -103,29 +93,31 @@ const lambdaHandler = async (
   event: ContactSyncBodyType,
   _context: Context,
 ): Promise<APIGatewayProxyResult> => {
-  console.log("Lambda invoked");
-
-  let dc: any;
-  let g: gremlin.process.GraphTraversalSource;
-
   try {
+    // check body first
+    if (!event[0]) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Malformed request",
+        }),
+      };
+    }
+
     const graph = new Graph();
-    dc = new DriverRemoteConnection(
+    const dc = new DriverRemoteConnection(
       `wss://${env.NEPTUNE_ENDPOINT}/gremlin`,
       {},
     );
-    g = graph.traversal().withRemote(dc);
+    const g = graph.traversal().withRemote(dc);
 
-    console.log(event[0]);
-
-    const { userId, userPhoneNumberHash, contacts, followingIds } = event[0]!;
+    const { userId, userPhoneNumberHash, contacts } = event[0];
 
     await updateContacts(
       g,
       userId,
       userPhoneNumberHash,
       contacts,
-      followingIds,
     );
 
     return {
@@ -142,11 +134,6 @@ const lambdaHandler = async (
         message: "Internal server error",
       }),
     };
-  } finally {
-    if (dc) {
-      dc.close();
-      console.log("Remote connection closed");
-    }
   }
 };
 

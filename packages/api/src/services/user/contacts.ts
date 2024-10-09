@@ -46,9 +46,6 @@ export class ContactService {
     // update the contacts in the db
     await this.contactsRepository.updateUserContacts(userId, filteredContacts);
 
-    // get following list from profile
-    const followingIds = await this.followRepository.getAllFollowingIds(userId);
-
     try {
       await sqs.send({
         id: userId + "_contactsync_" + Date.now().toString(),
@@ -56,7 +53,6 @@ export class ContactService {
           userId,
           userPhoneNumberHash,
           contacts: filteredContacts,
-          followingIds,
         }),
       });
     } catch (error) {
@@ -89,8 +85,7 @@ export class ContactService {
         body: JSON.stringify({
           userId,
           userPhoneNumberHash,
-          contacts: [],
-          followingIds: [],
+          contacts: []
         }),
       });
     } catch (error) {
@@ -106,8 +101,9 @@ export class ContactService {
       return [];
     }
 
-    const existingPhoneNumbers =
-      await this.userRepository.existingPhoneNumbers(phoneNumbers);
+    const existingPhoneNumbers = await this.userRepository.existingPhoneNumbers(
+      phoneNumbers,
+    );
 
     return phoneNumbers.filter(
       (number) => !existingPhoneNumbers.includes(number),
@@ -139,16 +135,17 @@ export class ContactService {
       ...recommendationsIds.tier3,
     ];
     if (allRecommendations.length === 0) {
-      const randomProfiles =
-        await this.userRepository.getRandomActiveProfilesForRecs(userId, 10);
+      const randomProfiles = await this.userRepository
+        .getRandomActiveProfilesForRecs(userId, 10);
       allRecommendations = randomProfiles
         .map((profile) => profile.userId)
         .filter((id) => id !== userId);
     }
 
     // start a transaction to get all the usernames and profilePhotos
-    const profiles =
-      await this.profileRepository.getBatchProfiles(allRecommendations);
+    const profiles = await this.profileRepository.getBatchProfiles(
+      allRecommendations,
+    );
     // Fetch presigned URLs for profile pictures in parallel
     const profilesWithUrls = await Promise.all(
       profiles.map(async (profile) => {
@@ -158,8 +155,8 @@ export class ContactService {
           relationshipStatus: "notFollowing" as RelationshipStatus,
           profilePictureUrl: profilePictureKey
             ? await this.cloudFrontService.getSignedUrlForProfilePicture(
-                profilePictureKey,
-              )
+              profilePictureKey,
+            )
             : null,
         };
       }),

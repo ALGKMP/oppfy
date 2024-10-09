@@ -153,8 +153,8 @@ export const handler = async (
     console.log(tier4); */
 
     const recommendedIds = {
-      tier1: [],
-      tier2: [],
+      tier1,
+      tier2,
       tier3: [],
       tier4: [],
     };
