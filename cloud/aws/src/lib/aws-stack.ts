@@ -224,7 +224,10 @@ export class AwsStack extends cdk.Stack {
       entry: "src/res/lambdas/contact-recs/index.ts",
       vpc,
       securityGroups: [lambdaSecurityGroup],
-      environment,
+      environment: {
+        ...environment,
+        NEPTUNE_ENDPOINT: neptune.cluster.clusterReadEndpoint.socketAddress,
+      },
     });
 
     const contactRecLambdaUrl = contactRecLambda.function.addFunctionUrl({
@@ -235,7 +238,10 @@ export class AwsStack extends cdk.Stack {
       entry: "src/res/lambdas/contact-sync/index.ts",
       vpc,
       securityGroups: [lambdaSecurityGroup],
-      environment,
+      environment: {
+        ...environment,
+        NEPTUNE_ENDPOINT: neptune.cluster.clusterEndpoint.socketAddress,
+      },
     });
 
     const contactSyncQueue = new Queue(this, "ContactSync");
@@ -297,23 +303,35 @@ export class AwsStack extends cdk.Stack {
 
     // Outputs
     new cdk.CfnOutput(this, "PublicPostDistributionUrl", {
-      value: `https://${publicPostDistribution.distribution.distributionDomainName}`,
+      value:
+        `https://${publicPostDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "PrivatePostDistributionUrl", {
-      value: `https://${privatePostDistribution.distribution.distributionDomainName}`,
+      value:
+        `https://${privatePostDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "PublicProfilePictureDistributionUrl", {
-      value: `https://${publicProfilePictureDistribution.distribution.distributionDomainName}`,
+      value:
+        `https://${publicProfilePictureDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "ProfileDistributionUrl", {
-      value: `https://${profileDistribution.distribution.distributionDomainName}`,
+      value:
+        `https://${profileDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "MuxWebhookUrl", {
       value: muxWebhookUrl.url,
+    });
+
+    new cdk.CfnOutput(this, "NeptuneClusterReadEndpoint", {
+      value: neptune.cluster.clusterReadEndpoint.hostname,
+    });
+
+    new cdk.CfnOutput(this, "NeptuneClusterWriteEndpoint", {
+      value: neptune.cluster.clusterEndpoint.hostname,
     });
 
     new cdk.CfnOutput(this, "ContactRecLambdaUrl", {

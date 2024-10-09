@@ -20,14 +20,10 @@ export class Neptune extends Construct {
       "Allow Gremlin access from any IPv4 address",
     );
 
-    this.cluster = new neptune.DatabaseCluster(this, "Cluster", {
+    this.cluster = new neptune.DatabaseCluster(this, "MyNeptuneCluster", {
       vpc,
       iamAuthentication: false,
-      instanceType: neptune.InstanceType.SERVERLESS,
-      serverlessScalingConfiguration: {
-        minCapacity: 1,
-        maxCapacity: 5,
-      },
+      instanceType: neptune.InstanceType.T3_MEDIUM,
       engineVersion: neptune.EngineVersion.V1_3_0_0,
       securityGroups: [securityGroup],
     });
