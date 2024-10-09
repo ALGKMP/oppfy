@@ -90,6 +90,8 @@ const Search = () => {
 
   const renderRecommendations = (recommendationsData: RecommendationsData) => (
     <RecommendationList
+      loading={isLoadingRecommendationsData}
+      recommendationsData={recommendationsData}
       handleProfileClicked={(userId, username) => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         router.push({
@@ -97,8 +99,6 @@ const Search = () => {
           params: { userId, username },
         });
       }}
-      loading={isLoadingRecommendationsData}
-      recommendationsData={recommendationsData}
     />
   );
 
