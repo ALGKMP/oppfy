@@ -127,7 +127,6 @@ const lambdaHandler = async (
       }),
     };
   } catch (error) {
-    console.error("Error during execution", error);
     return {
       statusCode: 500,
       body: JSON.stringify({
