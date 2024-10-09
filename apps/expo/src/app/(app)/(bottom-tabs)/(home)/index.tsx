@@ -178,21 +178,6 @@ const HomeScreen = () => {
           loading={isLoadingRecommendationsData}
           onItemPress={handleProfilePress}
           onShowMore={handleShowMore}
-          renderExtraItem={() => {
-            return (
-              <TouchableOpacity onPress={() => console.log("hi")}>
-                <YStack marginLeft="$2" gap="$1.5" alignItems="center">
-                  <Circle size={70} backgroundColor="#F214FF">
-                    <UserRoundPlus size="$3" marginLeft={3} color="white" />
-                  </Circle>
-
-                  <Text textAlign="center" fontWeight="600" theme="alt1">
-                    Invite
-                  </Text>
-                </YStack>
-              </TouchableOpacity>
-            );
-          }}
         />
       </View>
     );
