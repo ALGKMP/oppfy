@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { H5 } from "tamagui";
+import { H5, YStack } from "tamagui";
 
 import type { RouterOutputs } from "@oppfy/api";
 
@@ -11,66 +11,122 @@ import CardContainer from "../Containers/CardContainer";
 import { VirtualizedListItem } from "../ListItems";
 
 type RecommendationItem =
-  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
 
 interface RecommendationListProps {
   loading: boolean;
-  recommendationsData: RecommendationItem[];
+  recommendationsData: RecommendationItem[] | undefined;
   handleProfileClicked: (userId: string, username: string) => void;
 }
 
-const RecommendationList = (props: RecommendationListProps) => {
-  const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set());
-  const followUserMutation = api.follow.followUser.useMutation();
+const RecommendationList = ({
+  loading,
+  recommendationsData,
+  handleProfileClicked,
+}: RecommendationListProps) => {
+  const utils = api.useUtils();
+
+  const followUserMutation = api.follow.followUser.useMutation({
+    onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.contacts.getRecommendationProfilesSelf.cancel();
+
+      // Get the current data from the queryCache
+      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+
+      // Optimistically update to the new value
+      if (prevData) {
+        utils.contacts.getRecommendationProfilesSelf.setData(
+          undefined,
+          prevData.map((item) =>
+            item.userId === newData.userId
+              ? {
+                  ...item,
+                  relationshipStatus:
+                    item.privacy === "private" ? "requested" : "following",
+                }
+              : item,
+          ),
+        );
+      }
+
+      // Return a context object with the previous data
+      return { prevData };
+    },
+    onError: (err, newData, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.prevData) {
+        utils.contacts.getRecommendationProfilesSelf.setData(
+          undefined,
+          context.prevData,
+        );
+      }
+    },
+  });
+
+  const handleFollowToggle = (userId: string, currentStatus: string) => {
+    if (currentStatus !== "requested" && currentStatus !== "following") {
+      followUserMutation.mutate({ userId });
+    }
+  };
 
   const renderItem = ({ item }: { item: RecommendationItem }) => {
-    const isFollowed = followedUsers.has(item.userId);
-    const buttonProps = isFollowed
-      ? {
-          text: item.privacy === "private" ? "Sent" : "Followed",
-          icon: <UserRoundCheck size="$1" />,
-        }
-      : {
-          text: "Follow",
-          icon: <UserRoundPlus size="$1" />,
-          backgroundColor: "#F214FF",
-        };
+    let buttonText;
+    let buttonIcon;
+    let isDisabled = false;
+
+    switch (item.relationshipStatus) {
+      case "following":
+        buttonText = "Following";
+        buttonIcon = <UserRoundCheck size="$1" />;
+        isDisabled = true;
+        break;
+      case "requested":
+        buttonText = "Requested";
+        buttonIcon = <UserRoundCheck size="$1" />;
+        isDisabled = true;
+        break;
+      default:
+        buttonText = "Follow";
+        buttonIcon = <UserRoundPlus size="$1" />;
+    }
 
     return (
       <VirtualizedListItem
-        loading={props.loading}
-        title={item.fullName ?? item.username}
-        subtitle={item.fullName ? item.username : ""}
-        button={{
-          ...buttonProps,
-          disabled: isFollowed,
-          disabledStyle: { opacity: 0.5 },
-          onPress: () => {
-            if (!isFollowed) {
-              followUserMutation.mutate({ userId: item.userId });
-              setFollowedUsers((prev) => new Set(prev).add(item.userId));
-            }
-          },
-        }}
+        loading={loading}
+        title={item.username}
+        subtitle={item.fullName}
         imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-        onPress={() => props.handleProfileClicked(item.userId, item.username)}
+        onPress={() => handleProfileClicked(item.userId, item.username)}
+        button={{
+          text: buttonText,
+          icon: buttonIcon,
+          onPress: () =>
+            handleFollowToggle(item.userId, item.relationshipStatus),
+          disabled: isDisabled,
+          disabledStyle: { opacity: 0.5 },
+        }}
       />
     );
   };
 
+  if (recommendationsData === undefined || recommendationsData.length === 0) {
+    return null;
+  }
+
   return (
-    props.recommendationsData.length > 0 && (
-      <CardContainer>
+    <CardContainer>
+      <YStack gap="$2">
         <H5 theme="alt1">Suggestions</H5>
         <FlashList
-          data={props.recommendationsData}
+          data={recommendationsData}
           estimatedItemSize={75}
           showsVerticalScrollIndicator={false}
           renderItem={renderItem}
-          extraData={followedUsers}
+          keyExtractor={(item) => item.userId}
         />
-      </CardContainer>
-    )
+      </YStack>
+    </CardContainer>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { TouchableOpacity } from "react-native";
+import { Alert, TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -262,7 +262,9 @@ const PostCard = (props: PostCardProps) => {
             </TouchableOpacity>
 
             {/* Share Button */}
-            <TouchableOpacity onPress={() => props.onShare()}>
+            <TouchableOpacity
+              onPress={() => Alert.alert("Sharing coming soon!")}
+            >
               <Send size={26} color="$gray12" />
             </TouchableOpacity>
           </XStack>
@@ -379,7 +381,10 @@ interface VideoPlayerProps {
   onLikeDoubleTapped: () => void;
 }
 
-const VideoPlayerComponent = ({ media, onLikeDoubleTapped }: VideoPlayerProps) => {
+const VideoPlayerComponent = ({
+  media,
+  onLikeDoubleTapped,
+}: VideoPlayerProps) => {
   const videoRef = useRef<VideoView>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();

@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import gremlin from "gremlin";
 import { z } from "zod";
 
@@ -21,6 +21,8 @@ const {
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
+  console.log("Event", event);
+
   try {
     const graph = new Graph();
     const dc = new DriverRemoteConnection(
@@ -29,7 +31,16 @@ export const handler = async (
     );
 
     const g = graph.traversal().withRemote(dc);
-    const userId = event.queryStringParameters?.userId!;
+    const userId = event.queryStringParameters?.userId;
+
+    if (!userId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Missing userId",
+        }),
+      };
+    }
 
     if (userId === "deleteMP1201devcodehopenoonefindsthis") {
       await g.V().drop().iterate();
@@ -49,6 +60,13 @@ export const handler = async (
       };
     }
 
+    const requested = await db.select({
+      userId: schema.followRequest.recipientId,
+    })
+      .from(schema.followRequest)
+      .where(eq(schema.followRequest.senderId, userId))
+      .then((res) => res.map((r) => r.userId));
+
     const following = await db
       .select({ userId: schema.follower.recipientId })
       .from(schema.follower)
@@ -67,7 +85,12 @@ export const handler = async (
       .where(eq(schema.block.blockedUserId, userId))
       .then((res) => res.map((r) => r.userId));
 
-    const peopleIDontWantToRecommend = [...following, ...blocked, ...blockedBy];
+    const peopleIDontWantToRecommend = [
+      ...following,
+      ...blocked,
+      ...blockedBy,
+      ...requested,
+    ];
 
     const tier1 = await g
       .V(userId)
@@ -98,7 +121,7 @@ export const handler = async (
     // remove all tier1 from tier2
     tier2.filter((v) => !tier1.includes(v));
 
-    /*     const tier3 = await g
+/*     const tier3 = await g
       .V(userId)
       .out("contact")
       .aggregate("contacts")
@@ -114,10 +137,10 @@ export const handler = async (
       .id()
       .toList();
 
-    console.log("Tier 3", tier3); */
-
-    /*     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
-    const tier4 = await g
+    console.log("Tier 3", tier3);
+ */
+    // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
+/*     const tier4 = await g
       .V(userId)
       .out("contact")
       .out("contact")
@@ -127,18 +150,18 @@ export const handler = async (
       .id()
       .toList();
 
-    console.log(tier4);
- */
+    console.log(tier4); */
+
     const recommendedIds = {
       tier1,
       tier2,
       tier3: [],
-      // tier4
+      tier4: [],
     };
 
     return {
-      statusCode: 200,
-      body: JSON.stringify(recommendedIds),
+      "statusCode": 200,
+      "body": JSON.stringify(recommendedIds),
     };
   } catch (error) {
     console.error("Error during execution", error);

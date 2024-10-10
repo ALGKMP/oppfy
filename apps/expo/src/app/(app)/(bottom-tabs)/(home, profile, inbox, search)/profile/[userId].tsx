@@ -24,7 +24,6 @@ import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
-import { useSession } from "~/contexts/SessionContext";
 import useProfile from "~/hooks/useProfile";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -207,7 +206,10 @@ const OtherProfile = React.memo(() => {
     data: otherProfileData,
     isLoading: isLoadingProfileData,
     refetch: refetchProfileData,
-  } = api.profile.getFullProfileOther.useQuery({ userId });
+  } = api.profile.getFullProfileOther.useQuery(
+    { userId },
+    { refetchOnMount: true },
+  );
 
   const blocked = otherProfileData?.networkStatus.blocked ?? false;
   const isPrivate = otherProfileData?.networkStatus.privacy === "private";
@@ -222,7 +224,9 @@ const OtherProfile = React.memo(() => {
     data: recommendationsData,
     isLoading: isLoadingRecommendationsData,
     refetch: refetchRecommendationsData,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery();
+  } = api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+    refetchOnMount: true,
+  });
 
   const {
     data: friendsData,
@@ -233,6 +237,7 @@ const OtherProfile = React.memo(() => {
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: !!userId,
+      refetchOnMount: true,
     },
   );
 
@@ -248,6 +253,7 @@ const OtherProfile = React.memo(() => {
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: !!userId,
+      refetchOnMount: true,
     },
   );
 

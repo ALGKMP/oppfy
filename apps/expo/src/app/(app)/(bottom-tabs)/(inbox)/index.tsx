@@ -28,7 +28,6 @@ const REFETCH_INTERVAL = 1000 * 30;
 const Inbox = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user } = useSession();
   const { routeProfile } = useRouteProfile();
   const utils = api.useUtils();
 
