@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Dimensions, TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
@@ -94,6 +94,7 @@ const HomeScreen = () => {
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      console.log("viewableItems", viewableItems);
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
         .map((token) => (token.item as TokenItem).postId)
@@ -145,6 +146,15 @@ const HomeScreen = () => {
       );
     },
     [viewableItems],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log("in focus");
+      return () => {
+        console.log("out of focus");
+      };
+    }, []),
   );
 
   const renderSuggestions = useMemo(() => {
@@ -242,7 +252,7 @@ const HomeScreen = () => {
     <BaseScreenView
       padding={0}
       paddingBottom={0}
-      scrollEnabled={postItems.length == 0}
+      // scrollEnabled={postItems.length == 0}
       safeAreaEdges={["top"]}
     >
       <FlashList

@@ -398,25 +398,37 @@ const VideoPlayerComponent = ({ media, onLikeDoubleTapped }: VideoPlayerProps) =
 
   const safePlayPause = useCallback(
     (shouldPlay: boolean) => {
-      if (!media.isViewable) return;
-
-      if (shouldPlay && !isPlaying) {
+      console.log("shouldPlay", shouldPlay);
+      console.log("isPlaying", isPlaying);
+      console.log("isPaused", isPaused);
+      if (shouldPlay && (!isPlaying || isPaused)) {
         player.play();
         setIsPlaying(true);
+        setIsPaused(false);
       } else if (!shouldPlay && isPlaying) {
         player.pause();
         setIsPlaying(false);
       }
     },
-    [player, isPlaying, media.isViewable],
+    [player, isPlaying, isPaused],
   );
 
   useFocusEffect(
     useCallback(() => {
       if (media.isViewable) safePlayPause(true);
-      // Don't need to clean up because the video player is controlled by the native driver
-    }, [safePlayPause, media.isViewable]),
+      // return () => {
+      //   if (isPlaying) safePlayPause(false);
+      // };
+    }, [safePlayPause, media.isViewable, isPlaying]),
   );
+
+  useEffect(() => {
+    if (media.isViewable) {
+      safePlayPause(true);
+    } else {
+      safePlayPause(false);
+    }
+  }, [media.isViewable, safePlayPause]);
 
   const handleMute = useCallback(() => {
     toggleMute();

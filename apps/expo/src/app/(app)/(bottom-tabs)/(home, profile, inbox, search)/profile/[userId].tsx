@@ -641,7 +641,7 @@ const OtherProfile = React.memo(() => {
             loading={isLoadingRecommendationsData}
             data={recommendationsData ?? []}
             title="Suggestions 🔥"
-            uiStyle="suggestions"
+            uiStyle="default"
             onItemPress={navigateToProfile}
           />
         )}
@@ -723,7 +723,7 @@ const OtherProfile = React.memo(() => {
 
   return (
     <>
-      <BaseScreenView padding={0} paddingBottom={0}>
+      <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
         <FlashList
           ref={scrollRef}
           data={postItems}
@@ -732,7 +732,7 @@ const OtherProfile = React.memo(() => {
           }
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderNoPosts}
-          keyExtractor={(item) => `self-profile-post-${item.postId}`}
+          keyExtractor={(item) => `other-profile-post-${item.postId}`}
           estimatedItemSize={300}
           showsVerticalScrollIndicator={false}
           onEndReached={handleOnEndReached}
