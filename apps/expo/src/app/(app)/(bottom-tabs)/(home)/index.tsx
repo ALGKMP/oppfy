@@ -8,17 +8,16 @@ import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundPlus } from "@tamagui/lucide-icons";
 import {
   Button,
   Circle,
   getToken,
   H1,
   H5,
+  Separator,
   SizableText,
   Spacer,
   styled,
-  Text,
   View,
   XStack,
   YStack,
@@ -43,6 +42,7 @@ interface TokenItem {
 }
 
 const HomeScreen = () => {
+  console.log("HomeScreen");
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
@@ -93,19 +93,28 @@ const HomeScreen = () => {
   }, [refetchRecommendationsData, refetchPosts]);
 
   const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      console.log("viewableItems", viewableItems);
+    ({
+      viewableItems,
+      changed,
+    }: {
+      viewableItems: ViewToken[];
+      changed: ViewToken[];
+    }) => {
       const visibleItemIds = viewableItems
         .filter((token) => token.isViewable)
         .map((token) => (token.item as TokenItem).postId)
-        .filter((id) => id !== undefined);
-      setViewableItems(visibleItemIds as string[]);
+        .filter((id): id is string => id !== undefined);
+
+      console.log("New visible item IDs:", visibleItemIds);
+      setViewableItems(visibleItemIds);
     },
     [],
   );
 
   const renderPost = useCallback(
-    (item: PostItem, profile: Profile) => {
+    ({ item }: { item: PostItem }) => {
+      if (!profile || !("postId" in item)) return null;
+
       return (
         <View paddingTop="$4">
           <OtherPost
@@ -145,19 +154,10 @@ const HomeScreen = () => {
         </View>
       );
     },
-    [viewableItems],
+    [profile, viewableItems],
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      console.log("in focus");
-      return () => {
-        console.log("out of focus");
-      };
-    }, []),
-  );
-
-  const renderSuggestions = useMemo(() => {
+  const renderFooter = useCallback(() => {
     const handleProfilePress = (profile: RecommendationProfile) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.navigate({
@@ -176,87 +176,85 @@ const HomeScreen = () => {
       });
     };
 
-    if (recommendationsData === undefined || recommendationsData.length === 0)
-      return null;
-
     return (
-      <View paddingTop="$4" paddingHorizontal="$1">
-        <PeopleCarousel
-          title="Suggestions"
-          showMore={recommendationsData.length > 10}
-          data={recommendationsData}
-          loading={isLoadingRecommendationsData}
-          onItemPress={handleProfilePress}
-          onShowMore={handleShowMore}
-        />
+      <View>
+        {recommendationsData && recommendationsData.length > 0 && (
+          <View paddingTop="$4" paddingHorizontal="$1">
+            <PeopleCarousel
+              title="Suggestions"
+              showMore={recommendationsData.length > 10}
+              data={recommendationsData}
+              loading={isLoadingRecommendationsData}
+              onItemPress={handleProfilePress}
+              onShowMore={handleShowMore}
+            />
+          </View>
+        )}
+        <Footer />
       </View>
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
 
-  const renderFooter = useMemo(() => {
-    return (
-      <View>
-        {renderSuggestions}
-        <Footer />
-      </View>
-    );
-  }, [renderSuggestions]);
+  useEffect(() => {
+    console.log("isLoadingRecommendationsData", isLoadingRecommendationsData);
+    console.log("isLoadingPostData", isLoadingPostData);
+    console.log("isLoadingProfileData", isLoadingProfile);
+  });
 
-  if (isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile) {
-    return (
-      <BaseScreenView padding={0} paddingBottom={0} safeAreaEdges={["top"]}>
+  const isLoading =
+    isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile;
+
+  const listFooterComponent = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          <PostCard loading />
+          <PeopleCarousel loading />
+        </YStack>
+      );
+    }
+    if (postItems.length === 0) {
+      return <EmptyHomeScreen />;
+    }
+    return renderFooter();
+  }, [isLoading, postItems.length, renderFooter]);
+
+  return (
+    <BaseScreenView
+      padding={0}
+      paddingBottom={0}
+      scrollEnabled={postItems.length === 0}
+      safeAreaEdges={["top"]}
+    >
+      {isLoading ? (
+        <>
+          <PostCard loading />
+          <Spacer size="$4" />
+          <PostCard loading />
+        </>
+      ) : (
         <FlashList
-          data={PLACEHOLDER_DATA}
-          renderItem={() => <PostCard loading />}
-          estimatedItemSize={screenWidth}
+          ref={scrollRef}
+          data={postItems}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onEndReached={handleOnEndReached}
+          nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}
-          ListFooterComponent={() => (
-            <YStack gap="$4">
-              <PeopleCarousel loading />
-            </YStack>
-          )}
+          numColumns={1}
+          keyExtractor={(item) => "home_post_" + item.postId}
+          renderItem={renderPost}
+          estimatedItemSize={screenWidth}
+          ListFooterComponent={listFooterComponent}
+          extraData={viewableItems}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
           ListHeaderComponentStyle={{
             marginBottom: getToken("$4", "space") as number,
           }}
         />
-      </BaseScreenView>
-    );
-  }
-
-  if (profile === undefined || postItems.length === 0) {
-    return (
-      <BaseScreenView>
-        <EmptyHomeScreen />
-      </BaseScreenView>
-    );
-  }
-
-  return (
-    // ! dont remove the paddingBottom 0, it actually does something
-    <BaseScreenView
-      padding={0}
-      paddingBottom={0}
-      // scrollEnabled={postItems.length == 0}
-      safeAreaEdges={["top"]}
-    >
-      <FlashList
-        ref={scrollRef}
-        data={postItems}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        onEndReached={handleOnEndReached}
-        nestedScrollEnabled={true}
-        showsVerticalScrollIndicator={false}
-        numColumns={1}
-        keyExtractor={(item) => "home_" + item.postId}
-        renderItem={({ item }) => renderPost(item, profile)}
-        estimatedItemSize={screenWidth}
-        ListFooterComponent={renderFooter}
-        extraData={viewableItems}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-      />
+      )}
     </BaseScreenView>
   );
 };
