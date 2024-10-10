@@ -403,9 +403,6 @@ const VideoPlayerComponent = ({
 
   const safePlayPause = useCallback(
     (shouldPlay: boolean) => {
-      console.log("shouldPlay", shouldPlay);
-      console.log("isPlaying", isPlaying);
-      console.log("isPaused", isPaused);
       if (shouldPlay && (!isPlaying || isPaused)) {
         player.play();
         setIsPlaying(true);
