@@ -12,7 +12,7 @@ import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
-import { getToken, Spacer, Text, View, YStack } from "tamagui";
+import { getToken, Spacer, View, YStack } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
@@ -22,7 +22,6 @@ import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import EmptyPlaceholder from "~/components/UIPlaceholders/EmptyPlaceholder";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
@@ -102,19 +101,11 @@ const SelfProfile = React.memo(() => {
     [recommendationsData],
   );
 
-  const isLoadingData = useMemo(() => {
-    return (
-      isLoadingProfileData ||
-      isLoadingFriendsData ||
-      isLoadingRecommendationsData ||
-      isLoadingPostData
-    );
-  }, [
-    isLoadingProfileData,
-    isLoadingFriendsData,
-    isLoadingRecommendationsData,
-    isLoadingPostData,
-  ]);
+  const isLoading =
+    isLoadingProfileData ||
+    isLoadingFriendsData ||
+    isLoadingRecommendationsData ||
+    isLoadingPostData;
 
   const navigateToProfile = useCallback(
     ({ userId, username }: { userId: string; username: string }) => {
@@ -148,11 +139,9 @@ const SelfProfile = React.memo(() => {
         );
       },
       headerRight: () => (
-        <View>
-          <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
-            <MoreHorizontal />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
+          <MoreHorizontal />
+        </TouchableOpacity>
       ),
     });
   }, [navigation, profileData?.username, router]);
@@ -169,15 +158,8 @@ const SelfProfile = React.memo(() => {
     [],
   );
 
-  const viewabilityConfig = useMemo(
-    () => ({
-      itemVisiblePercentThreshold: 40,
-    }),
-    [],
-  );
-
   const renderPost = useCallback(
-    (item: Post, isViewable: boolean) => (
+    (item: Post) => (
       <SelfPost
         key={item.postId}
         id={item.postId}
@@ -201,7 +183,7 @@ const SelfProfile = React.memo(() => {
         media={{
           type: item.mediaType,
           url: item.imageUrl,
-          isViewable: isViewable,
+          isViewable: viewableItems.includes(item.postId),
           dimensions: {
             width: item.width,
             height: item.height,
@@ -213,7 +195,7 @@ const SelfProfile = React.memo(() => {
         }}
       />
     ),
-    [profileData],
+    [profileData, viewableItems],
   );
 
   const renderHeader = useMemo(
@@ -276,39 +258,23 @@ const SelfProfile = React.memo(() => {
     [friendItems, recommendationItems, router, navigateToProfile, profileData],
   );
 
-  const renderEmptyState = useCallback(() => {
-    return (
-      <View paddingTop="$6">
-        <EmptyPlaceholder
-          icon={<CameraOff size="$10" />}
-          title="No posts yet"
-        />
-      </View>
-    );
-  }, []);
+  const renderEmptyState = useCallback(() => (
+    <View paddingTop="$6">
+      <EmptyPlaceholder
+        icon={<CameraOff size="$10" />}
+        title="No posts yet"
+      />
+    </View>
+  ), []);
 
-  if (isLoadingData) {
+  if (isLoading) {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          renderItem={() => <PostCard loading />}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          ListHeaderComponent={() => (
-            <YStack gap="$4">
-              <ProfileHeaderDetails loading />
-              <PeopleCarousel loading />
-            </YStack>
-          )}
-          estimatedItemSize={300}
-          keyExtractor={(_, index) => `loading-${index}`}
-          showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <Spacer size="$4" />}
-          ListHeaderComponentStyle={{
-            marginBottom: getToken("$4", "space") as number,
-          }}
-        />
+        <YStack gap="$4">
+          <ProfileHeaderDetails loading />
+          <PeopleCarousel loading />
+          <PostCard loading />
+        </YStack>
       </BaseScreenView>
     );
   }
@@ -318,9 +284,7 @@ const SelfProfile = React.memo(() => {
       <FlashList
         ref={scrollRef}
         data={postItems}
-        renderItem={({ item }) =>
-          renderPost(item, viewableItems.includes(item.postId))
-        }
+        renderItem={({ item }) => renderPost(item)}
         ListHeaderComponent={renderHeader}
         keyExtractor={(item) => `self-profile-post-${item.postId}`}
         estimatedItemSize={600}
@@ -329,8 +293,8 @@ const SelfProfile = React.memo(() => {
         onRefresh={handleRefresh}
         refreshing={isRefreshing}
         onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        extraData={{ viewableItems, postItems }}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+        extraData={viewableItems}
         ItemSeparatorComponent={() => <Spacer size="$4" />}
         ListHeaderComponentStyle={{
           marginBottom: getToken("$4", "space") as number,

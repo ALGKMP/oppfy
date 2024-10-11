@@ -232,7 +232,7 @@ const Start = () => {
             ]}
           />
           <Animated.View style={[animatedSubtitleStyle]}>
-            <H4 fontSize={"$9"} color="white" textAlign="center">
+            <H4 fontSize="$9" color="white" textAlign="center">
               Other people post for you
             </H4> 
           </Animated.View>
