@@ -1,8 +1,7 @@
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { PermissionStatus } from "expo-contacts";
-
 import * as Crypto from "expo-crypto";
 import { parsePhoneNumber } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
@@ -67,6 +66,8 @@ const useContacts = (syncNow = false): ContactFns => {
         );
       }),
     );
+
+    console.log("syncing contacts", hashedNumbers);
 
     void syncContactsMutation.mutateAsync(hashedNumbers);
   }, [syncContactsMutation]);
