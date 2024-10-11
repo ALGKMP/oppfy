@@ -13,7 +13,7 @@ export class Queue extends Construct {
       retentionPeriod: cdk.Duration.days(1),
     });
 
-    this.queue = new sqs.Queue(this, `${id}Queue`, {
+    this.queue = new sqs.Queue(this, "Queue", {
       queueName: `${id}Queue`,
       retentionPeriod: cdk.Duration.hours(5),
       deadLetterQueue: {
