@@ -95,7 +95,7 @@ export class ContactsRepository {
     const response = await fetch(url);
 
     if (response.status !== 200) {
-      console.error("Error invoking Lambda function: ", await response.text());
+      console.error("Error invoking Lambda function: ", await response.text(), response.status);
       return {
         tier1: [],
         tier2: [],
