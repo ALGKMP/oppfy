@@ -291,9 +291,16 @@ const OtherProfile = React.memo(() => {
     [friendsData],
   );
 
-  const isLoadingData = useMemo(() => {
-    return isLoadingProfileData || isLoadingFriendsData || isLoadingPostData;
-  }, [isLoadingProfileData, isLoadingFriendsData, isLoadingPostData]);
+  const recommendationItems = useMemo(
+    () => recommendationsData ?? [],
+    [recommendationsData],
+  );
+
+  const isLoading =
+    isLoadingProfileData ||
+    isLoadingFriendsData ||
+    isLoadingPostData ||
+    isLoadingRecommendationsData;
 
   const navigateToProfile = useCallback(
     ({ userId, username }: { userId: string; username: string }) => {
@@ -459,7 +466,7 @@ const OtherProfile = React.memo(() => {
   );
 
   const renderPost = useCallback(
-    (item: Post, isViewable: boolean) => (
+    (item: Post) => (
       <OtherPost
         key={item.postId}
         id={item.postId}
@@ -484,7 +491,7 @@ const OtherProfile = React.memo(() => {
         media={{
           type: item.mediaType,
           url: item.imageUrl,
-          isViewable: isViewable,
+          isViewable: viewableItems.includes(item.postId),
           dimensions: {
             width: item.width,
             height: item.height,
@@ -500,6 +507,7 @@ const OtherProfile = React.memo(() => {
       selfProfileData?.profilePictureUrl,
       selfProfileData?.userId,
       selfProfileData?.username,
+      viewableItems,
     ],
   );
 
@@ -595,11 +603,12 @@ const OtherProfile = React.memo(() => {
     ],
   );
 
+  // TODO: There is likely another solution to this other than useMemo()
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
         <ProfileHeaderDetails
-          loading={false}
+          loading={isLoading}
           data={profileHeaderData}
           onFollowingPress={
             canViewContent
@@ -624,13 +633,13 @@ const OtherProfile = React.memo(() => {
 
         {friendItems.length > 0 && !blocked ? (
           <PeopleCarousel
-            loading={false}
+            loading={isLoading}
             data={friendItems}
             title="Friends 🔥"
             showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
             onTitlePress={() =>
               router.push({
-                pathname: "/profile/connections/following-list",
+                pathname: "/profile/connections/friend-list",
                 params: { userId, username },
               })
             }
@@ -644,29 +653,36 @@ const OtherProfile = React.memo(() => {
           />
         ) : (
           <PeopleCarousel
-            loading={isLoadingRecommendationsData}
-            data={recommendationsData ?? []}
+            loading={isLoading}
+            data={recommendationItems}
             title="Suggestions 🔥"
-            uiStyle="default"
+            showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
             onItemPress={navigateToProfile}
           />
         )}
       </YStack>
     ),
     [
+      isLoading,
       profileHeaderData,
       canViewContent,
       renderActionButtons,
       friendItems,
       blocked,
+      recommendationItems,
       otherProfileData?.friendCount,
-      navigateToProfile,
-      isLoadingRecommendationsData,
-      recommendationsData,
       router,
       userId,
       username,
+      navigateToProfile,
     ],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: Post }) => (
+      <View paddingTop="$4">{renderPost(item)}</View>
+    ),
+    [renderPost],
   );
 
   const renderNoPosts = useCallback(() => {
@@ -704,25 +720,29 @@ const OtherProfile = React.memo(() => {
     );
   }, [blocked, isPrivate, isFollowing]);
 
-  if (isLoadingData) {
+  const listFooterComponent = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          <PostCard loading />
+          <PostCard loading />
+        </YStack>
+      );
+    }
+    if (postItems.length === 0) {
+      return renderNoPosts();
+    }
+    return null;
+  }, [isLoading, postItems.length, renderNoPosts]);
+
+  if (isLoading) {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          renderItem={() => <PostCard loading />}
-          ListHeaderComponent={() => (
-            <YStack gap="$4">
-              <ProfileHeaderDetails loading />
-              <PeopleCarousel loading />
-            </YStack>
-          )}
-          estimatedItemSize={300}
-          showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <Spacer size="$4" />}
-          ListHeaderComponentStyle={{
-            marginBottom: getToken("$4", "space") as number,
-          }}
-        />
+        <YStack gap="$4">
+          <ProfileHeaderDetails loading />
+          <PeopleCarousel loading />
+          <PostCard loading />
+        </YStack>
       </BaseScreenView>
     );
   }
@@ -733,11 +753,10 @@ const OtherProfile = React.memo(() => {
         <FlashList
           ref={scrollRef}
           data={postItems}
-          renderItem={({ item }) =>
-            renderPost(item, viewableItems.includes(item.postId))
-          }
+          renderItem={renderItem}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderNoPosts}
+          ListFooterComponent={listFooterComponent}
           keyExtractor={(item) => `other-profile-post-${item.postId}`}
           estimatedItemSize={300}
           showsVerticalScrollIndicator={false}

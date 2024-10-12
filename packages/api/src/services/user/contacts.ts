@@ -1,25 +1,19 @@
 import { createHash } from "crypto";
-import { z } from "zod";
 
-import { and, db, inArray, notInArray, schema, sql } from "@oppfy/db";
-import { env } from "@oppfy/env";
 import { sqs } from "@oppfy/sqs";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
   ContactsRepository,
-  FollowRepository,
   ProfileRepository,
   UserRepository,
 } from "../../repositories";
 import { CloudFrontService } from "../aws/cloudfront";
-import { S3Service } from "../aws/s3";
 
 type RelationshipStatus = "notFollowing" | "following" | "requested";
 
 export class ContactService {
   private contactsRepository = new ContactsRepository();
-  private followRepository = new FollowRepository();
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
 
