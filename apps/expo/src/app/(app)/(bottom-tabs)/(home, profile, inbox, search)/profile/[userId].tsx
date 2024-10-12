@@ -458,20 +458,6 @@ const OtherProfile = React.memo(() => {
     [],
   );
 
-  /* 
-  * ! We need to clear the viewable items when the screen is unfocused on the screen 
-  * itself, and cannot just do it in the PostCard component because the PostCard is 
-  * unmounted when navigating to another screen and the video shit unmounts before the 
-  * useFocusEffect can run 
-  */
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        setViewableItems([]);
-      };
-    }, [])
-  );
-
   const viewabilityConfig = useMemo(
     () => ({
       itemVisiblePercentThreshold: 40,

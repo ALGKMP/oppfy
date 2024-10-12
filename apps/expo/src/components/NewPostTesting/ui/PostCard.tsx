@@ -11,7 +11,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { useVideoPlayer, VideoView } from "expo-video";
+import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import {
   Heart,
   MessageCircle,
@@ -385,7 +385,7 @@ const VideoPlayerComponent = ({
   media,
   onLikeDoubleTapped,
 }: VideoPlayerProps) => {
-  const videoRef = useRef<VideoView>(null);
+  const videoRef = useRef<Video>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
   const { hearts, addHeart } = useHeartAnimations();
@@ -393,65 +393,61 @@ const VideoPlayerComponent = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  const player = useVideoPlayer(media.url, (player) => {
-    player.loop = true;
-    player.muted = isMuted;
-    player.play();
-
-    setIsPlaying(true);
-  });
-
-  const safePlayPause = useCallback(
-    (shouldPlay: boolean) => {
-      if (shouldPlay && (!isPlaying || isPaused)) {
-        player.play();
+  useFocusEffect(
+    useCallback(() => {
+      if (media.isViewable) {
+        void videoRef.current?.playAsync();
         setIsPlaying(true);
         setIsPaused(false);
-      } else if (!shouldPlay && isPlaying) {
-        player.pause();
+      } else {
+        void videoRef.current?.pauseAsync();
         setIsPlaying(false);
       }
-    },
-    [player, isPlaying, isPaused],
+
+      return () => {
+        void videoRef.current?.pauseAsync();
+      };
+    }, [media.isViewable])
   );
 
-  useEffect(() => {
-    console.log("isViewable changed:", media.isViewable);
-    if (media.isViewable) {
-      safePlayPause(true);
-    } else {
-      safePlayPause(false);
-    }
-  }, [media.isViewable, safePlayPause]);
+  const handlePlaybackStatusUpdate = useCallback(
+    (status: AVPlaybackStatus) => {
+      if (status.isLoaded) {
+        if (status.didJustFinish) {
+          void videoRef.current?.replayAsync();
+        }
+      }
+    },
+    []
+  );
 
   const handleMute = useCallback(() => {
     toggleMute();
     addMute(!isMuted);
-    // eslint-disable-next-line react-compiler/react-compiler
-    player.muted = !isMuted;
-  }, [toggleMute, addMute, isMuted, player]);
+    void videoRef.current?.setIsMutedAsync(!isMuted);
+  }, [toggleMute, addMute, isMuted]);
 
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
       onLikeDoubleTapped();
     },
-    [addHeart, onLikeDoubleTapped],
+    [addHeart, onLikeDoubleTapped]
   );
 
   const handleHold = useCallback(() => {
     if (isPlaying) {
-      player.pause();
+      void videoRef.current?.pauseAsync();
       setIsPaused(true);
     }
-  }, [isPlaying, player]);
+  }, [isPlaying]);
 
   const handleRelease = useCallback(() => {
     if (isPaused) {
-      player.play();
+      void videoRef.current?.playAsync();
       setIsPaused(false);
     }
-  }, [isPaused, player]);
+  }, [isPaused]);
 
   const longPress = Gesture.LongPress()
     .onStart(() => {
@@ -479,16 +475,18 @@ const VideoPlayerComponent = ({
   return (
     <GestureDetector gesture={gestures}>
       <View>
-        <VideoView
+        <Video
           ref={videoRef}
           style={{
             width: "100%",
             aspectRatio: media.dimensions.width / media.dimensions.height,
             borderRadius: getToken("$8", "radius") as number,
           }}
-          contentFit="cover"
-          player={player}
-          nativeControls={false}
+          source={{ uri: media.url }}
+          resizeMode={ResizeMode.COVER}
+          isLooping
+          isMuted={isMuted}
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         />
         {muteIcons.map((muteIcon) => (
           <Mute key={muteIcon.id} muted={muteIcon.muted} />
