@@ -415,16 +415,8 @@ const VideoPlayerComponent = ({
     [player, isPlaying, isPaused],
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      if (media.isViewable) safePlayPause(true);
-      // return () => {
-      //   if (isPlaying) safePlayPause(false);
-      // };
-    }, [safePlayPause, media.isViewable, isPlaying]),
-  );
-
   useEffect(() => {
+    console.log("isViewable changed:", media.isViewable);
     if (media.isViewable) {
       safePlayPause(true);
     } else {
