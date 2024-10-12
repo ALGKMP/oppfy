@@ -416,6 +416,7 @@ const VideoPlayerComponent = ({
   );
 
   useEffect(() => {
+    console.log("isViewable changed:", media.isViewable);
     if (media.isViewable) {
       safePlayPause(true);
     } else {
