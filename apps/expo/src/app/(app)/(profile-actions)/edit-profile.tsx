@@ -38,15 +38,8 @@ import { api } from "~/utils/api";
 
 const profileSchema = z.object({
   fullName: sharedValidators.user.fullName,
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters long")
-    .max(30, "Username must be at most 30 characters long")
-    .regex(
-      /^[a-zA-Z0-9_][a-zA-Z0-9_\.]*[a-zA-Z0-9]$/,
-      "Username can only contain letters, numbers, underscores, and periods. It must start with a letter or number and end with a letter or number."
-    ),
-  bio: sharedValidators.user.bio,
+  username: sharedValidators.user.username,
+   bio: sharedValidators.user.bio,
 });
 
 type ProfileFields = z.infer<typeof profileSchema>;

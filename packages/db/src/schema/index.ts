@@ -146,10 +146,10 @@ export const userContact = pgTable(
 
 export const profile = pgTable("profile", {
   id: uuid("id").primaryKey().defaultRandom(),
-  username: text("username").unique().notNull(),
-  fullName: text("full_name"),
+  username: varchar("username", { length: 30 }).unique().notNull(),
+  fullName: varchar("full_name", { length: 30 }),
   dateOfBirth: dateType("date_of_birth"),
-  bio: text("bio"),
+  bio: varchar("bio", { length: 100 }),
   profilePictureKey: text("profile_picture_key"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()

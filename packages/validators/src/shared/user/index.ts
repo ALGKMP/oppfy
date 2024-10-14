@@ -14,10 +14,14 @@ export const fullName = z
 
 export const username = z
   .string()
-  .min(1, { message: "Username is too short" })
-  .max(24, { message: "Username is too long" });
+  .min(1, { message: "Username must be at least 1 characters long" })
+  .max(30, { message: "Username must be at most 30 characters long" })
+  .regex(
+    /^[a-zA-Z0-9_][a-zA-Z0-9_\.]*[a-zA-Z0-9]$/,
+    "Username can only contain letters, numbers, underscores, and periods. It must start with a letter or number and end with a letter or number.",
+  );
 
-export const bio = z.string().max(100, { message: "Bio is too long" });
+export const bio = z.string().max(100, { message: "Bio must be at most 100 characters long" });
 
 export const dateOfBirth = z
   .date()
