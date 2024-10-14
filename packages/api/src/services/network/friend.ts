@@ -48,7 +48,7 @@ export class FriendService {
 
     // Temporary fix
     if (receivedFriendRequest) {
-      await this.acceptFriendRequest(senderId, recipientId);
+      await this.acceptFriendRequest(recipientId, senderId);
       return;
     }
 
