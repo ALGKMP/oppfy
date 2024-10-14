@@ -262,8 +262,8 @@ const Footer = () => {
         <Circle
           size={60}
           backgroundColor="$blue500"
-          borderWidth={1}
-          borderColor="white"
+          borderWidth="$1.5"
+          // borderColor="white"
           overflow="hidden"
         >
           <StyledImage
@@ -273,8 +273,8 @@ const Footer = () => {
         <Circle
           size={70}
           backgroundColor="$green500"
-          borderWidth={1}
-          borderColor="white"
+          borderWidth="$1.5"
+          // borderColor="white"
           overflow="hidden"
           zIndex={1}
           marginLeft={-15}
@@ -287,8 +287,8 @@ const Footer = () => {
         <Circle
           size={60}
           backgroundColor="$yellow500"
-          borderWidth={1}
-          borderColor="white"
+          borderWidth="$1.5"
+          // borderColor="white"
           overflow="hidden"
         >
           <StyledImage
@@ -323,24 +323,28 @@ const Footer = () => {
 const EmptyHomeScreen = () => {
   return (
     <YStack flex={1} justifyContent="space-between">
+      <Footer />
       <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
         <H1>Welcome to</H1>
         <Image
           source={Splash}
           contentFit="contain"
           style={{
-            width: "100%",
+            width: "50%",
             aspectRatio: 4,
             resizeMode: "contain",
-            tintColor: "#F214FF",
           }}
         />
-        <SizableText size="$5" fontWeight="bold" textAlign="center">
+        <SizableText
+          size="$5"
+          // fontWeight="bold"
+          textAlign="center"
+          paddingHorizontal="$4"
+        >
           Once you follow people, you'll see who gets opped here the moment it
           happens!
         </SizableText>
       </YStack>
-      <Footer />
     </YStack>
   );
 };

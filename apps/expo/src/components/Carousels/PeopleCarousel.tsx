@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useMemo } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -74,56 +74,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     [props, throttledHandleShowMore],
   );
 
-  const renderDefaultItem = useCallback(({ item }: { item: T }) => {
-    return (
-      <TouchableOpacity onPress={() => onItemPress(item)}>
-        <YStack width={70} gap="$2" alignItems="center">
-          <Avatar source={item.profilePictureUrl} size={70} />
-          <Text
-            theme="alt1"
-            fontSize="$2"
-            fontWeight="600"
-            textAlign="center"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {item.username}
-          </Text>
-        </YStack>
-      </TouchableOpacity>
-    );
-  }, [onItemPress]);
-
-  const renderInstagramItem = useCallback(({ item }: { item: T }) => {
-    return (
-      <TouchableOpacity onPress={() => onItemPress(item)}>
-        <XStack width={150} gap="$2" alignItems="center" padding="$2">
-          <Avatar source={item.profilePictureUrl} size={44} />
-          <YStack flex={1}>
-            <Text
-              theme="alt1"
-              fontSize="$2"
-              fontWeight="600"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {item.username}
-            </Text>
-            <Text
-              theme="alt2"
-              fontSize="$1"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              Suggested for you
-            </Text>
-          </YStack>
-        </XStack>
-      </TouchableOpacity>
-    );
-  }, [onItemPress]);
-
-
   if (props.loading) {
     return (
       <CardContainer paddingLeft={0} paddingRight={0}>
@@ -154,7 +104,59 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     uiStyle = "default",
   } = props;
 
-  const renderItem = uiStyle === "suggestions" ? renderInstagramItem : renderDefaultItem;
+  const renderDefaultItem = ({ item }: { item: T }) => {
+    return (
+      <TouchableOpacity onPress={() => onItemPress(item)}>
+        <YStack width={70} gap="$2" alignItems="center">
+          <Avatar source={item.profilePictureUrl} size={70} />
+          <Text
+            theme="alt1"
+            fontSize="$2"
+            fontWeight="600"
+            textAlign="center"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {item.username}
+          </Text>
+        </YStack>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderInstagramItem = ({ item }: { item: T }) => {
+    return (
+      <TouchableOpacity onPress={() => onItemPress(item)}>
+        <XStack width={150} gap="$2" alignItems="center" padding="$2">
+          <Avatar source={item.profilePictureUrl} size={44} />
+          <YStack flex={1}>
+            <Text
+              theme="alt1"
+              fontSize="$2"
+              fontWeight="600"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.username}
+            </Text>
+            <Text
+              theme="alt2"
+              fontSize="$1"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              Suggested for you
+            </Text>
+          </YStack>
+        </XStack>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderItem = 
+    props.uiStyle === "suggestions"
+      ? renderInstagramItem
+      : renderDefaultItem;
 
   return (
     <CardContainer paddingHorizontal={0}>
