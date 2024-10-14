@@ -5,6 +5,9 @@ import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import Splash from "@assets/splash.png";
+import Person1 from "@assets/maya.jpg";
+import Person2 from "@assets/mckenzie.jpg";
+import Person3 from "@assets/girls.jpg";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -260,39 +263,39 @@ const Footer = () => {
     >
       <XStack justifyContent="center" alignItems="center">
         <Circle
-          size={60}
+          size="$7"
           backgroundColor="$blue500"
           borderWidth="$1.5"
-          // borderColor="white"
           overflow="hidden"
+          borderColor="$background"
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/women/28.jpg" }}
+            source={Person1}
           />
         </Circle>
         <Circle
-          size={70}
+          size="$8"
           backgroundColor="$green500"
           borderWidth="$1.5"
-          // borderColor="white"
           overflow="hidden"
+          borderColor="$background"
           zIndex={1}
           marginLeft={-15}
           marginRight={-15}
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
+            source={Person2}
           />
         </Circle>
         <Circle
-          size={60}
+          size="$7"
           backgroundColor="$yellow500"
           borderWidth="$1.5"
-          // borderColor="white"
           overflow="hidden"
+          borderColor="$background"
         >
           <StyledImage
-            source={{ uri: "https://randomuser.me/api/portraits/women/64.jpg" }}
+            source={Person3}
           />
         </Circle>
       </XStack>
@@ -322,29 +325,24 @@ const Footer = () => {
 
 const EmptyHomeScreen = () => {
   return (
-    <YStack flex={1} justifyContent="space-between">
-      <Footer />
+    <YStack flex={1} justifyContent="space-between" paddingHorizontal="$4">
       <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
         <H1>Welcome to</H1>
         <Image
           source={Splash}
           contentFit="contain"
           style={{
-            width: "50%",
+            width: "100%",
             aspectRatio: 4,
             resizeMode: "contain",
           }}
         />
-        <SizableText
-          size="$5"
-          // fontWeight="bold"
-          textAlign="center"
-          paddingHorizontal="$4"
-        >
+        <SizableText size="$5" fontWeight="bold" textAlign="center">
           Once you follow people, you'll see who gets opped here the moment it
           happens!
         </SizableText>
       </YStack>
+      <Footer />
     </YStack>
   );
 };
