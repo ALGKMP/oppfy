@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Dimensions, TouchableOpacity } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Dimensions } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import Person3 from "@assets/girls.jpg";
 import Person1 from "@assets/maya.jpg";
@@ -29,11 +29,10 @@ import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import { BaseScreenView } from "~/components/Views";
-import type { Profile, RecommendationProfile } from "~/hooks/useProfile";
+import type { RecommendationProfile } from "~/hooks/useProfile";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import Constants from 'expo-constants';
 
 const { width: screenWidth } = Dimensions.get("window");
 
