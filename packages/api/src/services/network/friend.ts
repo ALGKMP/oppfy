@@ -27,6 +27,7 @@ export class FriendService {
 
     const friendshipExists = await this.friendshipExists(senderId, recipientId);
 
+
     if (friendshipExists) {
       throw new DomainError(
         ErrorCode.USER_ALREADY_FRIENDS,
@@ -43,23 +44,20 @@ export class FriendService {
       );
     }
 
+    const receivedFriendRequest = await this.getFriendRequest(recipientId, senderId);
+
+    // Temporary fix
+    if (receivedFriendRequest) {
+      await this.acceptFriendRequest(senderId, recipientId);
+      return;
+    }
+
     const isFollowing = await this.isFollowing(senderId, recipientId);
 
     const sender = await this.userService.getUser(senderId);
     const recipient = await this.userService.getUser(recipientId);
 
     if (!isFollowing) {
-      const senderProfile = await this.profileRepository.getProfile(
-        sender.profileId,
-      );
-
-      if (senderProfile === undefined) {
-        throw new DomainError(
-          ErrorCode.PROFILE_NOT_FOUND,
-          `Profile not found for user ID "${senderId}"`,
-        );
-      }
-
       if (recipient.privacySetting === "private") {
         await this.followRepository.createFollowRequest(senderId, recipientId);
       } else {

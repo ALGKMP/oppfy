@@ -28,7 +28,6 @@ import useProfile from "~/hooks/useProfile";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const useProfileActions = (userId: string) => {
   const utils = api.useUtils();
@@ -555,6 +554,7 @@ const OtherProfile = React.memo(() => {
       public_Following_NotFriends: ["unfollow", "friend"],
       public_Following_OutboundRequest: ["cancelFriendRequest"],
       public_Following_Friends: ["removeFriend"],
+
       private_NotFollowing_NotFriends: ["follow", "friend"],
       private_OutboundRequest_NotFriends: ["cancelFollowRequest", "friend"],
       private_Following_NotFriends: ["unfollow", "friend"],
