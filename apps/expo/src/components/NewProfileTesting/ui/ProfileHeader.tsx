@@ -1,7 +1,6 @@
 import React, { memo, useEffect, useMemo } from "react";
 import type { ColorValue } from "react-native";
 import { TouchableOpacity } from "react-native";
-import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import {
   Button,
   Paragraph,
@@ -152,6 +151,8 @@ const ProfileHeaderDetails = memo((props: ProfileHeaderDetailsProps) => {
             backgroundColor={action.backgroundColor}
             onPress={action.onPress}
             disabled={action.disabled}
+            borderWidth="$0.5"
+            borderColor="white"
           >
             <XStack gap="$2" alignItems="center">
               <Text textAlign="center">{action.label}</Text>

@@ -4,10 +4,10 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
-import Splash from "@assets/splash.png";
+import Person3 from "@assets/girls.jpg";
 import Person1 from "@assets/maya.jpg";
 import Person2 from "@assets/mckenzie.jpg";
-import Person3 from "@assets/girls.jpg";
+import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -33,6 +33,7 @@ import type { Profile, RecommendationProfile } from "~/hooks/useProfile";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import Constants from 'expo-constants';
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -180,6 +181,7 @@ const HomeScreen = () => {
       <View>
         {recommendationsData && recommendationsData.length > 0 && (
           <View paddingTop="$4" paddingHorizontal="$1">
+            <Footer />
             <PeopleCarousel
               title="Suggestions"
               showMore={recommendationsData.length > 10}
@@ -190,7 +192,6 @@ const HomeScreen = () => {
             />
           </View>
         )}
-        <Footer />
       </View>
     );
   }, [recommendationsData, isLoadingRecommendationsData, router]);
@@ -207,19 +208,11 @@ const HomeScreen = () => {
         </YStack>
       );
     }
-    if (postItems.length === 0) {
-      return <EmptyHomeScreen />;
-    }
     return renderFooter();
-  }, [isLoading, postItems.length, renderFooter]);
+  }, [isLoading, renderFooter]);
 
   return (
-    <BaseScreenView
-      padding={0}
-      paddingBottom={0}
-      scrollEnabled={postItems.length === 0}
-      safeAreaEdges={["top"]}
-    >
+    <BaseScreenView padding={0} paddingBottom={0} safeAreaEdges={["top"]}>
       {isLoading ? (
         <>
           <PostCard loading />
@@ -244,6 +237,7 @@ const HomeScreen = () => {
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListEmptyComponent={EmptyHomeScreen}
           ListHeaderComponentStyle={{
             marginBottom: getToken("$4", "space") as number,
           }}
@@ -254,6 +248,10 @@ const HomeScreen = () => {
 };
 
 const Footer = () => {
+  const getAppStoreLink = () => {
+    return `https://apps.apple.com/ca/app/oppfy/id6736484676`;
+  };
+
   return (
     <YStack
       paddingVertical="$8"
@@ -269,9 +267,7 @@ const Footer = () => {
           overflow="hidden"
           borderColor="$background"
         >
-          <StyledImage
-            source={Person1}
-          />
+          <StyledImage source={Person1} />
         </Circle>
         <Circle
           size="$8"
@@ -283,9 +279,7 @@ const Footer = () => {
           marginLeft={-15}
           marginRight={-15}
         >
-          <StyledImage
-            source={Person2}
-          />
+          <StyledImage source={Person2} />
         </Circle>
         <Circle
           size="$7"
@@ -294,9 +288,7 @@ const Footer = () => {
           overflow="hidden"
           borderColor="$background"
         >
-          <StyledImage
-            source={Person3}
-          />
+          <StyledImage source={Person3} />
         </Circle>
       </XStack>
       <SizableText size="$5" textAlign="center">
@@ -311,8 +303,8 @@ const Footer = () => {
           backgroundColor: "#F214FF",
         }}
         onPress={async () => {
-          // TODO: share appstore link
-          await Sharing.shareAsync("https://oppfy.app", {
+          const storeLink = getAppStoreLink();
+          await Sharing.shareAsync(storeLink, {
             dialogTitle: "Share to...",
           });
         }}
@@ -342,7 +334,7 @@ const EmptyHomeScreen = () => {
           happens!
         </SizableText>
       </YStack>
-      <Footer />
+      {/* <Footer /> */}
     </YStack>
   );
 };
