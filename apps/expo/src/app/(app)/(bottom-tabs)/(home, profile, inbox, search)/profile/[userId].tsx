@@ -729,11 +729,8 @@ const OtherProfile = React.memo(() => {
         </YStack>
       );
     }
-    if (postItems.length === 0) {
-      return renderNoPosts();
-    }
     return null;
-  }, [isLoading, postItems.length, renderNoPosts]);
+  }, [isLoading]);
 
   if (isLoading) {
     return (

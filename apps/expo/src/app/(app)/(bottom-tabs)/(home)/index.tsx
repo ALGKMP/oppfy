@@ -5,8 +5,8 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import Person3 from "@assets/girls.jpg";
-import Person1 from "@assets/maya.jpg";
 import Person2 from "@assets/mattandfriends.png";
+import Person1 from "@assets/maya.jpg";
 import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
@@ -95,7 +95,6 @@ const HomeScreen = () => {
   const onViewableItemsChanged = useCallback(
     ({
       viewableItems,
-      changed,
     }: {
       viewableItems: ViewToken[];
       changed: ViewToken[];
@@ -157,6 +156,10 @@ const HomeScreen = () => {
     [profile, viewableItems],
   );
 
+
+  const isLoading =
+    isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile;
+
   const renderFooter = useCallback(() => {
     const handleProfilePress = (profile: RecommendationProfile) => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -176,6 +179,15 @@ const HomeScreen = () => {
       });
     };
 
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          <PostCard loading />
+          <PeopleCarousel loading />
+        </YStack>
+      );
+    }
+
     return (
       <View>
         {recommendationsData && recommendationsData.length > 0 && (
@@ -193,22 +205,7 @@ const HomeScreen = () => {
         )}
       </View>
     );
-  }, [recommendationsData, isLoadingRecommendationsData, router]);
-
-  const isLoading =
-    isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile;
-
-  const listFooterComponent = useCallback(() => {
-    if (isLoading) {
-      return (
-        <YStack gap="$4">
-          <PostCard loading />
-          <PeopleCarousel loading />
-        </YStack>
-      );
-    }
-    return renderFooter();
-  }, [isLoading, renderFooter]);
+  }, [recommendationsData, isLoadingRecommendationsData, router, isLoading]);
 
   return (
     <BaseScreenView padding={0} paddingBottom={0} safeAreaEdges={["top"]}>
@@ -231,7 +228,7 @@ const HomeScreen = () => {
           keyExtractor={(item) => "home_post_" + item.postId}
           renderItem={renderPost}
           estimatedItemSize={screenWidth}
-          ListFooterComponent={listFooterComponent}
+          ListFooterComponent={renderFooter}
           extraData={viewableItems}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
