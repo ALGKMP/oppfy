@@ -182,7 +182,7 @@ const HomeScreen = () => {
           <View paddingTop="$4" paddingHorizontal="$1">
             <Footer />
             <PeopleCarousel
-              title="Suggestions"
+              title="Suggestions 🔥"
               showMore={recommendationsData.length > 10}
               data={recommendationsData}
               loading={isLoadingRecommendationsData}
