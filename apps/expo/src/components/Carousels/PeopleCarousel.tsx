@@ -110,7 +110,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         <YStack width={70} gap="$2" alignItems="center">
           <Avatar source={item.profilePictureUrl} size={70} />
           <Text
-            theme="alt1"
             fontSize="$2"
             fontWeight="600"
             textAlign="center"
@@ -164,7 +163,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         {title && (
           <TouchableOpacity onPress={onTitlePress} disabled={!onTitlePress}>
             <XStack>
-              <H5 theme="alt1" paddingLeft="$3">
+              <H5 paddingLeft="$3">
                 {title}
               </H5>
               {emoji && <Text fontSize="$3"> {emoji}</Text>}
