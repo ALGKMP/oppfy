@@ -6,7 +6,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import Person3 from "@assets/girls.jpg";
 import Person1 from "@assets/maya.jpg";
-import Person2 from "@assets/mckenzie.jpg";
+import Person2 from "@assets/mattandfriends.png";
 import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
