@@ -382,7 +382,7 @@ const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
               backgroundColor: 'rgba(0, 0, 0, 0.1)',
             }}
           >
-            <ActivityIndicator size="large" color="#ffffff" />
+            <Circle size={48} borderWidth={2} borderColor="$gray11" />
           </View>
         )}
         {hearts.map((heart) => (
@@ -520,7 +520,7 @@ const VideoPlayerComponent = ({
               backgroundColor: 'rgba(0, 0, 0, 0.1)',
             }}
           >
-            <ActivityIndicator size="large" color="#ffffff" />
+            <Circle size={48} borderWidth={2} borderColor="$gray11" />
           </View>
         )}
         {muteIcons.map((muteIcon) => (

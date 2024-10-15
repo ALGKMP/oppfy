@@ -176,7 +176,6 @@ export const useOptimisticUpdatePost = () => {
         break;
       }
       case "home-feed": {
-        console.log("running home-feeed")
         await utils.post.paginatePostsForFeed.cancel();
         const prevData = utils.post.paginatePostsForFeed.getInfiniteData({
           pageSize: 10,
