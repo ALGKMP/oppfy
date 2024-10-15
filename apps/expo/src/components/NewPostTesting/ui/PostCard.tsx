@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import React, { useCallback, useRef, useState } from "react";
+import { Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Circle } from "tamagui";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -11,7 +12,8 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
+import { Video, ResizeMode } from 'expo-av';
+import type { AVPlaybackStatus } from 'expo-av';
 import {
   Heart,
   MessageCircle,
@@ -337,6 +339,7 @@ interface ImageComponentProps {
 
 const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
   const { hearts, addHeart } = useHeartAnimations();
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
@@ -363,7 +366,25 @@ const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
             borderRadius: getToken("$8", "radius") as number,
           }}
           contentFit="cover"
+          onLoadStart={() => setIsLoading(true)}
+          onLoadEnd={() => setIsLoading(false)}
         />
+        {isLoading && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <ActivityIndicator size="large" color="#ffffff" />
+          </View>
+        )}
         {hearts.map((heart) => (
           <GradientHeart
             key={heart.id}
@@ -392,6 +413,7 @@ const VideoPlayerComponent = ({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -409,6 +431,12 @@ const VideoPlayerComponent = ({
       };
     }, [media.isViewable])
   );
+
+  const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    if (status.isLoaded) {
+      setIsLoading(false);
+    }
+  };
 
   const handleMute = useCallback(() => {
     toggleMute();
@@ -475,7 +503,26 @@ const VideoPlayerComponent = ({
           resizeMode={ResizeMode.COVER}
           isLooping={true}
           isMuted={isMuted}
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+          onLoad={() => setIsLoading(false)}
+          onError={() => setIsLoading(false)}
         />
+        {isLoading && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <ActivityIndicator size="large" color="#ffffff" />
+          </View>
+        )}
         {muteIcons.map((muteIcon) => (
           <Mute key={muteIcon.id} muted={muteIcon.muted} />
         ))}

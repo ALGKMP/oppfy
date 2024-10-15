@@ -69,6 +69,20 @@ const CommentsBottomSheet = forwardRef<
   BottomSheetModal,
   CommentsBottomSheetProps
 >((props, ref) => {
+  const {
+    comments,
+    isLoading,
+    postRecipientId,
+    selfUserId,
+    selfProfilePicture,
+    onEndReached,
+    onPostComment,
+    onDeleteComment,
+    onReportComment,
+    onPressProfilePicture,
+    onPressUsername,
+  } = props;
+
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlashList<Comment> | null>(null);
@@ -78,18 +92,18 @@ const CommentsBottomSheet = forwardRef<
     (commentId: string) => {
       listRef.current?.prepareForLayoutAnimationRender();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      props.onDeleteComment(commentId);
+      onDeleteComment(commentId);
     },
-    [props],
+    [onDeleteComment],
   );
 
   const handlePostComment = useCallback(
     (comment: string) => {
       listRef.current?.prepareForLayoutAnimationRender();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      props.onPostComment(comment);
+      onPostComment(comment);
     },
-    [props],
+    [onPostComment],
   );
 
   const keyExtractor = useCallback((item: Comment) => item.id.toString(), []);
@@ -99,8 +113,8 @@ const CommentsBottomSheet = forwardRef<
       <CommentItem
         key={item.id}
         comment={item}
-        isPostOwner={props.selfUserId === props.postRecipientId}
-        isCommentOwner={item.userId === props.selfUserId}
+        isPostOwner={selfUserId === postRecipientId}
+        isCommentOwner={item.userId === selfUserId}
         onDelete={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -108,41 +122,48 @@ const CommentsBottomSheet = forwardRef<
         }}
         onReport={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          props.onReportComment(item.id);
+          onReportComment(item.id);
         }}
         onPressProfilePicture={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          props.onPressProfilePicture(item.userId, item.username);
+          onPressProfilePicture(item.userId, item.username);
         }}
         onPressUsername={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          props.onPressUsername(item.userId, item.username);
+          onPressUsername(item.userId, item.username);
         }}
       />
     ),
-    [handleDeleteComment, props],
+    [
+      selfUserId,
+      postRecipientId,
+      handleDeleteComment,
+      onReportComment,
+      onPressProfilePicture,
+      onPressUsername,
+    ],
   );
 
   const ListContent = useMemo(() => {
-    if (props.isLoading) return <LoadingView />;
-    if (props.comments.length === 0) return <EmptyCommentsView />;
+    if (isLoading) return <LoadingView />;
+    if (comments.length === 0) return <EmptyCommentsView />;
 
     return (
       <FlashList
         ref={listRef}
-        data={props.comments}
+        data={comments}
         renderItem={renderComment}
         estimatedItemSize={100}
-        onEndReached={props.onEndReached}
+        onEndReached={onEndReached}
         showsVerticalScrollIndicator={false}
         keyExtractor={keyExtractor}
       />
     );
   }, [
-    props.isLoading,
-    props.comments,
+    isLoading,
+    comments,
     renderComment,
-    props.onEndReached,
+    onEndReached,
     keyExtractor,
   ]);
 
