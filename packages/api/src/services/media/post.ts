@@ -1,6 +1,7 @@
 import type { z } from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
+import { env } from "@oppfy/env";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -12,6 +13,9 @@ import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
+import { MuxRepository } from "../../repositories/mux/mux";
+import { S3Repository } from "../../repositories/aws/s3";
+
 import { CloudFrontService } from "../aws/cloudfront";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
@@ -49,6 +53,8 @@ export class PostService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private viewRepository = new ViewRepository();
+  private muxRepository = new MuxRepository();
+  private s3Repository = new S3Repository();
 
   private cloudFrontService = new CloudFrontService();
   private notificationsService = new NotificationsService();
@@ -290,7 +296,18 @@ export class PostService {
       // get the post
       const post = await this.postRepository.getPost(postId);
 
+      if (!post) {
+        throw new DomainError(ErrorCode.POST_NOT_FOUND, "Post not found.");
+      }
+
       await this.postRepository.deletePost(postId);
+
+      // if (post.mediaType === "video") {
+      //   await this.muxRepository.deleteAsset(post.imageUrl);
+      // } else {
+      //   await this.s3Repository.deleteObject(env.S3_POST_BUCKET, post.imageUrl);
+      // }
+
     } catch (error) {
       console.error(`Error in deletePost for postId: ${postId}: `, error);
       throw new DomainError(
