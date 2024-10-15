@@ -410,17 +410,6 @@ const VideoPlayerComponent = ({
     }, [media.isViewable])
   );
 
-  const handlePlaybackStatusUpdate = useCallback(
-    (status: AVPlaybackStatus) => {
-      if (status.isLoaded) {
-        if (status.didJustFinish) {
-          void videoRef.current?.replayAsync();
-        }
-      }
-    },
-    []
-  );
-
   const handleMute = useCallback(() => {
     toggleMute();
     addMute(!isMuted);
@@ -484,9 +473,8 @@ const VideoPlayerComponent = ({
           }}
           source={{ uri: media.url }}
           resizeMode={ResizeMode.COVER}
-          isLooping
+          isLooping={true}
           isMuted={isMuted}
-          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         />
         {muteIcons.map((muteIcon) => (
           <Mute key={muteIcon.id} muted={muteIcon.muted} />
