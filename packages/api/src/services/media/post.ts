@@ -8,13 +8,12 @@ import {
   UserRepository,
   ViewRepository,
 } from "../../repositories";
+import { S3Repository } from "../../repositories/aws/s3";
 import { CommentRepository } from "../../repositories/media/comment";
 import { LikeRepository } from "../../repositories/media/like";
 import { PostRepository } from "../../repositories/media/post";
 import { PostStatsRepository } from "../../repositories/media/post-stats";
 import { MuxRepository } from "../../repositories/mux/mux";
-import { S3Repository } from "../../repositories/aws/s3";
-
 import { CloudFrontService } from "../aws/cloudfront";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
@@ -151,7 +150,7 @@ export class PostService {
       pageSize,
     );
 
-    const parsedFollowingResult = await this._processPaginatedPostData(
+    const parsedFollowingResult = await this._processPaginatedPostDataForFeed(
       followingResult,
       pageSize,
     );
@@ -308,7 +307,6 @@ export class PostService {
       // } else {
       //   await this.s3Repository.deleteObject(env.S3_POST_BUCKET, post.imageUrl);
       // }
-
     } catch (error) {
       console.error(`Error in deletePost for postId: ${postId}: `, error);
       throw new DomainError(
@@ -630,7 +628,7 @@ export class PostService {
 
   private async _processPaginatedPostData(
     data: Post[],
-    pageSize = 20,
+    pageSize: number,
   ): Promise<PaginatedResponse<Post>> {
     const items = data.map(async (item) => {
       try {
@@ -680,6 +678,68 @@ export class PostService {
       }
       nextCursor = {
         createdAt: nextItem.createdAt,
+        postId: nextItem.postId,
+      };
+    }
+    return {
+      items: await Promise.all(items),
+      nextCursor,
+    };
+  }
+
+  private async _processPaginatedPostDataForFeed(
+    data: Post[],
+    pageSize: number,
+  ): Promise<PaginatedResponse<Post>> {
+    const items = data.map(async (item) => {
+      try {
+        if (item.authorProfilePicture !== null) {
+          item.authorProfilePicture =
+            await this.cloudFrontService.getSignedUrlForProfilePicture(
+              item.authorProfilePicture,
+            );
+        }
+
+        if (item.recipientProfilePicture !== null) {
+          item.recipientProfilePicture =
+            await this.cloudFrontService.getSignedUrlForProfilePicture(
+              item.recipientProfilePicture,
+            );
+        }
+
+        if (item.mediaType === "image") {
+          const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
+            item.imageUrl,
+          );
+          item.imageUrl = imageUrl;
+        } else {
+          item.imageUrl = `https://stream.mux.com/${item.imageUrl}.m3u8`;
+        }
+      } catch (error) {
+        console.error(
+          `Error updating profile picture URLs for postId: ${item.postId}, authorId: ${item.authorId}, recipientId: ${item.recipientId}: `,
+          error,
+        );
+        throw new DomainError(
+          ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+          "Failed to get profile picture URL.",
+        );
+      }
+      return item;
+    });
+
+    let nextCursor: FeedCursor | undefined = undefined;
+    if (items.length > pageSize) {
+      const nextItem = await items[pageSize];
+      if (!nextItem) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_PAGINATE_POSTS,
+          "Failed to paginate posts.",
+        );
+      }
+      nextCursor = {
+        createdAt: nextItem.createdAt,
+        type: "following",
         postId: nextItem.postId,
       };
     }
