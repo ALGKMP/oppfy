@@ -17,7 +17,7 @@ export class PostRepository {
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
     const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
 
-    return await this.db
+    const result = await this.db
       .selectDistinct({
         postId: schema.post.id,
         authorId: schema.post.authorId,
@@ -45,6 +45,8 @@ export class PostRepository {
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(eq(schema.post.id, postId))
       .limit(1);
+    
+      return result[0];
   }
 
   @handleDatabaseErrors

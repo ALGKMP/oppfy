@@ -256,13 +256,13 @@ export class PostService {
   async getPost(postId: string): Promise<Post> {
     try {
       const post = await this.postRepository.getPost(postId);
-      if (!post[0]) {
+      if (!post) {
         throw new DomainError(
           ErrorCode.FAILED_TO_GET_POST,
           "Failed to get post.",
         );
       }
-      const updatedPost = await this._processPostData(post[0]);
+      const updatedPost = await this._processPostData(post);
       return updatedPost;
     } catch (error) {
       console.error(`Error in getPost for postId: ${postId}: `, error);
@@ -287,6 +287,9 @@ export class PostService {
 
   async deletePost(postId: string) {
     try {
+      // get the post
+      const post = await this.postRepository.getPost(postId);
+
       await this.postRepository.deletePost(postId);
     } catch (error) {
       console.error(`Error in deletePost for postId: ${postId}: `, error);
