@@ -154,7 +154,7 @@ export const postRouter = createTRPCRouter({
             createdAt: z.date(),
           })
           .optional(),
-        pageSize: z.number().nonnegative().optional(),
+        pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -188,7 +188,7 @@ export const postRouter = createTRPCRouter({
             createdAt: z.date(),
           })
           .optional(),
-        pageSize: z.number().nonnegative().optional(),
+        pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -223,7 +223,7 @@ export const postRouter = createTRPCRouter({
             postId: z.string(),
           })
           .optional(),
-        pageSize: z.number().nonnegative().optional(),
+        pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -231,7 +231,7 @@ export const postRouter = createTRPCRouter({
         return await ctx.services.post.paginatePostsForFeed(
           ctx.session.uid,
           input.cursor ?? null,
-          input.pageSize ?? 10,
+          input.pageSize,
         );
       } catch (err) {
         console.error("TRPC getPosts error: ", err);
@@ -258,7 +258,7 @@ export const postRouter = createTRPCRouter({
             createdAt: z.date(),
           })
           .optional(),
-        pageSize: z.number().nonnegative().optional(),
+        pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -266,7 +266,7 @@ export const postRouter = createTRPCRouter({
         const result = await ctx.services.post.paginatePostsOfUserOther({
           userId: input.userId,
           cursor: input.cursor ?? null,
-          pageSize: input.pageSize ?? 10,
+          pageSize: input.pageSize,
           currentUserId: ctx.session.uid,
         });
 
@@ -295,14 +295,14 @@ export const postRouter = createTRPCRouter({
             createdAt: z.date(),
           })
           .optional(),
-        pageSize: z.number().nonnegative().optional(),
+        pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {
       try {
         const result = await ctx.services.post.paginatePostsOfUserSelf(
           ctx.session.uid,
-          input.cursor,
+          input.cursor ?? null,
           input.pageSize,
         );
         return result;
@@ -331,7 +331,7 @@ export const postRouter = createTRPCRouter({
             createdAt: z.date(),
           })
           .optional(),
-        pageSize: z.number().nonnegative().optional(),
+        pageSize: z.number().nonnegative().optional().default(10),
       }),
     )
     .query(async ({ ctx, input }) => {

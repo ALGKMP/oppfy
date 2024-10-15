@@ -1,7 +1,6 @@
 import type { z } from "zod";
 
 import type { sharedValidators } from "@oppfy/validators";
-import { env } from "@oppfy/env";
 
 import { DomainError, ErrorCode } from "../../errors";
 import {
@@ -53,8 +52,6 @@ export class PostService {
   private userRepository = new UserRepository();
   private profileRepository = new ProfileRepository();
   private viewRepository = new ViewRepository();
-  private muxRepository = new MuxRepository();
-  private s3Repository = new S3Repository();
 
   private cloudFrontService = new CloudFrontService();
   private notificationsService = new NotificationsService();
@@ -63,7 +60,7 @@ export class PostService {
   async paginatePostsOfUserSelf(
     userId: string,
     cursor: PostCursor | null = null,
-    pageSize?: number,
+    pageSize: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
       const data = await this.postRepository.paginatePostsOfUser(
@@ -90,7 +87,7 @@ export class PostService {
   }: {
     userId: string;
     cursor: PostCursor | null;
-    pageSize?: number;
+    pageSize: number;
     currentUserId: string;
   }): Promise<PaginatedResponse<Post>> {
     try {
@@ -108,6 +105,7 @@ export class PostService {
       const data = await this.postRepository.paginatePostsOfUser(
         userId,
         cursor,
+        pageSize,
       );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
@@ -123,12 +121,13 @@ export class PostService {
   async paginatePostsOfRecommended(
     userId: string,
     cursor: PostCursor | null = null,
-    pageSize?: number,
+    pageSize: number,
   ) {
     try {
       const data = await this.postRepository.paginatePostsOfRecommended(
         userId,
         cursor,
+        pageSize,
       );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
@@ -144,7 +143,7 @@ export class PostService {
   async paginatePostsForFeed(
     userId: string,
     cursor: FeedCursor | null = null,
-    pageSize = 10,
+    pageSize: number,
   ): Promise<PaginatedResponse<Post>> {
     const followingResult = await this.postRepository.paginatePostsOfFollowing(
       userId,
@@ -216,12 +215,13 @@ export class PostService {
   async paginatePostsByUserSelf(
     userId: string,
     cursor: PostCursor | null = null,
-    pageSize?: number,
+    pageSize: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
       const data = await this.postRepository.paginatePostsByUser(
         userId,
         cursor,
+        pageSize,
       );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
@@ -237,7 +237,7 @@ export class PostService {
   async paginatePostsByUserOther(
     profileId: string,
     cursor: PostCursor | null = null,
-    pageSize?: number,
+    pageSize: number,
   ): Promise<PaginatedResponse<Post>> {
     try {
       const user = await this.userRepository.getUserByProfileId(profileId);
@@ -247,6 +247,7 @@ export class PostService {
       const data = await this.postRepository.paginatePostsByUser(
         user.id,
         cursor,
+        pageSize,
       );
       const updatedData = await this._processPaginatedPostData(data, pageSize);
       return updatedData;
