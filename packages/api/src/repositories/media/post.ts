@@ -93,7 +93,7 @@ export class PostRepository {
   async paginatePostsOfFollowing(
     userId: string,
     cursor: { createdAt: Date; postId: string } | null = null,
-    pageSize = 10,
+    pageSize: number,
   ) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
@@ -152,7 +152,7 @@ export class PostRepository {
   async paginatePostsOfRecommended(
     userId: string,
     cursor: { createdAt: Date; postId: string } | null = null,
-    pageSize = 10,
+    pageSize: number,
   ) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
@@ -228,7 +228,7 @@ export class PostRepository {
   async paginatePostsOfUser(
     userId: string,
     cursor: { createdAt: Date; postId: string } | null = null,
-    pageSize = 10,
+    pageSize: number,
   ) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
@@ -283,7 +283,7 @@ export class PostRepository {
   async paginatePostsByUser(
     userId: string,
     cursor: { createdAt: Date; postId: string } | null = null,
-    pageSize = 10,
+    pageSize: number,
   ) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");

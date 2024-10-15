@@ -51,7 +51,7 @@ export class CommentRepository {
   async paginateComments(
     postId: string,
     cursor: { createdAt: Date; commentId: string } | null = null,
-    pageSize = 10,
+    pageSize: number,
   ) {
     return await this.db
       .select({
