@@ -192,7 +192,6 @@ const HomeScreen = () => {
       <View>
         {recommendationsData && recommendationsData.length > 0 && (
           <View paddingTop="$4" paddingHorizontal="$1">
-            <Footer />
             <PeopleCarousel
               title="Suggestions 🔥"
               showMore={recommendationsData.length > 10}
@@ -201,6 +200,7 @@ const HomeScreen = () => {
               onItemPress={handleProfilePress}
               onShowMore={handleShowMore}
             />
+            <Footer />
           </View>
         )}
       </View>
@@ -247,7 +247,6 @@ const Footer = () => {
   const getAppStoreLink = () => {
     return `https://apps.apple.com/ca/app/oppfy/id6736484676`;
   };
-
   return (
     <YStack
       paddingVertical="$8"
@@ -326,11 +325,10 @@ const EmptyHomeScreen = () => {
           }}
         />
         <SizableText size="$5" fontWeight="bold" textAlign="center">
-          Once you follow people, you'll see who gets opped here the moment it
+          Once you follow people, you'll see who gets opped here the momment it
           happens!
         </SizableText>
       </YStack>
-      {/* <Footer /> */}
     </YStack>
   );
 };
