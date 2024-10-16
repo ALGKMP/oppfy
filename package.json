@@ -19,6 +19,7 @@
     "lint:fix": "turbo lint --continue -- --fix --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:ws": "pnpm dlx sherif@latest",
     "sort-package-json": "sort-package-json \"**/package.json\"",
+    "expo:update": "MESSAGE=\"$MESSAGE\" pnpm -F expo update:production",
     "typecheck": "turbo typecheck"
   },
   "prettier": "@oppfy/prettier-config",

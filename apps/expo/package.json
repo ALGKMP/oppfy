@@ -21,6 +21,7 @@
     "prebuild": "expo prebuild",
     "prebuild:clean": "expo prebuild --clean",
     "typecheck": "tsc --noEmit",
+    "update:production": "eas update --channel production --message \"$MESSAGE\"",
     "with-env": "dotenv -e ../../.env --"
   },
   "prettier": "@oppfy/prettier-config",
