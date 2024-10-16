@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Keyboard } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -20,6 +21,8 @@ type RecommendationsData =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
 
 const Search = () => {
+  const insets = useSafeAreaInsets();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResultsData>([]);
 
@@ -104,7 +107,7 @@ const Search = () => {
 
   return (
     <BaseScreenView scrollable keyboardDismissMode="interactive">
-      <YStack gap="$4">
+      <YStack flex={1} gap="$4" paddingBottom={insets.bottom}>
         <SearchInput
           value={searchTerm}
           placeholder="Search by username"
