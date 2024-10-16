@@ -18,11 +18,11 @@ import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
+import EmptyPlaceholder from "~/components/UIPlaceholders/EmptyPlaceholder";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import EmptyPlaceholder from "~/components/UIPlaceholders/EmptyPlaceholder";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -159,42 +159,45 @@ const SelfProfile = React.memo(() => {
   );
 
   const renderPost = useCallback(
-    (item: Post) => (
-      <SelfPost
-        key={item.postId}
-        id={item.postId}
-        createdAt={item.createdAt}
-        caption={item.caption}
-        self={{
-          id: profileData?.userId ?? "",
-          username: profileData?.username ?? "",
-          profilePicture: profileData?.profilePictureUrl,
-        }}
-        author={{
-          id: item.authorId,
-          username: item.authorUsername ?? "",
-          profilePicture: item.authorProfilePicture,
-        }}
-        recipient={{
-          id: item.recipientId,
-          username: item.recipientUsername ?? "",
-          profilePicture: item.recipientProfilePicture,
-        }}
-        media={{
-          type: item.mediaType,
-          url: item.imageUrl,
-          isViewable: viewableItems.includes(item.postId),
-          dimensions: {
-            width: item.width,
-            height: item.height,
-          },
-        }}
-        stats={{
-          likes: item.likesCount,
-          comments: item.commentsCount,
-        }}
-      />
-    ),
+    ({ item }: { item: Post }) => {
+      return (
+        <View paddingTop="$4">
+          <SelfPost
+            id={item.postId}
+            createdAt={item.createdAt}
+            caption={item.caption}
+            self={{
+              id: profileData?.userId ?? "",
+              username: profileData?.username ?? "",
+              profilePicture: profileData?.profilePictureUrl,
+            }}
+            author={{
+              id: item.authorId,
+              username: item.authorUsername ?? "",
+              profilePicture: item.authorProfilePicture,
+            }}
+            recipient={{
+              id: item.recipientId,
+              username: item.recipientUsername ?? "",
+              profilePicture: item.recipientProfilePicture,
+            }}
+            media={{
+              type: item.mediaType,
+              url: item.imageUrl,
+              isViewable: viewableItems.includes(item.postId),
+              dimensions: {
+                width: item.width,
+                height: item.height,
+              },
+            }}
+            stats={{
+              likes: item.likesCount,
+              comments: item.commentsCount,
+            }}
+          />
+        </View>
+      );
+    },
     [profileData, viewableItems],
   );
 
@@ -258,14 +261,17 @@ const SelfProfile = React.memo(() => {
     [friendItems, recommendationItems, router, navigateToProfile, profileData],
   );
 
-  const renderEmptyState = useCallback(() => (
-    <View paddingTop="$6">
-      <EmptyPlaceholder
-        icon={<CameraOff size="$10" />}
-        title="No posts yet"
-      />
-    </View>
-  ), []);
+  const renderEmptyState = useCallback(
+    () => (
+      <View paddingTop="$6">
+        <EmptyPlaceholder
+          icon={<CameraOff size="$10" />}
+          title="No posts yet"
+        />
+      </View>
+    ),
+    [],
+  );
 
   if (isLoading) {
     return (
@@ -284,7 +290,7 @@ const SelfProfile = React.memo(() => {
       <FlashList
         ref={scrollRef}
         data={postItems}
-        renderItem={({ item }) => renderPost(item)}
+        renderItem={renderPost}
         ListHeaderComponent={renderHeader}
         keyExtractor={(item) => `self-profile-post-${item.postId}`}
         estimatedItemSize={600}
