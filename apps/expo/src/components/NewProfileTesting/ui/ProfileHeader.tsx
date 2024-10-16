@@ -16,6 +16,7 @@ import { abbreviatedNumber } from "@oppfy/utils";
 
 import Avatar from "~/components/Avatar";
 import { Skeleton } from "~/components/Skeletons";
+import { StyleSheet } from "react-native";
 
 export interface ProfileData {
   userId: string;
@@ -151,8 +152,12 @@ const ProfileHeaderDetails = memo((props: ProfileHeaderDetailsProps) => {
             backgroundColor={action.backgroundColor}
             onPress={action.onPress}
             disabled={action.disabled}
-            borderWidth="$0.5"
+            borderWidth={1}
             borderColor="white"
+            pressStyle={{
+              borderWidth: 1,
+              borderColor: "white",
+            }}
           >
             <XStack gap="$2" alignItems="center">
               <Text textAlign="center">{action.label}</Text>
