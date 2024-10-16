@@ -8,7 +8,7 @@ import { Image, Stack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 
-const NUM_COLUMNS = 4;
+const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
 
@@ -65,14 +65,15 @@ const MediaPickerScreen = () => {
         width={ITEM_SIZE}
         height={ITEM_SIZE}
         margin={0.5}
-        onPress={() => {
+        onPress={async () => {
+          const assetInfo = await MediaLibrary.getAssetInfoAsync(item);
           router.push({
             pathname: "/preview",
             params: {
-              uri: item.uri,
-              type: item.mediaType,
-              height: item.height.toString(),
-              width: item.width.toString(),
+              uri: assetInfo.localUri,
+              type: assetInfo.mediaType,
+              height: assetInfo.height.toString(),
+              width: assetInfo.width.toString(),
             },
           });
         }}

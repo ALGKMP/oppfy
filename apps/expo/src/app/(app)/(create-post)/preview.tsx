@@ -224,6 +224,9 @@ const PreviewVideo = ({ uri, videoRef }: PreviewVideoProps) => {
         shouldPlay
         style={{ flex: 1 }}
         onPlaybackStatusUpdate={(status) => setStatus(status)}
+        onError={(error) => {
+          console.log(error);
+        }}
       />
       {showControls && (
         <Animated.View
