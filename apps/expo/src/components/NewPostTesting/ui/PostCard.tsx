@@ -360,6 +360,7 @@ const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
       <View>
         <Image
           source={{ uri: media.url }}
+          recyclingKey={media.url}
           style={{
             width: "100%",
             aspectRatio: media.dimensions.width / media.dimensions.height,
