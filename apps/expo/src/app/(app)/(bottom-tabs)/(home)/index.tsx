@@ -36,7 +36,7 @@ import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-type PostItem = RouterOutputs["post"]["paginatePostsOfRecommended"]["items"][0];
+type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
 
 interface TokenItem {
   postId?: string | undefined;
@@ -156,7 +156,6 @@ const HomeScreen = () => {
     [profile, viewableItems],
   );
 
-
   const isLoading =
     isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile;
 
@@ -209,6 +208,7 @@ const HomeScreen = () => {
 
   return (
     <BaseScreenView padding={0} paddingBottom={0} safeAreaEdges={["top"]}>
+    <>
       {isLoading ? (
         <>
           <PostCard loading />
@@ -222,7 +222,7 @@ const HomeScreen = () => {
           refreshing={refreshing}
           onRefresh={onRefresh}
           onEndReached={handleOnEndReached}
-          nestedScrollEnabled={true}
+          nestedScrollEnabled={false}
           showsVerticalScrollIndicator={false}
           numColumns={1}
           keyExtractor={(item) => "home_post_" + item.postId}
@@ -238,7 +238,10 @@ const HomeScreen = () => {
             marginBottom: getToken("$4", "space") as number,
           }}
         />
+
       )}
+
+    </>
     </BaseScreenView>
   );
 };
