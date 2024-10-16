@@ -163,7 +163,6 @@ const SelfProfile = React.memo(() => {
       return (
         <View paddingTop="$4">
           <SelfPost
-            key={item.postId}
             id={item.postId}
             createdAt={item.createdAt}
             caption={item.caption}

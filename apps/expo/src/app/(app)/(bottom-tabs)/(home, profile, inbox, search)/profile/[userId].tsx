@@ -474,7 +474,6 @@ const OtherProfile = React.memo(() => {
       return (
         <View paddingTop="$4">
           <OtherPost
-            key={item.postId}
             id={item.postId}
             endpoint="other-profile"
             createdAt={item.createdAt}
