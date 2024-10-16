@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import { ChevronRight } from "@tamagui/lucide-icons";
-import { Image, Stack, Text, useTheme, XStack, YStack } from "tamagui";
+import { Image, Stack, Text, XStack, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 

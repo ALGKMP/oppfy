@@ -34,7 +34,6 @@ const CameraLayout = () => {
       <Stack.Screen
         name="media-picker"
         options={{
-          title: "Media",
           animation: "fade",
         }}
       />
