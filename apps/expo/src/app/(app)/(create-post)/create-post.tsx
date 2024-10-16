@@ -1,8 +1,9 @@
-import React, { useCallback, useRef, useState } from "react";
-import { Pressable, View as RNView, StyleSheet } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Animated, Pressable, View as RNView, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { AVPlaybackStatus } from "expo-av";
 import { ResizeMode, Video } from "expo-av";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -75,7 +76,23 @@ const CreatePost = () => {
   const inputRef = useRef<TextInput>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
+  const [showControls, setShowControls] = useState(true);
+  const controlFadeAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (showControls) {
+      const timeout = setTimeout(() => {
+        Animated.timing(controlFadeAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => setShowControls(false));
+      }, 2000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [controlFadeAnim, showControls]);
 
   const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
 
@@ -122,12 +139,22 @@ const CreatePost = () => {
   });
 
   const togglePlayback = async () => {
-    if (isPlaying) {
+    if (!status?.isLoaded) return;
+
+    if (status.isPlaying) {
       await videoRef.current?.pauseAsync();
     } else {
       await videoRef.current?.playAsync();
     }
-    setIsPlaying(!isPlaying);
+
+    setShowControls(true);
+    controlFadeAnim.setValue(1);
+  };
+
+  const handleVideoPress = () => {
+    setShowControls(true);
+    controlFadeAnim.setValue(1);
+    void togglePlayback();
   };
 
   const openBottomSheet = () => {
@@ -216,7 +243,7 @@ const CreatePost = () => {
                 />
               ) : (
                 <Pressable
-                  onPress={togglePlayback}
+                  onPress={handleVideoPress}
                   style={[
                     styles.mediaContainer,
                     { width: previewWidth, height: previewHeight },
@@ -232,28 +259,32 @@ const CreatePost = () => {
                     resizeMode={ResizeMode.COVER}
                     isLooping
                     shouldPlay={false}
+                    onPlaybackStatusUpdate={(status) => setStatus(status)}
                   />
-                  <View
-                    position="absolute"
-                    top="0"
-                    left="0"
-                    right="0"
-                    bottom="0"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <View
-                      backgroundColor="rgba(0, 0, 0, 0.5)"
-                      borderRadius={24}
-                      padding={8}
+                  {showControls && (
+                    <Animated.View
+                      style={[
+                        styles.controlsContainer,
+                        { opacity: controlFadeAnim },
+                      ]}
                     >
-                      <Ionicons
-                        name={isPlaying ? "pause" : "play"}
-                        size={24}
-                        color="white"
-                      />
-                    </View>
-                  </View>
+                      <View
+                        backgroundColor="rgba(0, 0, 0, 0.5)"
+                        borderRadius={24}
+                        padding={8}
+                      >
+                        <Ionicons
+                          name={
+                            status?.isLoaded && status.isPlaying
+                              ? "pause"
+                              : "play"
+                          }
+                          size={24}
+                          color="white"
+                        />
+                      </View>
+                    </Animated.View>
+                  )}
                 </Pressable>
               )}
             </YStack>
@@ -379,6 +410,12 @@ const styles = StyleSheet.create({
   },
   mediaContainer: {
     position: "relative",
+    overflow: "hidden",
+  },
+  controlsContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

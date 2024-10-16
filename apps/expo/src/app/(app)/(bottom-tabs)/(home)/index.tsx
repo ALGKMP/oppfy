@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -46,6 +47,7 @@ const HomeScreen = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
+  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -115,42 +117,40 @@ const HomeScreen = () => {
       if (!profile || !("postId" in item)) return null;
 
       return (
-        <View paddingTop="$4">
-          <OtherPost
-            id={item.postId}
-            createdAt={item.createdAt}
-            caption={item.caption}
-            endpoint="home-feed"
-            self={{
-              id: profile.userId,
-              username: profile.username,
-              profilePicture: profile.profilePictureUrl,
-            }}
-            author={{
-              id: item.authorId,
-              username: item.authorUsername ?? "",
-              profilePicture: item.authorProfilePicture,
-            }}
-            recipient={{
-              id: item.recipientId,
-              username: item.recipientUsername ?? "",
-              profilePicture: item.recipientProfilePicture,
-            }}
-            media={{
-              isViewable: viewableItems.includes(item.postId),
-              type: item.mediaType,
-              url: item.imageUrl,
-              dimensions: {
-                width: item.width,
-                height: item.height,
-              },
-            }}
-            stats={{
-              likes: item.likesCount,
-              comments: item.commentsCount,
-            }}
-          />
-        </View>
+        <OtherPost
+          id={item.postId}
+          createdAt={item.createdAt}
+          caption={item.caption}
+          endpoint="home-feed"
+          self={{
+            id: profile.userId,
+            username: profile.username,
+            profilePicture: profile.profilePictureUrl,
+          }}
+          author={{
+            id: item.authorId,
+            username: item.authorUsername ?? "",
+            profilePicture: item.authorProfilePicture,
+          }}
+          recipient={{
+            id: item.recipientId,
+            username: item.recipientUsername ?? "",
+            profilePicture: item.recipientProfilePicture,
+          }}
+          media={{
+            isViewable: viewableItems.includes(item.postId),
+            type: item.mediaType,
+            url: item.imageUrl,
+            dimensions: {
+              width: item.width,
+              height: item.height,
+            },
+          }}
+          stats={{
+            likes: item.likesCount,
+            comments: item.commentsCount,
+          }}
+        />
       );
     },
     [profile, viewableItems],
@@ -207,41 +207,39 @@ const HomeScreen = () => {
   }, [recommendationsData, isLoadingRecommendationsData, router, isLoading]);
 
   return (
-    <BaseScreenView padding={0} paddingBottom={0} safeAreaEdges={["top"]}>
-    <>
-      {isLoading ? (
-        <>
-          <PostCard loading />
-          <Spacer size="$4" />
-          <PostCard loading />
-        </>
-      ) : (
-        <FlashList
-          ref={scrollRef}
-          data={postItems}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          onEndReached={handleOnEndReached}
-          nestedScrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-          numColumns={1}
-          keyExtractor={(item) => "home_post_" + item.postId}
-          renderItem={renderPost}
-          estimatedItemSize={screenWidth}
-          ListFooterComponent={renderFooter}
-          extraData={viewableItems}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-          ItemSeparatorComponent={() => <Spacer size="$4" />}
-          ListEmptyComponent={EmptyHomeScreen}
-          ListHeaderComponentStyle={{
-            marginBottom: getToken("$4", "space") as number,
-          }}
-        />
-
-      )}
-
-    </>
+    <BaseScreenView padding={0} paddingBottom={0}>
+      <>
+        {isLoading ? (
+          <>
+            <PostCard loading />
+            <Spacer size="$4" />
+            <PostCard loading />
+          </>
+        ) : (
+          <FlashList
+            ref={scrollRef}
+            data={postItems}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            onEndReached={handleOnEndReached}
+            nestedScrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+            numColumns={1}
+            keyExtractor={(item) => "home_post_" + item.postId}
+            renderItem={renderPost}
+            estimatedItemSize={screenWidth}
+            ListFooterComponent={renderFooter}
+            extraData={viewableItems}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+            ItemSeparatorComponent={() => <Spacer size="$4" />}
+            ListEmptyComponent={EmptyHomeScreen}
+            contentContainerStyle={{
+              paddingTop: (insets.top + getToken("$2", "space")) as number,
+            }}
+          />
+        )}
+      </>
     </BaseScreenView>
   );
 };

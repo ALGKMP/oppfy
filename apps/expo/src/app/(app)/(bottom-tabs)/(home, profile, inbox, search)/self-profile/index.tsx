@@ -161,41 +161,39 @@ const SelfProfile = React.memo(() => {
   const renderPost = useCallback(
     ({ item }: { item: Post }) => {
       return (
-        <View paddingTop="$4">
-          <SelfPost
-            id={item.postId}
-            createdAt={item.createdAt}
-            caption={item.caption}
-            self={{
-              id: profileData?.userId ?? "",
-              username: profileData?.username ?? "",
-              profilePicture: profileData?.profilePictureUrl,
-            }}
-            author={{
-              id: item.authorId,
-              username: item.authorUsername ?? "",
-              profilePicture: item.authorProfilePicture,
-            }}
-            recipient={{
-              id: item.recipientId,
-              username: item.recipientUsername ?? "",
-              profilePicture: item.recipientProfilePicture,
-            }}
-            media={{
-              type: item.mediaType,
-              url: item.imageUrl,
-              isViewable: viewableItems.includes(item.postId),
-              dimensions: {
-                width: item.width,
-                height: item.height,
-              },
-            }}
-            stats={{
-              likes: item.likesCount,
-              comments: item.commentsCount,
-            }}
-          />
-        </View>
+        <SelfPost
+          id={item.postId}
+          createdAt={item.createdAt}
+          caption={item.caption}
+          self={{
+            id: profileData?.userId ?? "",
+            username: profileData?.username ?? "",
+            profilePicture: profileData?.profilePictureUrl,
+          }}
+          author={{
+            id: item.authorId,
+            username: item.authorUsername ?? "",
+            profilePicture: item.authorProfilePicture,
+          }}
+          recipient={{
+            id: item.recipientId,
+            username: item.recipientUsername ?? "",
+            profilePicture: item.recipientProfilePicture,
+          }}
+          media={{
+            type: item.mediaType,
+            url: item.imageUrl,
+            isViewable: viewableItems.includes(item.postId),
+            dimensions: {
+              width: item.width,
+              height: item.height,
+            },
+          }}
+          stats={{
+            likes: item.likesCount,
+            comments: item.commentsCount,
+          }}
+        />
       );
     },
     [profileData, viewableItems],
