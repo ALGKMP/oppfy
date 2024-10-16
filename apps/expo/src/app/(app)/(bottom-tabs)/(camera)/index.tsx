@@ -171,7 +171,7 @@ const CameraPage = () => {
     }
 
     // Navigate to the custom media picker screen
-    router.push('/media-picker');
+    router.push('/album-picker');
   }, [router]);
 
   const onFlipCameraPressed = useCallback(() => {
