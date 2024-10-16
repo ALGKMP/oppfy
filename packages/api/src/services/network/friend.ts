@@ -27,7 +27,6 @@ export class FriendService {
 
     const friendshipExists = await this.friendshipExists(senderId, recipientId);
 
-
     if (friendshipExists) {
       throw new DomainError(
         ErrorCode.USER_ALREADY_FRIENDS,
@@ -135,6 +134,8 @@ export class FriendService {
         : [recipientId, senderId];
 
     await this.friendRepository.createFriend(user1, user2);
+
+    await this.friendRepository.deleteFriendRequest(senderId, recipientId);
 
     const senderFollowRequestToRecipient =
       await this.followRepository.getFollowRequest(senderId, recipientId);
