@@ -1,10 +1,11 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { Dimensions } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
-import { Image, Stack } from "tamagui";
+import { Stack } from "tamagui";
+import { Image } from "expo-image";
 
 import { BaseScreenView } from "~/components/Views";
 
@@ -59,7 +60,7 @@ const MediaPickerScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderItem = ({ item }: { item: MediaLibrary.Asset }) => {
+  const renderItem = useCallback(({ item }: { item: MediaLibrary.Asset }) => {
     return (
       <Stack
         width={ITEM_SIZE}
@@ -80,9 +81,12 @@ const MediaPickerScreen = () => {
       >
         <Image
           source={{ uri: item.uri }}
-          width="100%"
-          height="100%"
-          resizeMode="cover"
+          recyclingKey={item.uri}
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+          contentFit="cover"
         />
         {item.mediaType === "video" && (
           <Stack position="absolute" top={5} left={5}>
@@ -91,14 +95,14 @@ const MediaPickerScreen = () => {
         )}
       </Stack>
     );
-  };
+  }, [router]);
 
   return (
     <BaseScreenView padding={0}>
       <FlashList
         data={assets}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.uri}
         numColumns={NUM_COLUMNS}
         estimatedItemSize={ITEM_SIZE}
         onEndReached={() => {

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import { ChevronRight } from "@tamagui/lucide-icons";
-import { Image, Stack, Text, XStack, YStack } from "tamagui";
+import { Stack, Text, XStack, YStack } from "tamagui";
+import { Image } from "expo-image";
 
 import { BaseScreenView } from "~/components/Views";
 
@@ -80,10 +81,13 @@ const AlbumPickerScreen = () => {
       <XStack alignItems="center">
         <Image
           source={item.coverPhoto ? { uri: item.coverPhoto } : undefined}
-          width={70}
-          height={70}
-          borderRadius="$2"
-          marginRight="$3"
+          recyclingKey={item.id}
+          style={{
+            width: 70,
+            height: 70,
+            borderRadius: 100,
+            marginRight: 10,
+          }}
         />
         <YStack>
           <Text fontSize="$5" fontWeight="600" color="$color">
