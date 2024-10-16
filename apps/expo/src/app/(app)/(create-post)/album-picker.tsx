@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
 import { ChevronRight } from "@tamagui/lucide-icons";
-import { Stack, Text, XStack, YStack } from "tamagui";
+import { Stack, Text, XStack, YStack, getToken } from "tamagui";
 import { Image } from "expo-image";
 
 import { BaseScreenView } from "~/components/Views";
@@ -83,10 +83,10 @@ const AlbumPickerScreen = () => {
           source={item.coverPhoto ? { uri: item.coverPhoto } : undefined}
           recyclingKey={item.id}
           style={{
-            width: 70,
-            height: 70,
-            borderRadius: 100,
-            marginRight: 10,
+            width: 80,
+            height: 80,
+            borderRadius: getToken("$2", "radius") as number,
+            marginRight: getToken("$3", "space") as number,
           }}
         />
         <YStack>
