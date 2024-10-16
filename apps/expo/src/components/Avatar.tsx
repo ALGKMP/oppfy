@@ -7,6 +7,7 @@ interface AvatarProps {
   source: ImageSourcePropType | string | null | undefined;
   size?: number;
   bordered?: boolean;
+  recyclingKey?: string;
 }
 
 const Avatar = (props: AvatarProps) => {
@@ -15,6 +16,7 @@ const Avatar = (props: AvatarProps) => {
   return (
     <Image
       source={props.source ?? defaultProfilePicture}
+      recyclingKey={props.recyclingKey}
       style={{
         width: props.size ?? 46,
         height: props.size ?? 46,

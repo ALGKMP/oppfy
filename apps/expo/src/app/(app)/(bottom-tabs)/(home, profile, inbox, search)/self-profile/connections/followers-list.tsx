@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -116,7 +116,7 @@ const FollowerList = () => {
     </CardContainer>
   );
 
-  const renderListItem = (item: FollowerItem) => (
+  const renderListItem = useCallback((item: FollowerItem) => (
     <VirtualizedListItem
       loading={false}
       title={item.username}
@@ -147,10 +147,12 @@ const FollowerList = () => {
           params: { userId: item.userId },
         })
       }
-    />
+      />
+    ),
+    [router],
   );
 
-  const renderFollowers = () => (
+  const renderFollowers = useCallback(() => (
     <CardContainer>
       <H5 theme="alt1">Followers</H5>
       <FlashList
@@ -164,7 +166,7 @@ const FollowerList = () => {
         renderItem={({ item }) => renderListItem(item)}
       />
     </CardContainer>
-  );
+  ), [filteredItems, renderListItem]);
 
   const renderNoResults = () => (
     <View flex={1} justifyContent="center">
