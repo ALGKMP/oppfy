@@ -1,45 +1,43 @@
-import * as React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { useEffect } from "react";
-import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Reanimated, {
   Extrapolation,
   interpolate,
   runOnJS,
   useAnimatedProps,
   useSharedValue,
-} from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type {
   CameraProps,
   PhotoFile,
   Point,
   VideoFile,
-} from "react-native-vision-camera";
+} from 'react-native-vision-camera';
 import {
   Camera,
   useCameraDevice,
   useCameraFormat,
   useLocationPermission,
   useMicrophonePermission,
-} from "react-native-vision-camera";
-import { BlurView } from "expo-blur";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useIsFocused } from "@react-navigation/core";
-import { CameraOff } from "@tamagui/lucide-icons";
-import { View } from "tamagui";
+} from 'react-native-vision-camera';
+import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/core';
+import { CameraOff } from '@tamagui/lucide-icons';
+import { View } from 'tamagui';
 
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
+import { EmptyPlaceholder } from '~/components/UIPlaceholders';
+import { BaseScreenView } from '~/components/Views';
 import {
   CaptureButton,
   FocusIcon,
   useFocusAnimations,
-} from "~/features/camera/components";
-import useIsForeground from "~/hooks/useIsForeground";
+} from '~/features/camera/components';
+import useIsForeground from '~/hooks/useIsForeground';
+import * as MediaLibrary from 'expo-media-library';
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
 Reanimated.addWhitelistedNativeProps({
@@ -49,8 +47,8 @@ Reanimated.addWhitelistedNativeProps({
 const MAX_ZOOM_FACTOR = 10;
 const SCALE_FULL_ZOOM = 3;
 
-const SCREEN_WIDTH = Dimensions.get("screen").width;
-const SCREEN_HEIGHT = Dimensions.get("screen").height;
+const SCREEN_WIDTH = Dimensions.get('screen').width;
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
 const ASPECT_RATIO = 16 / 9;
 
 const CameraPage = () => {
@@ -85,7 +83,7 @@ const CameraPage = () => {
     [isPressingButton],
   );
 
-  // check if camera page is active
+  // Check if camera page is active
   const isFocussed = useIsFocused();
   const isForeground = useIsForeground();
   const isActive = isFocussed && isForeground;
@@ -95,17 +93,17 @@ const CameraPage = () => {
   const [enableHdr, _setEnableHdr] = useState(false);
   const [enableNightMode, _setEnableNightMode] = useState(false);
 
-  const [flash, setFlash] = useState<"off" | "on">("off");
-  const [position, setPosition] = useState<"front" | "back">("back");
+  const [flash, setFlash] = useState<'off' | 'on'>('off');
+  const [position, setPosition] = useState<'front' | 'back'>('back');
 
   const device = useCameraDevice(position);
 
   const format = useCameraFormat(device, [
     { fps: targetFps },
     { videoAspectRatio: ASPECT_RATIO },
-    { videoResolution: "max" },
+    { videoResolution: 'max' },
     { photoAspectRatio: ASPECT_RATIO },
-    { photoResolution: "max" },
+    { photoResolution: 'max' },
   ]);
 
   const _fps = Math.min(format?.maxFps ?? 1, targetFps);
@@ -130,23 +128,23 @@ const CameraPage = () => {
   }, []);
 
   const onMediaCaptured = useCallback(
-    (media: PhotoFile | VideoFile, type: "photo" | "video") => {
+    (media: PhotoFile | VideoFile, type: 'photo' | 'video') => {
       const { path: uri } = media;
 
       const dimension1 =
-        type === "video" ? format?.videoWidth : format?.photoWidth;
+        type === 'video' ? format?.videoWidth : format?.photoWidth;
       const dimension2 =
-        type === "video" ? format?.videoHeight : format?.photoHeight;
+        type === 'video' ? format?.videoHeight : format?.photoHeight;
 
       if (dimension1 === undefined || dimension2 === undefined) {
-        throw new Error("Dimension is undefined");
+        throw new Error('Dimension is undefined');
       }
 
       const width = Math.min(dimension1, dimension2);
       const height = Math.max(dimension1, dimension2);
 
       router.push({
-        pathname: "/preview",
+        pathname: '/preview',
         params: {
           type,
           uri,
@@ -165,36 +163,23 @@ const CameraPage = () => {
   );
 
   const onOpenMediaPicker = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      quality: 1,
-      videoMaxDuration: 60,
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-    });
-
-    if (!result.canceled) {
-      const imagePickerAsset = result.assets[0];
-      if (imagePickerAsset === undefined) return;
-
-      const { uri, width, height, type } = imagePickerAsset;
-
-      router.navigate({
-        pathname: "/preview",
-        params: {
-          type: type === "video" ? "video" : "photo",
-          uri,
-          width,
-          height,
-        },
-      });
+    // Request permissions when the button is pressed
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need media library permissions to make this work!');
+      return;
     }
+
+    // Navigate to the custom media picker screen
+    router.push('/album-picker');
   }, [router]);
 
   const onFlipCameraPressed = useCallback(() => {
-    setPosition((p) => (p === "back" ? "front" : "back"));
+    setPosition((p) => (p === 'back' ? 'front' : 'back'));
   }, []);
 
   const onFlashPressed = useCallback(() => {
-    setFlash((f) => (f === "off" ? "on" : "off"));
+    setFlash((f) => (f === 'off' ? 'on' : 'off'));
   }, []);
 
   const onFocus = useCallback(
@@ -224,7 +209,7 @@ const CameraPage = () => {
       );
     });
 
-  const flipCameraGesture = React.useMemo(
+  const flipCameraGesture = useMemo(
     () =>
       Gesture.Tap()
         .numberOfTaps(2)
@@ -256,7 +241,7 @@ const CameraPage = () => {
   }, [maxZoom, minZoom, zoom]);
 
   useEffect(() => {
-    // Reset zoom to it's default everytime the `device` changes.
+    // Reset zoom to its default every time the `device` changes.
     zoom.value = device?.neutralZoom ?? 1;
   }, [zoom, device]);
 
@@ -286,7 +271,7 @@ const CameraPage = () => {
       top={safeAreaPadding.paddingTop}
     >
       <GestureDetector gesture={composedGesture}>
-        {/* Do not delete this View, its needed to pass touch events to the camera */}
+        {/* Do not delete this View; it's needed to pass touch events to the camera */}
         <View flex={1}>
           <ReanimatedCamera
             ref={camera}
@@ -297,7 +282,7 @@ const CameraPage = () => {
             fps={30}
             photoHdr={photoHdr}
             videoHdr={videoHdr}
-            photoQualityBalance="quality"
+            photoQualityPriority="quality"
             lowLightBoost={device.supportsLowLightBoost && enableNightMode}
             enableZoomGesture={false}
             animatedProps={cameraAnimatedProps}
@@ -318,8 +303,8 @@ const CameraPage = () => {
 
       <CaptureButton
         style={{
-          position: "absolute",
-          alignSelf: "center",
+          position: 'absolute',
+          alignSelf: 'center',
           bottom: 36,
         }}
         camera={camera}
@@ -327,7 +312,7 @@ const CameraPage = () => {
         cameraZoom={zoom}
         minZoom={minZoom}
         maxZoom={maxZoom}
-        flash={supportsFlash ? flash : "off"}
+        flash={supportsFlash ? flash : 'off'}
         enabled={isCameraInitialized && isActive}
         setIsPressingButton={setIsPressingButton}
       />
@@ -336,7 +321,7 @@ const CameraPage = () => {
         style={[
           styles.iconButton,
           {
-            position: "absolute",
+            position: 'absolute',
             bottom: 12,
             left: 12,
           },
@@ -355,22 +340,16 @@ const CameraPage = () => {
         flexDirection="column"
         gap="$2"
       >
-        <TouchableOpacity
-          style={styles.iconButton}
-          onPress={onFlipCameraPressed}
-        >
+        <TouchableOpacity style={styles.iconButton} onPress={onFlipCameraPressed}>
           <BlurView intensity={50} style={styles.blurView}>
             <Ionicons name="camera-reverse" color="white" size={24} />
           </BlurView>
         </TouchableOpacity>
         {supportsFlash && (
-          <TouchableOpacity
-            style={[styles.iconButton]}
-            onPress={onFlashPressed}
-          >
+          <TouchableOpacity style={styles.iconButton} onPress={onFlashPressed}>
             <BlurView intensity={50} style={styles.blurView}>
               <Ionicons
-                name={flash === "on" ? "flash" : "flash-off"}
+                name={flash === 'on' ? 'flash' : 'flash-off'}
                 color="white"
                 size={24}
               />
@@ -401,15 +380,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 25,
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   blurView: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(64, 64, 64, 0.4)",
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(64, 64, 64, 0.4)',
   },
 });

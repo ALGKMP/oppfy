@@ -25,6 +25,13 @@ const CameraLayout = () => {
       }}
     >
       <Stack.Screen
+        name="media-picker"
+        options={{
+          title: "Media Picker",
+          animation: "fade",
+        }}
+      />
+      <Stack.Screen
         name="preview"
         options={{
           header: () => null,
