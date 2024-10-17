@@ -7,6 +7,7 @@ import { Construct } from "constructs";
 interface BaseCloudFrontProps {
   bucket: s3.Bucket;
   oai: cloudfront.IOriginAccessIdentity;
+  comment?: string;
 }
 
 interface PrivateCloudFrontProps extends BaseCloudFrontProps {
@@ -48,6 +49,7 @@ export class CloudFrontDistribution extends Construct {
 
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
       defaultBehavior: defaultBehavior,
+      comment: props.comment,
     });
   }
 }

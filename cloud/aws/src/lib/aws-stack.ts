@@ -142,6 +142,7 @@ export class AwsStack extends cdk.Stack {
         bucket: postBucket.bucket,
         oai,
         keyGroup,
+        comment: "Private distribution for posts",
       },
     );
 
@@ -303,23 +304,19 @@ export class AwsStack extends cdk.Stack {
 
     // Outputs
     new cdk.CfnOutput(this, "PublicPostDistributionUrl", {
-      value:
-        `https://${publicPostDistribution.distribution.distributionDomainName}`,
+      value: `https://${publicPostDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "PrivatePostDistributionUrl", {
-      value:
-        `https://${privatePostDistribution.distribution.distributionDomainName}`,
+      value: `https://${privatePostDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "PublicProfilePictureDistributionUrl", {
-      value:
-        `https://${publicProfilePictureDistribution.distribution.distributionDomainName}`,
+      value: `https://${publicProfilePictureDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "ProfileDistributionUrl", {
-      value:
-        `https://${profileDistribution.distribution.distributionDomainName}`,
+      value: `https://${profileDistribution.distribution.distributionDomainName}`,
     });
 
     new cdk.CfnOutput(this, "MuxWebhookUrl", {
