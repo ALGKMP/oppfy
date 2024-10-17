@@ -8,7 +8,6 @@ import React, {
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import {
-  useFocusEffect,
   useLocalSearchParams,
   useNavigation,
   useRouter,
