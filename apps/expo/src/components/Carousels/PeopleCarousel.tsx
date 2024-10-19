@@ -127,7 +127,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     return (
       <TouchableOpacity onPress={() => onItemPress(item)}>
         <XStack width={150} gap="$2" alignItems="center" padding="$2">
-          <Avatar source={item.profilePictureUrl} size={44} />
+          <Avatar source={item.profilePictureUrl} size={44} recyclingKey={item.userId} />
           <YStack flex={1}>
             <Text
               theme="alt1"
