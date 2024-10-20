@@ -14,6 +14,7 @@ import { useRouter } from 'next/router';
 const PostPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
+  console.log(id);
   const { data: post } = api.post.getPostForNextJs.useQuery({ postId: id as string });
 
   // Fetch post data here
