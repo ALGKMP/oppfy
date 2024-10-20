@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import { api } from '~/utils/api';
-import { env } from '@oppfy/env';
 
 interface OpenGraphProps {
   title: string;
@@ -25,7 +24,7 @@ const PostPage: React.FC = () => {
         title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
         description={post?.caption ?? ""}
         image={post?.imageUrl ?? ""}
-        url={`${env.NEXT_PUBLIC_APP_URL}/post/${id}`}
+        url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
       {/* Rest of your component */}
