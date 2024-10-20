@@ -268,8 +268,8 @@ export class PostService {
           "Failed to get post.",
         );
       }
-      const updatedPost = await this._processPostData(post);
-      return updatedPost;
+      const processedPost = await this._processPostData(post);
+      return processedPost;
     } catch (error) {
       console.error(`Error in getPost for postId: ${postId}: `, error);
       throw new DomainError(

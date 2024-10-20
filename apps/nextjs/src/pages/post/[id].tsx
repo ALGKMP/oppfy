@@ -1,4 +1,6 @@
 import Head from 'next/head';
+import { api } from '~/utils/api';
+import { env } from '@oppfy/env';
 
 interface OpenGraphProps {
   title: string;
@@ -13,16 +15,17 @@ import { useRouter } from 'next/router';
 const PostPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
+  const { data: post } = api.post.getPostForNextJs.useQuery({ postId: id as string });
 
   // Fetch post data here
 
   return (
     <>
       <OpenGraph
-        title={`Post Title - Your App Name`}
-        description="Post description or excerpt"
-        image="https://cdn.discordapp.com/attachments/1002773521975480371/1297021528910729236/part3-moving-state-down.png?ex=671511ad&is=6713c02d&hm=3f117fe3c5c015029c741b00da9e123f345da7407f05c62760e74a0c789dadeb&"
-        url={`https://your-domain.com/post/${id}`}
+        title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
+        description={post?.caption ?? ""}
+        image={post?.imageUrl ?? ""}
+        url={`${env.NEXT_PUBLIC_APP_URL}/post/${id}`}
         type="article"
       />
       {/* Rest of your component */}

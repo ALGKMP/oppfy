@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { DomainError } from "../../errors";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
 
 export const postRouter = createTRPCRouter({
   uploadPicturePostForUserOnApp: protectedProcedure
@@ -143,6 +143,12 @@ export const postRouter = createTRPCRouter({
           message: `Failed to delete post with ID ${input.postId}. Ensure the post exists and that you have the necessary permissions.`,
         });
       }
+    }),
+
+  getPostForNextJs: publicProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.services.post.getPost(input.postId);
     }),
 
   paginatePostsOfUserSelf: protectedProcedure
