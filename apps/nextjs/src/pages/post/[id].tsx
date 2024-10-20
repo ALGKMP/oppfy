@@ -17,19 +17,15 @@ const PostPage: React.FC = () => {
   console.log(id);
   const { data: post } = api.post.getPostForNextJs.useQuery({ postId: id as string });
 
-  // Fetch post data here
-
   return (
     <>
       <OpenGraph
         title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
         description={post?.caption ?? ""}
-        image={`https://d23ceri9cmy0px.cloudfront.net/posts/${id}`} // TODO: use env
-        // image={post?.imageUrl ?? ""}
-        url={`https://opp.oppfy.app/post/${id}`} // TODO: use env
+        image={post?.imageUrl ?? ""}
+        url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
-      {/* Rest of your component */}
     </>
   );
 };
