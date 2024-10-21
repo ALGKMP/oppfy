@@ -6,7 +6,15 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Circle, H5, Paragraph, SizableText, XStack, YStack } from "tamagui";
+import {
+  Circle,
+  H5,
+  Paragraph,
+  SizableText,
+  View,
+  XStack,
+  YStack,
+} from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { VirtualizedListItem } from "~/components/ListItems";
@@ -14,7 +22,6 @@ import { Skeleton } from "~/components/Skeletons";
 import RecommendationList from "~/components/SpecialLists/RecommendationList";
 import { TimeAgo } from "~/components/Texts";
 import { BaseScreenView } from "~/components/Views";
-import { useSession } from "~/contexts/SessionContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -287,7 +294,9 @@ const Inbox = () => {
 
   if (isCountRequestsLoading || isNotificationsLoading) {
     return (
-      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+      <BaseScreenView scrollable>
+        <View paddingBottom={insets.bottom}>{renderLoadingSkeletons()}</View>
+      </BaseScreenView>
     );
   }
 
