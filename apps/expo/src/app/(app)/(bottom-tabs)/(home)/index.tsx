@@ -114,7 +114,7 @@ const HomeScreen = () => {
 
   const renderPost = useCallback(
     ({ item }: { item: PostItem }) => {
-      if (!profile || !("postId" in item)) return null;
+      if (profile === undefined) return null;
 
       return (
         <OtherPost
@@ -210,11 +210,14 @@ const HomeScreen = () => {
     <BaseScreenView padding={0} paddingBottom={0}>
       <>
         {isLoading ? (
-          <>
-            <PostCard loading />
-            <Spacer size="$4" />
-            <PostCard loading />
-          </>
+          <YStack
+            paddingTop={(insets.top + getToken("$2", "space")) as number}
+            gap="$4"
+          >
+            {Array.from({ length: 3 }).map(() => (
+              <PostCard loading />
+            ))}
+          </YStack>
         ) : (
           <FlashList
             ref={scrollRef}
