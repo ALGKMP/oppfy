@@ -14,16 +14,29 @@ import { useRouter } from 'next/router';
 const PostPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  console.log(id);
+
+  // Check if the router is ready and id is available
   const isReady = router.isReady && typeof id === 'string';
-  const { data: post } = api.post.getPostForNextJs.useQuery({ postId: id as string }, { enabled: isReady });
+
+  const { data: post, isLoading } = api.post.getPostForNextJs.useQuery(
+    { postId: id as string },
+    { enabled: isReady }
+  );
+
+  if (!isReady || isLoading) {
+    return <div>Loading...</div>; // Or any loading component
+  }
+
+  if (!post) {
+    return <div>Post not found</div>; // Or any error component
+  }
 
   return (
     <>
       <OpenGraph
-        title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
-        description={post?.caption ?? ""}
-        image={post?.imageUrl ?? ""}
+        title={`${post.authorUsername} opped ${post.recipientUsername}`}
+        description={post.caption ?? ""}
+        image={post.imageUrl ?? ""}
         url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
@@ -45,4 +58,3 @@ const OpenGraph: React.FC<OpenGraphProps> = ({ title, description, image, url, t
 };
 
 export default PostPage;
-
