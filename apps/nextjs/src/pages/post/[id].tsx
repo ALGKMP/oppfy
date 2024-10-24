@@ -36,8 +36,8 @@ const PostPage: React.FC = () => {
     <>
       <OpenGraph
         title={`${post.authorUsername} opped ${post.recipientUsername}`}
-        description={post.caption ?? ""}
-        image={post.imageUrl ?? ""}
+        description={post.caption ?? "broken description"}
+        image={post.imageUrl ?? "broken image"}
         url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
