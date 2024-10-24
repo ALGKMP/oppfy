@@ -15,7 +15,8 @@ const PostPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
   console.log(id);
-  const { data: post } = api.post.getPostForNextJs.useQuery({ postId: id as string });
+  const isReady = router.isReady && typeof id === 'string';
+  const { data: post } = api.post.getPostForNextJs.useQuery({ postId: id as string }, { enabled: isReady });
 
   return (
     <>
