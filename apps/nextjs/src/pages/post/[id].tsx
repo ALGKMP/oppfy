@@ -24,24 +24,16 @@ const PostPage: React.FC = () => {
     { enabled: isReady }
   );
 
-  if (!isReady || isLoading) {
-    return <div>Loading...</div>; // Or any loading component
-  }
-
-  if (!post) {
-    return <div>Post not found</div>; // Or any error component
-  }
-
   return (
     <>
       <OpenGraph
-        title={`${post.authorUsername} opped ${post.recipientUsername}`}
-        description={post.caption ?? "broken description"}
-        image={`https://d23ceri9cmy0px.cloudfront.net/post/${post.postId}`}
+        title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
+        description={post?.caption ?? "broken description"}
+        image={`https://d23ceri9cmy0px.cloudfront.net/post/${post?.postId}`}
         url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
-      <Image src={post.imageUrl} alt={`${post.authorUsername} opped ${post.recipientUsername}`} width={500} height={500} />
+      <Image src={post?.imageUrl ?? ""} alt={`${post?.authorUsername} opped ${post?.recipientUsername}`} width={500} height={500} />
     </>
   );
 };
