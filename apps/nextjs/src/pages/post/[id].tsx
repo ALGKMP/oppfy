@@ -29,7 +29,7 @@ const PostPage: React.FC = () => {
       <OpenGraph
         title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
         description={post?.caption ?? "broken description"}
-        image={`https://d23ceri9cmy0px.cloudfront.net/post/${post?.postId}`}
+        image={`https://d23ceri9cmy0px.cloudfront.net/post/${id}`}
         url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
