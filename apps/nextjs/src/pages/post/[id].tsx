@@ -1,8 +1,6 @@
 import Head from 'next/head';
 import { api } from '~/utils/api';
 import Image from 'next/image';
-import { GetServerSideProps } from 'next';
-import { RouterOutputs } from '~/utils/api';
 
 interface OpenGraphProps {
   title: string;
@@ -12,28 +10,43 @@ interface OpenGraphProps {
   type?: string;
 }
 
-type PostType = RouterOutputs['post']['getPostForNextJs'];
+import { useRouter } from 'next/router';
 
-const PostPage: React.FC<{ post: PostType | null }> = ({ post }) => {
+const PostPage: React.FC = () => {
+  const router = useRouter();
+  const { id } = router.query;
+
+  // Check if the router is ready and id is available
+  const isReady = router.isReady && typeof id === 'string';
+
+  const { data: post, isLoading } = api.post.getPostForNextJs.useQuery(
+    { postId: id as string },
+    { enabled: isReady }
+  );
+
+  if (!isReady || isLoading) {
+    return <div>Loading...</div>; // Or any loading component
+  }
+
+  if (!post) {
+    return <div>Post not found</div>; // Or any error component
+  }
+
   return (
     <>
       <OpenGraph
-        title={post ? `${post.authorUsername} opped ${post.recipientUsername}` : "Post not found"}
-        description={post ? post.caption ?? "broken description" : "No description available"}
-        image={post ? post.imageUrl ?? "broken image" : "/default-image.png"}
-        url={`https://opp.oppfy.app/post/${post?.postId}`}
+        title={`${post.authorUsername} opped ${post.recipientUsername}`}
+        description={post.caption ?? "broken description"}
+        image={post.imageUrl ?? "broken image"}
+        url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
-      {!post ? (
-        <div>Post not found</div> // Or any error component
-      ) : (
-        <Image src={post.imageUrl} alt={`${post.authorUsername} opped ${post.recipientUsername}`} width={500} height={500} />
-      )}
+      <Image src={post.imageUrl} alt={`${post.authorUsername} opped ${post.recipientUsername}`} width={500} height={500} />
     </>
   );
 };
 
-const OpenGraph: React.FC<OpenGraphProps> = ({ title, description, image, url, type = 'article' }) => {
+const OpenGraph: React.FC<OpenGraphProps> = ({ title, description, image, url, type = 'website' }) => {
   return (
     <Head>
       <meta property="og:title" content={title} />
@@ -44,22 +57,6 @@ const OpenGraph: React.FC<OpenGraphProps> = ({ title, description, image, url, t
       <meta name="twitter:card" content="summary_large_image" />
     </Head>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params || {}; // Add a default empty object
-  if (!id) {
-    return {
-      notFound: true, // Return a 404 page if id is not found
-    };
-  }
-  const post = api.post.getPostForNextJs.useQuery({ postId: id as string });
-
-  return {
-    props: {
-      post,
-    },
-  };
 };
 
 export default PostPage;
