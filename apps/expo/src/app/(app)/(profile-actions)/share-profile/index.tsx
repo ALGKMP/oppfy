@@ -23,7 +23,7 @@ const ShareProfile = () => {
 
   const qrValue = new URL(
     `/profile?username=${username}&userId=${userId}`,
-    "https://app.oppfy.app",
+    "https://opp.oppfy.app",
   ).toString();
 
   const handleShare = () => {

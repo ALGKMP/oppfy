@@ -63,7 +63,6 @@ export class UserService {
 
     await this.userRepository.updateStatsOnUserDelete(userId);
 
-    console.log("updateStatsOnUserDelete worked")
     await this.profileRepository.deleteProfile(user.profileId);
     await this.searchRepository.deleteProfile(userId);
     await this.auth.deleteUser(userId);
