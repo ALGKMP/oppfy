@@ -21,7 +21,7 @@ const PostPage: React.FC<{ post: PostType | null }> = ({ post }) => {
         title={post ? `${post.authorUsername} opped ${post.recipientUsername}` : "Post not found"}
         description={post ? post.caption ?? "broken description" : "No description available"}
         image={post ? post.imageUrl ?? "broken image" : "/default-image.png"}
-        url={`https://opp.oppfy.app/post/${post?.id}`}
+        url={`https://opp.oppfy.app/post/${post?.postId}`}
         type="article"
       />
       {!post ? (
