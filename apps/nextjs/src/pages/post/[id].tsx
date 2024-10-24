@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { api } from '~/utils/api';
+import Image from 'next/image';
 
 interface OpenGraphProps {
   title: string;
@@ -40,6 +41,7 @@ const PostPage: React.FC = () => {
         url={`https://opp.oppfy.app/post/${id}`}
         type="article"
       />
+      <Image src={post.imageUrl} alt={`${post.authorUsername} opped ${post.recipientUsername}`} width={500} height={500} />
     </>
   );
 };
