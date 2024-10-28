@@ -33,7 +33,7 @@ const CONFIG = {
 };
 
 const Camera = memo(() => {
-  const translateY = useSharedValue(-CONFIG.CAMERA_SIZE);
+  const translateY = useSharedValue(-CONFIG.CAMERA_SIZE - 200);
   const translateX = useSharedValue(Math.random() * width);
   const rotate = useSharedValue(0);
 
