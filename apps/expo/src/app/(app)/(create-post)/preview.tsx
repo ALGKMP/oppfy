@@ -22,6 +22,7 @@ import {
   SCREEN_WIDTH,
 } from "~/constants/camera";
 import useSaveVideo from "~/hooks/useSaveMedia";
+import { BoldText } from "~/features/onboarding/components";
 
 const ASPECT_RATIOS = {
   PORTRAIT: {
@@ -130,8 +131,10 @@ const PreviewScreen = () => {
         <Button
           flex={1}
           size="$5"
-          borderRadius="$7"
-          icon={saveState === "idle" ? Download : undefined}
+          borderWidth="$1"
+          borderColor="white"
+          backgroundColor="$gray1"
+          borderRadius="$10"
           onPress={() =>
             saveToCameraRoll({
               uri,
@@ -147,18 +150,23 @@ const PreviewScreen = () => {
           ) : saveState === "saved" ? (
             "Saved"
           ) : (
-            "Save"
+            // "Save"
+            <Download size="$2" />
           )}
         </Button>
 
         <Button
-          flex={3}
+          flex={10}
           size="$5"
-          borderRadius="$7"
-          iconAfter={ArrowBigRight}
+          borderRadius="$10"
+          borderWidth="$1"
+          borderColor="white"
+          backgroundColor="$gray1"
           onPress={onContinue}
         >
-          Continue
+          <BoldText fontSize="$9" paddingRight="$0">
+            CONTINUE
+          </BoldText>
         </Button>
       </XStack>
     </BaseScreenView>

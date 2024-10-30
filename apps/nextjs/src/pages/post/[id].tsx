@@ -30,7 +30,7 @@ const PostPage: React.FC = () => {
         title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
         description={post?.caption ?? "broken description"}
         image={post?.imageUrl ?? "broken image"}
-        url={`https://opp.oppfy.app/post/${id}`}
+        url={`https://opp.oppfy.app/post/${post?.postId}`}
         type="article"
       />
       <Image src={post?.imageUrl ?? ""} alt={`${post?.authorUsername} opped ${post?.recipientUsername}`} width={500} height={500} />

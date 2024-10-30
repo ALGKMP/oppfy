@@ -61,6 +61,7 @@ export class ProfileService {
     }
 
     await this.profileRepository.updateProfile(profile.id, newData);
+    console.log("upserting profile")
     await this.searchRepository.upsertProfile(userWithProfile.id, {
       fullName: newData.fullName,
       username: newData.username,
