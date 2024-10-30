@@ -34,6 +34,7 @@ import { BaseScreenView } from "~/components/Views";
 import { SCREEN_WIDTH } from "~/constants/camera";
 import { useUploadMedia } from "~/hooks/media";
 import useStoreReview from "~/hooks/useRating";
+import { BoldText } from "~/features/onboarding/components";
 
 const postSchema = z.object({
   caption: z.optional(z.string().max(255)),
@@ -316,13 +317,29 @@ const CreatePost = () => {
           </YStack>
         </ScrollView>
 
+        {/* <TouchableOpacity onPress={onSubmit}>
+          <XStack justifyContent="center" alignItems="center">
+            <BoldText fontSize="$9" paddingRight="$0">
+              OPP YOUR FRIEND
+            </BoldText>
+            <ArrowBigRight size="$4" color="white" fill="white" />
+          </XStack>
+        </TouchableOpacity> */}
+
         <Button
           size="$5"
-          borderRadius="$7"
-          iconAfter={ArrowBigRight}
+          borderRadius="$10"
+          borderWidth="$1"
+          borderColor="white"
+          backgroundColor="$gray1"
           onPress={onSubmit}
         >
-          Continue
+          <XStack justifyContent="center" alignItems="center">
+            <BoldText fontSize="$9" paddingRight="$0">
+              OPP YOUR FRIEND
+            </BoldText>
+            <ArrowBigRight size="$4" color="white" fill="white" />
+          </XStack>
         </Button>
       </BaseScreenView>
 
