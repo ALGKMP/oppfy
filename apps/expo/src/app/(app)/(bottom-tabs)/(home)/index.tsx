@@ -214,8 +214,8 @@ const HomeScreen = () => {
             paddingTop={(insets.top + getToken("$2", "space")) as number}
             gap="$4"
           >
-            {Array.from({ length: 3 }).map(() => (
-              <PostCard loading />
+            {Array.from({ length: 3 }).map((i) => (
+              <PostCard key={i} loading />
             ))}
           </YStack>
         ) : (
