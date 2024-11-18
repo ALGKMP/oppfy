@@ -150,7 +150,6 @@ const PreviewScreen = () => {
           ) : saveState === "saved" ? (
             "Saved"
           ) : (
-            // "Save"
             <Download size="$2" />
           )}
         </Button>
