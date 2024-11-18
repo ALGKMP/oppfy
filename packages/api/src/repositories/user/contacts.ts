@@ -44,15 +44,15 @@ export class ContactsRepository {
           where: inArray(schema.contact.id, contactsToAdd),
         });
 
-        const newContactsToInsert = contactsToAdd.filter(
+        const newContactsToInsert = new Set(contactsToAdd.filter(
           (contact) =>
             !existingContacts.some((existing) => existing.id === contact),
-        );
+        ));
 
-        if (newContactsToInsert.length > 0) {
+        if (newContactsToInsert.size > 0) {
           await tx
             .insert(schema.contact)
-            .values(newContactsToInsert.map((id) => ({ id })));
+            .values(Array.from(newContactsToInsert).map((id) => ({ id })));
         }
 
         // Batch insert into `userContact` table
