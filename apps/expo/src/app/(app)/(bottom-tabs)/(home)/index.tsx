@@ -291,7 +291,7 @@ const Footer = () => {
         </Circle>
       </XStack>
       <SizableText size="$5" textAlign="center">
-        Invite some friends to use OPPFY with
+        Invite your friends to use OPPFY with
       </SizableText>
       <Button
         borderRadius="$8"
@@ -315,22 +315,21 @@ const Footer = () => {
 };
 
 const EmptyHomeScreen = () => {
+  const { profile } = useProfile();
+
   return (
     <YStack flex={1} justifyContent="space-between" paddingHorizontal="$4">
       <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
-        <H1>Welcome to</H1>
-        <Image
-          source={Splash}
-          contentFit="contain"
-          style={{
-            width: "100%",
-            aspectRatio: 4,
-            resizeMode: "contain",
-          }}
-        />
+        <YStack>
+          <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
+            Welcome
+          </H1>
+          <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
+            {profile?.username}
+          </H1>
+        </YStack>
         <SizableText size="$5" fontWeight="bold" textAlign="center">
-          Once you follow people, you'll see who gets opped here the momment it
-          happens!
+          Start following people to see who gets opped here the moment it happens!
         </SizableText>
       </YStack>
     </YStack>
