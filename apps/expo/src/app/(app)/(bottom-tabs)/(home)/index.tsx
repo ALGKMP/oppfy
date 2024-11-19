@@ -258,38 +258,6 @@ const Footer = () => {
       alignItems="center"
       gap="$4"
     >
-      <XStack justifyContent="center" alignItems="center">
-        <Circle
-          size="$7"
-          backgroundColor="$blue500"
-          borderWidth="$1.5"
-          overflow="hidden"
-          borderColor="$background"
-        >
-          <StyledImage source={Person1} />
-        </Circle>
-        <Circle
-          size="$8"
-          backgroundColor="$green500"
-          borderWidth="$1.5"
-          overflow="hidden"
-          borderColor="$background"
-          zIndex={1}
-          marginLeft={-15}
-          marginRight={-15}
-        >
-          <StyledImage source={Person2} />
-        </Circle>
-        <Circle
-          size="$7"
-          backgroundColor="$yellow500"
-          borderWidth="$1.5"
-          overflow="hidden"
-          borderColor="$background"
-        >
-          <StyledImage source={Person3} />
-        </Circle>
-      </XStack>
       <SizableText size="$5" textAlign="center">
         Invite your friends to use OPPFY with
       </SizableText>
@@ -318,20 +286,18 @@ const EmptyHomeScreen = () => {
   const { profile } = useProfile();
 
   return (
-    <YStack flex={1} justifyContent="space-between" paddingHorizontal="$4">
-      <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
-        <YStack>
-          <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
-            Welcome
-          </H1>
-          <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
-            {profile?.username}
-          </H1>
-        </YStack>
-        <SizableText size="$5" fontWeight="bold" textAlign="center">
-          Start following people to see who gets opped here the moment it happens!
-        </SizableText>
+    <YStack flex={1} alignItems="center" justifyContent="space-between" gap="$3">
+      <YStack justifyContent="space-between" alignItems="center">
+        <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
+          Welcome
+        </H1>
+        <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
+          {profile?.username}!
+        </H1>
       </YStack>
+      <SizableText size="$5" fontWeight="bold" textAlign="center">
+        Start following people to see who gets opped here the moment it happens!
+      </SizableText>
     </YStack>
   );
 };
