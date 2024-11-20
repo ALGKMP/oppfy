@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const postContentType = z.enum(["image/jpeg", "image/png"]);
+export const postContentType = z.enum(["image/jpeg", "image/png", "image/heic"]);
 
 export const post = z.object({
   postId: z.string(),

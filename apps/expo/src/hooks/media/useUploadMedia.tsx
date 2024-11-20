@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { z } from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -68,6 +67,7 @@ const useUploadMedia = () => {
       },
       body: videoBlob,
     });
+    console.log("Video blob type:", videoBlob.type);
 
     if (!response.ok) {
       throw new Error("Failed to upload video");
@@ -82,6 +82,8 @@ const useUploadMedia = () => {
     const parsedMediaType = sharedValidators.media.postContentType.safeParse(
       photoBlob.type,
     );
+
+    console.log("Media type of the image:", photoBlob.type);
 
     if (!parsedMediaType.success) {
       throw new Error("Invalid media type");

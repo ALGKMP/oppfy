@@ -185,6 +185,7 @@ const PreviewImage = ({ uri }: PreviewProps) => (
 );
 
 const PreviewVideo = ({ uri, videoRef }: PreviewVideoProps) => {
+  console.log("Video uri:", uri);
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
 

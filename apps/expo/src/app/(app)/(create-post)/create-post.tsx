@@ -317,15 +317,6 @@ const CreatePost = () => {
           </YStack>
         </ScrollView>
 
-        {/* <TouchableOpacity onPress={onSubmit}>
-          <XStack justifyContent="center" alignItems="center">
-            <BoldText fontSize="$9" paddingRight="$0">
-              OPP YOUR FRIEND
-            </BoldText>
-            <ArrowBigRight size="$4" color="white" fill="white" />
-          </XStack>
-        </TouchableOpacity> */}
-
         <Button
           size="$5"
           borderRadius="$10"

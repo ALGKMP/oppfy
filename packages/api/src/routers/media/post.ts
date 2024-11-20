@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { DomainError } from "../../errors";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
+import { postContentType } from "../../../../validators/src/shared/media";
 
 export const postRouter = createTRPCRouter({
   uploadPicturePostForUserOnApp: protectedProcedure
@@ -13,7 +14,7 @@ export const postRouter = createTRPCRouter({
         height: z.string(),
         width: z.string(),
         contentLength: z.number(),
-        contentType: z.enum(["image/jpeg", "image/png"]),
+        contentType: postContentType,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -38,7 +39,7 @@ export const postRouter = createTRPCRouter({
         height: z.string(),
         width: z.string(),
         contentLength: z.number(),
-        contentType: z.enum(["image/jpeg", "image/png"]),
+        contentType: postContentType,
       }),
     )
     .mutation(async ({ ctx, input }) => {

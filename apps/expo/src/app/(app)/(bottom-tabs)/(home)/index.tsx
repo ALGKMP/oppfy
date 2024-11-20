@@ -286,8 +286,13 @@ const EmptyHomeScreen = () => {
   const { profile } = useProfile();
 
   return (
-    <YStack flex={1} alignItems="center" justifyContent="space-between" gap="$3">
-      <YStack justifyContent="space-between" alignItems="center">
+    <YStack
+      // flex={1}
+      // alignItems="center"
+      // justifyContent="center" // Center vertically
+      // gap="$3"
+    >
+      <YStack justifyContent="center" alignItems="center">
         <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
           Welcome
         </H1>
@@ -301,10 +306,5 @@ const EmptyHomeScreen = () => {
     </YStack>
   );
 };
-
-const StyledImage = styled(Image, {
-  width: "100%",
-  height: "100%",
-});
 
 export default HomeScreen;
