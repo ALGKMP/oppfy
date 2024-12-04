@@ -5,7 +5,7 @@ packages:
   - cloud/aws/src/res/lambdas/*
   - tooling/*
 
-  catalog:
+catalog:
   "@tanstack/react-query": ^5.59.15
   "@trpc/client": ^11.0.0-rc.477
   "@trpc/react-query": ^11.0.0-rc.477
