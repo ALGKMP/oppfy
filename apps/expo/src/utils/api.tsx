@@ -45,6 +45,7 @@ const getBaseUrl = () => {
   const localhost = debuggerHost?.split(":")[0];
 
   if (!localhost) {
+    console.log("using oppfy.app");
     return "https://opp.oppfy.app";
   }
   return `http://${localhost}:3000`;
@@ -61,9 +62,9 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
   // const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     api.createClient({
-      transformer: superjson,
       links: [
         httpBatchLink({
+          transformer: superjson,
           url: `${getBaseUrl()}/api/trpc`,
           async headers() {
             const headers = new Map<string, string>();
@@ -71,7 +72,8 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
 
             const authToken = await auth().currentUser?.getIdToken();
             if (authToken) {
-              headers.set("authorization", `Bearer ${authToken}`);
+              // headers.set("authorization", `Bearer ${authToken}`); //TODO: double check case sensitivity
+              headers.set("Authorization", `Bearer ${authToken}`);
             }
 
             return Object.fromEntries(headers);
