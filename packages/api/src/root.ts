@@ -14,7 +14,7 @@ import {
   searchRouter,
   userRouter,
 } from "./routers";
-import { createTRPCRouter } from "./trpc";
+import { createTRPCRouter, createCallerFactory } from "./trpc";
 
 export const appRouter = createTRPCRouter({
   user: userRouter,
@@ -30,10 +30,11 @@ export const appRouter = createTRPCRouter({
   report: reportRouter,
 });
 
+export const createCaller = createCallerFactory(appRouter);
+
 export const openApiDocument = generateOpenApiDocument(appRouter, {
   title: "tRPC OpenAPI",
   version: "1.0.0",
-  // baseUrl: "http://localhost:3000/api",
   baseUrl: env.EXPO_PUBLIC_API_URL,
 });
 

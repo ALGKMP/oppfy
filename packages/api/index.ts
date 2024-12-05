@@ -1,7 +1,7 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "./src/root";
-import { appRouter, openApiDocument } from "./src/root";
+import { appRouter, openApiDocument, createCaller } from "./src/root";
 import { createTRPCContext } from "./src/trpc";
 
 /**
@@ -16,5 +16,5 @@ type RouterInputs = inferRouterInputs<AppRouter>;
  **/
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export { createTRPCContext, openApiDocument, appRouter };
+export { createTRPCContext, openApiDocument, appRouter, createCaller };
 export type { AppRouter, RouterInputs, RouterOutputs };
