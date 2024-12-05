@@ -1,5 +1,5 @@
 packages:
-  - apps/expo
+  - apps/*
   - packages/*
   - cloud/*
   - cloud/aws/src/res/lambdas/*
