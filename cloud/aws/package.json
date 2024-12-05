@@ -30,7 +30,7 @@
     "@oppfy/tsconfig": "workspace:*",
     "@types/aws-lambda": "^8.10.137",
     "@types/jest": "^29.5.12",
-    "@types/node": "^18.19.31",
+    "@types/node": "^20.17.7",
     "aws-cdk": "^2.116.1",
     "eslint": "^9.2.0",
     "jest": "^29.7.0",

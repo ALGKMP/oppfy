@@ -13,12 +13,13 @@
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },
+  "prettier": "@oppfy/prettier-config",
   "dependencies": {
     "@oppfy/api": "workspace:*",
     "@oppfy/db": "workspace:*",
-    "@oppfy/validators": "workspace:*",
     "@oppfy/env": "workspace:*",
     "@oppfy/firebase": "workspace:*",
+    "@oppfy/validators": "workspace:*",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@tanstack/react-query": "catalog:",
     "@trpc/client": "catalog:",
@@ -46,6 +47,5 @@
     "prettier": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
-  },
-  "prettier": "@oppfy/prettier-config"
+  }
 }

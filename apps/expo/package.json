@@ -5,9 +5,8 @@
   "main": "index.tsx",
   "scripts": {
     "android": "pnpm with-env expo run:android",
-    "build:ipa": "rm -f *.ipa && pnpm with-env eas build --profile production --local",
-    "submit": "eas submit --platform ios --path",
     "build:ios": "pnpm with-env expo build:ios",
+    "build:ipa": "rm -f *.ipa && pnpm with-env eas build --profile production --local",
     "clean": "git clean -xdf .expo .gitignore .turbo node_modules",
     "dev": "pnpm with-env expo start --tunnel",
     "dev:android": "pnpm with-env expo start --android",
@@ -20,6 +19,7 @@
     "open:ios": "open -a \"Xcode\" ios",
     "prebuild": "expo prebuild",
     "prebuild:clean": "expo prebuild --clean",
+    "submit": "eas submit --platform ios --path",
     "typecheck": "tsc --noEmit",
     "update:production": "eas update --channel production --message \"$MESSAGE\"",
     "with-env": "dotenv -e ../../.env --"
@@ -97,7 +97,7 @@
     "libphonenumber-js": "^1.10.61",
     "lodash": "^4.17.21",
     "nativewind": "^4.0.36",
-    "react": "18.2.0",
+    "react": "catalog:react18",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.51.3",
     "react-native": "0.74.5",
@@ -114,7 +114,7 @@
     "react-native-svg": "^15.2.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-vision-camera": "^4.5.3",
-    "superjson": "2.2.0",
+    "superjson": "2.2.1",
     "tamagui": "1.95.3",
     "uuid": "3.4.0",
     "zod": "^3.23.8"
