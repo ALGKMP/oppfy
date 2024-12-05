@@ -9,7 +9,6 @@
 import crypto from "crypto";
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { TRPC_ERROR_CODES_BY_NUMBER } from "@trpc/server/http";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import superjson from "superjson";
 import type { OpenApiMeta } from "trpc-openapi";
@@ -21,7 +20,6 @@ import { auth } from "@oppfy/firebase";
 import { mux } from "@oppfy/mux";
 import { s3 } from "@oppfy/s3";
 
-import { DomainError, ErrorCode } from "./errors";
 import { services } from "./services";
 
 /**
@@ -65,24 +63,45 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async ({
-  req,
-  res,
-}: CreateNextContextOptions) => {
-  const requestId = crypto.randomUUID();
-  res.setHeader("x-request-id", requestId);
+// export const createTRPCContext = async ({
+//   req,
+//   res,
+// }: CreateNextContextOptions) => {
+  export const createTRPCContext = async (opts: {
+    headers: Headers;
+  }) => {
+  console.log("Headers received:", Object.fromEntries(opts.headers));
 
-  const token = req.headers.authorization?.split("Bearer ")[1];
+  const authToken = opts.headers.get("Authorization") ?? null;
+  const source = opts.headers.get("x-trpc-source") ?? "unknown";
+
+  console.log(">>> tRPC Request from", source);
+
+  // const requestId = crypto.randomUUID();
+  opts.headers.set("x-request-id", crypto.randomUUID());
+
+  // const token = req.headers.authorization?.split("Bearer ")[1];
 
   let session: DecodedIdToken | null = null;
 
-  if (token) {
+  if (authToken) {
     try {
+      const token = authToken.split('Bearer ')[1];
+      console.log('Attempting to verify token:', token?.substring(0, 20) + '...');
+      if (!token) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          cause: "Invalid Firebase Token",
+          message: "No token provided"
+        });
+      }
       session = await auth.verifyIdToken(token);
-    } catch (_err) {
+    } catch (err) {
+      console.error('Firebase token verification failed:', err);
       throw new TRPCError({
         code: "UNAUTHORIZED",
         cause: "Invalid Firebase Token",
+        message: err instanceof Error ? err.message : "Unknown error during token verification"
       });
     }
   }
@@ -114,7 +133,7 @@ export const createTRPCContext = async ({
 
 const t = initTRPC
   .context<typeof createTRPCContext>()
-  .meta<OpenApiMeta>()
+  // .meta<OpenApiMeta>()
   .create({
     transformer: superjson,
     errorFormatter({ shape, error }) {
@@ -144,6 +163,7 @@ const t = initTRPC
 export const createTRPCRouter = t.router;
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  console.log("in enforceUserIsAuthed");
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -154,6 +174,8 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
     },
   });
 });
+
+export const createCallerFactory = t.createCallerFactory;
 
 /**
  * S3 Verification
