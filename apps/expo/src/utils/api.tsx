@@ -47,7 +47,8 @@ const getBaseUrl = () => {
   if (!localhost) {
     return "https://opp.oppfy.app";
   }
-  return `http://${localhost}:3000`;
+  // return `http://${localhost}:3000`;
+  return "https://opp.oppfy.app";
 };
 
 /**
