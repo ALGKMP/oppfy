@@ -8,7 +8,7 @@
     "build:ios": "pnpm with-env expo build:ios",
     "build:ipa": "rm -f *.ipa && pnpm with-env eas build --profile production --local",
     "clean": "git clean -xdf .expo .gitignore .turbo node_modules",
-    "dev": "pnpm with-env expo start --tunnel",
+    "dev": "pnpm with-env expo start",
     "dev:android": "pnpm with-env expo start --android",
     "dev:ios": "pnpm with-env expo start --ios",
     "format": "prettier --check . --ignore-path ../../.gitignore",
