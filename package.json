@@ -12,6 +12,7 @@
     "db:studio": "pnpm -F db studio",
     "db:wipe": "pnpm -F db wipe",
     "dev": "turbo dev --parallel",
+    "expo:update": "MESSAGE=\"$MESSAGE\" pnpm -F expo update:production",
     "format": "turbo format --continue -- --cache --cache-location node_modules/.cache/.prettiercache",
     "format:fix": "turbo format --continue -- --write --cache --cache-location node_modules/.cache/.prettiercache",
     "postinstall": "pnpm lint:ws",
@@ -19,10 +20,12 @@
     "lint:fix": "turbo lint --continue -- --fix --cache --cache-location node_modules/.cache/.eslintcache",
     "lint:ws": "pnpm dlx sherif@latest",
     "sort-package-json": "sort-package-json \"**/package.json\"",
-    "expo:update": "MESSAGE=\"$MESSAGE\" pnpm -F expo update:production",
     "typecheck": "turbo typecheck"
   },
   "prettier": "@oppfy/prettier-config",
+  "dependencies": {
+    "sort-package-json": "^2.12.0"
+  },
   "devDependencies": {
     "@oppfy/prettier-config": "workspace:*",
     "@turbo/gen": "^2.0.4",
@@ -30,9 +33,9 @@
     "turbo": "^2.0.6",
     "typescript": "^5.4"
   },
-  "packageManager": "pnpm@8.5.0",
+  "packageManager": "pnpm@9.14.2",
   "engines": {
-    "node": ">=18.19.1"
+    "node": ">=20.18.1",
+    "pnpm": "^9.14.2"
   }
 }
-
