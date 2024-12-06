@@ -17,7 +17,6 @@
   "dependencies": {
     "@oppfy/api": "workspace:*",
     "@oppfy/db": "workspace:*",
-    "@oppfy/env": "workspace:*",
     "@oppfy/firebase": "workspace:*",
     "@oppfy/validators": "workspace:*",
     "@t3-oss/env-nextjs": "^0.11.1",
