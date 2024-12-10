@@ -1,54 +1,70 @@
-// import Head from 'next/head'
-// import { api } from '~/utils/api';
-// import Image from 'next/image';
+import { Metadata } from 'next'
+import Image from 'next/image'
+import { api } from '~/trpc/server'
 
-// interface OpenGraphProps {
-//   title: string;
-//   description: string;
-//   image: string;
-//   url: string;
-//   type?: string;
-// }
+interface Props {
+  params: {
+    id: string
+  }
+}
 
-// import { useRouter } from 'next/router';
+// Generate metadata for the page
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await api.post.getPostForNextJs({ postId: params.id })
+  console.log(post)
+  
+  if (!post) {
+    return {
+      title: 'Post Not Found',
+      description: 'The requested post could not be found'
+    }
+  }
 
-// const PostPage: React.FC = () => {
-//   const router = useRouter();
-//   const { id } = router.query;
+  return {
+    title: `${post.authorUsername} opped ${post.recipientUsername}`,
+    description: post.caption ?? "No caption",
+    openGraph: {
+      title: `${post.authorUsername} opped ${post.recipientUsername}`,
+      description: post.caption ?? "No caption",
+      images: [
+        {
+          url: post.imageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${post.authorUsername} opped ${post.recipientUsername}`
+        }
+      ],
+      type: 'article',
+      url: `https://opp.oppfy.app/post/${post.postId}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${post.authorUsername} opped ${post.recipientUsername}`,
+      description: post.caption ?? "No caption",
+      images: [post.imageUrl],
+    }
+  }
+}
 
-//   // Check if the router is ready and id is available
-//   const isReady = router.isReady && typeof id === 'string';
+// Main page component
+export default async function PostPage({ params }: Props) {
+  const post = await api.post.getPostForNextJs({ postId: params.id })
+ 
+  if (!post) {
+    return <div>Post not found</div>
+  }
 
-//   const { data: post, isLoading } = api.post.getPostForNextJs.useQuery(
-//     { postId: id as string },
-//     { enabled: isReady }
-//   );
-
-//   return (
-//     <>
-//       <OpenGraph
-//         title={`${post?.authorUsername} opped ${post?.recipientUsername}`}
-//         description={post?.caption ?? "broken description"}
-//         image={post?.imageUrl ?? "broken image"}
-//         url={`https://opp.oppfy.app/post/${post?.postId}`}
-//         type="article"
-//       />
-//       <Image src={post?.imageUrl ?? ""} alt={`${post?.authorUsername} opped ${post?.recipientUsername}`} width={500} height={500} />
-//     </>
-//   );
-// };
-
-// const OpenGraph: React.FC<OpenGraphProps> = ({ title, description, image, url, type = 'website' }) => {
-//   return (
-//     <Head>
-//       <meta property="og:title" content={title} />
-//       <meta property="og:description" content={description} />
-//       <meta property="og:image" content={image} />
-//       <meta property="og:url" content={url} />
-//       <meta property="og:type" content={type} />
-//       <meta name="twitter:card" content="summary_large_image" />
-//     </Head>
-//   );
-// };
-
-// export default PostPage;
+  return (
+    <div>
+      <Image 
+        src={post.imageUrl} 
+        alt={`${post.authorUsername} opped ${post.recipientUsername}`}
+        width={500}
+        height={500}
+        priority
+      />
+      <h1>{post.authorUsername} opped {post.recipientUsername}</h1>
+      {post.caption && <p>{post.caption}</p>}
+    </div>
+  )
+}
