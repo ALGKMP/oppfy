@@ -4,7 +4,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/globals.css";
 
-import { env } from "@oppfy/env";
+import { env } from "~/env";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
