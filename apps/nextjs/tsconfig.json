@@ -15,6 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
     "jsx": "preserve",
+    "types": ["node", "next"],
     "isolatedModules": true
   },
   "include": [".", ".next/types/**/*.ts"],
