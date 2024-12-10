@@ -55,11 +55,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     tsconfigPaths: true,
     typedRoutes: true,
+    reactCompiler: true,
   },
   plugins: [
     "expo-av",
     "expo-font",
-    "expo-video",
+    [
+      "expo-video",
+      {
+        supportsBackgroundPlayback: false,
+        supportsPictureInPicture: false,
+      },
+    ],
     "expo-router",
     "react-native-image-marker",
     "@react-native-firebase/app",
