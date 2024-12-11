@@ -5,10 +5,6 @@ import reactConfig from "@oppfy/eslint-config/react";
 export default [
   {
     ignores: [".expo/**", "expo-plugins/**"],
-    plugins: ['eslint-plugin-react-compiler'],
-    rules: {
-      'react-compiler/react-compiler': 'error',
-    },
   },
   ...baseConfig,
   ...reactConfig,
