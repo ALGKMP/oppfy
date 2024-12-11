@@ -52,6 +52,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       projectId: "68175593-c314-48a6-8892-7afeeb66ab9f",
     },
   },
+  newArchEnabled: true,
   experiments: {
     tsconfigPaths: true,
     typedRoutes: true,
