@@ -1,6 +1,7 @@
-import React, { useRef, useState, useCallback, memo } from "react";
+import React, { memo, useCallback, useRef, useState } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 
+import { useAlertDialogNew } from "~/utils/dialogNew";
 import { AlertDialog } from "../Dialogs";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
@@ -23,44 +24,52 @@ interface MoreOptionsSheetProps {
   onDeletePost: () => void;
 }
 
-const MoreOptionsSheet = memo(({
-  isVisible,
-  isSaving,
-  isDeleting,
-  onClose,
-  onSavePost,
-  onDeletePost,
-}: MoreOptionsSheetProps) => {
-  const moreOptionsButtonOptions = React.useMemo(() => [
-    {
-      text: isSaving ? "Saving" : "Save Post",
-      textProps: {
-        color: isSaving ? "$gray9" : undefined,
-      },
-      autoClose: false,
-      disabled: isSaving,
-      onPress: onSavePost,
-    },
-    {
-      text: "Delete Post",
-      textProps: {
-        color: "$red9",
-      },
-      disabled: isDeleting,
-      onPress: onDeletePost,
-    },
-  ] satisfies ButtonOption[], [isSaving, isDeleting, onSavePost, onDeletePost]);
+const MoreOptionsSheet = memo(
+  ({
+    isVisible,
+    isSaving,
+    isDeleting,
+    onClose,
+    onSavePost,
+    onDeletePost,
+  }: MoreOptionsSheetProps) => {
+    const moreOptionsButtonOptions = React.useMemo(
+      () =>
+        [
+          {
+            text: isSaving ? "Saving" : "Save Post",
+            textProps: {
+              color: isSaving ? "$gray9" : undefined,
+            },
+            autoClose: false,
+            disabled: isSaving,
+            onPress: onSavePost,
+          },
+          {
+            text: "Delete Post",
+            textProps: {
+              color: "$red9",
+            },
+            disabled: isDeleting,
+            onPress: onDeletePost,
+          },
+        ] satisfies ButtonOption[],
+      [isSaving, isDeleting, onSavePost, onDeletePost],
+    );
 
-  return (
-    <ActionSheet
-      isVisible={isVisible}
-      buttonOptions={moreOptionsButtonOptions}
-      onCancel={onClose}
-    />
-  );
-});
+    return (
+      <ActionSheet
+        isVisible={isVisible}
+        buttonOptions={moreOptionsButtonOptions}
+        onCancel={onClose}
+      />
+    );
+  },
+);
 
 const SelfPost = memo((postProps: PostData) => {
+  const { alert } = useAlertDialogNew();
+
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
@@ -107,19 +116,38 @@ const SelfPost = memo((postProps: PostData) => {
     setSheetState("closed");
   }, []);
 
-  const handleDeletePost = useCallback(() => {
-    deletePost({ postId: postProps.id });
-  }, [deletePost, postProps.id]);
+  // const handleDeletePost = useCallback(() => {
+  //   deletePost({ postId: postProps.id });
+  // }, [deletePost, postProps.id]);
+  const handleDeletePost = useCallback(async () => {
+    const confirmed = await alert({
+      title: "Are you sure you want to delete this post?",
+      subtitle: "This action cannot be undone.",
+      acceptText: "Delete",
+      acceptTextProps: { color: "$red9" },
+      cancelText: "Cancel",
+    });
 
-  const handlePressProfilePictureCallback = useCallback((userId: string, username: string) => {
-    bottomSheetModalRef.current?.close();
-    handlePressProfilePicture(userId, username);
-  }, [handlePressProfilePicture]);
+    if (confirmed) {
+      deletePost({ postId: postProps.id });
+    }
+  }, [alert, deletePost, postProps.id]);
 
-  const handlePressUsernameCallback = useCallback((userId: string, username: string) => {
-    bottomSheetModalRef.current?.close();
-    handlePressUsername(userId, username);
-  }, [handlePressUsername]);
+  const handlePressProfilePictureCallback = useCallback(
+    (userId: string, username: string) => {
+      bottomSheetModalRef.current?.close();
+      handlePressProfilePicture(userId, username);
+    },
+    [handlePressProfilePicture],
+  );
+
+  const handlePressUsernameCallback = useCallback(
+    (userId: string, username: string) => {
+      bottomSheetModalRef.current?.close();
+      handlePressUsername(userId, username);
+    },
+    [handlePressUsername],
+  );
 
   return (
     <>
@@ -158,20 +186,10 @@ const SelfPost = memo((postProps: PostData) => {
           onSavePost={handleSavePost}
           isSaving={isSaving}
           isDeleting={isDeleting}
-          onDeletePost={handleOpenConfirmDeleteDialog}
+          onDeletePost={handleDeletePost}
         />
       )}
-
-      <AlertDialog
-        isVisible={sheetState === "confirmDelete"}
-        title="Are you sure you want to delete this post?"
-        subtitle="This action cannot be undone."
-        acceptText="Delete"
-        acceptTextProps={{ color: "$red9" }}
-        onAccept={handleDeletePost}
-      />
     </>
   );
 });
-
 export default SelfPost;

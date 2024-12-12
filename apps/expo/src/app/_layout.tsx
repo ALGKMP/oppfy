@@ -5,8 +5,9 @@ import { StatusBar } from "expo-status-bar";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
-import { TamaguiProvider } from "tamagui";
+import { PortalProvider, TamaguiProvider } from "tamagui";
 
+import { DialogProviderNew } from "~/components/Dialogs/DialogManagerNew";
 import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { SessionProvider } from "~/contexts/SessionContext";
@@ -28,13 +29,17 @@ const RootLayout = () => {
                   <AudioProvider>
                     <SafeAreaProvider>
                       <GestureHandlerRootView>
-                        <BottomSheetModalProvider>
-                          <ToastProvider native={true}>
-                            <StatusBar style="dark" />
-                            <Slot />
-                            <ToastViewport />
-                          </ToastProvider>
-                        </BottomSheetModalProvider>
+                        <PortalProvider>
+                          <BottomSheetModalProvider>
+                            <DialogProviderNew>
+                              <ToastProvider native={true}>
+                                <StatusBar style="dark" />
+                                <Slot />
+                                <ToastViewport />
+                              </ToastProvider>
+                            </DialogProviderNew>
+                          </BottomSheetModalProvider>
+                        </PortalProvider>
                       </GestureHandlerRootView>
                     </SafeAreaProvider>
                   </AudioProvider>
