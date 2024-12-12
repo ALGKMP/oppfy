@@ -1,5 +1,9 @@
 import { Accordion } from "./Accordian";
-import { AlertDialog } from "./AlertDialog";
+import {
+  AlertDialog,
+  AlertDialogProvider,
+  useAlertDialogController,
+} from "./AlertDialog";
 import { Avatar } from "./Avatar";
 import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
@@ -54,6 +58,8 @@ export {
   Switch,
   ToggleGroup,
   AlertDialog,
+  AlertDialogProvider,
+  useAlertDialogController,
   Dialog,
   Popover,
   Sheet,

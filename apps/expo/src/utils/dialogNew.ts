@@ -1,10 +1,17 @@
- // apps/expo/src/utils/dialogNew.ts
+// apps/expo/src/utils/dialogNew.ts
 import type { AlertDialogNewProps } from "../components/Dialogs/AlertDialogNew";
-import { useDialogNew } from "../components/Dialogs/DialogManagerNew";
+import { useDialogNew } from "../components/ui/AlertDialog/AlertDialogContext";
 
 type AlertOptions = Pick<
   AlertDialogNewProps,
-  "title" | "subtitle" | "acceptText" | "cancelText" | "titleProps" | "subtitleProps" | "acceptTextProps" | "cancelTextProps"
+  | "title"
+  | "subtitle"
+  | "acceptText"
+  | "cancelText"
+  | "titleProps"
+  | "subtitleProps"
+  | "acceptTextProps"
+  | "cancelTextProps"
 >;
 
 export const useAlertDialogNew = () => {

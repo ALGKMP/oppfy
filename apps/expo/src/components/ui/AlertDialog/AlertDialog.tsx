@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
-  SharedValue,
   useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
@@ -22,13 +24,12 @@ import {
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
-export interface AlertDialogNewProps {
+export interface AlertDialogProps {
   title: string;
   titleProps?: SizableTextProps;
   subtitle?: string;
   subtitleProps?: ParagraphProps;
   isVisible: boolean;
-  animation: SharedValue<number>;
   onAccept?: () => void;
   onCancel?: () => void;
   acceptText?: string;
@@ -37,21 +38,29 @@ export interface AlertDialogNewProps {
   cancelTextProps?: SizableTextProps;
 }
 
-export const AlertDialogNew = ({
+export const AlertDialog = ({
   title,
   titleProps,
   subtitle,
   subtitleProps,
   isVisible,
-  animation,
   onAccept,
   onCancel,
   acceptText = "Accept",
   cancelText = "Cancel",
   acceptTextProps,
   cancelTextProps,
-}: AlertDialogNewProps) => {
+}: AlertDialogProps) => {
   const theme = useTheme();
+  const animation = useSharedValue(0);
+
+  useEffect(() => {
+    if (isVisible) {
+      animation.value = withSpring(1, { damping: 15, stiffness: 200 });
+    } else {
+      animation.value = withTiming(0, { duration: 250 });
+    }
+  }, [isVisible]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),

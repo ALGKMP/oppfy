@@ -5,6 +5,7 @@ import { useAlertDialogNew } from "~/utils/dialogNew";
 import { AlertDialog } from "../Dialogs";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
+import { useAlertDialogController } from "../ui";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 import type { PostData } from "./ui/PostCard";
 import PostCard from "./ui/PostCard";
@@ -68,7 +69,7 @@ const MoreOptionsSheet = memo(
 );
 
 const SelfPost = memo((postProps: PostData) => {
-  const { alert } = useAlertDialogNew();
+  const alertDialog = useAlertDialogController();
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
@@ -120,7 +121,7 @@ const SelfPost = memo((postProps: PostData) => {
   //   deletePost({ postId: postProps.id });
   // }, [deletePost, postProps.id]);
   const handleDeletePost = useCallback(async () => {
-    const confirmed = await alert({
+    const confirmed = await alertDialog.show({
       title: "Are you sure you want to delete this post?",
       subtitle: "This action cannot be undone.",
       acceptText: "Delete",
@@ -131,7 +132,7 @@ const SelfPost = memo((postProps: PostData) => {
     if (confirmed) {
       deletePost({ postId: postProps.id });
     }
-  }, [alert, deletePost, postProps.id]);
+  }, [deletePost, postProps.id]);
 
   const handlePressProfilePictureCallback = useCallback(
     (userId: string, username: string) => {
