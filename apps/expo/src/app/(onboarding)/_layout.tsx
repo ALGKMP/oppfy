@@ -4,10 +4,10 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import Splash from "@assets/splash.png";
 import type {
-  HeaderBackButtonProps,
-  HeaderButtonProps,
+  NativeStackHeaderLeftProps,
   NativeStackHeaderProps,
-} from "@react-navigation/native-stack/src/types";
+  NativeStackHeaderRightProps,
+} from "@react-navigation/native-stack/";
 import { ChevronLeft, Info, X } from "@tamagui/lucide-icons";
 import { Text, useTheme } from "tamagui";
 
@@ -102,8 +102,8 @@ interface HeaderTitleProps {
   tintColor?: string | undefined;
 }
 
-type HeaderLeftProps = HeaderBackButtonProps;
-type HeaderRightProps = HeaderButtonProps;
+type HeaderLeftProps = NativeStackHeaderLeftProps;
+type HeaderRightProps = NativeStackHeaderRightProps;
 
 type HeaderProps = NativeStackHeaderProps;
 
