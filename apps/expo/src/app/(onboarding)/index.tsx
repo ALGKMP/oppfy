@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Dimensions, View } from "react-native";
 import Animated, {
   Easing,
@@ -13,7 +13,7 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/splash.png";
-import { H4 } from "tamagui";
+import { H2 } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
@@ -32,7 +32,7 @@ const CONFIG = {
   MAX_Y_SPEED: 250,
 };
 
-const Camera = memo(() => {
+const Camera = () => {
   const translateY = useSharedValue(-CONFIG.CAMERA_SIZE - 200);
   const translateX = useSharedValue(Math.random() * width);
   const rotate = useSharedValue(0);
@@ -83,7 +83,7 @@ const Camera = memo(() => {
       📸
     </Animated.Text>
   );
-});
+};
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
@@ -103,21 +103,21 @@ const Start = () => {
   const buttonOpacity = useSharedValue(0);
   const buttonTranslateY = useSharedValue(50);
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     requiredPermissions
       ? router.push("/firebaseauth/link")
       : router.push("/misc/permissions");
-  }, [requiredPermissions, router]);
+  };
 
-  const addCamera = useCallback(() => {
+  const addCamera = () => {
     setCameras((prev) => {
       if (prev.length >= CONFIG.MAX_CAMERAS) {
         return [...prev.slice(1), Date.now()];
       }
       return [...prev, Date.now()];
     });
-  }, []);
+  };
 
   useEffect(() => {
     const interval = setInterval(
@@ -133,7 +133,7 @@ const Start = () => {
     );
 
     return () => clearInterval(interval);
-  }, [addCamera, cameras.length, isInitialSpawn]);
+  }, [cameras.length, isInitialSpawn]);
 
   useEffect(() => {
     const fn = async () => {
@@ -231,11 +231,9 @@ const Start = () => {
               animatedIconStyle,
             ]}
           />
-          {/* <Animated.View style={[animatedSubtitleStyle]}>
-            <H4 fontSize="$9" color="white" textAlign="center">
-              Other people post for you
-            </H4> 
-          </Animated.View> */}
+          <Animated.View style={[animatedSubtitleStyle]}>
+            <H2 textAlign="center">Other people post for you</H2>
+          </Animated.View>
         </View>
 
         <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>

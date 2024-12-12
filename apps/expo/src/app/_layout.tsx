@@ -1,21 +1,20 @@
-// import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Slot, Stack } from "expo-router";
+import { Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { Theme, ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
-import { TamaguiProvider, View } from "tamagui";
+import { TamaguiProvider } from "tamagui";
 
 import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { SessionProvider } from "~/contexts/SessionContext";
 import { FontProvider } from "~/providers/FontProvider";
 import { SentryProvider } from "~/providers/SentryProvider";
+import { DARK_THEME } from "~/theme";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
-import { DARK_THEME } from "~/theme";
 
 const RootLayout = () => {
   return (
@@ -28,7 +27,7 @@ const RootLayout = () => {
                 <PermissionsProvider>
                   <AudioProvider>
                     <SafeAreaProvider>
-                      <GestureHandlerRootView style={{ flex: 1 }}>
+                      <GestureHandlerRootView>
                         <BottomSheetModalProvider>
                           <ToastProvider native={true}>
                             <StatusBar style="dark" />
