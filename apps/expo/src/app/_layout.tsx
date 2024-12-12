@@ -33,7 +33,7 @@ const RootLayout = () => {
                           <BottomSheetModalProvider>
                             <AlertDialogProvider>
                               <ToastProvider native={true}>
-                                <StatusBar style="dark" />
+                                <StatusBar style="auto" />
                                 <Slot />
                                 <ToastViewport />
                               </ToastProvider>
