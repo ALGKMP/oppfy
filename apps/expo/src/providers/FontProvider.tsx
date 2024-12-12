@@ -37,4 +37,4 @@ const FontProvider = ({ children }: FontProviderProps) => {
   return <>{children}</>;
 };
 
-export default FontProvider;
+export { FontProvider };

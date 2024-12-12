@@ -1,7 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import Constants from "expo-constants";
-import { PermissionStatus } from "expo-modules-core";
-import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
@@ -102,7 +99,7 @@ const SessionProvider = ({ children }: SessionProviderProps) => {
   );
 };
 
-export const useSession = () => {
+const useSession = () => {
   const context = useContext(AuthContext);
 
   if (!context) {
@@ -112,4 +109,4 @@ export const useSession = () => {
   return context;
 };
 
-export default SessionProvider;
+export { SessionProvider, useSession };

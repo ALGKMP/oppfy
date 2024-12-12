@@ -29,7 +29,7 @@ const PermissionsContext = createContext<PermissionsContextType | undefined>(
   undefined,
 );
 
-export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
+const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
   const [permissions, setPermissions] = useState<PermissionsStatus>({
     media: false,
     camera: false,
@@ -70,7 +70,7 @@ export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
       }
     });
 
-    void checkPermissions(); // Also call it on mount
+    void checkPermissions();
 
     return () => {
       subscription.remove();
@@ -86,10 +86,12 @@ export const PermissionsProvider = ({ children }: PermissionsProviderProps) => {
   );
 };
 
-export const usePermissions = () => {
+const usePermissions = () => {
   const context = useContext(PermissionsContext);
   if (context === undefined) {
     throw new Error("usePermissions must be used within a PermissionsProvider");
   }
   return context;
 };
+
+export { PermissionsProvider, usePermissions };

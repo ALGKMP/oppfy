@@ -18,4 +18,4 @@ const BottomTabs = withLayoutContext<
   BottomTabNavigationEventMap
 >(Navigator);
 
-export default BottomTabs;
+export { BottomTabs };

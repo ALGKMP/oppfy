@@ -18,4 +18,4 @@ const Drawer = withLayoutContext<
   DrawerNavigationEventMap
 >(Navigator);
 
-export default Drawer;
+export { Drawer };

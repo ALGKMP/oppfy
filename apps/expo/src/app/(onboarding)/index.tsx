@@ -231,11 +231,11 @@ const Start = () => {
               animatedIconStyle,
             ]}
           />
-          <Animated.View style={[animatedSubtitleStyle]}>
+          {/* <Animated.View style={[animatedSubtitleStyle]}>
             <H4 fontSize="$9" color="white" textAlign="center">
               Other people post for you
             </H4> 
-          </Animated.View>
+          </Animated.View> */}
         </View>
 
         <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>

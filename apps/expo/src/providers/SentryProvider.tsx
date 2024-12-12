@@ -21,10 +21,13 @@ interface SentryProviderProps {
 const SentryProvider = ({ children }: SentryProviderProps) => {
   const ref = useNavigationContainerRef();
 
-  useEffect(() => navigationIntegration.registerNavigationContainer(ref), [ref]);
+  useEffect(
+    () => navigationIntegration.registerNavigationContainer(ref),
+    [ref],
+  );
 
   const SentryWrappedComponent = Sentry.wrap(() => <>{children}</>);
   return <SentryWrappedComponent />;
 };
 
-export default SentryProvider;
+export { SentryProvider };

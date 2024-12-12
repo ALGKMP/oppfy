@@ -18,4 +18,4 @@ const Stack = withLayoutContext<
   NativeStackNavigationEventMap
 >(Navigator);
 
-export default Stack;
+export { Stack };

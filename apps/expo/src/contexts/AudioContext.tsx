@@ -8,19 +8,11 @@ interface AudioContextType {
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
-export const useAudio = (): AudioContextType => {
-  const context = useContext(AudioContext);
-  if (!context) {
-    throw new Error("useAudio must be used within an AudioProvider");
-  }
-  return context;
-};
-
 interface AudioProviderProps {
   children: ReactNode;
 }
 
-export const AudioProvider = ({ children }: AudioProviderProps) => {
+const AudioProvider = ({ children }: AudioProviderProps) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
   const toggleMute = (): void => {
@@ -36,3 +28,13 @@ export const AudioProvider = ({ children }: AudioProviderProps) => {
     <AudioContext.Provider value={value}>{children}</AudioContext.Provider>
   );
 };
+
+const useAudio = (): AudioContextType => {
+  const context = useContext(AudioContext);
+  if (!context) {
+    throw new Error("useAudio must be used within an AudioProvider");
+  }
+  return context;
+};
+
+export { AudioProvider, useAudio };

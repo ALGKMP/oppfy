@@ -18,4 +18,4 @@ const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
-export default MaterialTopTabs;
+export { MaterialTopTabs };
