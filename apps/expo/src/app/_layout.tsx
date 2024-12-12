@@ -15,60 +15,15 @@ import { FontProvider } from "~/providers/FontProvider";
 import { SentryProvider } from "~/providers/SentryProvider";
 import { TRPCProvider } from "~/utils/api";
 import tamaguiConfig from "../../tamagui.config";
+import { DARK_THEME } from "~/theme";
 
-export const NAV_THEME = {
-  background: "hsl(240 10% 3.9%)", // background
-  border: "hsl(240 3.7% 15.9%)", // border
-  card: "hsl(240 10% 3.9%)", // card
-  notification: "hsl(0 72% 51%)", // destructive
-  primary: "hsl(0 0% 98%)", // primary
-  text: "hsl(0 0% 98%)", // foreground
-};
-
-const DARK_THEME: Theme = {
-  dark: true,
-  colors: NAV_THEME,
-  fonts: {
-    regular: {
-      fontFamily: "System",
-      fontWeight: "400",
-    },
-    medium: {
-      fontFamily: "System",
-      fontWeight: "500",
-    },
-    bold: {
-      fontFamily: "System",
-      fontWeight: "700",
-    },
-    heavy: {
-      fontFamily: "System",
-      fontWeight: "900",
-    },
-  },
-};
-
-// const RootLayout = () => {
-//   return (
-//     <TRPCProvider>
-//       <ThemeProvider value={DARK_THEME}>
-//         <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-//           <StatusBar style="light" />
-//           <Stack>
-//             <Stack.Screen name="index" />
-//           </Stack>
-//         </TamaguiProvider>
-//       </ThemeProvider>
-//     </TRPCProvider>
-//   );
-// };
 const RootLayout = () => {
   return (
     <SentryProvider>
-      <FontProvider>
-        <TRPCProvider>
-          <ThemeProvider value={DARK_THEME}>
-            <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+      <TRPCProvider>
+        <ThemeProvider value={DARK_THEME}>
+          <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+            <FontProvider>
               <SessionProvider>
                 <PermissionsProvider>
                   <AudioProvider>
@@ -78,10 +33,6 @@ const RootLayout = () => {
                           <ToastProvider native={true}>
                             <StatusBar style="dark" />
                             <Slot />
-
-                            {/* <Stack>
-                              <Stack.Screen name="index" />
-                            </Stack> */}
                             <ToastViewport />
                           </ToastProvider>
                         </BottomSheetModalProvider>
@@ -90,10 +41,10 @@ const RootLayout = () => {
                   </AudioProvider>
                 </PermissionsProvider>
               </SessionProvider>
-            </TamaguiProvider>
-          </ThemeProvider>
-        </TRPCProvider>
-      </FontProvider>
+            </FontProvider>
+          </TamaguiProvider>
+        </ThemeProvider>
+      </TRPCProvider>
     </SentryProvider>
   );
 };
