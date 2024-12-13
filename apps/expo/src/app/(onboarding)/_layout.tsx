@@ -35,9 +35,6 @@ const OnboardingLayout = () => {
         name="index"
         options={{
           animation: "fade",
-          contentStyle: {
-            backgroundColor: "#F214FF",
-          },
           header: () => null,
         }}
       />
