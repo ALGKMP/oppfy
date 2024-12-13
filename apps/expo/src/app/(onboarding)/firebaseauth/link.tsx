@@ -7,25 +7,23 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
-import {
-  getToken,
-  H1,
-  H6,
-  ListItem,
-  Spinner,
-  Text,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { Header } from "~/components/Headers";
 import { SearchInput } from "~/components/Inputs";
-import { ScreenView } from "~/components/ui";
-import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import {
+  H1,
+  H6,
+  ListItem,
+  ScreenView,
+  Spinner,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
@@ -147,7 +145,7 @@ const PhoneNumber = () => {
   return (
     <ScreenView
       paddingBottom={0}
-      paddingTop={"$10"}
+      paddingTop="$10"
       justifyContent="space-between"
       keyboardAvoiding
       safeAreaEdges={["bottom"]}

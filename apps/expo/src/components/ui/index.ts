@@ -5,7 +5,7 @@ import {
   useAlertDialogController,
 } from "./AlertDialog";
 import { Avatar } from "./Avatar";
-import { Button, OnboardingButton } from "./Buttons";
+import { Button } from "./Buttons";
 import { Card } from "./Card";
 import { Checkbox } from "./Checkbox";
 import { Dialog } from "./Dialog";
@@ -33,7 +33,6 @@ import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 
 export {
   Button,
-  OnboardingButton,
   H1,
   H2,
   H3,

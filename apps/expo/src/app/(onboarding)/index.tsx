@@ -14,8 +14,9 @@ import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/splash.png";
 
-import { H2, OnboardingButton, ScreenView, View } from "~/components/ui";
+import { H2, ScreenView, View } from "~/components/ui";
 import { usePermissions } from "~/contexts/PermissionsContext";
+import { OnboardingButton } from "~/features/onboarding/components";
 
 const { width, height } = Dimensions.get("window");
 

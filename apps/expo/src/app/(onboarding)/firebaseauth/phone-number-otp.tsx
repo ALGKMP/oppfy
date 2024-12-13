@@ -4,11 +4,19 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
-import { H1, Spinner, styled, Text, View, XStack, YStack } from "tamagui";
+import { styled } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import {
+  H1,
+  ScreenView,
+  Spinner,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import {
   BoldText,
@@ -157,43 +165,40 @@ const PhoneNumberOTP = () => {
   };
 
   return (
-    <KeyboardSafeView>
-      <BaseScreenView
-        safeAreaEdges={["bottom"]}
-        backgroundColor="$background"
-        paddingBottom={0}
-        paddingHorizontal={0}
+    <ScreenView
+      paddingBottom={0}
+      paddingTop="$10"
+      justifyContent="space-between"
+      keyboardAvoiding
+      safeAreaEdges={["bottom"]}
+    >
+      <YStack paddingHorizontal="$4" gap="$6">
+        <H1 textAlign="center">Enter your{"\n"}verification code</H1>
+
+        <OTPInput
+          value={phoneNumberOTP}
+          onChange={(value) => {
+            setPhoneNumberOTP(value);
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
+        />
+
+        {error ? (
+          <DisclaimerText color="$red9">{error}</DisclaimerText>
+        ) : (
+          <DisclaimerText>
+            Verification code sent to <BoldText>{phoneNumber}</BoldText>
+          </DisclaimerText>
+        )}
+      </YStack>
+
+      <OnboardingButton
+        onPress={onSubmit}
+        disabled={!isValidPhoneNumberOTP || isLoading}
       >
-        <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$6">
-            <H1 textAlign="center">Enter your{"\n"}verification code</H1>
-
-            <OTPInput
-              value={phoneNumberOTP}
-              onChange={(value) => {
-                setPhoneNumberOTP(value);
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-            />
-
-            {error ? (
-              <DisclaimerText color="$red9">{error}</DisclaimerText>
-            ) : (
-              <DisclaimerText>
-                Verification code sent to <BoldText>{phoneNumber}</BoldText>
-              </DisclaimerText>
-            )}
-          </YStack>
-
-          <OnboardingButton
-            onPress={onSubmit}
-            disabled={!isValidPhoneNumberOTP || isLoading}
-          >
-            {isLoading ? <Spinner /> : "Verify Code"}
-          </OnboardingButton>
-        </YStack>
-      </BaseScreenView>
-    </KeyboardSafeView>
+        {isLoading ? <Spinner /> : "Verify Code"}
+      </OnboardingButton>
+    </ScreenView>
   );
 };
 

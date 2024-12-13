@@ -45,8 +45,8 @@ export const ScreenView: React.FC<ScreenViewProps> = ({
     : undefined;
 
   const keyboardOffset = Platform.select({
-    ios: insets.bottom + headerHeight + 68,
-    android: insets.bottom + headerHeight + 68,
+    ios: insets.bottom + headerHeight + 74,
+    android: insets.bottom + headerHeight + 74,
   });
 
   const content = (
