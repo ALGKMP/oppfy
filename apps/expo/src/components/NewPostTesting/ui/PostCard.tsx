@@ -1,19 +1,18 @@
 import React, { useCallback, useRef, useState } from "react";
-import { Alert, TouchableOpacity, ActivityIndicator } from "react-native";
+import { ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { Circle } from "tamagui";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { ResizeMode, Video } from "expo-av";
+import type { AVPlaybackStatus } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { Video, ResizeMode } from 'expo-av';
-import type { AVPlaybackStatus } from 'expo-av';
 import {
   Heart,
   MessageCircle,
@@ -21,6 +20,7 @@ import {
   Send,
 } from "@tamagui/lucide-icons";
 import {
+  Circle,
   getToken,
   Paragraph,
   SizableText,
@@ -37,6 +37,7 @@ import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
+import * as Sharing from "expo-sharing";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -193,7 +194,7 @@ const PostCard = (props: PostCardProps) => {
                     props.onRecipientPress();
                   }}
                 >
-                  <Avatar source={props.recipient.profilePicture} size={40} />
+                  <Avatar source={props.recipient.profilePicture} size={50} />
                 </TouchableOpacity>
 
                 <YStack gap="$1">
@@ -205,7 +206,7 @@ const PostCard = (props: PostCardProps) => {
                       props.onRecipientPress();
                     }}
                   >
-                    <SizableText fontWeight="bold" lineHeight={0}>
+                    <SizableText size="$5" fontWeight="bold" lineHeight={0}>
                       {props.recipient.username}
                     </SizableText>
                   </TouchableOpacity>
@@ -217,14 +218,14 @@ const PostCard = (props: PostCardProps) => {
                       props.onAuthorPress();
                     }}
                   >
-                    <XStack alignItems="center" gap="$2">
+                    {/* <XStack alignItems="center" gap="$2">
                       <SizableText size="$2" fontWeight="bold" lineHeight={0}>
                         opped by{" "}
                         <SizableText fontWeight="bold" color="$primary">
                           {props.author.username}
                         </SizableText>
                       </SizableText>
-                    </XStack>
+                    </XStack> */}
                   </TouchableOpacity>
                 </YStack>
               </XStack>
@@ -265,7 +266,11 @@ const PostCard = (props: PostCardProps) => {
 
             {/* Share Button */}
             <TouchableOpacity
-              onPress={() => Alert.alert("Sharing coming soon!")}
+              onPress={async () => {
+                await Sharing.shareAsync("https://google.com", {
+                  dialogTitle: "Share post",
+                });
+              }}
             >
               <Send size={26} color="$gray12" />
             </TouchableOpacity>
@@ -282,6 +287,18 @@ const PostCard = (props: PostCardProps) => {
             </TouchableOpacity>
           )}
 
+          {/* Opped by */}
+          <TouchableOpacity onPress={() => props.onAuthorPress()}>
+            <Paragraph>
+              <Text fontWeight="bold">
+                opped by{" "}
+                <Text fontWeight="bold" color="$primary">
+                  {props.author.username}
+                </Text>
+              </Text>
+            </Paragraph>
+          </TouchableOpacity>
+
           {/* Caption */}
           {props.caption && (
             <TouchableOpacity
@@ -289,7 +306,6 @@ const PostCard = (props: PostCardProps) => {
               onPress={() => setIsExpanded(!isExpanded)}
             >
               <Paragraph>
-                <Text fontWeight="bold">{props.author.username} </Text>
                 {isExpanded ? (
                   props.caption
                 ) : (
@@ -428,7 +444,7 @@ const VideoPlayerComponent = ({
       return () => {
         void videoRef.current?.pauseAsync();
       };
-    }, [media.isViewable])
+    }, [media.isViewable]),
   );
 
   const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
@@ -448,7 +464,7 @@ const VideoPlayerComponent = ({
       addHeart(x, y);
       onLikeDoubleTapped();
     },
-    [addHeart, onLikeDoubleTapped]
+    [addHeart, onLikeDoubleTapped],
   );
 
   const handleHold = useCallback(() => {
@@ -509,14 +525,14 @@ const VideoPlayerComponent = ({
         {isLoading && (
           <View
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
               bottom: 0,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.1)",
             }}
           >
             <Circle size={48} borderWidth={2} borderColor="$gray11" />
