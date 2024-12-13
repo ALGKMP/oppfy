@@ -243,16 +243,19 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
             <OTPBox
               key={index}
               {...(focused &&
-                index === value.length && {
+                (index === value.length ||
+                  (value.length === 6 && index === 5)) && {
                   backgroundColor: "$gray4",
                 })}
             >
               <Text fontSize="$7" fontWeight="bold" color="$color">
                 {value[index] ?? ""}
               </Text>
-              {focused && index === value.length && (
-                <View style={styles.cursor} />
-              )}
+              {focused &&
+                (index === value.length ||
+                  (value.length === 6 && index === 5)) && (
+                  <View style={styles.cursor} />
+                )}
             </OTPBox>
           ))}
         </XStack>
