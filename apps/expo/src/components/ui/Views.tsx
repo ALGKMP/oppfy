@@ -27,7 +27,7 @@ type ScreenViewProps = StackProps & {
 
 const defaultStyles = {
   flex: 1,
-  padding: "$2",
+  padding: "$4",
 };
 
 export const ScreenView: React.FC<ScreenViewProps> = ({

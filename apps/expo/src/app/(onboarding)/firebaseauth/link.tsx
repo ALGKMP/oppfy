@@ -150,7 +150,7 @@ const PhoneNumber = () => {
       keyboardAvoiding
       safeAreaEdges={["bottom"]}
     >
-      <YStack paddingHorizontal="$4" gap="$6">
+      <YStack gap="$6">
         <H1 textAlign="center">What's your{"\n"}phone number?</H1>
 
         <InputWrapper>
@@ -185,7 +185,7 @@ const PhoneNumber = () => {
 
       <OnboardingButton
         onPress={onSubmit}
-        marginHorizontal="$-2"
+        marginHorizontal="$-4"
         disabled={!isValidPhoneNumber || isLoading}
       >
         {isLoading ? <Spinner /> : "Send Verification Text"}
