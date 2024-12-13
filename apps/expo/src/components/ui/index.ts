@@ -29,7 +29,7 @@ import { Switch } from "./Switch";
 import { Paragraph, SizableText, Text } from "./Texts";
 import { ToggleGroup } from "./ToggleGroup";
 import { Tooltip } from "./Tooltip";
-import { ScrollView, View } from "./Views";
+import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 
 export {
   Button,
@@ -73,6 +73,8 @@ export {
   Square,
   Circle,
   View,
+  SafeAreaView,
+  ScreenView,
   ScrollView,
   Spinner,
 };
