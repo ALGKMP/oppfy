@@ -24,6 +24,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import { Header } from "~/components/Headers";
 import { SearchInput } from "~/components/Inputs";
+import { ScreenView } from "~/components/ui";
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
@@ -144,57 +145,54 @@ const PhoneNumber = () => {
   };
 
   return (
-    <KeyboardSafeView>
-      <BaseScreenView
-        safeAreaEdges={["bottom"]}
-        backgroundColor="$background"
-        paddingBottom={0}
-        paddingHorizontal={0}
+    <ScreenView
+      paddingBottom={0}
+      paddingTop={"$10"}
+      justifyContent="space-between"
+      keyboardAvoiding
+      safeAreaEdges={["bottom"]}
+    >
+      <YStack paddingHorizontal="$4" gap="$6">
+        <H1 textAlign="center">What's your{"\n"}phone number?</H1>
+
+        <InputWrapper>
+          <CountryPicker
+            selectedCountryData={countryData}
+            setSelectedCountryData={setCountryData}
+          />
+          <OnboardingInput
+            value={phoneNumber}
+            onChangeText={(text) => {
+              setPhoneNumber(text);
+              setError(null);
+            }}
+            placeholder="Your number here"
+            keyboardType="phone-pad"
+            autoFocus
+            placeholderTextColor="$gray8"
+            borderTopLeftRadius={0}
+            borderBottomLeftRadius={0}
+          />
+        </InputWrapper>
+
+        {error ? (
+          <DisclaimerText color="$red9">{error}</DisclaimerText>
+        ) : (
+          <DisclaimerText>
+            By Continuing you agree to our <BoldText>Privacy Policy</BoldText>{" "}
+            and <BoldText>Terms of Service</BoldText>.
+          </DisclaimerText>
+        )}
+      </YStack>
+
+      <OnboardingButton
+        onPress={onSubmit}
+        marginHorizontal="$-2"
+        disabled={!isValidPhoneNumber || isLoading}
       >
-        <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$6">
-            <H1 textAlign="center">What's your{"\n"}phone number?</H1>
-
-            <InputWrapper>
-              <CountryPicker
-                selectedCountryData={countryData}
-                setSelectedCountryData={setCountryData}
-              />
-              <OnboardingInput
-                value={phoneNumber}
-                onChangeText={(text) => {
-                  setPhoneNumber(text);
-                  setError(null);
-                }}
-                placeholder="Your number here"
-                keyboardType="phone-pad"
-                autoFocus
-                placeholderTextColor="$gray8"
-                borderTopLeftRadius={0}
-                borderBottomLeftRadius={0}
-              />
-            </InputWrapper>
-
-            {error ? (
-              <DisclaimerText color="$red9">{error}</DisclaimerText>
-            ) : (
-              <DisclaimerText>
-                By Continuing you agree to our{" "}
-                <BoldText>Privacy Policy</BoldText> and{" "}
-                <BoldText>Terms of Service</BoldText>.
-              </DisclaimerText>
-            )}
-          </YStack>
-
-          <OnboardingButton
-            onPress={onSubmit}
-            disabled={!isValidPhoneNumber || isLoading}
-          >
-            {isLoading ? <Spinner /> : "Send Verification Text"}
-          </OnboardingButton>
-        </YStack>
-      </BaseScreenView>
-    </KeyboardSafeView>
+        {isLoading ? <Spinner /> : "Send Verification Text"}
+      </OnboardingButton>
+    </ScreenView>
   );
 };
 

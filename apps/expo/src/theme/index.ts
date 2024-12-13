@@ -1,7 +1,7 @@
 import { Theme } from "@react-navigation/native";
 
 export const NAV_THEME = {
-  background: "hsl(240 10% 3.9%)", // background
+  background: "#151515", // background
   border: "hsl(240 3.7% 15.9%)", // border
   card: "hsl(240 10% 3.9%)", // card
   notification: "hsl(0 72% 51%)", // destructive
@@ -30,4 +30,4 @@ export const DARK_THEME: Theme = {
       fontWeight: "900",
     },
   },
-}; 
+};

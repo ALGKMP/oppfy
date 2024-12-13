@@ -26,9 +26,6 @@ const OnboardingLayout = () => {
         headerLeft: (props) => <HeaderLeft {...props} />,
         headerRight: (props) => <HeaderRight {...props} />,
         header: (props) => <Header {...props} />,
-        contentStyle: {
-          backgroundColor: theme.background.val,
-        },
       }}
     >
       <Stack.Screen
