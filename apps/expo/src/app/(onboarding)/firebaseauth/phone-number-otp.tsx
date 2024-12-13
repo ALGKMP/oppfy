@@ -9,7 +9,7 @@ import { styled } from "tamagui";
 import { sharedValidators } from "@oppfy/validators";
 
 import {
-  H1,
+  H2,
   ScreenView,
   Spinner,
   Text,
@@ -173,7 +173,7 @@ const PhoneNumberOTP = () => {
       safeAreaEdges={["bottom"]}
     >
       <YStack paddingHorizontal="$4" gap="$6">
-        <H1 textAlign="center">Enter your{"\n"}verification code</H1>
+        <H2 textAlign="center">Enter your{"\n"}verification code</H2>
 
         <OTPInput
           value={phoneNumberOTP}
@@ -193,6 +193,7 @@ const PhoneNumberOTP = () => {
       </YStack>
 
       <OnboardingButton
+        marginHorizontal="$-4"
         onPress={onSubmit}
         disabled={!isValidPhoneNumberOTP || isLoading}
       >

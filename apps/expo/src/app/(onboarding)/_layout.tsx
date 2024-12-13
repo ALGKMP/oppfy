@@ -9,66 +9,59 @@ import type {
   NativeStackHeaderRightProps,
 } from "@react-navigation/native-stack/";
 import { ChevronLeft, Info, X } from "@tamagui/lucide-icons";
-import { Text, useTheme } from "tamagui";
+import { Text } from "tamagui";
 
 import { AlertDialog } from "~/components/Dialogs";
 import { Header as BaseHeader } from "~/components/Headers";
 import { useSession } from "~/contexts/SessionContext";
 import { Stack } from "~/layouts";
 
-const OnboardingLayout = () => {
-  const theme = useTheme();
-
-  return (
-    <Stack
-      screenOptions={{
-        headerTitle: (props) => <HeaderTitle {...props} />,
-        headerLeft: (props) => <HeaderLeft {...props} />,
-        headerRight: (props) => <HeaderRight {...props} />,
-        header: (props) => <Header {...props} />,
+const OnboardingLayout = () => (
+  <Stack
+    screenOptions={{
+      headerTitle: (props) => <HeaderTitle {...props} />,
+      headerLeft: (props) => <HeaderLeft {...props} />,
+      headerRight: (props) => <HeaderRight {...props} />,
+      header: (props) => <Header {...props} />,
+    }}
+  >
+    <Stack.Screen
+      name="index"
+      options={{
+        animation: "fade",
+        header: () => null,
       }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          animation: "fade",
-          header: () => null,
-        }}
-      />
+    />
 
-      <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
+    <Stack.Screen name="misc/permissions" options={{ animation: "fade" }} />
 
-      <Stack.Screen name="firebaseauth/link" options={{ animation: "fade" }} />
-      <Stack.Screen
-        name="firebaseauth/phone-number-otp"
-        options={{ animation: "fade" }}
-      />
+    <Stack.Screen name="firebaseauth/link" options={{ animation: "fade" }} />
+    <Stack.Screen
+      name="firebaseauth/phone-number-otp"
+      options={{ animation: "fade" }}
+    />
 
-      <Stack.Screen
-        name="user-info/welcome"
-        options={{
-          animation: "fade",
-          gestureEnabled: false,
-          headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
-        }}
-      />
-      <Stack.Screen
-        name="user-info/full-name"
-        options={{ animation: "fade" }}
-      />
-      <Stack.Screen
-        name="user-info/date-of-birth"
-        options={{ animation: "fade" }}
-      />
+    <Stack.Screen
+      name="user-info/welcome"
+      options={{
+        animation: "fade",
+        gestureEnabled: false,
+        headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
+      }}
+    />
+    <Stack.Screen name="user-info/full-name" options={{ animation: "fade" }} />
+    <Stack.Screen
+      name="user-info/date-of-birth"
+      options={{ animation: "fade" }}
+    />
 
-      <Stack.Screen name="user-info/username" options={{ animation: "fade" }} />
-      <Stack.Screen
-        name="user-info/profile-picture"
-        options={{ animation: "fade" }}
-      />
-    </Stack>
-  );
-};
+    <Stack.Screen name="user-info/username" options={{ animation: "fade" }} />
+    <Stack.Screen
+      name="user-info/profile-picture"
+      options={{ animation: "fade" }}
+    />
+  </Stack>
+);
 
 const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
   const { signOut } = useSession();

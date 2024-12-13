@@ -41,7 +41,7 @@ const countriesWithoutSections = countriesData.filter(
 );
 
 // ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = false;
+auth().settings.appVerificationDisabledForTesting = true;
 
 enum Error {
   INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
@@ -184,8 +184,8 @@ const PhoneNumber = () => {
       </YStack>
 
       <OnboardingButton
-        onPress={onSubmit}
         marginHorizontal="$-4"
+        onPress={onSubmit}
         disabled={!isValidPhoneNumber || isLoading}
       >
         {isLoading ? <Spinner /> : "Send Verification Text"}
