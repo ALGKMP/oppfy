@@ -9,21 +9,35 @@ import { env } from "~/env";
 export const metadata: Metadata = {
   metadataBase: new URL(
     env.VERCEL_ENV === "production"
-      ? "https://turbo.t3.gg"
+      ? "https://opp.oppfy.app"
       : "http://localhost:3000",
   ),
-  title: "Create T3 Turbo",
-  description: "Simple monorepo with shared backend for web & mobile apps",
+  title: "Oppfy",
+  description: "Experience a new kind of social media where your friends capture your most authentic moments",
+  icons: {
+    icon: "/app-icon.png",
+    apple: "/app-icon.png",
+  },
   openGraph: {
-    title: "Create T3 Turbo",
-    description: "Simple monorepo with shared backend for web & mobile apps",
-    url: "https://create-t3-turbo.vercel.app",
-    siteName: "Create T3 Turbo",
+    title: "Oppfy",
+    description: "Experience a new kind of social media where your friends capture your most authentic moments",
+    url: "https://opp.oppfy.app",
+    siteName: "Oppfy",
+    images: [
+      {
+        url: "/icon.png",
+        width: 1200,
+        height: 630,
+        alt: "Oppfy App",
+      },
+    ],
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    site: "@jullerino",
-    creator: "@jullerino",
+    title: "Oppfy",
+    description: "Experience a new kind of social media where your friends capture your most authentic moments",
+    images: "/icon.png",
   },
 };
 
