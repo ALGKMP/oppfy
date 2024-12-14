@@ -77,7 +77,7 @@ const Search = () => {
           <VirtualizedListItem
             loading={false}
             title={item.username}
-            subtitle={item.fullName}
+            subtitle={item.name}
             imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
             onPress={() => {
               router.navigate({

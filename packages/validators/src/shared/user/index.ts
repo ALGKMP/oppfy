@@ -4,12 +4,12 @@ import { z } from "zod";
 
 import { AgeChecker } from "@oppfy/utils";
 
-export const fullName = z
+export const name = z
   .string()
-  .min(2, { message: "Name is too short" })
+  .min(1, { message: "Name is too short" })
   .max(24, { message: "Name is too long" })
-  .regex(/^[a-zA-Z]+([ '-][a-zA-Z]+)*$/, {
-    message: "Name contains invalid characters",
+  .regex(/^[a-zA-Z]+$/, {
+    message: "Name can only contain letters",
   });
 
 export const username = z
@@ -21,7 +21,9 @@ export const username = z
     "Username can only contain letters, numbers, underscores, and periods. It must start with a letter or number and end with a letter or number.",
   );
 
-export const bio = z.string().max(100, { message: "Bio must be at most 100 characters long" });
+export const bio = z
+  .string()
+  .max(100, { message: "Bio must be at most 100 characters long" });
 
 export const dateOfBirth = z
   .date()
@@ -151,6 +153,6 @@ export const recommededProfiles = z.array(
     username: z.string(),
     profileId: z.number(),
     privacy: z.enum(["public", "private"]),
-    fullName: z.string().nullable(),
+    name: z.string().nullable(),
   }),
 );

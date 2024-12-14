@@ -71,7 +71,7 @@ export const profileRouter = createTRPCRouter({
   updateProfile: protectedProcedure
     .input(
       z.object({
-        fullName: sharedValidators.user.fullName.optional(),
+        name: sharedValidators.user.name.optional(),
         username: sharedValidators.user.username.optional(),
         bio: sharedValidators.user.bio.optional(),
         dateOfBirth: sharedValidators.user.dateOfBirth.optional(),

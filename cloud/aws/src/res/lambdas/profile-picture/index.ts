@@ -114,7 +114,7 @@ const upsertProfile = async (
       profile: {
         columns: {
           username: true,
-          fullName: true,
+          name: true,
           bio: true,
           dateOfBirth: true,
           profilePictureKey: true,

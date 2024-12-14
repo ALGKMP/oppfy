@@ -77,7 +77,7 @@ export class UserService {
 
     return [
       user.profile.dateOfBirth,
-      user.profile.fullName,
+      user.profile.name,
       user.profile.username,
     ].every((field) => !!field);
   }
@@ -107,7 +107,7 @@ export class UserService {
       targetUserId,
       currentUserId,
     );
-    const isBlockedByTargetUser = await this.blockRepository.getBlockedUser(  
+    const isBlockedByTargetUser = await this.blockRepository.getBlockedUser(
       currentUserId,
       targetUserId,
     );

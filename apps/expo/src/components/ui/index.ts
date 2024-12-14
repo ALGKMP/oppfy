@@ -5,7 +5,7 @@ import {
   useAlertDialogController,
 } from "./AlertDialog";
 import { Avatar } from "./Avatar";
-import { Button, OnboardingButton } from "./Buttons";
+import { Button } from "./Buttons";
 import { Card } from "./Card";
 import { Checkbox } from "./Checkbox";
 import { Dialog } from "./Dialog";
@@ -29,11 +29,10 @@ import { Switch } from "./Switch";
 import { Paragraph, SizableText, Text } from "./Texts";
 import { ToggleGroup } from "./ToggleGroup";
 import { Tooltip } from "./Tooltip";
-import { ScrollView, View } from "./Views";
+import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 
 export {
   Button,
-  OnboardingButton,
   H1,
   H2,
   H3,
@@ -73,6 +72,8 @@ export {
   Square,
   Circle,
   View,
+  SafeAreaView,
+  ScreenView,
   ScrollView,
   Spinner,
 };

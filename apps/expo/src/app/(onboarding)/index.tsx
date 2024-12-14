@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, View } from "react-native";
+import { Dimensions } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -13,9 +13,8 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { SplashScreen, useRouter } from "expo-router";
 import Splash from "@assets/splash.png";
-import { H2 } from "tamagui";
 
-import { BaseScreenView } from "~/components/Views";
+import { H2, ScreenView, View } from "~/components/ui";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { OnboardingButton } from "~/features/onboarding/components";
 
@@ -198,51 +197,52 @@ const Start = () => {
   );
 
   return (
-    <BaseScreenView
+    <ScreenView
       padding={0}
-      backgroundColor="#F214FF"
-      safeAreaEdges={["top", "bottom"]}
-      bottomSafeAreaStyle={{ backgroundColor: "#F214FF" }}
-      topSafeAreaStyle={{ backgroundColor: "#F214FF" }}
+      backgroundColor={"$primary"}
+      safeAreaEdges={["bottom"]}
     >
-      <View style={{ flex: 1 }}>
-        <View style={{ position: "absolute", width: "100%", height: "100%" }}>
-          {renderedCameras}
-        </View>
+      {renderedCameras}
 
-        <View
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <AnimatedImage
-            source={Splash}
-            contentFit="contain"
-            style={[
-              {
-                width: "100%",
-                aspectRatio: 4,
-                resizeMode: "contain",
-              },
-              animatedIconStyle,
-            ]}
-          />
-          <Animated.View style={[animatedSubtitleStyle]}>
-            <H2 textAlign="center">Other people post for you</H2>
-          </Animated.View>
-        </View>
+      <View
+        position="absolute"
+        width="100%"
+        height="100%"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <AnimatedImage
+          source={Splash}
+          contentFit="contain"
+          style={[
+            {
+              width: "100%",
+              aspectRatio: 4,
+              resizeMode: "contain",
+            },
+            animatedIconStyle,
+          ]}
+        />
 
-        <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
-          <Animated.View style={animatedButtonStyle}>
-            <OnboardingButton onPress={onSubmit}>Welcome</OnboardingButton>
-          </Animated.View>
-        </View>
+        <Animated.View style={[animatedSubtitleStyle]}>
+          <H2 textAlign="center">Other people post for you</H2>
+        </Animated.View>
       </View>
-    </BaseScreenView>
+
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+          },
+          animatedButtonStyle,
+        ]}
+      >
+        <OnboardingButton onPress={onSubmit}>Welcome</OnboardingButton>
+      </Animated.View>
+    </ScreenView>
   );
 };
 

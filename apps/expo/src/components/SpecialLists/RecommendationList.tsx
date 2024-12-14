@@ -95,7 +95,7 @@ const RecommendationList = ({
       <VirtualizedListItem
         loading={loading}
         title={item.username}
-        subtitle={item.fullName}
+        subtitle={item.name}
         imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
         onPress={() => handleProfileClicked(item.userId, item.username)}
         button={{

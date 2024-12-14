@@ -17,7 +17,7 @@ export class BlockRepository {
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.block.createdAt,
         profileId: schema.profile.id,

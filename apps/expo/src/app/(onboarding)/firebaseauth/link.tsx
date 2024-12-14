@@ -7,24 +7,23 @@ import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
 import { FlashList } from "@shopify/flash-list";
 import { CheckCircle2, ChevronLeft } from "@tamagui/lucide-icons";
-import {
-  getToken,
-  H1,
-  H6,
-  ListItem,
-  Spinner,
-  Text,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import { Header } from "~/components/Headers";
-import { SearchInput } from "~/components/Inputs";
-import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import {
+  H2,
+  H6,
+  ListItem,
+  ScreenView,
+  SearchInput,
+  Spinner,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
@@ -42,7 +41,7 @@ const countriesWithoutSections = countriesData.filter(
 );
 
 // ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = false;
+auth().settings.appVerificationDisabledForTesting = true;
 
 enum Error {
   INVALID_PHONE_NUMBER = "Invalid phone number. Please check the number and try again.",
@@ -144,57 +143,54 @@ const PhoneNumber = () => {
   };
 
   return (
-    <KeyboardSafeView>
-      <BaseScreenView
-        safeAreaEdges={["bottom"]}
-        backgroundColor="$background"
-        paddingBottom={0}
-        paddingHorizontal={0}
+    <ScreenView
+      paddingBottom={0}
+      paddingTop="$10"
+      justifyContent="space-between"
+      keyboardAvoiding
+      safeAreaEdges={["bottom"]}
+    >
+      <YStack gap="$6">
+        <H2 textAlign="center">What's your{"\n"}phone number?</H2>
+
+        <InputWrapper>
+          <CountryPicker
+            selectedCountryData={countryData}
+            setSelectedCountryData={setCountryData}
+          />
+          <OnboardingInput
+            value={phoneNumber}
+            onChangeText={(text) => {
+              setPhoneNumber(text);
+              setError(null);
+            }}
+            placeholder="Your number here"
+            keyboardType="phone-pad"
+            autoFocus
+            placeholderTextColor="$gray8"
+            borderTopLeftRadius={0}
+            borderBottomLeftRadius={0}
+          />
+        </InputWrapper>
+
+        {error ? (
+          <DisclaimerText color="$red9">{error}</DisclaimerText>
+        ) : (
+          <DisclaimerText>
+            By Continuing you agree to our <BoldText>Privacy Policy</BoldText>{" "}
+            and <BoldText>Terms of Service</BoldText>.
+          </DisclaimerText>
+        )}
+      </YStack>
+
+      <OnboardingButton
+        marginHorizontal="$-4"
+        onPress={onSubmit}
+        disabled={!isValidPhoneNumber || isLoading}
       >
-        <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$6">
-            <H1 textAlign="center">What's your{"\n"}phone number?</H1>
-
-            <InputWrapper>
-              <CountryPicker
-                selectedCountryData={countryData}
-                setSelectedCountryData={setCountryData}
-              />
-              <OnboardingInput
-                value={phoneNumber}
-                onChangeText={(text) => {
-                  setPhoneNumber(text);
-                  setError(null);
-                }}
-                placeholder="Your number here"
-                keyboardType="phone-pad"
-                autoFocus
-                placeholderTextColor="$gray8"
-                borderTopLeftRadius={0}
-                borderBottomLeftRadius={0}
-              />
-            </InputWrapper>
-
-            {error ? (
-              <DisclaimerText color="$red9">{error}</DisclaimerText>
-            ) : (
-              <DisclaimerText>
-                By Continuing you agree to our{" "}
-                <BoldText>Privacy Policy</BoldText> and{" "}
-                <BoldText>Terms of Service</BoldText>.
-              </DisclaimerText>
-            )}
-          </YStack>
-
-          <OnboardingButton
-            onPress={onSubmit}
-            disabled={!isValidPhoneNumber || isLoading}
-          >
-            {isLoading ? <Spinner /> : "Send Verification Text"}
-          </OnboardingButton>
-        </YStack>
-      </BaseScreenView>
-    </KeyboardSafeView>
+        {isLoading ? <Spinner /> : "Send Verification Text"}
+      </OnboardingButton>
+    </ScreenView>
   );
 };
 

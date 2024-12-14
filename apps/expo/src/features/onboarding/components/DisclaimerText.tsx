@@ -1,7 +1,7 @@
 import { styled, Text } from "tamagui";
 
 const DisclaimerText = styled(Text, {
-  color: "$gray9",
+  color: "$gray11",
   textAlign: "center",
   fontSize: "$5",
 });

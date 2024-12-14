@@ -81,7 +81,7 @@ export class ProfileRepository {
         profileId: profile.id,
         privacy: user.privacySetting,
         username: profile.username,
-        fullName: profile.fullName,
+        name: profile.name,
         profilePictureKey: profile.profilePictureKey,
       })
       .from(schema.user)
