@@ -1,3 +1,3 @@
-import { styled, Group as TamaguiGroup } from "tamagui";
+import { Group as TamaguiGroup } from "tamagui";
 
-export const Group = styled(TamaguiGroup, {});
+export const Group = TamaguiGroup;

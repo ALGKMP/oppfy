@@ -1,10 +1,17 @@
 import React, { useEffect } from "react";
 import * as Haptics from "expo-haptics";
 import { SplashScreen, useRouter } from "expo-router";
-import { H4, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
-import { H3, ScreenView } from "~/components/ui";
-import { BaseScreenView } from "~/components/Views";
+import {
+  H3,
+  H4,
+  Group,
+  ScreenView,
+  Separator,
+  Text,
+  XStack,
+  YStack,
+} from "~/components/ui";
 import {
   DisclaimerText,
   OnboardingButton,
@@ -26,39 +33,39 @@ const Welcome = () => {
           Welcome to OPPFY, a place where roles are reversed.
         </H3>
 
-        <YGroup gap="$4">
-          <YGroup.Item>
+        <Group orientation="vertical" gap="$4">
+          <Group.Item>
             <ListItem
               emoji="🤝"
               title="Mutual OPP-eration"
               subTitle="Embrace the chaos as you and your friends take turns posting for each other."
             />
-          </YGroup.Item>
+          </Group.Item>
           <Separator />
-          <YGroup.Item>
+          <Group.Item>
             <ListItem
               emoji="📷"
               title="Unfiltered Exposure"
               subTitle="Let your squad capture your most real, unedited moments - no filters needed!"
             />
-          </YGroup.Item>
+          </Group.Item>
           <Separator />
-          <YGroup.Item>
+          <Group.Item>
             <ListItem
               emoji="💬"
               title="Authentic Engagement"
               subTitle="Comment, react, and vibe with your friends' posts to keep the conversation flowing."
             />
-          </YGroup.Item>
+          </Group.Item>
           <Separator />
-          <YGroup.Item>
+          <Group.Item>
             <ListItem
               emoji="🎉"
               title="Living on the Edge"
               subTitle="From embarrassing bloopers to epic adventures, your feed will be a rollercoaster ride."
             />
-          </YGroup.Item>
-        </YGroup>
+          </Group.Item>
+        </Group>
       </YStack>
 
       <OnboardingButton marginHorizontal="$-4" onPress={onSubmit}>
