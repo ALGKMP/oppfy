@@ -64,11 +64,35 @@ export default async function PostPage({ params }: Props) {
           Join the <span className="text-[#F214FF]">Oppfy</span> Beta
         </h1>
 
+        <div className="flex items-center gap-4 my-4">
+          <div className="flex flex-col items-center">
+            <img 
+              src={post?.authorProfilePicture ?? "/default-profile-picture.jpg"}
+              alt={`${post?.authorUsername}'s profile`}
+              className="w-16 h-16 rounded-full border-2 border-[#F214FF]"
+            />
+            <p className="text-white text-sm mt-2">@{post?.authorUsername}</p>
+          </div>
+          
+          <div className="flex flex-col items-center mx-2">
+            <span className="text-2xl mb-1">📸</span>
+            <span className="text-[#F214FF] text-sm font-medium">took a pic of</span>
+          </div>
+          
+          <div className="flex flex-col items-center">
+            <img 
+              src={post?.recipientProfilePicture ?? "/default-profile-picture.jpg"}
+              alt={`${post?.recipientUsername}'s profile`}
+              className="w-16 h-16 rounded-full border-2 border-[#F214FF]"
+            />
+            <p className="text-white text-sm mt-2">@{post?.recipientUsername}</p>
+          </div>
+        </div>
+
         <p className="text-xl text-gray-400 text-center max-w-md">
           Where your friends capture your most authentic moments. Join our exclusive beta and be part of something special.
         </p>
 
-        {/*TODO: say who it was invited by*/}
         <p className="text-xl text-gray-400 text-center max-w-md">
           Join the beta to see <span className="text-[#F214FF]">{post?.authorUsername}</span>'s post for <span className="text-[#F214FF]">{post?.recipientUsername}</span>
         </p>
