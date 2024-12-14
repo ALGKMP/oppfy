@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import { H1, YStack } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import { H2, ScreenView, YStack } from "~/components/ui";
 import {
   BoldText,
   DisclaimerText,
@@ -27,10 +26,8 @@ const Username = () => {
 
   const updateProfile = api.profile.updateProfile.useMutation();
 
-  const isValidUsername = useMemo(
-    () => sharedValidators.user.username.safeParse(username).success,
-    [username],
-  );
+  const isValidUsername =
+    sharedValidators.user.username.safeParse(username).success;
 
   const onSubmit = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -53,42 +50,43 @@ const Username = () => {
   };
 
   return (
-    <KeyboardSafeView>
-      <BaseScreenView
-        safeAreaEdges={["bottom"]}
-        backgroundColor="$background"
-        paddingBottom={0}
-        paddingHorizontal={0}
+    <ScreenView
+      paddingBottom={0}
+      paddingTop="$10"
+      justifyContent="space-between"
+      keyboardAvoiding
+      safeAreaEdges={["bottom"]}
+    >
+      <YStack paddingHorizontal="$4" gap="$6">
+        <H2 textAlign="center">Choose a{"\n"}username!</H2>
+
+        <InputWrapper>
+          <OnboardingInput
+            value={username}
+            onChangeText={setUsername}
+            textAlign="center"
+            autoComplete="off"
+            autoFocus
+          />
+        </InputWrapper>
+
+        {error ? (
+          <BoldText color="$red9">{error}</BoldText>
+        ) : (
+          <DisclaimerText>
+            Your username is how people find you. Your username must be unique.
+          </DisclaimerText>
+        )}
+      </YStack>
+
+      <OnboardingButton
+        marginHorizontal="$-4"
+        onPress={onSubmit}
+        disabled={!isValidUsername}
       >
-        <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$6">
-            <H1 textAlign="center">Choose a username!</H1>
-
-            <InputWrapper>
-              <OnboardingInput
-                value={username}
-                onChangeText={setUsername}
-                textAlign="center"
-                autoFocus
-              />
-            </InputWrapper>
-
-            {error ? (
-              <BoldText color="$red9">{error}</BoldText>
-            ) : (
-              <DisclaimerText>
-                Your username is how people find you on OPPFY. Your username
-                must be unique.
-              </DisclaimerText>
-            )}
-          </YStack>
-
-          <OnboardingButton onPress={onSubmit} disabled={!isValidUsername}>
-            Continue
-          </OnboardingButton>
-        </YStack>
-      </BaseScreenView>
-    </KeyboardSafeView>
+        Continue
+      </OnboardingButton>
+    </ScreenView>
   );
 };
 
