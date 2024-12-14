@@ -3,9 +3,9 @@ import * as Haptics from "expo-haptics";
 import { SplashScreen, useRouter } from "expo-router";
 
 import {
+  Group,
   H3,
   H4,
-  Group,
   ScreenView,
   Separator,
   Text,
@@ -21,7 +21,7 @@ const Welcome = () => {
   const router = useRouter();
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/user-info/full-name");
+    router.push("/user-info/name");
   };
 
   useEffect(() => void SplashScreen.hideAsync(), []);

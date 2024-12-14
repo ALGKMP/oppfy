@@ -49,7 +49,7 @@ const OnboardingLayout = () => (
         headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
       }}
     />
-    <Stack.Screen name="user-info/full-name" options={{ animation: "fade" }} />
+    <Stack.Screen name="user-info/name" options={{ animation: "fade" }} />
     <Stack.Screen
       name="user-info/date-of-birth"
       options={{ animation: "fade" }}
