@@ -24,7 +24,7 @@ const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, conside
 
 interface User {
   userId: string;
-  fullName: string | null;
+  name: string | null;
   username: string;
   profilePictureUrl: string | null;
 }
@@ -132,7 +132,7 @@ const AnimatedUserProfile = ({
           </Animated.View>
         </View>
         <Text fontSize="$3" fontWeight="bold" color="white">
-          {user.fullName}
+          {user.name}
         </Text>
         <Text fontSize="$2" color="$gray10">
           {user.username}

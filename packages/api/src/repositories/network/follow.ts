@@ -203,7 +203,7 @@ export class FollowRepository {
       .select({
         userId: schema.user.id,
         profileId: schema.profile.id,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         username: schema.profile.username,
         profilePictureUrl: schema.profile.profilePictureKey,
         privacy: schema.user.privacySetting,
@@ -226,7 +226,7 @@ export class FollowRepository {
             : undefined,
           // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
-          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
@@ -256,7 +256,7 @@ export class FollowRepository {
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         profilePictureUrl: schema.profile.profilePictureKey,
         profileId: schema.profile.id,
         privacy: schema.user.privacySetting,
@@ -294,7 +294,7 @@ export class FollowRepository {
             : undefined,
           // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
-          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
@@ -335,7 +335,7 @@ export class FollowRepository {
         userId: schema.user.id,
         profileId: schema.profile.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
@@ -372,7 +372,7 @@ export class FollowRepository {
             : undefined,
           // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
-          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
@@ -404,7 +404,7 @@ export class FollowRepository {
         userId: schema.user.id,
         profileId: schema.profile.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         createdAt: schema.follower.createdAt,
@@ -441,7 +441,7 @@ export class FollowRepository {
             : undefined,
           // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
-          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
@@ -471,7 +471,7 @@ export class FollowRepository {
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         profileId: schema.profile.id,
         profilePictureUrl: schema.profile.profilePictureKey,
         followRequestId: schema.followRequest.id,

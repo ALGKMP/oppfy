@@ -17,7 +17,7 @@ import { FollowService } from "../network/follow";
 import { FriendService } from "../network/friend";
 
 const updateProfile = z.object({
-  fullName: sharedValidators.user.fullName.optional(),
+  name: sharedValidators.user.name.optional(),
   username: sharedValidators.user.username.optional(),
   bio: sharedValidators.user.bio.optional(),
   dateOfBirth: sharedValidators.user.dateOfBirth.optional(),
@@ -61,9 +61,9 @@ export class ProfileService {
     }
 
     await this.profileRepository.updateProfile(profile.id, newData);
-    console.log("upserting profile")
+    console.log("upserting profile");
     await this.searchRepository.upsertProfile(userWithProfile.id, {
-      fullName: newData.fullName,
+      name: newData.name,
       username: newData.username,
       bio: newData.bio,
     });
@@ -92,7 +92,7 @@ export class ProfileService {
       profileId: user.profile.id,
       privacy: user.privacySetting,
       username: user.profile.username,
-      name: user.profile.fullName,
+      name: user.profile.name,
       bio: user.profile.bio,
       followerCount: user.profile.profileStats.followers,
       followingCount: user.profile.profileStats.following,
@@ -134,7 +134,7 @@ export class ProfileService {
       profileId: user.profile.id,
       privacy: user.privacySetting,
       username: user.profile.username,
-      name: user.profile.fullName,
+      name: user.profile.name,
       bio: user.profile.bio,
       followerCount: user.profile.profileStats.followers,
       followingCount: user.profile.profileStats.following,

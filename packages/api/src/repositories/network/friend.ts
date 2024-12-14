@@ -168,7 +168,7 @@ export class FriendRepository {
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         profileId: schema.profile.id,
@@ -201,7 +201,7 @@ export class FriendRepository {
             : undefined,
           // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
-          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
@@ -231,7 +231,7 @@ export class FriendRepository {
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         privacy: schema.user.privacySetting,
         profilePictureUrl: schema.profile.profilePictureKey,
         profileId: schema.profile.id,
@@ -279,7 +279,7 @@ export class FriendRepository {
             : undefined,
           // ! as of now drizzle does not update the return type
           isNotNull(schema.profile.username),
-          isNotNull(schema.profile.fullName),
+          isNotNull(schema.profile.name),
           isNotNull(schema.profile.dateOfBirth),
         ),
       )
@@ -308,7 +308,7 @@ export class FriendRepository {
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
-        name: schema.profile.fullName,
+        name: schema.profile.name,
         profileId: schema.profile.id,
         profilePictureUrl: schema.profile.profilePictureKey,
         friendRequestId: schema.friendRequest.id,

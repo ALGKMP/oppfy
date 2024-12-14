@@ -73,7 +73,7 @@ export class SearchRepository {
       .select({
         userId: schema.user.id,
         username: schema.profile.username,
-        fullName: schema.profile.fullName,
+        name: schema.profile.name,
         bio: schema.profile.bio,
         profilePictureKey: schema.profile.profilePictureKey,
       })
@@ -105,7 +105,7 @@ export class SearchRepository {
     return results.map((result) => ({
       userId: result.userId,
       username: result.username,
-      fullName: result.fullName ?? "",
+      name: result.name ?? "",
       bio: result.bio ?? "",
       profilePictureKey: result.profilePictureKey ?? "",
     }));
@@ -122,7 +122,7 @@ export class SearchRepository {
         profile: {
           columns: {
             username: true,
-            fullName: true,
+            name: true,
             bio: true,
             dateOfBirth: true,
             profilePictureKey: true,

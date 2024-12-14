@@ -29,14 +29,14 @@ import { OnboardingButton } from "~/features/onboarding/components";
 import { api, RouterOutputs } from "~/utils/api";
 
 const placeholderUsers = [
-  { fullName: "Michael", username: "michaelyyz" },
-  { fullName: "Ben Archer", username: "benarcher" },
-  { fullName: "Nebula", username: "nebula1600" },
-  { fullName: "kareem", username: "6kaleio" },
-  { fullName: "ayaaniqbal", username: "ayaaniqbal" },
-  { fullName: "Ali", username: "aliy45" },
-  { fullName: "itsalianna", username: "itsaliannaaa" },
-  { fullName: "Bautista", username: "bautista12" },
+  { name: "Michael", username: "michaelyyz" },
+  { name: "Ben Archer", username: "benarcher" },
+  { name: "Nebula", username: "nebula1600" },
+  { name: "kareem", username: "6kaleio" },
+  { name: "ayaaniqbal", username: "ayaaniqbal" },
+  { name: "Ali", username: "aliy45" },
+  { name: "itsalianna", username: "itsaliannaaa" },
+  { name: "Bautista", username: "bautista12" },
   // Add more users if needed
 ];
 
@@ -50,7 +50,7 @@ const AnimatedUserProfile = ({
 }: {
   user: {
     userId: string;
-    fullName: string | null;
+    name: string | null;
     username: string;
     profilePictureUrl: string | null;
   };
@@ -160,7 +160,7 @@ const AnimatedUserProfile = ({
       </TouchableOpacity>
       <Spacer size="$2" />
       <Text fontSize="$3" fontWeight="bold" color="white">
-        {user.fullName}
+        {user.name}
       </Text>
       <Text fontSize="$2" color="$gray10">
         {user.username}

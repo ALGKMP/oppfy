@@ -17,7 +17,7 @@ const dateType = customType<{ data: Date | null; driverData: string | null }>({
     return "date";
   },
   toDriver(value: Date | null): string | null {
-    return value ? value.toISOString().split("T")[0] ?? null : null;
+    return value ? (value.toISOString().split("T")[0] ?? null) : null;
   },
   fromDriver(value: string | null): Date | null {
     return value ? new Date(value) : null;
@@ -147,7 +147,7 @@ export const userContact = pgTable(
 export const profile = pgTable("profile", {
   id: uuid("id").primaryKey().defaultRandom(),
   username: varchar("username", { length: 30 }).unique().notNull(),
-  fullName: varchar("full_name", { length: 30 }),
+  name: varchar("name", { length: 30 }),
   dateOfBirth: dateType("date_of_birth"),
   bio: varchar("bio", { length: 100 }),
   profilePictureKey: text("profile_picture_key"),

@@ -11,7 +11,7 @@ export enum OpenSearchIndex {
 export interface OpenSearchProfileIndexResult {
   userId: string;
   username: string;
-  fullName: string;
+  name: string;
   bio: string;
   profilePictureKey: string;
 }

@@ -37,9 +37,9 @@ import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 
 const profileSchema = z.object({
-  fullName: sharedValidators.user.fullName,
+  name: sharedValidators.user.name,
   username: sharedValidators.user.username,
-   bio: sharedValidators.user.bio,
+  bio: sharedValidators.user.bio,
 });
 
 type ProfileFields = z.infer<typeof profileSchema>;
@@ -65,7 +65,7 @@ const EditProfile = () => {
     reset,
   } = useForm<ProfileFields>({
     defaultValues: {
-      fullName: defaultValues?.name ?? "",
+      name: defaultValues?.name ?? "",
       username: defaultValues?.username ?? "",
       bio: defaultValues?.bio ?? "",
     },
@@ -156,7 +156,7 @@ const EditProfile = () => {
         <Minus size="$4" />
         <View justifyContent="center" alignItems="center">
           <SizableText size="$5" textAlign="center" fontWeight="bold">
-            {currentField === "fullName" && "Edit Name"}
+            {currentField === "name" && "Edit Name"}
             {currentField === "username" && "Edit Username"}
             {currentField === "bio" && "Edit Bio"}
           </SizableText>
@@ -245,9 +245,9 @@ const EditProfile = () => {
 
   const renderBottomSheetContent = useCallback(() => {
     switch (currentField) {
-      case "fullName":
+      case "name":
         return renderFieldContent(
-          "fullName",
+          "name",
           "What's your name?",
           "Full Name",
           "✨ Your display name helps others recognize you.",
@@ -338,7 +338,7 @@ const EditProfile = () => {
               <XStack
                 justifyContent="space-between"
                 alignItems="center"
-                onPress={() => openBottomSheet("fullName")}
+                onPress={() => openBottomSheet("name")}
               >
                 <XStack flex={1} alignItems="center" gap="$3">
                   <Ionicons
@@ -353,7 +353,7 @@ const EditProfile = () => {
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
-                      {watch("fullName") || "Add name"}
+                      {watch("name") || "Add name"}
                     </Text>
                     <Text color="$gray10">Name</Text>
                   </YStack>

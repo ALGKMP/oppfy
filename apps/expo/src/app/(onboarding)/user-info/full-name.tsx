@@ -15,22 +15,19 @@ import {
 } from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
-const FullName = () => {
+const Name = () => {
   const router = useRouter();
 
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState("");
   const updateProfile = api.profile.updateProfile.useMutation();
 
-  const isValidFullName = useMemo(
-    () => sharedValidators.user.fullName.safeParse(fullName).success,
-    [fullName],
-  );
+  const isValidName = sharedValidators.user.name.safeParse(name).success;
 
   const onSubmit = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     await updateProfile.mutateAsync({
-      fullName,
+      name: name,
     });
 
     router.push("/user-info/date-of-birth");
@@ -50,8 +47,8 @@ const FullName = () => {
 
             <InputWrapper>
               <OnboardingInput
-                value={fullName}
-                onChangeText={setFullName}
+                value={name}
+                onChangeText={setName}
                 textAlign="center"
                 autoFocus
               />
@@ -64,7 +61,7 @@ const FullName = () => {
             </DisclaimerText>
           </YStack>
 
-          <OnboardingButton onPress={onSubmit} disabled={!isValidFullName}>
+          <OnboardingButton onPress={onSubmit} disabled={!isValidName}>
             Continue
           </OnboardingButton>
         </YStack>
@@ -73,4 +70,4 @@ const FullName = () => {
   );
 };
 
-export default FullName;
+export default Name;
