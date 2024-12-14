@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   title: "Oppfy",
   description: "Experience a new kind of social media where your friends capture your most authentic moments",
   icons: {
-    icon: "/app-icon.png",
-    apple: "/app-icon.png",
+    icon: "/icon.png",
+    apple: "/icon.png",
   },
   openGraph: {
     title: "Oppfy",
