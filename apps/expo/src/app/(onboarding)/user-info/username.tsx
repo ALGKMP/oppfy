@@ -66,6 +66,7 @@ const Username = () => {
             onChangeText={setUsername}
             textAlign="center"
             autoComplete="off"
+            autoCapitalize="none"
             autoFocus
           />
         </InputWrapper>

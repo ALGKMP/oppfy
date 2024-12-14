@@ -79,6 +79,22 @@ const useUploadProfilePicture = ({
     },
   });
 
+  const pickImage = async () => {
+    // Let the user pick an image
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (result.canceled || !result.assets[0]) {
+      return { success: false };
+    }
+
+    return { success: true, uri: result.assets[0].uri };
+  };
+
   const pickAndUploadImage = async () => {
     // Let the user pick an image
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -89,7 +105,7 @@ const useUploadProfilePicture = ({
     });
 
     if (result.canceled || !result.assets[0]) {
-      return;
+      return { success: false };
     }
 
     // Reduce image resolution
@@ -102,6 +118,8 @@ const useUploadProfilePicture = ({
     setImageUri(uri);
 
     await uploadProfilePicture.mutateAsync(uri);
+
+    return { success: true };
   };
 
   return {

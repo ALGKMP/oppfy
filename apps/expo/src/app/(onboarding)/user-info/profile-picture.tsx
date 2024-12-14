@@ -4,9 +4,10 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { H1, Spinner, YStack } from "tamagui";
+import Feather from "@expo/vector-icons/Feather";
+import { useTheme } from "tamagui";
 
-import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
+import { H2, ScreenView, Spinner, Text, View, YStack } from "~/components/ui";
 import {
   DisclaimerText,
   OnboardingButton,
@@ -18,6 +19,7 @@ import { api } from "~/utils/api";
 const ProfilePicture = () => {
   const router = useRouter();
   const utils = api.useUtils();
+  const theme = useTheme();
 
   const { syncContacts } = useContacts();
 
@@ -25,6 +27,13 @@ const ProfilePicture = () => {
     useUploadProfilePicture({
       optimisticallyUpdate: true,
     });
+
+  const [hasUploadedPic, setHasUploadedPic] = React.useState(false);
+
+  const handleImageUpload = async () => {
+    const result = await pickAndUploadImage();
+    if (result.success) setHasUploadedPic(true);
+  };
 
   useEffect(() => {
     const fn = async () => {
@@ -48,21 +57,19 @@ const ProfilePicture = () => {
   };
 
   return (
-    <KeyboardSafeView>
-      <BaseScreenView
-        safeAreaEdges={["bottom"]}
-        backgroundColor="$background"
-        paddingBottom={0}
-        paddingHorizontal={0}
-      >
-        <YStack flex={1} justifyContent="space-between">
-          <YStack paddingHorizontal="$4" gap="$6">
-            <H1 textAlign="center">Upload your profile pic.</H1>
+    <ScreenView
+      paddingBottom={0}
+      paddingTop="$10"
+      justifyContent="space-between"
+      keyboardAvoiding
+      safeAreaEdges={["bottom"]}
+    >
+      <YStack paddingHorizontal="$4" gap="$6">
+        <H2 textAlign="center">Upload your profile pic.</H2>
 
-            <TouchableOpacity
-              style={{ alignItems: "center" }}
-              onPress={pickAndUploadImage}
-            >
+        <YStack alignItems="center" gap="$3">
+          <TouchableOpacity onPress={handleImageUpload}>
+            <View position="relative">
               <Image
                 source={imageUri ?? DefaultProfilePicture}
                 style={{
@@ -73,28 +80,44 @@ const ProfilePicture = () => {
                   borderWidth: 2,
                 }}
               />
-            </TouchableOpacity>
-
-            <DisclaimerText>
-              Your profile picture helps people recognize you.
-            </DisclaimerText>
-          </YStack>
-
-          <OnboardingButton
-            disabled={uploadStatus === "pending"}
-            onPress={imageUri ? onSubmit : onSkip}
-          >
-            {uploadStatus === "pending" ? (
-              <Spinner />
-            ) : imageUri ? (
-              "Continue"
-            ) : (
-              "Skip"
-            )}
-          </OnboardingButton>
+              <View
+                position="absolute"
+                bottom={0}
+                right={0}
+                borderRadius={40}
+                borderWidth="$2"
+                borderColor={theme.background.val}
+                backgroundColor="$gray5"
+                padding="$2"
+              >
+                <Feather name="edit-3" size={24} color={theme.blue9.val} />
+              </View>
+            </View>
+          </TouchableOpacity>
         </YStack>
-      </BaseScreenView>
-    </KeyboardSafeView>
+
+        <DisclaimerText>
+          {hasUploadedPic
+            ? "You really understood the assignment with that pic!"
+            : "Because a face like yours is hard to forget."}
+        </DisclaimerText>
+      </YStack>
+
+      <OnboardingButton
+        marginHorizontal="$-4"
+        disabled={uploadStatus === "pending"}
+        onPress={hasUploadedPic ? onSubmit : onSkip}
+        {...(!hasUploadedPic ? { backgroundColor: "$gray7" } : {})}
+      >
+        {uploadStatus === "pending" ? (
+          <Spinner />
+        ) : hasUploadedPic ? (
+          "Continue"
+        ) : (
+          "Skip"
+        )}
+      </OnboardingButton>
+    </ScreenView>
   );
 };
 
