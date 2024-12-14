@@ -81,10 +81,10 @@ const ProfilePicture = () => {
           </YStack>
 
           <OnboardingButton
-            disabled={uploadStatus === "loading"}
+            disabled={uploadStatus === "pending"}
             onPress={imageUri ? onSubmit : onSkip}
           >
-            {uploadStatus === "loading" ? (
+            {uploadStatus === "pending" ? (
               <Spinner />
             ) : imageUri ? (
               "Continue"

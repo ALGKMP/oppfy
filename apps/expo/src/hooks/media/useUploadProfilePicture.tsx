@@ -24,8 +24,8 @@ const useUploadProfilePicture = ({
     return await response.blob();
   };
 
-  const uploadProfilePicture = useMutation(
-    async (uri: string) => {
+  const uploadProfilePicture = useMutation<void, Error, string>({
+    mutationFn: async (uri: string) => {
       const profilePictureBlob = await getMediaBlob(uri);
 
       const presignedUrl =
@@ -42,44 +42,42 @@ const useUploadProfilePicture = ({
         throw new Error("Failed to upload profile picture");
       }
     },
-    {
-      onMutate: async (newProfilePictureUrl) => {
-        if (!optimisticallyUpdate) return;
+    onMutate: async (newProfilePictureUrl: string) => {
+      if (!optimisticallyUpdate) return;
 
-        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.profile.getFullProfileSelf.cancel();
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.profile.getFullProfileSelf.cancel();
 
-        // Get the data from the queryCache
-        const prevData = utils.profile.getFullProfileSelf.getData();
-        if (prevData === undefined) return;
+      // Get the data from the queryCache
+      const prevData = utils.profile.getFullProfileSelf.getData();
+      if (prevData === undefined) return;
 
-        // Optimistically update the data
-        utils.profile.getFullProfileSelf.setData(undefined, {
-          ...prevData,
-          profilePictureUrl: newProfilePictureUrl,
-        });
+      // Optimistically update the data
+      utils.profile.getFullProfileSelf.setData(undefined, {
+        ...prevData,
+        profilePictureUrl: newProfilePictureUrl,
+      });
 
-        // Return the previous data so we can revert if something goes wrong
-        return { prevData };
-      },
-      onError: (_err, _newProfilePictureUrl, ctx) => {
-        if (!optimisticallyUpdate) return;
-        if (ctx === undefined) return;
-
-        // If the mutation fails, use the context-value from onMutate
-        utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
-      },
-      onSettled: () => {
-        if (!optimisticallyUpdate) return;
-        // Sync with server once mutation has settled
-        setTimeout(
-          () => void utils.profile.getFullProfileSelf.invalidate(),
-          10000,
-        );
-        // await utils.profile.getFullProfileSelf.invalidate();
-      },
+      // Return the previous data so we can revert if something goes wrong
+      return { prevData };
     },
-  );
+    onError: (err: Error, newProfilePictureUrl: string, ctx: any) => {
+      if (!optimisticallyUpdate) return;
+      if (ctx === undefined) return;
+
+      // If the mutation fails, use the context-value from onMutate
+      utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
+    },
+    onSettled: () => {
+      if (!optimisticallyUpdate) return;
+      // Sync with server once mutation has settled
+      setTimeout(
+        () => void utils.profile.getFullProfileSelf.invalidate(),
+        10000,
+      );
+      // await utils.profile.getFullProfileSelf.invalidate();
+    },
+  });
 
   const pickAndUploadImage = async () => {
     // Let the user pick an image
