@@ -70,7 +70,7 @@ export default async function PostPage({ params }: Props) {
 
         {/*TODO: say who it was invited by*/}
         <p className="text-xl text-gray-400 text-center max-w-md">
-          {post?.authorUsername} invited you to join the beta
+          Join the beta to see <span className="text-[#F214FF]">{post?.authorUsername}</span>'s post for <span className="text-[#F214FF]">{post?.recipientUsername}</span>
         </p>
 
         <div className="flex flex-col items-center gap-6">
