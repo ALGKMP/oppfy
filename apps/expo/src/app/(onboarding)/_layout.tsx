@@ -11,9 +11,7 @@ import type {
 import { ChevronLeft, Info, X } from "@tamagui/lucide-icons";
 import { Text } from "tamagui";
 
-import { AlertDialog } from "~/components/Dialogs";
 import { Header as BaseHeader } from "~/components/Headers";
-import { useSession } from "~/contexts/SessionContext";
 import { Stack } from "~/layouts";
 
 const OnboardingLayout = () => (
@@ -46,7 +44,6 @@ const OnboardingLayout = () => (
       options={{
         animation: "fade",
         gestureEnabled: false,
-        headerLeft: (props) => <WelcomeHeaderLeft {...props} />,
       }}
     />
     <Stack.Screen name="user-info/name" options={{ animation: "fade" }} />
@@ -62,27 +59,6 @@ const OnboardingLayout = () => (
     />
   </Stack>
 );
-
-const WelcomeHeaderLeft = (_: HeaderLeftProps) => {
-  const { signOut } = useSession();
-
-  const onSubmit = async () => {
-    await signOut();
-  };
-
-  return (
-    <AlertDialog
-      title="Exit Onboarding"
-      subtitle="Are you sure you want to quit? You'll lose any changes you've made."
-      trigger={
-        <TouchableOpacity hitSlop={10}>
-          <X />
-        </TouchableOpacity>
-      }
-      onAccept={onSubmit}
-    />
-  );
-};
 
 interface HeaderTitleProps {
   children: string;

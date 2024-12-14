@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
+import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
-import { SplashScreen, useRouter } from "expo-router";
+import { SplashScreen, useNavigation, useRouter } from "expo-router";
+import { X } from "@tamagui/lucide-icons";
 
 import {
   Group,
@@ -9,9 +11,11 @@ import {
   ScreenView,
   Separator,
   Text,
+  useAlertDialogController,
   XStack,
   YStack,
 } from "~/components/ui";
+import { useSession } from "~/contexts/SessionContext";
 import {
   DisclaimerText,
   OnboardingButton,
@@ -19,6 +23,37 @@ import {
 
 const Welcome = () => {
   const router = useRouter();
+  const navigation = useNavigation();
+
+  const alertDialog = useAlertDialogController();
+
+  const { signOut } = useSession();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          hitSlop={10}
+          onPress={async () => {
+            const confirmed = await alertDialog.show({
+              title: "Exit Onboarding",
+              subtitle:
+                "Are you sure you want to quit? You'll lose any changes you've made.",
+              acceptText: "Exit",
+              cancelText: "Cancel",
+            });
+
+            if (confirmed) {
+              await signOut();
+            }
+          }}
+        >
+          <X />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, signOut, alertDialog]);
+
   const onSubmit = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push("/user-info/name");
