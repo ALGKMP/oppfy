@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { SplashScreen, useRouter } from "expo-router";
 import { H4, Separator, Text, XStack, YGroup, YStack } from "tamagui";
 
+import { H3, ScreenView } from "~/components/ui";
 import { BaseScreenView } from "~/components/Views";
 import {
   DisclaimerText,
@@ -19,11 +20,12 @@ const Welcome = () => {
   useEffect(() => void SplashScreen.hideAsync(), []);
 
   return (
-    <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
-      <YStack flex={1} paddingHorizontal="$4" gap="$6">
-        <DisclaimerText>
+    <ScreenView safeAreaEdges={["bottom"]} justifyContent="space-between">
+      <YStack flex={1} gap="$6">
+        <H3 textAlign="center">
           Welcome to OPPFY, a place where roles are reversed.
-        </DisclaimerText>
+        </H3>
+
         <YGroup gap="$4">
           <YGroup.Item>
             <ListItem
@@ -58,8 +60,11 @@ const Welcome = () => {
           </YGroup.Item>
         </YGroup>
       </YStack>
-      <OnboardingButton onPress={onSubmit}>Become an OPP!</OnboardingButton>
-    </BaseScreenView>
+
+      <OnboardingButton marginHorizontal="$-4" onPress={onSubmit}>
+        Become an OPP!
+      </OnboardingButton>
+    </ScreenView>
   );
 };
 
@@ -71,8 +76,8 @@ interface ListItemProp {
 
 const ListItem = ({ emoji, title, subTitle }: ListItemProp) => {
   return (
-    <XStack alignItems="center" gap="$3">
-      <Text fontSize="$10">{emoji}</Text>
+    <XStack alignItems="center" gap="$4">
+      <Text fontSize={42}>{emoji}</Text>
       <YStack flex={1} gap>
         <H4>{title}</H4>
         <DisclaimerText textAlign="left">{subTitle}</DisclaimerText>

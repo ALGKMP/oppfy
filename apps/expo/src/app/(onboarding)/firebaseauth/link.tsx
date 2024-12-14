@@ -12,12 +12,12 @@ import { getToken, useTheme } from "tamagui";
 import { sharedValidators } from "@oppfy/validators";
 
 import { Header } from "~/components/Headers";
-import { SearchInput } from "~/components/Inputs";
 import {
-  H1,
+  H2,
   H6,
   ListItem,
   ScreenView,
+  SearchInput,
   Spinner,
   Text,
   View,
@@ -151,7 +151,7 @@ const PhoneNumber = () => {
       safeAreaEdges={["bottom"]}
     >
       <YStack gap="$6">
-        <H1 textAlign="center">What's your{"\n"}phone number?</H1>
+        <H2 textAlign="center">What's your{"\n"}phone number?</H2>
 
         <InputWrapper>
           <CountryPicker
