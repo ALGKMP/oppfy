@@ -16,7 +16,7 @@ import {
 } from "tamagui";
 
 import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
-import { OnboardingButton } from "~/features/onboarding/components";
+import { OnboardingButton } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import { api } from "~/utils/api";
 

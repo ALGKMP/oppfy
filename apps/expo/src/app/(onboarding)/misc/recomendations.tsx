@@ -15,8 +15,8 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Text, useTheme, YStack } from "tamagui";
 
+import { OnboardingButton } from "~/components/ui";
 import { BaseScreenView } from "~/components/Views";
-import { OnboardingButton } from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");

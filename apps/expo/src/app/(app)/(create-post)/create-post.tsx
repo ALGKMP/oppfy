@@ -34,7 +34,6 @@ import { BaseScreenView } from "~/components/Views";
 import { SCREEN_WIDTH } from "~/constants/camera";
 import { useUploadMedia } from "~/hooks/media";
 import useStoreReview from "~/hooks/useRating";
-import { BoldText } from "~/features/onboarding/components";
 
 const postSchema = z.object({
   caption: z.optional(z.string().max(255)),
@@ -326,9 +325,9 @@ const CreatePost = () => {
           onPress={onSubmit}
         >
           <XStack justifyContent="center" alignItems="center">
-            <BoldText fontSize="$9" paddingRight="$0">
+            <Text fontSize="$9" paddingRight="$0" fontWeight="bold">
               OPP YOUR FRIEND
-            </BoldText>
+            </Text>
             <ArrowBigRight size="$4" color="white" fill="white" />
           </XStack>
         </Button>

@@ -25,7 +25,7 @@ import {
 } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
-import { OnboardingButton } from "~/features/onboarding/components";
+import { OnboardingButton } from "~/components/ui";
 import { api, RouterOutputs } from "~/utils/api";
 
 const placeholderUsers = [

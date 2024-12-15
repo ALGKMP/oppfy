@@ -22,7 +22,7 @@ import {
   SCREEN_WIDTH,
 } from "~/constants/camera";
 import useSaveVideo from "~/hooks/useSaveMedia";
-import { BoldText } from "~/features/onboarding/components";
+import { Text } from "~/components/ui";
 
 const ASPECT_RATIOS = {
   PORTRAIT: {
@@ -163,9 +163,9 @@ const PreviewScreen = () => {
           backgroundColor="$gray1"
           onPress={onContinue}
         >
-          <BoldText fontSize="$9" paddingRight="$0">
+          <Text fontSize="$9" paddingRight="$0" fontWeight="bold">
             CONTINUE
-          </BoldText>
+          </Text>
         </Button>
       </XStack>
     </BaseScreenView>
