@@ -14,12 +14,11 @@ export const name = z
 
 export const username = z
   .string()
-  .min(1, { message: "Username must be at least 1 characters long" })
-  .max(30, { message: "Username must be at most 30 characters long" })
-  .regex(
-    /^[a-zA-Z0-9_][a-zA-Z0-9_\.]*[a-zA-Z0-9]$/,
-    "Username can only contain letters, numbers, underscores, and periods. It must start with a letter or number and end with a letter or number.",
-  );
+  .min(1, "Too short")
+  .max(30, "Too long")
+  .regex(/^[a-z0-9_]/, "Must start with letter, number, or underscore")
+  .regex(/^[a-z0-9_\.]*$/, "Only lowercase, numbers, underscores, dots allowed")
+  .regex(/[a-z0-9]$/, "Must end with letter or number");
 
 export const bio = z
   .string()

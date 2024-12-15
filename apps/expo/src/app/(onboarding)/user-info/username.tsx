@@ -26,15 +26,21 @@ const Username = () => {
 
   const updateProfile = api.profile.updateProfile.useMutation();
 
-  const isValidUsername =
-    sharedValidators.user.username.safeParse(username).success;
+  const isValidUsername = sharedValidators.user.username.safeParse(
+    username.toLowerCase(),
+  ).success;
+
+  const handleUsernameChange = (text: string) => {
+    const formattedText = text.replace(/\s/g, "_");
+    setUsername(formattedText);
+  };
 
   const onSubmit = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
       await updateProfile.mutateAsync({
-        username,
+        username: username.toLowerCase(),
       });
 
       router.push("/user-info/profile-picture");
@@ -63,9 +69,9 @@ const Username = () => {
         <InputWrapper>
           <OnboardingInput
             value={username}
-            onChangeText={setUsername}
+            onChangeText={handleUsernameChange}
             textAlign="center"
-            autoComplete="off"
+            autoCorrect={false}
             autoCapitalize="none"
             autoFocus
           />

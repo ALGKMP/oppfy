@@ -216,11 +216,18 @@ const EditProfile = () => {
                   onBlur={onBlur}
                   value={inputValue}
                   onChangeText={(text) => {
-                    setInputValue(text);
-                    setIsFieldChanged(text !== value);
+                    const processedText =
+                      field === "username"
+                        ? text.replace(/\s/g, "_") // Replace spaces with underscores for username
+                        : text;
+
+                    setInputValue(processedText);
+                    setIsFieldChanged(processedText !== value);
                   }}
                   multiline={field === "bio"}
                   maxLength={charLimit}
+                  autoCorrect={field === "username" ? false : true}
+                  autoCapitalize={field === "username" ? "none" : "words"}
                   style={{
                     fontWeight: "bold",
                     justifyContent: "flex-start",
@@ -285,7 +292,10 @@ const EditProfile = () => {
 
   const handleSave = async () => {
     if (currentField && isFieldChanged) {
-      setValue(currentField, inputValue);
+      const valueToSave =
+        currentField === "username" ? inputValue.toLowerCase() : inputValue;
+
+      setValue(currentField, valueToSave);
       await onSubmit();
     }
   };
