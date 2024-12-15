@@ -13,6 +13,21 @@ import type { InputProps } from "tamagui";
 export const Input = styled(TamaguiInput, {});
 export const TextArea = styled(TamaguiTextArea, {});
 
+export const OnboardingInput = styled(Input, {
+  width: "100%",
+  height: 76,
+  borderRadius: "$6",
+  backgroundColor: "$gray3",
+  paddingLeft: "$3",
+  paddingRight: "$3",
+  selectionColor: "$color",
+  borderWidth: 0,
+  color: "$color",
+  fontSize: "$8",
+  fontWeight: "bold",
+  shadowColor: "$gray6",
+});
+
 interface SearchInputProps extends InputProps {
   onClear: () => void;
 }

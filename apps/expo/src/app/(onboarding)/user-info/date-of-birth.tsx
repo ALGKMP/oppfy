@@ -6,13 +6,14 @@ import { useRouter } from "expo-router";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { H2, ScreenView, YStack } from "~/components/ui";
 import {
-  DisclaimerText,
-  InputWrapper,
+  H2,
   OnboardingButton,
   OnboardingInput,
-} from "~/features/onboarding/components";
+  Paragraph,
+  ScreenView,
+  YStack,
+} from "~/components/ui";
 import { api } from "~/utils/api";
 
 const DateOfBirth = () => {
@@ -46,22 +47,27 @@ const DateOfBirth = () => {
       keyboardAvoiding
       safeAreaEdges={["bottom"]}
     >
-      <YStack paddingHorizontal="$4" gap="$6">
+      <YStack alignItems="center" gap="$6">
         <H2 textAlign="center">When's your{"\n"}birthday?</H2>
 
-        <TouchableOpacity onPress={() => setOpen(true)}>
-          <InputWrapper>
-            <OnboardingInput
-              placeholder="Birthday"
-              textAlign="center"
-              pointerEvents="none"
-            >
-              {dateOfBirth?.toLocaleDateString()}
-            </OnboardingInput>
-          </InputWrapper>
+        <TouchableOpacity
+          style={{
+            width: "100%",
+          }}
+          onPress={() => setOpen(true)}
+        >
+          <OnboardingInput
+            placeholder="Birthday"
+            textAlign="center"
+            pointerEvents="none"
+          >
+            {dateOfBirth?.toLocaleDateString()}
+          </OnboardingInput>
         </TouchableOpacity>
 
-        <DisclaimerText>You must be 13+ to use OPPFY.</DisclaimerText>
+        <Paragraph size="$5" color="$gray11" textAlign="center">
+          You must be 13+ to use OPPFY.
+        </Paragraph>
       </YStack>
 
       <OnboardingButton

@@ -11,12 +11,14 @@ import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import { Header } from "~/components/Headers";
 import {
   H2,
   H6,
   ListItem,
+  OnboardingButton,
+  OnboardingInput,
+  Paragraph,
   ScreenView,
   SearchInput,
   Spinner,
@@ -28,13 +30,6 @@ import {
 import { useSession } from "~/contexts/SessionContext";
 import type { CountryData } from "~/data/groupedCountries";
 import { countriesData, suggestedCountriesData } from "~/data/groupedCountries";
-import {
-  BoldText,
-  DisclaimerText,
-  InputWrapper,
-  OnboardingButton,
-  OnboardingInput,
-} from "~/features/onboarding/components";
 import useSearch from "~/hooks/useSearch";
 
 const countriesWithoutSections = countriesData.filter(
@@ -151,36 +146,40 @@ const PhoneNumber = () => {
       keyboardAvoiding
       safeAreaEdges={["bottom"]}
     >
-      <YStack gap="$6">
+      <YStack alignItems="center" gap="$6">
         <H2 textAlign="center">What's your{"\n"}phone number?</H2>
 
-          <XStack>
-            <CountryPicker
-              selectedCountryData={countryData}
-              setSelectedCountryData={setCountryData}
-            />
-            <OnboardingInput
-              value={phoneNumber}
-              onChangeText={(text) => {
-                setPhoneNumber(text);
-                setError(null);
-              }}
-              placeholder="Your number here"
-              keyboardType="phone-pad"
-              autoFocus
-              placeholderTextColor="$gray8"
-              borderTopLeftRadius={0}
-              borderBottomLeftRadius={0}
-            />
-          </XStack>
+        <XStack>
+          <CountryPicker
+            selectedCountryData={countryData}
+            setSelectedCountryData={setCountryData}
+          />
+          <OnboardingInput
+            flex={1}
+            value={phoneNumber}
+            onChangeText={(text) => {
+              setPhoneNumber(text);
+              setError(null);
+            }}
+            placeholder="Your number here"
+            keyboardType="phone-pad"
+            autoFocus
+            placeholderTextColor="$gray8"
+            borderTopLeftRadius={0}
+            borderBottomLeftRadius={0}
+          />
+        </XStack>
 
         {error ? (
-          <DisclaimerText color="$red9">{error}</DisclaimerText>
+          <Paragraph size="$5" color="$red9" textAlign="center">
+            {error}
+          </Paragraph>
         ) : (
-          <DisclaimerText>
-            By Continuing you agree to our <BoldText>Privacy Policy</BoldText>{" "}
-            and <BoldText>Terms of Service</BoldText>.
-          </DisclaimerText>
+          <Paragraph size="$5" color="$gray11" textAlign="center">
+            By Continuing you agree to our{" "}
+            <Text fontWeight="bold">Privacy Policy</Text> and{" "}
+            <Text fontWeight="bold">Terms of Service</Text>.
+          </Paragraph>
         )}
       </YStack>
 

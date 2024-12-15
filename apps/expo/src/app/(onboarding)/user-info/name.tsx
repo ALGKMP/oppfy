@@ -4,14 +4,14 @@ import { useRouter } from "expo-router";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { H2, ScreenView, YStack } from "~/components/ui";
 import {
-  BoldText,
-  DisclaimerText,
-  InputWrapper,
+  H2,
   OnboardingButton,
   OnboardingInput,
-} from "~/features/onboarding/components";
+  Paragraph,
+  ScreenView,
+  YStack,
+} from "~/components/ui";
 import { api } from "~/utils/api";
 
 const Name = () => {
@@ -40,23 +40,20 @@ const Name = () => {
       keyboardAvoiding
       safeAreaEdges={["bottom"]}
     >
-      <YStack paddingHorizontal="$4" gap="$6">
+      <YStack alignItems="center" gap="$6">
         <H2 textAlign="center">What's your{"\n"} name?</H2>
 
-        <InputWrapper>
-          <OnboardingInput
-            value={name}
-            onChangeText={setName}
-            textAlign="center"
-            autoComplete="off"
-            autoFocus
-          />
-        </InputWrapper>
+        <OnboardingInput
+          value={name}
+          onChangeText={setName}
+          textAlign="center"
+          autoComplete="off"
+          autoFocus
+        />
 
-        <DisclaimerText>
-          By continuing, you agree to our <BoldText>Privacy Policy</BoldText>{" "}
-          and <BoldText>Terms of Service</BoldText>.
-        </DisclaimerText>
+        <Paragraph size="$5" color="$gray11" textAlign="center">
+          This is how we'll address you. You can always change it later.
+        </Paragraph>
       </YStack>
 
       <OnboardingButton

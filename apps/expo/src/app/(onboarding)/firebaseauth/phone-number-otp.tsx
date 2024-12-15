@@ -4,12 +4,13 @@ import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import auth from "@react-native-firebase/auth";
-import { styled } from "tamagui";
+import { Paragraph, styled } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import {
   H2,
+  OnboardingButton,
   ScreenView,
   Spinner,
   Text,
@@ -18,11 +19,6 @@ import {
   YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
-import {
-  BoldText,
-  DisclaimerText,
-  OnboardingButton,
-} from "~/features/onboarding/components";
 import { api } from "~/utils/api";
 
 // ! This is for testing purposes only, do not use in production
@@ -172,7 +168,7 @@ const PhoneNumberOTP = () => {
       keyboardAvoiding
       safeAreaEdges={["bottom"]}
     >
-      <YStack paddingHorizontal="$4" gap="$6">
+      <YStack alignItems="center" gap="$6">
         <H2 textAlign="center">Enter your{"\n"}verification code</H2>
 
         <OTPInput
@@ -184,11 +180,14 @@ const PhoneNumberOTP = () => {
         />
 
         {error ? (
-          <DisclaimerText color="$red9">{error}</DisclaimerText>
+          <Paragraph size="$5" color="$red9" textAlign="center">
+            {error}
+          </Paragraph>
         ) : (
-          <DisclaimerText>
-            Verification code sent to <BoldText>{phoneNumber}</BoldText>
-          </DisclaimerText>
+          <Paragraph size="$5" color="$gray11" textAlign="center">
+            Verification code sent to{" "}
+            <Text fontWeight="bold">{phoneNumber}</Text>
+          </Paragraph>
         )}
       </YStack>
 
@@ -239,7 +238,7 @@ const OTPInput = ({ value, onChange }: OTPInputProps) => {
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />
-        <XStack justifyContent="space-between">
+        <XStack width="100%" justifyContent="space-between">
           {[0, 1, 2, 3, 4, 5].map((index) => (
             <OTPBox
               key={index}

@@ -5,13 +5,16 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import Feather from "@expo/vector-icons/Feather";
-import { useTheme } from "tamagui";
+import { Paragraph, useTheme } from "tamagui";
 
-import { H2, ScreenView, Spinner, Text, View, YStack } from "~/components/ui";
 import {
-  DisclaimerText,
+  H2,
   OnboardingButton,
-} from "~/features/onboarding/components";
+  ScreenView,
+  Spinner,
+  View,
+  YStack,
+} from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
@@ -64,8 +67,8 @@ const ProfilePicture = () => {
       keyboardAvoiding
       safeAreaEdges={["bottom"]}
     >
-      <YStack paddingHorizontal="$4" gap="$6">
-        <H2 textAlign="center">Upload your profile pic.</H2>
+      <YStack alignItems="center" gap="$6">
+        <H2 textAlign="center">Upload your{"\n"}profile pic!</H2>
 
         <YStack alignItems="center" gap="$3">
           <TouchableOpacity onPress={handleImageUpload}>
@@ -96,11 +99,11 @@ const ProfilePicture = () => {
           </TouchableOpacity>
         </YStack>
 
-        <DisclaimerText>
+        <Paragraph size="$5" color="$gray11" textAlign="center">
           {hasUploadedPic
             ? "You really understood the assignment with that pic!"
             : "Because a face like yours is hard to forget."}
-        </DisclaimerText>
+        </Paragraph>
       </YStack>
 
       <OnboardingButton

@@ -19,10 +19,10 @@ import {
 
 import { AlertDialog, Dialog } from "~/components/Dialogs";
 import type { AlertDialogProps } from "~/components/Dialogs/AlertDialog";
+import { OnboardingButton } from "~/components/ui";
 import { BaseScreenView } from "~/components/Views";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
-import { OnboardingButton } from "~/features/onboarding/components";
 
 type PermissionType = "Camera" | "Contacts" | "Notifications";
 

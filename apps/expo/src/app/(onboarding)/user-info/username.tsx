@@ -4,14 +4,14 @@ import { useRouter } from "expo-router";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { H2, ScreenView, YStack } from "~/components/ui";
 import {
-  BoldText,
-  DisclaimerText,
-  InputWrapper,
+  H2,
   OnboardingButton,
   OnboardingInput,
-} from "~/features/onboarding/components";
+  Paragraph,
+  ScreenView,
+  YStack,
+} from "~/components/ui";
 import { api, isTRPCClientError } from "~/utils/api";
 
 enum Error {
@@ -63,26 +63,26 @@ const Username = () => {
       keyboardAvoiding
       safeAreaEdges={["bottom"]}
     >
-      <YStack paddingHorizontal="$4" gap="$6">
+      <YStack alignItems="center" gap="$6">
         <H2 textAlign="center">Choose a{"\n"}username!</H2>
 
-        <InputWrapper>
-          <OnboardingInput
-            value={username}
-            onChangeText={handleUsernameChange}
-            textAlign="center"
-            autoCorrect={false}
-            autoCapitalize="none"
-            autoFocus
-          />
-        </InputWrapper>
+        <OnboardingInput
+          value={username}
+          onChangeText={handleUsernameChange}
+          textAlign="center"
+          autoCorrect={false}
+          autoCapitalize="none"
+          autoFocus
+        />
 
         {error ? (
-          <BoldText color="$red9">{error}</BoldText>
+          <Paragraph size="$5" color="$red9" textAlign="center">
+            {error}
+          </Paragraph>
         ) : (
-          <DisclaimerText>
+          <Paragraph size="$5" color="$gray11" textAlign="center">
             Your username is how people find you. Your username must be unique.
-          </DisclaimerText>
+          </Paragraph>
         )}
       </YStack>
 

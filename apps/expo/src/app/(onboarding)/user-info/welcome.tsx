@@ -8,6 +8,8 @@ import {
   Group,
   H3,
   H4,
+  OnboardingButton,
+  Paragraph,
   ScreenView,
   Separator,
   Text,
@@ -16,10 +18,6 @@ import {
   YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
-import {
-  DisclaimerText,
-  OnboardingButton,
-} from "~/features/onboarding/components";
 
 const Welcome = () => {
   const router = useRouter();
@@ -122,7 +120,7 @@ const ListItem = ({ emoji, title, subTitle }: ListItemProp) => {
       <Text fontSize={42}>{emoji}</Text>
       <YStack flex={1} gap>
         <H4>{title}</H4>
-        <DisclaimerText textAlign="left">{subTitle}</DisclaimerText>
+        <Paragraph color="$gray11">{subTitle}</Paragraph>
       </YStack>
     </XStack>
   );

@@ -5,14 +5,14 @@ import {
   useAlertDialogController,
 } from "./AlertDialog";
 import { Avatar } from "./Avatar";
-import { Button } from "./Buttons";
+import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
 import { Checkbox } from "./Checkbox";
 import { Dialog } from "./Dialog";
 import { Form } from "./Form";
 import { Group } from "./Group";
 import { H1, H2, H3, H4, H5, H6 } from "./Headings";
-import { Input, SearchInput, TextArea } from "./Inputs";
+import { Input, OnboardingInput, SearchInput, TextArea } from "./Inputs";
 import { Label } from "./Label";
 import { ListItem } from "./ListItem";
 import { Popover } from "./Popover";
@@ -33,6 +33,7 @@ import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 
 export {
   Button,
+  OnboardingButton,
   H1,
   H2,
   H3,
@@ -49,6 +50,7 @@ export {
   Input,
   TextArea,
   SearchInput,
+  OnboardingInput,
   Label,
   Progress,
   RadioGroup,
