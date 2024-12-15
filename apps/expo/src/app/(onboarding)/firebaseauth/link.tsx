@@ -11,6 +11,7 @@ import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
+import CardContainer from "~/components/Containers/CardContainer";
 import { Header } from "~/components/Headers";
 import {
   H2,
@@ -153,25 +154,25 @@ const PhoneNumber = () => {
       <YStack gap="$6">
         <H2 textAlign="center">What's your{"\n"}phone number?</H2>
 
-        <InputWrapper>
-          <CountryPicker
-            selectedCountryData={countryData}
-            setSelectedCountryData={setCountryData}
-          />
-          <OnboardingInput
-            value={phoneNumber}
-            onChangeText={(text) => {
-              setPhoneNumber(text);
-              setError(null);
-            }}
-            placeholder="Your number here"
-            keyboardType="phone-pad"
-            autoFocus
-            placeholderTextColor="$gray8"
-            borderTopLeftRadius={0}
-            borderBottomLeftRadius={0}
-          />
-        </InputWrapper>
+          <XStack>
+            <CountryPicker
+              selectedCountryData={countryData}
+              setSelectedCountryData={setCountryData}
+            />
+            <OnboardingInput
+              value={phoneNumber}
+              onChangeText={(text) => {
+                setPhoneNumber(text);
+                setError(null);
+              }}
+              placeholder="Your number here"
+              keyboardType="phone-pad"
+              autoFocus
+              placeholderTextColor="$gray8"
+              borderTopLeftRadius={0}
+              borderBottomLeftRadius={0}
+            />
+          </XStack>
 
         {error ? (
           <DisclaimerText color="$red9">{error}</DisclaimerText>
@@ -272,7 +273,7 @@ const CountryPicker = ({
       <TouchableOpacity
         style={{
           height: 76,
-          borderRadius: getToken("$8", "radius") as number,
+          borderRadius: getToken("$6", "radius") as number,
           backgroundColor: theme.gray4.val,
           paddingLeft: getToken("$3", "space") as number,
           paddingRight: getToken("$3", "space") as number,
