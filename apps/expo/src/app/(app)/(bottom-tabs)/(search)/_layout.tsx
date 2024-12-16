@@ -1,5 +1,5 @@
 import React from "react";
-import type { NativeStackHeaderProps } from "@react-navigation/native-stack/src/types";
+import type { NativeStackHeaderProps } from "@react-navigation/native-stack/";
 import { Text, useTheme } from "tamagui";
 
 import { Header as BaseHeader } from "~/components/Headers";

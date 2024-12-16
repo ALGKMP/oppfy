@@ -1,7 +1,7 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import type { NativeStackHeaderProps } from "@react-navigation/native-stack/src/types";
+import type { NativeStackHeaderProps } from "@react-navigation/native-stack/";
 import { ChevronLeft, QrCode, X } from "@tamagui/lucide-icons";
 import { Text } from "tamagui";
 
