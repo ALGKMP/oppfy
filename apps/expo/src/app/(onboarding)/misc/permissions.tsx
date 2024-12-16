@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Linking, TouchableOpacity } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as Haptics from "expo-haptics";
@@ -7,51 +7,34 @@ import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { Check, Info } from "@tamagui/lucide-icons";
+
 import {
   Checkbox,
+  Group,
+  H3,
+  H4,
+  OnboardingButton,
+  Paragraph,
+  ScreenView,
   Separator,
   Text,
-  View,
+  useAlertDialogController,
+  useDialogController,
   XStack,
-  YGroup,
   YStack,
-} from "tamagui";
-
-import { AlertDialog, Dialog } from "~/components/Dialogs";
-import type { AlertDialogProps } from "~/components/Dialogs/AlertDialog";
-import { OnboardingButton } from "~/components/ui";
-import { BaseScreenView } from "~/components/Views";
+} from "~/components/ui";
 import { usePermissions } from "~/contexts/PermissionsContext";
 import { useSession } from "~/contexts/SessionContext";
 
 type PermissionType = "Camera" | "Contacts" | "Notifications";
 
-interface AlertDialogState
-  extends Pick<AlertDialogProps, "title" | "subtitle"> {
-  isVisible: boolean;
-}
-
-interface LearnMoreDialogState {
-  title: string;
-  subtitle: string;
-  isVisible: boolean;
-}
-
 const Permissions = () => {
   const router = useRouter();
   const { isSignedIn } = useSession();
   const { permissions, checkPermissions } = usePermissions();
-  const [alertDialogProps, setAlertDialogProps] = useState<AlertDialogState>({
-    isVisible: false,
-    title: "",
-    subtitle: "",
-  });
-  const [learnMoreDialogProps, setLearnMoreDialogProps] =
-    useState<LearnMoreDialogState>({
-      title: "",
-      subtitle: "",
-      isVisible: false,
-    });
+
+  const alertDialog = useAlertDialogController();
+  const learnMoreDialog = useDialogController();
 
   const requiredPermissions = permissions.camera && permissions.contacts;
 
@@ -66,12 +49,17 @@ const Permissions = () => {
       : router.push("/firebaseauth/link");
   };
 
-  const showPermissionAlert = (permissionType: PermissionType): void => {
-    setAlertDialogProps({
-      isVisible: true,
+  const showPermissionAlert = async (permissionType: PermissionType) => {
+    const confirmed = await alertDialog.show({
       title: `${permissionType} Permission`,
       subtitle: `Oppfy uses ${permissionType} to offer users the best experience. You can enable or disable this permission at any time in the settings.`,
+      cancelText: "OK",
+      acceptText: "Settings",
     });
+
+    if (confirmed) {
+      void openSettings();
+    }
   };
 
   const handlePermissionRequest = async (
@@ -92,10 +80,10 @@ const Permissions = () => {
         await requestFunction();
         await checkPermissions();
       } catch (error) {
-        showPermissionAlert(permissionType);
+        void showPermissionAlert(permissionType);
       }
     } else {
-      showPermissionAlert(permissionType);
+      void showPermissionAlert(permissionType);
     }
   };
 
@@ -121,19 +109,18 @@ const Permissions = () => {
     );
 
   return (
-    <BaseScreenView paddingHorizontal={0} safeAreaEdges={["bottom"]}>
-      <YStack flex={1} paddingHorizontal="$4" gap="$6">
-        <Text
-          alignSelf="center"
-          textAlign="center"
-          color="$gray9"
-          fontWeight="bold"
-        >
+    <ScreenView
+      paddingBottom={0}
+      safeAreaEdges={["bottom"]}
+      justifyContent="space-between"
+    >
+      <YStack flex={1} gap="$6">
+        <H3 textAlign="center">
           We'll just need a few permissions to get started.
-        </Text>
+        </H3>
 
-        <YGroup gap="$4">
-          <YGroup.Item>
+        <Group orientation="vertical" gap="$4">
+          <Group.Item>
             <ListItem
               emoji="📸"
               title="Camera"
@@ -151,32 +138,30 @@ const Permissions = () => {
                 </Checkbox>
               }
               underText={
-                <View marginTop="$2">
-                  <TouchableOpacity
-                    onPress={() =>
-                      setLearnMoreDialogProps({
-                        title: "Camera Permission",
-                        subtitle:
-                          "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
-                        isVisible: true,
-                      })
-                    }
-                  >
-                    <XStack alignItems="center" gap="$2">
-                      <Info size="$1" />
-                      <Text color="$blue9" fontWeight="bold">
-                        Learn more
-                      </Text>
-                    </XStack>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    void learnMoreDialog.show({
+                      title: "Camera Permission",
+                      subtitle:
+                        "Oppfy is a photo-sharing app, and we require camera permissions so users can take photos directly within the app. This allows you to capture and share moments instantly with your friends. Without camera access, you won't be able to use key features of the app.",
+                      acceptText: "Got it",
+                    });
+                  }}
+                >
+                  <XStack alignItems="center" gap="$2">
+                    <Info size="$1" />
+                    <Text color="$blue9" fontWeight="bold">
+                      Learn more
+                    </Text>
+                  </XStack>
+                </TouchableOpacity>
               }
             />
-          </YGroup.Item>
+          </Group.Item>
 
           <Separator />
 
-          <YGroup.Item>
+          <Group.Item>
             <ListItem
               emoji="📱"
               title="Contacts"
@@ -194,31 +179,30 @@ const Permissions = () => {
                 </Checkbox>
               }
               underText={
-                <View marginTop="$2">
-                  <TouchableOpacity
-                    onPress={() =>
-                      setLearnMoreDialogProps({
-                        title: "Contacts Permission",
-                        subtitle:
-                          "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
-                        isVisible: true,
-                      })
-                    }
-                  >
-                    <XStack alignItems="center" gap="$2">
-                      <Info size="$1" />
-                      <Text color="$blue9" fontWeight="bold">
-                        Learn more
-                      </Text>
-                    </XStack>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    void learnMoreDialog.show({
+                      title: "Contacts Permission",
+                      subtitle:
+                        "We use your contacts so you can easily find and share posts with friends. Oppfy is a social app which doesn't work without your contacts. We encrypt your contacts for maximum security.",
+                      acceptText: "Got it",
+                    });
+                  }}
+                >
+                  <XStack alignItems="center" gap="$2">
+                    <Info size="$1" />
+                    <Text color="$blue9" fontWeight="bold">
+                      Learn more
+                    </Text>
+                  </XStack>
+                </TouchableOpacity>
               }
             />
-          </YGroup.Item>
+          </Group.Item>
+
           <Separator />
 
-          <YGroup.Item>
+          <Group.Item>
             <ListItem
               emoji="🔔"
               title="Notifications"
@@ -236,58 +220,26 @@ const Permissions = () => {
                 </Checkbox>
               }
               underText={
-                <View marginTop="$2">
-                  <XStack alignItems="center" gap="$2">
-                    <Info size="$1" />
-                    <Text color="$gray9" fontWeight="bold">
-                      Optional
-                    </Text>
-                  </XStack>
-                </View>
+                <XStack alignItems="center" gap="$2">
+                  <Info size="$1" />
+                  <Text color="$gray9" fontWeight="bold">
+                    Optional
+                  </Text>
+                </XStack>
               }
             />
-          </YGroup.Item>
-        </YGroup>
+          </Group.Item>
+        </Group>
       </YStack>
 
-      <OnboardingButton onPress={onPress} disabled={!requiredPermissions}>
+      <OnboardingButton
+        marginHorizontal="$-4"
+        onPress={onPress}
+        disabled={!requiredPermissions}
+      >
         Continue
       </OnboardingButton>
-
-      <Dialog
-        title={learnMoreDialogProps.title}
-        subtitle={learnMoreDialogProps.subtitle}
-        isVisible={learnMoreDialogProps.isVisible}
-        onAccept={() =>
-          setLearnMoreDialogProps({ ...learnMoreDialogProps, isVisible: false })
-        }
-        acceptText="Got it"
-        acceptTextProps={{
-          color: "$blue9",
-        }}
-      />
-
-      <AlertDialog
-        isVisible={alertDialogProps.isVisible}
-        title={alertDialogProps.title}
-        subtitle={alertDialogProps.subtitle}
-        onCancel={() => {
-          setAlertDialogProps({ ...alertDialogProps, isVisible: false });
-          void openSettings();
-        }}
-        onAccept={() =>
-          setAlertDialogProps({ ...alertDialogProps, isVisible: false })
-        }
-        cancelText="Settings"
-        acceptText="OK"
-        cancelTextProps={{
-          color: "$blue9",
-        }}
-        acceptTextProps={{
-          color: "$blue9",
-        }}
-      />
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
@@ -308,16 +260,12 @@ const ListItem = ({
 }: ListItemProps) => {
   return (
     <XStack alignItems="center" gap="$4">
-      <Text fontSize="$10">{emoji}</Text>
-
+      <Text fontSize={42}>{emoji}</Text>
       <YStack flex={1} gap>
-        <Text fontSize="$7" fontWeight="bold">
-          {title}
-        </Text>
-        <Text color="$gray9">{subTitle}</Text>
-        {underText}
+        <H4>{title}</H4>
+        <Paragraph color="$gray11">{subTitle}</Paragraph>
+        {underText && <YStack marginTop="$2">{underText}</YStack>}
       </YStack>
-
       {checkbox}
     </XStack>
   );

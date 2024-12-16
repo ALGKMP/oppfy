@@ -60,7 +60,11 @@ const Welcome = () => {
   useEffect(() => void SplashScreen.hideAsync(), []);
 
   return (
-    <ScreenView safeAreaEdges={["bottom"]} justifyContent="space-between">
+    <ScreenView
+      paddingBottom={0}
+      safeAreaEdges={["bottom"]}
+      justifyContent="space-between"
+    >
       <YStack flex={1} gap="$6">
         <H3 textAlign="center">
           Welcome to OPPFY, a place where roles are reversed.
