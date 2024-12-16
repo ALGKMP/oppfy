@@ -7,33 +7,28 @@ import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
-import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronRight, Minus } from "@tamagui/lucide-icons";
+import { ChevronRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Button,
-  H3,
-  ScrollView,
-  Separator,
-  SizableText,
-  Spinner,
-  Text,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { useTheme } from "tamagui";
 import { z } from "zod";
 
 import { sharedValidators } from "@oppfy/validators";
 
 import CardContainer from "~/components/Containers/CardContainer";
-import { BaseScreenView } from "~/components/Views";
+import {
+  Button,
+  H3,
+  ScreenView,
+  Separator,
+  Spinner,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "~/components/ui";
+import { BottomSheet } from "~/components/ui/BottomSheet";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 
@@ -106,7 +101,7 @@ const EditProfile = () => {
   const onSubmit = handleSubmit(async (data) => {
     await updateProfile.mutateAsync(data, {
       onSuccess: () => {
-        bottomSheetRef.current?.close();
+        bottomSheetRef.current?.dismiss();
         reset(data);
       },
       onError: (error) => {
@@ -121,7 +116,7 @@ const EditProfile = () => {
   });
 
   const [currentField, setCurrentField] = useState<FieldKeys | null>(null);
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
   const inputRef = useRef<TextInput>(null);
   const [inputValue, setInputValue] = useState("");
   const [isFieldChanged, setIsFieldChanged] = useState(false);
@@ -130,7 +125,7 @@ const EditProfile = () => {
     setCurrentField(field);
     setInputValue(watch(field));
     setIsFieldChanged(false);
-    bottomSheetRef.current?.expand();
+    bottomSheetRef.current?.present();
   };
 
   const clearInput = () => {
@@ -145,32 +140,6 @@ const EditProfile = () => {
     );
     return maxCheck?.kind === "max" ? maxCheck.value : Infinity;
   };
-
-  const renderHeader = useCallback(() => {
-    return (
-      <YStack
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-        position="relative"
-      >
-        <Minus size="$4" />
-        <View justifyContent="center" alignItems="center">
-          <SizableText size="$5" textAlign="center" fontWeight="bold">
-            {currentField === "name" && "Edit Name"}
-            {currentField === "username" && "Edit Username"}
-            {currentField === "bio" && "Edit Bio"}
-          </SizableText>
-        </View>
-        <View
-          width="95%"
-          borderColor="$gray8"
-          borderWidth="$0.25"
-          marginTop="$3"
-        />
-      </YStack>
-    );
-  }, [currentField]);
 
   const renderFieldContent = useCallback(
     (
@@ -279,18 +248,6 @@ const EditProfile = () => {
     }
   }, [currentField, renderFieldContent]);
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        opacity={0.5}
-        {...props}
-      />
-    ),
-    [],
-  );
-
   const handleSave = async () => {
     if (currentField && isFieldChanged) {
       const valueToSave =
@@ -302,144 +259,145 @@ const EditProfile = () => {
   };
 
   const handleSheetClose = () => {
+    bottomSheetRef.current?.dismiss();
     setCurrentField(null);
     setInputValue("");
     setIsFieldChanged(false);
   };
 
   return (
-    <BaseScreenView>
-      <ScrollView>
-        <YStack gap="$5">
-          <TouchableOpacity onPress={pickAndUploadImage}>
-            <YStack alignItems="center" gap="$3">
-              <View position="relative">
-                <Image
-                  source={
-                    defaultValues?.profilePictureUrl ?? DefaultProfilePicture
-                  }
-                  style={{
-                    width: 160,
-                    height: 160,
-                    borderRadius: 80,
-                    borderColor: "#F214FF",
-                    borderWidth: 2,
-                  }}
-                />
-                <View
-                  position="absolute"
-                  bottom={0}
-                  right={0}
-                  borderRadius={40}
-                  borderWidth="$2"
-                  borderColor={theme.background.val}
-                  backgroundColor="$gray5"
-                  padding="$2"
-                >
-                  <Feather name="edit-3" size={24} color={theme.blue9.val} />
-                </View>
+    <ScreenView scrollable>
+      <YStack gap="$5">
+        <TouchableOpacity onPress={pickAndUploadImage}>
+          <YStack alignItems="center" gap="$3">
+            <View position="relative">
+              <Image
+                source={
+                  defaultValues?.profilePictureUrl ?? DefaultProfilePicture
+                }
+                style={{
+                  width: 160,
+                  height: 160,
+                  borderRadius: 80,
+                  borderColor: "#F214FF",
+                  borderWidth: 2,
+                }}
+              />
+              <View
+                position="absolute"
+                bottom={0}
+                right={0}
+                borderRadius={40}
+                borderWidth="$2"
+                borderColor={theme.background.val}
+                backgroundColor="$gray5"
+                padding="$2"
+              >
+                <Feather name="edit-3" size={24} color={theme.blue9.val} />
               </View>
-              <Text color="$blue10">Edit photo</Text>
-            </YStack>
-          </TouchableOpacity>
-          <CardContainer>
-            <YStack gap="$4">
-              <H3>Profile Information</H3>
+            </View>
+            <Text color="$blue10">Edit photo</Text>
+          </YStack>
+        </TouchableOpacity>
+        <CardContainer>
+          <YStack gap="$4">
+            <H3>Profile Information</H3>
 
-              <XStack
-                justifyContent="space-between"
-                alignItems="center"
-                onPress={() => openBottomSheet("name")}
-              >
-                <XStack flex={1} alignItems="center" gap="$3">
-                  <Ionicons
-                    name="person-outline"
-                    size={24}
-                    color={theme.gray10.val}
-                  />
-                  <YStack>
-                    <Text
-                      fontSize="$5"
-                      fontWeight="500"
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {watch("name") || "Add name"}
-                    </Text>
-                    <Text color="$gray10">Name</Text>
-                  </YStack>
-                </XStack>
-                <ChevronRight size={24} color="$gray10" />
+            <XStack
+              justifyContent="space-between"
+              alignItems="center"
+              onPress={() => openBottomSheet("name")}
+            >
+              <XStack flex={1} alignItems="center" gap="$3">
+                <Ionicons
+                  name="person-outline"
+                  size={24}
+                  color={theme.gray10.val}
+                />
+                <YStack>
+                  <Text
+                    fontSize="$5"
+                    fontWeight="500"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {watch("name") || "Add name"}
+                  </Text>
+                  <Text color="$gray10">Name</Text>
+                </YStack>
               </XStack>
-              <Separator />
+              <ChevronRight size={24} color="$gray10" />
+            </XStack>
+            <Separator />
 
-              <XStack
-                justifyContent="space-between"
-                alignItems="center"
-                onPress={() => openBottomSheet("username")}
-              >
-                <XStack flex={1} alignItems="center" gap="$3">
-                  <Ionicons
-                    name="at-outline"
-                    size={24}
-                    color={theme.gray10.val}
-                  />
-                  <YStack>
-                    <Text
-                      fontSize="$5"
-                      fontWeight="500"
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {watch("username")}
-                    </Text>
-                    <Text color="$gray10">Username</Text>
-                  </YStack>
-                </XStack>
-                <ChevronRight size={24} color="$gray10" />
+            <XStack
+              justifyContent="space-between"
+              alignItems="center"
+              onPress={() => openBottomSheet("username")}
+            >
+              <XStack flex={1} alignItems="center" gap="$3">
+                <Ionicons
+                  name="at-outline"
+                  size={24}
+                  color={theme.gray10.val}
+                />
+                <YStack>
+                  <Text
+                    fontSize="$5"
+                    fontWeight="500"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {watch("username")}
+                  </Text>
+                  <Text color="$gray10">Username</Text>
+                </YStack>
               </XStack>
-              <Separator />
+              <ChevronRight size={24} color="$gray10" />
+            </XStack>
+            <Separator />
 
-              <XStack
-                paddingBottom="$2"
-                justifyContent="space-between"
-                alignItems="center"
-                onPress={() => openBottomSheet("bio")}
-              >
-                <XStack flex={1} alignItems="center" gap="$3">
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={24}
-                    color={theme.gray10.val}
-                  />
-                  <YStack>
-                    <Text
-                      fontSize="$5"
-                      fontWeight="500"
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      {watch("bio") ? "Edit bio" : "Add bio"}
-                    </Text>
-                  </YStack>
-                </XStack>
-                <ChevronRight size={24} color="$gray10" />
+            <XStack
+              paddingBottom="$2"
+              justifyContent="space-between"
+              alignItems="center"
+              onPress={() => openBottomSheet("bio")}
+            >
+              <XStack flex={1} alignItems="center" gap="$3">
+                <Ionicons
+                  name="information-circle-outline"
+                  size={24}
+                  color={theme.gray10.val}
+                />
+                <YStack>
+                  <Text
+                    fontSize="$5"
+                    fontWeight="500"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {watch("bio") ? "Edit bio" : "Add bio"}
+                  </Text>
+                </YStack>
               </XStack>
-            </YStack>
-          </CardContainer>
-        </YStack>
-      </ScrollView>
+              <ChevronRight size={24} color="$gray10" />
+            </XStack>
+          </YStack>
+        </CardContainer>
+      </YStack>
 
       <BottomSheet
         ref={bottomSheetRef}
-        index={-1}
-        snapPoints={["50%"]}
-        enablePanDownToClose
-        keyboardBlurBehavior="restore"
-        onClose={handleSheetClose}
-        handleComponent={renderHeader}
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: theme.gray4.val }}
+        title={
+          currentField === "name"
+            ? "Edit Name"
+            : currentField === "username"
+              ? "Edit Username"
+              : currentField === "bio"
+                ? "Edit Bio"
+                : undefined
+        }
+        onDismiss={handleSheetClose}
       >
         {renderBottomSheetContent()}
         <XStack padding="$4" paddingBottom={insets.bottom}>
@@ -459,7 +417,7 @@ const EditProfile = () => {
           </Button>
         </XStack>
       </BottomSheet>
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
