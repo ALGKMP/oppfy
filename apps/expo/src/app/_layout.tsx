@@ -7,7 +7,11 @@ import { ThemeProvider } from "@react-navigation/native";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { PortalProvider, TamaguiProvider } from "tamagui";
 
-import { AlertDialogProvider, DialogProvider } from "~/components/ui";
+import {
+  ActionSheetProvider,
+  AlertDialogProvider,
+  DialogProvider,
+} from "~/components/ui";
 import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { SessionProvider } from "~/contexts/SessionContext";
@@ -31,15 +35,17 @@ const RootLayout = () => {
                       <GestureHandlerRootView>
                         <PortalProvider>
                           <BottomSheetModalProvider>
-                            <AlertDialogProvider>
-                              <DialogProvider>
-                                <ToastProvider native={true}>
-                                  <StatusBar style="auto" />
-                                  <Slot />
-                                  <ToastViewport />
-                                </ToastProvider>
-                              </DialogProvider>
-                            </AlertDialogProvider>
+                            <ActionSheetProvider>
+                              <AlertDialogProvider>
+                                <DialogProvider>
+                                  <ToastProvider native={true}>
+                                    <StatusBar style="auto" />
+                                    <Slot />
+                                    <ToastViewport />
+                                  </ToastProvider>
+                                </DialogProvider>
+                              </AlertDialogProvider>
+                            </ActionSheetProvider>
                           </BottomSheetModalProvider>
                         </PortalProvider>
                       </GestureHandlerRootView>

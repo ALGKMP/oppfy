@@ -1,5 +1,10 @@
 import { Accordion } from "./Accordian";
 import {
+  ActionSheet,
+  ActionSheetProvider,
+  useActionSheetController,
+} from "./ActionSheet";
+import {
   AlertDialog,
   AlertDialogProvider,
   useAlertDialogController,
@@ -69,6 +74,9 @@ export {
   Dialog,
   DialogProvider,
   useDialogController,
+  ActionSheet,
+  ActionSheetProvider,
+  useActionSheetController,
   Popover,
   Sheet,
   Tooltip,
