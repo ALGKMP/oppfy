@@ -8,7 +8,7 @@ import { Avatar } from "./Avatar";
 import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
 import { Checkbox } from "./Checkbox";
-import { Dialog } from "./Dialog";
+import { Dialog, DialogProvider, useDialogController } from "./Dialog";
 import { Form } from "./Form";
 import { Group } from "./Group";
 import { H1, H2, H3, H4, H5, H6 } from "./Headings";
@@ -62,6 +62,8 @@ export {
   AlertDialogProvider,
   useAlertDialogController,
   Dialog,
+  DialogProvider,
+  useDialogController,
   Popover,
   Sheet,
   Tooltip,
