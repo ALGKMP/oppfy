@@ -174,7 +174,8 @@ const HomeScreen = () => {
     const handleShowMore = () => {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       router.navigate({
-        pathname: "/(recommended)",
+        // pathname: "/(recommended)",
+        pathname: "/(app)/(recommended)" // Note: Using this because type error (could be wrong)
       });
     };
 
@@ -208,7 +209,6 @@ const HomeScreen = () => {
 
   return (
     <BaseScreenView padding={0} paddingBottom={0}>
-      <>
         {isLoading ? (
           <YStack
             paddingTop={(insets.top + getToken("$2", "space")) as number}
@@ -242,7 +242,6 @@ const HomeScreen = () => {
             }}
           />
         )}
-      </>
     </BaseScreenView>
   );
 };

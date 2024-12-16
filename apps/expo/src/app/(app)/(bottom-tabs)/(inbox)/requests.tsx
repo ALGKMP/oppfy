@@ -321,7 +321,8 @@ const Requests = () => {
     username,
   }: FriendRequestItem) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[userId]",
+      // pathname: "/(inbox)/profile/[userId]",
+      pathname: "/(app)/(bottom-tabs)/( inbox)/profile/[userId]", // TODO: Typescript keeps yelling about this.
       params: { userId, username },
     });
   };
@@ -331,7 +332,8 @@ const Requests = () => {
     username,
   }: FollowRequestItem) => {
     router.navigate({
-      pathname: "/(inbox)/profile/[userId]",
+      // pathname: "/(inbox)/profile/[userId]",
+      pathname: "/(app)/(bottom-tabs)/( inbox)/profile/[userId]", // TODO: Typescript keeps yelling about this.
       params: { userId, username },
     });
   };
