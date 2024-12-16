@@ -54,12 +54,12 @@ export const SettingsListItem = (item: SettingsListItemParams) => {
   );
 };
 
-export interface SettingsListGroupInput {
+export interface SettingsListInput {
   headerTitle: string;
   items: SettingsListItemParams[];
 }
 
-export const renderSettingsList = (group: SettingsListGroupInput) => (
+export const renderSettingsList = (group: SettingsListInput) => (
   <YStack gap="$2" key={group.headerTitle}>
     <H6 theme="alt1">{group.headerTitle}</H6>
 

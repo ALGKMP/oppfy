@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Share } from "react-native";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
@@ -13,13 +12,15 @@ import {
   ShieldCheck,
   Star,
 } from "@tamagui/lucide-icons";
-import { Button, YStack } from "tamagui";
 
-import type { SettingsGroupInput } from "~/components/Settings";
-import { renderSettingsGroup } from "~/components/Settings";
-import type { ButtonOption } from "~/components/Sheets";
-import { ActionSheet } from "~/components/Sheets";
-import { BaseScreenView } from "~/components/Views";
+import {
+  Button,
+  renderSettingsList,
+  ScreenView,
+  SettingsListInput,
+  useAlertDialogController,
+  YStack,
+} from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 
 enum WEBSITE_URL {
@@ -30,8 +31,7 @@ enum WEBSITE_URL {
 const Settings = () => {
   const router = useRouter();
   const { signOut } = useSession();
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const alertDialog = useAlertDialogController();
 
   const handleShare = async () => {
     await Share.share({
@@ -48,17 +48,21 @@ const Settings = () => {
     }
   };
 
-  const title = "Log Out";
-  const subtitle = "Are you sure you want to log out?";
-  const buttonOptions = [
-    {
-      text: "Log Out",
-      textProps: {
+  const handleLogout = async () => {
+    const confirmed = await alertDialog.show({
+      title: "Log Out",
+      subtitle: "Are you sure you want to log out?",
+      acceptText: "Log Out",
+      cancelText: "Cancel",
+      acceptTextProps: {
         color: "$red9",
       },
-      onPress: () => void signOut(),
-    },
-  ] satisfies ButtonOption[];
+    });
+
+    if (confirmed) {
+      void signOut();
+    }
+  };
 
   const settingsGroups = [
     {
@@ -113,14 +117,14 @@ const Settings = () => {
         },
       ],
     },
-  ] satisfies SettingsGroupInput[];
+  ] satisfies SettingsListInput[];
 
   return (
-    <BaseScreenView scrollable>
+    <ScreenView scrollable>
       <YStack gap="$4">
-        {settingsGroups.map(renderSettingsGroup)}
+        {settingsGroups.map(renderSettingsList)}
 
-        <Button size="$5" color="$red9" onPress={() => setIsModalVisible(true)}>
+        <Button size="$5" color="$red10" onPress={handleLogout}>
           Logout
         </Button>
 
@@ -134,15 +138,7 @@ const Settings = () => {
           </Button>
         )}
       </YStack>
-
-      <ActionSheet
-        title={title}
-        subtitle={subtitle}
-        buttonOptions={buttonOptions}
-        isVisible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-      />
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 

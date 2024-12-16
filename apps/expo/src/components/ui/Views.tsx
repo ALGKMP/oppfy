@@ -13,6 +13,7 @@ import {
   useTheme,
   type StackProps,
 } from "tamagui";
+import type { ScrollViewProps } from "tamagui";
 
 export const View = styled(TamaguiView, {});
 export const ScrollView = styled(TamaguiScrollView, {});
@@ -23,6 +24,7 @@ type ScreenViewProps = StackProps & {
   children: React.ReactNode;
   safeAreaEdges?: Edge[];
   keyboardAvoiding?: boolean;
+  scrollable?: boolean;
 };
 
 const defaultStyles = {
@@ -30,12 +32,13 @@ const defaultStyles = {
   padding: "$4",
 };
 
-export const ScreenView: React.FC<ScreenViewProps> = ({
+export const ScreenView = ({
   children,
   keyboardAvoiding = false,
   safeAreaEdges,
+  scrollable = false,
   ...props
-}) => {
+}: ScreenViewProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
@@ -49,7 +52,14 @@ export const ScreenView: React.FC<ScreenViewProps> = ({
     android: insets.bottom + headerHeight + 74,
   });
 
-  const content = (
+  const content = scrollable ? (
+    <ScrollView
+      {...(defaultStyles as ScrollViewProps)}
+      {...(props as ScrollViewProps)}
+    >
+      {children}
+    </ScrollView>
+  ) : (
     <View {...defaultStyles} {...props}>
       {children}
     </View>

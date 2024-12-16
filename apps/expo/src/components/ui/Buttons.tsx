@@ -1,15 +1,6 @@
 import { styled, Button as TamaguiButton } from "tamagui";
 
-export const Button = styled(TamaguiButton, {
-  backgroundColor: "$primary",
-  borderRadius: "$6",
-  hoverStyle: {
-    backgroundColor: "$primaryDark",
-  },
-  pressStyle: {
-    backgroundColor: "$primaryLight",
-  },
-});
+export const Button = styled(TamaguiButton, {});
 
 export const OnboardingButton = styled(Button, {
   height: 60,

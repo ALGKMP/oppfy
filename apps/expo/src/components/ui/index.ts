@@ -21,6 +21,10 @@ import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Separator } from "./Separator";
 import { renderSettingsList, SettingsListItem } from "./SettingsListItem";
+import type {
+  SettingsListInput,
+  SettingsListItemParams,
+} from "./SettingsListItem";
 import { Circle, Square } from "./Shapes";
 import { Sheet } from "./Sheet";
 import { Slider } from "./Slider";
@@ -84,3 +88,5 @@ export {
   ScrollView,
   Spinner,
 };
+
+export type { SettingsListInput, SettingsListItemParams };
