@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
+import Logo from "@assets/icon.png";
 import {
   BellRing,
   ChevronRight,
@@ -141,30 +142,29 @@ const Settings = () => {
             Sitemap
           </Button>
         )}
-      </YStack>
 
-      {/* Footer */}
-      <YStack marginTop="auto" alignItems="center" gap="$4">
-        <Image
-          source={require("../../../../assets/icon.png")}
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: 16,
-            marginBottom: 4,
-          }}
-        />
+        <YStack alignItems="center" paddingTop="$4" gap="$4">
+          <Image
+            source={Logo}
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 16,
+              marginBottom: 4,
+            }}
+          />
 
-        <YStack alignItems="center" gap="$2">
-          <XStack alignItems="center" gap="$2">
-            <Text fontSize="$3">Made with</Text>
-            <Heart size={16} color="$red10" fill="$red10" />
-            <Text fontSize="$3">by Oppfy</Text>
-          </XStack>
+          <YStack alignItems="center" gap="$2">
+            <XStack alignItems="center" gap="$2">
+              <Text fontSize="$3">Made with</Text>
+              <Heart size={16} color="$red10" fill="$red10" />
+              <Text fontSize="$3">by Oppfy</Text>
+            </XStack>
 
-          <Text color="$gray11" fontSize="$2" fontWeight="400">
-            Version {Constants.expoConfig?.version ?? "1.0.0"}
-          </Text>
+            <Text color="$gray11" fontSize="$2" fontWeight="400">
+              Version {Constants.expoConfig?.version ?? "1.0.0"}
+            </Text>
+          </YStack>
         </YStack>
       </YStack>
     </ScreenView>
