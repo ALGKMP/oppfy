@@ -20,6 +20,7 @@ import { Progress } from "./Progress";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Separator } from "./Separator";
+import { renderSettingsList, SettingsListItem } from "./SettingsListItem";
 import { Circle, Square } from "./Shapes";
 import { Sheet } from "./Sheet";
 import { Slider } from "./Slider";
@@ -72,6 +73,8 @@ export {
   Avatar,
   Card,
   ListItem,
+  SettingsListItem,
+  renderSettingsList,
   Separator,
   Square,
   Circle,

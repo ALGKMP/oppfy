@@ -1,10 +1,10 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import type {
-  HeaderBackButtonProps,
+  NativeStackHeaderLeftProps,
   NativeStackHeaderProps,
-} from "@react-navigation/native-stack/src/types";
+} from "@react-navigation/native-stack/";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Text, useTheme } from "tamagui";
 
@@ -38,7 +38,7 @@ const SearchLayout = () => {
   );
 };
 
-type HeaderLeftProps = HeaderBackButtonProps;
+type HeaderLeftProps = NativeStackHeaderLeftProps;
 
 type HeaderProps = NativeStackHeaderProps;
 

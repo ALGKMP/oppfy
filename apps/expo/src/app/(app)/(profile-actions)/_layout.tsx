@@ -2,9 +2,9 @@ import React from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import type {
-  HeaderBackButtonProps,
+  NativeStackHeaderLeftProps,
   NativeStackHeaderProps,
-} from "@react-navigation/native-stack/src/types";
+} from "@react-navigation/native-stack/";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Text } from "tamagui";
 
@@ -36,7 +36,7 @@ const ProfileActionsLayout = () => {
   );
 };
 
-type HeaderLeftProps = HeaderBackButtonProps;
+type HeaderLeftProps = NativeStackHeaderLeftProps;
 
 type HeaderProps = NativeStackHeaderProps;
 
