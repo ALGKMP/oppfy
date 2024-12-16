@@ -1,14 +1,12 @@
 import { cloneElement } from "react";
 import type { IconProps } from "@tamagui/helpers-icon";
-import {
-  H6,
-  ListItem,
-  Separator,
-  SizableText,
-  XStack,
-  YGroup,
-  YStack,
-} from "tamagui";
+
+import { YGroup } from "./Groups";
+import { H6 } from "./Headings";
+import { ListItem } from "./ListItem";
+import { Separator } from "./Separator";
+import { XStack, YStack } from "./Stacks";
+import { SizableText } from "./Texts";
 
 type Icon = JSX.Element;
 
@@ -26,9 +24,11 @@ export const SettingsListItem = (item: SettingsListItemParams) => {
   return (
     <ListItem
       size="$4.5"
+      backgroundColor="$gray2"
       onPress={item.onPress}
       hoverTheme={item.hoverTheme ?? true}
       pressTheme={item.pressTheme ?? true}
+      overflow="hidden"
     >
       <XStack flex={1} alignItems="center">
         <XStack flex={1} alignItems="center" gap="$2">
@@ -63,40 +63,15 @@ export const renderSettingsList = (group: SettingsListInput) => (
   <YStack gap="$2" key={group.headerTitle}>
     <H6 theme="alt1">{group.headerTitle}</H6>
 
-    <YGroup alignSelf="center" separator={<Separator />}>
+    <YGroup
+      borderRadius="$6"
+      alignSelf="center"
+      overflow="hidden"
+    >
       {group.items.map((item, index) => (
         <YGroup.Item key={index}>
-          <ListItem
-            size="$4.5"
-            backgroundColor="$gray2"
-            onPress={item.onPress}
-            hoverTheme={item.hoverTheme ?? true}
-            pressTheme={item.pressTheme ?? true}
-          >
-            <XStack flex={1} alignItems="center">
-              <XStack flex={1} alignItems="center" gap="$2">
-                {item.icon &&
-                  cloneElement(item.icon, {
-                    size:
-                      ((item.icon.props as IconProps).size as string) || "$1",
-                  })}
-                <YStack>
-                  <SizableText size="$5">{item.title}</SizableText>
-                  {item.subtitle && (
-                    <SizableText size="$3" theme="alt1">
-                      {item.subtitle}
-                    </SizableText>
-                  )}
-                </YStack>
-              </XStack>
-              {item.iconAfter &&
-                cloneElement(item.iconAfter, {
-                  size:
-                    ((item.iconAfter.props as IconProps).size as string) ||
-                    "$1",
-                })}
-            </XStack>
-          </ListItem>
+          <SettingsListItem {...item} />
+          {index < group.items.length - 1 && <Separator />}
         </YGroup.Item>
       ))}
     </YGroup>

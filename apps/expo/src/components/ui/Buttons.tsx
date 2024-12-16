@@ -1,6 +1,27 @@
 import { styled, Button as TamaguiButton } from "tamagui";
 
-export const Button = styled(TamaguiButton, {});
+export const Button = styled(TamaguiButton, {
+  size: "$5",
+  borderRadius: "$6",
+  disabledStyle: {
+    opacity: 0.7,
+  },
+
+  variants: {
+    variant: {
+      warning: {
+        // backgroundColor: "$yellow10",
+        // color: "white",
+        color: "$yellow11",
+      },
+      danger: {
+        // backgroundColor: "$red10",
+        // color: "white",
+        color: "$red11",
+      },
+    },
+  },
+});
 
 export const OnboardingButton = styled(Button, {
   height: 60,

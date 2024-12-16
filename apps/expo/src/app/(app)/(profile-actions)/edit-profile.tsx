@@ -403,11 +403,8 @@ const EditProfile = () => {
         <XStack padding="$4" paddingBottom={insets.bottom}>
           <Button
             flex={1}
-            size="$5"
-            borderRadius="$7"
             onPress={handleSave}
             disabled={!isFieldChanged || updateProfile.isPending}
-            opacity={isFieldChanged && !updateProfile.isPending ? 1 : 0.5}
           >
             {updateProfile.isPending ? (
               <Spinner size="small" color="$color" />

@@ -129,16 +129,12 @@ const Settings = () => {
       <YStack gap="$4" flex={1} paddingBottom="$8">
         {settingsGroups.map(renderSettingsList)}
 
-        <Button size="$5" color="$red10" onPress={handleLogout}>
+        <Button variant="danger" onPress={handleLogout}>
           Logout
         </Button>
 
         {__DEV__ && (
-          <Button
-            size="$5"
-            color="$yellow10Dark"
-            onPress={() => router.push("/_sitemap")}
-          >
+          <Button variant="warning" onPress={() => router.push("/_sitemap")}>
             Sitemap
           </Button>
         )}

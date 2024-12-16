@@ -16,7 +16,7 @@ import { CardContainer } from "./CardContainer";
 import { Checkbox } from "./Checkbox";
 import { Dialog, DialogProvider, useDialogController } from "./Dialog";
 import { Form } from "./Form";
-import { Group } from "./Group";
+import { Group, XGroup, YGroup } from "./Groups";
 import { H1, H2, H3, H4, H5, H6 } from "./Headings";
 import { Input, OnboardingInput, SearchInput, TextArea } from "./Inputs";
 import { Label } from "./Label";
@@ -84,6 +84,8 @@ export {
   Tooltip,
   Accordion,
   Group,
+  YGroup,
+  XGroup,
   Avatar,
   Card,
   ListItem,
