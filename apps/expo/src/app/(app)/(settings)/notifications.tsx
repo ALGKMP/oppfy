@@ -8,11 +8,13 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, Spinner, Switch, YStack } from "tamagui";
 
-import type { SettingsGroupInput } from "~/components/Settings";
-import { renderSettingsGroup } from "~/components/Settings";
-import { BaseScreenView } from "~/components/Views";
-import type { RouterOutputs } from "~/utils/api";
+import {
+  renderSettingsList,
+  ScreenView,
+  SettingsListInput,
+} from "~/components/ui";
 import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type SwitchState = RouterOutputs["notifications"]["getNotificationSettings"];
 
@@ -31,41 +33,39 @@ const Notifications = () => {
       },
     });
 
-  const {
-    isLoading: isUpdatingNotficationSettings,
-    ...updateNotificationSettings
-  } = api.notifications.updateNotificationSettings.useMutation({
-    onMutate: async (newNotificationSettings) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.notifications.getNotificationSettings.cancel();
+  const updateNotificationSettings =
+    api.notifications.updateNotificationSettings.useMutation({
+      onMutate: async (newNotificationSettings) => {
+        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+        await utils.notifications.getNotificationSettings.cancel();
 
-      // Get the data from the queryCache
-      const prevData = utils.notifications.getNotificationSettings.getData();
-      if (prevData === undefined) return;
+        // Get the data from the queryCache
+        const prevData = utils.notifications.getNotificationSettings.getData();
+        if (prevData === undefined) return;
 
-      // Optimistically update the data
-      utils.notifications.getNotificationSettings.setData(undefined, {
-        ...prevData,
-        ...newNotificationSettings,
-      });
+        // Optimistically update the data
+        utils.notifications.getNotificationSettings.setData(undefined, {
+          ...prevData,
+          ...newNotificationSettings,
+        });
 
-      // Return the previous data so we can revert if something goes wrong
-      return { prevData };
-    },
-    onError: (_err, _newNoticationSettings, ctx) => {
-      if (ctx === undefined) return;
+        // Return the previous data so we can revert if something goes wrong
+        return { prevData };
+      },
+      onError: (_err, _newNoticationSettings, ctx) => {
+        if (ctx === undefined) return;
 
-      // If the mutation fails, use the context-value from onMutate
-      utils.notifications.getNotificationSettings.setData(
-        undefined,
-        ctx.prevData,
-      );
-    },
-    onSettled: async () => {
-      // Sync with server once mutation has settled
-      await utils.notifications.getNotificationSettings.invalidate();
-    },
-  });
+        // If the mutation fails, use the context-value from onMutate
+        utils.notifications.getNotificationSettings.setData(
+          undefined,
+          ctx.prevData,
+        );
+      },
+      onSettled: async () => {
+        // Sync with server once mutation has settled
+        await utils.notifications.getNotificationSettings.invalidate();
+      },
+    });
 
   const [switchState, setSwitchState] =
     useState<SwitchState>(notificationSettings);
@@ -185,17 +185,17 @@ const Notifications = () => {
         },
       ],
     },
-  ] satisfies SettingsGroupInput[];
+  ] satisfies SettingsListInput[];
 
   return (
-    <BaseScreenView scrollable>
+    <ScreenView scrollable>
       <YStack gap="$4">
-        {settingsGroups.map(renderSettingsGroup)}
+        {settingsGroups.map(renderSettingsList)}
         <Button size="$4.5" onPress={onSubmit}>
-          {isUpdatingNotficationSettings ? <Spinner /> : "Save"}
+          {updateNotificationSettings.isPending ? <Spinner /> : "Save"}
         </Button>
       </YStack>
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
