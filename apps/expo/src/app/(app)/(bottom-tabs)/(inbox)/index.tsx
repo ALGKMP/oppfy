@@ -315,9 +315,11 @@ const Inbox = () => {
             handleProfileClicked={(userId, username) => {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               router.navigate({
-                pathname: "/(inbox)/profile/[userId]",
-                params: { userId, username },
-              });
+                // pathname: "/(inbox)/profile/[userId]",
+                pathname: "/(app)/(bottom-tabs)/( inbox)/profile/[userId]", // TODO: Typescript keeps yelling about this
+                params: { userId, username  },
+              }
+              );
             }}
             loading={isRecommendationsLoading}
             recommendationsData={recommendationsData}
