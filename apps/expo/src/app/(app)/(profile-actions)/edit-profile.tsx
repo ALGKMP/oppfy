@@ -21,6 +21,7 @@ import {
   ScrollView,
   Separator,
   SizableText,
+  Spinner,
   Text,
   useTheme,
   View,
@@ -447,10 +448,14 @@ const EditProfile = () => {
             size="$5"
             borderRadius="$7"
             onPress={handleSave}
-            disabled={!isFieldChanged}
-            opacity={isFieldChanged ? 1 : 0.5}
+            disabled={!isFieldChanged || updateProfile.isPending}
+            opacity={isFieldChanged && !updateProfile.isPending ? 1 : 0.5}
           >
-            Save
+            {updateProfile.isPending ? (
+              <Spinner size="small" color="$color" />
+            ) : (
+              "Save"
+            )}
           </Button>
         </XStack>
       </BottomSheet>

@@ -1,4 +1,5 @@
-import { Share } from "react-native";
+import { Image, Share } from "react-native";
+import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as StoreReview from "expo-store-review";
@@ -7,6 +8,7 @@ import {
   ChevronRight,
   FileLock2,
   Hammer,
+  Heart,
   NotepadText,
   Share2,
   ShieldCheck,
@@ -18,7 +20,9 @@ import {
   renderSettingsList,
   ScreenView,
   SettingsListInput,
+  Text,
   useAlertDialogController,
+  XStack,
   YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
@@ -121,7 +125,7 @@ const Settings = () => {
 
   return (
     <ScreenView scrollable>
-      <YStack gap="$4">
+      <YStack gap="$4" flex={1} paddingBottom="$8">
         {settingsGroups.map(renderSettingsList)}
 
         <Button size="$5" color="$red10" onPress={handleLogout}>
@@ -137,6 +141,31 @@ const Settings = () => {
             Sitemap
           </Button>
         )}
+      </YStack>
+
+      {/* Footer */}
+      <YStack marginTop="auto" alignItems="center" gap="$4">
+        <Image
+          source={require("../../../../assets/icon.png")}
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: 16,
+            marginBottom: 4,
+          }}
+        />
+
+        <YStack alignItems="center" gap="$2">
+          <XStack alignItems="center" gap="$2">
+            <Text fontSize="$3">Made with</Text>
+            <Heart size={16} color="$red10" fill="$red10" />
+            <Text fontSize="$3">by Oppfy</Text>
+          </XStack>
+
+          <Text color="$gray11" fontSize="$2" fontWeight="400">
+            Version {Constants.expoConfig?.version ?? "1.0.0"}
+          </Text>
+        </YStack>
       </YStack>
     </ScreenView>
   );

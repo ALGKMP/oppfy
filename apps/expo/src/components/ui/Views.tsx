@@ -62,7 +62,12 @@ export const ScreenView = ({
   });
 
   const content = scrollable ? (
-    <ScrollView {...defaultStyles} {...(props as ScrollViewProps)}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+      {...defaultStyles}
+      {...(props as ScrollViewProps)}
+    >
       {children}
     </ScrollView>
   ) : (
