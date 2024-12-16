@@ -18,24 +18,25 @@ import { CloudFrontService } from "../aws/cloudfront";
 import { NotificationsService } from "../user/notifications";
 import { UserService } from "../user/user";
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  nextCursor: PostCursor | CommentCursor | FeedCursor | undefined;
+interface BaseCursor {
+  createdAt: Date;
 }
 
-interface PostCursor {
-  createdAt: Date;
+export interface PaginatedResponse<TItem, TCursor extends BaseCursor> {
+  items: TItem[];
+  nextCursor: TCursor | undefined;
+}
+
+interface PostCursor extends BaseCursor {
   postId: string;
 }
 
-interface FeedCursor {
-  createdAt: Date;
+interface FeedCursor extends BaseCursor {
   postId: string;
   type: "following" | "recommended";
 }
 
-interface CommentCursor {
-  createdAt: Date;
+interface CommentCursor extends BaseCursor {
   commentId: string;
 }
 
@@ -60,7 +61,7 @@ export class PostService {
     userId: string,
     cursor: PostCursor | null = null,
     pageSize: number,
-  ): Promise<PaginatedResponse<Post>> {
+  ): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
       const data = await this.postRepository.paginatePostsOfUser(
         userId,
@@ -88,7 +89,7 @@ export class PostService {
     cursor: PostCursor | null;
     pageSize: number;
     currentUserId: string;
-  }): Promise<PaginatedResponse<Post>> {
+  }): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
       const canAccess = await this.userService.canAccessUserData({
         currentUserId,
@@ -143,7 +144,7 @@ export class PostService {
     userId: string,
     cursor: FeedCursor | null = null,
     pageSize: number,
-  ): Promise<PaginatedResponse<Post>> {
+  ): Promise<PaginatedResponse<Post, FeedCursor>> {
     const followingResult = await this.postRepository.paginatePostsOfFollowing(
       userId,
       cursor,
@@ -215,7 +216,7 @@ export class PostService {
     userId: string,
     cursor: PostCursor | null = null,
     pageSize: number,
-  ): Promise<PaginatedResponse<Post>> {
+  ): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
       const data = await this.postRepository.paginatePostsByUser(
         userId,
@@ -237,7 +238,7 @@ export class PostService {
     profileId: string,
     cursor: PostCursor | null = null,
     pageSize: number,
-  ): Promise<PaginatedResponse<Post>> {
+  ): Promise<PaginatedResponse<Post, PostCursor>> {
     try {
       const user = await this.userRepository.getUserByProfileId(profileId);
       if (!user) {
@@ -531,7 +532,7 @@ export class PostService {
     postId: string,
     cursor: CommentCursor | null = null,
     pageSize: number,
-  ): Promise<PaginatedResponse<CommentProfile>> {
+  ): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
     try {
       const data = await this.commentRepository.paginateComments(
         postId,
@@ -629,7 +630,7 @@ export class PostService {
   private async _processPaginatedPostData(
     data: Post[],
     pageSize: number,
-  ): Promise<PaginatedResponse<Post>> {
+  ): Promise<PaginatedResponse<Post, PostCursor>> {
     const items = data.map(async (item) => {
       try {
         if (item.authorProfilePicture !== null) {
@@ -690,7 +691,7 @@ export class PostService {
   private async _processPaginatedPostDataForFeed(
     data: Post[],
     pageSize: number,
-  ): Promise<PaginatedResponse<Post>> {
+  ): Promise<PaginatedResponse<Post, FeedCursor>> {
     const items = data.map(async (item) => {
       try {
         if (item.authorProfilePicture !== null) {
@@ -752,7 +753,7 @@ export class PostService {
   private async _updateProfilePictureUrls2(
     data: CommentProfile[],
     pageSize: number,
-  ): Promise<PaginatedResponse<CommentProfile>> {
+  ): Promise<PaginatedResponse<CommentProfile, CommentCursor>> {
     const items = data.map(async (item) => {
       try {
         if (item.profilePictureUrl !== null) {
