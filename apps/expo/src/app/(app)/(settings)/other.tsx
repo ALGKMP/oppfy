@@ -8,11 +8,12 @@ import {
 } from "@tamagui/lucide-icons";
 import { Button, YStack } from "tamagui";
 
-import type { SettingsGroupInput } from "~/components/Settings";
-import { renderSettingsGroup } from "~/components/Settings";
-import type { ButtonOption } from "~/components/Sheets";
-import { ActionSheet } from "~/components/Sheets";
-import { BaseScreenView } from "~/components/Views";
+import {
+  renderSettingsList,
+  ScreenView,
+  SettingsListInput,
+  useActionSheetController,
+} from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import { useContacts } from "~/hooks/contacts";
 
@@ -22,15 +23,7 @@ const Other = () => {
     syncContacts: handleSyncContacts,
     deleteContacts: handleDeleteContacts,
   } = useContacts();
-
-  const [isClearCacheModalVisible, setIsClearCacheModalVisible] =
-    useState(false);
-  const [isSyncContactsModalVisible, setIsSyncContactsModalVisible] =
-    useState(false);
-  const [isDeleteContactsModalVisible, setIsDeleteContactsModalVisible] =
-    useState(false);
-  const [isDeleteAccountModalVisible, setIsDeleteAccountModalVisible] =
-    useState(false);
+  const actionSheet = useActionSheetController();
 
   const handleClearCache = () => {
     if (FileSystem.cacheDirectory === null) return;
@@ -39,66 +32,68 @@ const Other = () => {
     });
   };
 
-  const clearCachetitle = "Clear Cache";
-  const clearCacheSubtitle =
-    "Clearing cache can help resolve issues with the app.";
-  const clearCacheButtonOptions = [
-    {
-      text: "Clear Cache",
-      textProps: {
-        color: "$red9",
-      },
-      onPress: () => {
-        void handleClearCache();
-        setIsClearCacheModalVisible(false);
-      },
-    },
-  ] satisfies ButtonOption[];
+  const handleShowClearCache = () => {
+    actionSheet.show({
+      title: "Clear Cache",
+      subtitle: "Clearing cache can help resolve issues with the app.",
+      buttonOptions: [
+        {
+          text: "Clear Cache",
+          textProps: {
+            color: "$red9",
+          },
+          onPress: handleClearCache,
+        },
+      ],
+    });
+  };
 
-  const syncContactsTitle = "Sync Contacts";
-  const syncContactsSubtitle =
-    "Syncing contacts can help you find friends on OPPFY.";
-  const syncContactsButtonOptions = [
-    {
-      text: "Sync Contacts",
-      onPress: () => {
-        void handleSyncContacts();
-        setIsSyncContactsModalVisible(false);
-      },
-    },
-  ] satisfies ButtonOption[];
+  const handleShowSyncContacts = () => {
+    actionSheet.show({
+      title: "Sync Contacts",
+      subtitle: "Syncing contacts can help you find friends on OPPFY.",
+      buttonOptions: [
+        {
+          text: "Sync Contacts",
+          onPress: () => void handleSyncContacts(),
+        },
+      ],
+    });
+  };
 
-  const deleteContactsTitle = "Delete Contacts";
-  const deleteContactsSubtitle =
-    "Are you sure you want to delete your synced contacts? This will negatively affect recommendations.";
-  const deleteContactsButtonOptions = [
-    {
-      text: "Delete Contacts",
-      textProps: {
-        color: "$red9",
-      },
-      onPress: () => {
-        void handleDeleteContacts();
-        setIsDeleteContactsModalVisible(false);
-      },
-    },
-  ] satisfies ButtonOption[];
+  const handleShowDeleteContacts = () => {
+    actionSheet.show({
+      title: "Delete Contacts",
+      subtitle:
+        "Are you sure you want to delete your synced contacts? This will negatively affect recommendations.",
+      buttonOptions: [
+        {
+          text: "Delete Contacts",
+          textProps: {
+            color: "$red9",
+          },
+          onPress: () => void handleDeleteContacts(),
+        },
+      ],
+    });
+  };
 
-  const deleteAccounttitle = "Delete Account";
-  const deleteAccountSubtitle =
-    "Are you sure you want to delete your account? This action cannot be undone.";
-  const deleteAccountButtonOptions = [
-    {
-      text: "Delete Account",
-      textProps: {
-        color: "$red9",
-      },
-      onPress: () => {
-        void deleteAccount();
-        setIsDeleteAccountModalVisible(false);
-      },
-    },
-  ] satisfies ButtonOption[];
+  const handleShowDeleteAccount = () => {
+    actionSheet.show({
+      title: "Delete Account",
+      subtitle:
+        "Are you sure you want to delete your account? This action cannot be undone.",
+      buttonOptions: [
+        {
+          text: "Delete Account",
+          textProps: {
+            color: "$red9",
+          },
+          onPress: () => void deleteAccount(),
+        },
+      ],
+    });
+  };
 
   const settingsGroups = [
     {
@@ -108,7 +103,7 @@ const Other = () => {
           title: "Clear Cache",
           icon: <XCircle />,
           iconAfter: <ChevronRight />,
-          onPress: () => setIsClearCacheModalVisible(true),
+          onPress: handleShowClearCache,
         },
       ],
     },
@@ -119,62 +114,27 @@ const Other = () => {
           title: "Sync",
           icon: <RefreshCcw />,
           iconAfter: <ChevronRight />,
-          onPress: () => setIsSyncContactsModalVisible(true),
+          onPress: handleShowSyncContacts,
         },
         {
           title: "Delete",
           icon: <Trash />,
           iconAfter: <ChevronRight />,
-          onPress: () => setIsDeleteContactsModalVisible(true),
+          onPress: handleShowDeleteContacts,
         },
       ],
     },
-  ] satisfies SettingsGroupInput[];
+  ] satisfies SettingsListInput[];
 
   return (
-    <BaseScreenView scrollable>
+    <ScreenView scrollable>
       <YStack gap="$4">
-        {settingsGroups.map(renderSettingsGroup)}
-        <Button
-          size="$4.5"
-          color="$red9"
-          onPress={() => setIsDeleteAccountModalVisible(true)}
-        >
+        {settingsGroups.map(renderSettingsList)}
+        <Button size="$4.5" color="$red9" onPress={handleShowDeleteAccount}>
           Delete Account
         </Button>
       </YStack>
-
-      <ActionSheet
-        title={clearCachetitle}
-        subtitle={clearCacheSubtitle}
-        buttonOptions={clearCacheButtonOptions}
-        isVisible={isClearCacheModalVisible}
-        onCancel={() => setIsClearCacheModalVisible(false)}
-      />
-
-      <ActionSheet
-        title={syncContactsTitle}
-        subtitle={syncContactsSubtitle}
-        buttonOptions={syncContactsButtonOptions}
-        isVisible={isSyncContactsModalVisible}
-        onCancel={() => setIsSyncContactsModalVisible(false)}
-      />
-      <ActionSheet
-        title={deleteContactsTitle}
-        subtitle={deleteContactsSubtitle}
-        buttonOptions={deleteContactsButtonOptions}
-        isVisible={isDeleteContactsModalVisible}
-        onCancel={() => setIsDeleteContactsModalVisible(false)}
-      />
-
-      <ActionSheet
-        title={deleteAccounttitle}
-        subtitle={deleteAccountSubtitle}
-        buttonOptions={deleteAccountButtonOptions}
-        isVisible={isDeleteAccountModalVisible}
-        onCancel={() => setIsDeleteAccountModalVisible(false)}
-      />
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
