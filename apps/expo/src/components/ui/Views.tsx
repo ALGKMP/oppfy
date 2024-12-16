@@ -11,21 +11,29 @@ import {
   ScrollView as TamaguiScrollView,
   View as TamaguiView,
   useTheme,
+  type ScrollViewProps,
   type StackProps,
 } from "tamagui";
-import type { ScrollViewProps } from "tamagui";
 
 export const View = styled(TamaguiView, {});
 export const ScrollView = styled(TamaguiScrollView, {});
-
 export const SafeAreaView = styled(RNSafeAreaView, {});
 
-type ScreenViewProps = StackProps & {
+interface CommonProps {
   children: React.ReactNode;
   safeAreaEdges?: Edge[];
   keyboardAvoiding?: boolean;
-  scrollable?: boolean;
-};
+}
+
+type ScreenViewProps = CommonProps &
+  (
+    | ({
+        scrollable: true;
+      } & ScrollViewProps)
+    | ({
+        scrollable?: false;
+      } & StackProps)
+  );
 
 const defaultStyles = {
   flex: 1,
@@ -43,9 +51,10 @@ export const ScreenView = ({
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
 
-  const bgColor = props.backgroundColor
-    ? theme[(props.backgroundColor as string).slice(1)]?.val
-    : undefined;
+  const bgColor =
+    "backgroundColor" in props && props.backgroundColor
+      ? theme[(props.backgroundColor as string).slice(1)]?.val
+      : undefined;
 
   const keyboardOffset = Platform.select({
     ios: insets.bottom + headerHeight + 74,
@@ -53,14 +62,11 @@ export const ScreenView = ({
   });
 
   const content = scrollable ? (
-    <ScrollView
-      {...(defaultStyles as ScrollViewProps)}
-      {...(props as ScrollViewProps)}
-    >
+    <ScrollView {...defaultStyles} {...(props as ScrollViewProps)}>
       {children}
     </ScrollView>
   ) : (
-    <View {...defaultStyles} {...props}>
+    <View {...defaultStyles} {...(props as StackProps)}>
       {children}
     </View>
   );

@@ -8,9 +8,8 @@ import { Button, H5, H6, View, YStack } from "tamagui";
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
-import { ActionSheet } from "~/components/Sheets";
+import { ScreenView, useActionSheetController } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -22,17 +21,14 @@ type BlockedUserItem =
 const BlockedUsers = () => {
   const utils = api.useUtils();
   const [refreshing, setRefreshing] = useState(false);
+  const actionSheet = useActionSheetController();
 
   const unblockUser = api.block.unblockUser.useMutation({
     onMutate: async (newData) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.block.paginateBlockedUsers.cancel();
-
-      // Get the data from the queryCache
       const prevData = utils.block.paginateBlockedUsers.getInfiniteData();
       if (prevData === undefined) return;
 
-      // Optimistically update the data
       utils.block.paginateBlockedUsers.setInfiniteData(
         {},
         {
@@ -51,7 +47,6 @@ const BlockedUsers = () => {
       utils.block.paginateBlockedUsers.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
-      // Sync with server once mutation has settled
       await utils.block.paginateBlockedUsers.invalidate();
     },
   });
@@ -93,6 +88,21 @@ const BlockedUsers = () => {
     });
   };
 
+  const handleShowUnblock = (item: BlockedUserItem) => {
+    actionSheet.show({
+      title: `Unblock ${item.username}`,
+      subtitle: `Are you sure you want to unblock ${item.username}?`,
+      imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+      buttonOptions: [
+        {
+          text: "Unblock",
+          textProps: { color: "$red9" },
+          onPress: () => void handleUnblock(item.userId),
+        },
+      ],
+    });
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await refetch();
@@ -124,23 +134,13 @@ const BlockedUsers = () => {
       subtitle={item.name}
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
       button={
-        <ActionSheet
-          title={`Unblock ${item.username}`}
-          subtitle={`Are you sure you want to unblock ${item.username}?`}
-          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          trigger={
-            <Button size="$3.5" icon={<UserRoundX size="$1" />}>
-              Unblock
-            </Button>
-          }
-          buttonOptions={[
-            {
-              text: "Unblock",
-              textProps: { color: "$red9" },
-              onPress: () => void handleUnblock(item.userId),
-            },
-          ]}
-        />
+        <Button
+          size="$3.5"
+          icon={<UserRoundX size="$1" />}
+          onPress={() => handleShowUnblock(item)}
+        >
+          Unblock
+        </Button>
       }
     />
   );
@@ -171,14 +171,12 @@ const BlockedUsers = () => {
   );
 
   if (isLoading) {
-    return (
-      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
-    );
+    return <ScreenView scrollable>{renderLoadingSkeletons()}</ScreenView>;
   }
 
   if (blockedUsersItems.length === 0) {
     return (
-      <BaseScreenView
+      <ScreenView
         scrollable
         contentContainerStyle={{
           flexGrow: 1,
@@ -189,12 +187,12 @@ const BlockedUsers = () => {
         }
       >
         {renderNoResults()}
-      </BaseScreenView>
+      </ScreenView>
     );
   }
 
   return (
-    <BaseScreenView
+    <ScreenView
       scrollable
       keyboardDismissMode="interactive"
       refreshControl={
@@ -217,7 +215,7 @@ const BlockedUsers = () => {
           </H6>
         )}
       </YStack>
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
