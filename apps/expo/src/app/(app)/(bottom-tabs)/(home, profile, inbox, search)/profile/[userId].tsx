@@ -124,23 +124,23 @@ const useProfileActions = (userId: string) => {
   // Determine if any action is currently loading
   const isAnyActionLoading = useMemo(() => {
     return (
-      followUser.isLoading ||
-      unfollowUser.isLoading ||
-      addFriend.isLoading ||
-      removeFriend.isLoading ||
-      cancelFollowRequest.isLoading ||
-      cancelFriendRequest.isLoading ||
+      followUser.isPending ||
+      unfollowUser.isPending ||
+      addFriend.isPending ||
+      removeFriend.isPending ||
+      cancelFollowRequest.isPending ||
+      cancelFriendRequest.isPending ||
       Object.values(isInvalidatingByAction).some(
         (isInvalidating) => isInvalidating,
       )
     );
   }, [
-    followUser.isLoading,
-    unfollowUser.isLoading,
-    addFriend.isLoading,
-    removeFriend.isLoading,
-    cancelFollowRequest.isLoading,
-    cancelFriendRequest.isLoading,
+    followUser.isPending,
+    unfollowUser.isPending,
+    addFriend.isPending,
+    removeFriend.isPending,
+    cancelFollowRequest.isPending,
+    cancelFriendRequest.isPending,
     isInvalidatingByAction,
   ]);
 
@@ -149,35 +149,35 @@ const useProfileActions = (userId: string) => {
     actions: {
       follow: {
         handler: handleFollow,
-        loading: followUser.isLoading || isInvalidatingByAction.follow,
+        loading: followUser.isPending || isInvalidatingByAction.follow,
         disabled: isAnyActionLoading,
       },
       unfollow: {
         handler: handleUnfollow,
-        loading: unfollowUser.isLoading || isInvalidatingByAction.unfollow,
+        loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
         disabled: isAnyActionLoading,
       },
       addFriend: {
         handler: handleAddFriend,
-        loading: addFriend.isLoading || isInvalidatingByAction.addFriend,
+        loading: addFriend.isPending || isInvalidatingByAction.addFriend,
         disabled: isAnyActionLoading,
       },
       removeFriend: {
         handler: handleRemoveFriend,
-        loading: removeFriend.isLoading || isInvalidatingByAction.removeFriend,
+        loading: removeFriend.isPending || isInvalidatingByAction.removeFriend,
         disabled: isAnyActionLoading,
       },
       cancelFollowRequest: {
         handler: handleCancelFollowRequest,
         loading:
-          cancelFollowRequest.isLoading ||
+          cancelFollowRequest.isPending ||
           isInvalidatingByAction.cancelFollowRequest,
         disabled: isAnyActionLoading,
       },
       cancelFriendRequest: {
         handler: handleCancelFriendRequest,
         loading:
-          cancelFriendRequest.isLoading ||
+          cancelFriendRequest.isPending ||
           isInvalidatingByAction.cancelFriendRequest,
         disabled: isAnyActionLoading,
       },
@@ -317,7 +317,7 @@ const OtherProfile = React.memo(() => {
     "closed" | "moreOptions" | "reportOptions"
   >("closed");
 
-  const { isLoading: isBlocking, ...blockUser } =
+  const { isPending: isBlocking, ...blockUser } =
     api.block.blockUser.useMutation({
       onMutate: async (_newBlockedUser) => {
         // Cancel outgoing fetches (so they don't overwrite our optimistic update)
@@ -352,7 +352,7 @@ const OtherProfile = React.memo(() => {
         await utils.profile.getFullProfileOther.invalidate({ userId });
       },
     });
-  const { isLoading: isUnblocking, ...unblockUser } =
+  const { isPending: isUnblocking, ...unblockUser } =
     api.block.unblockUser.useMutation({
       onMutate: async (_newUnblockedUser) => {
         // Cancel outgoing fetches (so they don't overwrite our optimistic update)
