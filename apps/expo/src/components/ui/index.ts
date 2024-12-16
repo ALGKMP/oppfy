@@ -12,6 +12,7 @@ import {
 import { Avatar } from "./Avatar";
 import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
+import { CardContainer } from "./CardContainer";
 import { Checkbox } from "./Checkbox";
 import { Dialog, DialogProvider, useDialogController } from "./Dialog";
 import { Form } from "./Form";
@@ -42,6 +43,7 @@ import { Tooltip } from "./Tooltip";
 import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 
 export {
+  CardContainer,
   Button,
   OnboardingButton,
   H1,

@@ -49,7 +49,7 @@ const ShareProfile = () => {
         <QRContainer paddingVertical="$8" width="100%">
           <YStack alignItems="center" gap="$4">
             <MaskedQRCode value={qrValue} />
-            <GradientText>{username.toUpperCase()}</GradientText>
+            <GradientText>{username}</GradientText>
           </YStack>
         </QRContainer>
         <XStack width="100%" gap="$4">
