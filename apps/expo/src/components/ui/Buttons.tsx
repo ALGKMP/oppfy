@@ -9,14 +9,13 @@ export const Button = styled(TamaguiButton, {
 
   variants: {
     variant: {
+      primary: {
+        backgroundColor: "$primary",
+      },
       warning: {
-        // backgroundColor: "$yellow10",
-        // color: "white",
         color: "$yellow11",
       },
       danger: {
-        // backgroundColor: "$red10",
-        // color: "white",
         color: "$red11",
       },
     },
