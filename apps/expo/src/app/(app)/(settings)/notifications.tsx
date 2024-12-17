@@ -6,12 +6,15 @@ import {
   ThumbsUp,
   UserRoundPlus,
 } from "@tamagui/lucide-icons";
-import { Button, Spinner, Switch, YStack } from "tamagui";
 
 import {
+  Button,
   renderSettingsList,
   ScreenView,
   SettingsListInput,
+  Spinner,
+  Switch,
+  YStack,
 } from "~/components/ui";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -109,7 +112,6 @@ const Notifications = () => {
           icon: <ThumbsUp />,
           iconAfter: (
             <Switch
-              size="$3"
               checked={switchState.likes}
               onCheckedChange={(value) => updateSwitchState("likes", value)}
             >

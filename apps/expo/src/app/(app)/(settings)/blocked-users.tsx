@@ -3,12 +3,19 @@ import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundX } from "@tamagui/lucide-icons";
-import { Button, H5, H6, View, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
-import { ScreenView, useActionSheetController } from "~/components/ui";
+import {
+  Button,
+  H5,
+  H6,
+  ScreenView,
+  useActionSheetController,
+  View,
+  YStack,
+} from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
