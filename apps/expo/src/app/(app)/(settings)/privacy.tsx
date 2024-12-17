@@ -1,15 +1,12 @@
-import { useState } from "react";
 import { useRouter } from "expo-router";
 import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
 
-import type { ButtonOption } from "~/components/Sheets";
-import { ActionSheet } from "~/components/Sheets";
-import { Switch } from "tamagui";
 import {
   renderSettingsList,
   ScreenView,
   SettingsListInput,
-  // Switch,
+  Switch,
+  useActionSheetController,
   YStack,
 } from "~/components/ui";
 import type { RouterInputs } from "~/utils/api";
@@ -20,8 +17,7 @@ type PrivacySetting = RouterInputs["user"]["updatePrivacySetting"]["privacy"];
 const Privacy = () => {
   const router = useRouter();
   const utils = api.useUtils();
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const actionSheet = useActionSheetController();
 
   const { data: privacySetting } = api.user.getPrivacySetting.useQuery(
     undefined,
@@ -49,6 +45,7 @@ const Privacy = () => {
       return { prevData };
     },
     onError: (_err, _newPrivacySettings, ctx) => {
+      console.log("ERROR")
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
@@ -73,9 +70,21 @@ const Privacy = () => {
       checked ? "private" : "public"
     ) satisfies PrivacySetting;
 
-    newPrivacySetting === "private"
-      ? setIsModalVisible(true)
-      : await handlePrivacySettingUpdate("public");
+    if (newPrivacySetting === "private") {
+      actionSheet.show({
+        title: "Switch to private account?",
+        subtitle:
+          "Only your followers will be able to see your photos and videos.",
+        buttonOptions: [
+          {
+            text: "Switch to private",
+            onPress: async () => await handlePrivacySettingUpdate("private"),
+          },
+        ],
+      });
+    } else {
+      await handlePrivacySettingUpdate("public");
+    }
   };
 
   const settingsGroups = [
@@ -107,31 +116,9 @@ const Privacy = () => {
     },
   ] satisfies SettingsListInput[];
 
-  const title = "Switch to private account?";
-  const subtitle =
-    "Only your followers will be able to see your photos and videos.";
-  const buttonOptions = [
-    {
-      text: "Switch to private",
-      onPress: () => {
-        void handlePrivacySettingUpdate("private");
-        setIsModalVisible(false);
-      },
-    },
-  ] satisfies ButtonOption[];
-
   return (
     <ScreenView scrollable>
       <YStack gap="$4">{settingsGroups.map(renderSettingsList)}</YStack>
-      <ActionSheet
-        title={title}
-        subtitle={subtitle}
-        buttonOptions={buttonOptions}
-        isVisible={isModalVisible}
-        onCancel={() => {
-          setIsModalVisible(false);
-        }}
-      />
     </ScreenView>
   );
 };
