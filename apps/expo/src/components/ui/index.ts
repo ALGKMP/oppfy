@@ -33,6 +33,7 @@ import type {
 } from "./SettingsListItem";
 import { Circle, Square } from "./Shapes";
 import { Sheet } from "./Sheet";
+import { Skeleton } from "./Skeleton";
 import { Slider } from "./Slider";
 import { Spinner } from "./Spinner";
 import { XStack, YStack } from "./Stacks";
@@ -99,6 +100,7 @@ export {
   ScreenView,
   ScrollView,
   Spinner,
+  Skeleton,
 };
 
 export type { SettingsListInput, SettingsListItemParams };
