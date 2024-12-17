@@ -6,13 +6,14 @@ import {
   Trash,
   XCircle,
 } from "@tamagui/lucide-icons";
-import { Button, YStack } from "tamagui";
 
 import {
+  Button,
   renderSettingsList,
   ScreenView,
   SettingsListInput,
   useActionSheetController,
+  YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import { useContacts } from "~/hooks/contacts";
@@ -130,7 +131,7 @@ const Other = () => {
     <ScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsList)}
-        <Button size="$4.5" color="$red9" onPress={handleShowDeleteAccount}>
+        <Button color="$red9" onPress={handleShowDeleteAccount}>
           Delete Account
         </Button>
       </YStack>

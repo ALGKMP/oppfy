@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
-import { Switch, YStack } from "tamagui";
 
-import type { SettingsGroupInput } from "~/components/Settings";
-import { renderSettingsGroup } from "~/components/Settings";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
-import { BaseScreenView } from "~/components/Views";
+import { Switch } from "tamagui";
+import {
+  renderSettingsList,
+  ScreenView,
+  SettingsListInput,
+  // Switch,
+  YStack,
+} from "~/components/ui";
 import type { RouterInputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -101,7 +105,7 @@ const Privacy = () => {
         },
       ],
     },
-  ] satisfies SettingsGroupInput[];
+  ] satisfies SettingsListInput[];
 
   const title = "Switch to private account?";
   const subtitle =
@@ -117,8 +121,8 @@ const Privacy = () => {
   ] satisfies ButtonOption[];
 
   return (
-    <BaseScreenView scrollable>
-      <YStack gap="$4">{settingsGroups.map(renderSettingsGroup)}</YStack>
+    <ScreenView scrollable>
+      <YStack gap="$4">{settingsGroups.map(renderSettingsList)}</YStack>
       <ActionSheet
         title={title}
         subtitle={subtitle}
@@ -128,7 +132,7 @@ const Privacy = () => {
           setIsModalVisible(false);
         }}
       />
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 

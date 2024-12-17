@@ -112,6 +112,7 @@ const Notifications = () => {
           icon: <ThumbsUp />,
           iconAfter: (
             <Switch
+              size="$3"
               checked={switchState.likes}
               onCheckedChange={(value) => updateSwitchState("likes", value)}
             >
@@ -193,7 +194,7 @@ const Notifications = () => {
     <ScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsList)}
-        <Button size="$4.5" onPress={onSubmit}>
+        <Button onPress={onSubmit}>
           {updateNotificationSettings.isPending ? <Spinner /> : "Save"}
         </Button>
       </YStack>
