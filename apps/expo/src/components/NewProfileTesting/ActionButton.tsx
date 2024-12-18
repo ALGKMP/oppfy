@@ -1,13 +1,9 @@
-import { type z } from "zod";
-import { sharedValidators } from "@oppfy/validators";
-import { Button, Text, XStack } from "~/components/ui";
+import { useEffect, useState } from "react";
+
+import { Button, Text, View, XStack } from "~/components/ui";
+import { Skeleton } from "~/components/ui/Skeleton";
 import { Spinner } from "~/components/ui/Spinner";
 import { api } from "~/utils/api";
-import { useState } from "react";
-
-interface ActionButtonProps {
-  userId: string; // TODO: For now, this is only used for Other Profiles
-}
 
 /*
  * TODO: Instead of passing in the networkStatus and userId as props,
@@ -15,9 +11,27 @@ interface ActionButtonProps {
  * This would make the component more flexible and easier to understand.
  */
 
+interface ActionButtonProps {
+  userId: string; // TODO: For now, this is only used for Other Profiles
+}
+
 const ActionButton = ({ userId }: ActionButtonProps) => {
   const actions = useProfileActions(userId);
-  const { data: networkStatus } = api.profile.getNetworkRelationships.useQuery({ userId });
+  const { data: networkStatus, isLoading: isNetworkStatusLoading } =
+    api.profile.getNetworkRelationships.useQuery({ userId });
+
+  if (isNetworkStatusLoading) {
+    return (
+      <XStack gap="$4">
+        <View flex={1}>
+        <Skeleton width="100%" height={44} radius={20} />
+      </View>
+      <View flex={1}>
+        <Skeleton width="100%" height={44} radius={20} />
+      </View>
+    </XStack>
+    );
+  }
 
   if (networkStatus?.isTargetUserBlocked || networkStatus?.isOtherUserBlocked) {
     return (
@@ -34,15 +48,36 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     );
   }
 
-  const { privacy, targetUserFollowState, targetUserFriendState } = networkStatus ?? {};
+  const { privacy, targetUserFollowState, targetUserFriendState } =
+    networkStatus ?? {};
 
   const buttonConfigs = {
     follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
-    unfollow: { label: "Unfollow", action: "unfollow" },
-    friend: { label: "Add Friend", action: "addFriend", backgroundColor: "#F214FF" },
-    removeFriend: { label: "Remove Friend", action: "removeFriend" },
-    cancelFollowRequest: { label: "Cancel Follow Request", action: "cancelFollowRequest" },
-    cancelFriendRequest: { label: "Cancel Friend Request", action: "cancelFriendRequest" },
+    unfollow: {
+      label: "Unfollow",
+      action: "unfollow",
+      backgroundColor: "$primary",
+    },
+    friend: {
+      label: "Add Friend",
+      action: "addFriend",
+      backgroundColor: "#F214FF",
+    },
+    removeFriend: {
+      label: "Remove Friend",
+      action: "removeFriend",
+      backgroundColor: "$primary",
+    },
+    cancelFollowRequest: {
+      label: "Cancel Follow Request",
+      action: "cancelFollowRequest",
+      backgroundColor: "$primary",
+    },
+    cancelFriendRequest: {
+      label: "Cancel Friend Request",
+      action: "cancelFriendRequest",
+      backgroundColor: "$primary",
+    },
   };
 
   const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
@@ -72,12 +107,14 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
           <Button
             key={buttonKey}
             flex={1}
-            borderRadius={20}
             backgroundColor={config.backgroundColor}
             onPress={handler}
             disabled={disabled}
             borderWidth={1}
+            rounded
+            outlined
             borderColor="white"
+            height={40}
             pressStyle={{
               borderWidth: 1,
               borderColor: "white",
@@ -114,15 +151,14 @@ const useProfileActions = (userId: string) => {
   >({});
 
   // Helper function to invalidate queries for a specific action
-  const invalidateQueries = 
-    async (actionKey: string) => {
-      setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
-      await Promise.all([
-        utils.profile.getFullProfileOther.invalidate({ userId }),
-        utils.contacts.getRecommendationProfilesSelf.invalidate(),
-      ]);
-      setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
-    }
+  const invalidateQueries = async (actionKey: string) => {
+    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
+    await Promise.all([
+      utils.profile.getFullProfileOther.invalidate({ userId }),
+      utils.contacts.getRecommendationProfilesSelf.invalidate(),
+    ]);
+    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
+  };
 
   // Mutations with onSettled callbacks that trigger invalidation per action
   const followUser = api.follow.followUser.useMutation({
@@ -170,22 +206,23 @@ const useProfileActions = (userId: string) => {
 
   const handleRemoveFriend = () => removeFriend.mutate({ recipientId: userId });
 
-  const handleCancelFollowRequest = () => cancelFollowRequest.mutate({ recipientId: userId });
+  const handleCancelFollowRequest = () =>
+    cancelFollowRequest.mutate({ recipientId: userId });
 
-  const handleCancelFriendRequest = () => cancelFriendRequest.mutate({ recipientId: userId });
+  const handleCancelFriendRequest = () =>
+    cancelFriendRequest.mutate({ recipientId: userId });
 
   // Determine if any action is currently loading
-  const isAnyActionLoading = (
+  const isAnyActionLoading =
     followUser.isPending ||
     unfollowUser.isPending ||
     addFriend.isPending ||
     removeFriend.isPending ||
-      cancelFollowRequest.isPending ||
-      cancelFriendRequest.isPending ||
-      Object.values(isInvalidatingByAction).some(
-        (isInvalidating) => isInvalidating,
-    )
-  );
+    cancelFollowRequest.isPending ||
+    cancelFriendRequest.isPending ||
+    Object.values(isInvalidatingByAction).some(
+      (isInvalidating) => isInvalidating,
+    );
 
   // Return actions with handlers and loading states
   return {
@@ -228,7 +265,4 @@ const useProfileActions = (userId: string) => {
   };
 };
 
-
-
 export default ActionButton;
-
