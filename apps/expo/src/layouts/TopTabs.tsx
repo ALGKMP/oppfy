@@ -11,11 +11,11 @@ import type {
 
 const { Navigator } = createMaterialTopTabNavigator();
 
-const MaterialTopTabs = withLayoutContext<
+const TopTabs = withLayoutContext<
   MaterialTopTabNavigationOptions,
   typeof Navigator,
   StackNavigationState<ParamListBase>,
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
-export { MaterialTopTabs };
+export { TopTabs };
