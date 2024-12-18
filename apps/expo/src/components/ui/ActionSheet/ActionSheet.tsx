@@ -100,8 +100,6 @@ export const ActionSheet = ({
     ],
   }));
 
-  if (!isVisible) return null;
-
   return (
     <Portal>
       <View
@@ -111,6 +109,7 @@ export const ActionSheet = ({
         right={0}
         bottom={0}
         justifyContent="flex-end"
+        pointerEvents={isVisible ? "auto" : "none"}
       >
         {/* Animated Backdrop */}
         <Animated.View style={[styles.backdrop, backgroundStyle]}>

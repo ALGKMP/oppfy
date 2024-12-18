@@ -17,10 +17,11 @@ export const ActionSheetProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
   const [sheetProps, setSheetProps] = useState<ActionSheetOptions | null>(null);
 
   const hide = useCallback(() => {
-    setSheetProps(null);
+    setIsVisible(false);
   }, []);
 
   const show = useCallback(
@@ -32,6 +33,7 @@ export const ActionSheetProvider = ({
           hide();
         },
       });
+      setIsVisible(true);
     },
     [hide],
   );
@@ -39,7 +41,7 @@ export const ActionSheetProvider = ({
   return (
     <ActionSheetContext.Provider value={{ show, hide }}>
       {children}
-      {sheetProps && <ActionSheet {...sheetProps} isVisible={!!sheetProps} />}
+      {sheetProps && <ActionSheet {...sheetProps} isVisible={isVisible} />}
     </ActionSheetContext.Provider>
   );
 };
