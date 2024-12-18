@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { RefreshControl } from "react-native";
+import { RefreshControl, TextInput } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { getToken, H6, useTheme, View, YStack } from "tamagui";
+import { getToken, H6, Input, useTheme, View, YStack } from "tamagui";
 
 import { SearchInput } from "~/components/Inputs";
 import {
@@ -125,20 +125,6 @@ const FollowerList = () => {
     [actionSheet, handleRemoveFollower],
   );
 
-  const ListHeaderComponent = useCallback(
-    () => (
-      <YStack gap="$4">
-        <SearchInput
-          placeholder="Search followers..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={() => setSearchQuery("")}
-        />
-      </YStack>
-    ),
-    [searchQuery, setSearchQuery],
-  );
-
   const ListEmptyComponent = useCallback(() => {
     if (isLoading) {
       return (
@@ -164,10 +150,8 @@ const FollowerList = () => {
 
     if (filteredItems.length === 0) {
       return (
-        <YStack flex={1} justifyContent="center">
-          <H6 theme="alt1" textAlign="center">
-            No Users Found
-          </H6>
+        <YStack flex={1}>
+          <H6 theme="alt1">No Users Found</H6>
         </YStack>
       );
     }
@@ -180,7 +164,16 @@ const FollowerList = () => {
       data={filteredItems}
       renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
-      ListHeaderComponent={ListHeaderComponent}
+      ListHeaderComponent={
+        <YStack gap="$4">
+          <SearchInput
+            placeholder="Search followers..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery("")}
+          />
+        </YStack>
+      }
       ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
