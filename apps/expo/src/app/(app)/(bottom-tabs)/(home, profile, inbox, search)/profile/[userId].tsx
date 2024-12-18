@@ -22,7 +22,6 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
-import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -515,78 +514,6 @@ const OtherProfile = React.memo(() => {
     ],
   );
 
-  const { actions } = useProfileActions(userId);
-
-  const renderActionButtons = useCallback((): ProfileAction[] => {
-    if (otherProfileData === undefined) return [];
-
-    const { privacy, blocked, targetUserFollowState, targetUserFriendState } =
-      otherProfileData.networkStatus;
-
-    if (blocked) {
-      return [
-        {
-          label: "Blocked",
-          onPress: () => {},
-          loading: false,
-          disabled: true,
-          backgroundColor: "$gray3",
-        },
-      ];
-    }
-
-    const buttonConfigs = {
-      follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
-      unfollow: { label: "Unfollow", action: "unfollow" },
-      friend: {
-        label: "Friend",
-        action: "addFriend",
-        backgroundColor: "#F214FF",
-      },
-      removeFriend: { label: "Remove Friend", action: "removeFriend" },
-      cancelFollowRequest: {
-        label: "Cancel Follow Request",
-        action: "cancelFollowRequest",
-      },
-      cancelFriendRequest: {
-        label: "Cancel Friend Request",
-        action: "cancelFriendRequest",
-      },
-    };
-
-    const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
-      public_NotFollowing_NotFriends: ["follow", "friend"],
-      public_Following_NotFriends: ["unfollow", "friend"],
-      public_Following_OutboundRequest: ["cancelFriendRequest"],
-      public_Following_Friends: ["removeFriend"],
-
-      private_NotFollowing_NotFriends: ["follow", "friend"],
-      private_OutboundRequest_NotFriends: ["cancelFollowRequest", "friend"],
-      private_Following_NotFriends: ["unfollow", "friend"],
-      private_OutboundRequest_OutboundRequest: ["cancelFriendRequest"],
-      private_Following_OutboundRequest: ["cancelFriendRequest"],
-      private_Following_Friends: ["removeFriend"],
-    };
-
-    const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
-    const buttonKeys = buttonCombinations[key] ?? [];
-
-    return buttonKeys.map((buttonKey) => {
-      const config = buttonConfigs[buttonKey];
-      const { handler, loading, disabled } =
-        actions[config.action as keyof typeof actions];
-
-      return {
-        label: config.label,
-        onPress: handler,
-        loading,
-        disabled: disabled || blocked,
-        backgroundColor:
-          "backgroundColor" in config ? config.backgroundColor : undefined,
-      };
-    });
-  }, [otherProfileData, actions]);
-
   // TODO: There is likely another solution to this other than useMemo()
   const renderHeader = useMemo(
     () => (
@@ -625,8 +552,6 @@ const OtherProfile = React.memo(() => {
     ),
     [
       isLoading,
-      canViewContent,
-      renderActionButtons,
       friendItems,
       blocked,
       recommendationItems,
