@@ -588,56 +588,11 @@ const OtherProfile = React.memo(() => {
     });
   }, [otherProfileData, actions]);
 
-  const profileHeaderData = useMemo(
-    () => ({
-      userId: otherProfileData?.userId ?? "",
-      username: otherProfileData?.username ?? "",
-      name: otherProfileData?.name ?? "",
-      bio: otherProfileData?.bio ?? "",
-      followerCount: otherProfileData?.followerCount ?? 0,
-      followingCount: otherProfileData?.followingCount ?? 0,
-      profilePictureUrl: otherProfileData?.profilePictureUrl,
-    }),
-    [
-      otherProfileData?.userId,
-      otherProfileData?.username,
-      otherProfileData?.name,
-      otherProfileData?.bio,
-      otherProfileData?.followerCount,
-      otherProfileData?.followingCount,
-      otherProfileData?.profilePictureUrl,
-    ],
-  );
-
   // TODO: There is likely another solution to this other than useMemo()
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
-        {/* <ProfileHeaderDetails
-          loading={isLoading}
-          data={profileHeaderData}
-          onFollowingPress={
-            canViewContent
-              ? () =>
-                  router.push({
-                    pathname: "/profile/connections/following-list",
-                    params: { userId, username },
-                  })
-              : undefined
-          }
-          onFollowersPress={
-            canViewContent
-              ? () =>
-                  router.push({
-                    pathname: "/profile/connections/followers-list",
-                    params: { userId, username },
-                  })
-              : undefined
-          }
-          actions={renderActionButtons()}
-        /> */}
         <Header userId={userId}/>
-
         {friendItems.length > 0 && !blocked ? (
           <PeopleCarousel
             loading={isLoading}
@@ -671,7 +626,6 @@ const OtherProfile = React.memo(() => {
     ),
     [
       isLoading,
-      profileHeaderData,
       canViewContent,
       renderActionButtons,
       friendItems,
