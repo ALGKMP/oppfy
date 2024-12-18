@@ -1,9 +1,11 @@
 import { YStack, XStack, Text } from "~/components/ui";
 import { TouchableOpacity } from "react-native";
+import { useSession } from "~/contexts/SessionContext";
 
 import { useState } from "react";
 
 import { abbreviatedNumber } from "@oppfy/utils";
+import { useRouter } from "expo-router";
 
 interface StatsProps {
   userId: string;
@@ -61,18 +63,25 @@ const Stats = ({ userId, followingCount, followerCount }: StatsProps) => {
  * @param {string} userId - The userId of the user
  * @returns {onFollowingPress: () => void, onFollowersPress: () => void}
  */
-const useOnFollowPress = ({ userId }: { userId: string }) => {
-  /*
-   * TODO:
-   * 1. Check if the userId is the current user's userId
-   * 2. If it is, then we return /self-profile/connections/following-list
-   * 2.1. same for followers
-   * 3. If it isn't, then we return /profile/connections/following-list
-   * 3.1. same for followers
-   */
+const useOnFollowPress = ({ userId }: { userId?: string } = {}) => {
+  const router = useRouter();
+  if (userId) {
+    return {
+      onFollowingPress: () => {
+        router.push("/self-profile/connections/following-list");
+      },
+      onFollowersPress: () => {
+        router.push("/self-profile/connections/followers-list");
+      },
+    };
+  }
   return {
-    onFollowingPress: () => {},
-    onFollowersPress: () => {},
+    onFollowingPress: () => {
+      router.push("/self-profile/connections/following-list");
+    },
+    onFollowersPress: () => {
+      router.push("/self-profile/connections/followers-list");
+    },
   };
 };
 
