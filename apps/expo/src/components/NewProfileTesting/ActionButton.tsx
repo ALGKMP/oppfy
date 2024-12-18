@@ -114,7 +114,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
             rounded
             outlined
             borderColor="white"
-            height={40}
+            // height={40}
             pressStyle={{
               borderWidth: 1,
               borderColor: "white",
