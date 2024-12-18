@@ -44,15 +44,6 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
             <Skeleton width={150} height={20} />
           </YStack>
         </XStack>
-
-        <XStack gap="$4">
-          <View flex={1}>
-            <Skeleton width="100%" height={44} radius={20} />
-          </View>
-          <View flex={1}>
-            <Skeleton width="100%" height={44} radius={20} />
-          </View>
-        </XStack>
       </YStack>
     );
   }
