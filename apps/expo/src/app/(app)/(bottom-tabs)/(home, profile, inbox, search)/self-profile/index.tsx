@@ -203,38 +203,7 @@ const SelfProfile = React.memo(() => {
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
-        {/* <ProfileHeaderDetails
-          loading={false}
-          data={{
-            userId: profileData?.userId ?? "",
-            username: profileData?.username ?? "",
-            name: profileData?.name ?? "",
-            bio: profileData?.bio ?? "",
-            followerCount: profileData?.followerCount ?? 0,
-            followingCount: profileData?.followingCount ?? 0,
-            profilePictureUrl: profileData?.profilePictureUrl,
-          }}
-          onFollowingPress={() =>
-            router.push("/self-profile/connections/following-list")
-          }
-          onFollowersPress={() =>
-            router.push("/self-profile/connections/followers-list")
-          }
-          actions={[
-            {
-              label: "Edit Profile",
-              onPress: () => {
-                router.push("/edit-profile");
-              },
-            },
-            {
-              label: "Share Profile",
-              onPress: () => {
-                router.push("/share-profile");
-              },
-            },
-          ]}
-        /> */}
+
         <Header />
 
         {friendItems.length > 0 ? (
