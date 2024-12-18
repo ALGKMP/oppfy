@@ -19,7 +19,20 @@ export const Button = styled(TamaguiButton, {
         color: "$red11",
       },
     },
-  },
+
+    // Boolean props
+    outlined: {
+      true: {
+        borderWidth: 1,
+        borderColor: "white",
+      },
+    },
+    rounded: {
+      true: {
+        borderRadius: 999,
+      },
+    },
+  } as const,
 });
 
 export const OnboardingButton = styled(Button, {
