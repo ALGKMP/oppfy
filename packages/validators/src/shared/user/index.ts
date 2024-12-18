@@ -155,3 +155,16 @@ export const recommededProfiles = z.array(
     name: z.string().nullable(),
   }),
 );
+
+// Add this new enum
+export const NetworkRelationshipState = z.enum([
+  "Following",
+  "Friends",
+  "OutboundFollowRequest", 
+  "InboundFollowRequest",
+  "InboundFriendRequest",
+  "OutboundFriendRequest", 
+  "NotFollowing",
+  "Blocked",
+  // "Private"
+]);
