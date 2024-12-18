@@ -3,6 +3,7 @@ import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
+import type { GetProps } from 'tamagui';
 
 import { Skeleton } from "~/components/Skeletons";
 import { Button } from "./Buttons";
@@ -18,9 +19,7 @@ type IconProp =
 
 type ActionProps = {
   label: string;
-  onPress: () => void;
-  icon?: IconProp;
-};
+} & GetProps<typeof Button>;
 
 type MediaListItemProps = {
   title: ReactNode;
@@ -73,7 +72,7 @@ export const MediaListItem = (props: MediaListItemProps) => {
           )}
 
           {secondaryAction && (
-            <Button size="$3.5" {...primaryAction}>
+            <Button size="$3.5" {...secondaryAction}>
               {secondaryAction.label}
             </Button>
           )}
