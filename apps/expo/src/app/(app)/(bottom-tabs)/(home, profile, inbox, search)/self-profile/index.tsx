@@ -17,12 +17,12 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import Header from "~/components/NewProfileTesting/Header";
 import EmptyPlaceholder from "~/components/UIPlaceholders/EmptyPlaceholder";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import Header from "~/components/NewProfileTesting/Header";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -202,7 +202,6 @@ const SelfProfile = React.memo(() => {
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
-
         <Header />
 
         {friendItems.length > 0 ? (
