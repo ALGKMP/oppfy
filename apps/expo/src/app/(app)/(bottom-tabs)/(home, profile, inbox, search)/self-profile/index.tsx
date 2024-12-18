@@ -23,6 +23,7 @@ import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import Header from "~/components/NewProfileTesting/Header";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -202,7 +203,7 @@ const SelfProfile = React.memo(() => {
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
-        <ProfileHeaderDetails
+        {/* <ProfileHeaderDetails
           loading={false}
           data={{
             userId: profileData?.userId ?? "",
@@ -233,7 +234,8 @@ const SelfProfile = React.memo(() => {
               },
             },
           ]}
-        />
+        /> */}
+        <Header />
 
         {friendItems.length > 0 ? (
           <PeopleCarousel
