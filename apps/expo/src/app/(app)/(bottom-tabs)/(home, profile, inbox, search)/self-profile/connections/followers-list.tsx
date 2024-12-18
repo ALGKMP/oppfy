@@ -6,10 +6,16 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { Button, H5, H6, View, YStack } from "tamagui";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
 import { VirtualizedListItem } from "~/components/ListItems";
 import { ActionSheet } from "~/components/Sheets";
+// import CardContainer from "~/components/Containers/CardContainer";
+import {
+  CardContainer,
+  MediaListItem,
+  useActionSheetController,
+} from "~/components/ui";
+import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useSearch from "~/hooks/useSearch";
@@ -25,6 +31,8 @@ const FollowerList = () => {
   const utils = api.useUtils();
 
   const [refreshing, setRefreshing] = useState(false);
+
+  const actionSheet = useActionSheetController();
 
   const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
@@ -116,57 +124,49 @@ const FollowerList = () => {
     </CardContainer>
   );
 
-  const renderListItem = useCallback((item: FollowerItem) => (
-    <VirtualizedListItem
-      loading={false}
+  const renderListItem = (item: FollowerItem) => (
+    <MediaListItem
       title={item.username}
       subtitle={item.name}
       imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-      button={
-        <ActionSheet
-          title="Remove Follower"
-          subtitle={`Are you sure you want to remove ${item.username} from your followers?`}
-          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          trigger={
-            <Button size="$3.5" icon={<UserRoundMinus size="$1" />}>
-              Remove
-            </Button>
-          }
-          buttonOptions={[
-            {
-              text: "Remove",
-              textProps: { color: "$red9" },
-              onPress: () => void handleRemoveFollower(item.userId),
-            },
-          ]}
-        />
-      }
-      onPress={() =>
-        router.push({
-          pathname: "/profile/[userId]",
-          params: { userId: item.userId },
-        })
-      }
-      />
-    ),
-    [router],
+      primaryAction={{
+        label: "Remove",
+        icon: UserRoundMinus,
+        onPress: () =>
+          actionSheet.show({
+            title: "Remove Follower",
+            subtitle: `Are you sure you want to remove ${item.username} from your followers?`,
+            imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+            buttonOptions: [
+              {
+                text: "Remove",
+                textProps: { color: "$red11" },
+                onPress: () => void handleRemoveFollower(item.userId),
+              },
+            ],
+          }),
+      }}
+    />
   );
 
-  const renderFollowers = useCallback(() => (
-    <CardContainer>
-      <H5 theme="alt1">Followers</H5>
-      <FlashList
-        data={filteredItems}
-        onRefresh={refetch}
-        refreshing={isLoading}
-        keyExtractor={(item) => "followers_list_" + item.userId}
-        estimatedItemSize={75}
-        onEndReached={handleOnEndReached}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => renderListItem(item)}
-      />
-    </CardContainer>
-  ), [filteredItems, renderListItem]);
+  const renderFollowers = useCallback(
+    () => (
+      <CardContainer title="Followers">
+        <FlashList
+          data={filteredItems}
+          onRefresh={refetch}
+          refreshing={isLoading}
+          keyExtractor={(item) => "followers_list_" + item.userId}
+          estimatedItemSize={75}
+          onEndReached={handleOnEndReached}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <Spacer />}
+          renderItem={({ item }) => renderListItem(item)}
+        />
+      </CardContainer>
+    ),
+    [filteredItems, renderListItem],
+  );
 
   const renderNoResults = () => (
     <View flex={1} justifyContent="center">
