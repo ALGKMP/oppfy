@@ -32,6 +32,7 @@ import useProfile from "~/hooks/useProfile";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import Header from "~/components/NewProfileTesting/Header";
 
 const useProfileActions = (userId: string) => {
   const utils = api.useUtils();
@@ -612,7 +613,7 @@ const OtherProfile = React.memo(() => {
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
-        <ProfileHeaderDetails
+        {/* <ProfileHeaderDetails
           loading={isLoading}
           data={profileHeaderData}
           onFollowingPress={
@@ -634,7 +635,8 @@ const OtherProfile = React.memo(() => {
               : undefined
           }
           actions={renderActionButtons()}
-        />
+        /> */}
+        <Header userId={userId}/>
 
         {friendItems.length > 0 && !blocked ? (
           <PeopleCarousel
