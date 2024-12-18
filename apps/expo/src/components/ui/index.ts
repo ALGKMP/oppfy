@@ -36,6 +36,7 @@ import { Circle, Square } from "./Shapes";
 import { Sheet } from "./Sheet";
 import { Skeleton } from "./Skeleton";
 import { Slider } from "./Slider";
+import { Spacer } from "./Spacer";
 import { Spinner } from "./Spinner";
 import { XStack, YStack } from "./Stacks";
 import { Switch } from "./Switch";
@@ -45,6 +46,7 @@ import { Tooltip } from "./Tooltip";
 import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 
 export {
+  Spacer,
   CardContainer,
   Button,
   OnboardingButton,
