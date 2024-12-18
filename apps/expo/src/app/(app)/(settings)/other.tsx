@@ -131,7 +131,7 @@ const Other = () => {
     <ScreenView scrollable>
       <YStack gap="$4">
         {settingsGroups.map(renderSettingsList)}
-        <Button color="$red9" onPress={handleShowDeleteAccount}>
+        <Button variant="danger" onPress={handleShowDeleteAccount}>
           Delete Account
         </Button>
       </YStack>

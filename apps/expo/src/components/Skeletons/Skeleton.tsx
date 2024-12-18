@@ -9,32 +9,31 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { View } from "tamagui";
+import { View, type RadiusTokens, type SizeTokens, type Tokens } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
 interface BaseSkeletonProps {
-  radius?: number;
+  radius?: RadiusTokens | number;
   shimmerColor?: string;
   backgroundColor?: string;
   shimmerDuration?: number;
-  testID?: string;
 }
 
 interface RectangularSkeletonProps extends BaseSkeletonProps {
   circular?: false;
-  width: DimensionValue;
-  height: DimensionValue;
+  width: SizeTokens | DimensionValue;
+  height: SizeTokens | DimensionValue;
 }
 
 interface CircularSkeletonProps extends BaseSkeletonProps {
   circular: true;
-  size: DimensionValue;
+  size: SizeTokens | DimensionValue;
 }
 
 type SkeletonProps = RectangularSkeletonProps | CircularSkeletonProps;
 
 const Skeleton = ({
-  radius = 6,
+  radius = "$6",
   shimmerColor = "$gray3",
   backgroundColor = "$gray5",
   shimmerDuration = 1000,
@@ -72,11 +71,9 @@ const Skeleton = ({
     <View
       overflow="hidden"
       backgroundColor={backgroundColor}
-      style={{
-        width,
-        height,
-        borderRadius: resolvedBorderRadius,
-      }}
+      borderRadius={resolvedBorderRadius}
+      width={width}
+      height={height}
     >
       <Animated.View style={[styles.gradientWrapper, animatedStyle]}>
         <LinearGradient
