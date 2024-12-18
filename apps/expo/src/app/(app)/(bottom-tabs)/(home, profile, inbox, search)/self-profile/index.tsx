@@ -17,7 +17,6 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
-import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import EmptyPlaceholder from "~/components/UIPlaceholders/EmptyPlaceholder";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
@@ -246,7 +245,6 @@ const SelfProfile = React.memo(() => {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <YStack gap="$4">
-          <ProfileHeaderDetails loading />
           <PeopleCarousel loading />
           <PostCard loading />
         </YStack>

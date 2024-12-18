@@ -23,7 +23,6 @@ import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
-import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -690,7 +689,6 @@ const OtherProfile = React.memo(() => {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <YStack gap="$4">
-          <ProfileHeaderDetails loading />
           <PeopleCarousel loading />
           <PostCard loading />
         </YStack>
