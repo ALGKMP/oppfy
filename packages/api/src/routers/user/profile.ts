@@ -114,6 +114,19 @@ export const profileRouter = createTRPCRouter({
     }
   }),
 
+  getNetworkRelationships: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.services.profile.getNetworkConnectionStatesBetweenUsers({
+        currentUserId: ctx.session.uid,
+        otherUserId: input.userId,
+      });
+    }),
+
   // TRPC Procedure for getting a full user profile
   getFullProfileOther: protectedProcedure
     .input(
