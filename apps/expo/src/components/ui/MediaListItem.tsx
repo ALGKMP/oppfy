@@ -1,20 +1,31 @@
-import type { ReactNode } from "react";
+import type { FunctionComponent, ReactNode } from "react";
 import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
-import { Button, SizableText, XStack, YStack } from "tamagui";
 
 import { Skeleton } from "~/components/Skeletons";
+import { Button } from "./Buttons";
+import { XStack, YStack } from "./Stacks";
+import { SizableText, Text } from "./Texts";
+
+type ButtonIconProps = { color?: any; size?: any };
+type IconProp =
+  | JSX.Element
+  | FunctionComponent<ButtonIconProps>
+  | ((props: ButtonIconProps) => any)
+  | null;
 
 type ActionProps = {
   label: string;
   onPress: () => void;
+  icon?: IconProp;
 };
 
 type MediaListItemProps = {
   title: ReactNode;
   subtitle?: ReactNode;
+  caption?: ReactNode;
   imageUrl?: string | ImageSourcePropType;
   primaryAction?: ActionProps;
   secondaryAction?: ActionProps;
@@ -26,7 +37,7 @@ export const MediaListItem = (props: MediaListItemProps) => {
     props;
 
   const content = (
-    <XStack alignItems="center" padding="$3" gap="$3">
+    <XStack alignItems="center" gap="$3">
       {imageUrl && (
         <Image
           source={imageUrl}
@@ -34,9 +45,9 @@ export const MediaListItem = (props: MediaListItemProps) => {
         />
       )}
 
-      <YStack flex={1} gap="$1">
+      <YStack flex={1} gap="$1.5">
         {typeof title === "string" ? (
-          <SizableText fontWeight="bold" size="$4">
+          <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
             {title}
           </SizableText>
         ) : (
@@ -45,7 +56,7 @@ export const MediaListItem = (props: MediaListItemProps) => {
 
         {subtitle &&
           (typeof subtitle === "string" ? (
-            <SizableText theme="alt1" size="$3">
+            <SizableText theme="alt1" size="$3" lineHeight={0}>
               {subtitle}
             </SizableText>
           ) : (
@@ -56,13 +67,13 @@ export const MediaListItem = (props: MediaListItemProps) => {
       {(primaryAction || secondaryAction) && (
         <XStack gap="$2">
           {primaryAction && (
-            <Button size="$3" onPress={primaryAction.onPress}>
+            <Button size="$3.5" {...primaryAction}>
               {primaryAction.label}
             </Button>
           )}
 
           {secondaryAction && (
-            <Button size="$3" theme="alt2" onPress={secondaryAction.onPress}>
+            <Button size="$3.5" {...primaryAction}>
               {secondaryAction.label}
             </Button>
           )}
