@@ -21,6 +21,7 @@ import { H1, H2, H3, H4, H5, H6 } from "./Headings";
 import { Input, OnboardingInput, SearchInput, TextArea } from "./Inputs";
 import { Label } from "./Label";
 import { ListItem } from "./ListItem";
+import { MediaListItem, MediaListItemSkeleton } from "./MediaListItem";
 import { Popover } from "./Popover";
 import { Progress } from "./Progress";
 import { RadioGroup } from "./RadioGroup";
@@ -101,6 +102,8 @@ export {
   ScrollView,
   Spinner,
   Skeleton,
+  MediaListItem,
+  MediaListItemSkeleton,
 };
 
 export type { SettingsListInput, SettingsListItemParams };
