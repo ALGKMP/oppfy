@@ -153,7 +153,7 @@ const Settings = () => {
           <YStack alignItems="center" gap="$2">
             <XStack alignItems="center" gap="$2">
               <Text fontSize="$3">Made with</Text>
-              <Heart size={16} color="$red10" fill="$red10" />
+              <Heart size={16} color="$red11" />
               <Text fontSize="$3">by Oppfy</Text>
             </XStack>
 
