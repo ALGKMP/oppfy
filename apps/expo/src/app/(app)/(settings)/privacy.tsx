@@ -45,7 +45,6 @@ const Privacy = () => {
       return { prevData };
     },
     onError: (_err, _newPrivacySettings, ctx) => {
-      console.log("ERROR")
       if (ctx === undefined) return;
 
       // If the mutation fails, use the context-value from onMutate
