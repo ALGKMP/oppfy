@@ -3,7 +3,7 @@ import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
-import type { GetProps } from 'tamagui';
+import type { GetProps } from "tamagui";
 
 import { Skeleton } from "~/components/Skeletons";
 import { Button } from "./Buttons";
@@ -87,15 +87,16 @@ export const MediaListItem = (props: MediaListItemProps) => {
 };
 
 export const MediaListItemSkeleton = () => (
-  <XStack alignItems="center" padding="$3" gap="$3">
+  <XStack alignItems="center" gap="$3">
     <Skeleton circular size={56} />
-    <YStack flex={1} gap="$1">
-      <Skeleton width={120} height={20} />
-      <Skeleton width={180} height={16} />
+
+    <YStack flex={1} gap="$1.5">
+      <Skeleton width={80} height={18} />
+      <Skeleton width={140} height={16} />
     </YStack>
+
     <XStack gap="$2">
-      <Skeleton width={90} height={36} />
-      <Skeleton width={90} height={36} />
+      <Skeleton width={100} height="$3.5" />
     </XStack>
   </XStack>
 );

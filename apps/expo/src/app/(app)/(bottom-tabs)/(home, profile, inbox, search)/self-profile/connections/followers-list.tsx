@@ -13,6 +13,7 @@ import { ActionSheet } from "~/components/Sheets";
 import {
   CardContainer,
   MediaListItem,
+  MediaListItemSkeleton,
   useActionSheetController,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
@@ -22,6 +23,7 @@ import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
+import { ScreenView } from "~/components/ui";
 
 type FollowerItem =
   RouterOutputs["follow"]["paginateFollowersSelf"]["items"][0];
@@ -109,17 +111,8 @@ const FollowerList = () => {
 
   const renderLoadingSkeletons = () => (
     <CardContainer>
-      {PLACEHOLDER_DATA.map((_, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading
-          showSkeletons={{
-            imageUrl: true,
-            title: true,
-            subtitle: true,
-            button: true,
-          }}
-        />
+      {Array.from({ length: 10 }).map((_, index) => (
+        <MediaListItemSkeleton />
       ))}
     </CardContainer>
   );
