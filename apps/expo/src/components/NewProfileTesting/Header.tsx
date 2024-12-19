@@ -3,7 +3,6 @@ import { Skeleton } from "~/components/Skeletons";
 import { Paragraph, SizableText, View, XStack, YStack } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
 import ActionButton from "./ActionButton";
-import SelfActionButton from "./SelfActionButton";
 import Stats from "./Stats";
 
 interface HeaderProps {
