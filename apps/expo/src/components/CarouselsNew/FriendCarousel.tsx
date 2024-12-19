@@ -1,14 +1,6 @@
-import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
-import { getToken, H5, Spacer, Text, View, XStack, YStack } from "tamagui";
-
-import CardContainer from "~/components/Containers/CardContainer";
-import { Skeleton } from "~/components/Skeletons";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import UserItem from "./UserItem";
 import Carousel from "./Carousel";
 
 /*
