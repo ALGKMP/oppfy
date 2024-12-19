@@ -41,21 +41,6 @@ const SelfProfile = React.memo(() => {
   } = useProfile();
 
   const {
-    data: recommendationsData,
-    isLoading: isLoadingRecommendationsData,
-    refetch: refetchRecommendations,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery();
-
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriends,
-  } = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    { pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
-  );
-
-  const {
     data: postsData,
     isLoading: isLoadingPostData,
     isFetchingNextPage,
@@ -74,12 +59,10 @@ const SelfProfile = React.memo(() => {
     setIsRefreshing(true);
     await Promise.all([
       refetchProfile(),
-      refetchRecommendations(),
-      refetchFriends(),
       refetchPosts(),
     ]);
     setIsRefreshing(false);
-  }, [refetchProfile, refetchRecommendations, refetchFriends, refetchPosts]);
+  }, [refetchProfile, refetchPosts]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -92,21 +75,7 @@ const SelfProfile = React.memo(() => {
     [postsData],
   );
 
-  const friendItems = useMemo(
-    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendsData],
-  );
-
-  const recommendationItems = useMemo(
-    () => recommendationsData ?? [],
-    [recommendationsData],
-  );
-
-  const isLoading =
-    isLoadingProfileData ||
-    isLoadingFriendsData ||
-    isLoadingRecommendationsData ||
-    isLoadingPostData;
+  const isLoading = isLoadingProfileData || isLoadingPostData;
 
   useLayoutEffect(() => {
     navigation.setOptions({
