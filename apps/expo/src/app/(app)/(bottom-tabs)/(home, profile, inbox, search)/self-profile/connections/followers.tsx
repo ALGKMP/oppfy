@@ -30,12 +30,16 @@ const Followers = () => {
 
   const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.follow.paginateFollowersSelf.cancel({ pageSize: PAGE_SIZE });
+
+      // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowersSelf.getInfiniteData({
         pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
+      // Optimistically update the data
       utils.follow.paginateFollowersSelf.setInfiniteData(
         { pageSize: PAGE_SIZE },
         {
@@ -57,6 +61,7 @@ const Followers = () => {
       );
     },
     onSettled: async () => {
+      // Sync with server once mutation has settled
       await utils.follow.paginateFollowersSelf.invalidate({
         pageSize: PAGE_SIZE,
       });
