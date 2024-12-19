@@ -31,7 +31,6 @@ interface LoadedProps<T extends PersonItem> {
   title?: string;
   emoji?: string;
   showMore?: boolean;
-  renderExtraItem?: () => React.ReactElement;
 }
 
 type PeopleCarouselProps<T extends PersonItem> = LoadedProps<T>;
@@ -111,7 +110,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     );
   }
 
-  const { data, title, emoji, showMore = false, renderExtraItem } = props;
+  const { data, title, emoji, showMore = false } = props;
 
   return (
     <CardContainer paddingHorizontal={0}>
@@ -132,7 +131,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
           renderItem={({ item }) => <UserItem item={item} />}
           ListFooterComponent={
             <>
-              {renderExtraItem?.()}
               {showMore && (
                 <TouchableOpacity onPress={throttledHandleShowMore}>
                   <YStack width={70} gap="$2" alignItems="center">
