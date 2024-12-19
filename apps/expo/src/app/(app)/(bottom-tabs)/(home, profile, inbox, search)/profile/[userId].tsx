@@ -36,7 +36,6 @@ const OtherProfile = React.memo(() => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
-  const { routeProfile } = useRouteProfile();
   const navigation = useNavigation();
   const toast = useToastController();
 
@@ -68,27 +67,6 @@ const OtherProfile = React.memo(() => {
   );
 
   const {
-    data: recommendationsData,
-    isLoading: isLoadingRecommendationsData,
-    refetch: refetchRecommendationsData,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
-    refetchOnMount: true,
-  });
-
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData,
-  } = api.friend.paginateFriendsOthers.useInfiniteQuery(
-    { userId, pageSize: 10 },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!userId,
-      refetchOnMount: true,
-    },
-  );
-
-  const {
     data: postsData,
     isLoading: isLoadingPostData,
     isFetchingNextPage,
@@ -110,17 +88,10 @@ const OtherProfile = React.memo(() => {
     setIsRefreshing(true);
     await Promise.all([
       refetchProfileData(),
-      refetchRecommendationsData(),
-      refetchFriendsData(),
       refetchPosts(),
     ]);
     setIsRefreshing(false);
-  }, [
-    refetchFriendsData,
-    refetchPosts,
-    refetchProfileData,
-    refetchRecommendationsData,
-  ]);
+  }, [refetchProfileData, refetchPosts]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -133,21 +104,7 @@ const OtherProfile = React.memo(() => {
     [postsData],
   );
 
-  const friendItems = useMemo(
-    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendsData],
-  );
-
-  const recommendationItems = useMemo(
-    () => recommendationsData ?? [],
-    [recommendationsData],
-  );
-
-  const isLoading =
-    isLoadingProfileData ||
-    isLoadingFriendsData ||
-    isLoadingPostData ||
-    isLoadingRecommendationsData;
+  const isLoading = isLoadingProfileData || isLoadingPostData;
 
   const [sheetState, setSheetState] = useState<
     "closed" | "moreOptions" | "reportOptions"
