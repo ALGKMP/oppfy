@@ -1,10 +1,7 @@
-import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
-import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { throttle } from "lodash";
 import { getToken, H5, Spacer, Text, View, XStack, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
