@@ -20,9 +20,7 @@ import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
-type SearchResultsData = RouterOutputs["search"]["profilesByUsername"];
-type RecommendationItem =
-  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
+type SearchResultItem = RouterOutputs["search"]["profilesByUsername"][number];
 
 const Search = () => {
   const insets = useSafeAreaInsets();
@@ -33,7 +31,7 @@ const Search = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchResultsData>([]);
+  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
 
   const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
@@ -167,7 +165,7 @@ const Search = () => {
   }, [searchTerm, performSearch]);
 
   const renderListItem = useCallback(
-    (item: SearchResultsData[0]) => (
+    (item: SearchResultItem) => (
       <MediaListItem
         title={item.username}
         subtitle={item.name}
