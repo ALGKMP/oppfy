@@ -360,29 +360,17 @@ const OtherProfile = React.memo(() => {
     ],
   );
 
-  // TODO: There is likely another solution to this other than useMemo()
-  const renderHeader = useMemo(
-    () => (
-      <YStack gap="$4">
-        <Header userId={userId} />
-        {friendItems.length > 0 && !blocked ? (
-          <FriendCarousel userId={userId} />
-        ) : (
-          <RecommendationCarousel />
-        )}
-      </YStack>
-    ),
-    [
-      isLoading,
-      friendItems,
-      blocked,
-      recommendationItems,
-      otherProfileData?.friendCount,
-      router,
-      userId,
-      username,
-      navigateToProfile,
-    ],
+  const renderHeader = () => (
+    <YStack gap="$4">
+      <Header userId={userId} />
+      {selfProfileData?.friendCount &&
+      selfProfileData?.friendCount > 0 &&
+      !blocked ? (
+        <FriendCarousel userId={userId} />
+      ) : (
+        <RecommendationCarousel />
+      )}
+    </YStack>
   );
 
   const renderNoPosts = useCallback(() => {
