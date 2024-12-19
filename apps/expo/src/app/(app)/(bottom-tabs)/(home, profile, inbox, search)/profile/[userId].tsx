@@ -22,8 +22,6 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
-import type { ProfileAction } from "~/components/NewProfileTesting/ui/ProfileHeader";
-import ProfileHeaderDetails from "~/components/NewProfileTesting/ui/ProfileHeader";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -32,158 +30,7 @@ import useProfile from "~/hooks/useProfile";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-
-const useProfileActions = (userId: string) => {
-  const utils = api.useUtils();
-  // State to track invalidation status per action using action keys
-  const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
-    Record<string, boolean>
-  >({});
-
-  // Helper function to invalidate queries for a specific action
-  const invalidateQueries = useCallback(
-    async (actionKey: string) => {
-      setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
-      await Promise.all([
-        utils.profile.getFullProfileOther.invalidate({ userId }),
-        utils.contacts.getRecommendationProfilesSelf.invalidate(),
-      ]);
-      setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
-    },
-    [utils, userId],
-  );
-
-  // Mutations with onSettled callbacks that trigger invalidation per action
-  const followUser = api.follow.followUser.useMutation({
-    onSettled: () => {
-      void invalidateQueries("follow");
-    },
-  });
-
-  const unfollowUser = api.follow.unfollowUser.useMutation({
-    onSettled: () => {
-      void invalidateQueries("unfollow");
-    },
-  });
-
-  const addFriend = api.friend.sendFriendRequest.useMutation({
-    onSettled: () => {
-      void invalidateQueries("addFriend");
-    },
-  });
-
-  const removeFriend = api.friend.removeFriend.useMutation({
-    onSettled: () => {
-      void invalidateQueries("removeFriend");
-    },
-  });
-
-  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
-    onSettled: () => {
-      void invalidateQueries("cancelFollowRequest");
-    },
-  });
-
-  const cancelFriendRequest = api.friend.cancelFriendRequest.useMutation({
-    onSettled: () => {
-      void invalidateQueries("cancelFriendRequest");
-    },
-  });
-
-  // Action handlers
-  const handleFollow = useCallback(
-    () => followUser.mutate({ userId }),
-    [followUser, userId],
-  );
-
-  const handleUnfollow = useCallback(
-    () => unfollowUser.mutate({ userId }),
-    [unfollowUser, userId],
-  );
-
-  const handleAddFriend = useCallback(
-    () => addFriend.mutate({ recipientId: userId }),
-    [addFriend, userId],
-  );
-
-  const handleRemoveFriend = useCallback(
-    () => removeFriend.mutate({ recipientId: userId }),
-    [removeFriend, userId],
-  );
-
-  const handleCancelFollowRequest = useCallback(
-    () => cancelFollowRequest.mutate({ recipientId: userId }),
-    [cancelFollowRequest, userId],
-  );
-
-  const handleCancelFriendRequest = useCallback(
-    () => cancelFriendRequest.mutate({ recipientId: userId }),
-    [cancelFriendRequest, userId],
-  );
-
-  // Determine if any action is currently loading
-  const isAnyActionLoading = useMemo(() => {
-    return (
-      followUser.isPending ||
-      unfollowUser.isPending ||
-      addFriend.isPending ||
-      removeFriend.isPending ||
-      cancelFollowRequest.isPending ||
-      cancelFriendRequest.isPending ||
-      Object.values(isInvalidatingByAction).some(
-        (isInvalidating) => isInvalidating,
-      )
-    );
-  }, [
-    followUser.isPending,
-    unfollowUser.isPending,
-    addFriend.isPending,
-    removeFriend.isPending,
-    cancelFollowRequest.isPending,
-    cancelFriendRequest.isPending,
-    isInvalidatingByAction,
-  ]);
-
-  // Return actions with handlers and loading states
-  return {
-    actions: {
-      follow: {
-        handler: handleFollow,
-        loading: followUser.isPending || isInvalidatingByAction.follow,
-        disabled: isAnyActionLoading,
-      },
-      unfollow: {
-        handler: handleUnfollow,
-        loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
-        disabled: isAnyActionLoading,
-      },
-      addFriend: {
-        handler: handleAddFriend,
-        loading: addFriend.isPending || isInvalidatingByAction.addFriend,
-        disabled: isAnyActionLoading,
-      },
-      removeFriend: {
-        handler: handleRemoveFriend,
-        loading: removeFriend.isPending || isInvalidatingByAction.removeFriend,
-        disabled: isAnyActionLoading,
-      },
-      cancelFollowRequest: {
-        handler: handleCancelFollowRequest,
-        loading:
-          cancelFollowRequest.isPending ||
-          isInvalidatingByAction.cancelFollowRequest,
-        disabled: isAnyActionLoading,
-      },
-      cancelFriendRequest: {
-        handler: handleCancelFriendRequest,
-        loading:
-          cancelFriendRequest.isPending ||
-          isInvalidatingByAction.cancelFriendRequest,
-        disabled: isAnyActionLoading,
-      },
-    },
-  };
-};
+import Header from "~/components/NewProfileTesting/Header";
 
 type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 
@@ -515,127 +362,11 @@ const OtherProfile = React.memo(() => {
     ],
   );
 
-  const { actions } = useProfileActions(userId);
-
-  const renderActionButtons = useCallback((): ProfileAction[] => {
-    if (otherProfileData === undefined) return [];
-
-    const { privacy, blocked, targetUserFollowState, targetUserFriendState } =
-      otherProfileData.networkStatus;
-
-    if (blocked) {
-      return [
-        {
-          label: "Blocked",
-          onPress: () => {},
-          loading: false,
-          disabled: true,
-          backgroundColor: "$gray3",
-        },
-      ];
-    }
-
-    const buttonConfigs = {
-      follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
-      unfollow: { label: "Unfollow", action: "unfollow" },
-      friend: {
-        label: "Friend",
-        action: "addFriend",
-        backgroundColor: "#F214FF",
-      },
-      removeFriend: { label: "Remove Friend", action: "removeFriend" },
-      cancelFollowRequest: {
-        label: "Cancel Follow Request",
-        action: "cancelFollowRequest",
-      },
-      cancelFriendRequest: {
-        label: "Cancel Friend Request",
-        action: "cancelFriendRequest",
-      },
-    };
-
-    const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
-      public_NotFollowing_NotFriends: ["follow", "friend"],
-      public_Following_NotFriends: ["unfollow", "friend"],
-      public_Following_OutboundRequest: ["cancelFriendRequest"],
-      public_Following_Friends: ["removeFriend"],
-
-      private_NotFollowing_NotFriends: ["follow", "friend"],
-      private_OutboundRequest_NotFriends: ["cancelFollowRequest", "friend"],
-      private_Following_NotFriends: ["unfollow", "friend"],
-      private_OutboundRequest_OutboundRequest: ["cancelFriendRequest"],
-      private_Following_OutboundRequest: ["cancelFriendRequest"],
-      private_Following_Friends: ["removeFriend"],
-    };
-
-    const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
-    const buttonKeys = buttonCombinations[key] ?? [];
-
-    return buttonKeys.map((buttonKey) => {
-      const config = buttonConfigs[buttonKey];
-      const { handler, loading, disabled } =
-        actions[config.action as keyof typeof actions];
-
-      return {
-        label: config.label,
-        onPress: handler,
-        loading,
-        disabled: disabled || blocked,
-        backgroundColor:
-          "backgroundColor" in config ? config.backgroundColor : undefined,
-      };
-    });
-  }, [otherProfileData, actions]);
-
-  const profileHeaderData = useMemo(
-    () => ({
-      userId: otherProfileData?.userId ?? "",
-      username: otherProfileData?.username ?? "",
-      name: otherProfileData?.name ?? "",
-      bio: otherProfileData?.bio ?? "",
-      followerCount: otherProfileData?.followerCount ?? 0,
-      followingCount: otherProfileData?.followingCount ?? 0,
-      profilePictureUrl: otherProfileData?.profilePictureUrl,
-    }),
-    [
-      otherProfileData?.userId,
-      otherProfileData?.username,
-      otherProfileData?.name,
-      otherProfileData?.bio,
-      otherProfileData?.followerCount,
-      otherProfileData?.followingCount,
-      otherProfileData?.profilePictureUrl,
-    ],
-  );
-
   // TODO: There is likely another solution to this other than useMemo()
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
-        <ProfileHeaderDetails
-          loading={isLoading}
-          data={profileHeaderData}
-          onFollowingPress={
-            canViewContent
-              ? () =>
-                  router.push({
-                    pathname: "/profile/connections/following-list",
-                    params: { userId, username },
-                  })
-              : undefined
-          }
-          onFollowersPress={
-            canViewContent
-              ? () =>
-                  router.push({
-                    pathname: "/profile/connections/followers-list",
-                    params: { userId, username },
-                  })
-              : undefined
-          }
-          actions={renderActionButtons()}
-        />
-
+        <Header userId={userId}/>
         {friendItems.length > 0 && !blocked ? (
           <PeopleCarousel
             loading={isLoading}
@@ -669,9 +400,6 @@ const OtherProfile = React.memo(() => {
     ),
     [
       isLoading,
-      profileHeaderData,
-      canViewContent,
-      renderActionButtons,
       friendItems,
       blocked,
       recommendationItems,
@@ -734,7 +462,6 @@ const OtherProfile = React.memo(() => {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <YStack gap="$4">
-          <ProfileHeaderDetails loading />
           <PeopleCarousel loading />
           <PostCard loading />
         </YStack>

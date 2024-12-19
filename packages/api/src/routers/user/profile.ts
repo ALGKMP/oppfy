@@ -114,6 +114,25 @@ export const profileRouter = createTRPCRouter({
     }
   }),
 
+  getNetworkRelationships: protectedProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      }),
+    )
+    // .output(
+    //   z.object({
+    //     currentUserRelationshipToOtherUser: sharedValidators.user.NetworkRelationshipState,
+    //     otherUserRelationshipToCurrentUser: sharedValidators.user.NetworkRelationshipState,
+    //   }),
+    // ) TODO: Don't Remove this comment. It's for if I wanna change how this shit works in the future
+    .query(async ({ ctx, input }) => {
+      return await ctx.services.profile.getNetworkConnectionStatesBetweenUsers({
+        currentUserId: ctx.session.uid,
+        otherUserId: input.userId,
+      });
+    }),
+
   // TRPC Procedure for getting a full user profile
   getFullProfileOther: protectedProcedure
     .input(

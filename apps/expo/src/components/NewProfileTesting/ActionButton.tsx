@@ -1,0 +1,268 @@
+import { useEffect, useState } from "react";
+
+import { Button, Text, View, XStack } from "~/components/ui";
+import { Skeleton } from "~/components/ui/Skeleton";
+import { Spinner } from "~/components/ui/Spinner";
+import { api } from "~/utils/api";
+
+/*
+ * TODO: Instead of passing in the networkStatus and userId as props,
+ * we could make this component make the requests itself.
+ * This would make the component more flexible and easier to understand.
+ */
+
+interface ActionButtonProps {
+  userId: string; // TODO: For now, this is only used for Other Profiles
+}
+
+const ActionButton = ({ userId }: ActionButtonProps) => {
+  const actions = useProfileActions(userId);
+  const { data: networkStatus, isLoading: isNetworkStatusLoading } =
+    api.profile.getNetworkRelationships.useQuery({ userId });
+
+  if (isNetworkStatusLoading) {
+    return (
+      <XStack gap="$4">
+        <View flex={1}>
+        <Skeleton width="100%" height={44} radius={20} />
+      </View>
+      <View flex={1}>
+        <Skeleton width="100%" height={44} radius={20} />
+      </View>
+    </XStack>
+    );
+  }
+
+  if (networkStatus?.isTargetUserBlocked || networkStatus?.isOtherUserBlocked) {
+    return (
+      <XStack gap="$4">
+        <Button
+          flex={1}
+          borderRadius={20}
+          backgroundColor="$gray3"
+          disabled={true}
+        >
+          <Text>Blocked</Text>
+        </Button>
+      </XStack>
+    );
+  }
+
+  const { privacy, targetUserFollowState, targetUserFriendState } =
+    networkStatus ?? {};
+
+  const buttonConfigs = {
+    follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
+    unfollow: {
+      label: "Unfollow",
+      action: "unfollow",
+      backgroundColor: "$primary",
+    },
+    friend: {
+      label: "Add Friend",
+      action: "addFriend",
+      backgroundColor: "#F214FF",
+    },
+    removeFriend: {
+      label: "Remove Friend",
+      action: "removeFriend",
+      backgroundColor: "$primary",
+    },
+    cancelFollowRequest: {
+      label: "Cancel Follow Request",
+      action: "cancelFollowRequest",
+      backgroundColor: "$primary",
+    },
+    cancelFriendRequest: {
+      label: "Cancel Friend Request",
+      action: "cancelFriendRequest",
+      backgroundColor: "$primary",
+    },
+  };
+
+  const buttonCombinations: Record<string, (keyof typeof buttonConfigs)[]> = {
+    public_NotFollowing_NotFriends: ["follow", "friend"],
+    public_Following_NotFriends: ["unfollow", "friend"],
+    public_Following_OutboundRequest: ["cancelFriendRequest"],
+    public_Following_Friends: ["removeFriend"],
+    private_NotFollowing_NotFriends: ["follow", "friend"],
+    private_OutboundRequest_NotFriends: ["cancelFollowRequest", "friend"],
+    private_Following_NotFriends: ["unfollow", "friend"],
+    private_OutboundRequest_OutboundRequest: ["cancelFriendRequest"],
+    private_Following_OutboundRequest: ["cancelFriendRequest"],
+    private_Following_Friends: ["removeFriend"],
+  };
+
+  const key = `${privacy}_${targetUserFollowState}_${targetUserFriendState}`;
+  const buttonKeys = buttonCombinations[key] ?? [];
+
+  return (
+    <XStack gap="$4">
+      {buttonKeys.map((buttonKey) => {
+        const config = buttonConfigs[buttonKey];
+        const actionKey = config.action as keyof typeof actions.actions;
+        const { handler, loading, disabled } = actions.actions[actionKey];
+
+        return (
+          <Button
+            key={buttonKey}
+            flex={1}
+            backgroundColor={config.backgroundColor}
+            onPress={handler}
+            disabled={disabled}
+            borderWidth={1}
+            rounded
+            outlined
+            borderColor="white"
+            // height={40}
+            pressStyle={{
+              borderWidth: 1,
+              borderColor: "white",
+            }}
+          >
+            <XStack gap="$2" alignItems="center">
+              <Text>{config.label}</Text>
+              {loading && <Spinner size="small" color="$color" />}
+            </XStack>
+          </Button>
+        );
+      })}
+    </XStack>
+  );
+};
+
+/*
+ * ==========================================
+ * ============== Hooks =====================
+ * ==========================================
+ */
+
+/**
+ * TODO: A hook that returns the functions to handle the actions for the profile (This is old code, change later)
+ *
+ * @param {string} userId - The userId of the user
+ * @returns {actions: {follow: {handler: () => void, loading: boolean}, unfollow: {handler: () => void, loading: boolean}, cancelFollowRequest: {handler: () => void, loading: boolean}, cancelFriendRequest: {handler: () => void, loading: boolean}, removeFriend: {handler: () => void, loading: boolean}}}
+ */
+const useProfileActions = (userId: string) => {
+  const utils = api.useUtils();
+  // State to track invalidation status per action using action keys
+  const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
+    Record<string, boolean>
+  >({});
+
+  // Helper function to invalidate queries for a specific action
+  const invalidateQueries = async (actionKey: string) => {
+    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
+    await Promise.all([
+      utils.profile.getFullProfileOther.invalidate({ userId }),
+      utils.contacts.getRecommendationProfilesSelf.invalidate(),
+    ]);
+    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
+  };
+
+  // Mutations with onSettled callbacks that trigger invalidation per action
+  const followUser = api.follow.followUser.useMutation({
+    onSettled: () => {
+      void invalidateQueries("follow");
+    },
+  });
+
+  const unfollowUser = api.follow.unfollowUser.useMutation({
+    onSettled: () => {
+      void invalidateQueries("unfollow");
+    },
+  });
+
+  const addFriend = api.friend.sendFriendRequest.useMutation({
+    onSettled: () => {
+      void invalidateQueries("addFriend");
+    },
+  });
+
+  const removeFriend = api.friend.removeFriend.useMutation({
+    onSettled: () => {
+      void invalidateQueries("removeFriend");
+    },
+  });
+
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
+    onSettled: () => {
+      void invalidateQueries("cancelFollowRequest");
+    },
+  });
+
+  const cancelFriendRequest = api.friend.cancelFriendRequest.useMutation({
+    onSettled: () => {
+      void invalidateQueries("cancelFriendRequest");
+    },
+  });
+
+  // Action handlers
+  const handleFollow = () => followUser.mutate({ userId });
+
+  const handleUnfollow = () => unfollowUser.mutate({ userId });
+
+  const handleAddFriend = () => addFriend.mutate({ recipientId: userId });
+
+  const handleRemoveFriend = () => removeFriend.mutate({ recipientId: userId });
+
+  const handleCancelFollowRequest = () =>
+    cancelFollowRequest.mutate({ recipientId: userId });
+
+  const handleCancelFriendRequest = () =>
+    cancelFriendRequest.mutate({ recipientId: userId });
+
+  // Determine if any action is currently loading
+  const isAnyActionLoading =
+    followUser.isPending ||
+    unfollowUser.isPending ||
+    addFriend.isPending ||
+    removeFriend.isPending ||
+    cancelFollowRequest.isPending ||
+    cancelFriendRequest.isPending ||
+    Object.values(isInvalidatingByAction).some(
+      (isInvalidating) => isInvalidating,
+    );
+
+  // Return actions with handlers and loading states
+  return {
+    actions: {
+      follow: {
+        handler: handleFollow,
+        loading: followUser.isPending || isInvalidatingByAction.follow,
+        disabled: isAnyActionLoading,
+      },
+      unfollow: {
+        handler: handleUnfollow,
+        loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
+        disabled: isAnyActionLoading,
+      },
+      addFriend: {
+        handler: handleAddFriend,
+        loading: addFriend.isPending || isInvalidatingByAction.addFriend,
+        disabled: isAnyActionLoading,
+      },
+      removeFriend: {
+        handler: handleRemoveFriend,
+        loading: removeFriend.isPending || isInvalidatingByAction.removeFriend,
+        disabled: isAnyActionLoading,
+      },
+      cancelFollowRequest: {
+        handler: handleCancelFollowRequest,
+        loading:
+          cancelFollowRequest.isPending ||
+          isInvalidatingByAction.cancelFollowRequest,
+        disabled: isAnyActionLoading,
+      },
+      cancelFriendRequest: {
+        handler: handleCancelFriendRequest,
+        loading:
+          cancelFriendRequest.isPending ||
+          isInvalidatingByAction.cancelFriendRequest,
+        disabled: isAnyActionLoading,
+      },
+    },
+  };
+};
+
+export default ActionButton;
