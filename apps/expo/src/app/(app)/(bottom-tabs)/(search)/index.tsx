@@ -3,24 +3,33 @@ import { Keyboard, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { getToken, H5, H6, View, YStack } from "tamagui";
+import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
+import { getToken, H5, H6, YStack } from "tamagui";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
-import RecommendationList from "~/components/SpecialLists/RecommendationList";
-import { MediaListItem, MediaListItemSkeleton } from "~/components/ui";
+import GridSuggestions from "~/components/SuggestedUsers/GridSuggestions";
+import {
+  MediaListItem,
+  MediaListItemActionProps,
+  MediaListItemSkeleton,
+  useActionSheetController,
+} from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
+import { useSession } from "~/contexts/SessionContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 type SearchResultsData = RouterOutputs["search"]["profilesByUsername"];
-type RecommendationsData =
-  RouterOutputs["contacts"]["getRecommendationProfilesSelf"];
+type RecommendationItem =
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
 
 const Search = () => {
   const insets = useSafeAreaInsets();
+  const actionSheet = useActionSheetController();
+  const { user } = useSession();
   const { routeProfile } = useRouteProfile();
+  const utils = api.useUtils();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -29,8 +38,110 @@ const Search = () => {
   const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
 
+  const followMutation = api.follow.followUser.useMutation({
+    onMutate: async (newData) => {
+      await utils.contacts.getRecommendationProfilesSelf.cancel();
+
+      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      if (!prevData) return;
+
+      utils.contacts.getRecommendationProfilesSelf.setData(
+        undefined,
+        prevData.map((item) =>
+          item.userId === newData.userId
+            ? {
+                ...item,
+                relationshipState:
+                  item.privacy === "private"
+                    ? "followRequestSent"
+                    : "following",
+              }
+            : item,
+        ),
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.contacts.getRecommendationProfilesSelf.invalidate();
+    },
+  });
+
+  const unfollowMutation = api.follow.unfollowUser.useMutation({
+    onMutate: async (newData) => {
+      await utils.contacts.getRecommendationProfilesSelf.cancel();
+
+      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      if (!prevData) return;
+
+      utils.contacts.getRecommendationProfilesSelf.setData(
+        undefined,
+        prevData.map((item) =>
+          item.userId === newData.userId
+            ? { ...item, relationshipState: "notFollowing" }
+            : item,
+        ),
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.contacts.getRecommendationProfilesSelf.invalidate();
+    },
+  });
+
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
+    onMutate: async (newData) => {
+      await utils.contacts.getRecommendationProfilesSelf.cancel();
+
+      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      if (!prevData) return;
+
+      utils.contacts.getRecommendationProfilesSelf.setData(
+        undefined,
+        prevData.map((item) =>
+          item.userId === newData.recipientId
+            ? { ...item, relationshipState: "notFollowing" }
+            : item,
+        ),
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.contacts.getRecommendationProfilesSelf.invalidate();
+    },
+  });
+
   const { mutateAsync: searchProfilesByUsername, isPending: isSearching } =
     api.search.profilesByUsername.useMutation();
+
+  const handleFollow = useCallback(
+    async (userId: string) => {
+      await followMutation.mutateAsync({ userId });
+    },
+    [followMutation],
+  );
+
+  const handleUnfollow = useCallback(
+    async (userId: string) => {
+      await unfollowMutation.mutateAsync({ userId });
+    },
+    [unfollowMutation],
+  );
+
+  const handleCancelFollowRequest = useCallback(
+    async (userId: string) => {
+      await cancelFollowRequest.mutateAsync({ recipientId: userId });
+    },
+    [cancelFollowRequest],
+  );
 
   const performSearch = useCallback(
     async (username: string) => {
@@ -83,12 +194,13 @@ const Search = () => {
         />
 
         {!searchTerm && (
-          <RecommendationList
-            loading={isLoadingRecommendationsData}
-            recommendationsData={recommendationsData}
-            handleProfileClicked={(userId, username) => {
-              routeProfile({ userId, username });
-            }}
+          <GridSuggestions
+            data={recommendationsData}
+            isLoading={isLoadingRecommendationsData}
+            onFollow={handleFollow}
+            onProfilePress={(userId, username) =>
+              routeProfile({ userId, username })
+            }
           />
         )}
       </YStack>
@@ -97,7 +209,7 @@ const Search = () => {
       searchTerm,
       isLoadingRecommendationsData,
       recommendationsData,
-      routeProfile,
+      renderListItem,
       performSearch,
     ],
   );
