@@ -61,7 +61,7 @@ const useOnFollowPress = ({ userId }: { userId?: string } = {}) => {
   if (userId) {
     return {
       onFollowingPress: () => {
-        router.push("/self-profile/connections/following-list");
+        router.push("/self-profile/connections/following");
       },
       onFollowersPress: () => {
         router.push("/self-profile/connections/followers");
@@ -70,7 +70,7 @@ const useOnFollowPress = ({ userId }: { userId?: string } = {}) => {
   }
   return {
     onFollowingPress: () => {
-      router.push("/self-profile/connections/following-list");
+      router.push("/self-profile/connections/following");
     },
     onFollowersPress: () => {
       router.push("/self-profile/connections/followers");
