@@ -107,8 +107,13 @@ function FriendCarousel(props: FriendCarouselProps) {
   return (
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$3">
-        <XStack>
-          <H5 paddingLeft="$3">Friends</H5>
+        <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$3">
+          <H5>Friends</H5>
+          <TouchableOpacity onPress={throttledHandleShowMore}>
+            <Text theme="alt1" fontSize="$3" fontWeight="600">
+              See all
+            </Text>
+          </TouchableOpacity>
         </XStack>
 
         <FlashList
@@ -118,39 +123,9 @@ function FriendCarousel(props: FriendCarouselProps) {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => <UserItem item={item} />}
-          ListFooterComponent={
-            <TouchableOpacity onPress={throttledHandleShowMore}>
-              <YStack width={70} gap="$2" alignItems="center">
-                <View
-                  width={70}
-                  height={70}
-                  justifyContent="center"
-                  alignItems="center"
-                  borderRadius={35}
-                  backgroundColor="$backgroundStrong"
-                >
-                  <Text fontSize={24}>👀</Text>
-                </View>
-                <Text
-                  theme="alt1"
-                  fontSize="$2"
-                  fontWeight="600"
-                  textAlign="center"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  See all
-                </Text>
-              </YStack>
-            </TouchableOpacity>
-          }
           ItemSeparatorComponent={() => <Spacer size="$2.5" />}
           contentContainerStyle={{
             paddingHorizontal: getToken("$2.5", "space") as number,
-          }}
-          ListFooterComponentStyle={{
-            justifyContent: "center",
-            alignItems: "center",
           }}
         />
       </YStack>
