@@ -262,6 +262,7 @@ const Following = () => {
           return {
             label: "Follow",
             icon: UserRoundPlus,
+            variant: "primary",
             onPress: () => void handleFollow(item.userId),
           };
       }
