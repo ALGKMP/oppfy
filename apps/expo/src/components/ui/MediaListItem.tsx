@@ -10,13 +10,6 @@ import { Button } from "./Buttons";
 import { XStack, YStack } from "./Stacks";
 import { Paragraph, SizableText, Text } from "./Texts";
 
-type ButtonIconProps = { color?: any; size?: any };
-type IconProp =
-  | JSX.Element
-  | FunctionComponent<ButtonIconProps>
-  | ((props: ButtonIconProps) => any)
-  | null;
-
 type ActionProps = {
   label: string;
 } & GetProps<typeof Button>;
@@ -62,7 +55,7 @@ export const MediaListItem = ({
           )}{" "}
           {subtitle &&
             (typeof subtitle === "string" ? (
-              <SizableText theme="alt1" size="$3" lineHeight={0}>
+              <SizableText color="$gray12" size="$3" lineHeight={0}>
                 {subtitle}
               </SizableText>
             ) : (
@@ -70,7 +63,7 @@ export const MediaListItem = ({
             ))}{" "}
           {caption &&
             (typeof caption === "string" ? (
-              <SizableText theme="alt2" size="$2" lineHeight={0}>
+              <SizableText color="$gray10" size="$2" lineHeight={0}>
                 {caption}
               </SizableText>
             ) : (
