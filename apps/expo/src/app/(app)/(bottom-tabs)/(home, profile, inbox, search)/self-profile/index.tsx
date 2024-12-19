@@ -23,6 +23,8 @@ import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
+import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -205,21 +207,9 @@ const SelfProfile = React.memo(() => {
         <Header />
 
         {friendItems.length > 0 ? (
-          <PeopleCarousel
-            loading={false}
-            data={friendItems}
-            title="Friends 🔥"
-            showMore={friendItems.length < (profileData?.friendCount ?? 0)}
-            onItemPress={navigateToProfile}
-            onShowMore={() => router.push("/self-profile/connections/friends")}
-          />
+          <FriendCarousel />
         ) : (
-          <PeopleCarousel
-            loading={false}
-            data={recommendationItems}
-            title="Suggestions 🔥"
-            onItemPress={navigateToProfile}
-          />
+          <RecommendationCarousel />
         )}
       </YStack>
     ),
