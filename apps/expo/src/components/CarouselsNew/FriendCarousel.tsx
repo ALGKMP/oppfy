@@ -58,7 +58,7 @@ function FriendCarousel(props: FriendCarouselProps) {
 /**
  * A hook that gets the friends of a user
  *
- * @param {string} userId - The userId of the user
+ * @param {string?} userId - The userId of the user (optional if getting friends for self)
  * @returns {actions: {follow: {handler: () => void, loading: boolean}, unfollow: {handler: () => void, loading: boolean}, cancelFollowRequest: {handler: () => void, loading: boolean}, cancelFriendRequest: {handler: () => void, loading: boolean}, removeFriend: {handler: () => void, loading: boolean}}}
  */
 
