@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -30,12 +30,14 @@ interface LoadedProps<T extends PersonItem> {
   data: T[];
   title?: string;
   emoji?: string;
-  showMore?: boolean;
 }
 
 type PeopleCarouselProps<T extends PersonItem> = LoadedProps<T>;
 
 function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
+
+  const [showMore, setShowMore] = useState(false);
+
   const {
     data: friendsData,
     isLoading: isLoadingFriendsData,
@@ -76,7 +78,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (isLoadingFriendsData) return;
-      if (!props.showMore) return;
+      if (!showMore) return;
 
       const { contentSize, contentOffset, layoutMeasurement } =
         event.nativeEvent;
@@ -110,7 +112,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     );
   }
 
-  const { data, title, emoji, showMore = false } = props;
+  const { data, title, emoji } = props;
 
   return (
     <CardContainer paddingHorizontal={0}>
