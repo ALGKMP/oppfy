@@ -1,37 +1,26 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
-import Person3 from "@assets/girls.jpg";
-import Person2 from "@assets/mattandfriends.png";
-import Person1 from "@assets/maya.jpg";
-import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import {
   Button,
-  Circle,
   getToken,
   H1,
   H5,
   SizableText,
   Spacer,
-  styled,
   View,
-  XStack,
   YStack,
 } from "tamagui";
 
-import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import { BaseScreenView } from "~/components/Views";
-import type { RecommendationProfile } from "~/hooks/useProfile";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -49,7 +38,6 @@ const HomeScreen = () => {
   useScrollToTop(scrollRef);
 
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<string[]>([]);
