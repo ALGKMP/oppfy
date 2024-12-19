@@ -8,11 +8,35 @@ const BlockSheet = ({ userId }: { userId: string }) => {
   const { data: networkRelationships } =
     api.profile.getNetworkRelationships.useQuery({ userId });
 
+  const sheetButtonOptions: ButtonOption[] = [
+    {
+      text: networkRelationships?.blocked
+        ? isUnblocking
+          ? "Unblocking..."
+        : "Unblock User"
+      : isBlocking
+        ? "Blocking..."
+        : "Block User",
+      textProps: {
+        color: isBlocking || isUnblocking ? "$gray9" : "$red9",
+      },
+      autoClose: false,
+      disabled: isBlocking || isUnblocking,
+      onPress: networkRelationships?.blocked
+        ? isUnblocking
+          ? handleUnblockUser
+          : handleBlockUser
+      : isBlocking
+        ? handleUnblockUser
+        : handleBlockUser,
+    },
+  ];
+
   return (
     <ActionSheet
       title="Block"
       isVisible={true}
-    //   buttonOptions={sheetButtonOptions}
+      buttonOptions={sheetButtonOptions}
     />
   );
 };
