@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -27,17 +27,14 @@ interface PersonItem {
 
 interface LoadedProps<T extends PersonItem> {
   userId: string;
-  data: T[];
-  title?: string;
-  emoji?: string;
+  // data: T[];
+  // title?: string;
+  // emoji?: string;
 }
 
-type PeopleCarouselProps<T extends PersonItem> = LoadedProps<T>;
+type FriendCarouselProps = LoadedProps<PersonItem>;
 
-function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
-
-  const [showMore, setShowMore] = useState(false);
-
+function FriendCarousel(props: FriendCarouselProps) {
   const {
     data: friendsData,
     isLoading: isLoadingFriendsData,
@@ -51,6 +48,8 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     },
   );
 
+  const friendsItems = friendsData?.pages.flatMap((page) => page.items) ?? [];
+
   const onShowMore = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
@@ -60,13 +59,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   };
 
   const throttledHandleShowMore = useRef(
-    throttle(
-      () => {
-        onShowMore();
-      },
-      300,
-      { leading: true, trailing: false },
-    ),
+    throttle(onShowMore, 300, { leading: true, trailing: false }),
   ).current;
 
   useEffect(() => {
@@ -78,7 +71,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (isLoadingFriendsData) return;
-      if (!showMore) return;
 
       const { contentSize, contentOffset, layoutMeasurement } =
         event.nativeEvent;
@@ -112,54 +104,45 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     );
   }
 
-  const { data, title, emoji } = props;
-
   return (
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$3">
-        {title && (
-          <XStack>
-            <H5 paddingLeft="$3">{title}</H5>
-            {emoji && <Text fontSize="$3"> {emoji}</Text>}
-          </XStack>
-        )}
+        <XStack>
+          <H5 paddingLeft="$3">Friends</H5>
+        </XStack>
 
         <FlashList
-          data={data}
+          data={friendsItems}
           horizontal
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => <UserItem item={item} />}
           ListFooterComponent={
-            <>
-              {showMore && (
-                <TouchableOpacity onPress={throttledHandleShowMore}>
-                  <YStack width={70} gap="$2" alignItems="center">
-                    <View
-                      width={70}
-                      height={70}
-                      justifyContent="center"
-                      alignItems="center"
-                      borderRadius={35}
-                      backgroundColor="$backgroundStrong"
-                    >
-                      <Text fontSize={24}>👀</Text>
-                    </View>
-                    <Text
-                      theme="alt1"
-                      fontSize="$2"
-                      fontWeight="600"
-                      textAlign="center"
-                      numberOfLines={1}
-                      ellipsizeMode="tail"
-                    >
-                      See more
-                    </Text>
-                  </YStack>
-                </TouchableOpacity>
-              )}
-            </>
+            <TouchableOpacity onPress={throttledHandleShowMore}>
+              <YStack width={70} gap="$2" alignItems="center">
+                <View
+                  width={70}
+                  height={70}
+                  justifyContent="center"
+                  alignItems="center"
+                  borderRadius={35}
+                  backgroundColor="$backgroundStrong"
+                >
+                  <Text fontSize={24}>👀</Text>
+                </View>
+                <Text
+                  theme="alt1"
+                  fontSize="$2"
+                  fontWeight="600"
+                  textAlign="center"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  See all
+                </Text>
+              </YStack>
+            </TouchableOpacity>
           }
           ItemSeparatorComponent={() => <Spacer size="$2.5" />}
           contentContainerStyle={{
@@ -175,4 +158,4 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
   );
 }
 
-export default PeopleCarousel;
+export default FriendCarousel;
