@@ -108,7 +108,11 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     return (
       <TouchableOpacity onPress={() => onItemPress(item)}>
         <YStack width={70} gap="$2" alignItems="center">
-          <Avatar source={item.profilePictureUrl} size={70} recyclingKey={item.userId} />
+          <Avatar
+            source={item.profilePictureUrl}
+            size={70}
+            recyclingKey={item.userId}
+          />
           <Text
             fontSize="$2"
             fontWeight="600"
@@ -127,7 +131,11 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     return (
       <TouchableOpacity onPress={() => onItemPress(item)}>
         <XStack width={150} gap="$2" alignItems="center" padding="$2">
-          <Avatar source={item.profilePictureUrl} size={44} recyclingKey={item.userId} />
+          <Avatar
+            source={item.profilePictureUrl}
+            size={44}
+            recyclingKey={item.userId}
+          />
           <YStack flex={1}>
             <Text
               theme="alt1"
@@ -152,10 +160,8 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     );
   };
 
-  const renderItem = 
-    props.uiStyle === "suggestions"
-      ? renderInstagramItem
-      : renderDefaultItem;
+  const renderItem =
+    props.uiStyle === "suggestions" ? renderInstagramItem : renderDefaultItem;
 
   return (
     <CardContainer paddingHorizontal={0}>
@@ -163,9 +169,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         {title && (
           <TouchableOpacity onPress={onTitlePress} disabled={!onTitlePress}>
             <XStack>
-              <H5 paddingLeft="$3">
-                {title}
-              </H5>
+              <H5 paddingLeft="$3">{title}</H5>
               {emoji && <Text fontSize="$3"> {emoji}</Text>}
             </XStack>
           </TouchableOpacity>
@@ -174,7 +178,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         <FlashList
           data={data}
           horizontal
-          estimatedItemSize={uiStyle === 'suggestions' ? 150 : 70}
+          estimatedItemSize={uiStyle === "suggestions" ? 150 : 70}
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={renderItem}
