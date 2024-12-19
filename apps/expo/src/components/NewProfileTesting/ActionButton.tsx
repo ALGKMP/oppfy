@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
 import { Button, Text, View, XStack } from "~/components/ui";
@@ -12,24 +13,57 @@ import { api } from "~/utils/api";
  */
 
 interface ActionButtonProps {
-  userId: string; // TODO: For now, this is only used for Other Profiles
+  userId?: string; // TODO: For now, this is only used for Other Profiles
 }
 
 const ActionButton = ({ userId }: ActionButtonProps) => {
   const actions = useProfileActions(userId);
+  
+  // Only make the network status query if userId is provided
   const { data: networkStatus, isLoading: isNetworkStatusLoading } =
-    api.profile.getNetworkRelationships.useQuery({ userId });
+    api.profile.getNetworkRelationships.useQuery(
+      { userId: userId! },
+      { enabled: !!userId },
+    );
+
+  // Handle self-profile case
+  if (!userId) {
+    return (
+      <XStack gap="$4">
+        {Object.entries(actions.actions).map(([key, { handler, loading }]) => (
+          <Button
+            key={key}
+            flex={1}
+            onPress={handler}
+            borderWidth={1}
+            rounded
+            outlined
+            borderColor="white"
+            pressStyle={{
+              borderWidth: 1,
+              borderColor: "white",
+            }}
+          >
+            <XStack gap="$2" alignItems="center">
+              <Text>{key === 'editProfile' ? 'Edit Profile' : 'Share Profile'}</Text>
+              {loading && <Spinner size="small" color="$color" />}
+            </XStack>
+          </Button>
+        ))}
+      </XStack>
+    );
+  }
 
   if (isNetworkStatusLoading) {
     return (
       <XStack gap="$4">
         <View flex={1}>
-        <Skeleton width="100%" height={44} radius={20} />
-      </View>
-      <View flex={1}>
-        <Skeleton width="100%" height={44} radius={20} />
-      </View>
-    </XStack>
+          <Skeleton width="100%" height={44} radius={20} />
+        </View>
+        <View flex={1}>
+          <Skeleton width="100%" height={44} radius={20} />
+        </View>
+      </XStack>
     );
   }
 
@@ -101,7 +135,9 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
       {buttonKeys.map((buttonKey) => {
         const config = buttonConfigs[buttonKey];
         const actionKey = config.action as keyof typeof actions.actions;
-        const { handler, loading, disabled } = actions.actions[actionKey];
+        const action = actions.actions[actionKey];
+        if (!action) return null;
+        const { handler, loading, disabled } = action;
 
         return (
           <Button
@@ -143,12 +179,30 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
  * @param {string} userId - The userId of the user
  * @returns {actions: {follow: {handler: () => void, loading: boolean}, unfollow: {handler: () => void, loading: boolean}, cancelFollowRequest: {handler: () => void, loading: boolean}, cancelFriendRequest: {handler: () => void, loading: boolean}, removeFriend: {handler: () => void, loading: boolean}}}
  */
-const useProfileActions = (userId: string) => {
+const useProfileActions = (userId?: string) => {
   const utils = api.useUtils();
+  const router = useRouter();
   // State to track invalidation status per action using action keys
   const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
     Record<string, boolean>
   >({});
+
+  if (!userId) {
+    return {
+      actions: {
+        editProfile: {
+          handler: () => router.push("/edit-profile"),
+          loading: false,
+          disabled: false,
+        },
+        shareProfile: {
+          handler: () => router.push("/share-profile"),
+          loading: false,
+          disabled: false,
+        },
+      },
+    };
+  }
 
   // Helper function to invalidate queries for a specific action
   const invalidateQueries = async (actionKey: string) => {
