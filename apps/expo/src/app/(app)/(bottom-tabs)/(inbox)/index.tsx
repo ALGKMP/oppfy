@@ -5,18 +5,19 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
+import { getToken } from "tamagui";
+
 import {
-  getToken,
   H5,
   H6,
+  MediaListItem,
+  MediaListItemSkeleton,
   Paragraph,
   SizableText,
+  TimeAgo,
   View,
   YStack,
-} from "tamagui";
-
-import { TimeAgo } from "~/components/Texts";
-import { MediaListItem, MediaListItemSkeleton } from "~/components/ui";
+} from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";
@@ -149,6 +150,7 @@ const Inbox = () => {
             return {
               label: "Follow",
               icon: UserRoundPlus,
+              variant: "primary" as const,
               onPress: () =>
                 void followUser.mutateAsync({ userId: item.userId }),
             };
@@ -172,13 +174,7 @@ const Inbox = () => {
           verticalText
           title={item.username}
           subtitle={getNotificationMessage(item)}
-          caption={
-            <TimeAgo
-              size="$2"
-              date={item.createdAt}
-              format={({ value, unit }) => `${value}${unit.charAt(0)} ago`}
-            />
-          }
+          caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
           imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
           primaryAction={buttonProps}
           onPress={() =>
