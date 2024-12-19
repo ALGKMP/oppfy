@@ -13,6 +13,7 @@ import {
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -25,6 +26,8 @@ const PAGE_SIZE = 20;
 const Followers = () => {
   const utils = api.useUtils();
   const actionSheet = useActionSheetController();
+
+  const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -131,9 +134,12 @@ const Followers = () => {
               ],
             }),
         }}
+        onPress={() =>
+          routeProfile({ userId: item.userId, username: item.username })
+        }
       />
     ),
-    [actionSheet, handleRemoveFollower],
+    [actionSheet, handleRemoveFollower, routeProfile],
   );
 
   const ListHeaderComponent = useMemo(

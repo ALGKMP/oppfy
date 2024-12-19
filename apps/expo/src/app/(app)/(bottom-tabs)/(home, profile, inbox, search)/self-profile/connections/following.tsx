@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
+import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
@@ -13,6 +14,7 @@ import {
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -25,6 +27,8 @@ const PAGE_SIZE = 20;
 const Following = () => {
   const utils = api.useUtils();
   const actionSheet = useActionSheetController();
+
+  const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -259,6 +263,9 @@ const Following = () => {
         subtitle={item.name}
         imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
         primaryAction={renderActionButton(item)}
+        onPress={() =>
+          routeProfile({ userId: item.userId, username: item.username })
+        }
       />
     ),
     [renderActionButton],
