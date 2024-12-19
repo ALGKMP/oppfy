@@ -14,6 +14,8 @@ import { FlashList } from "@shopify/flash-list";
 import { CameraOff, ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
+import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
+import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
@@ -22,8 +24,6 @@ import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
-import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
@@ -108,17 +108,6 @@ const SelfProfile = React.memo(() => {
     isLoadingRecommendationsData ||
     isLoadingPostData;
 
-  const navigateToProfile = useCallback(
-    ({ userId, username }: { userId: string; username: string }) => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push({
-        pathname: "/profile/[userId]",
-        params: { userId, username },
-      });
-    },
-    [router],
-  );
-
   useLayoutEffect(() => {
     navigation.setOptions({
       title: profileData?.username,
@@ -200,17 +189,12 @@ const SelfProfile = React.memo(() => {
     [profileData, viewableItems],
   );
 
-  const renderHeader = 
-    () => (
-      <YStack gap="$4">
-        <Header />
-        {friendItems.length > 0 ? (
-          <FriendCarousel />
-        ) : (
-          <RecommendationCarousel />
-        )}
-      </YStack>
-    )
+  const renderHeader = () => (
+    <YStack gap="$4">
+      <Header />
+      {profileData?.friendCount && profileData?.friendCount > 0 ? <FriendCarousel /> : <RecommendationCarousel />}
+    </YStack>
+  );
 
   const renderEmptyState = useCallback(
     () => (
