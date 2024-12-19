@@ -1,39 +1,162 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundPlus } from "@tamagui/lucide-icons";
-import { H5, H6, View, YStack } from "tamagui";
+import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
+import { getToken, H6, YStack } from "tamagui";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
-import { VirtualizedListItem } from "~/components/ListItems";
+import {
+  MediaListItem,
+  MediaListItemSkeleton,
+  useActionSheetController,
+} from "~/components/ui";
+import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
-import { ListItem } from "~/features/connections/components";
-import { useFollowHandlers } from "~/features/connections/hooks";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
+import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
-const FollowingList = () => {
+type FollowingItem =
+  RouterOutputs["follow"]["paginateFollowingOthers"]["items"][0];
+
+const PAGE_SIZE = 20;
+
+const Following = () => {
+  const utils = api.useUtils();
+  const actionSheet = useActionSheetController();
+
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { routeProfile } = useRouteProfile();
 
   const { user } = useSession();
+  const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const { follow, unfollow, cancelFollowRequest } = useFollowHandlers({
-    userId,
-    queryToOptimisticallyUpdate: "follow.paginateFollowingOthers",
-    queriesToInvalidate: [
-      "follow.paginateFollowingOthers",
-      "follow.paginateFollowersOthers",
-      "friend.paginateFriendsOthers",
-    ],
+  const followMutation = api.follow.followUser.useMutation({
+    onMutate: async (newData) => {
+      await utils.follow.paginateFollowingOthers.cancel({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
+
+      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
+      if (prevData === undefined) return;
+
+      utils.follow.paginateFollowingOthers.setInfiniteData(
+        { userId, pageSize: PAGE_SIZE },
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.userId === newData.userId
+                ? {
+                    ...item,
+                    relationshipState:
+                      item.privacy === "private"
+                        ? "followRequestSent"
+                        : "following",
+                  }
+                : item,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.follow.paginateFollowingOthers.setInfiniteData(
+        { userId, pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
+    },
+  });
+
+  const unfollowMutation = api.follow.unfollowUser.useMutation({
+    onMutate: async (newData) => {
+      await utils.follow.paginateFollowingOthers.cancel({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
+
+      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
+      if (prevData === undefined) return;
+
+      utils.follow.paginateFollowingOthers.setInfiniteData(
+        { userId, pageSize: PAGE_SIZE },
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.userId === newData.userId
+                ? { ...item, relationshipState: "notFollowing" }
+                : item,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.follow.paginateFollowingOthers.setInfiniteData(
+        { userId, pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
+    },
+  });
+
+  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
+    onMutate: async (newData) => {
+      await utils.follow.paginateFollowingOthers.cancel({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
+
+      const prevData = utils.follow.paginateFollowingOthers.getInfiniteData({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
+      if (prevData === undefined) return;
+
+      utils.follow.paginateFollowingOthers.setInfiniteData(
+        { userId, pageSize: PAGE_SIZE },
+        {
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.userId === newData.recipientId
+                ? { ...item, relationshipState: "notFollowing" }
+                : item,
+            ),
+          })),
+        },
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx === undefined) return;
+      utils.follow.paginateFollowingOthers.setInfiniteData(
+        { userId, pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
+    },
   });
 
   const {
@@ -44,135 +167,170 @@ const FollowingList = () => {
     hasNextPage,
     refetch,
   } = api.follow.paginateFollowingOthers.useInfiniteQuery(
-    { userId, pageSize: 20 },
+    { userId, pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const followingItems = useMemo(
-    () => followingData?.pages.flatMap((page) => page.items) ?? [],
-    [followingData],
-  );
+  const followingItems = useMemo(() => {
+    return followingData?.pages.flatMap((page) => page.items) ?? [];
+  }, [followingData]);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch({
     data: followingItems,
     keys: ["name", "username"],
   });
 
-  const handleOnEndReached = async () => {
+  const handleOnEndReached = useCallback(async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  };
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-  const handleRefresh = async () => {
+  const handleFollow = useCallback(
+    async (userId: string) => {
+      await followMutation.mutateAsync({ userId });
+    },
+    [followMutation],
+  );
+
+  const handleUnfollow = useCallback(
+    async (userId: string) => {
+      await unfollowMutation.mutateAsync({ userId });
+    },
+    [unfollowMutation],
+  );
+
+  const handleCancelFollowRequest = useCallback(
+    async (userId: string) => {
+      await cancelFollowRequest.mutateAsync({ recipientId: userId });
+    },
+    [cancelFollowRequest],
+  );
+
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
-  };
+  }, [refetch]);
 
-  const renderLoadingSkeletons = () => (
-    <CardContainer>
-      {PLACEHOLDER_DATA.map((_, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading
-          showSkeletons={{
-            imageUrl: true,
-            title: true,
-            subtitle: true,
-            button: true,
-          }}
-        />
-      ))}
-    </CardContainer>
+  const renderActionButton = useCallback(
+    (item: FollowingItem) => {
+      if (item.userId === user?.uid) return undefined;
+
+      switch (item.relationshipState) {
+        case "followRequestSent":
+          return {
+            label: "Sent",
+            icon: Send,
+            onPress: () =>
+              actionSheet.show({
+                title: "Cancel Follow Request",
+                subtitle: `Are you sure you want to cancel your follow request to ${item.username}?`,
+                imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+                buttonOptions: [
+                  {
+                    text: "Cancel Request",
+                    textProps: { color: "$red11" },
+                    onPress: () => void handleCancelFollowRequest(item.userId),
+                  },
+                ],
+              }),
+          };
+        case "following":
+          return {
+            label: "Unfollow",
+            icon: UserRoundMinus,
+            onPress: () =>
+              actionSheet.show({
+                title: "Unfollow User",
+                subtitle: `Are you sure you want to unfollow ${item.username}?`,
+                imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+                buttonOptions: [
+                  {
+                    text: "Unfollow",
+                    textProps: { color: "$red11" },
+                    onPress: () => void handleUnfollow(item.userId),
+                  },
+                ],
+              }),
+          };
+        case "notFollowing":
+          return {
+            label: "Follow",
+            icon: UserRoundPlus,
+            onPress: () => void handleFollow(item.userId),
+          };
+      }
+    },
+    [
+      actionSheet,
+      handleCancelFollowRequest,
+      handleUnfollow,
+      handleFollow,
+      user?.uid,
+    ],
   );
-
-  const renderFollowing = () => (
-    <CardContainer>
-      <H5 theme="alt1">Following</H5>
-      <FlashList
-        data={filteredItems}
-        onRefresh={refetch}
-        keyExtractor={(item) => "following_list_" + item.userId}
-        refreshing={isLoading}
-        estimatedItemSize={75}
-        onEndReached={handleOnEndReached}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <ListItem
-            item={item}
-            onProfilePress={() =>
-              routeProfile({ userId: item.userId, username: item.username })
-            }
-            handleFollow={follow}
-            handleUnfollow={unfollow}
-            handleCancelFollowRequest={cancelFollowRequest}
-            hideButton={item.userId === user?.uid}
-          />
-        )}
-      />
-    </CardContainer>
-  );
-
-  const renderNoResults = () => (
-    <View flex={1} justifyContent="center">
-      <EmptyPlaceholder
-        title="Following"
-        subtitle="Once you follow someone, you'll see them here."
-        icon={<UserRoundPlus />}
-      />
-    </View>
-  );
-
-  if (isLoading) {
-    return (
-      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
-    );
-  }
-
-  if (followingItems.length === 0) {
-    return (
-      <BaseScreenView
-        scrollable
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-        }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-      >
-        {renderNoResults()}
-      </BaseScreenView>
-    );
-  }
 
   return (
-    <BaseScreenView
-      scrollable
-      keyboardDismissMode="interactive"
+    <FlashList
+      data={filteredItems}
+      renderItem={({ item }) => (
+        <MediaListItem
+          title={item.username}
+          subtitle={item.name}
+          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+          primaryAction={renderActionButton(item)}
+          onPress={() =>
+            routeProfile({ userId: item.userId, username: item.username })
+          }
+        />
+      )}
+      estimatedItemSize={75}
+      ListHeaderComponent={
+        <YStack gap="$4">
+          <SearchInput
+            placeholder="Search following..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery("")}
+          />
+        </YStack>
+      }
+      ListEmptyComponent={
+        isLoading ? (
+          <YStack gap="$4">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <MediaListItemSkeleton key={index} />
+            ))}
+          </YStack>
+        ) : followingItems.length === 0 ? (
+          <YStack flex={1} justifyContent="center">
+            <EmptyPlaceholder
+              title="No following"
+              subtitle="No following found."
+              icon={<UserRoundPlus />}
+            />
+          </YStack>
+        ) : filteredItems.length === 0 ? (
+          <YStack flex={1}>
+            <H6 theme="alt1">No Users Found</H6>
+          </YStack>
+        ) : null
+      }
+      ItemSeparatorComponent={Spacer}
+      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+      }}
+      showsVerticalScrollIndicator={false}
+      onEndReached={handleOnEndReached}
+      onEndReachedThreshold={0.5}
+      keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
-    >
-      <YStack gap="$4">
-        <SearchInput
-          placeholder="Search following..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={() => setSearchQuery("")}
-        />
-
-        {filteredItems.length > 0 ? (
-          renderFollowing()
-        ) : (
-          <H6 theme="alt1" lineHeight={0}>
-            No Users Found
-          </H6>
-        )}
-      </YStack>
-    </BaseScreenView>
+    />
   );
 };
 
-export default FollowingList;
+export default Following;
