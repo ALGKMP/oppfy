@@ -27,8 +27,8 @@ function RecommendationCarousel() {
   const recommendationsItems = recommendationsData ?? [];
 
   const onShowMore = () => {
-    // TODO: Route for recommendations page
-    // void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // TODO: Recommendations page
     // router.push({
     //   pathname: "/",
     // });

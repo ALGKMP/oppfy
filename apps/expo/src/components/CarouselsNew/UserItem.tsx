@@ -4,11 +4,13 @@ import { Text, XStack, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import Avatar from "../Avatar";
 
-interface UserItemProps {
+export interface UserItemShortCard {
   userId: string;
   username: string;
   profilePictureUrl: string | null;
 }
+
+interface UserItemProps extends UserItemShortCard {}
 
 const UserItem = ({ item }: { item: UserItemProps }) => {
   const { routeProfile } = useRouteProfile();
