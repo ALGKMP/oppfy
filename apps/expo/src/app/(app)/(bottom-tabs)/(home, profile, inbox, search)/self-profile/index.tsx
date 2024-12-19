@@ -14,7 +14,6 @@ import { FlashList } from "@shopify/flash-list";
 import { CameraOff, ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
-import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
@@ -205,7 +204,6 @@ const SelfProfile = React.memo(() => {
     () => (
       <YStack gap="$4">
         <Header />
-
         {friendItems.length > 0 ? (
           <FriendCarousel />
         ) : (
@@ -213,7 +211,7 @@ const SelfProfile = React.memo(() => {
         )}
       </YStack>
     ),
-    [friendItems, recommendationItems, router, navigateToProfile, profileData],
+    [],
   );
 
   const renderEmptyState = useCallback(
@@ -232,7 +230,6 @@ const SelfProfile = React.memo(() => {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <YStack gap="$4">
-          <PeopleCarousel loading />
           <PostCard loading />
         </YStack>
       </BaseScreenView>
