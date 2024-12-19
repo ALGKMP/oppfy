@@ -58,16 +58,6 @@ function FriendCarousel(props: FriendCarouselProps) {
     });
   };
 
-  const throttledHandleShowMore = useRef(
-    throttle(onShowMore, 300, { leading: true, trailing: false }),
-  ).current;
-
-  useEffect(() => {
-    return () => {
-      throttledHandleShowMore.cancel();
-    };
-  }, [throttledHandleShowMore]);
-
   if (isLoadingFriendsData) {
     return (
       <CardContainer paddingLeft={0} paddingRight={0}>
@@ -92,7 +82,7 @@ function FriendCarousel(props: FriendCarouselProps) {
       <YStack gap="$3">
         <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$3">
           <H5>Friends</H5>
-          <TouchableOpacity onPress={throttledHandleShowMore}>
+          <TouchableOpacity onPress={onShowMore}>
             <Text theme="alt1" fontSize="$3" fontWeight="600">
               See all
             </Text>
