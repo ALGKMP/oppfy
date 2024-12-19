@@ -18,11 +18,9 @@ import UserItem from "./UserItem";
  * - Big cards and small cards
  */
 
-
 interface FriendCarouselProps {
-  userId: string;
+  userId?: string;
 }
-
 
 function FriendCarousel(props: FriendCarouselProps) {
   const { userId } = props;
@@ -35,10 +33,17 @@ function FriendCarousel(props: FriendCarouselProps) {
 
   const onShowMore = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push({
-      pathname: "/profile/connections/friends",
-      params: { userId: props.userId },
-    });
+    if (!userId) {
+      router.push({
+        pathname: "/self-profile/connections/friends",
+        params: { userId: props.userId },
+      });
+    } else {
+      router.push({
+        pathname: "/profile/connections/friends",
+        params: { userId: props.userId },
+      });
+    }
   };
 
   if (isLoadingFriendsData) {
@@ -111,7 +116,7 @@ interface UseGetFriendsProps {
 
 const useGetFriends = (props: UseGetFriendsProps) => {
   const { userId } = props;
-  
+
   const selfQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
     { pageSize: 10 },
     {
