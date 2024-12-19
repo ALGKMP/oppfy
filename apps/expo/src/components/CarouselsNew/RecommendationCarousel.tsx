@@ -61,7 +61,7 @@ function RecommendationCarousel() {
           alignItems="center"
           paddingHorizontal="$3"
         >
-          <H5>Friends</H5>
+          <H5>Recommendations</H5>
           <TouchableOpacity onPress={onShowMore}>
             <Text theme="alt1" fontSize="$3" fontWeight="600">
               See all
