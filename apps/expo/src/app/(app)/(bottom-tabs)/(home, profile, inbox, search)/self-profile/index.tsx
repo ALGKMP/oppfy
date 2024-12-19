@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import { TouchableOpacity } from "react-native";
-import * as Haptics from "expo-haptics";
 import { useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
