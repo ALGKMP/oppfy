@@ -200,7 +200,7 @@ const SelfProfile = React.memo(() => {
     [profileData, viewableItems],
   );
 
-  const renderHeader = useMemo(
+  const renderHeader = 
     () => (
       <YStack gap="$4">
         <Header />
@@ -210,9 +210,7 @@ const SelfProfile = React.memo(() => {
           <RecommendationCarousel />
         )}
       </YStack>
-    ),
-    [],
-  );
+    )
 
   const renderEmptyState = useCallback(
     () => (
