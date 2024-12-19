@@ -12,7 +12,6 @@ import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import {
   Button,
   Circle,
@@ -28,6 +27,7 @@ import {
 } from "tamagui";
 
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
+import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import { BaseScreenView } from "~/components/Views";
@@ -71,7 +71,6 @@ const HomeScreen = () => {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
-
 
   const postItems = useMemo(
     () => postData?.pages.flatMap((page) => page.items).filter(Boolean) ?? [],
@@ -152,28 +151,9 @@ const HomeScreen = () => {
     [profile, viewableItems],
   );
 
-  const isLoading =
-    isLoadingRecommendationsData || isLoadingPostData || isLoadingProfile;
+  const isLoading = isLoadingPostData || isLoadingProfile;
 
   const renderFooter = useCallback(() => {
-    const handleProfilePress = (profile: RecommendationProfile) => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.navigate({
-        pathname: "/profile/[userId]",
-        params: {
-          userId: profile.userId,
-          username: profile.username,
-        },
-      });
-    };
-
-    const handleShowMore = () => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.navigate({
-        // pathname: "/(recommended)",
-        pathname: "/(app)/(recommended)" // Note: Using this because type error (could be wrong)
-      });
-    };
 
     if (isLoading) {
       return (
@@ -185,51 +165,49 @@ const HomeScreen = () => {
 
     return (
       <View>
-        {recommendationsData && recommendationsData.length > 0 && (
-          <View paddingTop="$4" paddingHorizontal="$1">
-            <RecommendationCarousel />
-            <Footer />
-          </View>
-        )}
+        <View paddingTop="$4" paddingHorizontal="$1">
+          <RecommendationCarousel />
+          <Footer />
+        </View>
       </View>
     );
-  }, [recommendationsData, isLoadingRecommendationsData, router, isLoading]);
+  }, [isLoading]);
 
   return (
     <BaseScreenView padding={0} paddingBottom={0}>
-        {isLoading ? (
-          <YStack
-            paddingTop={(insets.top + getToken("$2", "space")) as number}
-            gap="$4"
-          >
-            {Array.from({ length: 3 }).map(() => (
-              <PostCard loading />
-            ))}
-          </YStack>
-        ) : (
-          <FlashList
-            ref={scrollRef}
-            data={postItems}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            onEndReached={handleOnEndReached}
-            nestedScrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-            numColumns={1}
-            keyExtractor={(item) => "home_post_" + item.postId}
-            renderItem={renderPost}
-            estimatedItemSize={screenWidth}
-            ListFooterComponent={renderFooter}
-            extraData={viewableItems}
-            onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-            ItemSeparatorComponent={() => <Spacer size="$4" />}
-            ListEmptyComponent={EmptyHomeScreen}
-            contentContainerStyle={{
-              paddingTop: (insets.top + getToken("$2", "space")) as number,
-            }}
-          />
-        )}
+      {isLoading ? (
+        <YStack
+          paddingTop={(insets.top + getToken("$2", "space")) as number}
+          gap="$4"
+        >
+          {Array.from({ length: 3 }).map(() => (
+            <PostCard loading />
+          ))}
+        </YStack>
+      ) : (
+        <FlashList
+          ref={scrollRef}
+          data={postItems}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onEndReached={handleOnEndReached}
+          nestedScrollEnabled={false}
+          showsVerticalScrollIndicator={false}
+          numColumns={1}
+          keyExtractor={(item) => "home_post_" + item.postId}
+          renderItem={renderPost}
+          estimatedItemSize={screenWidth}
+          ListFooterComponent={renderFooter}
+          extraData={viewableItems}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListEmptyComponent={EmptyHomeScreen}
+          contentContainerStyle={{
+            paddingTop: (insets.top + getToken("$2", "space")) as number,
+          }}
+        />
+      )}
     </BaseScreenView>
   );
 };
@@ -274,10 +252,10 @@ const EmptyHomeScreen = () => {
 
   return (
     <YStack
-      // flex={1}
-      // alignItems="center"
-      // justifyContent="center" // Center vertically
-      // gap="$3"
+    // flex={1}
+    // alignItems="center"
+    // justifyContent="center" // Center vertically
+    // gap="$3"
     >
       <YStack justifyContent="center" alignItems="center">
         <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
