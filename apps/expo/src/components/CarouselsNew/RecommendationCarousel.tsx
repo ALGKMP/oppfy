@@ -18,12 +18,7 @@ import UserItem from "./UserItem";
  * - Big cards and small cards
  */
 
-interface RecommendationCarouselProps {
-  userId?: string;
-}
-
-function RecommendationCarousel(props: RecommendationCarouselProps) {
-  const { userId } = props;
+function RecommendationCarousel() {
   const {
     data: recommendationsData,
     isLoading: isLoadingRecommendationsData,
@@ -32,18 +27,11 @@ function RecommendationCarousel(props: RecommendationCarouselProps) {
   const recommendationsItems = recommendationsData ?? [];
 
   const onShowMore = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (!userId) {
-      router.push({
-        pathname: "/self-profile/connections/friends",
-        params: { userId: props.userId },
-      });
-    } else {
-      router.push({
-        pathname: "/profile/connections/friends",
-        params: { userId: props.userId },
-      });
-    }
+    // TODO: Route for recommendations page
+    // void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // router.push({
+    //   pathname: "/",
+    // });
   };
 
   if (isLoadingRecommendationsData) {
