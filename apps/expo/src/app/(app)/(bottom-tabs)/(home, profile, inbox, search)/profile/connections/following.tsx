@@ -272,52 +272,76 @@ const Following = () => {
     ],
   );
 
+  const renderListItem = useCallback(
+    (item: FollowingItem) => (
+      <MediaListItem
+        title={item.username}
+        subtitle={item.name}
+        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+        primaryAction={renderActionButton(item)}
+        onPress={() =>
+          routeProfile({ userId: item.userId, username: item.username })
+        }
+      />
+    ),
+    [renderActionButton, routeProfile],
+  );
+
+  const ListHeaderComponent = useMemo(
+    () => (
+      <YStack gap="$4">
+        <SearchInput
+          placeholder="Search following..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
+        />
+      </YStack>
+    ),
+    [searchQuery, setSearchQuery],
+  );
+
+  const ListEmptyComponent = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <MediaListItemSkeleton key={index} />
+          ))}
+        </YStack>
+      );
+    }
+
+    if (followingItems.length === 0) {
+      return (
+        <YStack flex={1} justifyContent="center">
+          <EmptyPlaceholder
+            title="No following"
+            subtitle="No following found."
+            icon={<UserRoundPlus />}
+          />
+        </YStack>
+      );
+    }
+
+    if (filteredItems.length === 0) {
+      return (
+        <YStack flex={1}>
+          <H6 theme="alt1">No Users Found</H6>
+        </YStack>
+      );
+    }
+
+    return null;
+  }, [isLoading, followingItems.length, filteredItems.length]);
+
   return (
     <FlashList
       data={filteredItems}
-      renderItem={({ item }) => (
-        <MediaListItem
-          title={item.username}
-          subtitle={item.name}
-          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          primaryAction={renderActionButton(item)}
-          onPress={() =>
-            routeProfile({ userId: item.userId, username: item.username })
-          }
-        />
-      )}
+      renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
-      ListHeaderComponent={
-        <YStack gap="$4">
-          <SearchInput
-            placeholder="Search following..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onClear={() => setSearchQuery("")}
-          />
-        </YStack>
-      }
-      ListEmptyComponent={
-        isLoading ? (
-          <YStack gap="$4">
-            {Array.from({ length: 10 }).map((_, index) => (
-              <MediaListItemSkeleton key={index} />
-            ))}
-          </YStack>
-        ) : followingItems.length === 0 ? (
-          <YStack flex={1} justifyContent="center">
-            <EmptyPlaceholder
-              title="No following"
-              subtitle="No following found."
-              icon={<UserRoundPlus />}
-            />
-          </YStack>
-        ) : filteredItems.length === 0 ? (
-          <YStack flex={1}>
-            <H6 theme="alt1">No Users Found</H6>
-          </YStack>
-        ) : null
-      }
+      ListHeaderComponent={ListHeaderComponent}
+      ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
       ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
       contentContainerStyle={{
