@@ -58,10 +58,10 @@ const Followers = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowersSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowersSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
     onSettled: async () => {
       // Sync with server once mutation has settled

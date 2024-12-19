@@ -70,10 +70,10 @@ const Following = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowingSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -108,10 +108,10 @@ const Following = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowingSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -146,10 +146,10 @@ const Following = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowingSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 

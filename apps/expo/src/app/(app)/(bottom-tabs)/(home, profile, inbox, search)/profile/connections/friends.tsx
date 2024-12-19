@@ -74,10 +74,11 @@ const Friends = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.friend.paginateFriendsOthers.setInfiniteData(
-        { userId, pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.friend.paginateFriendsOthers.invalidate({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -113,10 +114,11 @@ const Friends = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.friend.paginateFriendsOthers.setInfiniteData(
-        { userId, pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.friend.paginateFriendsOthers.invalidate({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -152,10 +154,11 @@ const Friends = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.friend.paginateFriendsOthers.setInfiniteData(
-        { userId, pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.friend.paginateFriendsOthers.invalidate({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 

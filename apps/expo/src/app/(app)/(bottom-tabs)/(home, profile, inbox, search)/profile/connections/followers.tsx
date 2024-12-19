@@ -75,10 +75,11 @@ const Followers = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowersOthers.setInfiniteData(
-        { userId, pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowersOthers.invalidate({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -114,10 +115,11 @@ const Followers = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowersOthers.setInfiniteData(
-        { userId, pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowersOthers.invalidate({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -153,10 +155,11 @@ const Followers = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowersOthers.setInfiniteData(
-        { userId, pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowersOthers.invalidate({
+        userId,
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
