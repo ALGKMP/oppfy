@@ -89,11 +89,12 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
         />
       </XStack>
 
-      {userId && profileData?.userId === userId ? (
+      {/* {userId && profileData?.userId === userId ? (
         <ActionButton userId={userId} />
       ) : (
         <SelfActionButton />
-      )}
+      )} */}
+      <ActionButton userId={userId} />
     </YStack>
   );
 };
