@@ -31,19 +31,12 @@ interface LoadedProps<T extends PersonItem> {
 type FriendCarouselProps = LoadedProps<PersonItem>;
 
 function FriendCarousel(props: FriendCarouselProps) {
+  const { userId } = props;
   const {
     data: friendsData,
     isLoading: isLoadingFriendsData,
     refetch: refetchFriendsData, // TODO: Some Context on the page that triggers refetching
-  } = api.friend.paginateFriendsOthers.useInfiniteQuery(
-    { userId: props.userId, pageSize: 10 },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!props.userId,
-      refetchOnMount: true,
-    },
-  );
-
+  } = useGetFriends({ userId });
   const friendsItems = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
   const onShowMore = () => {
