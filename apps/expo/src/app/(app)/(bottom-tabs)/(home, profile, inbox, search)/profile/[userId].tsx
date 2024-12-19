@@ -14,7 +14,6 @@ import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
-import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
@@ -366,7 +365,6 @@ const OtherProfile = React.memo(() => {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <YStack gap="$4">
-          <PeopleCarousel loading />
           <PostCard loading />
         </YStack>
       </BaseScreenView>
