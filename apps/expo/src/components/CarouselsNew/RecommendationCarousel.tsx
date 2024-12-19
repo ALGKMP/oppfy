@@ -1,4 +1,3 @@
-import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -9,6 +8,7 @@ import { Skeleton } from "~/components/Skeletons";
 import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import UserItem from "./UserItem";
+import Carousel from "./Carousel";
 
 /*
  * TODO: Can make this a compound component later if we want to add more styles
@@ -34,54 +34,13 @@ function RecommendationCarousel() {
     // });
   };
 
-  if (isLoadingRecommendationsData) {
-    return (
-      <CardContainer paddingLeft={0} paddingRight={0}>
-        <FlashList
-          data={PLACEHOLDER_DATA}
-          horizontal
-          ListEmptyComponent={null}
-          estimatedItemSize={70}
-          showsHorizontalScrollIndicator={false}
-          renderItem={() => <Skeleton circular size={70} />}
-          ItemSeparatorComponent={() => <Spacer size="$2.5" />}
-          contentContainerStyle={{
-            paddingHorizontal: getToken("$2", "space") as number,
-          }}
-        />
-      </CardContainer>
-    );
-  }
-
   return (
-    <CardContainer paddingHorizontal={0}>
-      <YStack gap="$3">
-        <XStack
-          justifyContent="space-between"
-          alignItems="center"
-          paddingHorizontal="$3"
-        >
-          <H5>Recommendations</H5>
-          <TouchableOpacity onPress={onShowMore}>
-            <Text theme="alt1" fontSize="$3" fontWeight="600">
-              See all
-            </Text>
-          </TouchableOpacity>
-        </XStack>
-
-        <FlashList
-          data={recommendationsItems}
-          horizontal
-          estimatedItemSize={70}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => <UserItem item={item} />}
-          ItemSeparatorComponent={() => <Spacer size="$2.5" />}
-          contentContainerStyle={{
-            paddingHorizontal: getToken("$2.5", "space") as number,
-          }}
-        />
-      </YStack>
-    </CardContainer>
+    <Carousel
+      title="Recommendations"
+      onShowMore={onShowMore}
+      isLoading={isLoadingRecommendationsData}
+      data={recommendationsItems}
+    />
   );
 }
 
