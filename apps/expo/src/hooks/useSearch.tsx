@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import Fuse from "fuse.js";
+import Fuse, { FuseOptionKey } from "fuse.js";
 
 interface UseSearchOptions<T> {
   data: T[];
-  keys: string[];
+  keys: (keyof T)[];
   threshold?: number;
 }
 
@@ -17,7 +17,7 @@ const useSearch = <T,>({
   const fuse = useMemo(
     () =>
       new Fuse(data, {
-        keys,
+        keys: keys as FuseOptionKey<T>[],
         threshold,
       }),
     [data, keys, threshold],
