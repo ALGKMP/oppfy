@@ -83,7 +83,7 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
           )}
         </YStack>
         <Stats
-          userId={profileData?.userId ?? ""}
+          userId={userId}
           followingCount={profileData?.followingCount ?? 0}
           followerCount={profileData?.followerCount ?? 0}
         />

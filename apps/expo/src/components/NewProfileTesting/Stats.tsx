@@ -8,7 +8,7 @@ import { abbreviatedNumber } from "@oppfy/utils";
 import { useRouter } from "expo-router";
 
 interface StatsProps {
-  userId: string;
+  userId?: string;
   followingCount: number;
   followerCount: number;
 }
