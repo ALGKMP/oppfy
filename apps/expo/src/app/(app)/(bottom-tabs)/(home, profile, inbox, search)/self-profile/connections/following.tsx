@@ -1,45 +1,47 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
-import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { H5, H6, View, YStack } from "tamagui";
+import { getToken, H6, YStack } from "tamagui";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
-import { VirtualizedListItem } from "~/components/ListItems";
-import type { ButtonProps } from "~/components/ListItems/VirtualizedListItem";
+import {
+  MediaListItem,
+  MediaListItemSkeleton,
+  useActionSheetController,
+} from "~/components/ui";
+import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type FollowingItem =
   RouterOutputs["follow"]["paginateFollowingSelf"]["items"][0];
 
-const FollowingList = () => {
-  const router = useRouter();
+const PAGE_SIZE = 20;
+
+const Following = () => {
   const utils = api.useUtils();
+  const actionSheet = useActionSheetController();
 
   const [refreshing, setRefreshing] = useState(false);
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingSelf.cancel();
+      await utils.follow.paginateFollowingSelf.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowingSelf.getInfiniteData({
-        pageSize: 20,
+        pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -63,24 +65,27 @@ const FollowingList = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowingSelf.setInfiniteData(
+        { pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
     },
   });
 
   const unfollowMutation = api.follow.unfollowUser.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingSelf.cancel();
+      await utils.follow.paginateFollowingSelf.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowingSelf.getInfiniteData({
-        pageSize: 20,
+        pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -98,24 +103,27 @@ const FollowingList = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowingSelf.setInfiniteData(
+        { pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
     },
   });
 
   const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.follow.paginateFollowingSelf.cancel();
+      await utils.follow.paginateFollowingSelf.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
       const prevData = utils.follow.paginateFollowingSelf.getInfiniteData({
-        pageSize: 20,
+        pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -133,7 +141,10 @@ const FollowingList = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowingSelf.setInfiniteData(
+        { pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
     },
   });
 
@@ -145,12 +156,8 @@ const FollowingList = () => {
     hasNextPage,
     refetch,
   } = api.follow.paginateFollowingSelf.useInfiniteQuery(
-    {
-      pageSize: 20,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    { pageSize: PAGE_SIZE },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
   const followingItems = useMemo(() => {
@@ -162,141 +169,103 @@ const FollowingList = () => {
     keys: ["name", "username"],
   });
 
-  const handleOnEndReached = async () => {
+  const handleOnEndReached = useCallback(async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  };
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-  const handleFollow = async (userId: string) =>
-    await followMutation.mutateAsync({ userId });
+  const handleFollow = useCallback(
+    async (userId: string) => {
+      await followMutation.mutateAsync({ userId });
+    },
+    [followMutation],
+  );
 
-  const handleUnfollow = async (userId: string) =>
-    await unfollowMutation.mutateAsync({ userId });
+  const handleUnfollow = useCallback(
+    async (userId: string) => {
+      await unfollowMutation.mutateAsync({ userId });
+    },
+    [unfollowMutation],
+  );
 
-  const handleCancelFollowRequest = async (senderId: string) =>
-    await cancelFollowRequest.mutateAsync({ recipientId: senderId });
+  const handleCancelFollowRequest = useCallback(
+    async (userId: string) => {
+      await cancelFollowRequest.mutateAsync({ recipientId: userId });
+    },
+    [cancelFollowRequest],
+  );
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
-  };
+  }, [refetch]);
 
-  const renderLoadingSkeletons = () => (
-    <CardContainer>
-      {PLACEHOLDER_DATA.map((_, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading
-          showSkeletons={{
-            imageUrl: true,
-            title: true,
-            subtitle: true,
-            button: true,
-          }}
-        />
-      ))}
-    </CardContainer>
-  );
-
-  const renderButton = (item: FollowingItem): ButtonProps => {
-    switch (item.relationshipState) {
-      case "followRequestSent":
-        return {
-          text: "Sent",
-          icon: <Send size="$1" />,
-          onPress: () => void handleCancelFollowRequest(item.userId),
-        };
-      case "following":
-        return {
-          text: "Unfollow",
-          icon: <UserRoundMinus size="$1" />,
-          onPress: () => void handleUnfollow(item.userId),
-        };
-      case "notFollowing":
-        return {
-          text: "Follow",
-          icon: <UserRoundPlus size="$1" />,
-          backgroundColor: "$primary",
-          onPress: () => void handleFollow(item.userId),
-        };
-    }
-  };
-
-  const renderListItem = (item: FollowingItem) => (
-    <VirtualizedListItem
-      loading={false}
-      title={item.username}
-      subtitle={item.name}
-      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-      button={renderButton(item)}
-      onPress={() =>
-        router.push({
-          pathname: "/profile/[userId]",
-          params: { userId: item.userId, username: item.username },
-        })
+  const renderActionButton = useCallback(
+    (item: FollowingItem) => {
+      switch (item.relationshipState) {
+        case "followRequestSent":
+          return {
+            label: "Sent",
+            icon: Send,
+            onPress: () =>
+              actionSheet.show({
+                title: "Cancel Follow Request",
+                subtitle: `Are you sure you want to cancel your follow request to ${item.username}?`,
+                imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+                buttonOptions: [
+                  {
+                    text: "Cancel Request",
+                    textProps: { color: "$red11" },
+                    onPress: () => void handleCancelFollowRequest(item.userId),
+                  },
+                ],
+              }),
+          };
+        case "following":
+          return {
+            label: "Unfollow",
+            icon: UserRoundMinus,
+            onPress: () =>
+              actionSheet.show({
+                title: "Unfollow User",
+                subtitle: `Are you sure you want to unfollow ${item.username}?`,
+                imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+                buttonOptions: [
+                  {
+                    text: "Unfollow",
+                    textProps: { color: "$red11" },
+                    onPress: () => void handleUnfollow(item.userId),
+                  },
+                ],
+              }),
+          };
+        case "notFollowing":
+          return {
+            label: "Follow",
+            icon: UserRoundPlus,
+            onPress: () => void handleFollow(item.userId),
+          };
       }
-    />
+    },
+    [actionSheet, handleCancelFollowRequest, handleUnfollow, handleFollow],
   );
 
-  const renderFollowing = () => (
-    <CardContainer>
-      <H5 theme="alt1">Following</H5>
-      <FlashList
-        data={filteredItems}
-        onRefresh={refetch}
-        refreshing={isLoading}
-        keyExtractor={(item) => "following_list_" + item.userId}
-        estimatedItemSize={75}
-        onEndReached={handleOnEndReached}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => renderListItem(item)}
+  const renderListItem = useCallback(
+    (item: FollowingItem) => (
+      <MediaListItem
+        title={item.username}
+        subtitle={item.name}
+        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+        primaryAction={renderActionButton(item)}
       />
-    </CardContainer>
+    ),
+    [renderActionButton],
   );
 
-  const renderNoResults = () => (
-    <View flex={1} justifyContent="center">
-      <EmptyPlaceholder
-        title="No results"
-        subtitle="No following found."
-        icon={<UserRoundPlus />}
-      />
-    </View>
-  );
-
-  if (isLoading) {
-    return (
-      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
-    );
-  }
-
-  if (followingItems.length === 0) {
-    return (
-      <BaseScreenView
-        scrollable
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-        }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-      >
-        {renderNoResults()}
-      </BaseScreenView>
-    );
-  }
-
-  return (
-    <BaseScreenView
-      scrollable
-      keyboardDismissMode="interactive"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
+  const ListHeaderComponent = useMemo(
+    () => (
       <YStack gap="$4">
         <SearchInput
           placeholder="Search following..."
@@ -304,17 +273,66 @@ const FollowingList = () => {
           onChangeText={setSearchQuery}
           onClear={() => setSearchQuery("")}
         />
-
-        {filteredItems.length > 0 ? (
-          renderFollowing()
-        ) : (
-          <H6 theme="alt1" lineHeight={0}>
-            No Users Found
-          </H6>
-        )}
       </YStack>
-    </BaseScreenView>
+    ),
+    [searchQuery, setSearchQuery],
+  );
+
+  const ListEmptyComponent = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <MediaListItemSkeleton key={index} />
+          ))}
+        </YStack>
+      );
+    }
+
+    if (followingItems.length === 0) {
+      return (
+        <YStack flex={1} justifyContent="center">
+          <EmptyPlaceholder
+            title="No following"
+            subtitle="No following found."
+            icon={<UserRoundPlus />}
+          />
+        </YStack>
+      );
+    }
+
+    if (filteredItems.length === 0) {
+      return (
+        <YStack flex={1}>
+          <H6 theme="alt1">No Users Found</H6>
+        </YStack>
+      );
+    }
+
+    return null;
+  }, [isLoading, followingItems.length, filteredItems.length]);
+
+  return (
+    <FlashList
+      data={filteredItems}
+      renderItem={({ item }) => renderListItem(item)}
+      estimatedItemSize={75}
+      ListHeaderComponent={ListHeaderComponent}
+      ListEmptyComponent={ListEmptyComponent}
+      ItemSeparatorComponent={Spacer}
+      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+      }}
+      showsVerticalScrollIndicator={false}
+      onEndReached={handleOnEndReached}
+      onEndReachedThreshold={0.5}
+      keyboardShouldPersistTaps="always"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    />
   );
 };
 
-export default FollowingList;
+export default Following;
