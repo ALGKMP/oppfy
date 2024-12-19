@@ -9,6 +9,7 @@ import { getToken, H6, YStack } from "tamagui";
 import { SearchInput } from "~/components/Inputs";
 import {
   MediaListItem,
+  MediaListItemActionProps,
   MediaListItemSkeleton,
   useActionSheetController,
 } from "~/components/ui";
@@ -207,7 +208,7 @@ const Following = () => {
   }, [refetch]);
 
   const renderActionButton = useCallback(
-    (item: FollowingItem) => {
+    (item: FollowingItem): MediaListItemActionProps => {
       switch (item.relationshipState) {
         case "followRequestSent":
           return {
@@ -249,6 +250,7 @@ const Following = () => {
           return {
             label: "Follow",
             icon: UserRoundPlus,
+            variant: "primary",
             onPress: () => void handleFollow(item.userId),
           };
       }

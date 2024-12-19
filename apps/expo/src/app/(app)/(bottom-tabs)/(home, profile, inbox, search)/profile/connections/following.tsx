@@ -9,6 +9,7 @@ import { getToken, H6, YStack } from "tamagui";
 import { SearchInput } from "~/components/Inputs";
 import {
   MediaListItem,
+  MediaListItemActionProps,
   MediaListItemSkeleton,
   useActionSheetController,
 } from "~/components/ui";
@@ -214,7 +215,7 @@ const Following = () => {
   }, [refetch]);
 
   const renderActionButton = useCallback(
-    (item: FollowingItem) => {
+    (item: FollowingItem): MediaListItemActionProps | undefined => {
       if (item.userId === user?.uid) return undefined;
 
       switch (item.relationshipState) {
