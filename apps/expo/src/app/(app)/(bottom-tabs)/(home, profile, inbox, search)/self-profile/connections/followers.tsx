@@ -1,16 +1,14 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { RefreshControl, TextInput } from "react-native";
+import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { getToken, H6, Input, useTheme, View, YStack } from "tamagui";
+import { getToken, H6, YStack } from "tamagui";
 
 import { SearchInput } from "~/components/Inputs";
 import {
-  CardContainer,
   MediaListItem,
   MediaListItemSkeleton,
-  ScreenView,
   useActionSheetController,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
@@ -22,8 +20,9 @@ import { api } from "~/utils/api";
 type FollowerItem =
   RouterOutputs["follow"]["paginateFollowersSelf"]["items"][0];
 
-const FollowerList = () => {
-  const theme = useTheme();
+const PAGE_SIZE = 20;
+
+const Followers = () => {
   const utils = api.useUtils();
   const actionSheet = useActionSheetController();
 
@@ -31,12 +30,14 @@ const FollowerList = () => {
 
   const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
-      await utils.follow.paginateFollowersSelf.cancel();
-      const prevData = utils.follow.paginateFollowersSelf.getInfiniteData();
+      await utils.follow.paginateFollowersSelf.cancel({ pageSize: PAGE_SIZE });
+      const prevData = utils.follow.paginateFollowersSelf.getInfiniteData({
+        pageSize: PAGE_SIZE,
+      });
       if (prevData === undefined) return;
 
       utils.follow.paginateFollowersSelf.setInfiniteData(
-        {},
+        { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -50,10 +51,15 @@ const FollowerList = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowersSelf.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowersSelf.setInfiniteData(
+        { pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
     },
     onSettled: async () => {
-      await utils.follow.paginateFollowersSelf.invalidate();
+      await utils.follow.paginateFollowersSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -65,7 +71,7 @@ const FollowerList = () => {
     hasNextPage,
     refetch,
   } = api.follow.paginateFollowersSelf.useInfiniteQuery(
-    { pageSize: 20 },
+    { pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
@@ -179,21 +185,21 @@ const FollowerList = () => {
       renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
       ListHeaderComponent={ListHeaderComponent}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
+      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+      }}
+      showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}
       keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        padding: getToken("$4", "space"),
-      }}
     />
   );
 };
 
-export default FollowerList;
+export default Followers;

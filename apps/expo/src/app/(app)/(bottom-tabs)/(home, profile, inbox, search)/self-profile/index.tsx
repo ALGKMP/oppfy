@@ -211,9 +211,7 @@ const SelfProfile = React.memo(() => {
             title="Friends 🔥"
             showMore={friendItems.length < (profileData?.friendCount ?? 0)}
             onItemPress={navigateToProfile}
-            onShowMore={() =>
-              router.push("/self-profile/connections/friend-list")
-            }
+            onShowMore={() => router.push("/self-profile/connections/friends")}
           />
         ) : (
           <PeopleCarousel

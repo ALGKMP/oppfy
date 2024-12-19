@@ -33,14 +33,14 @@ const ConnectionsLayout = () => {
       }}
     >
       <TopTabs.Screen
-        name="friend-list"
+        name="friends"
         options={{
           tabBarLabel: "Friends",
         }}
         initialParams={{ userId }}
       />
       <TopTabs.Screen
-        name="followers-list"
+        name="followers"
         options={{
           tabBarLabel: "Followers",
         }}

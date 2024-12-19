@@ -1,11 +1,11 @@
-import { YStack, XStack, Text } from "~/components/ui";
-import { TouchableOpacity } from "react-native";
-import { useSession } from "~/contexts/SessionContext";
-
 import { useState } from "react";
+import { TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 
 import { abbreviatedNumber } from "@oppfy/utils";
-import { useRouter } from "expo-router";
+
+import { Text, XStack, YStack } from "~/components/ui";
+import { useSession } from "~/contexts/SessionContext";
 
 interface StatsProps {
   userId: string;
@@ -14,7 +14,6 @@ interface StatsProps {
 }
 
 const Stats = ({ userId, followingCount, followerCount }: StatsProps) => {
-
   /*
    * Notice how we just have one state variable for the entire component.
    * We don't have a wall of state or wall of functions,
@@ -36,16 +35,10 @@ const Stats = ({ userId, followingCount, followerCount }: StatsProps) => {
   return (
     <YStack alignItems="flex-end" gap="$2">
       <TouchableOpacity onPress={onFollowingPress} disabled={isRestricted}>
-        <Stat
-          label="Following"
-          value={abbreviatedNumber(followingCount)}
-        />
+        <Stat label="Following" value={abbreviatedNumber(followingCount)} />
       </TouchableOpacity>
       <TouchableOpacity onPress={onFollowersPress} disabled={isRestricted}>
-        <Stat
-          label="Followers"
-          value={abbreviatedNumber(followerCount)}
-        />
+        <Stat label="Followers" value={abbreviatedNumber(followerCount)} />
       </TouchableOpacity>
     </YStack>
   );
@@ -71,7 +64,7 @@ const useOnFollowPress = ({ userId }: { userId?: string } = {}) => {
         router.push("/self-profile/connections/following-list");
       },
       onFollowersPress: () => {
-        router.push("/self-profile/connections/followers-list");
+        router.push("/self-profile/connections/followers");
       },
     };
   }
@@ -80,7 +73,7 @@ const useOnFollowPress = ({ userId }: { userId?: string } = {}) => {
       router.push("/self-profile/connections/following-list");
     },
     onFollowersPress: () => {
-      router.push("/self-profile/connections/followers-list");
+      router.push("/self-profile/connections/followers");
     },
   };
 };
