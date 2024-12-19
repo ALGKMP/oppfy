@@ -9,7 +9,7 @@ export const searchRouter = createTRPCRouter({
   profilesByUsername: protectedProcedure
     .input(
       z.object({
-        username: sharedValidators.user.username,
+        username: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {

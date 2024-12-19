@@ -41,6 +41,7 @@ import { Spinner } from "./Spinner";
 import { XStack, YStack } from "./Stacks";
 import { Switch } from "./Switch";
 import { Paragraph, SizableText, Text } from "./Texts";
+import { TimeAgo } from "./TimeAgo";
 import { ToggleGroup } from "./ToggleGroup";
 import { Tooltip } from "./Tooltip";
 import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
@@ -59,6 +60,7 @@ export {
   Paragraph,
   SizableText,
   Text,
+  TimeAgo,
   XStack,
   YStack,
   Checkbox,

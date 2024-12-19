@@ -7,11 +7,7 @@ import React, {
 } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
-import {
-  useLocalSearchParams,
-  useNavigation,
-  useRouter,
-} from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -22,6 +18,7 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import Header from "~/components/NewProfileTesting/Header";
 import type { ButtonOption } from "~/components/Sheets";
 import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -30,7 +27,6 @@ import useProfile from "~/hooks/useProfile";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import Header from "~/components/NewProfileTesting/Header";
 
 type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
 
@@ -366,7 +362,7 @@ const OtherProfile = React.memo(() => {
   const renderHeader = useMemo(
     () => (
       <YStack gap="$4">
-        <Header userId={userId}/>
+        <Header userId={userId} />
         {friendItems.length > 0 && !blocked ? (
           <PeopleCarousel
             loading={isLoading}
@@ -375,14 +371,14 @@ const OtherProfile = React.memo(() => {
             showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
             onTitlePress={() =>
               router.push({
-                pathname: "/profile/connections/friend-list",
+                pathname: "/profile/connections/friends",
                 params: { userId, username },
               })
             }
             onItemPress={navigateToProfile}
             onShowMore={() =>
               router.push({
-                pathname: "/profile/connections/friend-list",
+                pathname: "/profile/connections/friends",
                 params: { userId, username },
               })
             }

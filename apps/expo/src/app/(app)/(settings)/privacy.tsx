@@ -109,7 +109,7 @@ const Privacy = () => {
           title: "Blocked Users",
           icon: <ShieldBan />,
           iconAfter: <ChevronRight />,
-          onPress: () => router.push("/blocked-users"),
+          onPress: () => router.push("/blocked"),
         },
       ],
     },

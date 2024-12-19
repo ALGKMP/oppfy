@@ -1,13 +1,11 @@
 import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
-import { useTheme } from "tamagui";
 
 import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
 import { api } from "~/utils/api";
 
 const ConnectionsLayout = () => {
-  const theme = useTheme();
   const navigation = useNavigation();
 
   const utils = api.useUtils();
@@ -20,31 +18,23 @@ const ConnectionsLayout = () => {
   }, [navigation, profileData?.username]);
 
   return (
-    <TopTabs
-      tabBar={(props) => <TopTabBar {...props} />}
-      backBehavior="none"
-      sceneContainerStyle={{
-        backgroundColor: theme.background.val,
-      }}
-    >
+    <TopTabs backBehavior="none" tabBar={(props) => <TopTabBar {...props} />}>
       <TopTabs.Screen
-        name="friend-list"
+        name="friends"
         options={{
-          tabBarLabel: "Friends",
+          title: "Friends",
         }}
       />
       <TopTabs.Screen
-        name="followers-list"
+        name="followers"
         options={{
-          title: "Test",
-          tabBarLabel: "Followers",
+          title: "Followers",
         }}
       />
       <TopTabs.Screen
-        name="following-list"
+        name="following"
         options={{
-          title: "Test",
-          tabBarLabel: "Following",
+          title: "Following",
         }}
       />
     </TopTabs>

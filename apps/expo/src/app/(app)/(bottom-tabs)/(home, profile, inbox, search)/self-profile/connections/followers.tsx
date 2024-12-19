@@ -1,20 +1,19 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { RefreshControl, TextInput } from "react-native";
+import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { getToken, H6, Input, useTheme, View, YStack } from "tamagui";
+import { getToken, H6, YStack } from "tamagui";
 
 import { SearchInput } from "~/components/Inputs";
 import {
-  CardContainer,
   MediaListItem,
   MediaListItemSkeleton,
-  ScreenView,
   useActionSheetController,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -22,21 +21,30 @@ import { api } from "~/utils/api";
 type FollowerItem =
   RouterOutputs["follow"]["paginateFollowersSelf"]["items"][0];
 
-const FollowerList = () => {
-  const theme = useTheme();
+const PAGE_SIZE = 20;
+
+const Followers = () => {
   const utils = api.useUtils();
   const actionSheet = useActionSheetController();
+
+  const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
 
   const removeFollower = api.follow.removeFollower.useMutation({
     onMutate: async (newData) => {
-      await utils.follow.paginateFollowersSelf.cancel();
-      const prevData = utils.follow.paginateFollowersSelf.getInfiniteData();
+      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
+      await utils.follow.paginateFollowersSelf.cancel({ pageSize: PAGE_SIZE });
+
+      // Get the data from the queryCache
+      const prevData = utils.follow.paginateFollowersSelf.getInfiniteData({
+        pageSize: PAGE_SIZE,
+      });
       if (prevData === undefined) return;
 
+      // Optimistically update the data
       utils.follow.paginateFollowersSelf.setInfiniteData(
-        {},
+        { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -50,10 +58,16 @@ const FollowerList = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowersSelf.setInfiniteData({}, ctx.prevData);
+      utils.follow.paginateFollowersSelf.setInfiniteData(
+        { pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
     },
     onSettled: async () => {
-      await utils.follow.paginateFollowersSelf.invalidate();
+      // Sync with server once mutation has settled
+      await utils.follow.paginateFollowersSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -65,7 +79,7 @@ const FollowerList = () => {
     hasNextPage,
     refetch,
   } = api.follow.paginateFollowersSelf.useInfiniteQuery(
-    { pageSize: 20 },
+    { pageSize: PAGE_SIZE },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
@@ -120,9 +134,26 @@ const FollowerList = () => {
               ],
             }),
         }}
+        onPress={() =>
+          routeProfile({ userId: item.userId, username: item.username })
+        }
       />
     ),
-    [actionSheet, handleRemoveFollower],
+    [actionSheet, handleRemoveFollower, routeProfile],
+  );
+
+  const ListHeaderComponent = useMemo(
+    () => (
+      <YStack gap="$4">
+        <SearchInput
+          placeholder="Search followers..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
+        />
+      </YStack>
+    ),
+    [searchQuery, setSearchQuery],
   );
 
   const ListEmptyComponent = useCallback(() => {
@@ -164,31 +195,22 @@ const FollowerList = () => {
       data={filteredItems}
       renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
-      ListHeaderComponent={
-        <YStack gap="$4">
-          <SearchInput
-            placeholder="Search followers..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onClear={() => setSearchQuery("")}
-          />
-        </YStack>
-      }
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
+      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+      }}
+      showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}
       keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        padding: getToken("$4", "space"),
-      }}
     />
   );
 };
 
-export default FollowerList;
+export default Followers;
