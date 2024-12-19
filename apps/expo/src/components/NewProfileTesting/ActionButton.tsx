@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 
 import { Button, Text, View, XStack } from "~/components/ui";
 import { Skeleton } from "~/components/ui/Skeleton";
@@ -18,7 +18,7 @@ interface ActionButtonProps {
 
 const ActionButton = ({ userId }: ActionButtonProps) => {
   const actions = useProfileActions(userId);
-  
+
   // Only make the network status query if userId is provided
   const { data: networkStatus, isLoading: isNetworkStatusLoading } =
     api.profile.getNetworkRelationships.useQuery(
@@ -45,7 +45,9 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
             }}
           >
             <XStack gap="$2" alignItems="center">
-              <Text>{key === 'editProfile' ? 'Edit Profile' : 'Share Profile'}</Text>
+              <Text>
+                {key === "editProfile" ? "Edit Profile" : "Share Profile"}
+              </Text>
               {loading && <Spinner size="small" color="$color" />}
             </XStack>
           </Button>
@@ -167,7 +169,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   );
 };
 
-/*
+/* 
  * ==========================================
  * ============== Hooks =====================
  * ==========================================
@@ -182,39 +184,9 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
 const useProfileActions = (userId?: string) => {
   const utils = api.useUtils();
   const router = useRouter();
-  // State to track invalidation status per action using action keys
-  const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
-    Record<string, boolean>
-  >({});
+  const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<Record<string, boolean>>({});
 
-  if (!userId) {
-    return {
-      actions: {
-        editProfile: {
-          handler: () => router.push("/edit-profile"),
-          loading: false,
-          disabled: false,
-        },
-        shareProfile: {
-          handler: () => router.push("/share-profile"),
-          loading: false,
-          disabled: false,
-        },
-      },
-    };
-  }
-
-  // Helper function to invalidate queries for a specific action
-  const invalidateQueries = async (actionKey: string) => {
-    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
-    await Promise.all([
-      utils.profile.getFullProfileOther.invalidate({ userId }),
-      utils.contacts.getRecommendationProfilesSelf.invalidate(),
-    ]);
-    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
-  };
-
-  // Mutations with onSettled callbacks that trigger invalidation per action
+  // NOTE: mutations must be declared unconditionally to not break the rules of hooks
   const followUser = api.follow.followUser.useMutation({
     onSettled: () => {
       void invalidateQueries("follow");
@@ -251,22 +223,16 @@ const useProfileActions = (userId?: string) => {
     },
   });
 
-  // Action handlers
-  const handleFollow = () => followUser.mutate({ userId });
+  const invalidateQueries = async (actionKey: string) => {
+    if (!userId) return;
+    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
+    await Promise.all([
+      utils.profile.getFullProfileOther.invalidate({ userId }),
+      utils.contacts.getRecommendationProfilesSelf.invalidate(),
+    ]);
+    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
+  };
 
-  const handleUnfollow = () => unfollowUser.mutate({ userId });
-
-  const handleAddFriend = () => addFriend.mutate({ recipientId: userId });
-
-  const handleRemoveFriend = () => removeFriend.mutate({ recipientId: userId });
-
-  const handleCancelFollowRequest = () =>
-    cancelFollowRequest.mutate({ recipientId: userId });
-
-  const handleCancelFriendRequest = () =>
-    cancelFriendRequest.mutate({ recipientId: userId });
-
-  // Determine if any action is currently loading
   const isAnyActionLoading =
     followUser.isPending ||
     unfollowUser.isPending ||
@@ -274,49 +240,56 @@ const useProfileActions = (userId?: string) => {
     removeFriend.isPending ||
     cancelFollowRequest.isPending ||
     cancelFriendRequest.isPending ||
-    Object.values(isInvalidatingByAction).some(
-      (isInvalidating) => isInvalidating,
-    );
+    Object.values(isInvalidatingByAction).some((isInvalidating) => isInvalidating);
 
-  // Return actions with handlers and loading states
-  return {
-    actions: {
-      follow: {
-        handler: handleFollow,
-        loading: followUser.isPending || isInvalidatingByAction.follow,
-        disabled: isAnyActionLoading,
-      },
-      unfollow: {
-        handler: handleUnfollow,
-        loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
-        disabled: isAnyActionLoading,
-      },
-      addFriend: {
-        handler: handleAddFriend,
-        loading: addFriend.isPending || isInvalidatingByAction.addFriend,
-        disabled: isAnyActionLoading,
-      },
-      removeFriend: {
-        handler: handleRemoveFriend,
-        loading: removeFriend.isPending || isInvalidatingByAction.removeFriend,
-        disabled: isAnyActionLoading,
-      },
-      cancelFollowRequest: {
-        handler: handleCancelFollowRequest,
-        loading:
-          cancelFollowRequest.isPending ||
-          isInvalidatingByAction.cancelFollowRequest,
-        disabled: isAnyActionLoading,
-      },
-      cancelFriendRequest: {
-        handler: handleCancelFriendRequest,
-        loading:
-          cancelFriendRequest.isPending ||
-          isInvalidatingByAction.cancelFriendRequest,
-        disabled: isAnyActionLoading,
-      },
-    },
-  };
+  // Create actions object based on userId
+  const actions = userId
+    ? {
+        follow: {
+          handler: () => followUser.mutate({ userId }),
+          loading: followUser.isPending || isInvalidatingByAction.follow,
+          disabled: isAnyActionLoading,
+        },
+        unfollow: {
+          handler: () => unfollowUser.mutate({ userId }),
+          loading: unfollowUser.isPending || isInvalidatingByAction.unfollow,
+          disabled: isAnyActionLoading,
+        },
+        addFriend: {
+          handler: () => addFriend.mutate({ recipientId: userId }),
+          loading: addFriend.isPending || isInvalidatingByAction.addFriend,
+          disabled: isAnyActionLoading,
+        },
+        removeFriend: {
+          handler: () => removeFriend.mutate({ recipientId: userId }),
+          loading: removeFriend.isPending || isInvalidatingByAction.removeFriend,
+          disabled: isAnyActionLoading,
+        },
+        cancelFollowRequest: {
+          handler: () => cancelFollowRequest.mutate({ recipientId: userId }),
+          loading: cancelFollowRequest.isPending || isInvalidatingByAction.cancelFollowRequest,
+          disabled: isAnyActionLoading,
+        },
+        cancelFriendRequest: {
+          handler: () => cancelFriendRequest.mutate({ recipientId: userId }),
+          loading: cancelFriendRequest.isPending || isInvalidatingByAction.cancelFriendRequest,
+          disabled: isAnyActionLoading,
+        },
+      }
+    : {
+        editProfile: {
+          handler: () => router.push("/edit-profile"),
+          loading: false,
+          disabled: false,
+        },
+        shareProfile: {
+          handler: () => router.push("/share-profile"),
+          loading: false,
+          disabled: false,
+        },
+      };
+
+  return { actions };
 };
 
 export default ActionButton;
