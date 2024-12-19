@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { usePathname, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
@@ -56,7 +56,6 @@ const Stats = ({ userId, followingCount, followerCount }: StatsProps) => {
  * @returns {onFollowingPress: () => void, onFollowersPress: () => void}
  */
 const useOnFollowPress = ({ userId }: { userId?: string } = {}) => {
-  const username = "test"
   const router = useRouter();
   if (userId) {
     return {
