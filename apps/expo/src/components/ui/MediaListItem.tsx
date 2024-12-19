@@ -8,7 +8,7 @@ import type { GetProps } from "tamagui";
 import { Skeleton } from "~/components/Skeletons";
 import { Button } from "./Buttons";
 import { XStack, YStack } from "./Stacks";
-import { SizableText, Text } from "./Texts";
+import { Paragraph, SizableText, Text } from "./Texts";
 
 type ButtonIconProps = { color?: any; size?: any };
 type IconProp =
@@ -22,6 +22,7 @@ type ActionProps = {
 } & GetProps<typeof Button>;
 
 type MediaListItemProps = {
+  verticalText?: boolean;
   title: ReactNode;
   subtitle?: ReactNode;
   caption?: ReactNode;
@@ -31,10 +32,16 @@ type MediaListItemProps = {
   onPress?: () => void;
 };
 
-export const MediaListItem = (props: MediaListItemProps) => {
-  const { title, subtitle, imageUrl, primaryAction, secondaryAction, onPress } =
-    props;
-
+export const MediaListItem = ({
+  verticalText,
+  title,
+  subtitle,
+  caption,
+  imageUrl,
+  primaryAction,
+  secondaryAction,
+  onPress,
+}: MediaListItemProps) => {
   const content = (
     <XStack alignItems="center" gap="$3">
       {imageUrl && (
@@ -44,24 +51,58 @@ export const MediaListItem = (props: MediaListItemProps) => {
         />
       )}
 
-      <YStack flex={1} gap="$1.5">
-        {typeof title === "string" ? (
-          <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
-            {title}
-          </SizableText>
-        ) : (
-          title
-        )}
-
-        {subtitle &&
-          (typeof subtitle === "string" ? (
-            <SizableText theme="alt1" size="$3" lineHeight={0}>
-              {subtitle}
+      {verticalText ? (
+        <Paragraph flex={1}>
+          {typeof title === "string" ? (
+            <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
+              {title}
             </SizableText>
           ) : (
-            subtitle
-          ))}
-      </YStack>
+            title
+          )}{" "}
+          {subtitle &&
+            (typeof subtitle === "string" ? (
+              <SizableText theme="alt1" size="$3" lineHeight={0}>
+                {subtitle}
+              </SizableText>
+            ) : (
+              subtitle
+            ))}{" "}
+          {caption &&
+            (typeof caption === "string" ? (
+              <SizableText theme="alt2" size="$2" lineHeight={0}>
+                {caption}
+              </SizableText>
+            ) : (
+              caption
+            ))}
+        </Paragraph>
+      ) : (
+        <YStack flex={1} gap="$1.5">
+          {typeof title === "string" ? (
+            <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
+              {title}
+            </SizableText>
+          ) : (
+            title
+          )}
+
+          {subtitle &&
+            (typeof subtitle === "string" ? (
+              <SizableText theme="alt1" size="$3" lineHeight={0}>
+                {subtitle}
+              </SizableText>
+            ) : (
+              subtitle
+            ))}
+
+          {caption && (
+            <SizableText theme="alt2" size="$2" lineHeight={0}>
+              {caption}
+            </SizableText>
+          )}
+        </YStack>
+      )}
 
       {(primaryAction || secondaryAction) && (
         <XStack gap="$2">
