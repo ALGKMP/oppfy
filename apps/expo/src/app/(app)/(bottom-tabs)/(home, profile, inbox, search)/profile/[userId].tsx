@@ -15,9 +15,9 @@ import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
-
-import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
+import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
+import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
@@ -365,35 +365,10 @@ const OtherProfile = React.memo(() => {
     () => (
       <YStack gap="$4">
         <Header userId={userId} />
-        <FriendCarousel userId={userId}/>
         {friendItems.length > 0 && !blocked ? (
-          <PeopleCarousel
-            loading={isLoading}
-            data={friendItems}
-            title="Friends 🔥"
-            showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
-            onTitlePress={() =>
-              router.push({
-                pathname: "/profile/connections/friends",
-                params: { userId, username },
-              })
-            }
-            onItemPress={navigateToProfile}
-            onShowMore={() =>
-              router.push({
-                pathname: "/profile/connections/friends",
-                params: { userId, username },
-              })
-            }
-          />
+          <FriendCarousel userId={userId} />
         ) : (
-          <PeopleCarousel
-            loading={isLoading}
-            data={recommendationItems}
-            title="Suggestions 🔥"
-            showMore={friendItems.length < (otherProfileData?.friendCount ?? 0)}
-            onItemPress={navigateToProfile}
-          />
+          <RecommendationCarousel />
         )}
       </YStack>
     ),
