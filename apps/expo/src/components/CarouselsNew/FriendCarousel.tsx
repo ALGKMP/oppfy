@@ -13,7 +13,9 @@ import UserItem from "./UserItem";
 /*
  * TODO: Can make this a compound component later if we want to add more styles
  * or if we want to add more functionality to the carousel.
- * For example, the Instagram carousel, and how some have big cards and some have small cards.
+ * For example
+ * - Turning the show more on and off
+ * - Big cards and small cards
  */
 
 interface PersonItem {
@@ -24,9 +26,6 @@ interface PersonItem {
 
 interface LoadedProps<T extends PersonItem> {
   userId: string;
-  // data: T[];
-  // title?: string;
-  // emoji?: string;
 }
 
 type FriendCarouselProps = LoadedProps<PersonItem>;
@@ -77,7 +76,11 @@ function FriendCarousel(props: FriendCarouselProps) {
   return (
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$3">
-        <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$3">
+        <XStack
+          justifyContent="space-between"
+          alignItems="center"
+          paddingHorizontal="$3"
+        >
           <H5>Friends</H5>
           <TouchableOpacity onPress={onShowMore}>
             <Text theme="alt1" fontSize="$3" fontWeight="600">
@@ -101,5 +104,46 @@ function FriendCarousel(props: FriendCarouselProps) {
     </CardContainer>
   );
 }
+
+/*
+ * ==========================================
+ * ============== Hooks =====================
+ * ==========================================
+ */
+
+/**
+ * A hook that gets the friends of a user
+ *
+ * @param {string} userId - The userId of the user
+ * @returns {actions: {follow: {handler: () => void, loading: boolean}, unfollow: {handler: () => void, loading: boolean}, cancelFollowRequest: {handler: () => void, loading: boolean}, cancelFriendRequest: {handler: () => void, loading: boolean}, removeFriend: {handler: () => void, loading: boolean}}}
+ */
+
+interface UseGetFriendsProps {
+  userId?: string;
+}
+
+const useGetFriends = (props: UseGetFriendsProps) => {
+  const { userId } = props;
+  
+  const selfQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
+    { pageSize: 10 },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !userId,
+      refetchOnMount: true,
+    },
+  );
+
+  const othersQuery = api.friend.paginateFriendsOthers.useInfiniteQuery(
+    { userId: userId ?? "", pageSize: 10 },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      enabled: !!userId,
+      refetchOnMount: true,
+    },
+  );
+
+  return userId ? othersQuery : selfQuery;
+};
 
 export default FriendCarousel;
