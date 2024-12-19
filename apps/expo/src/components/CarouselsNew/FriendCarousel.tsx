@@ -2,21 +2,22 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { TouchableOpacity } from "react-native";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { throttle } from "lodash";
 import { getToken, H5, Spacer, Text, View, XStack, YStack } from "tamagui";
-import { api } from "~/utils/api";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
+import { api } from "~/utils/api";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import UserItem from "./UserItem";
 
 /*
-* TODO: Can make this a compound component later if we want to add more styles
-* or if we want to add more functionality to the carousel.
-* For example, the Instagram carousel, and how some have big cards and some have small cards.
-*/
+ * TODO: Can make this a compound component later if we want to add more styles
+ * or if we want to add more functionality to the carousel.
+ * For example, the Instagram carousel, and how some have big cards and some have small cards.
+ */
 
 interface PersonItem {
   userId: string;
@@ -30,19 +31,16 @@ interface LoadedProps<T extends PersonItem> {
   title?: string;
   emoji?: string;
   showMore?: boolean;
-  onTitlePress?: () => void;
-  onShowMore?: () => void;
   renderExtraItem?: () => React.ReactElement;
 }
 
 type PeopleCarouselProps<T extends PersonItem> = LoadedProps<T>;
 
 function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
-
   const {
     data: friendsData,
     isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData,
+    refetch: refetchFriendsData, // TODO: Some Context on the page that triggers refetching
   } = api.friend.paginateFriendsOthers.useInfiniteQuery(
     { userId: props.userId, pageSize: 10 },
     {
@@ -52,14 +50,18 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     },
   );
 
+  const onShowMore = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: "/profile/connections/friends",
+      params: { userId: props.userId },
+    });
+  };
 
   const throttledHandleShowMore = useRef(
     throttle(
       () => {
-        if ("onShowMore" in props && props.onShowMore) {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          props.onShowMore();
-        }
+        onShowMore();
       },
       300,
       { leading: true, trailing: false },
@@ -109,25 +111,16 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     );
   }
 
-  const {
-    data,
-    title,
-    emoji,
-    showMore = false,
-    onTitlePress,
-    renderExtraItem,
-  } = props;
+  const { data, title, emoji, showMore = false, renderExtraItem } = props;
 
   return (
     <CardContainer paddingHorizontal={0}>
       <YStack gap="$3">
         {title && (
-          <TouchableOpacity onPress={onTitlePress} disabled={!onTitlePress}>
-            <XStack>
-              <H5 paddingLeft="$3">{title}</H5>
-              {emoji && <Text fontSize="$3"> {emoji}</Text>}
-            </XStack>
-          </TouchableOpacity>
+          <XStack>
+            <H5 paddingLeft="$3">{title}</H5>
+            {emoji && <Text fontSize="$3"> {emoji}</Text>}
+          </XStack>
         )}
 
         <FlashList
