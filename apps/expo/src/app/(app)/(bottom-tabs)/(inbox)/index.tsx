@@ -122,6 +122,25 @@ const Inbox = () => {
     setRefreshing(false);
   }, [refetchNotifications, refetchRequestCount]);
 
+  const getNotificationMessage = (item: NotificationItem) => {
+    const { eventType, username } = item;
+
+    switch (eventType) {
+      case "like":
+        return `liked your post`;
+      case "post":
+        return `has opped you`;
+      case "comment":
+        return `commented on your post`;
+      case "follow":
+        return `started following you`;
+      case "friend":
+        return `is now your friend`;
+      default:
+        return "";
+    }
+  };
+
   const renderListItem = useCallback(
     (item: NotificationItem) => {
       const buttonProps = (() => {
@@ -150,8 +169,9 @@ const Inbox = () => {
 
       return (
         <MediaListItem
+          verticalText
           title={item.username}
-          subtitle={item.message}
+          subtitle={getNotificationMessage(item)}
           caption={
             <TimeAgo
               size="$2"
