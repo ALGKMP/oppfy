@@ -18,17 +18,11 @@ import UserItem from "./UserItem";
  * - Big cards and small cards
  */
 
-interface PersonItem {
-  userId: string;
-  username: string;
-  profilePictureUrl: string | null;
-}
 
-interface LoadedProps<T extends PersonItem> {
+interface FriendCarouselProps {
   userId: string;
 }
 
-type FriendCarouselProps = LoadedProps<PersonItem>;
 
 function FriendCarousel(props: FriendCarouselProps) {
   const { userId } = props;

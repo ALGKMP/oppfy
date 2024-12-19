@@ -15,6 +15,8 @@ import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { useToastController } from "@tamagui/toast";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
+
+import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import PeopleCarousel from "~/components/Carousels/PeopleCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
@@ -363,6 +365,7 @@ const OtherProfile = React.memo(() => {
     () => (
       <YStack gap="$4">
         <Header userId={userId} />
+        <FriendCarousel userId={userId}/>
         {friendItems.length > 0 && !blocked ? (
           <PeopleCarousel
             loading={isLoading}
