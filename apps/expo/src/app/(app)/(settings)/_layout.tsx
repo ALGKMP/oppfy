@@ -29,7 +29,7 @@ const SettingsLayout = () => {
       <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
 
       <Stack.Screen name="privacy" options={{ title: "Privacy" }} />
-      <Stack.Screen name="blocked-users" options={{ title: "Blocked Users" }} />
+      <Stack.Screen name="blocked" options={{ title: "Blocked Users" }} />
 
       <Stack.Screen name="other" options={{ title: "Other" }} />
     </Stack>
