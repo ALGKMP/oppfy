@@ -32,7 +32,7 @@ const RootLayout = () => {
                 <PermissionsProvider>
                   <AudioProvider>
                     <SafeAreaProvider>
-                      <GestureHandlerRootView>
+                      <GestureHandlerRootView style={{ flex: 1 }}>
                         <PortalProvider>
                           <BottomSheetModalProvider>
                             <ActionSheetProvider>

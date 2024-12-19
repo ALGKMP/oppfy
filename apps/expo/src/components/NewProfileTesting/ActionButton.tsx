@@ -31,19 +31,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     return (
       <XStack gap="$4">
         {Object.entries(actions.actions).map(([key, { handler, loading }]) => (
-          <Button
-            key={key}
-            flex={1}
-            onPress={handler}
-            borderWidth={1}
-            rounded
-            outlined
-            borderColor="white"
-            pressStyle={{
-              borderWidth: 1,
-              borderColor: "white",
-            }}
-          >
+          <Button key={key} flex={1} rounded outlined onPress={handler}>
             <XStack gap="$2" alignItems="center">
               <Text>
                 {key === "editProfile" ? "Edit Profile" : "Share Profile"}
@@ -169,7 +157,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   );
 };
 
-/* 
+/*
  * ==========================================
  * ============== Hooks =====================
  * ==========================================
@@ -184,7 +172,9 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
 const useProfileActions = (userId?: string) => {
   const utils = api.useUtils();
   const router = useRouter();
-  const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<Record<string, boolean>>({});
+  const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
+    Record<string, boolean>
+  >({});
 
   // NOTE: mutations must be declared unconditionally to not break the rules of hooks
   const followUser = api.follow.followUser.useMutation({
@@ -240,7 +230,9 @@ const useProfileActions = (userId?: string) => {
     removeFriend.isPending ||
     cancelFollowRequest.isPending ||
     cancelFriendRequest.isPending ||
-    Object.values(isInvalidatingByAction).some((isInvalidating) => isInvalidating);
+    Object.values(isInvalidatingByAction).some(
+      (isInvalidating) => isInvalidating,
+    );
 
   // Create actions object based on userId
   const actions = userId
@@ -262,17 +254,22 @@ const useProfileActions = (userId?: string) => {
         },
         removeFriend: {
           handler: () => removeFriend.mutate({ recipientId: userId }),
-          loading: removeFriend.isPending || isInvalidatingByAction.removeFriend,
+          loading:
+            removeFriend.isPending || isInvalidatingByAction.removeFriend,
           disabled: isAnyActionLoading,
         },
         cancelFollowRequest: {
           handler: () => cancelFollowRequest.mutate({ recipientId: userId }),
-          loading: cancelFollowRequest.isPending || isInvalidatingByAction.cancelFollowRequest,
+          loading:
+            cancelFollowRequest.isPending ||
+            isInvalidatingByAction.cancelFollowRequest,
           disabled: isAnyActionLoading,
         },
         cancelFriendRequest: {
           handler: () => cancelFriendRequest.mutate({ recipientId: userId }),
-          loading: cancelFriendRequest.isPending || isInvalidatingByAction.cancelFriendRequest,
+          loading:
+            cancelFriendRequest.isPending ||
+            isInvalidatingByAction.cancelFriendRequest,
           disabled: isAnyActionLoading,
         },
       }

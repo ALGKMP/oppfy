@@ -11,6 +11,7 @@ import {
   H5,
   H6,
   MediaListItem,
+  MediaListItemActionProps,
   MediaListItemSkeleton,
   Paragraph,
   SizableText,
@@ -142,33 +143,35 @@ const Inbox = () => {
     }
   };
 
+  const renderActionButton = useCallback(
+    (item: NotificationItem): MediaListItemActionProps => {
+      switch (item.relationshipState) {
+        case "notFollowing":
+          return {
+            label: "Follow",
+            icon: UserRoundPlus,
+            variant: "primary",
+            onPress: () => void followUser.mutateAsync({ userId: item.userId }),
+          };
+        case "following":
+          return {
+            label: "Followed",
+            icon: UserRoundCheck,
+            disabled: true,
+          };
+        case "followRequestSent":
+          return {
+            label: "Sent",
+            icon: UserRoundCheck,
+            disabled: true,
+          };
+      }
+    },
+    [followUser],
+  );
+
   const renderListItem = useCallback(
     (item: NotificationItem) => {
-      const buttonProps = (() => {
-        switch (item.relationshipState) {
-          case "notFollowing":
-            return {
-              label: "Follow",
-              icon: UserRoundPlus,
-              variant: "primary" as const,
-              onPress: () =>
-                void followUser.mutateAsync({ userId: item.userId }),
-            };
-          case "following":
-            return {
-              label: "Followed",
-              icon: UserRoundCheck,
-              disabled: true,
-            };
-          case "followRequestSent":
-            return {
-              label: "Sent",
-              icon: UserRoundCheck,
-              disabled: true,
-            };
-        }
-      })();
-
       return (
         <MediaListItem
           verticalText
@@ -176,14 +179,14 @@ const Inbox = () => {
           subtitle={getNotificationMessage(item)}
           caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
           imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          primaryAction={buttonProps}
+          primaryAction={renderActionButton(item)}
           onPress={() =>
             routeProfile({ userId: item.userId, username: item.username })
           }
         />
       );
     },
-    [followUser, routeProfile],
+    [renderActionButton, routeProfile],
   );
 
   const ListHeaderComponent = useMemo(

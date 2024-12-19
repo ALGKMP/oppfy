@@ -59,10 +59,10 @@ const Friends = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.friend.paginateFriendsSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.friend.paginateFriendsSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
     onSettled: async () => {
       // Sync with server once mutation has settled

@@ -10,7 +10,7 @@ import { Button } from "./Buttons";
 import { XStack, YStack } from "./Stacks";
 import { Paragraph, SizableText, Text } from "./Texts";
 
-type ActionProps = {
+export type MediaListItemActionProps = {
   label: string;
 } & GetProps<typeof Button>;
 
@@ -20,8 +20,8 @@ type MediaListItemProps = {
   subtitle?: ReactNode;
   caption?: ReactNode;
   imageUrl?: string | ImageSourcePropType;
-  primaryAction?: ActionProps;
-  secondaryAction?: ActionProps;
+  primaryAction?: MediaListItemActionProps;
+  secondaryAction?: MediaListItemActionProps;
   onPress?: () => void;
 };
 

@@ -9,6 +9,7 @@ import { getToken, H6, YStack } from "tamagui";
 import { SearchInput } from "~/components/Inputs";
 import {
   MediaListItem,
+  MediaListItemActionProps,
   MediaListItemSkeleton,
   useActionSheetController,
 } from "~/components/ui";
@@ -69,10 +70,10 @@ const Following = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowingSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -107,10 +108,10 @@ const Following = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowingSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -145,10 +146,10 @@ const Following = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowingSelf.setInfiniteData(
-        { pageSize: PAGE_SIZE },
-        ctx.prevData,
-      );
+      // Refetch latest data since our optimistic update may be outdated
+      void utils.follow.paginateFollowingSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -207,7 +208,7 @@ const Following = () => {
   }, [refetch]);
 
   const renderActionButton = useCallback(
-    (item: FollowingItem) => {
+    (item: FollowingItem): MediaListItemActionProps => {
       switch (item.relationshipState) {
         case "followRequestSent":
           return {
@@ -249,6 +250,7 @@ const Following = () => {
           return {
             label: "Follow",
             icon: UserRoundPlus,
+            variant: "primary",
             onPress: () => void handleFollow(item.userId),
           };
       }
