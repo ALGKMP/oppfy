@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 
 import { abbreviatedNumber } from "@oppfy/utils";
 
 import { Text, XStack, YStack } from "~/components/ui";
-import { useSession } from "~/contexts/SessionContext";
 
 interface StatsProps {
   userId?: string;
@@ -57,14 +56,19 @@ const Stats = ({ userId, followingCount, followerCount }: StatsProps) => {
  * @returns {onFollowingPress: () => void, onFollowersPress: () => void}
  */
 const useOnFollowPress = ({ userId }: { userId?: string } = {}) => {
+  const username = "test"
   const router = useRouter();
   if (userId) {
     return {
-      onFollowingPress: () => {
-        router.push("/self-profile/connections/following");
+      onFollowingPress: () => { 
+        router.push({pathname: `/profile/connections/following`, params: {
+          userId,
+        }})
       },
       onFollowersPress: () => {
-        router.push("/self-profile/connections/followers");
+        router.push({pathname: `/profile/connections/followers`, params: {
+          userId,
+        }})
       },
     };
   }
