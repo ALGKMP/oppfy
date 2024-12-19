@@ -25,6 +25,10 @@ export const Button = styled(TamaguiButton, {
       true: {
         borderWidth: 1,
         borderColor: "white",
+        pressStyle: {
+          borderWidth: 1,
+          borderColor: "white",
+        },
       },
     },
     rounded: {
