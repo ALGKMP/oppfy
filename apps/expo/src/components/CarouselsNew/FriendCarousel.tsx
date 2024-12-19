@@ -31,7 +31,6 @@ interface LoadedProps<T extends PersonItem> {
   emoji?: string;
   showMore?: boolean;
   onTitlePress?: () => void;
-  onItemPress: (item: T) => void;
   onShowMore?: () => void;
   renderExtraItem?: () => React.ReactElement;
 }
@@ -116,7 +115,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     emoji,
     showMore = false,
     onTitlePress,
-    onItemPress,
     renderExtraItem,
   } = props;
 
