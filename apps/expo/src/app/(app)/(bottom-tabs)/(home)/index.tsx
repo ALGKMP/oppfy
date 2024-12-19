@@ -12,6 +12,7 @@ import Splash from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
+import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import {
   Button,
   Circle,
@@ -71,11 +72,6 @@ const HomeScreen = () => {
     },
   );
 
-  const {
-    isLoading: isLoadingRecommendationsData,
-    data: recommendationsData,
-    refetch: refetchRecommendationsData,
-  } = api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const postItems = useMemo(
     () => postData?.pages.flatMap((page) => page.items).filter(Boolean) ?? [],
@@ -90,9 +86,9 @@ const HomeScreen = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([refetchRecommendationsData(), refetchPosts()]);
+    await Promise.all([refetchPosts()]);
     setRefreshing(false);
-  }, [refetchRecommendationsData, refetchPosts]);
+  }, [refetchPosts]);
 
   const onViewableItemsChanged = useCallback(
     ({
@@ -183,7 +179,6 @@ const HomeScreen = () => {
       return (
         <YStack gap="$4">
           <PostCard loading />
-          <PeopleCarousel loading />
         </YStack>
       );
     }
@@ -192,14 +187,7 @@ const HomeScreen = () => {
       <View>
         {recommendationsData && recommendationsData.length > 0 && (
           <View paddingTop="$4" paddingHorizontal="$1">
-            <PeopleCarousel
-              title="Suggestions 🔥"
-              showMore={recommendationsData.length > 10}
-              data={recommendationsData}
-              loading={isLoadingRecommendationsData}
-              onItemPress={handleProfilePress}
-              onShowMore={handleShowMore}
-            />
+            <RecommendationCarousel />
             <Footer />
           </View>
         )}
