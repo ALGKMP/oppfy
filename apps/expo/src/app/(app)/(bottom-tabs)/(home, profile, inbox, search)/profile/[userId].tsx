@@ -37,7 +37,6 @@ const OtherProfile = React.memo(() => {
   useScrollToTop(scrollRef);
 
   const { routeProfile } = useRouteProfile();
-  const router = useRouter();
   const navigation = useNavigation();
   const toast = useToastController();
 
@@ -149,14 +148,6 @@ const OtherProfile = React.memo(() => {
     isLoadingFriendsData ||
     isLoadingPostData ||
     isLoadingRecommendationsData;
-
-  const navigateToProfile = useCallback(
-    ({ userId, username }: { userId: string; username: string }) => {
-      routeProfile({ userId, username });
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    },
-    [routeProfile],
-  );
 
   const [sheetState, setSheetState] = useState<
     "closed" | "moreOptions" | "reportOptions"
