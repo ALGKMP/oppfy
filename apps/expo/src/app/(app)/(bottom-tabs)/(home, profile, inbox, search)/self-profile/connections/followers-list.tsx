@@ -125,6 +125,20 @@ const FollowerList = () => {
     [actionSheet, handleRemoveFollower],
   );
 
+  const ListHeaderComponent = useMemo(
+    () => (
+      <YStack gap="$4">
+        <SearchInput
+          placeholder="Search followers..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
+        />
+      </YStack>
+    ),
+    [searchQuery, setSearchQuery],
+  );
+
   const ListEmptyComponent = useCallback(() => {
     if (isLoading) {
       return (
@@ -164,16 +178,7 @@ const FollowerList = () => {
       data={filteredItems}
       renderItem={({ item }) => renderListItem(item)}
       estimatedItemSize={75}
-      ListHeaderComponent={
-        <YStack gap="$4">
-          <SearchInput
-            placeholder="Search followers..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onClear={() => setSearchQuery("")}
-          />
-        </YStack>
-      }
+      ListHeaderComponent={ListHeaderComponent}
       ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
