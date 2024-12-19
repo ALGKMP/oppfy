@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import { TouchableOpacity } from "react-native";
-import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
@@ -26,7 +25,6 @@ import { ActionSheet } from "~/components/Sheets";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
-import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -61,10 +59,6 @@ const OtherProfile = React.memo(() => {
   const isPrivate = otherProfileData?.networkStatus.privacy === "private";
   const isFollowing =
     otherProfileData?.networkStatus.targetUserFollowState === "Following";
-  const canViewContent = useMemo(
-    () => !blocked && (!isPrivate || isFollowing),
-    [blocked, isPrivate, isFollowing],
-  );
 
   const {
     data: postsData,
