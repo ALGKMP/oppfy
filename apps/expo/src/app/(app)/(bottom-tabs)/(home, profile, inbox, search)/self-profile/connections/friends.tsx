@@ -1,42 +1,46 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
-import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { Button, H5, H6, View, YStack } from "tamagui";
+import { getToken, H6, YStack } from "tamagui";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import { SearchInput } from "~/components/Inputs";
-import { VirtualizedListItem } from "~/components/ListItems";
-import { ActionSheet } from "~/components/Sheets";
+import {
+  MediaListItem,
+  MediaListItemSkeleton,
+  useActionSheetController,
+} from "~/components/ui";
+import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 type FriendItem = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][0];
 
-const FriendList = () => {
-  const router = useRouter();
+const PAGE_SIZE = 20;
+
+const Friends = () => {
   const utils = api.useUtils();
+  const actionSheet = useActionSheetController();
 
   const [refreshing, setRefreshing] = useState(false);
 
   const removeFriend = api.friend.removeFriend.useMutation({
     onMutate: async (newData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-      await utils.friend.paginateFriendsSelf.cancel();
+      await utils.friend.paginateFriendsSelf.cancel({ pageSize: PAGE_SIZE });
 
       // Get the data from the queryCache
-      const prevData = utils.friend.paginateFriendsSelf.getInfiniteData();
+      const prevData = utils.friend.paginateFriendsSelf.getInfiniteData({
+        pageSize: PAGE_SIZE,
+      });
       if (prevData === undefined) return;
 
       // Optimistically update the data
       utils.friend.paginateFriendsSelf.setInfiniteData(
-        {},
+        { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -52,11 +56,16 @@ const FriendList = () => {
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.friend.paginateFriendsSelf.setInfiniteData({}, ctx.prevData);
+      utils.friend.paginateFriendsSelf.setInfiniteData(
+        { pageSize: PAGE_SIZE },
+        ctx.prevData,
+      );
     },
     onSettled: async () => {
       // Sync with server once mutation has settled
-      await utils.friend.paginateFriendsSelf.invalidate();
+      await utils.friend.paginateFriendsSelf.invalidate({
+        pageSize: PAGE_SIZE,
+      });
     },
   });
 
@@ -68,164 +77,135 @@ const FriendList = () => {
     hasNextPage,
     refetch,
   } = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    {
-      pageSize: 20,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    { pageSize: PAGE_SIZE },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const friendsItems = useMemo(() => {
+  const friendItems = useMemo(() => {
     return friendsData?.pages.flatMap((page) => page.items) ?? [];
   }, [friendsData]);
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch({
-    data: friendsItems,
+    data: friendItems,
     keys: ["name", "username"],
   });
 
-  const handleOnEndReached = async () => {
+  const handleOnEndReached = useCallback(async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  };
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
-  const handleRemoveFriend = async (userId: string) =>
-    await removeFriend.mutateAsync({ recipientId: userId });
+  const handleRemoveFriend = useCallback(
+    async (userId: string) => {
+      await removeFriend.mutateAsync({ recipientId: userId });
+    },
+    [removeFriend],
+  );
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
-  };
+  }, [refetch]);
 
-  const renderLoadingSkeletons = () => (
-    <CardContainer>
-      {PLACEHOLDER_DATA.map((_, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading
-          showSkeletons={{
-            imageUrl: true,
-            title: true,
-            subtitle: true,
-            button: true,
-          }}
-        />
-      ))}
-    </CardContainer>
-  );
-
-  const renderListItem = (item: FriendItem) => (
-    <VirtualizedListItem
-      loading={false}
-      title={item.username}
-      subtitle={item.name}
-      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-      button={
-        <ActionSheet
-          title="Remove Friend"
-          subtitle={`Are you sure you want to remove ${item.username} from your friends?`}
-          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          trigger={
-            <Button size="$3.5" icon={<UserRoundMinus size="$1" />}>
-              Remove
-            </Button>
-          }
-          buttonOptions={[
-            {
-              text: "Remove",
-              textProps: { color: "$red9" },
-              onPress: () => void handleRemoveFriend(item.userId),
-            },
-          ]}
-        />
-      }
-      onPress={() =>
-        router.push({
-          pathname: "/profile/[userId]",
-          params: { userId: item.userId, username: item.username },
-        })
-      }
-    />
-  );
-
-  const renderFriends = () => (
-    <CardContainer>
-      <H5 theme="alt1">Friends</H5>
-      <FlashList
-        data={filteredItems}
-        onRefresh={refetch}
-        refreshing={isLoading}
-        keyExtractor={(item) => "friend_list_" + item.userId}
-        estimatedItemSize={75}
-        onEndReached={handleOnEndReached}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => renderListItem(item)}
-      />
-    </CardContainer>
-  );
-
-  const renderNoResults = () => (
-    <View flex={1} justifyContent="center">
-      <EmptyPlaceholder
-        title="No results"
-        subtitle="No friends found."
-        icon={<UserRoundPlus />}
-      />
-    </View>
-  );
-
-  if (isLoading) {
-    return (
-      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
-    );
-  }
-
-  if (friendsItems.length === 0) {
-    return (
-      <BaseScreenView
-        scrollable
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
+  const renderListItem = useCallback(
+    (item: FriendItem) => (
+      <MediaListItem
+        title={item.username}
+        subtitle={item.name}
+        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+        primaryAction={{
+          label: "Remove",
+          icon: UserRoundMinus,
+          onPress: () =>
+            actionSheet.show({
+              title: "Remove Friend",
+              subtitle: `Are you sure you want to remove ${item.username} from your friends?`,
+              imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+              buttonOptions: [
+                {
+                  text: "Remove",
+                  textProps: { color: "$red11" },
+                  onPress: () => void handleRemoveFriend(item.userId),
+                },
+              ],
+            }),
         }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-      >
-        {renderNoResults()}
-      </BaseScreenView>
-    );
-  }
+      />
+    ),
+    [actionSheet, handleRemoveFriend],
+  );
 
-  return (
-    <BaseScreenView
-      scrollable
-      keyboardDismissMode="interactive"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
+  const ListHeaderComponent = useMemo(
+    () => (
       <YStack gap="$4">
         <SearchInput
-          value={searchQuery}
           placeholder="Search friends..."
+          value={searchQuery}
           onChangeText={setSearchQuery}
           onClear={() => setSearchQuery("")}
         />
-
-        {filteredItems.length > 0 ? (
-          renderFriends()
-        ) : (
-          <H6 theme="alt1" lineHeight={0}>
-            No Users Found
-          </H6>
-        )}
       </YStack>
-    </BaseScreenView>
+    ),
+    [searchQuery, setSearchQuery],
+  );
+
+  const ListEmptyComponent = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <MediaListItemSkeleton key={index} />
+          ))}
+        </YStack>
+      );
+    }
+
+    if (friendItems.length === 0) {
+      return (
+        <YStack flex={1} justifyContent="center">
+          <EmptyPlaceholder
+            title="No friends"
+            subtitle="No friends found."
+            icon={<UserRoundPlus />}
+          />
+        </YStack>
+      );
+    }
+
+    if (filteredItems.length === 0) {
+      return (
+        <YStack flex={1}>
+          <H6 theme="alt1">No Users Found</H6>
+        </YStack>
+      );
+    }
+
+    return null;
+  }, [isLoading, friendItems.length, filteredItems.length]);
+
+  return (
+    <FlashList
+      data={filteredItems}
+      renderItem={({ item }) => renderListItem(item)}
+      estimatedItemSize={75}
+      ListHeaderComponent={ListHeaderComponent}
+      ListEmptyComponent={ListEmptyComponent}
+      ItemSeparatorComponent={Spacer}
+      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+      }}
+      showsVerticalScrollIndicator={false}
+      onEndReached={handleOnEndReached}
+      onEndReachedThreshold={0.5}
+      keyboardShouldPersistTaps="always"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    />
   );
 };
 
-export default FriendList;
+export default Friends;
