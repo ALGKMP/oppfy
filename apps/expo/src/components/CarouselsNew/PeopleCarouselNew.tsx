@@ -11,6 +11,12 @@ import { Skeleton } from "~/components/Skeletons";
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import UserItem from "./UserItem";
 
+/*
+* TODO: Can make this a compound component later if we want to add more styles
+* or if we want to add more functionality to the carousel.
+* For example, the Instagram carousel, and how some have big cards and some have small cards.
+*/
+
 interface PersonItem {
   userId: string;
   username: string;
@@ -27,7 +33,6 @@ interface LoadedProps<T extends PersonItem> {
   title?: string;
   emoji?: string;
   showMore?: boolean;
-  uiStyle?: "default" | "suggestions";
   onTitlePress?: () => void;
   onItemPress: (item: T) => void;
   onShowMore?: () => void;
@@ -101,7 +106,6 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
     onTitlePress,
     onItemPress,
     renderExtraItem,
-    uiStyle = "default",
   } = props;
 
   return (
@@ -119,7 +123,7 @@ function PeopleCarousel<T extends PersonItem>(props: PeopleCarouselProps<T>) {
         <FlashList
           data={data}
           horizontal
-          estimatedItemSize={uiStyle === "suggestions" ? 150 : 70}
+          estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           renderItem={({ item }) => <UserItem item={item} />}
