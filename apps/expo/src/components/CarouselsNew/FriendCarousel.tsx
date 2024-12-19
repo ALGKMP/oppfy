@@ -68,23 +68,6 @@ function FriendCarousel(props: FriendCarouselProps) {
     };
   }, [throttledHandleShowMore]);
 
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isLoadingFriendsData) return;
-
-      const { contentSize, contentOffset, layoutMeasurement } =
-        event.nativeEvent;
-      const contentWidth = contentSize.width;
-      const offsetX = contentOffset.x;
-      const layoutWidth = layoutMeasurement.width;
-
-      if (offsetX + layoutWidth >= contentWidth + 80) {
-        throttledHandleShowMore();
-      }
-    },
-    [isLoadingFriendsData, throttledHandleShowMore],
-  );
-
   if (isLoadingFriendsData) {
     return (
       <CardContainer paddingLeft={0} paddingRight={0}>
@@ -121,7 +104,6 @@ function FriendCarousel(props: FriendCarouselProps) {
           horizontal
           estimatedItemSize={70}
           showsHorizontalScrollIndicator={false}
-          onScroll={handleScroll}
           renderItem={({ item }) => <UserItem item={item} />}
           ItemSeparatorComponent={() => <Spacer size="$2.5" />}
           contentContainerStyle={{
