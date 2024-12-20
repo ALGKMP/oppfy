@@ -40,7 +40,7 @@ const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2] satisfies FailOffset;
 const START_RECORDING_DELAY = 200;
 const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.075;
 
-const MAX_RECORDING_DURATION = 3000; // 10 seconds in milliseconds
+const MAX_RECORDING_DURATION = 60 * 1000; // 1 minute in milliseconds
 
 interface Context {
   offsetY?: number;
