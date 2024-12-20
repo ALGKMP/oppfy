@@ -15,8 +15,8 @@ import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import { Button, H5, H6, Text, YStack } from "~/components/ui";
-import { api } from "~/utils/api";
 import useRouteProfile from "~/hooks/useRouteProfile";
+import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 type RecommendationItem =
@@ -28,7 +28,8 @@ const GridSuggestions: React.FC = () => {
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
 
-  const { data, isLoading } = api.contacts.getRecommendationProfilesSelf.useQuery();
+  const { data, isLoading } =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
@@ -141,8 +142,7 @@ const GridSuggestions: React.FC = () => {
         shadowRadius={20}
         flex={1}
         pressStyle={{
-          scale: 0.96,
-          transform: [{ translateY: 5 }],
+          opacity: 0.8,
         }}
         onPress={() => handleProfilePress(item.userId, item.username)}
       >
