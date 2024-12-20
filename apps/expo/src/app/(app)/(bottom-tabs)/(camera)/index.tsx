@@ -5,7 +5,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Dimensions,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolation,
@@ -36,6 +41,7 @@ import { useIsFocused } from "@react-navigation/core";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
+import { useAlertDialogController } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import {
@@ -60,6 +66,7 @@ const ASPECT_RATIO = 16 / 9;
 const CameraPage = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const alertDialog = useAlertDialogController();
 
   const safeAreaPadding = {
     paddingLeft: insets.left,
@@ -169,16 +176,36 @@ const CameraPage = () => {
   );
 
   const onOpenMediaPicker = useCallback(async () => {
-    // Request permissions when the button is pressed
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need media library permissions to make this work!");
+    const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync();
+
+    // If permission already granted, navigate directly
+    if (status === "granted") {
+      router.push("/album-picker");
       return;
     }
 
-    // Navigate to the custom media picker screen
-    router.push("/album-picker");
-  }, [router]);
+    // If we can request permission, try that first
+    if (canAskAgain) {
+      const { granted } = await MediaLibrary.requestPermissionsAsync();
+
+      if (granted) {
+        router.push("/album-picker");
+        return;
+      }
+
+      // Can't ask again - show settings dialog
+      const confirmed = await alertDialog.show({
+        title: "Media Library Permission",
+        subtitle: "So you can share photos from your library with your friends",
+        cancelText: "OK",
+        acceptText: "Settings",
+      });
+
+      if (confirmed) {
+        await Linking.openSettings();
+      }
+    }
+  }, [alertDialog, router]);
 
   const onFlipCameraPressed = useCallback(() => {
     setPosition((p) => (p === "back" ? "front" : "back"));
@@ -288,7 +315,7 @@ const CameraPage = () => {
             fps={30}
             photoHdr={photoHdr}
             videoHdr={videoHdr}
-            photoQualityPriority="quality"
+            photoQualityBalance="quality"
             lowLightBoost={device.supportsLowLightBoost && enableNightMode}
             enableZoomGesture={false}
             animatedProps={cameraAnimatedProps}
