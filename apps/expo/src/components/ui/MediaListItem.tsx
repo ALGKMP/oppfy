@@ -2,13 +2,13 @@ import type { FunctionComponent, ReactNode } from "react";
 import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
+import { Image } from "tamagui";
 import type { GetProps } from "tamagui";
 
 import { Skeleton } from "~/components/Skeletons";
 import { Button } from "./Buttons";
 import { XStack, YStack } from "./Stacks";
-import { Paragraph, SizableText, Text } from "./Texts";
+import { Paragraph, SizableText } from "./Texts";
 
 export type MediaListItemActionProps = {
   label: string;
@@ -23,7 +23,6 @@ type MediaListItemProps = {
   primaryAction?: MediaListItemActionProps;
   secondaryAction?: MediaListItemActionProps;
   onPress?: () => void;
-  recyclingKey?: string;
 };
 
 export const MediaListItem = ({
@@ -35,18 +34,21 @@ export const MediaListItem = ({
   primaryAction,
   secondaryAction,
   onPress,
-  recyclingKey,
 }: MediaListItemProps) => {
   const content = (
     <XStack alignItems="center" gap="$3">
       {imageUrl && (
         <Image
-          recyclingKey={recyclingKey}
-          source={imageUrl}
-          style={{ width: 56, height: 56, borderRadius: 28 }}
-          cachePolicy="memory"
-          contentFit="cover"
-          transition={200}
+          {...(typeof imageUrl === "string"
+            ? {
+                source: {
+                  uri: imageUrl,
+                },
+              }
+            : { imageUrl })}
+          width={56}
+          height={56}
+          borderRadius={28}
         />
       )}
 

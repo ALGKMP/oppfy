@@ -176,7 +176,6 @@ const Inbox = () => {
     (item: NotificationItem) => {
       return (
         <MediaListItem
-          recyclingKey={item.id}
           verticalText
           title={item.username}
           subtitle={getNotificationMessage(item)}
@@ -261,7 +260,8 @@ const Inbox = () => {
     <FlashList
       data={notificationItems}
       renderItem={({ item }) => renderListItem(item)}
-      estimatedItemSize={75}
+      keyExtractor={(item) => item.id}
+      estimatedItemSize={56}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={
