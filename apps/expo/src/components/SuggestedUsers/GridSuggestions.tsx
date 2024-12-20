@@ -1,8 +1,7 @@
 import React from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, FlatList, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { FlashList } from "@shopify/flash-list";
 import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { MotiView } from "moti";
 import { getToken } from "tamagui";
@@ -20,12 +19,6 @@ interface GridSuggestionsProps {
   onProfilePress: (userId: string, username: string) => void;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const CONTAINER_PADDING = 16;
-const GRID_GAP = 12;
-const AVAILABLE_WIDTH = SCREEN_WIDTH - CONTAINER_PADDING * 2;
-const ITEM_WIDTH = (AVAILABLE_WIDTH - GRID_GAP) / 2;
-
 const GridSuggestions: React.FC<GridSuggestionsProps> = ({
   data,
   isLoading,
@@ -38,7 +31,11 @@ const GridSuggestions: React.FC<GridSuggestionsProps> = ({
         <H5 mb="$4" theme="alt1">
           Suggested for You
         </H5>
-        <YStack flexDirection="row" flexWrap="wrap" gap={GRID_GAP}>
+        <YStack
+          flexDirection="row"
+          flexWrap="wrap"
+          gap={getToken("$3", "space")}
+        >
           {Array.from({ length: 4 }).map((_, i) => (
             <MotiView
               key={i}
@@ -120,6 +117,7 @@ const GridSuggestions: React.FC<GridSuggestionsProps> = ({
             fontSize={16}
             color="$color"
             style={styles.username}
+            opacity={0.85}
           >
             {item.username}
           </Text>
@@ -130,14 +128,12 @@ const GridSuggestions: React.FC<GridSuggestionsProps> = ({
             transition={{ delay: index * 100 + 200 }}
           >
             <Button
-              icon={UserRoundPlus}
-              size="$3.5"
+              size="$3"
               variant="primary"
-              onPress={() => onFollow(item.userId)}
+              icon={UserRoundPlus}
               pressStyle={{ scale: 0.95 }}
-              chromeless
-              backgroundColor="$background"
-              borderRadius="$10"
+              opacity={0.85}
+              onPress={() => onFollow(item.userId)}
             >
               Follow
             </Button>
@@ -149,10 +145,10 @@ const GridSuggestions: React.FC<GridSuggestionsProps> = ({
 
   return (
     <YStack>
-      <FlashList
+      <FlatList
         data={data.slice(0, 6)}
         renderItem={renderItem}
-        estimatedItemSize={ITEM_WIDTH}
+        numColumns={2}
         ListHeaderComponent={
           <MotiView
             from={{ opacity: 0, translateY: -10 }}
@@ -162,31 +158,26 @@ const GridSuggestions: React.FC<GridSuggestionsProps> = ({
             <H5 theme="alt1">Suggested for You</H5>
           </MotiView>
         }
-        numColumns={2}
-        ListHeaderComponentStyle={{
-          marginBottom: getToken("$4", "space"),
-          paddingHorizontal: CONTAINER_PADDING,
+        columnWrapperStyle={{
+          gap: getToken("$3", "space"),
+        }}
+        contentContainerStyle={{
+          gap: getToken("$3", "space"),
         }}
         showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
         scrollEnabled={false}
-        contentContainerStyle={styles.listContainer}
       />
     </YStack>
   );
 };
 
 const styles = StyleSheet.create({
-  listContainer: {
-    gap: GRID_GAP,
-  },
   cardContainer: {
-    width: ITEM_WIDTH,
-    marginBottom: GRID_GAP,
+    flex: 1,
     aspectRatio: 1,
   },
   card: {
-    borderRadius: 20,
+    borderRadius: getToken("$6", "radius"),
     overflow: "hidden",
     backgroundColor: "$background",
     shadowColor: "#000",
@@ -197,8 +188,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    width: ITEM_WIDTH,
     aspectRatio: 1,
+    width: "100%",
   },
   gradient: {
     position: "absolute",
@@ -212,7 +203,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 12,
+    padding: getToken("$3", "space"),
   },
   username: {
     color: "white",
@@ -221,10 +212,9 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   skeletonCard: {
-    width: ITEM_WIDTH,
     aspectRatio: 1,
     backgroundColor: "$gray5",
-    borderRadius: 20,
+    borderRadius: getToken("$5", "radius"),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.1,
