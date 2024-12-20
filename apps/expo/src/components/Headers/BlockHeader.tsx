@@ -1,19 +1,20 @@
+import { TouchableOpacity } from "react-native";
+import { MoreHorizontal } from "@tamagui/lucide-icons";
+
+import { View } from "~/components/ui";
 import {
   ButtonOption,
   useActionSheetController,
 } from "~/components/ui/ActionSheet";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
-import { View } from "~/components/ui";
-import { TouchableOpacity } from "react-native";
 import { api } from "~/utils/api";
 
 const BlockUserHeader = ({ userId }: { userId: string }) => {
+  const utils = api.useUtils();
   const { show } = useActionSheetController();
   const { isBlocking, isUnblocking, handleBlockUser, handleUnblockUser } =
     useBlockUser(userId);
 
-  const { data: networkRelationships } =
-    api.profile.getNetworkRelationships.useQuery({ userId });
+  const networkRelationships = utils.profile.getNetworkRelationships.getData({ userId });
 
   const sheetButtonOptions: ButtonOption[] = [
     {
