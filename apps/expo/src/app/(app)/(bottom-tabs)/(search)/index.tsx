@@ -33,9 +33,6 @@ const Search = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
 
-  const { data: recommendationsData, isLoading: isLoadingRecommendationsData } =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
-
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
       await utils.contacts.getRecommendationProfilesSelf.cancel();
