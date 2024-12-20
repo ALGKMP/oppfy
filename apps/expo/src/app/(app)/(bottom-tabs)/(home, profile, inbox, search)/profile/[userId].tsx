@@ -16,11 +16,14 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
+import BlockUserHeader from "~/components/Headers/BlockHeader";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
-import type { ButtonOption } from "~/components/Sheets";
-import { ActionSheet } from "~/components/Sheets";
+import {
+  ButtonOption,
+  useActionSheetController,
+} from "~/components/ui/ActionSheet";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
@@ -79,10 +82,7 @@ const OtherProfile = React.memo(() => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await Promise.all([
-      refetchProfileData(),
-      refetchPosts(),
-    ]);
+    await Promise.all([refetchProfileData(), refetchPosts()]);
     setIsRefreshing(false);
   }, [refetchProfileData, refetchPosts]);
 
@@ -176,6 +176,8 @@ const OtherProfile = React.memo(() => {
       },
     });
 
+  const { show, hide } = useActionSheetController();
+
   // TODO: Action Sheet in Nav Header
   const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
@@ -225,19 +227,37 @@ const OtherProfile = React.memo(() => {
     handleBlockUser,
   ]);
 
+  const sheetButtonOptions: ButtonOption[] = [
+    {
+      text: otherProfileData?.networkStatus.blocked
+        ? isUnblocking
+          ? "Unblocking..."
+          : "Unblock User"
+        : isBlocking
+          ? "Blocking..."
+          : "Block User",
+      textProps: {
+        color: isBlocking || isUnblocking ? "$gray9" : "$red9",
+      },
+      autoClose: false,
+      disabled: isBlocking || isUnblocking,
+      onPress: otherProfileData?.networkStatus.blocked
+        ? isUnblocking
+          ? handleUnblockUser
+          : handleBlockUser
+        : isBlocking
+          ? handleUnblockUser
+          : handleBlockUser,
+    },
+  ];
+
   // TODO: Action Sheet In Header
   useLayoutEffect(() => {
     navigation.setOptions({
       title: username,
-      headerRight: () => (
-        <View>
-          <TouchableOpacity onPress={handleOpenMoreOptionsSheet}>
-            <MoreHorizontal />
-          </TouchableOpacity>
-        </View>
-      ),
+      headerRight: () => <BlockUserHeader userId={userId} />,
     });
-  }, [navigation, username, otherProfileData, handleOpenMoreOptionsSheet]);
+  }, [navigation, username, sheetButtonOptions]);
 
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
@@ -403,11 +423,11 @@ const OtherProfile = React.memo(() => {
         />
       </BaseScreenView>
 
-      <ActionSheet
+      {/* <ActionSheet
         isVisible={sheetState === "moreOptions"}
         buttonOptions={moreOptionsButtonOptions}
         onCancel={handleCloseMoreOptionsSheet}
-      />
+      /> */}
     </>
   );
 });
