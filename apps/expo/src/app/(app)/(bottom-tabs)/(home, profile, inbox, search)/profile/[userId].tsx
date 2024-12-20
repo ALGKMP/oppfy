@@ -5,13 +5,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
-import { useToastController } from "@tamagui/toast";
+import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
@@ -20,10 +18,6 @@ import BlockUserHeader from "~/components/Headers/BlockHeader";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
-import {
-  ButtonOption,
-  useActionSheetController,
-} from "~/components/ui/ActionSheet";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
@@ -37,9 +31,6 @@ const OtherProfile = React.memo(() => {
   useScrollToTop(scrollRef);
 
   const navigation = useNavigation();
-  const toast = useToastController();
-
-  const utils = api.useUtils();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -104,160 +95,13 @@ const OtherProfile = React.memo(() => {
     "closed" | "moreOptions" | "reportOptions"
   >("closed");
 
-  // TODO: Action Sheet
-  const { isPending: isBlocking, ...blockUser } =
-    api.block.blockUser.useMutation({
-      onMutate: async (_newBlockedUser) => {
-        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.profile.getFullProfileOther.cancel();
-
-        // Get the data from the queryCache
-        const prevData = utils.profile.getFullProfileOther.getData({ userId });
-        if (prevData === undefined) return;
-
-        // Optimistically update the data
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            networkStatus: {
-              ...prevData.networkStatus,
-              blocked: true,
-            },
-          },
-        );
-
-        // Return the previous data so we can revert if something goes wrong
-        return { prevData };
-      },
-      onError: (_err, _newBlockedUser, ctx) => {
-        if (ctx === undefined) return;
-
-        // If the mutation fails, use the context-value from onMutate
-        utils.profile.getFullProfileOther.setData({ userId }, ctx.prevData);
-      },
-      onSettled: async () => {
-        await utils.profile.getFullProfileOther.invalidate({ userId });
-      },
-    });
-  const { isPending: isUnblocking, ...unblockUser } =
-    api.block.unblockUser.useMutation({
-      onMutate: async (_newUnblockedUser) => {
-        // Cancel outgoing fetches (so they don't overwrite our optimistic update)
-        await utils.profile.getFullProfileOther.cancel();
-
-        // Get the data from the queryCache
-        const prevData = utils.profile.getFullProfileOther.getData({ userId });
-        if (prevData === undefined) return;
-
-        // Optimistically update the data
-        utils.profile.getFullProfileOther.setData(
-          { userId },
-          {
-            ...prevData,
-            networkStatus: {
-              ...prevData.networkStatus,
-              blocked: false,
-            },
-          },
-        );
-
-        // Return the previous data so we can revert if something goes wrong
-        return { prevData };
-      },
-      onError: (_err, _newUnblockedUser, ctx) => {
-        if (ctx === undefined) return;
-
-        // If the mutation fails, use the context-value from onMutate
-        utils.profile.getFullProfileOther.setData({ userId }, ctx.prevData);
-      },
-      onSettled: async () => {
-        await utils.profile.getFullProfileOther.invalidate({ userId });
-      },
-    });
-
-  const { show, hide } = useActionSheetController();
-
-  // TODO: Action Sheet in Nav Header
-  const handleOpenMoreOptionsSheet = useCallback(() => {
-    setSheetState("moreOptions");
-  }, []);
-
-  // TODO: Action Sheet
-  const handleCloseMoreOptionsSheet = useCallback(() => {
-    setSheetState("closed");
-  }, []);
-
-  const handleBlockUser = useCallback(async () => {
-    await blockUser.mutateAsync({ userId });
-    toast.show("User Blocked");
-  }, [blockUser, userId, toast]);
-
-  const handleUnblockUser = useCallback(async () => {
-    await unblockUser.mutateAsync({ userId });
-    toast.show("User Unblocked");
-  }, [unblockUser, userId, toast]);
-
-  // TODO: Action Sheet
-  const moreOptionsButtonOptions: ButtonOption[] = useMemo(() => {
-    const isBlocked = otherProfileData?.networkStatus.blocked ?? false;
-
-    return [
-      {
-        text: isBlocked
-          ? isUnblocking
-            ? "Unblocking..."
-            : "Unblock User"
-          : isBlocking
-            ? "Blocking..."
-            : "Block User",
-        textProps: {
-          color: isBlocking || isUnblocking ? "$gray9" : "$red9",
-        },
-        autoClose: false,
-        disabled: isBlocking || isUnblocking,
-        onPress: isBlocked ? handleUnblockUser : handleBlockUser,
-      },
-    ];
-  }, [
-    otherProfileData?.networkStatus.blocked,
-    isUnblocking,
-    isBlocking,
-    handleUnblockUser,
-    handleBlockUser,
-  ]);
-
-  const sheetButtonOptions: ButtonOption[] = [
-    {
-      text: otherProfileData?.networkStatus.blocked
-        ? isUnblocking
-          ? "Unblocking..."
-          : "Unblock User"
-        : isBlocking
-          ? "Blocking..."
-          : "Block User",
-      textProps: {
-        color: isBlocking || isUnblocking ? "$gray9" : "$red9",
-      },
-      autoClose: false,
-      disabled: isBlocking || isUnblocking,
-      onPress: otherProfileData?.networkStatus.blocked
-        ? isUnblocking
-          ? handleUnblockUser
-          : handleBlockUser
-        : isBlocking
-          ? handleUnblockUser
-          : handleBlockUser,
-    },
-  ];
-
   // TODO: Action Sheet In Header
   useLayoutEffect(() => {
     navigation.setOptions({
       title: username,
       headerRight: () => <BlockUserHeader userId={userId} />,
     });
-  }, [navigation, username, sheetButtonOptions]);
+  }, [navigation, username ]);
 
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
