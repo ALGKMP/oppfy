@@ -1,7 +1,14 @@
-import { ActionSheet, ButtonOption } from "~/components/ui/ActionSheet";
+import {
+  ButtonOption,
+  useActionSheetController,
+} from "~/components/ui/ActionSheet";
+import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { View } from "~/components/ui";
+import { TouchableOpacity } from "react-native";
 import { api } from "~/utils/api";
 
-const BlockSheet = ({ userId }: { userId: string }) => {
+const BlockUserHeader = ({ userId }: { userId: string }) => {
+  const { show } = useActionSheetController();
   const { isBlocking, isUnblocking, handleBlockUser, handleUnblockUser } =
     useBlockUser(userId);
 
@@ -13,10 +20,10 @@ const BlockSheet = ({ userId }: { userId: string }) => {
       text: networkRelationships?.blocked
         ? isUnblocking
           ? "Unblocking..."
-        : "Unblock User"
-      : isBlocking
-        ? "Blocking..."
-        : "Block User",
+          : "Unblock User"
+        : isBlocking
+          ? "Blocking..."
+          : "Block User",
       textProps: {
         color: isBlocking || isUnblocking ? "$gray9" : "$red9",
       },
@@ -26,18 +33,20 @@ const BlockSheet = ({ userId }: { userId: string }) => {
         ? isUnblocking
           ? handleUnblockUser
           : handleBlockUser
-      : isBlocking
-        ? handleUnblockUser
-        : handleBlockUser,
+        : isBlocking
+          ? handleUnblockUser
+          : handleBlockUser,
     },
   ];
 
   return (
-    <ActionSheet
-      title="Block"
-      isVisible={true}
-      buttonOptions={sheetButtonOptions}
-    />
+    <View>
+      <TouchableOpacity
+        onPress={() => show({ buttonOptions: sheetButtonOptions })}
+      >
+        <MoreHorizontal />
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -121,4 +130,4 @@ const useBlockUser = (userId: string) => {
   return { isBlocking, isUnblocking, handleBlockUser, handleUnblockUser };
 };
 
-export default BlockSheet;
+export default BlockUserHeader;
