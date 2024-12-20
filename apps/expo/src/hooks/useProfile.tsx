@@ -28,7 +28,7 @@ const useProfile = ({ userId }: UseProfileProps = { userId: undefined }): UseQue
 
   const selfQuery = api.profile.getFullProfileSelf.useQuery(undefined, {
     staleTime: STALE_TIME,
-    enabled: !!userId,
+    enabled: !userId,
   });
 
   if (userId) {
