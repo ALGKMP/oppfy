@@ -5,7 +5,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Dimensions,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolation,
@@ -302,7 +307,10 @@ const CameraPage = () => {
         />
 
         <TouchableOpacity
-          style={[styles.iconButton, { position: "absolute", bottom: 12, left: 12 }]}
+          style={[
+            styles.iconButton,
+            { position: "absolute", bottom: 12, left: 12 },
+          ]}
           onPress={onOpenMediaPicker}
         >
           <BlurView intensity={50} style={styles.blurView}>
@@ -311,13 +319,19 @@ const CameraPage = () => {
         </TouchableOpacity>
 
         <View style={{ position: "absolute", top: 12, right: 12 }}>
-          <TouchableOpacity style={[styles.iconButton, { marginBottom: 8 }]} onPress={onFlipCameraPressed}>
+          <TouchableOpacity
+            style={[styles.iconButton, { marginBottom: 8 }]}
+            onPress={onFlipCameraPressed}
+          >
             <BlurView intensity={50} style={styles.blurView}>
               <Ionicons name="camera-reverse" color="white" size={24} />
             </BlurView>
           </TouchableOpacity>
           {supportsFlash && (
-            <TouchableOpacity style={styles.iconButton} onPress={onFlashPressed}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={onFlashPressed}
+            >
               <BlurView intensity={50} style={styles.blurView}>
                 <Ionicons
                   name={flash === "on" ? "flash" : "flash-off"}
