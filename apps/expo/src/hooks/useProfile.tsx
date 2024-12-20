@@ -18,23 +18,30 @@ interface UseProfileProps {
 const useProfile = ({ userId }: UseProfileProps = { userId: undefined }): UseQueryResult<OtherProfile | SelfProfile, unknown> & {
   profile: OtherProfile | SelfProfile | undefined;
 } => {
+  const query = api.profile.getFullProfileOther.useQuery(
+    { userId: userId! },
+    {
+      staleTime: STALE_TIME,
+      enabled: !!userId,
+    },
+  );
+
+  const selfQuery = api.profile.getFullProfileSelf.useQuery(undefined, {
+    staleTime: STALE_TIME,
+    enabled: !!userId,
+  });
+
   if (userId) {
-    const query = api.profile.getFullProfileOther.useQuery({ userId }, {
-      staleTime: STALE_TIME,
-    });
-    return {
-      ...query,
-      profile: query.data,
-    };
-  } else {
-    const query = api.profile.getFullProfileSelf.useQuery(undefined, {
-      staleTime: STALE_TIME,
-    });
     return {
       ...query,
       profile: query.data,
     };
   }
+
+  return {
+    ...selfQuery,
+    profile: selfQuery.data,
+  };
 };
 
 export default useProfile;

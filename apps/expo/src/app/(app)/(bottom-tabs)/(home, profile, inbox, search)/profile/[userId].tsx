@@ -90,7 +90,6 @@ const OtherProfile = React.memo(() => {
 
   const isLoading = isLoadingProfileData || isLoadingPostData;
 
-  // TODO: Action Sheet In Header
   useLayoutEffect(() => {
     navigation.setOptions({
       title: username,
