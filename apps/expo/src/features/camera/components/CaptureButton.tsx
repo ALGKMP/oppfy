@@ -40,6 +40,8 @@ const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2] satisfies FailOffset;
 const START_RECORDING_DELAY = 200;
 const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.075;
 
+const MAX_RECORDING_DURATION = 3000; // 10 seconds in milliseconds
+
 interface Context {
   offsetY?: number;
   startY?: number;
@@ -104,6 +106,11 @@ const CaptureButton = ({
   const startRecording = useCallback(() => {
     if (camera.current === null) throw new Error("Camera ref is null");
 
+    recordingProgress.value = withTiming(1, {
+      duration: MAX_RECORDING_DURATION,
+      easing: Easing.linear,
+    });
+
     camera.current.startRecording({
       flash,
       onRecordingError: () => {
@@ -115,7 +122,23 @@ const CaptureButton = ({
       },
     });
     isRecording.current = true;
-  }, [camera, flash, onMediaCaptured, onStoppedRecording]);
+
+    setTimeout(() => {
+      if (isRecording.current) {
+        void stopRecording();
+        isPressingButton.value = false;
+        setIsPressingButton(false);
+      }
+    }, MAX_RECORDING_DURATION);
+  }, [
+    camera,
+    flash,
+    onMediaCaptured,
+    onStoppedRecording,
+    recordingProgress,
+    isPressingButton,
+    setIsPressingButton,
+  ]);
 
   const handleTapOnEnd = useCallback(
     async (_event: GestureStateChangeEvent<TapGestureHandlerEventPayload>) => {
