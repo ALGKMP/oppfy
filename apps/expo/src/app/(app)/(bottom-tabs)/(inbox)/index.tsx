@@ -1,6 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { RefreshControl, ViewToken } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -10,17 +15,14 @@ import { getToken } from "tamagui";
 import GridSuggestions from "~/components/GridSuggestions";
 import {
   H5,
-  H6,
   MediaListItem,
   MediaListItemActionProps,
   MediaListItemSkeleton,
   Paragraph,
-  SizableText,
-  TimeAgo,
-  View,
   YStack,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
+import { TimeAgo } from "~/components/ui/TimeAgo";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api, RouterOutputs } from "~/utils/api";
@@ -29,26 +31,21 @@ type NotificationItem =
   RouterOutputs["notifications"]["paginateNotifications"]["items"][0];
 
 const REFETCH_INTERVAL = 1000 * 30;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 const Inbox = () => {
   const router = useRouter();
   const utils = api.useUtils();
-  const insets = useSafeAreaInsets();
-
   const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(false);
 
-  const {
-    data: requestsCount,
-    isLoading: isCountRequestsLoading,
-    refetch: refetchRequestCount,
-  } = api.request.countRequests.useQuery(undefined, {
-    refetchInterval: REFETCH_INTERVAL,
-    refetchOnWindowFocus: true,
-  });
+  const { data: requestsCount, refetch: refetchRequestCount } =
+    api.request.countRequests.useQuery(undefined, {
+      refetchInterval: REFETCH_INTERVAL,
+      refetchOnWindowFocus: true,
+    });
 
   const {
     data: notificationsData,
@@ -65,6 +62,7 @@ const Inbox = () => {
     },
   );
 
+  // Flatten the paginated data into a single array
   const notificationItems = useMemo(
     () => notificationsData?.pages.flatMap((page) => page.items) ?? [],
     [notificationsData],
@@ -127,95 +125,93 @@ const Inbox = () => {
   }, [refetchNotifications, refetchRequestCount]);
 
   const getNotificationMessage = (item: NotificationItem) => {
-    const { eventType, username } = item;
-
-    switch (eventType) {
+    switch (item.eventType) {
       case "like":
-        return `liked your post`;
+        return "liked your post";
       case "post":
-        return `has opped you`;
+        return "has opped you";
       case "comment":
-        return `commented on your post`;
+        return "commented on your post";
       case "follow":
-        return `started following you`;
+        return "started following you";
       case "friend":
-        return `is now your friend`;
+        return "is now your friend";
       default:
         return "";
     }
   };
 
-  const renderActionButton = useCallback(
-    (item: NotificationItem): MediaListItemActionProps => {
-      switch (item.relationshipState) {
-        case "notFollowing":
-          return {
-            label: "Follow",
-            icon: UserRoundPlus,
-            variant: "primary",
-            onPress: () => void followUser.mutateAsync({ userId: item.userId }),
-          };
-        case "following":
-          return {
-            label: "Followed",
-            icon: UserRoundCheck,
-            disabled: true,
-          };
-        case "followRequestSent":
-          return {
-            label: "Sent",
-            icon: UserRoundCheck,
-            disabled: true,
-          };
-      }
-    },
-    [followUser],
-  );
+  const renderActionButton = (
+    item: NotificationItem,
+  ): MediaListItemActionProps | undefined => {
+    if (!item.userId) return undefined;
+    switch (item.relationshipState) {
+      case "notFollowing":
+        return {
+          label: "Follow",
+          icon: UserRoundPlus,
+          variant: "primary",
+          onPress: () => void followUser.mutateAsync({ userId: item.userId }),
+        };
+      case "following":
+        return {
+          label: "Followed",
+          icon: UserRoundCheck,
+          disabled: true,
+        };
+      case "followRequestSent":
+        return {
+          label: "Sent",
+          icon: UserRoundCheck,
+          disabled: true,
+        };
+      default:
+        return undefined;
+    }
+  };
 
   const renderListItem = useCallback(
-    (item: NotificationItem) => {
-      return (
-        <MediaListItem
-          verticalText
-          title={item.username}
-          subtitle={getNotificationMessage(item)}
-          caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
-          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          primaryAction={renderActionButton(item)}
-          onPress={() =>
-            routeProfile({ userId: item.userId, username: item.username })
-          }
-        />
-      );
-    },
-    [renderActionButton, routeProfile],
+    ({ item }: { item: NotificationItem }) => (
+      <MediaListItem
+        verticalText
+        title={item.username}
+        subtitle={getNotificationMessage(item)}
+        caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
+        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+        primaryAction={renderActionButton(item)}
+        onPress={() =>
+          routeProfile({ userId: item.userId, username: item.username })
+        }
+      />
+    ),
+    [routeProfile, followUser],
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <YStack gap="$4">
-        {requestsCount &&
-          (requestsCount.followRequestCount > 0 ||
-            requestsCount.friendRequestCount > 0) && (
-            <YStack
-              backgroundColor="$background"
-              padding="$4"
-              borderRadius="$4"
-              pressStyle={{ opacity: 0.7 }}
-              onPress={() => router.navigate("/requests")}
-            >
-              <H5>Follow and Friend Requests</H5>
-              <Paragraph theme="alt1">
-                {requestsCount.followRequestCount +
-                  requestsCount.friendRequestCount}{" "}
-                pending requests
-              </Paragraph>
-            </YStack>
-          )}
-      </YStack>
-    ),
-    [requestsCount, router],
-  );
+  const ListHeaderComponent = useMemo(() => {
+    const pendingRequests =
+      (requestsCount?.followRequestCount ?? 0) +
+      (requestsCount?.friendRequestCount ?? 0);
+
+    if (pendingRequests > 0) {
+      return (
+        <YStack gap="$4">
+          <YStack
+            backgroundColor="$background"
+            padding="$4"
+            borderRadius="$4"
+            pressStyle={{ opacity: 0.7 }}
+            onPress={() => router.navigate("/requests")}
+          >
+            <H5>Follow and Friend Requests</H5>
+            <Paragraph theme="alt1">
+              {pendingRequests} pending requests
+            </Paragraph>
+          </YStack>
+        </YStack>
+      );
+    }
+    return null;
+  }, [requestsCount, router]);
 
   const ListEmptyComponent = useCallback(() => {
     if (isNotificationsLoading) {
@@ -240,35 +236,77 @@ const Inbox = () => {
     }
 
     return null;
-  }, [isNotificationsLoading, notificationItems.length]);
+  }, [isNotificationsLoading]);
 
-  const onViewableItemsChanged = useRef(
+  // Viewability configuration
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 90, // Marks an item "viewable" when 90% of it is visible
+  };
+
+  // Callback when the visible items change
+  const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0 && notificationItems.length > 0) {
-        const lastVisibleIndex =
-          viewableItems[viewableItems.length - 1]?.index ?? 0;
-        const isNearEnd = lastVisibleIndex >= notificationItems.length - 10;
+      if (viewableItems.length > 0) {
+        const lastVisibleItem = viewableItems[viewableItems.length - 1];
+        const lastIndex = notificationItems.length - 1;
+        const thresholdIndex = lastIndex - 10; // Check if within last 10 items
 
-        if (isNearEnd) {
+        if (lastVisibleItem?.index && lastVisibleItem.index >= thresholdIndex) {
           setIsNearBottom(true);
+        } else {
+          setIsNearBottom(false);
         }
       }
     },
-  ).current;
+    [notificationItems],
+  );
+
+  // Reference for performance optimization
+  const viewabilityConfigCallbackPairs = useRef([
+    { viewabilityConfig, onViewableItemsChanged },
+  ]);
+
+  // const notificationItemsRef = useRef(notificationItems);
+  // notificationItemsRef.current = notificationItems;
+
+  // const onViewableItemsChanged = useRef(
+  //   ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+  //     console.log("viewableItems.length", viewableItems.length);
+  //     console.log(
+  //       "notificationItems.length",
+  //       notificationItemsRef.current.length,
+  //     );
+
+  //     if (viewableItems.length > 0 && notificationItemsRef.current.length > 0) {
+  //       const lastVisibleIndex =
+  //         viewableItems[viewableItems.length - 1]?.index ?? 0;
+  //       const isNearEnd =
+  //         lastVisibleIndex >= notificationItemsRef.current.length - 15;
+  //       console.log("isNearEnd", isNearEnd);
+  //       console.log("lastVisibleIndex", lastVisibleIndex);
+  //       console.log(
+  //         "notificationItems.length",
+  //         notificationItemsRef.current.length,
+  //       );
+
+  //       if (isNearEnd) {
+  //         setIsNearBottom(true);
+  //       }
+  //     }
+  //   },
+  // ).current;
 
   return (
     <FlashList
       data={notificationItems}
-      renderItem={({ item }) => renderListItem(item)}
+      renderItem={renderListItem}
       keyExtractor={(item) => item.id}
       estimatedItemSize={56}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={
         notificationItems.length > 0 && !hasNextPage && isNearBottom ? (
-          <YStack paddingTop="$4">
-            <GridSuggestions />
-          </YStack>
+          <GridSuggestions />
         ) : null
       }
       ItemSeparatorComponent={Spacer}
@@ -282,10 +320,8 @@ const Inbox = () => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
-      onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={{
-        itemVisiblePercentThreshold: 50,
-      }}
+      // Using viewabilityConfigCallbackPairs instead of onViewableItemsChanged directly
+      viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
     />
   );
 };
