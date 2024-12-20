@@ -191,25 +191,10 @@ const Search = () => {
           }}
         />
 
-        {!searchTerm && (
-          <GridSuggestions
-            data={recommendationsData}
-            isLoading={isLoadingRecommendationsData}
-            onFollow={handleFollow}
-            onProfilePress={(userId, username) =>
-              routeProfile({ userId, username })
-            }
-          />
-        )}
+        {!searchTerm && <GridSuggestions />}
       </YStack>
     ),
-    [
-      searchTerm,
-      isLoadingRecommendationsData,
-      recommendationsData,
-      renderListItem,
-      performSearch,
-    ],
+    [searchTerm, performSearch],
   );
 
   const ListEmptyComponent = useCallback(() => {
