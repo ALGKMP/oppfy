@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { RefreshControl } from "react-native";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { RefreshControl, ViewToken } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -7,6 +7,7 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
+import GridSuggestions from "~/components/GridSuggestions";
 import {
   H5,
   H6,
@@ -38,6 +39,7 @@ const Inbox = () => {
   const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(false);
 
   const {
     data: requestsCount,
@@ -174,6 +176,7 @@ const Inbox = () => {
     (item: NotificationItem) => {
       return (
         <MediaListItem
+          recyclingKey={item.id}
           verticalText
           title={item.username}
           subtitle={getNotificationMessage(item)}
@@ -240,27 +243,50 @@ const Inbox = () => {
     return null;
   }, [isNotificationsLoading, notificationItems.length]);
 
-  return (
-    <View flex={1}>
-      <FlashList
-        data={notificationItems}
-        renderItem={({ item }) => renderListItem(item)}
-        estimatedItemSize={75}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={ListEmptyComponent}
-        ItemSeparatorComponent={Spacer}
-        contentContainerStyle={{
-          padding: getToken("$4", "space"),
-        }}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleOnEndReached}
-        onEndReachedThreshold={0.5}
-        keyboardShouldPersistTaps="always"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      if (viewableItems.length > 0 && notificationItems.length > 0) {
+        const lastVisibleIndex =
+          viewableItems[viewableItems.length - 1]?.index ?? 0;
+        const isNearEnd = lastVisibleIndex >= notificationItems.length - 10;
+
+        if (isNearEnd) {
+          setIsNearBottom(true);
         }
-      />
-    </View>
+      }
+    },
+  ).current;
+
+  return (
+    <FlashList
+      data={notificationItems}
+      renderItem={({ item }) => renderListItem(item)}
+      estimatedItemSize={75}
+      ListHeaderComponent={ListHeaderComponent}
+      ListEmptyComponent={ListEmptyComponent}
+      ListFooterComponent={
+        notificationItems.length > 0 && !hasNextPage && isNearBottom ? (
+          <YStack paddingTop="$4">
+            <GridSuggestions />
+          </YStack>
+        ) : null
+      }
+      ItemSeparatorComponent={Spacer}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+      }}
+      showsVerticalScrollIndicator={false}
+      onEndReached={handleOnEndReached}
+      onEndReachedThreshold={0.5}
+      keyboardShouldPersistTaps="always"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={{
+        itemVisiblePercentThreshold: 50,
+      }}
+    />
   );
 };
 
