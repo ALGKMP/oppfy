@@ -3,7 +3,6 @@ import { FlatList } from "react-native";
 import Animated, {
   FadeIn,
   FadeInDown,
-  FadeInUp,
   useAnimatedStyle,
   withRepeat,
   withSequence,
@@ -12,13 +11,14 @@ import Animated, {
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import { Button, H5, H6, Text, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
+
+const STALE_TIME = 60 * 1000;
 
 type RecommendationItem =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
@@ -127,7 +127,6 @@ const SuggestionItem = ({
           <Button
             size="$3"
             variant="primary"
-            icon={UserRoundPlus}
             pressStyle={{ scale: 0.95 }}
             opacity={0.85}
             onPress={() => onFollow(item.userId)}
@@ -144,10 +143,15 @@ const GridSuggestions = () => {
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
 
-  const { data, isLoading } =
+  const { data: rawData, isLoading } =
     api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
-      staleTime: 10000,
+      staleTime: STALE_TIME,
     });
+
+  const data = useMemo(() => {
+    if (!rawData) return [];
+    return rawData.length % 2 === 0 ? rawData : rawData.slice(0, -1);
+  }, [rawData]);
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
@@ -157,33 +161,16 @@ const GridSuggestions = () => {
 
       utils.contacts.getRecommendationProfilesSelf.setData(
         undefined,
-        prevData.map((item) =>
-          item.userId === newData.userId
-            ? {
-                ...item,
-                relationshipState:
-                  item.privacy === "private"
-                    ? "followRequestSent"
-                    : "following",
-              }
-            : item,
-        ),
+        prevData.filter((item) => item.userId !== newData.userId),
       );
 
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
-      if (ctx?.prevData) {
-        void utils.contacts.getRecommendationProfilesSelf.invalidate();
-      }
+      if (ctx?.prevData === undefined) return;
+      void utils.contacts.getRecommendationProfilesSelf.invalidate();
     },
   });
-
-  const handleFollow = (userId: string) => {
-    followMutation.mutateAsync({ userId }).catch(() => {
-      /* Handle error if needed */
-    });
-  };
 
   const handleProfilePress = (userId: string, username: string) => {
     routeProfile({ userId, username });
@@ -225,7 +212,7 @@ const GridSuggestions = () => {
             item={item}
             index={index}
             onPressProfile={handleProfilePress}
-            onFollow={handleFollow}
+            onFollow={() => followMutation.mutateAsync({ userId: item.userId })}
           />
         )}
         numColumns={2}
