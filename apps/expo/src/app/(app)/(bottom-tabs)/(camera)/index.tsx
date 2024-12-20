@@ -5,12 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  Dimensions,
-  Linking,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
   Extrapolation,
@@ -19,7 +14,6 @@ import Reanimated, {
   useAnimatedProps,
   useSharedValue,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type {
   CameraProps,
   PhotoFile,
@@ -51,35 +45,24 @@ import {
 } from "~/features/camera/components";
 import useIsForeground from "~/hooks/useIsForeground";
 
+const ASPECT_RATIO = 16 / 9;
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const PREVIEW_HEIGHT = SCREEN_WIDTH * ASPECT_RATIO; // 16:9
+
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
-Reanimated.addWhitelistedNativeProps({
-  zoom: true,
-});
+Reanimated.addWhitelistedNativeProps({ zoom: true });
 
 const MAX_ZOOM_FACTOR = 10;
 const SCALE_FULL_ZOOM = 3;
 
-const SCREEN_WIDTH = Dimensions.get("screen").width;
-const SCREEN_HEIGHT = Dimensions.get("screen").height;
-const ASPECT_RATIO = 16 / 9;
-
 const CameraPage = () => {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   const alertDialog = useAlertDialogController();
-
-  const safeAreaPadding = {
-    paddingLeft: insets.left,
-    paddingTop: insets.top,
-    paddingRight: insets.right,
-    paddingBottom: insets.bottom,
-  };
 
   const camera = useRef<Camera>(null);
 
   const location = useLocationPermission();
   const microphone = useMicrophonePermission();
-
   const [isCameraInitialized, setIsCameraInitialized] = useState(false);
 
   const { animations, addAnimation } = useFocusAnimations();
@@ -88,7 +71,6 @@ const CameraPage = () => {
   const startZoom = useSharedValue(zoom.value);
 
   const isPressingButton = useSharedValue(false);
-
   const setIsPressingButton = useCallback(
     (newIsPressingButton: boolean) => {
       isPressingButton.value = newIsPressingButton;
@@ -96,45 +78,32 @@ const CameraPage = () => {
     [isPressingButton],
   );
 
-  // Check if camera page is active
   const isFocussed = useIsFocused();
   const isForeground = useIsForeground();
   const isActive = isFocussed && isForeground;
 
-  const [targetFps, _setTargetFps] = useState(30);
-
-  const [enableHdr, _setEnableHdr] = useState(false);
-  const [enableNightMode, _setEnableNightMode] = useState(false);
+  const [targetFps] = useState(30);
+  const [enableHdr] = useState(false);
+  const [enableNightMode] = useState(false);
 
   const [flash, setFlash] = useState<"off" | "on">("off");
   const [position, setPosition] = useState<"front" | "back">("back");
 
   const device = useCameraDevice(position);
-
   const format = useCameraFormat(device, [
     { fps: targetFps },
     { videoAspectRatio: ASPECT_RATIO },
-    { videoResolution: "max" },
     { photoAspectRatio: ASPECT_RATIO },
-    { photoResolution: "max" },
   ]);
 
-  const _fps = Math.min(format?.maxFps ?? 1, targetFps);
-
+  const maxFps = Math.min(format?.maxFps ?? 30, targetFps);
   const minZoom = device?.minZoom ?? 1;
   const maxZoom = Math.min(device?.maxZoom ?? 1, MAX_ZOOM_FACTOR);
 
   const videoHdr = format?.supportsVideoHdr && enableHdr;
   const photoHdr = format?.supportsPhotoHdr && enableHdr && !videoHdr;
-
-  const _supportsHdr = format?.supportsPhotoHdr;
   const supportsFlash = device?.hasFlash ?? false;
   const supportsFocus = device?.supportsFocus ?? false;
-  const _supportsNightMode = device?.supportsLowLightBoost ?? false;
-  const _supports60Fps = useMemo(
-    () => device?.formats.some((format) => format.maxFps >= 60),
-    [device?.formats],
-  );
 
   const onInitialized = useCallback(() => {
     setIsCameraInitialized(true);
@@ -144,66 +113,48 @@ const CameraPage = () => {
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
 
-      const dimension1 =
-        type === "video" ? format?.videoWidth : format?.photoWidth;
-      const dimension2 =
-        type === "video" ? format?.videoHeight : format?.photoHeight;
+      const w = format?.photoWidth ?? format?.videoWidth;
+      const h = format?.photoHeight ?? format?.videoHeight;
 
-      if (dimension1 === undefined || dimension2 === undefined) {
-        throw new Error("Dimension is undefined");
+      if (!w || !h) {
+        throw new Error("Captured media dimensions not found");
       }
-
-      const width = Math.min(dimension1, dimension2);
-      const height = Math.max(dimension1, dimension2);
 
       router.push({
         pathname: "/preview",
         params: {
           type,
           uri,
-          width,
-          height,
+          width: w,
+          height: h,
         },
       });
     },
-    [
-      format?.photoHeight,
-      format?.photoWidth,
-      format?.videoHeight,
-      format?.videoWidth,
-      router,
-    ],
+    [format, router],
   );
 
   const onOpenMediaPicker = useCallback(async () => {
     const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync();
-
-    // If permission already granted, navigate directly
     if (status === "granted") {
       router.push("/album-picker");
       return;
     }
-
-    // If we can request permission, try that first
     if (canAskAgain) {
       const { granted } = await MediaLibrary.requestPermissionsAsync();
-
       if (granted) {
         router.push("/album-picker");
         return;
       }
+    }
 
-      // Can't ask again - show settings dialog
-      const confirmed = await alertDialog.show({
-        title: "Media Library Permission",
-        subtitle: "So you can share photos from your library with your friends",
-        cancelText: "OK",
-        acceptText: "Settings",
-      });
-
-      if (confirmed) {
-        await Linking.openSettings();
-      }
+    const confirmed = await alertDialog.show({
+      title: "Media Library Permission",
+      subtitle: "Please grant permission to access your media.",
+      cancelText: "OK",
+      acceptText: "Settings",
+    });
+    if (confirmed) {
+      await Linking.openSettings();
     }
   }, [alertDialog, router]);
 
@@ -218,7 +169,7 @@ const CameraPage = () => {
   const onFocus = useCallback(
     (point: Point) => {
       addAnimation(point);
-      void camera.current?.focus(point);
+      camera.current?.focus(point);
     },
     [addAnimation],
   );
@@ -274,137 +225,110 @@ const CameraPage = () => {
   }, [maxZoom, minZoom, zoom]);
 
   useEffect(() => {
-    // Reset zoom to its default every time the `device` changes.
     zoom.value = device?.neutralZoom ?? 1;
   }, [zoom, device]);
 
   useEffect(() => {
-    const requestMicrophonePermission = async () => {
-      if (microphone.hasPermission) return;
-      await microphone.requestPermission().catch();
-    };
-
-    void requestMicrophonePermission();
+    if (!microphone.hasPermission) {
+      microphone.requestPermission().catch(() => {});
+    }
   }, [microphone]);
 
-  if (device === undefined) return <NoCameraDeviceError />;
+  if (!device) {
+    return (
+      <BaseScreenView
+        safeAreaEdges={["top", "bottom"]}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <EmptyPlaceholder
+          title="No camera device found"
+          subtitle="Please check your camera settings and try again."
+          icon={<CameraOff />}
+        />
+      </BaseScreenView>
+    );
+  }
 
   return (
-    <View
-      flex={1}
-      width={SCREEN_WIDTH}
-      height={Math.min(
-        (SCREEN_WIDTH * 16) / 9,
-        SCREEN_HEIGHT - insets.top - insets.bottom - 70,
-      )}
-      borderRadius={20}
-      overflow="hidden"
-      alignSelf="center"
-      position="absolute"
-      top={safeAreaPadding.paddingTop}
+    <BaseScreenView
+      safeAreaEdges={["top", "bottom"]}
+      justifyContent="center"
+      alignItems="center"
     >
-      <GestureDetector gesture={composedGesture}>
-        {/* Do not delete this View; it's needed to pass touch events to the camera */}
-        <View flex={1}>
-          <ReanimatedCamera
-            ref={camera}
-            device={device}
-            isActive={isActive}
-            onInitialized={onInitialized}
-            format={format}
-            fps={30}
-            photoHdr={photoHdr}
-            videoHdr={videoHdr}
-            photoQualityBalance="quality"
-            lowLightBoost={device.supportsLowLightBoost && enableNightMode}
-            enableZoomGesture={false}
-            animatedProps={cameraAnimatedProps}
-            photo={true}
-            video={true}
-            audio={microphone.hasPermission}
-            enableLocation={location.hasPermission}
-            style={{
-              flex: 1,
-            }}
-          />
-        </View>
-      </GestureDetector>
-
-      {animations.map(({ id, point }) => (
-        <FocusIcon key={id} x={point.x} y={point.y} />
-      ))}
-
-      <CaptureButton
-        style={{
-          position: "absolute",
-          alignSelf: "center",
-          bottom: 36,
-        }}
-        camera={camera}
-        onMediaCaptured={onMediaCaptured}
-        cameraZoom={zoom}
-        minZoom={minZoom}
-        maxZoom={maxZoom}
-        flash={supportsFlash ? flash : "off"}
-        enabled={isCameraInitialized && isActive}
-        setIsPressingButton={setIsPressingButton}
-      />
-
-      <TouchableOpacity
-        style={[
-          styles.iconButton,
-          {
-            position: "absolute",
-            bottom: 12,
-            left: 12,
-          },
-        ]}
-        onPress={onOpenMediaPicker}
-      >
-        <BlurView intensity={50} style={styles.blurView}>
-          <Ionicons name="images" color="white" size={24} />
-        </BlurView>
-      </TouchableOpacity>
-
       <View
-        position="absolute"
-        top={12}
-        right={12}
-        flexDirection="column"
-        gap="$2"
+        width={SCREEN_WIDTH}
+        height={PREVIEW_HEIGHT}
+        borderRadius={20}
+        overflow="hidden"
       >
+        <GestureDetector gesture={composedGesture}>
+          <View style={{ flex: 1 }}>
+            <ReanimatedCamera
+              ref={camera}
+              device={device}
+              isActive={isActive}
+              onInitialized={onInitialized}
+              format={format}
+              fps={maxFps}
+              photoHdr={photoHdr}
+              videoHdr={videoHdr}
+              lowLightBoost={device.supportsLowLightBoost && enableNightMode}
+              enableZoomGesture={false}
+              animatedProps={cameraAnimatedProps}
+              photo={true}
+              video={true}
+              audio={microphone.hasPermission}
+              enableLocation={location.hasPermission}
+              style={{ flex: 1 }}
+            />
+          </View>
+        </GestureDetector>
+
+        {animations.map(({ id, point }) => (
+          <FocusIcon key={id} x={point.x} y={point.y} />
+        ))}
+
+        <CaptureButton
+          style={{ position: "absolute", alignSelf: "center", bottom: 36 }}
+          camera={camera}
+          onMediaCaptured={onMediaCaptured}
+          cameraZoom={zoom}
+          minZoom={minZoom}
+          maxZoom={maxZoom}
+          flash={supportsFlash ? flash : "off"}
+          enabled={isCameraInitialized && isActive}
+          setIsPressingButton={setIsPressingButton}
+        />
+
         <TouchableOpacity
-          style={styles.iconButton}
-          onPress={onFlipCameraPressed}
+          style={[styles.iconButton, { position: "absolute", bottom: 12, left: 12 }]}
+          onPress={onOpenMediaPicker}
         >
           <BlurView intensity={50} style={styles.blurView}>
-            <Ionicons name="camera-reverse" color="white" size={24} />
+            <Ionicons name="images" color="white" size={24} />
           </BlurView>
         </TouchableOpacity>
-        {supportsFlash && (
-          <TouchableOpacity style={styles.iconButton} onPress={onFlashPressed}>
+
+        <View style={{ position: "absolute", top: 12, right: 12 }}>
+          <TouchableOpacity style={[styles.iconButton, { marginBottom: 8 }]} onPress={onFlipCameraPressed}>
             <BlurView intensity={50} style={styles.blurView}>
-              <Ionicons
-                name={flash === "on" ? "flash" : "flash-off"}
-                color="white"
-                size={24}
-              />
+              <Ionicons name="camera-reverse" color="white" size={24} />
             </BlurView>
           </TouchableOpacity>
-        )}
+          {supportsFlash && (
+            <TouchableOpacity style={styles.iconButton} onPress={onFlashPressed}>
+              <BlurView intensity={50} style={styles.blurView}>
+                <Ionicons
+                  name={flash === "on" ? "flash" : "flash-off"}
+                  color="white"
+                  size={24}
+                />
+              </BlurView>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
-  );
-};
-
-const NoCameraDeviceError = () => {
-  return (
-    <BaseScreenView justifyContent="center" alignItems="center">
-      <EmptyPlaceholder
-        title="No camera device found"
-        subtitle="Please check your camera settings and try again."
-        icon={<CameraOff />}
-      />
     </BaseScreenView>
   );
 };
