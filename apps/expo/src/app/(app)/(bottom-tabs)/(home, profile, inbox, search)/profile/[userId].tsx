@@ -99,10 +99,12 @@ const OtherProfile = React.memo(() => {
 
   const isLoading = isLoadingProfileData || isLoadingPostData;
 
+  // TODO: Action Sheet
   const [sheetState, setSheetState] = useState<
     "closed" | "moreOptions" | "reportOptions"
   >("closed");
 
+  // TODO: Action Sheet
   const { isPending: isBlocking, ...blockUser } =
     api.block.blockUser.useMutation({
       onMutate: async (_newBlockedUser) => {
@@ -174,10 +176,12 @@ const OtherProfile = React.memo(() => {
       },
     });
 
+  // TODO: Action Sheet in Nav Header
   const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
   }, []);
 
+  // TODO: Action Sheet
   const handleCloseMoreOptionsSheet = useCallback(() => {
     setSheetState("closed");
   }, []);
@@ -192,6 +196,7 @@ const OtherProfile = React.memo(() => {
     toast.show("User Unblocked");
   }, [unblockUser, userId, toast]);
 
+  // TODO: Action Sheet
   const moreOptionsButtonOptions: ButtonOption[] = useMemo(() => {
     const isBlocked = otherProfileData?.networkStatus.blocked ?? false;
 
@@ -220,6 +225,7 @@ const OtherProfile = React.memo(() => {
     handleBlockUser,
   ]);
 
+  // TODO: Action Sheet In Header
   useLayoutEffect(() => {
     navigation.setOptions({
       title: username,
