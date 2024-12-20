@@ -38,84 +38,88 @@ const useUploadMedia = () => {
     return await response.blob();
   };
 
-  const uploadVideoMutation = useMutation(async (input: UploadMediaInput) => {
-    const { uri, caption, width, height } = input;
+  const uploadVideoMutation = useMutation({
+    mutationFn: async (input: UploadMediaInput) => {
+      const { uri, caption, width, height } = input;
 
-    const videoBlob = await getMediaBlob(uri);
+      const videoBlob = await getMediaBlob(uri);
 
-    const baseData = {
-      caption,
-      width: width.toString(),
-      height: height.toString(),
-    };
+      const baseData = {
+        caption,
+        width: width.toString(),
+        height: height.toString(),
+      };
 
-    const presignedUrl =
-      input.type === "onApp"
-        ? await uploadVideoPostForUserOnApp.mutateAsync({
-            ...baseData,
-            recipient: input.recipient,
-          })
-        : await uploadVideoPostForUserNotOnApp.mutateAsync({
-            ...baseData,
-            number: input.number,
-          });
+      const presignedUrl =
+        input.type === "onApp"
+          ? await uploadVideoPostForUserOnApp.mutateAsync({
+              ...baseData,
+              recipient: input.recipient,
+            })
+          : await uploadVideoPostForUserNotOnApp.mutateAsync({
+              ...baseData,
+              number: input.number,
+            });
 
-    const response = await fetch(presignedUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": videoBlob.type,
-      },
-      body: videoBlob,
-    });
-    console.log("Video blob type:", videoBlob.type);
+      const response = await fetch(presignedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": videoBlob.type,
+        },
+        body: videoBlob,
+      });
+      console.log("Video blob type:", videoBlob.type);
 
-    if (!response.ok) {
-      throw new Error("Failed to upload video");
-    }
+      if (!response.ok) {
+        throw new Error("Failed to upload video");
+      }
+    },
   });
 
-  const uploadPhotoMutation = useMutation(async (input: UploadMediaInput) => {
-    const { uri, caption, width, height } = input;
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async (input: UploadMediaInput) => {
+      const { uri, caption, width, height } = input;
 
-    const photoBlob = await getMediaBlob(uri);
+      const photoBlob = await getMediaBlob(uri);
 
-    const parsedMediaType = sharedValidators.media.postContentType.safeParse(
-      photoBlob.type,
-    );
+      const parsedMediaType = sharedValidators.media.postContentType.safeParse(
+        photoBlob.type,
+      );
 
-    console.log("Media type of the image:", photoBlob.type);
+      console.log("Media type of the image:", photoBlob.type);
 
-    if (!parsedMediaType.success) {
-      throw new Error("Invalid media type");
-    }
+      if (!parsedMediaType.success) {
+        throw new Error("Invalid media type");
+      }
 
-    const baseData = {
-      caption,
-      width: width.toString(),
-      height: height.toString(),
-      contentLength: photoBlob.size,
-      contentType: parsedMediaType.data,
-    };
+      const baseData = {
+        caption,
+        width: width.toString(),
+        height: height.toString(),
+        contentLength: photoBlob.size,
+        contentType: parsedMediaType.data,
+      };
 
-    const presignedUrl =
-      input.type === "onApp"
-        ? await uploadPicturePostForUserOnApp.mutateAsync({
-            ...baseData,
-            recipient: input.recipient,
-          })
-        : await uploadPicturePostForUserNotOnApp.mutateAsync({
-            ...baseData,
-            number: input.number,
-          });
+      const presignedUrl =
+        input.type === "onApp"
+          ? await uploadPicturePostForUserOnApp.mutateAsync({
+              ...baseData,
+              recipient: input.recipient,
+            })
+          : await uploadPicturePostForUserNotOnApp.mutateAsync({
+              ...baseData,
+              number: input.number,
+            });
 
-    const response = await fetch(presignedUrl, {
-      method: "PUT",
-      body: photoBlob,
-    });
+      const response = await fetch(presignedUrl, {
+        method: "PUT",
+        body: photoBlob,
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to upload photo");
-    }
+      if (!response.ok) {
+        throw new Error("Failed to upload photo");
+      }
+    },
   });
 
   return {
