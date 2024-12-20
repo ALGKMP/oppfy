@@ -23,6 +23,7 @@ type MediaListItemProps = {
   primaryAction?: MediaListItemActionProps;
   secondaryAction?: MediaListItemActionProps;
   onPress?: () => void;
+  recyclingKey?: string;
 };
 
 export const MediaListItem = ({
@@ -34,13 +35,18 @@ export const MediaListItem = ({
   primaryAction,
   secondaryAction,
   onPress,
+  recyclingKey,
 }: MediaListItemProps) => {
   const content = (
     <XStack alignItems="center" gap="$3">
       {imageUrl && (
         <Image
+          recyclingKey={recyclingKey}
           source={imageUrl}
           style={{ width: 56, height: 56, borderRadius: 28 }}
+          cachePolicy="memory"
+          contentFit="cover"
+          transition={200}
         />
       )}
 
