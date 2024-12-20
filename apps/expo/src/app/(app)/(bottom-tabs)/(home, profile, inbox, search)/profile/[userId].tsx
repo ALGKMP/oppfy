@@ -90,11 +90,6 @@ const OtherProfile = React.memo(() => {
 
   const isLoading = isLoadingProfileData || isLoadingPostData;
 
-  // TODO: Action Sheet
-  const [sheetState, setSheetState] = useState<
-    "closed" | "moreOptions" | "reportOptions"
-  >("closed");
-
   // TODO: Action Sheet In Header
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -266,12 +261,6 @@ const OtherProfile = React.memo(() => {
           }}
         />
       </BaseScreenView>
-
-      {/* <ActionSheet
-        isVisible={sheetState === "moreOptions"}
-        buttonOptions={moreOptionsButtonOptions}
-        onCancel={handleCloseMoreOptionsSheet}
-      /> */}
     </>
   );
 });
