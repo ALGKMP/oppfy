@@ -13,6 +13,7 @@ export const Button = styled(TamaguiButton, {
         backgroundColor: "$primary",
         pressStyle: {
           backgroundColor: "#D900E6",
+          borderColor: "#D900E6",
         },
       },
       warning: {
