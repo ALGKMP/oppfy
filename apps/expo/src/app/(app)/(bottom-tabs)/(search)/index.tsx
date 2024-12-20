@@ -24,119 +24,14 @@ type SearchResultItem = RouterOutputs["search"]["profilesByUsername"][number];
 
 const Search = () => {
   const insets = useSafeAreaInsets();
-  const actionSheet = useActionSheetController();
-  const { user } = useSession();
   const { routeProfile } = useRouteProfile();
-  const utils = api.useUtils();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
 
-  const followMutation = api.follow.followUser.useMutation({
-    onMutate: async (newData) => {
-      await utils.contacts.getRecommendationProfilesSelf.cancel();
-
-      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
-      if (!prevData) return;
-
-      utils.contacts.getRecommendationProfilesSelf.setData(
-        undefined,
-        prevData.map((item) =>
-          item.userId === newData.userId
-            ? {
-                ...item,
-                relationshipState:
-                  item.privacy === "private"
-                    ? "followRequestSent"
-                    : "following",
-              }
-            : item,
-        ),
-      );
-
-      return { prevData };
-    },
-    onError: (_err, _newData, ctx) => {
-      if (ctx === undefined) return;
-      // Refetch latest data since our optimistic update may be outdated
-      void utils.contacts.getRecommendationProfilesSelf.invalidate();
-    },
-  });
-
-  const unfollowMutation = api.follow.unfollowUser.useMutation({
-    onMutate: async (newData) => {
-      await utils.contacts.getRecommendationProfilesSelf.cancel();
-
-      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
-      if (!prevData) return;
-
-      utils.contacts.getRecommendationProfilesSelf.setData(
-        undefined,
-        prevData.map((item) =>
-          item.userId === newData.userId
-            ? { ...item, relationshipState: "notFollowing" }
-            : item,
-        ),
-      );
-
-      return { prevData };
-    },
-    onError: (_err, _newData, ctx) => {
-      if (ctx === undefined) return;
-      // Refetch latest data since our optimistic update may be outdated
-      void utils.contacts.getRecommendationProfilesSelf.invalidate();
-    },
-  });
-
-  const cancelFollowRequest = api.follow.cancelFollowRequest.useMutation({
-    onMutate: async (newData) => {
-      await utils.contacts.getRecommendationProfilesSelf.cancel();
-
-      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
-      if (!prevData) return;
-
-      utils.contacts.getRecommendationProfilesSelf.setData(
-        undefined,
-        prevData.map((item) =>
-          item.userId === newData.recipientId
-            ? { ...item, relationshipState: "notFollowing" }
-            : item,
-        ),
-      );
-
-      return { prevData };
-    },
-    onError: (_err, _newData, ctx) => {
-      if (ctx === undefined) return;
-      // Refetch latest data since our optimistic update may be outdated
-      void utils.contacts.getRecommendationProfilesSelf.invalidate();
-    },
-  });
-
   const { mutateAsync: searchProfilesByUsername, isPending: isSearching } =
     api.search.profilesByUsername.useMutation();
-
-  const handleFollow = useCallback(
-    async (userId: string) => {
-      await followMutation.mutateAsync({ userId });
-    },
-    [followMutation],
-  );
-
-  const handleUnfollow = useCallback(
-    async (userId: string) => {
-      await unfollowMutation.mutateAsync({ userId });
-    },
-    [unfollowMutation],
-  );
-
-  const handleCancelFollowRequest = useCallback(
-    async (userId: string) => {
-      await cancelFollowRequest.mutateAsync({ recipientId: userId });
-    },
-    [cancelFollowRequest],
-  );
 
   const performSearch = useCallback(
     async (username: string) => {
