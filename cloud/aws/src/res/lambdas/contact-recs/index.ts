@@ -104,12 +104,13 @@ export const handler = async (
       .id()
       .toList();
 
+    const excludeForTier2 = [...peopleIDontWantToRecommend, ...tier1];
+
     // all incoming people who arent in tier1 and tier2
     const tier2 = await g
       .V(userId)
       .inE("contact")
-      .where(__.outV().hasId(P.without(tier1)))
-      .where(__.outV().hasId(P.without(peopleIDontWantToRecommend)))
+      .where(__.outV().hasId(P.without(excludeForTier2)))
       .outV()
       .dedup()
       .order()
@@ -119,7 +120,7 @@ export const handler = async (
       .toList();
 
     // remove all tier1 from tier2
-    tier2.filter((v) => !tier1.includes(v));
+
 
 /*     const tier3 = await g
       .V(userId)
