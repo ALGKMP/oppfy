@@ -1,10 +1,5 @@
-import React, {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { RefreshControl, ViewToken } from "react-native";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -38,7 +33,6 @@ const Inbox = () => {
   const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [isNearBottom, setIsNearBottom] = useState(false);
 
   const { data: requestsCount, refetch: refetchRequestCount } =
     api.request.countRequests.useQuery(undefined, {
@@ -237,33 +231,6 @@ const Inbox = () => {
     return null;
   }, [isNotificationsLoading]);
 
-  // Viewability configuration
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50,
-  };
-
-  // Callback when the visible items change
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0) {
-        const lastVisibleItem = viewableItems[viewableItems.length - 1];
-        const lastIndex = notificationItems.length - 1;
-        const thresholdIndex = lastIndex - 10; // Check if within last 10 items
-
-        if (lastVisibleItem?.index && lastVisibleItem.index >= thresholdIndex) {
-          setIsNearBottom(true);
-        } else {
-          setIsNearBottom(false);
-        }
-      }
-    },
-    [notificationItems],
-  );
-
-  const viewabilityConfigCallbackPairs = useRef([
-    { viewabilityConfig, onViewableItemsChanged },
-  ]);
-
   return (
     <FlashList
       data={notificationItems}
@@ -272,12 +239,11 @@ const Inbox = () => {
       estimatedItemSize={56}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
-      ListFooterComponent={
-        notificationItems.length > 0 && !hasNextPage && isNearBottom ? (
-          <GridSuggestions />
-        ) : null
-      }
+      ListFooterComponent={GridSuggestions}
       ItemSeparatorComponent={Spacer}
+      ListFooterComponentStyle={{
+        marginTop: getToken("$2", "space"),
+      }}
       contentContainerStyle={{
         padding: getToken("$4", "space"),
       }}
@@ -288,7 +254,6 @@ const Inbox = () => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
-      viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
     />
   );
 };
