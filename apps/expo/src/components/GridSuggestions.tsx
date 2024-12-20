@@ -15,7 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { getToken } from "tamagui";
 
-import { Button, H5, H6, Text, YStack } from "~/components/ui";
+import { Button, H5, Text, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -26,40 +26,6 @@ type RecommendationItem =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
-
-const SkeletonItem = ({ index }: { index: number }) => {
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: withRepeat(
-      withSequence(
-        withTiming(0.5, { duration: 1000 }),
-        withTiming(1, { duration: 1000 }),
-      ),
-      -1,
-      true,
-    ),
-  }));
-
-  return (
-    <Animated.View
-      key={index}
-      entering={FadeInDown.delay(index * 100)}
-      style={[
-        {
-          flex: 1,
-          aspectRatio: 1,
-          backgroundColor: "#eee",
-          borderRadius: 12,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.1,
-          shadowRadius: 20,
-          elevation: 5,
-        },
-        animatedStyle,
-      ]}
-    />
-  );
-};
 
 interface SuggestionItemProps {
   item: RecommendationItem;
@@ -221,31 +187,8 @@ const GridSuggestions = () => {
     routeProfile({ userId, username });
   };
 
-  const renderSkeletons = useMemo(
-    () => (
-      <YStack px="$4" gap="$4">
-        <H5 theme="alt1">Suggested for You</H5>
-        <YStack flexDirection="row" flexWrap="wrap" gap="$3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonItem key={i} index={i} />
-          ))}
-        </YStack>
-      </YStack>
-    ),
-    [],
-  );
-
-  if (isLoading) return renderSkeletons;
-
-  if (!data?.length) {
-    return (
-      <YStack px="$4">
-        <H5 mb="$4" theme="alt1">
-          Suggested for You
-        </H5>
-        <H6 theme="alt2">No suggestions available</H6>
-      </YStack>
-    );
+  if (!data?.length || isLoading) {
+    return null;
   }
 
   return (
