@@ -1,6 +1,5 @@
 import React, {
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -240,7 +239,7 @@ const Inbox = () => {
 
   // Viewability configuration
   const viewabilityConfig = {
-    itemVisiblePercentThreshold: 90, // Marks an item "viewable" when 90% of it is visible
+    itemVisiblePercentThreshold: 50,
   };
 
   // Callback when the visible items change
@@ -261,40 +260,9 @@ const Inbox = () => {
     [notificationItems],
   );
 
-  // Reference for performance optimization
   const viewabilityConfigCallbackPairs = useRef([
     { viewabilityConfig, onViewableItemsChanged },
   ]);
-
-  // const notificationItemsRef = useRef(notificationItems);
-  // notificationItemsRef.current = notificationItems;
-
-  // const onViewableItemsChanged = useRef(
-  //   ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-  //     console.log("viewableItems.length", viewableItems.length);
-  //     console.log(
-  //       "notificationItems.length",
-  //       notificationItemsRef.current.length,
-  //     );
-
-  //     if (viewableItems.length > 0 && notificationItemsRef.current.length > 0) {
-  //       const lastVisibleIndex =
-  //         viewableItems[viewableItems.length - 1]?.index ?? 0;
-  //       const isNearEnd =
-  //         lastVisibleIndex >= notificationItemsRef.current.length - 15;
-  //       console.log("isNearEnd", isNearEnd);
-  //       console.log("lastVisibleIndex", lastVisibleIndex);
-  //       console.log(
-  //         "notificationItems.length",
-  //         notificationItemsRef.current.length,
-  //       );
-
-  //       if (isNearEnd) {
-  //         setIsNearBottom(true);
-  //       }
-  //     }
-  //   },
-  // ).current;
 
   return (
     <FlashList
@@ -320,7 +288,6 @@ const Inbox = () => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
-      // Using viewabilityConfigCallbackPairs instead of onViewableItemsChanged directly
       viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
     />
   );
