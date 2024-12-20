@@ -6,8 +6,8 @@ import { FlashList } from "@shopify/flash-list";
 import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken, H5, H6, YStack } from "tamagui";
 
+import GridSuggestions from "~/components/GridSuggestions";
 import { SearchInput } from "~/components/Inputs";
-import GridSuggestions from "~/components/SuggestedUsers/GridSuggestions";
 import {
   MediaListItem,
   MediaListItemActionProps,
