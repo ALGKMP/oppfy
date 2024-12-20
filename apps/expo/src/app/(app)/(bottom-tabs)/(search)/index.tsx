@@ -3,19 +3,12 @@ import { Keyboard, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
-import { getToken, H5, H6, YStack } from "tamagui";
+import { getToken, H6, YStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
 import { SearchInput } from "~/components/Inputs";
-import {
-  MediaListItem,
-  MediaListItemActionProps,
-  MediaListItemSkeleton,
-  useActionSheetController,
-} from "~/components/ui";
+import { MediaListItem, MediaListItemSkeleton } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
-import { useSession } from "~/contexts/SessionContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
