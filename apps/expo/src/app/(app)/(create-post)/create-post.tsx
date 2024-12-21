@@ -1,12 +1,16 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Pressable, View as RNView, StyleSheet } from "react-native";
+import React, { useCallback, useRef, useState } from "react";
+import {
+  Dimensions,
+  Pressable,
+  View as RNView,
+  StyleSheet,
+} from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { AVPlaybackStatus } from "expo-av";
-import { ResizeMode, Video } from "expo-av";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -30,8 +34,10 @@ import {
 import { z } from "zod";
 
 import CardContainer from "~/components/Containers/CardContainer";
+import PlayPause, {
+  usePlayPauseAnimations,
+} from "~/components/Icons/PlayPause";
 import { BaseScreenView } from "~/components/Views";
-import { SCREEN_WIDTH } from "~/constants/camera";
 import { useUploadMedia } from "~/hooks/media";
 import {
   UploadMediaInputNotOnApp,
@@ -62,41 +68,24 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
   userType: "notOnApp";
 }
 
-const TARGET_ASPECT_RATIO = 9 / 16;
-const MAX_CONTENT_HEIGHT = SCREEN_WIDTH / TARGET_ASPECT_RATIO;
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const ASPECT_RATIO = 16 / 9;
 
 const CreatePost = () => {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
   const { promptForReview } = useStoreReview();
 
   const { type, uri, height, width, ...params } = useLocalSearchParams<
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
 
-  const videoRef = useRef<Video>(null);
   const inputRef = useRef<TextInput>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
-  const [showControls, setShowControls] = useState(true);
-  const controlFadeAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (showControls) {
-      const timeout = setTimeout(() => {
-        Animated.timing(controlFadeAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => setShowControls(false));
-      }, 2000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [controlFadeAnim, showControls]);
+  const [inputValue, setInputValue] = useState("");
+  const [isFieldChanged, setIsFieldChanged] = useState(false);
 
   const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
 
@@ -109,9 +98,6 @@ const CreatePost = () => {
   } = useForm<FieldTypes>({
     resolver: zodResolver(postSchema),
   });
-
-  const [inputValue, setInputValue] = useState("");
-  const [isFieldChanged, setIsFieldChanged] = useState(false);
 
   const onSubmit = handleSubmit(async (data) => {
     const baseData = {
@@ -142,25 +128,6 @@ const CreatePost = () => {
     router.dismissAll();
     router.navigate("/(app)/(bottom-tabs)/(home)");
   });
-
-  const togglePlayback = async () => {
-    if (!status?.isLoaded) return;
-
-    if (status.isPlaying) {
-      await videoRef.current?.pauseAsync();
-    } else {
-      await videoRef.current?.playAsync();
-    }
-
-    setShowControls(true);
-    controlFadeAnim.setValue(1);
-  };
-
-  const handleVideoPress = () => {
-    setShowControls(true);
-    controlFadeAnim.setValue(1);
-    void togglePlayback();
-  };
 
   const openBottomSheet = () => {
     setInputValue(watch("caption") ?? "");
@@ -223,14 +190,9 @@ const CreatePost = () => {
     inputRef.current?.blur();
   };
 
-  // Calculate the preview size (1/3 of the original size)
-  const contentAspectRatio = parseInt(width) / parseInt(height);
-  const contentHeight = Math.min(
-    SCREEN_WIDTH / contentAspectRatio,
-    MAX_CONTENT_HEIGHT,
-  );
+  // Calculate the preview size using the same aspect ratio as preview.tsx
   const previewWidth = SCREEN_WIDTH / 3;
-  const previewHeight = contentHeight / 3;
+  const previewHeight = previewWidth * ASPECT_RATIO;
 
   return (
     <>
@@ -247,50 +209,11 @@ const CreatePost = () => {
                   ]}
                 />
               ) : (
-                <Pressable
-                  onPress={handleVideoPress}
-                  style={[
-                    styles.mediaContainer,
-                    { width: previewWidth, height: previewHeight },
-                  ]}
-                >
-                  <Video
-                    ref={videoRef}
-                    source={{ uri }}
-                    style={[
-                      styles.media,
-                      { width: previewWidth, height: previewHeight },
-                    ]}
-                    resizeMode={ResizeMode.COVER}
-                    isLooping
-                    shouldPlay={false}
-                    onPlaybackStatusUpdate={(status) => setStatus(status)}
-                  />
-                  {showControls && (
-                    <Animated.View
-                      style={[
-                        styles.controlsContainer,
-                        { opacity: controlFadeAnim },
-                      ]}
-                    >
-                      <View
-                        backgroundColor="rgba(0, 0, 0, 0.5)"
-                        borderRadius={24}
-                        padding={8}
-                      >
-                        <Ionicons
-                          name={
-                            status?.isLoaded && status.isPlaying
-                              ? "pause"
-                              : "play"
-                          }
-                          size={24}
-                          color="white"
-                        />
-                      </View>
-                    </Animated.View>
-                  )}
-                </Pressable>
+                <PreviewVideo
+                  uri={uri}
+                  width={previewWidth}
+                  height={previewHeight}
+                />
               )}
             </YStack>
 
@@ -416,6 +339,49 @@ const CreatePost = () => {
   );
 };
 
+const PreviewVideo = ({
+  uri,
+  width,
+  height,
+}: {
+  uri: string;
+  width: number;
+  height: number;
+}) => {
+  const { playPauseIcons, addPlay, addPause } = usePlayPauseAnimations();
+
+  const player = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+  });
+
+  const togglePlayback = async () => {
+    if (player.playing) {
+      await player.pause();
+      addPause();
+    } else {
+      await player.play();
+      addPlay();
+    }
+  };
+
+  return (
+    <Pressable
+      onPress={togglePlayback}
+      style={[styles.mediaContainer, { width, height }]}
+    >
+      <VideoView
+        style={[styles.media, { width, height }]}
+        player={player}
+        nativeControls={false}
+        contentFit="cover"
+      />
+      {playPauseIcons.map((icon) => (
+        <PlayPause key={icon.id} isPlaying={icon.isPlaying} />
+      ))}
+    </Pressable>
+  );
+};
+
 const styles = StyleSheet.create({
   media: {
     borderRadius: 24,
@@ -423,11 +389,7 @@ const styles = StyleSheet.create({
   mediaContainer: {
     position: "relative",
     overflow: "hidden",
-  },
-  controlsContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
+    borderRadius: 24,
   },
 });
 
