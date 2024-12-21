@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { api } from "~/utils/api";
 import type { ImageSourcePropType } from "react-native";
 import { LayoutAnimation, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -28,6 +29,8 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+import { useSession } from "~/contexts/SessionContext";
+import useProfile from "~/hooks/useProfile";
 
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import Avatar from "../../Avatar";
@@ -37,6 +40,7 @@ import { TimeAgo } from "../../Texts";
 import { EmptyPlaceholder } from "../../UIPlaceholders";
 import BottomSheetBackdrop from "./BottomSheetBackdrop";
 import BottomSheetHeader from "./BottomSheetHeader";
+import { useComments } from "../hooks/useComments";
 
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
@@ -52,59 +56,58 @@ interface Comment {
 }
 
 interface CommentsBottomSheetProps {
-  comments: Comment[];
-  isLoading: boolean;
-  postRecipientId: string;
-  selfUserId: string;
-  selfProfilePicture: ProfilePicture;
-  onEndReached: () => void;
-  onPostComment: (comment: string) => void;
-  onDeleteComment: (commentId: string) => void;
-  onReportComment: (commentId: string) => void;
-  onPressProfilePicture: (userId: string, username: string) => void;
-  onPressUsername: (userId: string, username: string) => void;
+  postId: string;
+  postRecipientUserId: string;
+  endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
 }
 
 const CommentsBottomSheet = forwardRef<
   BottomSheetModal,
   CommentsBottomSheetProps
 >((props, ref) => {
+
   const {
-    comments,
-    isLoading,
-    postRecipientId,
-    selfUserId,
-    selfProfilePicture,
-    onEndReached,
-    onPostComment,
-    onDeleteComment,
-    onReportComment,
-    onPressProfilePicture,
-    onPressUsername,
-  } = props;
+    isLoadingComments,
+    commentItems,
+    handleLoadMoreComments,
+    handlePostComment,
+    handleDeleteComment,
+    handleReportComment,
+    handlePressProfilePicture,
+    handlePressUsername,
+  } = useComments({
+    postId: props.postId,
+    endpoint: props.endpoint,
+    userId: props.postRecipientUserId,
+  });
 
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlashList<Comment> | null>(null);
   const snapPoints = useMemo(() => ["100%"], []);
+  const { profile: selfProfile } = useProfile();
+  const { user } = useSession();
+  const selfUserId = user?.uid;
 
-  const handleDeleteComment = useCallback(
-    (commentId: string) => {
-      listRef.current?.prepareForLayoutAnimationRender();
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      onDeleteComment(commentId);
-    },
-    [onDeleteComment],
-  );
+  // TODO: Don't delete this yet
+  // const handleDeleteComment = useCallback(
+  //   (commentId: string) => {
+  //     listRef.current?.prepareForLayoutAnimationRender();
+  //     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  //     onDeleteComment(commentId);
+  //   },
+  //   [onDeleteComment],
+  // );
 
-  const handlePostComment = useCallback(
-    (comment: string) => {
-      listRef.current?.prepareForLayoutAnimationRender();
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      onPostComment(comment);
-    },
-    [onPostComment],
-  );
+  // TODO: Don't delete this yet
+  // const handlePostComment = useCallback(
+  //   (comment: string) => {
+  //     listRef.current?.prepareForLayoutAnimationRender();
+  //     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  //     onPostComment(comment);
+  //   },
+  //   [onPostComment],
+  // );
 
   const keyExtractor = useCallback((item: Comment) => item.id.toString(), []);
 
@@ -113,7 +116,7 @@ const CommentsBottomSheet = forwardRef<
       <CommentItem
         key={item.id}
         comment={item}
-        isPostOwner={selfUserId === postRecipientId}
+        isPostOwner={selfUserId === props.postRecipientUserId}
         isCommentOwner={item.userId === selfUserId}
         onDelete={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -122,48 +125,48 @@ const CommentsBottomSheet = forwardRef<
         }}
         onReport={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onReportComment(item.id);
+          handleReportComment(item.id);
         }}
         onPressProfilePicture={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onPressProfilePicture(item.userId, item.username);
+          handlePressProfilePicture(item.userId, item.username);
         }}
         onPressUsername={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onPressUsername(item.userId, item.username);
+          handlePressUsername(item.userId, item.username);
         }}
       />
     ),
     [
       selfUserId,
-      postRecipientId,
+      props.postRecipientUserId,
       handleDeleteComment,
-      onReportComment,
-      onPressProfilePicture,
-      onPressUsername,
+      handleReportComment,
+      handlePressProfilePicture,
+      handlePressUsername,
     ],
   );
 
   const ListContent = useMemo(() => {
-    if (isLoading) return <LoadingView />;
-    if (comments.length === 0) return <EmptyCommentsView />;
+    if (isLoadingComments) return <LoadingView />;
+    if (commentItems.length === 0) return <EmptyCommentsView />;
 
     return (
       <FlashList
         ref={listRef}
-        data={comments}
+        data={commentItems}
         renderItem={renderComment}
         estimatedItemSize={100}
-        onEndReached={onEndReached}
+        onEndReached={handleLoadMoreComments}
         showsVerticalScrollIndicator={false}
         keyExtractor={keyExtractor}
       />
     );
   }, [
-    isLoading,
-    comments,
+    isLoadingComments,
+    commentItems,
     renderComment,
-    onEndReached,
+    handleLoadMoreComments,
     keyExtractor,
   ]);
 
@@ -195,7 +198,7 @@ const CommentsBottomSheet = forwardRef<
       {content}
       <CommentInput
         onPostComment={handlePostComment}
-        selfProfilePicture={props.selfProfilePicture}
+        selfProfilePicture={selfProfile?.profilePictureUrl}
       />
     </BottomSheetModal>
   );
@@ -419,5 +422,12 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
 });
+
+
+/*
+ * ==========================================
+ * ============== Hooks =====================
+ * ==========================================
+ */
 
 export default CommentsBottomSheet;
