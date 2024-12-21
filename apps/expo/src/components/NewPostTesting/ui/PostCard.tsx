@@ -39,11 +39,11 @@ import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
 import CommentButton from "../CommentButton";
-import LikeButton from "../LikeButton";
-import ShareButton from "../ShareButton";
-import PostCaption from "../PostCaption";
 import CommentsCount from "../CommentsCount";
+import LikeButton from "../LikeButton";
+import PostCaption from "../PostCaption";
 import PostDate from "../Postdate";
+import ShareButton from "../ShareButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -112,7 +112,6 @@ interface LoadingPostCardProps {
 type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
 
 const PostCard = (props: PostCardProps) => {
-
   const renderMedia = (media: Media) => {
     if (props.loading) return;
 
@@ -127,12 +126,6 @@ const PostCard = (props: PostCardProps) => {
         onLikeDoubleTapped={props.onLikeDoubleTapped}
       />
     );
-  };
-
-  const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
-    if (value === 0 && unit === "second") return "Just now";
-    const pluralS = value !== 1 ? "s" : "";
-    return `${value} ${unit}${pluralS} ago`;
   };
 
   if (props.loading) {
@@ -268,15 +261,6 @@ const PostCard = (props: PostCardProps) => {
           />
 
           {/* Post Date */}
-          {/* <SizableText size="$2" color="$gray10">
-            <TimeAgo
-              size="$2"
-              theme="alt2"
-              lineHeight={0}
-              date={props.createdAt}
-              format={formatTimeAgo}
-            />
-          </SizableText> */}
           <PostDate createdAt={props.createdAt} />
         </YStack>
       </YStack>
