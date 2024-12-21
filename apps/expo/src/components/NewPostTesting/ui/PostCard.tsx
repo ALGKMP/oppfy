@@ -228,8 +228,8 @@ const PostCard = (props: PostCardProps) => {
 
             <CommentButton
               postId={props.id}
-              commentCount={props.stats.comments}
-              selfProfilePicture={props.self.profilePicture as string}
+              postRecipientUserId={props.recipient.id}
+              endpoint="home-feed"
             />
             {/* Share Button */}
             <TouchableOpacity

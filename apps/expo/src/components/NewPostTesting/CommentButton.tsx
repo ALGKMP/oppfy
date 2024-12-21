@@ -8,13 +8,13 @@ import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 
 interface CommentButtonProps {
   postId: string;
-  postRecipientId: string;
+  postRecipientUserId: string;
   endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
 }
 
 const CommentButton = ({
   postId,
-  postRecipientId,
+  postRecipientId: postRecipientUserId,
   endpoint,
 }: CommentButtonProps) => {
   const { show } = useBottomSheetController();
@@ -26,7 +26,7 @@ const CommentButton = ({
         <CommentsBottomSheet
           postId={postId}
           endpoint={endpoint}
-          postRecipientUserId={postRecipientId}
+          postRecipientUserId={postRecipientUserId}
         />
       ),
     });
