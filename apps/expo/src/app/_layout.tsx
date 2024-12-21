@@ -6,7 +6,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { PortalProvider, TamaguiProvider } from "tamagui";
-
+import { BottomSheetProvider } from "~/components/ui/NewBottomSheet";
 import {
   ActionSheetProvider,
   AlertDialogProvider,
@@ -39,9 +39,11 @@ const RootLayout = () => {
                               <AlertDialogProvider>
                                 <DialogProvider>
                                   <ToastProvider native={true}>
-                                    <StatusBar style="auto" />
-                                    <Slot />
-                                    <ToastViewport />
+                                    <BottomSheetProvider>
+                                      <StatusBar style="auto" />
+                                      <Slot />
+                                      <ToastViewport />
+                                    </BottomSheetProvider>
                                   </ToastProvider>
                                 </DialogProvider>
                               </AlertDialogProvider>
