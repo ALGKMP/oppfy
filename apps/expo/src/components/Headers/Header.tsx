@@ -10,6 +10,7 @@ interface HeaderProps {
   HeaderRight?: React.ReactNode;
   HeaderTitle?: React.ReactNode;
   containerProps?: StackProps;
+  safeArea?: boolean;
 }
 
 const HEADER_HEIGHT = Platform.OS === "ios" ? 44 : 56;
@@ -20,13 +21,14 @@ const StackHeader = ({
   HeaderRight,
   HeaderTitle = title ? <DefaultHeaderTitle title={title} /> : null,
   containerProps,
+  safeArea = true,
 }: HeaderProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
   const containerStyle = useMemo<ViewProps>(
     () => ({
-      paddingTop: insets.top,
+      paddingTop: safeArea ? insets.top : "$2",
       backgroundColor:
         containerProps?.backgroundColor === "transparent"
           ? "transparent"
