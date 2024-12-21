@@ -8,16 +8,14 @@ import { useLikePost } from "./hooks/useLikePost";
 interface LikeButtonProps {
   postId: string;
   endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
-  userId: string;
 }
 
-const LikeButton = ({ postId, endpoint, userId }: LikeButtonProps) => {
+const LikeButton = ({ postId, endpoint }: LikeButtonProps) => {
   const buttonLikeScale = useSharedValue(1);
 
   const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost({
     postId,
     endpoint,
-    userId,
   });
 
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
