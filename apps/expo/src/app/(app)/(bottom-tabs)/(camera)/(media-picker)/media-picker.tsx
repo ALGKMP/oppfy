@@ -72,6 +72,9 @@ const MediaPickerScreen = () => {
           margin={0.5}
           onPress={async () => {
             const assetInfo = await MediaLibrary.getAssetInfoAsync(item);
+
+            router.dismiss();
+            router.dismiss();
             router.push({
               pathname: "/(app)/(create-post)/preview",
               params: {
