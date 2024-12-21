@@ -5,6 +5,7 @@ import { SizableText, XStack } from "tamagui";
 
 import { useBottomSheetController } from "~/components/ui/NewBottomSheet";
 import { Text } from "../ui";
+
 // import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 
 interface CommentButtonProps {
@@ -35,10 +36,7 @@ const CommentButton = ({
 
   return (
     <TouchableOpacity onPress={handlePress}>
-      <XStack alignItems="center" gap="$2">
-        <MessageCircle size={20} />
-        <SizableText size="$4">{commentCount}</SizableText>
-      </XStack>
+      <MessageCircle size="$2" color="$gray12" />
     </TouchableOpacity>
   );
 };
