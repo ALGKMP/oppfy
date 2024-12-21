@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
   return (
-    <main className="flex h-screen flex-col items-center justify-start bg-black pt-16">
+    <main className="flex flex-col items-center justify-start bg-black pt-16">
       <div className="container flex flex-col items-center px-4">
         <img
           src="/icon.png"
