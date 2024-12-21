@@ -42,6 +42,7 @@ import CommentButton from "../CommentButton";
 import LikeButton from "../LikeButton";
 import ShareButton from "../ShareButton";
 import PostCaption from "../PostCaption";
+import CommentsCount from "../CommentsCount";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -258,17 +259,12 @@ const PostCard = (props: PostCardProps) => {
           <PostCaption caption={props.caption} />
 
           {/* Comments Count */}
-          <TouchableOpacity
-            onPress={() => {
-              console.log("Open Comments");
-            }}
-          >
-            <SizableText size="$3" color="$gray10">
-              {props.stats.comments > 0
-                ? `View ${props.stats.comments > 1 ? "all " : ""}${props.stats.comments} ${props.stats.comments === 1 ? "comment" : "comments"}`
-                : "Be the first to comment"}
-            </SizableText>
-          </TouchableOpacity>
+          <CommentsCount
+            commentsCount={props.stats.comments}
+            postId={props.id}
+            endpoint="home-feed"
+            postRecipientUserId={props.recipient.id}
+          />
 
           {/* Post Date */}
           <SizableText size="$2" color="$gray10">
