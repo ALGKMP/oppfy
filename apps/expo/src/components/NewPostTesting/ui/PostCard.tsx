@@ -40,6 +40,7 @@ import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
 import CommentButton from "../CommentButton";
 import LikeButton from "../LikeButton";
+import ShareButton from "../ShareButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -228,15 +229,7 @@ const PostCard = (props: PostCardProps) => {
               endpoint="home-feed" // TODO: THIS SHIT NEEDS TO BE A PROP
             />
             {/* Share Button */}
-            <TouchableOpacity
-              onPress={async () => {
-                await Sharing.shareAsync("https://google.com", {
-                  dialogTitle: "Share post",
-                });
-              }}
-            >
-              <Send size={26} color="$gray12" />
-            </TouchableOpacity>
+            <ShareButton postId={props.id} />
           </XStack>
 
           {/* Likes Count */}
