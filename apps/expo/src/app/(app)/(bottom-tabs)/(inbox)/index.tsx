@@ -245,7 +245,8 @@ const Inbox = () => {
         marginTop: getToken("$2", "space"),
       }}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
+        paddingBottom: getToken("$4", "space"),
+        paddingHorizontal: getToken("$4", "space"),
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
