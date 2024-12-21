@@ -21,7 +21,8 @@ const CommentButton = ({
 
   const handlePress = () => {
     show({
-      snapPoints: ["100%"],
+      snapPoints: ["90%"],
+      title: "Comments",
       children: (
         <CommentsBottomSheet
           postId={postId}
