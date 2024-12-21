@@ -4,9 +4,11 @@ import {
   type BottomSheetBackdropProps,
   type BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
+import { useTheme } from "tamagui";
+
+import { BaseScreenView } from "~/components/Views";
 import BottomSheetBackdrop from "./BottomSheetBackdrop";
 import BottomSheetHeader from "./BottomSheetHeader";
-import { useTheme } from "tamagui";
 
 export interface BottomSheetProps
   extends Partial<Omit<BottomSheetModalProps, "ref">> {
@@ -17,9 +19,14 @@ export interface BottomSheetProps
 }
 
 export const BottomSheet = React.forwardRef<BottomSheetModal, BottomSheetProps>(
-  (
-    { title, children, snapPoints = ["50%"], isVisible, onDismiss, ...props },
-  ) => {
+  ({
+    title,
+    children,
+    snapPoints = ["50%"],
+    isVisible,
+    onDismiss,
+    ...props
+  }) => {
     const theme = useTheme();
     const bottomSheetRef = React.useRef<BottomSheetModal>(null);
 

@@ -86,24 +86,24 @@ const CommentsBottomSheet = forwardRef<
   const selfUserId = user?.uid;
 
   // TODO: Don't delete this yet
-  // const handleDeleteComment = useCallback(
-  //   (commentId: string) => {
-  //     listRef.current?.prepareForLayoutAnimationRender();
-  //     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-  //     onDeleteComment(commentId);
-  //   },
-  //   [onDeleteComment],
-  // );
+  const handleDeleteCommentWithAnimation = useCallback(
+    (commentId: string) => {
+      listRef.current?.prepareForLayoutAnimationRender();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      handleDeleteComment(commentId);
+    },
+    [handleDeleteComment],
+  );
 
   // TODO: Don't delete this yet
-  // const handlePostComment = useCallback(
-  //   (comment: string) => {
-  //     listRef.current?.prepareForLayoutAnimationRender();
-  //     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-  //     onPostComment(comment);
-  //   },
-  //   [onPostComment],
-  // );
+  const handlePostCommentWithAnimation = useCallback(
+    (comment: string) => {
+      listRef.current?.prepareForLayoutAnimationRender();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      handlePostComment(comment);
+    },
+    [handlePostComment],
+  );
 
   const keyExtractor = useCallback((item: Comment) => item.id.toString(), []);
 
@@ -117,7 +117,7 @@ const CommentsBottomSheet = forwardRef<
         onDelete={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-          handleDeleteComment(item.id);
+          handleDeleteCommentWithAnimation(item.id);
         }}
         onReport={() => {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -136,7 +136,7 @@ const CommentsBottomSheet = forwardRef<
     [
       selfUserId,
       props.postRecipientUserId,
-      handleDeleteComment,
+      handleDeleteCommentWithAnimation,
       handleReportComment,
       handlePressProfilePicture,
       handlePressUsername,
@@ -175,7 +175,7 @@ const CommentsBottomSheet = forwardRef<
     <>
       {content}
       <CommentInput
-        onPostComment={handlePostComment}
+        onPostComment={handlePostCommentWithAnimation}
         selfProfilePicture={selfProfile?.profilePictureUrl}
       />
     </>
