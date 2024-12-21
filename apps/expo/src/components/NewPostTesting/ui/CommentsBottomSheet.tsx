@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { api } from "~/utils/api";
 import type { ImageSourcePropType } from "react-native";
 import { LayoutAnimation, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -175,32 +174,14 @@ const CommentsBottomSheet = forwardRef<
     [ListContent],
   );
 
-  const handleComponent = useCallback(
-    () => <BottomSheetHeader title="Comments" />,
-    [],
-  );
-
-  const backdropComponent = useCallback(
-    (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />,
-    [],
-  );
-
   return (
-    <BottomSheetModal
-      ref={ref}
-      snapPoints={snapPoints}
-      topInset={insets.top}
-      enablePanDownToClose
-      handleComponent={handleComponent}
-      backdropComponent={backdropComponent}
-      backgroundStyle={{ backgroundColor: theme.gray4.val }}
-    >
+    <>
       {content}
       <CommentInput
         onPostComment={handlePostComment}
         selfProfilePicture={selfProfile?.profilePictureUrl}
       />
-    </BottomSheetModal>
+    </>
   );
 });
 
