@@ -15,6 +15,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Download, X } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
+import PlayPause, {
+  usePlayPauseAnimations,
+} from "~/components/Icons/PlayPause";
 import { Text } from "~/components/ui";
 import { BaseScreenView } from "~/components/Views";
 import useSaveMedia from "~/hooks/useSaveMedia";
@@ -140,21 +143,7 @@ const PreviewVideo = ({
   videoRef: React.RefObject<Video>;
 }) => {
   const [status, setStatus] = useState<any>(null);
-  const [showControls, setShowControls] = useState(true);
-  const controlFadeAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (showControls) {
-      const timeout = setTimeout(() => {
-        Animated.timing(controlFadeAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => setShowControls(false));
-      }, 2000);
-      return () => clearTimeout(timeout);
-    }
-  }, [controlFadeAnim, showControls]);
+  const { playPauseIcons, addPlayPause } = usePlayPauseAnimations();
 
   const togglePlayback = () => {
     if (status?.isLoaded) {
@@ -163,8 +152,7 @@ const PreviewVideo = ({
       } else {
         videoRef.current?.playAsync();
       }
-      setShowControls(true);
-      controlFadeAnim.setValue(1);
+      addPlayPause(!status.isPlaying);
     }
   };
 
@@ -179,17 +167,9 @@ const PreviewVideo = ({
         style={{ flex: 1 }}
         onPlaybackStatusUpdate={(s) => setStatus(s)}
       />
-      {showControls && (
-        <Animated.View
-          style={[styles.controlOverlay, { opacity: controlFadeAnim }]}
-        >
-          <Ionicons
-            name={status?.isPlaying ? "pause" : "play"}
-            size={48}
-            color="white"
-          />
-        </Animated.View>
-      )}
+      {playPauseIcons.map((icon) => (
+        <PlayPause key={icon.id} isPlaying={icon.isPlaying} />
+      ))}
     </Pressable>
   );
 };
@@ -211,15 +191,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(64, 64, 64, 0.4)",
-  },
-  controlOverlay: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginLeft: -24,
-    marginTop: -24,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 48,
-    padding: 10,
   },
 });

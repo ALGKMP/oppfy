@@ -33,6 +33,10 @@ import CardContainer from "~/components/Containers/CardContainer";
 import { BaseScreenView } from "~/components/Views";
 import { SCREEN_WIDTH } from "~/constants/camera";
 import { useUploadMedia } from "~/hooks/media";
+import {
+  UploadMediaInputNotOnApp,
+  UploadMediaInputOnApp,
+} from "~/hooks/media/useUploadMedia";
 import useStoreReview from "~/hooks/useRating";
 
 const postSchema = z.object({
@@ -118,16 +122,17 @@ const CreatePost = () => {
     };
     const input =
       params.userType === "onApp"
-        ? {
+        ? ({
             ...baseData,
             recipient: params.recipient,
-            type: "onApp" as const,
-          }
-        : {
+            type: "onApp",
+          } satisfies UploadMediaInputOnApp)
+        : ({
             ...baseData,
             number: params.number,
-            type: "notOnApp" as const,
-          };
+            type: "notOnApp",
+          } satisfies UploadMediaInputNotOnApp);
+
     type === "photo"
       ? void uploadPhotoMutation.mutateAsync(input)
       : void uploadVideoMutation.mutateAsync(input);
@@ -135,7 +140,7 @@ const CreatePost = () => {
     await promptForReview();
 
     router.dismissAll();
-    router.navigate("/(home)");
+    router.navigate("/(app)/(bottom-tabs)/(home)");
   });
 
   const togglePlayback = async () => {
