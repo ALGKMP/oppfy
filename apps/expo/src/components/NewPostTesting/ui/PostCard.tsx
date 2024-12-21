@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import LikeButton from "../LikeButton";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -110,30 +111,6 @@ const PostCard = (props: PostCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const buttonLikeScale = useSharedValue(1);
 
-  const heartButtonAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: buttonLikeScale.value }],
-    };
-  });
-
-  const handleLikePress = useCallback(() => {
-    if (props.loading) return;
-    props.onLikePressed();
-    buttonLikeScale.value = withSpring(
-      1.2,
-      {
-        damping: 10,
-        stiffness: 200,
-      },
-      () => {
-        buttonLikeScale.value = withSpring(1, {
-          damping: 10,
-          stiffness: 200,
-        });
-      },
-    );
-  }, [props, buttonLikeScale]);
-
   const renderMedia = (media: Media) => {
     if (props.loading) return;
 
@@ -218,14 +195,6 @@ const PostCard = (props: PostCardProps) => {
                       props.onAuthorPress();
                     }}
                   >
-                    {/* <XStack alignItems="center" gap="$2">
-                      <SizableText size="$2" fontWeight="bold" lineHeight={0}>
-                        opped by{" "}
-                        <SizableText fontWeight="bold" color="$primary">
-                          {props.author.username}
-                        </SizableText>
-                      </SizableText>
-                    </XStack> */}
                   </TouchableOpacity>
                 </YStack>
               </XStack>
@@ -247,17 +216,11 @@ const PostCard = (props: PostCardProps) => {
         <YStack flex={1} paddingHorizontal="$1" gap="$1">
           <XStack gap="$3.5" alignItems="center">
             {/* Like Button */}
-            <TouchableOpacity onPress={handleLikePress}>
-              <Animated.View style={[heartButtonAnimatedStyle]}>
-                <Heart
-                  size="$2"
-                  padding="$3"
-                  color={props.hasLiked ? "red" : "$gray12"}
-                  fill="red"
-                  fillOpacity={props.hasLiked ? 1 : 0}
-                />
-              </Animated.View>
-            </TouchableOpacity>
+            <LikeButton
+              postId={props.id}
+              endpoint="home-feed" // TODO: THIS SHIT
+              userId={props.recipient.id}
+            />
 
             {/* Comment Button */}
             <TouchableOpacity onPress={() => props.onComment()}>
