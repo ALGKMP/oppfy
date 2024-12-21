@@ -44,6 +44,7 @@ import LikeButton from "../LikeButton";
 import PostCaption from "../PostCaption";
 import PostDate from "../Postdate";
 import ShareButton from "../ShareButton";
+import UnderPost from "../UnderPost";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -207,62 +208,24 @@ const PostCard = (props: PostCardProps) => {
         </View>
 
         {/* Under post */}
-        <YStack flex={1} paddingHorizontal="$1" gap="$1">
-          <XStack gap="$3.5" alignItems="center">
-            {/* Like Button */}
-            <LikeButton
-              postId={props.id}
-              endpoint="home-feed" // TODO: THIS SHIT NEEDS TO BE A PROP
-              userId={props.recipient.id}
-            />
-
-            {/* Comment Button */}
-            <CommentButton
-              postId={props.id}
-              postRecipientUserId={props.recipient.id}
-              endpoint="home-feed" // TODO: THIS SHIT NEEDS TO BE A PROP
-            />
-            {/* Share Button */}
-            <ShareButton postId={props.id} />
-          </XStack>
-
-          {/* Likes Count */}
-          {props.stats.likes > 0 && (
-            <TouchableOpacity>
-              <SizableText size="$3" fontWeight="bold">
-                {props.stats.likes > 0
-                  ? `${props.stats.likes} ${props.stats.likes === 1 ? "like" : "likes"}`
-                  : ""}
-              </SizableText>
-            </TouchableOpacity>
-          )}
-
-          {/* Opped by */}
-          <TouchableOpacity onPress={() => props.onAuthorPress()}>
-            <Paragraph>
-              <Text fontWeight="bold">
-                opped by{" "}
-                <Text fontWeight="bold" color="$primary">
-                  {props.author.username}
-                </Text>
-              </Text>
-            </Paragraph>
-          </TouchableOpacity>
-
-          {/* Caption */}
-          <PostCaption caption={props.caption} />
-
-          {/* Comments Count */}
-          <CommentsCount
-            commentsCount={props.stats.comments}
-            postId={props.id}
-            endpoint="home-feed"
-            postRecipientUserId={props.recipient.id}
-          />
-
-          {/* Post Date */}
-          <PostDate createdAt={props.createdAt} />
-        </YStack>
+        <UnderPost
+          id={props.id}
+          endpoint="home-feed"
+          createdAt={props.createdAt}
+          caption={props.caption}
+          author={{
+            id: props.author.id,
+            username: props.author.username,
+          }}
+          recipient={{
+            id: props.recipient.id,
+            username: props.recipient.username,
+          }}
+          stats={{
+            likes: props.stats.likes,
+            comments: props.stats.comments,
+          }}
+        />
       </YStack>
     </CardContainer>
   );
