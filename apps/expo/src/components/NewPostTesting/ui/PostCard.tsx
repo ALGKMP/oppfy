@@ -41,6 +41,7 @@ import Mute, { useMuteAnimations } from "../../Icons/Mute";
 import CommentButton from "../CommentButton";
 import LikeButton from "../LikeButton";
 import ShareButton from "../ShareButton";
+import PostCaption from "../PostCaption";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -109,8 +110,6 @@ interface LoadingPostCardProps {
 type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
 
 const PostCard = (props: PostCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const buttonLikeScale = useSharedValue(1);
 
   const renderMedia = (media: Media) => {
     if (props.loading) return;
@@ -256,28 +255,7 @@ const PostCard = (props: PostCardProps) => {
           </TouchableOpacity>
 
           {/* Caption */}
-          {props.caption && (
-            <TouchableOpacity
-              disabled={isExpanded || props.caption.length <= 110}
-              onPress={() => setIsExpanded(!isExpanded)}
-            >
-              <Paragraph>
-                {isExpanded ? (
-                  props.caption
-                ) : (
-                  <>
-                    {props.caption.slice(0, 110)}
-                    {props.caption.length > 110 && (
-                      <>
-                        ...
-                        <Text color="$gray8"> more</Text>
-                      </>
-                    )}
-                  </>
-                )}
-              </Paragraph>
-            </TouchableOpacity>
-          )}
+          <PostCaption caption={props.caption} />
 
           {/* Comments Count */}
           <TouchableOpacity
