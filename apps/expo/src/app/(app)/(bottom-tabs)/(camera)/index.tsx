@@ -141,13 +141,13 @@ const CameraPage = () => {
   const onOpenMediaPicker = useCallback(async () => {
     const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync();
     if (status === "granted") {
-      router.push("/album-picker");
+      router.push("/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker");
       return;
     }
     if (canAskAgain) {
       const { granted } = await MediaLibrary.requestPermissionsAsync();
       if (granted) {
-        router.push("/album-picker");
+        router.push("/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker");
         return;
       }
     }
