@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -7,11 +7,10 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { ResizeMode, Video } from "expo-av";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { useVideoPlayer, VideoView } from "expo-video";
 import { Download, X } from "@tamagui/lucide-icons";
 import { Button, View, XStack } from "tamagui";
 
@@ -35,13 +34,9 @@ const PreviewScreen = () => {
   }>();
 
   const router = useRouter();
-  const videoRef = useRef<Video>(null);
   const { saveState, saveToCameraRoll } = useSaveMedia();
 
   const onContinue = async () => {
-    if (type === "video" && videoRef.current) {
-      await videoRef.current.pauseAsync();
-    }
     router.push({
       pathname: "/post-to",
       params: {
@@ -65,7 +60,7 @@ const PreviewScreen = () => {
         {type === "photo" ? (
           <PreviewImage uri={uri} />
         ) : (
-          <PreviewVideo uri={uri} videoRef={videoRef} />
+          <PreviewVideo uri={uri} />
         )}
 
         <TouchableOpacity
@@ -135,37 +130,31 @@ const PreviewImage = ({ uri }: { uri: string }) => (
   <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
 );
 
-const PreviewVideo = ({
-  uri,
-  videoRef,
-}: {
-  uri: string;
-  videoRef: React.RefObject<Video>;
-}) => {
-  const [status, setStatus] = useState<any>(null);
-  const { playPauseIcons, addPlayPause } = usePlayPauseAnimations();
+const PreviewVideo = ({ uri }: { uri: string }) => {
+  const { playPauseIcons, addPlay, addPause } = usePlayPauseAnimations();
 
-  const togglePlayback = () => {
-    if (status?.isLoaded) {
-      if (status.isPlaying) {
-        videoRef.current?.pauseAsync();
-      } else {
-        videoRef.current?.playAsync();
-      }
-      addPlayPause(!status.isPlaying);
+  const player = useVideoPlayer(uri, (player) => {
+    player.loop = true;
+    player.play();
+  });
+
+  const togglePlayback = async () => {
+    if (player.playing) {
+      await player.pause();
+      addPause();
+    } else {
+      await player.play();
+      addPlay();
     }
   };
 
   return (
     <Pressable style={{ flex: 1 }} onPress={togglePlayback}>
-      <Video
-        ref={videoRef}
-        source={{ uri }}
-        resizeMode={ResizeMode.COVER}
-        isLooping
-        shouldPlay
+      <VideoView
         style={{ flex: 1 }}
-        onPlaybackStatusUpdate={(s) => setStatus(s)}
+        player={player}
+        nativeControls={false}
+        contentFit="cover"
       />
       {playPauseIcons.map((icon) => (
         <PlayPause key={icon.id} isPlaying={icon.isPlaying} />
