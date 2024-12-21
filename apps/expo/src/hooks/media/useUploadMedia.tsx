@@ -11,17 +11,17 @@ interface UploadMediaInputBase {
   height: number;
 }
 
-interface UploadMediaInputOnApp extends UploadMediaInputBase {
+export interface UploadMediaInputOnApp extends UploadMediaInputBase {
   recipient: string;
   type: "onApp";
 }
 
-interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
+export interface UploadMediaInputNotOnApp extends UploadMediaInputBase {
   number: string;
   type: "notOnApp";
 }
 
-type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
+export type UploadMediaInput = UploadMediaInputOnApp | UploadMediaInputNotOnApp;
 
 const useUploadMedia = () => {
   const uploadVideoPostForUserOnApp =
