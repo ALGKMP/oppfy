@@ -217,19 +217,15 @@ const PostCard = (props: PostCardProps) => {
             {/* Like Button */}
             <LikeButton
               postId={props.id}
-              endpoint="home-feed" // TODO: THIS SHIT
+              endpoint="home-feed" // TODO: THIS SHIT NEEDS TO BE A PROP
               userId={props.recipient.id}
             />
 
             {/* Comment Button */}
-            {/* <TouchableOpacity onPress={() => props.onComment()}>
-              <MessageCircle size="$2" color="$gray12" />
-            </TouchableOpacity> */}
-
             <CommentButton
               postId={props.id}
               postRecipientUserId={props.recipient.id}
-              endpoint="home-feed"
+              endpoint="home-feed" // TODO: THIS SHIT NEEDS TO BE A PROP
             />
             {/* Share Button */}
             <TouchableOpacity

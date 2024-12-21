@@ -37,8 +37,6 @@ import { BlurContextMenuWrapper } from "../../ContextMenu";
 import { Skeleton } from "../../Skeletons";
 import { TimeAgo } from "../../Texts";
 import { EmptyPlaceholder } from "../../UIPlaceholders";
-import BottomSheetBackdrop from "./BottomSheetBackdrop";
-import BottomSheetHeader from "./BottomSheetHeader";
 import { useComments } from "../hooks/useComments";
 
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
