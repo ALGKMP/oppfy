@@ -13,14 +13,16 @@ export const metadata: Metadata = {
       : "http://localhost:3000",
   ),
   title: "Oppfy",
-  description: "Experience a new kind of social media where your friends capture your most authentic moments",
+  description:
+    "Experience a new kind of social media where your friends capture your most authentic moments",
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",
   },
   openGraph: {
     title: "Oppfy",
-    description: "Experience a new kind of social media where your friends capture your most authentic moments",
+    description:
+      "Experience a new kind of social media where your friends capture your most authentic moments",
     url: "https://opp.oppfy.app",
     siteName: "Oppfy",
     images: [
@@ -36,16 +38,16 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Oppfy",
-    description: "Experience a new kind of social media where your friends capture your most authentic moments",
+    description:
+      "Experience a new kind of social media where your friends capture your most authentic moments",
     images: "/icon.png",
   },
 };
 
-
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className="min-h-screen bg-black">
         <TRPCReactProvider>{props.children}</TRPCReactProvider>
       </body>
     </html>
