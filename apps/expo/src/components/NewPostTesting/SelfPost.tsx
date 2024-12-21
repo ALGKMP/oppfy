@@ -6,13 +6,13 @@ import { AlertDialog } from "../Dialogs";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import { useAlertDialogController } from "../ui";
+import { useComments } from "./hooks/useComments";
+import { useDeletePost } from "./hooks/useDeletePost";
+import { useLikePost } from "./hooks/useLikePost";
+import { usePostActions } from "./hooks/usePostActions";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 import type { PostData } from "./ui/PostCard";
 import PostCard from "./ui/PostCard";
-import { useComments } from "./useComments";
-import { useDeletePost } from "./useDeletePost";
-import { useLikePost } from "./useLikePost";
-import { usePostActions } from "./usePostActions";
 
 type SheetState = "closed" | "moreOptions" | "confirmDelete";
 

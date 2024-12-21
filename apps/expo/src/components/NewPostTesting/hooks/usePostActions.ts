@@ -5,7 +5,7 @@ import { useToastController } from "@tamagui/toast";
 
 import { useSession } from "~/contexts/SessionContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import type { PostData as OtherPostProps } from "./ui/PostCard";
+import type { PostData as OtherPostProps } from "../ui/PostCard";
 import { useSaveMedia } from "./useSaveMedia";
 
 export const usePostActions = (postProps: OtherPostProps) => {

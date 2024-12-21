@@ -1,16 +1,16 @@
-import React, { useRef, useState, useCallback, memo } from "react";
+import React, { memo, useCallback, useRef, useState } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 import type { RouterInputs } from "~/utils/api";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
+import { useComments } from "./hooks/useComments";
+import { useLikePost } from "./hooks/useLikePost";
+import { usePostActions } from "./hooks/usePostActions";
+import { useReportPost } from "./hooks/useReportPost";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 import PostCard from "./ui/PostCard";
 import type { PostData } from "./ui/PostCard";
-import { useComments } from "./useComments";
-import { useLikePost } from "./useLikePost";
-import { usePostActions } from "./usePostActions";
-import { useReportPost } from "./useReportPost";
 
 type ReportPostReason = RouterInputs["report"]["reportPost"]["reason"];
 type _ReportCommentReason = RouterInputs["report"]["reportComment"]["reason"];

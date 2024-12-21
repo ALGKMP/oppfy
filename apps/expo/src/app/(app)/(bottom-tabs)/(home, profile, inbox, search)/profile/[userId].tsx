@@ -37,21 +37,13 @@ const OtherProfile = React.memo(() => {
     username: string;
   }>();
 
-  const { data: selfProfileData } = useProfile();
+  const { data: profileData } = useProfile();
 
   const {
-    data: otherProfileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfileData,
-  } = api.profile.getFullProfileOther.useQuery(
-    { userId },
-    { refetchOnMount: true },
-  );
-
-  const blocked = otherProfileData?.networkStatus.blocked ?? false;
-  const isPrivate = otherProfileData?.networkStatus.privacy === "private";
-  const isFollowing =
-    otherProfileData?.networkStatus.targetUserFollowState === "Following";
+    data: networkRelationships,
+    isLoading: isLoadingNetworkRelationships,
+    refetch: refetchNetworkRelationships,
+  } = api.profile.getNetworkRelationships.useQuery({ userId });
 
   const {
     data: postsData,
@@ -73,9 +65,9 @@ const OtherProfile = React.memo(() => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await Promise.all([refetchProfileData(), refetchPosts()]);
+    await Promise.all([refetchPosts(), refetchNetworkRelationships()]);
     setIsRefreshing(false);
-  }, [refetchProfileData, refetchPosts]);
+  }, [refetchPosts]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -88,7 +80,7 @@ const OtherProfile = React.memo(() => {
     [postsData],
   );
 
-  const isLoading = isLoadingProfileData || isLoadingPostData;
+  const isLoading = isLoadingPostData;
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -127,9 +119,9 @@ const OtherProfile = React.memo(() => {
           createdAt={item.createdAt}
           caption={item.caption}
           self={{
-            id: selfProfileData?.userId ?? "",
-            username: selfProfileData?.username ?? "",
-            profilePicture: selfProfileData?.profilePictureUrl,
+            id: profileData?.userId ?? "",
+            username: profileData?.username ?? "",
+            profilePicture: profileData?.profilePictureUrl,
           }}
           author={{
             id: item.authorId,
@@ -158,9 +150,9 @@ const OtherProfile = React.memo(() => {
       );
     },
     [
-      selfProfileData?.profilePictureUrl,
-      selfProfileData?.userId,
-      selfProfileData?.username,
+      profileData?.profilePictureUrl,
+      profileData?.userId,
+      profileData?.username,
       viewableItems,
     ],
   );
@@ -168,9 +160,9 @@ const OtherProfile = React.memo(() => {
   const renderHeader = () => (
     <YStack gap="$4">
       <Header userId={userId} />
-      {selfProfileData?.friendCount &&
-      selfProfileData?.friendCount > 0 &&
-      !blocked ? (
+      {profileData?.friendCount &&
+      profileData?.friendCount > 0 &&
+      !networkRelationships?.blocked ? (
         <FriendCarousel userId={userId} />
       ) : (
         <RecommendationCarousel />
@@ -179,7 +171,7 @@ const OtherProfile = React.memo(() => {
   );
 
   const renderNoPosts = useCallback(() => {
-    if (blocked) {
+    if (networkRelationships?.blocked) {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -191,7 +183,7 @@ const OtherProfile = React.memo(() => {
       );
     }
 
-    if (isPrivate && !isFollowing) {
+    if (networkRelationships?.privacy === "private") {
       return (
         <View paddingTop="$6">
           <EmptyPlaceholder
@@ -211,7 +203,7 @@ const OtherProfile = React.memo(() => {
         />
       </View>
     );
-  }, [blocked, isPrivate, isFollowing]);
+  }, [networkRelationships?.blocked, networkRelationships?.privacy]);
 
   const listFooterComponent = useCallback(() => {
     if (isLoading) {
