@@ -65,7 +65,7 @@ const Search = () => {
 
   const ListHeaderComponent = useMemo(
     () => (
-      <YStack gap="$4" pb="$4">
+      <YStack gap="$4">
         <SearchInput
           value={searchTerm}
           placeholder="Search by username"
@@ -113,8 +113,8 @@ const Search = () => {
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
-        paddingBottom: insets.bottom,
+        paddingBottom: getToken("$4", "space"),
+        paddingHorizontal: getToken("$4", "space"),
       }}
       showsVerticalScrollIndicator={false}
       onScrollBeginDrag={Keyboard.dismiss}
