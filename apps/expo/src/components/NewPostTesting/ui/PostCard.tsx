@@ -43,6 +43,7 @@ import LikeButton from "../LikeButton";
 import ShareButton from "../ShareButton";
 import PostCaption from "../PostCaption";
 import CommentsCount from "../CommentsCount";
+import PostDate from "../Postdate";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -267,7 +268,7 @@ const PostCard = (props: PostCardProps) => {
           />
 
           {/* Post Date */}
-          <SizableText size="$2" color="$gray10">
+          {/* <SizableText size="$2" color="$gray10">
             <TimeAgo
               size="$2"
               theme="alt2"
@@ -275,7 +276,8 @@ const PostCard = (props: PostCardProps) => {
               date={props.createdAt}
               format={formatTimeAgo}
             />
-          </SizableText>
+          </SizableText> */}
+          <PostDate createdAt={props.createdAt} />
         </YStack>
       </YStack>
     </CardContainer>
