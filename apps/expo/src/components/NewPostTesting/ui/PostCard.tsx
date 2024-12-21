@@ -1,49 +1,22 @@
 import React, { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Alert, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import { runOnJS } from "react-native-reanimated";
 import { ResizeMode, Video } from "expo-av";
 import type { AVPlaybackStatus } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import * as Sharing from "expo-sharing";
-import {
-  Heart,
-  MessageCircle,
-  MoreHorizontal,
-  Send,
-} from "@tamagui/lucide-icons";
-import {
-  Circle,
-  getToken,
-  Paragraph,
-  SizableText,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { MoreHorizontal } from "@tamagui/lucide-icons";
+import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
-import { TimeAgo } from "~/components/Texts";
 import { useAudio } from "~/contexts/AudioContext";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
-import CommentButton from "../CommentButton";
-import CommentsCount from "../CommentsCount";
-import LikeButton from "../LikeButton";
-import PostCaption from "../PostCaption";
-import PostDate from "../Postdate";
-import ShareButton from "../ShareButton";
 import UnderPost from "../UnderPost";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;

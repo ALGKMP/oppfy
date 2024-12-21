@@ -8,7 +8,6 @@ import { useComments } from "./hooks/useComments";
 import { useLikePost } from "./hooks/useLikePost";
 import { usePostActions } from "./hooks/usePostActions";
 import { useReportPost } from "./hooks/useReportPost";
-import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 import PostCard from "./ui/PostCard";
 import type { PostData } from "./ui/PostCard";
 
@@ -181,27 +180,6 @@ const OtherPost = memo((postProps: OtherPostProps) => {
         onAuthorPress={handleAuthorPress}
         onRecipientPress={handleRecipientPress}
       />
-
-      {/* <CommentsBottomSheet
-        ref={bottomSheetModalRef}
-        comments={commentItems}
-        isLoading={isLoadingComments}
-        postRecipientId={postProps.recipient.id}
-        selfUserId={postProps.self.id}
-        selfProfilePicture={postProps.self.profilePicture}
-        onEndReached={handleLoadMoreComments}
-        onPostComment={handlePostComment}
-        onDeleteComment={handleDeleteComment}
-        onReportComment={handleReportComment}
-        onPressProfilePicture={(userId, username) => {
-          bottomSheetModalRef.current?.close();
-          handlePressProfilePicture(userId, username);
-        }}
-        onPressUsername={(userId, username) => {
-          bottomSheetModalRef.current?.close();
-          handlePressUsername(userId, username);
-        }}
-      /> */}
 
       {sheetState === "moreOptions" && (
         <MoreOptionsSheet
