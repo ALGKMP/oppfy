@@ -2,7 +2,6 @@ import React, { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import LikeButton from "../LikeButton";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -14,6 +13,7 @@ import type { AVPlaybackStatus } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
+import * as Sharing from "expo-sharing";
 import {
   Heart,
   MessageCircle,
@@ -38,7 +38,8 @@ import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
-import * as Sharing from "expo-sharing";
+import CommentButton from "../CommentButton";
+import LikeButton from "../LikeButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -91,7 +92,6 @@ export interface PostData {
 interface PostCallbacks {
   onLikePressed: () => void;
   onLikeDoubleTapped: () => void;
-  onComment: () => void;
   onShare: () => void;
   onMoreOptions: () => void;
   onAuthorPress: () => void;
@@ -194,8 +194,7 @@ const PostCard = (props: PostCardProps) => {
                       );
                       props.onAuthorPress();
                     }}
-                  >
-                  </TouchableOpacity>
+                  ></TouchableOpacity>
                 </YStack>
               </XStack>
             </View>
@@ -223,10 +222,15 @@ const PostCard = (props: PostCardProps) => {
             />
 
             {/* Comment Button */}
-            <TouchableOpacity onPress={() => props.onComment()}>
+            {/* <TouchableOpacity onPress={() => props.onComment()}>
               <MessageCircle size="$2" color="$gray12" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
+            <CommentButton
+              postId={props.id}
+              commentCount={props.stats.comments}
+              selfProfilePicture={props.self.profilePicture as string}
+            />
             {/* Share Button */}
             <TouchableOpacity
               onPress={async () => {
@@ -287,7 +291,11 @@ const PostCard = (props: PostCardProps) => {
           )}
 
           {/* Comments Count */}
-          <TouchableOpacity onPress={() => props.onComment()}>
+          <TouchableOpacity
+            onPress={() => {
+              console.log("Open Comments");
+            }}
+          >
             <SizableText size="$3" color="$gray10">
               {props.stats.comments > 0
                 ? `View ${props.stats.comments > 1 ? "all " : ""}${props.stats.comments} ${props.stats.comments === 1 ? "comment" : "comments"}`

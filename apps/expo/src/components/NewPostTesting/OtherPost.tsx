@@ -152,10 +152,6 @@ const OtherPost = memo((postProps: OtherPostProps) => {
     isSaving,
   } = usePostActions(postProps);
 
-  const handleComment = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-
   const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
   }, []);
@@ -180,7 +176,6 @@ const OtherPost = memo((postProps: OtherPostProps) => {
         hasLiked={hasLiked}
         onLikePressed={handleLikePressed}
         onLikeDoubleTapped={handleLikeDoubleTapped}
-        onComment={handleComment}
         onShare={handleShare}
         onMoreOptions={handleOpenMoreOptionsSheet}
         onAuthorPress={handleAuthorPress}
