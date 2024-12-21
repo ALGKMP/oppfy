@@ -78,14 +78,11 @@ const CommentsBottomSheet = forwardRef<
     userId: props.postRecipientUserId,
   });
 
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const listRef = useRef<FlashList<Comment> | null>(null);
   const { profile: selfProfile } = useProfile();
   const { user } = useSession();
   const selfUserId = user?.uid;
 
-  // TODO: Don't delete this yet
   const handleDeleteCommentWithAnimation = useCallback(
     (commentId: string) => {
       listRef.current?.prepareForLayoutAnimationRender();
@@ -95,7 +92,6 @@ const CommentsBottomSheet = forwardRef<
     [handleDeleteComment],
   );
 
-  // TODO: Don't delete this yet
   const handlePostCommentWithAnimation = useCallback(
     (comment: string) => {
       listRef.current?.prepareForLayoutAnimationRender();
