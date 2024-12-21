@@ -31,7 +31,13 @@ export const BottomSheetProvider = ({
   return (
     <BottomSheetContext.Provider value={{ show, hide }}>
       {children}
-      {sheetProps && <BottomSheet {...sheetProps} isVisible={isVisible} />}
+      {sheetProps && (
+        <BottomSheet
+          {...sheetProps}
+          isVisible={isVisible}
+          onDismiss={hide}
+        />
+      )}
     </BottomSheetContext.Provider>
   );
 };
