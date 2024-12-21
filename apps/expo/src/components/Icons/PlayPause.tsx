@@ -76,7 +76,7 @@ export const usePlayPauseAnimations = () => {
     [],
   );
 
-  const addPlayPause = useCallback((playing: boolean) => {
+  const addIcon = useCallback((playing: boolean) => {
     const newPlayPause = {
       id: Date.now(),
       isPlaying: playing,
@@ -93,7 +93,15 @@ export const usePlayPauseAnimations = () => {
     );
   }, []);
 
-  return { playPauseIcons, addPlayPause };
+  const addPlay = useCallback(() => {
+    addIcon(true);
+  }, [addIcon]);
+
+  const addPause = useCallback(() => {
+    addIcon(false);
+  }, [addIcon]);
+
+  return { playPauseIcons, addPlay, addPause };
 };
 
 export default PlayPause;
