@@ -14,7 +14,7 @@ interface CommentButtonProps {
 
 const CommentButton = ({
   postId,
-  postRecipientId: postRecipientUserId,
+  postRecipientUserId,
   endpoint,
 }: CommentButtonProps) => {
   const { show } = useBottomSheetController();
