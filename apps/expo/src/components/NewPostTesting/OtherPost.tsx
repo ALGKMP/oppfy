@@ -182,7 +182,7 @@ const OtherPost = memo((postProps: OtherPostProps) => {
         onRecipientPress={handleRecipientPress}
       />
 
-      <CommentsBottomSheet
+      {/* <CommentsBottomSheet
         ref={bottomSheetModalRef}
         comments={commentItems}
         isLoading={isLoadingComments}
@@ -201,7 +201,7 @@ const OtherPost = memo((postProps: OtherPostProps) => {
           bottomSheetModalRef.current?.close();
           handlePressUsername(userId, username);
         }}
-      />
+      /> */}
 
       {sheetState === "moreOptions" && (
         <MoreOptionsSheet
