@@ -81,7 +81,6 @@ const CommentsBottomSheet = forwardRef<
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlashList<Comment> | null>(null);
-  const snapPoints = useMemo(() => ["100%"], []);
   const { profile: selfProfile } = useProfile();
   const { user } = useSession();
   const selfUserId = user?.uid;
