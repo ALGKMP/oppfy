@@ -61,7 +61,7 @@ interface CommentsBottomSheetProps {
 const CommentsBottomSheet = forwardRef<
   BottomSheetModal,
   CommentsBottomSheetProps
->((props, ref) => {
+>((props) => {
 
   const {
     isLoadingComments,
