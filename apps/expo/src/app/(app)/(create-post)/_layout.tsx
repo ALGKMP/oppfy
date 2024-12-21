@@ -24,19 +24,6 @@ const CameraLayout = () => {
         },
       }}
     >
-      {/* <Stack.Screen
-        name="album-picker"
-        options={{
-          title: "Gallery",
-          animation: "fade",
-        }}
-      />
-      <Stack.Screen
-        name="media-picker"
-        options={{
-          animation: "fade",
-        }}
-      /> */}
       <Stack.Screen
         name="image-picker"
         options={{
