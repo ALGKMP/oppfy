@@ -86,7 +86,7 @@ const PostFooter = ({
         </TouchableOpacity>
 
         {/* Caption */}
-        {caption && <PostCaption caption={caption} />}
+        <PostCaption caption={caption} />
 
         {/* Comments Count */}
         <CommentsCount

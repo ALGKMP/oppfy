@@ -10,6 +10,8 @@ interface PostCaptionProps {
 const PostCaption = ({ caption }: PostCaptionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  if (!caption) return null;
+
   return (
     <TouchableOpacity
       disabled={isExpanded || caption.length <= 110}
