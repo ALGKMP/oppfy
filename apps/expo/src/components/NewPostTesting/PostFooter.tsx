@@ -29,7 +29,7 @@ interface UnderPostProps {
   };
 }
 
-const UnderPost = ({
+const PostFooter = ({
   id,
   endpoint,
   createdAt,
@@ -50,10 +50,7 @@ const UnderPost = ({
       <YStack flex={1} paddingHorizontal="$1" gap="$1">
         <XStack gap="$3.5" alignItems="center">
           {/* Like Button */}
-          <LikeButton
-            postId={id}
-            endpoint={endpoint}
-          />
+          <LikeButton postId={id} endpoint={endpoint} />
 
           {/* Comment Button */}
           <CommentButton
@@ -106,4 +103,4 @@ const UnderPost = ({
   );
 };
 
-export default UnderPost;
+export default PostFooter;
