@@ -56,10 +56,7 @@ const SelfProfile = React.memo(() => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await Promise.all([
-      refetchProfile(),
-      refetchPosts(),
-    ]);
+    await Promise.all([refetchProfile(), refetchPosts()]);
     setIsRefreshing(false);
   }, [refetchProfile, refetchPosts]);
 
@@ -160,7 +157,11 @@ const SelfProfile = React.memo(() => {
   const renderHeader = () => (
     <YStack gap="$4">
       <Header />
-      {profileData?.friendCount && profileData?.friendCount > 0 ? <FriendCarousel /> : <RecommendationCarousel />}
+      {profileData?.friendCount && profileData?.friendCount > 0 ? (
+        <FriendCarousel />
+      ) : (
+        <RecommendationCarousel />
+      )}
     </YStack>
   );
 
