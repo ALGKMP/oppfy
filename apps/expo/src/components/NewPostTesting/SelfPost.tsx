@@ -1,11 +1,11 @@
 import React, { memo, useCallback, useRef, useState } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 
-import { useAlertDialogNew } from "~/utils/dialogNew";
 import { AlertDialog } from "../Dialogs";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import { useAlertDialogController } from "../ui";
+import { useBottomSheetController } from "../ui/NewBottomSheet";
 import { useComments } from "./hooks/useComments";
 import { useDeletePost } from "./hooks/useDeletePost";
 import { useLikePost } from "./hooks/useLikePost";
@@ -70,6 +70,7 @@ const MoreOptionsSheet = memo(
 
 const SelfPost = memo((postProps: PostData) => {
   const alertDialog = useAlertDialogController();
+  const { show: showComments } = useBottomSheetController();
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
@@ -101,8 +102,18 @@ const SelfPost = memo((postProps: PostData) => {
   const { deletePost, isDeleting } = useDeletePost();
 
   const handleComment = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
+    showComments({
+      children: (
+        <CommentsBottomSheet
+          postId={postProps.id}
+          postRecipientUserId={postProps.recipient.id}
+          endpoint="self-profile"
+        />
+      ),
+      snapPoints: ["90%"],
+      title: "Comments",
+    });
+  }, [showComments, postProps.id, postProps.recipient.id]);
 
   const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
@@ -117,9 +128,6 @@ const SelfPost = memo((postProps: PostData) => {
     setSheetState("closed");
   }, []);
 
-  // const handleDeletePost = useCallback(() => {
-  //   deletePost({ postId: postProps.id });
-  // }, [deletePost, postProps.id]);
   const handleDeletePost = useCallback(async () => {
     const confirmed = await alertDialog.show({
       title: "Are you sure you want to delete this post?",
@@ -132,7 +140,7 @@ const SelfPost = memo((postProps: PostData) => {
     if (confirmed) {
       deletePost({ postId: postProps.id });
     }
-  }, [deletePost, postProps.id]);
+  }, [deletePost, postProps.id, alertDialog]);
 
   const handlePressProfilePictureCallback = useCallback(
     (userId: string, username: string) => {
@@ -165,21 +173,6 @@ const SelfPost = memo((postProps: PostData) => {
         onRecipientPress={handleRecipientPress}
       />
 
-      <CommentsBottomSheet
-        ref={bottomSheetModalRef}
-        comments={commentItems}
-        isLoading={isLoadingComments}
-        postRecipientId={postProps.recipient.id}
-        selfUserId={postProps.self.id}
-        selfProfilePicture={postProps.self.profilePicture}
-        onEndReached={handleLoadMoreComments}
-        onPostComment={handlePostComment}
-        onDeleteComment={handleDeleteComment}
-        onReportComment={handleReportComment}
-        onPressProfilePicture={handlePressProfilePictureCallback}
-        onPressUsername={handlePressUsernameCallback}
-      />
-
       {sheetState === "moreOptions" && (
         <MoreOptionsSheet
           isVisible={true}
@@ -193,4 +186,5 @@ const SelfPost = memo((postProps: PostData) => {
     </>
   );
 });
+
 export default SelfPost;
