@@ -1,12 +1,16 @@
+import Link from "next/link";
+
 export default function TermsPage() {
   return (
     <main className="flex flex-col items-center justify-start bg-black pt-16">
       <div className="container flex flex-col items-center px-4">
-        <img
-          src="/icon.png"
-          alt="Oppfy Logo"
-          className="mb-8 h-20 w-20 rounded-xl shadow-lg"
-        />
+        <Link href="/" className="mb-8">
+          <img
+            src="/icon.png"
+            alt="Oppfy Logo"
+            className="h-20 w-20 rounded-xl shadow-lg"
+          />
+        </Link>
 
         <h1 className="mb-8 text-center text-4xl font-extrabold tracking-tight text-white">
           Terms of Service
