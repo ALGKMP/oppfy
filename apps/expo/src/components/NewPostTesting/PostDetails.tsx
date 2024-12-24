@@ -29,7 +29,7 @@ interface UnderPostProps {
   };
 }
 
-const PostFooter = ({
+const PostDetails = ({
   id,
   endpoint,
   createdAt,
@@ -103,4 +103,4 @@ const PostFooter = ({
   );
 };
 
-export default PostFooter;
+export default PostDetails;

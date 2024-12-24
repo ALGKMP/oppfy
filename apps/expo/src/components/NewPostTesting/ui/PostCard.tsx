@@ -17,7 +17,7 @@ import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
-import PostFooter from "../PostFooter";
+import PostDetails from "../PostFooter";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -181,7 +181,7 @@ const PostCard = (props: PostCardProps) => {
         </View>
 
         {/* Under post */}
-        <PostFooter
+        <PostDetails
           id={props.id}
           endpoint="home-feed"
           createdAt={props.createdAt}
