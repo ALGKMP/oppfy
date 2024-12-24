@@ -317,7 +317,7 @@ const VideoPlayerComponent = ({ media }: VideoPlayerProps) => {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
 
   const { handleLikeDoubleTapped } = useLikePost({
     postId: media.id,
@@ -344,7 +344,7 @@ const VideoPlayerComponent = ({ media }: VideoPlayerProps) => {
 
   const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
-      setIsLoading(false);
+      setIsVideoLoading(false);
     }
   };
 
@@ -414,10 +414,10 @@ const VideoPlayerComponent = ({ media }: VideoPlayerProps) => {
           isLooping={true}
           isMuted={isMuted}
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          onLoad={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)}
+          onLoad={() => setIsVideoLoading(false)}
+          onError={() => setIsVideoLoading(false)}
         />
-        {isLoading && (
+        {isVideoLoading && (
           <View
             style={{
               position: "absolute",
