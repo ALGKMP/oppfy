@@ -83,38 +83,34 @@ interface PostCallbacks {
 type LoadedPostCardProps = PostData &
   PostCallbacks & { hasLiked: boolean; loading: false };
 
-interface LoadingPostCardProps {
-  loading: true;
-}
-
-type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
+type PostCardProps = LoadedPostCardProps;
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
 
-  if (props.loading) {
-    return (
-      <CardContainer paddingVertical={0}>
-        <YStack>
-          <View marginHorizontal="$-3">
-            <Skeleton width="100%" height={600} radius={8} />
-            <View position="absolute" bottom={15} left={15}>
-              <XStack alignItems="center" gap="$3">
-                <Skeleton size={40} circular />
-                <YStack gap="$1">
-                  <Skeleton width={100} height={16} />
-                  <XStack alignItems="center" gap="$2">
-                    <Skeleton size={20} circular />
-                    <Skeleton width={80} height={12} />
-                  </XStack>
-                </YStack>
-              </XStack>
-            </View>
-          </View>
-        </YStack>
-      </CardContainer>
-    );
-  }
+  // if (props.loading) {
+  //   return (
+  //     <CardContainer paddingVertical={0}>
+  //       <YStack>
+  //         <View marginHorizontal="$-3">
+  //           <Skeleton width="100%" height={600} radius={8} />
+  //           <View position="absolute" bottom={15} left={15}>
+  //             <XStack alignItems="center" gap="$3">
+  //               <Skeleton size={40} circular />
+  //               <YStack gap="$1">
+  //                 <Skeleton width={100} height={16} />
+  //                 <XStack alignItems="center" gap="$2">
+  //                   <Skeleton size={20} circular />
+  //                   <Skeleton width={80} height={12} />
+  //                 </XStack>
+  //               </YStack>
+  //             </XStack>
+  //           </View>
+  //         </View>
+  //       </YStack>
+  //     </CardContainer>
+  //   );
+  // }
 
   return (
     <CardContainer paddingTop={0}>
