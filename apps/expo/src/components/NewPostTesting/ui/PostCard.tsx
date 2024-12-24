@@ -21,6 +21,7 @@ import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
 import CommentButton from "../CommentButton";
 import CommentsCount from "../CommentsCount";
+import { useLikePost } from "../hooks/useLikePost";
 import LikeButton from "../LikeButton";
 import PostCaption from "../PostCaption";
 import PostDate from "../PostDate";
@@ -52,10 +53,12 @@ interface MediaDimensions {
 }
 
 interface Media {
+  id: string;
   type: "image" | "video";
   url: string;
   isViewable: boolean;
   dimensions: MediaDimensions;
+  recipient: Recipient;
 }
 
 interface Stats {
@@ -64,7 +67,7 @@ interface Stats {
 }
 
 export interface PostData {
-  id: string;
+  postId: string;
   createdAt: Date;
   caption: string;
   self: Self;
@@ -119,7 +122,6 @@ const PostCard = (props: PostCardProps) => {
             {props.media.type === "image" ? (
               <ImageComponent
                 media={props.media}
-                onLikeDoubleTapped={props.onLikeDoubleTapped}
               />
             ) : (
               <VideoPlayer
@@ -177,16 +179,16 @@ const PostCard = (props: PostCardProps) => {
         <YStack flex={1} paddingHorizontal="$1" gap="$1">
           <XStack gap="$3.5" alignItems="center">
             {/* Like Button */}
-            <LikeButton postId={props.id} endpoint="home-feed" />
+            <LikeButton postId={props.postId} endpoint="home-feed" />
 
             {/* Comment Button */}
             <CommentButton
-              postId={props.id}
+              postId={props.postId}
               postRecipientUserId={props.recipient.id}
               endpoint="home-feed"
             />
             {/* Share Button */}
-            <ShareButton postId={props.id} />
+            <ShareButton postId={props.postId} />
           </XStack>
 
           {/* Likes Count */}
@@ -225,7 +227,7 @@ const PostCard = (props: PostCardProps) => {
           {/* Comments Count */}
           <CommentsCount
             commentsCount={props.stats.comments}
-            postId={props.id}
+            postId={props.postId}
             endpoint="home-feed"
             postRecipientUserId={props.recipient.id}
           />
@@ -240,19 +242,21 @@ const PostCard = (props: PostCardProps) => {
 
 interface ImageComponentProps {
   media: Media;
-  onLikeDoubleTapped: () => void;
 }
-
-const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
+const ImageComponent = ({ media }: ImageComponentProps) => {
+  const { handleLikeDoubleTapped } = useLikePost({
+    postId: media.id,
+    endpoint: "home-feed",
+    userId: media.recipient.id,
+  });
   const { hearts, addHeart } = useHeartAnimations();
   const [isImageLoading, setIsImageLoading] = useState(true);
-
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
-      onLikeDoubleTapped();
+      handleLikeDoubleTapped();
     },
-    [addHeart, onLikeDoubleTapped],
+    [addHeart, handleLikeDoubleTapped],
   );
 
   const doubleTap = Gesture.Tap()
