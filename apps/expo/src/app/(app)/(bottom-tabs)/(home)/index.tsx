@@ -1,3 +1,4 @@
+import React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -101,7 +102,7 @@ const HomeScreen = () => {
 
       return (
         <OtherPost
-          id={item.postId}
+          postId={item.postId}
           createdAt={item.createdAt}
           caption={item.caption}
           endpoint="home-feed"
@@ -121,12 +122,18 @@ const HomeScreen = () => {
             profilePicture: item.recipientProfilePicture,
           }}
           media={{
+            id: item.postId,
             isViewable: viewableItems.includes(item.postId),
             type: item.mediaType,
             url: item.imageUrl,
             dimensions: {
               width: item.width,
               height: item.height,
+            },
+            recipient: {
+              id: item.recipientId,
+              username: item.recipientUsername ?? "",
+              profilePicture: item.recipientProfilePicture,
             },
           }}
           stats={{
@@ -143,13 +150,13 @@ const HomeScreen = () => {
 
   const renderFooter = useCallback(() => {
 
-    if (isLoading) {
-      return (
-        <YStack gap="$4">
-          <PostCard loading />
-        </YStack>
-      );
-    }
+    // if (isLoading) {
+    //   return (
+    //     <YStack gap="$4">
+    //       <PostCard/>
+    //     </YStack>
+    //   );
+    // }
 
     return (
       <View>
@@ -169,7 +176,9 @@ const HomeScreen = () => {
           gap="$4"
         >
           {Array.from({ length: 3 }).map(() => (
-            <PostCard loading />
+            // <PostCard />
+            <>
+            </>
           ))}
         </YStack>
       ) : (

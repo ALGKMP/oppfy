@@ -134,12 +134,18 @@ const OtherProfile = React.memo(() => {
             profilePicture: item.recipientProfilePicture,
           }}
           media={{
+            id: item.postId,
             type: item.mediaType,
             url: item.imageUrl,
             isViewable: viewableItems.includes(item.postId),
             dimensions: {
               width: item.width,
               height: item.height,
+            },
+            recipient: {
+              id: item.recipientId,
+              username: item.recipientUsername ?? "",
+              profilePicture: item.recipientProfilePicture,
             },
           }}
           stats={{

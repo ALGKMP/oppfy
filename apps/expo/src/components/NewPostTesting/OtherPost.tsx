@@ -121,11 +121,11 @@ const OtherPost = memo((postProps: OtherPostProps) => {
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
   const { handleLikeDoubleTapped } = useLikePost({
-    postId: postProps.id,
+    postId: postProps.postId,
     endpoint: postProps.endpoint,
     userId: postProps.recipient.id,
   });
-  const { handleReportPost } = useReportPost(postProps.id);
+  const { handleReportPost } = useReportPost(postProps.postId);
 
   const { handleSavePost, isSaving } = usePostActions(postProps);
 
