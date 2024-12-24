@@ -120,27 +120,12 @@ interface OtherPostProps extends PostData {
 const OtherPost = memo((postProps: OtherPostProps) => {
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
-  const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost({
+  const { handleLikeDoubleTapped } = useLikePost({
     postId: postProps.id,
     endpoint: postProps.endpoint,
     userId: postProps.recipient.id,
   });
   const { handleReportPost } = useReportPost(postProps.id);
-
-  const {
-    commentItems,
-    isLoadingComments,
-    handleLoadMoreComments,
-    handlePostComment,
-    handleDeleteComment,
-    handleReportComment,
-    handlePressProfilePicture,
-    handlePressUsername,
-  } = useComments({
-    postId: postProps.id,
-    endpoint: postProps.endpoint,
-    userId: postProps.recipient.id,
-  });
 
   const { handleSavePost, isSaving } = usePostActions(postProps);
 
@@ -164,8 +149,6 @@ const OtherPost = memo((postProps: OtherPostProps) => {
     <>
       <PostCard
         {...postProps}
-        hasLiked={hasLiked}
-        onLikePressed={handleLikePressed}
         onLikeDoubleTapped={handleLikeDoubleTapped}
         onMoreOptions={handleOpenMoreOptionsSheet}
       />
