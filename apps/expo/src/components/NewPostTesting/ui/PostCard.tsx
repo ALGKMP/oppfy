@@ -10,21 +10,21 @@ import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
-import CommentButton from "../CommentButton";
-import CommentsCount from "../CommentsCount";
-import PostCaption from "../PostCaption";
-import PostDate from "../PostDate";
-import ShareButton from "../ShareButton";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
+import { Paragraph, Text } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
+import CommentButton from "../CommentButton";
+import CommentsCount from "../CommentsCount";
 import LikeButton from "../LikeButton";
-import { Paragraph, Text } from "~/components/ui";
+import PostCaption from "../PostCaption";
+import PostDate from "../PostDate";
+import ShareButton from "../ShareButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -80,8 +80,7 @@ interface PostCallbacks {
   onMoreOptions: () => void;
 }
 
-type LoadedPostCardProps = PostData &
-  PostCallbacks & { hasLiked: boolean; loading: false };
+type LoadedPostCardProps = PostData & PostCallbacks & { hasLiked: boolean };
 
 type PostCardProps = LoadedPostCardProps;
 
