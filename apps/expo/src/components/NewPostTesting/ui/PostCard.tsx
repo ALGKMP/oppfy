@@ -126,7 +126,6 @@ const PostCard = (props: PostCardProps) => {
             ) : (
               <VideoPlayer
                 media={props.media}
-                onLikeDoubleTapped={props.onLikeDoubleTapped}
               />
             )}
             <View position="absolute" bottom={15} left={15}>
@@ -308,13 +307,9 @@ const ImageComponent = ({ media }: ImageComponentProps) => {
 
 interface VideoPlayerProps {
   media: Media;
-  onLikeDoubleTapped: () => void;
 }
 
-const VideoPlayerComponent = ({
-  media,
-  onLikeDoubleTapped,
-}: VideoPlayerProps) => {
+const VideoPlayerComponent = ({ media }: VideoPlayerProps) => {
   const videoRef = useRef<Video>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
@@ -323,6 +318,12 @@ const VideoPlayerComponent = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { handleLikeDoubleTapped } = useLikePost({
+    postId: media.id,
+    endpoint: "home-feed",
+    userId: media.recipient.id,
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -356,9 +357,9 @@ const VideoPlayerComponent = ({
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
-      onLikeDoubleTapped();
+      handleLikeDoubleTapped();
     },
-    [addHeart, onLikeDoubleTapped],
+    [addHeart, handleLikeDoubleTapped],
   );
 
   const handleHold = useCallback(() => {
