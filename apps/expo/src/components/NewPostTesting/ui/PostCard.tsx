@@ -158,17 +158,6 @@ const PostCard = (props: PostCardProps) => {
                       {props.recipient.username}
                     </SizableText>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Light,
-                      );
-                      routeProfile({
-                        userId: props.author.id,
-                        username: props.author.username,
-                      });
-                    }}
-                  ></TouchableOpacity>
                 </YStack>
               </XStack>
             </View>
