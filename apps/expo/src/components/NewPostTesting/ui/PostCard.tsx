@@ -13,7 +13,7 @@ import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
 import CommentButton from "../CommentButton";
 import CommentsCount from "../CommentsCount";
 import PostCaption from "../PostCaption";
-import PostDate from "../Postdate";
+import PostDate from "../PostDate";
 import ShareButton from "../ShareButton";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
