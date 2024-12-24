@@ -143,13 +143,7 @@ const OtherPost = memo((postProps: OtherPostProps) => {
     userId: postProps.recipient.id,
   });
 
-  const {
-    handleSavePost,
-    handleShare,
-    handleRecipientPress,
-    handleAuthorPress,
-    isSaving,
-  } = usePostActions(postProps);
+  const { handleSavePost, isSaving } = usePostActions(postProps);
 
   const handleOpenMoreOptionsSheet = useCallback(() => {
     setSheetState("moreOptions");
@@ -175,10 +169,7 @@ const OtherPost = memo((postProps: OtherPostProps) => {
         hasLiked={hasLiked}
         onLikePressed={handleLikePressed}
         onLikeDoubleTapped={handleLikeDoubleTapped}
-        onShare={handleShare}
         onMoreOptions={handleOpenMoreOptionsSheet}
-        onAuthorPress={handleAuthorPress}
-        onRecipientPress={handleRecipientPress}
       />
 
       {sheetState === "moreOptions" && (
