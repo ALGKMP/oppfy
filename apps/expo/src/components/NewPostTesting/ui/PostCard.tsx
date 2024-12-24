@@ -17,7 +17,7 @@ import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
-import PostDetails from "../PostFooter";
+import PostDetails from "../PostDetails";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -86,21 +86,6 @@ interface LoadingPostCardProps {
 type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
 
 const PostCard = (props: PostCardProps) => {
-  const renderMedia = (media: Media) => {
-    if (props.loading) return;
-
-    return media.type === "image" ? (
-      <ImageComponent
-        media={media}
-        onLikeDoubleTapped={props.onLikeDoubleTapped}
-      />
-    ) : (
-      <VideoPlayer
-        media={media}
-        onLikeDoubleTapped={props.onLikeDoubleTapped}
-      />
-    );
-  };
 
   if (props.loading) {
     return (
@@ -131,7 +116,19 @@ const PostCard = (props: PostCardProps) => {
       <YStack gap="$3">
         <View marginHorizontal="$-3">
           <View>
-            {renderMedia(props.media)}
+            {
+              props.media.type === "image" ? (
+                <ImageComponent
+                  media={props.media}
+                  onLikeDoubleTapped={props.onLikeDoubleTapped}
+                />
+              ) : (
+                <VideoPlayer
+                  media={props.media}
+                  onLikeDoubleTapped={props.onLikeDoubleTapped}
+                />
+              )
+            }
             <View position="absolute" bottom={15} left={15}>
               <XStack alignItems="center" gap="$3">
                 <TouchableOpacity
