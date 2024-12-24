@@ -164,7 +164,6 @@ const OtherPost = memo((postProps: OtherPostProps) => {
     <>
       <PostCard
         {...postProps}
-        loading={false}
         hasLiked={hasLiked}
         onLikePressed={handleLikePressed}
         onLikeDoubleTapped={handleLikeDoubleTapped}
