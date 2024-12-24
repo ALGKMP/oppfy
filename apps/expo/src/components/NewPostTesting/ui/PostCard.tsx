@@ -75,18 +75,18 @@ export interface PostData {
 }
 
 interface PostCallbacks {
-  onLikePressed: () => void;
   onLikeDoubleTapped: () => void;
   onMoreOptions: () => void;
 }
 
-type LoadedPostCardProps = PostData & PostCallbacks & { hasLiked: boolean };
+type LoadedPostCardProps = PostData & PostCallbacks;
 
 type PostCardProps = LoadedPostCardProps;
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
 
+  // TODO: Do not delete this yet
   // if (props.loading) {
   //   return (
   //     <CardContainer paddingVertical={0}>
@@ -245,7 +245,7 @@ interface ImageComponentProps {
 
 const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
   const { hearts, addHeart } = useHeartAnimations();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isImageLoading, setIsImageLoading] = useState(true);
 
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
@@ -273,10 +273,10 @@ const ImageComponent = ({ media, onLikeDoubleTapped }: ImageComponentProps) => {
             borderRadius: getToken("$8", "radius") as number,
           }}
           contentFit="cover"
-          onLoadStart={() => setIsLoading(true)}
-          onLoadEnd={() => setIsLoading(false)}
+          onLoadStart={() => setIsImageLoading(true)}
+          onLoadEnd={() => setIsImageLoading(false)}
         />
-        {isLoading && (
+        {isImageLoading && (
           <View
             position="absolute"
             top={0}
