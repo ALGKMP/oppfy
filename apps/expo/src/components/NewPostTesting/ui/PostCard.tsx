@@ -78,7 +78,6 @@ export interface PostData {
 }
 
 interface PostCallbacks {
-  onLikeDoubleTapped: () => void;
   onMoreOptions: () => void;
 }
 
