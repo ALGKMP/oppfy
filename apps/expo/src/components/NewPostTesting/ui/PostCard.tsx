@@ -77,7 +77,6 @@ export interface PostData {
 interface PostCallbacks {
   onLikePressed: () => void;
   onLikeDoubleTapped: () => void;
-  onShare: () => void;
   onMoreOptions: () => void;
 }
 
