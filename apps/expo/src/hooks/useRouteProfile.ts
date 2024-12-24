@@ -7,8 +7,6 @@ interface ProfileRouteParams {
   username?: string;
 }
 
-// TODO: Pass in userId into the hook instead of into the function
-
 const useRouteProfile = () => {
   const { user } = useSession();
   const router = useRouter();
