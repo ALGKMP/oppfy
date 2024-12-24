@@ -118,7 +118,6 @@ interface OtherPostProps extends PostData {
 }
 
 const OtherPost = memo((postProps: OtherPostProps) => {
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [sheetState, setSheetState] = useState<SheetState>("closed");
 
   const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost({
