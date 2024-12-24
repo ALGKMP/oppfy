@@ -18,6 +18,7 @@ import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
 import PostDetails from "../PostDetails";
+import useRouteProfile from "~/hooks/useRouteProfile";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -72,8 +73,6 @@ interface PostCallbacks {
   onLikeDoubleTapped: () => void;
   onShare: () => void;
   onMoreOptions: () => void;
-  onAuthorPress: () => void;
-  onRecipientPress: () => void;
 }
 
 type LoadedPostCardProps = PostData &
@@ -86,6 +85,8 @@ interface LoadingPostCardProps {
 type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
 
 const PostCard = (props: PostCardProps) => {
+
+  const { routeProfile } = useRouteProfile();
 
   if (props.loading) {
     return (
@@ -116,25 +117,26 @@ const PostCard = (props: PostCardProps) => {
       <YStack gap="$3">
         <View marginHorizontal="$-3">
           <View>
-            {
-              props.media.type === "image" ? (
-                <ImageComponent
-                  media={props.media}
-                  onLikeDoubleTapped={props.onLikeDoubleTapped}
-                />
-              ) : (
-                <VideoPlayer
-                  media={props.media}
-                  onLikeDoubleTapped={props.onLikeDoubleTapped}
-                />
-              )
-            }
+            {props.media.type === "image" ? (
+              <ImageComponent
+                media={props.media}
+                onLikeDoubleTapped={props.onLikeDoubleTapped}
+              />
+            ) : (
+              <VideoPlayer
+                media={props.media}
+                onLikeDoubleTapped={props.onLikeDoubleTapped}
+              />
+            )}
             <View position="absolute" bottom={15} left={15}>
               <XStack alignItems="center" gap="$3">
                 <TouchableOpacity
                   onPress={() => {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    props.onRecipientPress();
+                    routeProfile({
+                      userId: props.recipient.id,
+                      username: props.recipient.username,
+                    });
                   }}
                 >
                   <Avatar source={props.recipient.profilePicture} size={50} />
@@ -146,7 +148,10 @@ const PostCard = (props: PostCardProps) => {
                       void Haptics.impactAsync(
                         Haptics.ImpactFeedbackStyle.Light,
                       );
-                      props.onRecipientPress();
+                      routeProfile({
+                        userId: props.recipient.id,
+                        username: props.recipient.username,
+                      });
                     }}
                   >
                     <SizableText size="$5" fontWeight="bold" lineHeight={0}>
@@ -158,7 +163,10 @@ const PostCard = (props: PostCardProps) => {
                       void Haptics.impactAsync(
                         Haptics.ImpactFeedbackStyle.Light,
                       );
-                      props.onAuthorPress();
+                      routeProfile({
+                        userId: props.author.id,
+                        username: props.author.username,
+                      });
                     }}
                   ></TouchableOpacity>
                 </YStack>
