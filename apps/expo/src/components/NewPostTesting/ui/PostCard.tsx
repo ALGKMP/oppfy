@@ -10,15 +10,21 @@ import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
+import CommentButton from "../CommentButton";
+import CommentsCount from "../CommentsCount";
+import PostCaption from "../PostCaption";
+import PostDate from "../Postdate";
+import ShareButton from "../ShareButton";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
 import { useAudio } from "~/contexts/AudioContext";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import Avatar from "../../Avatar";
 import CardContainer from "../../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../../Icons/Mute";
-import PostDetails from "../PostDetails";
-import useRouteProfile from "~/hooks/useRouteProfile";
+import LikeButton from "../LikeButton";
+import { Paragraph, Text } from "~/components/ui";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -85,7 +91,6 @@ interface LoadingPostCardProps {
 type PostCardProps = LoadingPostCardProps | LoadedPostCardProps;
 
 const PostCard = (props: PostCardProps) => {
-
   const { routeProfile } = useRouteProfile();
 
   if (props.loading) {
@@ -175,24 +180,65 @@ const PostCard = (props: PostCardProps) => {
         </View>
 
         {/* Under post */}
-        <PostDetails
-          id={props.id}
-          endpoint="home-feed"
-          createdAt={props.createdAt}
-          caption={props.caption}
-          author={{
-            id: props.author.id,
-            username: props.author.username,
-          }}
-          recipient={{
-            id: props.recipient.id,
-            username: props.recipient.username,
-          }}
-          stats={{
-            likes: props.stats.likes,
-            comments: props.stats.comments,
-          }}
-        />
+        <YStack flex={1} paddingHorizontal="$1" gap="$1">
+          <XStack gap="$3.5" alignItems="center">
+            {/* Like Button */}
+            <LikeButton postId={props.id} endpoint="home-feed" />
+
+            {/* Comment Button */}
+            <CommentButton
+              postId={props.id}
+              postRecipientUserId={props.recipient.id}
+              endpoint="home-feed"
+            />
+            {/* Share Button */}
+            <ShareButton postId={props.id} />
+          </XStack>
+
+          {/* Likes Count */}
+          {props.stats.likes > 0 && (
+            <TouchableOpacity>
+              <SizableText size="$3" fontWeight="bold">
+                {props.stats.likes > 0
+                  ? `${props.stats.likes} ${props.stats.likes === 1 ? "like" : "likes"}`
+                  : ""}
+              </SizableText>
+            </TouchableOpacity>
+          )}
+
+          {/* Opped by */}
+          <TouchableOpacity
+            onPress={() => {
+              routeProfile({
+                userId: props.author.id,
+                username: props.author.username,
+              });
+            }}
+          >
+            <Paragraph>
+              <Text fontWeight="bold">
+                opped by{" "}
+                <Text fontWeight="bold" color="$primary">
+                  {props.author.username}
+                </Text>
+              </Text>
+            </Paragraph>
+          </TouchableOpacity>
+
+          {/* Caption */}
+          <PostCaption caption={props.caption} />
+
+          {/* Comments Count */}
+          <CommentsCount
+            commentsCount={props.stats.comments}
+            postId={props.id}
+            endpoint="home-feed"
+            postRecipientUserId={props.recipient.id}
+          />
+
+          {/* Post Date */}
+          <PostDate createdAt={props.createdAt} />
+        </YStack>
       </YStack>
     </CardContainer>
   );
