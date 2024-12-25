@@ -45,6 +45,8 @@ import { ScreenView, useAlertDialogController, View } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useIsForeground from "~/hooks/useIsForeground";
 
+const MAX_RECORDING_DURATION = 60 * 1000; // 1 minute
+
 const ASPECT_RATIO = 16 / 9;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PREVIEW_HEIGHT = SCREEN_WIDTH * ASPECT_RATIO; // 16:9
@@ -292,15 +294,16 @@ const CameraPage = () => {
         ))}
 
         <CaptureButton
-          style={{ position: "absolute", alignSelf: "center", bottom: 36 }}
           camera={camera}
-          onMediaCaptured={onMediaCaptured}
           cameraZoom={zoom}
           minZoom={minZoom}
           maxZoom={maxZoom}
           flash={supportsFlash ? flash : "off"}
           enabled={isCameraInitialized && isActive}
+          maxRecordingDuration={MAX_RECORDING_DURATION}
           setIsPressingButton={setIsPressingButton}
+          onMediaCaptured={onMediaCaptured}
+          style={{ position: "absolute", alignSelf: "center", bottom: 36 }}
         />
 
         <TouchableOpacity

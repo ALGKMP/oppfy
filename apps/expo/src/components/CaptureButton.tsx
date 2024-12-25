@@ -40,8 +40,6 @@ const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2] satisfies FailOffset;
 const START_RECORDING_DELAY = 200;
 const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.075;
 
-const MAX_RECORDING_DURATION = 60 * 1000; // 1 minute in milliseconds
-
 interface Context {
   offsetY?: number;
   startY?: number;
@@ -63,6 +61,8 @@ interface Props extends ViewProps {
   enabled: boolean;
 
   setIsPressingButton: (isPressingButton: boolean) => void;
+
+  maxRecordingDuration: number;
 }
 
 const CaptureButton = ({
@@ -74,6 +74,7 @@ const CaptureButton = ({
   cameraZoom,
   enabled,
   setIsPressingButton,
+  maxRecordingDuration,
   style,
   ...props
 }: Props) => {
@@ -107,7 +108,7 @@ const CaptureButton = ({
     if (camera.current === null) throw new Error("Camera ref is null");
 
     recordingProgress.value = withTiming(1, {
-      duration: MAX_RECORDING_DURATION,
+      duration: maxRecordingDuration,
       easing: Easing.linear,
     });
 
