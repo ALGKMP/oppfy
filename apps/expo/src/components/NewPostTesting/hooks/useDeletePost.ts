@@ -2,7 +2,7 @@ import { api } from "~/utils/api";
 
 export const useDeletePost = () => {
   const utils = api.useUtils();
-  const { mutate: deletePost, isLoading: isDeleting } =
+  const { mutate: deletePost, isPending: isDeleting } =
     api.post.deletePost.useMutation({
       onMutate: async (newData) => {
         await utils.post.paginatePostsOfUserSelf.invalidate();
@@ -34,7 +34,12 @@ export const useDeletePost = () => {
       },
     });
 
+  const handleDeletePost = (postId: string) => {
+    deletePost({ postId });
+  };
+
   return {
+    handleDeletePost,
     deletePost,
     isDeleting,
   };
