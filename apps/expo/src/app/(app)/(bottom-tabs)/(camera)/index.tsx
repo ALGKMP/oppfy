@@ -49,7 +49,7 @@ const MAX_RECORDING_DURATION = 60 * 1000; // 1 minute
 
 const ASPECT_RATIO = 16 / 9;
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const PREVIEW_HEIGHT = SCREEN_WIDTH * ASPECT_RATIO; // 16:9
+const PREVIEW_HEIGHT = Math.floor(SCREEN_WIDTH * ASPECT_RATIO); // 16:9
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
 Reanimated.addWhitelistedNativeProps({ zoom: true });
@@ -243,7 +243,7 @@ const CameraPage = () => {
       <ScreenView
         alignItems="center"
         justifyContent="center"
-        safeAreaEdges={["top", "bottom"]}
+        safeAreaEdges={["top"]}
       >
         <EmptyPlaceholder
           title="No camera device found"
@@ -255,11 +255,7 @@ const CameraPage = () => {
   }
 
   return (
-    <ScreenView
-      safeAreaEdges={["top", "bottom"]}
-      justifyContent="center"
-      alignItems="center"
-    >
+    <ScreenView padding={0} safeAreaEdges={["top"]}>
       <View
         width={SCREEN_WIDTH}
         height={PREVIEW_HEIGHT}

@@ -52,13 +52,12 @@ const PreviewScreen = () => {
   };
 
   return (
-    <ScreenView justifyContent="center" alignItems="center">
+    <ScreenView padding={0} safeAreaEdges={["top"]}>
       <View
         width={SCREEN_WIDTH}
         height={PREVIEW_HEIGHT}
         borderRadius={20}
         overflow="hidden"
-        position="relative"
       >
         {type === "photo" ? (
           <PreviewImage uri={uri} />

@@ -130,7 +130,7 @@ const CaptureButton = ({
         isPressingButton.value = false;
         setIsPressingButton(false);
       }
-    }, MAX_RECORDING_DURATION);
+    }, maxRecordingDuration);
   }, [
     camera,
     flash,
