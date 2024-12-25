@@ -8,7 +8,6 @@ import type { AVPlaybackStatus } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
@@ -26,7 +25,6 @@ import LikeButton from "../LikeButton";
 import PostCaption from "../PostCaption";
 import PostDate from "../PostDate";
 import ShareButton from "../ShareButton";
-import { useActionSheetController } from "~/components/ui";
 import MorePostOptionsButton from "../MorePostOptionsButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
@@ -156,23 +154,8 @@ const PostCard = (props: PostCardProps) => {
                 </YStack>
               </XStack>
             </View>
-            {/* <TouchableOpacity
-              hitSlop={20}
-              style={{ position: "absolute", bottom: 15, right: 15 }}
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                show({
-                  title: "More Options",
-                  buttonOptions: [
-                    { text: "Save Post", onPress: () => {} },
-                    { text: "Report Post", onPress: () => {} },
-                  ],
-                });
-              }}
-            >
-              <MoreHorizontal />
-            </TouchableOpacity> */}
             <MorePostOptionsButton
+              postId={props.postId}
               mediaUrl={props.media.url}
               style={{ position: "absolute", bottom: 15, right: 15 }}
             />
