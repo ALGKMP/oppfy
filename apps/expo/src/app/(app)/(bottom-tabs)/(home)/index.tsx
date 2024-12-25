@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
@@ -18,13 +17,11 @@ import {
 } from "tamagui";
 
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
-import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/PostCard";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { processColorsInProps } from "react-native-reanimated/lib/typescript/Colors";
 
 const { width: screenWidth } = Dimensions.get("window");
 
