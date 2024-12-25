@@ -333,7 +333,7 @@ const PostTo = () => {
           }
           primaryAction={{
             label: "Select",
-            icon: ChevronRight,
+            iconAfter: ChevronRight,
             onPress: () => onContactSelected(item.data),
           }}
         />
