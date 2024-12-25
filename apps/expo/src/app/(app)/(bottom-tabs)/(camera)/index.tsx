@@ -39,13 +39,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { CameraOff } from "@tamagui/lucide-icons";
 
+import CaptureButton from "~/components/CaptureButton";
+import Focus, { useFocusAnimations } from "~/components/Icons/Focus";
 import { ScreenView, useAlertDialogController, View } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import {
-  CaptureButton,
-  FocusIcon,
-  useFocusAnimations,
-} from "~/features/camera/components";
 import useIsForeground from "~/hooks/useIsForeground";
 
 const ASPECT_RATIO = 16 / 9;
@@ -291,7 +288,7 @@ const CameraPage = () => {
         </GestureDetector>
 
         {animations.map(({ id, point }) => (
-          <FocusIcon key={id} x={point.x} y={point.y} />
+          <Focus key={id} x={point.x} y={point.y} />
         ))}
 
         <CaptureButton
