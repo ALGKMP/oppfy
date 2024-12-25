@@ -1,5 +1,4 @@
-import React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -20,11 +19,12 @@ import {
 
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
-import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import PostCard from "~/components/NewPostTesting/PostCard";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import { processColorsInProps } from "react-native-reanimated/lib/typescript/Colors";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -101,7 +101,7 @@ const HomeScreen = () => {
       if (profile === undefined) return null;
 
       return (
-        <OtherPost
+        <PostCard
           postId={item.postId}
           createdAt={item.createdAt}
           caption={item.caption}
@@ -123,17 +123,17 @@ const HomeScreen = () => {
           }}
           media={{
             id: item.postId,
-            isViewable: viewableItems.includes(item.postId),
-            type: item.mediaType,
-            url: item.imageUrl,
-            dimensions: {
-              width: item.width,
-              height: item.height,
-            },
             recipient: {
               id: item.recipientId,
               username: item.recipientUsername ?? "",
               profilePicture: item.recipientProfilePicture,
+            },
+            type: item.mediaType,
+            url: item.imageUrl,
+            isViewable: viewableItems.includes(item.postId),
+            dimensions: {
+              width: item.width,
+              height: item.height,
             },
           }}
           stats={{
@@ -149,14 +149,14 @@ const HomeScreen = () => {
   const isLoading = isLoadingPostData || isLoadingProfile;
 
   const renderFooter = useCallback(() => {
-
-    // if (isLoading) {
-    //   return (
-    //     <YStack gap="$4">
-    //       <PostCard/>
-    //     </YStack>
-    //   );
-    // }
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          <PostCard.loading />
+          <PostCard.loading />
+        </YStack>
+      );
+    }
 
     return (
       <View>
@@ -176,9 +176,7 @@ const HomeScreen = () => {
           gap="$4"
         >
           {Array.from({ length: 3 }).map(() => (
-            // <PostCard />
-            <>
-            </>
+            <PostCard.loading />
           ))}
         </YStack>
       ) : (
@@ -249,10 +247,10 @@ const EmptyHomeScreen = () => {
 
   return (
     <YStack
-    // flex={1}
-    // alignItems="center"
-    // justifyContent="center" // Center vertically
-    // gap="$3"
+      flex={1}
+      alignItems="center"
+      justifyContent="center"
+      gap="$3"
     >
       <YStack justifyContent="center" alignItems="center">
         <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">

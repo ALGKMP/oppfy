@@ -8,24 +8,24 @@ import type { AVPlaybackStatus } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { MoreHorizontal } from "@tamagui/lucide-icons";
 import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
 
 import Skeleton from "~/components/Skeletons/Skeleton";
 import { Paragraph, Text } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import Avatar from "../../Avatar";
-import CardContainer from "../../Containers/CardContainer";
-import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
-import Mute, { useMuteAnimations } from "../../Icons/Mute";
-import CommentButton from "../CommentButton";
-import CommentsCount from "../CommentsCount";
-import { useLikePost } from "../hooks/useLikePost";
-import LikeButton from "../LikeButton";
-import PostCaption from "../PostCaption";
-import PostDate from "../PostDate";
-import ShareButton from "../ShareButton";
+import Avatar from "../Avatar";
+import CardContainer from "../Containers/CardContainer";
+import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
+import Mute, { useMuteAnimations } from "../Icons/Mute";
+import CommentButton from "./CommentButton";
+import CommentsCount from "./CommentsCount";
+import { useLikePost } from "./hooks/useLikePost";
+import LikeButton from "./LikeButton";
+import MorePostOptionsButton from "./MorePostOptionsButton";
+import PostCaption from "./PostCaption";
+import PostDate from "./PostDate";
+import ShareButton from "./ShareButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -77,13 +77,9 @@ export interface PostData {
   stats: Stats;
 }
 
-interface PostCallbacks {
-  onMoreOptions: () => void;
-}
-
-type LoadedPostCardProps = PostData & PostCallbacks;
-
-type PostCardProps = LoadedPostCardProps;
+type PostCardProps = PostData & {
+  endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
+};
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
@@ -119,13 +115,9 @@ const PostCard = (props: PostCardProps) => {
         <View marginHorizontal="$-3">
           <View>
             {props.media.type === "image" ? (
-              <ImageComponent
-                media={props.media}
-              />
+              <ImageComponent endpoint={props.endpoint} media={props.media} />
             ) : (
-              <VideoPlayer
-                media={props.media}
-              />
+              <VideoPlayer endpoint={props.endpoint} media={props.media} />
             )}
             <View position="absolute" bottom={15} left={15}>
               <XStack alignItems="center" gap="$3">
@@ -160,16 +152,12 @@ const PostCard = (props: PostCardProps) => {
                 </YStack>
               </XStack>
             </View>
-            <TouchableOpacity
-              hitSlop={20}
+            <MorePostOptionsButton
+              postId={props.postId}
+              recipientUserId={props.recipient.id}
+              mediaUrl={props.media.url}
               style={{ position: "absolute", bottom: 15, right: 15 }}
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                props.onMoreOptions();
-              }}
-            >
-              <MoreHorizontal />
-            </TouchableOpacity>
+            />
           </View>
         </View>
 
@@ -177,13 +165,13 @@ const PostCard = (props: PostCardProps) => {
         <YStack flex={1} paddingHorizontal="$1" gap="$1">
           <XStack gap="$3.5" alignItems="center">
             {/* Like Button */}
-            <LikeButton postId={props.postId} endpoint="home-feed" />
+            <LikeButton postId={props.postId} endpoint={props.endpoint} />
 
             {/* Comment Button */}
             <CommentButton
               postId={props.postId}
               postRecipientUserId={props.recipient.id}
-              endpoint="home-feed"
+              endpoint={props.endpoint}
             />
             {/* Share Button */}
             <ShareButton postId={props.postId} />
@@ -226,7 +214,7 @@ const PostCard = (props: PostCardProps) => {
           <CommentsCount
             commentsCount={props.stats.comments}
             postId={props.postId}
-            endpoint="home-feed"
+            endpoint={props.endpoint}
             postRecipientUserId={props.recipient.id}
           />
 
@@ -238,13 +226,38 @@ const PostCard = (props: PostCardProps) => {
   );
 };
 
+PostCard.loading = function PostCardLoading() {
+  return (
+    <CardContainer paddingVertical={0}>
+      <YStack>
+        <View marginHorizontal="$-3">
+          <Skeleton width="100%" height={600} radius={8} />
+          <View position="absolute" bottom={15} left={15}>
+            <XStack alignItems="center" gap="$3">
+              <Skeleton size={40} circular />
+              <YStack gap="$1">
+                <Skeleton width={100} height={16} />
+                <XStack alignItems="center" gap="$2">
+                  <Skeleton size={20} circular />
+                  <Skeleton width={80} height={12} />
+                </XStack>
+              </YStack>
+            </XStack>
+          </View>
+        </View>
+      </YStack>
+    </CardContainer>
+  );
+};
+
 interface ImageComponentProps {
+  endpoint: "home-feed" | "other-profile" | "self-profile" | "single-post";
   media: Media;
 }
-const ImageComponent = ({ media }: ImageComponentProps) => {
+const ImageComponent = ({ endpoint, media }: ImageComponentProps) => {
   const { handleLikeDoubleTapped } = useLikePost({
     postId: media.id,
-    endpoint: "home-feed",
+    endpoint,
     userId: media.recipient.id,
   });
   const { hearts, addHeart } = useHeartAnimations();
@@ -305,10 +318,11 @@ const ImageComponent = ({ media }: ImageComponentProps) => {
 };
 
 interface VideoPlayerProps {
+  endpoint: "home-feed" | "other-profile" | "self-profile" | "single-post";
   media: Media;
 }
 
-const VideoPlayerComponent = ({ media }: VideoPlayerProps) => {
+const VideoPlayerComponent = ({ endpoint, media }: VideoPlayerProps) => {
   const videoRef = useRef<Video>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
@@ -320,7 +334,7 @@ const VideoPlayerComponent = ({ media }: VideoPlayerProps) => {
 
   const { handleLikeDoubleTapped } = useLikePost({
     postId: media.id,
-    endpoint: "home-feed",
+    endpoint,
     userId: media.recipient.id,
   });
 
