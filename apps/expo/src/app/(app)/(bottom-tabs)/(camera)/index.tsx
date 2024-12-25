@@ -115,10 +115,10 @@ const CameraPage = () => {
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
 
-      const w = format?.photoWidth ?? format?.videoWidth;
-      const h = format?.photoHeight ?? format?.videoHeight;
+      const width = Math.min(media.width, media.height);
+      const height = Math.max(media.width, media.height);
 
-      if (!w || !h) {
+      if (!width || !height) {
         throw new Error("Captured media dimensions not found");
       }
 
@@ -127,8 +127,8 @@ const CameraPage = () => {
         params: {
           type,
           uri,
-          width: w,
-          height: h,
+          width,
+          height,
         },
       });
     },
