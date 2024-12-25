@@ -38,11 +38,9 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { CameraOff } from "@tamagui/lucide-icons";
-import { View } from "tamagui";
 
-import { useAlertDialogController } from "~/components/ui";
+import { ScreenView, useAlertDialogController, View } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
 import {
   CaptureButton,
   FocusIcon,
@@ -147,7 +145,9 @@ const CameraPage = () => {
     if (canAskAgain) {
       const { granted } = await MediaLibrary.requestPermissionsAsync();
       if (granted) {
-        router.push("/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker");
+        router.push(
+          "/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker",
+        );
         return;
       }
     }
@@ -241,22 +241,22 @@ const CameraPage = () => {
 
   if (!device) {
     return (
-      <BaseScreenView
-        safeAreaEdges={["top", "bottom"]}
-        justifyContent="center"
+      <ScreenView
         alignItems="center"
+        justifyContent="center"
+        safeAreaEdges={["top", "bottom"]}
       >
         <EmptyPlaceholder
           title="No camera device found"
           subtitle="Please check your camera settings and try again."
           icon={<CameraOff />}
         />
-      </BaseScreenView>
+      </ScreenView>
     );
   }
 
   return (
-    <BaseScreenView
+    <ScreenView
       safeAreaEdges={["top", "bottom"]}
       justifyContent="center"
       alignItems="center"
@@ -343,7 +343,7 @@ const CameraPage = () => {
           )}
         </View>
       </View>
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
