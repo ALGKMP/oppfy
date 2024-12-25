@@ -1,32 +1,34 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { Button, H5, Spacer, YStack } from "tamagui";
+import { FlashList } from "@shopify/flash-list";
+import { getToken, H5, Spacer, YStack } from "tamagui";
 
-import CardContainer from "~/components/Containers/CardContainer";
-import { VirtualizedListItem } from "~/components/ListItems";
-import { BaseScreenView } from "~/components/Views";
-import type { RouterOutputs } from "~/utils/api";
-import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-
-const PAGE_SIZE = 20;
+import { MediaListItem, MediaListItemSkeleton } from "~/components/ui";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import { api, type RouterOutputs } from "~/utils/api";
 
 type FriendRequestItem =
   RouterOutputs["friend"]["paginateFriendRequests"]["items"][0];
 type FollowRequestItem =
   RouterOutputs["follow"]["paginateFollowRequests"]["items"][0];
 
+type ListItem =
+  | { type: "header"; title: string }
+  | { type: "friendRequest"; data: FriendRequestItem }
+  | { type: "followRequest"; data: FollowRequestItem };
+
+const PAGE_SIZE = 20;
+
 const Requests = () => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
   const utils = api.useUtils();
-
   const [refreshing, setRefreshing] = useState(false);
 
+  // Friend Requests Query
   const {
     data: friendRequestsData,
     isLoading: friendRequestsIsLoading,
@@ -35,13 +37,11 @@ const Requests = () => {
     isFetchingNextPage: friendRequestsIsFetchingNextPage,
     refetch: refetchFriendRequests,
   } = api.friend.paginateFriendRequests.useInfiniteQuery(
-    {
-      pageSize: PAGE_SIZE,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    { pageSize: PAGE_SIZE },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
+
+  // Follow Requests Query
   const {
     data: followRequestsData,
     isLoading: followRequestsIsLoading,
@@ -50,37 +50,31 @@ const Requests = () => {
     isFetchingNextPage: followRequestsIsFetchingNextPage,
     refetch: refetchFollowRequests,
   } = api.follow.paginateFollowRequests.useInfiniteQuery(
-    {
-      pageSize: PAGE_SIZE,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    { pageSize: PAGE_SIZE },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
+  // Accept/Decline Mutations
   const acceptFriendRequest = api.friend.acceptFriendRequest.useMutation({
     onMutate: async (newData) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.friend.paginateFriendRequests.cancel();
       await utils.follow.paginateFollowRequests.cancel();
       await utils.profile.getFullProfileSelf.cancel();
       await utils.friend.paginateFriendsSelf.cancel();
 
-      // Get the data from the queryCache
       const prevFriendData =
         utils.friend.paginateFriendRequests.getInfiniteData({
-          pageSize: 20,
+          pageSize: PAGE_SIZE,
         });
       const prevFollowData =
         utils.follow.paginateFollowRequests.getInfiniteData({
-          pageSize: 20,
+          pageSize: PAGE_SIZE,
         });
 
       if (prevFriendData === undefined || prevFollowData === undefined) return;
 
-      // Optimistically update the data
       utils.friend.paginateFriendRequests.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
           ...prevFriendData,
           pages: prevFriendData.pages.map((page) => ({
@@ -92,9 +86,8 @@ const Requests = () => {
         },
       );
 
-      // Optimistically update the follow requests data
       utils.follow.paginateFollowRequests.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
           ...prevFollowData,
           pages: prevFollowData.pages.map((page) => ({
@@ -120,28 +113,26 @@ const Requests = () => {
       );
     },
     onSettled: async () => {
-      // Sync with server once mutation has settled
       await utils.friend.paginateFriendRequests.invalidate();
       await utils.follow.paginateFollowRequests.invalidate();
       await utils.profile.getFullProfileSelf.invalidate();
       await utils.friend.paginateFriendsSelf.invalidate();
     },
   });
+
   const acceptFollowRequest = api.follow.acceptFollowRequest.useMutation({
     onMutate: async (newData) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.follow.paginateFollowRequests.cancel();
       await utils.follow.paginateFollowersSelf.cancel();
       await utils.profile.getFullProfileSelf.cancel();
-      // Get the data from the queryCache
+
       const prevData = utils.follow.paginateFollowRequests.getInfiniteData({
-        pageSize: 20,
+        pageSize: PAGE_SIZE,
       });
       if (prevData === undefined) return;
 
-      // Optimistically update the data
       utils.follow.paginateFollowRequests.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
           ...prevData,
           pages: prevData.pages.map((page) => ({
@@ -160,7 +151,6 @@ const Requests = () => {
       utils.follow.paginateFollowRequests.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
-      // Sync with server once mutation has settled
       await utils.follow.paginateFollowRequests.invalidate();
       await utils.follow.paginateFollowersSelf.invalidate();
       await utils.profile.getFullProfileSelf.invalidate();
@@ -169,22 +159,17 @@ const Requests = () => {
 
   const declineFriendRequest = api.friend.declineFriendRequest.useMutation({
     onMutate: async (newData) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.friend.paginateFriendRequests.cancel();
+      const prevData = utils.friend.paginateFriendRequests.getInfiniteData({
+        pageSize: PAGE_SIZE,
+      });
+      if (prevData === undefined) return;
 
-      // Get the data from the queryCache
-      const prevFriendData =
-        utils.friend.paginateFriendRequests.getInfiniteData();
-      const prevFollowData =
-        utils.follow.paginateFollowRequests.getInfiniteData();
-      if (prevFriendData === undefined || prevFollowData === undefined) return;
-
-      // Optimistically update the data
       utils.friend.paginateFriendRequests.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
-          ...prevFriendData,
-          pages: prevFriendData.pages.map((page) => ({
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
               (item) => item.userId !== newData.senderId,
@@ -193,53 +178,30 @@ const Requests = () => {
         },
       );
 
-      // Optimistically update the follow requests data
-      utils.follow.paginateFollowRequests.setInfiniteData(
-        { pageSize: 20 },
-        {
-          ...prevFollowData,
-        },
-      );
-
-      return { prevFriendData, prevFollowData };
+      return { prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.friend.paginateFriendRequests.setInfiniteData(
-        { pageSize: 20 },
-        ctx.prevFriendData,
-      );
-      utils.follow.paginateFollowRequests.setInfiniteData(
-        { pageSize: 20 },
-        ctx.prevFollowData,
-      );
+      utils.friend.paginateFriendRequests.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
-      // Sync with server once mutation has settled
       await utils.friend.paginateFriendRequests.invalidate();
-      await utils.follow.paginateFollowRequests.invalidate();
     },
   });
+
   const declineFollowRequest = api.follow.declineFollowRequest.useMutation({
     onMutate: async (newData) => {
-      // Cancel outgoing fetches
       await utils.follow.paginateFollowRequests.cancel();
-      await utils.friend.paginateFriendRequests.cancel();
+      const prevData = utils.follow.paginateFollowRequests.getInfiniteData({
+        pageSize: PAGE_SIZE,
+      });
+      if (prevData === undefined) return;
 
-      // Get the data from the queryCache
-      const prevFollowData =
-        utils.follow.paginateFollowRequests.getInfiniteData({ pageSize: 20 });
-      const prevFriendData =
-        utils.friend.paginateFriendRequests.getInfiniteData({ pageSize: 20 });
-
-      if (prevFollowData === undefined || prevFriendData === undefined) return;
-
-      // Optimistically update the follow requests data
       utils.follow.paginateFollowRequests.setInfiniteData(
-        { pageSize: 20 },
+        { pageSize: PAGE_SIZE },
         {
-          ...prevFollowData,
-          pages: prevFollowData.pages.map((page) => ({
+          ...prevData,
+          pages: prevData.pages.map((page) => ({
             ...page,
             items: page.items.filter(
               (item) => item.userId !== newData.senderId,
@@ -248,37 +210,14 @@ const Requests = () => {
         },
       );
 
-      // Optimistically update the friend requests data
-      utils.friend.paginateFriendRequests.setInfiniteData(
-        { pageSize: 20 },
-        {
-          ...prevFriendData,
-          pages: prevFriendData.pages.map((page) => ({
-            ...page,
-            items: page.items.filter(
-              (item) => item.userId !== newData.senderId,
-            ),
-          })),
-        },
-      );
-
-      return { prevFollowData, prevFriendData };
+      return { prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx === undefined) return;
-      utils.follow.paginateFollowRequests.setInfiniteData(
-        { pageSize: 20 },
-        ctx.prevFollowData,
-      );
-      utils.friend.paginateFriendRequests.setInfiniteData(
-        { pageSize: 20 },
-        ctx.prevFriendData,
-      );
+      utils.follow.paginateFollowRequests.setInfiniteData({}, ctx.prevData);
     },
     onSettled: async () => {
-      // Sync with server once mutation has settled
       await utils.follow.paginateFollowRequests.invalidate();
-      await utils.friend.paginateFriendRequests.invalidate();
     },
   });
 
@@ -286,179 +225,190 @@ const Requests = () => {
     () => friendRequestsData?.pages.flatMap((page) => page.items) ?? [],
     [friendRequestsData],
   );
+
   const followRequestItems = useMemo(
     () => followRequestsData?.pages.flatMap((page) => page.items) ?? [],
     [followRequestsData],
   );
 
-  const onAcceptFriendRequest = async (senderId: string) => {
-    await acceptFriendRequest.mutateAsync({ senderId });
-  };
-  const onAcceptFollowRequest = async (senderId: string) => {
-    await acceptFollowRequest.mutateAsync({ senderId });
-  };
+  // Combine items into sections
+  const items = useMemo(() => {
+    const result: ListItem[] = [];
 
-  const onDeclineFriendRequest = async (senderId: string) => {
-    await declineFriendRequest.mutateAsync({ senderId });
-  };
-  const onDeclineFollowRequest = async (senderId: string) => {
-    await declineFollowRequest.mutateAsync({ senderId });
-  };
-
-  const onShowMoreFriendRequests = async () => {
-    if (friendRequestsHasNextPage && !friendRequestsIsFetchingNextPage) {
-      await fetchNextFriendRequestsPage();
+    if (friendRequestItems.length > 0) {
+      result.push({ type: "header", title: "Friend Requests" });
+      friendRequestItems.forEach((item) =>
+        result.push({ type: "friendRequest", data: item }),
+      );
     }
-  };
-  const onShowMoreFollowRequests = async () => {
-    if (followRequestsHasNextPage && !followRequestsIsFetchingNextPage) {
-      await fetchNextFollowRequestsPage();
+
+    if (followRequestItems.length > 0) {
+      result.push({ type: "header", title: "Follow Requests" });
+      followRequestItems.forEach((item) =>
+        result.push({ type: "followRequest", data: item }),
+      );
     }
-  };
 
-  const onFriendRequestUserSelected = ({
-    userId,
-    username,
-  }: FriendRequestItem) => {
-    router.navigate({
-      // pathname: "/(inbox)/profile/[userId]",
-      pathname: "/(app)/(bottom-tabs)/( inbox)/profile/[userId]", // TODO: Typescript keeps yelling about this.
-      params: { userId, username },
-    });
-  };
+    return result;
+  }, [friendRequestItems, followRequestItems]);
 
-  const onFollowRequestUserSelected = ({
-    userId,
-    username,
-  }: FollowRequestItem) => {
-    router.navigate({
-      // pathname: "/(inbox)/profile/[userId]",
-      pathname: "/(app)/(bottom-tabs)/( inbox)/profile/[userId]", // TODO: Typescript keeps yelling about this.
-      params: { userId, username },
-    });
-  };
-
-  const onRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([refetchFriendRequests(), refetchFollowRequests()]);
     setRefreshing(false);
-  };
+  }, [refetchFriendRequests, refetchFollowRequests]);
 
-  const isLoading = followRequestsIsLoading || friendRequestsIsLoading;
+  const handleOnEndReached = useCallback(async () => {
+    if (friendRequestsHasNextPage && !friendRequestsIsFetchingNextPage) {
+      await fetchNextFriendRequestsPage();
+    }
+    if (followRequestsHasNextPage && !followRequestsIsFetchingNextPage) {
+      await fetchNextFollowRequestsPage();
+    }
+  }, [
+    friendRequestsHasNextPage,
+    friendRequestsIsFetchingNextPage,
+    followRequestsHasNextPage,
+    followRequestsIsFetchingNextPage,
+    fetchNextFriendRequestsPage,
+    fetchNextFollowRequestsPage,
+  ]);
 
-  const renderLoadingSkeletons = () => (
-    <CardContainer>
-      {PLACEHOLDER_DATA.map((_, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading
-          showSkeletons={{
-            imageUrl: true,
-            title: true,
-            subtitle: true,
-            subtitle2: true,
-            button: true,
-            button2: true,
+  const renderItem = useCallback(
+    ({ item }: { item: ListItem }) => {
+      if (item.type === "header") {
+        return <H5 theme="alt1">{item.title}</H5>;
+      }
+
+      if (item.type === "friendRequest") {
+        return (
+          <MediaListItem
+            title={item.data.username}
+            subtitle={item.data.name}
+            imageUrl={item.data.profilePictureUrl ?? DefaultProfilePicture}
+            primaryAction={{
+              label: "Decline",
+              onPress: () =>
+                void declineFriendRequest.mutateAsync({
+                  senderId: item.data.userId,
+                }),
+            }}
+            secondaryAction={{
+              label: "Accept",
+              variant: "primary",
+              onPress: () =>
+                void acceptFriendRequest.mutateAsync({
+                  senderId: item.data.userId,
+                }),
+            }}
+            onPress={() =>
+              router.navigate({
+                pathname: "/profile/[userId]",
+                params: {
+                  userId: item.data.userId,
+                  username: item.data.username,
+                },
+              })
+            }
+          />
+        );
+      }
+
+      return (
+        <MediaListItem
+          title={item.data.username}
+          subtitle={item.data.name}
+          imageUrl={item.data.profilePictureUrl ?? DefaultProfilePicture}
+          primaryAction={{
+            label: "Decline",
+            onPress: () =>
+              void declineFollowRequest.mutateAsync({
+                senderId: item.data.userId,
+              }),
           }}
+          secondaryAction={{
+            label: "Accept",
+            variant: "primary",
+            onPress: () =>
+              void acceptFollowRequest.mutateAsync({
+                senderId: item.data.userId,
+              }),
+          }}
+          onPress={() =>
+            router.navigate({
+              pathname: "/profile/[userId]",
+              params: {
+                userId: item.data.userId,
+                username: item.data.username,
+              },
+            })
+          }
         />
-      ))}
-    </CardContainer>
+      );
+    },
+    [
+      router,
+      acceptFriendRequest,
+      acceptFollowRequest,
+      declineFriendRequest,
+      declineFollowRequest,
+    ],
   );
 
-  const renderFriendRequests = () => (
-    <CardContainer>
-      <H5 theme="alt1">Friend Requests</H5>
+  const ListEmptyComponent = useCallback(() => {
+    if (friendRequestsIsLoading || followRequestsIsLoading) {
+      return (
+        <YStack gap="$4">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <MediaListItemSkeleton key={index} />
+          ))}
+        </YStack>
+      );
+    }
 
-      {friendRequestItems.map((item, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading={false}
-          title={item.username}
-          subtitle={item.name}
-          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          button={{
-            text: "Accept",
-            backgroundColor: "#F214FF",
-            onPress: () => void onAcceptFriendRequest(item.userId),
-          }}
-          button2={{
-            text: "Decline",
-            onPress: () => void onDeclineFriendRequest(item.userId),
-          }}
-          onPress={() => onFriendRequestUserSelected(item)}
-        />
-      ))}
-
-      {friendRequestItems.length > PAGE_SIZE && (
-        <>
-          <Spacer size="$2" />
-          <Button
-            onPress={onShowMoreFriendRequests}
-            disabled={friendRequestsIsFetchingNextPage}
-          >
-            Show more
-          </Button>
-        </>
-      )}
-    </CardContainer>
-  );
-
-  const renderFollowRequests = () => (
-    <CardContainer>
-      <H5 theme="alt1">Follow Requests</H5>
-
-      {followRequestItems.map((item, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading={false}
-          title={item.username}
-          subtitle={item.name}
-          imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-          button={{
-            text: "Accept",
-            backgroundColor: "#F214FF",
-            onPress: () => void onAcceptFollowRequest(item.userId),
-          }}
-          button2={{
-            text: "Decline",
-            onPress: () => void onDeclineFollowRequest(item.userId),
-          }}
-          onPress={() => onFollowRequestUserSelected(item)}
-        />
-      ))}
-
-      {followRequestItems.length > PAGE_SIZE && (
-        <>
-          <Spacer size="$2" />
-          <Button
-            onPress={onShowMoreFollowRequests}
-            disabled={followRequestsIsFetchingNextPage}
-          >
-            Show more
-          </Button>
-        </>
-      )}
-    </CardContainer>
-  );
-
-  if (isLoading) {
     return (
-      <BaseScreenView scrollable>{renderLoadingSkeletons()}</BaseScreenView>
+      <YStack flex={1} justifyContent="center">
+        <EmptyPlaceholder
+          title="No requests"
+          subtitle="You don't have any pending requests."
+        />
+      </YStack>
     );
-  }
+  }, [friendRequestsIsLoading, followRequestsIsLoading]);
+
+  const getItemType = useCallback((item: ListItem) => {
+    return item.type;
+  }, []);
+
+  const keyExtractor = useCallback((item: ListItem) => {
+    switch (item.type) {
+      case "header":
+        return `header-${item.title}`;
+      case "friendRequest":
+      case "followRequest":
+        return `request-${item.data.userId}`;
+    }
+  }, []);
 
   return (
-    <BaseScreenView
-      scrollable
+    <FlashList
+      data={items}
+      renderItem={renderItem}
+      estimatedItemSize={75}
+      getItemType={getItemType}
+      keyExtractor={keyExtractor}
+      ItemSeparatorComponent={Spacer}
+      ListEmptyComponent={ListEmptyComponent}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+        paddingBottom: insets.bottom + getToken("$2", "space"),
+      }}
+      onEndReached={handleOnEndReached}
+      onEndReachedThreshold={0.5}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
-    >
-      <YStack flex={1} gap="$4" paddingBottom={insets.bottom}>
-        {friendRequestItems.length > 0 && renderFriendRequests()}
-        {followRequestItems.length > 0 && renderFollowRequests()}
-      </YStack>
-    </BaseScreenView>
+    />
   );
 };
 
