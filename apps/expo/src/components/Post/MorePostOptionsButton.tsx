@@ -6,7 +6,7 @@ import { useActionSheetController } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import { useReportPost } from "../../hooks/post/useReportPost";
-import { useSaveMedia } from "../../hooks/useSaveMedia";
+import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 
 interface MorePostOptionsButtonProps {
   postId: string;
