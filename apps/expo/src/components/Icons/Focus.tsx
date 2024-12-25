@@ -24,7 +24,7 @@ const SIZE = 80;
 const STROKE_WIDTH = 2;
 const ANIMATION_DURATION = 300;
 
-const FocusIcon = ({ x, y }: FocusIconProps) => {
+const Focus = ({ x, y }: FocusIconProps) => {
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -122,4 +122,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FocusIcon;
+export default Focus;
