@@ -15,7 +15,6 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import BlockUserHeader from "~/components/Headers/BlockHeader";
-import OtherPost from "~/components/NewPostTesting/OtherPost";
 import PostCard from "~/components/NewPostTesting/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
@@ -113,46 +112,6 @@ const OtherProfile = React.memo(() => {
   const renderPost = useCallback(
     ({ item }: { item: Post }) => {
       return (
-        // <OtherPost
-        //   postId={item.postId}
-        //   endpoint="other-profile"
-        //   createdAt={item.createdAt}
-        //   caption={item.caption}
-        //   self={{
-        //     id: profileData?.userId ?? "",
-        //     username: profileData?.username ?? "",
-        //     profilePicture: profileData?.profilePictureUrl,
-        //   }}
-        //   author={{
-        //     id: item.authorId,
-        //     username: item.authorUsername ?? "",
-        //     profilePicture: item.authorProfilePicture,
-        //   }}
-        //   recipient={{
-        //     id: item.recipientId,
-        //     username: item.recipientUsername ?? "",
-        //     profilePicture: item.recipientProfilePicture,
-        //   }}
-        //   media={{
-        //     id: item.postId,
-        //     type: item.mediaType,
-        //     url: item.imageUrl,
-        //     isViewable: viewableItems.includes(item.postId),
-        //     dimensions: {
-        //       width: item.width,
-        //       height: item.height,
-        //     },
-        //     recipient: {
-        //       id: item.recipientId,
-        //       username: item.recipientUsername ?? "",
-        //       profilePicture: item.recipientProfilePicture,
-        //     },
-        //   }}
-        //   stats={{
-        //     likes: item.likesCount,
-        //     comments: item.commentsCount,
-        //   }}
-        // />
         <PostCard
           postId={item.postId}
           createdAt={item.createdAt}
