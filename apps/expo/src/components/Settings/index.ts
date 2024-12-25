@@ -1,3 +1,2 @@
-export { default as SettingsItem, renderSettingsGroup } from "./SettingsItem";
-
-export type { SettingsGroupInput } from "./SettingsItem";
+export { default as SettingsGroup } from "./SettingsItem";
+export type { SettingsItemProps, SettingsGroupProps } from "./SettingsItem";

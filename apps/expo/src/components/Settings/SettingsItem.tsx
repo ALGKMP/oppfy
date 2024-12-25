@@ -12,95 +12,79 @@ import {
 
 type Icon = JSX.Element;
 
-export interface SettingsItemParams {
+interface ItemProps {
   title: string;
-  subtitle?: string | undefined;
-  icon?: Icon | undefined;
-  iconAfter?: Icon | undefined;
-  hoverTheme?: boolean | undefined;
-  pressTheme?: boolean | undefined;
+  subtitle?: string;
+  icon?: Icon;
+  iconAfter?: Icon;
+  hoverTheme?: boolean;
+  pressTheme?: boolean;
   onPress?: () => void;
 }
 
-export const SettingsItem = (item: SettingsItemParams) => {
+interface GroupProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+const Item = ({
+  title,
+  subtitle,
+  icon,
+  iconAfter,
+  hoverTheme = true,
+  pressTheme = true,
+  onPress,
+}: ItemProps) => {
   return (
-    <ListItem
-      size="$4.5"
-      onPress={item.onPress}
-      hoverTheme={item.hoverTheme ?? true}
-      pressTheme={item.pressTheme ?? true}
-    >
-      <XStack flex={1} alignItems="center">
-        <XStack flex={1} alignItems="center" gap="$2">
-          {item.icon &&
-            cloneElement(item.icon, {
-              size: ((item.icon.props as IconProps).size as string) || "$1",
+    <YGroup.Item>
+      <ListItem
+        size="$4.5"
+        onPress={onPress}
+        backgroundColor="$gray2"
+        hoverTheme={hoverTheme}
+        pressTheme={pressTheme}
+      >
+        <XStack flex={1} alignItems="center">
+          <XStack flex={1} alignItems="center" gap="$2">
+            {icon &&
+              cloneElement(icon, {
+                size: ((icon.props as IconProps).size as string) || "$1",
+              })}
+            <YStack>
+              <SizableText size="$5">{title}</SizableText>
+              {subtitle && (
+                <SizableText size="$3" theme="alt1">
+                  {subtitle}
+                </SizableText>
+              )}
+            </YStack>
+          </XStack>
+          {iconAfter &&
+            cloneElement(iconAfter, {
+              size: ((iconAfter.props as IconProps).size as string) || "$1",
             })}
-          <YStack>
-            <SizableText size="$5">{item.title}</SizableText>
-            {item.subtitle && (
-              <SizableText size="$3" theme="alt1">
-                {item.subtitle}
-              </SizableText>
-            )}
-          </YStack>
         </XStack>
-        {item.iconAfter &&
-          cloneElement(item.iconAfter, {
-            size: ((item.iconAfter.props as IconProps).size as string) || "$1",
-          })}
-      </XStack>
-    </ListItem>
+      </ListItem>
+    </YGroup.Item>
   );
 };
 
-export interface SettingsGroupInput {
-  headerTitle: string;
-  items: SettingsItemParams[];
-}
+const SettingsGroup = ({ title, children }: GroupProps) => {
+  return (
+    <YStack gap="$2">
+      <H6 theme="alt1">{title}</H6>
+      <YGroup alignSelf="center" separator={<Separator />}>
+        {children}
+      </YGroup>
+    </YStack>
+  );
+};
 
-export const renderSettingsGroup = (group: SettingsGroupInput) => (
-  <YStack gap="$2" key={group.headerTitle}>
-    <H6 theme="alt1">{group.headerTitle}</H6>
+SettingsGroup.Item = Item;
 
-    <YGroup alignSelf="center" separator={<Separator />}>
-      {group.items.map((item, index) => (
-        <YGroup.Item key={index}>
-          <ListItem
-            size="$4.5"
-            backgroundColor="$gray2"
-            onPress={item.onPress}
-            hoverTheme={item.hoverTheme ?? true}
-            pressTheme={item.pressTheme ?? true}
-          >
-            <XStack flex={1} alignItems="center">
-              <XStack flex={1} alignItems="center" gap="$2">
-                {item.icon &&
-                  cloneElement(item.icon, {
-                    size:
-                      ((item.icon.props as IconProps).size as string) || "$1",
-                  })}
-                <YStack>
-                  <SizableText size="$5">{item.title}</SizableText>
-                  {item.subtitle && (
-                    <SizableText size="$3" theme="alt1">
-                      {item.subtitle}
-                    </SizableText>
-                  )}
-                </YStack>
-              </XStack>
-              {item.iconAfter &&
-                cloneElement(item.iconAfter, {
-                  size:
-                    ((item.iconAfter.props as IconProps).size as string) ||
-                    "$1",
-                })}
-            </XStack>
-          </ListItem>
-        </YGroup.Item>
-      ))}
-    </YGroup>
-  </YStack>
-);
-
-export default SettingsItem;
+export type {
+  ItemProps as SettingsItemProps,
+  GroupProps as SettingsGroupProps,
+};
+export default SettingsGroup;

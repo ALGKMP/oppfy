@@ -9,9 +9,8 @@ import {
 
 import {
   Button,
-  renderSettingsList,
   ScreenView,
-  SettingsListInput,
+  SettingsGroup,
   Spinner,
   Switch,
   YStack,
@@ -88,112 +87,109 @@ const Notifications = () => {
     await updateNotificationSettings.mutateAsync(switchState);
   };
 
-  const settingsGroups = [
-    {
-      headerTitle: "Notifications",
-      items: [
-        {
-          title: "Posts",
-          icon: <StickyNote />,
-          iconAfter: (
-            <Switch
-              size="$3"
-              checked={switchState.posts}
-              onCheckedChange={(value) => updateSwitchState("posts", value)}
-            >
-              <Switch.Thumb animation="quick" />
-            </Switch>
-          ),
-          hoverTheme: false,
-          pressTheme: false,
-        },
-        {
-          title: "Likes",
-          icon: <ThumbsUp />,
-          iconAfter: (
-            <Switch
-              size="$3"
-              checked={switchState.likes}
-              onCheckedChange={(value) => updateSwitchState("likes", value)}
-            >
-              <Switch.Thumb animation="quick" />
-            </Switch>
-          ),
-          hoverTheme: false,
-          pressTheme: false,
-        },
-        {
-          title: "Comments",
-          icon: <MessageCircle />,
-          iconAfter: (
-            <Switch
-              size="$3"
-              checked={switchState.comments}
-              onCheckedChange={(value) => updateSwitchState("comments", value)}
-            >
-              <Switch.Thumb animation="quick" />
-            </Switch>
-          ),
-          hoverTheme: false,
-          pressTheme: false,
-        },
-        {
-          title: "Mentions",
-          icon: <AtSign />,
-          iconAfter: (
-            <Switch
-              size="$3"
-              checked={switchState.mentions}
-              onCheckedChange={(value) => updateSwitchState("mentions", value)}
-            >
-              <Switch.Thumb animation="quick" />
-            </Switch>
-          ),
-          hoverTheme: false,
-          pressTheme: false,
-        },
-        {
-          title: "Follow Requests",
-          icon: <UserRoundPlus />,
-          iconAfter: (
-            <Switch
-              size="$3"
-              checked={switchState.followRequests}
-              onCheckedChange={(value) =>
-                updateSwitchState("followRequests", value)
-              }
-            >
-              <Switch.Thumb animation="quick" />
-            </Switch>
-          ),
-          hoverTheme: false,
-          pressTheme: false,
-        },
-        {
-          title: "Friend Requests",
-          icon: <UserRoundPlus />,
-          iconAfter: (
-            <Switch
-              size="$3"
-              checked={switchState.friendRequests}
-              onCheckedChange={(value) =>
-                updateSwitchState("friendRequests", value)
-              }
-            >
-              <Switch.Thumb animation="quick" />
-            </Switch>
-          ),
-          hoverTheme: false,
-          pressTheme: false,
-        },
-      ],
-    },
-  ] satisfies SettingsListInput[];
-
   return (
     <ScreenView scrollable>
       <YStack gap="$4">
-        {settingsGroups.map(renderSettingsList)}
+        <SettingsGroup title="Notifications">
+          <SettingsGroup.Item
+            title="Posts"
+            icon={<StickyNote />}
+            iconAfter={
+              <Switch
+                size="$3"
+                checked={switchState.posts}
+                onCheckedChange={(value) => updateSwitchState("posts", value)}
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
+            }
+            hoverTheme={false}
+            pressTheme={false}
+          />
+          <SettingsGroup.Item
+            title="Likes"
+            icon={<ThumbsUp />}
+            iconAfter={
+              <Switch
+                size="$3"
+                checked={switchState.likes}
+                onCheckedChange={(value) => updateSwitchState("likes", value)}
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
+            }
+            hoverTheme={false}
+            pressTheme={false}
+          />
+          <SettingsGroup.Item
+            title="Comments"
+            icon={<MessageCircle />}
+            iconAfter={
+              <Switch
+                size="$3"
+                checked={switchState.comments}
+                onCheckedChange={(value) =>
+                  updateSwitchState("comments", value)
+                }
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
+            }
+            hoverTheme={false}
+            pressTheme={false}
+          />
+          <SettingsGroup.Item
+            title="Mentions"
+            icon={<AtSign />}
+            iconAfter={
+              <Switch
+                size="$3"
+                checked={switchState.mentions}
+                onCheckedChange={(value) =>
+                  updateSwitchState("mentions", value)
+                }
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
+            }
+            hoverTheme={false}
+            pressTheme={false}
+          />
+          <SettingsGroup.Item
+            title="Follow Requests"
+            icon={<UserRoundPlus />}
+            iconAfter={
+              <Switch
+                size="$3"
+                checked={switchState.followRequests}
+                onCheckedChange={(value) =>
+                  updateSwitchState("followRequests", value)
+                }
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
+            }
+            hoverTheme={false}
+            pressTheme={false}
+          />
+          <SettingsGroup.Item
+            title="Friend Requests"
+            icon={<UserRoundPlus />}
+            iconAfter={
+              <Switch
+                size="$3"
+                checked={switchState.friendRequests}
+                onCheckedChange={(value) =>
+                  updateSwitchState("friendRequests", value)
+                }
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
+            }
+            hoverTheme={false}
+            pressTheme={false}
+          />
+        </SettingsGroup>
         <Button onPress={onSubmit}>
           {updateNotificationSettings.isPending ? <Spinner /> : "Save"}
         </Button>

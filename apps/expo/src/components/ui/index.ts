@@ -1,3 +1,5 @@
+import { SettingsGroup } from "../Settings";
+import type { SettingsGroupProps, SettingsItemProps } from "../Settings";
 import { Accordion } from "./Accordian";
 import {
   ActionSheet,
@@ -99,8 +101,7 @@ export {
   Avatar,
   Card,
   ListItem,
-  SettingsListItem,
-  renderSettingsList,
+  SettingsGroup,
   Separator,
   Square,
   Circle,
@@ -114,8 +115,4 @@ export {
   MediaListItemSkeleton,
 };
 
-export type {
-  SettingsListInput,
-  SettingsListItemParams,
-  MediaListItemActionProps,
-};
+export type { MediaListItemActionProps, SettingsGroupProps, SettingsItemProps };

@@ -2,9 +2,8 @@ import { useRouter } from "expo-router";
 import { BookLock, ChevronRight, ShieldBan } from "@tamagui/lucide-icons";
 
 import {
-  renderSettingsList,
   ScreenView,
-  SettingsListInput,
+  SettingsGroup,
   Switch,
   useActionSheetController,
   YStack,
@@ -28,30 +27,22 @@ const Privacy = () => {
 
   const updatePrivacySetting = api.user.updatePrivacySetting.useMutation({
     onMutate: async (newPrivacySettings) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.user.getPrivacySetting.cancel();
-
-      // Get the data from the queryCache
       const prevData = utils.user.getPrivacySetting.getData();
       if (prevData === undefined) return;
 
-      // Optimistically update the data
       utils.user.getPrivacySetting.setData(
         undefined,
         newPrivacySettings.privacy,
       );
 
-      // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
     onError: (_err, _newPrivacySettings, ctx) => {
       if (ctx === undefined) return;
-
-      // If the mutation fails, use the context-value from onMutate
       utils.user.getPrivacySetting.setData(undefined, ctx.prevData);
     },
     onSettled: async () => {
-      // Sync with server once mutation has settled
       await utils.user.getPrivacySetting.invalidate();
     },
   });
@@ -86,38 +77,33 @@ const Privacy = () => {
     }
   };
 
-  const settingsGroups = [
-    {
-      headerTitle: "Privacy",
-      items: [
-        {
-          title: "Private Account",
-          icon: <BookLock />,
-          iconAfter: (
-            <Switch
-              size="$3"
-              onCheckedChange={onSubmit}
-              checked={privacySetting === "private"}
-            >
-              <Switch.Thumb animation="quick" />
-            </Switch>
-          ),
-          hoverTheme: false,
-          pressTheme: false,
-        },
-        {
-          title: "Blocked Users",
-          icon: <ShieldBan />,
-          iconAfter: <ChevronRight />,
-          onPress: () => router.push("/blocked"),
-        },
-      ],
-    },
-  ] satisfies SettingsListInput[];
-
   return (
     <ScreenView scrollable>
-      <YStack gap="$4">{settingsGroups.map(renderSettingsList)}</YStack>
+      <YStack gap="$4">
+        <SettingsGroup title="Privacy">
+          <SettingsGroup.Item
+            title="Private Account"
+            icon={<BookLock />}
+            iconAfter={
+              <Switch
+                size="$3"
+                onCheckedChange={onSubmit}
+                checked={privacySetting === "private"}
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
+            }
+            hoverTheme={false}
+            pressTheme={false}
+          />
+          <SettingsGroup.Item
+            title="Blocked Users"
+            icon={<ShieldBan />}
+            iconAfter={<ChevronRight />}
+            onPress={() => router.push("/blocked")}
+          />
+        </SettingsGroup>
+      </YStack>
     </ScreenView>
   );
 };
