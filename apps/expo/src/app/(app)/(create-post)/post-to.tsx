@@ -108,7 +108,7 @@ const PostTo = () => {
     if (visibleContacts.length > 0) {
       result.push({
         type: "header",
-        title: "Share with Anyone",
+        title: "Post for Anyone",
         isContact: true,
       });
       visibleContacts.forEach((contact) => {
@@ -172,7 +172,7 @@ const PostTo = () => {
     if (contacts.length > 0) {
       result.push({
         type: "header",
-        title: "Share with Anyone",
+        title: "Post for Anyone",
         isContact: true,
       });
       result.push(...contacts);
@@ -288,7 +288,7 @@ const PostTo = () => {
               <TouchableOpacity
                 onPress={() => {
                   void infoDialog.show({
-                    title: "Share with Anyone",
+                    title: "Post for Anyone",
                     subtitle:
                       "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
                     acceptText: "Got it",
