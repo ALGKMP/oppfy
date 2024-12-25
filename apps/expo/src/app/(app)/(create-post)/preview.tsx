@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  ActivityIndicator,
-  Animated,
   Dimensions,
   Pressable,
   StyleSheet,
@@ -11,14 +9,19 @@ import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { Download, X } from "@tamagui/lucide-icons";
-import { Button, View, XStack } from "tamagui";
+import { Check, Download, X } from "@tamagui/lucide-icons";
 
 import PlayPause, {
   usePlayPauseAnimations,
 } from "~/components/Icons/PlayPause";
-import { Text } from "~/components/ui";
-import { BaseScreenView } from "~/components/Views";
+import {
+  Button,
+  ScreenView,
+  Spinner,
+  Text,
+  View,
+  XStack,
+} from "~/components/ui";
 import useSaveMedia from "~/hooks/useSaveMedia";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -49,7 +52,7 @@ const PreviewScreen = () => {
   };
 
   return (
-    <BaseScreenView justifyContent="center" alignItems="center">
+    <ScreenView justifyContent="center" alignItems="center">
       <View
         width={SCREEN_WIDTH}
         height={PREVIEW_HEIGHT}
@@ -84,11 +87,7 @@ const PreviewScreen = () => {
       >
         <Button
           flex={1}
-          size="$5"
-          borderWidth="$1"
-          borderColor="white"
-          backgroundColor="$gray1"
-          borderRadius="$10"
+          disabled={saveState === "saving" || saveState === "saved"}
           onPress={() =>
             saveToCameraRoll({
               uri,
@@ -96,33 +95,21 @@ const PreviewScreen = () => {
               mediaType: type === "photo" ? "image" : "video",
             })
           }
-          disabled={saveState === "saving" || saveState === "saved"}
-          disabledStyle={{ opacity: 0.5 }}
         >
-          {saveState === "saving" ? (
-            <ActivityIndicator size="small" color="#ffffff" />
-          ) : saveState === "saved" ? (
-            "Saved"
+          {saveState === "saved" ? (
+            <Check />
+          ) : saveState === "saving" ? (
+            <Spinner />
           ) : (
-            <Download size="$2" />
+            <Download />
           )}
         </Button>
 
-        <Button
-          flex={4}
-          size="$5"
-          borderRadius="$10"
-          borderWidth="$1"
-          borderColor="white"
-          backgroundColor="$gray1"
-          onPress={onContinue}
-        >
-          <Text fontSize="$9" fontWeight="bold">
-            CONTINUE
-          </Text>
+        <Button flex={5} variant="primary" onPress={onContinue}>
+          Continue
         </Button>
       </XStack>
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
