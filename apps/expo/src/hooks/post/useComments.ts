@@ -1,8 +1,8 @@
 import { useRouter } from "expo-router";
 import { useToastController } from "@tamagui/toast";
 
+import { useOptimisticUpdatePost } from "~/hooks/post/useOptimisticUpdatePost";
 import { api } from "~/utils/api";
-import { useOptimisticUpdatePost } from "../components/Post/hooks/useOptimicUpdatePost";
 
 interface UseCommentsProps {
   postId: string;

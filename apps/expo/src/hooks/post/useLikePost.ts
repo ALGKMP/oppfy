@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
 
 import { api } from "~/utils/api";
-import { useOptimisticUpdatePost } from "./useOptimicUpdatePost";
-import type { Endpoint } from "./useOptimicUpdatePost";
+import { useOptimisticUpdatePost } from "./useOptimisticUpdatePost";
+import type { Endpoint } from "./useOptimisticUpdatePost";
 import { useThrottleWithIncreaseDelay } from "./useThrottleWithIncreaseDelay";
 
 interface LikePostProps {
