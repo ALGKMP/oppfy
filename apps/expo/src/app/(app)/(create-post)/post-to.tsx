@@ -8,19 +8,24 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Info, UserRoundX } from "@tamagui/lucide-icons";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
-import { getToken, H5, H6, XStack, YStack } from "tamagui";
+import { getToken } from "tamagui";
 
-import { SearchInput } from "~/components/Inputs";
 import {
+  H5,
+  H6,
   MediaListItem,
   MediaListItemSkeleton,
+  SearchInput,
   Spacer,
   useDialogController,
+  XStack,
+  YStack,
 } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
+import { storage } from "~/utils/storage";
 
 const INITIAL_PAGE_SIZE = 5;
 const ADDITIONAL_PAGE_SIZE = 10;
@@ -36,6 +41,8 @@ type ListItem =
   | { type: "header"; title: string; isContact?: boolean }
   | { type: "friend"; data: Friend }
   | { type: "contact"; data: Contact };
+
+const HAS_SEEN_SHARE_TIP_KEY = "has_seen_share_tip";
 
 const PostTo = () => {
   const insets = useSafeAreaInsets();
@@ -197,6 +204,26 @@ const PostTo = () => {
     void loadContacts();
   }, []);
 
+  useEffect(() => {
+    if (__DEV__) storage.set(HAS_SEEN_SHARE_TIP_KEY, false);
+    const hasSeenTip = storage.getBoolean(HAS_SEEN_SHARE_TIP_KEY);
+
+    if (!hasSeenTip) {
+      // Show the fun popup after a short delay to let the screen mount smoothly
+      const timer = setTimeout(() => {
+        void infoDialog.show({
+          title: "Pro Tip: Friendly Peer Pressure 😈",
+          subtitle:
+            "Your friends aren't on Oppfy yet? Even better! Post something for them anyway - they'll get a text invite to join and see your post when they do. Watch how fast they download the app! 🎯",
+          acceptText: "Love it",
+        });
+        storage.set(HAS_SEEN_SHARE_TIP_KEY, true);
+      }, 750);
+
+      return () => clearTimeout(timer);
+    }
+  }, [infoDialog]);
+
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.all([loadContacts(), refetch()]);
@@ -248,7 +275,7 @@ const PostTo = () => {
     ({ item }: { item: ListItem }) => {
       if (item.type === "header") {
         return (
-          <XStack alignItems="center" gap="$2" >
+          <XStack alignItems="center" gap="$2">
             <H5 theme="alt1">{item.title}</H5>
             {item.isContact && (
               <TouchableOpacity
@@ -280,9 +307,10 @@ const PostTo = () => {
             }
             primaryAction={{
               label: "Select",
-              icon: ChevronRight,
+              iconAfter: ChevronRight,
               onPress: () => onFriendSelected(item.data.userId),
             }}
+            onPress={() => onFriendSelected(item.data.userId)}
           />
         );
       }
