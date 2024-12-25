@@ -6,12 +6,13 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { PortalProvider, TamaguiProvider } from "tamagui";
-import { BottomSheetProvider } from "~/components/ui/NewBottomSheet";
+
 import {
   ActionSheetProvider,
   AlertDialogProvider,
   DialogProvider,
 } from "~/components/ui";
+import { BottomSheetProvider } from "~/components/ui/BottomSheet";
 import { AudioProvider } from "~/contexts/AudioContext";
 import { PermissionsProvider } from "~/contexts/PermissionsContext";
 import { SessionProvider } from "~/contexts/SessionContext";

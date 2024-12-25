@@ -5,7 +5,7 @@ import { AlertDialog } from "../Dialogs";
 import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import { useAlertDialogController } from "../ui";
-import { useBottomSheetController } from "../ui/NewBottomSheet";
+import { useBottomSheetController } from "../ui/BottomSheet";
 import { useComments } from "./hooks/useComments";
 import { useDeletePost } from "./hooks/useDeletePost";
 import { useLikePost } from "./hooks/useLikePost";

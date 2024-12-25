@@ -10,6 +10,12 @@ import {
   useAlertDialogController,
 } from "./AlertDialog";
 import { Avatar } from "./Avatar";
+import {
+  BottomSheet,
+  BottomSheetProvider,
+  useBottomSheetController,
+} from "./BottomSheet";
+import type { BottomSheetProps } from "./BottomSheet";
 import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
 import { CardContainer } from "./CardContainer";
@@ -26,12 +32,6 @@ import {
   MediaListItemActionProps,
   MediaListItemSkeleton,
 } from "./MediaListItem";
-import {
-  BottomSheet,
-  BottomSheetProvider,
-  useBottomSheetController,
-} from "./NewBottomSheet";
-import type { BottomSheetProps } from "./NewBottomSheet";
 import { Popover } from "./Popover";
 import { Progress } from "./Progress";
 import { RadioGroup } from "./RadioGroup";
