@@ -74,7 +74,7 @@ const SettingsGroup = ({ title, children }: GroupProps) => {
   return (
     <YStack gap="$2">
       <H6 theme="alt1">{title}</H6>
-      <YGroup alignSelf="center" separator={<Separator />}>
+      <YGroup alignSelf="center" separator={<Separator />} borderRadius="$4">
         {children}
       </YGroup>
     </YStack>

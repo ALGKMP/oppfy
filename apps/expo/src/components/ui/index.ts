@@ -10,12 +10,14 @@ import {
   useAlertDialogController,
 } from "./AlertDialog";
 import { Avatar } from "./Avatar";
-import {
-  BottomSheet,
-  BottomSheetProvider,
-  useBottomSheetController,
-} from "./BottomSheet";
-import type { BottomSheetProps } from "./BottomSheet";
+// import {
+//   BottomSheet,
+//   BottomSheetProvider,
+//   useBottomSheetController,
+// } from "./BottomSheet";
+// import type { BottomSheetProps } from "./BottomSheet";
+import { BottomSheet, BottomSheetProps } from "./BottomSheet/BottomSheet";
+import { useBottomSheetController,BottomSheetProvider } from "./BottomSheet/BottomSheetContext";
 import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
 import { CardContainer } from "./CardContainer";

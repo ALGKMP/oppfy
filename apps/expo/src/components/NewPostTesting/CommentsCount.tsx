@@ -1,7 +1,7 @@
 import { TouchableOpacity } from "react-native";
 
 import { SizableText } from "~/components/ui/";
-import { useBottomSheetController } from "~/components/ui/BottomSheet";
+import { useBottomSheetController } from "~/components/ui";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 
 interface CommentsCountProps {
