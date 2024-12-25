@@ -14,7 +14,6 @@ const useSaveMedia = () => {
 
   const addWatermark = async (imageUri: string) => {
     try {
-      console.log("imageUri", imageUri);
       const result = await Marker.markImage({
         backgroundImage: {
           src: imageUri,
