@@ -1,5 +1,3 @@
-import { SettingsGroup } from "../Settings";
-import type { SettingsGroupProps, SettingsItemProps } from "../Settings";
 import { Accordion } from "./Accordian";
 import {
   ActionSheet,
@@ -33,6 +31,8 @@ import { Progress } from "./Progress";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Separator } from "./Separator";
+import SettingsGroup from "./Settings";
+import type { SettingsGroupProps, SettingsItemProps } from "./Settings";
 import { renderSettingsList, SettingsListItem } from "./SettingsListItem";
 import type {
   SettingsListInput,
