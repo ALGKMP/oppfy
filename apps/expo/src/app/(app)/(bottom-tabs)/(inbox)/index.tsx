@@ -44,13 +44,6 @@ const Inbox = () => {
       refetchOnWindowFocus: true,
     });
 
-  const totalRequestCount = useMemo(
-    () =>
-      (requestsCount?.followRequestCount ?? 0) +
-      (requestsCount?.friendRequestCount ?? 0),
-    [requestsCount],
-  );
-
   const {
     data: notificationsData,
     isLoading: isNotificationsLoading,
@@ -231,24 +224,36 @@ const Inbox = () => {
       (requestsCount?.friendRequestCount ?? 0);
 
     if (pendingRequests > 0) {
-      return renderFollowRequests();
-      // <YStack gap="$4">
-      //   {/* <YStack
-      //     backgroundColor="$background"
-      //     padding="$4"
-      //     borderRadius="$4"
-      //     pressStyle={{ opacity: 0.7 }}
-      //     onPress={() => router.navigate("/requests")}
-      //   > */}
-      //   {/* <H5>Follow and Friend Requests</H5> */}
-      //   <CardContainer>
-      //     <H5>Follow and Friend Requests</H5>
-      //     <Paragraph theme="alt1">
-      //       {pendingRequests} pending requests
-      //     </Paragraph>
-      //   </CardContainer>
-      //   {/* </YStack> */}
-      // </YStack>
+      <TouchableOpacity onPress={() => router.navigate("/requests")}>
+        <CardContainer
+          padding="$4"
+          orientation="horizontal"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <YStack>
+            <SizableText size="$6" fontWeight="bold">
+              Follow and Friend Requests
+            </SizableText>
+            <Paragraph theme="alt1">Approve or ignore these requests</Paragraph>
+          </YStack>
+
+          <Circle size="$2.5" backgroundColor="$red9">
+            {pendingRequests > 99 ? (
+              <XStack>
+                <SizableText size="$4" color="white" fontWeight="bold">
+                  99
+                </SizableText>
+                <SizableText size="$2">+</SizableText>
+              </XStack>
+            ) : (
+              <SizableText size="$4" color="white" fontWeight="bold">
+                {pendingRequests}
+              </SizableText>
+            )}
+          </Circle>
+        </CardContainer>
+      </TouchableOpacity>;
     }
     return null;
   }, [requestsCount, router]);
