@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Pressable,
@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -20,23 +21,23 @@ import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowBigRight, ChevronRight, Minus } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Button,
-  H5,
-  ScrollView,
-  SizableText,
-  Text,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { useTheme } from "tamagui";
 import { z } from "zod";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import PlayPause, {
   usePlayPauseAnimations,
 } from "~/components/Icons/PlayPause";
+import {
+  Button,
+  H5,
+  ScrollView,
+  SizableText,
+  Text,
+  View,
+  XStack,
+  YStack,
+} from "~/components/ui";
 import { BaseScreenView } from "~/components/Views";
 import { useUploadMedia } from "~/hooks/media";
 import {
@@ -71,15 +72,58 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ASPECT_RATIO = 16 / 9;
 
+const SEND_BUTTON_MESSAGES = [
+  (name: string) => `EXPOSE ${name.toUpperCase()} 📸`,
+  (name: string) => `GET ${name.toUpperCase()} IN HERE 😈`,
+  (name: string) => `${name.toUpperCase()} CAN'T HIDE 👀`,
+  (name: string) => `${name.toUpperCase()} NEEDS THIS 🫣`,
+  (name: string) => `PEER PRESSURE ${name.toUpperCase()} 🎯`,
+  (name: string) => `${name.toUpperCase()} IS MISSING OUT 💅`,
+  (name: string) => `GOTCHA ${name.toUpperCase()} 😏`,
+  (name: string) => `SHOW ${name.toUpperCase()} WHAT'S UP 🌟`,
+  (name: string) => `${name.toUpperCase()} SHOULD SEE THIS 👋`,
+  (name: string) => `TIME TO TAG ${name.toUpperCase()} 🎯`,
+  (name: string) => `BRING ${name.toUpperCase()} TO THE PARTY 🎈`,
+  (name: string) => `${name.toUpperCase()} WON'T BELIEVE THIS 🤯`,
+  (name: string) => `SUMMON ${name.toUpperCase()} 🔮`,
+  (name: string) => `${name.toUpperCase()} GOTTA SEE THIS 👀`,
+  (name: string) => `CALLING ${name.toUpperCase()} OUT 📢`,
+  (name: string) => `${name.toUpperCase()} WHERE YOU AT? 🗺️`,
+];
+
 const CreatePost = () => {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { promptForReview } = useStoreReview();
 
-  const { type, uri, height, width, ...params } = useLocalSearchParams<
+  const {
+    type,
+    uri,
+    height,
+    width,
+    recipientName,
+    recipientUsername,
+    recipientImage,
+    ...params
+  } = useLocalSearchParams<
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
+
+  const displayName = useMemo(() => {
+    if (params.userType === "onApp") {
+      return recipientUsername ?? recipientName ?? "THEM";
+    }
+    return recipientName?.split(" ")[0] ?? "THEM";
+  }, [params.userType, recipientName, recipientUsername]);
+
+  const [buttonMessage] = useState(() => {
+    const messageTemplate =
+      SEND_BUTTON_MESSAGES[
+        Math.floor(Math.random() * SEND_BUTTON_MESSAGES.length)
+      ]!;
+    return messageTemplate(displayName);
+  });
 
   const inputRef = useRef<TextInput>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -215,6 +259,17 @@ const CreatePost = () => {
                   height={previewHeight}
                 />
               )}
+
+              <XStack gap="$2" alignItems="center">
+                <Image
+                  source={recipientImage ?? DefaultProfilePicture}
+                  style={{ width: 24, height: 24, borderRadius: 12 }}
+                />
+                <Text color="$gray11">
+                  Posting to {params.userType === "onApp" ? "@" : ""}
+                  {displayName}
+                </Text>
+              </XStack>
             </YStack>
 
             <CardContainer padding="$4" paddingBottom="$5">
@@ -245,19 +300,13 @@ const CreatePost = () => {
         </ScrollView>
 
         <Button
-          size="$5"
-          borderRadius="$10"
-          borderWidth="$1"
-          borderColor="white"
-          backgroundColor="$gray1"
+          variant="primary"
+          iconAfter={ChevronRight}
           onPress={onSubmit}
+          pressStyle={{ scale: 0.97 }}
+          animation="bouncy"
         >
-          <XStack justifyContent="center" alignItems="center">
-            <Text fontSize="$9" paddingRight="$0" fontWeight="bold">
-              OPP YOUR FRIEND
-            </Text>
-            <ArrowBigRight size="$4" color="white" fill="white" />
-          </XStack>
+          {buttonMessage}
         </Button>
       </BaseScreenView>
 

@@ -9,7 +9,7 @@ import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { Check, Download, X } from "@tamagui/lucide-icons";
+import { Check, ChevronRight, Download, X } from "@tamagui/lucide-icons";
 
 import PlayPause, {
   usePlayPauseAnimations,
@@ -105,7 +105,12 @@ const PreviewScreen = () => {
           )}
         </Button>
 
-        <Button flex={5} variant="primary" onPress={onContinue}>
+        <Button
+          flex={5}
+          variant="primary"
+          iconAfter={ChevronRight}
+          onPress={onContinue}
+        >
           Continue
         </Button>
       </XStack>

@@ -238,7 +238,7 @@ const PostTo = () => {
   }, [isFetchingNextPage, hasNextPage, fetchNextPage, loadMoreContacts]);
 
   const onContactSelected = useCallback(
-    (recipientPhoneNumber: string) => {
+    (contact: Contact) => {
       router.navigate({
         pathname: "/create-post",
         params: {
@@ -246,8 +246,12 @@ const PostTo = () => {
           type,
           width,
           height,
-          number: recipientPhoneNumber,
+          number: contact.phoneNumbers?.[0]?.number ?? "",
           userType: "notOnApp",
+          recipientName: contact.name ?? "",
+          recipientImage: contact.imageAvailable
+            ? contact.image?.uri
+            : undefined,
         },
       });
     },
@@ -255,7 +259,7 @@ const PostTo = () => {
   );
 
   const onFriendSelected = useCallback(
-    (recipientId: string) => {
+    (friend: Friend) => {
       router.navigate({
         pathname: "/create-post",
         params: {
@@ -263,8 +267,11 @@ const PostTo = () => {
           type,
           width,
           height,
-          recipient: recipientId,
+          recipient: friend.userId,
           userType: "onApp",
+          recipientName: friend.name,
+          recipientUsername: friend.username,
+          recipientImage: friend.profilePictureUrl ?? undefined,
         },
       });
     },
@@ -308,9 +315,9 @@ const PostTo = () => {
             primaryAction={{
               label: "Select",
               iconAfter: ChevronRight,
-              onPress: () => onFriendSelected(item.data.userId),
+              onPress: () => onFriendSelected(item.data),
             }}
-            onPress={() => onFriendSelected(item.data.userId)}
+            onPress={() => onFriendSelected(item.data)}
           />
         );
       }
@@ -327,8 +334,7 @@ const PostTo = () => {
           primaryAction={{
             label: "Select",
             icon: ChevronRight,
-            onPress: () =>
-              onContactSelected(item.data.phoneNumbers?.[0]?.number ?? ""),
+            onPress: () => onContactSelected(item.data),
           }}
         />
       );
