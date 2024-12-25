@@ -6,7 +6,6 @@ interface PostDateProps {
 }
 
 const PostDate = ({ createdAt }: PostDateProps) => {
-
   const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
     if (value === 0 && unit === "second") return "Just now";
     const pluralS = value !== 1 ? "s" : "";
