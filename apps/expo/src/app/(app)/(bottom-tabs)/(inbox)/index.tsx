@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { RefreshControl } from "react-native";
+import { RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -8,11 +8,15 @@ import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
 import {
+  CardContainer,
+  Circle,
   H5,
   MediaListItem,
   MediaListItemActionProps,
   MediaListItemSkeleton,
   Paragraph,
+  SizableText,
+  XStack,
   YStack,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
@@ -180,28 +184,76 @@ const Inbox = () => {
     [routeProfile, followUser],
   );
 
+  const renderFollowRequests = () =>
+    totalRequestCount > 0 && (
+      <TouchableOpacity onPress={() => router.navigate("/requests")}>
+        <CardContainer
+          padding="$4"
+          orientation="horizontal"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <YStack>
+            <SizableText size="$6" fontWeight="bold">
+              Follow and Friend Requests
+            </SizableText>
+            <Paragraph theme="alt1">Approve or ignore these requests</Paragraph>
+          </YStack>
+
+          <Circle size="$2.5" backgroundColor="$red9">
+            {totalRequestCount > 99 ? (
+              <XStack>
+                <SizableText size="$4" color="white" fontWeight="bold">
+                  99
+                </SizableText>
+                <SizableText size="$2">+</SizableText>
+              </XStack>
+            ) : (
+              <SizableText size="$4" color="white" fontWeight="bold">
+                {totalRequestCount}
+              </SizableText>
+            )}
+          </Circle>
+        </CardContainer>
+      </TouchableOpacity>
+    );
+
   const ListHeaderComponent = useMemo(() => {
     const pendingRequests =
       (requestsCount?.followRequestCount ?? 0) +
       (requestsCount?.friendRequestCount ?? 0);
 
     if (pendingRequests > 0) {
-      return (
-        <YStack gap="$4">
-          <YStack
-            backgroundColor="$background"
-            padding="$4"
-            borderRadius="$4"
-            pressStyle={{ opacity: 0.7 }}
-            onPress={() => router.navigate("/requests")}
-          >
-            <H5>Follow and Friend Requests</H5>
-            <Paragraph theme="alt1">
-              {pendingRequests} pending requests
-            </Paragraph>
+      <TouchableOpacity onPress={() => router.navigate("/requests")}>
+        <CardContainer
+          padding="$4"
+          orientation="horizontal"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <YStack>
+            <SizableText size="$6" fontWeight="bold">
+              Follow and Friend Requests
+            </SizableText>
+            <Paragraph theme="alt1">Approve or ignore these requests</Paragraph>
           </YStack>
-        </YStack>
-      );
+
+          <Circle size="$2.5" backgroundColor="$red9">
+            {pendingRequests > 99 ? (
+              <XStack>
+                <SizableText size="$4" color="white" fontWeight="bold">
+                  99
+                </SizableText>
+                <SizableText size="$2">+</SizableText>
+              </XStack>
+            ) : (
+              <SizableText size="$4" color="white" fontWeight="bold">
+                {pendingRequests}
+              </SizableText>
+            )}
+          </Circle>
+        </CardContainer>
+      </TouchableOpacity>;
     }
     return null;
   }, [requestsCount, router]);
@@ -241,6 +293,9 @@ const Inbox = () => {
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={GridSuggestions}
       ItemSeparatorComponent={Spacer}
+      ListHeaderComponentStyle={{
+        paddingBottom: getToken("$4", "space"),
+      }}
       ListFooterComponentStyle={{
         marginTop: getToken("$2", "space"),
       }}
