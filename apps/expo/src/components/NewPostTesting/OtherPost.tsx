@@ -6,8 +6,8 @@ import type { ButtonOption } from "../Sheets";
 import { ActionSheet } from "../Sheets";
 import { useComments } from "./hooks/useComments";
 import { useLikePost } from "./hooks/useLikePost";
-import { usePostActions } from "./hooks/usePostActions";
 import { useReportPost } from "./hooks/useReportPost";
+import { usePostActions } from "./hooks/useSavePost";
 import PostCard from "./ui/PostCard";
 import type { PostData } from "./ui/PostCard";
 
