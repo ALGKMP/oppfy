@@ -184,77 +184,48 @@ const Inbox = () => {
     [routeProfile, followUser],
   );
 
-  const renderFollowRequests = () =>
-    totalRequestCount > 0 && (
-      <TouchableOpacity onPress={() => router.navigate("/requests")}>
-        <CardContainer
-          padding="$4"
-          orientation="horizontal"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <YStack>
-            <SizableText size="$6" fontWeight="bold">
-              Follow and Friend Requests
-            </SizableText>
-            <Paragraph theme="alt1">Approve or ignore these requests</Paragraph>
-          </YStack>
-
-          <Circle size="$2.5" backgroundColor="$red9">
-            {totalRequestCount > 99 ? (
-              <XStack>
-                <SizableText size="$4" color="white" fontWeight="bold">
-                  99
-                </SizableText>
-                <SizableText size="$2">+</SizableText>
-              </XStack>
-            ) : (
-              <SizableText size="$4" color="white" fontWeight="bold">
-                {totalRequestCount}
-              </SizableText>
-            )}
-          </Circle>
-        </CardContainer>
-      </TouchableOpacity>
-    );
-
   const ListHeaderComponent = useMemo(() => {
     const pendingRequests =
       (requestsCount?.followRequestCount ?? 0) +
       (requestsCount?.friendRequestCount ?? 0);
 
     if (pendingRequests > 0) {
-      <TouchableOpacity onPress={() => router.navigate("/requests")}>
-        <CardContainer
-          padding="$4"
-          orientation="horizontal"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <YStack>
-            <SizableText size="$6" fontWeight="bold">
-              Follow and Friend Requests
-            </SizableText>
-            <Paragraph theme="alt1">Approve or ignore these requests</Paragraph>
-          </YStack>
-
-          <Circle size="$2.5" backgroundColor="$red9">
-            {pendingRequests > 99 ? (
-              <XStack>
-                <SizableText size="$4" color="white" fontWeight="bold">
-                  99
-                </SizableText>
-                <SizableText size="$2">+</SizableText>
-              </XStack>
-            ) : (
-              <SizableText size="$4" color="white" fontWeight="bold">
-                {pendingRequests}
+      return (
+        <TouchableOpacity onPress={() => router.navigate("/requests")}>
+          <CardContainer
+            padding="$4"
+            orientation="horizontal"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <YStack>
+              <SizableText size="$6" fontWeight="bold">
+                Follow and Friend Requests
               </SizableText>
-            )}
-          </Circle>
-        </CardContainer>
-      </TouchableOpacity>;
+              <Paragraph theme="alt1">
+                Approve or ignore these requests
+              </Paragraph>
+            </YStack>
+
+            <Circle size="$2.5" backgroundColor="$red9">
+              {pendingRequests > 99 ? (
+                <XStack>
+                  <SizableText size="$4" color="white" fontWeight="bold">
+                    99
+                  </SizableText>
+                  <SizableText size="$2">+</SizableText>
+                </XStack>
+              ) : (
+                <SizableText size="$4" color="white" fontWeight="bold">
+                  {pendingRequests}
+                </SizableText>
+              )}
+            </Circle>
+          </CardContainer>
+        </TouchableOpacity>
+      );
     }
+
     return null;
   }, [requestsCount, router]);
 
