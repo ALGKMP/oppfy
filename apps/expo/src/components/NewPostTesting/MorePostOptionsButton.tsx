@@ -38,7 +38,7 @@ const MorePostOptionsButton = ({
             {
               text: "Report Post",
               onPress: () => {
-                hide();
+                // hide();
                 setTimeout(() => {
                   show({
                     title: "Report Post",
@@ -79,7 +79,7 @@ const MorePostOptionsButton = ({
                     },
                   ],
                   });
-                }, 400);
+                }, 4000);
               },
             },
           ],
