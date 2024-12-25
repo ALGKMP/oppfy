@@ -18,6 +18,7 @@ import { sharedValidators } from "@oppfy/validators";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import {
+  BottomSheet,
   Button,
   H3,
   ScreenView,
@@ -28,7 +29,6 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { BottomSheet } from "~/components/ui/BottomSheet";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 

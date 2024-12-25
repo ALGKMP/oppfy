@@ -26,6 +26,12 @@ import {
   MediaListItemActionProps,
   MediaListItemSkeleton,
 } from "./MediaListItem";
+import {
+  BottomSheet,
+  BottomSheetProvider,
+  useBottomSheetController,
+} from "./NewBottomSheet";
+import type { BottomSheetProps } from "./NewBottomSheet";
 import { Popover } from "./Popover";
 import { Progress } from "./Progress";
 import { RadioGroup } from "./RadioGroup";
@@ -33,11 +39,6 @@ import { Select } from "./Select";
 import { Separator } from "./Separator";
 import SettingsGroup from "./Settings";
 import type { SettingsGroupProps, SettingsItemProps } from "./Settings";
-import { renderSettingsList, SettingsListItem } from "./SettingsListItem";
-import type {
-  SettingsListInput,
-  SettingsListItemParams,
-} from "./SettingsListItem";
 import { Circle, Square } from "./Shapes";
 import { Sheet } from "./Sheet";
 import { Skeleton } from "./Skeleton";
@@ -91,6 +92,9 @@ export {
   ActionSheet,
   ActionSheetProvider,
   useActionSheetController,
+  BottomSheet,
+  BottomSheetProvider,
+  useBottomSheetController,
   Popover,
   Sheet,
   Tooltip,
@@ -115,4 +119,9 @@ export {
   MediaListItemSkeleton,
 };
 
-export type { MediaListItemActionProps, SettingsGroupProps, SettingsItemProps };
+export type {
+  MediaListItemActionProps,
+  SettingsGroupProps,
+  SettingsItemProps,
+  BottomSheetProps,
+};

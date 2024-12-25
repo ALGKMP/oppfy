@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Pressable,
@@ -28,14 +28,12 @@ import {
   Button,
   H5,
   ScreenView,
-  ScrollView,
-  SizableText,
   Text,
+  useBottomSheetController,
   View,
   XStack,
   YStack,
 } from "~/components/ui";
-import { useBottomSheetController } from "~/components/ui/NewBottomSheet";
 import { useUploadMedia } from "~/hooks/media";
 import {
   UploadMediaInputNotOnApp,
