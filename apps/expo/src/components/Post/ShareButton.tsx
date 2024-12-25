@@ -13,7 +13,7 @@ const ShareButton = ({ postId }: ShareButtonProps) => {
     <TouchableOpacity
       onPress={async () => {
         await share({
-          url: `https://opp.oppfy.app/post/${postId}`,
+          url: `https://oppfy.app/post/${postId}`,
           title: "Share post",
         });
       }}
