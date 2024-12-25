@@ -176,6 +176,11 @@ const OtherProfile = React.memo(() => {
   );
 
   const renderNoPosts = useCallback(() => {
+    if (isLoading) return (
+        <YStack gap="$4">
+          <PostCard.loading />
+        </YStack>
+    )
     if (networkRelationships?.blocked) {
       return (
         <View paddingTop="$6">
@@ -210,28 +215,6 @@ const OtherProfile = React.memo(() => {
     );
   }, [networkRelationships?.blocked, networkRelationships?.privacy]);
 
-  const listFooterComponent = useCallback(() => {
-    if (isLoading) {
-      return (
-        <YStack gap="$4">
-          <PostCard.loading />
-          <PostCard.loading />
-        </YStack>
-      );
-    }
-    return null;
-  }, [isLoading]);
-
-  if (isLoading) {
-    return (
-      <BaseScreenView padding={0} paddingBottom={0}>
-        <YStack gap="$4">
-          <PostCard.loading />
-        </YStack>
-      </BaseScreenView>
-    );
-  }
-
   return (
     <>
       <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
@@ -241,7 +224,6 @@ const OtherProfile = React.memo(() => {
           renderItem={renderPost}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderNoPosts}
-          ListFooterComponent={listFooterComponent}
           keyExtractor={(item) => `other-profile-post-${item.postId}`}
           estimatedItemSize={300}
           showsVerticalScrollIndicator={false}
