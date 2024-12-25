@@ -1,41 +1,47 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { RefreshControl } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { RefreshControl, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronRight, UserRoundX } from "@tamagui/lucide-icons";
-import { parsePhoneNumber } from "libphonenumber-js";
-import {
-  Button,
-  getToken,
-  H5,
-  Separator,
-  Spacer,
-  useTheme,
-  View,
-  YStack,
-} from "tamagui";
+import { ChevronRight, Info, UserRoundX } from "@tamagui/lucide-icons";
+import { parsePhoneNumberWithError } from "libphonenumber-js";
+import { getToken, H5, H6, XStack, YStack } from "tamagui";
 
-import CardContainer from "~/components/Containers/CardContainer";
-import { VirtualizedListItem } from "~/components/ListItems";
+import { SearchInput } from "~/components/Inputs";
+import {
+  MediaListItem,
+  MediaListItemSkeleton,
+  Spacer,
+  useDialogController,
+} from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
 import { useContacts } from "~/hooks/contacts";
+import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 
 const INITIAL_PAGE_SIZE = 5;
 const ADDITIONAL_PAGE_SIZE = 10;
 
-const PostTo = () => {
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
+type Friend = {
+  userId: string;
+  username: string;
+  name: string;
+  profilePictureUrl: string | null;
+};
 
+type ListItem =
+  | { type: "header"; title: string; isContact?: boolean }
+  | { type: "friend"; data: Friend }
+  | { type: "contact"; data: Contact };
+
+const PostTo = () => {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const headerHeight = useHeaderHeight();
+  const infoDialog = useDialogController();
 
   const { type, uri, height, width } = useLocalSearchParams<{
     uri: string;
@@ -44,41 +50,12 @@ const PostTo = () => {
     width: string;
   }>();
 
-  const _filterContactsOnApp =
-    api.contacts.filterOutPhoneNumbersOnApp.useMutation();
-
+  const [refreshing, setRefreshing] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [visibleContacts, setVisibleContacts] = useState<Contact[]>([]);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [contactsPage, setContactsPage] = useState(0);
   const { getDeviceContactsNotOnApp } = useContacts();
-
-  const formatPhoneNumber = (phoneNumber: string | undefined) => {
-    if (phoneNumber === undefined) return;
-
-    try {
-      const parsedNumber = parsePhoneNumber(phoneNumber);
-
-      return parsedNumber.isValid()
-        ? parsedNumber.formatNational()
-        : phoneNumber;
-    } catch (error) {
-      return phoneNumber;
-    }
-  };
-
-  useEffect(() => {
-    const loadContacts = async () => {
-      const contactsNotOnApp = await getDeviceContactsNotOnApp();
-      setContacts(contactsNotOnApp);
-      setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
-      setIsLoadingContacts(false);
-    };
-
-    void loadContacts();
-    // eslint-disable-next-line react-compiler/react-compiler
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const {
     data: friendsData,
@@ -88,62 +65,125 @@ const PostTo = () => {
     hasNextPage,
     refetch,
   } = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    {
-      pageSize: 20,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
+    { pageSize: 20 },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const friendItems = useMemo(
+  const formatPhoneNumber = useCallback((phoneNumber: string | undefined) => {
+    if (phoneNumber === undefined) return;
+    try {
+      const parsedNumber = parsePhoneNumberWithError(phoneNumber);
+      return parsedNumber.isValid()
+        ? parsedNumber.formatNational()
+        : phoneNumber;
+    } catch (error) {
+      return phoneNumber;
+    }
+  }, []);
+
+  const friendsList = useMemo(
     () => friendsData?.pages.flatMap((page) => page.items) ?? [],
     [friendsData],
   );
-  const itemCount = useMemo(
-    () =>
-      friendsData?.pages.reduce(
-        (total, page) => total + page.items.length,
-        0,
-      ) ?? 0,
-    [friendsData],
+
+  const items = useMemo(() => {
+    const result: ListItem[] = [];
+
+    // Add friends section if there are friends
+    if (friendsList.length > 0) {
+      result.push({ type: "header", title: "Friends" });
+      friendsList.forEach((friend) => {
+        result.push({ type: "friend", data: friend });
+      });
+    }
+
+    // Add contacts section if there are contacts
+    if (visibleContacts.length > 0) {
+      result.push({
+        type: "header",
+        title: "Share with Anyone",
+        isContact: true,
+      });
+      visibleContacts.forEach((contact) => {
+        result.push({ type: "contact", data: contact });
+      });
+    }
+
+    return result;
+  }, [friendsList, visibleContacts]);
+
+  const searchableItems = items.filter(
+    (item): item is Extract<ListItem, { type: "friend" | "contact" }> =>
+      item.type === "friend" || item.type === "contact",
   );
 
-  const handleOnEndReached = async () => {
-    if (!isFetchingNextPage && hasNextPage) {
-      await fetchNextPage();
+  const filterItems = useCallback(
+    (query: string) => {
+      return searchableItems.filter((item) => {
+        const searchTerm = query.toLowerCase();
+        if (item.type === "friend") {
+          return (
+            item.data.username.toLowerCase().includes(searchTerm) ||
+            item.data.name.toLowerCase().includes(searchTerm)
+          );
+        } else if (item.type === "contact") {
+          return (
+            item.data.name?.toLowerCase().includes(searchTerm) ||
+            item.data.phoneNumbers?.[0]?.number
+              ?.toLowerCase()
+              .includes(searchTerm)
+          );
+        }
+        return false;
+      });
+    },
+    [searchableItems],
+  );
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredItems = useMemo(
+    () => (searchQuery ? filterItems(searchQuery) : searchableItems),
+    [searchQuery, filterItems, searchableItems],
+  );
+
+  const displayItems = useMemo(() => {
+    const result: ListItem[] = [];
+    const friends = filteredItems.filter(
+      (item): item is Extract<ListItem, { type: "friend" }> =>
+        item.type === "friend",
+    );
+    const contacts = filteredItems.filter(
+      (item): item is Extract<ListItem, { type: "contact" }> =>
+        item.type === "contact",
+    );
+
+    if (friends.length > 0) {
+      result.push({ type: "header", title: "Friends" });
+      result.push(...friends);
     }
-  };
 
-  const onContactSelected = (recipientPhoneNumber: string) => {
-    router.navigate({
-      pathname: "/create-post",
-      params: {
-        uri,
-        type,
-        width,
-        height,
-        number: recipientPhoneNumber,
-        userType: "notOnApp",
-      },
-    });
-  };
+    if (contacts.length > 0) {
+      result.push({
+        type: "header",
+        title: "Share with Anyone",
+        isContact: true,
+      });
+      result.push(...contacts);
+    }
 
-  const onFriendSelected = (recipientId: string) => {
-    router.navigate({
-      pathname: "/create-post",
-      params: {
-        uri,
-        type,
-        width,
-        height,
-        recipient: recipientId,
-        userType: "onApp",
-      },
-    });
-  };
+    return result;
+  }, [filteredItems]);
 
-  const showMoreContacts = () => {
+  const loadContacts = useCallback(async () => {
+    const contactsNotOnApp = await getDeviceContactsNotOnApp();
+    setContacts(contactsNotOnApp);
+    setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
+    setIsLoadingContacts(false);
+  }, [getDeviceContactsNotOnApp]);
+
+  const loadMoreContacts = useCallback(() => {
+    if (visibleContacts.length >= contacts.length) return;
+
     const nextPage = contactsPage + 1;
     const newVisibleContacts = contacts.slice(
       0,
@@ -151,135 +191,210 @@ const PostTo = () => {
     );
     setVisibleContacts(newVisibleContacts);
     setContactsPage(nextPage);
-  };
+  }, [contacts, visibleContacts.length, contactsPage]);
 
-  const isLoading = isLoadingFriends || isLoadingContacts;
+  useEffect(() => {
+    void loadContacts();
+  }, []);
 
-  const renderLoadingSkeletons = () => {
-    <BaseScreenView scrollable>
-      <CardContainer>
-        {PLACEHOLDER_DATA.map((_, index) => (
-          <VirtualizedListItem
-            key={index}
-            loading
-            showSkeletons={{
-              imageUrl: true,
-              title: true,
-              subtitle: true,
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([loadContacts(), refetch()]);
+    setRefreshing(false);
+  }, [loadContacts, refetch]);
+
+  const handleOnEndReached = useCallback(async () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      await fetchNextPage();
+    }
+    loadMoreContacts();
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage, loadMoreContacts]);
+
+  const onContactSelected = useCallback(
+    (recipientPhoneNumber: string) => {
+      router.navigate({
+        pathname: "/create-post",
+        params: {
+          uri,
+          type,
+          width,
+          height,
+          number: recipientPhoneNumber,
+          userType: "notOnApp",
+        },
+      });
+    },
+    [router, uri, type, width, height],
+  );
+
+  const onFriendSelected = useCallback(
+    (recipientId: string) => {
+      router.navigate({
+        pathname: "/create-post",
+        params: {
+          uri,
+          type,
+          width,
+          height,
+          recipient: recipientId,
+          userType: "onApp",
+        },
+      });
+    },
+    [router, uri, type, width, height],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: ListItem }) => {
+      if (item.type === "header") {
+        return (
+          <XStack alignItems="center" gap="$2" >
+            <H5 theme="alt1">{item.title}</H5>
+            {item.isContact && (
+              <TouchableOpacity
+                onPress={() => {
+                  void infoDialog.show({
+                    title: "Share with Anyone",
+                    subtitle:
+                      "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
+                    acceptText: "Got it",
+                  });
+                }}
+              >
+                <Info size="$1" color="$blue9" />
+              </TouchableOpacity>
+            )}
+          </XStack>
+        );
+      }
+
+      if (item.type === "friend") {
+        return (
+          <MediaListItem
+            title={item.data.username}
+            subtitle={item.data.name}
+            imageUrl={
+              item.data.profilePictureUrl
+                ? { uri: item.data.profilePictureUrl }
+                : DefaultProfilePicture
+            }
+            primaryAction={{
+              label: "Select",
+              icon: ChevronRight,
+              onPress: () => onFriendSelected(item.data.userId),
             }}
           />
-        ))}
-      </CardContainer>
-    </BaseScreenView>;
-  };
-
-  const _renderContacts = () => (
-    <CardContainer>
-      <H5 theme="alt1">Contacts</H5>
-
-      {visibleContacts.map((contact, index) => (
-        <VirtualizedListItem
-          key={index}
-          loading={false}
-          title={contact.name}
-          subtitle={formatPhoneNumber(contact.phoneNumbers?.[0]?.number)}
-          button={<ChevronRight size={24} color="$gray10" />}
-          imageUrl={
-            contact.imageAvailable ? contact.image?.uri : DefaultProfilePicture
-          }
-          onPress={() =>
-            onContactSelected(contact.phoneNumbers?.[0]?.number ?? "")
-          }
-        />
-      ))}
-
-      {visibleContacts.length < contacts.length && (
-        <>
-          <Spacer size="$2" />
-          <Button
-            onPress={showMoreContacts}
-            disabled={visibleContacts.length >= contacts.length}
-          >
-            Show more
-          </Button>
-        </>
-      )}
-    </CardContainer>
-  );
-
-  const renderFriends = () => (
-    <CardContainer>
-      <H5 theme="alt1">Friends</H5>
-
-      <FlashList
-        data={friendItems}
-        ItemSeparatorComponent={Separator}
-        estimatedItemSize={75}
-        onEndReached={handleOnEndReached}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <VirtualizedListItem
-            loading={false}
-            title={item.username}
-            subtitle={item.name}
-            imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-            button={<ChevronRight size={24} color="$gray10" />}
-            onPress={() => onFriendSelected(item.userId)}
-          />
-        )}
-      />
-    </CardContainer>
-  );
-
-  const renderUsersToPostTo = () => (
-    <BaseScreenView
-      flex={1}
-      scrollable
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+        );
       }
-      bottomSafeAreaStyle={{
-        backgroundColor: theme.gray2.val,
-      }}
-    >
-      <YStack
-        flex={1}
-        gap="$4"
-        paddingBottom={(insets.bottom + getToken("$4", "space")) as number}
-      >
-        {/* // TODO: Uncomment this when we have contacts posting working */}
-        {/* {contacts.length > 0 && renderContacts()} */}
-        {itemCount > 0 && renderFriends()}
-      </YStack>
-    </BaseScreenView>
-  );
 
-  const renderNoResults = () => (
-    <BaseScreenView>
-      <View flex={1} justifyContent="center" bottom={headerHeight}>
-        <EmptyPlaceholder
-          title="Nowhere to post"
-          subtitle="No friends yet, once you've added someone they'll show up here."
-          icon={<UserRoundX />}
+      return (
+        <MediaListItem
+          title={item.data.name}
+          subtitle={formatPhoneNumber(item.data.phoneNumbers?.[0]?.number)}
+          imageUrl={
+            item.data.imageAvailable
+              ? { uri: item.data.image?.uri }
+              : DefaultProfilePicture
+          }
+          primaryAction={{
+            label: "Select",
+            icon: ChevronRight,
+            onPress: () =>
+              onContactSelected(item.data.phoneNumbers?.[0]?.number ?? ""),
+          }}
         />
-      </View>
-    </BaseScreenView>
+      );
+    },
+    [formatPhoneNumber, onContactSelected, onFriendSelected, infoDialog],
   );
 
-  if (isLoading) {
-    return renderLoadingSkeletons();
-  }
+  const ListHeaderComponent = useMemo(
+    () => (
+      <YStack gap="$4">
+        <SearchInput
+          placeholder="Search..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
+        />
+      </YStack>
+    ),
+    [searchQuery, setSearchQuery],
+  );
 
-  if (
-    itemCount === 0
-    // TODO: Uncomment this when we have contacts posting working
-    // && contacts.length === 0
-  ) {
-    return renderNoResults();
-  }
+  const ListEmptyComponent = useCallback(() => {
+    const isLoading = isLoadingFriends || isLoadingContacts;
 
-  return renderUsersToPostTo();
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <MediaListItemSkeleton key={index} />
+          ))}
+        </YStack>
+      );
+    }
+
+    if (items.length === 0) {
+      return (
+        <YStack flex={1} justifyContent="center">
+          <EmptyPlaceholder
+            title="Nowhere to post"
+            subtitle="No friends yet, once you've added someone they'll show up here."
+            icon={<UserRoundX />}
+          />
+        </YStack>
+      );
+    }
+
+    if (filteredItems.length === 0) {
+      return (
+        <YStack flex={1}>
+          <H6 theme="alt1">No Users Found</H6>
+        </YStack>
+      );
+    }
+
+    return null;
+  }, [isLoadingFriends, isLoadingContacts, items.length, filteredItems.length]);
+
+  const getItemType = useCallback((item: ListItem) => {
+    return item.type;
+  }, []);
+
+  const keyExtractor = useCallback((item: ListItem) => {
+    switch (item.type) {
+      case "header":
+        return `header-${item.title}`;
+      case "friend":
+        return `friend-${item.data.userId}`;
+      case "contact":
+        return `contact-${item.data.id ?? item.data.phoneNumbers?.[0]?.number ?? Math.random()}`;
+    }
+  }, []);
+
+  return (
+    <FlashList
+      data={displayItems}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      estimatedItemSize={75}
+      getItemType={getItemType}
+      ItemSeparatorComponent={Spacer}
+      ListHeaderComponent={ListHeaderComponent}
+      ListEmptyComponent={ListEmptyComponent}
+      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      contentContainerStyle={{
+        padding: getToken("$4", "space"),
+        paddingBottom: insets.bottom + getToken("$2", "space"),
+      }}
+      onEndReached={handleOnEndReached}
+      onEndReachedThreshold={0.5}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    />
+  );
 };
 
 export default PostTo;
