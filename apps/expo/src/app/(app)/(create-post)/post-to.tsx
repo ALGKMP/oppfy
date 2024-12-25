@@ -218,7 +218,7 @@ const PostTo = () => {
           acceptText: "Love it",
         });
         storage.set(HAS_SEEN_SHARE_TIP_KEY, true);
-      }, 750);
+      }, 500);
 
       return () => clearTimeout(timer);
     }
