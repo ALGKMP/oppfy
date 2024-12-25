@@ -87,12 +87,7 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
           followerCount={profileData?.followerCount ?? 0}
         />
       </XStack>
-
-      {/* {userId && profileData?.userId === userId ? (
-        <ActionButton userId={userId} />
-      ) : (
-        <SelfActionButton />
-      )} */}
+      
       <ActionButton userId={userId} />
     </YStack>
   );

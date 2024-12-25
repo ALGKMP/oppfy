@@ -183,39 +183,22 @@ const SelfProfile = React.memo(() => {
     </YStack>
   );
 
-  const renderNoPosts = useCallback(
-    () => (
+  const renderNoPosts = useCallback(() => {
+    if (isLoading)
+      return (
+        <YStack gap="$4">
+          <PostCard.loading />
+        </YStack>
+      );
+    return (
       <View paddingTop="$6">
         <EmptyPlaceholder
           icon={<CameraOff size="$10" />}
           title="No posts yet"
         />
       </View>
-    ),
-    [],
-  );
-
-  const listFooterComponent = useCallback(() => {
-    if (isLoading) {
-      return (
-        <YStack gap="$4">
-          <PostCard.loading />
-          <PostCard.loading />
-        </YStack>
-      );
-    }
-    return null;
-  }, [isLoading]);
-
-  if (isLoading) {
-    return (
-      <BaseScreenView padding={0} paddingBottom={0}>
-        <YStack gap="$4">
-          <PostCard.loading />
-        </YStack>
-      </BaseScreenView>
     );
-  }
+  }, [isLoading]);
 
   return (
     <>
@@ -226,7 +209,6 @@ const SelfProfile = React.memo(() => {
           renderItem={renderPost}
           ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderNoPosts}
-          ListFooterComponent={listFooterComponent}
           keyExtractor={(item) => `self-profile-post-${item.postId}`}
           estimatedItemSize={300}
           showsVerticalScrollIndicator={false}
