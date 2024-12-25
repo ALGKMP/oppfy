@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Pressable,
@@ -11,45 +11,35 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
-import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowBigRight, ChevronRight, Minus } from "@tamagui/lucide-icons";
+import { ChevronRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Button,
-  H5,
-  ScrollView,
-  SizableText,
-  Text,
-  useTheme,
-  View,
-  XStack,
-  YStack,
-} from "tamagui";
+import { useTheme } from "tamagui";
 import { z } from "zod";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import PlayPause, {
   usePlayPauseAnimations,
 } from "~/components/Icons/PlayPause";
-import { BaseScreenView } from "~/components/Views";
+import {
+  Button,
+  H5,
+  ScreenView,
+  Text,
+  useBottomSheetController,
+  View,
+  XStack,
+  YStack,
+} from "~/components/ui";
 import { useUploadMedia } from "~/hooks/media";
 import {
   UploadMediaInputNotOnApp,
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
 import useStoreReview from "~/hooks/useRating";
-
-const postSchema = z.object({
-  caption: z.optional(z.string().max(255)),
-});
-
-type FieldTypes = z.infer<typeof postSchema>;
 
 interface CreatePostBaseParams extends Record<string, string> {
   uri: string;
@@ -71,40 +61,137 @@ interface CreatePostWithPhoneNumber extends CreatePostBaseParams {
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ASPECT_RATIO = 16 / 9;
 
+const SEND_BUTTON_MESSAGES = [
+  (name: string) => `EXPOSE ${name} 📸`,
+  (name: string) => `GET ${name} IN HERE 😈`,
+  (name: string) => `${name} CAN'T HIDE 👀`,
+  (name: string) => `${name} NEEDS THIS 🫣`,
+  (name: string) => `PEER PRESSURE ${name} 🎯`,
+  (name: string) => `${name} IS MISSING OUT 💅`,
+  (name: string) => `GOTCHA ${name} 😏`,
+  (name: string) => `SHOW ${name} WHAT'S UP 🌟`,
+  (name: string) => `${name} SHOULD SEE THIS 👋`,
+  (name: string) => `TIME TO TAG ${name} 🎯`,
+  (name: string) => `BRING ${name} TO THE PARTY 🎈`,
+  (name: string) => `${name} WON'T BELIEVE THIS 🤯`,
+  (name: string) => `SUMMON ${name} 🔮`,
+  (name: string) => `${name} GOTTA SEE THIS 👀`,
+  (name: string) => `CALLING ${name} OUT 📢`,
+  (name: string) => `${name} WHERE YOU AT? 🗺️`,
+];
+
+const CaptionSheet = ({
+  caption,
+  onSave,
+}: {
+  caption: string;
+  onSave: (text: string) => void;
+}) => {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const inputRef = useRef<TextInput>(null);
+  const [localDraftCaption, setLocalDraftCaption] = useState(caption);
+
+  useEffect(() => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  }, []);
+
+  return (
+    <YStack flex={1}>
+      <YStack flex={1} padding="$4" gap="$4">
+        <XStack justifyContent="space-between">
+          <Text fontSize="$6" fontWeight="bold">
+            Caption
+          </Text>
+          <XStack alignItems="center" gap="$2">
+            <Text fontSize="$3" color="$gray10">
+              {localDraftCaption?.length ?? 0}/255
+            </Text>
+            <TouchableOpacity onPress={() => setLocalDraftCaption("")}>
+              <Ionicons name="close-circle" size={20} color={theme.gray8.val} />
+            </TouchableOpacity>
+          </XStack>
+        </XStack>
+        <BottomSheetTextInput
+          ref={inputRef}
+          placeholder="Write a caption..."
+          value={localDraftCaption}
+          onChangeText={setLocalDraftCaption}
+          multiline
+          maxLength={255}
+          style={{
+            fontWeight: "bold",
+            justifyContent: "flex-start",
+            color: theme.color.val,
+            backgroundColor: theme.gray5.val,
+            padding: 20,
+            borderRadius: 20,
+          }}
+        />
+      </YStack>
+      <XStack padding="$4" paddingBottom={insets.bottom}>
+        <Button
+          flex={1}
+          size="$5"
+          borderRadius="$7"
+          disabled={localDraftCaption === caption}
+          onPress={() => onSave(localDraftCaption)}
+        >
+          Save
+        </Button>
+      </XStack>
+    </YStack>
+  );
+};
+
 const CreatePost = () => {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { promptForReview } = useStoreReview();
+  const { show, hide } = useBottomSheetController();
+  const inputRef = useRef<TextInput>(null);
 
-  const { type, uri, height, width, ...params } = useLocalSearchParams<
+  const [caption, setCaption] = useState("");
+
+  const {
+    type,
+    uri,
+    height,
+    width,
+    recipientName,
+    recipientUsername,
+    recipientImage,
+    ...params
+  } = useLocalSearchParams<
     CreatePostWithRecipient | CreatePostWithPhoneNumber
   >();
 
-  const inputRef = useRef<TextInput>(null);
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  const [inputValue, setInputValue] = useState("");
-  const [isFieldChanged, setIsFieldChanged] = useState(false);
-
   const { uploadVideoMutation, uploadPhotoMutation } = useUploadMedia();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-  } = useForm<FieldTypes>({
-    resolver: zodResolver(postSchema),
+  const displayName = useMemo(() => {
+    if (params.userType === "onApp") {
+      return recipientUsername ?? recipientName ?? "THEM";
+    }
+    return recipientName?.split(" ")[0] ?? "THEM";
+  }, [params.userType, recipientName, recipientUsername]);
+
+  const [buttonMessage] = useState(() => {
+    const messageTemplate =
+      SEND_BUTTON_MESSAGES[
+        Math.floor(Math.random() * SEND_BUTTON_MESSAGES.length)
+      ]!;
+    return messageTemplate(displayName.toUpperCase());
   });
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = async () => {
     const baseData = {
       uri: uri,
       width: parseInt(width),
       height: parseInt(height),
-      caption: data.caption,
+      caption,
     };
     const input =
       params.userType === "onApp"
@@ -127,67 +214,21 @@ const CreatePost = () => {
 
     router.dismissAll();
     router.navigate("/(app)/(bottom-tabs)/(home)");
-  });
-
-  const openBottomSheet = () => {
-    setInputValue(watch("caption") ?? "");
-    setIsFieldChanged(false);
-    bottomSheetRef.current?.expand();
-    inputRef.current?.focus();
   };
 
-  const clearInput = () => {
-    setInputValue("");
-    setIsFieldChanged(true);
-  };
-
-  const renderHeader = useCallback(() => {
-    return (
-      <YStack
-        flex={1}
-        justifyContent="center"
-        alignItems="center"
-        position="relative"
-      >
-        <Minus size="$4" />
-        <View justifyContent="center" alignItems="center">
-          <SizableText size="$5" textAlign="center" fontWeight="bold">
-            Add Caption
-          </SizableText>
-        </View>
-        <View
-          width="95%"
-          borderColor="$gray8"
-          borderWidth="$0.25"
-          marginTop="$3"
+  const openCaptionSheet = () => {
+    show({
+      title: "Add Caption",
+      children: (
+        <CaptionSheet
+          caption={caption}
+          onSave={(text) => {
+            setCaption(text);
+            hide();
+          }}
         />
-      </YStack>
-    );
-  }, []);
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        opacity={0.5}
-        {...props}
-      />
-    ),
-    [],
-  );
-
-  const handleSave = () => {
-    if (isFieldChanged) {
-      setValue("caption", inputValue);
-      bottomSheetRef.current?.close();
-    }
-  };
-
-  const handleSheetClose = () => {
-    setInputValue("");
-    setIsFieldChanged(false);
-    inputRef.current?.blur();
+      ),
+    });
   };
 
   // Calculate the preview size using the same aspect ratio as preview.tsx
@@ -195,147 +236,72 @@ const CreatePost = () => {
   const previewHeight = previewWidth * ASPECT_RATIO;
 
   return (
-    <>
-      <BaseScreenView safeAreaEdges={["bottom"]}>
-        <ScrollView>
-          <YStack gap="$5">
-            <YStack gap="$4" alignItems="center">
-              {type === "photo" ? (
-                <Image
-                  source={{ uri }}
-                  style={[
-                    styles.media,
-                    { width: previewWidth, height: previewHeight },
-                  ]}
-                />
-              ) : (
-                <PreviewVideo
-                  uri={uri}
-                  width={previewWidth}
-                  height={previewHeight}
-                />
-              )}
-            </YStack>
-
-            <CardContainer padding="$4" paddingBottom="$5">
-              <YStack gap="$3">
-                <H5>Post Details</H5>
-                <XStack
-                  justifyContent="space-between"
-                  alignItems="center"
-                  onPress={openBottomSheet}
-                >
-                  <XStack flex={1} alignItems="center" gap="$3" mr="$4">
-                    <Ionicons
-                      name="chatbubble-outline"
-                      size={24}
-                      color={theme.gray10.val}
-                    />
-                    <View flex={1}>
-                      <Text fontSize="$5" fontWeight="500">
-                        {watch("caption") ? watch("caption") : "Add caption"}
-                      </Text>
-                    </View>
-                  </XStack>
-                  <ChevronRight size={24} color="$gray10" />
-                </XStack>
-              </YStack>
-            </CardContainer>
-          </YStack>
-        </ScrollView>
-
-        <Button
-          size="$5"
-          borderRadius="$10"
-          borderWidth="$1"
-          borderColor="white"
-          backgroundColor="$gray1"
-          onPress={onSubmit}
-        >
-          <XStack justifyContent="center" alignItems="center">
-            <Text fontSize="$9" paddingRight="$0" fontWeight="bold">
-              OPP YOUR FRIEND
-            </Text>
-            <ArrowBigRight size="$4" color="white" fill="white" />
-          </XStack>
-        </Button>
-      </BaseScreenView>
-
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={["50%"]}
-        enablePanDownToClose
-        keyboardBlurBehavior="restore"
-        onClose={handleSheetClose}
-        handleComponent={renderHeader}
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: theme.gray4.val }}
-      >
-        <YStack flex={1} padding="$4" gap="$4">
-          <XStack justifyContent="space-between">
-            <Text fontSize="$6" fontWeight="bold">
-              Caption
-            </Text>
-            <XStack alignItems="center" gap="$2">
-              <Text fontSize="$3" color="$gray10">
-                {inputValue.length}/255
-              </Text>
-              <TouchableOpacity onPress={clearInput}>
-                <Ionicons
-                  name="close-circle"
-                  size={20}
-                  color={theme.gray8.val}
-                />
-              </TouchableOpacity>
-            </XStack>
-          </XStack>
-          <Controller
-            control={control}
-            name="caption"
-            render={({ field: { onBlur } }) => (
-              <RNView>
-                <BottomSheetTextInput
-                  ref={inputRef}
-                  placeholder="Write a caption..."
-                  onBlur={onBlur}
-                  value={inputValue}
-                  onChangeText={(text) => {
-                    setInputValue(text);
-                    setIsFieldChanged(text !== watch("caption"));
-                  }}
-                  multiline
-                  maxLength={255}
-                  style={{
-                    fontWeight: "bold",
-                    justifyContent: "flex-start",
-                    color: theme.color.val,
-                    backgroundColor: theme.gray5.val,
-                    padding: 20,
-                    borderRadius: 20,
-                  }}
-                />
-              </RNView>
-            )}
-          />
-          {errors.caption && (
-            <Text color="$red8">{errors.caption.message}</Text>
+    <ScreenView safeAreaEdges={["bottom"]}>
+      <YStack flex={1} gap="$5">
+        <YStack gap="$4" alignItems="center">
+          {type === "photo" ? (
+            <Image
+              source={{ uri }}
+              style={[
+                styles.media,
+                { width: previewWidth, height: previewHeight },
+              ]}
+            />
+          ) : (
+            <PreviewVideo
+              uri={uri}
+              width={previewWidth}
+              height={previewHeight}
+            />
           )}
+
+          <XStack gap="$2" alignItems="center">
+            <Image
+              source={recipientImage ?? DefaultProfilePicture}
+              style={{ width: 24, height: 24, borderRadius: 12 }}
+            />
+            <Text color="$gray11">
+              Posting to {params.userType === "onApp" ? "@" : ""}
+              {displayName}
+            </Text>
+          </XStack>
         </YStack>
-        <XStack padding="$4" paddingBottom={insets.bottom}>
-          <Button
-            flex={1}
-            size="$5"
-            borderRadius="$7"
-            onPress={handleSave}
-            disabled={!isFieldChanged}
-            opacity={isFieldChanged ? 1 : 0.5}
-          >
-            Save
-          </Button>
-        </XStack>
-      </BottomSheet>
-    </>
+
+        <CardContainer padding="$4" paddingBottom="$5">
+          <YStack gap="$3">
+            <H5>Post Details</H5>
+            <XStack
+              justifyContent="space-between"
+              alignItems="center"
+              onPress={openCaptionSheet}
+            >
+              <XStack flex={1} alignItems="center" gap="$3" mr="$4">
+                <Ionicons
+                  name="chatbubble-outline"
+                  size={24}
+                  color={theme.gray10.val}
+                />
+                <View flex={1}>
+                  <Text fontSize="$5" fontWeight="500">
+                    {caption || "Add caption"}
+                  </Text>
+                </View>
+              </XStack>
+              <ChevronRight size={24} color="$gray10" />
+            </XStack>
+          </YStack>
+        </CardContainer>
+      </YStack>
+
+      <Button
+        variant="primary"
+        onPress={onSubmit}
+        pressStyle={{ scale: 0.95 }}
+        animation="bouncy"
+      >
+        {buttonMessage}
+      </Button>
+    </ScreenView>
   );
 };
 
@@ -356,10 +322,10 @@ const PreviewVideo = ({
 
   const togglePlayback = async () => {
     if (player.playing) {
-      await player.pause();
+      player.pause();
       addPause();
     } else {
-      await player.play();
+      player.play();
       addPlay();
     }
   };

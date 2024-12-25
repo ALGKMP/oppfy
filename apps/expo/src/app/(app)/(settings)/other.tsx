@@ -9,9 +9,8 @@ import {
 
 import {
   Button,
-  renderSettingsList,
   ScreenView,
-  SettingsListInput,
+  SettingsGroup,
   useActionSheetController,
   YStack,
 } from "~/components/ui";
@@ -96,41 +95,33 @@ const Other = () => {
     });
   };
 
-  const settingsGroups = [
-    {
-      headerTitle: "Other",
-      items: [
-        {
-          title: "Clear Cache",
-          icon: <XCircle />,
-          iconAfter: <ChevronRight />,
-          onPress: handleShowClearCache,
-        },
-      ],
-    },
-    {
-      headerTitle: "Contacts",
-      items: [
-        {
-          title: "Sync",
-          icon: <RefreshCcw />,
-          iconAfter: <ChevronRight />,
-          onPress: handleShowSyncContacts,
-        },
-        {
-          title: "Delete",
-          icon: <Trash />,
-          iconAfter: <ChevronRight />,
-          onPress: handleShowDeleteContacts,
-        },
-      ],
-    },
-  ] satisfies SettingsListInput[];
-
   return (
     <ScreenView scrollable>
       <YStack gap="$4">
-        {settingsGroups.map(renderSettingsList)}
+        <SettingsGroup title="Other">
+          <SettingsGroup.Item
+            title="Clear Cache"
+            icon={<XCircle />}
+            iconAfter={<ChevronRight />}
+            onPress={handleShowClearCache}
+          />
+        </SettingsGroup>
+
+        <SettingsGroup title="Contacts">
+          <SettingsGroup.Item
+            title="Sync"
+            icon={<RefreshCcw />}
+            iconAfter={<ChevronRight />}
+            onPress={handleShowSyncContacts}
+          />
+          <SettingsGroup.Item
+            title="Delete"
+            icon={<Trash />}
+            iconAfter={<ChevronRight />}
+            onPress={handleShowDeleteContacts}
+          />
+        </SettingsGroup>
+
         <Button variant="danger" onPress={handleShowDeleteAccount}>
           Delete Account
         </Button>

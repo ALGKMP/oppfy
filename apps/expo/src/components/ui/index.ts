@@ -10,6 +10,12 @@ import {
   useAlertDialogController,
 } from "./AlertDialog";
 import { Avatar } from "./Avatar";
+import {
+  BottomSheet,
+  BottomSheetProvider,
+  useBottomSheetController,
+} from "./BottomSheet";
+import type { BottomSheetProps } from "./BottomSheet";
 import { Button, OnboardingButton } from "./Buttons";
 import { Card } from "./Card";
 import { CardContainer } from "./CardContainer";
@@ -31,11 +37,7 @@ import { Progress } from "./Progress";
 import { RadioGroup } from "./RadioGroup";
 import { Select } from "./Select";
 import { Separator } from "./Separator";
-import { renderSettingsList, SettingsListItem } from "./SettingsListItem";
-import type {
-  SettingsListInput,
-  SettingsListItemParams,
-} from "./SettingsListItem";
+import { SettingsGroup } from "./Settings";
 import { Circle, Square } from "./Shapes";
 import { Sheet } from "./Sheet";
 import { Skeleton } from "./Skeleton";
@@ -89,6 +91,9 @@ export {
   ActionSheet,
   ActionSheetProvider,
   useActionSheetController,
+  BottomSheet,
+  BottomSheetProvider,
+  useBottomSheetController,
   Popover,
   Sheet,
   Tooltip,
@@ -99,8 +104,7 @@ export {
   Avatar,
   Card,
   ListItem,
-  SettingsListItem,
-  renderSettingsList,
+  SettingsGroup,
   Separator,
   Square,
   Circle,
@@ -114,8 +118,4 @@ export {
   MediaListItemSkeleton,
 };
 
-export type {
-  SettingsListInput,
-  SettingsListItemParams,
-  MediaListItemActionProps,
-};
+export type { MediaListItemActionProps, BottomSheetProps };

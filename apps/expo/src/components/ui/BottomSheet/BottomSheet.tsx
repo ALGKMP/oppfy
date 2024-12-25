@@ -16,6 +16,7 @@ export interface BottomSheetProps
   children: ReactNode;
   isVisible: boolean;
   onDismiss?: () => void;
+  onPresent?: () => void;
 }
 
 export const BottomSheet = React.forwardRef<BottomSheetModal, BottomSheetProps>(
@@ -25,6 +26,7 @@ export const BottomSheet = React.forwardRef<BottomSheetModal, BottomSheetProps>(
     snapPoints = ["50%"],
     isVisible,
     onDismiss,
+    onPresent,
     ...props
   }) => {
     const theme = useTheme();
@@ -33,10 +35,11 @@ export const BottomSheet = React.forwardRef<BottomSheetModal, BottomSheetProps>(
     useEffect(() => {
       if (isVisible) {
         bottomSheetRef.current?.present();
+        onPresent?.();
       } else {
         bottomSheetRef.current?.dismiss();
       }
-    }, [isVisible]);
+    }, [isVisible, onPresent]);
 
     const header = useCallback(
       () => <BottomSheetHeader title={title ?? ""} />,

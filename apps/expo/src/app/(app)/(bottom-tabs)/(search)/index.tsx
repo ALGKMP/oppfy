@@ -112,6 +112,9 @@ const Search = () => {
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
+      ListHeaderComponentStyle={{
+        paddingBottom: getToken("$4", "space"),
+      }}
       contentContainerStyle={{
         paddingBottom: getToken("$4", "space"),
         paddingHorizontal: getToken("$4", "space"),

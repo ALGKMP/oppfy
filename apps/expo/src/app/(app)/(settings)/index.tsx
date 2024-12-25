@@ -18,9 +18,8 @@ import {
 
 import {
   Button,
-  renderSettingsList,
   ScreenView,
-  SettingsListInput,
+  SettingsGroup,
   Text,
   useAlertDialogController,
   XStack,
@@ -69,65 +68,56 @@ const Settings = () => {
     }
   };
 
-  const settingsGroups = [
-    {
-      headerTitle: "Settings",
-      items: [
-        {
-          title: "Notifications",
-          icon: <BellRing />,
-          iconAfter: <ChevronRight />,
-          onPress: () => router.push("/notifications"),
-        },
-        {
-          title: "Privacy",
-          icon: <ShieldCheck />,
-          iconAfter: <ChevronRight />,
-          onPress: () => router.push("/privacy"),
-        },
-        {
-          title: "Other",
-          icon: <Hammer />,
-          iconAfter: <ChevronRight />,
-          onPress: () => router.push("/other"),
-        },
-      ],
-    },
-    {
-      headerTitle: "Other",
-      items: [
-        {
-          title: "Share Us",
-          icon: <Share2 />,
-          iconAfter: <ChevronRight />,
-          onPress: () => void handleShare(),
-        },
-        {
-          title: "Rate Us",
-          icon: <Star />,
-          iconAfter: <ChevronRight />,
-          onPress: () => void handleRate(),
-        },
-        {
-          title: "Privacy Policy",
-          icon: <FileLock2 />,
-          iconAfter: <ChevronRight />,
-          onPress: () => void Linking.openURL(WEBSITE_URL.PRIVACY),
-        },
-        {
-          title: "Terms and Conditions",
-          icon: <NotepadText />,
-          iconAfter: <ChevronRight />,
-          onPress: () => void Linking.openURL(WEBSITE_URL.TERMS),
-        },
-      ],
-    },
-  ] satisfies SettingsListInput[];
-
   return (
     <ScreenView scrollable>
       <YStack gap="$4" flex={1} paddingBottom="$8">
-        {settingsGroups.map(renderSettingsList)}
+        <SettingsGroup title="Settings">
+          <SettingsGroup.Item
+            title="Notifications"
+            icon={<BellRing />}
+            iconAfter={<ChevronRight />}
+            onPress={() => router.push("/notifications")}
+          />
+          <SettingsGroup.Item
+            title="Privacy"
+            icon={<ShieldCheck />}
+            iconAfter={<ChevronRight />}
+            onPress={() => router.push("/privacy")}
+          />
+          <SettingsGroup.Item
+            title="Other"
+            icon={<Hammer />}
+            iconAfter={<ChevronRight />}
+            onPress={() => router.push("/other")}
+          />
+        </SettingsGroup>
+
+        <SettingsGroup title="Other">
+          <SettingsGroup.Item
+            title="Share Us"
+            icon={<Share2 />}
+            iconAfter={<ChevronRight />}
+            onPress={() => void handleShare()}
+          />
+          <SettingsGroup.Item
+            title="Rate Us"
+            icon={<Star />}
+            iconAfter={<ChevronRight />}
+            onPress={() => void handleRate()}
+          />
+          <SettingsGroup.Item
+            title="Privacy Policy"
+            icon={<FileLock2 />}
+            iconAfter={<ChevronRight />}
+            onPress={() => void Linking.openURL(WEBSITE_URL.PRIVACY)}
+          />
+          <SettingsGroup.Item
+            title="Terms and Conditions"
+            icon={<NotepadText />}
+            iconAfter={<ChevronRight />}
+            onPress={() => void Linking.openURL(WEBSITE_URL.TERMS)}
+          />
+        </SettingsGroup>
 
         <Button variant="danger" onPress={handleLogout}>
           Logout

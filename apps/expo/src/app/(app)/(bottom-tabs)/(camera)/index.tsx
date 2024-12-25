@@ -38,17 +38,14 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/core";
 import { CameraOff } from "@tamagui/lucide-icons";
-import { View } from "tamagui";
 
-import { useAlertDialogController } from "~/components/ui";
+import CaptureButton from "~/components/CaptureButton";
+import Focus, { useFocusAnimations } from "~/components/Icons/Focus";
+import { ScreenView, useAlertDialogController, View } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
-import {
-  CaptureButton,
-  FocusIcon,
-  useFocusAnimations,
-} from "~/features/camera/components";
 import useIsForeground from "~/hooks/useIsForeground";
+
+const MAX_RECORDING_DURATION = 60 * 1000; // 1 minute
 
 const ASPECT_RATIO = 16 / 9;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -147,7 +144,9 @@ const CameraPage = () => {
     if (canAskAgain) {
       const { granted } = await MediaLibrary.requestPermissionsAsync();
       if (granted) {
-        router.push("/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker");
+        router.push(
+          "/(app)/(bottom-tabs)/(camera)/(media-picker)/album-picker",
+        );
         return;
       }
     }
@@ -241,26 +240,22 @@ const CameraPage = () => {
 
   if (!device) {
     return (
-      <BaseScreenView
-        safeAreaEdges={["top", "bottom"]}
-        justifyContent="center"
+      <ScreenView
         alignItems="center"
+        justifyContent="center"
+        safeAreaEdges={["top"]}
       >
         <EmptyPlaceholder
           title="No camera device found"
           subtitle="Please check your camera settings and try again."
           icon={<CameraOff />}
         />
-      </BaseScreenView>
+      </ScreenView>
     );
   }
 
   return (
-    <BaseScreenView
-      safeAreaEdges={["top", "bottom"]}
-      justifyContent="center"
-      alignItems="center"
-    >
+    <ScreenView padding={0} safeAreaEdges={["top"]}>
       <View
         width={SCREEN_WIDTH}
         height={PREVIEW_HEIGHT}
@@ -291,19 +286,20 @@ const CameraPage = () => {
         </GestureDetector>
 
         {animations.map(({ id, point }) => (
-          <FocusIcon key={id} x={point.x} y={point.y} />
+          <Focus key={id} x={point.x} y={point.y} />
         ))}
 
         <CaptureButton
-          style={{ position: "absolute", alignSelf: "center", bottom: 36 }}
           camera={camera}
-          onMediaCaptured={onMediaCaptured}
           cameraZoom={zoom}
           minZoom={minZoom}
           maxZoom={maxZoom}
           flash={supportsFlash ? flash : "off"}
           enabled={isCameraInitialized && isActive}
+          maxRecordingDuration={MAX_RECORDING_DURATION}
           setIsPressingButton={setIsPressingButton}
+          onMediaCaptured={onMediaCaptured}
+          style={{ position: "absolute", alignSelf: "center", bottom: 36 }}
         />
 
         <TouchableOpacity
@@ -343,7 +339,7 @@ const CameraPage = () => {
           )}
         </View>
       </View>
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 
