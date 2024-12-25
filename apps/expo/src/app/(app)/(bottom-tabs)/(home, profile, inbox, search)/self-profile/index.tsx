@@ -199,8 +199,8 @@ const SelfProfile = React.memo(() => {
     if (isLoading) {
       return (
         <YStack gap="$4">
-          <PostCard loading />
-          <PostCard loading />
+          <PostCard.loading />
+          <PostCard.loading />
         </YStack>
       );
     }
@@ -211,7 +211,7 @@ const SelfProfile = React.memo(() => {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <YStack gap="$4">
-          <PostCard loading />
+          <PostCard.loading />
         </YStack>
       </BaseScreenView>
     );
