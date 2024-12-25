@@ -1,9 +1,13 @@
-import { TouchableOpacity } from "react-native";
-import Animated from "react-native-reanimated";
-import { Heart } from "@tamagui/lucide-icons";
-import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useCallback } from "react";
-import { useLikePost } from "./hooks/useLikePost";
+import { TouchableOpacity } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
+import { Heart } from "@tamagui/lucide-icons";
+
+import { useLikePost } from "../../hooks/post/useLikePost";
 
 interface LikeButtonProps {
   postId: string;
