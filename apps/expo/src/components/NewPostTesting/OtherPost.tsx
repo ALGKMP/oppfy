@@ -144,7 +144,7 @@ const OtherPost = memo((postProps: OtherPostProps) => {
     <>
       <PostCard
         {...postProps}
-        onMoreOptions={handleOpenMoreOptionsSheet}
+        // onMoreOptions={handleOpenMoreOptionsSheet}
       />
 
       {sheetState === "moreOptions" && (

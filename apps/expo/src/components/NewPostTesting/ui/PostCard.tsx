@@ -26,6 +26,8 @@ import LikeButton from "../LikeButton";
 import PostCaption from "../PostCaption";
 import PostDate from "../PostDate";
 import ShareButton from "../ShareButton";
+import { useActionSheetController } from "~/components/ui";
+import MorePostOptionsButton from "../MorePostOptionsButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -77,13 +79,7 @@ export interface PostData {
   stats: Stats;
 }
 
-interface PostCallbacks {
-  onMoreOptions: () => void;
-}
-
-type LoadedPostCardProps = PostData & PostCallbacks;
-
-type PostCardProps = LoadedPostCardProps;
+type PostCardProps = PostData;
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
@@ -160,16 +156,26 @@ const PostCard = (props: PostCardProps) => {
                 </YStack>
               </XStack>
             </View>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               hitSlop={20}
               style={{ position: "absolute", bottom: 15, right: 15 }}
               onPress={() => {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                props.onMoreOptions();
+                show({
+                  title: "More Options",
+                  buttonOptions: [
+                    { text: "Save Post", onPress: () => {} },
+                    { text: "Report Post", onPress: () => {} },
+                  ],
+                });
               }}
             >
               <MoreHorizontal />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+            <MorePostOptionsButton
+              mediaUrl={props.media.url}
+              style={{ position: "absolute", bottom: 15, right: 15 }}
+            />
           </View>
         </View>
 
