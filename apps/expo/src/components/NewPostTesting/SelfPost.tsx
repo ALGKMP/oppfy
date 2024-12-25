@@ -9,7 +9,6 @@ import { useBottomSheetController } from "../ui/NewBottomSheet";
 import { useComments } from "./hooks/useComments";
 import { useDeletePost } from "./hooks/useDeletePost";
 import { useLikePost } from "./hooks/useLikePost";
-import { usePostActions } from "./hooks/useSavePost";
 import CommentsBottomSheet from "./ui/CommentsBottomSheet";
 import type { PostData } from "./ui/PostCard";
 import PostCard from "./ui/PostCard";

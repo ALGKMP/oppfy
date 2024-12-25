@@ -15,10 +15,9 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
-import SelfPost from "~/components/NewPostTesting/SelfPost";
 import PostCard from "~/components/NewPostTesting/ui/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
-import EmptyPlaceholder from "~/components/UIPlaceholders/EmptyPlaceholder";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -33,11 +32,7 @@ const SelfProfile = React.memo(() => {
   const navigation = useNavigation();
   const router = useRouter();
 
-  const {
-    profile: profileData,
-    isLoading: isLoadingProfileData,
-    refetch: refetchProfile,
-  } = useProfile();
+  const { data: profileData } = useProfile();
 
   const {
     data: postsData,
@@ -48,17 +43,19 @@ const SelfProfile = React.memo(() => {
     hasNextPage,
   } = api.post.paginatePostsOfUserSelf.useInfiniteQuery(
     { pageSize: 10 },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      refetchOnMount: true,
+    },
   );
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await Promise.all([refetchProfile(), refetchPosts()]);
+    await refetchPosts();
     setIsRefreshing(false);
-  }, [refetchProfile, refetchPosts]);
+  }, [refetchPosts]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -71,7 +68,7 @@ const SelfProfile = React.memo(() => {
     [postsData],
   );
 
-  const isLoading = isLoadingProfileData || isLoadingPostData;
+  const isLoading = isLoadingPostData;
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -101,6 +98,8 @@ const SelfProfile = React.memo(() => {
     });
   }, [navigation, profileData?.username, router]);
 
+  const [viewableItems, setViewableItems] = useState<string[]>([]);
+
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const visibleItemIds = viewableItems
@@ -113,11 +112,19 @@ const SelfProfile = React.memo(() => {
     [],
   );
 
+  const viewabilityConfig = useMemo(
+    () => ({
+      itemVisiblePercentThreshold: 40,
+    }),
+    [],
+  );
+
   const renderPost = useCallback(
     ({ item }: { item: Post }) => {
       return (
-        <SelfPost
-          id={item.postId}
+        <PostCard
+          postId={item.postId}
+          endpoint="self-profile"
           createdAt={item.createdAt}
           caption={item.caption}
           self={{
@@ -136,12 +143,18 @@ const SelfProfile = React.memo(() => {
             profilePicture: item.recipientProfilePicture,
           }}
           media={{
+            id: item.postId,
             type: item.mediaType,
             url: item.imageUrl,
             isViewable: viewableItems.includes(item.postId),
             dimensions: {
               width: item.width,
               height: item.height,
+            },
+            recipient: {
+              id: item.recipientId,
+              username: item.recipientUsername ?? "",
+              profilePicture: item.recipientProfilePicture,
             },
           }}
           stats={{
@@ -151,7 +164,12 @@ const SelfProfile = React.memo(() => {
         />
       );
     },
-    [profileData, viewableItems],
+    [
+      profileData?.profilePictureUrl,
+      profileData?.userId,
+      profileData?.username,
+      viewableItems,
+    ],
   );
 
   const renderHeader = () => (
@@ -165,7 +183,7 @@ const SelfProfile = React.memo(() => {
     </YStack>
   );
 
-  const renderEmptyState = useCallback(
+  const renderNoPosts = useCallback(
     () => (
       <View paddingTop="$6">
         <EmptyPlaceholder
@@ -176,6 +194,18 @@ const SelfProfile = React.memo(() => {
     ),
     [],
   );
+
+  const listFooterComponent = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          <PostCard loading />
+          <PostCard loading />
+        </YStack>
+      );
+    }
+    return null;
+  }, [isLoading]);
 
   if (isLoading) {
     return (
@@ -188,28 +218,31 @@ const SelfProfile = React.memo(() => {
   }
 
   return (
-    <BaseScreenView padding={0} paddingBottom={0}>
-      <FlashList
-        ref={scrollRef}
-        data={postItems}
-        renderItem={renderPost}
-        ListHeaderComponent={renderHeader}
-        keyExtractor={(item) => `self-profile-post-${item.postId}`}
-        estimatedItemSize={600}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleOnEndReached}
-        onRefresh={handleRefresh}
-        refreshing={isRefreshing}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-        extraData={viewableItems}
-        ItemSeparatorComponent={() => <Spacer size="$4" />}
-        ListHeaderComponentStyle={{
-          marginBottom: getToken("$4", "space") as number,
-        }}
-        ListEmptyComponent={renderEmptyState}
-      />
-    </BaseScreenView>
+    <>
+      <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
+        <FlashList
+          ref={scrollRef}
+          data={postItems}
+          renderItem={renderPost}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderNoPosts}
+          ListFooterComponent={listFooterComponent}
+          keyExtractor={(item) => `self-profile-post-${item.postId}`}
+          estimatedItemSize={300}
+          showsVerticalScrollIndicator={false}
+          onEndReached={handleOnEndReached}
+          onRefresh={handleRefresh}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          extraData={{ viewableItems, postItems }}
+          refreshing={isRefreshing}
+          ItemSeparatorComponent={() => <Spacer size="$4" />}
+          ListHeaderComponentStyle={{
+            marginBottom: getToken("$4", "space") as number,
+          }}
+        />
+      </BaseScreenView>
+    </>
   );
 });
 
