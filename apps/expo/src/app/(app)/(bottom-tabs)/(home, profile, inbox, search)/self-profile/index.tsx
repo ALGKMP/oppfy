@@ -15,7 +15,7 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
-import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import PostCard from "~/components/NewPostTesting/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";

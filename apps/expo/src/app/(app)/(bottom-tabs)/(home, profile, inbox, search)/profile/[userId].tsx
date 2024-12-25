@@ -16,7 +16,7 @@ import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import BlockUserHeader from "~/components/Headers/BlockHeader";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
-import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import PostCard from "~/components/NewPostTesting/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
@@ -87,7 +87,7 @@ const OtherProfile = React.memo(() => {
       title: username,
       headerRight: () => <BlockUserHeader userId={userId} />,
     });
-  }, [navigation, username ]);
+  }, [navigation, username]);
 
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 

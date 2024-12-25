@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 
-import PostCard from "./ui/PostCard";
-import type { PostData } from "./ui/PostCard";
+import PostCard from "./PostCard";
+import type { PostData } from "./PostCard";
 
 interface OtherPostProps extends PostData {
   endpoint: "other-profile" | "home-feed";

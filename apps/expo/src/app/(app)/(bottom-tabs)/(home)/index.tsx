@@ -1,5 +1,4 @@
-import React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -20,7 +19,7 @@ import {
 
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import OtherPost from "~/components/NewPostTesting/OtherPost";
-import PostCard from "~/components/NewPostTesting/ui/PostCard";
+import PostCard from "~/components/NewPostTesting/PostCard";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -149,7 +148,6 @@ const HomeScreen = () => {
   const isLoading = isLoadingPostData || isLoadingProfile;
 
   const renderFooter = useCallback(() => {
-
     // if (isLoading) {
     //   return (
     //     <YStack gap="$4">
@@ -177,8 +175,7 @@ const HomeScreen = () => {
         >
           {Array.from({ length: 3 }).map(() => (
             // <PostCard />
-            <>
-            </>
+            <></>
           ))}
         </YStack>
       ) : (

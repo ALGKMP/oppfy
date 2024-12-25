@@ -28,16 +28,16 @@ import {
   XStack,
   YStack,
 } from "tamagui";
+
 import { useSession } from "~/contexts/SessionContext";
 import useProfile from "~/hooks/useProfile";
-
 import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import Avatar from "../../Avatar";
-import { BlurContextMenuWrapper } from "../../ContextMenu";
-import { Skeleton } from "../../Skeletons";
-import { TimeAgo } from "../../Texts";
-import { EmptyPlaceholder } from "../../UIPlaceholders";
-import { useComments } from "../hooks/useComments";
+import Avatar from "../Avatar";
+import { BlurContextMenuWrapper } from "../ContextMenu";
+import { Skeleton } from "../Skeletons";
+import { TimeAgo } from "../Texts";
+import { EmptyPlaceholder } from "../UIPlaceholders";
+import { useComments } from "./hooks/useComments";
 
 /*
  * TODO: Clean up the CommentItem component.
@@ -67,7 +67,6 @@ const CommentsBottomSheet = forwardRef<
   BottomSheetModal,
   CommentsBottomSheetProps
 >((props) => {
-
   const {
     isLoadingComments,
     commentItems,
@@ -401,7 +400,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
 });
-
 
 /*
  * ==========================================

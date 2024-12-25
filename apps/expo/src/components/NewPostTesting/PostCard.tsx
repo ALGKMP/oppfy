@@ -14,18 +14,18 @@ import Skeleton from "~/components/Skeletons/Skeleton";
 import { Paragraph, Text } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import Avatar from "../../Avatar";
-import CardContainer from "../../Containers/CardContainer";
-import GradientHeart, { useHeartAnimations } from "../../Icons/GradientHeart";
-import Mute, { useMuteAnimations } from "../../Icons/Mute";
-import CommentButton from "../CommentButton";
-import CommentsCount from "../CommentsCount";
-import { useLikePost } from "../hooks/useLikePost";
-import LikeButton from "../LikeButton";
-import PostCaption from "../PostCaption";
-import PostDate from "../PostDate";
-import ShareButton from "../ShareButton";
-import MorePostOptionsButton from "../MorePostOptionsButton";
+import Avatar from "../Avatar";
+import CardContainer from "../Containers/CardContainer";
+import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
+import Mute, { useMuteAnimations } from "../Icons/Mute";
+import CommentButton from "./CommentButton";
+import CommentsCount from "./CommentsCount";
+import { useLikePost } from "./hooks/useLikePost";
+import LikeButton from "./LikeButton";
+import MorePostOptionsButton from "./MorePostOptionsButton";
+import PostCaption from "./PostCaption";
+import PostDate from "./PostDate";
+import ShareButton from "./ShareButton";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -113,13 +113,9 @@ const PostCard = (props: PostCardProps) => {
         <View marginHorizontal="$-3">
           <View>
             {props.media.type === "image" ? (
-              <ImageComponent
-                media={props.media}
-              />
+              <ImageComponent media={props.media} />
             ) : (
-              <VideoPlayer
-                media={props.media}
-              />
+              <VideoPlayer media={props.media} />
             )}
             <View position="absolute" bottom={15} left={15}>
               <XStack alignItems="center" gap="$3">
