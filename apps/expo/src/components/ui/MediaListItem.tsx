@@ -39,13 +39,7 @@ export const MediaListItem = ({
     <XStack alignItems="center" gap="$3">
       {imageUrl && (
         <Image
-          {...(typeof imageUrl === "string"
-            ? {
-                source: {
-                  uri: imageUrl,
-                },
-              }
-            : { imageUrl })}
+          source={typeof imageUrl === "string" ? { uri: imageUrl } : imageUrl}
           width={56}
           height={56}
           borderRadius={28}
