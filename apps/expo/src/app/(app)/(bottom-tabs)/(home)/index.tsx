@@ -17,7 +17,7 @@ import {
 } from "tamagui";
 
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
-import PostCard from "~/components/NewPostTesting/PostCard";
+import PostCard from "~/components/Post/PostCard";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -243,12 +243,7 @@ const EmptyHomeScreen = () => {
   const { profile } = useProfile();
 
   return (
-    <YStack
-      flex={1}
-      alignItems="center"
-      justifyContent="center"
-      gap="$3"
-    >
+    <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
       <YStack justifyContent="center" alignItems="center">
         <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
           Welcome

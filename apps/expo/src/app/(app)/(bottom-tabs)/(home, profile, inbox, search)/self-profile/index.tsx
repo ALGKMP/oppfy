@@ -1,4 +1,10 @@
-import React, { useCallback, useLayoutEffect, useMemo, useState, useRef } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { TouchableOpacity } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
@@ -9,8 +15,8 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
-import PostCard from "~/components/NewPostTesting/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
+import PostCard from "~/components/Post/PostCard";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";

@@ -15,8 +15,8 @@ import { getToken, Spacer, View, YStack } from "tamagui";
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
 import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import BlockUserHeader from "~/components/Headers/BlockHeader";
-import PostCard from "~/components/NewPostTesting/PostCard";
 import Header from "~/components/NewProfileTesting/Header";
+import PostCard from "~/components/Post/PostCard";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
@@ -226,7 +226,7 @@ const OtherProfile = React.memo(() => {
     return (
       <BaseScreenView padding={0} paddingBottom={0}>
         <YStack gap="$4">
-          <PostCard.loading/>
+          <PostCard.loading />
         </YStack>
       </BaseScreenView>
     );
