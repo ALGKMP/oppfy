@@ -1,5 +1,4 @@
 import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
-import Haptics from "expo-haptics";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 
 import { useActionSheetController } from "~/components/ui";
@@ -113,7 +112,6 @@ const MorePostOptionsButton = ({
       hitSlop={20}
       style={style}
       onPress={() => {
-        // void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         show({
           title: "More Options",
           buttonOptions:
