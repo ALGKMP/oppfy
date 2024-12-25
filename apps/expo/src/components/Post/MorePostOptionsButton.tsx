@@ -27,7 +27,7 @@ const MorePostOptionsButton = ({
 
   const { user } = useSession();
 
-  const { show } = useActionSheetController();
+  const { show, hide } = useActionSheetController();
 
   const buttonOptionsOther = [
     {
@@ -36,11 +36,18 @@ const MorePostOptionsButton = ({
     },
     {
       text: "Report Post",
+      textProps: {
+        color: "$red9",
+      },
       onPress: () => {
-        // hide();
+        hide();
         setTimeout(() => {
+          console.log("Showing report post");
           show({
             title: "Report Post",
+            titleProps: {
+              color: "$red9",
+            },
             buttonOptions: [
               {
                 text: "Violent or abusive",
@@ -76,7 +83,7 @@ const MorePostOptionsButton = ({
               },
             ],
           });
-        }, 4000);
+        }, 2000);
       },
     },
   ];
