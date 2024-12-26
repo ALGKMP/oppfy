@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
       ],
       type: "article",
-      url: `https://opp.oppfy.app/post/${post.postId}`,
+      url: `https://oppfy.app/post/${post.postId}`,
     },
     twitter: {
       card: "summary_large_image",

@@ -9,7 +9,7 @@ import { env } from "~/env";
 export const metadata: Metadata = {
   metadataBase: new URL(
     env.VERCEL_ENV === "production"
-      ? "https://opp.oppfy.app"
+      ? "https://oppfy.app"
       : "http://localhost:3000",
   ),
   title: "Oppfy",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "Oppfy",
     description:
       "Experience a new kind of social media where your friends capture your most authentic moments",
-    url: "https://opp.oppfy.app",
+    url: "https://oppfy.app",
     siteName: "Oppfy",
     images: [
       {
