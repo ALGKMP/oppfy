@@ -70,6 +70,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "expo-router",
     "react-native-image-marker",
+    "@config-plugins/ffmpeg-kit-react-native",
     "@react-native-firebase/app",
     "@react-native-firebase/auth",
     "@react-native-firebase/perf",
