@@ -33,7 +33,6 @@ const TabButton = React.memo(
         accessibilityRole="button"
         accessibilityState={isFocused ? { selected: true } : {}}
         accessibilityLabel={options.tabBarAccessibilityLabel}
-        testID={options.tabBarTestID}
         onPress={onPress}
         onLongPress={onLongPress}
         style={styles.tabButton}
@@ -116,7 +115,7 @@ const BottomTabBar = ({
       edges={["bottom"]}
       style={{ backgroundColor: theme.background.val }}
     >
-      <XStack height="$6" borderTopWidth={1} borderTopColor="$gray2">
+      <XStack height={50} borderTopWidth={1} borderTopColor="$gray2">
         {tabButtons}
       </XStack>
     </SafeAreaView>
