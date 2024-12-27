@@ -265,7 +265,7 @@ const Inbox = () => {
       ListFooterComponent={GridSuggestions}
       ItemSeparatorComponent={Spacer}
       ListHeaderComponentStyle={{
-        paddingBottom: getToken("$4", "space"),
+        paddingBottom: getToken("$2", "space"),
       }}
       ListFooterComponentStyle={{
         marginTop: getToken("$2", "space"),

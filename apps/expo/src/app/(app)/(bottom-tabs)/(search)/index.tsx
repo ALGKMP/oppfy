@@ -75,12 +75,18 @@ const Search = () => {
             setSearchResults([]);
           }}
         />
-
-        {!searchTerm && <GridSuggestions />}
       </YStack>
     ),
     [searchTerm, performSearch],
   );
+
+  const ListFooterComponent = useMemo(() => {
+    if (!searchTerm) {
+      return <GridSuggestions />;
+    }
+
+    return null;
+  }, [searchTerm]);
 
   const ListEmptyComponent = useCallback(() => {
     if (isSearching) {
@@ -111,8 +117,10 @@ const Search = () => {
       estimatedItemSize={75}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
+      ListFooterComponent={ListFooterComponent}
       ItemSeparatorComponent={Spacer}
       ListHeaderComponentStyle={{
+        paddingTop: getToken("$2", "space"),
         paddingBottom: getToken("$4", "space"),
       }}
       contentContainerStyle={{
