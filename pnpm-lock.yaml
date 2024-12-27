@@ -50,10 +50,6 @@ catalogs:
 importers:
 
   .:
-    dependencies:
-      sort-package-json:
-        specifier: ^2.12.0
-        version: 2.12.0
     devDependencies:
       '@oppfy/prettier-config':
         specifier: workspace:*
@@ -64,6 +60,9 @@ importers:
       prettier:
         specifier: ^3.2.5
         version: 3.4.2
+      sort-package-json:
+        specifier: ^2.12.0
+        version: 2.12.0
       turbo:
         specifier: ^2.0.6
         version: 2.3.3
@@ -73,6 +72,9 @@ importers:
 
   apps/expo:
     dependencies:
+      '@config-plugins/ffmpeg-kit-react-native':
+        specifier: ^9.0.0
+        version: 9.0.0(expo@52.0.18(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1)))(babel-plugin-react-compiler@19.0.0-beta-37ed2a7-20241206)(react-compiler-runtime@19.0.0-beta-37ed2a7-20241206(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1))(react@18.3.1))
       '@expo-google-fonts/inter':
         specifier: ^0.2.3
         version: 0.2.3
@@ -280,6 +282,9 @@ importers:
       expo-web-browser:
         specifier: ~14.0.1
         version: 14.0.1(expo@52.0.18(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1)))(babel-plugin-react-compiler@19.0.0-beta-37ed2a7-20241206)(react-compiler-runtime@19.0.0-beta-37ed2a7-20241206(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1))(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1))
+      ffmpeg-kit-react-native:
+        specifier: ^6.0.2
+        version: 6.0.2(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1))(react@18.3.1)
       fuse.js:
         specifier: ^7.0.0
         version: 7.0.0
@@ -2383,6 +2388,11 @@ packages:
     resolution: {integrity: sha512-tTQ0uDSCL0ypeMa8T/E9wAZRGKWj8kXP7+6RYgPTfOPs9N07C9xM8P02GJ3feETap4Ux5S69D9nteq9mEj86NA==}
     peerDependencies:
       react: '>=16.3.0'
+
+  '@config-plugins/ffmpeg-kit-react-native@9.0.0':
+    resolution: {integrity: sha512-04bXwdq7pmUPoGqYV0YGsrW/8Db+TNicn2Hznb5t+Dl740z9QkNGP4A38y1Mdz7mCU2EW0riASwl/JTH+6rBvw==}
+    peerDependencies:
+      expo: ^52
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -6984,6 +6994,12 @@ packages:
 
   fetch-retry@4.1.1:
     resolution: {integrity: sha512-e6eB7zN6UBSwGVwrbWVH+gdLnkW9WwHhmq2YDK1Sh30pzx1onRVGBvogTlUeWxwTa+L86NYdo4hFkh7O8ZjSnA==}
+
+  ffmpeg-kit-react-native@6.0.2:
+    resolution: {integrity: sha512-r9uSmahq8TeyIb7fXf3ft+uUXyoeWRFa99+khjo0TAzWO9y0z9wU7eGnab9JLw1MmCB9v64o4yojNluJhVm9nQ==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
 
   figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
@@ -12705,6 +12721,11 @@ snapshots:
       deepmerge: 3.3.0
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
+
+  '@config-plugins/ffmpeg-kit-react-native@9.0.0(expo@52.0.18(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1)))(babel-plugin-react-compiler@19.0.0-beta-37ed2a7-20241206)(react-compiler-runtime@19.0.0-beta-37ed2a7-20241206(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1))(react@18.3.1))':
+    dependencies:
+      expo: 52.0.18(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1)))(babel-plugin-react-compiler@19.0.0-beta-37ed2a7-20241206)(react-compiler-runtime@19.0.0-beta-37ed2a7-20241206(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1))(react@18.3.1)
+      semver: 7.6.3
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -18608,6 +18629,11 @@ snapshots:
       picomatch: 4.0.2
 
   fetch-retry@4.1.1: {}
+
+  ffmpeg-kit-react-native@6.0.2(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-native: 0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.16)(react@18.3.1)
 
   figures@3.2.0:
     dependencies:
