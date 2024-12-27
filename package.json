@@ -23,13 +23,11 @@
     "typecheck": "turbo typecheck"
   },
   "prettier": "@oppfy/prettier-config",
-  "dependencies": {
-    "sort-package-json": "^2.12.0"
-  },
   "devDependencies": {
     "@oppfy/prettier-config": "workspace:*",
     "@turbo/gen": "^2.0.4",
     "prettier": "^3.2.5",
+    "sort-package-json": "^2.12.0",
     "turbo": "^2.0.6",
     "typescript": "^5.4"
   },
