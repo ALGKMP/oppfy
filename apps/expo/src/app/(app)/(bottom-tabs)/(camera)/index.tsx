@@ -115,15 +115,23 @@ const CameraPage = () => {
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
 
-      const width = Math.min(media.width, media.height);
-      const height = Math.max(media.width, media.height);
+      let width: number | undefined = undefined;
+      let height: number | undefined = undefined;
 
-      if (!width || !height) {
+      if (type === "photo") {
+        width = format?.photoWidth;
+        height = format?.photoHeight;
+      } else {
+        width = format?.videoWidth;
+        height = format?.videoHeight;
+      }
+
+      if (width === undefined || height === undefined) {
         throw new Error("Captured media dimensions not found");
       }
 
       router.push({
-        pathname: "/preview",
+        pathname: "/editor",
         params: {
           type,
           uri,
@@ -132,7 +140,7 @@ const CameraPage = () => {
         },
       });
     },
-    [format, router],
+    [router],
   );
 
   const onOpenMediaPicker = useCallback(async () => {
