@@ -45,7 +45,7 @@ const useMediaProcessing = () => {
       }
 
       // Ensure output is h264 for compatibility
-      command = `${command} -c:v libx264 -preset fast -crf 23 -c:a aac "${outputUri}"`;
+      command = `${command} -c:v h264 -b:v 2M -c:a aac "${outputUri}"`;
 
       try {
         await FFmpegKit.execute(command);
