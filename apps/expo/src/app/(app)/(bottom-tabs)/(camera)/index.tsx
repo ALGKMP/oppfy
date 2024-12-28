@@ -119,11 +119,11 @@ const CameraPage = () => {
       let height: number | undefined = undefined;
 
       if (type === "photo") {
-        width = format?.photoWidth;
-        height = format?.photoHeight;
+        width = Math.min(format?.photoWidth ?? 0, format?.photoHeight ?? 0);
+        height = Math.max(format?.photoHeight ?? 0, format?.photoWidth ?? 0);
       } else {
-        width = format?.videoWidth;
-        height = format?.videoHeight;
+        width = Math.min(format?.videoWidth ?? 0, format?.videoHeight ?? 0);
+        height = Math.max(format?.videoHeight ?? 0, format?.videoWidth ?? 0);
       }
 
       if (width === undefined || height === undefined) {
