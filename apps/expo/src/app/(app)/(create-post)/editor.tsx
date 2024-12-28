@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
-import { useEvent } from "expo";
-import type { AVPlaybackStatus } from "expo-av";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -57,22 +55,60 @@ const MediaEditor = () => {
 
   const { processVideo, processPhoto } = useMediaProcessing();
 
+  const [currentTime, setCurrentTime] = useState(0);
+
   const player = useVideoPlayer(uri, (player) => {
     if (type === "video") {
       player.loop = true;
       player.play();
+    }
+  });
 
+  useEffect(() => {
+    if (type === "video") {
       const subscription = player.addListener("statusChange", ({ status }) => {
         if (status === "readyToPlay" && videoDuration === 0) {
-          setVideoDuration(player.duration);
+          const duration = player.duration;
+          setVideoDuration(duration);
+          setTrimEnd(Math.min(duration, 60));
         }
       });
 
+      const timeSubscription = player.addListener(
+        "timeUpdate",
+        ({ currentTime }) => {
+          setCurrentTime(currentTime);
+          if (currentTime >= trimEnd) {
+            player.currentTime = trimStart;
+          }
+        },
+      );
+
       return () => {
         subscription.remove();
+        timeSubscription.remove();
       };
     }
-  });
+  }, [type, player, videoDuration, trimStart, trimEnd]);
+
+  const handleTrimsChange = useCallback(
+    (start: number, end: number) => {
+      setTrimStart(start);
+      setTrimEnd(end);
+
+      if (currentTime < start || currentTime > end) {
+        player.currentTime = start;
+      }
+    },
+    [player, currentTime],
+  );
+
+  const handleSeek = useCallback(
+    (time: number) => {
+      player.currentTime = time;
+    },
+    [player],
+  );
 
   const onSave = useCallback(async () => {
     try {
@@ -186,14 +222,9 @@ const MediaEditor = () => {
               uri={uri}
               duration={videoDuration}
               maxDuration={60}
-              onTrimsChange={(start, end) => {
-                setTrimStart(start);
-                setTrimEnd(end);
-                if (player.playing) {
-                  player.pause();
-                }
-                player.play();
-              }}
+              onTrimsChange={handleTrimsChange}
+              onSeek={handleSeek}
+              currentTime={currentTime}
             />
           )}
         </YStack>
@@ -201,6 +232,8 @@ const MediaEditor = () => {
     </ScreenView>
   );
 };
+
+export default MediaEditor;
 
 const styles = StyleSheet.create({
   iconButton: {
@@ -219,5 +252,3 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(64, 64, 64, 0.4)",
   },
 });
-
-export default MediaEditor;
