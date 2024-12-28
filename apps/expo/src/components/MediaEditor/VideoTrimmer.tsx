@@ -83,7 +83,7 @@ export default function VideoTrimmer({
 
   // Default rightEdge => up to maxDuration
   const rightEdge = useSharedValue(
-    (Math.min(duration, maxDuration) / duration) * CONTAINER_WIDTH
+    (Math.min(duration, maxDuration) / duration) * CONTAINER_WIDTH,
   );
   const rightEdgeOnStart = useSharedValue(0);
 
@@ -139,7 +139,7 @@ export default function VideoTrimmer({
       "worklet";
       return (px / CONTAINER_WIDTH) * duration;
     },
-    [duration]
+    [duration],
   );
 
   /************************************************************
@@ -160,7 +160,7 @@ export default function VideoTrimmer({
       if (onTrimsChange) {
         runOnJS(onTrimsChange)(startSec, endSec);
       }
-    }
+    },
   );
 
   /************************************************************
@@ -190,21 +190,11 @@ export default function VideoTrimmer({
 
       leftEdge.value = newLeft;
 
-      // Push or pull the seeker if crossing from left to right or right to left
-      if (!isSeeking.value) {
-        // Dragging right and crossing the seeker
-        if (e.translationX > 0 && newLeft > seekerX.value) {
-          seekerX.value = newLeft;
-          if (onSeek) {
-            runOnJS(onSeek)(pxToSec(seekerX.value));
-          }
-        }
-        // Dragging left and crossing the seeker
-        else if (e.translationX < 0 && newLeft < seekerX.value) {
-          seekerX.value = newLeft;
-          if (onSeek) {
-            runOnJS(onSeek)(pxToSec(seekerX.value));
-          }
+      // Only adjust seeker if it's outside the new trim region
+      if (!isSeeking.value && seekerX.value < newLeft) {
+        seekerX.value = newLeft;
+        if (onSeek) {
+          runOnJS(onSeek)(pxToSec(seekerX.value));
         }
       }
     })
@@ -236,21 +226,11 @@ export default function VideoTrimmer({
 
       rightEdge.value = newRight;
 
-      // Pull or push the seeker if crossing from right to left or left to right
-      if (!isSeeking.value) {
-        // Dragging left and crossing the seeker
-        if (e.translationX < 0 && newRight < seekerX.value) {
-          seekerX.value = newRight;
-          if (onSeek) {
-            runOnJS(onSeek)(pxToSec(seekerX.value));
-          }
-        }
-        // Dragging right and crossing the seeker
-        else if (e.translationX > 0 && newRight > seekerX.value) {
-          seekerX.value = newRight;
-          if (onSeek) {
-            runOnJS(onSeek)(pxToSec(seekerX.value));
-          }
+      // Only adjust seeker if it's outside the new trim region
+      if (!isSeeking.value && seekerX.value > newRight) {
+        seekerX.value = newRight;
+        if (onSeek) {
+          runOnJS(onSeek)(pxToSec(seekerX.value));
         }
       }
     })
@@ -285,17 +265,14 @@ export default function VideoTrimmer({
       leftEdge.value = newLeft;
       rightEdge.value = newRight;
 
-      // Push/pull the seeker if the region crosses it
+      // Only move seeker if it's outside the new trim region
       if (!isSeeking.value) {
-        // Moving the trimmer box to the right
-        if (shift > 0 && newLeft > seekerX.value) {
+        if (seekerX.value < newLeft) {
           seekerX.value = newLeft;
           if (onSeek) {
             runOnJS(onSeek)(pxToSec(seekerX.value));
           }
-        }
-        // Moving the trimmer box to the left
-        else if (shift < 0 && newRight < seekerX.value) {
+        } else if (seekerX.value > newRight) {
           seekerX.value = newRight;
           if (onSeek) {
             runOnJS(onSeek)(pxToSec(seekerX.value));
@@ -327,9 +304,7 @@ export default function VideoTrimmer({
     })
     .onEnd(() => {
       seekerX.value = withSpring(seekerX.value);
-      setTimeout(() => {
-        isSeeking.value = false;
-      }, 100);
+      isSeeking.value = false;
     });
 
   /************************************************************
