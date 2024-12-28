@@ -34,6 +34,9 @@ const SEEKER_WIDTH = 6;
 /** If you want the seeker to extend above/below the filmstrip */
 const SEEKER_OVERHANG = 6;
 
+/** Hit slop for better touch targets */
+const HIT_SLOP = { top: 24, bottom: 24, left: 24, right: 24 };
+
 /** How many thumbnails to generate */
 const FRAME_COUNT = 8;
 
@@ -163,6 +166,7 @@ const VideoTrimmer = ({
 
   // LEFT HANDLE => physically at [leftEdge - HANDLE_WIDTH.. leftEdge].
   const leftHandlePan = Gesture.Pan()
+    .hitSlop(HIT_SLOP)
     .onBegin(() => {
       leftEdgeOnStart.value = leftEdge.value;
       isTrimming.value = true;
@@ -199,6 +203,7 @@ const VideoTrimmer = ({
 
   // RIGHT HANDLE => physically at [rightEdge.. rightEdge + HANDLE_WIDTH].
   const rightHandlePan = Gesture.Pan()
+    .hitSlop(HIT_SLOP)
     .onBegin(() => {
       rightEdgeOnStart.value = rightEdge.value;
       isTrimming.value = true;
@@ -282,6 +287,7 @@ const VideoTrimmer = ({
 
   // SEEKER DRAG => move between [leftEdge..rightEdge]
   const seekerPan = Gesture.Pan()
+    .hitSlop(HIT_SLOP)
     .onBegin(() => {
       isSeeking.value = true;
       seekerXOnStart.value = seekerX.value;
