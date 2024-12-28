@@ -14,19 +14,17 @@ import * as VideoThumbnails from "expo-video-thumbnails";
 /** Example UI kit; replace with <Text> from RN if you prefer */
 import { Text } from "~/components/ui";
 
-/** Layout constants */
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const CONTAINER_WIDTH = SCREEN_WIDTH - 32; // horizontal padding
+const CONTAINER_WIDTH = SCREEN_WIDTH - 32;
 const FILMSTRIP_HEIGHT = 64;
 
-/** The width of each handle. “Right side” of left handle = leftEdge + HANDLE_WIDTH */
 const HANDLE_WIDTH = 12;
 const HANDLE_TOUCH_SLOP = 20;
 
 const FRAME_COUNT = 8;
 const DEFAULT_MAX_DURATION = 60;
 
-/** Utility: format mm:ss */
+/** Format mm:ss */
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds)) return "0:00";
   const mins = Math.floor(seconds / 60);
@@ -42,6 +40,13 @@ interface VideoTrimmerProps {
   onSeek?: (timeSec: number) => void;
 }
 
+/**
+ * A trimmer that:
+ * - The left edge is the start of the video,
+ * - The right edge is the end of the video,
+ * - The left handle is physically drawn to the left of leftEdge,
+ * - The right handle is physically drawn to the right of rightEdge.
+ */
 const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   uri,
   duration,
@@ -50,23 +55,24 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   onSeek,
 }) => {
   // ─────────────────────────────────────────────────────────────────────────────
-  // 1) Thumbnails + Loading
+  // 1) State for Thumbnails
   // ─────────────────────────────────────────────────────────────────────────────
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // For UI display
+  // For UI display (start/end times)
   const [localStart, setLocalStart] = useState(0);
   const [localEnd, setLocalEnd] = useState(Math.min(duration, maxDuration));
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 2) Shared Values for the TRIM region: leftEdge, rightEdge
+  // 2) Shared Values: leftEdge, rightEdge
+  //    Now leftEdge is the *actual* start, rightEdge is the *actual* end.
   // ─────────────────────────────────────────────────────────────────────────────
   const leftEdge = useSharedValue(0);
   const leftEdgeOnStart = useSharedValue(0);
 
   const rightEdge = useSharedValue(
-    (Math.min(duration, maxDuration) / duration) * CONTAINER_WIDTH,
+    (Math.min(duration, maxDuration) / duration) * CONTAINER_WIDTH
   );
   const rightEdgeOnStart = useSharedValue(0);
 
@@ -75,19 +81,16 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   const regionRightOnStart = useSharedValue(0);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 3) SEEKER State
+  // 3) SEEKER
   // ─────────────────────────────────────────────────────────────────────────────
   const seekerX = useSharedValue(0);
   const seekerXOnStart = useSharedValue(0);
 
-  // Are we dragging the seeker?
   const isSeeking = useSharedValue(false);
-
-  // Are we dragging *any* handle or the region?
   const isTrimming = useSharedValue(false);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 4) Generate Thumbnails
+  // 4) Thumbnails
   // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     let cancel = false;
@@ -119,14 +122,14 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   }, [uri, duration]);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 5) px -> sec
+  // 5) Utility: px -> sec
   // ─────────────────────────────────────────────────────────────────────────────
   const pxToSec = useCallback(
     (px: number) => {
       "worklet";
       return (px / CONTAINER_WIDTH) * duration;
     },
-    [duration],
+    [duration]
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -134,8 +137,10 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   // ─────────────────────────────────────────────────────────────────────────────
   useAnimatedReaction(
     () => {
-      const startPx = leftEdge.value + HANDLE_WIDTH;
+      // Our selected region is now [leftEdge.. rightEdge].
+      const startPx = leftEdge.value;
       const endPx = rightEdge.value;
+
       // clamp so we never invert
       const actualStartPx = Math.min(startPx, endPx - 1);
       const actualEndPx = Math.max(endPx, startPx + 1);
@@ -151,18 +156,15 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
       if (onTrimsChange) {
         runOnJS(onTrimsChange)(startSec, endSec);
       }
-    },
+    }
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
   // 7) GESTURES
+  //    We now define the bounding box as [leftEdge.. rightEdge].
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * LEFT HANDLE
-   * - Only move seeker if we drag *to the right* (e.translationX > 0)
-   *   and the bounding box crosses the seeker’s position.
-   */
+  // LEFT HANDLE: physically sits at [leftEdge - HANDLE_WIDTH.. leftEdge].
   const leftHandlePan = Gesture.Pan()
     .hitSlop({ horizontal: HANDLE_TOUCH_SLOP })
     .onBegin(() => {
@@ -173,31 +175,28 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
       const translation = e.translationX;
       let newLeft = leftEdgeOnStart.value + translation;
 
-      // clamp
-      if (newLeft < 0) {
-        newLeft = 0;
-      }
-      if (newLeft > rightEdge.value - HANDLE_WIDTH) {
-        newLeft = rightEdge.value - HANDLE_WIDTH;
+      // clamp: 0 <= newLeft <= rightEdge
+      if (newLeft < 0) newLeft = 0;
+      if (newLeft > rightEdge.value) {
+        newLeft = rightEdge.value;
       }
 
       // enforce maxDuration
-      const totalRangePx = rightEdge.value - (newLeft + HANDLE_WIDTH);
+      const totalWidthPx = rightEdge.value - newLeft;
       const maxRangePx = (maxDuration / duration) * CONTAINER_WIDTH;
-      if (totalRangePx > maxRangePx) {
-        newLeft = rightEdge.value - HANDLE_WIDTH - maxRangePx;
+      if (totalWidthPx > maxRangePx) {
+        newLeft = rightEdge.value - maxRangePx;
         if (newLeft < 0) newLeft = 0;
       }
 
+      // set
       leftEdge.value = newLeft;
 
-      // Only "push" the seeker if user is dragging RIGHT (translation > 0),
-      // we're not currently dragging the seeker, and the new bounding box
-      // crosses the seeker.
+      // Snap seeker only if user is shrinking across it (dragging right)
+      // and crossing the seeker.
       if (!isSeeking.value && translation > 0) {
-        const newStartPx = newLeft + HANDLE_WIDTH;
-        if (newStartPx > seekerX.value) {
-          seekerX.value = newStartPx;
+        if (newLeft > seekerX.value) {
+          seekerX.value = newLeft;
         }
       }
     })
@@ -206,11 +205,7 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
       isTrimming.value = false;
     });
 
-  /**
-   * RIGHT HANDLE
-   * - Only move seeker if we drag *to the left* (e.translationX < 0)
-   *   and the bounding box crosses the seeker’s position.
-   */
+  // RIGHT HANDLE: physically sits at [rightEdge.. rightEdge + HANDLE_WIDTH].
   const rightHandlePan = Gesture.Pan()
     .hitSlop({ horizontal: HANDLE_TOUCH_SLOP })
     .onBegin(() => {
@@ -221,27 +216,27 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
       const translation = e.translationX;
       let newRight = rightEdgeOnStart.value + translation;
 
-      // clamp
-      if (newRight < leftEdge.value + HANDLE_WIDTH) {
-        newRight = leftEdge.value + HANDLE_WIDTH;
+      // clamp: leftEdge <= newRight <= CONTAINER_WIDTH
+      if (newRight < leftEdge.value) {
+        newRight = leftEdge.value;
       }
       if (newRight > CONTAINER_WIDTH) {
         newRight = CONTAINER_WIDTH;
       }
 
       // enforce maxDuration
-      const totalRangePx = newRight - (leftEdge.value + HANDLE_WIDTH);
+      const totalWidthPx = newRight - leftEdge.value;
       const maxRangePx = (maxDuration / duration) * CONTAINER_WIDTH;
-      if (totalRangePx > maxRangePx) {
-        newRight = leftEdge.value + HANDLE_WIDTH + maxRangePx;
+      if (totalWidthPx > maxRangePx) {
+        newRight = leftEdge.value + maxRangePx;
         if (newRight > CONTAINER_WIDTH) newRight = CONTAINER_WIDTH;
       }
 
+      // set
       rightEdge.value = newRight;
 
-      // Only "push" the seeker if user is dragging LEFT (translation < 0),
-      // we're not currently dragging the seeker, and the new bounding box
-      // crosses the seeker.
+      // Snap seeker only if user is shrinking across it (dragging left)
+      // and crossing the seeker.
       if (!isSeeking.value && translation < 0) {
         if (newRight < seekerX.value) {
           seekerX.value = newRight;
@@ -253,10 +248,7 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
       isTrimming.value = false;
     });
 
-  /**
-   * REGION DRAG
-   * - Move leftEdge/rightEdge in tandem, but do NOT move seeker.
-   */
+  // REGION DRAG: shift [leftEdge.. rightEdge] in tandem, no seeker snapping
   const regionPan = Gesture.Pan()
     .onBegin(() => {
       regionLeftOnStart.value = leftEdge.value;
@@ -288,10 +280,7 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
       isTrimming.value = false;
     });
 
-  /**
-   * SEEKER DRAG
-   * - Only clamps to [startPx..endPx].
-   */
+  // SEEKER: clamp to [leftEdge.. rightEdge]
   const seekerPan = Gesture.Pan()
     .onBegin(() => {
       isSeeking.value = true;
@@ -299,23 +288,17 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
     })
     .onUpdate((e) => {
       let newPos = seekerXOnStart.value + e.translationX;
-      const startPx = leftEdge.value + HANDLE_WIDTH;
-      const endPx = rightEdge.value;
-
-      if (newPos < startPx) newPos = startPx;
-      if (newPos > endPx) newPos = endPx;
-
+      if (newPos < leftEdge.value) newPos = leftEdge.value;
+      if (newPos > rightEdge.value) newPos = rightEdge.value;
       seekerX.value = newPos;
 
-      // callback for live scrubbing
+      // callback
       if (onSeek) {
-        const timeSec = pxToSec(newPos);
-        runOnJS(onSeek)(timeSec);
+        runOnJS(onSeek)(pxToSec(newPos));
       }
     })
     .onEnd(() => {
       seekerX.value = withSpring(seekerX.value);
-      // small delay before we say "done seeking"
       setTimeout(() => {
         isSeeking.value = false;
       }, 200);
@@ -324,32 +307,38 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   // ─────────────────────────────────────────────────────────────────────────────
   // 8) Animated Styles
   // ─────────────────────────────────────────────────────────────────────────────
-  const leftOverlayStyle = useAnimatedStyle(() => ({
-    width: leftEdge.value + HANDLE_WIDTH,
-  }));
 
+  // Overlays
+  const leftOverlayStyle = useAnimatedStyle(() => ({
+    // [0.. leftEdge]
+    width: leftEdge.value,
+  }));
   const rightOverlayStyle = useAnimatedStyle(() => ({
+    // [rightEdge.. CONTAINER_WIDTH]
     left: rightEdge.value,
     width: CONTAINER_WIDTH - rightEdge.value,
   }));
 
+  // The "selected area" => [leftEdge.. rightEdge]
   const selectedAreaStyle = useAnimatedStyle(() => {
-    const left = leftEdge.value + HANDLE_WIDTH;
-    const width = rightEdge.value - left;
+    const width = rightEdge.value - leftEdge.value;
     return {
-      left,
+      left: leftEdge.value,
       width: width < 0 ? 0 : width,
     };
   });
 
+  // Left handle => physically from [leftEdge - HANDLE_WIDTH.. leftEdge].
   const leftHandleStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: leftEdge.value }],
+    transform: [{ translateX: leftEdge.value - HANDLE_WIDTH }],
   }));
 
+  // Right handle => physically from [rightEdge.. rightEdge + HANDLE_WIDTH].
   const rightHandleStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: rightEdge.value }],
   }));
 
+  // Seeker => pinned at seekerX
   const seekerStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: seekerX.value }],
   }));
@@ -359,7 +348,7 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   // ─────────────────────────────────────────────────────────────────────────────
   return (
     <View style={styles.rootContainer}>
-      {/* Header row */}
+      {/* Header */}
       <View style={styles.headerRow}>
         <Text style={styles.headerTitle}>Trim Video</Text>
         <Text style={styles.headerTime}>
@@ -369,7 +358,7 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
 
       {/* Filmstrip */}
       <View style={styles.filmstripContainer}>
-        {/* Thumbnails row */}
+        {/* Thumbnails */}
         <View style={[styles.thumbnailRow, { width: CONTAINER_WIDTH }]}>
           {loading && (
             <ActivityIndicator
@@ -390,45 +379,42 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
             ))}
         </View>
 
-        {/* Left overlay => [0..(leftEdge+HANDLE_WIDTH)] */}
+        {/* Overlays */}
         <Animated.View
           style={[styles.overlay, styles.leftOverlay, leftOverlayStyle]}
         />
-
-        {/* Right overlay => [rightEdge..CONTAINER_WIDTH] */}
         <Animated.View
           style={[styles.overlay, styles.rightOverlay, rightOverlayStyle]}
         />
 
-        {/* Selected area => [leftEdge+HANDLE_WIDTH..rightEdge] */}
+        {/* Selected area => [leftEdge.. rightEdge] */}
         <Animated.View style={[styles.selectedArea, selectedAreaStyle]}>
-          {/* Region Drag */}
           <GestureDetector gesture={regionPan}>
             <View style={styles.centerDragArea} />
           </GestureDetector>
         </Animated.View>
 
-        {/* Left handle => pinned at leftEdge */}
+        {/* Left handle => [leftEdge - HANDLE_WIDTH.. leftEdge] */}
         <GestureDetector gesture={leftHandlePan}>
           <Animated.View
             style={[styles.handle, styles.leftHandle, leftHandleStyle]}
           />
         </GestureDetector>
 
-        {/* Right handle => pinned at rightEdge */}
+        {/* Right handle => [rightEdge.. rightEdge + HANDLE_WIDTH] */}
         <GestureDetector gesture={rightHandlePan}>
           <Animated.View
             style={[styles.handle, styles.rightHandle, rightHandleStyle]}
           />
         </GestureDetector>
 
-        {/* Seeker (playhead) => [startPx..endPx] */}
+        {/* Seeker => [seekerX.. seekerX] */}
         <GestureDetector gesture={seekerPan}>
           <Animated.View style={[styles.seeker, seekerStyle]} />
         </GestureDetector>
       </View>
 
-      {/* Footer row */}
+      {/* Footer */}
       <View style={styles.footerRow}>
         <Text>{formatTime(localStart)}</Text>
         <Text>{formatTime(localEnd)}</Text>
@@ -437,7 +423,6 @@ const ThreePieceVideoTrimmerWithSeeker: React.FC<VideoTrimmerProps> = ({
   );
 };
 
-/** Styles */
 const styles = StyleSheet.create({
   rootContainer: {
     width: "100%",
@@ -470,7 +455,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 
-  // Overlays
+  /** Overlays */
   overlay: {
     position: "absolute",
     top: 0,
@@ -484,7 +469,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
 
-  // Selected area
+  /** Selected area = [leftEdge.. rightEdge] */
   selectedArea: {
     position: "absolute",
     top: 0,
@@ -497,7 +482,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Handles
+  /** Handles */
   handle: {
     position: "absolute",
     top: 0,
@@ -508,7 +493,7 @@ const styles = StyleSheet.create({
   leftHandle: {},
   rightHandle: {},
 
-  // Seeker (playhead)
+  /** Seeker (playhead) */
   seeker: {
     position: "absolute",
     top: 0,
