@@ -6,7 +6,6 @@ import {
 } from "@gorhom/bottom-sheet";
 import { useTheme } from "tamagui";
 
-import { BaseScreenView } from "~/components/Views";
 import BottomSheetBackdrop from "./BottomSheetBackdrop";
 import BottomSheetHeader from "./BottomSheetHeader";
 
