@@ -26,7 +26,7 @@ import {
 import useMediaProcessing from "~/hooks/media/useMediaProcessing";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const PREVIEW_SCALE = 0.7; // 70% of screen width
+const PREVIEW_SCALE = 0.75; // 70% of screen width
 
 interface CropRegion {
   x: number;
@@ -150,22 +150,14 @@ const VideoEditorContent = ({
       </View>
 
       {videoDuration > 0 && (
-        <View
-          paddingHorizontal="$4"
-          paddingVertical="$4"
-          onLayout={handleTrimmerLayout}
-        >
-          {trimmerWidth > 0 && (
-            <VideoTrimmer
-              uri={uri}
-              duration={videoDuration}
-              maxDuration={60}
-              onTrimsChange={handleTrimsChange}
-              onSeek={handleSeek}
-              currentTime={player.currentTime}
-            />
-          )}
-        </View>
+        <VideoTrimmer
+          uri={uri}
+          maxDuration={60}
+          duration={videoDuration}
+          onTrimsChange={handleTrimsChange}
+          onSeek={handleSeek}
+          currentTime={player.currentTime}
+        />
       )}
     </YStack>
   );
@@ -232,7 +224,7 @@ const VideoEditor = () => {
   }, [router, uri, cropRegion, trimStart, trimEnd, processVideo]);
 
   return (
-    <ScreenView paddingTop={0} safeAreaEdges={["top"]}>
+    <ScreenView paddingTop={0} safeAreaEdges={["top"]} gap="$4">
       {/* Header */}
       <XStack alignItems="center" justifyContent="space-between">
         <TouchableOpacity
@@ -261,14 +253,12 @@ const VideoEditor = () => {
       </XStack>
 
       {/* Editor Content */}
-      <YStack flex={1} paddingVertical="$8">
-        <VideoEditorContent
-          uri={uri}
-          aspectRatio={aspectRatio}
-          onCropChange={setCropRegion}
-          onTrimChange={handleTrimChange}
-        />
-      </YStack>
+      <VideoEditorContent
+        uri={uri}
+        aspectRatio={aspectRatio}
+        onCropChange={setCropRegion}
+        onTrimChange={handleTrimChange}
+      />
     </ScreenView>
   );
 };
