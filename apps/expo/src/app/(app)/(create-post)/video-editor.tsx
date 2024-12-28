@@ -78,7 +78,6 @@ const VideoEditorContent = ({
     const timeSubscription = player.addListener(
       "timeUpdate",
       ({ currentTime: time }) => {
-        console.log("time", time);
         setCurrentTime(time);
         if (time >= trimEnd) {
           player.currentTime = trimStart;
@@ -163,7 +162,7 @@ const VideoEditorContent = ({
               maxDuration={60}
               onTrimsChange={handleTrimsChange}
               onSeek={handleSeek}
-              currentTime={currentTime}
+              currentTime={player.currentTime}
             />
           )}
         </View>
