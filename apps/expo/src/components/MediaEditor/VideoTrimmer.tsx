@@ -1,297 +1,410 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Dimensions, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Reanimated, {
+import Animated, {
   runOnJS,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
-import { Scissors } from "@tamagui/lucide-icons";
+import * as VideoThumbnails from "expo-video-thumbnails";
 
-import { Text, XStack, YStack } from "~/components/ui";
+/** Swap for your own UI kit or just use <Text> from RN */
+import { Text } from "~/components/ui";
 
+/** Layout constants */
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const TRIMMER_HEIGHT = 64;
+const CONTAINER_WIDTH = SCREEN_WIDTH - 32; // space for horizontal padding
+const FILMSTRIP_HEIGHT = 64;
+
 const HANDLE_WIDTH = 12;
-const HANDLE_BORDER_WIDTH = 3;
-const MAX_DURATION = 60; // 60 seconds
-const SEEK_WIDTH = 3;
+const HANDLE_TOUCH_SLOP = 20;
 
-const ReanimatedView = Reanimated.createAnimatedComponent(View);
+const FRAME_COUNT = 8;
+const DEFAULT_MAX_DURATION = 60;
 
-interface VideoTrimmerProps {
-  uri: string;
-  duration: number;
-  maxDuration?: number;
-  onTrimsChange?: (start: number, end: number) => void;
-  onSeek?: (time: number) => void;
-  currentTime?: number;
-}
-
-const formatTime = (seconds: number) => {
+/** Utility to display time in mm:ss */
+function formatTime(seconds: number) {
+  if (!Number.isFinite(seconds)) return "0:00";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
-};
+}
 
-export const VideoTrimmer = ({
+interface VideoTrimmerProps {
+  uri: string; // local or remote video URI
+  duration: number; // total length in seconds
+  maxDuration?: number; // maximum allowable selection
+  onTrimsChange?: (start: number, end: number) => void;
+}
+
+/**
+ * A video trimmer that splits the UI into three "pieces":
+ * left overlay, selected area, right overlay.
+ * The selected area has its own handle logic to reduce jitter.
+ */
+const ThreePieceVideoTrimmer: React.FC<VideoTrimmerProps> = ({
   uri,
   duration,
-  maxDuration = MAX_DURATION,
+  maxDuration = DEFAULT_MAX_DURATION,
   onTrimsChange,
-  onSeek,
-  currentTime = 0,
-}: VideoTrimmerProps) => {
+}) => {
+  // ---------------------------------------------------------------------------
+  // 1) Loading + Thumbnails
+  // ---------------------------------------------------------------------------
   const [thumbnails, setThumbnails] = useState<string[]>([]);
-  const [trimStart, setTrimStart] = useState(0);
-  const [trimEnd, setTrimEnd] = useState(Math.min(duration, maxDuration));
-  const [isDraggingSeek, setIsDraggingSeek] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Animation values
-  const startX = useSharedValue(0);
-  const endX = useSharedValue(SCREEN_WIDTH - HANDLE_WIDTH);
-  const translateX = useSharedValue(0);
-  const contextX = useSharedValue(0);
-  const seekX = useSharedValue(
-    (currentTime / duration) * (SCREEN_WIDTH - HANDLE_WIDTH),
+  // For textual display
+  const [localStart, setLocalStart] = useState(0);
+  const [localEnd, setLocalEnd] = useState(Math.min(duration, maxDuration));
+
+  // ---------------------------------------------------------------------------
+  // 2) Shared Values: leftEdge / rightEdge in px
+  // ---------------------------------------------------------------------------
+  const leftEdge = useSharedValue(0);
+  const leftEdgeOnStart = useSharedValue(0);
+
+  const rightEdge = useSharedValue(
+    (Math.min(duration, maxDuration) / duration) * CONTAINER_WIDTH,
   );
+  const rightEdgeOnStart = useSharedValue(0);
 
+  // For center-drag gesture:
+  const regionLeftOnStart = useSharedValue(0);
+  const regionRightOnStart = useSharedValue(0);
+
+  // ---------------------------------------------------------------------------
+  // 3) Generate Thumbnails
+  // ---------------------------------------------------------------------------
   useEffect(() => {
-    if (!isDraggingSeek) {
-      seekX.value = withTiming(
-        (currentTime / duration) * (SCREEN_WIDTH - HANDLE_WIDTH),
-      );
-    }
-  }, [currentTime, duration, isDraggingSeek]);
+    let cancel = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const step = duration / (FRAME_COUNT - 1);
+        const promises: Promise<VideoThumbnails.VideoThumbnailsResult>[] = [];
+        for (let i = 0; i < FRAME_COUNT; i++) {
+          const ms = Math.round(step * i * 1000);
+          promises.push(VideoThumbnails.getThumbnailAsync(uri, { time: ms }));
+        }
+        const results = await Promise.all(promises);
+        if (!cancel) {
+          setThumbnails(results.map((r) => r.uri));
+        }
+      } catch (e) {
+        console.warn("Error generating thumbnails", e);
+      } finally {
+        if (!cancel) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [uri, duration]);
 
-  useEffect(() => {
-    // TODO: Generate video thumbnails
-    // This would use something like react-native-video-thumbnails
-    // For now we'll use a placeholder
-    setThumbnails(Array(10).fill(uri));
-  }, [uri]);
-
-  const updateTrimValues = useCallback(
-    (start: number, end: number) => {
-      const newStart = Math.max(0, Math.min(start, end - 1));
-      const newEnd = Math.min(duration, Math.max(newStart + 1, end));
-
-      setTrimStart(newStart);
-      setTrimEnd(newEnd);
-      onTrimsChange?.(newStart, newEnd);
+  // ---------------------------------------------------------------------------
+  // 4) Convert px => seconds
+  // ---------------------------------------------------------------------------
+  const pxToSec = useCallback(
+    (px: number) => {
+      "worklet";
+      return (px / CONTAINER_WIDTH) * duration;
     },
-    [duration, onTrimsChange],
+    [duration],
   );
 
-  // Seek gesture
-  const seekGesture = Gesture.Pan()
-    .runOnJS(true)
-    .onStart(() => {
-      setIsDraggingSeek(true);
+  // ---------------------------------------------------------------------------
+  // 5) useAnimatedReaction => local states + external callback
+  // ---------------------------------------------------------------------------
+  useAnimatedReaction(
+    () => {
+      const start = pxToSec(leftEdge.value);
+      const end = pxToSec(rightEdge.value);
+      return { start, end };
+    },
+    ({ start, end }) => {
+      runOnJS(setLocalStart)(start);
+      runOnJS(setLocalEnd)(end);
+      onTrimsChange && runOnJS(onTrimsChange)(start, end);
+    },
+  );
+
+  // ---------------------------------------------------------------------------
+  // 6) Gestures
+  // ---------------------------------------------------------------------------
+
+  /** Left handle */
+  const leftHandlePan = Gesture.Pan()
+    .hitSlop({ horizontal: HANDLE_TOUCH_SLOP })
+    .onBegin(() => {
+      leftEdgeOnStart.value = leftEdge.value;
     })
     .onUpdate((e) => {
-      const progress = SCREEN_WIDTH - HANDLE_WIDTH;
-      const newX = Math.max(0, Math.min(progress, e.absoluteX));
-      seekX.value = newX;
-      const time = (newX / progress) * duration;
-      onSeek?.(time);
+      let newLeft = leftEdgeOnStart.value + e.translationX;
+
+      // Bound [0..rightEdge]
+      if (newLeft < 0) {
+        newLeft = 0;
+      }
+      if (newLeft > rightEdge.value) {
+        newLeft = rightEdge.value;
+      }
+
+      // Enforce maxDuration => (rightEdge - newLeft) <= maxRangePx
+      const currentRange = rightEdge.value - newLeft;
+      const maxRangePx = (maxDuration / duration) * CONTAINER_WIDTH;
+      if (currentRange > maxRangePx) {
+        newLeft = rightEdge.value - maxRangePx;
+      }
+
+      leftEdge.value = newLeft;
     })
     .onEnd(() => {
-      setIsDraggingSeek(false);
+      leftEdge.value = withSpring(leftEdge.value);
     });
 
-  // Pan gesture for the entire trimmer region
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      "worklet";
-      contextX.value = translateX.value;
+  /** Right handle */
+  const rightHandlePan = Gesture.Pan()
+    .hitSlop({ horizontal: HANDLE_TOUCH_SLOP })
+    .onBegin(() => {
+      rightEdgeOnStart.value = rightEdge.value;
     })
     .onUpdate((e) => {
-      "worklet";
-      const maxTranslate =
-        SCREEN_WIDTH - (endX.value - startX.value) - HANDLE_WIDTH;
-      translateX.value = Math.max(
-        -startX.value,
-        Math.min(maxTranslate, contextX.value + e.translationX),
-      );
+      let newRight = rightEdgeOnStart.value + e.translationX;
 
-      const progress = SCREEN_WIDTH - HANDLE_WIDTH * 2;
-      const newStart =
-        ((startX.value + translateX.value) / progress) * duration;
-      const newEnd = ((endX.value + translateX.value) / progress) * duration;
+      // Bound [leftEdge..CONTAINER_WIDTH]
+      if (newRight < leftEdge.value) {
+        newRight = leftEdge.value;
+      }
+      if (newRight > CONTAINER_WIDTH) {
+        newRight = CONTAINER_WIDTH;
+      }
 
-      runOnJS(updateTrimValues)(newStart, newEnd);
+      // Enforce maxDuration => (newRight - leftEdge) <= maxRangePx
+      const currentRange = newRight - leftEdge.value;
+      const maxRangePx = (maxDuration / duration) * CONTAINER_WIDTH;
+      if (currentRange > maxRangePx) {
+        newRight = leftEdge.value + maxRangePx;
+      }
+
+      rightEdge.value = newRight;
+    })
+    .onEnd(() => {
+      rightEdge.value = withSpring(rightEdge.value);
     });
 
-  // Left handle gesture
-  const leftHandleGesture = Gesture.Pan()
-    .onStart(() => {
-      "worklet";
-      contextX.value = startX.value;
+  /** Center area (drag entire selection) */
+  const regionPan = Gesture.Pan()
+    .onBegin(() => {
+      regionLeftOnStart.value = leftEdge.value;
+      regionRightOnStart.value = rightEdge.value;
     })
     .onUpdate((e) => {
-      "worklet";
-      const minX = 0;
-      const maxX = endX.value - HANDLE_WIDTH;
-      startX.value = Math.max(
-        minX,
-        Math.min(maxX, contextX.value + e.translationX),
-      );
+      const shift = e.translationX;
+      let newLeft = regionLeftOnStart.value + shift;
+      let newRight = regionRightOnStart.value + shift;
+      const width = regionRightOnStart.value - regionLeftOnStart.value;
 
-      const progress = SCREEN_WIDTH - HANDLE_WIDTH * 2;
-      const newStart = (startX.value / progress) * duration;
-      runOnJS(updateTrimValues)(newStart, trimEnd);
-    });
+      // Keep within [0..CONTAINER_WIDTH]
+      if (newLeft < 0) {
+        newLeft = 0;
+        newRight = width; // so total length stays the same
+      }
+      if (newRight > CONTAINER_WIDTH) {
+        newRight = CONTAINER_WIDTH;
+        newLeft = CONTAINER_WIDTH - width;
+      }
 
-  // Right handle gesture
-  const rightHandleGesture = Gesture.Pan()
-    .onStart(() => {
-      "worklet";
-      contextX.value = endX.value;
+      leftEdge.value = newLeft;
+      rightEdge.value = newRight;
     })
-    .onUpdate((e) => {
-      "worklet";
-      const minX = startX.value + HANDLE_WIDTH;
-      const maxX = SCREEN_WIDTH - HANDLE_WIDTH;
-      endX.value = Math.max(
-        minX,
-        Math.min(maxX, contextX.value + e.translationX),
-      );
-
-      const progress = SCREEN_WIDTH - HANDLE_WIDTH * 2;
-      const newEnd = (endX.value / progress) * duration;
-      runOnJS(updateTrimValues)(trimStart, newEnd);
+    .onEnd(() => {
+      leftEdge.value = withSpring(leftEdge.value);
+      rightEdge.value = withSpring(rightEdge.value);
     });
 
-  // Animated styles
-  const trimmerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
+  // ---------------------------------------------------------------------------
+  // 7) Animated Styles for Overlays + Selected Area
+  // ---------------------------------------------------------------------------
 
-  const leftHandleStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: startX.value }],
-  }));
+  /**
+   * Left Overlay covers from [0..leftEdge]
+   */
+  const leftOverlayStyle = useAnimatedStyle(() => {
+    return {
+      width: leftEdge.value,
+    };
+  });
 
-  const rightHandleStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: endX.value }],
-  }));
+  /**
+   * Right Overlay covers from [rightEdge..CONTAINER_WIDTH]
+   */
+  const rightOverlayStyle = useAnimatedStyle(() => {
+    return {
+      left: rightEdge.value,
+      width: CONTAINER_WIDTH - rightEdge.value,
+    };
+  });
 
-  const selectedRegionStyle = useAnimatedStyle(() => ({
-    left: startX.value + HANDLE_WIDTH,
-    right: SCREEN_WIDTH - endX.value,
-  }));
+  /**
+   * Selected Area covers [leftEdge..rightEdge].
+   * We place it absolutely with left: leftEdge, width: ...
+   */
+  const selectedAreaStyle = useAnimatedStyle(() => {
+    const width = rightEdge.value - leftEdge.value;
+    return {
+      left: leftEdge.value,
+      width,
+    };
+  });
 
-  const seekStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: seekX.value }],
-  }));
-
+  // ---------------------------------------------------------------------------
+  // 8) Render
+  // ---------------------------------------------------------------------------
   return (
-    <YStack gap="$2">
-      <XStack alignItems="center" justifyContent="space-between">
-        <XStack alignItems="center" gap="$2">
-          <Scissors size={16} />
-          <Text fontWeight="500">Trim Video</Text>
-        </XStack>
-        <Text fontSize="$3" color="$gray11">
-          {formatTime(trimEnd - trimStart)} / {formatTime(maxDuration)}
+    <View style={styles.rootContainer}>
+      {/* Title row */}
+      <View style={styles.headerRow}>
+        <Text style={styles.headerTitle}>Trim Video</Text>
+        <Text style={styles.headerTime}>
+          {Math.round(localEnd - localStart)}s / {maxDuration}s
         </Text>
-      </XStack>
-
-      <View style={styles.container}>
-        {/* Thumbnails */}
-        <View style={styles.thumbnailsContainer}>
-          {thumbnails.map((thumbnail, index) => (
-            <Image
-              key={index}
-              source={{ uri: thumbnail }}
-              style={styles.thumbnail}
-              contentFit="cover"
-            />
-          ))}
-        </View>
-
-        {/* Seek line */}
-        <GestureDetector gesture={seekGesture}>
-          <View style={StyleSheet.absoluteFill}>
-            <ReanimatedView style={[styles.seekLine, seekStyle]} />
-          </View>
-        </GestureDetector>
-
-        {/* Trimmer overlay */}
-        <GestureDetector gesture={panGesture}>
-          <ReanimatedView style={[styles.trimmerOverlay, trimmerStyle]}>
-            {/* Selected region */}
-            <ReanimatedView
-              style={[styles.selectedRegion, selectedRegionStyle]}
-            />
-
-            {/* Left handle */}
-            <GestureDetector gesture={leftHandleGesture}>
-              <ReanimatedView
-                style={[styles.handle, styles.leftHandle, leftHandleStyle]}
-              >
-                <View style={styles.handleBar} />
-              </ReanimatedView>
-            </GestureDetector>
-
-            {/* Right handle */}
-            <GestureDetector gesture={rightHandleGesture}>
-              <ReanimatedView
-                style={[styles.handle, styles.rightHandle, rightHandleStyle]}
-              >
-                <View style={styles.handleBar} />
-              </ReanimatedView>
-            </GestureDetector>
-          </ReanimatedView>
-        </GestureDetector>
-
-        {/* Time indicators */}
-        <View style={styles.timeIndicators}>
-          <Text style={styles.timeText}>{formatTime(trimStart)}</Text>
-          <Text style={styles.timeText}>{formatTime(trimEnd)}</Text>
-        </View>
       </View>
-    </YStack>
+
+      {/* Filmstrip */}
+      <View style={styles.filmstripContainer}>
+        <View style={[styles.thumbnailRow, { width: CONTAINER_WIDTH }]}>
+          {loading && (
+            <ActivityIndicator
+              style={{ position: "absolute", zIndex: 99, alignSelf: "center" }}
+            />
+          )}
+          {!loading &&
+            thumbnails.map((thumbUri, idx) => (
+              <Image
+                key={`thumb-${idx}`}
+                source={{ uri: thumbUri }}
+                style={[
+                  styles.thumbnail,
+                  { width: CONTAINER_WIDTH / FRAME_COUNT },
+                ]}
+                contentFit="cover"
+              />
+            ))}
+        </View>
+
+        {/* Left Overlay => covers [0..leftEdge] */}
+        <Animated.View
+          style={[styles.overlay, styles.leftOverlay, leftOverlayStyle]}
+        />
+
+        {/* Right Overlay => covers [rightEdge..CONTAINER_WIDTH] */}
+        <Animated.View
+          style={[styles.overlay, styles.rightOverlay, rightOverlayStyle]}
+        />
+
+        {/* Selected Area => covers [leftEdge..rightEdge] */}
+        <Animated.View style={[styles.selectedArea, selectedAreaStyle]}>
+          {/* Center area (for dragging the entire region) */}
+          <GestureDetector gesture={regionPan}>
+            <View style={styles.centerDragArea} />
+          </GestureDetector>
+
+          {/* Left handle */}
+          <GestureDetector gesture={leftHandlePan}>
+            <View style={[styles.handle, styles.leftHandle]} />
+          </GestureDetector>
+
+          {/* Right handle */}
+          <GestureDetector gesture={rightHandlePan}>
+            <View style={[styles.handle, styles.rightHandle]} />
+          </GestureDetector>
+        </Animated.View>
+      </View>
+
+      {/* Time labels */}
+      <View style={styles.footerRow}>
+        <Text>{formatTime(localStart)}</Text>
+        <Text>{formatTime(localEnd)}</Text>
+      </View>
+    </View>
   );
 };
 
+/** Styles */
 const styles = StyleSheet.create({
-  container: {
-    height: TRIMMER_HEIGHT,
+  rootContainer: {
     width: "100%",
-    borderRadius: 8,
-    overflow: "hidden",
-    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
-  thumbnailsContainer: {
+  headerRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  headerTime: {
+    fontSize: 14,
+  },
+  filmstripContainer: {
+    width: "100%",
+    height: FILMSTRIP_HEIGHT,
+    marginTop: 8,
+    position: "relative",
+  },
+  thumbnailRow: {
     height: "100%",
+    flexDirection: "row",
   },
   thumbnail: {
-    flex: 1,
     height: "100%",
   },
-  trimmerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: "row",
-  },
-  selectedRegion: {
+
+  /** Overlays: left & right greyed-out regions */
+  overlay: {
     position: "absolute",
     top: 0,
     bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  leftOverlay: {
+    left: 0,
+  },
+  rightOverlay: {
+    right: 0,
+  },
+
+  /** Selected area in the middle, with handles on each side */
+  selectedArea: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    // slightly tinted background
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderColor: "#fff",
     borderWidth: 2,
-    borderColor: "white",
+  },
+  centerDragArea: {
+    position: "absolute",
+    left: HANDLE_WIDTH,
+    right: HANDLE_WIDTH,
+    top: 0,
+    bottom: 0,
   },
   handle: {
     position: "absolute",
+    width: HANDLE_WIDTH,
     top: 0,
     bottom: 0,
-    width: HANDLE_WIDTH,
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#fff",
   },
   leftHandle: {
     left: 0,
@@ -299,33 +412,12 @@ const styles = StyleSheet.create({
   rightHandle: {
     right: 0,
   },
-  handleBar: {
-    width: HANDLE_WIDTH - HANDLE_BORDER_WIDTH * 2,
-    height: "100%",
-    backgroundColor: "white",
-    borderRadius: 2,
-  },
-  timeIndicators: {
-    position: "absolute",
-    bottom: -24,
-    left: 0,
-    right: 0,
+
+  footerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: HANDLE_WIDTH,
-  },
-  timeText: {
-    color: "#666",
-    fontSize: 12,
-  },
-  seekLine: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    width: SEEK_WIDTH,
-    backgroundColor: "#fff",
-    borderRadius: SEEK_WIDTH / 2,
+    marginTop: 6,
   },
 });
 
-export default VideoTrimmer;
+export default ThreePieceVideoTrimmer;

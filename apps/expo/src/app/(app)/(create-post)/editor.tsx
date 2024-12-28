@@ -7,7 +7,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { Check, ChevronLeft } from "@tamagui/lucide-icons";
 
 import { ImageCropper } from "~/components/MediaEditor/ImageCropper";
-import { VideoTrimmer } from "~/components/MediaEditor/VideoTrimmer";
+import VideoTrimmer from "~/components/MediaEditor/VideoTrimmer";
 import {
   Button,
   ScreenView,
@@ -160,7 +160,7 @@ const MediaEditor = () => {
       <YStack flex={1}>
         {/* Header */}
         <XStack
-          paddingHorizontal="$4"
+        //   paddingHorizontal="$4"
           paddingVertical="$3"
           alignItems="center"
           justifyContent="space-between"
@@ -216,7 +216,7 @@ const MediaEditor = () => {
         </View>
 
         {/* Controls */}
-        <YStack flex={1} padding="$4" gap="$4">
+        <YStack flex={1}  gap="$4">
           {type === "video" && videoDuration > 0 && (
             <VideoTrimmer
               uri={uri}
