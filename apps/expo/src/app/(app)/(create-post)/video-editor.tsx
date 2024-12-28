@@ -233,13 +233,9 @@ const VideoEditor = () => {
   }, [router, uri, cropRegion, trimStart, trimEnd, processVideo]);
 
   return (
-    <ScreenView padding={0} safeAreaEdges={["top"]}>
+    <ScreenView paddingTop={0} safeAreaEdges={["top"]}>
       {/* Header */}
-      <XStack
-        paddingHorizontal="$4"
-        justifyContent="space-between"
-        backgroundColor="$backgroundTransparent"
-      >
+      <XStack alignItems="center" justifyContent="space-between">
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => router.back()}

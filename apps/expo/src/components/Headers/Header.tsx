@@ -8,7 +8,7 @@ interface HeaderProps {
   title?: string;
   HeaderLeft?: React.ReactNode;
   HeaderRight?: React.ReactNode;
-  HeaderTitle?: React.ReactNode;
+  HeaderTitle?: React.ReactNode | string;
   containerProps?: StackProps;
   safeArea?: boolean;
 }
@@ -52,9 +52,9 @@ interface DefaultHeaderTitleProps {
   title: string;
 }
 
-const DefaultHeaderTitle = React.memo(({ title }: DefaultHeaderTitleProps) => (
+const DefaultHeaderTitle = ({ title }: DefaultHeaderTitleProps) => (
   <StyledHeaderTitle>{title}</StyledHeaderTitle>
-));
+);
 
 const HeaderContainer = styled(XStack, {
   height: HEADER_HEIGHT,
@@ -68,7 +68,7 @@ const SideContainer = styled(View, {
 });
 
 const StyledHeaderTitle = styled(Text, {
-  fontSize: "$5",
+  fontSize: "$6",
   fontWeight: "bold",
 });
 
