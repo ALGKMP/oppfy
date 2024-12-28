@@ -130,15 +130,26 @@ const CameraPage = () => {
         throw new Error("Captured media dimensions not found");
       }
 
-      router.push({
-        pathname: "/editor",
-        params: {
-          type,
-          uri,
-          width,
-          height,
-        },
-      });
+      if (type === "photo") {
+        router.push({
+          pathname: "/preview",
+          params: {
+            type,
+            uri,
+            width,
+            height,
+          },
+        });
+      } else {
+        router.push({
+          pathname: "/video-editor",
+          params: {
+            uri,
+            width,
+            height,
+          },
+        });
+      }
     },
     [router],
   );
