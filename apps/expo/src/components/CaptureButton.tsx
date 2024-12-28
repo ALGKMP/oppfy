@@ -40,6 +40,8 @@ const PAN_GESTURE_HANDLER_ACTIVE_Y = [-2, 2] satisfies FailOffset;
 const START_RECORDING_DELAY = 200;
 const BORDER_WIDTH = CAPTURE_BUTTON_SIZE * 0.075;
 
+const MIN_RECORDING_DURATION = 1000; // 1 second minimum
+
 interface Context {
   offsetY?: number;
   startY?: number;
@@ -80,6 +82,7 @@ const CaptureButton = ({
 }: Props) => {
   const isRecording = useRef(false);
   const pressDownDate = useRef<Date | undefined>(undefined);
+  const recordingStartTime = useRef<Date | undefined>(undefined);
 
   const context = useSharedValue<Context>({});
   const recordingProgress = useSharedValue(0);
@@ -96,6 +99,7 @@ const CaptureButton = ({
 
   const onStoppedRecording = useCallback(() => {
     isRecording.current = false;
+    recordingStartTime.current = undefined;
     cancelAnimation(recordingProgress);
   }, [recordingProgress]);
 
@@ -112,13 +116,22 @@ const CaptureButton = ({
       easing: Easing.linear,
     });
 
+    recordingStartTime.current = new Date();
+
     camera.current.startRecording({
       flash,
       onRecordingError: () => {
         onStoppedRecording();
       },
       onRecordingFinished: (video) => {
-        onMediaCaptured(video, "video");
+        // Only save the video if it meets minimum duration
+        if (recordingStartTime.current) {
+          const duration =
+            new Date().getTime() - recordingStartTime.current.getTime();
+          if (duration >= MIN_RECORDING_DURATION) {
+            onMediaCaptured(video, "video");
+          }
+        }
         onStoppedRecording();
       },
     });
@@ -139,6 +152,7 @@ const CaptureButton = ({
     recordingProgress,
     isPressingButton,
     setIsPressingButton,
+    maxRecordingDuration,
   ]);
 
   const handleTapOnEnd = useCallback(
@@ -151,7 +165,11 @@ const CaptureButton = ({
       const diff = now.getTime() - pressDownDate.current.getTime();
       pressDownDate.current = undefined;
 
-      diff < START_RECORDING_DELAY ? await takePhoto() : await stopRecording();
+      if (diff < START_RECORDING_DELAY) {
+        await takePhoto();
+      } else {
+        await stopRecording();
+      }
 
       isPressingButton.value = false;
       setIsPressingButton(false);
