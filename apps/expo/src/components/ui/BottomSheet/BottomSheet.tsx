@@ -6,7 +6,6 @@ import {
 } from "@gorhom/bottom-sheet";
 import { useTheme } from "tamagui";
 
-import { BaseScreenView } from "~/components/Views";
 import BottomSheetBackdrop from "./BottomSheetBackdrop";
 import BottomSheetHeader from "./BottomSheetHeader";
 
@@ -19,7 +18,7 @@ export interface BottomSheetProps
   onPresent?: () => void;
 }
 
-export const BottomSheet = React.forwardRef<BottomSheetModal, BottomSheetProps>(
+export const BottomSheet = 
   ({
     title,
     children,
@@ -28,7 +27,7 @@ export const BottomSheet = React.forwardRef<BottomSheetModal, BottomSheetProps>(
     onDismiss,
     onPresent,
     ...props
-  }) => {
+  }: BottomSheetProps) => {
     const theme = useTheme();
     const bottomSheetRef = React.useRef<BottomSheetModal>(null);
 
@@ -68,5 +67,4 @@ export const BottomSheet = React.forwardRef<BottomSheetModal, BottomSheetProps>(
         {children}
       </BottomSheetModal>
     );
-  },
-);
+  }

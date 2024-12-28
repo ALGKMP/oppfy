@@ -1,5 +1,4 @@
 import React, {
-  forwardRef,
   useCallback,
   useMemo,
   useRef,
@@ -63,10 +62,7 @@ interface CommentsBottomSheetProps {
   endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
 }
 
-const CommentsBottomSheet = forwardRef<
-  BottomSheetModal,
-  CommentsBottomSheetProps
->((props) => {
+const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   const {
     isLoadingComments,
     commentItems,
