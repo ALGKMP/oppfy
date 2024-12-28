@@ -34,7 +34,9 @@ const SEEKER_OVERHANG = 6;
 const HIT_SLOP = { top: 24, bottom: 24, left: 24, right: 24 };
 
 /** How many thumbnails to generate */
-const FRAME_COUNT = 8;
+const MIN_FRAME_COUNT = 8;
+const MAX_FRAME_COUNT = 20;
+const FRAME_INTERVAL = 2; // Generate a frame every 2 seconds
 
 /** Maximum selection, in seconds */
 const DEFAULT_MAX_DURATION = 60;
@@ -70,6 +72,7 @@ const VideoTrimmer = ({
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [frameCount, setFrameCount] = useState(MIN_FRAME_COUNT);
 
   const [localStart, setLocalStart] = useState(0);
   const [localEnd, setLocalEnd] = useState(Math.min(duration, maxDuration));
@@ -113,12 +116,26 @@ const VideoTrimmer = ({
     (async () => {
       setLoading(true);
       try {
-        const step = duration / Math.max(1, FRAME_COUNT - 1);
+        // Calculate number of frames based on duration
+        const calculatedFrameCount = Math.min(
+          MAX_FRAME_COUNT,
+          Math.max(MIN_FRAME_COUNT, Math.ceil(duration / FRAME_INTERVAL)),
+        );
+        setFrameCount(calculatedFrameCount);
+
+        const step = duration / Math.max(1, calculatedFrameCount - 1);
         const tasks: Promise<VideoThumbnails.VideoThumbnailsResult>[] = [];
-        for (let i = 0; i < FRAME_COUNT; i++) {
+
+        for (let i = 0; i < calculatedFrameCount; i++) {
           const timeMs = Math.round(step * i * 1000);
-          tasks.push(VideoThumbnails.getThumbnailAsync(uri, { time: timeMs }));
+          tasks.push(
+            VideoThumbnails.getThumbnailAsync(uri, {
+              time: timeMs,
+              quality: 0.5, // Lower quality for faster generation
+            }),
+          );
         }
+
         const results = await Promise.all(tasks);
         if (!cancel) {
           setThumbnails(results.map((r) => r.uri));
@@ -419,7 +436,7 @@ const VideoTrimmer = ({
                 source={{ uri: thumbUri }}
                 style={[
                   styles.thumbnail,
-                  { width: containerWidth / FRAME_COUNT },
+                  { width: containerWidth / frameCount },
                 ]}
                 contentFit="cover"
               />
