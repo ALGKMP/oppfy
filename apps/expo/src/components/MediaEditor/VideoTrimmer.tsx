@@ -56,7 +56,7 @@ function formatTime(seconds: number) {
  * - Drags a seeker line within the selection, automatically pushing/pulling the seeker
  *   if the region crosses it.
  */
-export default function FancyVideoTrimmer({
+export default function VideoTrimmer({
   uri,
   duration,
   maxDuration = DEFAULT_MAX_DURATION,
@@ -164,7 +164,7 @@ export default function FancyVideoTrimmer({
   );
 
   /************************************************************
-   * 5) Gestures
+   * 5) Updated Gestures: push/pull seeker when crossing edges
    ************************************************************/
 
   // LEFT HANDLE => physically at [leftEdge - HANDLE_WIDTH.. leftEdge].
@@ -190,10 +190,17 @@ export default function FancyVideoTrimmer({
 
       leftEdge.value = newLeft;
 
-      // If we cross the seeker while not seeking, push it
+      // Push or pull the seeker if crossing from left to right or right to left
       if (!isSeeking.value) {
-        // e.translationX>0 means dragging to the right
-        if (newLeft > seekerX.value) {
+        // Dragging right and crossing the seeker
+        if (e.translationX > 0 && newLeft > seekerX.value) {
+          seekerX.value = newLeft;
+          if (onSeek) {
+            runOnJS(onSeek)(pxToSec(seekerX.value));
+          }
+        }
+        // Dragging left and crossing the seeker
+        else if (e.translationX < 0 && newLeft < seekerX.value) {
           seekerX.value = newLeft;
           if (onSeek) {
             runOnJS(onSeek)(pxToSec(seekerX.value));
@@ -206,7 +213,7 @@ export default function FancyVideoTrimmer({
       isTrimming.value = false;
     });
 
-  // RIGHT HANDLE => physically at [rightEdge.. rightEdge+HANDLE_WIDTH].
+  // RIGHT HANDLE => physically at [rightEdge.. rightEdge + HANDLE_WIDTH].
   const rightHandlePan = Gesture.Pan()
     .onBegin(() => {
       rightEdgeOnStart.value = rightEdge.value;
@@ -229,10 +236,17 @@ export default function FancyVideoTrimmer({
 
       rightEdge.value = newRight;
 
-      // If we cross the seeker while not seeking, pull it
+      // Pull or push the seeker if crossing from right to left or left to right
       if (!isSeeking.value) {
-        // e.translationX<0 means dragging to the left
-        if (newRight < seekerX.value) {
+        // Dragging left and crossing the seeker
+        if (e.translationX < 0 && newRight < seekerX.value) {
+          seekerX.value = newRight;
+          if (onSeek) {
+            runOnJS(onSeek)(pxToSec(seekerX.value));
+          }
+        }
+        // Dragging right and crossing the seeker
+        else if (e.translationX > 0 && newRight > seekerX.value) {
           seekerX.value = newRight;
           if (onSeek) {
             runOnJS(onSeek)(pxToSec(seekerX.value));
@@ -271,14 +285,17 @@ export default function FancyVideoTrimmer({
       leftEdge.value = newLeft;
       rightEdge.value = newRight;
 
-      // If not seeking, push/pull the seeker if region crosses it
+      // Push/pull the seeker if the region crosses it
       if (!isSeeking.value) {
+        // Moving the trimmer box to the right
         if (shift > 0 && newLeft > seekerX.value) {
           seekerX.value = newLeft;
           if (onSeek) {
             runOnJS(onSeek)(pxToSec(seekerX.value));
           }
-        } else if (shift < 0 && newRight < seekerX.value) {
+        }
+        // Moving the trimmer box to the left
+        else if (shift < 0 && newRight < seekerX.value) {
           seekerX.value = newRight;
           if (onSeek) {
             runOnJS(onSeek)(pxToSec(seekerX.value));
@@ -381,17 +398,24 @@ export default function FancyVideoTrimmer({
               <Image
                 key={`thumb-${index}`}
                 source={{ uri: thumbUri }}
-                style={[styles.thumbnail, { width: CONTAINER_WIDTH / FRAME_COUNT }]}
+                style={[
+                  styles.thumbnail,
+                  { width: CONTAINER_WIDTH / FRAME_COUNT },
+                ]}
                 contentFit="cover"
               />
             ))}
         </View>
 
         {/* Left overlay => [0.. leftEdge] */}
-        <Animated.View style={[styles.overlay, styles.leftOverlay, leftOverlayStyle]} />
+        <Animated.View
+          style={[styles.overlay, styles.leftOverlay, leftOverlayStyle]}
+        />
 
         {/* Right overlay => [rightEdge.. CONTAINER_WIDTH] */}
-        <Animated.View style={[styles.overlay, styles.rightOverlay, rightOverlayStyle]} />
+        <Animated.View
+          style={[styles.overlay, styles.rightOverlay, rightOverlayStyle]}
+        />
 
         {/* Selected area => [leftEdge.. rightEdge] */}
         <Animated.View style={[styles.selectedArea, selectedAreaStyle]}>
@@ -402,12 +426,16 @@ export default function FancyVideoTrimmer({
 
         {/* Left handle => physically at [leftEdge - HANDLE_WIDTH.. leftEdge] */}
         <GestureDetector gesture={leftHandlePan}>
-          <Animated.View style={[styles.handle, styles.leftHandle, leftHandleStyle]} />
+          <Animated.View
+            style={[styles.handle, styles.leftHandle, leftHandleStyle]}
+          />
         </GestureDetector>
 
         {/* Right handle => physically at [rightEdge.. rightEdge+HANDLE_WIDTH] */}
         <GestureDetector gesture={rightHandlePan}>
-          <Animated.View style={[styles.handle, styles.rightHandle, rightHandleStyle]} />
+          <Animated.View
+            style={[styles.handle, styles.rightHandle, rightHandleStyle]}
+          />
         </GestureDetector>
 
         {/* Seeker => extends above & below the filmstrip */}
