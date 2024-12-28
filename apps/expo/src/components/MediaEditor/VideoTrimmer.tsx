@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
+  LayoutChangeEvent,
   StyleSheet,
   Text,
   View,
@@ -13,14 +13,10 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
 import * as VideoThumbnails from "expo-video-thumbnails";
-
-const SCREEN_WIDTH = Dimensions.get("window").width;
-const PADDING = 16;
-/** The width of our filmstrip */
-const CONTAINER_WIDTH = SCREEN_WIDTH - PADDING * 2;
 
 /** Filmstrip height */
 const FILMSTRIP_HEIGHT = 64;
@@ -43,6 +39,9 @@ const FRAME_COUNT = 8;
 /** Maximum selection, in seconds */
 const DEFAULT_MAX_DURATION = 60;
 
+/** Padding around the trimmer */
+const PADDING = 16;
+
 /** Utility to format time (M:SS) */
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds)) return "0:00";
@@ -57,6 +56,7 @@ interface VideoTrimmerProps {
   maxDuration?: number;
   onTrimsChange?: (start: number, end: number) => void;
   onSeek?: (timeSec: number) => void;
+  currentTime?: number;
 }
 
 const VideoTrimmer = ({
@@ -65,12 +65,19 @@ const VideoTrimmer = ({
   maxDuration = DEFAULT_MAX_DURATION,
   onTrimsChange,
   onSeek,
+  currentTime = 0,
 }: VideoTrimmerProps) => {
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   const [localStart, setLocalStart] = useState(0);
   const [localEnd, setLocalEnd] = useState(Math.min(duration, maxDuration));
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    setContainerWidth(width - PADDING * 2);
+  }, []);
 
   /************************************************************
    * 1) Shared Values for the selection region [leftEdge..rightEdge]
@@ -80,7 +87,9 @@ const VideoTrimmer = ({
 
   // Default rightEdge => up to maxDuration
   const rightEdge = useSharedValue(
-    (Math.min(duration, maxDuration) / duration) * CONTAINER_WIDTH,
+    containerWidth
+      ? (Math.min(duration, maxDuration) / duration) * containerWidth
+      : 0,
   );
   const rightEdgeOnStart = useSharedValue(0);
 
@@ -134,10 +143,19 @@ const VideoTrimmer = ({
   const pxToSec = useCallback(
     (px: number) => {
       "worklet";
-      return (px / CONTAINER_WIDTH) * duration;
+      if (!containerWidth) return 0;
+      return (px / containerWidth) * duration;
     },
-    [duration],
+    [duration, containerWidth],
   );
+
+  // Update rightEdge when containerWidth changes
+  useEffect(() => {
+    if (containerWidth) {
+      rightEdge.value =
+        (Math.min(duration, maxDuration) / duration) * containerWidth;
+    }
+  }, [containerWidth, duration, maxDuration]);
 
   /************************************************************
    * 4) Reaction: edges => localStart/localEnd => onTrimsChange
@@ -180,7 +198,7 @@ const VideoTrimmer = ({
 
       // enforce maxDuration => region width <= maxRangePx
       const regionWidth = rightEdge.value - newLeft;
-      const maxRangePx = (maxDuration / duration) * CONTAINER_WIDTH;
+      const maxRangePx = (maxDuration / duration) * containerWidth;
       if (regionWidth > maxRangePx) {
         newLeft = rightEdge.value - maxRangePx;
         if (newLeft < 0) newLeft = 0;
@@ -213,14 +231,14 @@ const VideoTrimmer = ({
 
       // clamp => [leftEdge.. CONTAINER_WIDTH]
       if (newRight < leftEdge.value) newRight = leftEdge.value;
-      if (newRight > CONTAINER_WIDTH) newRight = CONTAINER_WIDTH;
+      if (newRight > containerWidth) newRight = containerWidth;
 
       // enforce maxDuration => region width <= maxRangePx
       const regionWidth = newRight - leftEdge.value;
-      const maxRangePx = (maxDuration / duration) * CONTAINER_WIDTH;
+      const maxRangePx = (maxDuration / duration) * containerWidth;
       if (regionWidth > maxRangePx) {
         newRight = leftEdge.value + maxRangePx;
-        if (newRight > CONTAINER_WIDTH) newRight = CONTAINER_WIDTH;
+        if (newRight > containerWidth) newRight = containerWidth;
       }
 
       rightEdge.value = newRight;
@@ -256,9 +274,9 @@ const VideoTrimmer = ({
         newLeft = 0;
         newRight = width;
       }
-      if (newRight > CONTAINER_WIDTH) {
-        newRight = CONTAINER_WIDTH;
-        newLeft = CONTAINER_WIDTH - width;
+      if (newRight > containerWidth) {
+        newRight = containerWidth;
+        newLeft = containerWidth - width;
       }
 
       leftEdge.value = newLeft;
@@ -318,7 +336,7 @@ const VideoTrimmer = ({
   // The right overlay covers [rightEdge.. CONTAINER_WIDTH]
   const rightOverlayStyle = useAnimatedStyle(() => ({
     left: rightEdge.value,
-    width: CONTAINER_WIDTH - rightEdge.value,
+    width: containerWidth - rightEdge.value,
   }));
 
   // The selected area => white border => [leftEdge.. rightEdge]
@@ -345,11 +363,33 @@ const VideoTrimmer = ({
     transform: [{ translateX: seekerX.value }],
   }));
 
+  // Update seeker position based on currentTime
+  useAnimatedReaction(
+    () => {
+      if (!isSeeking.value && !isTrimming.value && containerWidth) {
+        return (currentTime / duration) * containerWidth;
+      }
+      return null;
+    },
+    (position) => {
+      if (position !== null) {
+        seekerX.value = withTiming(
+          Math.max(leftEdge.value, Math.min(rightEdge.value, position)),
+          {
+            duration: 100, // 100ms animation
+            easing: (x) => x, // linear easing for smooth movement
+          },
+        );
+      }
+    },
+    [currentTime, duration, containerWidth],
+  );
+
   /************************************************************
    * RENDER
    ************************************************************/
-  return (
-    <View style={styles.root}>
+  return containerWidth ? (
+    <View style={styles.root} onLayout={handleLayout}>
       {/* Header row */}
       <View style={styles.headerRow}>
         <Text style={styles.headerTitle}>Trim Video</Text>
@@ -359,8 +399,12 @@ const VideoTrimmer = ({
       </View>
 
       {/* Filmstrip Container */}
-      {/* IMPORTANT: Remove or override "overflow: hidden" so the handles show outside. */}
-      <View style={[styles.filmstripContainer, { overflow: "visible" }]}>
+      <View
+        style={[
+          styles.filmstripContainer,
+          { width: containerWidth, overflow: "visible" },
+        ]}
+      >
         {/* Thumbnails row */}
         <View style={styles.thumbnailRow}>
           {loading && (
@@ -375,7 +419,7 @@ const VideoTrimmer = ({
                 source={{ uri: thumbUri }}
                 style={[
                   styles.thumbnail,
-                  { width: CONTAINER_WIDTH / FRAME_COUNT },
+                  { width: containerWidth / FRAME_COUNT },
                 ]}
                 contentFit="cover"
               />
@@ -429,6 +473,8 @@ const VideoTrimmer = ({
         <Text style={styles.footerText}>{formatTime(localEnd)}</Text>
       </View>
     </View>
+  ) : (
+    <View style={styles.root} onLayout={handleLayout} />
   );
 };
 
@@ -439,7 +485,6 @@ const styles = StyleSheet.create({
   root: {
     width: "100%",
     padding: PADDING,
-    backgroundColor: "#000",
   },
   headerRow: {
     flexDirection: "row",
@@ -456,7 +501,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   filmstripContainer: {
-    width: CONTAINER_WIDTH,
+    width: "100%",
     height: FILMSTRIP_HEIGHT,
     marginTop: 12,
     position: "relative",
@@ -518,7 +563,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     top: -SEEKER_OVERHANG,
     bottom: -SEEKER_OVERHANG,
-    borderRadius: 2,
+    borderRadius: 4,
   },
   footerRow: {
     flexDirection: "row",
