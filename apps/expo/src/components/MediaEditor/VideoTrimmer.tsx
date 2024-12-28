@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-/** If you're NOT using expo-image, import { Image } from "react-native" */
 import {
   ActivityIndicator,
   Dimensions,
@@ -403,14 +402,18 @@ export default function VideoTrimmer({
         <GestureDetector gesture={leftHandlePan}>
           <Animated.View
             style={[styles.handle, styles.leftHandle, leftHandleStyle]}
-          />
+          >
+            <View style={[styles.handleLine, styles.leftHandleLine]} />
+          </Animated.View>
         </GestureDetector>
 
         {/* Right handle => physically at [rightEdge.. rightEdge+HANDLE_WIDTH] */}
         <GestureDetector gesture={rightHandlePan}>
           <Animated.View
             style={[styles.handle, styles.rightHandle, rightHandleStyle]}
-          />
+          >
+            <View style={[styles.handleLine, styles.rightHandleLine]} />
+          </Animated.View>
         </GestureDetector>
 
         {/* Seeker => extends above & below the filmstrip */}
@@ -497,6 +500,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: HANDLE_WIDTH,
     backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
   },
   leftHandle: {
     borderTopLeftRadius: 6,
@@ -522,5 +527,16 @@ const styles = StyleSheet.create({
   footerText: {
     color: "#fff",
     fontSize: 14,
+  },
+  handleLine: {
+    width: 2,
+    height: "50%",
+    backgroundColor: "#000",
+  },
+  leftHandleLine: {
+    marginLeft: 1,
+  },
+  rightHandleLine: {
+    marginRight: 1,
   },
 });
