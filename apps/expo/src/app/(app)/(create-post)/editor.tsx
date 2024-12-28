@@ -289,7 +289,7 @@ const MediaEditor = () => {
       </XStack>
 
       {/* Editor Content */}
-      <YStack flex={1} backgroundColor="black" paddingVertical="$8">
+      <YStack flex={1} paddingVertical="$8">
         {type === "photo" ? (
           <View width={previewWidth} height={previewHeight} alignSelf="center">
             <ImageCropper
@@ -331,7 +331,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "black",
   },
 });
 
