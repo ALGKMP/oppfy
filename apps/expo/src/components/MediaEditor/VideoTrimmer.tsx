@@ -34,9 +34,7 @@ const SEEKER_OVERHANG = 6;
 const HIT_SLOP = { top: 24, bottom: 24, left: 24, right: 24 };
 
 /** How many thumbnails to generate */
-const MIN_FRAME_COUNT = 8;
-const MAX_FRAME_COUNT = 20;
-const FRAME_INTERVAL = 2; // Generate a frame every 2 seconds
+const THUMBNAIL_COUNT = 8; // Fixed number of thumbnails regardless of duration
 
 /** Maximum selection, in seconds */
 const DEFAULT_MAX_DURATION = 60;
@@ -72,7 +70,6 @@ const VideoTrimmer = ({
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [containerWidth, setContainerWidth] = useState(0);
-  const [frameCount, setFrameCount] = useState(MIN_FRAME_COUNT);
 
   const [localStart, setLocalStart] = useState(0);
   const [localEnd, setLocalEnd] = useState(Math.min(duration, maxDuration));
@@ -113,42 +110,47 @@ const VideoTrimmer = ({
    ************************************************************/
   useEffect(() => {
     let cancel = false;
-    (async () => {
+    const generateThumbnails = async () => {
       setLoading(true);
       try {
-        // Calculate number of frames based on duration
-        const calculatedFrameCount = Math.min(
-          MAX_FRAME_COUNT,
-          Math.max(MIN_FRAME_COUNT, Math.ceil(duration / FRAME_INTERVAL)),
-        );
-        setFrameCount(calculatedFrameCount);
+        const thumbnailCount = THUMBNAIL_COUNT;
+        const thumbnailArray: string[] = [];
 
-        const step = duration / Math.max(1, calculatedFrameCount - 1);
-        const tasks: Promise<VideoThumbnails.VideoThumbnailsResult>[] = [];
+        // Generate thumbnails sequentially to avoid overwhelming the device
+        for (let i = 0; i < thumbnailCount; i++) {
+          if (cancel) break;
 
-        for (let i = 0; i < calculatedFrameCount; i++) {
-          const timeMs = Math.round(step * i * 1000);
-          tasks.push(
-            VideoThumbnails.getThumbnailAsync(uri, {
-              time: timeMs,
-              quality: 0.5, // Lower quality for faster generation
-            }),
+          // Calculate time for this thumbnail (distribute evenly across duration)
+          const timeMs = Math.floor(
+            (duration * i * 1000) / (thumbnailCount - 1),
           );
-        }
 
-        const results = await Promise.all(tasks);
-        if (!cancel) {
-          setThumbnails(results.map((r) => r.uri));
+          try {
+            const result = await VideoThumbnails.getThumbnailAsync(uri, {
+              time: timeMs,
+              quality: 0.6,
+            });
+
+            if (!cancel) {
+              thumbnailArray[i] = result.uri;
+              // Update thumbnails as they're generated
+              setThumbnails([...thumbnailArray]);
+            }
+          } catch (err) {
+            console.warn(`Error generating thumbnail ${i}:`, err);
+            // Continue with other thumbnails even if one fails
+          }
         }
       } catch (err) {
-        console.warn("Error generating thumbnails:", err);
+        console.warn("Error in thumbnail generation:", err);
       } finally {
         if (!cancel) {
           setLoading(false);
         }
       }
-    })();
+    };
 
+    generateThumbnails();
     return () => {
       cancel = true;
     };
@@ -424,23 +426,22 @@ const VideoTrimmer = ({
       >
         {/* Thumbnails row */}
         <View style={styles.thumbnailRow}>
-          {loading && (
+          {loading && thumbnails.length === 0 && (
             <ActivityIndicator
               style={{ position: "absolute", zIndex: 99, alignSelf: "center" }}
             />
           )}
-          {!loading &&
-            thumbnails.map((thumbUri, index) => (
-              <Image
-                key={`thumb-${index}`}
-                source={{ uri: thumbUri }}
-                style={[
-                  styles.thumbnail,
-                  { width: containerWidth / frameCount },
-                ]}
-                contentFit="cover"
-              />
-            ))}
+          {thumbnails.map((thumbUri, index) => (
+            <Image
+              key={`thumb-${index}`}
+              source={{ uri: thumbUri }}
+              style={[
+                styles.thumbnail,
+                { width: containerWidth / THUMBNAIL_COUNT },
+              ]}
+              contentFit="cover"
+            />
+          ))}
         </View>
 
         {/* Left overlay => [0.. leftEdge] */}
