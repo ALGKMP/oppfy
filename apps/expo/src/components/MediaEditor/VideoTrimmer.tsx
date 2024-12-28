@@ -48,26 +48,21 @@ function formatTime(seconds: number) {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-/**
- * A "FancyVideoTrimmer" that:
- * - Shows a row of thumbnails (filmstrip).
- * - Lets the user drag left/right handles that physically appear *outside* the filmstrip edges.
- * - Drags a seeker line within the selection, automatically pushing/pulling the seeker
- *   if the region crosses it.
- */
-export default function VideoTrimmer({
-  uri,
-  duration,
-  maxDuration = DEFAULT_MAX_DURATION,
-  onTrimsChange,
-  onSeek,
-}: {
+interface VideoTrimmerProps {
   uri: string;
   duration: number;
   maxDuration?: number;
   onTrimsChange?: (start: number, end: number) => void;
   onSeek?: (timeSec: number) => void;
-}) {
+}
+
+const VideoTrimmer = ({
+  uri,
+  duration,
+  maxDuration = DEFAULT_MAX_DURATION,
+  onTrimsChange,
+  onSeek,
+}: VideoTrimmerProps) => {
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -429,7 +424,7 @@ export default function VideoTrimmer({
       </View>
     </View>
   );
-}
+};
 
 /************************************************************
  * STYLES
@@ -540,3 +535,5 @@ const styles = StyleSheet.create({
     marginRight: 1,
   },
 });
+
+export default VideoTrimmer;
