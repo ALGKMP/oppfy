@@ -150,6 +150,7 @@ const OtherProfile = React.memo(() => {
           stats={{
             likes: item.likesCount,
             comments: item.commentsCount,
+            hasLiked: item.hasLiked,
           }}
         />
       );
