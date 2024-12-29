@@ -136,6 +136,7 @@ const HomeScreen = () => {
           stats={{
             likes: item.likesCount,
             comments: item.commentsCount,
+            hasLiked: item.hasLiked
           }}
         />
       );
