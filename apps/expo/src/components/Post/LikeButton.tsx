@@ -12,13 +12,15 @@ import { useLikePost } from "~/hooks/post/useLikePost";
 interface LikeButtonProps {
   postId: string;
   endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
+  initialHasLiked: boolean;
 }
 
-const LikeButton = ({ postId, endpoint }: LikeButtonProps) => {
+const LikeButton = ({ postId, endpoint, initialHasLiked }: LikeButtonProps) => {
   const buttonLikeScale = useSharedValue(1);
   const { handleLikePressed, handleLikeDoubleTapped, hasLiked } = useLikePost({
     postId,
     endpoint,
+    initialHasLiked,
   });
 
   const heartButtonAnimatedStyle = useAnimatedStyle(() => {
