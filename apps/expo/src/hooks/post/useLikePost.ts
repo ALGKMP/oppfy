@@ -9,13 +9,14 @@ interface LikePostProps {
   postId: string;
   endpoint: Endpoint;
   userId?: string;
+  initialHasLiked: boolean;
 }
 
-export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
+export const useLikePost = ({ postId, endpoint, userId, initialHasLiked }: LikePostProps) => {
   const utils = api.useUtils();
   const { data: hasLiked } = api.post.hasliked.useQuery(
     { postId },
-    { initialData: false },
+    { initialData: initialHasLiked },
   );
 
   const clickCount = useRef(0);
