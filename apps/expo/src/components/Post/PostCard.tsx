@@ -64,6 +64,7 @@ interface Media {
 interface Stats {
   likes: number;
   comments: number;
+  hasLiked: boolean;
 }
 
 export interface PostData {
@@ -90,9 +91,17 @@ const PostCard = (props: PostCardProps) => {
         <View marginHorizontal="$-3">
           <View>
             {props.media.type === "image" ? (
-              <ImageComponent endpoint={props.endpoint} media={props.media} />
+              <ImageComponent
+                endpoint={props.endpoint}
+                media={props.media}
+                stats={props.stats}
+              />
             ) : (
-              <VideoPlayer endpoint={props.endpoint} media={props.media} />
+              <VideoPlayer
+                endpoint={props.endpoint}
+                media={props.media}
+                stats={props.stats}
+              />
             )}
             <View position="absolute" bottom={15} left={15}>
               <XStack alignItems="center" gap="$3">
@@ -140,7 +149,11 @@ const PostCard = (props: PostCardProps) => {
         <YStack flex={1} paddingHorizontal="$1" gap="$1">
           <XStack gap="$3.5" alignItems="center">
             {/* Like Button */}
-            <LikeButton postId={props.postId} endpoint={props.endpoint} />
+            <LikeButton
+              postId={props.postId}
+              endpoint={props.endpoint}
+              initialHasLiked={props.stats.hasLiked}
+            />
 
             {/* Comment Button */}
             <CommentButton
@@ -225,15 +238,19 @@ PostCard.loading = function PostCardLoading() {
   );
 };
 
+// TODO: This needs cleaning up 
+
 interface ImageComponentProps {
   endpoint: "home-feed" | "other-profile" | "self-profile" | "single-post";
   media: Media;
+  stats: Stats;
 }
-const ImageComponent = ({ endpoint, media }: ImageComponentProps) => {
+const ImageComponent = ({ endpoint, media, stats }: ImageComponentProps) => {
   const { handleLikeDoubleTapped } = useLikePost({
     postId: media.id,
     endpoint,
     userId: media.recipient.id,
+    initialHasLiked: stats.hasLiked,
   });
   const { hearts, addHeart } = useHeartAnimations();
   const [isImageLoading, setIsImageLoading] = useState(true);
@@ -295,9 +312,12 @@ const ImageComponent = ({ endpoint, media }: ImageComponentProps) => {
 interface VideoPlayerProps {
   endpoint: "home-feed" | "other-profile" | "self-profile" | "single-post";
   media: Media;
+  stats: Stats;
 }
 
-const VideoPlayerComponent = ({ endpoint, media }: VideoPlayerProps) => {
+// TODO: This needs cleaning up 
+
+const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
   const videoRef = useRef<Video>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
@@ -311,6 +331,7 @@ const VideoPlayerComponent = ({ endpoint, media }: VideoPlayerProps) => {
     postId: media.id,
     endpoint,
     userId: media.recipient.id,
+    initialHasLiked: stats.hasLiked,
   });
 
   useFocusEffect(
