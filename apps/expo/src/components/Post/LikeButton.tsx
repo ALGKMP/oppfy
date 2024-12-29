@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -7,7 +7,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { Heart } from "@tamagui/lucide-icons";
 
-import { useLikePost } from "../../hooks/post/useLikePost";
+import { api } from "~/utils/api";
+import { useLikePost } from "~/hooks/post/useLikePost";
 
 interface LikeButtonProps {
   postId: string;
@@ -16,8 +17,7 @@ interface LikeButtonProps {
 
 const LikeButton = ({ postId, endpoint }: LikeButtonProps) => {
   const buttonLikeScale = useSharedValue(1);
-
-  const { hasLiked, handleLikePressed, handleLikeDoubleTapped } = useLikePost({
+  const { handleLikePressed, handleLikeDoubleTapped, hasLiked } = useLikePost({
     postId,
     endpoint,
   });
@@ -28,7 +28,7 @@ const LikeButton = ({ postId, endpoint }: LikeButtonProps) => {
     };
   });
 
-  const handleLikePress = useCallback(() => {
+  const handleLikePress = () => {
     handleLikePressed();
     buttonLikeScale.value = withSpring(
       1.2,
@@ -43,7 +43,7 @@ const LikeButton = ({ postId, endpoint }: LikeButtonProps) => {
         });
       },
     );
-  }, [buttonLikeScale]);
+  };
 
   return (
     <TouchableOpacity onPress={handleLikePress}>

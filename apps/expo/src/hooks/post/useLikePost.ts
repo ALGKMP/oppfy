@@ -109,7 +109,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     },
   });
 
-  const handleLikePressed = useCallback(async () => {
+  const handleLikePressed = async () => {
     isLikingRef.current = true;
 
     // Optimistically update the UI
@@ -125,14 +125,7 @@ export const useLikePost = ({ postId, endpoint, userId }: LikePostProps) => {
     // Call the throttled function
     clickCount.current++;
     throttledLikeRequest.current(hasLiked);
-  }, [
-    hasLiked,
-    postId,
-    utils.post.hasliked,
-    changeLikeCount,
-    endpoint,
-    userId,
-  ]);
+  }
 
   const handleLikeDoubleTapped = async () => {
     if (!hasLiked) {
