@@ -1,4 +1,3 @@
-import { useCallback, useEffect } from "react";
 import { TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
