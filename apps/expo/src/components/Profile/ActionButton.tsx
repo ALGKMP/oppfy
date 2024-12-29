@@ -17,7 +17,7 @@ interface ActionButtonProps {
 }
 
 const ActionButton = ({ userId }: ActionButtonProps) => {
-  const actions = useProfileActions(userId);
+  const actions = useProfileActionButtons(userId);
 
   // Only make the network status query if userId is provided
   const { data: networkStatus, isLoading: isNetworkStatusLoading } =
@@ -169,7 +169,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
  * @param {string} userId - The userId of the user
  * @returns {actions: {follow: {handler: () => void, loading: boolean}, unfollow: {handler: () => void, loading: boolean}, cancelFollowRequest: {handler: () => void, loading: boolean}, cancelFriendRequest: {handler: () => void, loading: boolean}, removeFriend: {handler: () => void, loading: boolean}}}
  */
-const useProfileActions = (userId?: string) => {
+const useProfileActionButtons = (userId?: string) => {
   const utils = api.useUtils();
   const router = useRouter();
   const [isInvalidatingByAction, setIsInvalidatingByAction] = useState<
