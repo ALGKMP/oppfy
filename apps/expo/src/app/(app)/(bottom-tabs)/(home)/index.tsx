@@ -136,7 +136,7 @@ const HomeScreen = () => {
           stats={{
             likes: item.likesCount,
             comments: item.commentsCount,
-            hasLiked: item.hasLiked
+            hasLiked: item.hasLiked,
           }}
         />
       );
@@ -173,8 +173,8 @@ const HomeScreen = () => {
           paddingTop={(insets.top + getToken("$2", "space")) as number}
           gap="$4"
         >
-          {Array.from({ length: 3 }).map(() => (
-            <PostCard.loading />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <PostCard.loading key={`loading-post-${index}`} />
           ))}
         </YStack>
       ) : (
