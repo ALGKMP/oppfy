@@ -4,6 +4,7 @@ import { Paragraph, SizableText, View, XStack, YStack } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
 import ActionButton from "./ActionButton";
 import Stats from "./Stats";
+import { useEffect, useState } from "react";
 
 interface HeaderProps {
   userId?: string;
@@ -13,7 +14,23 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
     userId,
   });
+  const [isRestricted, setIsRestricted] = useState(false);
 
+  useEffect(() => {
+    if (isLoadingProfileData) return;
+    if (profileData && "networkStatus" in profileData) {
+      const isPrivateAndNotFollowing = profileData.privacy === "private" && profileData.networkStatus.otherUserFollowState === "NotFollowing";
+      const isBlocked = profileData.networkStatus.blocked;
+      setIsRestricted(isPrivateAndNotFollowing || isBlocked);
+      console.log("otherUserFollowState", profileData.networkStatus.otherUserFollowState);
+      console.log("targetUserFollowState", profileData.networkStatus.targetUserFollowState);
+    }
+    console.log(isRestricted);
+  }, [profileData, isLoadingProfileData]);
+
+  if (profileData && "networkStatus" in profileData) {
+
+  }
   // Skeleton UI while loading Profile Data
   if (isLoadingProfileData) {
     return (
@@ -85,6 +102,7 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
           userId={userId}
           followingCount={profileData?.followingCount ?? 0}
           followerCount={profileData?.followerCount ?? 0}
+          disableButtons={isRestricted}
         />
       </XStack>
       
