@@ -42,11 +42,12 @@ type ProfileFields = z.infer<typeof profileSchema>;
 type FieldKeys = keyof ProfileFields;
 
 const EditProfile = () => {
-  const { show, hide } = useBottomSheetController();
   const utils = api.useUtils();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const defaultValues = utils.profile.getFullProfileSelf.getData();
+  const { show: showBottomSheet, hide: hideBottomSheet } =
+    useBottomSheetController();
 
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
@@ -71,38 +72,33 @@ const EditProfile = () => {
 
   const updateProfile = api.profile.updateProfile.useMutation({
     onMutate: async (newPartialProfileData) => {
-      // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await utils.profile.getFullProfileSelf.cancel();
-
-      // Get the data from the queryCache
       const prevData = utils.profile.getFullProfileSelf.getData();
       if (prevData === undefined) return;
-
-      // Optimistically update the data
       utils.profile.getFullProfileSelf.setData(undefined, {
         ...prevData,
         ...newPartialProfileData,
       });
-
-      // Return the previous data so we can revert if something goes wrong
       return { prevData };
     },
     onError: (_err, _newPartialProfileData, ctx) => {
       if (ctx === undefined) return;
-
-      // If the mutation fails, use the context-value from onMutate
       utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
     },
     onSettled: async () => {
-      // Sync with server once mutation has settled
       await utils.profile.getFullProfileSelf.invalidate();
     },
   });
 
+  const [currentField, setCurrentField] = useState<FieldKeys | null>(null);
+  const inputRef = useRef<TextInput>(null);
+  const [inputValue, setInputValue] = useState("");
+  const [isFieldChanged, setIsFieldChanged] = useState(false);
+
   const onSubmit = handleSubmit(async (data) => {
     await updateProfile.mutateAsync(data, {
       onSuccess: () => {
-        hide();
+        hideBottomSheet();
         reset(data);
       },
       onError: (error) => {
@@ -116,42 +112,54 @@ const EditProfile = () => {
     });
   });
 
-  const inputRef = useRef<TextInput>(null);
-  const [inputValue, setInputValue] = useState("");
-  const [isFieldChanged, setIsFieldChanged] = useState(false);
-  const [currentField, setCurrentField] = useState<FieldKeys | null>(null);
-
   const openBottomSheet = (field: FieldKeys) => {
+    const currentValue = watch(field);
+
     setCurrentField(field);
-    setInputValue(watch(field));
+    setInputValue(currentValue);
     setIsFieldChanged(false);
 
-    show({
-      title:
-        field === "name"
-          ? "Edit Name"
-          : field === "username"
-            ? "Edit Username"
-            : "Edit Bio",
-      children: renderFieldContent(
-        field,
-        field === "name"
-          ? "What's your name?"
-          : field === "username"
-            ? "Choose your username"
-            : "About you",
-        field === "name"
-          ? "Full Name"
-          : field === "username"
-            ? "Username"
-            : "Bio",
-        field === "name"
-          ? "✨ Your display name helps others recognize you."
-          : field === "username"
-            ? "🔗 Your unique identifier for mentions and sharing."
-            : "🌟 Share a brief description of who you are or what you're passionate about.",
-      ),
-      snapPoints: ["50%"],
+    const title =
+      field === "name"
+        ? "Edit Name"
+        : field === "username"
+          ? "Edit Username"
+          : "Edit Bio";
+
+    const content =
+      field === "name"
+        ? renderFieldContent(
+            "name",
+            "What's your name?",
+            "Full Name",
+            "✨ Your display name helps others recognize you.",
+            currentValue,
+          )
+        : field === "username"
+          ? renderFieldContent(
+              "username",
+              "Choose your username",
+              "Username",
+              "🔗 Your unique identifier for mentions and sharing.",
+              currentValue,
+            )
+          : renderFieldContent(
+              "bio",
+              "About you",
+              "Bio",
+              "🌟 Share a brief description of who you are or what you're passionate about.",
+              currentValue,
+            );
+
+    showBottomSheet({
+      snapPoints: ["60%"],
+      title,
+      children: content,
+      onDismiss: () => {
+        setCurrentField(null);
+        setInputValue("");
+        setIsFieldChanged(false);
+      },
     });
   };
 
@@ -174,6 +182,7 @@ const EditProfile = () => {
       title: string,
       placeholder: string,
       description: string,
+      initialValue: string,
     ) => {
       const charLimit = getCharLimit(field);
       return (
@@ -184,7 +193,7 @@ const EditProfile = () => {
             </Text>
             <XStack alignItems="center" gap="$2">
               <Text fontSize="$3" color="$gray10">
-                {inputValue.length}/{charLimit}
+                {initialValue.length}/{charLimit}
               </Text>
               <TouchableOpacity onPress={clearInput}>
                 <Ionicons
@@ -211,12 +220,10 @@ const EditProfile = () => {
                   autoFocus
                   placeholder={placeholder}
                   onBlur={onBlur}
-                  value={inputValue}
+                  value={initialValue}
                   onChangeText={(text) => {
                     const processedText =
-                      field === "username"
-                        ? text.replace(/\s/g, "_") // Replace spaces with underscores for username
-                        : text;
+                      field === "username" ? text.replace(/\s/g, "_") : text;
 
                     setInputValue(processedText);
                     setIsFieldChanged(processedText !== value);
@@ -241,10 +248,30 @@ const EditProfile = () => {
             {description}
           </Text>
           {errors[field] && <Text color="$red8">{errors[field]?.message}</Text>}
+          <XStack padding="$4" paddingBottom={insets.bottom}>
+            <Button
+              flex={1}
+              onPress={handleSave}
+              disabled={!isFieldChanged || updateProfile.isPending}
+            >
+              {updateProfile.isPending ? (
+                <Spinner size="small" color="$color" />
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </XStack>
         </YStack>
       );
     },
-    [control, errors, inputValue, theme],
+    [
+      control,
+      errors,
+      theme,
+      insets.bottom,
+      isFieldChanged,
+      updateProfile.isPending,
+    ],
   );
 
   const handleSave = async () => {
@@ -254,10 +281,6 @@ const EditProfile = () => {
 
       setValue(currentField, valueToSave);
       await onSubmit();
-      hide();
-      setCurrentField(null);
-      setInputValue("");
-      setIsFieldChanged(false);
     }
   };
 
