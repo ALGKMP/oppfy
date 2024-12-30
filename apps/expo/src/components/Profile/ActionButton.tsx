@@ -80,7 +80,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     unfollow: {
       label: "Unfollow",
       action: "unfollow",
-      backgroundColor: "$primary",
+      backgroundColor: "$gray3",
     },
     friend: {
       label: "Add Friend",
@@ -90,17 +90,17 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     removeFriend: {
       label: "Remove Friend",
       action: "removeFriend",
-      backgroundColor: "$primary",
+      backgroundColor: "$gray3",
     },
     cancelFollowRequest: {
       label: "Cancel Follow Request",
       action: "cancelFollowRequest",
-      backgroundColor: "$primary",
+      backgroundColor: "$gray3",
     },
     cancelFriendRequest: {
       label: "Cancel Friend Request",
       action: "cancelFriendRequest",
-      backgroundColor: "$primary",
+      backgroundColor: "$gray3",
     },
   };
 
@@ -147,7 +147,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
             }}
           >
             <XStack gap="$2" alignItems="center">
-              <Text>{config.label}</Text>
+              <Text textAlign="center" fontWeight="bold">{config.label}</Text>
               {loading && <Spinner size="small" color="$color" />}
             </XStack>
           </Button>
