@@ -10,33 +10,21 @@ interface StatsProps {
   userId?: string;
   followingCount: number;
   followerCount: number;
+  disableButtons?: boolean;
 }
 
-const Stats = ({ userId, followingCount, followerCount }: StatsProps) => {
-  /*
-   * Notice how we just have one state variable for the entire component.
-   * We don't have a wall of state or wall of functions,
-   * we just have a single state variable and a single function.
-   * This keeps our components simple and easy to understand.
-   */
+const Stats = ({ userId, followingCount, followerCount, disableButtons }: StatsProps) => {
 
   const { onFollowingPress, onFollowersPress } = useOnFollowPress({
     userId,
   });
 
-  /*
-   * TODO: Some isRestricted state (this would be related to if the users's private and we don't follow, or they're blocked)
-   * Either pass this in as a prop, or set it in a hook.
-   * Gonna decide later.
-   */
-  const [isRestricted, setIsRestricted] = useState(false);
-
   return (
     <YStack alignItems="flex-end" gap="$2">
-      <TouchableOpacity onPress={onFollowingPress} disabled={isRestricted}>
+      <TouchableOpacity onPress={onFollowingPress} disabled={disableButtons}>
         <Stat label="Following" value={abbreviatedNumber(followingCount)} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={onFollowersPress} disabled={isRestricted}>
+      <TouchableOpacity onPress={onFollowersPress} disabled={disableButtons}>
         <Stat label="Followers" value={abbreviatedNumber(followerCount)} />
       </TouchableOpacity>
     </YStack>
