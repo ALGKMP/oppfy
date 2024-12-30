@@ -7,7 +7,7 @@ import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
-import { BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
@@ -18,7 +18,6 @@ import { sharedValidators } from "@oppfy/validators";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import {
-  BottomSheet,
   Button,
   H3,
   ScreenView,
@@ -29,6 +28,7 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
+import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 
@@ -42,6 +42,7 @@ type ProfileFields = z.infer<typeof profileSchema>;
 type FieldKeys = keyof ProfileFields;
 
 const EditProfile = () => {
+  const { show, hide } = useBottomSheetController();
   const utils = api.useUtils();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -101,7 +102,7 @@ const EditProfile = () => {
   const onSubmit = handleSubmit(async (data) => {
     await updateProfile.mutateAsync(data, {
       onSuccess: () => {
-        bottomSheetRef.current?.dismiss();
+        hide();
         reset(data);
       },
       onError: (error) => {
@@ -115,17 +116,43 @@ const EditProfile = () => {
     });
   });
 
-  const [currentField, setCurrentField] = useState<FieldKeys | null>(null);
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
   const inputRef = useRef<TextInput>(null);
   const [inputValue, setInputValue] = useState("");
   const [isFieldChanged, setIsFieldChanged] = useState(false);
+  const [currentField, setCurrentField] = useState<FieldKeys | null>(null);
 
   const openBottomSheet = (field: FieldKeys) => {
     setCurrentField(field);
     setInputValue(watch(field));
     setIsFieldChanged(false);
-    bottomSheetRef.current?.present();
+
+    show({
+      title:
+        field === "name"
+          ? "Edit Name"
+          : field === "username"
+            ? "Edit Username"
+            : "Edit Bio",
+      children: renderFieldContent(
+        field,
+        field === "name"
+          ? "What's your name?"
+          : field === "username"
+            ? "Choose your username"
+            : "About you",
+        field === "name"
+          ? "Full Name"
+          : field === "username"
+            ? "Username"
+            : "Bio",
+        field === "name"
+          ? "✨ Your display name helps others recognize you."
+          : field === "username"
+            ? "🔗 Your unique identifier for mentions and sharing."
+            : "🌟 Share a brief description of who you are or what you're passionate about.",
+      ),
+      snapPoints: ["50%"],
+    });
   };
 
   const clearInput = () => {
@@ -220,34 +247,6 @@ const EditProfile = () => {
     [control, errors, inputValue, theme],
   );
 
-  const renderBottomSheetContent = useCallback(() => {
-    switch (currentField) {
-      case "name":
-        return renderFieldContent(
-          "name",
-          "What's your name?",
-          "Full Name",
-          "✨ Your display name helps others recognize you.",
-        );
-      case "username":
-        return renderFieldContent(
-          "username",
-          "Choose your username",
-          "Username",
-          "🔗 Your unique identifier for mentions and sharing.",
-        );
-      case "bio":
-        return renderFieldContent(
-          "bio",
-          "About you",
-          "Bio",
-          "🌟 Share a brief description of who you are or what you're passionate about.",
-        );
-      default:
-        return null;
-    }
-  }, [currentField, renderFieldContent]);
-
   const handleSave = async () => {
     if (currentField && isFieldChanged) {
       const valueToSave =
@@ -255,14 +254,11 @@ const EditProfile = () => {
 
       setValue(currentField, valueToSave);
       await onSubmit();
+      hide();
+      setCurrentField(null);
+      setInputValue("");
+      setIsFieldChanged(false);
     }
-  };
-
-  const handleSheetClose = () => {
-    bottomSheetRef.current?.dismiss();
-    setCurrentField(null);
-    setInputValue("");
-    setIsFieldChanged(false);
   };
 
   return (
@@ -385,35 +381,6 @@ const EditProfile = () => {
           </YStack>
         </CardContainer>
       </YStack>
-
-      <BottomSheet
-        ref={bottomSheetRef}
-        title={
-          currentField === "name"
-            ? "Edit Name"
-            : currentField === "username"
-              ? "Edit Username"
-              : currentField === "bio"
-                ? "Edit Bio"
-                : undefined
-        }
-        onDismiss={handleSheetClose}
-      >
-        {renderBottomSheetContent()}
-        <XStack padding="$4" paddingBottom={insets.bottom}>
-          <Button
-            flex={1}
-            onPress={handleSave}
-            disabled={!isFieldChanged || updateProfile.isPending}
-          >
-            {updateProfile.isPending ? (
-              <Spinner size="small" color="$color" />
-            ) : (
-              "Save"
-            )}
-          </Button>
-        </XStack>
-      </BottomSheet>
     </ScreenView>
   );
 };
