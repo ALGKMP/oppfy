@@ -147,7 +147,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
             }}
           >
             <XStack gap="$2" alignItems="center">
-              <Text textAlign="center" fontWeight="bold">{config.label}</Text>
+              <Text textAlign="center">{config.label}</Text>
               {loading && <Spinner size="small" color="$color" />}
             </XStack>
           </Button>
