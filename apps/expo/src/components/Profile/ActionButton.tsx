@@ -146,9 +146,28 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
               borderColor: "white",
             }}
           >
-            <XStack gap="$2" alignItems="center">
-              <Text textAlign="center">{config.label}</Text>
-              {loading && <Spinner size="small" color="$color" />}
+            <XStack
+              position="relative"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Text
+                textAlign="center"
+                // opacity={loading ? 0 : 1} // Hide text when loading
+              >
+                {config.label}
+              </Text>
+              {loading && (
+                <XStack
+                  position="absolute"
+                  top={0}
+                  bottom={0}
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Spinner size="small" color="$color" />
+                </XStack>
+              )}
             </XStack>
           </Button>
         );
