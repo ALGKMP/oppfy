@@ -17,7 +17,7 @@ interface ActionButtonProps {
 }
 
 const ActionButton = ({ userId }: ActionButtonProps) => {
-  const actions = useProfileActionButtons(userId);
+  const { actions } = useProfileActionButtons(userId);
 
   // Only make the network status query if userId is provided
   const { data: networkStatus, isLoading: isNetworkStatusLoading } =
@@ -30,7 +30,7 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   if (!userId) {
     return (
       <XStack gap="$4">
-        {Object.entries(actions.actions).map(([key, { handler, loading }]) => (
+        {Object.entries(actions).map(([key, { handler, loading }]) => (
           <Button key={key} flex={1} rounded outlined onPress={handler}>
             <XStack gap="$2" alignItems="center">
               <Text>
@@ -124,8 +124,8 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     <XStack gap="$4">
       {buttonKeys.map((buttonKey) => {
         const config = buttonConfigs[buttonKey];
-        const actionKey = config.action as keyof typeof actions.actions;
-        const action = actions.actions[actionKey];
+        const actionKey = config.action as keyof typeof actions;
+        const action = actions[actionKey];
         if (!action) return null;
         const { handler, loading, disabled } = action;
 
@@ -215,12 +215,14 @@ const useProfileActionButtons = (userId?: string) => {
 
   const invalidateQueries = async (actionKey: string) => {
     if (!userId) return;
+    utils.profile.getNetworkRelationships.invalidate({ userId: userId! });
+
     setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
-    await Promise.all([
-      utils.profile.getFullProfileOther.invalidate({ userId }),
-      utils.contacts.getRecommendationProfilesSelf.invalidate(),
-    ]);
-    setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
+    // await Promise.all([
+    //   utils.profile.getFullProfileOther.invalidate({ userId }),
+    //   utils.contacts.getRecommendationProfilesSelf.invalidate(),
+    // ]);
+    // setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
   };
 
   const isAnyActionLoading =
