@@ -38,11 +38,6 @@ import { Skeleton } from "../Skeletons";
 import { TimeAgo } from "../Texts";
 import { EmptyPlaceholder } from "../UIPlaceholders";
 
-/*
- * TODO: Clean up the CommentItem component.
- * TODO: Instead of passing the handlers as props, use the useComments hook within the component itself.
- */
-
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
