@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import type { ImageSourcePropType } from "react-native";
 import { LayoutAnimation, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -30,7 +25,6 @@ import {
 
 import { useSession } from "~/contexts/SessionContext";
 import useProfile from "~/hooks/useProfile";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { useComments } from "../../hooks/post/useComments";
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
@@ -175,7 +169,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
 
 const LoadingView = React.memo(() => (
   <ScrollView>
-    {PLACEHOLDER_DATA.map((_, index) => (
+    {Array.from({ length: 20 }, () => null).map((_, index) => (
       <XStack key={index} padding="$3.5" gap="$2.5">
         <Skeleton circular size={46} />
         <YStack flex={1} gap="$2">

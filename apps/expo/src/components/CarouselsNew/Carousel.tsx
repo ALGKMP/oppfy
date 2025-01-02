@@ -4,7 +4,6 @@ import { getToken, H5, Spacer, Text, View, XStack, YStack } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import { Skeleton } from "~/components/Skeletons";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import UserItem, { UserItemShortCard } from "./UserItem";
 
 /*
@@ -24,10 +23,12 @@ const Carousel = (props: CarouselProps) => {
   const { title, onShowMore, isLoading, data } = props;
 
   if (isLoading) {
+    const placeholderData = Array.from({ length: 20 }, () => null);
+
     return (
       <CardContainer paddingLeft={0} paddingRight={0}>
         <FlashList
-          data={PLACEHOLDER_DATA}
+          data={placeholderData}
           horizontal
           ListEmptyComponent={null}
           estimatedItemSize={70}
