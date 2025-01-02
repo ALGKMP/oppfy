@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
-  LayoutChangeEvent,
   Pressable,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import * as FileSystem from "expo-file-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -106,24 +104,6 @@ const VideoEditorContent = ({
     player.timeUpdateEventInterval = 0.05;
   });
 
-  const { status, error } = useEvent(player, "statusChange", {
-    status: player.status,
-  });
-
-  console.log("Video Player Debug:", {
-    uri,
-    status,
-    error: error ? { ...error } : null,
-    player: {
-      duration: player.duration,
-      currentTime: player.currentTime,
-      bufferedPosition: player.bufferedPosition,
-      playing: player.playing,
-      muted: player.muted,
-      volume: player.volume,
-    },
-  });
-
   useEffect(() => {
     const subscription = player.addListener("statusChange", ({ status }) => {
       if (status === "readyToPlay" && videoDuration === 0) {
@@ -171,10 +151,10 @@ const VideoEditorContent = ({
 
   const togglePlayback = async () => {
     if (player.playing) {
-      await player.pause();
+      player.pause();
       addPause();
     } else {
-      await player.play();
+      player.play();
       addPlay();
     }
   };
