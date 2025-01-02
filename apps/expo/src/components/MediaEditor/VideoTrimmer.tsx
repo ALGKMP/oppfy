@@ -120,10 +120,13 @@ const VideoTrimmer = ({
         for (let i = 0; i < thumbnailCount; i++) {
           if (cancel) break;
 
-          // Calculate time for this thumbnail (distribute evenly across duration)
-          const timeMs = Math.floor(
-            (duration * i * 1000) / (thumbnailCount - 1),
-          );
+          // Calculate time for this thumbnail
+          // For the last thumbnail, use 99% of duration to ensure we can get a valid frame
+          const progress =
+            i === thumbnailCount - 1
+              ? 0.99 // Last thumbnail at 99% of duration
+              : i / (thumbnailCount - 1);
+          const timeMs = Math.round(progress * duration * 1000);
 
           try {
             const result = await VideoThumbnails.getThumbnailAsync(uri, {
