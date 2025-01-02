@@ -63,23 +63,6 @@ const MediaPickerScreen = () => {
     void fetchAssets();
   }, []);
 
-  const onMediaSelected = useCallback(
-    async (asset: MediaLibrary.Asset) => {
-      const { uri, width, height, mediaType } = asset;
-
-      router.push({
-        pathname: "/editor",
-        params: {
-          type: mediaType === "video" ? "video" : "photo",
-          uri,
-          width: width.toString(),
-          height: height.toString(),
-        },
-      });
-    },
-    [router],
-  );
-
   const renderItem = useCallback(
     ({ item }: { item: MediaLibrary.Asset }) => {
       return (
@@ -92,8 +75,10 @@ const MediaPickerScreen = () => {
 
             router.dismiss();
             router.dismiss();
+
             router.push({
-              pathname: "/(app)/(create-post)/preview",
+              pathname:
+                item.mediaType === "video" ? "/video-editor" : "/preview",
               params: {
                 uri: assetInfo.localUri,
                 type: assetInfo.mediaType,
