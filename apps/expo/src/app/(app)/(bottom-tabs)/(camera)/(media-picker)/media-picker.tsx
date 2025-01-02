@@ -5,6 +5,7 @@ import React, {
   useState,
 } from "react";
 import { Dimensions } from "react-native";
+import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
@@ -17,6 +18,44 @@ import { BaseScreenView } from "~/components/Views";
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
+
+const moveVideoToLocalStorage = async (uri: string) => {
+  // Remove file:// prefix if present
+  const cleanUri = uri.replace("file://", "");
+  const filename = cleanUri.split("/").pop() || "video.mp4";
+  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
+
+  try {
+    // Ensure videos directory exists
+    await FileSystem.makeDirectoryAsync(
+      `${FileSystem.documentDirectory}videos/`,
+      {
+        intermediates: true,
+      },
+    ).catch(() => {});
+
+    console.log("Moving video:", {
+      from: cleanUri,
+      to: destination,
+    });
+
+    // Move file
+    await FileSystem.moveAsync({
+      from: cleanUri,
+      to: destination,
+    });
+
+    return `file://${destination}`;
+  } catch (error) {
+    console.error("Error moving video:", error);
+    // If move fails, try copying instead
+    await FileSystem.copyAsync({
+      from: uri,
+      to: destination,
+    });
+    return `file://${destination}`;
+  }
+};
 
 const MediaPickerScreen = () => {
   const router = useRouter();
@@ -71,21 +110,54 @@ const MediaPickerScreen = () => {
           height={ITEM_SIZE}
           margin={0.5}
           onPress={async () => {
-            const assetInfo = await MediaLibrary.getAssetInfoAsync(item);
+            try {
+              // Get full asset info with network download if needed
+              const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
+                shouldDownloadFromNetwork: true,
+              });
 
-            router.dismiss();
-            router.dismiss();
+              // For videos, we need to move to local storage
+              if (item.mediaType === "video") {
+                if (!assetInfo.localUri) {
+                  throw new Error("Could not get local URI for video");
+                }
 
-            router.push({
-              pathname:
-                item.mediaType === "video" ? "/video-editor" : "/preview",
-              params: {
-                uri: assetInfo.localUri,
-                type: assetInfo.mediaType,
-                height: assetInfo.height.toString(),
-                width: assetInfo.width.toString(),
-              },
-            });
+                console.log("Original video URI:", assetInfo.localUri);
+
+                // Move to local storage
+                const localUri = await moveVideoToLocalStorage(
+                  assetInfo.localUri,
+                );
+                console.log("Moved video to:", localUri);
+
+                router.dismiss();
+                router.dismiss();
+                router.push({
+                  pathname: "/video-editor",
+                  params: {
+                    uri: localUri,
+                    type: assetInfo.mediaType,
+                    height: assetInfo.height.toString(),
+                    width: assetInfo.width.toString(),
+                  },
+                });
+              } else {
+                // For images, continue with the normal flow
+                router.dismiss();
+                router.dismiss();
+                router.push({
+                  pathname: "/preview",
+                  params: {
+                    uri: assetInfo.uri,
+                    type: assetInfo.mediaType,
+                    height: assetInfo.height.toString(),
+                    width: assetInfo.width.toString(),
+                  },
+                });
+              }
+            } catch (error) {
+              console.error("Error accessing media:", error);
+            }
           }}
         >
           <Image

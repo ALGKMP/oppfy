@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dimensions,
   Pressable,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -50,6 +51,8 @@ const PreviewScreen = () => {
       },
     });
   };
+
+  console.log("Preview screen uri:", uri);
 
   return (
     <ScreenView padding={0} safeAreaEdges={["top"]}>
@@ -129,12 +132,30 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
     player.play();
   });
 
+  const { status, error } = useEvent(player, "statusChange", {
+    status: player.status,
+  });
+
+  console.log("Preview Video Debug:", {
+    uri,
+    status,
+    error: error ? { ...error } : null,
+    player: {
+      duration: player.duration,
+      currentTime: player.currentTime,
+      bufferedPosition: player.bufferedPosition,
+      playing: player.playing,
+      muted: player.muted,
+      volume: player.volume,
+    },
+  });
+
   const togglePlayback = async () => {
     if (player.playing) {
-      player.pause();
+      await player.pause();
       addPause();
     } else {
-      player.play();
+      await player.play();
       addPlay();
     }
   };

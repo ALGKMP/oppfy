@@ -6,7 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { useEvent } from "expo";
 import { BlurView } from "expo-blur";
+import * as FileSystem from "expo-file-system";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { Check, ChevronLeft } from "@tamagui/lucide-icons";
@@ -36,6 +38,44 @@ interface CropRegion {
   rotation: number;
 }
 
+const moveVideoToLocalStorage = async (uri: string) => {
+  // Remove file:// prefix if present
+  const cleanUri = uri.replace("file://", "");
+  const filename = cleanUri.split("/").pop() || "video.mp4";
+  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
+
+  try {
+    // Ensure videos directory exists
+    await FileSystem.makeDirectoryAsync(
+      `${FileSystem.documentDirectory}videos/`,
+      {
+        intermediates: true,
+      },
+    ).catch(() => {});
+
+    console.log("Moving video:", {
+      from: cleanUri,
+      to: destination,
+    });
+
+    // Move file
+    await FileSystem.moveAsync({
+      from: cleanUri,
+      to: destination,
+    });
+
+    return `file://${destination}`;
+  } catch (error) {
+    console.error("Error moving video:", error);
+    // If move fails, try copying instead
+    await FileSystem.copyAsync({
+      from: uri,
+      to: destination,
+    });
+    return `file://${destination}`;
+  }
+};
+
 /**
  * Video Editor Component
  */
@@ -64,6 +104,24 @@ const VideoEditorContent = ({
     player.loop = true;
     player.play();
     player.timeUpdateEventInterval = 0.05;
+  });
+
+  const { status, error } = useEvent(player, "statusChange", {
+    status: player.status,
+  });
+
+  console.log("Video Player Debug:", {
+    uri,
+    status,
+    error: error ? { ...error } : null,
+    player: {
+      duration: player.duration,
+      currentTime: player.currentTime,
+      bufferedPosition: player.bufferedPosition,
+      playing: player.playing,
+      muted: player.muted,
+      volume: player.volume,
+    },
   });
 
   useEffect(() => {
@@ -111,11 +169,6 @@ const VideoEditorContent = ({
     [player],
   );
 
-  const handleTrimmerLayout = useCallback((event: LayoutChangeEvent) => {
-    const { width } = event.nativeEvent.layout;
-    setTrimmerWidth(width);
-  }, []);
-
   const togglePlayback = async () => {
     if (player.playing) {
       await player.pause();
@@ -156,7 +209,7 @@ const VideoEditorContent = ({
           duration={videoDuration}
           onTrimsChange={handleTrimsChange}
           onSeek={handleSeek}
-          currentTime={player.currentTime}
+          currentTime={currentTime}
         />
       )}
     </YStack>
@@ -199,17 +252,49 @@ const VideoEditor = () => {
   const onSave = useCallback(async () => {
     try {
       setIsProcessing(true);
+
+      // Ensure videos directory exists
+      const videosDir = `${FileSystem.documentDirectory}videos/`;
+      await FileSystem.makeDirectoryAsync(videosDir, {
+        intermediates: true,
+      }).catch(() => {});
+
+      // Process video directly to videos directory
+      const outputFilename = `processed_${Date.now()}.mp4`;
+      const outputUri = `${videosDir}${outputFilename}`;
+
+      console.log("Starting video processing:", {
+        inputUri: uri,
+        outputUri,
+        trimStart,
+        trimEnd,
+      });
+
       const processedUri = await processVideo({
         uri,
         startTime: trimStart,
         endTime: trimEnd,
         crop: cropRegion,
+        outputUri,
       });
+
+      if (!processedUri) {
+        throw new Error("Failed to process video: No output URI returned");
+      }
+
+      console.log("Processed video saved to:", processedUri);
+
+      // Add file:// prefix only when passing to preview
+      const finalUri = processedUri.startsWith("file://")
+        ? processedUri
+        : `file://${processedUri}`;
+
+      console.log("Final video URI for preview:", finalUri);
 
       router.push({
         pathname: "/preview",
         params: {
-          uri: processedUri,
+          uri: finalUri,
           type: "video",
           width: cropRegion.width.toString(),
           height: cropRegion.height.toString(),

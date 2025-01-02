@@ -16,6 +16,7 @@ interface ProcessVideoOptions {
   startTime: number;
   endTime: number;
   crop?: CropRegion;
+  outputUri?: string;
 }
 
 interface ProcessPhotoOptions {
@@ -23,12 +24,34 @@ interface ProcessPhotoOptions {
   crop?: CropRegion;
 }
 
+const sanitizeUri = (uri: string) => {
+  // Remove file:// prefix and any hash fragments
+  return uri.replace(/^file:\/\//, "").split("#")[0];
+};
+
 const useMediaProcessing = () => {
   const processVideo = useCallback(
-    async ({ uri, startTime, endTime, crop }: ProcessVideoOptions) => {
-      const outputUri = `${FileSystem.cacheDirectory}processed_${Date.now()}.mp4`;
+    async ({
+      uri,
+      startTime,
+      endTime,
+      crop,
+      outputUri,
+    }: ProcessVideoOptions) => {
+      // Clean input and output URIs
+      const cleanInputUri = sanitizeUri(uri);
+      const finalOutputUri = outputUri
+        ? sanitizeUri(outputUri)
+        : `${FileSystem.cacheDirectory}processed_${Date.now()}.mp4`;
 
-      let command = `-i "${uri}" -t ${endTime - startTime}`;
+      console.log("Processing video:", {
+        input: cleanInputUri,
+        output: finalOutputUri,
+        startTime,
+        endTime,
+      });
+
+      let command = `-i "${cleanInputUri}" -t ${endTime - startTime}`;
 
       if (startTime > 0) {
         command = `${command} -ss ${startTime}`;
@@ -45,11 +68,12 @@ const useMediaProcessing = () => {
       }
 
       // Ensure output is h264 for compatibility
-      command = `${command} -c:v h264 -b:v 2M -c:a aac "${outputUri}"`;
+      command = `${command} -c:v h264 -b:v 2M -c:a aac "${finalOutputUri}"`;
 
       try {
+        console.log("FFmpeg command:", command);
         await FFmpegKit.execute(command);
-        return outputUri;
+        return finalOutputUri;
       } catch (error) {
         console.error("Error processing video:", error);
         throw error;
