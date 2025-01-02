@@ -36,6 +36,9 @@ const HIT_SLOP = { top: 24, bottom: 24, left: 24, right: 24 };
 /** How many thumbnails to generate */
 const THUMBNAIL_COUNT = 8; // Fixed number of thumbnails regardless of duration
 
+/** Minimum selection, in seconds */
+const MIN_DURATION = 1;
+
 /** Maximum selection, in seconds */
 const DEFAULT_MAX_DURATION = 60;
 
@@ -215,9 +218,15 @@ const VideoTrimmer = ({
         if (newLeft < 0) newLeft = 0;
       }
 
+      // enforce minDuration => region width >= minRangePx
+      const minRangePx = (MIN_DURATION / duration) * containerWidth;
+      if (regionWidth < minRangePx) {
+        newLeft = rightEdge.value - minRangePx;
+        if (newLeft < 0) newLeft = 0;
+      }
+
       leftEdge.value = newLeft;
 
-      // Only adjust seeker if it's outside the new trim region
       if (!isSeeking.value && seekerX.value < newLeft) {
         seekerX.value = newLeft;
         if (onSeek) {
@@ -252,9 +261,15 @@ const VideoTrimmer = ({
         if (newRight > containerWidth) newRight = containerWidth;
       }
 
+      // enforce minDuration => region width >= minRangePx
+      const minRangePx = (MIN_DURATION / duration) * containerWidth;
+      if (regionWidth < minRangePx) {
+        newRight = leftEdge.value + minRangePx;
+        if (newRight > containerWidth) newRight = containerWidth;
+      }
+
       rightEdge.value = newRight;
 
-      // Only adjust seeker if it's outside the new trim region
       if (!isSeeking.value && seekerX.value > newRight) {
         seekerX.value = newRight;
         if (onSeek) {
@@ -323,16 +338,28 @@ const VideoTrimmer = ({
     })
     .onUpdate((e) => {
       let newPos = seekerXOnStart.value + e.translationX;
-      if (newPos < leftEdge.value) newPos = leftEdge.value;
-      if (newPos > rightEdge.value) newPos = rightEdge.value;
-
+      // Clamp to edges without buffer
+      newPos = Math.max(leftEdge.value, Math.min(rightEdge.value, newPos));
       seekerX.value = newPos;
       if (onSeek) {
         runOnJS(onSeek)(pxToSec(newPos));
       }
     })
     .onEnd(() => {
-      seekerX.value = withSpring(seekerX.value);
+      // No spring animation at edges for immediate response
+      const finalPos = Math.max(
+        leftEdge.value,
+        Math.min(rightEdge.value, seekerX.value),
+      );
+      if (finalPos === leftEdge.value || finalPos === rightEdge.value) {
+        seekerX.value = finalPos;
+      } else {
+        seekerX.value = withSpring(finalPos, {
+          damping: 20,
+          stiffness: 400,
+          mass: 0.5,
+        });
+      }
       isSeeking.value = false;
     });
 
@@ -378,19 +405,29 @@ const VideoTrimmer = ({
   useAnimatedReaction(
     () => {
       if (!isSeeking.value && !isTrimming.value && containerWidth) {
-        return (currentTime / duration) * containerWidth;
+        const position = (currentTime / duration) * containerWidth;
+        // When reaching start, immediately reset without animation
+        if (currentTime === 0) {
+          return { position, immediate: true };
+        }
+        return { position, immediate: false };
       }
       return null;
     },
-    (position) => {
-      if (position !== null) {
-        seekerX.value = withTiming(
-          Math.max(leftEdge.value, Math.min(rightEdge.value, position)),
-          {
-            duration: 100, // 100ms animation
-            easing: (x) => x, // linear easing for smooth movement
-          },
+    (result) => {
+      if (result !== null) {
+        const clampedPosition = Math.max(
+          leftEdge.value,
+          Math.min(rightEdge.value, result.position),
         );
+        if (result.immediate) {
+          seekerX.value = clampedPosition;
+        } else {
+          seekerX.value = withTiming(clampedPosition, {
+            duration: 100,
+            easing: (x) => x,
+          });
+        }
       }
     },
     [currentTime, duration, containerWidth],
