@@ -318,6 +318,7 @@ const PreviewVideo = ({
 
   const player = useVideoPlayer(uri, (player) => {
     player.loop = true;
+    player.play();
   });
 
   const togglePlayback = async () => {
