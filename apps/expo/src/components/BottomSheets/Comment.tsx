@@ -1,41 +1,22 @@
 import React, {
-  useCallback,
   useMemo,
-  useRef,
-  useState,
 } from "react";
-import type { ImageSourcePropType } from "react-native";
-import { LayoutAnimation, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Haptics from "expo-haptics";
-import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { FlashList } from "@shopify/flash-list";
 import {
   AlertCircle,
-  MessageCircleOff,
-  SendHorizontal,
   Trash2,
 } from "@tamagui/lucide-icons";
 import {
-  ScrollView,
   SizableText,
   Text,
-  useTheme,
   View,
   XStack,
   YStack,
 } from "tamagui";
 
-import { useSession } from "~/contexts/SessionContext";
-import useProfile from "~/hooks/useProfile";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
-import { useComments } from "../../hooks/post/useComments";
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
-import { Skeleton } from "../Skeletons";
 import { TimeAgo } from "../Texts";
-import { EmptyPlaceholder } from "../UIPlaceholders";
 
 interface Comment {
   userId: string;
