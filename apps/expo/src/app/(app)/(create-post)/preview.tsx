@@ -51,6 +51,8 @@ const PreviewScreen = () => {
     });
   };
 
+  console.log("Preview screen uri:", uri);
+
   return (
     <ScreenView padding={0} safeAreaEdges={["top"]}>
       <View
@@ -131,10 +133,10 @@ const PreviewVideo = ({ uri }: { uri: string }) => {
 
   const togglePlayback = async () => {
     if (player.playing) {
-      await player.pause();
+      player.pause();
       addPause();
     } else {
-      await player.play();
+      player.play();
       addPlay();
     }
   };

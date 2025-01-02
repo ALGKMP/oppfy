@@ -5,6 +5,7 @@ import React, {
   useState,
 } from "react";
 import { Dimensions } from "react-native";
+import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
@@ -17,6 +18,34 @@ import { BaseScreenView } from "~/components/Views";
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
+
+const moveVideoToLocalStorage = async (uri: string) => {
+  // Remove file:// prefix if present
+  const cleanUri = uri.replace("file://", "");
+  const filename = cleanUri.split("/").pop() || "video.mp4";
+  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
+
+  // Ensure videos directory exists
+  await FileSystem.makeDirectoryAsync(
+    `${FileSystem.documentDirectory}videos/`,
+    {
+      intermediates: true,
+    },
+  ).catch(() => {});
+
+  console.log("Moving video:", {
+    from: cleanUri,
+    to: destination,
+  });
+
+  // Copy file
+  await FileSystem.copyAsync({
+    from: uri,
+    to: destination,
+  });
+
+  return `file://${destination}`;
+};
 
 const MediaPickerScreen = () => {
   const router = useRouter();
@@ -71,19 +100,47 @@ const MediaPickerScreen = () => {
           height={ITEM_SIZE}
           margin={0.5}
           onPress={async () => {
-            const assetInfo = await MediaLibrary.getAssetInfoAsync(item);
-
-            router.dismiss();
-            router.dismiss();
-            router.push({
-              pathname: "/(app)/(create-post)/preview",
-              params: {
-                uri: assetInfo.localUri,
-                type: assetInfo.mediaType,
-                height: assetInfo.height.toString(),
-                width: assetInfo.width.toString(),
-              },
+            // Get full asset info with network download if needed
+            const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
+              shouldDownloadFromNetwork: true,
             });
+
+            // For videos, we need to move to local storage
+            if (item.mediaType === "video") {
+              if (!assetInfo.localUri) {
+                throw new Error("Could not get local URI for video");
+              }
+
+              // Move to local storage
+              const localUri = await moveVideoToLocalStorage(
+                assetInfo.localUri,
+              );
+
+              router.dismiss();
+              router.dismiss();
+              router.push({
+                pathname: "/video-editor",
+                params: {
+                  uri: localUri,
+                  type: assetInfo.mediaType,
+                  height: assetInfo.height.toString(),
+                  width: assetInfo.width.toString(),
+                },
+              });
+            } else {
+              // For images, continue with the normal flow
+              router.dismiss();
+              router.dismiss();
+              router.push({
+                pathname: "/preview",
+                params: {
+                  uri: assetInfo.uri,
+                  type: assetInfo.mediaType,
+                  height: assetInfo.height.toString(),
+                  width: assetInfo.width.toString(),
+                },
+              });
+            }
           }}
         >
           <Image

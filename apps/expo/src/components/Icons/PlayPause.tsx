@@ -60,7 +60,7 @@ const PlayPause = ({ isPlaying }: { isPlaying: boolean }) => {
       ]}
     >
       <Avatar circular size="$5" backgroundColor="$gray7" flex={1}>
-        {isPlaying ? <Pause size="$2" /> : <Play size="$2" />}
+        {isPlaying ? <Pause size="$2" /> : <Play size="$2" left={2} />}
       </Avatar>
     </Animated.View>
   );

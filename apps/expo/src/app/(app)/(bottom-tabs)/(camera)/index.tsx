@@ -115,24 +115,43 @@ const CameraPage = () => {
     (media: PhotoFile | VideoFile, type: "photo" | "video") => {
       const { path: uri } = media;
 
-      const width = Math.min(media.width, media.height);
-      const height = Math.max(media.width, media.height);
+      let width: number | undefined = undefined;
+      let height: number | undefined = undefined;
 
-      if (!width || !height) {
+      if (type === "photo") {
+        width = Math.min(format?.photoWidth ?? 0, format?.photoHeight ?? 0);
+        height = Math.max(format?.photoHeight ?? 0, format?.photoWidth ?? 0);
+      } else {
+        width = Math.min(format?.videoWidth ?? 0, format?.videoHeight ?? 0);
+        height = Math.max(format?.videoHeight ?? 0, format?.videoWidth ?? 0);
+      }
+
+      if (width === undefined || height === undefined) {
         throw new Error("Captured media dimensions not found");
       }
 
-      router.push({
-        pathname: "/preview",
-        params: {
-          type,
-          uri,
-          width,
-          height,
-        },
-      });
+      if (type === "photo") {
+        router.push({
+          pathname: "/preview",
+          params: {
+            type,
+            uri,
+            width,
+            height,
+          },
+        });
+      } else {
+        router.push({
+          pathname: "/video-editor",
+          params: {
+            uri,
+            width,
+            height,
+          },
+        });
+      }
     },
-    [format, router],
+    [router],
   );
 
   const onOpenMediaPicker = useCallback(async () => {
