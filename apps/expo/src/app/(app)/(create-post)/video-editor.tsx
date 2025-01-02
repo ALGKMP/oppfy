@@ -36,44 +36,6 @@ interface CropRegion {
   rotation: number;
 }
 
-const moveVideoToLocalStorage = async (uri: string) => {
-  // Remove file:// prefix if present
-  const cleanUri = uri.replace("file://", "");
-  const filename = cleanUri.split("/").pop() || "video.mp4";
-  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
-
-  try {
-    // Ensure videos directory exists
-    await FileSystem.makeDirectoryAsync(
-      `${FileSystem.documentDirectory}videos/`,
-      {
-        intermediates: true,
-      },
-    ).catch(() => {});
-
-    console.log("Moving video:", {
-      from: cleanUri,
-      to: destination,
-    });
-
-    // Move file
-    await FileSystem.moveAsync({
-      from: cleanUri,
-      to: destination,
-    });
-
-    return `file://${destination}`;
-  } catch (error) {
-    console.error("Error moving video:", error);
-    // If move fails, try copying instead
-    await FileSystem.copyAsync({
-      from: uri,
-      to: destination,
-    });
-    return `file://${destination}`;
-  }
-};
-
 /**
  * Video Editor Component
  */

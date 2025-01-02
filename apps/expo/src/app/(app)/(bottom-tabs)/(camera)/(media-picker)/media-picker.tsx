@@ -25,36 +25,26 @@ const moveVideoToLocalStorage = async (uri: string) => {
   const filename = cleanUri.split("/").pop() || "video.mp4";
   const destination = `${FileSystem.documentDirectory}videos/${filename}`;
 
-  try {
-    // Ensure videos directory exists
-    await FileSystem.makeDirectoryAsync(
-      `${FileSystem.documentDirectory}videos/`,
-      {
-        intermediates: true,
-      },
-    ).catch(() => {});
+  // Ensure videos directory exists
+  await FileSystem.makeDirectoryAsync(
+    `${FileSystem.documentDirectory}videos/`,
+    {
+      intermediates: true,
+    },
+  ).catch(() => {});
 
-    console.log("Moving video:", {
-      from: cleanUri,
-      to: destination,
-    });
+  console.log("Moving video:", {
+    from: cleanUri,
+    to: destination,
+  });
 
-    // Move file
-    await FileSystem.moveAsync({
-      from: cleanUri,
-      to: destination,
-    });
+  // Copy file
+  await FileSystem.copyAsync({
+    from: uri,
+    to: destination,
+  });
 
-    return `file://${destination}`;
-  } catch (error) {
-    console.error("Error moving video:", error);
-    // If move fails, try copying instead
-    await FileSystem.copyAsync({
-      from: uri,
-      to: destination,
-    });
-    return `file://${destination}`;
-  }
+  return `file://${destination}`;
 };
 
 const MediaPickerScreen = () => {
@@ -110,53 +100,46 @@ const MediaPickerScreen = () => {
           height={ITEM_SIZE}
           margin={0.5}
           onPress={async () => {
-            try {
-              // Get full asset info with network download if needed
-              const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
-                shouldDownloadFromNetwork: true,
-              });
+            // Get full asset info with network download if needed
+            const assetInfo = await MediaLibrary.getAssetInfoAsync(item, {
+              shouldDownloadFromNetwork: true,
+            });
 
-              // For videos, we need to move to local storage
-              if (item.mediaType === "video") {
-                if (!assetInfo.localUri) {
-                  throw new Error("Could not get local URI for video");
-                }
-
-                console.log("Original video URI:", assetInfo.localUri);
-
-                // Move to local storage
-                const localUri = await moveVideoToLocalStorage(
-                  assetInfo.localUri,
-                );
-                console.log("Moved video to:", localUri);
-
-                router.dismiss();
-                router.dismiss();
-                router.push({
-                  pathname: "/video-editor",
-                  params: {
-                    uri: localUri,
-                    type: assetInfo.mediaType,
-                    height: assetInfo.height.toString(),
-                    width: assetInfo.width.toString(),
-                  },
-                });
-              } else {
-                // For images, continue with the normal flow
-                router.dismiss();
-                router.dismiss();
-                router.push({
-                  pathname: "/preview",
-                  params: {
-                    uri: assetInfo.uri,
-                    type: assetInfo.mediaType,
-                    height: assetInfo.height.toString(),
-                    width: assetInfo.width.toString(),
-                  },
-                });
+            // For videos, we need to move to local storage
+            if (item.mediaType === "video") {
+              if (!assetInfo.localUri) {
+                throw new Error("Could not get local URI for video");
               }
-            } catch (error) {
-              console.error("Error accessing media:", error);
+
+              // Move to local storage
+              const localUri = await moveVideoToLocalStorage(
+                assetInfo.localUri,
+              );
+
+              router.dismiss();
+              router.dismiss();
+              router.push({
+                pathname: "/video-editor",
+                params: {
+                  uri: localUri,
+                  type: assetInfo.mediaType,
+                  height: assetInfo.height.toString(),
+                  width: assetInfo.width.toString(),
+                },
+              });
+            } else {
+              // For images, continue with the normal flow
+              router.dismiss();
+              router.dismiss();
+              router.push({
+                pathname: "/preview",
+                params: {
+                  uri: assetInfo.uri,
+                  type: assetInfo.mediaType,
+                  height: assetInfo.height.toString(),
+                  width: assetInfo.width.toString(),
+                },
+              });
             }
           }}
         >
