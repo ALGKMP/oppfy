@@ -25,13 +25,6 @@ const CameraLayout = () => {
       }}
     >
       <Stack.Screen
-        name="image-picker"
-        options={{
-          presentation: "modal",
-          animation: "slide_from_bottom",
-        }}
-      />
-      <Stack.Screen
         name="video-editor"
         options={{
           header: () => null,
