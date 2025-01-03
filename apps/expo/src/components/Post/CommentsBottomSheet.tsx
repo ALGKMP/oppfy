@@ -9,8 +9,7 @@ import { LayoutAnimation, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
-import { BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import {
   AlertCircle,
