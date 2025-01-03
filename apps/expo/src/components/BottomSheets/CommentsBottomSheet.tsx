@@ -163,22 +163,6 @@ const EmptyCommentsView = React.memo(() => (
   </View>
 ));
 
-interface CommentInputProps {
-  onPostComment: (comment: string) => void;
-  selfProfilePicture: ProfilePicture;
-}
-
-const styles = StyleSheet.create({
-  input: {
-    padding: 14,
-    minHeight: 46,
-    paddingRight: 64,
-    borderRadius: 16,
-    textAlignVertical: "center",
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-});
-
 /*
  * ==========================================
  * ============== Hooks =====================
