@@ -161,7 +161,7 @@ const GridSuggestions = () => {
 
   const data = useMemo(() => {
     if (!rawData) return [];
-    return rawData.length % 2 === 0 ? rawData : rawData.slice(0, -1);
+    return rawData;
   }, [rawData]);
 
   const followMutation = api.follow.followUser.useMutation({
