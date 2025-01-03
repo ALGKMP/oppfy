@@ -1,7 +1,7 @@
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { AlertCircle, Trash2 } from "@tamagui/lucide-icons";
-import { SizableText, Text, View, XStack, YStack } from "tamagui";
 
+import { SizableText, Text, View, XStack, YStack } from "~/components/ui";
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
@@ -15,7 +15,7 @@ interface Comment {
   createdAt: Date;
 }
 
-interface CommentItemProps {
+interface CommentProps {
   comment: Comment;
   isPostOwner: boolean;
   isCommentOwner: boolean;
@@ -27,7 +27,7 @@ interface CommentItemProps {
   onPressUsername: () => void;
 }
 
-const CommentItem = ({
+const Comment = ({
   comment,
   isPostOwner,
   isCommentOwner,
@@ -35,7 +35,7 @@ const CommentItem = ({
   onReport,
   onPressProfilePicture,
   onPressUsername,
-}: CommentItemProps) => {
+}: CommentProps) => {
   const contextMenuOptions = () => {
     const options = [];
 
@@ -109,4 +109,4 @@ const CommentItem = ({
   );
 };
 
-export default CommentItem;
+export default Comment;
