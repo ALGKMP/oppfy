@@ -9,7 +9,7 @@ import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
+import { CameraOff, ChevronLeft, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
@@ -22,12 +22,17 @@ import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import { TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 
-type Post = RouterOutputs["post"]["paginatePostsByUserOther"]["items"][number];
+
+type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 
 const OtherProfile = React.memo(() => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
+
+  const router = useRouter();
 
   const navigation = useNavigation();
 
@@ -40,7 +45,6 @@ const OtherProfile = React.memo(() => {
 
   const {
     data: networkRelationships,
-    isLoading: isLoadingNetworkRelationships,
     refetch: refetchNetworkRelationships,
   } = api.profile.getNetworkRelationships.useQuery({ userId });
 
@@ -66,7 +70,7 @@ const OtherProfile = React.memo(() => {
     setIsRefreshing(true);
     await Promise.all([refetchPosts(), refetchNetworkRelationships()]);
     setIsRefreshing(false);
-  }, [refetchPosts]);
+  }, [refetchPosts, refetchNetworkRelationships]);
 
   const handleOnEndReached = useCallback(async () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -79,14 +83,29 @@ const OtherProfile = React.memo(() => {
     [postsData],
   );
 
-  const isLoading = isLoadingPostData;
-
   useLayoutEffect(() => {
     navigation.setOptions({
       title: username,
+      headerLeft: () => {
+        const firstRoute = !router.canDismiss();
+        if (firstRoute) return null;
+
+        return (
+          <TouchableOpacity
+            hitSlop={10}
+            onPress={() => {
+              if (navigation.canGoBack()) {
+                router.back();
+              }
+            }}
+          >
+            <ChevronLeft />
+          </TouchableOpacity>
+        );
+      },
       headerRight: () => <BlockUserHeader userId={userId} />,
     });
-  }, [navigation, username]);
+  }, [navigation, username, userId, router]);
 
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
@@ -155,12 +174,7 @@ const OtherProfile = React.memo(() => {
         />
       );
     },
-    [
-      profileData?.profilePictureUrl,
-      profileData?.userId,
-      profileData?.username,
-      viewableItems,
-    ],
+    [profileData?.profilePictureUrl, profileData?.userId, profileData?.username, viewableItems],
   );
 
   const renderHeader = () => (
@@ -177,11 +191,12 @@ const OtherProfile = React.memo(() => {
   );
 
   const renderNoPosts = useCallback(() => {
-    if (isLoading) return (
+    if (isLoadingPostData)
+      return (
         <YStack gap="$4">
           <PostCard.loading />
         </YStack>
-    )
+      );
     if (networkRelationships?.blocked) {
       return (
         <View paddingTop="$6">
@@ -214,7 +229,7 @@ const OtherProfile = React.memo(() => {
         />
       </View>
     );
-  }, [networkRelationships?.blocked, networkRelationships?.privacy]);
+  }, [isLoadingPostData, networkRelationships]);
 
   return (
     <>
