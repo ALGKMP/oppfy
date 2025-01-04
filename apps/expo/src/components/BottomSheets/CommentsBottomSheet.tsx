@@ -8,7 +8,6 @@ import { ScrollView, View, XStack, YStack } from "tamagui";
 
 import { useSession } from "~/contexts/SessionContext";
 import useProfile from "~/hooks/useProfile";
-import { PLACEHOLDER_DATA } from "~/utils/placeholder-data";
 import { useComments } from "../../hooks/post/useComments";
 import { Skeleton } from "../Skeletons";
 import { EmptyPlaceholder } from "../UIPlaceholders";
@@ -141,7 +140,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
 
 const LoadingView = React.memo(() => (
   <ScrollView>
-    {PLACEHOLDER_DATA.map((_, index) => (
+    {Array.from({ length: 20 }, () => null).map((_, index) => (
       <XStack key={index} padding="$3.5" gap="$2.5">
         <Skeleton circular size={46} />
         <YStack flex={1} gap="$2">
