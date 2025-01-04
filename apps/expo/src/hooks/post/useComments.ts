@@ -24,7 +24,7 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const postComment = api.post.createComment.useMutation({
+  const postCommentMutation = api.post.createComment.useMutation({
     onMutate: async (newCommentData) => {
       // Cancel outgoing fetches (so they don't overwrite our optimistic update)
       await changeCommentCount({
@@ -91,7 +91,7 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     },
   });
 
-  const deleteComment = api.post.deleteComment.useMutation({
+  const deleteCommentMutation = api.post.deleteComment.useMutation({
     onMutate: async (newCommentData) => {
       await changeCommentCount({
         endpoint,
@@ -146,7 +146,7 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     },
   });
 
-  const reportComment = api.report.reportComment.useMutation();
+  const reportCommentMutation = api.report.reportComment.useMutation();
 
   const handleLoadMoreComments = async () => {
     if (commentsHasNextPage && !commentsIsFetchingNextPage) {
@@ -154,16 +154,16 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     }
   };
 
-  const handlePostComment = async (body: string) => {
-    await postComment.mutateAsync({ postId, body });
+  const postComment = async (body: string) => {
+    await postCommentMutation.mutateAsync({ postId, body });
   };
 
-  const handleDeleteComment = async (commentId: string) => {
-    await deleteComment.mutateAsync({ postId, commentId });
+  const deleteComment = async (commentId: string) => {
+    await deleteCommentMutation.mutateAsync({ postId, commentId });
   };
 
-  const handleReportComment = async (commentId: string) => {
-    await reportComment.mutateAsync({ commentId, reason: "Other" });
+  const reportComment = async (commentId: string) => {
+    await reportCommentMutation.mutateAsync({ commentId, reason: "Other" });
     toast.show("Comment Reported");
   };
 
@@ -183,8 +183,8 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     commentItems,
     isLoadingComments,
     handleLoadMoreComments,
-    handlePostComment,
-    handleDeleteComment,
-    handleReportComment,
+    postComment,
+    deleteComment,
+    reportComment,
   };
 };
