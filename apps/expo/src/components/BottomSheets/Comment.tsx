@@ -6,10 +6,10 @@ import { AlertCircle, Trash2 } from "@tamagui/lucide-icons";
 
 import { SizableText, Text, View, XStack, YStack } from "~/components/ui";
 import { useComments } from "~/hooks/post/useComments";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
-import useRouteProfile from "~/hooks/useRouteProfile";
 
 interface Comment {
   userId: string;
@@ -28,14 +28,14 @@ interface CommentProps {
   listRef: React.RefObject<FlashList<Comment>>;
 
   comment: Comment;
-  isPostOwner: boolean;
-  isCommentOwner: boolean;
+  isPostRecipient: boolean;
+  isCommentAuthor: boolean;
 }
 
 const Comment = ({
   comment,
-  isPostOwner,
-  isCommentOwner,
+  isPostRecipient,
+  isCommentAuthor,
   postId,
   endpoint,
   postRecipientUserId,
@@ -53,10 +53,7 @@ const Comment = ({
     routeProfile({ userId: comment.userId });
   };
 
-  const {
-    handleDeleteComment,
-    handleReportComment,
-  } = useComments({
+  const { handleDeleteComment, handleReportComment } = useComments({
     postId: postId,
     endpoint: endpoint,
     userId: postRecipientUserId,
@@ -77,7 +74,7 @@ const Comment = ({
   const contextMenuOptions = () => {
     const options = [];
 
-    if (isPostOwner && !isCommentOwner) {
+    if (isPostRecipient && !isCommentAuthor) {
       options.push({
         label: (
           <SizableText size="$5" color="$red10">
@@ -96,7 +93,7 @@ const Comment = ({
         icon: <AlertCircle size="$1.5" color="$red10" />,
         onPress: () => onReport(comment.id),
       });
-    } else if (isCommentOwner) {
+    } else if (isCommentAuthor) {
       options.push({
         label: (
           <SizableText size="$5" color="$red10">

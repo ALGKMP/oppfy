@@ -58,15 +58,11 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
         listRef={listRef}
         key={item.id}
         comment={item}
-        isPostOwner={selfUserId === props.postRecipientUserId}
-        isCommentOwner={item.userId === selfUserId}
+        isPostRecipient={selfUserId === props.postRecipientUserId}
+        isCommentAuthor={item.userId === selfUserId}
       />
     ),
-    [
-      selfUserId,
-      props.postRecipientUserId,
-      handleReportComment
-    ],
+    [selfUserId, props.postRecipientUserId, handleReportComment],
   );
 
   const ListContent = useMemo(() => {
