@@ -26,69 +26,60 @@ const Search = () => {
   const { mutateAsync: searchProfilesByUsername, isPending: isSearching } =
     api.search.profilesByUsername.useMutation();
 
-  const performSearch = useCallback(
-    async (username: string) => {
-      setSearchTerm(username);
+  const performSearch = async (username: string) => {
+    setSearchTerm(username);
 
-      if (!username) {
-        setSearchResults([]);
-        return;
-      }
+    if (!username) {
+      setSearchResults([]);
+      return;
+    }
 
-      const results = await searchProfilesByUsername({ username });
-      setSearchResults(results);
-    },
-    [searchProfilesByUsername],
-  );
+    const results = await searchProfilesByUsername({ username });
+    setSearchResults(results);
+  };
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
     if (searchTerm) {
       await performSearch(searchTerm);
     }
     setRefreshing(false);
-  }, [searchTerm, performSearch]);
+  };
 
-  const renderListItem = useCallback(
-    (item: SearchResultItem) => (
-      <MediaListItem
-        title={item.username}
-        subtitle={item.name}
-        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-        onPress={() =>
-          routeProfile({ userId: item.userId, username: item.username })
-        }
+  const renderListItem = (item: SearchResultItem) => (
+    <MediaListItem
+      title={item.username}
+      subtitle={item.name}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+      onPress={() =>
+        routeProfile({ userId: item.userId, username: item.username })
+      }
+    />
+  );
+
+  const ListHeaderComponent = (
+    <YStack gap="$4">
+      <SearchInput
+        value={searchTerm}
+        placeholder="Search by username"
+        onChangeText={performSearch}
+        onClear={() => {
+          setSearchTerm("");
+          setSearchResults([]);
+        }}
       />
-    ),
-    [routeProfile],
+    </YStack>
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <YStack gap="$4">
-        <SearchInput
-          value={searchTerm}
-          placeholder="Search by username"
-          onChangeText={performSearch}
-          onClear={() => {
-            setSearchTerm("");
-            setSearchResults([]);
-          }}
-        />
-      </YStack>
-    ),
-    [searchTerm, performSearch],
-  );
-
-  const ListFooterComponent = useMemo(() => {
+  const ListFooterComponent = () => {
     if (!searchTerm) {
       return <GridSuggestions />;
     }
 
     return null;
-  }, [searchTerm]);
+  };
 
-  const ListEmptyComponent = useCallback(() => {
+  const ListEmptyComponent = () => {
     if (isSearching) {
       return (
         <YStack gap="$4">
@@ -108,7 +99,7 @@ const Search = () => {
     }
 
     return null;
-  }, [isSearching, searchTerm, searchResults.length]);
+  };
 
   return (
     <FlashList
