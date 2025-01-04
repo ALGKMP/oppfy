@@ -28,8 +28,6 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     handlePostComment,
     handleDeleteComment,
     handleReportComment,
-    handlePressProfilePicture,
-    handlePressUsername,
   } = useComments({
     postId: props.postId,
     endpoint: props.endpoint,
@@ -40,15 +38,6 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   const { profile: selfProfile } = useProfile();
   const { user } = useSession();
   const selfUserId = user?.uid;
-
-  const handleDeleteCommentWithAnimation = useCallback(
-    (commentId: string) => {
-      listRef.current?.prepareForLayoutAnimationRender();
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      handleDeleteComment(commentId);
-    },
-    [handleDeleteComment],
-  );
 
   const handlePostCommentWithAnimation = useCallback(
     (comment: string) => {
@@ -64,36 +53,20 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   const renderComment = useCallback(
     ({ item }: { item: Comment }) => (
       <Comment
+        postId={props.postId}
+        endpoint={props.endpoint}
+        postRecipientUserId={props.postRecipientUserId}
+        listRef={listRef}
         key={item.id}
         comment={item}
         isPostOwner={selfUserId === props.postRecipientUserId}
         isCommentOwner={item.userId === selfUserId}
-        onDelete={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-          handleDeleteCommentWithAnimation(item.id);
-        }}
-        onReport={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          handleReportComment(item.id);
-        }}
-        onPressProfilePicture={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          handlePressProfilePicture(item.userId, item.username);
-        }}
-        onPressUsername={() => {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          handlePressUsername(item.userId, item.username);
-        }}
       />
     ),
     [
       selfUserId,
       props.postRecipientUserId,
-      handleDeleteCommentWithAnimation,
-      handleReportComment,
-      handlePressProfilePicture,
-      handlePressUsername,
+      handleReportComment
     ],
   );
 
