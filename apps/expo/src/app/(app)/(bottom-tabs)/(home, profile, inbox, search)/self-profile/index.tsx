@@ -72,7 +72,7 @@ const SelfProfile = React.memo(() => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      // title: profileData?.username,
+      title: profileData?.username,
       headerLeft: () => {
         const firstRoute = !router.canDismiss();
         if (firstRoute) return null;
