@@ -1,81 +1,23 @@
-import React from "react";
-import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import type {
-  NativeStackHeaderLeftProps,
-  NativeStackHeaderProps,
-} from "@react-navigation/native-stack/";
-import { ChevronLeft } from "@tamagui/lucide-icons";
-import { Text } from "tamagui";
+import { Stack } from "expo-router";
+import { useTheme } from "tamagui";
 
-import { Header as BaseHeader } from "~/components/Headers";
-import { Stack } from "~/layouts";
+const RecommendationsLayout = () => {
+  const theme = useTheme();
 
-const SettingsLayout = () => {
   return (
-    <Stack screenOptions={{}}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
-          headerLeft: (props) => <HeaderLeft {...props} />,
-          header: (props) => <Header {...props} />,
-          title: "Find more friends 💁‍♂️🙋‍♀️",
+          headerShown: false,
         }}
       />
     </Stack>
   );
 };
 
-type HeaderLeftProps = NativeStackHeaderLeftProps;
-
-type HeaderProps = NativeStackHeaderProps;
-
-const HeaderLeft = ({ canGoBack }: HeaderLeftProps) => {
-  const router = useRouter();
-
-  return (
-    <TouchableOpacity
-      hitSlop={10}
-      onPress={() => {
-        canGoBack ? void router.back() : null;
-      }}
-    >
-      <ChevronLeft />
-    </TouchableOpacity>
-  );
-};
-
-const Header = ({ navigation, options }: HeaderProps) => (
-  <BaseHeader
-    HeaderLeft={
-      options.headerLeft
-        ? options.headerLeft({
-            canGoBack: navigation.canGoBack(),
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-    HeaderTitle={
-      typeof options.headerTitle === "function" ? (
-        options.headerTitle({
-          children: options.title ?? "",
-          tintColor: options.headerTintColor,
-        })
-      ) : options.title ? (
-        <Text fontSize="$5" fontWeight="bold">
-          {options.title}
-        </Text>
-      ) : null
-    }
-    HeaderRight={
-      options.headerRight
-        ? options.headerRight({
-            canGoBack: navigation.canGoBack(),
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-  />
-);
-
-export default SettingsLayout;
+export default RecommendationsLayout;

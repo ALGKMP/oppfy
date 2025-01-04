@@ -1,63 +1,53 @@
-import React, { useState } from "react";
+import React from "react";
 import { Dimensions, TouchableOpacity, View } from "react-native";
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { useRoute } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import {
-  Button,
-  ScrollView,
-  Spacer,
-  Text,
-  useTheme,
-  XStack,
-  YStack,
-} from "tamagui";
+  ChevronLeft,
+  UserRoundCheck,
+  UserRoundPlus,
+} from "@tamagui/lucide-icons";
+import { Text, useTheme, XStack, YStack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
-import { OnboardingButton } from "~/components/ui";
-import { api, RouterOutputs } from "~/utils/api";
-
-const placeholderUsers = [
-  { name: "Michael", username: "michaelyyz" },
-  { name: "Ben Archer", username: "benarcher" },
-  { name: "Nebula", username: "nebula1600" },
-  { name: "kareem", username: "6kaleio" },
-  { name: "ayaaniqbal", username: "ayaaniqbal" },
-  { name: "Ali", username: "aliy45" },
-  { name: "itsalianna", username: "itsaliannaaa" },
-  { name: "Bautista", username: "bautista12" },
-  // Add more users if needed
-];
+import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");
 const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, considering margin and padding
 
-const AnimatedUserProfile = ({
-  user,
-  index,
-  onUserSelected,
-}: {
-  user: {
-    userId: string;
-    name: string | null;
-    username: string;
-    profilePictureUrl: string | null;
-  };
+interface User {
+  userId: string;
+  profileId: string;
+  privacy: "public" | "private";
+  username: string;
+  name: string | null;
+  profilePictureUrl: string | null;
+  relationshipStatus: "notFollowing" | "following" | "requested";
+}
+
+interface UserProfileProps {
+  user: User;
   index: number;
   onUserSelected: (userId: string, added: boolean) => void;
-}) => {
-  const [isAdded, setIsAdded] = useState(false);
+  isAdded: boolean;
+}
+
+const AnimatedUserProfile = ({
+  user,
+  onUserSelected,
+  index: _index,
+  isAdded,
+}: UserProfileProps) => {
   const opacity = useSharedValue(1);
   const checkmarkOpacity = useSharedValue(0);
   const theme = useTheme();
@@ -74,7 +64,7 @@ const AnimatedUserProfile = ({
     };
   });
 
-  const handleFollowPress = () => {
+  const handlePress = () => {
     const newIsAdded = !isAdded;
     onUserSelected(user.userId, newIsAdded);
 
@@ -86,26 +76,16 @@ const AnimatedUserProfile = ({
       withDelay(200, withTiming(1, { duration: 200 })),
       withDelay(500, withTiming(0, { duration: 200 })),
     );
-    setTimeout(() => {
-      setIsAdded(newIsAdded);
-    }, 1000);
-  };
-
-  const handleProfilePress = () => {
-    router.navigate({
-      pathname: "/profile/[userId]",
-      params: { userId: user.userId, username: user.username },
-    });
   };
 
   return (
-    <YStack
-      width={itemWidth}
-      alignItems="center"
-      marginBottom="$4"
-      marginRight="4"
-    >
-      <TouchableOpacity onPress={handleProfilePress}>
+    <TouchableOpacity onPress={handlePress}>
+      <YStack
+        width={itemWidth}
+        alignItems="center"
+        marginBottom="$4"
+        marginRight="4" // Add margin to create spacing between items
+      >
         <View style={{ position: "relative", width: 80, height: 80 }}>
           <Animated.View style={animatedStyle}>
             <Image
@@ -129,78 +109,121 @@ const AnimatedUserProfile = ({
           >
             <UserRoundCheck marginLeft={2} size={40} color="white" />
           </Animated.View>
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                bottom: -5,
+                right: -5,
+                backgroundColor: isAdded ? "#F214FF" : "#333",
+                borderRadius: 15,
+                width: 30,
+                height: 30,
+                marginLeft: 2,
+                justifyContent: "center",
+                alignItems: "center",
+                borderWidth: 3,
+                borderColor: theme.background.val,
+              },
+              animatedStyle,
+            ]}
+          >
+            {isAdded ? (
+              <UserRoundCheck marginLeft={2} size={16} color="white" />
+            ) : (
+              <UserRoundPlus marginLeft={2} size={16} color="white" />
+            )}
+          </Animated.View>
         </View>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleFollowPress}>
-        <Animated.View
-          style={[
-            {
-              position: "absolute",
-              bottom: -5,
-              right: -40,
-              backgroundColor: isAdded ? "#F214FF" : "#333",
-              borderRadius: 15,
-              width: 30,
-              height: 30,
-              marginLeft: 2,
-              justifyContent: "center",
-              alignItems: "center",
-              borderWidth: 3,
-              borderColor: theme.background.val,
-            },
-            animatedStyle,
-          ]}
-        >
-          {isAdded ? (
-            <UserRoundCheck marginLeft={2} size={16} color="white" />
-          ) : (
-            <UserRoundPlus marginLeft={2} size={16} color="white" />
-          )}
-        </Animated.View>
-      </TouchableOpacity>
-      <Spacer size="$2" />
-      <Text fontSize="$3" fontWeight="bold" color="white">
-        {user.name}
-      </Text>
-      <Text fontSize="$2" color="$gray10">
-        {user.username}
-      </Text>
-    </YStack>
+        <Text fontSize="$3" fontWeight="bold" color="white">
+          {user.name}
+        </Text>
+        <Text fontSize="$2" color="$gray10">
+          {user.username}
+        </Text>
+      </YStack>
+    </TouchableOpacity>
   );
 };
 
-const OnboardingRecomendations = () => {
+const RecommendationsPage = () => {
   const theme = useTheme();
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const requiredUsers = 5;
+  const utils = api.useUtils();
 
-  const { data: recommendations, isLoading } =
+  const { data: recommendations } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
 
-  const followMultipleUsersMutation = api.follow.followUsers.useMutation();
+  const followUserMutation = api.follow.followUser.useMutation({
+    onMutate: async (newData) => {
+      await utils.contacts.getRecommendationProfilesSelf.cancel();
+      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      if (!prevData) return { prevData: undefined };
 
-  const handleUserSelected = (username: string, selected: boolean) => {
-    setSelectedUsers((prev) =>
-      selected ? [...prev, username] : prev.filter((u) => u !== username),
-    );
+      utils.contacts.getRecommendationProfilesSelf.setData(
+        undefined,
+        prevData.map((item) =>
+          item.userId === newData.userId
+            ? {
+                ...item,
+                relationshipStatus:
+                  item.privacy === "private" ? "requested" : "following",
+              }
+            : item,
+        ),
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx?.prevData === undefined) return;
+      utils.contacts.getRecommendationProfilesSelf.setData(
+        undefined,
+        ctx.prevData,
+      );
+    },
+  });
+
+  const handleUserSelected = async (userId: string, added: boolean) => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (added) {
+      await followUserMutation.mutateAsync({ userId });
+    }
+  };
+
+  const handleBack = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.back();
   };
 
   return (
     <BaseScreenView
       flex={1}
       backgroundColor={theme.background.val}
-      safeAreaEdges={["bottom"]}
+      padding={0}
+      safeAreaEdges={["top", "bottom"]}
     >
-      {/*       <Text
-        fontSize="$6"
-        fontWeight="bold"
-        color="white"
-        backgroundColor={"transparent"}
-        textAlign="center"
-        marginVertical="$4"
+      <XStack
+        paddingHorizontal="$4"
+        paddingTop="$2"
+        paddingBottom="$4"
+        marginTop="$4"
+        alignItems="center"
+        space="$3"
       >
-        Recommendations
-      </Text> */}
+        <TouchableOpacity onPress={handleBack}>
+          <ChevronLeft size={24} color="white" />
+        </TouchableOpacity>
+        <Text
+          flex={1}
+          fontSize="$6"
+          color="white"
+          fontWeight="bold"
+          textAlign="center"
+          marginRight={24}
+        >
+          Recommendations
+        </Text>
+      </XStack>
       <FlashList
         data={recommendations}
         estimatedItemSize={itemWidth}
@@ -209,6 +232,10 @@ const OnboardingRecomendations = () => {
             user={item}
             index={index}
             onUserSelected={handleUserSelected}
+            isAdded={
+              item.relationshipStatus === "following" ||
+              item.relationshipStatus === "requested"
+            }
           />
         )}
         numColumns={3}
@@ -221,4 +248,4 @@ const OnboardingRecomendations = () => {
   );
 };
 
-export default OnboardingRecomendations;
+export default RecommendationsPage;

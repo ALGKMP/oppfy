@@ -1,4 +1,6 @@
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+
 import { api } from "~/utils/api";
 import Carousel from "./Carousel";
 
@@ -20,10 +22,7 @@ function RecommendationCarousel() {
 
   const onShowMore = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // TODO: Recommendations page
-    // router.push({
-    //   pathname: "/",
-    // });
+    router.push("/(app)/(recommended)");
   };
 
   return (
