@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import { useToastController } from "@tamagui/toast";
 
 import { useOptimisticUpdatePost } from "~/hooks/post/useOptimisticUpdatePost";
@@ -11,7 +10,6 @@ interface UseCommentsProps {
 }
 
 export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
-  const router = useRouter();
   const toast = useToastController();
   const utils = api.useUtils();
   const { changeCommentCount } = useOptimisticUpdatePost();
