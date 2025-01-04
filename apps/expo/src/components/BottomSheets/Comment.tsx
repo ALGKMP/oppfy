@@ -11,7 +11,7 @@ import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
 
-interface Comment {
+export interface CommentItem {
   userId: string;
   id: string;
   body: string;
@@ -21,25 +21,19 @@ interface Comment {
 }
 
 interface CommentProps {
-  postId: string;
-  endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
-  postRecipientUserId: string;
-
-  listRef: React.RefObject<FlashList<Comment>>;
-
-  comment: Comment;
+  comment: CommentItem;
   isPostRecipient: boolean;
   isCommentAuthor: boolean;
+  onDelete: (commentId: string) => void;
+  onReport: (commentId: string) => void;
 }
 
 const Comment = ({
   comment,
   isPostRecipient,
   isCommentAuthor,
-  postId,
-  endpoint,
-  postRecipientUserId,
-  listRef,
+  onDelete,
+  onReport,
 }: CommentProps) => {
   const { routeProfile } = useRouteProfile();
 
@@ -53,22 +47,14 @@ const Comment = ({
     routeProfile({ userId: comment.userId });
   };
 
-  const { handleDeleteComment, handleReportComment } = useComments({
-    postId: postId,
-    endpoint: endpoint,
-    userId: postRecipientUserId,
-  });
-
-  const onDelete = (commentId: string) => {
+  const handleDelete = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    listRef.current?.prepareForLayoutAnimationRender();
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    handleDeleteComment(commentId);
+    onDelete(comment.id);
   };
 
-  const onReport = (commentId: string) => {
+  const handleReport = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    handleReportComment(commentId);
+    onReport(comment.id);
   };
 
   const contextMenuOptions = () => {
@@ -82,7 +68,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <Trash2 size="$1.5" color="$red10" />,
-        onPress: () => onDelete(comment.id),
+        onPress: handleDelete,
       });
       options.push({
         label: (
@@ -91,7 +77,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <AlertCircle size="$1.5" color="$red10" />,
-        onPress: () => onReport(comment.id),
+        onPress: handleReport,
       });
     } else if (isCommentAuthor) {
       options.push({
@@ -101,7 +87,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <Trash2 size="$1.5" color="$red10" />,
-        onPress: () => onDelete(comment.id),
+        onPress: handleDelete,
       });
     } else {
       options.push({
@@ -111,7 +97,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <AlertCircle size="$1.5" color="$red10" />,
-        onPress: () => onReport(comment.id),
+        onPress: handleReport,
       });
     }
     return options;

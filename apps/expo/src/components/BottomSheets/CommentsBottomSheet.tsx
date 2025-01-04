@@ -4,11 +4,10 @@ import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 import { ScrollView, View, XStack, YStack } from "tamagui";
 
+import { Skeleton } from "~/components/Skeletons";
+import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { useSession } from "~/contexts/SessionContext";
-import useProfile from "~/hooks/useProfile";
-import { useComments } from "../../hooks/post/useComments";
-import { Skeleton } from "../Skeletons";
-import { EmptyPlaceholder } from "../UIPlaceholders";
+import { useComments } from "~/hooks/post/useComments";
 import Comment from "./Comment";
 import type { CommentItem } from "./Comment";
 import TextInputWithAvatar from "./TextInputWithAvatar";
@@ -24,9 +23,9 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     isLoadingComments,
     commentItems,
     handleLoadMoreComments,
-    handlePostComment,
-    handleReportComment,
-    handleDeleteComment,
+    postComment,
+    reportComment,
+    deleteComment,
   } = useComments({
     postId: props.postId,
     endpoint: props.endpoint,
@@ -37,46 +36,27 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   const { user } = useSession();
   const selfUserId = user?.uid;
 
-  const handlePostCommentWithAnimation = useCallback(
-    (comment: string) => {
-      listRef.current?.prepareForLayoutAnimationRender();
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      handlePostComment(comment);
-    },
-    [handlePostComment],
-  );
+  const handlePostCommentWithAnimation = (comment: string) => {
+    listRef.current?.prepareForLayoutAnimationRender();
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    postComment(comment);
+  };
 
-  const handleDeleteWithAnimation = useCallback(
-    (commentId: string) => {
-      listRef.current?.prepareForLayoutAnimationRender();
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      handleDeleteComment(commentId);
-    },
-    [handleDeleteComment],
-  );
+  const handleDeleteWithAnimation = (commentId: string) => {
+    listRef.current?.prepareForLayoutAnimationRender();
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    deleteComment(commentId);
+  };
 
-  const keyExtractor = useCallback(
-    (item: CommentItem) => item.id.toString(),
-    [],
-  );
-
-  const renderComment = useCallback(
-    ({ item }: { item: CommentItem }) => (
-      <Comment
-        key={item.id}
-        comment={item}
-        isPostRecipient={selfUserId === props.postRecipientUserId}
-        isCommentAuthor={item.userId === selfUserId}
-        onDelete={handleDeleteComment}
-        onReport={handleReportComment}
-      />
-    ),
-    [
-      selfUserId,
-      props.postRecipientUserId,
-      handleReportComment,
-      handleDeleteComment,
-    ],
+  const renderComment = ({ item }: { item: CommentItem }) => (
+    <Comment
+      key={item.id}
+      comment={item}
+      isPostRecipient={selfUserId === props.postRecipientUserId}
+      isCommentAuthor={item.userId === selfUserId}
+      onDelete={handleDeleteWithAnimation}
+      onReport={reportComment}
+    />
   );
 
   const ListContent = useMemo(() => {
@@ -91,7 +71,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
         estimatedItemSize={100}
         onEndReached={handleLoadMoreComments}
         showsVerticalScrollIndicator={false}
-        keyExtractor={keyExtractor}
+        keyExtractor={(item) => item.id.toString()}
       />
     );
   }, [
@@ -99,7 +79,6 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     commentItems,
     renderComment,
     handleLoadMoreComments,
-    keyExtractor,
   ]);
 
   const content = useMemo(
