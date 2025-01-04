@@ -169,20 +169,6 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     toast.show("Comment Reported");
   };
 
-  const handlePressProfilePicture = (userId: string, username: string) => {
-    router.push({
-      pathname: `/profile/[userId]`,
-      params: { userId, username },
-    });
-  };
-
-  const handlePressUsername = (userId: string, username: string) => {
-    router.push({
-      pathname: `/profile/[userId]`,
-      params: { userId, username },
-    });
-  };
-
   const commentItems =
     comments?.pages
       .flatMap((page) => page.items)
@@ -202,7 +188,5 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     handlePostComment,
     handleDeleteComment,
     handleReportComment,
-    handlePressProfilePicture,
-    handlePressUsername,
   };
 };
