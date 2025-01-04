@@ -14,8 +14,6 @@ import { EmptyPlaceholder } from "../UIPlaceholders";
 import Comment from "./Comment";
 import TextInputWithAvatar from "./TextInputWithAvatar";
 
-type ProfilePicture = ImageSourcePropType | string | undefined | null;
-
 interface CommentsBottomSheetProps {
   postId: string;
   postRecipientUserId: string;
