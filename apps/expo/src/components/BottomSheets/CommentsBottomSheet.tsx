@@ -10,6 +10,7 @@ import { useComments } from "../../hooks/post/useComments";
 import { Skeleton } from "../Skeletons";
 import { EmptyPlaceholder } from "../UIPlaceholders";
 import Comment from "./Comment";
+import type { CommentItem } from "./Comment";
 import TextInputWithAvatar from "./TextInputWithAvatar";
 
 interface CommentsBottomSheetProps {
@@ -25,14 +26,14 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     handleLoadMoreComments,
     handlePostComment,
     handleReportComment,
+    handleDeleteComment,
   } = useComments({
     postId: props.postId,
     endpoint: props.endpoint,
     userId: props.postRecipientUserId,
   });
 
-  const listRef = useRef<FlashList<Comment> | null>(null);
-  const { profile: selfProfile } = useProfile();
+  const listRef = useRef<FlashList<CommentItem> | null>(null);
   const { user } = useSession();
   const selfUserId = user?.uid;
 
@@ -45,22 +46,37 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     [handlePostComment],
   );
 
-  const keyExtractor = useCallback((item: Comment) => item.id.toString(), []);
+  const handleDeleteWithAnimation = useCallback(
+    (commentId: string) => {
+      listRef.current?.prepareForLayoutAnimationRender();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      handleDeleteComment(commentId);
+    },
+    [handleDeleteComment],
+  );
+
+  const keyExtractor = useCallback(
+    (item: CommentItem) => item.id.toString(),
+    [],
+  );
 
   const renderComment = useCallback(
-    ({ item }: { item: Comment }) => (
+    ({ item }: { item: CommentItem }) => (
       <Comment
-        postId={props.postId}
-        endpoint={props.endpoint}
-        postRecipientUserId={props.postRecipientUserId}
-        listRef={listRef}
         key={item.id}
         comment={item}
         isPostRecipient={selfUserId === props.postRecipientUserId}
         isCommentAuthor={item.userId === selfUserId}
+        onDelete={handleDeleteComment}
+        onReport={handleReportComment}
       />
     ),
-    [selfUserId, props.postRecipientUserId, handleReportComment],
+    [
+      selfUserId,
+      props.postRecipientUserId,
+      handleReportComment,
+      handleDeleteComment,
+    ],
   );
 
   const ListContent = useMemo(() => {
@@ -94,9 +110,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   return (
     <>
       {content}
-      <TextInputWithAvatar
-        onPostComment={handlePostCommentWithAnimation}
-      />
+      <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
     </>
   );
 });
