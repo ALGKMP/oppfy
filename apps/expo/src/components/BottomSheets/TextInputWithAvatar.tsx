@@ -9,18 +9,17 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import type { ImageSourcePropType } from "react-native";
+import useProfile from "~/hooks/useProfile";
 
 interface CommentInputProps {
   onPostComment: (comment: string) => void;
-  selfProfilePicture: ProfilePicture;
 }
-
-type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
 const EMOJI_LIST = ["❤️", "🙏", "🔥", "😂", "😭", "😢", "😲", "😍"];
 
 const TextInputWithAvatar = React.memo(
-  ({ onPostComment, selfProfilePicture }: CommentInputProps) => {
+  ({ onPostComment }: CommentInputProps) => {
+    const { profile } = useProfile();
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const [inputValue, setInputValue] = useState("");
@@ -58,7 +57,7 @@ const TextInputWithAvatar = React.memo(
           ))}
         </XStack>
         <XStack alignItems="flex-start" gap="$3">
-          <Avatar source={selfProfilePicture} size={46} bordered />
+          <Avatar source={profile?.profilePictureUrl} size={46} bordered />
           <View flex={1} position="relative">
             <BottomSheetTextInput
               placeholder="Add a comment..."

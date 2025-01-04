@@ -1,7 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import type { ImageSourcePropType } from "react-native";
-import { LayoutAnimation, StyleSheet } from "react-native";
-import * as Haptics from "expo-haptics";
+import { LayoutAnimation } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 import { ScrollView, View, XStack, YStack } from "tamagui";
@@ -98,7 +96,6 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
       {content}
       <TextInputWithAvatar
         onPostComment={handlePostCommentWithAnimation}
-        selfProfilePicture={selfProfile?.profilePictureUrl}
       />
     </>
   );
