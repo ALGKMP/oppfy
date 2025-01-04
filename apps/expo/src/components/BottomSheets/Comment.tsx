@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { LayoutAnimation } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
@@ -55,10 +54,6 @@ const Comment = ({
   };
 
   const {
-    isLoadingComments,
-    commentItems,
-    handleLoadMoreComments,
-    handlePostComment,
     handleDeleteComment,
     handleReportComment,
   } = useComments({
@@ -122,7 +117,6 @@ const Comment = ({
         onPress: () => onReport(comment.id),
       });
     }
-
     return options;
   };
 

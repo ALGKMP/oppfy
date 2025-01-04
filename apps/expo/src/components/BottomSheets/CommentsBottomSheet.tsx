@@ -26,7 +26,6 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     commentItems,
     handleLoadMoreComments,
     handlePostComment,
-    handleDeleteComment,
     handleReportComment,
   } = useComments({
     postId: props.postId,
