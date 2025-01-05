@@ -45,9 +45,13 @@ export const BottomSheetProvider = ({
 export const useBottomSheetController = () => {
   const context = useContext(BottomSheetContext);
   if (!context) {
-    throw new Error(
-      "useBottomSheetController must be used within a BottomSheetProvider"
+    console.warn(
+      "useBottomSheetController was called outside of BottomSheetProvider. Some features may not work.",
     );
+    return {
+      show: () => {},
+      hide: () => {},
+    };
   }
   return context;
 };
