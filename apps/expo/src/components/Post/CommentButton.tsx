@@ -2,8 +2,8 @@ import React from "react";
 import { TouchableOpacity } from "react-native";
 import { MessageCircle } from "@tamagui/lucide-icons";
 
-import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import CommentsBottomSheet from "~/components/BottomSheets/CommentsBottomSheet";
+import { useBottomSheetController } from "~/components/ui/BottomSheet";
 
 interface CommentButtonProps {
   postId: string;
@@ -16,7 +16,7 @@ const CommentButton = ({
   postRecipientUserId,
   endpoint,
 }: CommentButtonProps) => {
-  const { show } = useBottomSheetController();
+  const { show, hide } = useBottomSheetController();
 
   const handlePress = () => {
     show({
@@ -27,6 +27,7 @@ const CommentButton = ({
           postId={postId}
           endpoint={endpoint}
           postRecipientUserId={postRecipientUserId}
+          onHideBottomSheet={hide}
         />
       ),
     });

@@ -16,6 +16,7 @@ interface CommentsBottomSheetProps {
   postId: string;
   postRecipientUserId: string;
   endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
+  onHideBottomSheet: () => void;
 }
 
 const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
@@ -56,6 +57,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
       isCommentAuthor={item.userId === selfUserId}
       onDelete={handleDeleteWithAnimation}
       onReport={reportComment}
+      onHideBottomSheet={props.onHideBottomSheet}
     />
   );
 

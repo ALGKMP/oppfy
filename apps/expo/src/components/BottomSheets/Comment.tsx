@@ -1,11 +1,8 @@
-import { LayoutAnimation } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
-import { FlashList } from "@shopify/flash-list";
 import { AlertCircle, Trash2 } from "@tamagui/lucide-icons";
 
 import { SizableText, Text, View, XStack, YStack } from "~/components/ui";
-import { useComments } from "~/hooks/post/useComments";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
@@ -26,6 +23,7 @@ interface CommentProps {
   isCommentAuthor: boolean;
   onDelete: (commentId: string) => void;
   onReport: (commentId: string) => void;
+  onHideBottomSheet: () => void;
 }
 
 const Comment = ({
@@ -34,17 +32,20 @@ const Comment = ({
   isCommentAuthor,
   onDelete,
   onReport,
+  onHideBottomSheet,
 }: CommentProps) => {
   const { routeProfile } = useRouteProfile();
 
   const handlePressProfilePicture = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     routeProfile({ userId: comment.userId });
+    onHideBottomSheet();
   };
 
   const handlePressUsername = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     routeProfile({ userId: comment.userId });
+    onHideBottomSheet();
   };
 
   const handleDelete = () => {
