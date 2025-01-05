@@ -1,9 +1,7 @@
 import { TouchableOpacity } from "react-native-gesture-handler";
-import * as Haptics from "expo-haptics";
 import { AlertCircle, Trash2 } from "@tamagui/lucide-icons";
 
 import { SizableText, Text, View, XStack, YStack } from "~/components/ui";
-import useRouteProfile from "~/hooks/useRouteProfile";
 import Avatar from "../Avatar";
 import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
@@ -21,9 +19,9 @@ interface CommentProps {
   comment: CommentItem;
   isPostRecipient: boolean;
   isCommentAuthor: boolean;
-  onDelete: (commentId: string) => void;
-  onReport: (commentId: string) => void;
-  onHideBottomSheet: () => void;
+  onDelete: () => void;
+  onReport: () => void;
+  onPressProfile: () => void;
 }
 
 const Comment = ({
@@ -32,32 +30,8 @@ const Comment = ({
   isCommentAuthor,
   onDelete,
   onReport,
-  onHideBottomSheet,
+  onPressProfile,
 }: CommentProps) => {
-  const { routeProfile } = useRouteProfile();
-
-  const handlePressProfilePicture = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    routeProfile({ userId: comment.userId });
-    onHideBottomSheet();
-  };
-
-  const handlePressUsername = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    routeProfile({ userId: comment.userId });
-    onHideBottomSheet();
-  };
-
-  const handleDelete = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onDelete(comment.id);
-  };
-
-  const handleReport = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onReport(comment.id);
-  };
-
   const contextMenuOptions = () => {
     const options = [];
 
@@ -69,7 +43,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <Trash2 size="$1.5" color="$red10" />,
-        onPress: handleDelete,
+        onPress: onDelete,
       });
       options.push({
         label: (
@@ -78,7 +52,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <AlertCircle size="$1.5" color="$red10" />,
-        onPress: handleReport,
+        onPress: onReport,
       });
     } else if (isCommentAuthor) {
       options.push({
@@ -88,7 +62,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <Trash2 size="$1.5" color="$red10" />,
-        onPress: handleDelete,
+        onPress: onDelete,
       });
     } else {
       options.push({
@@ -98,7 +72,7 @@ const Comment = ({
           </SizableText>
         ),
         icon: <AlertCircle size="$1.5" color="$red10" />,
-        onPress: handleReport,
+        onPress: onReport,
       });
     }
     return options;
@@ -108,12 +82,12 @@ const Comment = ({
     <BlurContextMenuWrapper options={contextMenuOptions()}>
       <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
         <XStack gap="$3" alignItems="flex-start">
-          <TouchableOpacity onPress={handlePressProfilePicture}>
+          <TouchableOpacity onPress={onPressProfile}>
             <Avatar source={comment.profilePictureUrl} size={46} />
           </TouchableOpacity>
           <YStack gap="$2" width="100%" flex={1}>
             <XStack gap="$2">
-              <TouchableOpacity onPress={handlePressUsername}>
+              <TouchableOpacity onPress={onPressProfile}>
                 <Text fontWeight="bold">{comment.username}</Text>
               </TouchableOpacity>
               <TimeAgo

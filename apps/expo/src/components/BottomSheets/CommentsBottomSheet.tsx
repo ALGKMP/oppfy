@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { Dimensions, LayoutAnimation } from "react-native";
+import * as Haptics from "expo-haptics";
 import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 
@@ -8,6 +9,7 @@ import { ScrollView, View, XStack, YStack } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { useSession } from "~/contexts/SessionContext";
 import { useComments } from "~/hooks/post/useComments";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import Comment from "./Comment";
 import type { CommentItem } from "./Comment";
 import TextInputWithAvatar from "./TextInputWithAvatar";
@@ -36,6 +38,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   const listRef = useRef<FlashList<CommentItem> | null>(null);
   const { user } = useSession();
   const selfUserId = user?.uid;
+  const { routeProfile } = useRouteProfile();
 
   const handlePostCommentWithAnimation = (comment: string) => {
     listRef.current?.prepareForLayoutAnimationRender();
@@ -55,9 +58,19 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
       comment={item}
       isPostRecipient={selfUserId === props.postRecipientUserId}
       isCommentAuthor={item.userId === selfUserId}
-      onDelete={handleDeleteWithAnimation}
-      onReport={reportComment}
-      onHideBottomSheet={props.onHideBottomSheet}
+      onDelete={() => {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        handleDeleteWithAnimation(item.id);
+      }}
+      onReport={() => {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        reportComment(item.id);
+      }}
+      onPressProfile={() => {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        routeProfile({ userId: item.userId });
+        props.onHideBottomSheet();
+      }}
     />
   );
 
