@@ -36,7 +36,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`${schema.like.userId} IS NOT NULL`.as("has_liked"),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
@@ -47,8 +50,8 @@ export class PostRepository {
       .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .where(eq(schema.post.id, postId))
       .limit(1);
-    
-      return result[0];
+
+    return result[0];
   }
 
   @handleDatabaseErrors
@@ -77,7 +80,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`${schema.like.userId} IS NOT NULL`.as("has_liked"),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(schema.comment)
       .innerJoin(schema.post, eq(schema.comment.postId, schema.post.id))
@@ -123,7 +129,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`${schema.like.userId} IS NOT NULL`.as("has_liked"),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(schema.follower)
       .innerJoin(
@@ -207,7 +216,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`${schema.like.userId} IS NOT NULL`.as("has_liked"),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(latestPosts)
       .innerJoin(schema.post, eq(schema.post.id, latestPosts.postId))
@@ -262,7 +274,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`${schema.like.userId} IS NOT NULL`.as("has_liked"),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
@@ -270,7 +285,7 @@ export class PostRepository {
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .innerJoin(schema.like, eq(schema.like.postId, schema.post.id))
+      .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .where(
         and(
           eq(schema.post.recipientId, userId),
@@ -319,15 +334,18 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`${schema.like.userId} IS NOT NULL`.as("has_liked"),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(schema.post)
-      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
+      .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .innerJoin(schema.like, eq(schema.like.postId, schema.post.id))
+      .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .where(
         and(
           eq(schema.post.authorId, userId),
