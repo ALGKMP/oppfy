@@ -1,10 +1,10 @@
-import React, { useCallback, useMemo, useRef } from "react";
-import { LayoutAnimation } from "react-native";
+import React, { useRef } from "react";
+import { Dimensions, LayoutAnimation } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
-import { ScrollView, View, XStack, YStack } from "tamagui";
 
 import { Skeleton } from "~/components/Skeletons";
+import { ScrollView, View, XStack, YStack } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { useSession } from "~/contexts/SessionContext";
 import { useComments } from "~/hooks/post/useComments";
@@ -22,7 +22,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   const {
     isLoadingComments,
     commentItems,
-    handleLoadMoreComments,
+    loadMoreComments,
     postComment,
     reportComment,
     deleteComment,
@@ -59,62 +59,45 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     />
   );
 
-  const ListContent = useMemo(() => {
-    if (isLoadingComments) return <LoadingView />;
-    if (commentItems.length === 0) return <EmptyCommentsView />;
-
-    return (
-      <FlashList
-        ref={listRef}
-        data={commentItems}
-        renderItem={renderComment}
-        estimatedItemSize={100}
-        onEndReached={handleLoadMoreComments}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    );
-  }, [
-    isLoadingComments,
-    commentItems,
-    renderComment,
-    handleLoadMoreComments,
-  ]);
-
-  const content = useMemo(
-    () => <YStack flex={1}>{ListContent}</YStack>,
-    [ListContent],
-  );
-
   return (
     <>
-      {content}
+      {isLoadingComments ? (
+        <ScrollView>
+          <XStack padding="$3.5" gap="$2.5">
+            <Skeleton circular size={46} />
+            <YStack flex={1} gap="$2">
+              <Skeleton width="40%" height={20} />
+              <Skeleton width="100%" height={20} />
+            </YStack>
+          </XStack>
+        </ScrollView>
+      ) : commentItems.length === 0 ? (
+        <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
+          <EmptyPlaceholder
+            title="No comments yet"
+            subtitle="Be the first to comment"
+            icon={<MessageCircleOff />}
+          />
+        </View>
+      ) : (
+        <FlashList
+          ref={listRef}
+          data={commentItems}
+          renderItem={renderComment}
+          estimatedItemSize={83}
+          onEndReached={loadMoreComments}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.id.toString()}
+          estimatedListSize={{
+            width: Dimensions.get("window").width,
+            height: Dimensions.get("window").height,
+          }}
+        />
+      )}
       <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
     </>
   );
 });
-
-const LoadingView = React.memo(() => (
-  <ScrollView>
-    <XStack padding="$3.5" gap="$2.5">
-      <Skeleton circular size={46} />
-      <YStack flex={1} gap="$2">
-        <Skeleton width="40%" height={20} />
-        <Skeleton width="100%" height={20} />
-      </YStack>
-    </XStack>
-  </ScrollView>
-));
-
-const EmptyCommentsView = React.memo(() => (
-  <View flex={1} justifyContent="center" alignItems="center">
-    <EmptyPlaceholder
-      title="No comments yet"
-      subtitle="Be the first to comment"
-      icon={<MessageCircleOff />}
-    />
-  </View>
-));
 
 /*
  * ==========================================

@@ -148,11 +148,11 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
 
   const reportCommentMutation = api.report.reportComment.useMutation();
 
-  const handleLoadMoreComments = async () => {
+  const loadMoreComments = async () => {
     if (commentsHasNextPage && !commentsIsFetchingNextPage) {
       await fetchNextCommentsPage();
     }
-  };
+  }
 
   const postComment = async (body: string) => {
     await postCommentMutation.mutateAsync({ postId, body });
@@ -182,7 +182,7 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
   return {
     commentItems,
     isLoadingComments,
-    handleLoadMoreComments,
+    loadMoreComments,
     postComment,
     deleteComment,
     reportComment,
