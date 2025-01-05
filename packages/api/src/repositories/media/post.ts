@@ -44,7 +44,7 @@ export class PostRepository {
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .innerJoin(schema.like, eq(schema.like.postId, schema.post.id))
+      .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
       .where(eq(schema.post.id, postId))
       .limit(1);
     
@@ -322,7 +322,7 @@ export class PostRepository {
         hasLiked: sql<boolean>`${schema.like.userId} IS NOT NULL`.as("has_liked"),
       })
       .from(schema.post)
-      .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
