@@ -28,8 +28,8 @@ import {
 import { useSession } from "~/contexts/SessionContext";
 
 enum WEBSITE_URL {
-  PRIVACY = "https://oppfy.app/privacy",
-  TERMS = "https://oppfy.app/terms",
+  PRIVACY = "https://www.oppfy.app/privacy",
+  TERMS = "https://www.oppfy.app/terms",
 }
 
 const Settings = () => {
@@ -42,7 +42,7 @@ const Settings = () => {
       title: "Join me on Oppfy!",
       message:
         "Check out Oppfy - the social media app where your friends capture your best moments! Download now:",
-      url: "https://oppfy.app",
+      url: "https://www.oppfy.app",
     });
   };
 

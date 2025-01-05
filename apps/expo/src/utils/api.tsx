@@ -46,7 +46,7 @@ const getBaseUrl = () => {
 
   if (!localhost) {
     console.log("using oppfy.app");
-    return "https://oppfy.app";
+    return "https://www.oppfy.app";
   }
 
   return `http://${localhost}:3000`;

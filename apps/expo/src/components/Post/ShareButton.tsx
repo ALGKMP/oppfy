@@ -1,5 +1,6 @@
 import { TouchableOpacity } from "react-native";
 import { Send } from "@tamagui/lucide-icons";
+
 import useShare from "~/hooks/useShare";
 
 interface ShareButtonProps {
@@ -13,7 +14,7 @@ const ShareButton = ({ postId }: ShareButtonProps) => {
     <TouchableOpacity
       onPress={async () => {
         await share({
-          url: `https://oppfy.app/post/${postId}`,
+          url: `https://www.oppfy.app/post/${postId}`,
           title: "Share post",
         });
       }}

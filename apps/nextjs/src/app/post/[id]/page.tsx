@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
       ],
       type: "article",
-      url: `https://oppfy.app/post/${post.postId}`,
+      url: `https://www.oppfy.app/post/${post.postId}`,
     },
     twitter: {
       card: "summary_large_image",
@@ -54,77 +54,88 @@ export default async function PostPage({ params }: Props) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-black">
       <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16">
-        <img 
+        <img
           src="/icon.png"
-          alt="Oppfy Logo" 
-          className="w-40 h-40 rounded-xl shadow-lg"
+          alt="Oppfy Logo"
+          className="h-40 w-40 rounded-xl shadow-lg"
         />
-        
-        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-center text-white">
+
+        <h1 className="text-center text-4xl font-extrabold tracking-tight text-white md:text-6xl">
           Join the <span className="text-[#F214FF]">Oppfy</span> Beta
         </h1>
 
-        <div className="flex items-center gap-4 my-4">
+        <div className="my-4 flex items-center gap-4">
           <div className="flex flex-col items-center">
-            <img 
+            <img
               src={post?.authorProfilePicture ?? "/default-profile-picture.jpg"}
               alt={`${post?.authorUsername}'s profile`}
-              className="w-16 h-16 rounded-full border-2 border-[#F214FF]"
+              className="h-16 w-16 rounded-full border-2 border-[#F214FF]"
             />
-            <p className="text-white text-sm mt-2">@{post?.authorUsername}</p>
+            <p className="mt-2 text-sm text-white">@{post?.authorUsername}</p>
           </div>
-          
-          <div className="flex flex-col items-center mx-2">
-            <span className="text-2xl mb-1">📸</span>
-            <span className="text-[#F214FF] text-sm font-medium">took a pic of</span>
+
+          <div className="mx-2 flex flex-col items-center">
+            <span className="mb-1 text-2xl">📸</span>
+            <span className="text-sm font-medium text-[#F214FF]">
+              took a pic of
+            </span>
           </div>
-          
+
           <div className="flex flex-col items-center">
-            <img 
-              src={post?.recipientProfilePicture ?? "/default-profile-picture.jpg"}
+            <img
+              src={
+                post?.recipientProfilePicture ?? "/default-profile-picture.jpg"
+              }
               alt={`${post?.recipientUsername}'s profile`}
-              className="w-16 h-16 rounded-full border-2 border-[#F214FF]"
+              className="h-16 w-16 rounded-full border-2 border-[#F214FF]"
             />
-            <p className="text-white text-sm mt-2">@{post?.recipientUsername}</p>
+            <p className="mt-2 text-sm text-white">
+              @{post?.recipientUsername}
+            </p>
           </div>
         </div>
 
-        <p className="text-xl text-gray-400 text-center max-w-md">
-          Where your friends capture your most authentic moments. Join our exclusive beta and be part of something special.
+        <p className="max-w-md text-center text-xl text-gray-400">
+          Where your friends capture your most authentic moments. Join our
+          exclusive beta and be part of something special.
         </p>
 
-        <p className="text-xl text-gray-400 text-center max-w-md">
-          Join the beta to see <span className="text-[#F214FF]">{post?.authorUsername}</span>'s post for <span className="text-[#F214FF]">{post?.recipientUsername}</span>
+        <p className="max-w-md text-center text-xl text-gray-400">
+          Join the beta to see{" "}
+          <span className="text-[#F214FF]">{post?.authorUsername}</span>'s post
+          for <span className="text-[#F214FF]">{post?.recipientUsername}</span>
         </p>
 
         <div className="flex flex-col items-center gap-6">
           <a
             href="https://testflight.apple.com/join/EHMR7AxB"
-            className="px-8 py-4 bg-[#F214FF] text-white font-bold rounded-xl hover:opacity-90 transition-opacity"
+            className="rounded-xl bg-[#F214FF] px-8 py-4 font-bold text-white transition-opacity hover:opacity-90"
           >
             Get Early Access on TestFlight
           </a>
-          
-          <p className="text-sm text-gray-500 text-center">
+
+          <p className="text-center text-sm text-gray-500">
             Currently available for iOS users
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-3 gap-8 max-w-2xl">
+        <div className="mt-12 grid max-w-2xl grid-cols-3 gap-8">
           <div className="text-center">
-            <span className="text-3xl mb-2 block">🤝</span>
-            <h3 className="text-[#F214FF] font-bold mb-1">Friend-Powered</h3>
-            <p className="text-gray-400 text-sm">Let your friends be your photographers</p>
+            <span className="mb-2 block text-3xl">🤝</span>
+            <h3 className="mb-1 font-bold text-[#F214FF]">Friend-Powered</h3>
+            <p className="text-sm text-gray-400">
+              Let your friends be your photographers
+            </p>
           </div>
           <div className="text-center">
-            <span className="text-3xl mb-2 block">📸</span>
-            <h3 className="text-[#F214FF] font-bold mb-1">Real Moments</h3>
-            <p className="text-gray-400 text-sm">Capture life as it happens</p>
+            <span className="mb-2 block text-3xl">📸</span>
+            <h3 className="mb-1 font-bold text-[#F214FF]">Real Moments</h3>
+            <p className="text-sm text-gray-400">Capture life as it happens</p>
           </div>
           <div className="text-center">
-            <span className="text-3xl mb-2 block">✨</span>
-            <h3 className="text-[#F214FF] font-bold mb-1">Be Yourself</h3>
-            <p className="text-gray-400 text-sm">No filters, just fun</p>
+            <span className="mb-2 block text-3xl">✨</span>
+            <h3 className="mb-1 font-bold text-[#F214FF]">Be Yourself</h3>
+            <p className="text-sm text-gray-400">No filters, just fun</p>
           </div>
         </div>
       </div>
