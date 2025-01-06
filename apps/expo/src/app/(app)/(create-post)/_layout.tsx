@@ -25,14 +25,6 @@ const CameraLayout = () => {
       }}
     >
       <Stack.Screen
-        name="video-editor"
-        options={{
-          header: () => null,
-          title: "Edit Media",
-          animation: "slide_from_right",
-        }}
-      />
-      <Stack.Screen
         name="preview"
         options={{
           header: () => null,

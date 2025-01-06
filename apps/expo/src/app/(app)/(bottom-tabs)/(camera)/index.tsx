@@ -142,7 +142,7 @@ const CameraPage = () => {
         });
       } else {
         router.push({
-          pathname: "/video-editor",
+          pathname: "/preview",
           params: {
             uri,
             width,
