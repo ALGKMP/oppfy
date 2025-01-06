@@ -13,6 +13,7 @@ import BottomSheetHeader from "./BottomSheetHeader";
 export interface BottomSheetProps
   extends Partial<Omit<BottomSheetModalProps, "ref">> {
   title?: string;
+  headerShown?: boolean;
   children: ReactNode;
   isVisible: boolean;
   onDismiss?: () => void;
@@ -21,6 +22,7 @@ export interface BottomSheetProps
 
 export const BottomSheet = ({
   title,
+  headerShown = true,
   children,
   snapPoints = ["50%"],
   isVisible,
@@ -58,7 +60,7 @@ export const BottomSheet = ({
       enablePanDownToClose
       keyboardBlurBehavior="restore"
       backdropComponent={backdropComponent}
-      handleComponent={header}
+      handleComponent={headerShown ? header : null}
       onDismiss={onDismiss}
       backgroundStyle={{
         backgroundColor: theme.gray4.val,
