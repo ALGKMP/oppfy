@@ -100,12 +100,31 @@ export const userRelations = relations(user, ({ one, many }) => ({
   pushTokens: many(pushToken),
 }));
 
+export const pendingUser = pgTable("pendingUser", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  phoneNumber: text("phone_number").notNull().unique(),
+  name: text("name"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const pendingUserRelations = relations(pendingUser, ({ many }) => ({
+  posts: many(postOfUserNotOnApp),
+}));
+
 export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
   id: uuid("id").primaryKey().defaultRandom(),
   phoneNumber: text("phone_number").notNull(),
   authorId: varchar("author_id", { length: 255 })
     .notNull()
     .references(() => user.id),
+  pendingUserId: uuid("pending_user_id")
+    .notNull()
+    .references(() => pendingUser.id),
   caption: text("caption").notNull().default(""),
   key: text("key").notNull(),
   width: integer("width").notNull().default(500),
@@ -118,6 +137,20 @@ export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
     .defaultNow()
     .notNull(),
 });
+
+export const postOfUserNotOnAppRelations = relations(
+  postOfUserNotOnApp,
+  ({ one }) => ({
+    author: one(user, {
+      fields: [postOfUserNotOnApp.authorId],
+      references: [user.id],
+    }),
+    pendingUser: one(pendingUser, {
+      fields: [postOfUserNotOnApp.pendingUserId],
+      references: [pendingUser.id],
+    }),
+  }),
+);
 
 export const contact = pgTable("contact", {
   id: varchar("id", { length: 128 }).primaryKey(),
