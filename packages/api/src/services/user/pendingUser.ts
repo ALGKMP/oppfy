@@ -1,15 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 
-import { db } from "@oppfy/db";
-import {
-  notifications,
-  pendingUser,
-  post,
-  postOfUserNotOnApp,
-  user,
-} from "@oppfy/db/schema";
+import { PendingUserRepository } from "../../repositories/user/pendingUser";
 
 const PHONE_NUMBER_REGEX = /^\+[1-9]\d{1,14}$/; // E.164 format
 
@@ -33,33 +24,15 @@ export const PendingUserService = {
   }) {
     await this.validatePhoneNumber(phoneNumber);
 
-    // Check if user already exists
-    const existingUser = await db.query.user.findFirst({
-      where: eq(user.phoneNumber, phoneNumber),
-    });
-
-    if (existingUser) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "User already exists with this phone number",
-      });
-    }
-
     // Check if pending user exists
-    let pendingUserRecord = await db.query.pendingUser.findFirst({
-      where: eq(pendingUser.phoneNumber, phoneNumber),
-    });
+    let pendingUserRecord =
+      await PendingUserRepository.findByPhoneNumber(phoneNumber);
 
     // If no pending user exists, create one
     if (!pendingUserRecord) {
-      pendingUserRecord = await db
-        .insert(pendingUser)
-        .values({
-          phoneNumber,
-          name,
-        })
-        .returning()
-        .then((res) => res[0]);
+      pendingUserRecord = await PendingUserRepository.create({
+        phoneNumber,
+      });
     }
 
     return pendingUserRecord;
@@ -87,27 +60,21 @@ export const PendingUserService = {
     // Validate phone number format
     await this.validatePhoneNumber(phoneNumber);
 
-    const post = await db
-      .insert(postOfUserNotOnApp)
-      .values({
-        authorId,
-        pendingUserId,
-        phoneNumber,
-        key: mediaKey,
-        caption,
-        width,
-        height,
-        mediaType,
-      })
-      .returning();
-
-    return post[0];
+    return PendingUserRepository.createPost({
+      authorId,
+      pendingUserId,
+      phoneNumber,
+      key: mediaKey,
+      caption,
+      width,
+      height,
+      mediaType,
+    });
   },
 
   async checkForPendingPosts(phoneNumber: string) {
-    const pendingUserRecord = await db.query.pendingUser.findFirst({
-      where: eq(pendingUser.phoneNumber, phoneNumber),
-    });
+    const pendingUserRecord =
+      await PendingUserRepository.findByPhoneNumber(phoneNumber);
 
     if (!pendingUserRecord) {
       return {
@@ -116,9 +83,9 @@ export const PendingUserService = {
       };
     }
 
-    const posts = await db.query.postOfUserNotOnApp.findMany({
-      where: eq(postOfUserNotOnApp.pendingUserId, pendingUserRecord.id),
-    });
+    const posts = await PendingUserRepository.findPostsByPendingUserId(
+      pendingUserRecord.id,
+    );
 
     return {
       hasPendingPosts: posts.length > 0,
@@ -128,45 +95,13 @@ export const PendingUserService = {
   },
 
   async updateUserPendingPostsStatus(userId: string, postCount: number) {
-    await db
-      .update(user)
-      .set({
-        hasPendingPosts: postCount > 0,
-        pendingPostsCount: postCount,
-      })
-      .where(eq(user.id, userId));
+    await PendingUserRepository.updateUserPendingPostsStatus(userId, postCount);
   },
 
   async getPendingPostsForUser(userId: string) {
-    const userRecord = await db.query.user.findFirst({
-      where: eq(user.id, userId),
-    });
-
-    if (!userRecord || !userRecord.hasPendingPosts) {
-      return [];
-    }
-
-    const pendingUserRecord = await db.query.pendingUser.findFirst({
-      where: eq(pendingUser.phoneNumber, userRecord.phoneNumber),
-    });
-
-    if (!pendingUserRecord) {
-      return [];
-    }
-
-    return db.query.postOfUserNotOnApp.findMany({
-      where: eq(postOfUserNotOnApp.pendingUserId, pendingUserRecord.id),
-      with: {
-        author: {
-          with: {
-            profile: true,
-          },
-        },
-      },
-    });
+    return PendingUserRepository.findPostsByPhoneNumber(userId);
   },
 
-  // This will be called later when the user reviews their posts
   async migratePendingUserPosts({
     pendingUserId,
     newUserId,
@@ -174,65 +109,9 @@ export const PendingUserService = {
     pendingUserId: string;
     newUserId: string;
   }) {
-    // Get all pending posts
-    const pendingPosts = await db.query.postOfUserNotOnApp.findMany({
-      where: eq(postOfUserNotOnApp.pendingUserId, pendingUserId),
-      with: {
-        author: true,
-      },
-    });
-
-    // Start a transaction to ensure all operations succeed or fail together
-    return await db.transaction(async (tx) => {
-      // Move each post to the regular posts table
-      const migratedPosts = await Promise.all(
-        pendingPosts.map(async (pendingPost) => {
-          // Create new post (initially private)
-          const newPost = await tx
-            .insert(post)
-            .values({
-              authorId: pendingPost.authorId,
-              recipientId: newUserId,
-              caption: pendingPost.caption,
-              key: pendingPost.key,
-              width: pendingPost.width,
-              height: pendingPost.height,
-              mediaType: pendingPost.mediaType,
-            })
-            .returning()
-            .then((res) => res[0]);
-
-          // Create notification for the original poster
-          await tx.insert(notifications).values({
-            senderId: newUserId,
-            recipientId: pendingPost.authorId,
-            eventType: "post",
-            entityId: newPost.id,
-            entityType: "post",
-          });
-
-          // Delete the pending post
-          await tx
-            .delete(postOfUserNotOnApp)
-            .where(eq(postOfUserNotOnApp.id, pendingPost.id));
-
-          return newPost;
-        }),
-      );
-
-      // Delete the pending user
-      await tx.delete(pendingUser).where(eq(pendingUser.id, pendingUserId));
-
-      // Update user's pending posts status
-      await tx
-        .update(user)
-        .set({
-          hasPendingPosts: false,
-          pendingPostsCount: 0,
-        })
-        .where(eq(user.id, newUserId));
-
-      return migratedPosts;
+    return PendingUserRepository.migratePosts({
+      pendingUserId,
+      newUserId,
     });
   },
 };

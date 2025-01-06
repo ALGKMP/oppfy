@@ -105,7 +105,6 @@ export const userRelations = relations(user, ({ one, many }) => ({
 export const pendingUser = pgTable("pendingUser", {
   id: uuid("id").primaryKey().defaultRandom(),
   phoneNumber: text("phone_number").notNull().unique(),
-  name: text("name"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { mediaTypeEnum } from "@oppfy/db/schema";
 
 import { PendingUserService } from "../../services/user/pendingUser";
 import {
