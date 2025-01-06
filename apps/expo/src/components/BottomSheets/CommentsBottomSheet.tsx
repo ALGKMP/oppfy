@@ -13,6 +13,7 @@ import useRouteProfile from "~/hooks/useRouteProfile";
 import Comment from "./Comment";
 import type { CommentItem } from "./Comment";
 import TextInputWithAvatar from "./TextInputWithAvatar";
+import { BottomSheetFlashList, BottomSheetView } from "@gorhom/bottom-sheet";
 
 interface CommentsBottomSheetProps {
   postId: string;
@@ -75,7 +76,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   );
 
   return (
-    <>
+    <BottomSheetView style={{ flex: 1 }}>
       {isLoadingComments ? (
         <ScrollView>
           <XStack padding="$3.5" gap="$2.5">
@@ -95,8 +96,8 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
           />
         </View>
       ) : (
-        <FlashList
-          ref={listRef}
+        <BottomSheetFlashList
+          // ref={listRef}
           data={commentItems}
           renderItem={renderComment}
           estimatedItemSize={83}
@@ -110,7 +111,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
         />
       )}
       <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
-    </>
+    </BottomSheetView>
   );
 });
 
