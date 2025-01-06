@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -83,80 +83,70 @@ const Followers = () => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const followerItems = useMemo(() => {
-    return followersData?.pages.flatMap((page) => page.items) ?? [];
-  }, [followersData]);
+  const followerItems =
+    followersData?.pages.flatMap((page) => page.items) ?? [];
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch({
     data: followerItems,
     keys: ["name", "username"],
   });
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+  };
 
-  const handleRemoveFollower = useCallback(
-    async (userId: string) => {
-      await removeFollower.mutateAsync({ userId });
-    },
-    [removeFollower],
-  );
+  const handleRemoveFollower = async (userId: string) => {
+    await removeFollower.mutateAsync({ userId });
+  };
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
-  }, [refetch]);
+  };
 
-  const renderListItem = useCallback(
-    (item: FollowerItem) => (
-      <MediaListItem
-        title={item.username}
-        subtitle={item.name}
-        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-        primaryAction={{
-          label: "Remove",
-          icon: UserRoundMinus,
-          onPress: () =>
-            actionSheet.show({
-              title: "Remove Follower",
-              subtitle: `Are you sure you want to remove ${item.username} from your followers?`,
-              imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
-              buttonOptions: [
-                {
-                  text: "Remove",
-                  textProps: { color: "$red11" },
-                  onPress: () => void handleRemoveFollower(item.userId),
-                },
-              ],
-            }),
-        }}
-        onPress={() =>
-          routeProfile({ userId: item.userId, username: item.username })
-        }
+  const renderListItem = (item: FollowerItem) => (
+    <MediaListItem
+      title={item.username}
+      subtitle={item.name}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+      primaryAction={{
+        label: "Remove",
+        icon: UserRoundMinus,
+        onPress: () =>
+          actionSheet.show({
+            title: "Remove Follower",
+            subtitle: `Are you sure you want to remove ${item.username} from your followers?`,
+            imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+            buttonOptions: [
+              {
+                text: "Remove",
+                textProps: { color: "$red11" },
+                onPress: () => void handleRemoveFollower(item.userId),
+              },
+            ],
+          }),
+      }}
+      onPress={() =>
+        routeProfile({ userId: item.userId, username: item.username })
+      }
+    />
+  );
+
+  const ListHeaderComponent = (
+    <YStack gap="$4">
+      <SearchInput
+        placeholder="Search followers..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onClear={() => setSearchQuery("")}
       />
-    ),
-    [actionSheet, handleRemoveFollower, routeProfile],
+    </YStack>
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <YStack gap="$4">
-        <SearchInput
-          placeholder="Search followers..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={() => setSearchQuery("")}
-        />
-      </YStack>
-    ),
-    [searchQuery, setSearchQuery],
-  );
-
-  const ListEmptyComponent = useCallback(() => {
+  const ListEmptyComponent = () => {
     if (isLoading) {
       return (
         <YStack gap="$4">
@@ -188,7 +178,7 @@ const Followers = () => {
     }
 
     return null;
-  }, [isLoading, followerItems.length, filteredItems.length]);
+  };
 
   return (
     <FlashList
