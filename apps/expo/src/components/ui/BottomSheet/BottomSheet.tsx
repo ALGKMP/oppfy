@@ -64,7 +64,7 @@ export const BottomSheet = ({
       handleComponent={headerShown ? header : null}
       onDismiss={onDismiss}
       animationConfigs={{
-        duration: 150,
+        duration: 175,
       }}
       backgroundStyle={{
         backgroundColor: theme.gray4.val,
