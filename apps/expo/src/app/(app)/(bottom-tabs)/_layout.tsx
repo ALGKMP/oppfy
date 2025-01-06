@@ -11,6 +11,7 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import { BottomSheetView } from "@gorhom/bottom-sheet";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
 import { MotiView } from "moti";

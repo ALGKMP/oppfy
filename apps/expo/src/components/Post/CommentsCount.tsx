@@ -1,8 +1,9 @@
 import { TouchableOpacity } from "react-native";
+import { BottomSheetView } from "@gorhom/bottom-sheet";
 
+import CommentsBottomSheet from "~/components/BottomSheets/CommentsBottomSheet";
 import { SizableText } from "~/components/ui/";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
-import CommentsBottomSheet from "~/components/BottomSheets/CommentsBottomSheet";
 
 interface CommentsCountProps {
   commentsCount: number;
@@ -17,18 +18,21 @@ const CommentsCount = ({
   endpoint,
   postRecipientUserId,
 }: CommentsCountProps) => {
-  const { show } = useBottomSheetController();
+  const { show, hide } = useBottomSheetController();
 
   const handlePress = () => {
     show({
       snapPoints: ["90%"],
       title: "Comments",
       children: (
-        <CommentsBottomSheet
-          postId={postId}
-          endpoint={endpoint}
-          postRecipientUserId={postRecipientUserId}
-        />
+        <BottomSheetView style={{ flex: 1 }}>
+          <CommentsBottomSheet
+            onHideBottomSheet={hide}
+            postId={postId}
+            endpoint={endpoint}
+            postRecipientUserId={postRecipientUserId}
+          />
+        </BottomSheetView>
       ),
     });
   };

@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Dimensions, LayoutAnimation } from "react-native";
 import * as Haptics from "expo-haptics";
+import { BottomSheetFlashList, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 
@@ -74,8 +75,18 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     />
   );
 
+  const ListEmptyComponent = () => (
+    <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
+      <EmptyPlaceholder
+        title="No comments yet"
+        subtitle="Be the first to comment"
+        icon={<MessageCircleOff />}
+      />
+    </View>
+  );
+
   return (
-    <>
+    <BottomSheetView style={{ flex: 1 }}>
       {isLoadingComments ? (
         <ScrollView>
           <XStack padding="$3.5" gap="$2.5">
@@ -86,17 +97,10 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
             </YStack>
           </XStack>
         </ScrollView>
-      ) : commentItems.length === 0 ? (
-        <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
-          <EmptyPlaceholder
-            title="No comments yet"
-            subtitle="Be the first to comment"
-            icon={<MessageCircleOff />}
-          />
-        </View>
       ) : (
-        <FlashList
-          ref={listRef}
+        <BottomSheetFlashList
+          // ref={listRef}
+          ListEmptyComponent={ListEmptyComponent}
           data={commentItems}
           renderItem={renderComment}
           estimatedItemSize={83}
@@ -110,7 +114,7 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
         />
       )}
       <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
-    </>
+    </BottomSheetView>
   );
 });
 

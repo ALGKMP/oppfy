@@ -6,7 +6,7 @@ import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
-import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput, BottomSheetView } from "@gorhom/bottom-sheet";
 import { useTheme } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
@@ -201,42 +201,44 @@ const EditProfile = () => {
     show({
       title: FIELD_TITLES[field],
       children: (
-        <ProfileFieldSheet
-          fieldKey={field}
-          initialValue={currentValue}
-          maxLength={maxLength}
-          isMutating={isMutating}
-          onSave={async (newValue) => {
-            // Immediately update local states
-            let dataToUpdate = {
-              name,
-              username,
-              bio,
-            };
+        <BottomSheetView style={{ flex: 1 }}>
+          <ProfileFieldSheet
+            fieldKey={field}
+            initialValue={currentValue}
+            maxLength={maxLength}
+            isMutating={isMutating}
+            onSave={async (newValue) => {
+              // Immediately update local states
+              let dataToUpdate = {
+                name,
+                username,
+                bio,
+              };
 
-            if (field === "name") {
-              setName(newValue);
-              dataToUpdate.name = newValue;
-            }
-            if (field === "username") {
-              setUsername(newValue.toLowerCase());
-              dataToUpdate.username = newValue.toLowerCase();
-            }
-            if (field === "bio") {
-              setBio(newValue);
-              dataToUpdate.bio = newValue;
-            }
+              if (field === "name") {
+                setName(newValue);
+                dataToUpdate.name = newValue;
+              }
+              if (field === "username") {
+                setUsername(newValue.toLowerCase());
+                dataToUpdate.username = newValue.toLowerCase();
+              }
+              if (field === "bio") {
+                setBio(newValue);
+                dataToUpdate.bio = newValue;
+              }
 
-            try {
-              // Show a spinner while updating
-              await updateProfile.mutateAsync(dataToUpdate);
-            } catch (error) {
-              // handle error if needed
-            } finally {
-              hide();
-            }
-          }}
-        />
+              try {
+                // Show a spinner while updating
+                await updateProfile.mutateAsync(dataToUpdate);
+              } catch (error) {
+                // handle error if needed
+              } finally {
+                hide();
+              }
+            }}
+          />
+        </BottomSheetView>
       ),
     });
   };

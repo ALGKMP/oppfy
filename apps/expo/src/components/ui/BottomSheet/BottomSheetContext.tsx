@@ -1,4 +1,6 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
+import { BottomSheetView } from "@gorhom/bottom-sheet";
+
 import { BottomSheet } from "./BottomSheet";
 import type { BottomSheetProps } from "./BottomSheet";
 
@@ -32,11 +34,7 @@ export const BottomSheetProvider = ({
     <BottomSheetContext.Provider value={{ show, hide }}>
       {children}
       {sheetProps && (
-        <BottomSheet
-          {...sheetProps}
-          isVisible={isVisible}
-          onDismiss={hide}
-        />
+          <BottomSheet {...sheetProps} isVisible={isVisible} onDismiss={hide} />
       )}
     </BottomSheetContext.Provider>
   );
