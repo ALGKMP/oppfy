@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { db } from "@oppfy/db";
@@ -11,7 +11,6 @@ import {
   user,
 } from "@oppfy/db/schema";
 
-const MAX_PENDING_POSTS_PER_DAY = 10; // Rate limit: max 10 posts per day to non-registered users
 const PHONE_NUMBER_REGEX = /^\+[1-9]\d{1,14}$/; // E.164 format
 
 export const PendingUserService = {
@@ -21,25 +20,6 @@ export const PendingUserService = {
         code: "BAD_REQUEST",
         message:
           "Invalid phone number format. Please use international format (e.g., +1234567890)",
-      });
-    }
-  },
-
-  async checkRateLimit(authorId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const postsToday = await db.query.postOfUserNotOnApp.findMany({
-      where: and(
-        eq(postOfUserNotOnApp.authorId, authorId),
-        gte(postOfUserNotOnApp.createdAt, today),
-      ),
-    });
-
-    if (postsToday.length >= MAX_PENDING_POSTS_PER_DAY) {
-      throw new TRPCError({
-        code: "TOO_MANY_REQUESTS",
-        message: `You can only create ${MAX_PENDING_POSTS_PER_DAY} posts per day for non-registered users`,
       });
     }
   },
@@ -106,9 +86,6 @@ export const PendingUserService = {
   }) {
     // Validate phone number format
     await this.validatePhoneNumber(phoneNumber);
-
-    // Check rate limit
-    await this.checkRateLimit(authorId);
 
     const post = await db
       .insert(postOfUserNotOnApp)
