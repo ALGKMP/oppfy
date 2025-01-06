@@ -35,7 +35,6 @@ interface SuggestionItemProps {
 }
 
 const { width: screenWidth } = Dimensions.get("window");
-const TILE_WIDTH = screenWidth / 2 - getToken("$3", "space") * 2; // Two tiles with gap in between
 
 const SuggestionItem = ({
   item,
@@ -43,6 +42,8 @@ const SuggestionItem = ({
   onPressProfile,
   onFollow,
 }: SuggestionItemProps) => {
+  const TILE_WIDTH = screenWidth / 2 - getToken("$3", "space") * 2; // Two tiles with gap in between
+
   // Animation for the card press
   const cardScale = useSharedValue(1);
   const cardStyle = useAnimatedStyle(() => ({
