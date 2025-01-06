@@ -16,6 +16,16 @@ export const Button = styled(TamaguiButton, {
           borderColor: "$primary",
         },
       },
+      white: {
+        backgroundColor: "white",
+        pressStyle: {
+          backgroundColor: "$gray12",
+          borderColor: "$primary",
+        },
+        textProps: {
+          color: "$primary",
+        },
+      },
       warning: {
         color: "$yellow11",
       },

@@ -61,7 +61,7 @@ const BottomTabsLayout = () => {
     const isDev = process.env.NODE_ENV === "development";
     if (isDev || !hasSeenWelcome) {
       bottomSheet.show({
-        snapPoints: ["90%"],
+        snapPoints: ["100%"],
         headerShown: false,
         enableDismissOnClose: false,
         enablePanDownToClose: false,
@@ -327,9 +327,11 @@ export const WelcomeBottomSheet = () => {
       backgroundColor="$primary"
       padding="$4"
       paddingTop="$8"
-      space="$6"
       position="relative"
+      borderTopLeftRadius="$8"
+      borderTopRightRadius="$8"
       overflow="hidden"
+      gap="$6"
     >
       {/* Decorative background elements */}
       <AnimatedSvg
@@ -352,14 +354,14 @@ export const WelcomeBottomSheet = () => {
       </AnimatedSvg>
 
       {/* Header */}
-      <YStack space="$2" alignItems="center">
-        <Circle size={120} backgroundColor="$background" opacity={0.9}>
+      <YStack alignItems="center" gap="$2">
+        <Circle size={120} backgroundColor="$gray6" opacity={0.9}>
           <MotiView
             from={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", delay: 300 }}
           >
-            <Text fontSize={60}>📸</Text>
+            <Text fontSize={70}>📸</Text>
           </MotiView>
         </Circle>
         <H3
@@ -377,7 +379,7 @@ export const WelcomeBottomSheet = () => {
       </YStack>
 
       {/* Features */}
-      <YStack space="$6" paddingHorizontal="$2">
+      <YStack paddingHorizontal="$2" gap="$6">
         <MotiView
           from={{ translateX: -100, opacity: 0 }}
           animate={{ translateX: 0, opacity: 1 }}
@@ -430,13 +432,11 @@ export const WelcomeBottomSheet = () => {
         >
           <Button
             size="$6"
-            width="100%"
-            backgroundColor="white"
+            variant="white"
             onPress={handleDismissWelcome}
+            fontWeight="bold"
           >
-            <Text color="$primary" fontWeight="bold" fontSize={18}>
-              Let's Get Started
-            </Text>
+            Let's Get Started
           </Button>
         </MotiView>
       </YStack>
