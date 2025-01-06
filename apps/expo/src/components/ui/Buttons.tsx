@@ -11,6 +11,7 @@ export const Button = styled(TamaguiButton, {
     variant: {
       primary: {
         backgroundColor: "$primary",
+        borderColor: "white",
         pressStyle: {
           backgroundColor: "#D900E6",
           borderColor: "$primary",
@@ -22,6 +23,7 @@ export const Button = styled(TamaguiButton, {
           backgroundColor: "$gray12",
           borderColor: "$primary",
         },
+        borderColor: "$primary",
         textProps: {
           color: "$primary",
         },
@@ -38,11 +40,6 @@ export const Button = styled(TamaguiButton, {
     outlined: {
       true: {
         borderWidth: 1,
-        borderColor: "white",
-        pressStyle: {
-          borderWidth: 1,
-          borderColor: "white",
-        },
       },
     },
     rounded: {
