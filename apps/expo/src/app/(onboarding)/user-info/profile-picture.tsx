@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
@@ -17,6 +17,7 @@ import {
 } from "~/components/ui";
 import { useContacts } from "~/hooks/contacts";
 import { useUploadProfilePicture } from "~/hooks/media";
+import { useCheckPendingPosts } from "~/hooks/post/useCheckPendingPosts";
 import { api } from "~/utils/api";
 
 const ProfilePicture = () => {
@@ -38,6 +39,30 @@ const ProfilePicture = () => {
     if (result.success) setHasUploadedPic(true);
   };
 
+  const { checkAndNavigate } = useCheckPendingPosts();
+
+  const onSubmit = useCallback(async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Check for pending posts first
+    const hasPendingPosts = await checkAndNavigate();
+    if (!hasPendingPosts) {
+      // If no pending posts, go to home
+      router.replace("/(app)/(bottom-tabs)/(home)");
+    }
+  }, [router, checkAndNavigate]);
+
+  const onSkip = useCallback(async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Check for pending posts first
+    const hasPendingPosts = await checkAndNavigate();
+    if (!hasPendingPosts) {
+      // If no pending posts, go to home
+      router.replace("/(app)/(bottom-tabs)/(home)");
+    }
+  }, [router, checkAndNavigate]);
+
   useEffect(() => {
     const fn = async () => {
       await syncContacts();
@@ -48,16 +73,6 @@ const ProfilePicture = () => {
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const onSubmit = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("/(app)/(bottom-tabs)/(home)");
-  };
-
-  const onSkip = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.replace("/(app)/(bottom-tabs)/(home)");
-  };
 
   return (
     <ScreenView
