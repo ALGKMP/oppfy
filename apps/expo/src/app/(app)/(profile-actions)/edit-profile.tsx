@@ -1,5 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
-import { View as RNView } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,18 +7,12 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronRight } from "@tamagui/lucide-icons";
-import { Controller, useForm } from "react-hook-form";
 import { useTheme } from "tamagui";
-import { z } from "zod";
-
-import { sharedValidators } from "@oppfy/validators";
 
 import CardContainer from "~/components/Containers/CardContainer";
 import {
   Button,
-  H3,
+  H5,
   ScreenView,
   Separator,
   Spinner,
@@ -32,261 +25,228 @@ import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import { useUploadProfilePicture } from "~/hooks/media";
 import { api } from "~/utils/api";
 
-const profileSchema = z.object({
-  name: sharedValidators.user.name,
-  username: sharedValidators.user.username,
-  bio: sharedValidators.user.bio,
-});
+/* -----------------------------
+   Titles/placeholders for fields
+------------------------------ */
+const FIELD_TITLES = {
+  name: "Edit Name",
+  username: "Edit Username",
+  bio: "Edit Bio",
+} as const;
 
-type ProfileFields = z.infer<typeof profileSchema>;
-type FieldKeys = keyof ProfileFields;
+const FIELD_PLACEHOLDERS = {
+  name: "Full Name",
+  username: "Your username",
+  bio: "Your bio",
+} as const;
+
+/**
+ * A generic bottom-sheet component for editing a single field.
+ * Once the user presses "Save," we'll immediately call your API to update that field,
+ * and show a spinner while the request is in flight.
+ */
+const ProfileFieldSheet = ({
+  fieldKey,
+  initialValue,
+  onSave,
+  maxLength = 100,
+  isMutating,
+}: {
+  fieldKey: "name" | "username" | "bio";
+  initialValue: string;
+  onSave: (text: string) => void;
+  maxLength?: number;
+  isMutating: boolean;
+}) => {
+  const insets = useSafeAreaInsets();
+  const theme = useTheme();
+
+  // local text input state
+  const [localValue, setLocalValue] = useState(initialValue);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ref for the text input to auto-focus
+  const inputRef = useRef<TextInput>(null);
+
+  // Auto-focus the text input after the sheet shows
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    try {
+      await onSave(localValue);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isLoading = isSubmitting || isMutating;
+
+  return (
+    <YStack flex={1}>
+      <YStack flex={1} padding="$4" gap="$4">
+        {/* Title + char counter + clear icon */}
+        <XStack justifyContent="space-between">
+          <Text fontSize="$6" fontWeight="bold">
+            {FIELD_TITLES[fieldKey] ?? "Edit Field"}
+          </Text>
+          <XStack alignItems="center" gap="$2">
+            <Text fontSize="$3" color="$gray10">
+              {localValue.length}/{maxLength}
+            </Text>
+            <TouchableOpacity onPress={() => setLocalValue("")}>
+              <Ionicons name="close-circle" size={20} color={theme.gray8.val} />
+            </TouchableOpacity>
+          </XStack>
+        </XStack>
+
+        {/* Text input */}
+        <BottomSheetTextInput
+          ref={inputRef}
+          placeholder={FIELD_PLACEHOLDERS[fieldKey] ?? "Type here..."}
+          value={localValue}
+          onChangeText={setLocalValue}
+          multiline={fieldKey === "bio"}
+          maxLength={maxLength}
+          autoCapitalize={fieldKey === "username" ? "none" : "words"}
+          autoCorrect={fieldKey === "username" ? false : true}
+          style={{
+            fontWeight: "bold",
+            justifyContent: "flex-start",
+            color: theme.color.val,
+            backgroundColor: theme.gray5.val,
+            padding: 20,
+            borderRadius: 20,
+          }}
+        />
+      </YStack>
+
+      {/* Save button */}
+      <XStack padding="$4" paddingBottom={insets.bottom}>
+        <Button
+          flex={1}
+          size="$5"
+          borderRadius="$7"
+          disabled={localValue === initialValue || isLoading}
+          onPress={handleSave}
+        >
+          {isLoading ? <Spinner size="small" color="$color" /> : "Save"}
+        </Button>
+      </XStack>
+    </YStack>
+  );
+};
 
 const EditProfile = () => {
-  const utils = api.useUtils();
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
-  const defaultValues = utils.profile.getFullProfileSelf.getData();
-  const { show: showBottomSheet, hide: hideBottomSheet } =
-    useBottomSheetController();
-
   const { pickAndUploadImage } = useUploadProfilePicture({
     optimisticallyUpdate: true,
   });
+  const { show, hide } = useBottomSheetController();
 
-  const {
-    control,
-    setError,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-    reset,
-  } = useForm<ProfileFields>({
-    defaultValues: {
-      name: defaultValues?.name ?? "",
-      username: defaultValues?.username ?? "",
-      bio: defaultValues?.bio ?? "",
-    },
-    resolver: zodResolver(profileSchema),
-  });
+  /* -------------------------------------------
+     Pull the user's existing data from the cache
+  -------------------------------------------- */
+  const utils = api.useUtils();
+  const defaultValues = utils.profile.getFullProfileSelf.getData();
 
+  // Locally track the user's profile fields
+  const [name, setName] = useState(defaultValues?.name ?? "");
+  const [username, setUsername] = useState(defaultValues?.username ?? "");
+  const [bio, setBio] = useState(defaultValues?.bio ?? "");
+
+  /* ---------------------------------------------
+     Mutation to update the profile in real-time
+  ---------------------------------------------- */
   const updateProfile = api.profile.updateProfile.useMutation({
-    onMutate: async (newPartialProfileData) => {
+    onMutate: async (newData) => {
       await utils.profile.getFullProfileSelf.cancel();
       const prevData = utils.profile.getFullProfileSelf.getData();
-      if (prevData === undefined) return;
-      utils.profile.getFullProfileSelf.setData(undefined, {
-        ...prevData,
-        ...newPartialProfileData,
-      });
+      if (prevData) {
+        utils.profile.getFullProfileSelf.setData(undefined, {
+          ...prevData,
+          ...newData,
+        });
+      }
       return { prevData };
     },
-    onError: (_err, _newPartialProfileData, ctx) => {
-      if (ctx === undefined) return;
-      utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
+    onError: (_err, _newData, ctx) => {
+      if (ctx?.prevData) {
+        utils.profile.getFullProfileSelf.setData(undefined, ctx.prevData);
+      }
     },
     onSettled: async () => {
       await utils.profile.getFullProfileSelf.invalidate();
     },
   });
 
-  const [currentField, setCurrentField] = useState<FieldKeys | null>(null);
-  const inputRef = useRef<TextInput>(null);
-  const [inputValue, setInputValue] = useState("");
-  const [isFieldChanged, setIsFieldChanged] = useState(false);
+  // is the update mutation currently running
+  const isMutating = updateProfile.isPending;
 
-  const onSubmit = handleSubmit(async (data) => {
-    await updateProfile.mutateAsync(data, {
-      onSuccess: () => {
-        hideBottomSheet();
-        reset(data);
-      },
-      onError: (error) => {
-        if (error.data?.code === "CONFLICT") {
-          setError("username", {
-            type: "manual",
-            message: "Username already taken.",
-          });
-        }
-      },
+  /**
+   * Open the bottom sheet for a particular field (name, username, or bio).
+   * Once the user hits "Save," we do an immediate profile update,
+   * showing a spinner in place of the "Save" text while requesting.
+   */
+  const openFieldSheet = (field: "name" | "username" | "bio") => {
+    const currentValue =
+      field === "name" ? name : field === "username" ? username : bio;
+    const maxLength = field === "bio" ? 255 : 50; // example maximum
+
+    show({
+      title: FIELD_TITLES[field],
+      children: (
+        <ProfileFieldSheet
+          fieldKey={field}
+          initialValue={currentValue}
+          maxLength={maxLength}
+          isMutating={isMutating}
+          onSave={async (newValue) => {
+            // Immediately update local states
+            let dataToUpdate = {
+              name,
+              username,
+              bio,
+            };
+
+            if (field === "name") {
+              setName(newValue);
+              dataToUpdate.name = newValue;
+            }
+            if (field === "username") {
+              setUsername(newValue.toLowerCase());
+              dataToUpdate.username = newValue.toLowerCase();
+            }
+            if (field === "bio") {
+              setBio(newValue);
+              dataToUpdate.bio = newValue;
+            }
+
+            try {
+              // Show a spinner while updating
+              await updateProfile.mutateAsync(dataToUpdate);
+            } catch (error) {
+              // handle error if needed
+            } finally {
+              hide();
+            }
+          }}
+        />
+      ),
     });
-  });
-
-  const openBottomSheet = (field: FieldKeys) => {
-    const currentValue = watch(field);
-
-    setCurrentField(field);
-    setInputValue(currentValue);
-    setIsFieldChanged(false);
-
-    const title =
-      field === "name"
-        ? "Edit Name"
-        : field === "username"
-          ? "Edit Username"
-          : "Edit Bio";
-
-    const content =
-      field === "name"
-        ? renderFieldContent(
-            "name",
-            "What's your name?",
-            "Full Name",
-            "✨ Your display name helps others recognize you.",
-            currentValue,
-          )
-        : field === "username"
-          ? renderFieldContent(
-              "username",
-              "Choose your username",
-              "Username",
-              "🔗 Your unique identifier for mentions and sharing.",
-              currentValue,
-            )
-          : renderFieldContent(
-              "bio",
-              "About you",
-              "Bio",
-              "🌟 Share a brief description of who you are or what you're passionate about.",
-              currentValue,
-            );
-
-    showBottomSheet({
-      snapPoints: ["60%"],
-      title,
-      children: content,
-      onDismiss: () => {
-        setCurrentField(null);
-        setInputValue("");
-        setIsFieldChanged(false);
-      },
-    });
-  };
-
-  const clearInput = () => {
-    setInputValue("");
-    setIsFieldChanged(true);
-  };
-
-  const getCharLimit = (field: FieldKeys): number => {
-    const validation = profileSchema.shape[field];
-    const maxCheck = validation._def.checks.find(
-      (check) => check.kind === "max",
-    );
-    return maxCheck?.kind === "max" ? maxCheck.value : Infinity;
-  };
-
-  const renderFieldContent = useCallback(
-    (
-      field: FieldKeys,
-      title: string,
-      placeholder: string,
-      description: string,
-      initialValue: string,
-    ) => {
-      const charLimit = getCharLimit(field);
-      return (
-        <YStack flex={1} padding="$4" gap="$4">
-          <XStack justifyContent="space-between">
-            <Text fontSize="$6" fontWeight="bold">
-              {title}
-            </Text>
-            <XStack alignItems="center" gap="$2">
-              <Text fontSize="$3" color="$gray10">
-                {initialValue.length}/{charLimit}
-              </Text>
-              <TouchableOpacity onPress={clearInput}>
-                <Ionicons
-                  name="close-circle"
-                  size={20}
-                  color={theme.gray8.val}
-                />
-              </TouchableOpacity>
-            </XStack>
-          </XStack>
-          <Controller
-            control={control}
-            name={field}
-            render={({ field: { onBlur, value } }) => (
-              <RNView
-                onLayout={() => {
-                  if (inputRef.current) {
-                    inputRef.current.focus();
-                  }
-                }}
-              >
-                <BottomSheetTextInput
-                  ref={inputRef}
-                  autoFocus
-                  placeholder={placeholder}
-                  onBlur={onBlur}
-                  value={initialValue}
-                  onChangeText={(text) => {
-                    const processedText =
-                      field === "username" ? text.replace(/\s/g, "_") : text;
-
-                    setInputValue(processedText);
-                    setIsFieldChanged(processedText !== value);
-                  }}
-                  multiline={field === "bio"}
-                  maxLength={charLimit}
-                  autoCorrect={field === "username" ? false : true}
-                  autoCapitalize={field === "username" ? "none" : "words"}
-                  style={{
-                    fontWeight: "bold",
-                    justifyContent: "flex-start",
-                    color: theme.color.val,
-                    backgroundColor: theme.gray5.val,
-                    padding: 20,
-                    borderRadius: 20,
-                  }}
-                />
-              </RNView>
-            )}
-          />
-          <Text fontSize="$3" color="$gray10">
-            {description}
-          </Text>
-          {errors[field] && <Text color="$red8">{errors[field]?.message}</Text>}
-          <XStack padding="$4" paddingBottom={insets.bottom}>
-            <Button
-              flex={1}
-              onPress={handleSave}
-              disabled={!isFieldChanged || updateProfile.isPending}
-            >
-              {updateProfile.isPending ? (
-                <Spinner size="small" color="$color" />
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </XStack>
-        </YStack>
-      );
-    },
-    [
-      control,
-      errors,
-      theme,
-      insets.bottom,
-      isFieldChanged,
-      updateProfile.isPending,
-    ],
-  );
-
-  const handleSave = async () => {
-    if (currentField && isFieldChanged) {
-      const valueToSave =
-        currentField === "username" ? inputValue.toLowerCase() : inputValue;
-
-      setValue(currentField, valueToSave);
-      await onSubmit();
-    }
   };
 
   return (
-    <ScreenView scrollable>
+    <ScreenView scrollable safeAreaEdges={["bottom"]}>
       <YStack gap="$5">
+        {/* ---------------------------------------
+            Edit Profile Picture 
+        --------------------------------------- */}
         <TouchableOpacity onPress={pickAndUploadImage}>
           <YStack alignItems="center" gap="$3">
             <View position="relative">
@@ -318,14 +278,19 @@ const EditProfile = () => {
             <Text color="$blue10">Edit photo</Text>
           </YStack>
         </TouchableOpacity>
-        <CardContainer>
-          <YStack gap="$4">
-            <H3>Profile Information</H3>
 
+        {/* ---------------------------------------
+            Card for main profile fields
+        --------------------------------------- */}
+        <CardContainer padding="$4">
+          <YStack gap="$4">
+            <H5>Profile Information</H5>
+
+            {/* Name */}
             <XStack
               justifyContent="space-between"
               alignItems="center"
-              onPress={() => openBottomSheet("name")}
+              onPress={() => openFieldSheet("name")}
             >
               <XStack flex={1} alignItems="center" gap="$3">
                 <Ionicons
@@ -340,19 +305,24 @@ const EditProfile = () => {
                     numberOfLines={1}
                     ellipsizeMode="tail"
                   >
-                    {watch("name") || "Add name"}
+                    {name || "Add name"}
                   </Text>
                   <Text color="$gray10">Name</Text>
                 </YStack>
               </XStack>
-              <ChevronRight size={24} color="$gray10" />
+              <Ionicons
+                name="chevron-forward"
+                size={24}
+                color={theme.gray10.val}
+              />
             </XStack>
             <Separator />
 
+            {/* Username */}
             <XStack
               justifyContent="space-between"
               alignItems="center"
-              onPress={() => openBottomSheet("username")}
+              onPress={() => openFieldSheet("username")}
             >
               <XStack flex={1} alignItems="center" gap="$3">
                 <Ionicons
@@ -367,20 +337,24 @@ const EditProfile = () => {
                     numberOfLines={1}
                     ellipsizeMode="tail"
                   >
-                    {watch("username")}
+                    {username || "Add username"}
                   </Text>
                   <Text color="$gray10">Username</Text>
                 </YStack>
               </XStack>
-              <ChevronRight size={24} color="$gray10" />
+              <Ionicons
+                name="chevron-forward"
+                size={24}
+                color={theme.gray10.val}
+              />
             </XStack>
             <Separator />
 
+            {/* Bio */}
             <XStack
-              paddingBottom="$2"
               justifyContent="space-between"
               alignItems="center"
-              onPress={() => openBottomSheet("bio")}
+              onPress={() => openFieldSheet("bio")}
             >
               <XStack flex={1} alignItems="center" gap="$3">
                 <Ionicons
@@ -395,11 +369,24 @@ const EditProfile = () => {
                     numberOfLines={1}
                     ellipsizeMode="tail"
                   >
-                    {watch("bio") ? "Edit bio" : "Add bio"}
+                    {bio ? "Edit bio" : "Add bio"}
                   </Text>
+                  {bio ? (
+                    <Text
+                      color="$gray10"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {bio}
+                    </Text>
+                  ) : null}
                 </YStack>
               </XStack>
-              <ChevronRight size={24} color="$gray10" />
+              <Ionicons
+                name="chevron-forward"
+                size={24}
+                color={theme.gray10.val}
+              />
             </XStack>
           </YStack>
         </CardContainer>
