@@ -13,48 +13,59 @@ interface Props {
 
 // Generate metadata for the page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await api.post.getPostForNextJs({ postId: params.id });
-  console.log(post);
+  try {
+    const post = await api.post.getPostForNextJs({ postId: params.id });
 
-  if (!post) {
+    if (!post) {
+      return {
+        title: "Post Not Found | Oppfy",
+        description: "The requested post could not be found",
+      };
+    }
+
     return {
-      title: "Post Not Found",
+      title: `${post.authorUsername} opped ${post.recipientUsername} | Oppfy`,
+      description: post.caption ?? "No caption",
+      openGraph: {
+        title: `${post.authorUsername} opped ${post.recipientUsername}`,
+        description: post.caption ?? "No caption",
+        images: [
+          {
+            url: post.imageUrl,
+            width: 1200,
+            height: 630,
+            alt: `${post.authorUsername} opped ${post.recipientUsername}`,
+          },
+        ],
+        type: "article",
+        url: `https://www.oppfy.app/post/${post.postId}`,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${post.authorUsername} opped ${post.recipientUsername}`,
+        description: post.caption ?? "No caption",
+        images: [post.imageUrl],
+      },
+    };
+  } catch (error) {
+    return {
+      title: "Post Not Found | Oppfy",
       description: "The requested post could not be found",
     };
   }
-
-  return {
-    title: `${post.authorUsername} opped ${post.recipientUsername}`,
-    description: post.caption ?? "No caption",
-    openGraph: {
-      title: `${post.authorUsername} opped ${post.recipientUsername}`,
-      description: post.caption ?? "No caption",
-      images: [
-        {
-          url: post.imageUrl,
-          width: 1200,
-          height: 630,
-          alt: `${post.authorUsername} opped ${post.recipientUsername}`,
-        },
-      ],
-      type: "article",
-      url: `https://www.oppfy.app/post/${post.postId}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${post.authorUsername} opped ${post.recipientUsername}`,
-      description: post.caption ?? "No caption",
-      images: [post.imageUrl],
-    },
-  };
 }
 
 // Main page component
 export default async function PostPage({ params }: Props) {
   let post;
+
   try {
     post = await api.post.getPostForNextJs({ postId: params.id });
   } catch (error) {
+    post = null;
+  }
+
+  if (!post) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-black">
         <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16">
@@ -113,9 +124,7 @@ export default async function PostPage({ params }: Props) {
     );
   }
 
-  const aspectRatio =
-    post?.height && post?.width ? post.height / post.width : 1;
-
+  const aspectRatio = post.height && post.width ? post.height / post.width : 1;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-black">
       <AnimatedPostPage post={post} aspectRatio={aspectRatio} />
