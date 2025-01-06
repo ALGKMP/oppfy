@@ -13,7 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput, BottomSheetView } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
@@ -99,50 +99,56 @@ const CaptionSheet = ({
   }, []);
 
   return (
-    <YStack flex={1}>
-      <YStack flex={1} padding="$4" gap="$4">
-        <XStack justifyContent="space-between">
-          <Text fontSize="$6" fontWeight="bold">
-            Caption
-          </Text>
-          <XStack alignItems="center" gap="$2">
-            <Text fontSize="$3" color="$gray10">
-              {localDraftCaption?.length ?? 0}/255
+    <BottomSheetView style={{ flex: 1 }}>
+      <YStack flex={1}>
+        <YStack flex={1} padding="$4" gap="$4">
+          <XStack justifyContent="space-between">
+            <Text fontSize="$6" fontWeight="bold">
+              Caption
             </Text>
-            <TouchableOpacity onPress={() => setLocalDraftCaption("")}>
-              <Ionicons name="close-circle" size={20} color={theme.gray8.val} />
-            </TouchableOpacity>
+            <XStack alignItems="center" gap="$2">
+              <Text fontSize="$3" color="$gray10">
+                {localDraftCaption?.length ?? 0}/255
+              </Text>
+              <TouchableOpacity onPress={() => setLocalDraftCaption("")}>
+                <Ionicons
+                  name="close-circle"
+                  size={20}
+                  color={theme.gray8.val}
+                />
+              </TouchableOpacity>
+            </XStack>
           </XStack>
+          <BottomSheetTextInput
+            ref={inputRef}
+            placeholder="Write a caption..."
+            value={localDraftCaption}
+            onChangeText={setLocalDraftCaption}
+            multiline
+            maxLength={255}
+            style={{
+              fontWeight: "bold",
+              justifyContent: "flex-start",
+              color: theme.color.val,
+              backgroundColor: theme.gray5.val,
+              padding: 20,
+              borderRadius: 20,
+            }}
+          />
+        </YStack>
+        <XStack padding="$4" paddingBottom={insets.bottom}>
+          <Button
+            flex={1}
+            size="$5"
+            borderRadius="$7"
+            disabled={localDraftCaption === caption}
+            onPress={() => onSave(localDraftCaption)}
+          >
+            Save
+          </Button>
         </XStack>
-        <BottomSheetTextInput
-          ref={inputRef}
-          placeholder="Write a caption..."
-          value={localDraftCaption}
-          onChangeText={setLocalDraftCaption}
-          multiline
-          maxLength={255}
-          style={{
-            fontWeight: "bold",
-            justifyContent: "flex-start",
-            color: theme.color.val,
-            backgroundColor: theme.gray5.val,
-            padding: 20,
-            borderRadius: 20,
-          }}
-        />
       </YStack>
-      <XStack padding="$4" paddingBottom={insets.bottom}>
-        <Button
-          flex={1}
-          size="$5"
-          borderRadius="$7"
-          disabled={localDraftCaption === caption}
-          onPress={() => onSave(localDraftCaption)}
-        >
-          Save
-        </Button>
-      </XStack>
-    </YStack>
+    </BottomSheetView>
   );
 };
 

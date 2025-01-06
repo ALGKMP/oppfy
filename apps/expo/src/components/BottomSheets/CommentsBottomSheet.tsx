@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Dimensions, LayoutAnimation } from "react-native";
 import * as Haptics from "expo-haptics";
+import { BottomSheetFlashList, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 
@@ -13,7 +14,6 @@ import useRouteProfile from "~/hooks/useRouteProfile";
 import Comment from "./Comment";
 import type { CommentItem } from "./Comment";
 import TextInputWithAvatar from "./TextInputWithAvatar";
-import { BottomSheetFlashList, BottomSheetView } from "@gorhom/bottom-sheet";
 
 interface CommentsBottomSheetProps {
   postId: string;
@@ -75,6 +75,16 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     />
   );
 
+  const ListEmptyComponent = () => (
+    <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
+      <EmptyPlaceholder
+        title="No comments yet"
+        subtitle="Be the first to comment"
+        icon={<MessageCircleOff />}
+      />
+    </View>
+  );
+
   return (
     <BottomSheetView style={{ flex: 1 }}>
       {isLoadingComments ? (
@@ -87,17 +97,10 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
             </YStack>
           </XStack>
         </ScrollView>
-      ) : commentItems.length === 0 ? (
-        <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
-          <EmptyPlaceholder
-            title="No comments yet"
-            subtitle="Be the first to comment"
-            icon={<MessageCircleOff />}
-          />
-        </View>
       ) : (
         <BottomSheetFlashList
           // ref={listRef}
+          ListEmptyComponent={ListEmptyComponent}
           data={commentItems}
           renderItem={renderComment}
           estimatedItemSize={83}

@@ -11,6 +11,7 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import { BottomSheetView } from "@gorhom/bottom-sheet";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
 import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
 import { MotiView } from "moti";
@@ -322,125 +323,132 @@ export const WelcomeBottomSheet = () => {
   };
 
   return (
-    <YStack
-      flex={1}
-      backgroundColor="$primary"
-      padding="$4"
-      paddingTop="$8"
-      position="relative"
-      borderTopLeftRadius="$8"
-      borderTopRightRadius="$8"
-      overflow="hidden"
-      gap="$6"
-    >
-      {/* Decorative background elements */}
-      <AnimatedSvg
-        style={[{ position: "absolute", top: -100, right: -100 }, rStyle]}
-        width={400}
-        height={400}
-      >
-        <Defs>
-          <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={STARTING_COLOR} stopOpacity="0.3" />
-            <Stop offset="1" stopColor={ENDING_COLOR} stopOpacity="0.3" />
-          </LinearGradient>
-        </Defs>
-        <AnimatedPath
-          d="M100,100 Q150,50 200,100 T300,100 Q350,150 300,200 T200,200 Q150,250 100,200 T0,100"
-          fill="url(#grad)"
-          stroke={ENDING_COLOR}
-          animatedProps={animatedProps}
-        />
-      </AnimatedSvg>
-
-      {/* Header */}
-      <YStack alignItems="center" gap="$2">
-        <Circle size={120} backgroundColor="$gray6" opacity={0.9}>
-          <MotiView
-            from={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", delay: 300 }}
-          >
-            <Text fontSize={70}>📸</Text>
-          </MotiView>
-        </Circle>
-        <H3
-          color="white"
-          textAlign="center"
-          fontSize={32}
-          fontWeight="bold"
-          opacity={0.95}
-        >
-          Welcome to Oppfy
-        </H3>
-        <Paragraph color="white" textAlign="center" opacity={0.8} fontSize={16}>
-          Where friends capture your authentic moments
-        </Paragraph>
-      </YStack>
-
-      {/* Features */}
-      <YStack paddingHorizontal="$2" gap="$6">
-        <MotiView
-          from={{ translateX: -100, opacity: 0 }}
-          animate={{ translateX: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 400 }}
-        >
-          <Feature
-            icon="🤳"
-            title="Friends Are Your Photographers"
-            description="Let your friends capture and post your candid moments - no selfies allowed!"
-          />
-        </MotiView>
-
-        <MotiView
-          from={{ translateX: 100, opacity: 0 }}
-          animate={{ translateX: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 600 }}
-        >
-          <Feature
-            icon="✨"
-            title="Real & Unfiltered"
-            description="Experience life through others' eyes - raw, authentic, and spontaneous"
-          />
-        </MotiView>
-
-        <MotiView
-          from={{ translateX: -100, opacity: 0 }}
-          animate={{ translateX: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 800 }}
-        >
-          <Feature
-            icon="🎭"
-            title="No More Perfect Poses"
-            description="Say goodbye to staged photos - embrace the beauty of natural moments"
-          />
-        </MotiView>
-      </YStack>
-
-      {/* Get Started Button */}
+    <BottomSheetView style={{ flex: 1 }}>
       <YStack
-        position="absolute"
-        bottom={40}
-        left={0}
-        right={0}
-        paddingHorizontal="$4"
+        flex={1}
+        backgroundColor="$primary"
+        padding="$4"
+        paddingTop="$8"
+        position="relative"
+        borderTopLeftRadius="$8"
+        borderTopRightRadius="$8"
+        overflow="hidden"
+        gap="$6"
       >
-        <MotiView
-          from={{ translateY: 100, opacity: 0 }}
-          animate={{ translateY: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 1000 }}
+        {/* Decorative background elements */}
+        <AnimatedSvg
+          style={[{ position: "absolute", top: -100, right: -100 }, rStyle]}
+          width={400}
+          height={400}
         >
-          <Button
-            size="$6"
-            variant="white"
-            onPress={handleDismissWelcome}
+          <Defs>
+            <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor={STARTING_COLOR} stopOpacity="0.3" />
+              <Stop offset="1" stopColor={ENDING_COLOR} stopOpacity="0.3" />
+            </LinearGradient>
+          </Defs>
+          <AnimatedPath
+            d="M100,100 Q150,50 200,100 T300,100 Q350,150 300,200 T200,200 Q150,250 100,200 T0,100"
+            fill="url(#grad)"
+            stroke={ENDING_COLOR}
+            animatedProps={animatedProps}
+          />
+        </AnimatedSvg>
+
+        {/* Header */}
+        <YStack alignItems="center" gap="$2">
+          <Circle size={120} backgroundColor="$gray6" opacity={0.9}>
+            <MotiView
+              from={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", delay: 300 }}
+            >
+              <Text fontSize={70}>📸</Text>
+            </MotiView>
+          </Circle>
+          <H3
+            color="white"
+            textAlign="center"
+            fontSize={32}
             fontWeight="bold"
+            opacity={0.95}
           >
-            Let's Get Started
-          </Button>
-        </MotiView>
+            Welcome to Oppfy
+          </H3>
+          <Paragraph
+            color="white"
+            textAlign="center"
+            opacity={0.8}
+            fontSize={16}
+          >
+            Where friends capture your authentic moments
+          </Paragraph>
+        </YStack>
+
+        {/* Features */}
+        <YStack paddingHorizontal="$2" gap="$6">
+          <MotiView
+            from={{ translateX: -100, opacity: 0 }}
+            animate={{ translateX: 0, opacity: 1 }}
+            transition={{ type: "spring", delay: 400 }}
+          >
+            <Feature
+              icon="🤳"
+              title="Friends Are Your Photographers"
+              description="Let your friends capture and post your candid moments - no selfies allowed!"
+            />
+          </MotiView>
+
+          <MotiView
+            from={{ translateX: 100, opacity: 0 }}
+            animate={{ translateX: 0, opacity: 1 }}
+            transition={{ type: "spring", delay: 600 }}
+          >
+            <Feature
+              icon="✨"
+              title="Real & Unfiltered"
+              description="Experience life through others' eyes - raw, authentic, and spontaneous"
+            />
+          </MotiView>
+
+          <MotiView
+            from={{ translateX: -100, opacity: 0 }}
+            animate={{ translateX: 0, opacity: 1 }}
+            transition={{ type: "spring", delay: 800 }}
+          >
+            <Feature
+              icon="🎭"
+              title="No More Perfect Poses"
+              description="Say goodbye to staged photos - embrace the beauty of natural moments"
+            />
+          </MotiView>
+        </YStack>
+
+        {/* Get Started Button */}
+        <YStack
+          position="absolute"
+          bottom={40}
+          left={0}
+          right={0}
+          paddingHorizontal="$4"
+        >
+          <MotiView
+            from={{ translateY: 100, opacity: 0 }}
+            animate={{ translateY: 0, opacity: 1 }}
+            transition={{ type: "spring", delay: 1000 }}
+          >
+            <Button
+              size="$6"
+              variant="white"
+              onPress={handleDismissWelcome}
+              fontWeight="bold"
+            >
+              Let's Get Started
+            </Button>
+          </MotiView>
+        </YStack>
       </YStack>
-    </YStack>
+    </BottomSheetView>
   );
 };
 
