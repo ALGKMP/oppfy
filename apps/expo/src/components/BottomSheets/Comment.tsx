@@ -83,11 +83,11 @@ const Comment = ({
       <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
         <XStack gap="$3" alignItems="flex-start">
           <TouchableOpacity onPress={onPressProfile}>
-            {/* <Avatar
+            <Avatar
               source={comment.profilePictureUrl}
               size={46}
               recyclingKey={comment.id}
-            /> */}
+            />
           </TouchableOpacity>
           <YStack gap="$2" width="100%" flex={1}>
             <XStack gap="$2">
