@@ -73,6 +73,8 @@ export const user = pgTable("user", {
     .default("public")
     .notNull(),
   phoneNumber: text("phone_number").notNull().unique(),
+  hasPendingPosts: boolean("has_pending_posts").default(false).notNull(),
+  pendingPostsCount: integer("pending_posts_count").default(0).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

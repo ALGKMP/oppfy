@@ -104,19 +104,30 @@ export const PendingUserService = {
     return post[0];
   },
 
-  async getPendingUserPosts(pendingUserId: string) {
-    return db.query.postOfUserNotOnApp.findMany({
-      where: eq(postOfUserNotOnApp.pendingUserId, pendingUserId),
-      with: {
-        author: {
-          with: {
-            profile: true,
-          },
-        },
-      },
+  async checkForPendingPosts(phoneNumber: string) {
+    const pendingUserRecord = await db.query.pendingUser.findFirst({
+      where: eq(pendingUser.phoneNumber, phoneNumber),
     });
+
+    if (!pendingUserRecord) {
+      return {
+        hasPendingPosts: false,
+        pendingUserId: null,
+      };
+    }
+
+    const posts = await db.query.postOfUserNotOnApp.findMany({
+      where: eq(postOfUserNotOnApp.pendingUserId, pendingUserRecord.id),
+    });
+
+    return {
+      hasPendingPosts: posts.length > 0,
+      pendingUserId: pendingUserRecord.id,
+      postCount: posts.length,
+    };
   },
 
+  // This will be called later when the user reviews their posts
   async migratePendingUserPosts({
     pendingUserId,
     newUserId,
@@ -175,17 +186,5 @@ export const PendingUserService = {
 
       return migratedPosts;
     });
-  },
-
-  async getPendingPostsForPhoneNumber(phoneNumber: string) {
-    const pendingUserRecord = await db.query.pendingUser.findFirst({
-      where: eq(pendingUser.phoneNumber, phoneNumber),
-    });
-
-    if (!pendingUserRecord) {
-      return [];
-    }
-
-    return this.getPendingUserPosts(pendingUserRecord.id);
   },
 };

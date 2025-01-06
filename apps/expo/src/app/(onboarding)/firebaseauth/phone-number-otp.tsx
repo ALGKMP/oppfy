@@ -19,7 +19,6 @@ import {
   YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
-import { usePendingPosts } from "~/hooks/auth/usePendingPosts";
 import { api } from "~/utils/api";
 
 // ! This is for testing purposes only, do not use in production
@@ -63,18 +62,21 @@ const isFirebaseError = (
 const PhoneNumberOTP = () => {
   const router = useRouter();
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
-  const { checkAndMigratePendingPosts } = usePendingPosts();
 
   const { verifyPhoneNumberOTP } = useSession();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [migratingPosts, setMigratingPosts] = useState(false);
+  const [checkingPosts, setCheckingPosts] = useState(false);
 
   const createUser = api.user.createUser.useMutation();
   const userOnboardingCompletedMutation =
     api.user.checkOnboardingComplete.useMutation();
+  const checkPendingPosts = api.pendingUser.checkPendingPosts.useQuery(
+    { phoneNumber },
+    { enabled: false },
+  );
 
   const isValidPhoneNumberOTP = useMemo(
     () =>
@@ -93,29 +95,43 @@ const PhoneNumberOTP = () => {
       phoneNumber,
     });
 
-    // Check and migrate any pending posts after creating the user
-    setMigratingPosts(true);
+    // Check for pending posts but don't migrate them yet
+    setCheckingPosts(true);
     try {
-      await checkAndMigratePendingPosts(phoneNumber);
+      const result = await checkPendingPosts.refetch();
+      // Store the pending posts info for later if needed
+      if (result.data?.hasPendingPosts) {
+        // TODO: Store this information to show the review screen later
+        console.log(
+          `User has ${result.data.postCount} pending posts to review`,
+        );
+      }
     } catch (error) {
-      console.error("Error migrating pending posts:", error);
-      // Don't block the flow if migration fails
+      console.error("Error checking pending posts:", error);
+    } finally {
+      setCheckingPosts(false);
     }
-    setMigratingPosts(false);
 
     router.replace("/user-info/welcome");
   };
 
   const handleExistingUser = async () => {
-    // Check and migrate any pending posts before proceeding
-    setMigratingPosts(true);
+    // Check for pending posts but don't migrate them yet
+    setCheckingPosts(true);
     try {
-      await checkAndMigratePendingPosts(phoneNumber);
+      const result = await checkPendingPosts.refetch();
+      // Store the pending posts info for later if needed
+      if (result.data?.hasPendingPosts) {
+        // TODO: Store this information to show the review screen later
+        console.log(
+          `User has ${result.data.postCount} pending posts to review`,
+        );
+      }
     } catch (error) {
-      console.error("Error migrating pending posts:", error);
-      // Don't block the flow if migration fails
+      console.error("Error checking pending posts:", error);
+    } finally {
+      setCheckingPosts(false);
     }
-    setMigratingPosts(false);
 
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
@@ -217,9 +233,9 @@ const PhoneNumberOTP = () => {
       <OnboardingButton
         marginHorizontal="$-4"
         onPress={onSubmit}
-        disabled={!isValidPhoneNumberOTP || isLoading || migratingPosts}
+        disabled={!isValidPhoneNumberOTP || isLoading || checkingPosts}
       >
-        {isLoading || migratingPosts ? <Spinner /> : "Verify Code"}
+        {isLoading || checkingPosts ? <Spinner /> : "Verify Code"}
       </OnboardingButton>
     </ScreenView>
   );

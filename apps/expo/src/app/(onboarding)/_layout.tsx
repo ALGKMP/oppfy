@@ -40,6 +40,14 @@ const OnboardingLayout = () => (
     />
 
     <Stack.Screen
+      name="review-pending-posts"
+      options={{
+        animation: "fade",
+        gestureEnabled: false,
+      }}
+    />
+
+    <Stack.Screen
       name="user-info/welcome"
       options={{
         animation: "fade",

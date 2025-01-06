@@ -44,26 +44,14 @@ export const pendingUserRouter = createTRPCRouter({
       return post;
     }),
 
-  getPendingUserPosts: protectedProcedure
-    .input(
-      z.object({
-        pendingUserId: z.string(),
-      }),
-    )
-    .query(async ({ input }) => {
-      return PendingUserService.getPendingUserPosts(input.pendingUserId);
-    }),
-
-  getPendingPostsByPhoneNumber: publicProcedure
+  checkPendingPosts: publicProcedure
     .input(
       z.object({
         phoneNumber: z.string(),
       }),
     )
     .query(async ({ input }) => {
-      return PendingUserService.getPendingPostsForPhoneNumber(
-        input.phoneNumber,
-      );
+      return PendingUserService.checkForPendingPosts(input.phoneNumber);
     }),
 
   migratePendingPosts: protectedProcedure
