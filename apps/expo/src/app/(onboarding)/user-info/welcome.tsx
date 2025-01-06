@@ -1,17 +1,17 @@
 import React, { useEffect } from "react";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, useWindowDimensions } from "react-native";
 import * as Haptics from "expo-haptics";
 import { SplashScreen, useNavigation, useRouter } from "expo-router";
-import { X } from "@tamagui/lucide-icons";
+import { AnimatePresence } from "@tamagui/animate-presence";
+import { LinearGradient } from "@tamagui/linear-gradient";
+import { ArrowRight, Sparkles, X } from "@tamagui/lucide-icons";
 
 import {
-  Group,
-  H3,
-  H4,
+  Circle,
+  H1,
   OnboardingButton,
   Paragraph,
   ScreenView,
-  Separator,
   Text,
   useAlertDialogController,
   XStack,
@@ -22,9 +22,9 @@ import { useSession } from "~/contexts/SessionContext";
 const Welcome = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const { width } = useWindowDimensions();
 
   const alertDialog = useAlertDialogController();
-
   const { signOut } = useSession();
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const Welcome = () => {
             }
           }}
         >
-          <X />
+          <X color="$gray11" />
         </TouchableOpacity>
       ),
     });
@@ -61,72 +61,127 @@ const Welcome = () => {
 
   return (
     <ScreenView
+      backgroundColor="$background"
       paddingBottom={0}
       safeAreaEdges={["bottom"]}
       justifyContent="space-between"
+      animation="bouncy"
     >
-      <YStack flex={1} gap="$6">
-        <H3 textAlign="center">
-          Welcome to OPPFY, a place where roles are reversed.
-        </H3>
+      <YStack
+        flex={1}
+        gap="$8"
+        justifyContent="center"
+        alignItems="center"
+        paddingHorizontal="$4"
+      >
+        <AnimatePresence>
+          {/* Main Content */}
+          <YStack
+            animation="bouncy"
+            enterStyle={{
+              y: 20,
+              opacity: 0,
+            }}
+            y={0}
+            opacity={1}
+            gap="$12"
+            maxWidth={600}
+            alignItems="center"
+          >
+            {/* Icon */}
+            <YStack
+              animation="bouncy"
+              enterStyle={{ scale: 0.8, opacity: 0 }}
+              pressStyle={{ scale: 0.97 }}
+            >
+              <Circle
+                size={width * 0.38}
+                backgroundColor="$background"
+                borderWidth={1.5}
+                borderColor="$primary"
+                shadowColor="$primary"
+                shadowOpacity={0.15}
+                shadowRadius={40}
+                pressStyle={{
+                  scale: 1.02,
+                  backgroundColor: "$backgroundHover",
+                }}
+              >
+                <Circle
+                  size={width * 0.32}
+                  backgroundColor="$background"
+                  borderWidth={1.5}
+                  borderColor="$primary"
+                  opacity={0.7}
+                >
+                  <Circle
+                    size={width * 0.2}
+                    backgroundColor="$primary"
+                    shadowColor="$primary"
+                    shadowOpacity={0.5}
+                    shadowRadius={20}
+                  >
+                    <Sparkles size={width * 0.1} color="white" />
+                  </Circle>
+                </Circle>
+              </Circle>
+            </YStack>
 
-        <Group orientation="vertical" gap="$4">
-          <Group.Item>
-            <ListItem
-              emoji="🤝"
-              title="Mutual OPP-eration"
-              subTitle="Embrace the chaos as you and your friends take turns posting for each other."
-            />
-          </Group.Item>
-          <Separator />
-          <Group.Item>
-            <ListItem
-              emoji="📷"
-              title="Unfiltered Exposure"
-              subTitle="Let your squad capture your most real, unedited moments - no filters needed!"
-            />
-          </Group.Item>
-          <Separator />
-          <Group.Item>
-            <ListItem
-              emoji="💬"
-              title="Authentic Engagement"
-              subTitle="Comment, react, and vibe with your friends' posts to keep the conversation flowing."
-            />
-          </Group.Item>
-          <Separator />
-          <Group.Item>
-            <ListItem
-              emoji="🎉"
-              title="Living on the Edge"
-              subTitle="From embarrassing bloopers to epic adventures, your feed will be a rollercoaster ride."
-            />
-          </Group.Item>
-        </Group>
+            {/* Text Content */}
+            <YStack gap="$4" alignItems="center">
+              <H1
+                textAlign="center"
+                color="$gray12"
+                size="$9"
+                letterSpacing={-1}
+                animation="bouncy"
+                enterStyle={{ y: -20, opacity: 0 }}
+              >
+                Hi there!
+              </H1>
+
+              <Paragraph
+                textAlign="center"
+                color="$gray11"
+                size="$6"
+                maxWidth={320}
+                animation="bouncy"
+              >
+                Let's get your profile set up in just a few quick steps
+              </Paragraph>
+            </YStack>
+          </YStack>
+        </AnimatePresence>
       </YStack>
 
-      <OnboardingButton marginHorizontal="$-4" onPress={onSubmit}>
-        Become an OPP!
+      <OnboardingButton
+        marginHorizontal="$-4"
+        onPress={onSubmit}
+        // animation="bouncy"
+        // enterStyle={{
+        //   y: 20,
+        //   opacity: 0,
+        // }}
+        // y={0}
+        // opacity={1}
+        // backgroundColor="$primary"
+        // pressStyle={{
+        //   opacity: 0.9,
+        //   scale: 0.98,
+        // }}
+        // scale={1}
+        // shadowColor="$primary"
+        // shadowOpacity={0.2}
+        // shadowRadius={20}
+      >
+        {/* <XStack gap="$3" alignItems="center">
+          <Text color="white" fontWeight="600" fontSize="$6"> */}
+            Get Started
+          {/* </Text>
+          <ArrowRight size={20} color="white" />
+        </XStack> */}
       </OnboardingButton>
     </ScreenView>
-  );
-};
-
-interface ListItemProp {
-  emoji: string;
-  title: string;
-  subTitle: string;
-}
-
-const ListItem = ({ emoji, title, subTitle }: ListItemProp) => {
-  return (
-    <XStack alignItems="center" gap="$4">
-      <Text fontSize={42}>{emoji}</Text>
-      <YStack flex={1} gap>
-        <H4>{title}</H4>
-        <Paragraph color="$gray11">{subTitle}</Paragraph>
-      </YStack>
-    </XStack>
   );
 };
 
