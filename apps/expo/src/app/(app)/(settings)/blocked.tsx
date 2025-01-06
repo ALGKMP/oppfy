@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -75,77 +75,67 @@ const Blocked = () => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const blockedUsersItems = useMemo(() => {
-    return blockedUsersData?.pages.flatMap((page) => page.items) ?? [];
-  }, [blockedUsersData]);
+  const blockedUsersItems =
+    blockedUsersData?.pages.flatMap((page) => page.items) ?? [];
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch({
     data: blockedUsersItems,
     keys: ["name", "username"],
   });
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+  };
 
-  const handleUnblock = useCallback(
-    async (userId: string) => {
-      await unblockUser.mutateAsync({ userId });
-    },
-    [unblockUser],
-  );
+  const handleUnblock = async (userId: string) => {
+    await unblockUser.mutateAsync({ userId });
+  };
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
-  }, [refetch]);
+  };
 
-  const renderListItem = useCallback(
-    (item: BlockedUserItem) => (
-      <MediaListItem
-        title={item.username}
-        subtitle={item.name}
-        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-        primaryAction={{
-          label: "Unblock",
-          icon: UserRoundX,
-          onPress: () =>
-            actionSheet.show({
-              title: "Unblock User",
-              subtitle: `Are you sure you want to unblock ${item.username}?`,
-              imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
-              buttonOptions: [
-                {
-                  text: "Unblock",
-                  textProps: { color: "$red11" },
-                  onPress: () => void handleUnblock(item.userId),
-                },
-              ],
-            }),
-        }}
+  const renderListItem = (item: BlockedUserItem) => (
+    <MediaListItem
+      title={item.username}
+      subtitle={item.name}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+      primaryAction={{
+        label: "Unblock",
+        icon: UserRoundX,
+        onPress: () =>
+          actionSheet.show({
+            title: "Unblock User",
+            subtitle: `Are you sure you want to unblock ${item.username}?`,
+            imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+            buttonOptions: [
+              {
+                text: "Unblock",
+                textProps: { color: "$red11" },
+                onPress: () => void handleUnblock(item.userId),
+              },
+            ],
+          }),
+      }}
+    />
+  );
+
+  const ListHeaderComponent = () => (
+    <YStack gap="$4">
+      <SearchInput
+        placeholder="Search blocked users..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onClear={() => setSearchQuery("")}
       />
-    ),
-    [actionSheet, handleUnblock],
+    </YStack>
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <YStack gap="$4">
-        <SearchInput
-          placeholder="Search blocked users..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={() => setSearchQuery("")}
-        />
-      </YStack>
-    ),
-    [searchQuery, setSearchQuery],
-  );
-
-  const ListEmptyComponent = useCallback(() => {
+  const ListEmptyComponent = () => {
     if (isLoading) {
       return (
         <YStack gap="$4">
@@ -177,7 +167,7 @@ const Blocked = () => {
     }
 
     return null;
-  }, [isLoading, blockedUsersItems.length, filteredItems.length]);
+  };
 
   return (
     <FlashList
