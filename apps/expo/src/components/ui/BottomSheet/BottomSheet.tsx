@@ -64,7 +64,6 @@ export const BottomSheet = ({
         backgroundColor: theme.gray4.val,
       }}
       topInset={insets.top}
-      bottomInset={insets.bottom}
       {...props}
     >
       {children}
