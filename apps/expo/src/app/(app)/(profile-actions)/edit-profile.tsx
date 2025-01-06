@@ -7,6 +7,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { BookLock } from "@tamagui/lucide-icons";
 import { useTheme } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
@@ -16,7 +17,9 @@ import {
   ScreenView,
   Separator,
   Spinner,
+  Switch,
   Text,
+  useActionSheetController,
   View,
   XStack,
   YStack,
@@ -148,12 +151,44 @@ const EditProfile = () => {
     optimisticallyUpdate: true,
   });
   const { show, hide } = useBottomSheetController();
+  const actionSheet = useActionSheetController();
 
   /* -------------------------------------------
      Pull the user's existing data from the cache
   -------------------------------------------- */
   const utils = api.useUtils();
   const defaultValues = utils.profile.getFullProfileSelf.getData();
+
+  // Get privacy setting
+  const { data: privacySetting } = api.user.getPrivacySetting.useQuery(
+    undefined,
+    {
+      initialData: "public",
+    },
+  );
+
+  // Mutation for privacy setting
+  const updatePrivacySetting = api.user.updatePrivacySetting.useMutation({
+    onMutate: async (newPrivacySettings) => {
+      await utils.user.getPrivacySetting.cancel();
+      const prevData = utils.user.getPrivacySetting.getData();
+      if (prevData === undefined) return;
+
+      utils.user.getPrivacySetting.setData(
+        undefined,
+        newPrivacySettings.privacy,
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newPrivacySettings, ctx) => {
+      if (ctx === undefined) return;
+      utils.user.getPrivacySetting.setData(undefined, ctx.prevData);
+    },
+    onSettled: async () => {
+      await utils.user.getPrivacySetting.invalidate();
+    },
+  });
 
   // Locally track the user's profile fields
   const [name, setName] = useState(defaultValues?.name ?? "");
@@ -239,6 +274,34 @@ const EditProfile = () => {
         />
       ),
     });
+  };
+
+  const handlePrivacySettingUpdate = async (
+    newPrivacySetting: "private" | "public",
+  ) => {
+    await updatePrivacySetting.mutateAsync({
+      privacy: newPrivacySetting,
+    });
+  };
+
+  const onPrivacyChange = async (checked: boolean) => {
+    const newPrivacySetting = checked ? "private" : "public";
+
+    if (newPrivacySetting === "private") {
+      actionSheet.show({
+        title: "Switch to private account?",
+        subtitle:
+          "Only your followers will be able to see your photos and videos.",
+        buttonOptions: [
+          {
+            text: "Switch to private",
+            onPress: async () => await handlePrivacySettingUpdate("private"),
+          },
+        ],
+      });
+    } else {
+      await handlePrivacySettingUpdate("public");
+    }
   };
 
   return (
@@ -387,6 +450,38 @@ const EditProfile = () => {
                 size={24}
                 color={theme.gray10.val}
               />
+            </XStack>
+          </YStack>
+        </CardContainer>
+
+        {/* Privacy Settings Card */}
+        <CardContainer padding="$4">
+          <YStack gap="$4">
+            <H5>Privacy Settings</H5>
+            <XStack justifyContent="space-between" alignItems="center">
+              <XStack flex={1} alignItems="center" gap="$3">
+                <BookLock size={24} color={theme.gray10.val} />
+                <YStack flex={1}>
+                  <Text
+                    fontSize="$5"
+                    fontWeight="500"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    Private Account
+                  </Text>
+                  <Text color="$gray10">
+                    Only followers can see your content
+                  </Text>
+                </YStack>
+              </XStack>
+              <Switch
+                size="$3"
+                onCheckedChange={onPrivacyChange}
+                checked={privacySetting === "private"}
+              >
+                <Switch.Thumb animation="quick" />
+              </Switch>
             </XStack>
           </YStack>
         </CardContainer>
