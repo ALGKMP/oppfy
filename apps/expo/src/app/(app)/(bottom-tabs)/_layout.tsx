@@ -12,7 +12,14 @@ import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
+import {
+  Camera,
+  Circle as CircleIcon,
+  Home,
+  Inbox,
+  Search,
+  User2,
+} from "@tamagui/lucide-icons";
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
@@ -357,40 +364,125 @@ export const WelcomeBottomSheet = ({
       </AnimatedSvg>
 
       {/* Header */}
-      <YStack alignItems="center" gap="$2">
-        <Circle size={120} backgroundColor="$gray6" opacity={0.9}>
-          <MotiView
-            from={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{
-              scale: {
-                type: "spring",
-                delay: 300,
-                damping: 12,
-                stiffness: 100,
-              },
-              opacity: {
-                type: "timing",
-                duration: 600,
-                delay: 300,
-              },
-            }}
-          >
-            <Text fontSize={70}>📸</Text>
-          </MotiView>
-        </Circle>
-        <H3
-          color="white"
-          textAlign="center"
-          fontSize={32}
-          fontWeight="bold"
-          opacity={0.95}
+      <YStack alignItems="center" gap="$4">
+        <MotiView
+          from={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            scale: {
+              type: "spring",
+              delay: 300,
+              damping: 12,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 300,
+            },
+          }}
         >
-          Welcome to Oppfy
-        </H3>
-        <Paragraph color="white" textAlign="center" opacity={0.8} fontSize={16}>
-          Where friends capture your authentic moments
-        </Paragraph>
+          <YStack
+            alignItems="center"
+            justifyContent="center"
+            position="relative"
+          >
+            {/* Camera Body */}
+            <Circle
+              size={70}
+              backgroundColor="white"
+              borderWidth={3}
+              borderColor="$primary"
+              shadowColor="$primary"
+              shadowOpacity={0.3}
+              shadowRadius={10}
+            >
+              {/* Camera Lens */}
+              <Circle
+                size={40}
+                backgroundColor="$primary"
+                borderWidth={2}
+                borderColor="white"
+                shadowColor="$primary"
+                shadowOpacity={0.2}
+                shadowRadius={5}
+              >
+                {/* Inner Lens Ring */}
+                <Circle size={25} backgroundColor="white" opacity={0.3} />
+              </Circle>
+            </Circle>
+
+            {/* Camera Flash */}
+            <Circle
+              position="absolute"
+              top={5}
+              right={5}
+              size={15}
+              backgroundColor="white"
+              borderWidth={2}
+              borderColor="$primary"
+              animation="bouncy"
+              enterStyle={{ scale: 0.5, opacity: 0 }}
+              exitStyle={{ scale: 0.5, opacity: 0 }}
+              pressStyle={{ scale: 0.9 }}
+            />
+
+            {/* Animated Sparkle Effects */}
+            <MotiView
+              from={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
+              transition={{
+                loop: true,
+                repeatReverse: false,
+                duration: 2000,
+              }}
+              style={{
+                position: "absolute",
+                top: -10,
+                right: -10,
+              }}
+            >
+              <CircleIcon size={15} color="white" />
+            </MotiView>
+            <MotiView
+              from={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
+              transition={{
+                loop: true,
+                repeatReverse: false,
+                duration: 2000,
+                delay: 500,
+              }}
+              style={{
+                position: "absolute",
+                bottom: -5,
+                left: -5,
+              }}
+            >
+              <CircleIcon size={12} color="white" />
+            </MotiView>
+          </YStack>
+        </MotiView>
+
+        <YStack gap="$2">
+          <H3
+            color="white"
+            textAlign="center"
+            fontSize={32}
+            fontWeight="bold"
+            opacity={0.95}
+          >
+            Welcome to Oppfy
+          </H3>
+          <Paragraph
+            color="white"
+            textAlign="center"
+            opacity={0.8}
+            fontSize={16}
+          >
+            Where friends capture your authentic moments
+          </Paragraph>
+        </YStack>
       </YStack>
 
       {/* Features */}
