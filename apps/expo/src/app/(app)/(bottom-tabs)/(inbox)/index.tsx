@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
@@ -59,11 +59,8 @@ const Inbox = () => {
     },
   );
 
-  // Flatten the paginated data into a single array
-  const notificationItems = useMemo(
-    () => notificationsData?.pages.flatMap((page) => page.items) ?? [],
-    [notificationsData],
-  );
+  const notificationItems =
+    notificationsData?.pages.flatMap((page) => page.items) ?? [];
 
   const followUser = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
@@ -109,17 +106,17 @@ const Inbox = () => {
     },
   });
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+  };
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
     await Promise.all([refetchNotifications(), refetchRequestCount()]);
     setRefreshing(false);
-  }, [refetchNotifications, refetchRequestCount]);
+  };
 
   const getNotificationMessage = (item: NotificationItem) => {
     switch (item.eventType) {
@@ -167,24 +164,21 @@ const Inbox = () => {
     }
   };
 
-  const renderListItem = useCallback(
-    ({ item }: { item: NotificationItem }) => (
-      <MediaListItem
-        verticalText
-        title={item.username}
-        subtitle={getNotificationMessage(item)}
-        caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
-        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-        primaryAction={renderActionButton(item)}
-        onPress={() =>
-          routeProfile({ userId: item.userId, username: item.username })
-        }
-      />
-    ),
-    [routeProfile, followUser],
+  const renderListItem = ({ item }: { item: NotificationItem }) => (
+    <MediaListItem
+      verticalText
+      title={item.username}
+      subtitle={getNotificationMessage(item)}
+      caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+      primaryAction={renderActionButton(item)}
+      onPress={() =>
+        routeProfile({ userId: item.userId, username: item.username })
+      }
+    />
   );
 
-  const ListHeaderComponent = useMemo(() => {
+  const ListHeaderComponent = () => {
     const pendingRequests =
       (requestsCount?.followRequestCount ?? 0) +
       (requestsCount?.friendRequestCount ?? 0);
@@ -227,9 +221,9 @@ const Inbox = () => {
     }
 
     return null;
-  }, [requestsCount, router]);
+  };
 
-  const ListEmptyComponent = useCallback(() => {
+  const ListEmptyComponent = () => {
     if (isNotificationsLoading) {
       return (
         <YStack gap="$4">
@@ -252,7 +246,7 @@ const Inbox = () => {
     }
 
     return null;
-  }, [isNotificationsLoading]);
+  };
 
   return (
     <FlashList
