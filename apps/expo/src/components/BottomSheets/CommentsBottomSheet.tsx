@@ -87,34 +87,43 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
 
   return (
     <BottomSheetView style={{ flex: 1 }}>
-      {isLoadingComments ? (
-        <ScrollView>
-          <XStack padding="$3.5" gap="$2.5">
-            <Skeleton circular size={46} />
-            <YStack flex={1} gap="$2">
-              <Skeleton width="40%" height={20} />
-              <Skeleton width="100%" height={20} />
-            </YStack>
-          </XStack>
-        </ScrollView>
-      ) : commentItems.length === 0 ? (
-        <ListEmptyComponent />
-      ) : (
-        <BottomSheetFlashList
-          // ref={listRef}
-          data={commentItems}
-          renderItem={renderComment}
-          estimatedItemSize={83}
-          onEndReached={loadMoreComments}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id.toString()}
-          estimatedListSize={{
-            width: Dimensions.get("window").width,
-            height: Dimensions.get("window").height,
-          }}
-        />
-      )}
-      <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
+      <View flex={1}>
+        {isLoadingComments ? (
+          <>
+            {Array.from({ length: 20 }).map((_, index) => (
+              <XStack
+                padding="$3.5"
+                gap="$2.5"
+                key={`skeleton-on-comments${index}-${props.postId}`}
+              >
+                <Skeleton circular size={46} />
+                <YStack flex={1} gap="$2">
+                  <Skeleton width="40%" height={20} />
+                  <Skeleton width="100%" height={20} />
+                </YStack>
+              </XStack>
+            ))}
+          </>
+        ) : commentItems.length === 0 ? (
+          <ListEmptyComponent />
+        ) : (
+          // <BottomSheetFlashList
+          <FlashList
+            ref={listRef}
+            data={commentItems}
+            renderItem={renderComment}
+            estimatedItemSize={83}
+            onEndReached={loadMoreComments}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item) => item.id.toString()}
+            estimatedListSize={{
+              width: Dimensions.get("window").width,
+              height: Dimensions.get("window").height,
+            }}
+          />
+        )}
+        <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
+      </View>
     </BottomSheetView>
   );
 });

@@ -4,7 +4,6 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { FlashList } from "@shopify/flash-list";
 import { SendHorizontal } from "@tamagui/lucide-icons";
 import { useTheme } from "tamagui";
 
