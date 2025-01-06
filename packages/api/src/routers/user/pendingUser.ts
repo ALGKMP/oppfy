@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-
 import { PendingUserService } from "../../services/user/pendingUser";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "../../trpc";
+import { TRPCError } from "@trpc/server";
 
 export const pendingUserRouter = createTRPCRouter({
   createPostForContact: protectedProcedure
@@ -28,6 +28,13 @@ export const pendingUserRouter = createTRPCRouter({
           name: input.contactName,
         },
       );
+
+      if (!pendingUserRecord) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Pending user not found",
+        });
+      }
 
       const post = await PendingUserService.createPostForPendingUser({
         authorId: ctx.session.user.id,

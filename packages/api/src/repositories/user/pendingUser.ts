@@ -97,14 +97,14 @@ export const PendingUserRepository = {
             .then((res) => res[0]);
 
           // Create notification
-          await tx.insert(schema.notifications).values({
+/*           await tx.insert(schema.notifications).values({
             senderId: newUserId,
             recipientId: pendingPost.authorId,
             eventType: "post",
             entityId: newPost.id,
             entityType: "post",
           });
-
+ */
           // Delete pending post
           await tx
             .delete(schema.postOfUserNotOnApp)
