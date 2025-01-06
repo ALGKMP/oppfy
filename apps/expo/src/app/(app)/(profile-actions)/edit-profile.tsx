@@ -201,42 +201,42 @@ const EditProfile = () => {
     show({
       title: FIELD_TITLES[field],
       children: (
-          <ProfileFieldSheet
-            fieldKey={field}
-            initialValue={currentValue}
-            maxLength={maxLength}
-            isMutating={isMutating}
-            onSave={async (newValue) => {
-              // Immediately update local states
-              let dataToUpdate = {
-                name,
-                username,
-                bio,
-              };
+        <ProfileFieldSheet
+          fieldKey={field}
+          initialValue={currentValue}
+          maxLength={maxLength}
+          isMutating={isMutating}
+          onSave={async (newValue) => {
+            // Immediately update local states
+            let dataToUpdate = {
+              name,
+              username,
+              bio,
+            };
 
-              if (field === "name") {
-                setName(newValue);
-                dataToUpdate.name = newValue;
-              }
-              if (field === "username") {
-                setUsername(newValue.toLowerCase());
-                dataToUpdate.username = newValue.toLowerCase();
-              }
-              if (field === "bio") {
-                setBio(newValue);
-                dataToUpdate.bio = newValue;
-              }
+            if (field === "name") {
+              setName(newValue);
+              dataToUpdate.name = newValue;
+            }
+            if (field === "username") {
+              setUsername(newValue.toLowerCase());
+              dataToUpdate.username = newValue.toLowerCase();
+            }
+            if (field === "bio") {
+              setBio(newValue);
+              dataToUpdate.bio = newValue;
+            }
 
-              try {
-                // Show a spinner while updating
-                await updateProfile.mutateAsync(dataToUpdate);
-              } catch (error) {
-                // handle error if needed
-              } finally {
-                hide();
-              }
-            }}
-          />
+            try {
+              // Show a spinner while updating
+              await updateProfile.mutateAsync(dataToUpdate);
+            } catch (error) {
+              // handle error if needed
+            } finally {
+              hide();
+            }
+          }}
+        />
       ),
     });
   };
@@ -298,7 +298,7 @@ const EditProfile = () => {
                   size={24}
                   color={theme.gray10.val}
                 />
-                <YStack>
+                <YStack flex={1}>
                   <Text
                     fontSize="$5"
                     fontWeight="500"
@@ -330,7 +330,7 @@ const EditProfile = () => {
                   size={24}
                   color={theme.gray10.val}
                 />
-                <YStack>
+                <YStack flex={1}>
                   <Text
                     fontSize="$5"
                     fontWeight="500"
@@ -362,7 +362,7 @@ const EditProfile = () => {
                   size={24}
                   color={theme.gray10.val}
                 />
-                <YStack>
+                <YStack flex={1}>
                   <Text
                     fontSize="$5"
                     fontWeight="500"
