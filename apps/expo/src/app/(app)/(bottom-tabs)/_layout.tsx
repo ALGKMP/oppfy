@@ -499,7 +499,7 @@ export const WelcomeBottomSheet = ({
             onPress={handleComplete}
             fontWeight="bold"
           >
-            Let's Get Opping
+            Let's Get Started
           </Button>
         </MotiView>
       </YStack>
