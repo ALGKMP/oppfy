@@ -97,10 +97,11 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
             </YStack>
           </XStack>
         </ScrollView>
+      ) : commentItems.length === 0 ? (
+        <ListEmptyComponent />
       ) : (
         <BottomSheetFlashList
           // ref={listRef}
-          ListEmptyComponent={ListEmptyComponent}
           data={commentItems}
           renderItem={renderComment}
           estimatedItemSize={83}
