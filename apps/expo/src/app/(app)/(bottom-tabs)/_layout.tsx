@@ -60,15 +60,18 @@ const BottomTabsLayout = () => {
     const hasSeenWelcome = storage.getBoolean(HAS_SEEN_WELCOME_KEY);
     const isDev = process.env.NODE_ENV === "development";
     if (isDev || !hasSeenWelcome) {
-      bottomSheet.show({
-        snapPoints: ["100%"],
-        headerShown: false,
-        enableDismissOnClose: false,
-        enablePanDownToClose: false,
-        enableHandlePanningGesture: false,
-        enableContentPanningGesture: false,
-        children: <WelcomeBottomSheet />,
-      });
+      // 1 second delay
+      setTimeout(() => {
+        bottomSheet.show({
+          snapPoints: ["100%"],
+          headerShown: false,
+          enableDismissOnClose: false,
+          enablePanDownToClose: false,
+          enableHandlePanningGesture: false,
+          enableContentPanningGesture: false,
+          children: <WelcomeBottomSheet onComplete={handleDismissWelcome} />,
+        });
+      }, 1000);
     }
   }, []);
 
@@ -277,17 +280,20 @@ const Feature = ({
   </YStack>
 );
 
-export const WelcomeBottomSheet = () => {
+export const WelcomeBottomSheet = ({
+  onComplete,
+}: {
+  onComplete: () => void;
+}) => {
   const theme = useTheme();
-  const bottomSheet = useBottomSheetController();
   const rotation = useSharedValue(0);
   const scale = useSharedValue(1);
 
   // Create a pulsing animation
   useEffect(() => {
     scale.value = withRepeat(
-      withTiming(1.2, {
-        duration: 2000,
+      withTiming(1.15, {
+        duration: 3000,
         easing: Easing.inOut(Easing.ease),
       }),
       -1,
@@ -295,7 +301,7 @@ export const WelcomeBottomSheet = () => {
     );
     rotation.value = withRepeat(
       withTiming(360, {
-        duration: 20000,
+        duration: 30000,
         easing: Easing.linear,
       }),
       -1,
@@ -315,10 +321,9 @@ export const WelcomeBottomSheet = () => {
     };
   });
 
-  const handleDismissWelcome = () => {
-    storage.set(HAS_SEEN_WELCOME_KEY, true);
+  const handleComplete = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    bottomSheet.hide();
+    onComplete();
   };
 
   return (
@@ -346,7 +351,7 @@ export const WelcomeBottomSheet = () => {
           </LinearGradient>
         </Defs>
         <AnimatedPath
-          d="M100,100 Q150,50 200,100 T300,100 Q350,150 300,200 T200,200 Q150,250 100,200 T0,100"
+          d="M100,100 C150,50 200,150 250,100 S350,50 400,100 S500,150 450,200 S350,250 300,200 S200,150 150,200 S50,250 100,200 S150,150 100,100"
           fill="url(#grad)"
           stroke={ENDING_COLOR}
           animatedProps={animatedProps}
@@ -359,7 +364,19 @@ export const WelcomeBottomSheet = () => {
           <MotiView
             from={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", delay: 300 }}
+            transition={{
+              scale: {
+                type: "spring",
+                delay: 300,
+                damping: 12,
+                stiffness: 100,
+              },
+              opacity: {
+                type: "timing",
+                duration: 600,
+                delay: 300,
+              },
+            }}
           >
             <Text fontSize={70}>📸</Text>
           </MotiView>
@@ -383,7 +400,19 @@ export const WelcomeBottomSheet = () => {
         <MotiView
           from={{ translateX: -100, opacity: 0 }}
           animate={{ translateX: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 400 }}
+          transition={{
+            translateX: {
+              type: "spring",
+              delay: 400,
+              damping: 15,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 400,
+            },
+          }}
         >
           <Feature
             icon="🤳"
@@ -395,7 +424,19 @@ export const WelcomeBottomSheet = () => {
         <MotiView
           from={{ translateX: 100, opacity: 0 }}
           animate={{ translateX: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 600 }}
+          transition={{
+            translateX: {
+              type: "spring",
+              delay: 600,
+              damping: 15,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 600,
+            },
+          }}
         >
           <Feature
             icon="✨"
@@ -407,7 +448,19 @@ export const WelcomeBottomSheet = () => {
         <MotiView
           from={{ translateX: -100, opacity: 0 }}
           animate={{ translateX: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 800 }}
+          transition={{
+            translateX: {
+              type: "spring",
+              delay: 800,
+              damping: 15,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 800,
+            },
+          }}
         >
           <Feature
             icon="🎭"
@@ -428,15 +481,27 @@ export const WelcomeBottomSheet = () => {
         <MotiView
           from={{ translateY: 100, opacity: 0 }}
           animate={{ translateY: 0, opacity: 1 }}
-          transition={{ type: "spring", delay: 1000 }}
+          transition={{
+            translateY: {
+              type: "spring",
+              delay: 1000,
+              damping: 20,
+              stiffness: 120,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 1000,
+            },
+          }}
         >
           <Button
             size="$6"
             variant="white"
-            onPress={handleDismissWelcome}
+            onPress={handleComplete}
             fontWeight="bold"
           >
-            Let's Get Started
+            Let's Get Opping
           </Button>
         </MotiView>
       </YStack>
