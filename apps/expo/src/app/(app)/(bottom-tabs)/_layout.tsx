@@ -28,7 +28,6 @@ import {
   View,
   YStack,
 } from "~/components/ui";
-import { BottomSheet } from "~/components/ui/BottomSheet/BottomSheet";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
