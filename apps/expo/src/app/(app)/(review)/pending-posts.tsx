@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Button, H2, Paragraph, XStack, YStack } from "tamagui";
 
-import { PostPreview } from "~/components/post/PostPreview";
+// import { PostPreview } from "~/components/post/PostPreview";
 import { ScreenView, Spinner } from "~/components/ui";
 import { usePendingPostsManager } from "~/hooks/post/usePendingPostsManager";
 
@@ -89,7 +89,7 @@ export default function PendingPostsReview() {
           </Paragraph>
         )}
 
-        <FlashList
+{/*         <FlashList
           data={pendingPosts}
           renderItem={({ item }) => (
             <PostPreview post={item} author={item.author} />
@@ -97,7 +97,7 @@ export default function PendingPostsReview() {
           estimatedItemSize={300}
           contentContainerStyle={{ gap: 16 }}
         />
-
+ */}
         <XStack gap="$4" justifyContent="flex-end">
           <Button variant="outlined" onPress={handleSkip}>
             Skip for Now
