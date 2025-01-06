@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
@@ -84,80 +84,69 @@ const Friends = () => {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  const friendItems = useMemo(() => {
-    return friendsData?.pages.flatMap((page) => page.items) ?? [];
-  }, [friendsData]);
+  const friendItems = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch({
     data: friendItems,
     keys: ["name", "username"],
   });
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {
       await fetchNextPage();
     }
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+  };
 
-  const handleRemoveFriend = useCallback(
-    async (userId: string) => {
-      await removeFriend.mutateAsync({ recipientId: userId });
-    },
-    [removeFriend],
-  );
+  const handleRemoveFriend = async (userId: string) => {
+    await removeFriend.mutateAsync({ recipientId: userId });
+  };
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
-  }, [refetch]);
+  };
 
-  const renderListItem = useCallback(
-    (item: FriendItem) => (
-      <MediaListItem
-        title={item.username}
-        subtitle={item.name}
-        imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
-        primaryAction={{
-          label: "Remove",
-          icon: UserRoundMinus,
-          onPress: () =>
-            actionSheet.show({
-              title: "Remove Friend",
-              subtitle: `Are you sure you want to remove ${item.username} from your friends?`,
-              imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
-              buttonOptions: [
-                {
-                  text: "Remove",
-                  textProps: { color: "$red11" },
-                  onPress: () => void handleRemoveFriend(item.userId),
-                },
-              ],
-            }),
-        }}
-        onPress={() =>
-          routeProfile({ userId: item.userId, username: item.username })
-        }
+  const renderListItem = (item: FriendItem) => (
+    <MediaListItem
+      title={item.username}
+      subtitle={item.name}
+      imageUrl={item.profilePictureUrl ?? DefaultProfilePicture}
+      primaryAction={{
+        label: "Remove",
+        icon: UserRoundMinus,
+        onPress: () =>
+          actionSheet.show({
+            title: "Remove Friend",
+            subtitle: `Are you sure you want to remove ${item.username} from your friends?`,
+            imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
+            buttonOptions: [
+              {
+                text: "Remove",
+                textProps: { color: "$red11" },
+                onPress: () => void handleRemoveFriend(item.userId),
+              },
+            ],
+          }),
+      }}
+      onPress={() =>
+        routeProfile({ userId: item.userId, username: item.username })
+      }
+    />
+  );
+
+  const ListHeaderComponent = (
+    <YStack gap="$4">
+      <SearchInput
+        placeholder="Search friends..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onClear={() => setSearchQuery("")}
       />
-    ),
-    [actionSheet, handleRemoveFriend, routeProfile],
+    </YStack>
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <YStack gap="$4">
-        <SearchInput
-          placeholder="Search friends..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={() => setSearchQuery("")}
-        />
-      </YStack>
-    ),
-    [searchQuery, setSearchQuery],
-  );
-
-  const ListEmptyComponent = useCallback(() => {
+  const ListEmptyComponent = () => {
     if (isLoading) {
       return (
         <YStack gap="$4">
@@ -189,7 +178,7 @@ const Friends = () => {
     }
 
     return null;
-  }, [isLoading, friendItems.length, filteredItems.length]);
+  };
 
   return (
     <FlashList

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, type ReactNode } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BottomSheetModal,
   type BottomSheetBackdropProps,
@@ -18,53 +19,54 @@ export interface BottomSheetProps
   onPresent?: () => void;
 }
 
-export const BottomSheet = 
-  ({
-    title,
-    children,
-    snapPoints = ["50%"],
-    isVisible,
-    onDismiss,
-    onPresent,
-    ...props
-  }: BottomSheetProps) => {
-    const theme = useTheme();
-    const bottomSheetRef = React.useRef<BottomSheetModal>(null);
+export const BottomSheet = ({
+  title,
+  children,
+  snapPoints = ["50%"],
+  isVisible,
+  onDismiss,
+  onPresent,
+  ...props
+}: BottomSheetProps) => {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const bottomSheetRef = React.useRef<BottomSheetModal>(null);
 
-    useEffect(() => {
-      if (isVisible) {
-        bottomSheetRef.current?.present();
-        onPresent?.();
-      } else {
-        bottomSheetRef.current?.dismiss();
-      }
-    }, [isVisible, onPresent]);
+  useEffect(() => {
+    if (isVisible) {
+      bottomSheetRef.current?.present();
+      onPresent?.();
+    } else {
+      bottomSheetRef.current?.dismiss();
+    }
+  }, [isVisible, onPresent]);
 
-    const header = useCallback(
-      () => <BottomSheetHeader title={title ?? ""} />,
-      [title],
-    );
+  const header = useCallback(
+    () => <BottomSheetHeader title={title ?? ""} />,
+    [title],
+  );
 
-    const backdropComponent = useCallback(
-      (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />,
-      [],
-    );
+  const backdropComponent = useCallback(
+    (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />,
+    [],
+  );
 
-    return (
-      <BottomSheetModal
-        ref={bottomSheetRef}
-        snapPoints={snapPoints}
-        enablePanDownToClose
-        keyboardBlurBehavior="restore"
-        backdropComponent={backdropComponent}
-        handleComponent={header}
-        onDismiss={onDismiss}
-        backgroundStyle={{
-          backgroundColor: theme.gray4.val,
-        }}
-        {...props}
-      >
-        {children}
-      </BottomSheetModal>
-    );
-  }
+  return (
+    <BottomSheetModal
+      ref={bottomSheetRef}
+      snapPoints={snapPoints}
+      enablePanDownToClose
+      keyboardBlurBehavior="restore"
+      backdropComponent={backdropComponent}
+      handleComponent={header}
+      onDismiss={onDismiss}
+      backgroundStyle={{
+        backgroundColor: theme.gray4.val,
+      }}
+      topInset={insets.top}
+      {...props}
+    >
+      {children}
+    </BottomSheetModal>
+  );
+};

@@ -14,6 +14,7 @@ import { Video } from "@tamagui/lucide-icons";
 import { Stack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
+import useMediaProcessing from "~/hooks/media/useMediaProcessing";
 
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -50,6 +51,7 @@ const moveVideoToLocalStorage = async (uri: string) => {
 const MediaPickerScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const { processVideo } = useMediaProcessing();
 
   const { albumId, albumTitle } = useLocalSearchParams<{
     albumId: string;
@@ -105,7 +107,7 @@ const MediaPickerScreen = () => {
               shouldDownloadFromNetwork: true,
             });
 
-            // For videos, we need to move to local storage
+            // For videos, we need to move to local storage and process
             if (item.mediaType === "video") {
               if (!assetInfo.localUri) {
                 throw new Error("Could not get local URI for video");
@@ -116,12 +118,20 @@ const MediaPickerScreen = () => {
                 assetInfo.localUri,
               );
 
+              // Process video to 1 minute
+              const processedUri = await processVideo({
+                uri: localUri,
+                startTime: 0,
+                endTime: 60, // 1 minute
+                outputUri: `${FileSystem.documentDirectory}videos/processed_${Date.now()}.mp4`,
+              });
+
               router.dismiss();
               router.dismiss();
               router.push({
-                pathname: "/video-editor",
+                pathname: "/preview",
                 params: {
-                  uri: localUri,
+                  uri: processedUri,
                   type: assetInfo.mediaType,
                   height: assetInfo.height.toString(),
                   width: assetInfo.width.toString(),
@@ -160,7 +170,7 @@ const MediaPickerScreen = () => {
         </Stack>
       );
     },
-    [router],
+    [router, processVideo],
   );
 
   return (
