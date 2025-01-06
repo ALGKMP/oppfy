@@ -3,8 +3,8 @@ import { AlertCircle, Trash2 } from "@tamagui/lucide-icons";
 
 import { SizableText, Text, View, XStack, YStack } from "~/components/ui";
 import Avatar from "../Avatar";
-import { BlurContextMenuWrapper } from "../ContextMenu";
 import { TimeAgo } from "../Texts";
+import { BlurContextMenuWrapper } from "../ContextMenu";
 
 export interface CommentItem {
   userId: string;
@@ -83,7 +83,11 @@ const Comment = ({
       <View padding="$3.5" backgroundColor="$gray4" borderRadius="$7">
         <XStack gap="$3" alignItems="flex-start">
           <TouchableOpacity onPress={onPressProfile}>
-            <Avatar source={comment.profilePictureUrl} size={46} />
+            {/* <Avatar
+              source={comment.profilePictureUrl}
+              size={46}
+              recyclingKey={comment.id}
+            /> */}
           </TouchableOpacity>
           <YStack gap="$2" width="100%" flex={1}>
             <XStack gap="$2">

@@ -6,7 +6,7 @@ import { Image } from "expo-image";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
-import { BottomSheetTextInput, BottomSheetView } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { useTheme } from "tamagui";
 
 import CardContainer from "~/components/Containers/CardContainer";
@@ -201,7 +201,6 @@ const EditProfile = () => {
     show({
       title: FIELD_TITLES[field],
       children: (
-        <BottomSheetView style={{ flex: 1 }}>
           <ProfileFieldSheet
             fieldKey={field}
             initialValue={currentValue}
@@ -238,7 +237,6 @@ const EditProfile = () => {
               }
             }}
           />
-        </BottomSheetView>
       ),
     });
   };

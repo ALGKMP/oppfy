@@ -13,7 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetTextInput, BottomSheetView } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
@@ -99,7 +99,6 @@ const CaptionSheet = ({
   }, []);
 
   return (
-    <BottomSheetView style={{ flex: 1 }}>
       <YStack flex={1}>
         <YStack flex={1} padding="$4" gap="$4">
           <XStack justifyContent="space-between">
@@ -148,7 +147,6 @@ const CaptionSheet = ({
           </Button>
         </XStack>
       </YStack>
-    </BottomSheetView>
   );
 };
 

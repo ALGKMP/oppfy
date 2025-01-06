@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, type ReactNode } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   BottomSheetModal,
+  BottomSheetView,
   type BottomSheetBackdropProps,
   type BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
@@ -68,7 +69,7 @@ export const BottomSheet = ({
       topInset={insets.top}
       {...props}
     >
-      {children}
+      <BottomSheetView style={{ flex: 1 }}>{children}</BottomSheetView>
     </BottomSheetModal>
   );
 };

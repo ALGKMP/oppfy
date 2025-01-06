@@ -1,5 +1,4 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
-import { BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { BottomSheet } from "./BottomSheet";
 import type { BottomSheetProps } from "./BottomSheet";
