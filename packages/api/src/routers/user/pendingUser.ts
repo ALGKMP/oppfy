@@ -54,6 +54,23 @@ export const pendingUserRouter = createTRPCRouter({
       return PendingUserService.checkForPendingPosts(input.phoneNumber);
     }),
 
+  updatePendingPostsStatus: protectedProcedure
+    .input(
+      z.object({
+        postCount: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await PendingUserService.updateUserPendingPostsStatus(
+        ctx.session.user.id,
+        input.postCount,
+      );
+    }),
+
+  getPendingPosts: protectedProcedure.query(async ({ ctx }) => {
+    return PendingUserService.getPendingPostsForUser(ctx.session.user.id);
+  }),
+
   migratePendingPosts: protectedProcedure
     .input(
       z.object({

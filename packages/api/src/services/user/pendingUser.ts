@@ -127,6 +127,45 @@ export const PendingUserService = {
     };
   },
 
+  async updateUserPendingPostsStatus(userId: string, postCount: number) {
+    await db
+      .update(user)
+      .set({
+        hasPendingPosts: postCount > 0,
+        pendingPostsCount: postCount,
+      })
+      .where(eq(user.id, userId));
+  },
+
+  async getPendingPostsForUser(userId: string) {
+    const userRecord = await db.query.user.findFirst({
+      where: eq(user.id, userId),
+    });
+
+    if (!userRecord || !userRecord.hasPendingPosts) {
+      return [];
+    }
+
+    const pendingUserRecord = await db.query.pendingUser.findFirst({
+      where: eq(pendingUser.phoneNumber, userRecord.phoneNumber),
+    });
+
+    if (!pendingUserRecord) {
+      return [];
+    }
+
+    return db.query.postOfUserNotOnApp.findMany({
+      where: eq(postOfUserNotOnApp.pendingUserId, pendingUserRecord.id),
+      with: {
+        author: {
+          with: {
+            profile: true,
+          },
+        },
+      },
+    });
+  },
+
   // This will be called later when the user reviews their posts
   async migratePendingUserPosts({
     pendingUserId,
@@ -183,6 +222,15 @@ export const PendingUserService = {
 
       // Delete the pending user
       await tx.delete(pendingUser).where(eq(pendingUser.id, pendingUserId));
+
+      // Update user's pending posts status
+      await tx
+        .update(user)
+        .set({
+          hasPendingPosts: false,
+          pendingPostsCount: 0,
+        })
+        .where(eq(user.id, newUserId));
 
       return migratedPosts;
     });

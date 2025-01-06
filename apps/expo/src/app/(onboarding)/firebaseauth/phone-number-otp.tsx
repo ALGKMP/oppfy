@@ -77,6 +77,8 @@ const PhoneNumberOTP = () => {
     { phoneNumber },
     { enabled: false },
   );
+  const updatePendingPostsStatus =
+    api.pendingUser.updatePendingPostsStatus.useMutation();
 
   const isValidPhoneNumberOTP = useMemo(
     () =>
@@ -95,16 +97,14 @@ const PhoneNumberOTP = () => {
       phoneNumber,
     });
 
-    // Check for pending posts but don't migrate them yet
+    // Check for pending posts and store the status
     setCheckingPosts(true);
     try {
       const result = await checkPendingPosts.refetch();
-      // Store the pending posts info for later if needed
-      if (result.data?.hasPendingPosts) {
-        // TODO: Store this information to show the review screen later
-        console.log(
-          `User has ${result.data.postCount} pending posts to review`,
-        );
+      if (result.data?.hasPendingPosts && result.data.postCount !== undefined) {
+        await updatePendingPostsStatus.mutateAsync({
+          postCount: result.data.postCount,
+        });
       }
     } catch (error) {
       console.error("Error checking pending posts:", error);
@@ -116,16 +116,14 @@ const PhoneNumberOTP = () => {
   };
 
   const handleExistingUser = async () => {
-    // Check for pending posts but don't migrate them yet
+    // Check for pending posts and store the status
     setCheckingPosts(true);
     try {
       const result = await checkPendingPosts.refetch();
-      // Store the pending posts info for later if needed
-      if (result.data?.hasPendingPosts) {
-        // TODO: Store this information to show the review screen later
-        console.log(
-          `User has ${result.data.postCount} pending posts to review`,
-        );
+      if (result.data?.hasPendingPosts && result.data.postCount !== undefined) {
+        await updatePendingPostsStatus.mutateAsync({
+          postCount: result.data.postCount,
+        });
       }
     } catch (error) {
       console.error("Error checking pending posts:", error);
