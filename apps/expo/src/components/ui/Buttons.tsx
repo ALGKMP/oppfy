@@ -3,9 +3,15 @@ import { styled, Button as TamaguiButton } from "tamagui";
 export const Button = styled(TamaguiButton, {
   size: "$5",
   borderRadius: "$6",
+  borderColor: "white",
+  pressStyle: {
+    borderWidth: 0,
+    borderColor: "white",
+  },
   disabledStyle: {
     opacity: 0.7,
   },
+  animation: "100ms",
 
   variants: {
     variant: {
@@ -73,5 +79,5 @@ export const OnboardingButton = styled(Button, {
     backgroundColor: "$color9",
     opacity: 0.7,
   },
-  animation: "bouncy",
+  animation: "100ms",
 });
