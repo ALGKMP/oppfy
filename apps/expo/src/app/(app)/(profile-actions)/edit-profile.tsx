@@ -19,13 +19,13 @@ import {
   Spinner,
   Switch,
   Text,
-  useActionSheetController,
   View,
   XStack,
   YStack,
 } from "~/components/ui";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import { useUploadProfilePicture } from "~/hooks/media";
+import { usePrivacySettings } from "~/hooks/usePrivacySettings";
 import { api } from "~/utils/api";
 
 /* -----------------------------
@@ -151,7 +151,7 @@ const EditProfile = () => {
     optimisticallyUpdate: true,
   });
   const { show, hide } = useBottomSheetController();
-  const actionSheet = useActionSheetController();
+  const { privacySetting, onPrivacyChange } = usePrivacySettings();
 
   /* -------------------------------------------
      Pull the user's existing data from the cache
@@ -160,7 +160,7 @@ const EditProfile = () => {
   const defaultValues = utils.profile.getFullProfileSelf.getData();
 
   // Get privacy setting
-  const { data: privacySetting } = api.user.getPrivacySetting.useQuery(
+  const { data: privacySettingData } = api.user.getPrivacySetting.useQuery(
     undefined,
     {
       initialData: "public",
@@ -274,34 +274,6 @@ const EditProfile = () => {
         />
       ),
     });
-  };
-
-  const handlePrivacySettingUpdate = async (
-    newPrivacySetting: "private" | "public",
-  ) => {
-    await updatePrivacySetting.mutateAsync({
-      privacy: newPrivacySetting,
-    });
-  };
-
-  const onPrivacyChange = async (checked: boolean) => {
-    const newPrivacySetting = checked ? "private" : "public";
-
-    if (newPrivacySetting === "private") {
-      actionSheet.show({
-        title: "Switch to private account?",
-        subtitle:
-          "Only your followers will be able to see your photos and videos.",
-        buttonOptions: [
-          {
-            text: "Switch to private",
-            onPress: async () => await handlePrivacySettingUpdate("private"),
-          },
-        ],
-      });
-    } else {
-      await handlePrivacySettingUpdate("public");
-    }
   };
 
   return (
