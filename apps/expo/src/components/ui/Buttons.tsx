@@ -16,6 +16,9 @@ export const Button = styled(TamaguiButton, {
           backgroundColor: "#D900E6",
           borderColor: "$primary",
         },
+        textProps: {
+          color: "white",
+        },
       },
       white: {
         backgroundColor: "white",
@@ -70,4 +73,5 @@ export const OnboardingButton = styled(Button, {
     backgroundColor: "$color9",
     opacity: 0.7,
   },
+  animation: "bouncy",
 });
