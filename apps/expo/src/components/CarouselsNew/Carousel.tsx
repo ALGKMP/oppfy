@@ -27,25 +27,43 @@ const Carousel = (props: CarouselProps) => {
 
     return (
       <CardContainer paddingLeft={0} paddingRight={0}>
-        <FlashList
-          data={placeholderData}
-          horizontal
-          ListEmptyComponent={null}
-          estimatedItemSize={70}
-          showsHorizontalScrollIndicator={false}
-          renderItem={() => <Skeleton circular size={70} />}
-          ItemSeparatorComponent={() => <Spacer size="$2.5" />}
-          contentContainerStyle={{
-            paddingHorizontal: getToken("$2", "space") as number,
-          }}
-        />
+        <YStack gap="$3" minHeight={100}>
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            paddingHorizontal="$3"
+          >
+            <H5>{title}</H5>
+            <TouchableOpacity onPress={onShowMore}>
+              <Text theme="alt1" fontSize="$3" fontWeight="600">
+                See all
+              </Text>
+            </TouchableOpacity>
+          </XStack>
+          <FlashList
+            data={placeholderData}
+            horizontal
+            ListEmptyComponent={null}
+            estimatedItemSize={70}
+            showsHorizontalScrollIndicator={false}
+            renderItem={() => <Skeleton circular size={70} />}
+            ItemSeparatorComponent={() => <Spacer size="$2.5" />}
+            contentContainerStyle={{
+              paddingHorizontal: getToken("$2", "space") as number,
+            }}
+          />
+        </YStack>
       </CardContainer>
     );
   }
 
+  if (!data?.length) {
+    return null;
+  }
+
   return (
     <CardContainer paddingHorizontal={0}>
-      <YStack gap="$3">
+      <YStack gap="$3" minHeight={100}>
         <XStack
           justifyContent="space-between"
           alignItems="center"
