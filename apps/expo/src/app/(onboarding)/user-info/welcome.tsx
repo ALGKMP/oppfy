@@ -29,7 +29,8 @@ interface OrbitingCircleProps {
   orbitSize: number;
   speed: number;
   delay: number;
-  clockwise?: boolean;
+  opacity?: number;
+  pulseEnabled?: boolean;
 }
 
 const OrbitingCircle: React.FC<OrbitingCircleProps> = ({
@@ -37,7 +38,8 @@ const OrbitingCircle: React.FC<OrbitingCircleProps> = ({
   orbitSize,
   speed,
   delay,
-  clockwise = true,
+  opacity = 0.15,
+  pulseEnabled = false,
 }) => {
   const spinValue = new Animated.Value(0);
 
@@ -57,7 +59,7 @@ const OrbitingCircle: React.FC<OrbitingCircleProps> = ({
 
   const rotate = spinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: clockwise ? ["0deg", "360deg"] : ["360deg", "0deg"],
+    outputRange: ["0deg", "360deg"],
   });
 
   return (
@@ -70,7 +72,7 @@ const OrbitingCircle: React.FC<OrbitingCircleProps> = ({
       <Circle
         size={size}
         backgroundColor="$primary"
-        opacity={0.15}
+        opacity={opacity}
         animation="bouncy"
         enterStyle={{ scale: 0.5, opacity: 0 }}
         pressStyle={{ scale: 1.1 }}
@@ -196,6 +198,8 @@ const Welcome = () => {
         left="-10%"
         top="-10%"
         overflow="hidden"
+        animation="bouncy"
+        enterStyle={{ opacity: 0 }}
       >
         <LinearGradient
           width="100%"
@@ -260,50 +264,94 @@ const Welcome = () => {
           <YStack
             animation="bouncy"
             enterStyle={{
-              y: 20,
+              y: 40,
               opacity: 0,
+              scale: 0.9,
             }}
             y={0}
             opacity={1}
-            gap="$12"
+            scale={1}
+            gap="$4"
             maxWidth={600}
             alignItems="center"
           >
+            {/* Top Text */}
+            <YStack
+              animation="bouncy"
+              enterStyle={{
+                y: -20,
+                opacity: 0,
+                scale: 0.9,
+              }}
+              y={0}
+              opacity={1}
+              scale={1}
+            >
+              <H1
+                size="$10"
+                textAlign="center"
+                letterSpacing={-1}
+                color="$primary"
+                opacity={0.9}
+              >
+                Hi there!
+              </H1>
+            </YStack>
+
             {/* Animated Icon */}
             <YStack
               animation="bouncy"
-              enterStyle={{ scale: 0.8, opacity: 0 }}
-              pressStyle={{ scale: 0.97 }}
+              enterStyle={{
+                scale: 0.7,
+                opacity: 0,
+                rotateZ: "-45deg",
+              }}
+              scale={1}
+              opacity={1}
+              rotateZ="0deg"
               position="relative"
               alignItems="center"
               justifyContent="center"
+              marginVertical="$8"
             >
-              {/* Orbiting Circles */}
+              {/* Orbiting Elements */}
+              <OrbitingCircle
+                size={20}
+                orbitSize={width * 0.55}
+                speed={12000}
+                delay={400}
+                opacity={0.1}
+                pulseEnabled
+              />
               <OrbitingCircle
                 size={15}
                 orbitSize={width * 0.5}
-                speed={8000}
-                delay={0}
+                speed={10000}
+                delay={300}
+                opacity={0.12}
               />
               <OrbitingCircle
                 size={12}
                 orbitSize={width * 0.45}
-                speed={6000}
+                speed={15000}
                 delay={200}
-                clockwise={false}
+                opacity={0.08}
+                pulseEnabled
               />
               <OrbitingCircle
                 size={10}
                 orbitSize={width * 0.4}
-                speed={10000}
-                delay={400}
+                speed={8000}
+                delay={100}
+                opacity={0.15}
               />
               <OrbitingCircle
                 size={8}
                 orbitSize={width * 0.35}
-                speed={7000}
-                delay={600}
-                clockwise={false}
+                speed={20000}
+                delay={0}
+                opacity={0.1}
+                pulseEnabled
               />
 
               {/* Central Icon */}
@@ -340,26 +388,36 @@ const Welcome = () => {
               </Circle>
             </YStack>
 
-            {/* Text Content */}
-            <YStack gap="$4" alignItems="center">
-              <H1
-                size="$9"
-                textAlign="center"
-                letterSpacing={-1}
-                animation="bouncy"
-                enterStyle={{ y: -20, opacity: 0 }}
-              >
-                Hi there!
-              </H1>
-
+            {/* Bottom Text */}
+            <YStack
+              gap="$4"
+              alignItems="center"
+              animation="bouncy"
+              enterStyle={{
+                y: 20,
+                opacity: 0,
+                scale: 0.9,
+              }}
+              y={0}
+              opacity={1}
+              scale={1}
+            >
               <Paragraph
-                size="$6"
+                size="$7"
+                color="$gray12"
+                textAlign="center"
+                maxWidth={340}
+                fontWeight="600"
+              >
+                Let's get your profile set up
+              </Paragraph>
+              <Paragraph
+                size="$5"
                 color="$gray11"
                 textAlign="center"
-                maxWidth={320}
-                animation="bouncy"
+                maxWidth={280}
               >
-                Let's get your profile set up in just a few quick steps
+                It'll only take a few quick steps
               </Paragraph>
             </YStack>
           </YStack>
@@ -370,10 +428,12 @@ const Welcome = () => {
         marginHorizontal="$-4"
         onPress={onSubmit}
         variant="primary"
+        animation="bouncy"
         textProps={{
           fontWeight: "bold",
           fontSize: 18,
         }}
+        iconAfter={ArrowRight}
       >
         Get Started
       </OnboardingButton>
