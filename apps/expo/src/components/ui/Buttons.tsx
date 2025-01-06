@@ -3,6 +3,7 @@ import { styled, Button as TamaguiButton } from "tamagui";
 export const Button = styled(TamaguiButton, {
   size: "$5",
   borderRadius: "$6",
+  borderWidth: 0,
   borderColor: "white",
   pressStyle: {
     borderWidth: 0,
