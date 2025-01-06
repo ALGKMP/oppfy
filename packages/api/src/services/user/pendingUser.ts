@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { db } from "@oppfy/db";
-import { pendingUser, postOfUserNotOnApp, user } from "@oppfy/db/schema";
+import { pendingUser, post, postOfUserNotOnApp, user } from "@oppfy/db/schema";
 
 export const PendingUserService = {
   async createOrGetPendingUser({
@@ -101,8 +101,56 @@ export const PendingUserService = {
     pendingUserId: string;
     newUserId: string;
   }) {
-    // This will be implemented when we create the migration flow
-    // It will move posts from postOfUserNotOnApp to the regular posts table
-    // and delete the pending user
+    // Get all pending posts
+    const pendingPosts = await db.query.postOfUserNotOnApp.findMany({
+      where: eq(postOfUserNotOnApp.pendingUserId, pendingUserId),
+    });
+
+    // Start a transaction to ensure all operations succeed or fail together
+    return await db.transaction(async (tx) => {
+      // Move each post to the regular posts table
+      const migratedPosts = await Promise.all(
+        pendingPosts.map(async (pendingPost) => {
+          // Create new post
+          const newPost = await tx
+            .insert(post)
+            .values({
+              authorId: pendingPost.authorId,
+              recipientId: newUserId, // The new user is the recipient
+              caption: pendingPost.caption,
+              key: pendingPost.key,
+              width: pendingPost.width,
+              height: pendingPost.height,
+              mediaType: pendingPost.mediaType,
+            })
+            .returning()
+            .then((res) => res[0]);
+
+          // Delete the pending post
+          await tx
+            .delete(postOfUserNotOnApp)
+            .where(eq(postOfUserNotOnApp.id, pendingPost.id));
+
+          return newPost;
+        }),
+      );
+
+      // Delete the pending user
+      await tx.delete(pendingUser).where(eq(pendingUser.id, pendingUserId));
+
+      return migratedPosts;
+    });
+  },
+
+  async getPendingPostsForPhoneNumber(phoneNumber: string) {
+    const pendingUserRecord = await db.query.pendingUser.findFirst({
+      where: eq(pendingUser.phoneNumber, phoneNumber),
+    });
+
+    if (!pendingUserRecord) {
+      return [];
+    }
+
+    return this.getPendingUserPosts(pendingUserRecord.id);
   },
 };

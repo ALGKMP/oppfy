@@ -3,7 +3,11 @@ import { z } from "zod";
 import { mediaTypeEnum } from "@oppfy/db/schema";
 
 import { PendingUserService } from "../../services/user/pendingUser";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "../../trpc";
 
 export const pendingUserRouter = createTRPCRouter({
   createPostForContact: protectedProcedure
@@ -48,5 +52,32 @@ export const pendingUserRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       return PendingUserService.getPendingUserPosts(input.pendingUserId);
+    }),
+
+  getPendingPostsByPhoneNumber: publicProcedure
+    .input(
+      z.object({
+        phoneNumber: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      return PendingUserService.getPendingPostsForPhoneNumber(
+        input.phoneNumber,
+      );
+    }),
+
+  migratePendingPosts: protectedProcedure
+    .input(
+      z.object({
+        pendingUserId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const migratedPosts = await PendingUserService.migratePendingUserPosts({
+        pendingUserId: input.pendingUserId,
+        newUserId: ctx.session.user.id,
+      });
+
+      return migratedPosts;
     }),
 });

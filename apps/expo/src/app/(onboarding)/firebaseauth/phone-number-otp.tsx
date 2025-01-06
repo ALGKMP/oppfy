@@ -19,6 +19,7 @@ import {
   YStack,
 } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
+import { usePendingPosts } from "~/hooks/auth/usePendingPosts";
 import { api } from "~/utils/api";
 
 // ! This is for testing purposes only, do not use in production
@@ -62,12 +63,14 @@ const isFirebaseError = (
 const PhoneNumberOTP = () => {
   const router = useRouter();
   const { phoneNumber } = useLocalSearchParams<{ phoneNumber: string }>();
+  const { checkAndMigratePendingPosts } = usePendingPosts();
 
   const { verifyPhoneNumberOTP } = useSession();
 
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [migratingPosts, setMigratingPosts] = useState(false);
 
   const createUser = api.user.createUser.useMutation();
   const userOnboardingCompletedMutation =
@@ -90,10 +93,30 @@ const PhoneNumberOTP = () => {
       phoneNumber,
     });
 
+    // Check and migrate any pending posts after creating the user
+    setMigratingPosts(true);
+    try {
+      await checkAndMigratePendingPosts(phoneNumber);
+    } catch (error) {
+      console.error("Error migrating pending posts:", error);
+      // Don't block the flow if migration fails
+    }
+    setMigratingPosts(false);
+
     router.replace("/user-info/welcome");
   };
 
   const handleExistingUser = async () => {
+    // Check and migrate any pending posts before proceeding
+    setMigratingPosts(true);
+    try {
+      await checkAndMigratePendingPosts(phoneNumber);
+    } catch (error) {
+      console.error("Error migrating pending posts:", error);
+      // Don't block the flow if migration fails
+    }
+    setMigratingPosts(false);
+
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
 
@@ -194,9 +217,9 @@ const PhoneNumberOTP = () => {
       <OnboardingButton
         marginHorizontal="$-4"
         onPress={onSubmit}
-        disabled={!isValidPhoneNumberOTP || isLoading}
+        disabled={!isValidPhoneNumberOTP || isLoading || migratingPosts}
       >
-        {isLoading ? <Spinner /> : "Verify Code"}
+        {isLoading || migratingPosts ? <Spinner /> : "Verify Code"}
       </OnboardingButton>
     </ScreenView>
   );
