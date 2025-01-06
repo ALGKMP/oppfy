@@ -66,7 +66,6 @@ const BottomTabsLayout = () => {
         bottomSheet.show({
           snapPoints: ["100%"],
           headerShown: false,
-          enableDismissOnClose: false,
           enablePanDownToClose: false,
           enableHandlePanningGesture: false,
           enableContentPanningGesture: false,
