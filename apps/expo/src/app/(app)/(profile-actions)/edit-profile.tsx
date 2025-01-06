@@ -113,7 +113,7 @@ const ProfileFieldSheet = ({
           onChangeText={setLocalValue}
           multiline={fieldKey === "bio"}
           maxLength={maxLength}
-          autoCapitalize={fieldKey === "username" ? "none" : "words"}
+          autoCapitalize={fieldKey === "username" ? "none" : "sentences"}
           autoCorrect={fieldKey === "username" ? false : true}
           style={{
             fontWeight: "bold",
