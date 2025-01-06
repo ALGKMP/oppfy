@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -221,99 +221,46 @@ const Requests = () => {
     },
   });
 
-  const friendRequestItems = useMemo(
-    () => friendRequestsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendRequestsData],
-  );
+  const friendRequestItems =
+    friendRequestsData?.pages.flatMap((page) => page.items) ?? [];
+  const followRequestItems =
+    followRequestsData?.pages.flatMap((page) => page.items) ?? [];
 
-  const followRequestItems = useMemo(
-    () => followRequestsData?.pages.flatMap((page) => page.items) ?? [],
-    [followRequestsData],
-  );
+  const items: ListItem[] = [];
+  if (friendRequestItems.length > 0) {
+    items.push({ type: "header", title: "Friend Requests" });
+    friendRequestItems.forEach((item: FriendRequestItem) =>
+      items.push({ type: "friendRequest", data: item }),
+    );
+  }
+  if (followRequestItems.length > 0) {
+    items.push({ type: "header", title: "Follow Requests" });
+    followRequestItems.forEach((item: FollowRequestItem) =>
+      items.push({ type: "followRequest", data: item }),
+    );
+  }
 
-  // Combine items into sections
-  const items = useMemo(() => {
-    const result: ListItem[] = [];
-
-    if (friendRequestItems.length > 0) {
-      result.push({ type: "header", title: "Friend Requests" });
-      friendRequestItems.forEach((item) =>
-        result.push({ type: "friendRequest", data: item }),
-      );
-    }
-
-    if (followRequestItems.length > 0) {
-      result.push({ type: "header", title: "Follow Requests" });
-      followRequestItems.forEach((item) =>
-        result.push({ type: "followRequest", data: item }),
-      );
-    }
-
-    return result;
-  }, [friendRequestItems, followRequestItems]);
-
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
     await Promise.all([refetchFriendRequests(), refetchFollowRequests()]);
     setRefreshing(false);
-  }, [refetchFriendRequests, refetchFollowRequests]);
+  };
 
-  const handleOnEndReached = useCallback(async () => {
+  const handleOnEndReached = async () => {
     if (friendRequestsHasNextPage && !friendRequestsIsFetchingNextPage) {
       await fetchNextFriendRequestsPage();
     }
     if (followRequestsHasNextPage && !followRequestsIsFetchingNextPage) {
       await fetchNextFollowRequestsPage();
     }
-  }, [
-    friendRequestsHasNextPage,
-    friendRequestsIsFetchingNextPage,
-    followRequestsHasNextPage,
-    followRequestsIsFetchingNextPage,
-    fetchNextFriendRequestsPage,
-    fetchNextFollowRequestsPage,
-  ]);
+  };
 
-  const renderItem = useCallback(
-    ({ item }: { item: ListItem }) => {
-      if (item.type === "header") {
-        return <H5 theme="alt1">{item.title}</H5>;
-      }
+  const renderItem = ({ item }: { item: ListItem }) => {
+    if (item.type === "header") {
+      return <H5 theme="alt1">{item.title}</H5>;
+    }
 
-      if (item.type === "friendRequest") {
-        return (
-          <MediaListItem
-            title={item.data.username}
-            subtitle={item.data.name}
-            imageUrl={item.data.profilePictureUrl ?? DefaultProfilePicture}
-            primaryAction={{
-              label: "Decline",
-              onPress: () =>
-                void declineFriendRequest.mutateAsync({
-                  senderId: item.data.userId,
-                }),
-            }}
-            secondaryAction={{
-              label: "Accept",
-              variant: "primary",
-              onPress: () =>
-                void acceptFriendRequest.mutateAsync({
-                  senderId: item.data.userId,
-                }),
-            }}
-            onPress={() =>
-              router.navigate({
-                pathname: "/profile/[userId]",
-                params: {
-                  userId: item.data.userId,
-                  username: item.data.username,
-                },
-              })
-            }
-          />
-        );
-      }
-
+    if (item.type === "friendRequest") {
       return (
         <MediaListItem
           title={item.data.username}
@@ -322,7 +269,7 @@ const Requests = () => {
           primaryAction={{
             label: "Decline",
             onPress: () =>
-              void declineFollowRequest.mutateAsync({
+              void declineFriendRequest.mutateAsync({
                 senderId: item.data.userId,
               }),
           }}
@@ -330,7 +277,7 @@ const Requests = () => {
             label: "Accept",
             variant: "primary",
             onPress: () =>
-              void acceptFollowRequest.mutateAsync({
+              void acceptFriendRequest.mutateAsync({
                 senderId: item.data.userId,
               }),
           }}
@@ -345,17 +292,42 @@ const Requests = () => {
           }
         />
       );
-    },
-    [
-      router,
-      acceptFriendRequest,
-      acceptFollowRequest,
-      declineFriendRequest,
-      declineFollowRequest,
-    ],
-  );
+    }
 
-  const ListEmptyComponent = useCallback(() => {
+    return (
+      <MediaListItem
+        title={item.data.username}
+        subtitle={item.data.name}
+        imageUrl={item.data.profilePictureUrl ?? DefaultProfilePicture}
+        primaryAction={{
+          label: "Decline",
+          onPress: () =>
+            void declineFollowRequest.mutateAsync({
+              senderId: item.data.userId,
+            }),
+        }}
+        secondaryAction={{
+          label: "Accept",
+          variant: "primary",
+          onPress: () =>
+            void acceptFollowRequest.mutateAsync({
+              senderId: item.data.userId,
+            }),
+        }}
+        onPress={() =>
+          router.navigate({
+            pathname: "/profile/[userId]",
+            params: {
+              userId: item.data.userId,
+              username: item.data.username,
+            },
+          })
+        }
+      />
+    );
+  };
+
+  const ListEmptyComponent = () => {
     if (friendRequestsIsLoading || followRequestsIsLoading) {
       return (
         <YStack gap="$4">
@@ -374,13 +346,13 @@ const Requests = () => {
         />
       </YStack>
     );
-  }, [friendRequestsIsLoading, followRequestsIsLoading]);
+  };
 
-  const getItemType = useCallback((item: ListItem) => {
+  const getItemType = (item: ListItem) => {
     return item.type;
-  }, []);
+  };
 
-  const keyExtractor = useCallback((item: ListItem) => {
+  const keyExtractor = (item: ListItem) => {
     switch (item.type) {
       case "header":
         return `header-${item.title}`;
@@ -388,7 +360,7 @@ const Requests = () => {
       case "followRequest":
         return `request-${item.data.userId}`;
     }
-  }, []);
+  };
 
   return (
     <FlashList
