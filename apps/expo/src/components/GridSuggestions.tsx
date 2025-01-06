@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { FlatList } from "react-native";
+import { Dimensions, FlatList } from "react-native";
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -33,6 +33,9 @@ interface SuggestionItemProps {
   onPressProfile: (userId: string, username: string) => void;
   onFollow: (userId: string) => void;
 }
+
+const { width: screenWidth } = Dimensions.get("window");
+const TILE_WIDTH = screenWidth / 2 - getToken("$3", "space") * 2; // Two tiles with gap in between
 
 const SuggestionItem = ({
   item,
@@ -72,7 +75,7 @@ const SuggestionItem = ({
   return (
     <AnimatedYStack
       entering={FadeInDown.delay(index * 100).springify()}
-      flex={1}
+      width={TILE_WIDTH}
       aspectRatio={1}
     >
       <AnimatedYStack
