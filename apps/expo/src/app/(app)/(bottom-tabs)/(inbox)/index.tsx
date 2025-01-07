@@ -171,6 +171,7 @@ const Inbox = () => {
   const renderListItem = ({ item }: { item: NotificationItem }) => (
     <MediaListItem
       verticalText
+      recyclingKey={item.id}
       title={item.username}
       subtitle={getNotificationMessage(item)}
       caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
@@ -258,7 +259,7 @@ const Inbox = () => {
       data={notificationItems}
       renderItem={renderListItem}
       keyExtractor={(item) => item.id}
-      estimatedItemSize={56}
+      estimatedItemSize={18}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={GridSuggestions}
@@ -276,6 +277,7 @@ const Inbox = () => {
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}
+      extraData={notificationItems}
       keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
