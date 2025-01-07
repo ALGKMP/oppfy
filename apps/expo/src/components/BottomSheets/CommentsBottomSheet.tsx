@@ -1,12 +1,10 @@
 import React, { useRef } from "react";
-import { Dimensions, LayoutAnimation } from "react-native";
+import { LayoutAnimation } from "react-native";
 import * as Haptics from "expo-haptics";
-import { BottomSheetFlashList, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 
-import { Skeleton } from "~/components/Skeletons";
-import { ScrollView, View, XStack, YStack } from "~/components/ui";
+import { View } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { useSession } from "~/contexts/SessionContext";
 import { useComments } from "~/hooks/post/useComments";
@@ -24,7 +22,6 @@ interface CommentsBottomSheetProps {
 
 const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
   const {
-    isLoadingComments,
     commentItems,
     loadMoreComments,
     postComment,
@@ -75,59 +72,39 @@ const CommentsBottomSheet = React.memo((props: CommentsBottomSheetProps) => {
     />
   );
 
-  const ListEmptyComponent = () => (
-    <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
-      <EmptyPlaceholder
-        title="No comments yet"
-        subtitle="Be the first to comment"
-        icon={<MessageCircleOff />}
-      />
-    </View>
-  );
-
   return (
-    <BottomSheetView style={{ flex: 1 }}>
-      <View flex={1}>
-        {isLoadingComments ? (
-          <>
-            {Array.from({ length: 20 }).map((_, index) => (
-              <XStack
-                padding="$3.5"
-                gap="$2.5"
-                key={`skeleton-on-comments${index}-${props.postId}`}
-              >
-                <Skeleton circular size={46} />
-                <YStack flex={1} gap="$2">
-                  <Skeleton width="40%" height={20} />
-                  <Skeleton width="100%" height={20} />
-                </YStack>
-              </XStack>
-            ))}
-          </>
-        ) : commentItems.length === 0 ? (
-          <ListEmptyComponent />
-        ) : (
-          // <BottomSheetFlashList
-          <FlashList
-            ref={listRef}
-            data={commentItems}
-            renderItem={renderComment}
-            estimatedItemSize={83}
-            onEndReached={loadMoreComments}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.id.toString()}
-            estimatedListSize={{
-              width: Dimensions.get("window").width,
-              height: Dimensions.get("window").height,
-            }}
-          />
-        )}
-        <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
-      </View>
-    </BottomSheetView>
+    <>
+      {commentItems.length === 0 ? (
+        <ListEmptyComponent />
+      ) : (
+        <FlashList
+          ref={listRef}
+          data={commentItems}
+          renderItem={renderComment}
+          estimatedItemSize={83}
+          onEndReached={loadMoreComments}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.id.toString()}
+          removeClippedSubviews={true}
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+          }}
+        />
+      )}
+      <TextInputWithAvatar onPostComment={handlePostCommentWithAnimation} />
+    </>
   );
 });
 
+const ListEmptyComponent = () => (
+  <View flex={1} justifyContent="center" alignItems="center" flexGrow={1}>
+    <EmptyPlaceholder
+      title="No comments yet"
+      subtitle="Be the first to comment"
+      icon={<MessageCircleOff />}
+    />
+  </View>
+);
 /*
  * ==========================================
  * ============== Hooks =====================
