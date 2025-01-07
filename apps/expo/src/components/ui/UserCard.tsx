@@ -11,7 +11,9 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 
-import { Button, Text, YStack } from "./";
+import { Button } from "./Buttons";
+import { YStack } from "./Stacks";
+import { Text } from "./Texts";
 
 const AnimatedYStack = Animated.createAnimatedComponent(YStack);
 
