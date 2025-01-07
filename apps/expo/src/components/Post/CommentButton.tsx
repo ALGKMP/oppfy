@@ -2,7 +2,7 @@ import React from "react";
 import { TouchableOpacity } from "react-native";
 import { MessageCircle } from "@tamagui/lucide-icons";
 
-import CommentsBottomSheet from "~/components/BottomSheets/CommentsBottomSheet";
+import CommentsBottomSheet from "~/components/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
 
 interface CommentButtonProps {
