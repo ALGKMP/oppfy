@@ -51,6 +51,7 @@ import { TimeAgo } from "./TimeAgo";
 import { ToggleGroup } from "./ToggleGroup";
 import { Tooltip } from "./Tooltip";
 import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
+import { UserCard } from "./UserCard";
 
 export {
   Spacer,
@@ -116,6 +117,7 @@ export {
   Skeleton,
   MediaListItem,
   MediaListItemSkeleton,
+  UserCard,
 };
 
 export type { MediaListItemActionProps, BottomSheetProps };
