@@ -24,21 +24,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    // Calculate dimensions that maintain aspect ratio within 1200x630 bounds
-    const targetWidth = 1200;
-    const targetHeight = 630;
-    const aspectRatio =
-      post.height && post.width ? post.height / post.width : 1;
-
-    let finalWidth = targetWidth;
-    let finalHeight = Math.round(targetWidth * aspectRatio);
-
-    // If height exceeds target, scale down from height instead
-    if (finalHeight > targetHeight) {
-      finalHeight = targetHeight;
-      finalWidth = Math.round(targetHeight / aspectRatio);
-    }
-
     return {
       title: `${post.authorUsername} opped ${post.recipientUsername} | Oppfy`,
       description: post.caption ?? "No caption",
@@ -48,8 +33,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: [
           {
             url: post.imageUrl,
-            width: finalWidth,
-            height: finalHeight,
+            width: 1200,
+            height: 630,
             alt: `${post.authorUsername} opped ${post.recipientUsername}`,
           },
         ],
