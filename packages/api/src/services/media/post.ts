@@ -589,6 +589,33 @@ export class PostService {
     }
   }
 
+  async getPostForNextJs(postId: string): Promise<Post> {
+    try {
+      const post = await this.postRepository.getPost(postId);
+      if (!post) {
+        throw new DomainError(
+          ErrorCode.FAILED_TO_GET_POST,
+          "Failed to get post.",
+        );
+      }
+
+      const user = await this.userRepository.getUser(post.authorId);
+      if (!user) {
+        throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+      }
+
+      if (user.privacySetting !== "public") {
+        throw new DomainError(ErrorCode.UNAUTHORIZED, "This post is private");
+      }
+
+      const processedPost = await this._processPostData(post);
+      return processedPost;
+    } catch (error) {
+      console.error(`Error in getPostForNextJs for postId: ${postId}: `, error);
+      throw error;
+    }
+  }
+
   private async _processPostData(data: Post): Promise<Post> {
     try {
       // Update author profile picture URL

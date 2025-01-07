@@ -1,9 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { DomainError } from "../../errors";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
 import { postContentType } from "../../../../validators/src/shared/media";
+import { DomainError, ErrorCode } from "../../errors";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "../../trpc";
 
 export const postRouter = createTRPCRouter({
   uploadPicturePostForUserOnApp: protectedProcedure
@@ -150,8 +154,20 @@ export const postRouter = createTRPCRouter({
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.getPost(input.postId);
+        return await ctx.services.post.getPostForNextJs(input.postId);
       } catch (err) {
+        if (err instanceof DomainError) {
+          if (err.code === ErrorCode.UNAUTHORIZED) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: err.message,
+            });
+          }
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: err.message,
+          });
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: `Failed to get post with ID ${input.postId}. The post may not exist or the database could be unreachable.`,
