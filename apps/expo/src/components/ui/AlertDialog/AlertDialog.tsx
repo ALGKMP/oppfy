@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -53,12 +54,24 @@ export const AlertDialog = ({
 }: AlertDialogProps) => {
   const theme = useTheme();
   const animation = useSharedValue(0);
+  const [mounted, setMounted] = React.useState(false);
+
+  const handleAnimationComplete = useCallback((isOpen: boolean) => {
+    if (!isOpen) {
+      setMounted(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (isVisible) {
+      setMounted(true);
       animation.value = withSpring(1, { damping: 15, stiffness: 200 });
     } else {
-      animation.value = withTiming(0, { duration: 250 });
+      animation.value = withTiming(0, { duration: 250 }, (finished) => {
+        if (finished) {
+          runOnJS(handleAnimationComplete)(false);
+        }
+      });
     }
   }, [isVisible]);
 
@@ -85,7 +98,7 @@ export const AlertDialog = ({
     ],
   }));
 
-  if (!isVisible) return null;
+  if (!mounted) return null;
 
   return (
     <Portal>

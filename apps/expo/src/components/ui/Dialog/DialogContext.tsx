@@ -12,15 +12,16 @@ interface DialogContextValue {
 
 const DialogContext = createContext<DialogContextValue | null>(null);
 
-export const DialogProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
   const [dialogProps, setDialogProps] = useState<DialogOptions | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   const hide = useCallback(() => {
-    setDialogProps(null);
+    setIsVisible(false);
+    // We'll let the animation complete before clearing the props
+    setTimeout(() => {
+      setDialogProps(null);
+    }, 300); // slightly longer than animation duration to ensure completion
   }, []);
 
   const show = useCallback(
@@ -33,6 +34,7 @@ export const DialogProvider = ({
             resolve();
           },
         });
+        setIsVisible(true);
       });
     },
     [hide],
@@ -41,7 +43,7 @@ export const DialogProvider = ({
   return (
     <DialogContext.Provider value={{ show, hide }}>
       {children}
-      {dialogProps && <Dialog {...dialogProps} isVisible={!!dialogProps} />}
+      {dialogProps && <Dialog {...dialogProps} isVisible={isVisible} />}
     </DialogContext.Provider>
   );
 };
@@ -51,4 +53,4 @@ export const useDialogController = () => {
   if (!context)
     throw new Error("useDialog must be used within a DialogProvider");
   return context;
-}; 
+};

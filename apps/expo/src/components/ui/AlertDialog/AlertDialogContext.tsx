@@ -20,9 +20,14 @@ export const AlertDialogProvider = ({
   const [dialogProps, setDialogProps] = useState<AlertDialogOptions | null>(
     null,
   );
+  const [isVisible, setIsVisible] = useState(false);
 
   const hide = useCallback(() => {
-    setDialogProps(null);
+    setIsVisible(false);
+    // We'll let the animation complete before clearing the props
+    setTimeout(() => {
+      setDialogProps(null);
+    }, 300); // slightly longer than animation duration to ensure completion
   }, []);
 
   const show = useCallback(
@@ -39,6 +44,7 @@ export const AlertDialogProvider = ({
             resolve(false);
           },
         });
+        setIsVisible(true);
       });
     },
     [hide],
@@ -47,9 +53,7 @@ export const AlertDialogProvider = ({
   return (
     <AlertDialogContext.Provider value={{ show, hide }}>
       {children}
-      {dialogProps && (
-        <AlertDialog {...dialogProps} isVisible={!!dialogProps} />
-      )}
+      {dialogProps && <AlertDialog {...dialogProps} isVisible={isVisible} />}
     </AlertDialogContext.Provider>
   );
 };
