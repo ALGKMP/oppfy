@@ -1,7 +1,10 @@
 import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 
-import { useActionSheetController } from "~/components/ui";
+import {
+  useActionSheetController,
+  useAlertDialogController,
+} from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
@@ -25,7 +28,7 @@ const MorePostOptionsButton = ({
   const { handleReportPost } = useReportPost(postId);
 
   const { user } = useSession();
-
+  const { show: showAlert } = useAlertDialogController();
   const { show, hide } = useActionSheetController();
 
   const buttonOptionsOther = [
@@ -107,8 +110,21 @@ const MorePostOptionsButton = ({
         color: "$red9",
       },
       disabled: isDeleting,
-      onPress: () => void handleDeletePost(postId),
-      autoClose: true,
+      onPress: async () => {
+        hide();
+        const shouldDelete = await showAlert({
+          title: "Delete Post",
+          subtitle:
+            "Are you sure you want to delete this post? This action cannot be undone.",
+          acceptText: "Delete",
+          cancelText: "Cancel",
+        });
+
+        if (shouldDelete) {
+          void handleDeletePost(postId);
+        }
+      },
+      autoClose: false,
     },
   ];
 
