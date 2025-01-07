@@ -2,15 +2,15 @@ import type { FunctionComponent, ReactNode } from "react";
 import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
+import { Image as ExpoImage } from "expo-image";
 import { Image } from "tamagui";
 import type { GetProps } from "tamagui";
-import { Image as ExpoImage } from "expo-image";
 
 import { Skeleton } from "~/components/Skeletons";
+import { Avatar } from "./Avatar";
 import { Button } from "./Buttons";
 import { XStack, YStack } from "./Stacks";
 import { Paragraph, SizableText } from "./Texts";
-import { Avatar } from "./Avatar";
 
 export type MediaListItemActionProps = {
   label: string;
@@ -133,7 +133,7 @@ export const MediaListItem = ({
   return <TouchableOpacity onPress={onPress}>{content}</TouchableOpacity>;
 };
 
-export const MediaListItemSkeleton = () => (
+MediaListItem.Skeleton = () => (
   <XStack alignItems="center" gap="$3">
     <Skeleton circular size={56} />
 
