@@ -234,14 +234,17 @@ const useProfileActionButtons = (userId?: string) => {
 
   const invalidateQueries = async (actionKey: string) => {
     if (!userId) return;
-    utils.profile.getNetworkRelationships.invalidate({ userId: userId! });
-
     setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: true }));
-    // await Promise.all([
-    //   utils.profile.getFullProfileOther.invalidate({ userId }),
-    //   utils.contacts.getRecommendationProfilesSelf.invalidate(),
-    // ]);
-    // setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
+
+    try {
+      await Promise.all([
+        utils.profile.getNetworkRelationships.invalidate({ userId: userId! }),
+        utils.profile.getFullProfileOther.invalidate({ userId }),
+        utils.contacts.getRecommendationProfilesSelf.invalidate(),
+      ]);
+    } finally {
+      setIsInvalidatingByAction((prev) => ({ ...prev, [actionKey]: false }));
+    }
   };
 
   const isAnyActionLoading =
@@ -255,6 +258,14 @@ const useProfileActionButtons = (userId?: string) => {
       (isInvalidating) => isInvalidating,
     );
 
+  console.log("isAnyActionLoading", isAnyActionLoading);
+  console.log("followUser.isPending", followUser.isPending);
+  console.log("unfollowUser.isPending", unfollowUser.isPending);
+  console.log("addFriend.isPending", addFriend.isPending);
+  console.log("removeFriend.isPending", removeFriend.isPending);
+  console.log("cancelFollowRequest.isPending", cancelFollowRequest.isPending);
+  console.log("cancelFriendRequest.isPending", cancelFriendRequest.isPending);
+  console.log("isInvalidatingByAction", isInvalidatingByAction);
   // Create actions object based on userId
   const actions = userId
     ? {
