@@ -1,7 +1,7 @@
 import type { ImageSourcePropType } from "react-native";
-import { Image } from "expo-image";
 import defaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { useTheme } from "tamagui";
+// import { Image } from "expo-image";
+import { Image, useTheme } from "tamagui";
 
 interface AvatarProps {
   source: ImageSourcePropType | string | null | undefined;
@@ -15,8 +15,12 @@ const Avatar = (props: AvatarProps) => {
 
   return (
     <Image
-      source={props.source ?? defaultProfilePicture}
-      recyclingKey={props.recyclingKey}
+      source={
+        typeof props.source === "string"
+          ? { uri: props.source }
+          : (props.source ?? defaultProfilePicture)
+      }
+      // recyclingKey={props.recyclingKey}
       style={{
         width: props.size ?? 46,
         height: props.size ?? 46,
