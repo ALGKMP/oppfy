@@ -1,6 +1,6 @@
 import { TouchableOpacity } from "react-native";
 
-import CommentsBottomSheet from "~/components/BottomSheets/CommentsBottomSheet";
+import CommentsBottomSheet from "~/components/Comment/CommentsBottomSheet";
 import { SizableText } from "~/components/ui/";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
 
@@ -24,12 +24,12 @@ const CommentsCount = ({
       snapPoints: ["100%"],
       title: "Comments",
       children: (
-          <CommentsBottomSheet
-            onHideBottomSheet={hide}
-            postId={postId}
-            endpoint={endpoint}
-            postRecipientUserId={postRecipientUserId}
-          />
+        <CommentsBottomSheet
+          onHideBottomSheet={hide}
+          postId={postId}
+          endpoint={endpoint}
+          postRecipientUserId={postRecipientUserId}
+        />
       ),
     });
   };
