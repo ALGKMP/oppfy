@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { ImageSourcePropType } from "react-native";
 import {
@@ -70,12 +70,29 @@ export const ActionSheet = ({
       animation.value = withSpring(1, { damping: 15, stiffness: 200 });
     } else {
       animation.value = withTiming(0, { duration: 250 }, (finished) => {
-        if (finished) {
-          onCancel && runOnJS(onCancel)();
+        if (finished && onCancel) {
+          runOnJS(onCancel)();
         }
       });
     }
   }, [isVisible, animation, onCancel]);
+
+  const handleCancel = useCallback(() => {
+    if (onCancel) onCancel();
+  }, [onCancel]);
+
+  const handleOptionPress = useCallback(
+    (option: ButtonOption) => {
+      if (!option.disabled) {
+        option.onPress?.();
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        if (option.autoClose !== false) {
+          handleCancel();
+        }
+      }
+    },
+    [handleCancel],
+  );
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
@@ -113,7 +130,7 @@ export const ActionSheet = ({
       >
         {/* Animated Backdrop */}
         <Animated.View style={[styles.backdrop, backgroundStyle]}>
-          <TouchableWithoutFeedback onPress={onCancel}>
+          <TouchableWithoutFeedback onPress={handleCancel}>
             <View position="absolute" top={0} left={0} right={0} bottom={0} />
           </TouchableWithoutFeedback>
         </Animated.View>
@@ -169,17 +186,7 @@ export const ActionSheet = ({
               <React.Fragment key={index}>
                 {index > 0 && <Separator />}
                 <TouchableOpacity
-                  onPress={() => {
-                    if (!option.disabled) {
-                      option.onPress?.();
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Light,
-                      );
-                      if (option.autoClose !== false) {
-                        onCancel?.();
-                      }
-                    }
-                  }}
+                  onPress={() => handleOptionPress(option)}
                   style={[
                     styles.optionButton,
                     {
@@ -211,7 +218,7 @@ export const ActionSheet = ({
             borderRadius="$6"
           >
             <TouchableOpacity
-              onPress={onCancel}
+              onPress={handleCancel}
               style={[
                 styles.cancelButton,
                 {

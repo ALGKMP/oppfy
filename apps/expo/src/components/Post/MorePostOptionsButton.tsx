@@ -3,9 +3,9 @@ import { MoreHorizontal } from "@tamagui/lucide-icons";
 
 import { useActionSheetController } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
+import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import { useReportPost } from "../../hooks/post/useReportPost";
-import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 
 interface MorePostOptionsButtonProps {
   postId: string;
@@ -32,6 +32,7 @@ const MorePostOptionsButton = ({
     {
       text: isSaving ? "Saving..." : "Save Post",
       onPress: () => void handleSavePost(mediaUrl),
+      autoClose: true,
     },
     {
       text: "Report Post",
@@ -39,51 +40,54 @@ const MorePostOptionsButton = ({
         color: "$red9",
       },
       onPress: () => {
-        hide();
-        setTimeout(() => {
-          console.log("Showing report post");
-          show({
-            title: "Report Post",
-            titleProps: {
-              color: "$red9",
+        show({
+          title: "Report Post",
+          titleProps: {
+            color: "$red9",
+          },
+          buttonOptions: [
+            {
+              text: "Violent or abusive",
+              textProps: { color: "$blue9" },
+              onPress: () => void handleReportPost("Violent or abusive"),
+              autoClose: true,
             },
-            buttonOptions: [
-              {
-                text: "Violent or abusive",
-                textProps: { color: "$blue9" },
-                onPress: () => void handleReportPost("Violent or abusive"),
-              },
-              {
-                text: "Sexually explicit or predatory",
-                textProps: { color: "$blue9" },
-                onPress: () =>
-                  void handleReportPost("Sexually explicit or predatory"),
-              },
-              {
-                text: "Hate, harassment, or bullying",
-                textProps: { color: "$blue9" },
-                onPress: () =>
-                  void handleReportPost("Hate, harassment or bullying"),
-              },
-              {
-                text: "Suicide and self-harm",
-                textProps: { color: "$blue9" },
-                onPress: () => void handleReportPost("Suicide and self-harm"),
-              },
-              {
-                text: "Scam or spam",
-                textProps: { color: "$blue9" },
-                onPress: () => void handleReportPost("Spam or scam"),
-              },
-              {
-                text: "Other",
-                textProps: { color: "$blue9" },
-                onPress: () => void handleReportPost("Other"),
-              },
-            ],
-          });
-        }, 2000);
+            {
+              text: "Sexually explicit or predatory",
+              textProps: { color: "$blue9" },
+              onPress: () =>
+                void handleReportPost("Sexually explicit or predatory"),
+              autoClose: true,
+            },
+            {
+              text: "Hate, harassment, or bullying",
+              textProps: { color: "$blue9" },
+              onPress: () =>
+                void handleReportPost("Hate, harassment or bullying"),
+              autoClose: true,
+            },
+            {
+              text: "Suicide and self-harm",
+              textProps: { color: "$blue9" },
+              onPress: () => void handleReportPost("Suicide and self-harm"),
+              autoClose: true,
+            },
+            {
+              text: "Scam or spam",
+              textProps: { color: "$blue9" },
+              onPress: () => void handleReportPost("Spam or scam"),
+              autoClose: true,
+            },
+            {
+              text: "Other",
+              textProps: { color: "$blue9" },
+              onPress: () => void handleReportPost("Other"),
+              autoClose: true,
+            },
+          ],
+        });
       },
+      autoClose: false,
     },
   ];
 
@@ -93,9 +97,9 @@ const MorePostOptionsButton = ({
       textProps: {
         color: isSaving ? "$gray9" : undefined,
       },
-      autoClose: false,
       disabled: isSaving,
       onPress: () => void handleSavePost(mediaUrl),
+      autoClose: true,
     },
     {
       text: "Delete Post",
@@ -104,6 +108,7 @@ const MorePostOptionsButton = ({
       },
       disabled: isDeleting,
       onPress: () => void handleDeletePost(postId),
+      autoClose: true,
     },
   ];
 
@@ -118,6 +123,7 @@ const MorePostOptionsButton = ({
             user?.uid === recipientUserId
               ? buttonOptionsSelf
               : buttonOptionsOther,
+          onCancel: () => {},
         });
       }}
     >
