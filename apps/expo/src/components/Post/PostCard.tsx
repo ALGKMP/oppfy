@@ -238,7 +238,7 @@ PostCard.loading = function PostCardLoading() {
   );
 };
 
-// TODO: This needs cleaning up 
+// TODO: This needs cleaning up
 
 interface ImageComponentProps {
   endpoint: "home-feed" | "other-profile" | "self-profile" | "single-post";
@@ -253,7 +253,8 @@ const ImageComponent = ({ endpoint, media, stats }: ImageComponentProps) => {
     initialHasLiked: stats.hasLiked,
   });
   const { hearts, addHeart } = useHeartAnimations();
-  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+
   const handleDoubleTap = useCallback(
     (x: number, y: number) => {
       addHeart(x, y);
@@ -274,14 +275,24 @@ const ImageComponent = ({ endpoint, media, stats }: ImageComponentProps) => {
         <Image
           source={{ uri: media.url }}
           recyclingKey={media.url}
+          cachePolicy="memory-disk"
           style={{
             width: "100%",
             aspectRatio: media.dimensions.width / media.dimensions.height,
             borderRadius: getToken("$8", "radius") as number,
           }}
           contentFit="cover"
-          onLoadStart={() => setIsImageLoading(true)}
-          onLoadEnd={() => setIsImageLoading(false)}
+          transition={0}
+          onLoadStart={() => {
+            requestAnimationFrame(() => {
+              setIsImageLoading(true);
+            });
+          }}
+          onLoad={() => {
+            requestAnimationFrame(() => {
+              setIsImageLoading(false);
+            });
+          }}
         />
         {isImageLoading && (
           <View
@@ -315,7 +326,7 @@ interface VideoPlayerProps {
   stats: Stats;
 }
 
-// TODO: This needs cleaning up 
+// TODO: This needs cleaning up
 
 const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
   const videoRef = useRef<Video>(null);
@@ -325,7 +336,7 @@ const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   const { handleLikeDoubleTapped } = useLikePost({
     postId: media.id,
@@ -353,7 +364,9 @@ const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
 
   const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
-      setIsVideoLoading(false);
+      requestAnimationFrame(() => {
+        setIsVideoLoading(false);
+      });
     }
   };
 
@@ -423,21 +436,22 @@ const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
           isLooping={true}
           isMuted={isMuted}
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          onLoad={() => setIsVideoLoading(false)}
-          onError={() => setIsVideoLoading(false)}
+          onLoadStart={() => {
+            requestAnimationFrame(() => {
+              setIsVideoLoading(true);
+            });
+          }}
         />
         {isVideoLoading && (
           <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.1)",
-            }}
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor="rgba(0, 0, 0, 0.1)"
           >
             <Circle size={48} borderWidth={2} borderColor="$gray11" />
           </View>
