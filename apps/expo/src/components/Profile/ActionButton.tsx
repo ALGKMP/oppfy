@@ -257,15 +257,6 @@ const useProfileActionButtons = (userId?: string) => {
     Object.values(isInvalidatingByAction).some(
       (isInvalidating) => isInvalidating,
     );
-
-  console.log("isAnyActionLoading", isAnyActionLoading);
-  console.log("followUser.isPending", followUser.isPending);
-  console.log("unfollowUser.isPending", unfollowUser.isPending);
-  console.log("addFriend.isPending", addFriend.isPending);
-  console.log("removeFriend.isPending", removeFriend.isPending);
-  console.log("cancelFollowRequest.isPending", cancelFollowRequest.isPending);
-  console.log("cancelFriendRequest.isPending", cancelFriendRequest.isPending);
-  console.log("isInvalidatingByAction", isInvalidatingByAction);
   // Create actions object based on userId
   const actions = userId
     ? {
