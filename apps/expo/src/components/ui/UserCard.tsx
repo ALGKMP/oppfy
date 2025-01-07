@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import Animated, {
@@ -27,7 +28,7 @@ export interface UserCardProps {
   actionButton?: {
     label: string;
     onPress: () => void;
-    variant?: "primary" | "secondary" | "outline";
+    variant?: ComponentProps<typeof Button>["variant"];
   };
   index?: number; // For animation delays in lists
 }
@@ -146,6 +147,7 @@ export const UserCard = ({
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      activeOpacity={0.8}
     >
       <AnimatedYStack
         entering={FadeInDown.delay(index * 100).springify()}
