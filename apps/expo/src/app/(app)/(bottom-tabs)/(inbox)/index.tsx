@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
@@ -37,6 +38,9 @@ const Inbox = () => {
   const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
+
+  const listRef = useRef<FlashList<NotificationItem>>(null);
+  useScrollToTop(listRef);
 
   const { data: requestsCount, refetch: refetchRequestCount } =
     api.request.countRequests.useQuery(undefined, {
@@ -250,6 +254,7 @@ const Inbox = () => {
 
   return (
     <FlashList
+      ref={listRef}
       data={notificationItems}
       renderItem={renderListItem}
       keyExtractor={(item) => item.id}
