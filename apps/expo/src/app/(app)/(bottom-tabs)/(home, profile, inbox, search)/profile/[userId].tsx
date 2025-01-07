@@ -5,11 +5,17 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useScrollToTop } from "@react-navigation/native";
+import { TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, ChevronLeft, Lock, MoreHorizontal, UserX } from "@tamagui/lucide-icons";
+import {
+  CameraOff,
+  ChevronLeft,
+  Lock,
+  MoreHorizontal,
+  UserX,
+} from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/CarouselsNew/FriendCarousel";
@@ -22,16 +28,10 @@ import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
-import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 
 const OtherProfile = React.memo(() => {
-  const scrollRef = useRef(null);
-  useScrollToTop(scrollRef);
-
   const router = useRouter();
 
   const navigation = useNavigation();
@@ -43,10 +43,8 @@ const OtherProfile = React.memo(() => {
 
   const { data: profileData } = useProfile();
 
-  const {
-    data: networkRelationships,
-    refetch: refetchNetworkRelationships,
-  } = api.profile.getNetworkRelationships.useQuery({ userId });
+  const { data: networkRelationships, refetch: refetchNetworkRelationships } =
+    api.profile.getNetworkRelationships.useQuery({ userId });
 
   const {
     data: postsData,
@@ -174,7 +172,12 @@ const OtherProfile = React.memo(() => {
         />
       );
     },
-    [profileData?.profilePictureUrl, profileData?.userId, profileData?.username, viewableItems],
+    [
+      profileData?.profilePictureUrl,
+      profileData?.userId,
+      profileData?.username,
+      viewableItems,
+    ],
   );
 
   const renderHeader = () => (
@@ -235,7 +238,6 @@ const OtherProfile = React.memo(() => {
     <>
       <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
         <FlashList
-          ref={scrollRef}
           data={postItems}
           renderItem={renderPost}
           ListHeaderComponent={renderHeader}
