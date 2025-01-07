@@ -30,7 +30,6 @@ import { ListItem } from "./ListItem";
 import {
   MediaListItem,
   MediaListItemActionProps,
-  MediaListItemSkeleton,
 } from "./MediaListItem";
 import { Popover } from "./Popover";
 import { Progress } from "./Progress";
@@ -116,7 +115,6 @@ export {
   Spinner,
   Skeleton,
   MediaListItem,
-  MediaListItemSkeleton,
   UserCard,
 };
 

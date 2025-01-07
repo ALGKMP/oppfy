@@ -140,7 +140,7 @@ const Blocked = () => {
       return (
         <YStack gap="$4">
           {Array.from({ length: 10 }).map((_, index) => (
-            <MediaListItemSkeleton key={index} />
+            <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
       );
