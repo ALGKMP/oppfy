@@ -1,5 +1,6 @@
 import React, {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -208,7 +209,7 @@ const SelfProfile = () => {
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmptyList}
         keyExtractor={(item) => `self-profile-post-${item.postId}`}
-        estimatedItemSize={300}
+        estimatedItemSize={664}
         showsVerticalScrollIndicator={false}
         onEndReached={handleOnEndReached}
         onRefresh={handleRefresh}
