@@ -1,9 +1,15 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { View as RNView, StyleSheet, TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { Edit3, Send, Settings2, Share2 } from "@tamagui/lucide-icons";
+import {
+  Calendar,
+  Edit3,
+  Send,
+  Settings2,
+  Share2,
+} from "@tamagui/lucide-icons";
 import { getToken, Text, View, XStack, YStack } from "tamagui";
 
 import Avatar from "~/components/Avatar";
@@ -17,13 +23,18 @@ interface HeaderProps {
   userId?: string;
 }
 
+const styles = StyleSheet.create({
+  patternText: {
+    position: "absolute",
+  },
+});
+
 const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   const router = useRouter();
   const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
     userId,
   });
 
-  // Loading states
   const [isImageLoaded, setIsImageLoaded] = React.useState(false);
 
   const defaultProfile = {
@@ -38,6 +49,65 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   };
 
   const profile = profileData ?? defaultProfile;
+
+  // Create abstract pattern elements
+  const createAbstractPattern = () => {
+    const elements = [];
+    const username = profile.username || "";
+
+    // Create floating letters from username
+    for (let i = 0; i < username.length; i++) {
+      const char = username[i];
+      const angle = (i / username.length) * Math.PI * 2;
+      const radius = 35 + Math.random() * 10;
+      const x = 50 + Math.cos(angle) * radius;
+      const y = 50 + Math.sin(angle) * radius;
+
+      elements.push({
+        type: "letter",
+        char,
+        x: x + "%",
+        y: y + "%",
+        scale: 0.8 + Math.random() * 0.4,
+        rotate: angle * (180 / Math.PI) + Math.random() * 30,
+        opacity: 0.4 + Math.random() * 0.3,
+      });
+    }
+
+    // Add decorative dots
+    for (let i = 0; i < 24; i++) {
+      const angle = (i / 24) * Math.PI * 2;
+      const radius = 20 + Math.random() * 40;
+      const x = 50 + Math.cos(angle) * radius;
+      const y = 50 + Math.sin(angle) * radius;
+
+      elements.push({
+        type: "dot",
+        x: x + "%",
+        y: y + "%",
+        size: 2 + Math.random() * 4,
+        opacity: 0.1 + Math.random() * 0.2,
+      });
+    }
+
+    // Add connecting lines
+    for (let i = 0; i < 12; i++) {
+      const startAngle = (i / 12) * Math.PI * 2;
+      const endAngle = ((i + 1) / 12) * Math.PI * 2;
+      const radius = 30 + Math.random() * 20;
+
+      elements.push({
+        type: "line",
+        x1: 50 + Math.cos(startAngle) * radius + "%",
+        y1: 50 + Math.sin(startAngle) * radius + "%",
+        x2: 50 + Math.cos(endAngle) * radius + "%",
+        y2: 50 + Math.sin(endAngle) * radius + "%",
+        opacity: 0.05 + Math.random() * 0.1,
+      });
+    }
+
+    return elements;
+  };
 
   return (
     <YStack>
@@ -68,6 +138,120 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
                 backgroundColor: "rgba(255,255,255,0.15)",
               }}
             />
+
+            {/* Abstract Pattern Overlay */}
+            <View
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              overflow="hidden"
+            >
+              {createAbstractPattern().map((element, i) => {
+                if (element.type === "letter") {
+                  return (
+                    <Text
+                      key={`letter-${i}`}
+                      position="absolute"
+                      color="white"
+                      fontSize={32}
+                      fontWeight="900"
+                      opacity={element.opacity}
+                      style={[
+                        styles.patternText,
+                        {
+                          left: element.x,
+                          top: element.y,
+                          transform: [
+                            { scale: element.scale },
+                            { rotate: element.rotate + "deg" },
+                          ] as any,
+                        },
+                      ]}
+                    >
+                      {element.char}
+                    </Text>
+                  );
+                }
+
+                if (element.type === "dot" && element.size !== undefined) {
+                  return (
+                    <View
+                      key={`dot-${i}`}
+                      position="absolute"
+                      backgroundColor="white"
+                      opacity={element.opacity}
+                      style={{
+                        left: element.x,
+                        top: element.y,
+                        width: element.size,
+                        height: element.size,
+                        borderRadius: element.size / 2,
+                      }}
+                    />
+                  );
+                }
+
+                if (element.type === "line") {
+                  const x1 = element.x1 || "0%";
+                  const y1 = element.y1 || "0%";
+                  const x2 = element.x2 || "0%";
+                  const y2 = element.y2 || "0%";
+
+                  // Convert percentages to numbers for calculations
+                  const x1Num = parseFloat(x1);
+                  const y1Num = parseFloat(y1);
+                  const x2Num = parseFloat(x2);
+                  const y2Num = parseFloat(y2);
+
+                  return (
+                    <View
+                      key={`line-${i}`}
+                      position="absolute"
+                      backgroundColor="white"
+                      opacity={element.opacity}
+                      style={{
+                        position: "absolute",
+                        left: x1,
+                        top: y1,
+                        width: "1px",
+                        height: "1px",
+                        transform: [
+                          {
+                            rotate:
+                              Math.atan2(y2Num - y1Num, x2Num - x1Num) + "rad",
+                          },
+                          {
+                            scaleX: Math.hypot(x2Num - x1Num, y2Num - y1Num),
+                          },
+                        ] as any,
+                        transformOrigin: "0 0",
+                      }}
+                    />
+                  );
+                }
+              })}
+            </View>
+
+            {/* Join Date Pill - Now at bottom right */}
+            <XStack
+              position="absolute"
+              bottom={12}
+              right={12}
+              alignItems="center"
+              gap="$2"
+              opacity={0.9}
+              backgroundColor="rgba(0,0,0,0.4)"
+              paddingHorizontal="$3.5"
+              paddingVertical="$2"
+              borderRadius="$12"
+            >
+              <Calendar size={14} color="white" />
+              <Text color="white" fontSize="$2" fontWeight="700">
+                Joined 2024
+              </Text>
+            </XStack>
           </>
         ) : (
           <View
