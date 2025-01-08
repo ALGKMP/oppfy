@@ -1,93 +1,120 @@
-import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import React, { useMemo } from "react";
+import { TouchableOpacity, useWindowDimensions } from "react-native";
+import { useRouter } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
+import { ChevronRight, Users } from "@tamagui/lucide-icons";
+import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
+
+import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
-import Carousel from "./Carousel";
+import type { RouterOutputs } from "~/utils/api";
+import { UserCard } from "../ui/UserCard";
 
-/*
- * TODO: Can make this a compound component later if we want to add more styles
- * or if we want to add more functionality to the carousel.
- * For example
- * - Turning the show more on and off
- * - Big cards and small cards
- */
+type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
+type SeeAllItem = { type: "see-all" };
+type ListItem = Friend | SeeAllItem;
 
-interface FriendCarouselProps {
-  userId?: string;
-}
+const isFriend = (item: ListItem): item is Friend => {
+  return !("type" in item);
+};
 
-function FriendCarousel(props: FriendCarouselProps) {
-  const { userId } = props;
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriendsData,
-    refetch: refetchFriendsData, // TODO: Some Context on the page that triggers refetching
-  } = useGetFriends({ userId });
-  const friendsItems = friendsData?.pages.flatMap((page) => page.items) ?? [];
+const SeeAllCard = ({ width }: { width: number }) => (
+  <YStack
+    width={width}
+    height={width * 1.2}
+    borderRadius="$6"
+    backgroundColor="$gray3"
+    alignItems="center"
+    justifyContent="center"
+    gap="$2"
+    opacity={0.8}
+  >
+    <ChevronRight size={24} opacity={0.6} />
+    <Text fontSize="$2" fontWeight="500" opacity={0.6}>
+      See All
+    </Text>
+  </YStack>
+);
 
-  const onShowMore = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (!userId) {
-      router.push({
-        pathname: "/self-profile/connections/friends",
-        params: { userId: props.userId },
-      });
-    } else {
-      router.push({
-        pathname: "/profile/connections/friends",
-        params: { userId: props.userId },
-      });
-    }
-  };
+const FriendCarousel = () => {
+  const { width: windowWidth } = useWindowDimensions();
+  const { routeProfile } = useRouteProfile();
+  const router = useRouter();
+
+  const { data: friendsData, isLoading } =
+    api.friend.paginateFriendsSelf.useInfiniteQuery(
+      { pageSize: 10 },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+        staleTime: 60 * 1000, // 1 minute
+      },
+    );
+
+  const friends = useMemo(
+    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
+    [friendsData],
+  );
+
+  if (isLoading) {
+    return (
+      <YStack padding="$4" alignItems="center">
+        <Spinner size="small" />
+      </YStack>
+    );
+  }
+
+  if (!friends?.length) {
+    return null;
+  }
+
+  const CARD_WIDTH = windowWidth * 0.25;
+  const CARD_GAP = getToken("$3", "space") as number;
+
+  const items: ListItem[] = [...friends, { type: "see-all" }];
 
   return (
-    <Carousel
-      title="Friends"
-      onShowMore={onShowMore}
-      isLoading={isLoadingFriendsData}
-      data={friendsItems}
-    />
+    <YStack gap="$2">
+      <XStack alignItems="center" gap="$2" opacity={0.7}>
+        <Users size={14} />
+        <Text fontSize="$3" fontWeight="500">
+          Your Circle
+        </Text>
+      </XStack>
+
+      <FlashList
+        data={items}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        estimatedItemSize={CARD_WIDTH}
+        ItemSeparatorComponent={() => <View width={CARD_GAP} />}
+        renderItem={({ item, index }) => {
+          if (!isFriend(item)) {
+            return (
+              <TouchableOpacity
+                onPress={() => router.push("/self-profile/connections/friends")}
+              >
+                <SeeAllCard width={CARD_WIDTH} />
+              </TouchableOpacity>
+            );
+          }
+
+          return (
+            <UserCard
+              userId={item.userId}
+              username={item.username}
+              profilePictureUrl={item.profilePictureUrl}
+              size="small"
+              width={CARD_WIDTH}
+              index={index}
+              onPress={() =>
+                routeProfile({ userId: item.userId, username: item.username })
+              }
+            />
+          );
+        }}
+      />
+    </YStack>
   );
-}
-
-/*
- * ==========================================
- * ============== hooks =====================
- * ==========================================
- */
-
-/**
- * A hook that gets the friends of a user
- *
- * @param {string?} userId - The userId of the user (optional if getting friends for self)
- * @returns {actions: {follow: {handler: () => void, loading: boolean}, unfollow: {handler: () => void, loading: boolean}, cancelFollowRequest: {handler: () => void, loading: boolean}, cancelFriendRequest: {handler: () => void, loading: boolean}, removeFriend: {handler: () => void, loading: boolean}}}
- */
-
-interface UseGetFriendsProps {
-  userId?: string;
-}
-
-const useGetFriends = (props: UseGetFriendsProps) => {
-  const { userId } = props;
-
-  const selfQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
-    { pageSize: 10 },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !userId,
-      refetchOnMount: true,
-    },
-  );
-
-  const othersQuery = api.friend.paginateFriendsOthers.useInfiniteQuery(
-    { userId: userId ?? "", pageSize: 10 },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!userId,
-      refetchOnMount: true,
-    },
-  );
-
-  return userId ? othersQuery : selfQuery;
 };
 
 export default FriendCarousel;
