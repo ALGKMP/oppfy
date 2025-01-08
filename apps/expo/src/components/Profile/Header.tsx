@@ -3,19 +3,11 @@ import { TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import {
-  Edit3,
-  MessageCircle,
-  Send,
-  Settings2,
-  Share,
-  Share2,
-  UserPlus,
-  Users,
-} from "@tamagui/lucide-icons";
+import { Edit3, Send, Settings2, Share2 } from "@tamagui/lucide-icons";
 import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
 
 import Avatar from "~/components/Avatar";
+import ActionButton from "~/components/Profile/ActionButton";
 import { Button } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
 
@@ -97,7 +89,7 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
             </YStack>
           </YStack>
 
-          {/* Action Buttons */}
+          {/* Quick Action Buttons */}
           {!userId ? (
             <XStack gap="$3" paddingBottom="$1">
               <Button
@@ -127,13 +119,6 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
             </XStack>
           ) : (
             <XStack gap="$3" paddingBottom="$1">
-              {/* <Button
-                icon={<MessageCircle size={20} />}
-                variant="outlined"
-                size="$3.5"
-                circular
-                borderWidth={1.5}
-              /> */}
               <Button
                 icon={<Send size={20} />}
                 variant="outlined"
@@ -152,33 +137,8 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
           </Text>
         )}
 
-        {/* Action Buttons for Other Profiles */}
-        {userId && (
-          <XStack gap="$3">
-            <Button
-              icon={<UserPlus size={18} />}
-              size="$4"
-              flex={1}
-              backgroundColor="$primary"
-              color="white"
-              borderRadius="$6"
-              pressStyle={{ opacity: 0.8 }}
-            >
-              Follow
-            </Button>
-            <Button
-              icon={<Users size={18} />}
-              size="$4"
-              flex={1}
-              variant="outlined"
-              borderWidth={1.5}
-              borderRadius="$6"
-              pressStyle={{ opacity: 0.8 }}
-            >
-              Add Friend
-            </Button>
-          </XStack>
-        )}
+        {/* Action Buttons */}
+        <ActionButton userId={userId} />
 
         {/* Stats */}
         <XStack
@@ -196,30 +156,55 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
           elevation={2}
         >
           <TouchableOpacity
-            onPress={() => router.push("/self-profile/connections/posts")}
-          >
-            <StatItem label="Posts" value={profileData.postCount ?? 0} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push("/self-profile/connections/following")}
+            onPress={() =>
+              router.push({
+                pathname: userId
+                  ? "/profile/connections/posts"
+                  : "/self-profile/connections/posts",
+                ...(userId && { params: { userId } }),
+              })
+            }
           >
             <StatItem
-              label="Following"
-              value={profileData.followingCount ?? 0}
+              label="Posts"
+              value={profileData.profileStats?.postCount ?? 0}
             />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push("/self-profile/connections/followers")}
+            onPress={() =>
+              router.push({
+                pathname: userId
+                  ? "/profile/connections/following"
+                  : "/self-profile/connections/following",
+                ...(userId && { params: { userId } }),
+              })
+            }
           >
-            <StatItem
-              label="Followers"
-              value={profileData.followerCount ?? 0}
-            />
+            <StatItem label="Following" value={profileData.followingCount} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => router.push("/self-profile/connections/friends")}
+            onPress={() =>
+              router.push({
+                pathname: userId
+                  ? "/profile/connections/followers"
+                  : "/self-profile/connections/followers",
+                ...(userId && { params: { userId } }),
+              })
+            }
           >
-            <StatItem label="Friends" value={profileData.friendCount ?? 0} />
+            <StatItem label="Followers" value={profileData.followerCount} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: userId
+                  ? "/profile/connections/friends"
+                  : "/self-profile/connections/friends",
+                ...(userId && { params: { userId } }),
+              })
+            }
+          >
+            <StatItem label="Friends" value={profileData.friendCount} />
           </TouchableOpacity>
         </XStack>
       </YStack>

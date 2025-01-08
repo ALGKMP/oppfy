@@ -1,22 +1,30 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import type { IconProps } from "@tamagui/helpers-icon";
+import { Edit3, Share2, UserPlus, Users } from "@tamagui/lucide-icons";
+import { XStack } from "tamagui";
 
-import { Button, Text, View, XStack } from "~/components/ui";
+import { Button } from "~/components/ui";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { Spinner } from "~/components/ui/Spinner";
 import { api } from "~/utils/api";
 
-/*
- * TODO: Instead of passing in the networkStatus and userId as props,
- * we could make this component make the requests itself.
- * This would make the component more flexible and easier to understand.
- */
-
 interface ActionButtonProps {
-  userId?: string; // TODO: For now, this is only used for Other Profiles
+  userId?: string;
+}
+
+type IconComponent = React.FC<IconProps>;
+
+interface ButtonConfig {
+  label: string;
+  action: string;
+  icon: IconComponent;
+  iconSize?: number;
+  isPrimary?: boolean;
 }
 
 const ActionButton = ({ userId }: ActionButtonProps) => {
+  const router = useRouter();
   const { actions } = useProfileActionButtons(userId);
 
   // Only make the network status query if userId is provided
@@ -29,44 +37,47 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   // Handle self-profile case
   if (!userId) {
     return (
-      <XStack gap="$4">
-        {Object.entries(actions).map(([key, { handler, loading }]) => (
-          <Button key={key} flex={1} rounded outlined onPress={handler}>
-            <XStack gap="$2" alignItems="center">
-              <Text>
-                {key === "editProfile" ? "Edit Profile" : "Share Profile"}
-              </Text>
-              {loading && <Spinner size="small" color="$color" />}
-            </XStack>
-          </Button>
-        ))}
+      <XStack gap="$3">
+        <Button
+          icon={<Edit3 size={20} />}
+          variant="outlined"
+          size="$3.5"
+          circular
+          borderWidth={1.5}
+          onPress={() => router.push("/edit-profile")}
+        />
+        <Button
+          icon={<Share2 size={20} />}
+          variant="outlined"
+          size="$3.5"
+          circular
+          borderWidth={1.5}
+          onPress={() => router.push("/share-profile")}
+        />
       </XStack>
     );
   }
 
   if (isNetworkStatusLoading) {
     return (
-      <XStack gap="$4">
-        <View flex={1}>
-          <Skeleton width="100%" height={44} radius={20} />
-        </View>
-        <View flex={1}>
-          <Skeleton width="100%" height={44} radius={20} />
-        </View>
+      <XStack gap="$3">
+        <Skeleton width="48%" height={44} radius={12} />
+        <Skeleton width="48%" height={44} radius={12} />
       </XStack>
     );
   }
 
   if (networkStatus?.isTargetUserBlocked || networkStatus?.isOtherUserBlocked) {
     return (
-      <XStack gap="$4">
+      <XStack gap="$3">
         <Button
           flex={1}
-          borderRadius={20}
+          size="$4"
           backgroundColor="$gray3"
+          borderRadius="$6"
           disabled={true}
         >
-          <Text>Blocked</Text>
+          Blocked
         </Button>
       </XStack>
     );
@@ -75,32 +86,50 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   const { privacy, targetUserFollowState, targetUserFriendState } =
     networkStatus ?? {};
 
-  const buttonConfigs = {
-    follow: { label: "Follow", action: "follow", backgroundColor: "#F214FF" },
+  const buttonConfigs: Record<string, ButtonConfig> = {
+    follow: {
+      label: "Follow",
+      action: "follow",
+      icon: UserPlus,
+      iconSize: 18,
+      isPrimary: true,
+    },
     unfollow: {
       label: "Unfollow",
       action: "unfollow",
-      backgroundColor: "$gray3",
+      icon: UserPlus,
+      iconSize: 18,
+      isPrimary: false,
     },
     friend: {
       label: "Add Friend",
       action: "addFriend",
-      backgroundColor: "#F214FF",
+      icon: Users,
+      iconSize: 18,
+      isPrimary:
+        targetUserFollowState === "Following" ||
+        targetUserFollowState === "OutboundRequest",
     },
     removeFriend: {
-      label: "Remove Friend",
+      label: "Remove",
       action: "removeFriend",
-      backgroundColor: "$gray3",
+      icon: Users,
+      iconSize: 18,
+      isPrimary: false,
     },
     cancelFollowRequest: {
-      label: "Cancel Follow Request",
+      label: "Requested",
       action: "cancelFollowRequest",
-      backgroundColor: "$gray3",
+      icon: UserPlus,
+      iconSize: 18,
+      isPrimary: false,
     },
     cancelFriendRequest: {
-      label: "Cancel Friend Request",
+      label: "Requested",
       action: "cancelFriendRequest",
-      backgroundColor: "$gray3",
+      icon: Users,
+      iconSize: 18,
+      isPrimary: false,
     },
   };
 
@@ -121,54 +150,42 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   const buttonKeys = buttonCombinations[key] ?? [];
 
   return (
-    <XStack gap="$4">
+    <XStack gap="$3">
       {buttonKeys.map((buttonKey) => {
         const config = buttonConfigs[buttonKey];
+        if (!config) return null;
+
         const actionKey = config.action as keyof typeof actions;
         const action = actions[actionKey];
         if (!action) return null;
+
         const { handler, loading, disabled } = action;
+        const Icon = config.icon;
+        const iconSize = config.iconSize ?? 18;
 
         return (
           <Button
             key={buttonKey}
             flex={1}
-            backgroundColor={config.backgroundColor}
+            size="$4"
+            icon={!loading ? <Icon size={iconSize} /> : undefined}
+            backgroundColor={config.isPrimary ? "$primary" : undefined}
+            color={config.isPrimary ? "white" : undefined}
+            variant={config.isPrimary ? undefined : "outlined"}
+            borderWidth={config.isPrimary ? 0 : 1.5}
+            borderRadius="$6"
             onPress={handler}
             disabled={disabled}
-            borderWidth={1}
-            rounded
-            outlined
-            borderColor="white"
-            // height={40}
-            pressStyle={{
-              borderWidth: 1,
-              borderColor: "white",
-            }}
+            pressStyle={{ opacity: 0.8 }}
           >
-            <XStack
-              position="relative"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Text
-                textAlign="center"
-                // opacity={loading ? 0 : 1} // Hide text when loading
-              >
-                {config.label}
-              </Text>
-              {loading && (
-                <XStack
-                  position="absolute"
-                  top={0}
-                  bottom={0}
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Spinner size="small" color="$color" />
-                </XStack>
-              )}
-            </XStack>
+            {loading ? (
+              <Spinner
+                size="small"
+                color={config.isPrimary ? "white" : "$color"}
+              />
+            ) : (
+              config.label
+            )}
           </Button>
         );
       })}
@@ -176,18 +193,6 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   );
 };
 
-/*
- * ==========================================
- * ============== Hooks =====================
- * ==========================================
- */
-
-/**
- * TODO: A hook that returns the functions to handle the actions for the profile (This is old code, change later)
- *
- * @param {string} userId - The userId of the user
- * @returns {actions: {follow: {handler: () => void, loading: boolean}, unfollow: {handler: () => void, loading: boolean}, cancelFollowRequest: {handler: () => void, loading: boolean}, cancelFriendRequest: {handler: () => void, loading: boolean}, removeFriend: {handler: () => void, loading: boolean}}}
- */
 const useProfileActionButtons = (userId?: string) => {
   const utils = api.useUtils();
   const router = useRouter();
@@ -195,7 +200,6 @@ const useProfileActionButtons = (userId?: string) => {
     Record<string, boolean>
   >({});
 
-  // NOTE: mutations must be declared unconditionally to not break the rules of hooks
   const followUser = api.follow.followUser.useMutation({
     onSettled: () => {
       void invalidateQueries("follow");
@@ -257,7 +261,7 @@ const useProfileActionButtons = (userId?: string) => {
     Object.values(isInvalidatingByAction).some(
       (isInvalidating) => isInvalidating,
     );
-  // Create actions object based on userId
+
   const actions = userId
     ? {
         follow: {
