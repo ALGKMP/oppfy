@@ -260,9 +260,9 @@ export class PostService {
     }
   }
 
-  async getPost(postId: string): Promise<Post> {
+  async getPost(postId: string, userId: string): Promise<Post> {
     try {
-      const post = await this.postRepository.getPost(postId);
+      const post = await this.postRepository.getPost(postId, userId);
       if (!post) {
         throw new DomainError(
           ErrorCode.FAILED_TO_GET_POST,
@@ -294,13 +294,6 @@ export class PostService {
 
   async deletePost(postId: string) {
     try {
-      // get the post
-      const post = await this.postRepository.getPost(postId);
-
-      if (!post) {
-        throw new DomainError(ErrorCode.POST_NOT_FOUND, "Post not found.");
-      }
-
       await this.postRepository.deletePost(postId);
 
       // if (post.mediaType === "video") {
@@ -329,7 +322,7 @@ export class PostService {
       await this.likeRepository.addLike(postId, userId);
       await this.postStatsRepository.incrementLikesCount(postId);
 
-      const post = await this.getPost(postId);
+      const post = await this.getPost(postId, userId);
 
       // Only store and send notification if the liker is not the post owner
       if (userId !== post.recipientId) {
@@ -443,7 +436,7 @@ export class PostService {
     await this.commentRepository.addComment({ postId, userId, body });
     await this.postStatsRepository.incrementCommentsCount(postId);
 
-    const post = await this.getPost(postId);
+    const post = await this.getPost(postId, userId);
 
     // Only store and send notification if the commenter is not the post owner
     if (userId !== post.recipientId) {
@@ -589,9 +582,9 @@ export class PostService {
     }
   }
 
-  async getPostForNextJs(postId: string): Promise<Post> {
+  async getPostForNextJs(postId: string): Promise<Omit<Post, "hasLiked">> {
     try {
-      const post = await this.postRepository.getPost(postId);
+      const post = await this.postRepository.getPostForNextJs(postId);
       if (!post) {
         throw new DomainError(
           ErrorCode.FAILED_TO_GET_POST,
@@ -608,7 +601,7 @@ export class PostService {
         throw new DomainError(ErrorCode.UNAUTHORIZED, "This post is private");
       }
 
-      const processedPost = await this._processPostData(post);
+      const processedPost = await this._processPostDataForNextJs(post);
       return processedPost;
     } catch (error) {
       console.error(`Error in getPostForNextJs for postId: ${postId}: `, error);
@@ -653,6 +646,47 @@ export class PostService {
     }
     return data;
   }
+
+  private async _processPostDataForNextJs(
+    data: Omit<Post, "hasLiked">,
+  ): Promise<Omit<Post, "hasLiked">> {
+    try {
+      // Update author profile picture URL
+      if (data.authorProfilePicture !== null) {
+        data.authorProfilePicture =
+          await this.cloudFrontService.getSignedUrlForProfilePicture(
+            data.authorProfilePicture,
+          );
+      }
+
+      if (data.recipientProfilePicture !== null) {
+        data.recipientProfilePicture =
+          await this.cloudFrontService.getSignedUrlForProfilePicture(
+            data.recipientProfilePicture,
+          );
+      }
+
+      if (data.mediaType === "image") {
+        const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
+          data.imageUrl,
+        );
+        data.imageUrl = imageUrl;
+      } else {
+        data.imageUrl = `https://stream.mux.com/${data.imageUrl}.m3u8`;
+      }
+    } catch (error) {
+      console.error(
+        `Error updating profile picture URLs for postId: ${data.postId}, authorId: ${data.authorId}, recipientId: ${data.recipientId}: `,
+        error,
+      );
+      throw new DomainError(
+        ErrorCode.FAILED_TO_GET_PROFILE_PICTURE,
+        "Failed to get profile picture URL.",
+      );
+    }
+    return data;
+  }
+
 
   private async _processPaginatedPostData(
     data: Post[],

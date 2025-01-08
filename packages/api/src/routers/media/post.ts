@@ -392,7 +392,7 @@ export const postRouter = createTRPCRouter({
     .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-        return await ctx.services.post.getPost(input.postId);
+        return await ctx.services.post.getPost(input.postId, ctx.session.uid);
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
