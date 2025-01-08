@@ -4,16 +4,23 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Sparkles } from "@tamagui/lucide-icons";
 import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
+import type { SpaceTokens, Token } from "tamagui";
 
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
+import { H5, Spacer } from "../ui";
 import { UserCard } from "../ui/UserCard";
 
 type Recommendation =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
 type SeeAllItem = { type: "see-all" };
 type ListItem = Recommendation | SeeAllItem;
+
+interface RecommendationCarouselProps {
+  paddingHorizontal?: SpaceTokens;
+  paddingVertical?: SpaceTokens;
+}
 
 const isRecommendation = (item: ListItem): item is Recommendation => {
   return !("type" in item);
@@ -37,7 +44,10 @@ const SeeAllCard = ({ width }: { width: number }) => (
   </YStack>
 );
 
-const RecommendationCarousel = () => {
+const RecommendationCarousel = ({
+  paddingHorizontal,
+  paddingVertical,
+}: RecommendationCarouselProps = {}) => {
   const { width: windowWidth } = useWindowDimensions();
   const { routeProfile } = useRouteProfile();
   const router = useRouter();
@@ -85,17 +95,20 @@ const RecommendationCarousel = () => {
   }
 
   const CARD_WIDTH = windowWidth * 0.25;
-  const CARD_GAP = getToken("$3", "space") as number;
+  const CARD_GAP = getToken("$2", "space") as number;
 
   const items: ListItem[] = [...recommendations, { type: "see-all" }];
 
   return (
-    <YStack gap="$2">
-      <XStack alignItems="center" gap="$2" opacity={0.7}>
+    <YStack paddingVertical={paddingVertical} gap="$2">
+      <XStack
+        paddingHorizontal={paddingHorizontal}
+        alignItems="center"
+        gap="$2"
+        opacity={0.7}
+      >
         <Sparkles size={14} />
-        <Text fontSize="$3" fontWeight="500">
-          Suggested for You
-        </Text>
+        <H5>Suggested for You</H5>
       </XStack>
 
       <FlashList
@@ -103,7 +116,10 @@ const RecommendationCarousel = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
-        ItemSeparatorComponent={() => <View width={CARD_GAP} />}
+        ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
+        contentContainerStyle={{
+          paddingHorizontal: getToken(paddingHorizontal as Token, "space"),
+        }}
         renderItem={({ item, index }) => {
           if (!isRecommendation(item)) {
             return (

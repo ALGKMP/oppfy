@@ -4,15 +4,22 @@ import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Users } from "@tamagui/lucide-icons";
 import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
+import type { SpaceTokens, Token } from "tamagui";
 
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
+import { H5, Spacer } from "../ui";
 import { UserCard } from "../ui/UserCard";
 
 type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
 type SeeAllItem = { type: "see-all" };
 type ListItem = Friend | SeeAllItem;
+
+interface FriendCarouselProps {
+  paddingHorizontal?: SpaceTokens;
+  paddingVertical?: SpaceTokens;
+}
 
 const isFriend = (item: ListItem): item is Friend => {
   return !("type" in item);
@@ -36,7 +43,10 @@ const SeeAllCard = ({ width }: { width: number }) => (
   </YStack>
 );
 
-const FriendCarousel = () => {
+const FriendCarousel = ({
+  paddingHorizontal,
+  paddingVertical,
+}: FriendCarouselProps = {}) => {
   const { width: windowWidth } = useWindowDimensions();
   const { routeProfile } = useRouteProfile();
   const router = useRouter();
@@ -68,17 +78,20 @@ const FriendCarousel = () => {
   }
 
   const CARD_WIDTH = windowWidth * 0.25;
-  const CARD_GAP = getToken("$3", "space") as number;
+  const CARD_GAP = getToken("$2", "space") as number;
 
   const items: ListItem[] = [...friends, { type: "see-all" }];
 
   return (
-    <YStack gap="$2">
-      <XStack alignItems="center" gap="$2" opacity={0.7}>
+    <YStack paddingVertical={paddingVertical} gap="$2">
+      <XStack
+        paddingHorizontal={paddingHorizontal}
+        alignItems="center"
+        gap="$2"
+        opacity={0.7}
+      >
         <Users size={14} />
-        <Text fontSize="$3" fontWeight="500">
-          Your Circle
-        </Text>
+        <H5>Friends</H5>
       </XStack>
 
       <FlashList
@@ -86,7 +99,10 @@ const FriendCarousel = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
-        ItemSeparatorComponent={() => <View width={CARD_GAP} />}
+        ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
+        contentContainerStyle={{
+          paddingHorizontal: getToken(paddingHorizontal as Token, "space"),
+        }}
         renderItem={({ item, index }) => {
           if (!isFriend(item)) {
             return (

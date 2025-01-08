@@ -160,7 +160,7 @@ const SelfProfile = React.memo(() => {
           stats={{
             likes: item.likesCount,
             comments: item.commentsCount,
-            hasLiked: item.hasLiked
+            hasLiked: item.hasLiked,
           }}
         />
       );
@@ -177,9 +177,9 @@ const SelfProfile = React.memo(() => {
     <YStack gap="$4">
       <Header />
       {profileData?.friendCount && profileData?.friendCount > 0 ? (
-        <FriendCarousel />
+        <FriendCarousel paddingHorizontal="$2.5" />
       ) : (
-        <RecommendationCarousel />
+        <RecommendationCarousel paddingHorizontal="$2.5" />
       )}
     </YStack>
   );
