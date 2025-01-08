@@ -14,7 +14,6 @@ import {
   H5,
   MediaListItem,
   MediaListItemActionProps,
-  MediaListItemSkeleton,
   Paragraph,
   SizableText,
   XStack,

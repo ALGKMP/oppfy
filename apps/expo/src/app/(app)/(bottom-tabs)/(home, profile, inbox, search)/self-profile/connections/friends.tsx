@@ -6,11 +6,7 @@ import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken, H6, YStack } from "tamagui";
 
 import { SearchInput } from "~/components/Inputs";
-import {
-  MediaListItem,
-  MediaListItemSkeleton,
-  useActionSheetController,
-} from "~/components/ui";
+import { MediaListItem, useActionSheetController } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";

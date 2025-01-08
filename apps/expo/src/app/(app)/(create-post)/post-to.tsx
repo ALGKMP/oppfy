@@ -14,7 +14,6 @@ import {
   H5,
   H6,
   MediaListItem,
-  MediaListItemSkeleton,
   SearchInput,
   Spacer,
   useDialogController,

@@ -10,7 +10,6 @@ import { SearchInput } from "~/components/Inputs";
 import {
   MediaListItem,
   MediaListItemActionProps,
-  MediaListItemSkeleton,
   useActionSheetController,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
