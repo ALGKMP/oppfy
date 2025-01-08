@@ -6,7 +6,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { getToken, H5, Spacer, YStack } from "tamagui";
 
-import { MediaListItem, MediaListItemSkeleton } from "~/components/ui";
+import { MediaListItem } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { api, type RouterOutputs } from "~/utils/api";
 
