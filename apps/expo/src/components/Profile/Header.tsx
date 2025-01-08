@@ -1,5 +1,17 @@
 import React from "react";
 import { View as RNView, StyleSheet, TouchableOpacity } from "react-native";
+import Animated, {
+  Easing,
+  interpolateColor,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -23,9 +35,20 @@ interface HeaderProps {
   userId?: string;
 }
 
+const AnimatedText = Animated.createAnimatedComponent(Text);
+const AnimatedView = Animated.createAnimatedComponent(View);
+
 const styles = StyleSheet.create({
   patternText: {
     position: "absolute",
+  },
+  gradientOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.4,
   },
 });
 
@@ -50,7 +73,30 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
 
   const profile = profileData ?? defaultProfile;
 
-  // Create abstract pattern elements
+  // Animation values
+  const gradientProgress = useSharedValue(0);
+  const pulseScale = useSharedValue(1);
+
+  React.useEffect(() => {
+    // Start continuous gradient animation
+    gradientProgress.value = withRepeat(
+      withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+
+    // Start pulse animation
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.2, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1,
+      true,
+    );
+  }, []);
+
+  // Create abstract pattern elements with animations
   const createAbstractPattern = () => {
     const elements = [];
     const username = profile.username || "";
@@ -63,14 +109,43 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
       const x = 50 + Math.cos(angle) * radius;
       const y = 50 + Math.sin(angle) * radius;
 
+      const rotation = useSharedValue(angle * (180 / Math.PI));
+      const scale = useSharedValue(0.8 + Math.random() * 0.4);
+
+      // Create unique animation for each letter
+      React.useEffect(() => {
+        rotation.value = withRepeat(
+          withTiming(rotation.value + 360, {
+            duration: 10000 + Math.random() * 5000,
+            easing: Easing.linear,
+          }),
+          -1,
+          true,
+        );
+
+        scale.value = withRepeat(
+          withSequence(
+            withTiming(scale.value * 1.2, {
+              duration: 2000 + Math.random() * 1000,
+            }),
+            withTiming(scale.value, { duration: 2000 + Math.random() * 1000 }),
+          ),
+          -1,
+          true,
+        );
+      }, []);
+
+      const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }, { rotate: `${rotation.value}deg` }],
+        opacity: withSpring(0.4 + Math.random() * 0.3),
+      }));
+
       elements.push({
         type: "letter",
         char,
         x: x + "%",
         y: y + "%",
-        scale: 0.8 + Math.random() * 0.4,
-        rotate: angle * (180 / Math.PI) + Math.random() * 30,
-        opacity: 0.4 + Math.random() * 0.3,
+        animatedStyle,
       });
     }
 
@@ -81,20 +156,78 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
       const x = 50 + Math.cos(angle) * radius;
       const y = 50 + Math.sin(angle) * radius;
 
+      const dotScale = useSharedValue(1);
+      const dotOpacity = useSharedValue(0.1 + Math.random() * 0.2);
+
+      React.useEffect(() => {
+        dotScale.value = withRepeat(
+          withSequence(
+            withDelay(
+              Math.random() * 2000,
+              withTiming(1.5, { duration: 1500 + Math.random() * 1000 }),
+            ),
+            withTiming(1, { duration: 1500 + Math.random() * 1000 }),
+          ),
+          -1,
+          true,
+        );
+
+        dotOpacity.value = withRepeat(
+          withSequence(
+            withTiming(0.3, { duration: 2000 }),
+            withTiming(0.1, { duration: 2000 }),
+          ),
+          -1,
+          true,
+        );
+      }, []);
+
+      const animatedDotStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: dotScale.value }],
+        opacity: dotOpacity.value,
+      }));
+
       elements.push({
         type: "dot",
         x: x + "%",
         y: y + "%",
         size: 2 + Math.random() * 4,
-        opacity: 0.1 + Math.random() * 0.2,
+        animatedStyle: animatedDotStyle,
       });
     }
 
-    // Add connecting lines
+    // Add connecting lines with flow animation
     for (let i = 0; i < 12; i++) {
       const startAngle = (i / 12) * Math.PI * 2;
       const endAngle = ((i + 1) / 12) * Math.PI * 2;
       const radius = 30 + Math.random() * 20;
+
+      const lineProgress = useSharedValue(0);
+
+      React.useEffect(() => {
+        lineProgress.value = withRepeat(
+          withSequence(
+            withDelay(
+              i * 200,
+              withTiming(1, {
+                duration: 2000,
+                easing: Easing.inOut(Easing.ease),
+              }),
+            ),
+            withTiming(0, {
+              duration: 2000,
+              easing: Easing.inOut(Easing.ease),
+            }),
+          ),
+          -1,
+          true,
+        );
+      }, []);
+
+      const animatedLineStyle = useAnimatedStyle(() => ({
+        opacity: lineProgress.value * 0.15,
+        transform: [{ scaleX: lineProgress.value }],
+      }));
 
       elements.push({
         type: "line",
@@ -102,12 +235,29 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
         y1: 50 + Math.sin(startAngle) * radius + "%",
         x2: 50 + Math.cos(endAngle) * radius + "%",
         y2: 50 + Math.sin(endAngle) * radius + "%",
-        opacity: 0.05 + Math.random() * 0.1,
+        animatedStyle: animatedLineStyle,
       });
     }
 
     return elements;
   };
+
+  // Gradient animation style
+  const gradientStyle = useAnimatedStyle(() => {
+    const backgroundColor = interpolateColor(
+      gradientProgress.value,
+      [0, 0.5, 1],
+      [
+        "rgba(130, 130, 255, 0.2)",
+        "rgba(255, 130, 130, 0.2)",
+        "rgba(130, 130, 255, 0.2)",
+      ],
+    );
+
+    return {
+      backgroundColor,
+    };
+  });
 
   return (
     <YStack>
@@ -139,6 +289,9 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
               }}
             />
 
+            {/* Animated Gradient Overlay */}
+            <Animated.View style={[styles.gradientOverlay, gradientStyle]} />
+
             {/* Abstract Pattern Overlay */}
             <View
               position="absolute"
@@ -151,44 +304,42 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
               {createAbstractPattern().map((element, i) => {
                 if (element.type === "letter") {
                   return (
-                    <Text
+                    <AnimatedText
                       key={`letter-${i}`}
                       position="absolute"
                       color="white"
                       fontSize={32}
                       fontWeight="900"
-                      opacity={element.opacity}
                       style={[
                         styles.patternText,
                         {
                           left: element.x,
                           top: element.y,
-                          transform: [
-                            { scale: element.scale },
-                            { rotate: element.rotate + "deg" },
-                          ] as any,
                         },
+                        element.animatedStyle,
                       ]}
                     >
                       {element.char}
-                    </Text>
+                    </AnimatedText>
                   );
                 }
 
                 if (element.type === "dot" && element.size !== undefined) {
                   return (
-                    <View
+                    <AnimatedView
                       key={`dot-${i}`}
                       position="absolute"
                       backgroundColor="white"
-                      opacity={element.opacity}
-                      style={{
-                        left: element.x,
-                        top: element.y,
-                        width: element.size,
-                        height: element.size,
-                        borderRadius: element.size / 2,
-                      }}
+                      style={[
+                        {
+                          left: element.x,
+                          top: element.y,
+                          width: element.size,
+                          height: element.size,
+                          borderRadius: element.size / 2,
+                        },
+                        element.animatedStyle,
+                      ]}
                     />
                   );
                 }
@@ -199,35 +350,37 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
                   const x2 = element.x2 || "0%";
                   const y2 = element.y2 || "0%";
 
-                  // Convert percentages to numbers for calculations
                   const x1Num = parseFloat(x1);
                   const y1Num = parseFloat(y1);
                   const x2Num = parseFloat(x2);
                   const y2Num = parseFloat(y2);
 
                   return (
-                    <View
+                    <AnimatedView
                       key={`line-${i}`}
                       position="absolute"
                       backgroundColor="white"
-                      opacity={element.opacity}
-                      style={{
-                        position: "absolute",
-                        left: x1,
-                        top: y1,
-                        width: "1px",
-                        height: "1px",
-                        transform: [
-                          {
-                            rotate:
-                              Math.atan2(y2Num - y1Num, x2Num - x1Num) + "rad",
-                          },
-                          {
-                            scaleX: Math.hypot(x2Num - x1Num, y2Num - y1Num),
-                          },
-                        ] as any,
-                        transformOrigin: "0 0",
-                      }}
+                      style={[
+                        {
+                          position: "absolute",
+                          left: x1,
+                          top: y1,
+                          width: "1px",
+                          height: "1px",
+                          transform: [
+                            {
+                              rotate:
+                                Math.atan2(y2Num - y1Num, x2Num - x1Num) +
+                                "rad",
+                            },
+                            {
+                              scaleX: Math.hypot(x2Num - x1Num, y2Num - y1Num),
+                            },
+                          ] as any,
+                          transformOrigin: "0 0",
+                        },
+                        element.animatedStyle,
+                      ]}
                     />
                   );
                 }
