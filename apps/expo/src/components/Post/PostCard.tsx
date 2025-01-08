@@ -274,7 +274,7 @@ const ImageComponent = ({ endpoint, media, stats }: ImageComponentProps) => {
       <View>
         <Image
           source={{ uri: media.url }}
-          recyclingKey={media.url}
+          recyclingKey={media.id}
           cachePolicy="memory-disk"
           style={{
             width: "100%",
