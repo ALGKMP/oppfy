@@ -67,8 +67,8 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
   if (isNetworkStatusLoading) {
     return (
       <XStack gap="$3">
-        <Skeleton width="48%" height={44} radius={12} />
-        <Skeleton width="48%" height={44} radius={12} />
+        <Skeleton width="48%" height={44} radius="$6" />
+        <Skeleton width="48%" height={44} radius="$6" />
       </XStack>
     );
   }

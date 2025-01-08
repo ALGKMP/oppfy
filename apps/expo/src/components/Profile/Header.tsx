@@ -95,10 +95,15 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
                 </>
               ) : (
                 <>
-                  <Text fontWeight="700" fontSize="$7" color="$color">
+                  <Text
+                    height={28}
+                    fontWeight="700"
+                    fontSize="$7"
+                    color="$color"
+                  >
                     {profile.name}
                   </Text>
-                  <Text fontSize="$3" color="$color" opacity={0.6}>
+                  <Text height={16} fontSize="$3" color="$color" opacity={0.6}>
                     @{profile.username}
                   </Text>
                 </>
