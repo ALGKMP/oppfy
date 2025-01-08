@@ -39,21 +39,27 @@ const ActionButton = ({ userId }: ActionButtonProps) => {
     return (
       <XStack gap="$3">
         <Button
-          icon={<Edit3 size={20} />}
+          flex={1}
+          size="$4"
+          icon={<Edit3 size={18} />}
           variant="outlined"
-          size="$3.5"
-          circular
           borderWidth={1.5}
+          borderRadius="$6"
           onPress={() => router.push("/edit-profile")}
-        />
+        >
+          Edit Profile
+        </Button>
         <Button
-          icon={<Share2 size={20} />}
-          variant="outlined"
-          size="$3.5"
-          circular
-          borderWidth={1.5}
+          flex={1}
+          size="$4"
+          icon={<Share2 size={18} />}
+          backgroundColor="$primary"
+          color="white"
+          borderRadius="$6"
           onPress={() => router.push("/share-profile")}
-        />
+        >
+          Share Profile
+        </Button>
       </XStack>
     );
   }
