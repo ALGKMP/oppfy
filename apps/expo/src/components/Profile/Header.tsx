@@ -1,109 +1,228 @@
 import { useEffect, useState } from "react";
+import { TouchableOpacity } from "react-native";
+import { BlurView } from "expo-blur";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import {
+  Edit3,
+  MessageCircle,
+  Send,
+  Settings2,
+  Share,
+  Share2,
+  UserPlus,
+  Users,
+} from "@tamagui/lucide-icons";
+import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
 
 import Avatar from "~/components/Avatar";
-import { Skeleton } from "~/components/Skeletons";
-import { Paragraph, SizableText, View, XStack, YStack } from "~/components/ui";
+import { Button } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
-import ActionButton from "./ActionButton";
-import Stats from "./Stats";
 
 interface HeaderProps {
   userId?: string;
 }
 
+const StatItem = ({ label, value }: { label: string; value: number }) => (
+  <YStack alignItems="center" gap="$1.5">
+    <Text fontWeight="700" fontSize="$6" color="$color">
+      {value}
+    </Text>
+    <Text fontSize="$2" color="$color" opacity={0.6} fontWeight="500">
+      {label}
+    </Text>
+  </YStack>
+);
+
 const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
+  const router = useRouter();
   const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
     userId,
   });
-  const [isRestricted, setIsRestricted] = useState(false);
 
-  useEffect(() => {
-    if (isLoadingProfileData) return;
-    if (profileData && "networkStatus" in profileData) {
-      setIsRestricted(
-        (profileData.privacy === "private" &&
-          profileData.networkStatus.otherUserFollowState === "NotFollowing") ||
-          profileData.networkStatus.blocked,
-      );
-    }
-  }, [profileData, isLoadingProfileData]);
-
-  // Skeleton UI while loading Profile Data
   if (isLoadingProfileData) {
     return (
-      <YStack
-        padding="$4"
-        paddingBottom={0}
-        alignItems="center"
-        backgroundColor="$background"
-        gap="$4"
-      >
-        <View alignItems="center" marginBottom={-30}>
-          <Skeleton circular size={160} />
-        </View>
-
-        <XStack
-          justifyContent="space-between"
-          alignItems="flex-end"
-          width="100%"
-        >
-          <YStack alignItems="flex-start" gap="$2" flex={1}>
-            <Skeleton width={80} height={20} />
-            <Skeleton width={150} height={20} />
-          </YStack>
-
-          <YStack alignItems="flex-end" gap="$2">
-            <Skeleton width={80} height={20} />
-            <Skeleton width={150} height={20} />
-          </YStack>
-        </XStack>
+      <YStack padding="$4" alignItems="center">
+        <Spinner size="small" color="$primary" />
       </YStack>
     );
   }
 
+  if (!profileData) return null;
+
   return (
-    <YStack
-      padding="$4"
-      paddingBottom={0}
-      alignItems="center"
-      backgroundColor="$background"
-      gap="$4"
-    >
-      <View alignItems="center" marginBottom={-30}>
-        <Avatar source={profileData?.profilePictureUrl} size={160} />
-      </View>
-
-      <XStack justifyContent="space-between" alignItems="flex-end" width="100%">
-        <YStack alignItems="flex-start" gap="$2" flex={1}>
-          <SizableText
-            size="$8"
-            fontWeight="bold"
-            textAlign="left"
-            lineHeight={0}
-          >
-            {profileData?.name}
-          </SizableText>
-
-          {profileData?.bio && (
-            <Paragraph
-              theme="alt1"
-              maxWidth="90%"
-              textAlign="left"
-              lineHeight={0}
-            >
-              {profileData?.bio}
-            </Paragraph>
-          )}
-        </YStack>
-        <Stats
-          userId={userId}
-          followingCount={profileData?.followingCount ?? 0}
-          followerCount={profileData?.followerCount ?? 0}
-          disableButtons={isRestricted}
+    <YStack>
+      {/* Cover Image Area */}
+      <YStack height={140} overflow="hidden" borderRadius="$6">
+        <Image
+          source={profileData.profilePictureUrl ?? ""}
+          style={{
+            width: "100%",
+            height: "100%",
+            opacity: 0.6,
+          }}
+          contentFit="cover"
         />
-      </XStack>
+        <BlurView
+          intensity={90}
+          tint="light"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(255,255,255,0.15)",
+          }}
+        />
+      </YStack>
 
-      <ActionButton userId={userId} />
+      {/* Profile Info Section */}
+      <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
+        <XStack justifyContent="space-between" alignItems="flex-end">
+          {/* Avatar and Name */}
+          <YStack>
+            <Avatar
+              source={profileData.profilePictureUrl}
+              size={110}
+              bordered
+            />
+            <YStack paddingTop="$3" gap="$1">
+              <Text fontWeight="700" fontSize="$7" color="$color">
+                {profileData.name}
+              </Text>
+              <Text fontSize="$3" color="$color" opacity={0.6}>
+                @{profileData.username}
+              </Text>
+            </YStack>
+          </YStack>
+
+          {/* Action Buttons */}
+          {!userId ? (
+            <XStack gap="$3" paddingBottom="$1">
+              <Button
+                icon={<Edit3 size={20} />}
+                variant="outlined"
+                size="$3.5"
+                circular
+                borderWidth={1.5}
+                onPress={() => router.push("/edit-profile")}
+              />
+              <Button
+                icon={<Share2 size={20} />}
+                variant="outlined"
+                size="$3.5"
+                circular
+                borderWidth={1.5}
+                onPress={() => router.push("/share-profile")}
+              />
+              <Button
+                icon={<Settings2 size={20} />}
+                variant="outlined"
+                size="$3.5"
+                circular
+                borderWidth={1.5}
+                onPress={() => router.push("/(app)/(settings)")}
+              />
+            </XStack>
+          ) : (
+            <XStack gap="$3" paddingBottom="$1">
+              {/* <Button
+                icon={<MessageCircle size={20} />}
+                variant="outlined"
+                size="$3.5"
+                circular
+                borderWidth={1.5}
+              /> */}
+              <Button
+                icon={<Send size={20} />}
+                variant="outlined"
+                size="$3.5"
+                circular
+                borderWidth={1.5}
+              />
+            </XStack>
+          )}
+        </XStack>
+
+        {/* Bio */}
+        {profileData.bio && (
+          <Text fontSize="$4" color="$color" opacity={0.8} lineHeight={22}>
+            {profileData.bio}
+          </Text>
+        )}
+
+        {/* Action Buttons for Other Profiles */}
+        {userId && (
+          <XStack gap="$3">
+            <Button
+              icon={<UserPlus size={18} />}
+              size="$4"
+              flex={1}
+              backgroundColor="$primary"
+              color="white"
+              borderRadius="$6"
+              pressStyle={{ opacity: 0.8 }}
+            >
+              Follow
+            </Button>
+            <Button
+              icon={<Users size={18} />}
+              size="$4"
+              flex={1}
+              variant="outlined"
+              borderWidth={1.5}
+              borderRadius="$6"
+              pressStyle={{ opacity: 0.8 }}
+            >
+              Add Friend
+            </Button>
+          </XStack>
+        )}
+
+        {/* Stats */}
+        <XStack
+          paddingVertical="$4"
+          marginHorizontal="$-2.5"
+          justifyContent="space-around"
+          backgroundColor="$background"
+          borderRadius="$8"
+          borderWidth={1}
+          borderColor="$borderColor"
+          shadowColor="$shadowColor"
+          shadowOffset={{ width: 0, height: 2 }}
+          shadowOpacity={0.05}
+          shadowRadius={8}
+          elevation={2}
+        >
+          <TouchableOpacity
+            onPress={() => router.push("/self-profile/connections/posts")}
+          >
+            <StatItem label="Posts" value={profileData.postCount ?? 0} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push("/self-profile/connections/following")}
+          >
+            <StatItem
+              label="Following"
+              value={profileData.followingCount ?? 0}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push("/self-profile/connections/followers")}
+          >
+            <StatItem
+              label="Followers"
+              value={profileData.followerCount ?? 0}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push("/self-profile/connections/friends")}
+          >
+            <StatItem label="Friends" value={profileData.friendCount ?? 0} />
+          </TouchableOpacity>
+        </XStack>
+      </YStack>
     </YStack>
   );
 };

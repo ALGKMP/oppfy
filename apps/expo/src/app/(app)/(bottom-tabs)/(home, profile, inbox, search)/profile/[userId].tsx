@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   Lock,
   MoreHorizontal,
+  Users,
   UserX,
 } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
@@ -28,6 +29,7 @@ import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
+import { H5, XStack } from "~/components/ui";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 
@@ -181,15 +183,26 @@ const OtherProfile = React.memo(() => {
   );
 
   const renderHeader = () => (
-    <YStack gap="$4">
+    <YStack gap="$2">
       <Header userId={userId} />
       {profileData?.friendCount &&
       profileData?.friendCount > 0 &&
       !networkRelationships?.blocked ? (
-        <FriendCarousel userId={userId} />
+        // <FriendCarousel paddingHorizontal="$2.5" />
+        <RecommendationCarousel paddingHorizontal="$2.5" />
       ) : (
-        <RecommendationCarousel />
+        <RecommendationCarousel paddingHorizontal="$2.5" />
       )}
+
+      <XStack
+        paddingHorizontal="$2.5"
+        alignItems="center"
+        gap="$2"
+        opacity={0.7}
+      >
+        <Users size={14} />
+        <H5>Posts</H5>
+      </XStack>
     </YStack>
   );
 
@@ -253,7 +266,7 @@ const OtherProfile = React.memo(() => {
           refreshing={isRefreshing}
           ItemSeparatorComponent={() => <Spacer size="$4" />}
           ListHeaderComponentStyle={{
-            marginBottom: getToken("$4", "space") as number,
+            marginBottom: getToken("$2", "space") as number,
           }}
         />
       </BaseScreenView>

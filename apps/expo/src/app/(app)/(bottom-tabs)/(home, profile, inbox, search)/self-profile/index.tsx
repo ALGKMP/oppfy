@@ -5,19 +5,26 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { TouchableOpacity } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, ChevronLeft, MoreHorizontal } from "@tamagui/lucide-icons";
+import { CameraOff, Users } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
+// import { FriendCarousel, RecommendationCarousel } from "~/components/CarouselsNew";
 import FriendCarousel from "~/components/FriendCarousel";
+//
+// import {
+//   FriendCarousel,
+//   RecommendationCarousel,
+// } from "~/components/CarouselsNew";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
+import { H5, XStack } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+// import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -25,13 +32,11 @@ import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
-const SelfProfile = React.memo(() => {
+const SelfProfile = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
   const navigation = useNavigation();
-  const router = useRouter();
-
   const { data: profileData } = useProfile();
 
   const {
@@ -72,31 +77,9 @@ const SelfProfile = React.memo(() => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: profileData?.username,
-      headerLeft: () => {
-        const firstRoute = !router.canDismiss();
-        if (firstRoute) return null;
-
-        return (
-          <TouchableOpacity
-            hitSlop={10}
-            onPress={() => {
-              if (navigation.canGoBack()) {
-                router.back();
-              }
-            }}
-          >
-            <ChevronLeft />
-          </TouchableOpacity>
-        );
-      },
-      headerRight: () => (
-        <TouchableOpacity onPress={() => router.push("/(app)/(settings)")}>
-          <MoreHorizontal />
-        </TouchableOpacity>
-      ),
+      headerShown: false,
     });
-  }, [navigation, profileData?.username, router]);
+  }, [navigation]);
 
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
@@ -173,18 +156,33 @@ const SelfProfile = React.memo(() => {
     ],
   );
 
-  const renderHeader = () => (
-    <YStack gap="$4">
-      <Header />
-      {profileData?.friendCount && profileData?.friendCount > 0 ? (
-        <FriendCarousel paddingHorizontal="$2.5" />
-      ) : (
-        <RecommendationCarousel paddingHorizontal="$2.5" />
-      )}
-    </YStack>
+  const renderHeader = useCallback(
+    () => (
+      <YStack gap="$2">
+        <Header />
+        <YStack>
+          {profileData?.friendCount && profileData?.friendCount > 0 ? (
+            <FriendCarousel paddingHorizontal="$2.5" />
+          ) : (
+            <RecommendationCarousel paddingHorizontal="$4" />
+          )}
+        </YStack>
+
+        <XStack
+          paddingHorizontal="$2.5"
+          alignItems="center"
+          gap="$2"
+          opacity={0.7}
+        >
+          <Users size={14} />
+          <H5>Posts</H5>
+        </XStack>
+      </YStack>
+    ),
+    [profileData?.friendCount],
   );
 
-  const renderNoPosts = useCallback(() => {
+  const renderEmptyList = useCallback(() => {
     if (isLoading)
       return (
         <YStack gap="$4">
@@ -202,31 +200,29 @@ const SelfProfile = React.memo(() => {
   }, [isLoading]);
 
   return (
-    <>
-      <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
-        <FlashList
-          ref={scrollRef}
-          data={postItems}
-          renderItem={renderPost}
-          ListHeaderComponent={renderHeader}
-          ListEmptyComponent={renderNoPosts}
-          keyExtractor={(item) => `self-profile-post-${item.postId}`}
-          estimatedItemSize={300}
-          showsVerticalScrollIndicator={false}
-          onEndReached={handleOnEndReached}
-          onRefresh={handleRefresh}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          extraData={{ viewableItems, postItems }}
-          refreshing={isRefreshing}
-          ItemSeparatorComponent={() => <Spacer size="$4" />}
-          ListHeaderComponentStyle={{
-            marginBottom: getToken("$4", "space") as number,
-          }}
-        />
-      </BaseScreenView>
-    </>
+    <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
+      <FlashList
+        ref={scrollRef}
+        data={postItems}
+        renderItem={renderPost}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmptyList}
+        keyExtractor={(item) => `self-profile-post-${item.postId}`}
+        estimatedItemSize={300}
+        showsVerticalScrollIndicator={false}
+        onEndReached={handleOnEndReached}
+        onRefresh={handleRefresh}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        extraData={{ viewableItems, postItems }}
+        refreshing={isRefreshing}
+        ItemSeparatorComponent={() => <Spacer size="$4" />}
+        ListHeaderComponentStyle={{
+          marginBottom: getToken("$2", "space") as number,
+        }}
+      />
+    </BaseScreenView>
   );
-});
+};
 
 export default SelfProfile;
