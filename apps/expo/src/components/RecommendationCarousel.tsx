@@ -124,7 +124,7 @@ const RecommendationCarousel = ({
           if (!isRecommendation(item)) {
             return (
               <TouchableOpacity
-                onPress={() => router.push("/(app)/(recommended)")}
+                onPress={() => router.push("/(app)/(recommendations)")}
               >
                 <SeeAllCard width={CARD_WIDTH} />
               </TouchableOpacity>
