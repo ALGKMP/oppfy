@@ -11,7 +11,7 @@ export class PostRepository {
   private contactsRepository = new ContactsRepository();
 
   @handleDatabaseErrors
-  async getPost(postId: string) {
+  async getPost(postId: string, userId: string) {
     const author = aliasedTable(schema.user, "author");
     const recipient = aliasedTable(schema.user, "recipient");
     const authorProfile = aliasedTable(schema.profile, "authorProfile");
@@ -36,10 +36,9 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked:
-          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
-            "has_liked",
-          ),
+        hasLiked: sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+          "has_liked",
+        ),
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
@@ -47,7 +46,51 @@ export class PostRepository {
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
+      .leftJoin(
+        schema.like,
+        and(
+          eq(schema.like.postId, schema.post.id),
+          eq(schema.like.userId, userId!),
+        ),
+      )
+      .where(eq(schema.post.id, postId))
+      .limit(1);
+
+    return result[0];
+  }
+
+  async getPostForNextJs(postId: string) {
+    const author = aliasedTable(schema.user, "author");
+    const recipient = aliasedTable(schema.user, "recipient");
+    const authorProfile = aliasedTable(schema.profile, "authorProfile");
+    const recipientProfile = aliasedTable(schema.profile, "recipientProfile");
+
+    const result = await this.db
+      .selectDistinct({
+        postId: schema.post.id,
+        authorId: schema.post.authorId,
+        authorUsername: authorProfile.username,
+        authorProfileId: authorProfile.id,
+        authorProfilePicture: authorProfile.profilePictureKey,
+        recipientId: schema.post.recipientId,
+        recipientProfileId: recipientProfile.id,
+        recipientUsername: recipientProfile.username,
+        recipientProfilePicture: recipientProfile.profilePictureKey,
+        caption: schema.post.caption,
+        imageUrl: schema.post.key,
+        width: schema.post.width,
+        height: schema.post.height,
+        commentsCount: schema.postStats.comments,
+        likesCount: schema.postStats.likes,
+        mediaType: schema.post.mediaType,
+        createdAt: schema.post.createdAt,
+      })
+      .from(schema.post)
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
+      .innerJoin(author, eq(schema.post.authorId, author.id))
+      .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
+      .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
+      .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
       .where(eq(schema.post.id, postId))
       .limit(1);
 
@@ -228,7 +271,13 @@ export class PostRepository {
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .innerJoin(schema.like, eq(schema.like.postId, schema.post.id))
+      .leftJoin(
+        schema.like,
+        and(
+          eq(schema.like.postId, schema.post.id),
+          eq(schema.like.userId, userId),
+        ),
+      )
       .where(
         cursor
           ? or(
@@ -285,7 +334,13 @@ export class PostRepository {
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
       .innerJoin(recipientProfile, eq(recipient.profileId, recipientProfile.id))
-      .leftJoin(schema.like, eq(schema.like.postId, schema.post.id))
+      .leftJoin(
+        schema.like,
+        and(
+          eq(schema.like.postId, schema.post.id),
+          eq(schema.like.userId, userId),
+        ),
+      )
       .where(
         and(
           eq(schema.post.recipientId, userId),
@@ -340,7 +395,7 @@ export class PostRepository {
           ),
       })
       .from(schema.post)
-      .innerJoin(schema.postStats, eq(schema.post.id, schema.postStats.postId))
+      .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
       .innerJoin(author, eq(schema.post.authorId, author.id))
       .innerJoin(authorProfile, eq(author.profileId, authorProfile.id))
       .innerJoin(recipient, eq(schema.post.recipientId, recipient.id))
