@@ -16,8 +16,8 @@ import {
   YStack,
 } from "tamagui";
 
-import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import PostCard from "~/components/Post/PostCard";
+import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";

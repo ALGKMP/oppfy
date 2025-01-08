@@ -2,26 +2,27 @@ import React, { useMemo } from "react";
 import { TouchableOpacity, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronRight, Users } from "@tamagui/lucide-icons";
+import { ChevronRight, Sparkles } from "@tamagui/lucide-icons";
 import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
-import { H5, Spacer } from "../ui";
-import { UserCard } from "../ui/UserCard";
+import { H5, Spacer } from "./ui";
+import { UserCard } from "./ui/UserCard";
 
-type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
+type Recommendation =
+  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
 type SeeAllItem = { type: "see-all" };
-type ListItem = Friend | SeeAllItem;
+type ListItem = Recommendation | SeeAllItem;
 
-interface FriendCarouselProps {
+interface RecommendationCarouselProps {
   paddingHorizontal?: SpaceTokens;
   paddingVertical?: SpaceTokens;
 }
 
-const isFriend = (item: ListItem): item is Friend => {
+const isRecommendation = (item: ListItem): item is Recommendation => {
   return !("type" in item);
 };
 
@@ -43,27 +44,43 @@ const SeeAllCard = ({ width }: { width: number }) => (
   </YStack>
 );
 
-const FriendCarousel = ({
+const RecommendationCarousel = ({
   paddingHorizontal,
   paddingVertical,
-}: FriendCarouselProps = {}) => {
+}: RecommendationCarouselProps = {}) => {
   const { width: windowWidth } = useWindowDimensions();
   const { routeProfile } = useRouteProfile();
   const router = useRouter();
+  const utils = api.useUtils();
 
-  const { data: friendsData, isLoading } =
-    api.friend.paginateFriendsSelf.useInfiniteQuery(
-      { pageSize: 10 },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-        staleTime: 60 * 1000, // 1 minute
-      },
-    );
+  const { data: recommendationsData, isLoading } =
+    api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+      staleTime: 60 * 1000, // 1 minute
+    });
 
-  const friends = useMemo(
-    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendsData],
+  const recommendations = useMemo(
+    () => recommendationsData ?? [],
+    [recommendationsData],
   );
+
+  const followMutation = api.follow.followUser.useMutation({
+    onMutate: async (newData) => {
+      await utils.contacts.getRecommendationProfilesSelf.cancel();
+      const prevData = utils.contacts.getRecommendationProfilesSelf.getData();
+      if (!prevData) return { prevData: undefined };
+
+      utils.contacts.getRecommendationProfilesSelf.setData(
+        undefined,
+        prevData.filter((item) => item.userId !== newData.userId),
+      );
+
+      return { prevData };
+    },
+    onError: (_err, _newData, ctx) => {
+      if (ctx?.prevData === undefined) return;
+      void utils.contacts.getRecommendationProfilesSelf.invalidate();
+    },
+  });
 
   if (isLoading) {
     return (
@@ -73,14 +90,14 @@ const FriendCarousel = ({
     );
   }
 
-  if (!friends?.length) {
+  if (!recommendations?.length) {
     return null;
   }
 
   const CARD_WIDTH = windowWidth * 0.25;
-  const CARD_GAP = getToken("$2", "space") as number;
+  const CARD_GAP = getToken("$2.5", "space") as number;
 
-  const items: ListItem[] = [...friends, { type: "see-all" }];
+  const items: ListItem[] = [...recommendations, { type: "see-all" }];
 
   return (
     <YStack paddingVertical={paddingVertical} gap="$2">
@@ -90,8 +107,8 @@ const FriendCarousel = ({
         gap="$2"
         opacity={0.7}
       >
-        <Users size={14} />
-        <H5>Friends</H5>
+        <Sparkles size={14} />
+        <H5>Suggested for You</H5>
       </XStack>
 
       <FlashList
@@ -104,10 +121,10 @@ const FriendCarousel = ({
           paddingHorizontal: getToken(paddingHorizontal as Token, "space"),
         }}
         renderItem={({ item, index }) => {
-          if (!isFriend(item)) {
+          if (!isRecommendation(item)) {
             return (
               <TouchableOpacity
-                onPress={() => router.push("/self-profile/connections/friends")}
+                onPress={() => router.push("/(app)/(recommended)")}
               >
                 <SeeAllCard width={CARD_WIDTH} />
               </TouchableOpacity>
@@ -125,6 +142,13 @@ const FriendCarousel = ({
               onPress={() =>
                 routeProfile({ userId: item.userId, username: item.username })
               }
+              actionButton={{
+                label: "Follow",
+                onPress: () =>
+                  followMutation.mutateAsync({ userId: item.userId }),
+                variant: "primary",
+                icon: "follow",
+              }}
             />
           );
         }}
@@ -133,4 +157,4 @@ const FriendCarousel = ({
   );
 };
 
-export default FriendCarousel;
+export default RecommendationCarousel;
