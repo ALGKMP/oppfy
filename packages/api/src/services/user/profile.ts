@@ -100,6 +100,7 @@ export class ProfileService {
       postCount: user.profile.profileStats.posts,
       profilePictureUrl,
       profileStats: user.profile.profileStats,
+      createdAt: user.profile.createdAt,
     };
   }
 
@@ -143,6 +144,7 @@ export class ProfileService {
       postCount: user.profile.profileStats.posts,
       profilePictureUrl,
       networkStatus,
+      createdAt: user.profile.createdAt,
     };
   }
 

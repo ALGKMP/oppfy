@@ -82,15 +82,16 @@ export const PrivacyStatus = z.union([
 
 export const fullProfileSelf = z.object({
   userId: z.string(),
-  profileId: z.string(),
+  profileId: z.number(),
   username: z.string(),
-  name: z.string(),
-  bio: z.union([z.string(), z.null()]),
+  name: z.string().nullable(),
+  bio: z.string().nullable(),
   privacy: z.enum(["public", "private"]),
+  profilePictureUrl: z.string().nullable(),
   followerCount: z.number(),
   followingCount: z.number(),
   friendCount: z.number(),
-  profilePictureUrl: z.string().nullable(),
+  postCount: z.number(),
   profileStats: z.object({
     createdAt: z.date(),
     profileId: z.string(),
@@ -102,20 +103,23 @@ export const fullProfileSelf = z.object({
     friends: z.number(),
     views: z.number(),
   }),
+  createdAt: z.date(),
 });
 
 export const fullProfileOther = z.object({
   userId: z.string(),
   profileId: z.number(),
   username: z.string(),
-  name: z.string(),
-  bio: z.union([z.string(), z.null()]),
+  name: z.string().nullable(),
+  bio: z.string().nullable(),
   privacy: z.enum(["public", "private"]),
   profilePictureUrl: z.string().nullable(),
   followerCount: z.number(),
   followingCount: z.number(),
   friendCount: z.number(),
+  postCount: z.number(),
   networkStatus: PrivacyStatus,
+  createdAt: z.date(),
 });
 
 export const friendItems = z.array(
@@ -160,10 +164,10 @@ export const recommededProfiles = z.array(
 export const NetworkRelationshipState = z.enum([
   "Following",
   "Friends",
-  "OutboundFollowRequest", 
+  "OutboundFollowRequest",
   "InboundFollowRequest",
   "InboundFriendRequest",
-  "OutboundFriendRequest", 
+  "OutboundFriendRequest",
   "NotFollowing",
   "Blocked",
   // "Private"

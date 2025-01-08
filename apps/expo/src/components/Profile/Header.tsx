@@ -1,5 +1,10 @@
 import React from "react";
-import { View as RNView, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Dimensions,
+  View as RNView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import Animated, {
   Easing,
   interpolateColor,
@@ -29,6 +34,7 @@ import ActionButton from "~/components/Profile/ActionButton";
 import Stats from "~/components/Profile/Stats";
 import { Button } from "~/components/ui";
 import { Skeleton } from "~/components/ui/Skeleton";
+import { TimeAgo } from "~/components/ui/TimeAgo";
 import useProfile from "~/hooks/useProfile";
 
 interface HeaderProps {
@@ -401,9 +407,28 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
               borderRadius="$12"
             >
               <Calendar size={14} color="white" />
-              <Text color="white" fontSize="$2" fontWeight="700">
-                Joined 2024
-              </Text>
+              {profile.createdAt && (
+                <TimeAgo
+                  date={profile.createdAt}
+                  color="white"
+                  fontSize="$2"
+                  fontWeight="700"
+                  prefix="Joined"
+                  format={({ value, unit }) => {
+                    const units = {
+                      second: "seconds",
+                      minute: "minutes",
+                      hour: "hours",
+                      day: "days",
+                      week: "weeks",
+                      month: "months",
+                      year: "years",
+                    } satisfies Record<string, string>;
+                    return `${value} ${value === 1 ? unit : units[unit]} ago`;
+                  }}
+                  updateInterval={60000} // Update every minute
+                />
+              )}
             </XStack>
           </>
         ) : (
