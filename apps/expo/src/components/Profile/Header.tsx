@@ -8,23 +8,13 @@ import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
 
 import Avatar from "~/components/Avatar";
 import ActionButton from "~/components/Profile/ActionButton";
+import Stats from "~/components/Profile/Stats";
 import { Button } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
 
 interface HeaderProps {
   userId?: string;
 }
-
-const StatItem = ({ label, value }: { label: string; value: number }) => (
-  <YStack alignItems="center" gap="$1.5">
-    <Text fontWeight="700" fontSize="$6" color="$color">
-      {value}
-    </Text>
-    <Text fontSize="$2" color="$color" opacity={0.6} fontWeight="500">
-      {label}
-    </Text>
-  </YStack>
-);
 
 const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   const router = useRouter();
@@ -93,22 +83,6 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
           {!userId ? (
             <XStack gap="$3" paddingBottom="$1">
               <Button
-                icon={<Edit3 size={20} />}
-                variant="outlined"
-                size="$3.5"
-                circular
-                borderWidth={1.5}
-                onPress={() => router.push("/edit-profile")}
-              />
-              <Button
-                icon={<Share2 size={20} />}
-                variant="outlined"
-                size="$3.5"
-                circular
-                borderWidth={1.5}
-                onPress={() => router.push("/share-profile")}
-              />
-              <Button
                 icon={<Settings2 size={20} />}
                 variant="outlined"
                 size="$3.5"
@@ -141,72 +115,14 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
         <ActionButton userId={userId} />
 
         {/* Stats */}
-        <XStack
-          paddingVertical="$4"
-          marginHorizontal="$-2.5"
-          justifyContent="space-around"
-          backgroundColor="$background"
-          borderRadius="$8"
-          borderWidth={1}
-          borderColor="$borderColor"
-          shadowColor="$shadowColor"
-          shadowOffset={{ width: 0, height: 2 }}
-          shadowOpacity={0.05}
-          shadowRadius={8}
-          elevation={2}
-        >
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: userId
-                  ? "/profile/connections/posts"
-                  : "/self-profile/connections/posts",
-                ...(userId && { params: { userId } }),
-              })
-            }
-          >
-            <StatItem
-              label="Posts"
-              value={profileData.profileStats?.postCount ?? 0}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: userId
-                  ? "/profile/connections/following"
-                  : "/self-profile/connections/following",
-                ...(userId && { params: { userId } }),
-              })
-            }
-          >
-            <StatItem label="Following" value={profileData.followingCount} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: userId
-                  ? "/profile/connections/followers"
-                  : "/self-profile/connections/followers",
-                ...(userId && { params: { userId } }),
-              })
-            }
-          >
-            <StatItem label="Followers" value={profileData.followerCount} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: userId
-                  ? "/profile/connections/friends"
-                  : "/self-profile/connections/friends",
-                ...(userId && { params: { userId } }),
-              })
-            }
-          >
-            <StatItem label="Friends" value={profileData.friendCount} />
-          </TouchableOpacity>
-        </XStack>
+        <Stats
+          userId={userId}
+          username={profileData.username}
+          postCount={profileData.postCount}
+          followingCount={profileData.followingCount}
+          followerCount={profileData.followerCount}
+          friendCount={profileData.friendCount}
+        />
       </YStack>
     </YStack>
   );
