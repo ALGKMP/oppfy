@@ -3,7 +3,7 @@ import * as Contacts from "expo-contacts";
 import type { Contact } from "expo-contacts";
 import { PermissionStatus } from "expo-contacts";
 import * as Crypto from "expo-crypto";
-import { parsePhoneNumber } from "libphonenumber-js";
+import { parsePhoneNumber, parsePhoneNumberWithError } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
 
 import { api } from "~/utils/api";
@@ -51,7 +51,7 @@ const useContacts = (syncNow = false): ContactFns => {
     );
 
     const numbers = phoneNumbers.map((numberthing) => {
-      const phoneNumber = parsePhoneNumber(
+      const phoneNumber = parsePhoneNumberWithError(
         numberthing.number,
         numberthing.country.toLocaleUpperCase() as CountryCode,
       );
