@@ -3,7 +3,7 @@ import { TouchableOpacity, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Sparkles } from "@tamagui/lucide-icons";
-import { getToken, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { getToken, Text, View, XStack, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
 import useRouteProfile from "~/hooks/useRouteProfile";
@@ -14,17 +14,11 @@ import { UserCard } from "./ui/UserCard";
 
 type Recommendation =
   RouterOutputs["contacts"]["getRecommendationProfilesSelf"][number];
-type SeeAllItem = { type: "see-all" };
-type ListItem = Recommendation | SeeAllItem;
 
 interface RecommendationCarouselProps {
   paddingHorizontal?: SpaceTokens;
   paddingVertical?: SpaceTokens;
 }
-
-const isRecommendation = (item: ListItem): item is Recommendation => {
-  return !("type" in item);
-};
 
 const SeeAllCard = ({ width }: { width: number }) => (
   <YStack
@@ -42,6 +36,16 @@ const SeeAllCard = ({ width }: { width: number }) => (
       See All
     </Text>
   </YStack>
+);
+
+const LoadingCard = ({ width }: { width: number }) => (
+  <YStack
+    width={width}
+    height={width * 1.2}
+    borderRadius="$6"
+    backgroundColor="$gray3"
+    opacity={0.5}
+  />
 );
 
 const RecommendationCarousel = ({
@@ -82,22 +86,12 @@ const RecommendationCarousel = ({
     },
   });
 
-  if (isLoading) {
-    return (
-      <YStack padding="$4" alignItems="center">
-        <Spinner size="small" />
-      </YStack>
-    );
-  }
-
-  if (!recommendations?.length) {
-    return null;
-  }
-
   const CARD_WIDTH = windowWidth * 0.25;
   const CARD_GAP = getToken("$2.5", "space") as number;
 
-  const items: ListItem[] = [...recommendations, { type: "see-all" }];
+  if (!isLoading && !recommendations?.length) {
+    return null;
+  }
 
   return (
     <YStack paddingVertical={paddingVertical} gap="$2">
@@ -112,7 +106,7 @@ const RecommendationCarousel = ({
       </XStack>
 
       <FlashList
-        data={items}
+        data={isLoading ? Array(4).fill(null) : [...recommendations, null]}
         horizontal
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
@@ -121,7 +115,11 @@ const RecommendationCarousel = ({
           paddingHorizontal: getToken(paddingHorizontal as Token, "space"),
         }}
         renderItem={({ item, index }) => {
-          if (!isRecommendation(item)) {
+          if (isLoading) {
+            return <LoadingCard width={CARD_WIDTH} />;
+          }
+
+          if (!item) {
             return (
               <TouchableOpacity
                 onPress={() => router.push("/(app)/(recommendations)")}
