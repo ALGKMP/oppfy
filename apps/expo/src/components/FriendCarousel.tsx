@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { TouchableOpacity, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -64,10 +64,7 @@ const FriendCarousel = ({
       },
     );
 
-  const friends = useMemo(
-    () => friendsData?.pages.flatMap((page) => page.items) ?? [],
-    [friendsData],
-  );
+  const friends = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
   const CARD_WIDTH = windowWidth * 0.25;
   const CARD_GAP = getToken("$2.5", "space") as number;

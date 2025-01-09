@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { TouchableOpacity, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -62,10 +62,7 @@ const RecommendationCarousel = ({
       staleTime: 60 * 1000, // 1 minute
     });
 
-  const recommendations = useMemo(
-    () => recommendationsData ?? [],
-    [recommendationsData],
-  );
+  const recommendations = recommendationsData ?? [];
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Dimensions, FlatList } from "react-native";
 import { getToken } from "tamagui";
 
@@ -19,15 +19,10 @@ const GridSuggestions = () => {
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
 
-  const { data: rawData, isLoading } =
+  const { data, isLoading } =
     api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
       staleTime: STALE_TIME,
     });
-
-  const data = useMemo(() => {
-    if (!rawData) return [];
-    return rawData;
-  }, [rawData]);
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
