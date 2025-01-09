@@ -23,14 +23,11 @@ import { Checkbox } from "./Checkbox";
 import { Dialog, DialogProvider, useDialogController } from "./Dialog";
 import { Form } from "./Form";
 import { Group, XGroup, YGroup } from "./Groups";
-import { H1, H2, H3, H4, H5, H6 } from "./Headings";
+import { H1, H2, H3, H4, H5, H6, HeaderTitle } from "./Headings";
 import { Input, OnboardingInput, SearchInput, TextArea } from "./Inputs";
 import { Label } from "./Label";
 import { ListItem } from "./ListItem";
-import {
-  MediaListItem,
-  MediaListItemActionProps,
-} from "./MediaListItem";
+import { MediaListItem, MediaListItemActionProps } from "./MediaListItem";
 import { Popover } from "./Popover";
 import { Progress } from "./Progress";
 import { RadioGroup } from "./RadioGroup";
@@ -49,8 +46,8 @@ import { Paragraph, SizableText, Text } from "./Texts";
 import { TimeAgo } from "./TimeAgo";
 import { ToggleGroup } from "./ToggleGroup";
 import { Tooltip } from "./Tooltip";
-import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 import { UserCard } from "./UserCard";
+import { SafeAreaView, ScreenView, ScrollView, View } from "./Views";
 
 export {
   Spacer,
@@ -63,6 +60,7 @@ export {
   H4,
   H5,
   H6,
+  HeaderTitle,
   Paragraph,
   SizableText,
   Text,
