@@ -7,12 +7,12 @@ import { Skeleton } from "~/components/ui/Skeleton";
 
 interface StatsProps {
   userId?: string;
-  username?: string;
+  username: string | null | undefined;
   postCount: number;
   followingCount: number;
   followerCount: number;
   friendCount: number;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 const StatItem = ({

@@ -20,10 +20,10 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   });
 
   const defaultProfile = {
-    name: "Loading...",
-    username: "loading",
-    bio: null,
-    profilePictureUrl: null,
+    name: undefined,
+    username: undefined,
+    bio: undefined,
+    profilePictureUrl: undefined,
     followingCount: 0,
     followerCount: 0,
     friendCount: 0,

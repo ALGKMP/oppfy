@@ -36,8 +36,8 @@ const styles = StyleSheet.create({
 });
 
 interface HeaderGradientProps {
-  username: string;
-  profilePictureUrl: string | null;
+  username: string | null | undefined;
+  profilePictureUrl: string | null | undefined;
 }
 
 const HeaderGradient = ({
@@ -60,11 +60,12 @@ const HeaderGradient = ({
   // Create abstract pattern elements with animations
   const createAbstractPattern = () => {
     const elements = [];
+    const usernameStr = username || "";
 
     // Create floating letters from username
-    for (let i = 0; i < username.length; i++) {
-      const char = username[i];
-      const angle = (i / username.length) * Math.PI * 2;
+    for (let i = 0; i < usernameStr.length; i++) {
+      const char = usernameStr[i];
+      const angle = (i / usernameStr.length) * Math.PI * 2;
       const radius = 35 + Math.random() * 10;
       const x = 50 + Math.cos(angle) * radius;
       const y = 50 + Math.sin(angle) * radius;

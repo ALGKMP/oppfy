@@ -2,7 +2,7 @@ import React from "react";
 import { Text } from "tamagui";
 
 interface BioProps {
-  bio: string | null;
+  bio: string | null | undefined;
   isLoading: boolean;
 }
 

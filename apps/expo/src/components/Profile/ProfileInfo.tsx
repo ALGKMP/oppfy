@@ -5,9 +5,9 @@ import Avatar from "~/components/Avatar";
 import { Skeleton } from "~/components/ui/Skeleton";
 
 interface ProfileInfoProps {
-  name: string | null;
-  username: string | null;
-  profilePictureUrl: string | null;
+  name: string | null | undefined;
+  username: string | null | undefined;
+  profilePictureUrl: string | null | undefined;
   isLoading: boolean;
 }
 
