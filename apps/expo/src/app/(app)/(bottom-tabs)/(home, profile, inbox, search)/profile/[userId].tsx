@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   Lock,
   MoreHorizontal,
+  ScrollText,
   Users,
   UserX,
 } from "@tamagui/lucide-icons";
@@ -18,7 +19,7 @@ import BlockUserHeader from "~/components/Headers/BlockHeader";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { H5, XStack } from "~/components/ui";
+import { H5, HeaderTitle, XStack } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
@@ -171,15 +172,9 @@ const OtherProfile = () => {
         <RecommendationCarousel paddingHorizontal="$2.5" />
       )}
       {(isLoadingPostData || postItems.length > 0) && (
-        <XStack
-          paddingHorizontal="$2.5"
-          alignItems="center"
-          gap="$2"
-          opacity={0.7}
-        >
-          <Users size={14} />
-          <H5>Posts</H5>
-        </XStack>
+        <HeaderTitle icon={<ScrollText />} paddingHorizontal="$2.5">
+          Posts
+        </HeaderTitle>
       )}
     </YStack>
   );
