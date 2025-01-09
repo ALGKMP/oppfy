@@ -1,10 +1,10 @@
 import React from "react";
 import { View, XStack, YStack } from "tamagui";
 
-import ActionButton from "~/components/Profile/ActionButton";
 import Bio from "~/components/Profile/Bio";
 import HeaderGradient from "~/components/Profile/HeaderGradient";
 import JoinDatePill from "~/components/Profile/JoinDatePill";
+import ProfileActions from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
@@ -60,7 +60,7 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
 
         <Bio bio={profile.bio} isLoading={isLoadingProfileData} />
 
-        <ActionButton userId={userId} />
+        <ProfileActions userId={userId} />
 
         <Stats
           userId={userId}
