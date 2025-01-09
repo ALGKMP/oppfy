@@ -7,7 +7,7 @@ import { getToken, H6, YStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
 import { SearchInput } from "~/components/Inputs";
-import { MediaListItem,  } from "~/components/ui";
+import { HeaderTitle, MediaListItem } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
@@ -58,17 +58,15 @@ const Search = () => {
   );
 
   const ListHeaderComponent = (
-    <YStack gap="$4">
-      <SearchInput
-        value={searchTerm}
-        placeholder="Search by username"
-        onChangeText={performSearch}
-        onClear={() => {
-          setSearchTerm("");
-          setSearchResults([]);
-        }}
-      />
-    </YStack>
+    <SearchInput
+      value={searchTerm}
+      placeholder="Search by username"
+      onChangeText={performSearch}
+      onClear={() => {
+        setSearchTerm("");
+        setSearchResults([]);
+      }}
+    />
   );
 
   const ListFooterComponent = () => {
@@ -82,7 +80,7 @@ const Search = () => {
   const ListEmptyComponent = () => {
     if (isSearching) {
       return (
-        <YStack gap="$4">
+        <YStack gap="$2.5">
           {Array.from({ length: 10 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
@@ -91,11 +89,7 @@ const Search = () => {
     }
 
     if (searchTerm && !searchResults.length) {
-      return (
-        <YStack flex={1}>
-          <H6 theme="alt1">No Users Found</H6>
-        </YStack>
-      );
+      return <HeaderTitle>No Users Found</HeaderTitle>;
     }
 
     return null;
@@ -112,7 +106,7 @@ const Search = () => {
       ItemSeparatorComponent={Spacer}
       ListHeaderComponentStyle={{
         paddingTop: getToken("$2", "space"),
-        paddingBottom: getToken("$4", "space"),
+        paddingBottom: getToken("$3", "space"),
       }}
       contentContainerStyle={{
         paddingBottom: getToken("$4", "space"),

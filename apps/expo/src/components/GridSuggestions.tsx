@@ -56,37 +56,34 @@ const GridSuggestions = () => {
   const TILE_WIDTH = screenWidth / 2 - getToken("$3", "space") * 2; // Two tiles with gap in between
 
   return (
-    <YStack>
-      <FlatList
-        data={data}
-        renderItem={({ item, index }) => (
-          <UserCard
-            userId={item.userId}
-            username={item.username}
-            profilePictureUrl={item.profilePictureUrl}
-            width={TILE_WIDTH}
-            index={index}
-            onPress={() => handleProfilePress(item.userId, item.username)}
-            actionButton={{
-              label: "Follow",
-              onPress: () =>
-                followMutation.mutateAsync({ userId: item.userId }),
-              variant: "primary",
-            }}
-          />
-        )}
-        numColumns={2}
-        ListHeaderComponent={
-          <HeaderTitle icon={<Sparkles />} theme="alt1">
-            Suggested for You
-          </HeaderTitle>
-        }
-        columnWrapperStyle={{ gap: getToken("$3", "space") }}
-        contentContainerStyle={{ gap: getToken("$3", "space") }}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={false}
-      />
-    </YStack>
+    <FlatList
+      data={data}
+      renderItem={({ item, index }) => (
+        <UserCard
+          userId={item.userId}
+          username={item.username}
+          profilePictureUrl={item.profilePictureUrl}
+          width={TILE_WIDTH}
+          index={index}
+          onPress={() => handleProfilePress(item.userId, item.username)}
+          actionButton={{
+            label: "Follow",
+            onPress: () => followMutation.mutateAsync({ userId: item.userId }),
+            variant: "primary",
+          }}
+        />
+      )}
+      numColumns={2}
+      ListHeaderComponent={
+        <HeaderTitle icon={<Sparkles />} theme="alt1">
+          Suggested for You
+        </HeaderTitle>
+      }
+      columnWrapperStyle={{ gap: getToken("$2", "space") }}
+      contentContainerStyle={{ gap: getToken("$2", "space") }}
+      showsVerticalScrollIndicator={false}
+      scrollEnabled={false}
+    />
   );
 };
 

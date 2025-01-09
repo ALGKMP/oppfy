@@ -360,7 +360,7 @@ const PostTo = () => {
 
     if (isLoading) {
       return (
-        <YStack gap="$4">
+        <YStack gap="$2.5">
           {Array.from({ length: 10 }).map((_, index) => (
             <MediaListItem.Skeleton key={index} />
           ))}
