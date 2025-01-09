@@ -3,13 +3,14 @@ import { TouchableOpacity, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Sparkles } from "@tamagui/lucide-icons";
-import { getToken, Text, View, XStack, YStack } from "tamagui";
+import { getToken, Text, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
-import { H5, Spacer } from "./ui";
+import { Spacer } from "./ui";
+import { HeaderTitle } from "./ui/Headings";
 import { UserCard } from "./ui/UserCard";
 
 type Recommendation =
@@ -92,15 +93,9 @@ const RecommendationCarousel = ({
 
   return (
     <YStack paddingVertical={paddingVertical} gap="$2">
-      <XStack
-        paddingHorizontal={paddingHorizontal}
-        alignItems="center"
-        gap="$2"
-        opacity={0.7}
-      >
-        <Sparkles size={14} />
-        <H5>Suggested for You</H5>
-      </XStack>
+      <HeaderTitle icon={<Sparkles />} paddingHorizontal={paddingHorizontal}>
+        Suggested for You
+      </HeaderTitle>
 
       <FlashList
         data={isLoading ? Array(4).fill(null) : [...recommendations, null]}

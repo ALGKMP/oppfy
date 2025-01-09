@@ -10,6 +10,7 @@ import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 import { H5, Spacer } from "./ui";
+import { HeaderTitle } from "./ui/Headings";
 import { UserCard } from "./ui/UserCard";
 
 type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
@@ -75,15 +76,9 @@ const FriendCarousel = ({
 
   return (
     <YStack paddingVertical={paddingVertical} gap="$2">
-      <XStack
-        paddingHorizontal={paddingHorizontal}
-        alignItems="center"
-        gap="$2"
-        opacity={0.7}
-      >
-        <Users size={14} />
-        <H5>Friends</H5>
-      </XStack>
+      <HeaderTitle icon={<Users />} paddingHorizontal={paddingHorizontal}>
+        Friends
+      </HeaderTitle>
 
       <FlashList
         data={isLoading ? Array(4).fill(null) : [...friends, null]}

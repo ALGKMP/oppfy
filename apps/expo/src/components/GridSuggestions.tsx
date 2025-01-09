@@ -1,8 +1,10 @@
 import React from "react";
 import { Dimensions, FlatList } from "react-native";
+import { Sparkles } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
-import { H5, YStack } from "~/components/ui";
+import { YStack } from "~/components/ui";
+import { HeaderTitle } from "~/components/ui/Headings";
 import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
@@ -74,7 +76,11 @@ const GridSuggestions = () => {
           />
         )}
         numColumns={2}
-        ListHeaderComponent={<H5 theme="alt1">Suggested for You</H5>}
+        ListHeaderComponent={
+          <HeaderTitle icon={<Sparkles />} theme="alt1">
+            Suggested for You
+          </HeaderTitle>
+        }
         columnWrapperStyle={{ gap: getToken("$3", "space") }}
         contentContainerStyle={{ gap: getToken("$3", "space") }}
         showsVerticalScrollIndicator={false}
