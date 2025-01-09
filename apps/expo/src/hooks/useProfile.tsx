@@ -15,7 +15,9 @@ interface UseProfileProps {
   userId?: string;
 }
 
-const useProfile = ({ userId }: UseProfileProps = { userId: undefined }): UseQueryResult<OtherProfile | SelfProfile, unknown> & {
+const useProfile = (
+  { userId }: UseProfileProps = { userId: undefined },
+): UseQueryResult<OtherProfile | SelfProfile, unknown> & {
   profile: OtherProfile | SelfProfile | undefined;
 } => {
   const query = api.profile.getFullProfileOther.useQuery(
