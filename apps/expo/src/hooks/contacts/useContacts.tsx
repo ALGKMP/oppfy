@@ -95,7 +95,7 @@ const useContacts = (syncNow = false): ContactFns => {
         if (number === undefined) return null;
 
         try {
-          const parsedNumber = parsePhoneNumber(number);
+          const parsedNumber = parsePhoneNumberWithError(number);
           return parsedNumber.isValid() ? parsedNumber.format("E.164") : null;
         } catch (error) {
           return null;
@@ -115,7 +115,7 @@ const useContacts = (syncNow = false): ContactFns => {
           if (number === undefined) return false;
 
           try {
-            const parsedNumber = parsePhoneNumber(number);
+            const parsedNumber = parsePhoneNumberWithError(number);
             return (
               parsedNumber.isValid() &&
               parsedNumber.format("E.164") === phoneNumber
