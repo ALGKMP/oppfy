@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Extrapolation,
@@ -37,6 +37,7 @@ export interface AlertDialogProps {
   cancelText?: string;
   acceptTextProps?: SizableTextProps;
   cancelTextProps?: SizableTextProps;
+  onAnimationComplete?: (visible: boolean) => void;
 }
 
 export const AlertDialog = ({
@@ -51,29 +52,22 @@ export const AlertDialog = ({
   cancelText = "Cancel",
   acceptTextProps,
   cancelTextProps,
+  onAnimationComplete,
 }: AlertDialogProps) => {
   const theme = useTheme();
   const animation = useSharedValue(0);
-  const [mounted, setMounted] = React.useState(false);
 
-  const handleAnimationComplete = useCallback((isOpen: boolean) => {
-    if (!isOpen) {
-      setMounted(false);
-    }
-  }, []);
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (isVisible) {
-      setMounted(true);
       animation.value = withSpring(1, { damping: 15, stiffness: 200 });
     } else {
       animation.value = withTiming(0, { duration: 250 }, (finished) => {
         if (finished) {
-          runOnJS(handleAnimationComplete)(false);
+          runOnJS(onAnimationComplete!)(false);
         }
       });
     }
-  }, [isVisible]);
+  }, [isVisible, onAnimationComplete]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
@@ -98,7 +92,7 @@ export const AlertDialog = ({
     ],
   }));
 
-  if (!mounted) return null;
+  if (!isVisible && animation.value === 0) return null;
 
   return (
     <Portal>
