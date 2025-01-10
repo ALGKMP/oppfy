@@ -54,6 +54,10 @@ const muxBodySchema = z
   })
   .passthrough();
 
+const deleteAsset = async (assetId: string) => {
+  await mux.video.assets.delete(assetId);
+};
+
 const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
   const rawBody = event.body;
   const headers = event.headers;
@@ -72,60 +76,78 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
 
   const key = body.data.playback_ids[0].id;
   const metadata = body.data.passthrough;
+  const assetId = body.object.id;
 
-  if (metadata.type === "onApp") {
-    const { insertId: postId } = await db.transaction(async (tx) => {
-      const [post] = await tx
-        .insert(schema.post)
-        .values({
-          key,
-          mediaType: "video" as const,
-          authorId: metadata.author,
-          height: parseInt(metadata.height),
-          width: parseInt(metadata.width),
-          caption: metadata.caption,
-          recipientId: metadata.recipient,
-        })
-        .returning({ insertId: schema.post.id });
+  try {
+    if (metadata.type === "onApp") {
+      try {
+        const { insertId: postId } = await db.transaction(async (tx) => {
+          const [post] = await tx
+            .insert(schema.post)
+            .values({
+              key,
+              mediaType: "video" as const,
+              authorId: metadata.author,
+              height: parseInt(metadata.height),
+              width: parseInt(metadata.width),
+              caption: metadata.caption,
+              recipientId: metadata.recipient,
+            })
+            .returning({ insertId: schema.post.id });
 
-      if (post === undefined) {
-        throw new Error("Failed to insert post");
+          if (post === undefined) {
+            throw new Error("Failed to insert post");
+          }
+
+          await tx.insert(schema.postStats).values({ postId: post.insertId });
+          return post;
+        });
+
+        await storeNotification(metadata.author, metadata.recipient, {
+          eventType: "post",
+          entityType: "post",
+          entityId: postId.toString(),
+        });
+
+        const { posts } = await getNotificationSettings(metadata.recipient);
+        if (posts) {
+          const pushTokens = await getPushTokens(metadata.recipient);
+          if (pushTokens.length > 0) {
+            const senderProfile = await getProfile(metadata.author);
+            await sendNotification(
+              pushTokens,
+              metadata.author,
+              metadata.recipient,
+              {
+                title: "You've been opped",
+                body: `${senderProfile.username} posted a video of you`,
+                entityId: postId.toString(),
+                entityType: "post",
+              },
+            );
+          }
+        }
+      } catch (error) {
+        // If the transaction fails, delete the Mux asset
+        await deleteAsset(assetId);
+        throw error;
       }
-
-      await tx.insert(schema.postStats).values({ postId: post.insertId });
-      return post;
-    });
-
-    await storeNotification(metadata.author, metadata.recipient, {
-      eventType: "post",
-      entityType: "post",
-      entityId: postId.toString(),
-    });
-
-    const { posts } = await getNotificationSettings(metadata.recipient);
-    if (!posts) return;
-
-    const pushTokens = await getPushTokens(metadata.recipient);
-    if (pushTokens.length === 0) return;
-
-    const senderProfile = await getProfile(metadata.author);
-
-    await sendNotification(pushTokens, metadata.author, metadata.recipient, {
-      title: "You've been opped",
-      body: `${senderProfile.username} posted a video of you`,
-      entityId: postId.toString(),
-      entityType: "post",
-    });
-  } else {
-    await db.insert(schema.postOfUserNotOnApp).values({
-      key,
-      mediaType: "video" as const,
-      authorId: metadata.author,
-      height: parseInt(metadata.height),
-      width: parseInt(metadata.width),
-      caption: metadata.caption,
-      phoneNumber: metadata.number,
-    });
+    } else {
+      await db.insert(schema.postOfUserNotOnApp).values({
+        key,
+        mediaType: "video" as const,
+        authorId: metadata.author,
+        height: parseInt(metadata.height),
+        width: parseInt(metadata.width),
+        caption: metadata.caption,
+        phoneNumber: metadata.number,
+      });
+    }
+  } catch (error) {
+    console.error("Error processing video:", error);
+    // Ensure Mux asset is deleted in case of any error
+    await deleteAsset(assetId);
+    throw error;
   }
 };
 
