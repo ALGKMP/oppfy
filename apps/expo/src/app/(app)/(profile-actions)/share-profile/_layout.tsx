@@ -1,7 +1,5 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { ChevronLeft, QrCode, X } from "@tamagui/lucide-icons";
 
 import { Icon } from "~/components/ui";
 import { Stack } from "~/layouts";
@@ -23,13 +21,6 @@ const ShareProfileLayout = () => {
             <Icon name="chevron-back" onPress={() => router.back()} blurred />
           ),
           headerRight: () => (
-            // <TouchableOpacity
-            //   onPress={() => {
-            //     router.navigate("/share-profile/scan-qr");
-            //   }}
-            // >
-            //   <QrCode />
-            // </TouchableOpacity>
             <Icon
               name="qr-code"
               onPress={() => router.navigate("/share-profile/scan-qr")}
