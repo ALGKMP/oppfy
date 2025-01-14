@@ -24,6 +24,8 @@ import { Dialog, DialogProvider, useDialogController } from "./Dialog";
 import { Form } from "./Form";
 import { Group, XGroup, YGroup } from "./Groups";
 import { H1, H2, H3, H4, H5, H6, HeaderTitle } from "./Headings";
+import { Icon } from "./Icon";
+import type { IconName } from "./Icon";
 import { Input, OnboardingInput, SearchInput, TextArea } from "./Inputs";
 import { Label } from "./Label";
 import { ListItem } from "./ListItem";
@@ -114,6 +116,7 @@ export {
   Skeleton,
   MediaListItem,
   UserCard,
+  Icon,
 };
 
-export type { MediaListItemActionProps, BottomSheetProps };
+export type { MediaListItemActionProps, BottomSheetProps, IconName };
