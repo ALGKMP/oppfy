@@ -4,6 +4,7 @@ import Splash from "@assets/splash.png";
 import { Info } from "@tamagui/lucide-icons";
 import { Image } from "tamagui";
 
+import { Icon } from "~/components/ui";
 import { Stack } from "~/layouts";
 
 const HeaderTitle = () => (
@@ -11,14 +12,11 @@ const HeaderTitle = () => (
 );
 
 const HeaderRight = () => (
-  <TouchableOpacity
-    hitSlop={10}
-    onPress={() => {
-      void Linking.openURL("https://www.oppfy.app");
-    }}
-  >
-    <Info />
-  </TouchableOpacity>
+  <Icon
+    name="information-circle"
+    onPress={() => Linking.openURL("https://www.oppfy.app")}
+    blurred
+  />
 );
 
 const OnboardingLayout = () => (
