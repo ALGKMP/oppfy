@@ -20,7 +20,7 @@ interface IconProps {
 export const Icon = ({
   name,
   color = "white",
-  size = 24,
+  size = 22,
   style,
   iconStyle,
   onPress,
@@ -56,9 +56,9 @@ export type { IconName };
 
 const styles = StyleSheet.create({
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 16,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
