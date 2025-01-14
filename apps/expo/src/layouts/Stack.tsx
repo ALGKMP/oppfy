@@ -41,13 +41,7 @@ const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
 
   if (!canGoBack) return null;
 
-  return (
-    <Icon 
-      name="chevron-back" 
-      onPress={() => router.back()}
-      blurred
-    />
-  );
+  return <Icon name="chevron-back" onPress={() => router.back()} blurred />;
 };
 
 const CustomNavigator = ({ children, ...rest }: any) => {
@@ -55,7 +49,6 @@ const CustomNavigator = ({ children, ...rest }: any) => {
     <Navigator
       {...rest}
       screenOptions={{
-        ...rest.screenOptions,
         header: ({ navigation, route, options }) => (
           <Header
             HeaderLeft={
@@ -82,6 +75,7 @@ const CustomNavigator = ({ children, ...rest }: any) => {
             })}
           />
         ),
+        ...rest.screenOptions,
       }}
     >
       {children}
