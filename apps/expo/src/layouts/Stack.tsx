@@ -31,6 +31,11 @@ const CustomNavigator = ({ children, ...rest }: any) => {
       screenOptions={{
         header: ({ navigation, route, options }) => (
           <Header
+            containerProps={{
+              backgroundColor: options.headerTransparent
+                ? "transparent"
+                : undefined,
+            }}
             HeaderLeft={
               options.headerLeft?.({
                 canGoBack: navigation.canGoBack(),

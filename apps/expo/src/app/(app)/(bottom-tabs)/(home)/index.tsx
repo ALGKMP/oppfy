@@ -173,7 +173,7 @@ const HomeScreen = () => {
           paddingTop={(insets.top + getToken("$2", "space")) as number}
           gap="$4"
         >
-          {Array.from({ length: 3 }).map((_, index) => (
+          {Array.from({ length: 5 }).map((_, index) => (
             <PostCard.loading key={`loading-post-${index}`} />
           ))}
         </YStack>

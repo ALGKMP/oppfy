@@ -1,11 +1,9 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import type { NativeStackHeaderProps } from "@react-navigation/native-stack/";
 import { ChevronLeft, QrCode, X } from "@tamagui/lucide-icons";
-import { Text } from "tamagui";
 
-import { Header as BaseHeader } from "~/components/Headers";
+import { Icon } from "~/components/ui";
 import { Stack } from "~/layouts";
 
 const ShareProfileLayout = () => {
@@ -14,27 +12,29 @@ const ShareProfileLayout = () => {
   return (
     <Stack
       screenOptions={{
-        header: (props) => <Header {...props} />,
+        headerTransparent: true,
       }}
     >
       <Stack.Screen
         name="index"
         options={{
           title: "Share Profile",
-          headerTransparent: true,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <ChevronLeft />
-            </TouchableOpacity>
+            <Icon name="chevron-back" onPress={() => router.back()} blurred />
           ),
           headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {
-                router.navigate("/share-profile/scan-qr");
-              }}
-            >
-              <QrCode />
-            </TouchableOpacity>
+            // <TouchableOpacity
+            //   onPress={() => {
+            //     router.navigate("/share-profile/scan-qr");
+            //   }}
+            // >
+            //   <QrCode />
+            // </TouchableOpacity>
+            <Icon
+              name="qr-code"
+              onPress={() => router.navigate("/share-profile/scan-qr")}
+              blurred
+            />
           ),
         }}
       />
@@ -44,54 +44,13 @@ const ShareProfileLayout = () => {
         options={{
           title: "Scan QR",
           animation: "fade",
-          headerTransparent: true,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <X />
-            </TouchableOpacity>
+            <Icon name="close" onPress={() => router.back()} blurred />
           ),
         }}
       />
     </Stack>
   );
 };
-
-type HeaderProps = NativeStackHeaderProps;
-
-const Header = ({ navigation, options }: HeaderProps) => (
-  <BaseHeader
-    containerProps={{
-      backgroundColor: options.headerTransparent ? "transparent" : undefined,
-    }}
-    HeaderLeft={
-      options.headerLeft
-        ? options.headerLeft({
-            canGoBack: navigation.canGoBack(),
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-    HeaderTitle={
-      typeof options.headerTitle === "function" ? (
-        options.headerTitle({
-          children: options.title ?? "",
-          tintColor: options.headerTintColor,
-        })
-      ) : options.title ? (
-        <Text fontSize="$5" fontWeight="bold">
-          {options.title}
-        </Text>
-      ) : null
-    }
-    HeaderRight={
-      options.headerRight
-        ? options.headerRight({
-            canGoBack: navigation.canGoBack(),
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-  />
-);
 
 export default ShareProfileLayout;

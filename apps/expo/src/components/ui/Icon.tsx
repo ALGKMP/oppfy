@@ -42,7 +42,7 @@ export const Icon = ({
       disabled={disabled}
     >
       {blurred ? (
-        <BlurView intensity={50} style={styles.blurView}>
+        <BlurView intensity={30} style={styles.blurView}>
           {iconElement}
         </BlurView>
       ) : (
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 25,
+    borderRadius: 18,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
