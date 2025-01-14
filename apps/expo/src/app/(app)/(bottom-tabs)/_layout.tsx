@@ -23,7 +23,6 @@ import {
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
-import { Header as BaseHeader } from "~/components/Headers";
 import { BottomTabBar } from "~/components/TabBars";
 import {
   Button,
@@ -145,20 +144,7 @@ const BottomTabsLayout = () => {
   };
 
   return (
-    <BottomTabs
-      tabBar={(props) => <BottomTabBar {...props} />}
-      screenOptions={{
-        header: (props) => <Header {...props} />,
-        headerStyle: {
-          backgroundColor: theme.background.val,
-        },
-      }}
-      screenListeners={{
-        tabPress: () =>
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
-      }}
-      backBehavior="history"
-    >
+    <BottomTabs backBehavior="history">
       <BottomTabs.Screen
         name="(home)"
         options={{
@@ -215,48 +201,6 @@ interface FeatureProps {
   description: string;
 }
 
-type HeaderProps = BottomTabHeaderProps;
-
-const Header = ({ options }: HeaderProps) => (
-  <BaseHeader
-    HeaderLeft={
-      options.headerLeft
-        ? options.headerLeft({
-            canGoBack: false,
-            pressColor: options.headerPressColor,
-            pressOpacity: options.headerPressOpacity,
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-    HeaderTitle={
-      typeof options.headerTitle === "function" ? (
-        options.headerTitle({
-          children: options.title ?? "",
-          tintColor: options.headerTintColor,
-          allowFontScaling: options.tabBarAllowFontScaling,
-        })
-      ) : options.title ? (
-        <Text fontSize="$5" fontWeight="bold">
-          {options.title}
-        </Text>
-      ) : null
-    }
-    HeaderRight={
-      options.headerRight
-        ? options.headerRight({
-            canGoBack: false,
-            pressColor: options.headerPressColor,
-            pressOpacity: options.headerPressOpacity,
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-  />
-);
-
-// const SECONDARY_COLOR = "#A608EF"; // a deeper purple to blend nicely with pink
-// hot pink
 const STARTING_COLOR = "#a819b0";
 const ENDING_COLOR = "#F214FF";
 
