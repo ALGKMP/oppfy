@@ -73,7 +73,6 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
 
             const authToken = await auth().currentUser?.getIdToken();
             if (authToken) {
-              // headers.set("authorization", `Bearer ${authToken}`); //TODO: double check case sensitivity
               headers.set("Authorization", `Bearer ${authToken}`);
             }
 
