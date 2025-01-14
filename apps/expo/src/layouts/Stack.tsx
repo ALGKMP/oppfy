@@ -1,4 +1,6 @@
-import { TouchableOpacity } from "react-native";
+import React from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { BlurView } from "expo-blur";
 import { useRouter, withLayoutContext } from "expo-router";
 import type {
   ParamListBase,
@@ -9,12 +11,30 @@ import type {
   NativeStackNavigationEventMap,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
-import { ChevronLeft } from "@tamagui/lucide-icons";
 import { Text } from "tamagui";
 
 import { Header } from "~/components/Headers";
+import { Icon } from "~/components/ui";
 
 const { Navigator } = createNativeStackNavigator();
+
+const styles = StyleSheet.create({
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 25,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  blurView: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(64, 64, 64, 0.4)",
+  },
+});
 
 const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
   const router = useRouter();
@@ -22,9 +42,11 @@ const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
   if (!canGoBack) return null;
 
   return (
-    <TouchableOpacity hitSlop={10} onPress={() => router.back()}>
-      <ChevronLeft />
-    </TouchableOpacity>
+    <Icon 
+      name="chevron-back" 
+      onPress={() => router.back()}
+      blurred
+    />
   );
 };
 
