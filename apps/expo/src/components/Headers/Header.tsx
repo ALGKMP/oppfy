@@ -64,7 +64,7 @@ const HeaderContainer = styled(XStack, {
 });
 
 const SideContainer = styled(View, {
-  minWidth: "$2",
+  minWidth: "$3",
 });
 
 const StyledHeaderTitle = styled(Text, {

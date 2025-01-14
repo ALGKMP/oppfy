@@ -14,10 +14,12 @@ import { Stack } from "~/layouts";
 const SettingsLayout = () => {
   return (
     <Stack
-      screenOptions={{
-        headerLeft: (props) => <HeaderLeft {...props} />,
-        header: (props) => <Header {...props} />,
-      }}
+      screenOptions={
+        {
+          // headerLeft: (props) => <HeaderLeft {...props} />,
+          // header: (props) => <Header {...props} />,
+        }
+      }
     >
       <Stack.Screen
         name="index"
