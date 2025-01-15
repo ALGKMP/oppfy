@@ -22,7 +22,8 @@
     "submit": "eas submit --platform ios --path",
     "typecheck": "tsc --noEmit",
     "update:production": "eas update --channel production --message \"$MESSAGE\"",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "dotenv -e ../../.env --",
+    "clip": "BUILDING_FOR_APP_CLIP=1 pnpm with-env expo run:ios --scheme OppfyClip"
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
@@ -106,6 +107,7 @@
     "react-dom": "18.3.1",
     "react-hook-form": "^7.51.3",
     "react-native": "0.76.5",
+    "react-native-app-clip": "^0.5.1",
     "react-native-date-picker": "^5.0.2",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-image-marker": "^1.2.6",
