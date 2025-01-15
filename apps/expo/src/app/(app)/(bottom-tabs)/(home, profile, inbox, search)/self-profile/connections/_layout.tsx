@@ -18,7 +18,7 @@ const ConnectionsLayout = () => {
   }, [navigation, profileData?.username]);
 
   return (
-    <TopTabs backBehavior="none" tabBar={(props) => <TopTabBar {...props} />}>
+    <TopTabs backBehavior="none">
       <TopTabs.Screen
         name="friends"
         options={{
