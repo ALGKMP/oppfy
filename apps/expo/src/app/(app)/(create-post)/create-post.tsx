@@ -15,7 +15,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronRight } from "@tamagui/lucide-icons";
+import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
 import { useTheme } from "tamagui";
 import { z } from "zod";
@@ -28,6 +28,7 @@ import PlayPause, {
 import {
   Button,
   H5,
+  HeaderTitle,
   ScreenView,
   Text,
   useBottomSheetController,
@@ -274,7 +275,7 @@ const CreatePost = () => {
 
         <CardContainer padding="$4" paddingBottom="$5">
           <YStack gap="$3">
-            <H5>Post Details</H5>
+            <HeaderTitle>Post Details</HeaderTitle>
             <XStack
               justifyContent="space-between"
               alignItems="center"
