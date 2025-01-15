@@ -1,6 +1,6 @@
-import type { ImageSourcePropType } from "react-native";
+import { ImageSourcePropType } from "react-native";
 import defaultProfilePicture from "@assets/default-profile-picture.jpg";
-// import { Image } from "expo-image";
+import type { ImageProps } from "tamagui";
 import { Image, useTheme } from "tamagui";
 
 interface AvatarProps {
@@ -8,6 +8,7 @@ interface AvatarProps {
   size?: number;
   bordered?: boolean;
   recyclingKey?: string;
+  style?: ImageProps["style"];
 }
 
 const Avatar = (props: AvatarProps) => {
@@ -20,14 +21,16 @@ const Avatar = (props: AvatarProps) => {
           ? { uri: props.source }
           : (props.source ?? defaultProfilePicture)
       }
-      // recyclingKey={props.recyclingKey}
-      style={{
-        width: props.size ?? 46,
-        height: props.size ?? 46,
-        borderRadius: props.size ? props.size / 2 : 23,
-        borderWidth: props.bordered ? 2 : 0,
-        borderColor: theme.primary.val as string,
-      }}
+      style={[
+        props.style,
+        {
+          width: props.size ?? 46,
+          height: props.size ?? 46,
+          borderRadius: props.size ? props.size / 2 : 23,
+          borderWidth: props.bordered ? 2 : 0,
+          borderColor: theme.primary.val as string,
+        },
+      ]}
     />
   );
 };

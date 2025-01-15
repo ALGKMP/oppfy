@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
@@ -14,6 +15,7 @@ import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
+import Avatar from "~/components/Avatar";
 import {
   Button,
   Circle,
@@ -26,6 +28,7 @@ import {
   YStack,
   type IconName,
 } from "~/components/ui";
+import useProfile from "~/hooks/useProfile";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
@@ -41,6 +44,7 @@ interface TabBarIconProps {
 const BottomTabsLayout = () => {
   const utils = api.useUtils();
   const bottomSheet = useBottomSheetController();
+  const { profile } = useProfile();
 
   const { data: unreadNotificationsCount } =
     api.notifications.getUnreadNotificationsCount.useQuery();
@@ -77,14 +81,46 @@ const BottomTabsLayout = () => {
 
   const getTabBarIcon =
     (iconName: IconName) =>
-    ({ focused, color, size }: TabBarIconProps) => (
-      <Icon
-        name={iconName}
-        color={color}
-        size={size}
-        style={{ opacity: focused ? 1 : 0.5 }}
-      />
-    );
+    ({ focused, color, size }: TabBarIconProps) => {
+      const animatedStyle = useAnimatedStyle(() => ({
+        transform: [
+          {
+            scale: withSpring(focused ? 1.1 : 1, {
+              mass: 0.5,
+              damping: 12,
+              stiffness: 100,
+            }),
+          },
+        ],
+      }));
+
+      // Special case for profile tab
+      if (iconName === "person-circle" && profile?.profilePictureUrl) {
+        return (
+          <Animated.View style={animatedStyle}>
+            <Avatar
+              source={profile.profilePictureUrl}
+              size={size}
+              bordered={focused}
+              style={{ opacity: focused ? 1 : 0.5 }}
+            />
+          </Animated.View>
+        );
+      }
+
+      return (
+        <Animated.View style={animatedStyle}>
+          <Icon
+            name={iconName}
+            color={color}
+            size={size}
+            iconStyle={{
+              opacity: focused ? 1 : 0.5,
+            }}
+          />
+        </Animated.View>
+      );
+    };
 
   const NotificationBadge = ({ count }: { count: number }) => {
     return (
