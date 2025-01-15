@@ -88,7 +88,6 @@ const TopTabBar = ({
           role="button"
           aria-selected={isFocused}
           aria-label={options.tabBarAccessibilityLabel}
-          testID={options.tabBarTestID}
           onPress={onPress}
           onLongPress={onLongPress}
         >
@@ -142,4 +141,4 @@ const createNonTamaguiStyles = (): NonTamaguiStyles =>
     },
   });
 
-export default React.memo(TopTabBar);
+export default TopTabBar;
