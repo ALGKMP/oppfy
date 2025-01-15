@@ -34,7 +34,7 @@
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
     "drizzle-kit": "^0.21.1",
-    "eslint": "^9.2.0",
+    "eslint": "catalog:",
     "prettier": "^3.2.5",
     "typescript": "^5.4"
   }
