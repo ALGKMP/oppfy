@@ -20,6 +20,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useTheme } from "tamagui";
 import { z } from "zod";
 
+import Avatar from "~/components/Avatar";
 import CardContainer from "~/components/Containers/CardContainer";
 import PlayPause, {
   usePlayPauseAnimations,
@@ -99,54 +100,50 @@ const CaptionSheet = ({
   }, []);
 
   return (
-      <YStack flex={1}>
-        <YStack flex={1} padding="$4" gap="$4">
-          <XStack justifyContent="space-between">
-            <Text fontSize="$6" fontWeight="bold">
-              Caption
+    <YStack flex={1}>
+      <YStack flex={1} padding="$4" gap="$4">
+        <XStack justifyContent="space-between">
+          <Text fontSize="$6" fontWeight="bold">
+            Caption
+          </Text>
+          <XStack alignItems="center" gap="$2">
+            <Text fontSize="$3" color="$gray10">
+              {localDraftCaption?.length ?? 0}/255
             </Text>
-            <XStack alignItems="center" gap="$2">
-              <Text fontSize="$3" color="$gray10">
-                {localDraftCaption?.length ?? 0}/255
-              </Text>
-              <TouchableOpacity onPress={() => setLocalDraftCaption("")}>
-                <Ionicons
-                  name="close-circle"
-                  size={20}
-                  color={theme.gray8.val}
-                />
-              </TouchableOpacity>
-            </XStack>
+            <TouchableOpacity onPress={() => setLocalDraftCaption("")}>
+              <Ionicons name="close-circle" size={20} color={theme.gray8.val} />
+            </TouchableOpacity>
           </XStack>
-          <BottomSheetTextInput
-            ref={inputRef}
-            placeholder="Write a caption..."
-            value={localDraftCaption}
-            onChangeText={setLocalDraftCaption}
-            multiline
-            maxLength={255}
-            style={{
-              fontWeight: "bold",
-              justifyContent: "flex-start",
-              color: theme.color.val,
-              backgroundColor: theme.gray5.val,
-              padding: 20,
-              borderRadius: 20,
-            }}
-          />
-        </YStack>
-        <XStack padding="$4" paddingBottom={insets.bottom}>
-          <Button
-            flex={1}
-            size="$5"
-            borderRadius="$7"
-            disabled={localDraftCaption === caption}
-            onPress={() => onSave(localDraftCaption)}
-          >
-            Save
-          </Button>
         </XStack>
+        <BottomSheetTextInput
+          ref={inputRef}
+          placeholder="Write a caption..."
+          value={localDraftCaption}
+          onChangeText={setLocalDraftCaption}
+          multiline
+          maxLength={255}
+          style={{
+            fontWeight: "bold",
+            justifyContent: "flex-start",
+            color: theme.color.val,
+            backgroundColor: theme.gray5.val,
+            padding: 20,
+            borderRadius: 20,
+          }}
+        />
       </YStack>
+      <XStack padding="$4" paddingBottom={insets.bottom}>
+        <Button
+          flex={1}
+          size="$5"
+          borderRadius="$7"
+          disabled={localDraftCaption === caption}
+          onPress={() => onSave(localDraftCaption)}
+        >
+          Save
+        </Button>
+      </XStack>
+    </YStack>
   );
 };
 
@@ -260,13 +257,17 @@ const CreatePost = () => {
           )}
 
           <XStack gap="$2" alignItems="center">
-            <Image
+            <Avatar
+              size={28}
               source={recipientImage ?? DefaultProfilePicture}
-              style={{ width: 24, height: 24, borderRadius: 12 }}
+              bordered
             />
             <Text color="$gray11">
-              Posting to {params.userType === "onApp" ? "@" : ""}
-              {displayName}
+              Posting to{" "}
+              <Text fontWeight="bold" color="$primary">
+                {params.userType === "onApp" ? "@" : ""}
+                {displayName}
+              </Text>
             </Text>
           </XStack>
         </YStack>
