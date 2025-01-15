@@ -21,9 +21,9 @@ const ConnectionsLayout = () => {
   return (
     <TopTabs backBehavior="none" initialRouteName={initialRouteName}>
       <TopTabs.Screen
-        name="friends"
+        name="following"
         options={{
-          tabBarLabel: "Friends",
+          tabBarLabel: "Following",
         }}
         initialParams={{ userId }}
       />
@@ -35,9 +35,9 @@ const ConnectionsLayout = () => {
         initialParams={{ userId }}
       />
       <TopTabs.Screen
-        name="following"
+        name="friends"
         options={{
-          tabBarLabel: "Following",
+          tabBarLabel: "Friends",
         }}
         initialParams={{ userId }}
       />
