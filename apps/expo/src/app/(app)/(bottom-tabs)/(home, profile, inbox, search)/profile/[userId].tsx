@@ -92,30 +92,6 @@ const OtherProfile = () => {
     itemVisiblePercentThreshold: 40,
   };
 
-  // useLayoutEffect(() => {
-  //   navigation.setOptions({
-  //     title: username,
-  //     headerLeft: () => {
-  //       const firstRoute = !router.canDismiss();
-  //       if (firstRoute) return null;
-
-  //       return (
-  //         <TouchableOpacity
-  //           hitSlop={10}
-  //           onPress={() => {
-  //             if (navigation.canGoBack()) {
-  //               router.back();
-  //             }
-  //           }}
-  //         >
-  //           <ChevronLeft />
-  //         </TouchableOpacity>
-  //       );
-  //     },
-  //     headerRight: () => <BlockUserHeader userId={userId} />,
-  //   });
-  // }, [navigation, username, userId, router]);
-
   const renderPost = ({ item }: { item: Post }) => (
     <PostCard
       postId={item.postId}
