@@ -7,6 +7,7 @@ import type {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type {
+  NativeStackHeaderProps,
   NativeStackNavigationEventMap,
   NativeStackNavigationOptions,
 } from "@react-navigation/native-stack";
@@ -17,12 +18,18 @@ import { Icon } from "~/components/ui";
 
 const { Navigator } = createNativeStackNavigator();
 
-const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
-  const router = useRouter();
-
+const DefaultHeaderLeft = ({
+  navigation,
+  canGoBack,
+}: {
+  navigation: NativeStackHeaderProps["navigation"];
+  canGoBack: boolean;
+}) => {
   if (!canGoBack) return null;
 
-  return <Icon name="chevron-back" onPress={() => router.back()} blurred />;
+  return (
+    <Icon name="chevron-back" onPress={() => navigation.goBack()} blurred />
+  );
 };
 
 const CustomNavigator = ({
@@ -47,7 +54,12 @@ const CustomNavigator = ({
                 options.headerLeft?.({
                   canGoBack: !!back,
                   tintColor: options.headerTintColor,
-                }) ?? <DefaultHeaderLeft canGoBack={!!back} />
+                }) ?? (
+                  <DefaultHeaderLeft
+                    navigation={navigation}
+                    canGoBack={!!back}
+                  />
+                )
               }
               HeaderTitle={
                 typeof options.headerTitle === "function" ? (
