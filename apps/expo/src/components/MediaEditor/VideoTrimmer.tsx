@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
+import type {
+  LayoutChangeEvent} from "react-native";
 import {
   ActivityIndicator,
-  LayoutChangeEvent,
   StyleSheet,
   Text,
   View,

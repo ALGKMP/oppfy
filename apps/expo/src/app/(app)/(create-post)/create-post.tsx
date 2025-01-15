@@ -37,7 +37,7 @@ import {
   YStack,
 } from "~/components/ui";
 import { useUploadMedia } from "~/hooks/media";
-import {
+import type {
   UploadMediaInputNotOnApp,
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
@@ -109,7 +109,7 @@ const CaptionSheet = ({
           </Text>
           <XStack alignItems="center" gap="$2">
             <Text fontSize="$3" color="$gray10">
-              {localDraftCaption?.length ?? 0}/255
+              {localDraftCaption.length ?? 0}/255
             </Text>
             <TouchableOpacity onPress={() => setLocalDraftCaption("")}>
               <Ionicons name="close-circle" size={20} color={theme.gray8.val} />

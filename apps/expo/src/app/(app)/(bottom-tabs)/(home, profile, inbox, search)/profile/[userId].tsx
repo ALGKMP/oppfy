@@ -143,7 +143,7 @@ const OtherProfile = () => {
     <YStack gap="$2" position="relative">
       <Header userId={userId} />
       {profileData?.friendCount &&
-      profileData?.friendCount > 0 &&
+      profileData.friendCount > 0 &&
       !networkRelationships?.blocked ? (
         <RecommendationCarousel paddingHorizontal="$2.5" />
       ) : (

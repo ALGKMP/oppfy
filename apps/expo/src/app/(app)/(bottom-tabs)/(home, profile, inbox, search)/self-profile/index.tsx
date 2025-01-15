@@ -126,7 +126,7 @@ const SelfProfile = () => {
     <YStack gap="$2">
       <Header />
       <YStack>
-        {profileData?.friendCount && profileData?.friendCount > 0 ? (
+        {profileData?.friendCount && profileData.friendCount > 0 ? (
           <FriendCarousel paddingHorizontal="$2.5" />
         ) : (
           <RecommendationCarousel paddingHorizontal="$4" />

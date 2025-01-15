@@ -29,12 +29,12 @@ import { storage } from "~/utils/storage";
 const INITIAL_PAGE_SIZE = 5;
 const ADDITIONAL_PAGE_SIZE = 10;
 
-type Friend = {
+interface Friend {
   userId: string;
   username: string;
   name: string;
   profilePictureUrl: string | null;
-};
+}
 
 type ListItem =
   | { type: "header"; title: string; isContact?: boolean }
@@ -134,7 +134,7 @@ const PostTo = () => {
           );
         } else if (item.type === "contact") {
           return (
-            item.data.name?.toLowerCase().includes(searchTerm) ||
+            item.data.name.toLowerCase().includes(searchTerm) ||
             item.data.phoneNumbers?.[0]?.number
               ?.toLowerCase()
               .includes(searchTerm)

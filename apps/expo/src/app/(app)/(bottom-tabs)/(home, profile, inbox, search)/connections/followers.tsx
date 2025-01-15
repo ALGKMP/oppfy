@@ -7,9 +7,10 @@ import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken, H6, YStack } from "tamagui";
 
 import { SearchInput } from "~/components/Inputs";
+import type {
+  MediaListItemActionProps} from "~/components/ui";
 import {
   MediaListItem,
-  MediaListItemActionProps,
   useActionSheetController,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";

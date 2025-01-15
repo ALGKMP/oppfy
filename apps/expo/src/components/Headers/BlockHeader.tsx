@@ -2,8 +2,9 @@ import { TouchableOpacity } from "react-native";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 
 import { View } from "~/components/ui";
+import type {
+  ButtonOption} from "~/components/ui/ActionSheet";
 import {
-  ButtonOption,
   useActionSheetController,
 } from "~/components/ui/ActionSheet";
 import { api } from "~/utils/api";

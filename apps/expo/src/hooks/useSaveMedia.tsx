@@ -214,7 +214,7 @@ const useSaveMedia = () => {
 
   const extractPlayback = async (uri: string) => {
     const regex = /mux\.com\/([a-zA-Z0-9]+)\./;
-    const match = uri.match(regex);
+    const match = regex.exec(uri);
     if (match) {
       return match[1];
     } else {

@@ -1,4 +1,5 @@
-import React, { useEffect, useState, type ElementType } from "react";
+import React, { useEffect, useState  } from "react";
+import type {ElementType} from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Easing,
@@ -25,9 +26,10 @@ import {
   Text,
   useBottomSheetController,
   View,
-  YStack,
-  type IconName,
+  YStack
+  
 } from "~/components/ui";
+import type {IconName} from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";

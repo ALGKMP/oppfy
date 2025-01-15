@@ -10,10 +10,11 @@ import {
   styled,
   ScrollView as TamaguiScrollView,
   View as TamaguiView,
-  useTheme,
-  type ScrollViewProps,
-  type StackProps,
+  useTheme
+  
+  
 } from "tamagui";
+import type {ScrollViewProps, StackProps} from "tamagui";
 
 export const View = styled(TamaguiView, {});
 export const ScrollView = styled(TamaguiScrollView, {});

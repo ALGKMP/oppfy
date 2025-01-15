@@ -8,7 +8,8 @@ import { getToken, H5, Spacer, YStack } from "tamagui";
 
 import { MediaListItem } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { api, type RouterOutputs } from "~/utils/api";
+import { api  } from "~/utils/api";
+import type {RouterOutputs} from "~/utils/api";
 
 type FriendRequestItem =
   RouterOutputs["friend"]["paginateFriendRequests"]["items"][0];

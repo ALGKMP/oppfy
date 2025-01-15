@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import Fuse, { FuseOptionKey } from "fuse.js";
+import type { FuseOptionKey } from "fuse.js";
+import Fuse from "fuse.js";
 
 interface UseSearchOptions<T> {
   data: T[];

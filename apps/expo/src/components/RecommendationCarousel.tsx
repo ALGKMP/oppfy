@@ -87,7 +87,7 @@ const RecommendationCarousel = ({
   const CARD_WIDTH = windowWidth * 0.25;
   const CARD_GAP = getToken("$2.5", "space") as number;
 
-  if (!isLoading && !recommendations?.length) {
+  if (!isLoading && !recommendations.length) {
     return null;
   }
 

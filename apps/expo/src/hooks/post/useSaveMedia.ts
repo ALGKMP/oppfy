@@ -45,7 +45,7 @@ export const useSaveMedia = () => {
 
   const saveMedia = async (
     mediaUrl: string,
-    watermark?: WatermarkOptions | undefined,
+    watermark?: WatermarkOptions  ,
   ) => {
     setIsSaving(true);
 

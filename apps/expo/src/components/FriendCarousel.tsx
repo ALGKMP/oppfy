@@ -70,7 +70,7 @@ const FriendCarousel = ({
   const CARD_WIDTH = windowWidth * 0.25;
   const CARD_GAP = getToken("$2.5", "space") as number;
 
-  if (!isLoading && !friends?.length) {
+  if (!isLoading && !friends.length) {
     return null;
   }
 

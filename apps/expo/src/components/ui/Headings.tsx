@@ -1,4 +1,5 @@
-import { cloneElement, type ReactNode } from "react";
+import { cloneElement  } from "react";
+import type {ReactNode} from "react";
 import {
   styled,
   H1 as TamaguiH1,

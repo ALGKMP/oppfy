@@ -51,7 +51,7 @@ export class PostRepository {
         schema.like,
         and(
           eq(schema.like.postId, schema.post.id),
-          eq(schema.like.userId, userId!),
+          eq(schema.like.userId, userId),
         ),
       )
       .where(eq(schema.post.id, postId))

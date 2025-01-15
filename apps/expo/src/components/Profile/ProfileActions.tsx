@@ -248,7 +248,7 @@ const useProfileActionButtons = (userId?: string) => {
 
     try {
       await Promise.all([
-        utils.profile.getNetworkRelationships.invalidate({ userId: userId! }),
+        utils.profile.getNetworkRelationships.invalidate({ userId: userId }),
         utils.profile.getFullProfileOther.invalidate({ userId }),
         utils.contacts.getRecommendationProfilesSelf.invalidate(),
       ]);

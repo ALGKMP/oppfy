@@ -8,12 +8,13 @@ import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
+import type {
+  MediaListItemActionProps} from "~/components/ui";
 import {
   CardContainer,
   Circle,
   H5,
   MediaListItem,
-  MediaListItemActionProps,
   Paragraph,
   SizableText,
   XStack,
@@ -23,7 +24,8 @@ import { Spacer } from "~/components/ui/Spacer";
 import { TimeAgo } from "~/components/ui/TimeAgo";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 
 type NotificationItem =
   RouterOutputs["notifications"]["paginateNotifications"]["items"][0];

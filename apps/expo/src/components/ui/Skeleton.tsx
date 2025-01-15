@@ -9,7 +9,8 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { RadiusTokens, SizeTokens, SpecificTokens } from "tamagui";
+import type { RadiusTokens, SizeTokens} from "tamagui";
+import { SpecificTokens } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
 import { View } from "./Views";

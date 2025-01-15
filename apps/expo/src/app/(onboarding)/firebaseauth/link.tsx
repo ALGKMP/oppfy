@@ -209,7 +209,7 @@ const CountryPicker = ({
 
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
     {
-      data: countriesWithoutSections as CountryData[],
+      data: countriesWithoutSections,
       keys: ["name", "dialingCode", "countryCode"],
     },
   );

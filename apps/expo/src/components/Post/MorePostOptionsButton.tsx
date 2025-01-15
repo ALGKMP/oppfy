@@ -1,4 +1,5 @@
-import { StyleProp, TouchableOpacity, ViewStyle } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 
 import {

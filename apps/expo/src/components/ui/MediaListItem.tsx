@@ -16,7 +16,7 @@ export type MediaListItemActionProps = {
   label: string;
 } & GetProps<typeof Button>;
 
-type MediaListItemProps = {
+interface MediaListItemProps {
   recyclingKey?: string;
   verticalText?: boolean;
   title: ReactNode;
@@ -26,7 +26,7 @@ type MediaListItemProps = {
   primaryAction?: MediaListItemActionProps;
   secondaryAction?: MediaListItemActionProps;
   onPress?: () => void;
-};
+}
 
 export const MediaListItem = ({
   recyclingKey,
@@ -60,7 +60,7 @@ export const MediaListItem = ({
       {verticalText ? (
         <Paragraph flex={1}>
           {typeof title === "string" ? (
-            <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
+            <SizableText size="$4" fontWeight="bold" lineHeight={0}>
               {title}
             </SizableText>
           ) : (
@@ -86,7 +86,7 @@ export const MediaListItem = ({
       ) : (
         <YStack flex={1} gap="$1.5">
           {typeof title === "string" ? (
-            <SizableText size="$4" fontWeight={"bold"} lineHeight={0}>
+            <SizableText size="$4" fontWeight="bold" lineHeight={0}>
               {title}
             </SizableText>
           ) : (
