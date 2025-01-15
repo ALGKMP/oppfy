@@ -60,8 +60,8 @@ const Stats = ({
     if (isLoading) return;
 
     const basePath = userId
-      ? "/profile/connections"
-      : "/self-profile/connections";
+      ? "/connections"
+      : "/self-connections";
     router.push({
       pathname: `${basePath}/${section}` as any,
       ...(userId && { params: { userId, username } }),

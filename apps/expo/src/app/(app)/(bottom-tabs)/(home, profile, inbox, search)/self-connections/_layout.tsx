@@ -12,16 +12,17 @@ const ConnectionsLayout = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerShown: true,
       title: profileData?.username,
     });
   }, [navigation, profileData?.username]);
 
   return (
-    <TopTabs backBehavior="none">
+    <TopTabs>
       <TopTabs.Screen
-        name="following"
+        name="friends"
         options={{
-          title: "Following",
+          title: "Friends",
         }}
       />
       <TopTabs.Screen
@@ -31,9 +32,9 @@ const ConnectionsLayout = () => {
         }}
       />
       <TopTabs.Screen
-        name="friends"
+        name="following"
         options={{
-          title: "Friends",
+          title: "Following",
         }}
       />
     </TopTabs>

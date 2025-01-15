@@ -14,6 +14,7 @@ const ConnectionsLayout = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerShown: true,
       title: username,
     });
   }, [navigation, username]);
