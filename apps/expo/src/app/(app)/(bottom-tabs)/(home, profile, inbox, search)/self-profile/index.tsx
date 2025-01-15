@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
@@ -20,6 +21,8 @@ import { api } from "~/utils/api";
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
 const SelfProfile = () => {
+  const insets = useSafeAreaInsets();
+
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
@@ -155,28 +158,27 @@ const SelfProfile = () => {
   };
 
   return (
-    <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
-      <FlashList
-        ref={scrollRef}
-        data={postItems}
-        renderItem={renderPost}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyList}
-        keyExtractor={(item) => `self-profile-post-${item.postId}`}
-        estimatedItemSize={664}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleOnEndReached}
-        onRefresh={handleRefresh}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        extraData={{ viewableItems, postItems }}
-        refreshing={isRefreshing}
-        ItemSeparatorComponent={() => <Spacer size="$4" />}
-        ListHeaderComponentStyle={{
-          marginBottom: getToken("$2", "space") as number,
-        }}
-      />
-    </BaseScreenView>
+    <FlashList
+      ref={scrollRef}
+      data={postItems}
+      renderItem={renderPost}
+      ListHeaderComponent={renderHeader}
+      ListEmptyComponent={renderEmptyList}
+      keyExtractor={(item) => `self-profile-post-${item.postId}`}
+      estimatedItemSize={664}
+      showsVerticalScrollIndicator={false}
+      onEndReached={handleOnEndReached}
+      onRefresh={handleRefresh}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={viewabilityConfig}
+      extraData={{ viewableItems, postItems }}
+      refreshing={isRefreshing}
+      ItemSeparatorComponent={() => <Spacer size="$4" />}
+      ListHeaderComponentStyle={{
+        marginTop: insets.top,
+        marginBottom: getToken("$2", "space") as number,
+      }}
+    />
   );
 };
 
