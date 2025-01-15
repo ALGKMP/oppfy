@@ -1,4 +1,3 @@
-import { SizableText } from "~/components/ui/";
 import { TimeAgo } from "~/components/ui/TimeAgo";
 
 interface PostDateProps {
@@ -13,15 +12,13 @@ const PostDate = ({ createdAt }: PostDateProps) => {
   };
 
   return (
-    <SizableText size="$2" color="$gray10">
-      <TimeAgo
-        size="$2"
-        theme="alt2"
-        lineHeight={0}
-        date={createdAt}
-        format={formatTimeAgo}
-      />
-    </SizableText>
+    <TimeAgo
+      size="$2"
+      color="$gray12"
+      lineHeight={0}
+      date={createdAt}
+      format={formatTimeAgo}
+    />
   );
 };
 

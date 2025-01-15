@@ -35,9 +35,11 @@ const CommentsCount = ({
   };
   return (
     <TouchableOpacity onPress={handlePress}>
-      <SizableText size="$3" color="$gray10">
+      <SizableText size="$3" color="$gray10" fontWeight="500" opacity={0.9}>
         {commentsCount > 0
-          ? `View ${commentsCount > 1 ? "all " : ""}${commentsCount} ${commentsCount === 1 ? "comment" : "comments"}`
+          ? `View ${commentsCount > 1 ? "all " : ""}${commentsCount} ${
+              commentsCount === 1 ? "comment" : "comments"
+            }`
           : "Be the first to comment"}
       </SizableText>
     </TouchableOpacity>

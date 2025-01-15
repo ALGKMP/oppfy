@@ -7,6 +7,7 @@ import { ResizeMode, Video } from "expo-av";
 import type { AVPlaybackStatus } from "expo-av";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "expo-router";
 import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
 
@@ -16,7 +17,6 @@ import { useAudio } from "~/contexts/AudioContext";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { useLikePost } from "../../hooks/post/useLikePost";
 import Avatar from "../Avatar";
-import CardContainer from "../Containers/CardContainer";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../Icons/Mute";
 import CommentButton from "./CommentButton";
@@ -26,6 +26,7 @@ import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
 import PostDate from "./PostDate";
 import ShareButton from "./ShareButton";
+import { FloatingComments } from './FloatingComments';
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -86,155 +87,254 @@ const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
 
   return (
-    <CardContainer paddingTop={0}>
-      <YStack gap="$3">
-        <View marginHorizontal="$-3">
-          <View>
-            {props.media.type === "image" ? (
-              <ImageComponent
-                endpoint={props.endpoint}
-                media={props.media}
-                stats={props.stats}
-              />
-            ) : (
-              <VideoPlayer
-                endpoint={props.endpoint}
-                media={props.media}
-                stats={props.stats}
-              />
-            )}
-            <View position="absolute" bottom={15} left={15}>
-              <XStack alignItems="center" gap="$3">
-                <TouchableOpacity
-                  onPress={() => {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    routeProfile({
-                      userId: props.recipient.id,
-                      username: props.recipient.username,
-                    });
-                  }}
-                >
-                  <Avatar source={props.recipient.profilePicture} size={50} />
-                </TouchableOpacity>
+    <YStack marginVertical="$2" overflow="hidden">
+      {/* Media Content with Overlays */}
+      <View>
+        {props.media.type === "image" ? (
+          <ImageComponent
+            endpoint={props.endpoint}
+            media={props.media}
+            stats={props.stats}
+          />
+        ) : (
+          <VideoPlayer
+            endpoint={props.endpoint}
+            media={props.media}
+            stats={props.stats}
+          />
+        )}
 
-                <YStack gap="$1">
-                  <TouchableOpacity
-                    onPress={() => {
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Light,
-                      );
-                      routeProfile({
-                        userId: props.recipient.id,
-                        username: props.recipient.username,
-                      });
-                    }}
-                  >
-                    <SizableText size="$5" fontWeight="bold" lineHeight={0}>
-                      {props.recipient.username}
-                    </SizableText>
-                  </TouchableOpacity>
-                </YStack>
-              </XStack>
-            </View>
+        {/* Top Gradient Overlay */}
+        <LinearGradient
+          colors={["rgba(0,0,0,0.5)", "transparent"]}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 120,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Bottom Gradient Overlay */}
+        <LinearGradient
+          colors={["transparent", "rgba(0,0,0,0.7)"]}
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 160,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Top Header - Overlaid on image */}
+        <XStack
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          paddingHorizontal="$4"
+          paddingVertical="$4"
+          alignItems="center"
+          justifyContent="space-between"
+          zIndex={2}
+        >
+          <XStack gap="$3" alignItems="center">
+            <TouchableOpacity
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                routeProfile({
+                  userId: props.author.id,
+                  username: props.author.username,
+                });
+              }}
+            >
+              <Avatar source={props.author.profilePicture} size={44} bordered />
+            </TouchableOpacity>
+
+            <YStack>
+              <TouchableOpacity
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  routeProfile({
+                    userId: props.author.id,
+                    username: props.author.username,
+                  });
+                }}
+              >
+                <Text
+                  color="white"
+                  fontWeight="600"
+                  fontSize="$5"
+                  shadowColor="black"
+                  shadowOffset={{ width: 1, height: 1 }}
+                  shadowOpacity={0.4}
+                  shadowRadius={3}
+                >
+                  {props.author.username}
+                </Text>
+              </TouchableOpacity>
+              <PostDate createdAt={props.createdAt} light />
+            </YStack>
+          </XStack>
+
+          <XStack alignItems="center" justifyContent="flex-end" width="$5">
             <MorePostOptionsButton
               postId={props.postId}
               recipientUserId={props.recipient.id}
               mediaUrl={props.media.url}
-              style={{ position: "absolute", bottom: 15, right: 15 }}
+              light
+              style={{ position: "relative", right: 0, bottom: 0 }}
             />
-          </View>
-        </View>
-
-        {/* Under post */}
-        <YStack flex={1} paddingHorizontal="$1" gap="$1">
-          <XStack gap="$3.5" alignItems="center">
-            {/* Like Button */}
-            <LikeButton
-              postId={props.postId}
-              endpoint={props.endpoint}
-              initialHasLiked={props.stats.hasLiked}
-            />
-
-            {/* Comment Button */}
-            <CommentButton
-              postId={props.postId}
-              postRecipientUserId={props.recipient.id}
-              endpoint={props.endpoint}
-            />
-            {/* Share Button */}
-            <ShareButton postId={props.postId} />
           </XStack>
+        </XStack>
 
-          {/* Likes Count */}
-          {props.stats.likes > 0 && (
-            <TouchableOpacity>
-              <SizableText size="$3" fontWeight="bold">
-                {props.stats.likes > 0
-                  ? `${props.stats.likes} ${props.stats.likes === 1 ? "like" : "likes"}`
-                  : ""}
-              </SizableText>
-            </TouchableOpacity>
-          )}
-
-          {/* Opped by */}
-          <TouchableOpacity
-            onPress={() => {
-              routeProfile({
-                userId: props.author.id,
-                username: props.author.username,
-              });
-            }}
-          >
-            <Paragraph>
-              <Text fontWeight="bold">
-                opped by{" "}
-                <Text fontWeight="bold" color="$primary">
-                  {props.author.username}
+        {/* Floating Action Buttons - Right side */}
+        <YStack
+          position="absolute"
+          right={0}
+          bottom={24}
+          paddingRight="$4"
+          gap="$5"
+          zIndex={2}
+          alignItems="flex-end"
+        >
+          {/* Like Button */}
+          <GlassButton expanded={(props.stats.likes ?? 0) > 0}>
+            {(props.stats.likes ?? 0) > 0 ? (
+              <>
+                <Text
+                  color="white"
+                  fontWeight="600"
+                  fontSize="$4"
+                  textAlign="center"
+                  shadowColor="black"
+                  shadowOffset={{ width: 1, height: 1 }}
+                  shadowOpacity={0.5}
+                  shadowRadius={3}
+                >
+                  {props.stats.likes >= 1000000
+                    ? `${(props.stats.likes / 1000000).toFixed(1)}M`
+                    : props.stats.likes >= 1000
+                      ? `${(props.stats.likes / 1000).toFixed(1)}K`
+                      : props.stats.likes}
                 </Text>
-              </Text>
-            </Paragraph>
-          </TouchableOpacity>
+                <LikeButton
+                  postId={props.postId}
+                  endpoint={props.endpoint}
+                  initialHasLiked={props.stats.hasLiked ?? false}
+                  light
+                  compact
+                />
+              </>
+            ) : (
+              <LikeButton
+                postId={props.postId}
+                endpoint={props.endpoint}
+                initialHasLiked={props.stats.hasLiked ?? false}
+                light
+                compact
+              />
+            )}
+          </GlassButton>
 
-          {/* Caption */}
-          <PostCaption caption={props.caption} />
+          {/* Comment Button */}
+          <GlassButton expanded={(props.stats.comments ?? 0) > 0}>
+            {(props.stats.comments ?? 0) > 0 ? (
+              <>
+                <Text
+                  color="white"
+                  fontWeight="600"
+                  fontSize="$4"
+                  textAlign="center"
+                  shadowColor="black"
+                  shadowOffset={{ width: 1, height: 1 }}
+                  shadowOpacity={0.5}
+                  shadowRadius={3}
+                >
+                  {props.stats.comments >= 1000000
+                    ? `${(props.stats.comments / 1000000).toFixed(1)}M`
+                    : props.stats.comments >= 1000
+                      ? `${(props.stats.comments / 1000).toFixed(1)}K`
+                      : props.stats.comments}
+                </Text>
+                <CommentButton
+                  postId={props.postId}
+                  postRecipientUserId={props.recipient.id}
+                  endpoint={props.endpoint}
+                  light
+                  compact
+                />
+              </>
+            ) : (
+              <CommentButton
+                postId={props.postId}
+                postRecipientUserId={props.recipient.id}
+                endpoint={props.endpoint}
+                light
+                compact
+              />
+            )}
+          </GlassButton>
 
-          {/* Comments Count */}
-          <CommentsCount
-            commentsCount={props.stats.comments}
-            postId={props.postId}
-            endpoint={props.endpoint}
-            postRecipientUserId={props.recipient.id}
-          />
-
-          {/* Post Date */}
-          <PostDate createdAt={props.createdAt} />
+          {/* Share Button */}
+          <GlassButton expanded={false}>
+            <ShareButton postId={props.postId} light compact />
+          </GlassButton>
         </YStack>
-      </YStack>
-    </CardContainer>
+
+        {/* Bottom Content Overlay */}
+        <YStack
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          paddingHorizontal="$4"
+          paddingVertical="$4"
+          zIndex={2}
+          gap="$2"
+        >
+          <PostCaption
+            caption={props.caption}
+            light
+            username={props.author.username}
+          />
+        </YStack>
+
+        {props.stats.comments > 0 && (
+          <FloatingComments
+            comments={[
+              { id: '1', username: 'user1', content: '🔥 This is amazing!' },
+              { id: '2', username: 'user2', content: 'Love this! 💫' },
+              { id: '3', username: 'user3', content: 'Incredible shot 📸' },
+              // We can fetch real comments here
+            ]}
+          />
+        )}
+      </View>
+    </YStack>
   );
 };
 
 PostCard.loading = function PostCardLoading() {
   return (
-    <CardContainer paddingVertical={0}>
-      <YStack>
-        <View marginHorizontal="$-3">
-          <Skeleton width="100%" height={600} radius={8} />
-          <View position="absolute" bottom={15} left={15}>
-            <XStack alignItems="center" gap="$3">
-              <Skeleton size={40} circular />
-              <YStack gap="$1">
-                <Skeleton width={100} height={16} />
-                <XStack alignItems="center" gap="$2">
-                  <Skeleton size={20} circular />
-                  <Skeleton width={80} height={12} />
-                </XStack>
-              </YStack>
-            </XStack>
-          </View>
+    <YStack marginVertical="$2">
+      <View>
+        <Skeleton width="100%" height={600} radius={0} />
+        <View position="absolute" top={16} left={16} right={16}>
+          <XStack alignItems="center" gap="$3">
+            <Skeleton size={44} circular />
+            <YStack gap="$2">
+              <Skeleton width={120} height={20} />
+              <Skeleton width={80} height={14} />
+            </YStack>
+          </XStack>
         </View>
-      </YStack>
-    </CardContainer>
+      </View>
+    </YStack>
   );
 };
 
@@ -472,5 +572,53 @@ const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
 };
 
 const VideoPlayer = React.memo(VideoPlayerComponent);
+
+// Create a reusable glass button component
+const GlassButton = ({
+  expanded,
+  children,
+}: {
+  expanded: boolean;
+  children: React.ReactNode;
+}) => (
+  <XStack
+    borderRadius={50}
+    height={50}
+    alignItems="center"
+    animation="quick"
+    pressStyle={{
+      scale: 0.96,
+      opacity: 0.8,
+    }}
+    // Glass effect with darker base
+    backgroundColor="rgba(0,0,0,0.35)"
+    shadowColor="rgba(0,0,0,0.2)"
+    shadowOffset={{ width: 0, height: 2 }}
+    shadowRadius={8}
+    shadowOpacity={1}
+    borderWidth={0.5}
+    borderColor="rgba(255,255,255,0.15)"
+    // Glass overlay
+    style={{
+      backdropFilter: "blur(8px)",
+      WebkitBackdropFilter: "blur(8px)",
+    }}
+  >
+    {expanded ? (
+      <XStack alignItems="center" gap="$3" paddingLeft="$4" paddingRight="$3">
+        {children}
+      </XStack>
+    ) : (
+      <XStack
+        width={50}
+        height={50}
+        alignItems="center"
+        justifyContent="center"
+      >
+        {children}
+      </XStack>
+    )}
+  </XStack>
+);
 
 export default PostCard;

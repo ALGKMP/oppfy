@@ -9,12 +9,16 @@ interface CommentButtonProps {
   postId: string;
   postRecipientUserId: string;
   endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
+  light?: boolean;
+  compact?: boolean;
 }
 
 const CommentButton = ({
   postId,
   postRecipientUserId,
   endpoint,
+  light,
+  compact,
 }: CommentButtonProps) => {
   const { show, hide } = useBottomSheetController();
 
@@ -34,8 +38,20 @@ const CommentButton = ({
   };
 
   return (
-    <TouchableOpacity onPress={handlePress}>
-      <MessageCircle size="$2" color="$gray12" />
+    <TouchableOpacity
+      onPress={handlePress}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
+      <MessageCircle
+        size={compact ? 20 : 26}
+        color={light ? "white" : "$gray12"}
+        style={{
+          shadowColor: "black",
+          shadowOffset: { width: 1, height: 1 },
+          shadowOpacity: 0.3,
+          shadowRadius: 2,
+        }}
+      />
     </TouchableOpacity>
   );
 };
