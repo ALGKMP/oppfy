@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -19,7 +20,7 @@ import BlockUserHeader from "~/components/Headers/BlockHeader";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { H5, HeaderTitle, XStack } from "~/components/ui";
+import { H5, HeaderTitle, Icon, XStack } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
@@ -31,6 +32,8 @@ type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 const OtherProfile = () => {
   const router = useRouter();
   const navigation = useNavigation();
+
+  const insets = useSafeAreaInsets();
 
   const { userId, username } = useLocalSearchParams<{
     userId: string;
@@ -137,12 +140,11 @@ const OtherProfile = () => {
   );
 
   const renderHeader = () => (
-    <YStack gap="$2">
+    <YStack gap="$2" position="relative">
       <Header userId={userId} />
       {profileData?.friendCount &&
       profileData?.friendCount > 0 &&
       !networkRelationships?.blocked ? (
-        // <FriendCarousel paddingHorizontal="$2.5" />
         <RecommendationCarousel paddingHorizontal="$2.5" />
       ) : (
         <RecommendationCarousel paddingHorizontal="$2.5" />
@@ -152,6 +154,16 @@ const OtherProfile = () => {
           Posts
         </HeaderTitle>
       )}
+      <Icon
+        name="chevron-back"
+        onPress={() => router.back()}
+        blurred
+        style={{
+          position: "absolute",
+          top: 12,
+          left: 12,
+        }}
+      />
     </YStack>
   );
 
@@ -197,27 +209,26 @@ const OtherProfile = () => {
   };
 
   return (
-    <BaseScreenView padding={0} paddingBottom={0} scrollEnabled={false}>
-      <FlashList
-        data={postItems}
-        renderItem={renderPost}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderNoPosts}
-        keyExtractor={(item) => `other-profile-post-${item.postId}`}
-        estimatedItemSize={300}
-        showsVerticalScrollIndicator={false}
-        onEndReached={handleOnEndReached}
-        onRefresh={handleRefresh}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        extraData={{ viewableItems, postItems }}
-        refreshing={isRefreshing}
-        ItemSeparatorComponent={() => <Spacer size="$4" />}
-        ListHeaderComponentStyle={{
-          marginBottom: getToken("$2", "space") as number,
-        }}
-      />
-    </BaseScreenView>
+    <FlashList
+      data={postItems}
+      renderItem={renderPost}
+      ListHeaderComponent={renderHeader}
+      ListEmptyComponent={renderNoPosts}
+      keyExtractor={(item) => `other-profile-post-${item.postId}`}
+      estimatedItemSize={300}
+      showsVerticalScrollIndicator={false}
+      onEndReached={handleOnEndReached}
+      onRefresh={handleRefresh}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={viewabilityConfig}
+      extraData={{ viewableItems, postItems }}
+      refreshing={isRefreshing}
+      ItemSeparatorComponent={() => <Spacer size="$4" />}
+      ListHeaderComponentStyle={{
+        marginTop: insets.top,
+        marginBottom: getToken("$2", "space") as number,
+      }}
+    />
   );
 };
 

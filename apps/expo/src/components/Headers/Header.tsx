@@ -28,7 +28,7 @@ const StackHeader = ({
 
   const containerStyle = useMemo<ViewProps>(
     () => ({
-      paddingTop: safeArea ? insets.top : "$2",
+      paddingTop: safeArea ? insets.top : "$3",
       backgroundColor:
         containerProps?.backgroundColor === "transparent"
           ? "transparent"
