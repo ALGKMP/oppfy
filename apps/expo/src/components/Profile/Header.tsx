@@ -33,11 +33,15 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
 
   const profile = profileData ?? defaultProfile;
 
+  // Generate a unique key for HeaderGradient based on username
+  const headerKey = `header-gradient-${profile.username ?? "default"}`;
+
   return (
     <YStack>
       {/* Cover Image Area */}
       <YStack height={140} overflow="hidden" borderRadius="$6">
         <HeaderGradient
+          key={headerKey}
           username={profile.username}
           profilePictureUrl={profile.profilePictureUrl}
         />
