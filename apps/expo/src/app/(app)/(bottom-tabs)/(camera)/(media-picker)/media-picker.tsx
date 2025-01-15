@@ -5,13 +5,14 @@ import React, {
   useState,
 } from "react";
 import { Dimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
-import { Stack } from "tamagui";
+import { getToken, Stack } from "tamagui";
 
 import { BaseScreenView } from "~/components/Views";
 import useMediaProcessing from "~/hooks/media/useMediaProcessing";
@@ -51,6 +52,7 @@ const moveVideoToLocalStorage = async (uri: string) => {
 const MediaPickerScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { processVideo } = useMediaProcessing();
 
   const { albumId, albumTitle } = useLocalSearchParams<{
@@ -185,6 +187,10 @@ const MediaPickerScreen = () => {
         void fetchAssets();
       }}
       onEndReachedThreshold={0.5}
+      contentContainerStyle={{
+        paddingBottom: insets.bottom,
+        paddingTop: getToken("$3", "space"),
+      }}
     />
   );
 };

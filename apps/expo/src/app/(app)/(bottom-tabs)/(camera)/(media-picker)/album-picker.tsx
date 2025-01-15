@@ -95,7 +95,8 @@ const AlbumPickerScreen = () => {
         <XStack
           alignItems="center"
           justifyContent="space-between"
-          paddingVertical="$3"
+          paddingTop={index === 0 ? 0 : "$3"}
+          paddingBottom={index === albums.length - 1 ? 0 : "$3"}
           borderBottomWidth={index < albums.length - 1 ? 1 : 0}
           borderBottomColor="$borderColor"
           onPress={handlePress}
@@ -140,6 +141,7 @@ const AlbumPickerScreen = () => {
       estimatedItemSize={80}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
+        paddingTop: getToken("$3", "space"),
         paddingHorizontal: getToken("$4", "space"),
       }}
     />
