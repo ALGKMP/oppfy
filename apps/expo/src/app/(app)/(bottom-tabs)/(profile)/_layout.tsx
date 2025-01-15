@@ -1,10 +1,10 @@
-import { Stack } from "expo-router";
+import { Stack } from "~/layouts";
 
 const ProfileLayout = () => {
   return (
     <Stack
       screenOptions={{
-        header: () => null,
+        headerShown: false,
       }}
     >
       <Stack.Screen name="self-profile" />
