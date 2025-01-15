@@ -8,6 +8,7 @@ const ProfileLayout = () => {
       }}
     >
       <Stack.Screen name="self-profile" />
+      <Stack.Screen name="profile" options={{ headerShown: false }} />
     </Stack>
   );
 };

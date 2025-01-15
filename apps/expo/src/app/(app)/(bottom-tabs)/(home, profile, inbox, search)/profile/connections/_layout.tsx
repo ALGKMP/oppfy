@@ -1,7 +1,6 @@
 import React, { useLayoutEffect } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 
-import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
 
 const ConnectionsLayout = () => {
@@ -20,11 +19,7 @@ const ConnectionsLayout = () => {
   }, [navigation, username]);
 
   return (
-    <TopTabs
-      backBehavior="none"
-      initialRouteName={initialRouteName}
-      tabBar={(props) => <TopTabBar {...props} />}
-    >
+    <TopTabs backBehavior="none" initialRouteName={initialRouteName}>
       <TopTabs.Screen
         name="friends"
         options={{

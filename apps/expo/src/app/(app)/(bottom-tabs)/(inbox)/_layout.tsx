@@ -15,6 +15,9 @@ const InboxLayout = () => (
         title: "Requests",
       }}
     />
+
+    <Stack.Screen name="profile" options={{ headerShown: false }} />
+    <Stack.Screen name="self-profile" options={{ headerShown: false }} />
   </Stack>
 );
 

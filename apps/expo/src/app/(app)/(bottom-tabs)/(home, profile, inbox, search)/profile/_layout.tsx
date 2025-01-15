@@ -1,14 +1,30 @@
+import { useLocalSearchParams } from "expo-router";
+
 import { Stack } from "~/layouts";
 
-const ProfileLayout = () => (
-  <Stack
-    screenOptions={{
-      headerShown: false,
-    }}
-  >
-    <Stack.Screen name="[userId]" />
-    <Stack.Screen name="connections" />
-  </Stack>
-);
+const ProfileLayout = () => {
+  const { userId, username } = useLocalSearchParams<{
+    userId: string;
+    username: string;
+  }>();
+
+  return (
+    <Stack
+      screenOptions={
+        {
+          // headerShown: false,
+        }
+      }
+    >
+      <Stack.Screen
+        name="[userId]"
+        options={{
+          title: username,
+        }}
+      />
+      <Stack.Screen name="connections" />
+    </Stack>
+  );
+};
 
 export default ProfileLayout;
