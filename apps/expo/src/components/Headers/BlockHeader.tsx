@@ -14,7 +14,9 @@ const BlockUserHeader = ({ userId }: { userId: string }) => {
   const { isBlocking, isUnblocking, handleBlockUser, handleUnblockUser } =
     useBlockUser(userId);
 
-  const networkRelationships = utils.profile.getNetworkRelationships.getData({ userId });
+  const networkRelationships = utils.profile.getNetworkRelationships.getData({
+    userId,
+  });
 
   const sheetButtonOptions: ButtonOption[] = [
     {

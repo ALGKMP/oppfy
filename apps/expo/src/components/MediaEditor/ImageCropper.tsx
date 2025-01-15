@@ -1,20 +1,16 @@
-import React, { useCallback, useEffect } from 'react';
-import {
-  Dimensions,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import React, { useCallback, useEffect } from "react";
+import { Dimensions, StyleSheet, TouchableOpacity } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Reanimated, {
-  useSharedValue,
-  useAnimatedStyle,
   runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
   withSpring,
-} from 'react-native-reanimated';
-import { Image } from 'expo-image';
-import { Crop, RotateCcw } from '@tamagui/lucide-icons';
+} from "react-native-reanimated";
+import { Image } from "expo-image";
+import { Crop, RotateCcw } from "@tamagui/lucide-icons";
 
-import { Text, View, XStack, YStack } from '~/components/ui';
+import { Text, View, XStack, YStack } from "~/components/ui";
 
 const ReanimatedImage = Reanimated.createAnimatedComponent(Image);
 
@@ -43,7 +39,7 @@ const SPRING_CONFIG = {
   stiffness: 200,
 };
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_WIDTH = Dimensions.get("window").width;
 /** We can decide how large the crop area is relative to screen. Adjust to your preference. */
 const CROP_AREA_WIDTH = SCREEN_WIDTH * 0.9;
 
@@ -111,7 +107,7 @@ export const ImageCropper = ({
         setImageHeight(h);
       }
     },
-    []
+    [],
   );
 
   /**
@@ -129,7 +125,7 @@ export const ImageCropper = ({
    *    never leaves the bounding container, given the current scale.
    */
   const clampImageTransform = useCallback(() => {
-    'worklet';
+    "worklet";
 
     if (!imageWidth || !imageHeight) return;
 
@@ -146,13 +142,19 @@ export const ImageCropper = ({
     if (scaledImageWidth < containerWidth) {
       translateX.value = 0;
     } else {
-      translateX.value = Math.min(Math.max(translateX.value, -maxOffsetX), maxOffsetX);
+      translateX.value = Math.min(
+        Math.max(translateX.value, -maxOffsetX),
+        maxOffsetX,
+      );
     }
 
     if (scaledImageHeight < containerHeight) {
       translateY.value = 0;
     } else {
-      translateY.value = Math.min(Math.max(translateY.value, -maxOffsetY), maxOffsetY);
+      translateY.value = Math.min(
+        Math.max(translateY.value, -maxOffsetY),
+        maxOffsetY,
+      );
     }
   }, [imageWidth, imageHeight, containerWidth, containerHeight]);
 
@@ -180,12 +182,12 @@ export const ImageCropper = ({
     // The image center in container coordinates is (translateX, translateY).
     // We want the top-left of the container in *image coordinates*:
     const xInImageSpace =
-      (imageWidth / 2 + // center of image in image coords
-        -translateX.value / s) -
+      imageWidth / 2 + // center of image in image coords
+      -translateX.value / s -
       containerHalfW / s;
     const yInImageSpace =
-      (imageHeight / 2 + // center of image in image coords
-        -translateY.value / s) -
+      imageHeight / 2 + // center of image in image coords
+      -translateY.value / s -
       containerHalfH / s;
 
     // The width/height of the container in image coordinates is containerWidth/s, containerHeight/s
@@ -193,8 +195,14 @@ export const ImageCropper = ({
     const hInImageSpace = containerHeight / s;
 
     // Clamp so we don't go out of the image
-    const clampX = Math.max(0, Math.min(xInImageSpace, imageWidth - wInImageSpace));
-    const clampY = Math.max(0, Math.min(yInImageSpace, imageHeight - hInImageSpace));
+    const clampX = Math.max(
+      0,
+      Math.min(xInImageSpace, imageWidth - wInImageSpace),
+    );
+    const clampY = Math.max(
+      0,
+      Math.min(yInImageSpace, imageHeight - hInImageSpace),
+    );
     const clampW = Math.min(wInImageSpace, imageWidth);
     const clampH = Math.min(hInImageSpace, imageHeight);
 
@@ -218,28 +226,26 @@ export const ImageCropper = ({
   /**
    * 9. Pan Gesture
    */
-  const panGesture = Gesture.Pan()
-    .onUpdate((evt) => {
-      translateX.value += evt.translationX;
-      translateY.value += evt.translationY;
+  const panGesture = Gesture.Pan().onUpdate((evt) => {
+    translateX.value += evt.translationX;
+    translateY.value += evt.translationY;
 
-      clampImageTransform();
-      runOnJS(updateCropRegion)();
-    });
+    clampImageTransform();
+    runOnJS(updateCropRegion)();
+  });
 
   /**
    * 10. Pinch Gesture
    */
-  const pinchGesture = Gesture.Pinch()
-    .onUpdate((evt) => {
-      // event.scale is the relative scale from pinch start => multiply with current scale.
-      const newScale = scale.value * evt.scale;
+  const pinchGesture = Gesture.Pinch().onUpdate((evt) => {
+    // event.scale is the relative scale from pinch start => multiply with current scale.
+    const newScale = scale.value * evt.scale;
 
-      // Bound scale between minScale and maxScale
-      scale.value = Math.max(minScale, Math.min(newScale, maxScale));
-      clampImageTransform();
-      runOnJS(updateCropRegion)();
-    });
+    // Bound scale between minScale and maxScale
+    scale.value = Math.max(minScale, Math.min(newScale, maxScale));
+    clampImageTransform();
+    runOnJS(updateCropRegion)();
+  });
 
   /**
    * 11. Reset transforms
@@ -311,7 +317,9 @@ export const ImageCropper = ({
           { width: containerWidth, height: containerHeight },
         ]}
       >
-        <GestureDetector gesture={Gesture.Simultaneous(panGesture, pinchGesture)}>
+        <GestureDetector
+          gesture={Gesture.Simultaneous(panGesture, pinchGesture)}
+        >
           <Reanimated.View style={[styles.imageWrapper, animatedImageStyle]}>
             <ReanimatedImage
               source={{ uri }}
@@ -325,17 +333,31 @@ export const ImageCropper = ({
         {/* Grid Overlay */}
         <View style={styles.gridContainer} pointerEvents="none">
           {/* Vertical lines */}
-          <View style={[styles.gridLine, styles.verticalLine, { left: '33.333%' }]} />
-          <View style={[styles.gridLine, styles.verticalLine, { left: '66.666%' }]} />
+          <View
+            style={[styles.gridLine, styles.verticalLine, { left: "33.333%" }]}
+          />
+          <View
+            style={[styles.gridLine, styles.verticalLine, { left: "66.666%" }]}
+          />
           {/* Horizontal lines */}
-          <View style={[styles.gridLine, styles.horizontalLine, { top: '33.333%' }]} />
-          <View style={[styles.gridLine, styles.horizontalLine, { top: '66.666%' }]} />
+          <View
+            style={[styles.gridLine, styles.horizontalLine, { top: "33.333%" }]}
+          />
+          <View
+            style={[styles.gridLine, styles.horizontalLine, { top: "66.666%" }]}
+          />
         </View>
       </View>
 
-      <Text fontSize="$3" color="$gray11" textAlign="center" marginTop="$4" maxWidth={300}>
-        Use two fingers to pinch (zoom) and one finger to move the image.  
-        The 3x3 grid can help you align your composition!
+      <Text
+        fontSize="$3"
+        color="$gray11"
+        textAlign="center"
+        marginTop="$4"
+        maxWidth={300}
+      >
+        Use two fingers to pinch (zoom) and one finger to move the image. The
+        3x3 grid can help you align your composition!
       </Text>
     </YStack>
   );
@@ -343,24 +365,24 @@ export const ImageCropper = ({
 
 const styles = StyleSheet.create({
   container: {
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: 'black',
+    overflow: "hidden",
+    position: "relative",
+    backgroundColor: "black",
     borderRadius: 12,
   },
   imageWrapper: {
     flex: 1,
     // We'll make it bigger than the container so we can see the transforms.
     // Actually, we can just use "position: 'absolute'" if we want.
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
   },
   image: {
     // The image itself will be sized by transform scale.
     // By default, set its anchor to center so transforms pivot from the center.
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     // We'll rely on onLoad to get natural image size,
     // and scale it in Reanimated instead.
   },
@@ -369,16 +391,16 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   gridLine: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    position: "absolute",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
   },
   verticalLine: {
     width: 1,
-    height: '100%',
+    height: "100%",
   },
   horizontalLine: {
     height: 1,
-    width: '100%',
+    width: "100%",
   },
 });
 

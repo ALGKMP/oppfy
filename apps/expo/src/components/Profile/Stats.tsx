@@ -59,9 +59,7 @@ const Stats = ({
   const navigateToSection = (section: string) => {
     if (isLoading) return;
 
-    const basePath = userId
-      ? "/connections"
-      : "/self-connections";
+    const basePath = userId ? "/connections" : "/self-connections";
     router.push({
       pathname: `${basePath}/${section}` as any,
       ...(userId && { params: { userId, username } }),

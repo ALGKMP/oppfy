@@ -130,7 +130,6 @@ const useSaveMedia = () => {
           console.error(`Error deleting ${itemPath}:`, error);
         }
       }
-
     } catch (error) {
       console.error("Error cleaning up cache directory:", error);
     }

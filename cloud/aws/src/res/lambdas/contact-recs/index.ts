@@ -60,9 +60,10 @@ export const handler = async (
       };
     }
 
-    const requested = await db.select({
-      userId: schema.followRequest.recipientId,
-    })
+    const requested = await db
+      .select({
+        userId: schema.followRequest.recipientId,
+      })
       .from(schema.followRequest)
       .where(eq(schema.followRequest.senderId, userId))
       .then((res) => res.map((r) => r.userId));
@@ -121,8 +122,7 @@ export const handler = async (
 
     // remove all tier1 from tier2
 
-
-/*     const tier3 = await g
+    /*     const tier3 = await g
       .V(userId)
       .out("contact")
       .aggregate("contacts")
@@ -141,7 +141,7 @@ export const handler = async (
     console.log("Tier 3", tier3);
  */
     // tier 4 is just people 2 more edge from all the tier1 vertecies who im not following
-/*     const tier4 = await g
+    /*     const tier4 = await g
       .V(userId)
       .out("contact")
       .out("contact")
@@ -161,8 +161,8 @@ export const handler = async (
     };
 
     return {
-      "statusCode": 200,
-      "body": JSON.stringify(recommendedIds),
+      statusCode: 200,
+      body: JSON.stringify(recommendedIds),
     };
   } catch (error) {
     console.error("Error during execution", error);

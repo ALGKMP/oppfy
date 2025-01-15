@@ -3,8 +3,8 @@ import { AlertCircle, Trash2 } from "@tamagui/lucide-icons";
 
 import { SizableText, Text, View, XStack, YStack } from "~/components/ui";
 import Avatar from "../Avatar";
-import { TimeAgo } from "../Texts";
 import { BlurContextMenuWrapper } from "../ContextMenu";
+import { TimeAgo } from "../Texts";
 
 export interface CommentItem {
   userId: string;

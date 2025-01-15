@@ -37,13 +37,12 @@ const useShare = () => {
           Alert.alert("Sharing is not available on your device");
         }
         await deleteCachedMedia(processedUri);
-      } 
-      else if (url) {
+      } else if (url) {
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(url, {
             dialogTitle: title ?? "Share to...",
-            mimeType: 'text/plain',
-            UTI: 'public.plain-text',
+            mimeType: "text/plain",
+            UTI: "public.plain-text",
           });
         } else {
           Alert.alert("Sharing is not available on your device");

@@ -6,8 +6,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { Heart } from "@tamagui/lucide-icons";
 
-import { api } from "~/utils/api";
 import { useLikePost } from "~/hooks/post/useLikePost";
+import { api } from "~/utils/api";
 
 interface LikeButtonProps {
   postId: string;

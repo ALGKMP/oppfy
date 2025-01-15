@@ -44,10 +44,12 @@ export class ContactsRepository {
           where: inArray(schema.contact.id, contactsToAdd),
         });
 
-        const newContactsToInsert = new Set(contactsToAdd.filter(
-          (contact) =>
-            !existingContacts.some((existing) => existing.id === contact),
-        ));
+        const newContactsToInsert = new Set(
+          contactsToAdd.filter(
+            (contact) =>
+              !existingContacts.some((existing) => existing.id === contact),
+          ),
+        );
 
         if (newContactsToInsert.size > 0) {
           await tx
@@ -95,7 +97,11 @@ export class ContactsRepository {
     const response = await fetch(url);
 
     if (response.status !== 200) {
-      console.error("Error invoking Lambda function: ", await response.text(), response.status);
+      console.error(
+        "Error invoking Lambda function: ",
+        await response.text(),
+        response.status,
+      );
       return {
         tier1: [],
         tier2: [],

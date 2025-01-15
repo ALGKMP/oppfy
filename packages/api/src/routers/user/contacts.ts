@@ -8,7 +8,9 @@ export const contactsRouter = createTRPCRouter({
     .input(z.array(z.string()))
     .mutation(async ({ input, ctx }) => {
       try {
-        console.log("synced Contacts $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        console.log(
+          "synced Contacts $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
+        );
         await ctx.services.contact.syncContacts(ctx.session.uid, input);
       } catch (err) {
         throw new TRPCError({
@@ -18,7 +20,9 @@ export const contactsRouter = createTRPCRouter({
     }),
   deleteContacts: protectedProcedure.mutation(async ({ ctx }) => {
     try {
-        console.log("Deleting Contacts $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+      console.log(
+        "Deleting Contacts $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
+      );
       await ctx.services.contact.deleteContacts(ctx.session.uid);
     } catch (err) {
       throw new TRPCError({

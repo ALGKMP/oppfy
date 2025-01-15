@@ -9,11 +9,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { RadiusTokens, SizeTokens, SpecificTokens } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
 import { View } from "./Views";
-import { SizeTokens, SpecificTokens } from "tamagui";
-import { RadiusTokens } from "tamagui";
 
 interface BaseSkeletonProps {
   radius?: RadiusTokens | number;

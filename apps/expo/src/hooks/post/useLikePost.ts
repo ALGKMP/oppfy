@@ -12,7 +12,12 @@ interface LikePostProps {
   initialHasLiked: boolean;
 }
 
-export const useLikePost = ({ postId, endpoint, userId, initialHasLiked }: LikePostProps) => {
+export const useLikePost = ({
+  postId,
+  endpoint,
+  userId,
+  initialHasLiked,
+}: LikePostProps) => {
   const utils = api.useUtils();
   const { data: hasLiked } = api.post.hasliked.useQuery(
     { postId },
@@ -126,7 +131,7 @@ export const useLikePost = ({ postId, endpoint, userId, initialHasLiked }: LikeP
     // Call the throttled function
     clickCount.current++;
     throttledLikeRequest.current(hasLiked);
-  }
+  };
 
   const handleLikeDoubleTapped = async () => {
     if (!hasLiked) {

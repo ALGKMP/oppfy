@@ -15,8 +15,8 @@ import {
   YStack,
 } from "tamagui";
 
-import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { OnboardingButton } from "~/components/ui";
+import { BaseScreenView, KeyboardSafeView } from "~/components/Views";
 import { useContacts } from "~/hooks/contacts";
 import { api } from "~/utils/api";
 

@@ -43,7 +43,10 @@ export class FriendService {
       );
     }
 
-    const receivedFriendRequest = await this.getFriendRequest(recipientId, senderId);
+    const receivedFriendRequest = await this.getFriendRequest(
+      recipientId,
+      senderId,
+    );
 
     // Temporary fix
     if (receivedFriendRequest) {

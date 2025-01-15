@@ -113,12 +113,7 @@ const lambdaHandler = async (
 
     const { userId, userPhoneNumberHash, contacts } = event[0];
 
-    await updateContacts(
-      g,
-      userId,
-      userPhoneNumberHash,
-      contacts,
-    );
+    await updateContacts(g, userId, userPhoneNumberHash, contacts);
 
     return {
       statusCode: 200,

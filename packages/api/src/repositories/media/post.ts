@@ -36,9 +36,10 @@ export class PostRepository {
         likesCount: schema.postStats.likes,
         mediaType: schema.post.mediaType,
         createdAt: schema.post.createdAt,
-        hasLiked: sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
-          "has_liked",
-        ),
+        hasLiked:
+          sql<boolean>`CASE WHEN ${schema.like.userId} IS NOT NULL THEN true ELSE false END`.as(
+            "has_liked",
+          ),
       })
       .from(schema.post)
       .innerJoin(schema.postStats, eq(schema.postStats.postId, schema.post.id))
