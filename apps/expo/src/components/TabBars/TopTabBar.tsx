@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ViewStyle } from "react-native";
 import { Animated, Dimensions, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import type { MaterialTopTabBarProps } from "@react-navigation/material-top-tabs";
 import { styled, useTheme, XStack, YStack } from "tamagui";
 
@@ -106,23 +105,18 @@ const TopTabBar = ({
   );
 
   return (
-    <SafeAreaView
-      edges={["top"]}
-      style={{ backgroundColor: theme.background.val }}
-    >
-      <StyledTabBar>
-        <XStack flex={1}>{state.routes.map(renderTab)}</XStack>
-        <Animated.View
-          style={[
-            nonTamaguiStyles.indicator,
-            {
-              width: indicatorWidth,
-              transform: [{ translateX }],
-            },
-          ]}
-        />
-      </StyledTabBar>
-    </SafeAreaView>
+    <StyledTabBar backgroundColor={theme.background}>
+      <XStack flex={1}>{state.routes.map(renderTab)}</XStack>
+      <Animated.View
+        style={[
+          nonTamaguiStyles.indicator,
+          {
+            width: indicatorWidth,
+            transform: [{ translateX }],
+          },
+        ]}
+      />
+    </StyledTabBar>
   );
 };
 
@@ -147,4 +141,4 @@ const createNonTamaguiStyles = (): NonTamaguiStyles =>
     },
   });
 
-export default TopTabBar;
+export default React.memo(TopTabBar);
