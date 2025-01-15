@@ -97,7 +97,7 @@ const FriendCarousel = ({
           if (!item) {
             return (
               <TouchableOpacity
-                onPress={() => router.push("/self-profile/connections/friends")}
+                onPress={() => router.push("/self-connections/friends")}
               >
                 <SeeAllCard width={CARD_WIDTH} />
               </TouchableOpacity>

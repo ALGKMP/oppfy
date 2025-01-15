@@ -20,9 +20,9 @@ const ConnectionsLayout = () => {
   return (
     <TopTabs>
       <TopTabs.Screen
-        name="friends"
+        name="following"
         options={{
-          title: "Friends",
+          title: "Following",
         }}
       />
       <TopTabs.Screen
@@ -32,9 +32,9 @@ const ConnectionsLayout = () => {
         }}
       />
       <TopTabs.Screen
-        name="following"
+        name="friends"
         options={{
-          title: "Following",
+          title: "Friends",
         }}
       />
     </TopTabs>
