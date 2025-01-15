@@ -11,28 +11,20 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import {
-  Camera,
-  Circle as CircleIcon,
-  Home,
-  Inbox,
-  Search,
-  User2,
-} from "@tamagui/lucide-icons";
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
-import { BottomTabBar } from "~/components/TabBars";
 import {
   Button,
   Circle,
   H3,
+  Icon,
   Paragraph,
   Text,
   useBottomSheetController,
   View,
   YStack,
+  type IconName,
 } from "~/components/ui";
 import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
@@ -47,7 +39,6 @@ interface TabBarIconProps {
 }
 
 const BottomTabsLayout = () => {
-  const theme = useTheme();
   const utils = api.useUtils();
   const bottomSheet = useBottomSheetController();
 
@@ -85,9 +76,14 @@ const BottomTabsLayout = () => {
   };
 
   const getTabBarIcon =
-    (IconComponent: ElementType) =>
-    ({ focused, ...props }: TabBarIconProps) => (
-      <IconComponent strokeWidth={focused ? 3 : 1.5} {...props} />
+    (iconName: IconName) =>
+    ({ focused, color, size }: TabBarIconProps) => (
+      <Icon
+        name={iconName}
+        color={color}
+        size={size}
+        style={{ opacity: focused ? 1 : 0.5 }}
+      />
     );
 
   const NotificationBadge = ({ count }: { count: number }) => {
@@ -144,38 +140,34 @@ const BottomTabsLayout = () => {
   };
 
   return (
-    <BottomTabs backBehavior="history">
+    <BottomTabs screenOptions={{ headerShown: false }} backBehavior="history">
       <BottomTabs.Screen
         name="(home)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Home),
+          tabBarIcon: getTabBarIcon("home"),
         }}
       />
 
       <BottomTabs.Screen
         name="(search)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Search),
+          tabBarIcon: getTabBarIcon("search"),
         }}
       />
 
       <BottomTabs.Screen
         name="(camera)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Camera),
+          tabBarIcon: getTabBarIcon("camera"),
         }}
       />
 
       <BottomTabs.Screen
         name="(inbox)"
         options={{
-          header: () => null,
           tabBarIcon: (props) => (
             <View>
-              {getTabBarIcon(Inbox)(props)}
+              {getTabBarIcon("notifications")(props)}
               {(unreadNotificationsCount ?? 0) > 0 && (
                 <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
@@ -187,8 +179,7 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(profile)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(User2),
+          tabBarIcon: getTabBarIcon("person-circle"),
         }}
       />
     </BottomTabs>
@@ -196,7 +187,7 @@ const BottomTabsLayout = () => {
 };
 
 interface FeatureProps {
-  emoji: string;
+  icon: string;
   title: string;
   description: string;
 }
@@ -207,15 +198,7 @@ const ENDING_COLOR = "#F214FF";
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const Feature = ({
-  icon,
-  title,
-  description,
-}: {
-  icon: string;
-  title: string;
-  description: string;
-}) => (
+const Feature = ({ icon, title, description }: FeatureProps) => (
   <YStack gap="$2" alignItems="flex-start">
     <Text fontSize={28}>{icon}</Text>
     <YStack gap="$1">
@@ -386,7 +369,7 @@ export const WelcomeBottomSheet = ({
                 right: -10,
               }}
             >
-              <CircleIcon size={15} color="white" />
+              <Icon name="ellipse" size={15} color="white" />
             </MotiView>
             <MotiView
               from={{ opacity: 0, scale: 0.5 }}
@@ -403,7 +386,7 @@ export const WelcomeBottomSheet = ({
                 left: -5,
               }}
             >
-              <CircleIcon size={12} color="white" />
+              <Icon name="ellipse" size={12} color="white" />
             </MotiView>
           </YStack>
         </MotiView>

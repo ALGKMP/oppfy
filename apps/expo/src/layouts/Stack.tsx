@@ -1,5 +1,6 @@
 import React from "react";
 import { useRouter, withLayoutContext } from "expo-router";
+import { getHeaderTitle } from "@react-navigation/elements";
 import type {
   ParamListBase,
   StackNavigationState,
@@ -24,42 +25,49 @@ const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
   return <Icon name="chevron-back" onPress={() => router.back()} blurred />;
 };
 
-const CustomNavigator = ({ children, ...rest }: any) => {
+const CustomNavigator = ({
+  children,
+  ...rest
+}: React.ComponentProps<typeof Navigator>) => {
   return (
     <Navigator
       {...rest}
       screenOptions={{
-        header: ({ navigation, route, options }) => (
-          <Header
-            containerProps={{
-              backgroundColor: options.headerTransparent
-                ? "transparent"
-                : undefined,
-            }}
-            HeaderLeft={
-              options.headerLeft?.({
-                canGoBack: navigation.canGoBack(),
-                tintColor: options.headerTintColor,
-              }) ?? <DefaultHeaderLeft canGoBack={navigation.canGoBack()} />
-            }
-            HeaderTitle={
-              typeof options.headerTitle === "function" ? (
-                options.headerTitle({
-                  children: options.title ?? "",
+        header: ({ navigation, route, options, back }) => {
+          const title = getHeaderTitle(options, route.name);
+
+          return (
+            <Header
+              containerProps={{
+                backgroundColor: options.headerTransparent
+                  ? "transparent"
+                  : undefined,
+              }}
+              HeaderLeft={
+                options.headerLeft?.({
+                  canGoBack: !!back,
                   tintColor: options.headerTintColor,
-                })
-              ) : (
-                <Text fontSize="$5" fontWeight="bold">
-                  {options.title ?? route.name}
-                </Text>
-              )
-            }
-            HeaderRight={options.headerRight?.({
-              canGoBack: navigation.canGoBack(),
-              tintColor: options.headerTintColor,
-            })}
-          />
-        ),
+                }) ?? <DefaultHeaderLeft canGoBack={!!back} />
+              }
+              HeaderTitle={
+                typeof options.headerTitle === "function" ? (
+                  options.headerTitle({
+                    children: title,
+                    tintColor: options.headerTintColor,
+                  })
+                ) : (
+                  <Text fontSize="$5" fontWeight="bold">
+                    {title}
+                  </Text>
+                )
+              }
+              HeaderRight={options.headerRight?.({
+                canGoBack: !!back,
+                tintColor: options.headerTintColor,
+              })}
+            />
+          );
+        },
         ...rest.screenOptions,
       }}
     >
