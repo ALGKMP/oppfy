@@ -1,7 +1,6 @@
 import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
 
-import { TopTabBar } from "~/components/TabBars";
 import { TopTabs } from "~/layouts";
 import { api } from "~/utils/api";
 
