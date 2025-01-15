@@ -75,12 +75,6 @@ const SelfProfile = () => {
     itemVisiblePercentThreshold: 40,
   };
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
-
   const renderPost = ({ item }: { item: Post }) => (
     <PostCard
       postId={item.postId}

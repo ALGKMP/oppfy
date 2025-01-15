@@ -9,13 +9,7 @@ const ProfileLayout = () => {
   }>();
 
   return (
-    <Stack
-      screenOptions={
-        {
-          // headerShown: false,
-        }
-      }
-    >
+    <Stack>
       <Stack.Screen
         name="[userId]"
         options={{
