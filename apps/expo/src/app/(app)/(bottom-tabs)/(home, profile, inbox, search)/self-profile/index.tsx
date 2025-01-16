@@ -138,12 +138,16 @@ const SelfProfile = () => {
   );
 
   const renderEmptyList = () => {
-    if (isLoadingPostData)
+    if (isLoadingPostData) {
       return (
         <YStack gap="$4">
-          <PostCard.Skeleton />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <PostCard.Skeleton key={index} />
+          ))}
         </YStack>
       );
+    }
+
     return (
       <View paddingTop="$6">
         <EmptyPlaceholder
