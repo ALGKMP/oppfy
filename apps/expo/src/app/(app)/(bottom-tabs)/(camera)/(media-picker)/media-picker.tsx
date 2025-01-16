@@ -78,7 +78,12 @@ const MediaPickerScreen = () => {
       sortBy: [MediaLibrary.SortBy.creationTime],
     });
 
-    setAssets((prevAssets) => [...prevAssets, ...media.assets]);
+    // Filter out assets that are wider than tall
+    const filteredAssets = media.assets.filter(
+      (asset) => asset.height >= asset.width,
+    );
+
+    setAssets((prevAssets) => [...prevAssets, ...filteredAssets]);
     setEndCursor(media.endCursor);
     setHasNextPage(media.hasNextPage);
     setIsLoading(false);
