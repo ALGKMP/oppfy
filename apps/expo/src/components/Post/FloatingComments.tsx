@@ -119,16 +119,17 @@ export const FloatingComments = ({
   postRecipientUserId,
 }: FloatingCommentsProps) => {
   const [visibleComments, setVisibleComments] = React.useState<Comment[]>([]);
+  const [isCurrentlyAnimating, setIsCurrentlyAnimating] = React.useState(false);
   const commentQueue = useRef<Comment[]>([...comments]);
   const isAnimating = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const hasStartedRef = useRef(false);
-  const wasViewableRef = useRef(false);
   const { show, hide } = useBottomSheetController();
 
   const showNextComment = React.useCallback(() => {
     if (commentQueue.current.length > 0 && !isAnimating.current) {
       isAnimating.current = true;
+      setIsCurrentlyAnimating(true);
       const nextComment = commentQueue.current.shift();
       if (nextComment) {
         setVisibleComments((prev) => [...prev, nextComment].slice(-1));
@@ -138,19 +139,18 @@ export const FloatingComments = ({
 
   const handleAnimationComplete = React.useCallback(() => {
     isAnimating.current = false;
+    setIsCurrentlyAnimating(false);
     setVisibleComments((prev) => prev.slice(1));
-    
-    // Only schedule next comment if we still have comments and were recently viewable
-    if (commentQueue.current.length > 0 && wasViewableRef.current) {
+
+    // Only schedule next comment if we're still viewable
+    if (commentQueue.current.length > 0 && isViewable) {
       timeoutRef.current = setTimeout(showNextComment, 1000);
     }
-  }, [showNextComment]);
+  }, [isViewable, showNextComment]);
 
   useEffect(() => {
-    wasViewableRef.current = isViewable;
-
     if (isViewable && !hasStartedRef.current) {
-      // Only start animations once
+      // Only start the animation sequence once when becoming viewable
       hasStartedRef.current = true;
       commentQueue.current = [...comments];
       showNextComment();
@@ -176,8 +176,9 @@ export const FloatingComments = ({
     });
   };
 
-  // Allow animations to complete even when not viewable
-  if (!isViewable && !visibleComments.length && !isAnimating.current) return null;
+  // Only return null if we're not viewable AND have no active animations
+  if (!isViewable && !visibleComments.length && !isCurrentlyAnimating)
+    return null;
 
   return (
     <TouchableOpacity onPress={handlePress}>

@@ -118,6 +118,7 @@ const PostCard = (props: PostCardProps) => {
           right: 0,
           height: 120,
           zIndex: 1,
+          pointerEvents: "none",
         }}
       />
 
@@ -131,6 +132,7 @@ const PostCard = (props: PostCardProps) => {
           right: 0,
           height: 160,
           zIndex: 1,
+          pointerEvents: "none",
         }}
       />
 
@@ -144,6 +146,7 @@ const PostCard = (props: PostCardProps) => {
         paddingHorizontal="$4"
         justifyContent="space-between"
         zIndex={2}
+        pointerEvents="box-none"
       >
         <TouchableOpacity
           onPress={() => {
