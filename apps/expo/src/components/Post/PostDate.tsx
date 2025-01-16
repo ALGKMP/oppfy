@@ -1,3 +1,4 @@
+import type { TimeFormat } from "~/components/ui/TimeAgo";
 import { TimeAgo } from "~/components/ui/TimeAgo";
 
 interface PostDateProps {
@@ -5,7 +6,7 @@ interface PostDateProps {
 }
 
 const PostDate = ({ createdAt }: PostDateProps) => {
-  const formatTimeAgo = ({ value, unit }: { value: number; unit: string }) => {
+  const formatTimeAgo = ({ value, unit }: TimeFormat) => {
     if (value === 0 && unit === "second") return "Just now";
     const pluralS = value !== 1 ? "s" : "";
     return `${value} ${unit}${pluralS} ago`;

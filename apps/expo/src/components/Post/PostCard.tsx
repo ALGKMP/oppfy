@@ -141,35 +141,24 @@ const PostCard = (props: PostCardProps) => {
         top={0}
         left={0}
         right={0}
-        paddingHorizontal="$4"
         paddingVertical="$4"
-        alignItems="center"
+        paddingHorizontal="$4"
         justifyContent="space-between"
         zIndex={2}
       >
-        <XStack gap="$3" alignItems="center">
-          <TouchableOpacity
-            onPress={() => {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              routeProfile({
-                userId: props.author.id,
-                username: props.author.username,
-              });
-            }}
-          >
+        <TouchableOpacity
+          onPress={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            routeProfile({
+              userId: props.author.id,
+              username: props.author.username,
+            });
+          }}
+        >
+          <XStack gap="$3" alignItems="center">
             <Avatar source={props.author.profilePicture} size={44} bordered />
-          </TouchableOpacity>
 
-          <YStack>
-            <TouchableOpacity
-              onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                routeProfile({
-                  userId: props.author.id,
-                  username: props.author.username,
-                });
-              }}
-            >
+            <YStack>
               <Text
                 color="white"
                 fontWeight="600"
@@ -181,10 +170,10 @@ const PostCard = (props: PostCardProps) => {
               >
                 {props.author.username}
               </Text>
-            </TouchableOpacity>
-            <PostDate createdAt={props.createdAt} />
-          </YStack>
-        </XStack>
+              <PostDate createdAt={props.createdAt} />
+            </YStack>
+          </XStack>
+        </TouchableOpacity>
 
         <XStack alignItems="center" justifyContent="flex-end" width="$5">
           <MorePostOptionsButton
@@ -207,85 +196,47 @@ const PostCard = (props: PostCardProps) => {
         alignItems="flex-end"
       >
         {/* Like Button */}
-        <GlassButton expanded={(props.stats.likes ?? 0) > 0}>
-          {(props.stats.likes ?? 0) > 0 ? (
-            <>
-              <Text
-                color="white"
-                fontWeight="600"
-                fontSize="$4"
-                textAlign="center"
-                shadowColor="black"
-                shadowOffset={{ width: 1, height: 1 }}
-                shadowOpacity={0.5}
-                shadowRadius={3}
-              >
-                {props.stats.likes >= 1000000
-                  ? `${(props.stats.likes / 1000000).toFixed(1)}M`
-                  : props.stats.likes >= 1000
-                    ? `${(props.stats.likes / 1000).toFixed(1)}K`
-                    : props.stats.likes}
-              </Text>
-              <LikeButton
-                postId={props.postId}
-                endpoint={props.endpoint}
-                initialHasLiked={props.stats.hasLiked ?? false}
-                light
-                compact
-              />
-            </>
-          ) : (
-            <LikeButton
-              postId={props.postId}
-              endpoint={props.endpoint}
-              initialHasLiked={props.stats.hasLiked ?? false}
-              light
-              compact
-            />
+        <GlassButton>
+          {props.stats.likes > 0 && (
+            <Text>
+              {props.stats.likes >= 1000000
+                ? `${(props.stats.likes / 1000000).toFixed(1)}M`
+                : props.stats.likes >= 1000
+                  ? `${(props.stats.likes / 1000).toFixed(1)}K`
+                  : props.stats.likes}
+            </Text>
           )}
+          <LikeButton
+            postId={props.postId}
+            endpoint={props.endpoint}
+            initialHasLiked={props.stats.hasLiked}
+            light
+            compact
+          />
         </GlassButton>
 
         {/* Comment Button */}
-        <GlassButton expanded={(props.stats.comments ?? 0) > 0}>
-          {(props.stats.comments ?? 0) > 0 ? (
-            <>
-              <Text
-                color="white"
-                fontWeight="600"
-                fontSize="$4"
-                textAlign="center"
-                shadowColor="black"
-                shadowOffset={{ width: 1, height: 1 }}
-                shadowOpacity={0.5}
-                shadowRadius={3}
-              >
-                {props.stats.comments >= 1000000
-                  ? `${(props.stats.comments / 1000000).toFixed(1)}M`
-                  : props.stats.comments >= 1000
-                    ? `${(props.stats.comments / 1000).toFixed(1)}K`
-                    : props.stats.comments}
-              </Text>
-              <CommentButton
-                postId={props.postId}
-                postRecipientUserId={props.recipient.id}
-                endpoint={props.endpoint}
-                light
-                compact
-              />
-            </>
-          ) : (
-            <CommentButton
-              postId={props.postId}
-              postRecipientUserId={props.recipient.id}
-              endpoint={props.endpoint}
-              light
-              compact
-            />
+        <GlassButton>
+          {props.stats.comments > 0 && (
+            <Text>
+              {props.stats.comments >= 1000000
+                ? `${(props.stats.comments / 1000000).toFixed(1)}M`
+                : props.stats.comments >= 1000
+                  ? `${(props.stats.comments / 1000).toFixed(1)}K`
+                  : props.stats.comments}
+            </Text>
           )}
+          <CommentButton
+            postId={props.postId}
+            postRecipientUserId={props.recipient.id}
+            endpoint={props.endpoint}
+            light
+            compact
+          />
         </GlassButton>
 
         {/* Share Button */}
-        <GlassButton expanded={false}>
+        <GlassButton>
           <ShareButton postId={props.postId} light compact />
         </GlassButton>
       </YStack>
@@ -575,51 +526,27 @@ const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
 
 const VideoPlayer = React.memo(VideoPlayerComponent);
 
-// Create a reusable glass button component
-const GlassButton = ({
-  expanded,
-  children,
-}: {
-  expanded: boolean;
-  children: React.ReactNode;
-}) => (
+const GlassButton = ({ children }: { children: React.ReactNode }) => (
   <XStack
-    borderRadius={50}
-    height={50}
+    padding="$3"
     alignItems="center"
+    justifyContent="center"
+    gap="$2"
+    borderRadius={25}
     animation="quick"
     pressStyle={{
       scale: 0.96,
       opacity: 0.8,
     }}
-    // Glass effect with darker base
     backgroundColor="rgba(0,0,0,0.35)"
-    shadowColor="rgba(0,0,0,0.2)"
-    shadowOffset={{ width: 0, height: 2 }}
-    shadowRadius={8}
-    shadowOpacity={1}
     borderWidth={0.5}
     borderColor="rgba(255,255,255,0.15)"
-    // Glass overlay
     style={{
       backdropFilter: "blur(8px)",
       WebkitBackdropFilter: "blur(8px)",
     }}
   >
-    {expanded ? (
-      <XStack alignItems="center" gap="$3" paddingLeft="$4" paddingRight="$3">
-        {children}
-      </XStack>
-    ) : (
-      <XStack
-        width={50}
-        height={50}
-        alignItems="center"
-        justifyContent="center"
-      >
-        {children}
-      </XStack>
-    )}
+    {children}
   </XStack>
 );
 

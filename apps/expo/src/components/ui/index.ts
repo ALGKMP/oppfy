@@ -46,6 +46,7 @@ import { Spinner } from "./Spinner";
 import { XStack, YStack } from "./Stacks";
 import { Switch } from "./Switch";
 import { Paragraph, SizableText, Text } from "./Texts";
+import type { TimeFormat } from "./TimeAgo";
 import { TimeAgo } from "./TimeAgo";
 import { ToggleGroup } from "./ToggleGroup";
 import { Tooltip } from "./Tooltip";
@@ -120,4 +121,9 @@ export {
   Icon,
 };
 
-export type { MediaListItemActionProps, BottomSheetProps, IconName };
+export type {
+  MediaListItemActionProps,
+  BottomSheetProps,
+  IconName,
+  TimeFormat,
+};
