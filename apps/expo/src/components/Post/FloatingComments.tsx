@@ -122,32 +122,38 @@ export const FloatingComments = ({
   const commentQueue = useRef<Comment[]>([...comments]);
   const isAnimating = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const hasStartedRef = useRef(false);
+  const wasViewableRef = useRef(false);
   const { show, hide } = useBottomSheetController();
 
   const showNextComment = React.useCallback(() => {
-    if (commentQueue.current.length > 0 && !isAnimating.current && isViewable) {
+    if (commentQueue.current.length > 0 && !isAnimating.current) {
       isAnimating.current = true;
       const nextComment = commentQueue.current.shift();
       if (nextComment) {
-        setVisibleComments((prev) => [...prev, nextComment].slice(-1)); // Show only 1 at a time
+        setVisibleComments((prev) => [...prev, nextComment].slice(-1));
       }
     }
-  }, [isViewable]);
+  }, []);
 
   const handleAnimationComplete = React.useCallback(() => {
     isAnimating.current = false;
     setVisibleComments((prev) => prev.slice(1));
-    timeoutRef.current = setTimeout(showNextComment, 1000);
+    
+    // Only schedule next comment if we still have comments and were recently viewable
+    if (commentQueue.current.length > 0 && wasViewableRef.current) {
+      timeoutRef.current = setTimeout(showNextComment, 1000);
+    }
   }, [showNextComment]);
 
   useEffect(() => {
-    if (isViewable) {
+    wasViewableRef.current = isViewable;
+
+    if (isViewable && !hasStartedRef.current) {
+      // Only start animations once
+      hasStartedRef.current = true;
       commentQueue.current = [...comments];
       showNextComment();
-    } else {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      setVisibleComments([]);
-      isAnimating.current = false;
     }
 
     return () => {
@@ -170,7 +176,8 @@ export const FloatingComments = ({
     });
   };
 
-  if (!isViewable) return null;
+  // Allow animations to complete even when not viewable
+  if (!isViewable && !visibleComments.length && !isAnimating.current) return null;
 
   return (
     <TouchableOpacity onPress={handlePress}>

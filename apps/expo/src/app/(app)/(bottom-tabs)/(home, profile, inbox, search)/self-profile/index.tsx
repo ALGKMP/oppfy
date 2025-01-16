@@ -144,7 +144,7 @@ const SelfProfile = () => {
     if (isLoadingPostData)
       return (
         <YStack gap="$4">
-          <PostCard.loading />
+          <PostCard.Skeleton />
         </YStack>
       );
     return (

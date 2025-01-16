@@ -222,7 +222,7 @@ const PostCard = (props: PostCardProps) => {
   );
 };
 
-PostCard.loading = function PostCardLoading() {
+PostCard.Skeleton = function PostCardLoading() {
   return (
     <YStack marginVertical="$2">
       <View>

@@ -150,8 +150,8 @@ const HomeScreen = () => {
     if (isLoading) {
       return (
         <YStack gap="$4">
-          <PostCard.loading />
-          <PostCard.loading />
+          <PostCard.Skeleton />
+          <PostCard.Skeleton />
         </YStack>
       );
     }
@@ -174,7 +174,7 @@ const HomeScreen = () => {
           gap="$4"
         >
           {Array.from({ length: 5 }).map((_, index) => (
-            <PostCard.loading key={`loading-post-${index}`} />
+            <PostCard.Skeleton key={`loading-post-${index}`} />
           ))}
         </YStack>
       ) : (
