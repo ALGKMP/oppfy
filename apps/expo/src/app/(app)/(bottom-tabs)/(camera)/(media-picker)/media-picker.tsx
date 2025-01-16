@@ -14,7 +14,6 @@ import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
 import { getToken, Stack } from "tamagui";
 
-import { BaseScreenView } from "~/components/Views";
 import useMediaProcessing from "~/hooks/media/useMediaProcessing";
 
 const NUM_COLUMNS = 3;
@@ -24,7 +23,7 @@ const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
 const moveVideoToLocalStorage = async (uri: string) => {
   // Remove file:// prefix if present
   const cleanUri = uri.replace("file://", "");
-  const filename = cleanUri.split("/").pop() || "video.mp4";
+  const filename = cleanUri.split("/").pop() ?? "video.mp4";
   const destination = `${FileSystem.documentDirectory}videos/${filename}`;
 
   // Ensure videos directory exists
@@ -33,12 +32,8 @@ const moveVideoToLocalStorage = async (uri: string) => {
     {
       intermediates: true,
     },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
   ).catch(() => {});
-
-  console.log("Moving video:", {
-    from: cleanUri,
-    to: destination,
-  });
 
   // Copy file
   await FileSystem.copyAsync({
@@ -94,6 +89,8 @@ const MediaPickerScreen = () => {
     setEndCursor(null);
     setHasNextPage(true);
     void fetchAssets();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderItem = useCallback(
@@ -189,7 +186,7 @@ const MediaPickerScreen = () => {
       onEndReachedThreshold={0.5}
       contentContainerStyle={{
         paddingBottom: insets.bottom,
-        paddingTop: getToken("$3", "space"),
+        paddingTop: getToken("$3", "space") as number,
       }}
     />
   );
