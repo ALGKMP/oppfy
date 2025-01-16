@@ -9,7 +9,7 @@ import { useLikePost } from "~/hooks/post/useLikePost";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import type { PostMediaProps } from "./types";
 
-export const PostImage = ({ endpoint, media, stats }: PostMediaProps) => {
+export const PostImage = ({ endpoint, media, stats, isViewable }: PostMediaProps) => {
   const { handleLikeDoubleTapped } = useLikePost({
     postId: media.id,
     endpoint,

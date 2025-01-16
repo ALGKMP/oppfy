@@ -1,8 +1,9 @@
+type Endpoint = "self-profile" | "other-profile" | "single-post" | "home-feed";
+
 export interface PostMediaProps {
   media: {
     id: string;
     url: string;
-    isViewable: boolean;
     dimensions: {
       width: number;
       height: number;
@@ -11,8 +12,9 @@ export interface PostMediaProps {
       id: string;
     };
   };
-  endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
   stats: {
     hasLiked: boolean;
   };
+  endpoint: Endpoint;
+  isViewable: boolean;
 }

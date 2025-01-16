@@ -44,7 +44,6 @@ interface Media {
   id: string;
   type: "image" | "video";
   url: string;
-  isViewable: boolean;
   dimensions: MediaDimensions;
   recipient: Recipient;
 }
@@ -55,7 +54,9 @@ interface Stats {
   hasLiked: boolean;
 }
 
-export interface PostData {
+type Endpoint = "self-profile" | "other-profile" | "single-post" | "home-feed";
+
+export interface PostCardProps {
   postId: string;
   createdAt: Date;
   caption: string;
@@ -64,11 +65,9 @@ export interface PostData {
   recipient: Recipient;
   media: Media;
   stats: Stats;
+  endpoint: Endpoint;
+  isViewable: boolean;
 }
-
-type PostCardProps = PostData & {
-  endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
-};
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
@@ -80,12 +79,14 @@ const PostCard = (props: PostCardProps) => {
           endpoint={props.endpoint}
           media={props.media}
           stats={props.stats}
+          isViewable={props.isViewable}
         />
       ) : (
         <PostVideo
           endpoint={props.endpoint}
           media={props.media}
           stats={props.stats}
+          isViewable={props.isViewable}
         />
       )}
 
@@ -194,10 +195,10 @@ const PostCard = (props: PostCardProps) => {
               { id: "2", username: "user2", content: "Love this! 💫" },
               { id: "3", username: "user3", content: "Incredible shot 📸" },
             ]}
-            isViewable={props.media.isViewable}
             postId={props.postId}
-            endpoint={props.endpoint}
             postRecipientUserId={props.recipient.id}
+            endpoint={props.endpoint}
+            isViewable={props.isViewable}
           />
         )}
         <PostCaption caption={props.caption} />

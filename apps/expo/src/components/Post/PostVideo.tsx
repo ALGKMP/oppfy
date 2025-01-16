@@ -3,8 +3,8 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { ResizeMode, Video } from "expo-av";
 import type { AVPlaybackStatus } from "expo-av";
-import { getToken } from "tamagui";
 import { useFocusEffect } from "expo-router";
+import { getToken } from "tamagui";
 
 import { Circle, View } from "~/components/ui";
 import { useAudio } from "~/contexts/AudioContext";
@@ -13,7 +13,12 @@ import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../Icons/Mute";
 import type { PostMediaProps } from "./types";
 
-export const PostVideo = ({ endpoint, media, stats }: PostMediaProps) => {
+export const PostVideo = ({
+  endpoint,
+  media,
+  stats,
+  isViewable,
+}: PostMediaProps) => {
   const videoRef = useRef<Video>(null);
   const { isMuted, toggleMute } = useAudio();
   const { muteIcons, addMute } = useMuteAnimations();
@@ -32,7 +37,7 @@ export const PostVideo = ({ endpoint, media, stats }: PostMediaProps) => {
 
   useFocusEffect(
     useCallback(() => {
-      if (media.isViewable) {
+      if (isViewable) {
         void videoRef.current?.playAsync();
         setIsPlaying(true);
         setIsPaused(false);
@@ -44,7 +49,7 @@ export const PostVideo = ({ endpoint, media, stats }: PostMediaProps) => {
       return () => {
         void videoRef.current?.pauseAsync();
       };
-    }, [media.isViewable]),
+    }, [isViewable]),
   );
 
   const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
@@ -101,7 +106,10 @@ export const PostVideo = ({ endpoint, media, stats }: PostMediaProps) => {
       runOnJS(handleDoubleTap)(event.x, event.y);
     });
 
-  const gestures = Gesture.Exclusive(doubleTap, Gesture.Race(longPress, singleTap));
+  const gestures = Gesture.Exclusive(
+    doubleTap,
+    Gesture.Race(longPress, singleTap),
+  );
 
   return (
     <GestureDetector gesture={gestures}>
@@ -151,4 +159,4 @@ export const PostVideo = ({ endpoint, media, stats }: PostMediaProps) => {
       </View>
     </GestureDetector>
   );
-}; 
+};
