@@ -53,7 +53,6 @@ export const Icon = ({
 };
 
 export type { IconName };
-
 const styles = StyleSheet.create({
   iconButton: {
     width: 38,

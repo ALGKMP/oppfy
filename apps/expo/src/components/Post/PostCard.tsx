@@ -5,11 +5,12 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { ResizeMode, Video } from "expo-av";
 import type { AVPlaybackStatus } from "expo-av";
+import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "expo-router";
-import { getToken } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import {
   Circle,
@@ -26,14 +27,11 @@ import { useLikePost } from "../../hooks/post/useLikePost";
 import Avatar from "../Avatar";
 import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
 import Mute, { useMuteAnimations } from "../Icons/Mute";
-import CommentButton from "./CommentButton";
-import CommentsCount from "./CommentsCount";
 import { FloatingComments } from "./FloatingComments";
-import LikeButton from "./LikeButton";
 import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
 import PostDate from "./PostDate";
-import ShareButton from "./ShareButton";
+import { PostStats } from "./PostStats";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -91,6 +89,7 @@ type PostCardProps = PostData & {
 };
 
 const PostCard = (props: PostCardProps) => {
+  const theme = useTheme();
   const { routeProfile } = useRouteProfile();
 
   return (
@@ -185,61 +184,13 @@ const PostCard = (props: PostCardProps) => {
         </XStack>
       </XStack>
 
-      {/* Floating Action Buttons - Right side */}
-      <YStack
-        position="absolute"
-        right={0}
-        bottom={24}
-        paddingRight="$4"
-        gap="$5"
-        zIndex={2}
-        alignItems="flex-end"
-      >
-        {/* Like Button */}
-        <GlassButton>
-          {props.stats.likes > 0 && (
-            <Text>
-              {props.stats.likes >= 1000000
-                ? `${(props.stats.likes / 1000000).toFixed(1)}M`
-                : props.stats.likes >= 1000
-                  ? `${(props.stats.likes / 1000).toFixed(1)}K`
-                  : props.stats.likes}
-            </Text>
-          )}
-          <LikeButton
-            postId={props.postId}
-            endpoint={props.endpoint}
-            initialHasLiked={props.stats.hasLiked}
-            light
-            compact
-          />
-        </GlassButton>
-
-        {/* Comment Button */}
-        <GlassButton>
-          {props.stats.comments > 0 && (
-            <Text>
-              {props.stats.comments >= 1000000
-                ? `${(props.stats.comments / 1000000).toFixed(1)}M`
-                : props.stats.comments >= 1000
-                  ? `${(props.stats.comments / 1000).toFixed(1)}K`
-                  : props.stats.comments}
-            </Text>
-          )}
-          <CommentButton
-            postId={props.postId}
-            postRecipientUserId={props.recipient.id}
-            endpoint={props.endpoint}
-            light
-            compact
-          />
-        </GlassButton>
-
-        {/* Share Button */}
-        <GlassButton>
-          <ShareButton postId={props.postId} light compact />
-        </GlassButton>
-      </YStack>
+      {/* Floating Action Buttons - Vertical Stack on Right side */}
+      <PostStats
+        postId={props.postId}
+        recipientUserId={props.recipient.id}
+        endpoint={props.endpoint}
+        stats={props.stats}
+      />
 
       {/* Bottom Content Overlay */}
       <YStack
@@ -525,29 +476,5 @@ const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
 };
 
 const VideoPlayer = React.memo(VideoPlayerComponent);
-
-const GlassButton = ({ children }: { children: React.ReactNode }) => (
-  <XStack
-    padding="$3"
-    alignItems="center"
-    justifyContent="center"
-    gap="$2"
-    borderRadius={25}
-    animation="quick"
-    pressStyle={{
-      scale: 0.96,
-      opacity: 0.8,
-    }}
-    backgroundColor="rgba(0,0,0,0.35)"
-    borderWidth={0.5}
-    borderColor="rgba(255,255,255,0.15)"
-    style={{
-      backdropFilter: "blur(8px)",
-      WebkitBackdropFilter: "blur(8px)",
-    }}
-  >
-    {children}
-  </XStack>
-);
 
 export default PostCard;
