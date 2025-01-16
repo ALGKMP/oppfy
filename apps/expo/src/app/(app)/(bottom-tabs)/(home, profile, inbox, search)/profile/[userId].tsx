@@ -125,7 +125,6 @@ const OtherProfile = () => {
         },
         type: item.mediaType,
         url: item.imageUrl,
-        isViewable: viewableItems.includes(item.postId),
         dimensions: {
           width: item.width,
           height: item.height,
@@ -136,6 +135,7 @@ const OtherProfile = () => {
         comments: item.commentsCount,
         hasLiked: item.hasLiked,
       }}
+      isViewable={viewableItems.includes(item.postId)}
     />
   );
 

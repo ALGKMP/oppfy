@@ -77,9 +77,9 @@ const SelfProfile = () => {
 
   const renderPost = ({ item }: { item: Post }) => (
     <PostCard
-    postId={item.postId}
-    endpoint="self-profile"
-    createdAt={item.createdAt}
+      postId={item.postId}
+      endpoint="self-profile"
+      createdAt={item.createdAt}
       caption={item.caption}
       self={{
         id: profileData?.userId ?? "",
