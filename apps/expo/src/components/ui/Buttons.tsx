@@ -23,6 +23,9 @@ export const Button = styled(TamaguiButton, {
           backgroundColor: "#D900E6",
           borderColor: "$primary",
         },
+        disabledStyle: {
+          backgroundColor: "#D900E6",
+        },
         textProps: {
           color: "white",
         },

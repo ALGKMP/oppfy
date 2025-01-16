@@ -1,13 +1,11 @@
-import React, { useCallback, useEffect  } from "react";
-import type {ReactNode} from "react";
+import React, { useCallback, useEffect } from "react";
+import type { ReactNode } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  BottomSheetModal,
-  BottomSheetView
-  
-  
+import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import type {
+  BottomSheetBackdropProps,
+  BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
-import type {BottomSheetBackdropProps, BottomSheetModalProps} from "@gorhom/bottom-sheet";
 import { useTheme } from "tamagui";
 
 import BottomSheetBackdrop from "./BottomSheetBackdrop";

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { DimensionValue } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,7 +8,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { BookLock, ChevronRight } from "@tamagui/lucide-icons";
-import { useTheme } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
@@ -98,8 +99,8 @@ const NameSheet = ({
             fontWeight: "bold",
             color: theme.color.val,
             backgroundColor: theme.gray5.val,
-            padding: 20,
-            borderRadius: 20,
+            padding: getToken("$4", "space") as DimensionValue,
+            borderRadius: getToken("$6", "radius") as string,
           }}
         />
       </YStack>
@@ -107,8 +108,7 @@ const NameSheet = ({
       <XStack padding="$4" paddingBottom={insets.bottom}>
         <Button
           flex={1}
-          size="$5"
-          borderRadius="$7"
+          variant="primary"
           disabled={value === initialValue || isLoading || !isValid(value)}
           onPress={handleSave}
         >
@@ -188,8 +188,8 @@ const UsernameSheet = ({
             fontWeight: "bold",
             color: theme.color.val,
             backgroundColor: theme.gray5.val,
-            padding: 20,
-            borderRadius: 20,
+            padding: getToken("$4", "space") as DimensionValue,
+            borderRadius: getToken("$6", "radius") as string,
           }}
         />
       </YStack>
@@ -197,8 +197,7 @@ const UsernameSheet = ({
       <XStack padding="$4" paddingBottom={insets.bottom}>
         <Button
           flex={1}
-          size="$5"
-          borderRadius="$7"
+          variant="primary"
           disabled={value === initialValue || isLoading || !isValid(value)}
           onPress={handleSave}
         >
@@ -221,7 +220,7 @@ const BioSheet = ({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const inputRef = useRef<TextInput>(null);
-  const [value, setValue] = useState(initialValue ?? "");
+  const [value, setValue] = useState(initialValue);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isValid = (val: string) => {
@@ -277,8 +276,8 @@ const BioSheet = ({
             fontWeight: "bold",
             color: theme.color.val,
             backgroundColor: theme.gray5.val,
-            padding: 20,
-            borderRadius: 20,
+            padding: getToken("$4", "space") as DimensionValue,
+            borderRadius: getToken("$6", "radius") as string,
             height: 100,
           }}
         />
@@ -287,8 +286,7 @@ const BioSheet = ({
       <XStack padding="$4" paddingBottom={insets.bottom}>
         <Button
           flex={1}
-          size="$5"
-          borderRadius="$7"
+          variant="primary"
           disabled={value === initialValue || isLoading || !isValid(value)}
           onPress={handleSave}
         >
