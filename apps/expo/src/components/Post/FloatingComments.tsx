@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, TouchableOpacity } from "react-native";
 import Animated, {
   Easing,
   interpolate,
@@ -12,10 +12,21 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "tamagui";
 
+import CommentsBottomSheet from "~/components/Comment/CommentsBottomSheet";
+import { useBottomSheetController } from "~/components/ui/BottomSheet";
+
 interface Comment {
   id: string;
   username: string;
   content: string;
+}
+
+interface FloatingCommentsProps {
+  comments: Comment[];
+  isViewable: boolean;
+  postId: string;
+  endpoint: "self-profile" | "other-profile" | "home-feed" | "single-post";
+  postRecipientUserId: string;
 }
 
 const FloatingComment = ({
@@ -65,7 +76,7 @@ const FloatingComment = ({
     }, 1500); // Longer hold before fade
 
     return () => clearTimeout(fadeTimer);
-  }, []);
+  }, [onAnimationComplete, opacity, translateY]);
 
   return (
     <Animated.View style={animatedStyle}>
@@ -103,14 +114,15 @@ const FloatingComment = ({
 export const FloatingComments = ({
   comments,
   isViewable,
-}: {
-  comments: Comment[];
-  isViewable: boolean;
-}) => {
+  postId,
+  endpoint,
+  postRecipientUserId,
+}: FloatingCommentsProps) => {
   const [visibleComments, setVisibleComments] = React.useState<Comment[]>([]);
   const commentQueue = useRef<Comment[]>([...comments]);
   const isAnimating = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const { show, hide } = useBottomSheetController();
 
   const showNextComment = React.useCallback(() => {
     if (commentQueue.current.length > 0 && !isAnimating.current && isViewable) {
@@ -141,19 +153,36 @@ export const FloatingComments = ({
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [isViewable, comments]);
+  }, [isViewable, comments, showNextComment]);
+
+  const handlePress = () => {
+    show({
+      snapPoints: ["100%"],
+      title: "Comments",
+      children: (
+        <CommentsBottomSheet
+          postId={postId}
+          endpoint={endpoint}
+          postRecipientUserId={postRecipientUserId}
+          onHideBottomSheet={hide}
+        />
+      ),
+    });
+  };
 
   if (!isViewable) return null;
 
   return (
-    <View pointerEvents="none">
-      {visibleComments.map((comment) => (
-        <FloatingComment
-          key={comment.id}
-          comment={comment}
-          onAnimationComplete={handleAnimationComplete}
-        />
-      ))}
-    </View>
+    <TouchableOpacity onPress={handlePress}>
+      <View pointerEvents="none">
+        {visibleComments.map((comment) => (
+          <FloatingComment
+            key={comment.id}
+            comment={comment}
+            onAnimationComplete={handleAnimationComplete}
+          />
+        ))}
+      </View>
+    </TouchableOpacity>
   );
 };

@@ -211,13 +211,12 @@ const PostCard = (props: PostCardProps) => {
               { id: "3", username: "user3", content: "Incredible shot 📸" },
             ]}
             isViewable={props.media.isViewable}
+            postId={props.postId}
+            endpoint={props.endpoint}
+            postRecipientUserId={props.recipient.id}
           />
         )}
-        <PostCaption
-          caption={props.caption}
-          light
-          username={props.author.username}
-        />
+        <PostCaption caption={props.caption} />
       </YStack>
     </View>
   );
