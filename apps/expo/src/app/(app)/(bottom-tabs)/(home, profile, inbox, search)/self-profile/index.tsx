@@ -1,19 +1,18 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import { CameraOff, ScrollText, Users } from "@tamagui/lucide-icons";
+import { CameraOff, ScrollText } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { H5, HeaderTitle, XStack } from "~/components/ui";
+import { HeaderTitle } from "~/components/ui";
 import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -26,7 +25,6 @@ const SelfProfile = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
-  const navigation = useNavigation();
   const { data: profileData } = useProfile();
 
   const {
@@ -68,8 +66,7 @@ const SelfProfile = () => {
   }) => {
     const visibleItemIds = viewableItems
       .filter((token) => token.isViewable)
-      .map((token) => token.item?.postId)
-      .filter((id): id is string => id !== undefined);
+      .map((token) => (token.item as Post).postId);
 
     setViewableItems(visibleItemIds);
   };
@@ -103,7 +100,6 @@ const SelfProfile = () => {
         id: item.postId,
         type: item.mediaType,
         url: item.imageUrl,
-        isViewable: viewableItems.includes(item.postId),
         dimensions: {
           width: item.width,
           height: item.height,
@@ -119,6 +115,7 @@ const SelfProfile = () => {
         comments: item.commentsCount,
         hasLiked: item.hasLiked,
       }}
+      isViewable={viewableItems.includes(item.postId)}
     />
   );
 
@@ -144,7 +141,7 @@ const SelfProfile = () => {
     if (isLoadingPostData)
       return (
         <YStack gap="$4">
-          <PostCard.loading />
+          <PostCard.Skeleton />
         </YStack>
       );
     return (

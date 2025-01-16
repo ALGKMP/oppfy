@@ -103,7 +103,7 @@ const MorePostOptionsButton = ({
       },
       disabled: isSaving,
       onPress: () => void handleSavePost(mediaUrl),
-      autoClose: true,
+      autoClose: false,
     },
     {
       text: "Delete Post",
@@ -140,7 +140,6 @@ const MorePostOptionsButton = ({
             user?.uid === recipientUserId
               ? buttonOptionsSelf
               : buttonOptionsOther,
-          onCancel: () => {},
         });
       }}
     >

@@ -25,11 +25,7 @@ import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
-
-interface TokenItem {
-  postId?: string | undefined;
-}
+type Post = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
 
 const HomeScreen = () => {
   const scrollRef = useRef(null);
@@ -75,26 +71,20 @@ const HomeScreen = () => {
     setRefreshing(false);
   }, [refetchPosts]);
 
-  const onViewableItemsChanged = useCallback(
-    ({
-      viewableItems,
-    }: {
-      viewableItems: ViewToken[];
-      changed: ViewToken[];
-    }) => {
-      const visibleItemIds = viewableItems
-        .filter((token) => token.isViewable)
-        .map((token) => (token.item as TokenItem).postId)
-        .filter((id): id is string => id !== undefined);
+  const onViewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: ViewToken[];
+  }) => {
+    const visibleItemIds = viewableItems
+      .filter((token) => token.isViewable)
+      .map((token) => (token.item as Post).postId);
 
-      console.log("New visible item IDs:", visibleItemIds);
-      setViewableItems(visibleItemIds);
-    },
-    [],
-  );
+    setViewableItems(visibleItemIds);
+  };
 
   const renderPost = useCallback(
-    ({ item }: { item: PostItem }) => {
+    ({ item }: { item: Post }) => {
       if (profile === undefined) return null;
 
       return (
@@ -127,7 +117,6 @@ const HomeScreen = () => {
             },
             type: item.mediaType,
             url: item.imageUrl,
-            isViewable: viewableItems.includes(item.postId),
             dimensions: {
               width: item.width,
               height: item.height,
@@ -138,6 +127,7 @@ const HomeScreen = () => {
             comments: item.commentsCount,
             hasLiked: item.hasLiked,
           }}
+          isViewable={viewableItems.includes(item.postId)}
         />
       );
     },
@@ -150,8 +140,8 @@ const HomeScreen = () => {
     if (isLoading) {
       return (
         <YStack gap="$4">
-          <PostCard.loading />
-          <PostCard.loading />
+          <PostCard.Skeleton />
+          <PostCard.Skeleton />
         </YStack>
       );
     }
@@ -174,7 +164,7 @@ const HomeScreen = () => {
           gap="$4"
         >
           {Array.from({ length: 5 }).map((_, index) => (
-            <PostCard.loading key={`loading-post-${index}`} />
+            <PostCard.Skeleton key={`loading-post-${index}`} />
           ))}
         </YStack>
       ) : (
