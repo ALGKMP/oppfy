@@ -1,32 +1,12 @@
-import React, { useCallback, useRef, useState } from "react";
+import React from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
-import { ResizeMode, Video } from "expo-av";
-import type { AVPlaybackStatus } from "expo-av";
-import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect } from "expo-router";
-import { getToken, useTheme } from "tamagui";
 
-import {
-  Circle,
-  Paragraph,
-  Skeleton,
-  Text,
-  View,
-  XStack,
-  YStack,
-} from "~/components/ui";
-import { useAudio } from "~/contexts/AudioContext";
+import { Skeleton, Text, View, XStack, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import { useLikePost } from "../../hooks/post/useLikePost";
 import Avatar from "../Avatar";
-import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
-import Mute, { useMuteAnimations } from "../Icons/Mute";
 import { FloatingComments } from "./FloatingComments";
 import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
