@@ -24,6 +24,11 @@ apps/expo/.gitignore
 apps/expo/ios
 apps/expo/android
 
+# expo clip
+apps/expo-clip/ios
+apps/expo-clip/android
+expo-env.d.ts
+
 # production
 build
 

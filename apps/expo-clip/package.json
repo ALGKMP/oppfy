@@ -1,0 +1,30 @@
+{
+  "name": "@oppfy/expo-clip",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "expo start",
+    "prebuild": "expo prebuild",
+    "clip": "npx expo run:ios --configuration Release --scheme OppfyClip",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "build:ios": "BUILDING_FOR_APP_CLIP=1 eas build --platform ios --profile clip",
+    "clean": "git clean -xdf .expo .turbo node_modules"
+  },
+  "dependencies": {
+    "expo": "~52.0.0",
+    "expo-router": "4.0.11",
+    "expo-status-bar": "~2.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.5",
+    "react-native-app-clip": "^0.5.1",
+    "tamagui": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.4",
+    "@oppfy/tsconfig": "workspace:*",
+    "@types/react": "~18.2.45",
+    "typescript": "^5.4"
+  }
+}
