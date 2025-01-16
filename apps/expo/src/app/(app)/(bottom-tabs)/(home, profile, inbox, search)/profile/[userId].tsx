@@ -168,12 +168,16 @@ const OtherProfile = () => {
   );
 
   const renderNoPosts = () => {
-    if (isLoadingPostData)
+    if (isLoadingPostData) {
       return (
         <YStack gap="$4">
-          <PostCard.Skeleton />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <PostCard.Skeleton key={index} />
+          ))}
         </YStack>
       );
+    }
+
     if (networkRelationships?.blocked) {
       return (
         <View paddingTop="$6">

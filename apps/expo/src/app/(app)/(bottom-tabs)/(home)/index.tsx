@@ -140,8 +140,9 @@ const HomeScreen = () => {
     if (isLoading) {
       return (
         <YStack gap="$4">
-          <PostCard.Skeleton />
-          <PostCard.Skeleton />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <PostCard.Skeleton key={index} />
+          ))}
         </YStack>
       );
     }

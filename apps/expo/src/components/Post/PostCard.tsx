@@ -209,20 +209,53 @@ const PostCard = (props: PostCardProps) => {
 
 PostCard.Skeleton = function PostCardLoading() {
   return (
-    <YStack marginVertical="$2">
-      <View>
-        <Skeleton width="100%" height={600} radius={0} />
-        <View position="absolute" top={16} left={16} right={16}>
-          <XStack alignItems="center" gap="$3">
-            <Skeleton size={44} circular />
-            <YStack gap="$2">
-              <Skeleton width={120} height={20} />
-              <Skeleton width={80} height={14} />
-            </YStack>
-          </XStack>
-        </View>
-      </View>
-    </YStack>
+    <View borderRadius="$8" overflow="hidden" backgroundColor="$gray3">
+      {/* Header */}
+      <XStack
+        paddingVertical="$4"
+        paddingHorizontal="$4"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <XStack gap="$3" alignItems="center">
+          <Skeleton circular size={44} />
+          <YStack gap="$2">
+            <Skeleton width={120} height={18} />
+            <Skeleton width={80} height={14} />
+          </YStack>
+        </XStack>
+        <Skeleton width={24} height={24} />
+      </XStack>
+
+      {/* Media */}
+      {/* <Skeleton width="100%" height={500} radius={0} /> */}
+      <View width="100%" height={500} backgroundColor="$gray3" />
+
+      {/* Bottom Content */}
+      <YStack paddingHorizontal="$4" paddingVertical="$4" gap="$2">
+        {/* Floating Comments Skeleton */}
+        <Skeleton width={140} height={32} radius="$6" />
+
+        {/* Caption Skeleton */}
+        <YStack gap="$1">
+          <Skeleton width="80%" height={16} />
+          <Skeleton width="80%" height={16} />
+        </YStack>
+      </YStack>
+
+      {/* Stats Buttons */}
+      <YStack
+        position="absolute"
+        right={16}
+        bottom={24}
+        gap="$5"
+        alignItems="flex-end"
+      >
+        <Skeleton size={44} circular />
+        <Skeleton size={44} circular />
+        <Skeleton size={44} circular />
+      </YStack>
+    </View>
   );
 };
 
