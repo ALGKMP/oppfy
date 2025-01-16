@@ -18,6 +18,7 @@ import {
 
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
+import { HeaderTitle } from "~/components/ui";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -148,12 +149,10 @@ const HomeScreen = () => {
     }
 
     return (
-      <View>
-        <View paddingTop="$4" paddingHorizontal="$1">
-          <RecommendationCarousel />
-          <Footer />
-        </View>
-      </View>
+      <YStack paddingHorizontal="$4" gap="$4">
+        <RecommendationCarousel />
+        <Footer />
+      </YStack>
     );
   }, [isLoading]);
 
@@ -190,6 +189,10 @@ const HomeScreen = () => {
           contentContainerStyle={{
             paddingTop: (insets.top + getToken("$2", "space")) as number,
           }}
+          ListFooterComponentStyle={{
+            paddingTop: getToken("$3", "space"),
+            paddingBottom: getToken("$4", "space"),
+          }}
         />
       )}
     </BaseScreenView>
@@ -201,15 +204,10 @@ const Footer = () => {
     return `https://apps.apple.com/ca/app/oppfy/id6736484676`;
   };
   return (
-    <YStack
-      paddingVertical="$8"
-      paddingHorizontal="$4"
-      alignItems="center"
-      gap="$4"
-    >
-      <SizableText size="$5" textAlign="center">
-        Invite your friends to use OPPFY with
-      </SizableText>
+    <YStack alignItems="center" gap="$2">
+      <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
+        Grow Your OPPFY Community
+      </HeaderTitle>
       <Button
         borderRadius="$8"
         backgroundColor="#F214FF"

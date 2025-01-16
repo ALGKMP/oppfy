@@ -93,7 +93,7 @@ const RecommendationCarousel = ({
 
   return (
     <YStack paddingVertical={paddingVertical} gap="$2">
-      <HeaderTitle icon={<Sparkles />} paddingHorizontal={paddingHorizontal}>
+      <HeaderTitle icon="sparkles" paddingHorizontal={paddingHorizontal}>
         Suggested for You
       </HeaderTitle>
 
@@ -104,7 +104,7 @@ const RecommendationCarousel = ({
         estimatedItemSize={CARD_WIDTH}
         ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
         contentContainerStyle={{
-          paddingHorizontal: getToken(paddingHorizontal as Token, "space"),
+          paddingHorizontal: getToken(paddingHorizontal as Token, "space") as number,
         }}
         renderItem={({ item, index }) => {
           if (isLoading) {

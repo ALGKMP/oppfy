@@ -43,10 +43,7 @@ export const useSaveMedia = () => {
     return markedImage;
   };
 
-  const saveMedia = async (
-    mediaUrl: string,
-    watermark?: WatermarkOptions  ,
-  ) => {
+  const saveMedia = async (mediaUrl: string, watermark?: WatermarkOptions) => {
     setIsSaving(true);
 
     const { status } = await MediaLibrary.requestPermissionsAsync();
@@ -72,7 +69,7 @@ export const useSaveMedia = () => {
         scale: 0.7,
       });
       toast.show("Post Saved");
-    } catch (error) {
+    } catch {
       toast.show("Enable media library permission in settings", {
         burntOptions: {
           preset: "error",

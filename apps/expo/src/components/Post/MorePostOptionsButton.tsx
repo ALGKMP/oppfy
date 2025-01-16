@@ -3,6 +3,7 @@ import { TouchableOpacity } from "react-native";
 import { MoreHorizontal } from "@tamagui/lucide-icons";
 
 import {
+  Icon,
   useActionSheetController,
   useAlertDialogController,
 } from "~/components/ui";
@@ -10,19 +11,20 @@ import { useSession } from "~/contexts/SessionContext";
 import { useSaveMedia } from "~/hooks/post/useSaveMedia";
 import { useDeletePost } from "../../hooks/post/useDeletePost";
 import { useReportPost } from "../../hooks/post/useReportPost";
+import { Author, Recipient } from "./PostCard";
 
 interface MorePostOptionsButtonProps {
   postId: string;
-  recipientUserId: string;
+  author: Author;
+  recipient: Recipient;
   mediaUrl: string;
-  style?: StyleProp<ViewStyle>;
 }
 
 const MorePostOptionsButton = ({
   mediaUrl,
-  style = { position: "absolute", bottom: 15, right: 15 },
   postId,
-  recipientUserId,
+  author,
+  recipient,
 }: MorePostOptionsButtonProps) => {
   const { handleSavePost, isSaving } = useSaveMedia();
   const { handleDeletePost, isDeleting } = useDeletePost();
@@ -130,21 +132,18 @@ const MorePostOptionsButton = ({
   ];
 
   return (
-    <TouchableOpacity
-      hitSlop={20}
-      style={style}
+    <Icon
+      name="ellipsis-horizontal"
       onPress={() => {
         show({
           title: "More Options",
           buttonOptions:
-            user?.uid === recipientUserId
+            user?.uid === recipient.id
               ? buttonOptionsSelf
               : buttonOptionsOther,
         });
       }}
-    >
-      <MoreHorizontal />
-    </TouchableOpacity>
+    />
   );
 };
 

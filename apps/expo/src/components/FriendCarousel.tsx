@@ -76,7 +76,7 @@ const FriendCarousel = ({
 
   return (
     <YStack paddingVertical={paddingVertical} gap="$2">
-      <HeaderTitle icon={<Users />} paddingHorizontal={paddingHorizontal}>
+      <HeaderTitle icon="people" paddingHorizontal={paddingHorizontal}>
         Friends
       </HeaderTitle>
 
@@ -87,7 +87,7 @@ const FriendCarousel = ({
         estimatedItemSize={CARD_WIDTH}
         ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
         contentContainerStyle={{
-          paddingHorizontal: getToken(paddingHorizontal as Token, "space"),
+          paddingHorizontal: getToken(paddingHorizontal as Token, "space") as number,
         }}
         renderItem={({ item, index }) => {
           if (isLoading) {

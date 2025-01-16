@@ -150,7 +150,7 @@ const OtherProfile = () => {
         <RecommendationCarousel paddingHorizontal="$2.5" />
       )}
       {(isLoadingPostData || postItems.length > 0) && (
-        <HeaderTitle icon={<ScrollText />} paddingHorizontal="$2.5">
+        <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
           Posts
         </HeaderTitle>
       )}

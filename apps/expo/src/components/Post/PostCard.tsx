@@ -23,13 +23,13 @@ interface Self {
   profilePicture: ProfilePicture;
 }
 
-interface Author {
+export interface Author {
   id: string;
   username: string;
   profilePicture: ProfilePicture;
 }
 
-interface Recipient {
+export interface Recipient {
   id: string;
   username: string;
   profilePicture: ProfilePicture;
@@ -162,9 +162,9 @@ const PostCard = (props: PostCardProps) => {
         <XStack alignItems="center" justifyContent="flex-end" width="$5">
           <MorePostOptionsButton
             postId={props.postId}
-            recipientUserId={props.recipient.id}
+            author={props.author}
+            recipient={props.recipient}
             mediaUrl={props.media.url}
-            style={{ position: "relative", right: 0, bottom: 0 }}
           />
         </XStack>
       </XStack>

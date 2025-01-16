@@ -1,4 +1,3 @@
-import { cloneElement  } from "react";
 import type {ReactNode} from "react";
 import {
   styled,
@@ -11,13 +10,15 @@ import {
   XStack,
 } from "tamagui";
 import type { XStackProps } from "tamagui";
-
-type IconProp = JSX.Element | null;
+import { Icon } from "./Icon";
+import type { IconName } from "./Icon";
 
 interface HeaderTitleProps extends XStackProps {
   children: ReactNode;
-  icon?: IconProp;
-  iconAfter?: IconProp;
+  icon?: IconName;
+  iconAfter?: IconName;
+  iconSize?: number;
+  iconColor?: string;
 }
 
 export const H1 = styled(TamaguiH1, {});
@@ -31,11 +32,13 @@ export const HeaderTitle = ({
   children,
   icon,
   iconAfter,
+  iconSize = 14,
+  iconColor,
   ...props
 }: HeaderTitleProps) => (
   <XStack alignItems="center" gap="$2" opacity={0.7} {...props}>
-    {icon && cloneElement(icon, { size: icon.props.size ?? 14 })}
+    {icon && <Icon name={icon} size={iconSize} color={iconColor} />}
     <H5>{children}</H5>
-    {iconAfter && cloneElement(iconAfter, { size: iconAfter.props.size ?? 14 })}
+    {iconAfter && <Icon name={iconAfter} size={iconSize} color={iconColor} />}
   </XStack>
 );

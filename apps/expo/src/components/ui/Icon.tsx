@@ -52,7 +52,6 @@ export const Icon = ({
   );
 };
 
-export type { IconName };
 const styles = StyleSheet.create({
   iconButton: {
     width: 38,
@@ -70,3 +69,5 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(64, 64, 64, 0.4)",
   },
 });
+
+export type { IconName };
