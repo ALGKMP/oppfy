@@ -36,7 +36,7 @@ const MorePostOptionsButton = ({
 
   const buttonOptionsOther = [
     {
-      text: isSaving ? "Saving..." : "Save Post",
+      text: "Save Post",
       onPress: () => void handleSavePost(mediaUrl),
       autoClose: true,
     },
@@ -99,13 +99,13 @@ const MorePostOptionsButton = ({
 
   const buttonOptionsSelf = [
     {
-      text: isSaving ? "Saving" : "Save Post",
+      text: isSaving ? "Saving..." : "Save Post",
       textProps: {
         color: isSaving ? "$gray9" : undefined,
       },
       disabled: isSaving,
       onPress: () => void handleSavePost(mediaUrl),
-      autoClose: false,
+      autoClose: true,
     },
     {
       text: "Delete Post",
@@ -138,9 +138,7 @@ const MorePostOptionsButton = ({
         show({
           title: "More Options",
           buttonOptions:
-            user?.uid === recipient.id
-              ? buttonOptionsSelf
-              : buttonOptionsOther,
+            user?.uid === recipient.id ? buttonOptionsSelf : buttonOptionsOther,
         });
       }}
     />
