@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { Href, useRouter } from "expo-router";
 import { Text, XStack, YStack } from "tamagui";
 
 import { Skeleton } from "~/components/ui/Skeleton";
@@ -61,9 +61,9 @@ const Stats = ({
 
     const basePath = userId ? "/connections" : "/self-connections";
     router.push({
-      pathname: `${basePath}/${section}` as any,
+      pathname: `${basePath}/${section}`,
       ...(userId && { params: { userId, username } }),
-    });
+    } as Href);
   };
 
   return (

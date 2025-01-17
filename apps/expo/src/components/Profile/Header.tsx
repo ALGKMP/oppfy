@@ -9,6 +9,8 @@ import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
 import useProfile from "~/hooks/useProfile";
+import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 interface HeaderProps {
   userId?: string;
@@ -18,6 +20,12 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
     userId,
   });
+
+  const { data: networkRelationships } =
+    api.profile.getNetworkRelationships.useQuery(
+      { userId: userId ?? "" },
+      { enabled: !!userId },
+    );
 
   const defaultProfile = {
     name: undefined,
@@ -32,6 +40,7 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   };
 
   const profile = profileData ?? defaultProfile;
+  const isBlocked = networkRelationships?.blocked ?? false;
 
   // Generate a unique key for HeaderGradient based on username
   const headerKey = `header-gradient-${profile.username ?? "default"}`;
@@ -59,22 +68,34 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
             profilePictureUrl={profile.profilePictureUrl}
             isLoading={isLoadingProfileData}
           />
-          <QuickActions userId={userId} isLoading={isLoadingProfileData} />
+          <QuickActions
+            userId={userId}
+            username={profile.username}
+            profilePictureUrl={profile.profilePictureUrl}
+            isLoading={isLoadingProfileData}
+            networkRelationships={networkRelationships}
+          />
         </XStack>
 
         <Bio bio={profile.bio} isLoading={isLoadingProfileData} />
 
-        <ProfileActions userId={userId} />
-
-        <Stats
+        <ProfileActions
           userId={userId}
-          username={profile.username}
-          postCount={profile.postCount}
-          followingCount={profile.followingCount}
-          followerCount={profile.followerCount}
-          friendCount={profile.friendCount}
-          isLoading={isLoadingProfileData}
+          isDisabled={isBlocked}
+          networkRelationships={networkRelationships}
         />
+
+        {!isBlocked && (
+          <Stats
+            userId={userId}
+            username={profile.username}
+            postCount={profile.postCount}
+            followingCount={profile.followingCount}
+            followerCount={profile.followerCount}
+            friendCount={profile.friendCount}
+            isLoading={isLoadingProfileData}
+          />
+        )}
       </YStack>
     </YStack>
   );
