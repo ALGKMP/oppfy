@@ -26,7 +26,7 @@ interface BlurContextMenuWrapperProps {
   options: Option[];
 }
 
-const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
+export const BlurContextMenuWrapper = (props: BlurContextMenuWrapperProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const scale = useSharedValue(1);
   const animationState = useSharedValue(0);
@@ -145,5 +145,3 @@ const styles = StyleSheet.create({
     }),
   },
 });
-
-export default BlurContextMenuWrapper;

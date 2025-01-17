@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, YStack } from "tamagui";
 
-import Avatar from "~/components/Avatar";
+import { Avatar } from "~/components/ui";
 import { Skeleton } from "~/components/ui/Skeleton";
 
 interface ProfileInfoProps {

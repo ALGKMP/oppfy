@@ -11,7 +11,7 @@ import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { HeaderTitle } from "~/components/ui";
+import { Header } from "~/components/Layouts";
 import {
   H2,
   H6,
@@ -221,7 +221,7 @@ const CountryPicker = ({
   }, [searchQuery, filteredItems]);
 
   const onCountrySelect = (countryData: CountryData) => {
-    setSelectedCountryData && setSelectedCountryData(countryData);
+    setSelectedCountryData?.(countryData);
     setModalVisible(false);
   };
 

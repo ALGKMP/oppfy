@@ -4,9 +4,8 @@ import type { ImageSourcePropType } from "react-native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { Skeleton, Text, View, XStack, YStack } from "~/components/ui";
+import { Avatar, Skeleton, Text, View, XStack, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import Avatar from "../Avatar";
 import { FloatingComments } from "./FloatingComments";
 import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";

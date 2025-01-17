@@ -16,9 +16,9 @@ import * as Haptics from "expo-haptics";
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
-import Avatar from "~/components/Avatar";
 import { BottomTabs } from "~/components/Layouts/Navigation";
 import {
+  Avatar,
   Button,
   Circle,
   H3,

@@ -16,11 +16,11 @@ import { Controller, useForm } from "react-hook-form";
 import { getToken, useTheme } from "tamagui";
 import { z } from "zod";
 
-import Avatar from "~/components/Avatar";
 import PlayPause, {
   usePlayPauseAnimations,
 } from "~/components/Icons/PlayPause";
 import {
+  Avatar,
   Button,
   CardContainer,
   H5,

@@ -1,3 +1,4 @@
+import { Avatar } from "./Avatar";
 import { Accordion } from "./Accordian";
 import {
   ActionSheet,
@@ -9,7 +10,7 @@ import {
   AlertDialogProvider,
   useAlertDialogController,
 } from "./AlertDialog";
-import { Avatar } from "./Avatar";
+import { BlurContextMenuWrapper } from "./BlurContextMenuWrapper";
 import {
   BottomSheet,
   BottomSheetProvider,
@@ -123,6 +124,7 @@ export {
   Icon,
   EmptyPlaceholder,
   LoadingIndicatorOverlay,
+  BlurContextMenuWrapper,
 };
 
 export type {

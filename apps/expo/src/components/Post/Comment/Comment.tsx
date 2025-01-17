@@ -2,6 +2,8 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { AlertCircle, Trash2 } from "@tamagui/lucide-icons";
 
 import {
+  Avatar,
+  BlurContextMenuWrapper,
   SizableText,
   Text,
   TimeAgo,
@@ -9,8 +11,6 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import Avatar from "../../Avatar";
-import { BlurContextMenuWrapper } from "../../ContextMenu";
 
 export interface CommentItem {
   userId: string;

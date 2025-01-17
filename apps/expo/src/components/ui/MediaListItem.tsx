@@ -1,8 +1,7 @@
-import type { FunctionComponent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import React from "react";
 import type { ImageSourcePropType } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { Image as ExpoImage } from "expo-image";
 import { Image } from "tamagui";
 import type { GetProps } from "tamagui";
 
@@ -42,19 +41,7 @@ export const MediaListItem = ({
   const content = (
     <XStack alignItems="center" gap="$3">
       {imageUrl && (
-        <Image
-          key={recyclingKey}
-          source={typeof imageUrl === "string" ? { uri: imageUrl } : imageUrl}
-          width={56}
-          height={56}
-          borderRadius={28}
-        />
-        // <Avatar source={imageUrl} size={56} />
-        // <ExpoImage
-        //   source={typeof imageUrl === "string" ? { uri: imageUrl } : imageUrl}
-        //   style={{ width: 56, height: 56, borderRadius: 28 }}
-        //   recyclingKey={recyclingKey}
-        // />
+        <Avatar source={imageUrl} size={56} recyclingKey={recyclingKey} />
       )}
 
       {verticalText ? (
