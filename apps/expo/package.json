@@ -8,7 +8,6 @@
     "build:ios": "pnpm with-env expo build:ios",
     "build:ipa": "rm -f *.ipa && pnpm with-env eas build --profile production --local",
     "clean": "git clean -xdf .expo .gitignore .turbo node_modules",
-    "clip": "BUILDING_FOR_APP_CLIP=1 pnpm with-env expo run:ios --scheme OppfyClip",
     "dev": "pnpm with-env expo start",
     "dev:android": "pnpm with-env expo start --android",
     "dev:ios": "pnpm with-env expo start --ios",

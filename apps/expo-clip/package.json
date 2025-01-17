@@ -2,29 +2,40 @@
   "name": "@oppfy/expo-clip",
   "version": "0.1.0",
   "private": true,
-  "main": "index.js",
+  "main": "index.tsx",
   "scripts": {
-    "dev": "expo start",
-    "prebuild": "expo prebuild",
-    "clip": "npx expo run:ios --configuration Release --scheme OppfyClip",
     "android": "expo run:android",
-    "ios": "expo run:ios",
     "build:ios": "BUILDING_FOR_APP_CLIP=1 eas build --platform ios --profile clip",
-    "clean": "git clean -xdf .expo .turbo node_modules"
+    "clean": "git clean -xdf .expo .turbo node_modules",
+    "clip": "npx expo run:ios --configuration Release --scheme OppfyClip",
+    "dev": "expo start",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild"
   },
   "dependencies": {
+    "@expo/metro-config": "~0.19.0",
+    "@tamagui/font-inter": "1.95.3",
+    "@tamagui/shorthands": "1.95.3",
+    "@tamagui/themes": "1.95.3",
     "expo": "~52.0.0",
+    "expo-constants": "~17.0.3",
+    "expo-linking": "~7.0.3",
     "expo-router": "4.0.11",
     "expo-status-bar": "~2.0.0",
     "react": "18.3.1",
     "react-native": "0.76.5",
     "react-native-app-clip": "^0.5.1",
+    "react-native-safe-area-context": "4.12.0",
     "tamagui": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",
+    "@babel/preset-env": "^7.24.4",
+    "@babel/preset-typescript": "^7.26.0",
+    "@babel/runtime": "^7.24.4",
     "@oppfy/tsconfig": "workspace:*",
-    "@types/react": "~18.2.45",
+    "@types/babel__core": "^7.20.5",
+    "@types/react": "~18.2.79",
     "typescript": "^5.4"
   }
 }
