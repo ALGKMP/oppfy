@@ -4,35 +4,55 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "Oppfy Clip",
   slug: "oppfy-clip",
+  scheme: "oppfy-clip",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
-  userInterfaceStyle: "light",
+  userInterfaceStyle: "dark",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#F214FF",
+  },
+  runtimeVersion: {
+    policy: "nativeVersion",
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    supportsTablet: true,
+    supportsTablet: false,
     bundleIdentifier: "com.oppfy.app.Clip",
-    associatedDomains: ["appclips:yourdomain.com"],
+    associatedDomains: [
+      "applinks:oppfy.app",
+      "applinks:www.oppfy.app",
+      "applinks:oppfy.app",
+      "applinks:oppfy-nextjs.vercel.app",
+    ],
   },
   android: {
     package: "com.oppfy.app.Clip",
   },
-  plugins: ["expo-router", ["react-native-app-clip", { name: "Oppfy Clip" }]],
   experiments: {
     tsconfigPaths: true,
     typedRoutes: true,
+    reactCompiler: true,
   },
   extra: {
     router: {
       origin: false,
     },
     eas: {
-      projectId: "your-project-id",
+      projectId: "68175593-c314-48a6-8892-7afeeb66ab9f",
     },
   },
+  plugins: [
+    "expo-router",
+    [
+      "react-native-app-clip",
+      {
+        name: "Oppfy Clip",
+        groupIdentifier: "group.com.oppfy.app",
+        deploymentTarget: "16.0",
+      },
+    ],
+  ],
 });
