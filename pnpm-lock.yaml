@@ -409,9 +409,24 @@ importers:
 
   apps/expo-clip:
     dependencies:
+      '@expo/metro-config':
+        specifier: ~0.19.0
+        version: 0.19.8
+      '@tamagui/font-inter':
+        specifier: 1.95.3
+        version: 1.95.3(react@18.3.1)
+      '@tamagui/shorthands':
+        specifier: 1.95.3
+        version: 1.95.3
+      '@tamagui/themes':
+        specifier: 1.95.3
+        version: 1.95.3
       expo:
         specifier: ~52.0.0
         version: 52.0.23(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1)))(graphql@15.8.0)(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1)
+      expo-constants:
+        specifier: ~17.0.3
+        version: 17.0.3(expo@52.0.23(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1)))(graphql@15.8.0)(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))
       expo-router:
         specifier: 4.0.11
         version: 4.0.11(4hwfpn5j2zze2xdwk7jylwhxbm)
@@ -427,6 +442,9 @@ importers:
       react-native-app-clip:
         specifier: ^0.5.1
         version: 0.5.1(expo@52.0.23(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1)))(graphql@15.8.0)(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1)
+      react-native-safe-area-context:
+        specifier: 4.12.0
+        version: 4.12.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1)
       tamagui:
         specifier: '*'
         version: 1.95.3(@types/react@18.2.79)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1)
@@ -434,11 +452,23 @@ importers:
       '@babel/core':
         specifier: ^7.24.4
         version: 7.26.0
+      '@babel/preset-env':
+        specifier: ^7.24.4
+        version: 7.26.0(@babel/core@7.26.0)
+      '@babel/preset-typescript':
+        specifier: ^7.26.0
+        version: 7.26.0(@babel/core@7.26.0)
+      '@babel/runtime':
+        specifier: ^7.24.4
+        version: 7.26.0
       '@oppfy/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      '@types/babel__core':
+        specifier: ^7.20.5
+        version: 7.20.5
       '@types/react':
-        specifier: ~18.2.45
+        specifier: ~18.2.79
         version: 18.2.79
       typescript:
         specifier: ^5.4

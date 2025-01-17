@@ -3,12 +3,23 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "@assets/*": ["./assets/*"]
     },
     "jsx": "react-native",
     "strict": true,
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
+    "types": ["nativewind/types"],
+    "checkJs": false
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "include": [
+    "index.tsx",
+    "src",
+    "*.ts",
+    "*.js",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "./metro-require.d.ts"
+  ],
   "exclude": ["node_modules"]
 }
