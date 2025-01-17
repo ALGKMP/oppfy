@@ -217,7 +217,7 @@ const Followers = () => {
           label: "Sent",
           icon: Send,
           onPress: () =>
-            actionSheet.show({
+            void actionSheet.show({
               title: "Cancel Follow Request",
               subtitle: `Are you sure you want to cancel your follow request to ${item.username}?`,
               imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
@@ -235,7 +235,7 @@ const Followers = () => {
           label: "Unfollow",
           icon: UserRoundMinus,
           onPress: () =>
-            actionSheet.show({
+            void actionSheet.show({
               title: "Unfollow User",
               subtitle: `Are you sure you want to unfollow ${item.username}?`,
               imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
@@ -323,9 +323,11 @@ const Followers = () => {
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$4", "space") as number,
+      }}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
+        padding: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}

@@ -215,7 +215,7 @@ const Friends = () => {
           label: "Sent",
           icon: Send,
           onPress: () =>
-            actionSheet.show({
+            void actionSheet.show({
               title: "Cancel Follow Request",
               subtitle: `Are you sure you want to cancel your follow request to ${item.username}?`,
               imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
@@ -233,7 +233,7 @@ const Friends = () => {
           label: "Unfollow",
           icon: UserRoundMinus,
           onPress: () =>
-            actionSheet.show({
+            void actionSheet.show({
               title: "Unfollow User",
               subtitle: `Are you sure you want to unfollow ${item.username}?`,
               imageUrl: item.profilePictureUrl ?? DefaultProfilePicture,
@@ -295,7 +295,7 @@ const Friends = () => {
         <YStack flex={1} justifyContent="center">
           <EmptyPlaceholder
             title="No friends"
-            subtitle="Once you follow someone, you'll see them here."
+            subtitle="No friends found."
             icon={<UserRoundPlus />}
           />
         </YStack>
@@ -321,9 +321,11 @@ const Friends = () => {
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$4", "space") as number,
+      }}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
+        padding: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
