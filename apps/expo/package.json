@@ -8,6 +8,7 @@
     "build:ios": "pnpm with-env expo build:ios",
     "build:ipa": "rm -f *.ipa && pnpm with-env eas build --profile production --local",
     "clean": "git clean -xdf .expo .gitignore .turbo node_modules",
+    "clip": "BUILDING_FOR_APP_CLIP=1 pnpm with-env expo run:ios --scheme OppfyClip",
     "dev": "pnpm with-env expo start",
     "dev:android": "pnpm with-env expo start --android",
     "dev:ios": "pnpm with-env expo start --ios",
@@ -22,8 +23,7 @@
     "submit": "eas submit --platform ios --path",
     "typecheck": "tsc --noEmit",
     "update:production": "eas update --channel production --message \"$MESSAGE\"",
-    "with-env": "dotenv -e ../../.env --",
-    "clip": "BUILDING_FOR_APP_CLIP=1 pnpm with-env expo run:ios --scheme OppfyClip"
+    "with-env": "dotenv -e ../../.env --"
   },
   "prettier": "@oppfy/prettier-config",
   "dependencies": {
