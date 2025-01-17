@@ -150,44 +150,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           "Oppfy would like to access your photos so you can pick photos and videos to share with friends",
       },
     ],
-    [
-      "react-native-app-clip",
-      {
-        name: "Oppfy Clip",
-        bundleIdSuffix: "Clip",
-        groupIdentifier: "group.com.oppfy.app",
-        deploymentTarget: "16.0",
-        // Add this to exclude Firebase from App Clip
-        excludedModules: [
-          // Firebase modules
-          "@react-native-firebase/app",
-          "@react-native-firebase/auth",
-          "@react-native-firebase/perf",
-          "@react-native-firebase/crashlytics",
-
-          // Media modules
-          "expo-av",
-          "expo-video",
-          "expo-camera",
-          "expo-image-picker",
-          "expo-media-library",
-          "expo-video-thumbnails",
-          "ffmpeg-kit-react-native",
-          "react-native-vision-camera",
-
-          // Social/Contact modules
-          "@snapchat/snap-kit-react-native",
-          "expo-contacts",
-
-          // Analytics/Monitoring
-          "@sentry/react-native",
-
-          // Other heavy modules
-          "@gorhom/bottom-sheet",
-          "react-native-reanimated",
-          "@shopify/flash-list",
-        ],
-      },
-    ],
   ],
 });
