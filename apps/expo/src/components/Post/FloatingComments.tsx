@@ -12,7 +12,7 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import { Text, View } from "tamagui";
 
-import CommentsBottomSheet from "~/components/Comment/CommentsBottomSheet";
+import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
 
 interface Comment {

@@ -9,7 +9,7 @@ import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Text, XStack, YStack } from "tamagui";
 
-import CommentsBottomSheet from "~/components/Comment/CommentsBottomSheet";
+import CommentsBottomSheet from "~/components/Post/Comment/CommentsBottomSheet";
 import { useBottomSheetController } from "~/components/ui/BottomSheet";
 import { useLikePost } from "~/hooks/post/useLikePost";
 import { Icon } from "../ui";

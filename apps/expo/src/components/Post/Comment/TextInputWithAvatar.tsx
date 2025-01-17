@@ -9,7 +9,7 @@ import { useTheme } from "tamagui";
 
 import { SizableText, View, XStack, YStack } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
-import Avatar from "../Avatar";
+import Avatar from "../../Avatar";
 
 interface CommentInputProps {
   onPostComment: (comment: string) => void;

@@ -9,8 +9,8 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import Avatar from "../Avatar";
-import { BlurContextMenuWrapper } from "../ContextMenu";
+import Avatar from "../../Avatar";
+import { BlurContextMenuWrapper } from "../../ContextMenu";
 
 export interface CommentItem {
   userId: string;
