@@ -427,6 +427,9 @@ importers:
       expo-constants:
         specifier: ~17.0.3
         version: 17.0.3(expo@52.0.23(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1)))(graphql@15.8.0)(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))
+      expo-linking:
+        specifier: ~7.0.3
+        version: 7.0.3(expo@52.0.23(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@expo/metro-runtime@4.0.0(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1)))(graphql@15.8.0)(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1))(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0)(@types/react@18.2.79)(react@18.3.1))(react@18.3.1)
       expo-router:
         specifier: 4.0.11
         version: 4.0.11(4hwfpn5j2zze2xdwk7jylwhxbm)
@@ -461,6 +464,15 @@ importers:
       '@babel/runtime':
         specifier: ^7.24.4
         version: 7.26.0
+      '@oppfy/api':
+        specifier: workspace:*
+        version: link:../../packages/api
+      '@oppfy/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@oppfy/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
       '@oppfy/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript

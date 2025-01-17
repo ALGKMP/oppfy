@@ -31,10 +31,13 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/preset-env": "^7.24.4",
-    "@babel/preset-typescript": "^7.26.0",
     "@babel/runtime": "^7.24.4",
+    "@oppfy/api": "workspace:*",
+    "@oppfy/eslint-config": "workspace:*",
+    "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
     "@types/babel__core": "^7.20.5",
+    "@babel/preset-typescript": "^7.26.0",
     "@types/react": "~18.2.79",
     "typescript": "^5.4"
   }
