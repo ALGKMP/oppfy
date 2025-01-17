@@ -26,7 +26,10 @@ const DefaultHeaderLeft = ({ canGoBack }: { canGoBack?: boolean }) => {
   return <Icon name="chevron-back" onPress={() => router.back()} blurred />;
 };
 
-const CustomNavigator = ({ children, ...rest }: any) => {
+const CustomNavigator = ({
+  children,
+  ...rest
+}: React.ComponentProps<typeof Navigator>) => {
   return (
     <Navigator
       {...rest}
@@ -34,11 +37,9 @@ const CustomNavigator = ({ children, ...rest }: any) => {
       screenOptions={{
         header: ({ navigation, route, options }) => (
           <Header
-            containerProps={{
-              backgroundColor: options.headerTransparent
-                ? "transparent"
-                : undefined,
-            }}
+            backgroundColor={
+              options.headerTransparent ? "transparent" : undefined
+            }
             HeaderLeft={
               options.headerLeft?.({
                 canGoBack: navigation.canGoBack(),
