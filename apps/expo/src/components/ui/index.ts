@@ -30,6 +30,7 @@ import type { IconName } from "./Icon";
 import { Input, OnboardingInput, SearchInput, TextArea } from "./Inputs";
 import { Label } from "./Label";
 import { ListItem } from "./ListItem";
+import { LoadingIndicatorOverlay } from "./LoadingIndicatorOverlay";
 import type { MediaListItemActionProps } from "./MediaListItem";
 import { MediaListItem } from "./MediaListItem";
 import { Popover } from "./Popover";
@@ -121,6 +122,7 @@ export {
   UserCard,
   Icon,
   EmptyPlaceholder,
+  LoadingIndicatorOverlay,
 };
 
 export type {
