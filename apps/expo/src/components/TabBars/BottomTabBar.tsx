@@ -47,7 +47,7 @@ const TabButton = React.memo(
 
 TabButton.displayName = "TabButton";
 
-const BottomTabBar = ({
+export const BottomTabBar = ({
   state,
   descriptors,
   navigation,
@@ -127,5 +127,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-export default React.memo(BottomTabBar);

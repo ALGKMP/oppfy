@@ -10,7 +10,7 @@ interface NonTamaguiStyles {
   indicator: ViewStyle;
 }
 
-const TopTabBar = ({
+export const TopTabBar = ({
   state,
   descriptors,
   navigation,
@@ -140,5 +140,3 @@ const createNonTamaguiStyles = (): NonTamaguiStyles =>
       backgroundColor: "white",
     },
   });
-
-export default React.memo(TopTabBar);
