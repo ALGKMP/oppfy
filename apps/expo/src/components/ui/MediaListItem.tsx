@@ -6,9 +6,9 @@ import { Image as ExpoImage } from "expo-image";
 import { Image } from "tamagui";
 import type { GetProps } from "tamagui";
 
-import { Skeleton } from "~/components/Skeletons";
 import { Avatar } from "./Avatar";
 import { Button } from "./Buttons";
+import { Skeleton } from "./Skeleton";
 import { XStack, YStack } from "./Stacks";
 import { Paragraph, SizableText } from "./Texts";
 

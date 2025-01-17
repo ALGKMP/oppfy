@@ -27,7 +27,6 @@ import {
   Icon,
   XStack,
 } from "~/components/ui";
-import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";

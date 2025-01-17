@@ -12,7 +12,6 @@ import { CameraOff } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
 import { EmptyPlaceholder } from "~/components/ui";
-import { BaseScreenView } from "~/components/Views";
 
 const { width } = Dimensions.get("window");
 

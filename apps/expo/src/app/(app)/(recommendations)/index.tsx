@@ -7,7 +7,6 @@ import { Text, useTheme, XStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
 import { ScreenView } from "~/components/ui";
-import { BaseScreenView } from "~/components/Views";
 
 const RecommendationsPage = () => {
   const theme = useTheme();

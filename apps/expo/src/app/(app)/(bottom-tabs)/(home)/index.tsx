@@ -19,7 +19,6 @@ import {
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { HeaderTitle } from "~/components/ui";
-import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
@@ -137,6 +136,35 @@ const HomeScreen = () => {
 
   const isLoading = isLoadingPostData || isLoadingProfile;
 
+  const renderEmptyList = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <PostCard.Skeleton key={`loading-post-${index}`} />
+          ))}
+        </YStack>
+      );
+    }
+
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
+        <YStack justifyContent="center" alignItems="center">
+          <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
+            Welcome
+          </H1>
+          <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
+            {profile?.username}!
+          </H1>
+        </YStack>
+        <SizableText size="$5" fontWeight="bold" textAlign="center">
+          Start following people to see who gets opped here the moment it
+          happens!
+        </SizableText>
+      </YStack>
+    );
+  }, [isLoading, profile?.username]);
+
   const renderFooter = useCallback(() => {
     if (isLoading) {
       return (
@@ -157,45 +185,32 @@ const HomeScreen = () => {
   }, [isLoading]);
 
   return (
-    <BaseScreenView padding={0} paddingBottom={0}>
-      {isLoading ? (
-        <YStack
-          paddingTop={(insets.top + getToken("$2", "space")) as number}
-          gap="$4"
-        >
-          {Array.from({ length: 5 }).map((_, index) => (
-            <PostCard.Skeleton key={`loading-post-${index}`} />
-          ))}
-        </YStack>
-      ) : (
-        <FlashList
-          ref={scrollRef}
-          data={postItems}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          onEndReached={handleOnEndReached}
-          nestedScrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-          numColumns={1}
-          keyExtractor={(item) => "home_post_" + item.postId}
-          renderItem={renderPost}
-          estimatedItemSize={screenWidth}
-          ListFooterComponent={renderFooter}
-          extraData={viewableItems}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-          ItemSeparatorComponent={() => <Spacer size="$4" />}
-          ListEmptyComponent={EmptyHomeScreen}
-          contentContainerStyle={{
-            paddingTop: (insets.top + getToken("$2", "space")) as number,
-          }}
-          ListFooterComponentStyle={{
-            paddingTop: getToken("$3", "space"),
-            paddingBottom: getToken("$4", "space"),
-          }}
-        />
-      )}
-    </BaseScreenView>
+    <FlashList
+      ref={scrollRef}
+      data={postItems}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      onEndReached={handleOnEndReached}
+      nestedScrollEnabled={false}
+      showsVerticalScrollIndicator={false}
+      numColumns={1}
+      keyExtractor={(item) => "home_post_" + item.postId}
+      renderItem={renderPost}
+      estimatedItemSize={screenWidth}
+      ListFooterComponent={renderFooter}
+      extraData={viewableItems}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+      ItemSeparatorComponent={() => <Spacer size="$4" />}
+      ListEmptyComponent={renderEmptyList}
+      contentContainerStyle={{
+        paddingTop: (insets.top + getToken("$2", "space")) as number,
+      }}
+      ListFooterComponentStyle={{
+        paddingTop: getToken("$3", "space"),
+        paddingBottom: getToken("$4", "space"),
+      }}
+    />
   );
 };
 
@@ -225,26 +240,6 @@ const Footer = () => {
       >
         <H5>✨ Share Invites ✨</H5>
       </Button>
-    </YStack>
-  );
-};
-
-const EmptyHomeScreen = () => {
-  const { profile } = useProfile();
-
-  return (
-    <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
-      <YStack justifyContent="center" alignItems="center">
-        <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
-          Welcome
-        </H1>
-        <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
-          {profile?.username}!
-        </H1>
-      </YStack>
-      <SizableText size="$5" fontWeight="bold" textAlign="center">
-        Start following people to see who gets opped here the moment it happens!
-      </SizableText>
     </YStack>
   );
 };

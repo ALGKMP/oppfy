@@ -19,7 +19,6 @@ import {
 } from "@tamagui/lucide-icons";
 import { Text, useTheme, XStack, YStack } from "tamagui";
 
-import { BaseScreenView } from "~/components/Views";
 import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");

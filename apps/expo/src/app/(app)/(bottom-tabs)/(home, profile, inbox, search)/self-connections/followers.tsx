@@ -5,10 +5,10 @@ import { FlashList } from "@shopify/flash-list";
 import { UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken, H6, YStack } from "tamagui";
 
-import { SearchInput } from "~/components/Inputs";
 import {
   EmptyPlaceholder,
   MediaListItem,
+  SearchInput,
   useActionSheetController,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";

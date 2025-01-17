@@ -13,7 +13,6 @@ import {
 } from "tamagui";
 
 import PostItem from "~/components/Media/PostItem";
-import { BaseScreenView } from "~/components/Views";
 import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 

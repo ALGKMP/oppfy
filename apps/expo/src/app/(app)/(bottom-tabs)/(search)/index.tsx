@@ -6,8 +6,7 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, H6, YStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
-import { SearchInput } from "~/components/Inputs";
-import { HeaderTitle, MediaListItem } from "~/components/ui";
+import { HeaderTitle, MediaListItem, SearchInput } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
