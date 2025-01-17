@@ -20,17 +20,9 @@ import { FontProvider } from "~/providers/FontProvider";
 import { SentryProvider } from "~/providers/SentryProvider";
 import { DARK_THEME } from "~/theme";
 import { TRPCProvider } from "~/utils/api";
-import { isAppClip } from "~/utils/appClip";
 import tamaguiConfig from "../../tamagui.config";
 
 const RootLayout = () => {
-  if (isAppClip()) {
-    return (
-      <Stack>
-        <Stack.Screen name="clip" options={{ title: "Quick Access" }} />
-      </Stack>
-    );
-  }
 
   return (
     <SentryProvider>
