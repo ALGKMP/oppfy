@@ -8,11 +8,11 @@ import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
-import type {
-  MediaListItemActionProps} from "~/components/ui";
+import type { MediaListItemActionProps } from "~/components/ui";
 import {
   CardContainer,
   Circle,
+  EmptyPlaceholder,
   H5,
   MediaListItem,
   Paragraph,
@@ -22,7 +22,6 @@ import {
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { TimeAgo } from "~/components/ui/TimeAgo";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";

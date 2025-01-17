@@ -4,8 +4,7 @@ import * as Haptics from "expo-haptics";
 import { FlashList } from "@shopify/flash-list";
 import { MessageCircleOff } from "@tamagui/lucide-icons";
 
-import { View } from "~/components/ui";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import { EmptyPlaceholder, View } from "~/components/ui";
 import { useSession } from "~/contexts/SessionContext";
 import { useComments } from "~/hooks/post/useComments";
 import useRouteProfile from "~/hooks/useRouteProfile";

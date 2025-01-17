@@ -10,7 +10,11 @@ interface EmptyPlaceholderProps {
   icon?: Icon;
 }
 
-const EmptyPlaceholder = ({ title, subtitle, icon }: EmptyPlaceholderProps) => (
+export const EmptyPlaceholder = ({
+  title,
+  subtitle,
+  icon,
+}: EmptyPlaceholderProps) => (
   <YStack alignItems="center" gap="$2">
     {icon &&
       cloneElement(icon, {
@@ -30,5 +34,3 @@ const EmptyPlaceholder = ({ title, subtitle, icon }: EmptyPlaceholderProps) => (
     </YStack>
   </YStack>
 );
-
-export default EmptyPlaceholder;

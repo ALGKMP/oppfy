@@ -21,6 +21,7 @@ import { Card } from "./Card";
 import { CardContainer } from "./CardContainer";
 import { Checkbox } from "./Checkbox";
 import { Dialog, DialogProvider, useDialogController } from "./Dialog";
+import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Form } from "./Form";
 import { Group, XGroup, YGroup } from "./Groups";
 import { H1, H2, H3, H4, H5, H6, HeaderTitle } from "./Headings";
@@ -119,6 +120,7 @@ export {
   MediaListItem,
   UserCard,
   Icon,
+  EmptyPlaceholder,
 };
 
 export type {

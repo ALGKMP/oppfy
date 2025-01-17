@@ -11,6 +11,7 @@ import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { getToken } from "tamagui";
 
 import {
+  EmptyPlaceholder,
   H5,
   H6,
   MediaListItem,
@@ -20,7 +21,6 @@ import {
   XStack,
   YStack,
 } from "~/components/ui";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import { useContacts } from "~/hooks/contacts";
 import useSearch from "~/hooks/useSearch";
 import { api } from "~/utils/api";

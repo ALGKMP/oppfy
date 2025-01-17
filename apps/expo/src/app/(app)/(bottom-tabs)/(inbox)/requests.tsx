@@ -6,10 +6,9 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
 import { getToken, H5, Spacer, YStack } from "tamagui";
 
-import { MediaListItem } from "~/components/ui";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { api  } from "~/utils/api";
-import type {RouterOutputs} from "~/utils/api";
+import { EmptyPlaceholder, MediaListItem } from "~/components/ui";
+import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type FriendRequestItem =
   RouterOutputs["friend"]["paginateFriendRequests"]["items"][0];

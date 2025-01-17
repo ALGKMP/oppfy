@@ -20,8 +20,13 @@ import BlockUserHeader from "~/components/Headers/BlockHeader";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { H5, HeaderTitle, Icon, XStack } from "~/components/ui";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
+import {
+  EmptyPlaceholder,
+  H5,
+  HeaderTitle,
+  Icon,
+  XStack,
+} from "~/components/ui";
 import { BaseScreenView } from "~/components/Views";
 import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";

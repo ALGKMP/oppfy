@@ -7,14 +7,13 @@ import { Send, UserRoundMinus, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken, H6, YStack } from "tamagui";
 
 import { SearchInput } from "~/components/Inputs";
-import type {
-  MediaListItemActionProps} from "~/components/ui";
+import type { MediaListItemActionProps } from "~/components/ui";
 import {
+  EmptyPlaceholder,
   MediaListItem,
   useActionSheetController,
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import useSearch from "~/hooks/useSearch";
 import type { RouterOutputs } from "~/utils/api";
