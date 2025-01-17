@@ -4,8 +4,10 @@ const { FileStore } = require("metro-cache");
 
 const path = require("path");
 
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
+
 module.exports = withTurborepoManagedCache(
-  withMonorepoPaths(withAppClipConfig(getDefaultConfig(__dirname))),
+  withMonorepoPaths(getSentryExpoConfig(__dirname)),
 );
 
 /**
@@ -45,28 +47,5 @@ function withTurborepoManagedCache(config) {
   config.cacheStores = [
     new FileStore({ root: path.join(__dirname, "node_modules/.cache/metro") }),
   ];
-  return config;
-}
-
-function withAppClipConfig(config) {
-  // Add TypeScript extensions to resolver
-  config.resolver.sourceExts = [
-    ...(config.resolver.sourceExts || []),
-    "tsx",
-    "ts",
-    "jsx",
-    "js",
-    "json",
-  ];
-
-  if (process.env.BUILDING_FOR_APP_CLIP) {
-    config.resolver.blockList = [
-      /.*firebase.*/,
-      /.*sentry.*/,
-      /.*ffmpeg.*/,
-      /.*vision-camera.*/,
-    ];
-  }
-
   return config;
 }
