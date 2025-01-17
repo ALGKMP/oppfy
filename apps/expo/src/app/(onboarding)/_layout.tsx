@@ -4,8 +4,8 @@ import Splash from "@assets/splash.png";
 import { Info } from "@tamagui/lucide-icons";
 import { Image } from "tamagui";
 
+import { Stack } from "~/components/Layouts/Navigation";
 import { Icon } from "~/components/ui";
-import { Stack } from "~/layouts";
 
 const HeaderTitle = () => (
   <Image source={Splash} resizeMode="contain" width={100} height={100} />

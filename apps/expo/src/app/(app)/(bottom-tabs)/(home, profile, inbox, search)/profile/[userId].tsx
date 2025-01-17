@@ -16,7 +16,6 @@ import {
 import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
-import BlockUserHeader from "~/components/Headers/BlockHeader";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";

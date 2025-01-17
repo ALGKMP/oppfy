@@ -12,9 +12,9 @@ import type {
 } from "@react-navigation/native";
 import { Text } from "tamagui";
 
-import { Header } from "~/components/Headers";
-import { BottomTabBar } from "~/components/TabBars";
 import { Icon } from "~/components/ui";
+import BottomTabBar from "../BottomTabBar";
+import Header from "../Header";
 
 const { Navigator } = createBottomTabNavigator();
 

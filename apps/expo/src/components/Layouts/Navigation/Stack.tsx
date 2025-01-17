@@ -1,5 +1,5 @@
 import React from "react";
-import { useRouter, withLayoutContext } from "expo-router";
+import { withLayoutContext } from "expo-router";
 import { getHeaderTitle } from "@react-navigation/elements";
 import type {
   ParamListBase,
@@ -13,8 +13,8 @@ import type {
 } from "@react-navigation/native-stack";
 import { Text } from "tamagui";
 
-import { Header } from "~/components/Headers";
 import { Icon } from "~/components/ui";
+import Header from "../Header";
 
 const { Navigator } = createNativeStackNavigator();
 

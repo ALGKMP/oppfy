@@ -2,9 +2,9 @@ import React from "react";
 import type { NativeStackHeaderProps } from "@react-navigation/native-stack/";
 import { Text } from "tamagui";
 
-import { Header as BaseHeader } from "~/components/Headers";
+import { Header as BaseHeader } from "~/components/Layouts";
+import { Stack } from "~/components/Layouts/Navigation";
 import { Icon } from "~/components/ui";
-import { Stack } from "~/layouts";
 
 const MediaPickerLayout = () => (
   <Stack

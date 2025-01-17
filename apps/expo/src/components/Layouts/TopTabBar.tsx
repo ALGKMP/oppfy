@@ -10,7 +10,7 @@ interface NonTamaguiStyles {
   indicator: ViewStyle;
 }
 
-export const TopTabBar = ({
+const TopTabBar = ({
   state,
   descriptors,
   navigation,
@@ -140,3 +140,5 @@ const createNonTamaguiStyles = (): NonTamaguiStyles =>
       backgroundColor: "white",
     },
   });
+
+export default TopTabBar;

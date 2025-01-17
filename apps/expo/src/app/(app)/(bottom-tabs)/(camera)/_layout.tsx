@@ -1,6 +1,6 @@
 import { Slot } from "expo-router";
 
-import { Stack } from "~/layouts";
+import { Stack } from "~/components/Layouts/Navigation";
 
 const CameraLayout = () => (
   <Stack

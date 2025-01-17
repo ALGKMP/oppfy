@@ -10,7 +10,7 @@ import type {
   StackNavigationState,
 } from "@react-navigation/native";
 
-import { TopTabBar } from "~/components/TabBars";
+import TopTabBar from "../TopTabBar";
 
 const { Navigator } = createMaterialTopTabNavigator();
 

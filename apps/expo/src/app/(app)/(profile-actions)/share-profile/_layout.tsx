@@ -1,8 +1,8 @@
 import React from "react";
 import { useRouter } from "expo-router";
 
+import { Stack } from "~/components/Layouts/Navigation";
 import { Icon } from "~/components/ui";
-import { Stack } from "~/layouts";
 
 const ShareProfileLayout = () => {
   const router = useRouter();

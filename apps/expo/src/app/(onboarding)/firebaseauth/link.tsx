@@ -11,7 +11,7 @@ import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import { Header } from "~/components/Headers";
+import { HeaderTitle } from "~/components/ui";
 import {
   H2,
   H6,

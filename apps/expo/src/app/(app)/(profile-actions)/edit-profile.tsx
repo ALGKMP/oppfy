@@ -12,9 +12,9 @@ import { getToken, useTheme } from "tamagui";
 
 import { sharedValidators } from "@oppfy/validators";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import {
   Button,
+  CardContainer,
   HeaderTitle,
   ScreenView,
   Separator,

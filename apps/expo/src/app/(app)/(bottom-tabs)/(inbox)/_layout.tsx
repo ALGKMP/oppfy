@@ -1,4 +1,4 @@
-import { Stack } from "~/layouts";
+import { Stack } from "~/components/Layouts/Navigation";
 
 const InboxLayout = () => (
   <Stack>

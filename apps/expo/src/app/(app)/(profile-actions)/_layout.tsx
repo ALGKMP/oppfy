@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Stack } from "~/layouts";
+import { Stack } from "~/components/Layouts/Navigation";
 
 const ProfileActionsLayout = () => {
   return (

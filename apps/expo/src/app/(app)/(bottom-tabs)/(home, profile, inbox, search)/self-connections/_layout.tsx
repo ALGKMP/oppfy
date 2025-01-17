@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 import { useNavigation } from "expo-router";
 
-import { TopTabs } from "~/layouts";
+import { TopTabs } from "~/components/Layouts/Navigation";
 import { api } from "~/utils/api";
 
 const ConnectionsLayout = () => {

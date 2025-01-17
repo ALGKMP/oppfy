@@ -1,7 +1,7 @@
 import React, { useLayoutEffect } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 
-import { TopTabs } from "~/layouts";
+import { TopTabs } from "~/components/Layouts/Navigation";
 
 const ConnectionsLayout = () => {
   const navigation = useNavigation();

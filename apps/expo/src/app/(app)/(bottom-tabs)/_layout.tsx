@@ -1,5 +1,5 @@
-import React, { useEffect, useState  } from "react";
-import type {ElementType} from "react";
+import React, { useEffect, useState } from "react";
+import type { ElementType } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Easing,
@@ -17,6 +17,7 @@ import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
 import Avatar from "~/components/Avatar";
+import { BottomTabs } from "~/components/Layouts/Navigation";
 import {
   Button,
   Circle,
@@ -26,12 +27,10 @@ import {
   Text,
   useBottomSheetController,
   View,
-  YStack
-  
+  YStack,
 } from "~/components/ui";
-import type {IconName} from "~/components/ui";
+import type { IconName } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
-import { BottomTabs } from "~/layouts";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
 

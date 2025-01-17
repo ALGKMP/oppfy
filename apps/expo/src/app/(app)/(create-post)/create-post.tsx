@@ -17,12 +17,12 @@ import { getToken, useTheme } from "tamagui";
 import { z } from "zod";
 
 import Avatar from "~/components/Avatar";
-import CardContainer from "~/components/Containers/CardContainer";
 import PlayPause, {
   usePlayPauseAnimations,
 } from "~/components/Icons/PlayPause";
 import {
   Button,
+  CardContainer,
   H5,
   HeaderTitle,
   ScreenView,
