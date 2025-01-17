@@ -45,11 +45,9 @@ const CustomNavigator = ({
 
           return (
             <Header
-              containerProps={{
-                backgroundColor: options.headerTransparent
-                  ? "transparent"
-                  : undefined,
-              }}
+              backgroundColor={
+                options.headerTransparent ? "transparent" : undefined
+              }
               HeaderLeft={
                 options.headerLeft?.({
                   canGoBack: !!back,

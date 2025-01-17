@@ -11,7 +11,7 @@ import { LinearGradient } from "@tamagui/linear-gradient";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
-import { EmptyPlaceholder } from "~/components/ui";
+import { EmptyPlaceholder, ScreenView } from "~/components/ui";
 
 const { width } = Dimensions.get("window");
 
@@ -65,25 +65,25 @@ const ScanQr = () => {
 
   if (!hasPermission) {
     return (
-      <BaseScreenView justifyContent="center" alignItems="center">
+      <ScreenView justifyContent="center" alignItems="center">
         <EmptyPlaceholder
           title="No camera device found"
           subtitle="Please check your camera settings and try again."
           icon={<CameraOff />}
         />
-      </BaseScreenView>
+      </ScreenView>
     );
   }
 
   if (device === undefined) {
     return (
-      <BaseScreenView justifyContent="center" alignItems="center">
+      <ScreenView justifyContent="center" alignItems="center">
         <EmptyPlaceholder
           title="No camera device found"
           subtitle="Please check your camera settings and try again."
           icon={<CameraOff />}
         />
-      </BaseScreenView>
+      </ScreenView>
     );
   }
 

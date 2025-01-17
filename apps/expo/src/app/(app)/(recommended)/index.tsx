@@ -20,6 +20,7 @@ import {
 import { Text, useTheme, XStack, YStack } from "tamagui";
 
 import { api } from "~/utils/api";
+import { ScreenView } from "~/components/ui";
 
 const { width: screenWidth } = Dimensions.get("window");
 const itemWidth = screenWidth / 3 - 24; // Calculate width of each item, considering margin and padding
@@ -195,9 +196,7 @@ const RecommendationsPage = () => {
   };
 
   return (
-    <BaseScreenView
-      flex={1}
-      backgroundColor={theme.background.val}
+    <ScreenView
       padding={0}
       safeAreaEdges={["top", "bottom"]}
     >
@@ -243,7 +242,7 @@ const RecommendationsPage = () => {
           paddingHorizontal: 12,
         }}
       />
-    </BaseScreenView>
+    </ScreenView>
   );
 };
 

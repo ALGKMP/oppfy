@@ -26,10 +26,8 @@ type HeaderProps = NativeStackHeaderProps;
 
 const Header = ({ navigation, options, back }: HeaderProps) => (
   <BaseHeader
-    safeArea={false}
-    containerProps={{
-      backgroundColor: options.headerTransparent ? "transparent" : undefined,
-    }}
+    useSafeArea={false}
+    backgroundColor={options.headerTransparent ? "transparent" : undefined}
     HeaderLeft={
       options.headerLeft?.({
         canGoBack: !!back,

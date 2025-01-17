@@ -1,75 +1,63 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { StackProps, ViewProps } from "tamagui";
-import { styled, Text, useTheme, View, XStack } from "tamagui";
+import { Stack, Text, useTheme, View, XStack } from "tamagui";
 
 interface HeaderProps {
   title?: string;
   HeaderLeft?: React.ReactNode;
   HeaderRight?: React.ReactNode;
-  HeaderTitle?: React.ReactNode | string;
-  containerProps?: StackProps;
-  safeArea?: boolean;
+  HeaderTitle?: React.ReactNode;
+  backgroundColor?: string;
+  useSafeArea?: boolean;
 }
 
 const HEADER_HEIGHT = Platform.OS === "ios" ? 44 : 56;
 
-const StackHeader = ({
+const Header = ({
   title,
   HeaderLeft,
   HeaderRight,
-  HeaderTitle = title ? <DefaultHeaderTitle title={title} /> : null,
-  containerProps,
-  safeArea = true,
+  HeaderTitle,
+  backgroundColor,
+  useSafeArea = true,
 }: HeaderProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const containerStyle = useMemo<ViewProps>(
-    () => ({
-      paddingTop: safeArea ? insets.top : "$3",
-      backgroundColor:
-        containerProps?.backgroundColor === "transparent"
-          ? "transparent"
-          : theme.background.val,
-    }),
-    [insets.top, containerProps?.backgroundColor, theme.background.val],
-  );
+  const content =
+    HeaderTitle ??
+    (title && (
+      <Text fontSize="$6" fontWeight="bold">
+        {title}
+      </Text>
+    ));
 
   return (
-    <View {...containerStyle}>
-      <HeaderContainer {...containerProps}>
-        <SideContainer alignItems="flex-start">{HeaderLeft}</SideContainer>
-        <View alignItems="center">{HeaderTitle}</View>
-        <SideContainer alignItems="flex-end">{HeaderRight}</SideContainer>
-      </HeaderContainer>
-    </View>
+    <Stack
+      backgroundColor={backgroundColor ?? theme.background.val}
+      paddingTop={useSafeArea ? insets.top : "$3"}
+    >
+      <XStack
+        height={HEADER_HEIGHT}
+        paddingHorizontal="$4"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <View flex={1} alignItems="flex-start">
+          {HeaderLeft}
+        </View>
+
+        <View flex={2} alignItems="center">
+          {content}
+        </View>
+
+        <View flex={1} alignItems="flex-end">
+          {HeaderRight}
+        </View>
+      </XStack>
+    </Stack>
   );
 };
 
-interface DefaultHeaderTitleProps {
-  title: string;
-}
-
-const DefaultHeaderTitle = ({ title }: DefaultHeaderTitleProps) => (
-  <StyledHeaderTitle>{title}</StyledHeaderTitle>
-);
-
-const HeaderContainer = styled(XStack, {
-  height: HEADER_HEIGHT,
-  paddingHorizontal: "$4",
-  alignItems: "center",
-  justifyContent: "space-between",
-});
-
-const SideContainer = styled(View, {
-  minWidth: "$3",
-});
-
-const StyledHeaderTitle = styled(Text, {
-  fontSize: "$6",
-  fontWeight: "bold",
-});
-
-export default React.memo(StackHeader);
+export default React.memo(Header);
