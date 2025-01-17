@@ -113,7 +113,11 @@ export const ActionSheet = ({
     onAnimationComplete,
   ]);
 
-  const handleCancel = React.useCallback(() => {
+  const handleBackdropPress = React.useCallback(() => {
+    onCancel?.();
+  }, [onCancel]);
+
+  const handleCancelPress = React.useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onCancel?.();
   }, [onCancel]);
@@ -124,11 +128,11 @@ export const ActionSheet = ({
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         option.onPress?.();
         if (option.autoClose !== false) {
-          handleCancel();
+          handleBackdropPress();
         }
       }
     },
-    [handleCancel],
+    [handleBackdropPress],
   );
 
   const backdropStyle = useAnimatedStyle(() => ({
@@ -163,7 +167,7 @@ export const ActionSheet = ({
       >
         {/* Backdrop */}
         <Animated.View style={[styles.backdrop, backdropStyle]}>
-          <TouchableWithoutFeedback onPress={handleCancel}>
+          <TouchableWithoutFeedback onPress={handleBackdropPress}>
             <View position="absolute" top={0} left={0} right={0} bottom={0} />
           </TouchableWithoutFeedback>
         </Animated.View>
@@ -251,7 +255,7 @@ export const ActionSheet = ({
             borderRadius="$6"
           >
             <TouchableOpacity
-              onPress={handleCancel}
+              onPress={handleCancelPress}
               style={[
                 styles.cancelButton,
                 {
