@@ -175,9 +175,12 @@ const Friends = () => {
 
   const friendItems = friendsData?.pages.flatMap((page) => page.items) ?? [];
 
-  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch<FriendItem>({
     data: friendItems,
-    keys: ["name", "username"],
+    fuseOptions: {
+      keys: ["name", "username"],
+      threshold: 0.3,
+    },
   });
 
   const handleOnEndReached = async () => {

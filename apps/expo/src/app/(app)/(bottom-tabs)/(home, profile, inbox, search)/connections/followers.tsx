@@ -177,10 +177,14 @@ const Followers = () => {
   const followerItems =
     followersData?.pages.flatMap((page) => page.items) ?? [];
 
-  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
-    data: followerItems,
-    keys: ["name", "username"],
-  });
+  const { searchQuery, setSearchQuery, filteredItems } =
+    useSearch<FollowerItem>({
+      data: followerItems,
+      fuseOptions: {
+        keys: ["name", "username"],
+        threshold: 0.3,
+      },
+    });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {

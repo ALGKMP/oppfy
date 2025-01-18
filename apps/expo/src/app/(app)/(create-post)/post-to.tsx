@@ -7,6 +7,7 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Info, UserRoundX } from "@tamagui/lucide-icons";
+import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
 import { getToken } from "tamagui";
 
@@ -82,7 +83,7 @@ const PostTo = () => {
       return parsedNumber.isValid()
         ? parsedNumber.formatNational()
         : phoneNumber;
-    } catch (error) {
+    } catch {
       return phoneNumber;
     }
   }, []);
@@ -123,42 +124,49 @@ const PostTo = () => {
       item.type === "friend" || item.type === "contact",
   );
 
-  const filterItems = useCallback(
-    (query: string) => {
-      return searchableItems.filter((item) => {
-        const searchTerm = query.toLowerCase();
-        if (item.type === "friend") {
-          return (
-            item.data.username.toLowerCase().includes(searchTerm) ||
-            item.data.name.toLowerCase().includes(searchTerm)
-          );
-        } else if (item.type === "contact") {
-          return (
-            item.data.name.toLowerCase().includes(searchTerm) ||
-            item.data.phoneNumbers?.[0]?.number
-              ?.toLowerCase()
-              .includes(searchTerm)
-          );
-        }
-        return false;
-      });
-    },
-    [searchableItems],
-  );
+  const searchOptions: IFuseOptions<ListItem> = {
+    keys: [
+      {
+        name: "data.username",
+        getFn: (item: ListItem) =>
+          item.type === "friend" ? item.data.username : "",
+      },
+      {
+        name: "data.name",
+        getFn: (item: ListItem) =>
+          item.type === "friend"
+            ? item.data.name
+            : item.type === "contact"
+              ? item.data.name
+              : "",
+      },
+      {
+        name: "data.phoneNumber",
+        getFn: (item: ListItem) =>
+          item.type === "contact"
+            ? (item.data.phoneNumbers?.[0]?.number ?? "")
+            : "",
+      },
+    ],
+    threshold: 0.3,
+  };
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const filteredItems = useMemo(
-    () => (searchQuery ? filterItems(searchQuery) : searchableItems),
-    [searchQuery, filterItems, searchableItems],
-  );
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredItems: searchResults,
+  } = useSearch<ListItem>({
+    data: searchableItems,
+    fuseOptions: searchOptions,
+  });
 
   const displayItems = useMemo(() => {
     const result: ListItem[] = [];
-    const friends = filteredItems.filter(
+    const friends = searchResults.filter(
       (item): item is Extract<ListItem, { type: "friend" }> =>
         item.type === "friend",
     );
-    const contacts = filteredItems.filter(
+    const contacts = searchResults.filter(
       (item): item is Extract<ListItem, { type: "contact" }> =>
         item.type === "contact",
     );
@@ -178,7 +186,7 @@ const PostTo = () => {
     }
 
     return result;
-  }, [filteredItems]);
+  }, [searchResults]);
 
   const loadContacts = useCallback(async () => {
     const contactsNotOnApp = await getDeviceContactsNotOnApp();
@@ -201,6 +209,8 @@ const PostTo = () => {
 
   useEffect(() => {
     void loadContacts();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -380,7 +390,7 @@ const PostTo = () => {
       );
     }
 
-    if (filteredItems.length === 0) {
+    if (searchResults.length === 0) {
       return (
         <YStack flex={1}>
           <H6 theme="alt1">No Users Found</H6>
@@ -389,7 +399,7 @@ const PostTo = () => {
     }
 
     return null;
-  }, [isLoadingFriends, isLoadingContacts, items.length, filteredItems.length]);
+  }, [isLoadingFriends, isLoadingContacts, items.length, searchResults.length]);
 
   const getItemType = useCallback((item: ListItem) => {
     return item.type;

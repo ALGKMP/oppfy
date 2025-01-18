@@ -77,10 +77,14 @@ const Blocked = () => {
   const blockedUsersItems =
     blockedUsersData?.pages.flatMap((page) => page.items) ?? [];
 
-  const { searchQuery, setSearchQuery, filteredItems } = useSearch({
-    data: blockedUsersItems,
-    keys: ["name", "username"],
-  });
+  const { searchQuery, setSearchQuery, filteredItems } =
+    useSearch<BlockedUserItem>({
+      data: blockedUsersItems,
+      fuseOptions: {
+        keys: ["name", "username"],
+        threshold: 0.3,
+      },
+    });
 
   const handleOnEndReached = async () => {
     if (!isFetchingNextPage && hasNextPage) {

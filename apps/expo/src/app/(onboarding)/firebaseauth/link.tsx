@@ -210,7 +210,10 @@ const CountryPicker = ({
   const { searchQuery, setSearchQuery, filteredItems } = useSearch<CountryData>(
     {
       data: countriesWithoutSections,
-      keys: ["name", "dialingCode", "countryCode"],
+      fuseOptions: {
+        keys: ["name", "dialingCode", "countryCode"],
+        threshold: 0.3,
+      },
     },
   );
 
