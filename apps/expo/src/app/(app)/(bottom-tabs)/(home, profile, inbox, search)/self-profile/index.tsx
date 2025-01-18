@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
@@ -13,6 +13,7 @@ import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder, HeaderTitle } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -45,6 +46,15 @@ const SelfProfile = () => {
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
+
+  const { routeProfile } = useRouteProfile();
+
+  // const handleUserPress = useCallback(
+  //   (params: { userId: string; username: string }) => {
+  //     void routeProfile(params);
+  //   },
+  //   [routeProfile],
+  // );
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -123,9 +133,12 @@ const SelfProfile = () => {
       <Header />
       <YStack>
         {profileData?.friendCount && profileData.friendCount > 0 ? (
-          <FriendCarousel paddingHorizontal="$2.5" />
+          <FriendCarousel paddingHorizontal="$2.5" onUserPress={routeProfile} />
         ) : (
-          <RecommendationCarousel paddingHorizontal="$4" />
+          <RecommendationCarousel
+            paddingHorizontal="$4"
+            onUserPress={routeProfile}
+          />
         )}
       </YStack>
       {(isLoadingPostData || postItems.length > 0) && (

@@ -1,32 +1,18 @@
-import React, { useLayoutEffect, useState } from "react";
-import { TouchableOpacity } from "react-native";
+import React, { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
-import {
-  CameraOff,
-  ChevronLeft,
-  Lock,
-  MoreHorizontal,
-  ScrollText,
-  Users,
-  UserX,
-} from "@tamagui/lucide-icons";
+import { CameraOff, Lock, UserX } from "@tamagui/lucide-icons";
 import { getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import {
-  EmptyPlaceholder,
-  H5,
-  HeaderTitle,
-  Icon,
-  XStack,
-} from "~/components/ui";
+import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -34,7 +20,7 @@ type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 
 const OtherProfile = () => {
   const router = useRouter();
-  const navigation = useNavigation();
+  const { routeProfile } = useRouteProfile();
 
   const insets = useSafeAreaInsets();
 
@@ -88,8 +74,7 @@ const OtherProfile = () => {
   }) => {
     const visibleItemIds = viewableItems
       .filter((token) => token.isViewable)
-      .map((token) => token.item?.postId)
-      .filter((id): id is string => id !== undefined);
+      .map((token) => (token.item as Post).postId);
 
     setViewableItems(visibleItemIds);
   };
@@ -148,9 +133,12 @@ const OtherProfile = () => {
       {profileData?.friendCount &&
       profileData.friendCount > 0 &&
       !networkRelationships?.blocked ? (
-        <RecommendationCarousel paddingHorizontal="$2.5" />
+        <FriendCarousel paddingHorizontal="$2.5" onUserPress={routeProfile} />
       ) : (
-        <RecommendationCarousel paddingHorizontal="$2.5" />
+        <RecommendationCarousel
+          paddingHorizontal="$2.5"
+          onUserPress={routeProfile}
+        />
       )}
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">

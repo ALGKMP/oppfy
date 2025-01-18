@@ -12,12 +12,14 @@ const useRouteProfile = () => {
   const router = useRouter();
 
   const routeProfile = ({ userId, username }: ProfileRouteParams) => {
-    user?.uid === userId
-      ? router.push("/self-profile")
-      : router.push({
-          pathname: "/profile/[userId]",
-          params: { userId, username },
-        });
+    router.push(
+      user?.uid === userId
+        ? "/self-profile"
+        : {
+            pathname: "/profile/[userId]",
+            params: { userId, username },
+          },
+    );
   };
 
   return { routeProfile };

@@ -5,7 +5,6 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
-import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 import { Spacer } from "./ui";
@@ -17,6 +16,7 @@ type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
 interface FriendCarouselProps {
   paddingHorizontal?: SpaceTokens;
   paddingVertical?: SpaceTokens;
+  onUserPress: (params: { userId: string; username: string }) => void;
 }
 
 const LoadingCard = ({ width }: { width: number }) => (
@@ -32,9 +32,9 @@ const LoadingCard = ({ width }: { width: number }) => (
 const FriendCarousel = ({
   paddingHorizontal,
   paddingVertical,
-}: FriendCarouselProps = {}) => {
+  onUserPress,
+}: FriendCarouselProps) => {
   const { width: windowWidth } = useWindowDimensions();
-  const { routeProfile } = useRouteProfile();
   const router = useRouter();
 
   const { data: friendsData, isLoading } =
@@ -97,7 +97,7 @@ const FriendCarousel = ({
               width={CARD_WIDTH}
               index={index}
               onPress={() =>
-                routeProfile({ userId: item.userId, username: item.username })
+                onUserPress({ userId: item.userId, username: item.username })
               }
             />
           );

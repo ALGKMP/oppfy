@@ -5,7 +5,6 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
-import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 import { Spacer } from "./ui";
@@ -18,6 +17,7 @@ type Recommendation =
 interface RecommendationCarouselProps {
   paddingHorizontal?: SpaceTokens;
   paddingVertical?: SpaceTokens;
+  onUserPress: (params: { userId: string; username: string }) => void;
 }
 
 const LoadingCard = ({ width }: { width: number }) => (
@@ -33,9 +33,9 @@ const LoadingCard = ({ width }: { width: number }) => (
 const RecommendationCarousel = ({
   paddingHorizontal,
   paddingVertical,
-}: RecommendationCarouselProps = {}) => {
+  onUserPress,
+}: RecommendationCarouselProps) => {
   const { width: windowWidth } = useWindowDimensions();
-  const { routeProfile } = useRouteProfile();
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -114,7 +114,7 @@ const RecommendationCarousel = ({
               width={CARD_WIDTH}
               index={index}
               onPress={() =>
-                routeProfile({ userId: item.userId, username: item.username })
+                onUserPress({ userId: item.userId, username: item.username })
               }
               actionButton={{
                 label: "Follow",

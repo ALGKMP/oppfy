@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
@@ -20,6 +21,7 @@ import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { HeaderTitle } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -30,6 +32,8 @@ type Post = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
 const HomeScreen = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
+  const router = useRouter();
+  const { routeProfile } = useRouteProfile();
 
   const insets = useSafeAreaInsets();
 
@@ -82,6 +86,13 @@ const HomeScreen = () => {
 
     setViewableItems(visibleItemIds);
   };
+
+  const handleUserPress = useCallback(
+    (params: { userId: string; username: string }) => {
+      void routeProfile(params);
+    },
+    [routeProfile],
+  );
 
   const renderPost = useCallback(
     ({ item }: { item: Post }) => {
@@ -178,11 +189,11 @@ const HomeScreen = () => {
 
     return (
       <YStack paddingHorizontal="$4" gap="$4">
-        <RecommendationCarousel />
+        <RecommendationCarousel onUserPress={handleUserPress} />
         <Footer />
       </YStack>
     );
-  }, [isLoading]);
+  }, [isLoading, handleUserPress]);
 
   return (
     <FlashList
