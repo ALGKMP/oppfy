@@ -1,28 +1,16 @@
 import { useMemo, useState } from "react";
-import type { FuseOptionKey } from "fuse.js";
+import type { IFuseOptions } from "fuse.js";
 import Fuse from "fuse.js";
 
 interface UseSearchOptions<T> {
   data: T[];
-  keys: (keyof T)[];
-  threshold?: number;
+  fuseOptions: IFuseOptions<T>;
 }
 
-const useSearch = <T,>({
-  data,
-  keys,
-  threshold = 0.3,
-}: UseSearchOptions<T>) => {
+const useSearch = <T>({ data, fuseOptions }: UseSearchOptions<T>) => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(data, {
-        keys: keys as FuseOptionKey<T>[],
-        threshold,
-      }),
-    [data, keys, threshold],
-  );
+  const fuse = useMemo(() => new Fuse(data, fuseOptions), [data, fuseOptions]);
 
   const filteredItems = useMemo(() => {
     if (!searchQuery) return data;
