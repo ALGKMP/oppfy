@@ -1,15 +1,14 @@
 import React from "react";
-import { TouchableOpacity, useWindowDimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { Users } from "@tamagui/lucide-icons";
-import { getToken, Text, View, XStack, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
-import { H5, Spacer } from "./ui";
+import { Spacer } from "./ui";
 import { HeaderTitle } from "./ui/Headings";
 import { UserCard } from "./ui/UserCard";
 
@@ -62,7 +61,7 @@ const FriendCarousel = ({
         Friends
       </HeaderTitle>
 
-      <FlashList
+      <FlashList<Friend | null>
         data={isLoading ? Array(4).fill(null) : [...friends, null]}
         horizontal
         showsHorizontalScrollIndicator={false}

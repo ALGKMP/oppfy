@@ -49,7 +49,7 @@ const GridSuggestions = () => {
     routeProfile({ userId, username });
   };
 
-  if (!data?.length || isLoading) {
+  if (!data?.length) {
     return null;
   }
 
@@ -68,7 +68,8 @@ const GridSuggestions = () => {
           onPress={() => handleProfilePress(item.userId, item.username)}
           actionButton={{
             label: "Follow",
-            onPress: () => followMutation.mutateAsync({ userId: item.userId }),
+            onPress: () =>
+              void followMutation.mutateAsync({ userId: item.userId }),
           }}
         />
       )}
@@ -78,8 +79,8 @@ const GridSuggestions = () => {
           Suggested for You
         </HeaderTitle>
       }
-      columnWrapperStyle={{ gap: getToken("$2", "space") }}
-      contentContainerStyle={{ gap: getToken("$2", "space") }}
+      columnWrapperStyle={{ gap: getToken("$2", "space") as number }}
+      contentContainerStyle={{ gap: getToken("$2", "space") as number }}
       showsVerticalScrollIndicator={false}
       scrollEnabled={false}
     />

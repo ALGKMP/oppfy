@@ -78,7 +78,7 @@ const RecommendationCarousel = ({
         Suggested for You
       </HeaderTitle>
 
-      <FlashList
+      <FlashList<Recommendation | null>
         data={isLoading ? Array(4).fill(null) : [...recommendations, null]}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -119,7 +119,7 @@ const RecommendationCarousel = ({
               actionButton={{
                 label: "Follow",
                 onPress: () =>
-                  followMutation.mutateAsync({ userId: item.userId }),
+                  void followMutation.mutateAsync({ userId: item.userId }),
                 variant: "primary",
                 icon: "follow",
               }}
