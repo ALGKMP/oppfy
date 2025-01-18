@@ -18,6 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     policy: "nativeVersion",
   },
   assetBundlePatterns: ["**/*"],
+
   ios: {
     supportsTablet: false,
     bundleIdentifier: "com.oppfy.app.Clip",
@@ -31,6 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: "com.oppfy.app.Clip",
   },
+  newArchEnabled: false,
   experiments: {
     tsconfigPaths: true,
     typedRoutes: true,
