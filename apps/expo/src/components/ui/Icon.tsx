@@ -60,8 +60,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   blurView: {
-    width: "100%",
-    height: "100%",
+    padding: 8,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(64, 64, 64, 0.4)",
