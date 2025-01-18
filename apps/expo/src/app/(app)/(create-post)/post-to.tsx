@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, TouchableOpacity } from "react-native";
+import { Keyboard, RefreshControl, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { Contact } from "expo-contacts";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -426,10 +426,14 @@ const PostTo = () => {
       ItemSeparatorComponent={Spacer}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
-      ListHeaderComponentStyle={{ marginBottom: getToken("$4", "space") }}
+      onScrollBeginDrag={Keyboard.dismiss}
+      keyboardShouldPersistTaps="handled"
+      ListHeaderComponentStyle={{
+        marginBottom: getToken("$4", "space") as number,
+      }}
       contentContainerStyle={{
-        padding: getToken("$4", "space"),
-        paddingBottom: insets.bottom + getToken("$2", "space"),
+        padding: getToken("$4", "space") as number,
+        paddingBottom: (insets.bottom + getToken("$2", "space")) as number,
       }}
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}

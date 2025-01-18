@@ -104,12 +104,12 @@ const Search = () => {
       ListFooterComponent={ListFooterComponent}
       ItemSeparatorComponent={Spacer}
       ListHeaderComponentStyle={{
-        paddingTop: getToken("$2", "space"),
-        paddingBottom: getToken("$3", "space"),
+        paddingTop: getToken("$2", "space") as number,
+        paddingBottom: getToken("$3", "space") as number,
       }}
       contentContainerStyle={{
-        paddingBottom: getToken("$4", "space"),
-        paddingHorizontal: getToken("$4", "space"),
+        paddingBottom: getToken("$4", "space") as number,
+        paddingHorizontal: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onScrollBeginDrag={Keyboard.dismiss}
