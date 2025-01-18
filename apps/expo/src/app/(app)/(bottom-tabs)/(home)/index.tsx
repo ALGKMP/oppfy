@@ -24,7 +24,7 @@ import {
 
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { HeaderTitle, Icon } from "~/components/ui";
+import { Avatar, HeaderTitle, Icon } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -164,15 +164,11 @@ const HomeScreen = () => {
     }
 
     return (
-      <YStack
-        flex={1}
-        height="100%"
-        paddingHorizontal="$4"
-        paddingTop={screenWidth * 0.2}
-      >
+      <YStack flex={1} height="100%" paddingHorizontal="$4" paddingTop="$4">
         <YStack alignItems="center" gap="$4">
           {/* Welcome Section */}
           <YStack alignItems="center" gap="$2" marginBottom="$2">
+            <Avatar size={100} source={profile?.profilePictureUrl} />
             <H1 color="$gray12" textAlign="center" letterSpacing={1} size="$9">
               Welcome to OPPFY
             </H1>
