@@ -1,19 +1,13 @@
 import React from "react";
 import { Dimensions, FlatList } from "react-native";
-import { Sparkles } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
-import { YStack } from "~/components/ui";
 import { HeaderTitle } from "~/components/ui/Headings";
 import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
 
 const STALE_TIME = 60 * 1000;
-
-type RecommendationItem =
-  RouterOutputs["contacts"]["getRecommendationProfilesSelf"][0];
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -21,10 +15,12 @@ const GridSuggestions = () => {
   const utils = api.useUtils();
   const { routeProfile } = useRouteProfile();
 
-  const { data, isLoading } =
-    api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+  const { data } = api.contacts.getRecommendationProfilesSelf.useQuery(
+    undefined,
+    {
       staleTime: STALE_TIME,
-    });
+    },
+  );
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {

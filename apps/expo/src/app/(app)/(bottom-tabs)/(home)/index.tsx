@@ -191,7 +191,7 @@ const HomeScreen = () => {
               alignItems="center"
               gap="$3"
               pressStyle={{ opacity: 0.8 }}
-              onPress={() => router.push("/(app)/(recommended)")}
+              onPress={() => router.push("/(app)/(recommendations)")}
             >
               {/* <Users size={24} color={getToken("$gray11", "color") as string} /> */}
               <Icon name="people" />
