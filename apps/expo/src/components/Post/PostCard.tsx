@@ -234,7 +234,8 @@ const PostCard = (props: PostCardProps) => {
         zIndex={2}
         gap="$2"
       >
-        {props.stats.comments > 0 && (
+        {/* TODO: Implement backend */}
+        {/* {props.stats.comments > 0 && (
           <FloatingComments
             comments={[
               { id: "1", username: "user1", content: "🔥 This is amazing!" },
@@ -246,7 +247,7 @@ const PostCard = (props: PostCardProps) => {
             endpoint={props.endpoint}
             isViewable={props.isViewable}
           />
-        )}
+        )} */}
         <PostCaption caption={props.caption} />
       </YStack>
     </View>
