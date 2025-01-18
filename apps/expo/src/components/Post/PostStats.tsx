@@ -69,7 +69,7 @@ const StatButton = ({
     <BlurView
       intensity={50}
       style={{
-        padding: 4,
+        padding: 12,
         borderRadius: 24,
         overflow: "hidden",
         justifyContent: "center",
@@ -78,11 +78,9 @@ const StatButton = ({
         borderColor: "rgba(255,255,255,0.15)",
       }}
     >
-      <XStack justifyContent="center" alignItems="center">
+      <XStack justifyContent="center" alignItems="center" gap="$2">
         {count !== undefined && count > 0 && (
-          <Text color="white" paddingLeft="$2">
-            {formatCount(count)}
-          </Text>
+          <Text color="white">{formatCount(count)}</Text>
         )}
         {children}
       </XStack>
