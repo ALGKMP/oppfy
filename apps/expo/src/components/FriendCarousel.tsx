@@ -87,7 +87,10 @@ const FriendCarousel = ({
         estimatedItemSize={CARD_WIDTH}
         ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
         contentContainerStyle={{
-          paddingHorizontal: getToken(paddingHorizontal as Token, "space") as number,
+          paddingHorizontal: getToken(
+            paddingHorizontal as Token,
+            "space",
+          ) as number,
         }}
         renderItem={({ item, index }) => {
           if (isLoading) {

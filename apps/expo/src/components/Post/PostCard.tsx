@@ -129,19 +129,33 @@ const PostCard = (props: PostCardProps) => {
         zIndex={2}
         pointerEvents="box-none"
       >
-        <TouchableOpacity
-          onPress={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            routeProfile({
-              userId: props.author.id,
-              username: props.author.username,
-            });
-          }}
-        >
-          <XStack gap="$3" alignItems="center">
-            <Avatar source={props.author.profilePicture} size={44} bordered />
+        <XStack gap="$3" alignItems="center">
+          <TouchableOpacity
+            onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              routeProfile({
+                userId: props.recipient.id,
+                username: props.recipient.username,
+              });
+            }}
+          >
+            <Avatar
+              source={props.recipient.profilePicture}
+              size={44}
+              bordered
+            />
+          </TouchableOpacity>
 
-            <YStack>
+          <YStack>
+            <TouchableOpacity
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                routeProfile({
+                  userId: props.recipient.id,
+                  username: props.recipient.username,
+                });
+              }}
+            >
               <Text
                 color="white"
                 fontWeight="600"
@@ -151,12 +165,45 @@ const PostCard = (props: PostCardProps) => {
                 shadowOpacity={0.4}
                 shadowRadius={3}
               >
-                {props.author.username}
+                {props.recipient.username}
               </Text>
-              <PostDate createdAt={props.createdAt} />
-            </YStack>
-          </XStack>
-        </TouchableOpacity>
+            </TouchableOpacity>
+            <XStack gap="$1" alignItems="center">
+              <TouchableOpacity
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  routeProfile({
+                    userId: props.author.id,
+                    username: props.author.username,
+                  });
+                }}
+              >
+                <Text
+                  color="white"
+                  fontWeight="500"
+                  fontSize="$4"
+                  shadowColor="black"
+                  shadowOffset={{ width: 1, height: 1 }}
+                  shadowOpacity={0.4}
+                  shadowRadius={3}
+                >
+                  opped by {props.author.username}
+                </Text>
+              </TouchableOpacity>
+              <Text
+                color="white"
+                fontWeight="500"
+                fontSize="$4"
+                shadowColor="black"
+                shadowOffset={{ width: 1, height: 1 }}
+                shadowOpacity={0.4}
+                shadowRadius={3}
+              >
+                • <PostDate createdAt={props.createdAt} />
+              </Text>
+            </XStack>
+          </YStack>
+        </XStack>
 
         <XStack alignItems="center" justifyContent="flex-end" width="$5">
           <MorePostOptionsButton
