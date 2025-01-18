@@ -2,7 +2,7 @@ import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Oppfy Clip",
+  name: "Oppfy",
   slug: "oppfy-clip",
   scheme: "oppfy-clip",
   version: "1.0.0",
@@ -51,7 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "react-native-app-clip",
       {
-        name: "Oppfy Clip",
+        name: "Oppfy",
         groupIdentifier: "group.com.oppfy.app",
         deploymentTarget: "16.0",
       },
