@@ -207,8 +207,8 @@ const HomeScreen = () => {
         paddingTop: (insets.top + getToken("$2", "space")) as number,
       }}
       ListFooterComponentStyle={{
-        paddingTop: getToken("$3", "space"),
-        paddingBottom: getToken("$4", "space"),
+        paddingTop: getToken("$3", "space") as number,
+        paddingBottom: getToken("$4", "space") as number,
       }}
     />
   );
