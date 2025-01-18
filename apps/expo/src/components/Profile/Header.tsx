@@ -11,6 +11,7 @@ import Stats from "~/components/Profile/Stats";
 import useProfile from "~/hooks/useProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
+import { H3 } from "../ui";
 
 interface HeaderProps {
   userId?: string;
@@ -56,6 +57,17 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
         />
         <View position="absolute" bottom={12} right={12}>
           <JoinDatePill createdAt={profile.createdAt} />
+        </View>
+        <View
+          position="absolute"
+          top={0}
+          bottom={0}
+          left={0}
+          right={0}
+          alignItems="center"
+          justifyContent="center"
+        >
+          {!userId && <H3></H3>}
         </View>
       </YStack>
 

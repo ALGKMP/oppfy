@@ -71,7 +71,7 @@ const GridSuggestions = () => {
       )}
       numColumns={2}
       ListHeaderComponent={
-        <HeaderTitle icon="sparkles" theme="alt1">
+        <HeaderTitle icon="sparkles" >
           Suggested for You
         </HeaderTitle>
       }
