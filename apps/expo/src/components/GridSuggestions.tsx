@@ -69,7 +69,6 @@ const GridSuggestions = () => {
           actionButton={{
             label: "Follow",
             onPress: () => followMutation.mutateAsync({ userId: item.userId }),
-            variant: "primary",
           }}
         />
       )}

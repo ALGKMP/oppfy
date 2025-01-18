@@ -1,9 +1,8 @@
 import React from "react";
-import { TouchableOpacity, useWindowDimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronRight, Sparkles } from "@tamagui/lucide-icons";
-import { getToken, Text, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
 import useRouteProfile from "~/hooks/useRouteProfile";
@@ -20,24 +19,6 @@ interface RecommendationCarouselProps {
   paddingHorizontal?: SpaceTokens;
   paddingVertical?: SpaceTokens;
 }
-
-const SeeAllCard = ({ width }: { width: number }) => (
-  <YStack
-    width={width}
-    height={width * 1.2}
-    borderRadius="$6"
-    backgroundColor="$gray3"
-    alignItems="center"
-    justifyContent="center"
-    gap="$2"
-    opacity={0.8}
-  >
-    <ChevronRight size={24} opacity={0.6} />
-    <Text fontSize="$2" fontWeight="500" opacity={0.6}>
-      See All
-    </Text>
-  </YStack>
-);
 
 const LoadingCard = ({ width }: { width: number }) => (
   <YStack
@@ -116,11 +97,11 @@ const RecommendationCarousel = ({
 
           if (!item) {
             return (
-              <TouchableOpacity
+              <UserCard.SeeAll
+                width={CARD_WIDTH}
                 onPress={() => router.push("/(app)/(recommendations)")}
-              >
-                <SeeAllCard width={CARD_WIDTH} />
-              </TouchableOpacity>
+                index={index}
+              />
             );
           }
 

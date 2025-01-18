@@ -13,7 +13,14 @@ import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
-import { Check, Heart, Plus, Sparkles, UserPlus } from "@tamagui/lucide-icons";
+import {
+  Check,
+  ChevronRight,
+  Heart,
+  Plus,
+  Sparkles,
+  UserPlus,
+} from "@tamagui/lucide-icons";
 import { getTokens } from "tamagui";
 
 import { Button } from "./Buttons";
@@ -57,7 +64,7 @@ export const UserCard = ({
   profilePictureUrl,
   bio,
   stats,
-  width: propWidth,
+  width: propWidth = 100,
   size = "medium",
   style = "gradient",
   onPress,
@@ -145,11 +152,15 @@ export const UserCard = ({
       }
     : {};
 
+  // Calculate height based on size
+  const height = size === "small" ? propWidth * 1.2 : propWidth;
+
   return (
     <Container {...containerProps}>
       <AnimatedYStack
         entering={FadeIn.delay(index * 100).springify()}
-        width={width}
+        width={propWidth}
+        height={height}
         overflow="hidden"
         borderRadius="$6"
         backgroundColor="$background"
@@ -292,3 +303,82 @@ export const UserCard = ({
     </Container>
   );
 };
+
+UserCard.SeeAll = ({
+  width,
+  onPress,
+  index = 0,
+  size = "small",
+}: {
+  width: number;
+  onPress: () => void;
+  index?: number;
+  size?: "small" | "large";
+}) => {
+  const [isPressed, setIsPressed] = useState(false);
+  const scale = useSharedValue(1);
+  const contentY = useSharedValue(0);
+  const blur = useSharedValue(0);
+
+  // Calculate height based on size
+  const height = size === "small" ? width * 1.2 : width;
+
+  const handlePressIn = () => {
+    setIsPressed(true);
+    scale.value = withSpring(0.95, { damping: 15, stiffness: 200 });
+    contentY.value = withSpring(-5, { damping: 15, stiffness: 200 });
+    blur.value = withTiming(1, { duration: 200 });
+  };
+
+  const handlePressOut = () => {
+    setIsPressed(false);
+    scale.value = withSpring(1, { damping: 15, stiffness: 200 });
+    contentY.value = withSpring(0, { damping: 15, stiffness: 200 });
+    blur.value = withTiming(0, { duration: 200 });
+  };
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const contentStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: contentY.value }],
+  }));
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={1}
+    >
+      <AnimatedYStack
+        entering={FadeIn.delay(index * 100).springify()}
+        width={width}
+        height={height}
+        borderRadius="$6"
+        backgroundColor="$gray3"
+        alignItems="center"
+        justifyContent="center"
+        gap="$2"
+        elevation={10}
+        shadowColor="#000"
+        shadowOffset={{ width: 0, height: 8 }}
+        shadowOpacity={0.2}
+        shadowRadius={16}
+        style={cardStyle}
+      >
+        <Animated.View style={contentStyle}>
+          <YStack alignItems="center" gap="$2">
+            <ChevronRight size={24} opacity={0.6} />
+            <Text fontSize="$2" fontWeight="500" opacity={0.6}>
+              See All
+            </Text>
+          </YStack>
+        </Animated.View>
+      </AnimatedYStack>
+    </TouchableOpacity>
+  );
+};
+
+export default UserCard;
