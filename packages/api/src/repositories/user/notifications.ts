@@ -356,4 +356,22 @@ export class NotificationsRepository {
 
     await query;
   }
+
+  @handleDatabaseErrors
+  async deleteNotificationsBetweenUsers(userId1: string, userId2: string) {
+    await this.db
+      .delete(schema.notifications)
+      .where(
+        or(
+          and(
+            eq(schema.notifications.senderId, userId1),
+            eq(schema.notifications.recipientId, userId2),
+          ),
+          and(
+            eq(schema.notifications.senderId, userId2),
+            eq(schema.notifications.recipientId, userId1),
+          ),
+        ),
+      );
+  }
 }
