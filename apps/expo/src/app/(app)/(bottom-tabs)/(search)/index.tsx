@@ -1,9 +1,8 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { getToken, H6, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
 import { HeaderTitle, MediaListItem, SearchInput } from "~/components/ui";
@@ -15,7 +14,6 @@ import type { RouterOutputs } from "~/utils/api";
 type SearchResultItem = RouterOutputs["search"]["profilesByUsername"][number];
 
 const Search = () => {
-  const insets = useSafeAreaInsets();
   const { routeProfile } = useRouteProfile();
 
   const [searchTerm, setSearchTerm] = useState("");

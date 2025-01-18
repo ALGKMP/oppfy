@@ -15,6 +15,7 @@ import {
   EmptyPlaceholder,
   H5,
   H6,
+  HeaderTitle,
   MediaListItem,
   SearchInput,
   Spacer,
@@ -291,23 +292,20 @@ const PostTo = () => {
     ({ item }: { item: ListItem }) => {
       if (item.type === "header") {
         return (
-          <XStack alignItems="center" gap="$2">
-            <H5 theme="alt1">{item.title}</H5>
-            {item.isContact && (
-              <TouchableOpacity
-                onPress={() => {
-                  void infoDialog.show({
+          <HeaderTitle
+            info={
+              item.isContact
+                ? {
                     title: "Post for Anyone",
                     subtitle:
                       "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
                     acceptText: "Got it",
-                  });
-                }}
-              >
-                <Info size="$1" color="$blue9" />
-              </TouchableOpacity>
-            )}
-          </XStack>
+                  }
+                : undefined
+            }
+          >
+            {item.title}
+          </HeaderTitle>
         );
       }
 
@@ -348,7 +346,7 @@ const PostTo = () => {
         />
       );
     },
-    [formatPhoneNumber, onContactSelected, onFriendSelected, infoDialog],
+    [formatPhoneNumber, onContactSelected, onFriendSelected],
   );
 
   const ListHeaderComponent = useMemo(
@@ -393,7 +391,7 @@ const PostTo = () => {
     if (searchResults.length === 0) {
       return (
         <YStack flex={1}>
-          <H6 theme="alt1">No Users Found</H6>
+          <HeaderTitle>No Users Found</HeaderTitle>
         </YStack>
       );
     }
@@ -429,7 +427,7 @@ const PostTo = () => {
       onScrollBeginDrag={Keyboard.dismiss}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponentStyle={{
-        marginBottom: getToken("$4", "space") as number,
+        marginBottom: getToken("$3", "space") as number,
       }}
       contentContainerStyle={{
         padding: getToken("$4", "space") as number,

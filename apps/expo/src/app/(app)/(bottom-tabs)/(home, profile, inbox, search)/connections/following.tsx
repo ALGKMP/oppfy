@@ -8,6 +8,7 @@ import { getToken, H6, YStack } from "tamagui";
 
 import {
   EmptyPlaceholder,
+  HeaderTitle,
   MediaListItem,
   SearchInput,
   useActionSheetController,
@@ -311,7 +312,7 @@ const Following = () => {
     if (filteredItems.length === 0) {
       return (
         <YStack flex={1}>
-          <H6 theme="alt1">No Users Found</H6>
+          <HeaderTitle>No Users Found</HeaderTitle>
         </YStack>
       );
     }
