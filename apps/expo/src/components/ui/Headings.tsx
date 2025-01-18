@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { TouchableOpacity } from "react-native";
 import { Info } from "@tamagui/lucide-icons";
 import {

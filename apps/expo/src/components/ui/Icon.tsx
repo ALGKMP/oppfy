@@ -54,8 +54,6 @@ export const Icon = ({
 
 const styles = StyleSheet.create({
   iconButton: {
-    width: 38,
-    height: 38,
     borderRadius: 16,
     overflow: "hidden",
     justifyContent: "center",

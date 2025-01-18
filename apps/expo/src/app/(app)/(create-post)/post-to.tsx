@@ -9,13 +9,14 @@ import { FlashList } from "@shopify/flash-list";
 import { ChevronRight, Info, UserRoundX } from "@tamagui/lucide-icons";
 import type { IFuseOptions } from "fuse.js";
 import { parsePhoneNumberWithError } from "libphonenumber-js";
-import { getToken } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 
 import {
   EmptyPlaceholder,
   H5,
   H6,
   HeaderTitle,
+  Icon,
   MediaListItem,
   SearchInput,
   Spacer,
@@ -46,6 +47,7 @@ type ListItem =
 const HAS_SEEN_SHARE_TIP_KEY = "has_seen_share_tip";
 
 const PostTo = () => {
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const headerHeight = useHeaderHeight();
@@ -292,20 +294,23 @@ const PostTo = () => {
     ({ item }: { item: ListItem }) => {
       if (item.type === "header") {
         return (
-          <HeaderTitle
-            info={
-              item.isContact
-                ? {
+          <XStack alignItems="center" gap="$1">
+            <HeaderTitle>{item.title}</HeaderTitle>
+            {item.isContact && (
+              <Icon
+                name="information-circle"
+                color={theme.primary.val as string}
+                onPress={() =>
+                  void infoDialog.show({
                     title: "Post for Anyone",
                     subtitle:
                       "You can share posts with friends who aren't on Oppfy yet! They'll get a text invite to join and see your post when they do. It's a great way to bring your friends into the fun.",
                     acceptText: "Got it",
-                  }
-                : undefined
-            }
-          >
-            {item.title}
-          </HeaderTitle>
+                  })
+                }
+              />
+            )}
+          </XStack>
         );
       }
 
