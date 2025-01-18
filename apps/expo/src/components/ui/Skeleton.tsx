@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import type { DimensionValue } from "react-native";
 import { StyleSheet } from "react-native";
 import Animated, {
@@ -9,8 +9,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import type { RadiusTokens, SizeTokens} from "tamagui";
-import { SpecificTokens } from "tamagui";
+import type { RadiusTokens, SizeTokens } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
 import { View } from "./Views";
@@ -36,7 +35,7 @@ interface CircularSkeletonProps extends BaseSkeletonProps {
 type SkeletonProps = RectangularSkeletonProps | CircularSkeletonProps;
 
 export const Skeleton = ({
-  radius = "$4",
+  radius = "$6",
   shimmerColor = "$gray3",
   backgroundColor = "$gray5",
   shimmerDuration = 1000,
@@ -48,7 +47,7 @@ export const Skeleton = ({
 
   const shimmer = useSharedValue(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     shimmer.value = withRepeat(
       withSequence(
         withTiming(1, { duration: shimmerDuration }),
@@ -65,19 +64,18 @@ export const Skeleton = ({
     ],
   }));
 
-  const memoizedGradientColors = [
-    backgroundColor,
-    shimmerColor,
-    backgroundColor,
-  ];
+  const memoizedGradientColors = useMemo(
+    () => [backgroundColor, shimmerColor, backgroundColor],
+    [backgroundColor, shimmerColor],
+  );
 
   return (
     <View
       overflow="hidden"
       backgroundColor={backgroundColor}
+      borderRadius={resolvedBorderRadius}
       width={width}
       height={height}
-      borderRadius={resolvedBorderRadius}
     >
       <Animated.View style={[styles.gradientWrapper, animatedStyle]}>
         <LinearGradient
