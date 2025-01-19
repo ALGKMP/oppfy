@@ -1,9 +1,10 @@
 import { useCallback } from "react";
 
 import { api } from "~/utils/api";
-import { useUploadMedia } from "../media/useUploadMedia";
+import useUploadMedia from "../media/useUploadMedia";
 
 export const usePostToContact = () => {
+  // MARKER: pendingUser
   const { mutateAsync: createPostForContact } =
     api.pendingUser.createPostForContact.useMutation();
   const { uploadMedia } = useUploadMedia();

@@ -48,6 +48,10 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+
+
+        // do pending user stuff here
+
         return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
           author: ctx.session.uid,
           ...input,
@@ -98,6 +102,9 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+
+        // do pending user stuff here
+
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({
           ...input,
           author: ctx.session.uid,

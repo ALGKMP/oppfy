@@ -133,6 +133,15 @@ const lambdaHandler = async (
         throw error;
       }
     } else {
+      // get pending userId
+      const pendingUser = await db.query.pendingUser.findFirst({
+        where: eq(schema.pendingUser.phoneNumber, metadata.number),
+      });
+
+      if (pendingUser === undefined) {
+        throw new Error("Pending user not found");
+      }
+
       await db.insert(schema.postOfUserNotOnApp).values({
         key,
         mediaType: "image" as const,
@@ -141,6 +150,7 @@ const lambdaHandler = async (
         width: parseInt(metadata.width),
         caption: metadata.caption,
         phoneNumber: metadata.number,
+        pendingUserId: pendingUser.id,
       });
     }
   } catch (error) {
