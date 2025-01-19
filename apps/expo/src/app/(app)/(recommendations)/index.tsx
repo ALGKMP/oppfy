@@ -50,7 +50,9 @@ const Recommendations = () => {
     return null;
   }
 
-  const TILE_WIDTH = screenWidth / 2 - getToken("$3", "space") * 2; // Two tiles with gap in between
+  const SCREEN_PADDING = getToken("$4", "space") as number;
+  const GAP = getToken("$2", "space") as number;
+  const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
 
   return (
     <ScreenView>
