@@ -152,7 +152,7 @@ export const useComments = ({ postId, endpoint, userId }: UseCommentsProps) => {
     if (commentsHasNextPage && !commentsIsFetchingNextPage) {
       await fetchNextCommentsPage();
     }
-  }
+  };
 
   const postComment = async (body: string) => {
     await postCommentMutation.mutateAsync({ postId, body });

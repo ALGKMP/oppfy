@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, type ReactNode } from "react";
+import React, { useCallback, useEffect } from "react";
+import type { ReactNode } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  BottomSheetModal,
-  type BottomSheetBackdropProps,
-  type BottomSheetModalProps,
+import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import type {
+  BottomSheetBackdropProps,
+  BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
 import { useTheme } from "tamagui";
 
@@ -13,6 +14,7 @@ import BottomSheetHeader from "./BottomSheetHeader";
 export interface BottomSheetProps
   extends Partial<Omit<BottomSheetModalProps, "ref">> {
   title?: string;
+  headerShown?: boolean;
   children: ReactNode;
   isVisible: boolean;
   onDismiss?: () => void;
@@ -21,6 +23,7 @@ export interface BottomSheetProps
 
 export const BottomSheet = ({
   title,
+  headerShown = true,
   children,
   snapPoints = ["50%"],
   isVisible,
@@ -58,15 +61,18 @@ export const BottomSheet = ({
       enablePanDownToClose
       keyboardBlurBehavior="restore"
       backdropComponent={backdropComponent}
-      handleComponent={header}
+      handleComponent={headerShown ? header : null}
       onDismiss={onDismiss}
+      animationConfigs={{
+        duration: 175,
+      }}
       backgroundStyle={{
         backgroundColor: theme.gray4.val,
       }}
       topInset={insets.top}
       {...props}
     >
-      {children}
+      <BottomSheetView style={{ flex: 1 }}>{children}</BottomSheetView>
     </BottomSheetModal>
   );
 };

@@ -1,6 +1,10 @@
 import { api } from "~/utils/api";
 
-export type Endpoint = "self-profile" | "other-profile" | "home-feed" | "single-post";
+export type Endpoint =
+  | "self-profile"
+  | "other-profile"
+  | "home-feed"
+  | "single-post";
 
 interface IncrementLikeCountProps {
   postId: string;

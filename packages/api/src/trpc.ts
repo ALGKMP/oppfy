@@ -67,9 +67,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 //   req,
 //   res,
 // }: CreateNextContextOptions) => {
-  export const createTRPCContext = async (opts: {
-    headers: Headers;
-  }) => {
+export const createTRPCContext = async (opts: { headers: Headers }) => {
   console.log("Headers received:", Object.fromEntries(opts.headers));
 
   const authToken = opts.headers.get("Authorization") ?? null;
@@ -86,22 +84,28 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 
   if (authToken) {
     try {
-      const token = authToken.split('Bearer ')[1];
-      console.log('Attempting to verify token:', token?.substring(0, 20) + '...');
+      const token = authToken.split("Bearer ")[1];
+      console.log(
+        "Attempting to verify token:",
+        token?.substring(0, 20) + "...",
+      );
       if (!token) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           cause: "Invalid Firebase Token",
-          message: "No token provided"
+          message: "No token provided",
         });
       }
       session = await auth.verifyIdToken(token);
     } catch (err) {
-      console.error('Firebase token verification failed:', err);
+      console.error("Firebase token verification failed:", err);
       throw new TRPCError({
         code: "UNAUTHORIZED",
         cause: "Invalid Firebase Token",
-        message: err instanceof Error ? err.message : "Unknown error during token verification"
+        message:
+          err instanceof Error
+            ? err.message
+            : "Unknown error during token verification",
       });
     }
   }

@@ -1,39 +1,44 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
+import LogoText from "@assets/splash.png";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
+import { ArrowRight, Sparkles, Users } from "@tamagui/lucide-icons";
 import {
   Button,
   getToken,
   H1,
+  H3,
   H5,
   SizableText,
   Spacer,
   View,
+  XStack,
   YStack,
 } from "tamagui";
 
-import RecommendationCarousel from "~/components/CarouselsNew/RecommendationCarousel";
 import PostCard from "~/components/Post/PostCard";
-import { BaseScreenView } from "~/components/Views";
+import RecommendationCarousel from "~/components/RecommendationCarousel";
+import { Avatar, HeaderTitle, Icon, Separator } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-type PostItem = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
-
-interface TokenItem {
-  postId?: string | undefined;
-}
+type Post = RouterOutputs["post"]["paginatePostsForFeed"]["items"][0];
 
 const HomeScreen = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
+  const router = useRouter();
+  const { routeProfile } = useRouteProfile();
 
   const insets = useSafeAreaInsets();
 
@@ -75,26 +80,27 @@ const HomeScreen = () => {
     setRefreshing(false);
   }, [refetchPosts]);
 
-  const onViewableItemsChanged = useCallback(
-    ({
-      viewableItems,
-    }: {
-      viewableItems: ViewToken[];
-      changed: ViewToken[];
-    }) => {
-      const visibleItemIds = viewableItems
-        .filter((token) => token.isViewable)
-        .map((token) => (token.item as TokenItem).postId)
-        .filter((id): id is string => id !== undefined);
+  const onViewableItemsChanged = ({
+    viewableItems,
+  }: {
+    viewableItems: ViewToken[];
+  }) => {
+    const visibleItemIds = viewableItems
+      .filter((token) => token.isViewable)
+      .map((token) => (token.item as Post).postId);
 
-      console.log("New visible item IDs:", visibleItemIds);
-      setViewableItems(visibleItemIds);
+    setViewableItems(visibleItemIds);
+  };
+
+  const handleUserPress = useCallback(
+    (params: { userId: string; username: string }) => {
+      void routeProfile(params);
     },
-    [],
+    [routeProfile],
   );
 
   const renderPost = useCallback(
-    ({ item }: { item: PostItem }) => {
+    ({ item }: { item: Post }) => {
       if (profile === undefined) return null;
 
       return (
@@ -127,7 +133,6 @@ const HomeScreen = () => {
             },
             type: item.mediaType,
             url: item.imageUrl,
-            isViewable: viewableItems.includes(item.postId),
             dimensions: {
               width: item.width,
               height: item.height,
@@ -138,6 +143,7 @@ const HomeScreen = () => {
             comments: item.commentsCount,
             hasLiked: item.hasLiked,
           }}
+          isViewable={viewableItems.includes(item.postId)}
         />
       );
     },
@@ -146,118 +152,151 @@ const HomeScreen = () => {
 
   const isLoading = isLoadingPostData || isLoadingProfile;
 
-  const renderFooter = useCallback(() => {
+  const renderEmptyList = useCallback(() => {
     if (isLoading) {
       return (
         <YStack gap="$4">
-          <PostCard.loading />
-          <PostCard.loading />
+          {Array.from({ length: 5 }).map((_, index) => (
+            <PostCard.Skeleton key={`loading-post-${index}`} />
+          ))}
         </YStack>
       );
     }
 
     return (
-      <View>
-        <View paddingTop="$4" paddingHorizontal="$1">
-          <RecommendationCarousel />
-          <Footer />
-        </View>
-      </View>
-    );
-  }, [isLoading]);
+      <YStack flex={1} height="100%" paddingHorizontal="$4" paddingTop="$6">
+        <YStack alignItems="center" gap="$4">
+          {/* Welcome Section */}
+          <YStack alignItems="center" gap="$2" marginBottom="$2">
+            <Avatar size={110} source={profile?.profilePictureUrl} bordered />
+            <H1 color="$gray12" textAlign="center" letterSpacing={1} size="$9">
+              Welcome to OPPFY
+            </H1>
+            <H3 color="$gray11" textAlign="center" fontWeight="400" size="$6">
+              {profile?.username}!
+            </H3>
+          </YStack>
 
-  return (
-    <BaseScreenView padding={0} paddingBottom={0}>
-      {isLoading ? (
-        <YStack
-          paddingTop={(insets.top + getToken("$2", "space")) as number}
-          gap="$4"
-        >
+          {/* Action Cards */}
+          <YStack gap="$3" width="100%" maxWidth={400}>
+            <XStack
+              backgroundColor="$gray3"
+              padding="$3.5"
+              paddingRight="$5"
+              borderRadius="$6"
+              alignItems="center"
+              gap="$3"
+              pressStyle={{ opacity: 0.8 }}
+              onPress={() => router.push("/(app)/(recommendations)")}
+            >
+              {/* <Users size={24} color={getToken("$gray11", "color") as string} /> */}
+              <Icon name="people" />
+              <YStack flex={1}>
+                <H5 color="$gray12">Find Your Friends</H5>
+                <SizableText color="$gray11" size="$3">
+                  Connect with friends to see their moments
+                </SizableText>
+              </YStack>
+              <Icon name="arrow-forward" size={14} />
+            </XStack>
+
+            <XStack
+              backgroundColor="$gray3"
+              padding="$3.5"
+              paddingRight="$5"
+              borderRadius="$6"
+              alignItems="center"
+              gap="$3"
+              pressStyle={{ opacity: 0.8 }}
+              onPress={() => router.push("/(app)/(bottom-tabs)/(camera)")}
+            >
+              <Icon name="sparkles" />
+              <YStack flex={1}>
+                <H5 color="$gray12">Share Your First Moment</H5>
+                <SizableText color="$gray11" size="$3">
+                  Create your first post to get started
+                </SizableText>
+              </YStack>
+              <Icon name="arrow-forward" size={14} />
+            </XStack>
+          </YStack>
+
+          <Separator width="100%" />
+        </YStack>
+      </YStack>
+    );
+  }, [isLoading, profile?.profilePictureUrl, profile?.username, router]);
+
+  const renderFooter = useCallback(() => {
+    if (isLoading) {
+      return (
+        <YStack gap="$4">
           {Array.from({ length: 3 }).map((_, index) => (
-            <PostCard.loading key={`loading-post-${index}`} />
+            <PostCard.Skeleton key={index} />
           ))}
         </YStack>
-      ) : (
-        <FlashList
-          ref={scrollRef}
-          data={postItems}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          onEndReached={handleOnEndReached}
-          nestedScrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-          numColumns={1}
-          keyExtractor={(item) => "home_post_" + item.postId}
-          renderItem={renderPost}
-          estimatedItemSize={screenWidth}
-          ListFooterComponent={renderFooter}
-          extraData={viewableItems}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
-          ItemSeparatorComponent={() => <Spacer size="$4" />}
-          ListEmptyComponent={EmptyHomeScreen}
-          contentContainerStyle={{
-            paddingTop: (insets.top + getToken("$2", "space")) as number,
-          }}
+      );
+    }
+
+    return (
+      <YStack gap="$4">
+        <RecommendationCarousel
+          paddingHorizontal="$4"
+          onUserPress={handleUserPress}
         />
-      )}
-    </BaseScreenView>
-  );
-};
-
-const Footer = () => {
-  const getAppStoreLink = () => {
-    return `https://apps.apple.com/ca/app/oppfy/id6736484676`;
-  };
-  return (
-    <YStack
-      paddingVertical="$8"
-      paddingHorizontal="$4"
-      alignItems="center"
-      gap="$4"
-    >
-      <SizableText size="$5" textAlign="center">
-        Invite your friends to use OPPFY with
-      </SizableText>
-      <Button
-        borderRadius="$8"
-        backgroundColor="#F214FF"
-        pressStyle={{
-          opacity: 0.8,
-          borderWidth: 0,
-          backgroundColor: "#F214FF",
-        }}
-        onPress={async () => {
-          const storeLink = getAppStoreLink();
-          await Sharing.shareAsync(storeLink, {
-            dialogTitle: "Share to...",
-          });
-        }}
-      >
-        <H5>✨ Share Invites ✨</H5>
-      </Button>
-    </YStack>
-  );
-};
-
-const EmptyHomeScreen = () => {
-  const { profile } = useProfile();
-
-  return (
-    <YStack flex={1} alignItems="center" justifyContent="center" gap="$3">
-      <YStack justifyContent="center" alignItems="center">
-        <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
-          Welcome
-        </H1>
-        <H1 numberOfLines={1} ellipsizeMode="tail" textAlign="center">
-          {profile?.username}!
-        </H1>
+        <Footer />
       </YStack>
-      <SizableText size="$5" fontWeight="bold" textAlign="center">
-        Start following people to see who gets opped here the moment it happens!
-      </SizableText>
-    </YStack>
+    );
+  }, [isLoading, handleUserPress]);
+
+  return (
+    <FlashList
+      ref={scrollRef}
+      data={postItems}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      onEndReached={handleOnEndReached}
+      nestedScrollEnabled={false}
+      showsVerticalScrollIndicator={false}
+      numColumns={1}
+      keyExtractor={(item) => "home_post_" + item.postId}
+      renderItem={renderPost}
+      estimatedItemSize={screenWidth}
+      ListFooterComponent={renderFooter}
+      extraData={viewableItems}
+      onViewableItemsChanged={onViewableItemsChanged}
+      viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
+      ItemSeparatorComponent={() => <Spacer size="$4" />}
+      ListEmptyComponent={renderEmptyList}
+      contentContainerStyle={{
+        paddingTop: (insets.top + getToken("$2", "space")) as number,
+      }}
+      ListFooterComponentStyle={{
+        paddingTop: getToken("$3", "space") as number,
+        paddingBottom: getToken("$4", "space") as number,
+      }}
+    />
   );
 };
+
+const Footer = () => (
+  <YStack alignItems="center" gap="$2">
+    <HeaderTitle icon="rocket" iconAfter="rocket" paddingHorizontal="$2.5">
+      Grow Your OPPFY Community
+    </HeaderTitle>
+    <Button
+      borderRadius="$8"
+      backgroundColor="#F214FF"
+      pressStyle={{
+        opacity: 0.8,
+        borderWidth: 0,
+        backgroundColor: "#F214FF",
+      }}
+      onPress={() => Sharing.shareAsync("https://www.oppfy.app")}
+    >
+      <H5>✨ Share Invites ✨</H5>
+    </Button>
+  </YStack>
+);
 
 export default HomeScreen;

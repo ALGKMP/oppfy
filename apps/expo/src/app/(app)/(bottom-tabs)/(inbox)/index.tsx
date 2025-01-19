@@ -2,18 +2,19 @@ import React, { useRef, useState } from "react";
 import { RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
+import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
+import type { MediaListItemActionProps } from "~/components/ui";
 import {
   CardContainer,
   Circle,
+  EmptyPlaceholder,
   H5,
   MediaListItem,
-  MediaListItemActionProps,
-  MediaListItemSkeleton,
   Paragraph,
   SizableText,
   XStack,
@@ -21,9 +22,9 @@ import {
 } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import { TimeAgo } from "~/components/ui/TimeAgo";
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import { api, RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 
 type NotificationItem =
   RouterOutputs["notifications"]["paginateNotifications"]["items"][0];
@@ -37,6 +38,9 @@ const Inbox = () => {
   const { routeProfile } = useRouteProfile();
 
   const [refreshing, setRefreshing] = useState(false);
+
+  const listRef = useRef<FlashList<NotificationItem>>(null);
+  useScrollToTop(listRef);
 
   const { data: requestsCount, refetch: refetchRequestCount } =
     api.request.countRequests.useQuery(undefined, {
@@ -167,6 +171,7 @@ const Inbox = () => {
   const renderListItem = ({ item }: { item: NotificationItem }) => (
     <MediaListItem
       verticalText
+      recyclingKey={item.id}
       title={item.username}
       subtitle={getNotificationMessage(item)}
       caption={<TimeAgo size="$2" suffix="ago" date={item.createdAt} />}
@@ -226,9 +231,9 @@ const Inbox = () => {
   const ListEmptyComponent = () => {
     if (isNotificationsLoading) {
       return (
-        <YStack gap="$4">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <MediaListItemSkeleton key={index} />
+        <YStack gap="$2.5">
+          {Array.from({ length: 20 }).map((_, index) => (
+            <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
       );
@@ -250,17 +255,15 @@ const Inbox = () => {
 
   return (
     <FlashList
+      ref={listRef}
       data={notificationItems}
       renderItem={renderListItem}
       keyExtractor={(item) => item.id}
-      estimatedItemSize={56}
+      estimatedItemSize={18}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={GridSuggestions}
       ItemSeparatorComponent={Spacer}
-      ListHeaderComponentStyle={{
-        paddingBottom: getToken("$4", "space"),
-      }}
       ListFooterComponentStyle={{
         marginTop: getToken("$2", "space"),
       }}
@@ -271,6 +274,7 @@ const Inbox = () => {
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
       onEndReachedThreshold={0.5}
+      extraData={notificationItems}
       keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />

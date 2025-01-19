@@ -6,23 +6,23 @@ import {
   useCodeScanner,
 } from "react-native-vision-camera";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { CameraOff } from "@tamagui/lucide-icons";
 import { View } from "tamagui";
 
-import { EmptyPlaceholder } from "~/components/UIPlaceholders";
-import { BaseScreenView } from "~/components/Views";
+import { EmptyPlaceholder, ScreenView } from "~/components/ui";
+import useRouteProfile from "~/hooks/useRouteProfile";
 
 const { width } = Dimensions.get("window");
 
 const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
 
 const ScanQr = () => {
-  const router = useRouter();
   const device = useCameraDevice("back");
   const [hasPermission, setHasPermission] = useState(false);
   const [isScanning, setIsScanning] = useState(true);
+
+  const { routeProfile } = useRouteProfile();
 
   useEffect(() => {
     const checkPermissions = async () => {
@@ -53,12 +53,8 @@ const ScanQr = () => {
         const username = url.searchParams.get("username") ?? "";
 
         setTimeout(() => {
-          router.push({
-            pathname: "/profile/[userId]",
-            params: { userId, username },
-          });
-          // Reset scanning state after navigation
-          setIsScanning(true);
+          routeProfile({ userId, username });
+          setIsScanning(true); // Reset scanning state after navigation
         }, 100);
       }
     },
@@ -66,25 +62,25 @@ const ScanQr = () => {
 
   if (!hasPermission) {
     return (
-      <BaseScreenView justifyContent="center" alignItems="center">
+      <ScreenView justifyContent="center" alignItems="center">
         <EmptyPlaceholder
           title="No camera device found"
           subtitle="Please check your camera settings and try again."
           icon={<CameraOff />}
         />
-      </BaseScreenView>
+      </ScreenView>
     );
   }
 
   if (device === undefined) {
     return (
-      <BaseScreenView justifyContent="center" alignItems="center">
+      <ScreenView justifyContent="center" alignItems="center">
         <EmptyPlaceholder
           title="No camera device found"
           subtitle="Please check your camera settings and try again."
           icon={<CameraOff />}
         />
-      </BaseScreenView>
+      </ScreenView>
     );
   }
 

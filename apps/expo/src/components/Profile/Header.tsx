@@ -1,11 +1,17 @@
-import { useEffect, useState } from "react";
+import React from "react";
+import { View, XStack, YStack } from "tamagui";
 
-import Avatar from "~/components/Avatar";
-import { Skeleton } from "~/components/Skeletons";
-import { Paragraph, SizableText, View, XStack, YStack } from "~/components/ui";
+import Bio from "~/components/Profile/Bio";
+import HeaderGradient from "~/components/Profile/HeaderGradient";
+import JoinDatePill from "~/components/Profile/JoinDatePill";
+import ProfileActions from "~/components/Profile/ProfileActions";
+import ProfileInfo from "~/components/Profile/ProfileInfo";
+import QuickActions from "~/components/Profile/QuickActions";
+import Stats from "~/components/Profile/Stats";
 import useProfile from "~/hooks/useProfile";
-import ActionButton from "./ActionButton";
-import Stats from "./Stats";
+import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import { H3 } from "../ui";
 
 interface HeaderProps {
   userId?: string;
@@ -15,95 +21,94 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
   const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
     userId,
   });
-  const [isRestricted, setIsRestricted] = useState(false);
 
-  useEffect(() => {
-    if (isLoadingProfileData) return;
-    if (profileData && "networkStatus" in profileData) {
-      setIsRestricted(
-        (profileData.privacy === "private" &&
-          profileData.networkStatus.otherUserFollowState === "NotFollowing") ||
-          profileData.networkStatus.blocked,
-      );
-    }
-  }, [profileData, isLoadingProfileData]);
-
-  // Skeleton UI while loading Profile Data
-  if (isLoadingProfileData) {
-    return (
-      <YStack
-        padding="$4"
-        paddingBottom={0}
-        alignItems="center"
-        backgroundColor="$background"
-        gap="$4"
-      >
-        <View alignItems="center" marginBottom={-30}>
-          <Skeleton circular size={160} />
-        </View>
-
-        <XStack
-          justifyContent="space-between"
-          alignItems="flex-end"
-          width="100%"
-        >
-          <YStack alignItems="flex-start" gap="$2" flex={1}>
-            <Skeleton width={80} height={20} />
-            <Skeleton width={150} height={20} />
-          </YStack>
-
-          <YStack alignItems="flex-end" gap="$2">
-            <Skeleton width={80} height={20} />
-            <Skeleton width={150} height={20} />
-          </YStack>
-        </XStack>
-      </YStack>
+  const { data: networkRelationships } =
+    api.profile.getNetworkRelationships.useQuery(
+      { userId: userId ?? "" },
+      { enabled: !!userId },
     );
-  }
+
+  const defaultProfile = {
+    name: undefined,
+    username: undefined,
+    bio: undefined,
+    profilePictureUrl: undefined,
+    followingCount: 0,
+    followerCount: 0,
+    friendCount: 0,
+    postCount: 0,
+    createdAt: undefined,
+  };
+
+  const profile = profileData ?? defaultProfile;
+  const isBlocked = networkRelationships?.blocked ?? false;
+
+  // Generate a unique key for HeaderGradient based on username
+  const headerKey = `header-gradient-${profile.username ?? "default"}`;
 
   return (
-    <YStack
-      padding="$4"
-      paddingBottom={0}
-      alignItems="center"
-      backgroundColor="$background"
-      gap="$4"
-    >
-      <View alignItems="center" marginBottom={-30}>
-        <Avatar source={profileData?.profilePictureUrl} size={160} />
-      </View>
-
-      <XStack justifyContent="space-between" alignItems="flex-end" width="100%">
-        <YStack alignItems="flex-start" gap="$2" flex={1}>
-          <SizableText
-            size="$8"
-            fontWeight="bold"
-            textAlign="left"
-            lineHeight={0}
-          >
-            {profileData?.name}
-          </SizableText>
-
-          {profileData?.bio && (
-            <Paragraph
-              theme="alt1"
-              maxWidth="90%"
-              textAlign="left"
-              lineHeight={0}
-            >
-              {profileData?.bio}
-            </Paragraph>
-          )}
-        </YStack>
-        <Stats
-          userId={userId}
-          followingCount={profileData?.followingCount ?? 0}
-          followerCount={profileData?.followerCount ?? 0}
-          disableButtons={isRestricted}
+    <YStack>
+      {/* Cover Image Area */}
+      <YStack height={140} overflow="hidden" borderRadius="$6">
+        <HeaderGradient
+          key={headerKey}
+          username={profile.username}
+          profilePictureUrl={profile.profilePictureUrl}
         />
-      </XStack>
+        <View position="absolute" bottom={12} right={12}>
+          <JoinDatePill createdAt={profile.createdAt} />
+        </View>
+        <View
+          position="absolute"
+          top={0}
+          bottom={0}
+          left={0}
+          right={0}
+          alignItems="center"
+          justifyContent="center"
+        >
+          {!userId && <H3></H3>}
+        </View>
+      </YStack>
 
-      <ActionButton userId={userId} />
+      {/* Profile Info Section */}
+      <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
+        <XStack justifyContent="space-between" alignItems="flex-end">
+          <ProfileInfo
+            name={profile.name}
+            username={profile.username}
+            profilePictureUrl={profile.profilePictureUrl}
+            isLoading={isLoadingProfileData}
+          />
+          <QuickActions
+            userId={userId}
+            username={profile.username}
+            profilePictureUrl={profile.profilePictureUrl}
+            isLoading={isLoadingProfileData}
+            networkRelationships={networkRelationships}
+          />
+        </XStack>
+
+        <Bio bio={profile.bio} isLoading={isLoadingProfileData} />
+
+        <ProfileActions
+          userId={userId}
+          isDisabled={isBlocked}
+          networkRelationships={networkRelationships}
+        />
+
+        {!isBlocked && (
+          <Stats
+            userId={userId}
+            username={profile.username}
+            postCount={profile.postCount}
+            followingCount={profile.followingCount}
+            followerCount={profile.followerCount}
+            friendCount={profile.friendCount}
+            isLoading={isLoadingProfileData}
+          />
+        )}
+      </YStack>
     </YStack>
   );
 };

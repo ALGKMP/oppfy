@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import type { ReactNode } from "react";
 import type { ImageSourcePropType } from "react-native";
 import {
@@ -7,11 +7,12 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import Animated, {
-  Extrapolation,
+  Extrapolate,
   interpolate,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -41,6 +42,7 @@ export interface ButtonOption {
 }
 
 export interface ActionSheetProps {
+  id: string;
   imageUrl?: string | ImageSourcePropType;
   title?: string;
   titleProps?: SizableTextProps;
@@ -49,9 +51,21 @@ export interface ActionSheetProps {
   buttonOptions: ButtonOption[];
   isVisible: boolean;
   onCancel?: () => void;
+  onAnimationComplete?: (finished: boolean) => void;
 }
 
+const SPRING_CONFIG = {
+  damping: 20,
+  mass: 1,
+  stiffness: 250,
+} as const;
+
+const TIMING_CONFIG = {
+  duration: 250,
+} as const;
+
 export const ActionSheet = ({
+  id,
   imageUrl,
   title,
   titleProps,
@@ -60,41 +74,81 @@ export const ActionSheet = ({
   buttonOptions,
   isVisible,
   onCancel,
+  onAnimationComplete,
 }: ActionSheetProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const animation = useSharedValue(0);
 
-  useEffect(() => {
+  // Separate animations for better control
+  const slideAnimation = useSharedValue(0);
+  const fadeAnimation = useSharedValue(0);
+  const backdropAnimation = useSharedValue(0);
+
+  React.useEffect(() => {
     if (isVisible) {
-      animation.value = withSpring(1, { damping: 15, stiffness: 200 });
+      // Backdrop fades in first
+      backdropAnimation.value = withTiming(1, { duration: 200 });
+      // Then sheet slides up with spring physics
+      slideAnimation.value = withSequence(
+        withTiming(0.01, { duration: 50 }),
+        withSpring(1, SPRING_CONFIG),
+      );
+      // Content fades in slightly delayed
+      fadeAnimation.value = withTiming(1, { duration: 300 });
     } else {
-      animation.value = withTiming(0, { duration: 250 }, (finished) => {
-        if (finished) {
-          onCancel && runOnJS(onCancel)();
+      // Reverse animation sequence
+      fadeAnimation.value = withTiming(0, { duration: 150 });
+      slideAnimation.value = withTiming(0, TIMING_CONFIG);
+      backdropAnimation.value = withTiming(0, TIMING_CONFIG, (finished) => {
+        if (onAnimationComplete) {
+          runOnJS(onAnimationComplete)(finished ?? false);
         }
       });
     }
-  }, [isVisible, animation, onCancel]);
+  }, [
+    isVisible,
+    slideAnimation,
+    fadeAnimation,
+    backdropAnimation,
+    onAnimationComplete,
+  ]);
 
-  const backgroundStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
+  const handleBackdropPress = React.useCallback(() => {
+    onCancel?.();
+  }, [onCancel]);
+
+  const handleCancelPress = React.useCallback(() => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onCancel?.();
+  }, [onCancel]);
+
+  const handleOptionPress = React.useCallback(
+    (option: ButtonOption) => {
+      if (!option.disabled) {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        option.onPress?.();
+        if (option.autoClose !== false) {
+          handleBackdropPress();
+        }
+      }
+    },
+    [handleBackdropPress],
+  );
+
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropAnimation.value,
+    pointerEvents: backdropAnimation.value > 0 ? "auto" : "none",
   }));
 
   const containerStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      animation.value,
-      [0, 0.5, 1],
-      [0, 0, 1],
-      Extrapolation.CLAMP,
-    ),
+    opacity: fadeAnimation.value,
     transform: [
       {
         translateY: interpolate(
-          animation.value,
+          slideAnimation.value,
           [0, 1],
           [300, 0],
-          Extrapolation.CLAMP,
+          Extrapolate.CLAMP,
         ),
       },
     ],
@@ -111,9 +165,9 @@ export const ActionSheet = ({
         justifyContent="flex-end"
         pointerEvents={isVisible ? "auto" : "none"}
       >
-        {/* Animated Backdrop */}
-        <Animated.View style={[styles.backdrop, backgroundStyle]}>
-          <TouchableWithoutFeedback onPress={onCancel}>
+        {/* Backdrop */}
+        <Animated.View style={[styles.backdrop, backdropStyle]}>
+          <TouchableWithoutFeedback onPress={handleBackdropPress}>
             <View position="absolute" top={0} left={0} right={0} bottom={0} />
           </TouchableWithoutFeedback>
         </Animated.View>
@@ -166,20 +220,10 @@ export const ActionSheet = ({
               </>
             )}
             {buttonOptions.map((option, index) => (
-              <React.Fragment key={index}>
+              <React.Fragment key={`${id}-option-${index}`}>
                 {index > 0 && <Separator />}
                 <TouchableOpacity
-                  onPress={() => {
-                    if (!option.disabled) {
-                      option.onPress?.();
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Light,
-                      );
-                      if (option.autoClose !== false) {
-                        onCancel?.();
-                      }
-                    }
-                  }}
+                  onPress={() => handleOptionPress(option)}
                   style={[
                     styles.optionButton,
                     {
@@ -211,7 +255,7 @@ export const ActionSheet = ({
             borderRadius="$6"
           >
             <TouchableOpacity
-              onPress={onCancel}
+              onPress={handleCancelPress}
               style={[
                 styles.cancelButton,
                 {

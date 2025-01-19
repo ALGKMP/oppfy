@@ -97,8 +97,10 @@ export class ProfileService {
       followerCount: user.profile.profileStats.followers,
       followingCount: user.profile.profileStats.following,
       friendCount: user.profile.profileStats.friends,
+      postCount: user.profile.profileStats.posts,
       profilePictureUrl,
       profileStats: user.profile.profileStats,
+      createdAt: user.profile.createdAt,
     };
   }
 
@@ -139,8 +141,10 @@ export class ProfileService {
       followerCount: user.profile.profileStats.followers,
       followingCount: user.profile.profileStats.following,
       friendCount: user.profile.profileStats.friends,
+      postCount: user.profile.profileStats.posts,
       profilePictureUrl,
       networkStatus,
+      createdAt: user.profile.createdAt,
     };
   }
 

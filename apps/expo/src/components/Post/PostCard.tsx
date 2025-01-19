@@ -1,31 +1,18 @@
-import React, { useCallback, useRef, useState } from "react";
+import React from "react";
 import { TouchableOpacity } from "react-native";
 import type { ImageSourcePropType } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
-import { ResizeMode, Video } from "expo-av";
-import type { AVPlaybackStatus } from "expo-av";
 import * as Haptics from "expo-haptics";
-import { Image } from "expo-image";
-import { useFocusEffect } from "expo-router";
-import { Circle, getToken, SizableText, View, XStack, YStack } from "tamagui";
+import { LinearGradient } from "expo-linear-gradient";
 
-import Skeleton from "~/components/Skeletons/Skeleton";
-import { Paragraph, Text } from "~/components/ui";
-import { useAudio } from "~/contexts/AudioContext";
+import { Avatar, Skeleton, Text, View, XStack, YStack } from "~/components/ui";
 import useRouteProfile from "~/hooks/useRouteProfile";
-import { useLikePost } from "../../hooks/post/useLikePost";
-import Avatar from "../Avatar";
-import CardContainer from "../Containers/CardContainer";
-import GradientHeart, { useHeartAnimations } from "../Icons/GradientHeart";
-import Mute, { useMuteAnimations } from "../Icons/Mute";
-import CommentButton from "./CommentButton";
-import CommentsCount from "./CommentsCount";
-import LikeButton from "./LikeButton";
+import { FloatingComments } from "./FloatingComments";
 import MorePostOptionsButton from "./MorePostOptionsButton";
 import PostCaption from "./PostCaption";
 import PostDate from "./PostDate";
-import ShareButton from "./ShareButton";
+import { PostImage } from "./PostImage";
+import { PostStats } from "./PostStats";
+import { PostVideo } from "./PostVideo";
 
 type ProfilePicture = ImageSourcePropType | string | undefined | null;
 
@@ -35,13 +22,13 @@ interface Self {
   profilePicture: ProfilePicture;
 }
 
-interface Author {
+export interface Author {
   id: string;
   username: string;
   profilePicture: ProfilePicture;
 }
 
-interface Recipient {
+export interface Recipient {
   id: string;
   username: string;
   profilePicture: ProfilePicture;
@@ -56,7 +43,6 @@ interface Media {
   id: string;
   type: "image" | "video";
   url: string;
-  isViewable: boolean;
   dimensions: MediaDimensions;
   recipient: Recipient;
 }
@@ -67,7 +53,9 @@ interface Stats {
   hasLiked: boolean;
 }
 
-export interface PostData {
+type Endpoint = "self-profile" | "other-profile" | "single-post" | "home-feed";
+
+export interface PostCardProps {
   postId: string;
   createdAt: Date;
   caption: string;
@@ -76,387 +64,246 @@ export interface PostData {
   recipient: Recipient;
   media: Media;
   stats: Stats;
+  endpoint: Endpoint;
+  isViewable: boolean;
 }
-
-type PostCardProps = PostData & {
-  endpoint: "self-profile" | "other-profile" | "single-post" | "home-feed";
-};
 
 const PostCard = (props: PostCardProps) => {
   const { routeProfile } = useRouteProfile();
 
   return (
-    <CardContainer paddingTop={0}>
-      <YStack gap="$3">
-        <View marginHorizontal="$-3">
-          <View>
-            {props.media.type === "image" ? (
-              <ImageComponent
-                endpoint={props.endpoint}
-                media={props.media}
-                stats={props.stats}
-              />
-            ) : (
-              <VideoPlayer
-                endpoint={props.endpoint}
-                media={props.media}
-                stats={props.stats}
-              />
-            )}
-            <View position="absolute" bottom={15} left={15}>
-              <XStack alignItems="center" gap="$3">
-                <TouchableOpacity
-                  onPress={() => {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    routeProfile({
-                      userId: props.recipient.id,
-                      username: props.recipient.username,
-                    });
-                  }}
-                >
-                  <Avatar source={props.recipient.profilePicture} size={50} />
-                </TouchableOpacity>
+    <View borderRadius="$8" overflow="hidden">
+      {props.media.type === "image" ? (
+        <PostImage
+          endpoint={props.endpoint}
+          media={props.media}
+          stats={props.stats}
+          isViewable={props.isViewable}
+        />
+      ) : (
+        <PostVideo
+          endpoint={props.endpoint}
+          media={props.media}
+          stats={props.stats}
+          isViewable={props.isViewable}
+        />
+      )}
 
-                <YStack gap="$1">
-                  <TouchableOpacity
-                    onPress={() => {
-                      void Haptics.impactAsync(
-                        Haptics.ImpactFeedbackStyle.Light,
-                      );
-                      routeProfile({
-                        userId: props.recipient.id,
-                        username: props.recipient.username,
-                      });
-                    }}
-                  >
-                    <SizableText size="$5" fontWeight="bold" lineHeight={0}>
-                      {props.recipient.username}
-                    </SizableText>
-                  </TouchableOpacity>
-                </YStack>
-              </XStack>
-            </View>
-            <MorePostOptionsButton
-              postId={props.postId}
-              recipientUserId={props.recipient.id}
-              mediaUrl={props.media.url}
-              style={{ position: "absolute", bottom: 15, right: 15 }}
-            />
-          </View>
-        </View>
+      {/* Top Gradient Overlay */}
+      <LinearGradient
+        colors={["rgba(0,0,0,0.5)", "transparent"]}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 120,
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
 
-        {/* Under post */}
-        <YStack flex={1} paddingHorizontal="$1" gap="$1">
-          <XStack gap="$3.5" alignItems="center">
-            {/* Like Button */}
-            <LikeButton
-              postId={props.postId}
-              endpoint={props.endpoint}
-              initialHasLiked={props.stats.hasLiked}
-            />
+      {/* Bottom Gradient Overlay */}
+      <LinearGradient
+        colors={["transparent", "rgba(0,0,0,0.7)"]}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 160,
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      />
 
-            {/* Comment Button */}
-            <CommentButton
-              postId={props.postId}
-              postRecipientUserId={props.recipient.id}
-              endpoint={props.endpoint}
-            />
-            {/* Share Button */}
-            <ShareButton postId={props.postId} />
-          </XStack>
-
-          {/* Likes Count */}
-          {props.stats.likes > 0 && (
-            <TouchableOpacity>
-              <SizableText size="$3" fontWeight="bold">
-                {props.stats.likes > 0
-                  ? `${props.stats.likes} ${props.stats.likes === 1 ? "like" : "likes"}`
-                  : ""}
-              </SizableText>
-            </TouchableOpacity>
-          )}
-
-          {/* Opped by */}
+      {/* Top Header - Overlaid on image */}
+      <XStack
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        paddingVertical="$4"
+        paddingHorizontal="$4"
+        justifyContent="space-between"
+        zIndex={2}
+        pointerEvents="box-none"
+      >
+        <XStack gap="$3" alignItems="center">
           <TouchableOpacity
             onPress={() => {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               routeProfile({
-                userId: props.author.id,
-                username: props.author.username,
+                userId: props.recipient.id,
+                username: props.recipient.username,
               });
             }}
           >
-            <Paragraph>
-              <Text fontWeight="bold">
-                opped by{" "}
-                <Text fontWeight="bold" color="$primary">
-                  {props.author.username}
-                </Text>
-              </Text>
-            </Paragraph>
+            <Avatar
+              source={props.recipient.profilePicture}
+              size={44}
+              bordered
+            />
           </TouchableOpacity>
 
-          {/* Caption */}
-          <PostCaption caption={props.caption} />
+          <YStack>
+            <TouchableOpacity
+              onPress={() => {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                routeProfile({
+                  userId: props.recipient.id,
+                  username: props.recipient.username,
+                });
+              }}
+            >
+              <Text
+                color="white"
+                fontWeight="600"
+                fontSize="$5"
+                shadowColor="black"
+                shadowOffset={{ width: 1, height: 1 }}
+                shadowOpacity={0.4}
+                shadowRadius={3}
+              >
+                {props.recipient.username}
+              </Text>
+            </TouchableOpacity>
+            <XStack gap="$1" alignItems="center">
+              <TouchableOpacity
+                onPress={() => {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  routeProfile({
+                    userId: props.author.id,
+                    username: props.author.username,
+                  });
+                }}
+              >
+                <Text
+                  color="white"
+                  fontWeight="500"
+                  fontSize="$4"
+                  shadowColor="black"
+                  shadowOffset={{ width: 1, height: 1 }}
+                  shadowOpacity={0.4}
+                  shadowRadius={3}
+                >
+                  opped by {props.author.username}
+                </Text>
+              </TouchableOpacity>
+              <Text
+                color="white"
+                fontWeight="500"
+                fontSize="$4"
+                shadowColor="black"
+                shadowOffset={{ width: 1, height: 1 }}
+                shadowOpacity={0.4}
+                shadowRadius={3}
+              >
+                • <PostDate createdAt={props.createdAt} />
+              </Text>
+            </XStack>
+          </YStack>
+        </XStack>
 
-          {/* Comments Count */}
-          <CommentsCount
-            commentsCount={props.stats.comments}
+        <XStack alignItems="center" justifyContent="flex-end" width="$5">
+          <MorePostOptionsButton
             postId={props.postId}
-            endpoint={props.endpoint}
-            postRecipientUserId={props.recipient.id}
+            author={props.author}
+            recipient={props.recipient}
+            mediaUrl={props.media.url}
           />
+        </XStack>
+      </XStack>
 
-          {/* Post Date */}
-          <PostDate createdAt={props.createdAt} />
+      {/* Floating Action Buttons - Vertical Stack on Right side */}
+      <PostStats
+        postId={props.postId}
+        recipientUserId={props.recipient.id}
+        endpoint={props.endpoint}
+        stats={props.stats}
+      />
+
+      {/* Bottom Content Overlay */}
+      <YStack
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        paddingHorizontal="$4"
+        paddingVertical="$4"
+        zIndex={2}
+        gap="$2"
+      >
+        {/* TODO: Implement backend */}
+        {/* {props.stats.comments > 0 && (
+          <FloatingComments
+            comments={[
+              { id: "1", username: "user1", content: "🔥 This is amazing!" },
+              { id: "2", username: "user2", content: "Love this! 💫" },
+              { id: "3", username: "user3", content: "Incredible shot 📸" },
+            ]}
+            postId={props.postId}
+            postRecipientUserId={props.recipient.id}
+            endpoint={props.endpoint}
+            isViewable={props.isViewable}
+          />
+        )} */}
+        <PostCaption caption={props.caption} />
+      </YStack>
+    </View>
+  );
+};
+
+PostCard.Skeleton = function PostCardLoading() {
+  return (
+    <View borderRadius="$8" overflow="hidden" backgroundColor="$gray3">
+      {/* Header */}
+      <XStack
+        paddingVertical="$4"
+        paddingHorizontal="$4"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <XStack gap="$3" alignItems="center">
+          <Skeleton circular size={44} />
+          <YStack gap="$2">
+            <Skeleton width={120} height={18} />
+            <Skeleton width={80} height={14} />
+          </YStack>
+        </XStack>
+        <Skeleton width={24} height={24} />
+      </XStack>
+
+      {/* Media */}
+      {/* <Skeleton width="100%" height={500} radius={0} /> */}
+      <View width="100%" height={500} backgroundColor="$gray3" />
+
+      {/* Bottom Content */}
+      <YStack paddingHorizontal="$4" paddingVertical="$4" gap="$2">
+        {/* Floating Comments Skeleton */}
+        <Skeleton width={140} height={32} radius="$6" />
+
+        {/* Caption Skeleton */}
+        <YStack gap="$1">
+          <Skeleton width="80%" height={16} />
+          <Skeleton width="80%" height={16} />
         </YStack>
       </YStack>
-    </CardContainer>
-  );
-};
 
-PostCard.loading = function PostCardLoading() {
-  return (
-    <CardContainer paddingVertical={0}>
-      <YStack>
-        <View marginHorizontal="$-3">
-          <Skeleton width="100%" height={600} radius={8} />
-          <View position="absolute" bottom={15} left={15}>
-            <XStack alignItems="center" gap="$3">
-              <Skeleton size={40} circular />
-              <YStack gap="$1">
-                <Skeleton width={100} height={16} />
-                <XStack alignItems="center" gap="$2">
-                  <Skeleton size={20} circular />
-                  <Skeleton width={80} height={12} />
-                </XStack>
-              </YStack>
-            </XStack>
-          </View>
-        </View>
+      {/* Stats Buttons */}
+      <YStack
+        position="absolute"
+        right={16}
+        bottom={24}
+        gap="$5"
+        alignItems="flex-end"
+      >
+        <Skeleton size={44} circular />
+        <Skeleton size={44} circular />
+        <Skeleton size={44} circular />
       </YStack>
-    </CardContainer>
+    </View>
   );
 };
-
-// TODO: This needs cleaning up 
-
-interface ImageComponentProps {
-  endpoint: "home-feed" | "other-profile" | "self-profile" | "single-post";
-  media: Media;
-  stats: Stats;
-}
-const ImageComponent = ({ endpoint, media, stats }: ImageComponentProps) => {
-  const { handleLikeDoubleTapped } = useLikePost({
-    postId: media.id,
-    endpoint,
-    userId: media.recipient.id,
-    initialHasLiked: stats.hasLiked,
-  });
-  const { hearts, addHeart } = useHeartAnimations();
-  const [isImageLoading, setIsImageLoading] = useState(true);
-  const handleDoubleTap = useCallback(
-    (x: number, y: number) => {
-      addHeart(x, y);
-      handleLikeDoubleTapped();
-    },
-    [addHeart, handleLikeDoubleTapped],
-  );
-
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart((event) => {
-      runOnJS(handleDoubleTap)(event.x, event.y);
-    });
-
-  return (
-    <GestureDetector gesture={doubleTap}>
-      <View>
-        <Image
-          source={{ uri: media.url }}
-          recyclingKey={media.url}
-          style={{
-            width: "100%",
-            aspectRatio: media.dimensions.width / media.dimensions.height,
-            borderRadius: getToken("$8", "radius") as number,
-          }}
-          contentFit="cover"
-          onLoadStart={() => setIsImageLoading(true)}
-          onLoadEnd={() => setIsImageLoading(false)}
-        />
-        {isImageLoading && (
-          <View
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor="rgba(0, 0, 0, 0.1)"
-          >
-            <Circle size={48} borderWidth={2} borderColor="$gray11" />
-          </View>
-        )}
-        {hearts.map((heart) => (
-          <GradientHeart
-            key={heart.id}
-            gradient={heart.gradient}
-            position={heart.position}
-          />
-        ))}
-      </View>
-    </GestureDetector>
-  );
-};
-
-interface VideoPlayerProps {
-  endpoint: "home-feed" | "other-profile" | "self-profile" | "single-post";
-  media: Media;
-  stats: Stats;
-}
-
-// TODO: This needs cleaning up 
-
-const VideoPlayerComponent = ({ endpoint, media, stats }: VideoPlayerProps) => {
-  const videoRef = useRef<Video>(null);
-  const { isMuted, toggleMute } = useAudio();
-  const { muteIcons, addMute } = useMuteAnimations();
-  const { hearts, addHeart } = useHeartAnimations();
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isVideoLoading, setIsVideoLoading] = useState(true);
-
-  const { handleLikeDoubleTapped } = useLikePost({
-    postId: media.id,
-    endpoint,
-    userId: media.recipient.id,
-    initialHasLiked: stats.hasLiked,
-  });
-
-  useFocusEffect(
-    useCallback(() => {
-      if (media.isViewable) {
-        void videoRef.current?.playAsync();
-        setIsPlaying(true);
-        setIsPaused(false);
-      } else {
-        void videoRef.current?.pauseAsync();
-        setIsPlaying(false);
-      }
-
-      return () => {
-        void videoRef.current?.pauseAsync();
-      };
-    }, [media.isViewable]),
-  );
-
-  const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
-      setIsVideoLoading(false);
-    }
-  };
-
-  const handleMute = useCallback(() => {
-    toggleMute();
-    addMute(!isMuted);
-    void videoRef.current?.setIsMutedAsync(!isMuted);
-  }, [toggleMute, addMute, isMuted]);
-
-  const handleDoubleTap = useCallback(
-    (x: number, y: number) => {
-      addHeart(x, y);
-      handleLikeDoubleTapped();
-    },
-    [addHeart, handleLikeDoubleTapped],
-  );
-
-  const handleHold = useCallback(() => {
-    if (isPlaying) {
-      void videoRef.current?.pauseAsync();
-      setIsPaused(true);
-    }
-  }, [isPlaying]);
-
-  const handleRelease = useCallback(() => {
-    if (isPaused) {
-      void videoRef.current?.playAsync();
-      setIsPaused(false);
-    }
-  }, [isPaused]);
-
-  const longPress = Gesture.LongPress()
-    .onStart(() => {
-      runOnJS(handleHold)();
-    })
-    .onEnd(() => {
-      runOnJS(handleRelease)();
-    });
-
-  const singleTap = Gesture.Tap().onStart(() => {
-    runOnJS(handleMute)();
-  });
-
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .onStart((event) => {
-      runOnJS(handleDoubleTap)(event.x, event.y);
-    });
-
-  const gestures = Gesture.Exclusive(
-    doubleTap,
-    Gesture.Race(longPress, singleTap),
-  );
-
-  return (
-    <GestureDetector gesture={gestures}>
-      <View>
-        <Video
-          ref={videoRef}
-          style={{
-            width: "100%",
-            aspectRatio: media.dimensions.width / media.dimensions.height,
-            borderRadius: getToken("$8", "radius") as number,
-          }}
-          source={{ uri: media.url }}
-          resizeMode={ResizeMode.COVER}
-          isLooping={true}
-          isMuted={isMuted}
-          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          onLoad={() => setIsVideoLoading(false)}
-          onError={() => setIsVideoLoading(false)}
-        />
-        {isVideoLoading && (
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <Circle size={48} borderWidth={2} borderColor="$gray11" />
-          </View>
-        )}
-        {muteIcons.map((muteIcon) => (
-          <Mute key={muteIcon.id} muted={muteIcon.muted} />
-        ))}
-        {hearts.map((heart) => (
-          <GradientHeart
-            key={heart.id}
-            gradient={heart.gradient}
-            position={heart.position}
-          />
-        ))}
-      </View>
-    </GestureDetector>
-  );
-};
-
-const VideoPlayer = React.memo(VideoPlayerComponent);
 
 export default PostCard;

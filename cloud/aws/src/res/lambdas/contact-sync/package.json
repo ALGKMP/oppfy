@@ -28,7 +28,7 @@
     "@oppfy/prettier-config": "workspace:*",
     "@oppfy/tsconfig": "workspace:*",
     "@types/gremlin": "^3.6.7",
-    "eslint": "^9.2.0",
+    "eslint": "catalog:",
     "prettier": "^3.2.5",
     "typescript": "^5.4"
   }

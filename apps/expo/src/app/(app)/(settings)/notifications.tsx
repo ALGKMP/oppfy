@@ -72,6 +72,14 @@ const Notifications = () => {
   const [switchState, setSwitchState] =
     useState<SwitchState>(notificationSettings);
 
+  const hasChanges = () => {
+    return Object.keys(switchState).some(
+      (key) =>
+        switchState[key as keyof SwitchState] !==
+        notificationSettings[key as keyof SwitchState],
+    );
+  };
+
   const updateSwitchState = (key: keyof SwitchState, value: boolean) => {
     setSwitchState((prev) => ({
       ...prev,
@@ -190,7 +198,11 @@ const Notifications = () => {
             pressTheme={false}
           />
         </SettingsGroup>
-        <Button onPress={onSubmit}>
+        <Button
+          onPress={onSubmit}
+          disabled={!hasChanges() || updateNotificationSettings.isPending}
+          opacity={!hasChanges() ? 0.5 : 1}
+        >
           {updateNotificationSettings.isPending ? <Spinner /> : "Save"}
         </Button>
       </YStack>

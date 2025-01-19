@@ -1,5 +1,6 @@
 import React from "react";
-import { Stack, type StackProps } from "tamagui";
+import { Stack  } from "tamagui";
+import type {StackProps} from "tamagui";
 
 import { H5 } from "./Headings";
 

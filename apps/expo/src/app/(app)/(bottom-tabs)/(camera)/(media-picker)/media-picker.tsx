@@ -5,15 +5,15 @@ import React, {
   useState,
 } from "react";
 import { Dimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
-import { Stack } from "tamagui";
+import { getToken, Stack } from "tamagui";
 
-import { BaseScreenView } from "~/components/Views";
 import useMediaProcessing from "~/hooks/media/useMediaProcessing";
 
 const NUM_COLUMNS = 3;
@@ -23,7 +23,7 @@ const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
 const moveVideoToLocalStorage = async (uri: string) => {
   // Remove file:// prefix if present
   const cleanUri = uri.replace("file://", "");
-  const filename = cleanUri.split("/").pop() || "video.mp4";
+  const filename = cleanUri.split("/").pop() ?? "video.mp4";
   const destination = `${FileSystem.documentDirectory}videos/${filename}`;
 
   // Ensure videos directory exists
@@ -32,12 +32,8 @@ const moveVideoToLocalStorage = async (uri: string) => {
     {
       intermediates: true,
     },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
   ).catch(() => {});
-
-  console.log("Moving video:", {
-    from: cleanUri,
-    to: destination,
-  });
 
   // Copy file
   await FileSystem.copyAsync({
@@ -51,6 +47,7 @@ const moveVideoToLocalStorage = async (uri: string) => {
 const MediaPickerScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { processVideo } = useMediaProcessing();
 
   const { albumId, albumTitle } = useLocalSearchParams<{
@@ -81,7 +78,12 @@ const MediaPickerScreen = () => {
       sortBy: [MediaLibrary.SortBy.creationTime],
     });
 
-    setAssets((prevAssets) => [...prevAssets, ...media.assets]);
+    // Filter out assets that are wider than tall
+    const filteredAssets = media.assets.filter(
+      (asset) => asset.height >= asset.width,
+    );
+
+    setAssets((prevAssets) => [...prevAssets, ...filteredAssets]);
     setEndCursor(media.endCursor);
     setHasNextPage(media.hasNextPage);
     setIsLoading(false);
@@ -92,6 +94,8 @@ const MediaPickerScreen = () => {
     setEndCursor(null);
     setHasNextPage(true);
     void fetchAssets();
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const renderItem = useCallback(
@@ -185,6 +189,10 @@ const MediaPickerScreen = () => {
         void fetchAssets();
       }}
       onEndReachedThreshold={0.5}
+      contentContainerStyle={{
+        paddingBottom: insets.bottom,
+        paddingTop: getToken("$3", "space") as number,
+      }}
     />
   );
 };

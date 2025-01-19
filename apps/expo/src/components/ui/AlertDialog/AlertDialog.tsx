@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -36,6 +37,7 @@ export interface AlertDialogProps {
   cancelText?: string;
   acceptTextProps?: SizableTextProps;
   cancelTextProps?: SizableTextProps;
+  onAnimationComplete?: (visible: boolean) => void;
 }
 
 export const AlertDialog = ({
@@ -50,17 +52,22 @@ export const AlertDialog = ({
   cancelText = "Cancel",
   acceptTextProps,
   cancelTextProps,
+  onAnimationComplete,
 }: AlertDialogProps) => {
   const theme = useTheme();
   const animation = useSharedValue(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isVisible) {
       animation.value = withSpring(1, { damping: 15, stiffness: 200 });
     } else {
-      animation.value = withTiming(0, { duration: 250 });
+      animation.value = withTiming(0, { duration: 250 }, (finished) => {
+        if (finished) {
+          runOnJS(onAnimationComplete!)(false);
+        }
+      });
     }
-  }, [isVisible]);
+  }, [isVisible, onAnimationComplete]);
 
   const backgroundStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP),
@@ -85,7 +92,7 @@ export const AlertDialog = ({
     ],
   }));
 
-  if (!isVisible) return null;
+  if (!isVisible && animation.value === 0) return null;
 
   return (
     <Portal>

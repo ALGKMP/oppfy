@@ -4,8 +4,8 @@ import Marker, { Position } from "react-native-image-marker";
 import { randomUUID } from "expo-crypto";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
-import { useToastController } from "@tamagui/toast";
 import watermark from "@assets/watermark.png";
+import { useToastController } from "@tamagui/toast";
 
 interface WatermarkOptions {
   image: ImageSourcePropType | string;
@@ -43,10 +43,7 @@ export const useSaveMedia = () => {
     return markedImage;
   };
 
-  const saveMedia = async (
-    mediaUrl: string,
-    watermark?: WatermarkOptions | undefined,
-  ) => {
+  const saveMedia = async (mediaUrl: string, watermark?: WatermarkOptions) => {
     setIsSaving(true);
 
     const { status } = await MediaLibrary.requestPermissionsAsync();
@@ -72,7 +69,7 @@ export const useSaveMedia = () => {
         scale: 0.7,
       });
       toast.show("Post Saved");
-    } catch (error) {
+    } catch {
       toast.show("Enable media library permission in settings", {
         burntOptions: {
           preset: "error",

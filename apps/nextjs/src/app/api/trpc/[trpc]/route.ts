@@ -1,9 +1,9 @@
-import { appRouter, createTRPCContext } from "@oppfy/api";
-
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
+import { appRouter, createTRPCContext } from "@oppfy/api";
+
 // The edge runtime is isn't compatible with something
-// export const runtime = "edge"; 
+// export const runtime = "edge";
 
 /**
  * Configure basic CORS headers

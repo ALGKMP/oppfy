@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { LoadingIndicatorOverlay } from "~/components/Overlays";
+import { LoadingIndicatorOverlay } from "~/components/ui";
 import { api } from "~/utils/api";
 
 export default function ProfilePage() {

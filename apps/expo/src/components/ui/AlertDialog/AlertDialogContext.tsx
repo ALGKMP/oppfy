@@ -3,7 +3,10 @@ import React, { createContext, useCallback, useContext, useState } from "react";
 import type { AlertDialogProps } from "./AlertDialog";
 import { AlertDialog } from "./AlertDialog";
 
-type AlertDialogOptions = Omit<AlertDialogProps, "isVisible">;
+type AlertDialogOptions = Omit<
+  AlertDialogProps,
+  "isVisible" | "onAnimationComplete"
+>;
 
 interface AlertDialogContextValue {
   show: (props: AlertDialogOptions) => Promise<boolean>;
@@ -17,38 +20,75 @@ export const AlertDialogProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [dialogProps, setDialogProps] = useState<AlertDialogOptions | null>(
-    null,
-  );
+  const [dialogState, setDialogState] = useState<{
+    props: AlertDialogOptions | null;
+    isVisible: boolean;
+    resolve?: (value: boolean) => void;
+  }>({
+    props: null,
+    isVisible: false,
+  });
 
   const hide = useCallback(() => {
-    setDialogProps(null);
+    setDialogState((prev) => ({
+      ...prev,
+      isVisible: false,
+    }));
+  }, []);
+
+  const handleAnimationComplete = useCallback((visible: boolean) => {
+    if (!visible) {
+      setDialogState((prev) => ({
+        ...prev,
+        props: null,
+        resolve: undefined,
+      }));
+    }
   }, []);
 
   const show = useCallback(
     (props: AlertDialogOptions): Promise<boolean> => {
-      return new Promise((resolve) => {
-        setDialogProps({
-          ...props,
-          onAccept: () => {
-            hide();
-            resolve(true);
-          },
-          onCancel: () => {
-            hide();
-            resolve(false);
-          },
+      return new Promise<boolean>((resolve) => {
+        const handleAccept = () => {
+          hide();
+          props.onAccept?.();
+          resolve(true);
+        };
+
+        const handleCancel = () => {
+          hide();
+          props.onCancel?.();
+          resolve(false);
+        };
+
+        setDialogState({
+          props: { ...props, onAccept: handleAccept, onCancel: handleCancel },
+          isVisible: true,
+          resolve,
         });
       });
     },
     [hide],
   );
 
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (dialogState.resolve) {
+        dialogState.resolve(false);
+      }
+    };
+  }, [dialogState.resolve]);
+
   return (
     <AlertDialogContext.Provider value={{ show, hide }}>
       {children}
-      {dialogProps && (
-        <AlertDialog {...dialogProps} isVisible={!!dialogProps} />
+      {dialogState.props && (
+        <AlertDialog
+          {...dialogState.props}
+          isVisible={dialogState.isVisible}
+          onAnimationComplete={handleAnimationComplete}
+        />
       )}
     </AlertDialogContext.Provider>
   );
@@ -56,9 +96,10 @@ export const AlertDialogProvider = ({
 
 export const useAlertDialogController = () => {
   const context = useContext(AlertDialogContext);
-  if (!context)
+  if (!context) {
     throw new Error(
       "useAlertDialog must be used within an AlertDialogProvider",
     );
+  }
   return context;
 };

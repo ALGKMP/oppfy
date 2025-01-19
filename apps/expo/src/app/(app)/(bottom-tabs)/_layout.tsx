@@ -1,25 +1,40 @@
+import React, { useEffect, useState } from "react";
 import type { ElementType } from "react";
-import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedProps,
+  useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
-import type { BottomTabHeaderProps } from "@react-navigation/bottom-tabs";
-import { Camera, Home, Inbox, Search, User2 } from "@tamagui/lucide-icons";
 import { MotiView } from "moti";
-import { Circle, Text, useTheme, View, YStack } from "tamagui";
+import { useTheme } from "tamagui";
 
-import { Header as BaseHeader } from "~/components/Headers";
-import { BottomTabBar } from "~/components/TabBars";
-import { BottomTabs } from "~/layouts";
+import { BottomTabs } from "~/components/Layouts/Navigation";
+import {
+  Avatar,
+  Button,
+  Circle,
+  H3,
+  Icon,
+  Paragraph,
+  Text,
+  useBottomSheetController,
+  View,
+  YStack,
+} from "~/components/ui";
+import type { IconName } from "~/components/ui";
+import useProfile from "~/hooks/useProfile";
 import { api } from "~/utils/api";
+import { storage } from "~/utils/storage";
+
+const HAS_SEEN_WELCOME_KEY = "has_seen_welcome";
 
 interface TabBarIconProps {
   focused: boolean;
@@ -28,8 +43,9 @@ interface TabBarIconProps {
 }
 
 const BottomTabsLayout = () => {
-  const theme = useTheme();
   const utils = api.useUtils();
+  const bottomSheet = useBottomSheetController();
+  const { profile } = useProfile();
 
   const { data: unreadNotificationsCount } =
     api.notifications.getUnreadNotificationsCount.useQuery();
@@ -41,11 +57,73 @@ const BottomTabsLayout = () => {
     void prefetch();
   }, [utils.profile.getFullProfileSelf]);
 
+  useEffect(() => {
+    const hasSeenWelcome = storage.getBoolean(HAS_SEEN_WELCOME_KEY);
+    const isDev = process.env.NODE_ENV === "development";
+    if (isDev || !hasSeenWelcome) {
+      // 1 second delay
+      setTimeout(() => {
+        bottomSheet.show({
+          snapPoints: ["100%"],
+          headerShown: false,
+          enablePanDownToClose: false,
+          enableHandlePanningGesture: false,
+          enableContentPanningGesture: false,
+          children: <WelcomeBottomSheet onComplete={handleDismissWelcome} />,
+        });
+      }, 1000);
+    }
+  // eslint-disable-next-line react-compiler/react-compiler
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleDismissWelcome = () => {
+    storage.set(HAS_SEEN_WELCOME_KEY, true);
+    bottomSheet.hide();
+  };
+
   const getTabBarIcon =
-    (IconComponent: ElementType) =>
-    ({ focused, ...props }: TabBarIconProps) => (
-      <IconComponent strokeWidth={focused ? 3 : 1.5} {...props} />
-    );
+    (iconName: IconName) =>
+    ({ focused, color, size }: TabBarIconProps) => {
+      const animatedStyle = useAnimatedStyle(() => ({
+        transform: [
+          {
+            scale: withSpring(focused ? 1.1 : 1, {
+              mass: 0.5,
+              damping: 12,
+              stiffness: 100,
+            }),
+          },
+        ],
+      }));
+
+      // Special case for profile tab
+      if (iconName === "person-circle" && profile?.profilePictureUrl) {
+        return (
+          <Animated.View style={animatedStyle}>
+            <Avatar
+              source={profile.profilePictureUrl}
+              size={size}
+              bordered={focused}
+              style={{ opacity: focused ? 1 : 0.5 }}
+            />
+          </Animated.View>
+        );
+      }
+
+      return (
+        <Animated.View style={animatedStyle}>
+          <Icon
+            name={iconName}
+            color={color}
+            size={size}
+            iconStyle={{
+              opacity: focused ? 1 : 0.5,
+            }}
+          />
+        </Animated.View>
+      );
+    };
 
   const NotificationBadge = ({ count }: { count: number }) => {
     return (
@@ -53,8 +131,14 @@ const BottomTabsLayout = () => {
         from={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{
-          type: "timing",
-          duration: 300,
+          opacity: {
+            type: "timing",
+            duration: 300,
+          },
+          scale: {
+            type: "timing",
+            duration: 300,
+          },
         }}
         style={{
           position: "absolute",
@@ -95,51 +179,34 @@ const BottomTabsLayout = () => {
   };
 
   return (
-    <BottomTabs
-      tabBar={(props) => <BottomTabBar {...props} />}
-      screenOptions={{
-        header: (props) => <Header {...props} />,
-      }}
-      sceneContainerStyle={{
-        backgroundColor: theme.background.val,
-      }}
-      screenListeners={{
-        tabPress: () =>
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
-      }}
-      backBehavior="history"
-    >
+    <BottomTabs screenOptions={{ headerShown: false }} backBehavior="history">
       <BottomTabs.Screen
         name="(home)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Home),
+          tabBarIcon: getTabBarIcon("home"),
         }}
       />
 
       <BottomTabs.Screen
         name="(search)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Search),
+          tabBarIcon: getTabBarIcon("search"),
         }}
       />
 
       <BottomTabs.Screen
         name="(camera)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(Camera),
+          tabBarIcon: getTabBarIcon("camera"),
         }}
       />
 
       <BottomTabs.Screen
         name="(inbox)"
         options={{
-          header: () => null,
           tabBarIcon: (props) => (
             <View>
-              {getTabBarIcon(Inbox)(props)}
+              {getTabBarIcon("notifications")(props)}
               {(unreadNotificationsCount ?? 0) > 0 && (
                 <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
@@ -151,172 +218,351 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(profile)"
         options={{
-          header: () => null,
-          tabBarIcon: getTabBarIcon(User2),
+          tabBarIcon: getTabBarIcon("person-circle"),
         }}
       />
     </BottomTabs>
   );
 };
 
+interface FeatureProps {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const STARTING_COLOR = "#a819b0";
+const ENDING_COLOR = "#F214FF";
+
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const CameraTabIcon = ({ focused }: { focused: boolean }) => {
-  const [showTooltip, setShowTooltip] = useState(true);
-  const gradientX1 = useSharedValue(0);
-  const gradientY1 = useSharedValue(0);
-  const gradientX2 = useSharedValue(1);
-  const gradientY2 = useSharedValue(1);
-  const pulseScale = useSharedValue(1);
+const Feature = ({ icon, title, description }: FeatureProps) => (
+  <YStack gap="$2" alignItems="flex-start">
+    <Text fontSize={28}>{icon}</Text>
+    <YStack gap="$1">
+      <Text color="$color" fontSize={18} fontWeight="bold">
+        {title}
+      </Text>
+      <Text color="$color" fontSize={14} opacity={0.8}>
+        {description}
+      </Text>
+    </YStack>
+  </YStack>
+);
 
+export const WelcomeBottomSheet = ({
+  onComplete,
+}: {
+  onComplete: () => void;
+}) => {
+  const theme = useTheme();
+  const rotation = useSharedValue(0);
+  const scale = useSharedValue(1);
+
+  // Create a pulsing animation
   useEffect(() => {
-    setShowTooltip(!focused);
-
-    gradientX1.value = withRepeat(
-      withTiming(1, {
-        duration: 4000,
-        easing: Easing.linear,
-      }),
-      -1,
-      false,
-    );
-
-    gradientY1.value = withRepeat(
-      withTiming(1, {
-        duration: 4000,
-        easing: Easing.linear,
-      }),
-      -1,
-      false,
-    );
-
-    gradientX2.value = withRepeat(
-      withTiming(0, {
-        duration: 4000,
-        easing: Easing.linear,
-      }),
-      -1,
-      false,
-    );
-
-    gradientY2.value = withRepeat(
-      withTiming(0, {
-        duration: 4000,
-        easing: Easing.linear,
-      }),
-      -1,
-      false,
-    );
-
-    pulseScale.value = withRepeat(
-      withTiming(1.05, {
-        duration: 1000,
-        easing: Easing.inOut(Easing.sin),
+    scale.value = withRepeat(
+      withTiming(1.15, {
+        duration: 3000,
+        easing: Easing.inOut(Easing.ease),
       }),
       -1,
       true,
     );
-  }, [focused, gradientX1, gradientX2, gradientY1, gradientY2, pulseScale]);
+    rotation.value = withRepeat(
+      withTiming(360, {
+        duration: 30000,
+        easing: Easing.linear,
+      }),
+      -1,
+      false,
+    );
+  }, []);
 
-  const animatedGradientProps = useAnimatedProps(() => ({
-    x1: `${gradientX1.value * 100}%`,
-    y1: `${gradientY1.value * 100}%`,
-    x2: `${gradientX2.value * 100}%`,
-    y2: `${gradientY2.value * 100}%`,
-  }));
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotation.value}deg` }, { scale: scale.value }],
+    };
+  });
 
-  const animatedSvgProps = useAnimatedProps(() => ({
-    transform: [{ scale: pulseScale.value }],
-  }));
+  const animatedProps = useAnimatedProps(() => {
+    return {
+      strokeWidth: 2 + scale.value,
+    };
+  });
+
+  const handleComplete = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onComplete();
+  };
 
   return (
-    <YStack alignItems="center">
-      {showTooltip && (
-        <View position="absolute" bottom={40} width={140} height={60}>
-          <AnimatedSvg
-            width={140}
-            height={60}
-            viewBox="-10 -10 140 60"
-            style={{ position: "absolute", top: 0, left: 0 }}
-            animatedProps={animatedSvgProps}
+    <YStack
+      flex={1}
+      backgroundColor="$primary"
+      padding="$4"
+      paddingTop="$8"
+      position="relative"
+      borderTopLeftRadius="$8"
+      borderTopRightRadius="$8"
+      overflow="hidden"
+      gap="$6"
+    >
+      {/* Decorative background elements */}
+      <AnimatedSvg
+        style={[{ position: "absolute", top: -100, right: -100 }, rStyle]}
+        width={400}
+        height={400}
+      >
+        <Defs>
+          <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={STARTING_COLOR} stopOpacity="0.3" />
+            <Stop offset="1" stopColor={ENDING_COLOR} stopOpacity="0.3" />
+          </LinearGradient>
+        </Defs>
+        <AnimatedPath
+          d="M100,100 C150,50 200,150 250,100 S350,50 400,100 S500,150 450,200 S350,250 300,200 S200,150 150,200 S50,250 100,200 S150,150 100,100"
+          fill="url(#grad)"
+          stroke={ENDING_COLOR}
+          animatedProps={animatedProps}
+        />
+      </AnimatedSvg>
+
+      {/* Header */}
+      <YStack alignItems="center" gap="$4">
+        <MotiView
+          from={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            scale: {
+              type: "spring",
+              delay: 300,
+              damping: 12,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 300,
+            },
+          }}
+        >
+          <YStack
+            alignItems="center"
+            justifyContent="center"
+            position="relative"
           >
-            <Defs>
-              <AnimatedLinearGradient
-                id="rainbow"
-                animatedProps={animatedGradientProps}
+            {/* Camera Body */}
+            <Circle
+              size={70}
+              backgroundColor="white"
+              borderWidth={3}
+              borderColor="$primary"
+              shadowColor="$primary"
+              shadowOpacity={0.3}
+              shadowRadius={10}
+            >
+              {/* Camera Lens */}
+              <Circle
+                size={40}
+                backgroundColor="$primary"
+                borderWidth={2}
+                borderColor="white"
+                shadowColor="$primary"
+                shadowOpacity={0.2}
+                shadowRadius={5}
               >
-                <Stop offset="0%" stopColor="#FF0000" />
-                <Stop offset="16.67%" stopColor="#FF7F00" />
-                <Stop offset="33.33%" stopColor="#FFFF00" />
-                <Stop offset="50%" stopColor="#00FF00" />
-                <Stop offset="66.67%" stopColor="#0000FF" />
-                <Stop offset="83.33%" stopColor="#4B0082" />
-                <Stop offset="100%" stopColor="#9400D3" />
-              </AnimatedLinearGradient>
-            </Defs>
-            <Path
-              d="M10 0 H110 A10 10 0 0 1 120 10 V25 A10 10 0 0 1 110 35 H65 L60 40 L55 35 H10 A10 10 0 0 1 0 25 V10 A10 10 0 0 1 10 0 Z"
-              fill="#000000"
-              stroke="url(#rainbow)"
-              strokeWidth={4}
+                {/* Inner Lens Ring */}
+                <Circle size={25} backgroundColor="white" opacity={0.3} />
+              </Circle>
+            </Circle>
+
+            {/* Camera Flash */}
+            <Circle
+              position="absolute"
+              top={5}
+              right={5}
+              size={15}
+              backgroundColor="white"
+              borderWidth={2}
+              borderColor="$primary"
+              animation="bouncy"
+              enterStyle={{ scale: 0.5, opacity: 0 }}
+              exitStyle={{ scale: 0.5, opacity: 0 }}
+              pressStyle={{ scale: 0.9 }}
             />
-          </AnimatedSvg>
-          <Text
+
+            {/* Animated Sparkle Effects */}
+            <MotiView
+              from={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
+              transition={{
+                loop: true,
+                repeatReverse: false,
+                duration: 2000,
+              }}
+              style={{
+                position: "absolute",
+                top: -10,
+                right: -10,
+              }}
+            >
+              <Icon name="ellipse" size={15} color="white" />
+            </MotiView>
+            <MotiView
+              from={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
+              transition={{
+                loop: true,
+                repeatReverse: false,
+                duration: 2000,
+                delay: 500,
+              }}
+              style={{
+                position: "absolute",
+                bottom: -5,
+                left: -5,
+              }}
+            >
+              <Icon name="ellipse" size={12} color="white" />
+            </MotiView>
+          </YStack>
+        </MotiView>
+
+        <YStack gap="$2">
+          <H3
             color="white"
-            fontSize={16}
-            position="absolute"
-            top={17}
-            left={10}
-            right={10}
             textAlign="center"
+            fontSize={32}
+            fontWeight="bold"
+            opacity={0.95}
           >
-            Take a photo
-          </Text>
-        </View>
-      )}
-      <Camera strokeWidth={focused ? 3 : 1.5} />
+            Welcome to Oppfy
+          </H3>
+          <Paragraph
+            color="white"
+            textAlign="center"
+            opacity={0.8}
+            fontSize={16}
+          >
+            Where friends capture your authentic moments
+          </Paragraph>
+        </YStack>
+      </YStack>
+
+      {/* Features */}
+      <YStack paddingHorizontal="$2" gap="$6">
+        <MotiView
+          from={{ translateX: -100, opacity: 0 }}
+          animate={{ translateX: 0, opacity: 1 }}
+          transition={{
+            translateX: {
+              type: "spring",
+              delay: 400,
+              damping: 15,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 400,
+            },
+          }}
+        >
+          <Feature
+            icon="🤳"
+            title="Friends Are Your Photographers"
+            description="Let your friends capture and post your candid moments - no selfies allowed!"
+          />
+        </MotiView>
+
+        <MotiView
+          from={{ translateX: 100, opacity: 0 }}
+          animate={{ translateX: 0, opacity: 1 }}
+          transition={{
+            translateX: {
+              type: "spring",
+              delay: 600,
+              damping: 15,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 600,
+            },
+          }}
+        >
+          <Feature
+            icon="✨"
+            title="Real & Unfiltered"
+            description="Experience life through others' eyes - raw, authentic, and spontaneous"
+          />
+        </MotiView>
+
+        <MotiView
+          from={{ translateX: -100, opacity: 0 }}
+          animate={{ translateX: 0, opacity: 1 }}
+          transition={{
+            translateX: {
+              type: "spring",
+              delay: 800,
+              damping: 15,
+              stiffness: 100,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 800,
+            },
+          }}
+        >
+          <Feature
+            icon="🎭"
+            title="No More Perfect Poses"
+            description="Say goodbye to staged photos - embrace the beauty of natural moments"
+          />
+        </MotiView>
+      </YStack>
+
+      {/* Get Started Button */}
+      <YStack
+        position="absolute"
+        bottom={40}
+        left={0}
+        right={0}
+        paddingHorizontal="$4"
+      >
+        <MotiView
+          from={{ translateY: 100, opacity: 0 }}
+          animate={{ translateY: 0, opacity: 1 }}
+          transition={{
+            translateY: {
+              type: "spring",
+              delay: 1000,
+              damping: 20,
+              stiffness: 120,
+            },
+            opacity: {
+              type: "timing",
+              duration: 600,
+              delay: 1000,
+            },
+          }}
+        >
+          <Button
+            size="$6"
+            variant="white"
+            onPress={handleComplete}
+            fontWeight="bold"
+          >
+            Let's Get Started
+          </Button>
+        </MotiView>
+      </YStack>
     </YStack>
   );
 };
-
-type HeaderProps = BottomTabHeaderProps;
-
-const Header = ({ options }: HeaderProps) => (
-  <BaseHeader
-    HeaderLeft={
-      options.headerLeft
-        ? options.headerLeft({
-            labelVisible: options.tabBarShowLabel,
-            pressColor: options.headerPressColor,
-            pressOpacity: options.headerPressOpacity,
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-    HeaderTitle={
-      typeof options.headerTitle === "function" ? (
-        options.headerTitle({
-          children: options.title ?? "",
-          tintColor: options.headerTintColor,
-          allowFontScaling: options.tabBarAllowFontScaling,
-        })
-      ) : options.title ? (
-        <Text fontSize="$5" fontWeight="bold">
-          {options.title}
-        </Text>
-      ) : null
-    }
-    HeaderRight={
-      options.headerRight
-        ? options.headerRight({
-            pressColor: options.headerPressColor,
-            pressOpacity: options.headerPressOpacity,
-            tintColor: options.headerTintColor,
-          })
-        : undefined
-    }
-  />
-);
 
 export default BottomTabsLayout;

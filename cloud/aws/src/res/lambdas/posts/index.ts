@@ -1,6 +1,10 @@
 import { parser } from "@aws-lambda-powertools/parser/middleware";
 import { S3Schema } from "@aws-lambda-powertools/parser/schemas";
-import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import middy from "@middy/core";
 import { createEnv } from "@t3-oss/env-core";
@@ -39,6 +43,14 @@ const sns = new SNSClient({
   region: "us-east-1",
 });
 
+const deleteS3Object = async (bucket: string, key: string) => {
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  });
+  await s3.send(command);
+};
+
 const lambdaHandler = async (
   event: S3ObjectLambdaEvent,
   _context: Context,
@@ -52,70 +64,90 @@ const lambdaHandler = async (
   const key = record.s3.object.key;
   const objectBucket = record.s3.bucket.name;
 
-  const command = new HeadObjectCommand({
-    Bucket: objectBucket,
-    Key: key,
-  });
+  try {
+    const command = new HeadObjectCommand({
+      Bucket: objectBucket,
+      Key: key,
+    });
 
-  const { Metadata } = await s3.send(command);
+    const { Metadata } = await s3.send(command);
 
-  if (Metadata === undefined) {
-    throw new Error("Metadata not provided");
-  }
+    if (Metadata === undefined) {
+      throw new Error("Metadata not provided");
+    }
 
-  const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
+    const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
+    metadata.caption = decodeURIComponent(metadata.caption);
 
-  // decode the caption
-  metadata.caption = decodeURIComponent(metadata.caption);
+    if (metadata.type === "onApp") {
+      try {
+        const { insertId: postId } = await db.transaction(async (tx) => {
+          const [post] = await tx
+            .insert(schema.post)
+            .values({
+              authorId: metadata.author,
+              recipientId: metadata.recipient,
+              key: key,
+              mediaType: "image" as const,
+              height: parseInt(metadata.height),
+              width: parseInt(metadata.width),
+              caption: metadata.caption,
+            })
+            .returning({ insertId: schema.post.id });
 
-  if (metadata.type === "onApp") {
-    const { insertId: postId } = await db.transaction(async (tx) => {
-      const [post] = await tx
-        .insert(schema.post)
-        .values({
-          authorId: metadata.author,
-          recipientId: metadata.recipient,
-          key: key,
-          mediaType: "image" as const,
-          height: parseInt(metadata.height),
-          width: parseInt(metadata.width),
-          caption: metadata.caption,
-        })
-        .returning({ insertId: schema.post.id });
+          if (post === undefined) {
+            throw new Error("Failed to insert post");
+          }
 
-      if (post === undefined) {
-        throw new Error("Failed to insert post");
+          await tx.insert(schema.postStats).values({ postId: post.insertId });
+          return post;
+        });
+
+        await storeNotification(metadata.author, metadata.recipient, {
+          eventType: "post",
+          entityType: "post",
+          entityId: postId.toString(),
+        });
+
+        const { posts } = await getNotificationSettings(metadata.recipient);
+        if (posts) {
+          const pushTokens = await getPushTokens(metadata.recipient);
+          if (pushTokens.length > 0) {
+            const senderProfile = await getProfile(metadata.author);
+            await sendNotification(
+              pushTokens,
+              metadata.author,
+              metadata.recipient,
+              {
+                title: "You've been opped",
+                body: `${senderProfile.username} posted a picture of you`,
+                entityId: postId.toString(),
+                entityType: "post",
+              },
+            );
+          }
+        }
+      } catch (error) {
+        // If the transaction fails, delete the S3 object
+        await deleteS3Object(objectBucket, key);
+        throw error;
       }
-
-      await tx.insert(schema.postStats).values({ postId: post.insertId });
-      return post;
-    });
-
-    await storeNotification(metadata.author, metadata.recipient, {
-      eventType: "post",
-      entityType: "post",
-      entityId: postId.toString(),
-    });
-
-    const { posts } = await getNotificationSettings(metadata.recipient);
-    if (!posts) return;
-
-    const pushTokens = await getPushTokens(metadata.recipient);
-    if (pushTokens.length === 0) return;
-
-    const senderProfile = await getProfile(metadata.author);
-
-    await sendNotification(pushTokens, metadata.author, metadata.recipient, {
-      title: "You've been opped",
-      body: `${senderProfile.username} posted a picture of you`,
-      entityId: postId.toString(),
-      entityType: "post",
-    });
-  } else {
-    // await db.insert(schema.postOfUserNotOnApp).values({
-    //   ...data,
-    //   phoneNumber: metadata.number,
-    // });
+    } else {
+      await db.insert(schema.postOfUserNotOnApp).values({
+        key,
+        mediaType: "image" as const,
+        authorId: metadata.author,
+        height: parseInt(metadata.height),
+        width: parseInt(metadata.width),
+        caption: metadata.caption,
+        phoneNumber: metadata.number,
+      });
+    }
+  } catch (error) {
+    console.error("Error processing post:", error);
+    // Ensure S3 object is deleted in case of any error
+    await deleteS3Object(objectBucket, key);
+    throw error;
   }
 };
 

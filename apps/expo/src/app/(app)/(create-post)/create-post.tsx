@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Dimensions,
-  Pressable,
-  View as RNView,
-  StyleSheet,
-} from "react-native";
+import type { DimensionValue } from "react-native";
+import { Dimensions, Pressable, StyleSheet } from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,18 +11,20 @@ import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronRight } from "@tamagui/lucide-icons";
+import { ChevronRight, ScrollText } from "@tamagui/lucide-icons";
 import { Controller, useForm } from "react-hook-form";
-import { useTheme } from "tamagui";
+import { getToken, useTheme } from "tamagui";
 import { z } from "zod";
 
-import CardContainer from "~/components/Containers/CardContainer";
 import PlayPause, {
   usePlayPauseAnimations,
 } from "~/components/Icons/PlayPause";
 import {
+  Avatar,
   Button,
+  CardContainer,
   H5,
+  HeaderTitle,
   ScreenView,
   Text,
   useBottomSheetController,
@@ -35,7 +33,7 @@ import {
   YStack,
 } from "~/components/ui";
 import { useUploadMedia } from "~/hooks/media";
-import {
+import type {
   UploadMediaInputNotOnApp,
   UploadMediaInputOnApp,
 } from "~/hooks/media/useUploadMedia";
@@ -107,13 +105,14 @@ const CaptionSheet = ({
           </Text>
           <XStack alignItems="center" gap="$2">
             <Text fontSize="$3" color="$gray10">
-              {localDraftCaption?.length ?? 0}/255
+              {localDraftCaption.length}/255
             </Text>
             <TouchableOpacity onPress={() => setLocalDraftCaption("")}>
               <Ionicons name="close-circle" size={20} color={theme.gray8.val} />
             </TouchableOpacity>
           </XStack>
         </XStack>
+
         <BottomSheetTextInput
           ref={inputRef}
           placeholder="Write a caption..."
@@ -123,19 +122,20 @@ const CaptionSheet = ({
           maxLength={255}
           style={{
             fontWeight: "bold",
-            justifyContent: "flex-start",
             color: theme.color.val,
             backgroundColor: theme.gray5.val,
-            padding: 20,
-            borderRadius: 20,
+            padding: getToken("$4", "space") as DimensionValue,
+            borderRadius: getToken("$6", "radius") as string,
+            height: 100,
+            textAlignVertical: "top",
           }}
         />
       </YStack>
+
       <XStack padding="$4" paddingBottom={insets.bottom}>
         <Button
           flex={1}
-          size="$5"
-          borderRadius="$7"
+          variant="primary"
           disabled={localDraftCaption === caption}
           onPress={() => onSave(localDraftCaption)}
         >
@@ -256,20 +256,24 @@ const CreatePost = () => {
           )}
 
           <XStack gap="$2" alignItems="center">
-            <Image
+            <Avatar
+              size={28}
               source={recipientImage ?? DefaultProfilePicture}
-              style={{ width: 24, height: 24, borderRadius: 12 }}
+              bordered
             />
             <Text color="$gray11">
-              Posting to {params.userType === "onApp" ? "@" : ""}
-              {displayName}
+              Posting to{" "}
+              <Text fontWeight="bold" color="$primary">
+                {params.userType === "onApp" ? "@" : ""}
+                {displayName}
+              </Text>
             </Text>
           </XStack>
         </YStack>
 
         <CardContainer padding="$4" paddingBottom="$5">
           <YStack gap="$3">
-            <H5>Post Details</H5>
+            <HeaderTitle>Post Details</HeaderTitle>
             <XStack
               justifyContent="space-between"
               alignItems="center"

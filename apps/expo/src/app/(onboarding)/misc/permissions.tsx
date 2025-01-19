@@ -42,11 +42,11 @@ const Permissions = () => {
     await Linking.openSettings();
   };
 
-  const onPress = (): void => {
+  const onPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    isSignedIn
-      ? router.push("/(app)/(bottom-tabs)/(home)")
-      : router.push("/firebaseauth/link");
+    void router.push(
+      isSignedIn ? "/(app)/(bottom-tabs)/(home)" : "/firebaseauth/link",
+    );
   };
 
   const showPermissionAlert = async (permissionType: PermissionType) => {
@@ -55,6 +55,12 @@ const Permissions = () => {
       subtitle: `Oppfy uses ${permissionType} to offer users the best experience. You can enable or disable this permission at any time in the settings.`,
       cancelText: "OK",
       acceptText: "Settings",
+      acceptTextProps: {
+        color: "$blue9",
+      },
+      cancelTextProps: {
+        color: "$gray9",
+      },
     });
 
     if (confirmed) {

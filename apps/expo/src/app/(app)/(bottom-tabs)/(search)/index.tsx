@@ -1,13 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Keyboard, RefreshControl } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { FlashList } from "@shopify/flash-list";
-import { getToken, H6, YStack } from "tamagui";
+import { getToken, YStack } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
-import { SearchInput } from "~/components/Inputs";
-import { MediaListItem, MediaListItemSkeleton } from "~/components/ui";
+import { HeaderTitle, MediaListItem, SearchInput } from "~/components/ui";
 import { Spacer } from "~/components/ui/Spacer";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
@@ -16,7 +14,6 @@ import type { RouterOutputs } from "~/utils/api";
 type SearchResultItem = RouterOutputs["search"]["profilesByUsername"][number];
 
 const Search = () => {
-  const insets = useSafeAreaInsets();
   const { routeProfile } = useRouteProfile();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,17 +55,15 @@ const Search = () => {
   );
 
   const ListHeaderComponent = (
-    <YStack gap="$4">
-      <SearchInput
-        value={searchTerm}
-        placeholder="Search by username"
-        onChangeText={performSearch}
-        onClear={() => {
-          setSearchTerm("");
-          setSearchResults([]);
-        }}
-      />
-    </YStack>
+    <SearchInput
+      value={searchTerm}
+      placeholder="Search by username"
+      onChangeText={performSearch}
+      onClear={() => {
+        setSearchTerm("");
+        setSearchResults([]);
+      }}
+    />
   );
 
   const ListFooterComponent = () => {
@@ -82,20 +77,16 @@ const Search = () => {
   const ListEmptyComponent = () => {
     if (isSearching) {
       return (
-        <YStack gap="$4">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <MediaListItemSkeleton key={index} />
+        <YStack gap="$2.5">
+          {Array.from({ length: 20 }).map((_, index) => (
+            <MediaListItem.Skeleton key={index} />
           ))}
         </YStack>
       );
     }
 
     if (searchTerm && !searchResults.length) {
-      return (
-        <YStack flex={1}>
-          <H6 theme="alt1">No Users Found</H6>
-        </YStack>
-      );
+      return <HeaderTitle>No Users Found</HeaderTitle>;
     }
 
     return null;
@@ -111,12 +102,12 @@ const Search = () => {
       ListFooterComponent={ListFooterComponent}
       ItemSeparatorComponent={Spacer}
       ListHeaderComponentStyle={{
-        paddingTop: getToken("$2", "space"),
-        paddingBottom: getToken("$4", "space"),
+        paddingTop: getToken("$2", "space") as number,
+        paddingBottom: getToken("$3", "space") as number,
       }}
       contentContainerStyle={{
-        paddingBottom: getToken("$4", "space"),
-        paddingHorizontal: getToken("$4", "space"),
+        paddingBottom: getToken("$4", "space") as number,
+        paddingHorizontal: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onScrollBeginDrag={Keyboard.dismiss}

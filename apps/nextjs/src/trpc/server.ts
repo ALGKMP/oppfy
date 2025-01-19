@@ -17,7 +17,7 @@ const createContext = async () => {
   return createTRPCContext({
     headers: heads,
   });
-}
+};
 
 const getQueryClient = createQueryClient;
 const caller = createCaller(createContext);

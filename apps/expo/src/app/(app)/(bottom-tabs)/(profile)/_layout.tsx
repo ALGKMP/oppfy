@@ -1,14 +1,13 @@
-import { Stack } from "expo-router";
+import { Stack } from "~/components/Layouts/Navigation";
 
 const ProfileLayout = () => {
   return (
     <Stack
+      initialRouteName="self-profile"
       screenOptions={{
-        header: () => null,
+        headerShown: false,
       }}
-    >
-      <Stack.Screen name="self-profile" />
-    </Stack>
+    ></Stack>
   );
 };
 

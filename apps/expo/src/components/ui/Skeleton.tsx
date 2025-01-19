@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import type { DimensionValue } from "react-native";
 import { StyleSheet } from "react-native";
 import Animated, {
@@ -9,11 +9,13 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { View } from "tamagui";
+import type { RadiusTokens, SizeTokens } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
+import { View } from "./Views";
+
 interface BaseSkeletonProps {
-  radius?: number;
+  radius?: RadiusTokens | number;
   shimmerColor?: string;
   backgroundColor?: string;
   shimmerDuration?: number;
@@ -21,19 +23,19 @@ interface BaseSkeletonProps {
 
 interface RectangularSkeletonProps extends BaseSkeletonProps {
   circular?: false;
-  width: DimensionValue;
-  height: DimensionValue;
+  width: SizeTokens | DimensionValue;
+  height: SizeTokens | DimensionValue;
 }
 
 interface CircularSkeletonProps extends BaseSkeletonProps {
   circular: true;
-  size: DimensionValue;
+  size: SizeTokens | DimensionValue;
 }
 
 type SkeletonProps = RectangularSkeletonProps | CircularSkeletonProps;
 
 export const Skeleton = ({
-  radius = 6,
+  radius = "$6",
   shimmerColor = "$gray3",
   backgroundColor = "$gray5",
   shimmerDuration = 1000,
@@ -45,7 +47,7 @@ export const Skeleton = ({
 
   const shimmer = useSharedValue(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     shimmer.value = withRepeat(
       withSequence(
         withTiming(1, { duration: shimmerDuration }),
@@ -62,21 +64,18 @@ export const Skeleton = ({
     ],
   }));
 
-  const memoizedGradientColors = [
-    backgroundColor,
-    shimmerColor,
-    backgroundColor,
-  ];
+  const memoizedGradientColors = useMemo(
+    () => [backgroundColor, shimmerColor, backgroundColor],
+    [backgroundColor, shimmerColor],
+  );
 
   return (
     <View
       overflow="hidden"
       backgroundColor={backgroundColor}
-      style={{
-        width,
-        height,
-        borderRadius: resolvedBorderRadius,
-      }}
+      borderRadius={resolvedBorderRadius}
+      width={width}
+      height={height}
     >
       <Animated.View style={[styles.gradientWrapper, animatedStyle]}>
         <LinearGradient

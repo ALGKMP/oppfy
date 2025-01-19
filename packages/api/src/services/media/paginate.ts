@@ -196,13 +196,14 @@ export class PaginationService {
           nextCursor: undefined,
         };
       }
-      const items = await Promise.all(data.map(async (item) => {
-        if (item.profilePictureUrl) {
-          const profilePicturePresignedUrl =
-            await this.cloudFrontService.getSignedUrlForProfilePicture(
-              item.profilePictureUrl,
-            );
-          item.profilePictureUrl = profilePicturePresignedUrl;
+      const items = await Promise.all(
+        data.map(async (item) => {
+          if (item.profilePictureUrl) {
+            const profilePicturePresignedUrl =
+              await this.cloudFrontService.getSignedUrlForProfilePicture(
+                item.profilePictureUrl,
+              );
+            item.profilePictureUrl = profilePicturePresignedUrl;
           }
           return item;
         }),

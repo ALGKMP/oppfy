@@ -3,17 +3,42 @@ import { styled, Button as TamaguiButton } from "tamagui";
 export const Button = styled(TamaguiButton, {
   size: "$5",
   borderRadius: "$6",
+  borderWidth: 0,
+  borderColor: "white",
+  pressStyle: {
+    borderWidth: 0,
+    borderColor: "white",
+  },
   disabledStyle: {
     opacity: 0.7,
   },
+  animation: "100ms",
 
   variants: {
     variant: {
       primary: {
         backgroundColor: "$primary",
+        borderColor: "white",
         pressStyle: {
           backgroundColor: "#D900E6",
           borderColor: "$primary",
+        },
+        disabledStyle: {
+          backgroundColor: "#D900E6",
+        },
+        textProps: {
+          color: "white",
+        },
+      },
+      white: {
+        backgroundColor: "white",
+        pressStyle: {
+          backgroundColor: "$gray12",
+          borderColor: "$primary",
+        },
+        borderColor: "$primary",
+        textProps: {
+          color: "$primary",
         },
       },
       warning: {
@@ -28,11 +53,6 @@ export const Button = styled(TamaguiButton, {
     outlined: {
       true: {
         borderWidth: 1,
-        borderColor: "white",
-        pressStyle: {
-          borderWidth: 1,
-          borderColor: "white",
-        },
       },
     },
     rounded: {
@@ -63,4 +83,5 @@ export const OnboardingButton = styled(Button, {
     backgroundColor: "$color9",
     opacity: 0.7,
   },
+  animation: "100ms",
 });
