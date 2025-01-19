@@ -16,7 +16,7 @@ const useRouteProfile = () => {
       user?.uid === userId
         ? "/self-profile"
         : {
-            pathname: "/connections/followers",
+            pathname: "/other-profile",
             params: { userId, username },
           },
     );
