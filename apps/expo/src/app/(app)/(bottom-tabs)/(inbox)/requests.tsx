@@ -7,6 +7,7 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, H5, Spacer, YStack } from "tamagui";
 
 import { EmptyPlaceholder, MediaListItem } from "~/components/ui";
+import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
@@ -23,10 +24,11 @@ type ListItem =
 const PAGE_SIZE = 20;
 
 const Requests = () => {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const utils = api.useUtils();
   const [refreshing, setRefreshing] = useState(false);
+
+  const { routeProfile } = useRouteProfile();
 
   // Friend Requests Query
   const {
@@ -282,12 +284,9 @@ const Requests = () => {
               }),
           }}
           onPress={() =>
-            router.navigate({
-              pathname: "/profile/[userId]",
-              params: {
-                userId: item.data.userId,
-                username: item.data.username,
-              },
+            routeProfile({
+              userId: item.data.userId,
+              username: item.data.username,
             })
           }
         />
@@ -315,12 +314,9 @@ const Requests = () => {
             }),
         }}
         onPress={() =>
-          router.navigate({
-            pathname: "/profile/[userId]",
-            params: {
-              userId: item.data.userId,
-              username: item.data.username,
-            },
+          routeProfile({
+            userId: item.data.userId,
+            username: item.data.username,
           })
         }
       />

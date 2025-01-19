@@ -1,11 +1,11 @@
 import React, { useCallback, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
 import { CameraOff, ScrollText } from "@tamagui/lucide-icons";
-import { getToken, Spacer, View, YStack } from "tamagui";
+import { Button, getToken, Spacer, View, YStack } from "tamagui";
 
 import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
@@ -21,6 +21,7 @@ type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
 const SelfProfile = () => {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
@@ -140,6 +141,7 @@ const SelfProfile = () => {
             onUserPress={routeProfile}
           />
         )}
+        {/* <Button onPress={() => router.push("otherpr")}>TEST</Button> */}
       </YStack>
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
