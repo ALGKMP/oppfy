@@ -24,7 +24,7 @@ import {
 
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { Avatar, HeaderTitle, Icon } from "~/components/ui";
+import { Avatar, HeaderTitle, Icon, Separator } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
@@ -164,11 +164,11 @@ const HomeScreen = () => {
     }
 
     return (
-      <YStack flex={1} height="100%" paddingHorizontal="$4" paddingTop="$4">
+      <YStack flex={1} height="100%" paddingHorizontal="$4" paddingTop="$6">
         <YStack alignItems="center" gap="$4">
           {/* Welcome Section */}
           <YStack alignItems="center" gap="$2" marginBottom="$2">
-            <Avatar size={100} source={profile?.profilePictureUrl} />
+            <Avatar size={110} source={profile?.profilePictureUrl} bordered />
             <H1 color="$gray12" textAlign="center" letterSpacing={1} size="$9">
               Welcome to OPPFY
             </H1>
@@ -221,22 +221,11 @@ const HomeScreen = () => {
             </XStack>
           </YStack>
 
-          {/* Recommendations and Share Section */}
-          <YStack
-            gap="$4"
-            width="100%"
-            marginTop="$4"
-            borderTopWidth={1}
-            borderColor="$gray5"
-            paddingTop="$4"
-          >
-            <RecommendationCarousel onUserPress={handleUserPress} />
-            <Footer />
-          </YStack>
+          <Separator width="100%" />
         </YStack>
       </YStack>
     );
-  }, [isLoading, profile?.username, router, handleUserPress]);
+  }, [isLoading, profile?.profilePictureUrl, profile?.username, router]);
 
   const renderFooter = useCallback(() => {
     if (isLoading) {
@@ -249,17 +238,16 @@ const HomeScreen = () => {
       );
     }
 
-    if (postItems.length > 0) {
-      return (
-        <YStack paddingHorizontal="$4" gap="$4">
-          <RecommendationCarousel onUserPress={handleUserPress} />
-          <Footer />
-        </YStack>
-      );
-    }
-
-    return null;
-  }, [isLoading, postItems.length, handleUserPress]);
+    return (
+      <YStack gap="$4">
+        <RecommendationCarousel
+          paddingHorizontal="$4"
+          onUserPress={handleUserPress}
+        />
+        <Footer />
+      </YStack>
+    );
+  }, [isLoading, handleUserPress]);
 
   return (
     <FlashList
@@ -293,7 +281,7 @@ const HomeScreen = () => {
 
 const Footer = () => (
   <YStack alignItems="center" gap="$2">
-    <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
+    <HeaderTitle icon="rocket" iconAfter="rocket" paddingHorizontal="$2.5">
       Grow Your OPPFY Community
     </HeaderTitle>
     <Button
