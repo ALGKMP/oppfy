@@ -42,7 +42,7 @@ const FriendCarousel = ({
       { pageSize: 10 },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
-        staleTime: 60 * 1000, // 1 minute
+        staleTime: 60 * 5000, // 5 minutes
       },
     );
 

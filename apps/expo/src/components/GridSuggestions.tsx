@@ -7,7 +7,7 @@ import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 
-const STALE_TIME = 60 * 1000;
+const STALE_TIME = 60 * 5000;
 
 const { width: screenWidth } = Dimensions.get("window");
 

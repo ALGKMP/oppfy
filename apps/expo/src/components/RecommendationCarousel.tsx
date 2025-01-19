@@ -41,7 +41,7 @@ const RecommendationCarousel = ({
 
   const { data: recommendationsData, isLoading } =
     api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
-      staleTime: 60 * 1000, // 1 minute
+      staleTime: 60 * 5000, // 5 minutes
     });
 
   const recommendations = recommendationsData ?? [];
