@@ -1,27 +1,22 @@
 import React from "react";
 import { Dimensions, FlatList } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getToken } from "tamagui";
 
-import { ScreenView } from "~/components/ui";
-import { HeaderTitle } from "~/components/ui/Headings";
 import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
-
-const STALE_TIME = 60 * 1000;
 
 const { width: screenWidth } = Dimensions.get("window");
 
 const Recommendations = () => {
   const utils = api.useUtils();
+  const insets = useSafeAreaInsets();
+
   const { routeProfile } = useRouteProfile();
 
-  const { data } = api.contacts.getRecommendationProfilesSelf.useQuery(
-    undefined,
-    {
-      staleTime: STALE_TIME,
-    },
-  );
+  const { data, refetch, isRefetching } =
+    api.contacts.getRecommendationProfilesSelf.useQuery();
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
@@ -31,14 +26,25 @@ const Recommendations = () => {
 
       utils.contacts.getRecommendationProfilesSelf.setData(
         undefined,
-        prevData.filter((item) => item.userId !== newData.userId),
+        prevData.map((item) =>
+          item.userId === newData.userId
+            ? {
+                ...item,
+                relationshipStatus:
+                  item.privacy === "private" ? "requested" : "following",
+              }
+            : item,
+        ),
       );
 
       return { prevData };
     },
     onError: (_err, _newData, ctx) => {
       if (ctx?.prevData === undefined) return;
-      void utils.contacts.getRecommendationProfilesSelf.invalidate();
+      utils.contacts.getRecommendationProfilesSelf.setData(
+        undefined,
+        ctx.prevData,
+      );
     },
   });
 
@@ -55,34 +61,44 @@ const Recommendations = () => {
   const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
 
   return (
-    <ScreenView>
-      <FlatList
-        data={data}
-        renderItem={({ item, index }) => (
-          <UserCard
-            userId={item.userId}
-            username={item.username}
-            profilePictureUrl={item.profilePictureUrl}
-            width={TILE_WIDTH}
-            index={index}
-            onPress={() => handleProfilePress(item.userId, item.username)}
-            actionButton={{
-              label: "Follow",
-              onPress: () =>
-                void followMutation.mutateAsync({ userId: item.userId }),
-            }}
-          />
-        )}
-        numColumns={2}
-        ListHeaderComponent={
-          <HeaderTitle icon="sparkles">Suggested for You</HeaderTitle>
-        }
-        columnWrapperStyle={{ gap: getToken("$2", "space") as number }}
-        contentContainerStyle={{ gap: getToken("$2", "space") as number }}
-        showsVerticalScrollIndicator={false}
-        // scrollEnabled={false}
-      />
-    </ScreenView>
+    <FlatList
+      data={data}
+      renderItem={({ item, index }) => (
+        <UserCard
+          userId={item.userId}
+          username={item.username}
+          profilePictureUrl={item.profilePictureUrl}
+          width={TILE_WIDTH}
+          index={index}
+          onPress={() => handleProfilePress(item.userId, item.username)}
+          actionButton={{
+            label:
+              item.relationshipStatus === "following"
+                ? "Following"
+                : item.relationshipStatus === "requested"
+                  ? "Requested"
+                  : "Follow",
+            onPress: () =>
+              void followMutation.mutateAsync({ userId: item.userId }),
+            variant:
+              item.relationshipStatus === "following" ||
+              item.relationshipStatus === "requested"
+                ? "outlined"
+                : "primary",
+          }}
+        />
+      )}
+      numColumns={2}
+      columnWrapperStyle={{ gap: getToken("$2", "space") as number }}
+      contentContainerStyle={{
+        padding: getToken("$4", "space") as number,
+        paddingBottom: insets.bottom,
+        gap: getToken("$2", "space") as number,
+      }}
+      showsVerticalScrollIndicator={false}
+      refreshing={isRefetching}
+      onRefresh={refetch}
+    />
   );
 };
 
