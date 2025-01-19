@@ -1,11 +1,12 @@
 import { Stack } from "~/components/Layouts/Navigation";
 
 const InboxLayout = () => (
-  <Stack>
+  <Stack screenOptions={{ headerShown: false }}>
     <Stack.Screen
       name="index"
       options={{
         title: "Inbox",
+        headerShown: true,
       }}
     />
 
@@ -13,11 +14,9 @@ const InboxLayout = () => (
       name="requests"
       options={{
         title: "Requests",
+        headerShown: true,
       }}
     />
-
-    <Stack.Screen name="profile" options={{ headerShown: false }} />
-    <Stack.Screen name="self-profile" options={{ headerShown: false }} />
   </Stack>
 );
 

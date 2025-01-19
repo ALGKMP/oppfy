@@ -3,13 +3,11 @@ import { Stack } from "~/components/Layouts/Navigation";
 const ProfileLayout = () => {
   return (
     <Stack
+      initialRouteName="self-profile"
       screenOptions={{
         headerShown: false,
       }}
-    >
-      <Stack.Screen name="self-profile" />
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-    </Stack>
+    ></Stack>
   );
 };
 

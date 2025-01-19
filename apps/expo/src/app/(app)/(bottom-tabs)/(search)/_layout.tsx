@@ -4,16 +4,14 @@ import { Stack } from "~/components/Layouts/Navigation";
 
 const SearchLayout = () => {
   return (
-    <Stack>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="index"
         options={{
           title: "Search",
+          headerShown: true,
         }}
       />
-
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-      <Stack.Screen name="self-profile" options={{ headerShown: false }} />
     </Stack>
   );
 };
