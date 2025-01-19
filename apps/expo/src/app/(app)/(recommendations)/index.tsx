@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dimensions, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getToken } from "tamagui";
@@ -12,11 +12,17 @@ const { width: screenWidth } = Dimensions.get("window");
 const Recommendations = () => {
   const utils = api.useUtils();
   const insets = useSafeAreaInsets();
-
   const { routeProfile } = useRouteProfile();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data, refetch, isRefetching } =
+  const { data, refetch, isLoading } =
     api.contacts.getRecommendationProfilesSelf.useQuery();
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
+  };
 
   const followMutation = api.follow.followUser.useMutation({
     onMutate: async (newData) => {
@@ -52,13 +58,30 @@ const Recommendations = () => {
     routeProfile({ userId, username });
   };
 
+  const SCREEN_PADDING = getToken("$4", "space") as number;
+  const GAP = getToken("$2", "space") as number;
+  const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2;
+
+  if (isLoading && !isRefreshing) {
+    return (
+      <FlatList
+        data={Array(10).fill(0)}
+        renderItem={() => <UserCard.Skeleton width={TILE_WIDTH} />}
+        numColumns={2}
+        columnWrapperStyle={{ gap: getToken("$2", "space") as number }}
+        contentContainerStyle={{
+          padding: getToken("$4", "space") as number,
+          paddingBottom: insets.bottom,
+          gap: getToken("$2", "space") as number,
+        }}
+        showsVerticalScrollIndicator={false}
+      />
+    );
+  }
+
   if (!data?.length) {
     return null;
   }
-
-  const SCREEN_PADDING = getToken("$4", "space") as number;
-  const GAP = getToken("$2", "space") as number;
-  const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2; // Account for screen padding and gap between tiles
 
   return (
     <FlatList
@@ -96,8 +119,8 @@ const Recommendations = () => {
         gap: getToken("$2", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
-      refreshing={isRefetching}
-      onRefresh={refetch}
+      refreshing={isRefreshing}
+      onRefresh={handleRefresh}
     />
   );
 };
