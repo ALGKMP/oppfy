@@ -262,13 +262,11 @@ const HomeScreen = () => {
       viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListEmptyComponent={renderEmptyList}
-      contentContainerStyle={{
-        paddingTop: (insets.top + getToken("$2", "space")) as number,
-      }}
       ListFooterComponentStyle={{
         paddingTop: getToken("$3", "space") as number,
         paddingBottom: getToken("$4", "space") as number,
       }}
+      contentInsetAdjustmentBehavior="automatic"
     />
   );
 };
