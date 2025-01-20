@@ -13,6 +13,7 @@ import Animated, {
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { MotiView } from "moti";
 import { useTheme } from "tamagui";
 
@@ -73,8 +74,8 @@ const BottomTabsLayout = () => {
         });
       }, 1000);
     }
-  // eslint-disable-next-line react-compiler/react-compiler
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-compiler/react-compiler
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDismissWelcome = () => {
@@ -96,20 +97,6 @@ const BottomTabsLayout = () => {
           },
         ],
       }));
-
-      // Special case for profile tab
-      if (iconName === "person-circle" && profile?.profilePictureUrl) {
-        return (
-          <Animated.View style={animatedStyle}>
-            <Avatar
-              source={profile.profilePictureUrl}
-              size={size}
-              bordered={focused}
-              style={{ opacity: focused ? 1 : 0.5 }}
-            />
-          </Animated.View>
-        );
-      }
 
       return (
         <Animated.View style={animatedStyle}>
@@ -218,7 +205,30 @@ const BottomTabsLayout = () => {
       <BottomTabs.Screen
         name="(profile)"
         options={{
-          tabBarIcon: getTabBarIcon("person-circle"),
+          tabBarIcon: ({ focused, size }) => {
+            const animatedStyle = useAnimatedStyle(() => ({
+              transform: [
+                {
+                  scale: withSpring(focused ? 1.1 : 1, {
+                    mass: 0.5,
+                    damping: 12,
+                    stiffness: 100,
+                  }),
+                },
+              ],
+            }));
+
+            return (
+              <Animated.View style={animatedStyle}>
+                <Avatar
+                  source={profile?.profilePictureUrl ?? DefaultProfilePicture}
+                  size={size}
+                  bordered={focused}
+                  style={{ opacity: focused ? 1 : 0.5 }}
+                />
+              </Animated.View>
+            );
+          },
         }}
       />
     </BottomTabs>
