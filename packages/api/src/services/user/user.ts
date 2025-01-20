@@ -47,7 +47,12 @@ export class UserService {
       usernameExists = await this.profileRepository.usernameExists(username);
     } while (usernameExists);
 
-    await this.userRepository.createUser(userId, phoneNumber, username);
+    await this.userRepository.createUser(
+      userId,
+      phoneNumber,
+      username,
+      accountStatus,
+    );
   }
 
   async getUser(userId: string) {
@@ -64,6 +69,10 @@ export class UserService {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }
     return user;
+  }
+
+  async getUserByPhoneNumberNoThrow(phoneNumber: string) {
+    return await this.userRepository.getUserByPhoneNumber(phoneNumber);
   }
 
   async getUserByProfileId(profileId: string) {
@@ -99,12 +108,6 @@ export class UserService {
       user.profile.name,
       user.profile.username,
     ].every((field) => !!field);
-  }
-
-  async isNewUser(uid: string) {
-    const counts = await this.postRepository.getCountOfPostsNotOnApp(uid);
-
-    return counts[0]?.count === 0;
   }
 
   async canAccessUserData({

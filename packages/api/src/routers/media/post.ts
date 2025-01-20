@@ -51,7 +51,9 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         // make/check for account
-        const user = await ctx.services.user.getUserByPhoneNumber(input.number);
+        const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
+          input.number,
+        );
 
         if (!user) {
           // make ranodm uuid

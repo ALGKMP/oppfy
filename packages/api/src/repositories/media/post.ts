@@ -441,14 +441,4 @@ export class PostRepository {
     await this.db.delete(schema.post).where(eq(schema.post.id, postId));
   }
 
-  @handleDatabaseErrors
-  async getCountOfPostsNotOnApp(userId: string) {
-    return await this.db
-      .select({
-        count: sql<number>`count(*)`.as("count"),
-      })
-      .from(schema.postOfUserNotOnApp)
-      .where(eq(schema.post.authorId, userId))
-      .limit(1);
-  }
 }
