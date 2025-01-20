@@ -8,12 +8,14 @@ interface ProfileInfoProps {
   name: string | null | undefined;
   username: string | null | undefined;
   profilePictureUrl: string | null | undefined;
+  isLoading: boolean;
 }
 
 const ProfileInfo = ({
   name,
   username,
   profilePictureUrl,
+  isLoading,
 }: ProfileInfoProps) => {
   console.log("name", name);
   console.log("username", username);
@@ -22,8 +24,10 @@ const ProfileInfo = ({
     <YStack>
       {profilePictureUrl ? (
         <Avatar source={profilePictureUrl} size={110} bordered />
-      ) : (
+      ) : isLoading ? (
         <Skeleton size={110} circular />
+      ) : (
+        <Avatar source={null} size={110} bordered />
       )}
 
       <YStack paddingTop="$3" gap="$1">

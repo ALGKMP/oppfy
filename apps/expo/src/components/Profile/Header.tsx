@@ -76,6 +76,7 @@ const Header = (
             profilePictureUrl={
               profileData?.profilePictureUrl ?? profilePictureUrl
             }
+            isLoading={isLoadingProfileData}
           />
           <QuickActions
             userId={userId}
