@@ -54,17 +54,6 @@ const Header = (
         <View position="absolute" bottom={12} right={12}>
           <JoinDatePill createdAt={profileData?.createdAt ?? undefined} />
         </View>
-        <View
-          position="absolute"
-          top={0}
-          bottom={0}
-          left={0}
-          right={0}
-          alignItems="center"
-          justifyContent="center"
-        >
-          {!userId && <H3></H3>}
-        </View>
       </YStack>
 
       {/* Profile Info Section */}

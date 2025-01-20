@@ -263,10 +263,9 @@ const HomeScreen = () => {
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListEmptyComponent={renderEmptyList}
       ListFooterComponentStyle={{
-        paddingTop: getToken("$3", "space") as number,
+        paddingTop: insets.top + getToken("$3", "space") as number,
         paddingBottom: getToken("$4", "space") as number,
       }}
-      contentInsetAdjustmentBehavior="automatic"
     />
   );
 };

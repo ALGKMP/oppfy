@@ -231,9 +231,9 @@ const OtherProfile = () => {
       refreshing={isRefreshing}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListHeaderComponentStyle={{
+        marginTop: insets.top,
         marginBottom: getToken("$2", "space") as number,
       }}
-      contentInsetAdjustmentBehavior="automatic"
     />
   );
 };
