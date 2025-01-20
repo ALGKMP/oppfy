@@ -130,8 +130,7 @@ const MediaPickerScreen = () => {
                 outputUri: `${FileSystem.documentDirectory}videos/processed_${Date.now()}.mp4`,
               });
 
-              router.dismiss();
-              router.dismiss();
+              router.dismissTo("/(app)/(bottom-tabs)/(camera)");
               router.push({
                 pathname: "/preview",
                 params: {
@@ -143,9 +142,8 @@ const MediaPickerScreen = () => {
               });
             } else {
               // For images, continue with the normal flow
-              router.dismiss();
-              router.dismiss();
-              router.push({
+              router.dismissTo("/(app)/(bottom-tabs)/(camera)");
+              router.navigate({
                 pathname: "/preview",
                 params: {
                   uri: assetInfo.uri,

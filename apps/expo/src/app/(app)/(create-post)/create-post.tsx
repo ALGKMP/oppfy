@@ -206,14 +206,13 @@ const CreatePost = () => {
             type: "notOnApp",
           } satisfies UploadMediaInputNotOnApp);
 
-    type === "photo"
-      ? void uploadPhotoMutation.mutateAsync(input)
-      : void uploadVideoMutation.mutateAsync(input);
+    await (type === "photo"
+      ? uploadPhotoMutation.mutateAsync(input)
+      : uploadVideoMutation.mutateAsync(input));
 
     await promptForReview();
 
-    router.dismissAll();
-    router.navigate("/(app)/(bottom-tabs)/(home)");
+    router.dismissTo("/(app)/(bottom-tabs)/(camera)");
   };
 
   const openCaptionSheet = () => {
