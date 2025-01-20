@@ -2,7 +2,7 @@ import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Oppfy",
+  name: "Oppfy Clip",
   slug: "oppfy-clip",
   scheme: "oppfy-clip",
   version: "1.0.0",
