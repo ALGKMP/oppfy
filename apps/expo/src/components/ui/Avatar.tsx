@@ -15,6 +15,7 @@ interface AvatarProps {
 export const Avatar = (props: AvatarProps) => {
   const theme = useTheme();
   const size = props.size ?? 46;
+  const imageSize = size - (props.bordered ? 4 : 0);
 
   return (
     <Stack
@@ -61,7 +62,16 @@ export const Avatar = (props: AvatarProps) => {
         </>
       )}
 
-      {/* Actual image */}
+      {/* Gray background */}
+      <Stack
+        position="absolute"
+        width={imageSize}
+        height={imageSize}
+        backgroundColor="$gray4"
+        borderRadius={imageSize / 2}
+      />
+
+      {/* Image */}
       <Image
         source={
           typeof props.source === "string"
@@ -71,9 +81,9 @@ export const Avatar = (props: AvatarProps) => {
         style={[
           props.style,
           {
-            width: size - (props.bordered ? 4 : 0),
-            height: size - (props.bordered ? 4 : 0),
-            borderRadius: (size - (props.bordered ? 4 : 0)) / 2,
+            width: imageSize,
+            height: imageSize,
+            borderRadius: imageSize / 2,
           },
         ]}
       />
