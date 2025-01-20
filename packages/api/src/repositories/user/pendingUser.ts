@@ -2,23 +2,30 @@ import { and, eq } from "drizzle-orm";
 
 import { db, schema } from "@oppfy/db";
 
-export const PendingUserRepository = {
+import { handleDatabaseErrors } from "../../errors";
+
+export class PendingUserRepository {
+  private db = db;
+
+  @handleDatabaseErrors
   async findByPhoneNumber(phoneNumber: string) {
-    return db.query.pendingUser.findFirst({
+    return this.db.query.pendingUser.findFirst({
       where: eq(schema.pendingUser.phoneNumber, phoneNumber),
     });
-  },
+  }
 
+  @handleDatabaseErrors
   async create(data: { phoneNumber: string }) {
-    return db
+    return this.db
       .insert(schema.pendingUser)
       .values(data)
       .returning()
       .then((res) => res[0]);
-  },
+  }
 
+  @handleDatabaseErrors
   async findPostsByPendingUserId(pendingUserId: string) {
-    return db.query.postOfUserNotOnApp.findMany({
+    return this.db.query.postOfUserNotOnApp.findMany({
       where: eq(schema.postOfUserNotOnApp.pendingUserId, pendingUserId),
       with: {
         author: {
@@ -28,25 +35,28 @@ export const PendingUserRepository = {
         },
       },
     });
-  },
+  }
 
+  @handleDatabaseErrors
   async findPostsByPhoneNumber(phoneNumber: string) {
     const pendingUserRecord = await this.findByPhoneNumber(phoneNumber);
     if (!pendingUserRecord) return [];
 
     return this.findPostsByPendingUserId(pendingUserRecord.id);
-  },
+  }
 
+  @handleDatabaseErrors
   async updateUserPendingPostsStatus(userId: string, postCount: number) {
-    await db
+    await this.db
       .update(schema.user)
       .set({
         hasPendingPosts: postCount > 0,
         pendingPostsCount: postCount,
       })
       .where(eq(schema.user.id, userId));
-  },
+  }
 
+  @handleDatabaseErrors
   async migratePosts({
     pendingUserId,
     newUserId,
@@ -54,8 +64,8 @@ export const PendingUserRepository = {
     pendingUserId: string;
     newUserId: string;
   }) {
-    return await db.transaction(async (tx) => {
-      const pendingPosts = await db.query.postOfUserNotOnApp.findMany({
+    return await this.db.transaction(async (tx) => {
+      const pendingPosts = await this.db.query.postOfUserNotOnApp.findMany({
         where: eq(schema.postOfUserNotOnApp.pendingUserId, pendingUserId),
         with: {
           author: true,
@@ -79,15 +89,6 @@ export const PendingUserRepository = {
             .returning()
             .then((res) => res[0]);
 
-          // Create notification
-/*           await tx.insert(schema.notifications).values({
-            senderId: newUserId,
-            recipientId: pendingPost.authorId,
-            eventType: "post",
-            entityId: newPost.id,
-            entityType: "post",
-          });
- */
           // Delete pending post
           await tx
             .delete(schema.postOfUserNotOnApp)
@@ -113,5 +114,5 @@ export const PendingUserRepository = {
 
       return migratedPosts;
     });
-  },
-};
+  }
+}

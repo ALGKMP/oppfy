@@ -5,6 +5,8 @@ import { PendingUserRepository } from "../../repositories/user/pendingUser";
 const PHONE_NUMBER_REGEX = /^\+[1-9]\d{1,14}$/; // E.164 format
 
 export class PendingUserService {
+  private pendingUserRepository = new PendingUserRepository();
+
   async validatePhoneNumber(phoneNumber: string) {
     if (!PHONE_NUMBER_REGEX.test(phoneNumber)) {
       throw new TRPCError({
@@ -20,11 +22,11 @@ export class PendingUserService {
 
     // Check if pending user exists
     let pendingUserRecord =
-      await PendingUserRepository.findByPhoneNumber(phoneNumber);
+      await this.pendingUserRepository.findByPhoneNumber(phoneNumber);
 
     // If no pending user exists, create one
     if (!pendingUserRecord) {
-      pendingUserRecord = await PendingUserRepository.create({
+      pendingUserRecord = await this.pendingUserRepository.create({
         phoneNumber,
       });
     }
@@ -34,7 +36,7 @@ export class PendingUserService {
 
   async checkForPendingPosts(phoneNumber: string) {
     const pendingUserRecord =
-      await PendingUserRepository.findByPhoneNumber(phoneNumber);
+      await this.pendingUserRepository.findByPhoneNumber(phoneNumber);
 
     if (!pendingUserRecord) {
       return {
@@ -43,7 +45,7 @@ export class PendingUserService {
       };
     }
 
-    const posts = await PendingUserRepository.findPostsByPendingUserId(
+    const posts = await this.pendingUserRepository.findPostsByPendingUserId(
       pendingUserRecord.id,
     );
 
@@ -55,11 +57,14 @@ export class PendingUserService {
   }
 
   async updateUserPendingPostsStatus(userId: string, postCount: number) {
-    await PendingUserRepository.updateUserPendingPostsStatus(userId, postCount);
+    await this.pendingUserRepository.updateUserPendingPostsStatus(
+      userId,
+      postCount,
+    );
   }
 
   async getPendingPostsForUser(userId: string) {
-    return PendingUserRepository.findPostsByPhoneNumber(userId);
+    return this.pendingUserRepository.findPostsByPhoneNumber(userId);
   }
 
   async migratePendingUserPosts({
@@ -69,7 +74,7 @@ export class PendingUserService {
     pendingUserId: string;
     newUserId: string;
   }) {
-    return PendingUserRepository.migratePosts({
+    return this.pendingUserRepository.migratePosts({
       pendingUserId,
       newUserId,
     });

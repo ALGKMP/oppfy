@@ -55,6 +55,8 @@ export const postRouter = createTRPCRouter({
             phoneNumber: input.number,
           });
 
+        console.log("pendingUserRecord", pendingUserRecord);
+
         return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
           author: ctx.session.uid,
           ...input,
