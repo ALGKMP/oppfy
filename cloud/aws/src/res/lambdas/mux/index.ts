@@ -133,15 +133,7 @@ const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<void> => {
         throw error;
       }
     } else {
-      await db.insert(schema.postOfUserNotOnApp).values({
-        key,
-        mediaType: "video" as const,
-        authorId: metadata.author,
-        height: parseInt(metadata.height),
-        width: parseInt(metadata.width),
-        caption: metadata.caption,
-        phoneNumber: metadata.number,
-      });
+      console.log("here");  
     }
   } catch (error) {
     console.error("Error processing video:", error);

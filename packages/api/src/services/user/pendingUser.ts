@@ -5,7 +5,7 @@ import { PendingUserRepository } from "../../repositories/user/pendingUser";
 const PHONE_NUMBER_REGEX = /^\+[1-9]\d{1,14}$/; // E.164 format
 
 export class PendingUserService {
-  private pendingUserRepository = new PendingUserRepository();
+/*   private pendingUserRepository = new PendingUserRepository();
 
   async validatePhoneNumber(phoneNumber: string) {
     if (!PHONE_NUMBER_REGEX.test(phoneNumber)) {
@@ -17,22 +17,7 @@ export class PendingUserService {
     }
   }
 
-  async createOrGetPendingUser({ phoneNumber }: { phoneNumber: string }) {
-    await this.validatePhoneNumber(phoneNumber);
-
-    // Check if pending user exists
-    let pendingUserRecord =
-      await this.pendingUserRepository.findByPhoneNumber(phoneNumber);
-
-    // If no pending user exists, create one
-    if (!pendingUserRecord) {
-      pendingUserRecord = await this.pendingUserRepository.create({
-        phoneNumber,
-      });
-    }
-
-    return pendingUserRecord;
-  }
+ 
 
   async checkForPendingPosts(phoneNumber: string) {
     const pendingUserRecord =
@@ -78,5 +63,5 @@ export class PendingUserService {
       pendingUserId,
       newUserId,
     });
-  }
+  } */
 }

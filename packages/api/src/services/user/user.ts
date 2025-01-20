@@ -1,5 +1,8 @@
+import { z } from "zod";
+
 import { auth } from "@oppfy/firebase";
 
+import { accountStatusEnum } from "../../../../db/src/schema";
 import { DomainError, ErrorCode } from "../../errors";
 import {
   BlockRepository,
@@ -12,6 +15,10 @@ import {
 } from "../../repositories";
 import { UserRepository } from "../../repositories/user/user";
 
+//TODO: move to validators
+export type InferEnum<T extends { enumValues: string[] }> =
+  T["enumValues"][number];
+
 export class UserService {
   private searchRepository = new SearchRepository();
   private userRepository = new UserRepository();
@@ -23,7 +30,11 @@ export class UserService {
   private postStatsRepository = new PostStatsRepository();
   private auth = auth;
 
-  async createUser(userId: string, phoneNumber: string) {
+  async createUser(
+    userId: string,
+    phoneNumber: string,
+    accountStatus: InferEnum<typeof accountStatusEnum> = "onApp",
+  ) {
     let username;
     let usernameExists;
     do {
@@ -41,6 +52,14 @@ export class UserService {
 
   async getUser(userId: string) {
     const user = await this.userRepository.getUser(userId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+    return user;
+  }
+
+  async getUserByPhoneNumber(phoneNumber: string) {
+    const user = await this.userRepository.getUserByPhoneNumber(phoneNumber);
     if (!user) {
       throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
     }

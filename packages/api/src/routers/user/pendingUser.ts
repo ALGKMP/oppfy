@@ -9,7 +9,7 @@ import {
 } from "../../trpc";
 
 export const pendingUserRouter = createTRPCRouter({
-  createPostForContact: protectedProcedure
+/*   createPostForContact: protectedProcedure
     .input(
       z.object({
         phoneNumber: z.string(),
@@ -75,5 +75,5 @@ export const pendingUserRouter = createTRPCRouter({
       });
 
       return migratedPosts;
-    }),
+    }), */
 });

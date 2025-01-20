@@ -137,25 +137,7 @@ const lambdaHandler = async (
     } else {
       console.log("here");
 
-      // get pending userId
-      const pendingUser = await db.query.pendingUser.findFirst({
-        where: eq(schema.pendingUser.phoneNumber, metadata.number),
-      });
 
-      if (pendingUser === undefined) {
-        throw new Error("Pending user not found");
-      }
-
-      await db.insert(schema.postOfUserNotOnApp).values({
-        key,
-        mediaType: "image" as const,
-        authorId: metadata.author,
-        height: parseInt(metadata.height),
-        width: parseInt(metadata.width),
-        caption: metadata.caption,
-        phoneNumber: metadata.number,
-        pendingUserId: pendingUser.id,
-      });
     }
   } catch (error) {
     console.error("Error processing post:", error);

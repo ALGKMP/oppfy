@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -49,15 +50,14 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        console.log("input", input);
+        // make/check for account
+        const user = await ctx.services.user.getUserByPhoneNumber(input.number);
 
-        // do pending user stuff here
-        const pendingUserRecord =
-          await ctx.services.pendingUser.createOrGetPendingUser({
-            phoneNumber: input.number,
-          });
-
-        console.log("pendingUserRecord", pendingUserRecord);
+        if (!user) {
+          // make ranodm uuid
+          const userId = randomUUID();
+          await ctx.services.user.createUser(userId, input.number, "notOnApp");
+        }
 
         return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
           author: ctx.session.uid,
