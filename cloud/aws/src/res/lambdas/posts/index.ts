@@ -81,63 +81,58 @@ const lambdaHandler = async (
     const metadata = sharedValidators.aws.metadataSchema.parse(Metadata);
     metadata.caption = decodeURIComponent(metadata.caption);
 
-    if (metadata.type === "onApp") {
-      try {
-        const { insertId: postId } = await db.transaction(async (tx) => {
-          const [post] = await tx
-            .insert(schema.post)
-            .values({
-              authorId: metadata.author,
-              recipientId: metadata.recipient,
-              key: key,
-              mediaType: "image" as const,
-              height: parseInt(metadata.height),
-              width: parseInt(metadata.width),
-              caption: metadata.caption,
-            })
-            .returning({ insertId: schema.post.id });
+    // if (metadata.type === "onApp") {
+    try {
+      const { insertId: postId } = await db.transaction(async (tx) => {
+        const [post] = await tx
+          .insert(schema.post)
+          .values({
+            authorId: metadata.author,
+            recipientId: metadata.recipient,
+            key: key,
+            mediaType: "image" as const,
+            height: parseInt(metadata.height),
+            width: parseInt(metadata.width),
+            caption: metadata.caption,
+          })
+          .returning({ insertId: schema.post.id });
 
-          if (post === undefined) {
-            throw new Error("Failed to insert post");
-          }
-
-          await tx.insert(schema.postStats).values({ postId: post.insertId });
-          return post;
-        });
-
-        await storeNotification(metadata.author, metadata.recipient, {
-          eventType: "post",
-          entityType: "post",
-          entityId: postId.toString(),
-        });
-
-        const { posts } = await getNotificationSettings(metadata.recipient);
-        if (posts) {
-          const pushTokens = await getPushTokens(metadata.recipient);
-          if (pushTokens.length > 0) {
-            const senderProfile = await getProfile(metadata.author);
-            await sendNotification(
-              pushTokens,
-              metadata.author,
-              metadata.recipient,
-              {
-                title: "You've been opped",
-                body: `${senderProfile.username} posted a picture of you`,
-                entityId: postId.toString(),
-                entityType: "post",
-              },
-            );
-          }
+        if (post === undefined) {
+          throw new Error("Failed to insert post");
         }
-      } catch (error) {
-        // If the transaction fails, delete the S3 object
-        await deleteS3Object(objectBucket, key);
-        throw error;
+
+        await tx.insert(schema.postStats).values({ postId: post.insertId });
+        return post;
+      });
+
+      await storeNotification(metadata.author, metadata.recipient, {
+        eventType: "post",
+        entityType: "post",
+        entityId: postId.toString(),
+      });
+
+      const { posts } = await getNotificationSettings(metadata.recipient);
+      if (posts) {
+        const pushTokens = await getPushTokens(metadata.recipient);
+        if (pushTokens.length > 0) {
+          const senderProfile = await getProfile(metadata.author);
+          await sendNotification(
+            pushTokens,
+            metadata.author,
+            metadata.recipient,
+            {
+              title: "You've been opped",
+              body: `${senderProfile.username} posted a picture of you`,
+              entityId: postId.toString(),
+              entityType: "post",
+            },
+          );
+        }
       }
-    } else {
-      console.log("here");
-
-
+    } catch (error) {
+      // If the transaction fails, delete the S3 object
+      await deleteS3Object(objectBucket, key);
+      throw error;
     }
   } catch (error) {
     console.error("Error processing post:", error);
