@@ -7,9 +7,9 @@
     "android": "expo run:android",
     "build:ios": "BUILDING_FOR_APP_CLIP=1 eas build --platform ios --profile clip",
     "clean": "git clean -xdf .expo .turbo node_modules",
-    "clip": "npx expo run:ios --configuration Release --scheme OppfyClip",
-    "dev": "expo start",
-    "ios": "expo run:ios",
+    "clip": "npx expo run:ios --configuration Release --scheme OppfyClip --port 8082",
+    "dev": "expo start --port 8082",
+    "ios": "expo run:ios --scheme --port 8082 -- --device",
     "prebuild": "expo prebuild"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "@tamagui/themes": "1.95.3",
     "expo": "~52.0.0",
     "expo-constants": "~17.0.3",
+    "expo-image": "~2.0.4",
     "expo-linking": "~7.0.3",
     "expo-router": "4.0.11",
     "expo-status-bar": "~2.0.0",
