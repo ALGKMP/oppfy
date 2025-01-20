@@ -21,13 +21,18 @@ type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 const OtherProfile = () => {
   const router = useRouter();
   const { routeProfile } = useRouteProfile();
-
   const insets = useSafeAreaInsets();
 
-  const { userId, username } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     userId: string;
-    username: string;
+    username?: string;
+    name?: string;
+    profilePictureUrl?: string;
   }>();
+
+  const { userId } = params;
+
+  console.log("params", params);
 
   const { data: profileData } = useProfile();
 
@@ -129,16 +134,18 @@ const OtherProfile = () => {
 
   const renderHeader = () => (
     <YStack gap="$2" position="relative">
-      <Header userId={userId} />
+      <Header
+        userId={userId}
+        name={params.name}
+        username={params.username}
+        profilePictureUrl={params.profilePictureUrl}
+      />
       {profileData?.friendCount &&
       profileData.friendCount > 0 &&
       !networkRelationships?.blocked ? (
         <FriendCarousel paddingHorizontal="$2.5" onUserPress={routeProfile} />
       ) : (
-        <RecommendationCarousel
-          paddingHorizontal="$2.5"
-          onUserPress={routeProfile}
-        />
+        <RecommendationCarousel paddingHorizontal="$2.5" />
       )}
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">

@@ -5,6 +5,7 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
+import useRouteProfile from "~/hooks/useRouteProfile";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 import { Spacer } from "./ui";
@@ -35,7 +36,9 @@ const FriendCarousel = ({
   onUserPress,
 }: FriendCarouselProps) => {
   const { width: windowWidth } = useWindowDimensions();
+
   const router = useRouter();
+  const { routeProfile } = useRouteProfile();
 
   const { data: friendsData, isLoading } =
     api.friend.paginateFriendsSelf.useInfiniteQuery(
@@ -97,7 +100,12 @@ const FriendCarousel = ({
               width={CARD_WIDTH}
               index={index}
               onPress={() =>
-                onUserPress({ userId: item.userId, username: item.username })
+                routeProfile({
+                  userId: item.userId,
+                  username: item.username,
+                  name: item.name,
+                  profilePictureUrl: item.profilePictureUrl,
+                })
               }
             />
           );

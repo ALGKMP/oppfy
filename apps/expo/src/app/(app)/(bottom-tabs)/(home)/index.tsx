@@ -160,6 +160,7 @@ const HomeScreen = () => {
             <PostCard.Skeleton key={`loading-post-${index}`} />
           ))}
         </YStack>
+        
       );
     }
 

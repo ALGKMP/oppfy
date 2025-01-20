@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, XStack, YStack } from "tamagui";
 
 import Bio from "~/components/Profile/Bio";
@@ -10,14 +10,20 @@ import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
 import useProfile from "~/hooks/useProfile";
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
 import { H3 } from "../ui";
 
 interface HeaderProps {
   userId?: string;
+  name?: string | undefined;
+  username?: string | undefined;
+  profilePictureUrl?: string | undefined;
 }
 
-const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
+const Header = (
+  { userId, name, username, profilePictureUrl }: HeaderProps = {
+    userId: undefined,
+  },
+) => {
   const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
     userId,
   });
@@ -28,23 +34,11 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
       { enabled: !!userId },
     );
 
-  const defaultProfile = {
-    name: undefined,
-    username: undefined,
-    bio: undefined,
-    profilePictureUrl: undefined,
-    followingCount: 0,
-    followerCount: 0,
-    friendCount: 0,
-    postCount: 0,
-    createdAt: undefined,
-  };
-
-  const profile = profileData ?? defaultProfile;
+  // const profile = profileData ?? defaultProfile;
   const isBlocked = networkRelationships?.blocked ?? false;
 
   // Generate a unique key for HeaderGradient based on username
-  const headerKey = `header-gradient-${profile.username ?? "default"}`;
+  const headerKey = `header-gradient-${profileData?.username ?? "default"}`;
 
   return (
     <YStack>
@@ -52,11 +46,13 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
       <YStack height={140} overflow="hidden" borderRadius="$6">
         <HeaderGradient
           key={headerKey}
-          username={profile.username}
-          profilePictureUrl={profile.profilePictureUrl}
+          username={profileData?.username ?? username}
+          profilePictureUrl={
+            profileData?.profilePictureUrl ?? profilePictureUrl
+          }
         />
         <View position="absolute" bottom={12} right={12}>
-          <JoinDatePill createdAt={profile.createdAt} />
+          <JoinDatePill createdAt={profileData?.createdAt ?? undefined} />
         </View>
         <View
           position="absolute"
@@ -75,21 +71,27 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
       <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
         <XStack justifyContent="space-between" alignItems="flex-end">
           <ProfileInfo
-            name={profile.name}
-            username={profile.username}
-            profilePictureUrl={profile.profilePictureUrl}
-            isLoading={isLoadingProfileData}
+            name={profileData?.name ?? name}
+            username={profileData?.username ?? username}
+            profilePictureUrl={
+              profileData?.profilePictureUrl ?? profilePictureUrl
+            }
           />
           <QuickActions
             userId={userId}
-            username={profile.username}
-            profilePictureUrl={profile.profilePictureUrl}
+            username={profileData?.username ?? username}
+            profilePictureUrl={
+              profileData?.profilePictureUrl ?? profilePictureUrl
+            }
             isLoading={isLoadingProfileData}
             networkRelationships={networkRelationships}
           />
         </XStack>
 
-        <Bio bio={profile.bio} isLoading={isLoadingProfileData} />
+        <Bio
+          bio={profileData?.bio ?? undefined}
+          isLoading={isLoadingProfileData}
+        />
 
         <ProfileActions
           userId={userId}
@@ -100,11 +102,11 @@ const Header = ({ userId }: HeaderProps = { userId: undefined }) => {
         {!isBlocked && (
           <Stats
             userId={userId}
-            username={profile.username}
-            postCount={profile.postCount}
-            followingCount={profile.followingCount}
-            followerCount={profile.followerCount}
-            friendCount={profile.friendCount}
+            username={profileData?.username ?? username}
+            postCount={profileData?.postCount ?? 0}
+            followingCount={profileData?.followingCount ?? 0}
+            followerCount={profileData?.followerCount ?? 0}
+            friendCount={profileData?.friendCount ?? 0}
             isLoading={isLoadingProfileData}
           />
         )}
