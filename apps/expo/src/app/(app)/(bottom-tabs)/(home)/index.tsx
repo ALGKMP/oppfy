@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -247,8 +247,6 @@ const HomeScreen = () => {
     <FlashList
       ref={scrollRef}
       data={postItems}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
       onEndReached={handleOnEndReached}
       nestedScrollEnabled={false}
       showsVerticalScrollIndicator={false}
@@ -262,10 +260,20 @@ const HomeScreen = () => {
       viewabilityConfig={{ itemVisiblePercentThreshold: 40 }}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListEmptyComponent={renderEmptyList}
+      contentContainerStyle={{
+        paddingTop: (insets.top + getToken("$2", "space")) as number,
+      }}
       ListFooterComponentStyle={{
-        paddingTop: insets.top + getToken("$3", "space") as number,
+        paddingTop: getToken("$3", "space") as number,
         paddingBottom: getToken("$4", "space") as number,
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          progressViewOffset={insets.top}
+        />
+      }
     />
   );
 };

@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
+import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
@@ -47,8 +48,6 @@ const SelfProfile = () => {
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
   const postItems = postsData?.pages.flatMap((page) => page.items) ?? [];
-
-  const { routeProfile } = useRouteProfile();
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -176,16 +175,21 @@ const SelfProfile = () => {
       estimatedItemSize={664}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
-      onRefresh={handleRefresh}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       extraData={{ viewableItems, postItems }}
-      refreshing={isRefreshing}
       ItemSeparatorComponent={() => <Spacer size="$4" />}
       ListHeaderComponentStyle={{
         paddingTop: insets.top,
         marginBottom: getToken("$2", "space") as number,
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          progressViewOffset={insets.top}
+        />
+      }
     />
   );
 };
