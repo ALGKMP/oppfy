@@ -7,7 +7,6 @@ export const usePostToContact = () => {
   // MARKER: pendingUser
   const { mutateAsync: createPostForContact } =
     api.pendingUser.createPostForContact.useMutation();
-  const { uploadMedia } = useUploadMedia();
 
   const postToContact = useCallback(
     async ({

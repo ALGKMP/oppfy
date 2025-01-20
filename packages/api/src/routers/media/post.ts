@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { postContentType } from "../../../../validators/src/shared/media";
 import { DomainError, ErrorCode } from "../../errors";
+import { PendingUserService } from "../../services/user/pendingUser";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -48,9 +49,11 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-
-
         // do pending user stuff here
+        const pendingUserRecord =
+          await ctx.services.pendingUser.createOrGetPendingUser({
+            phoneNumber: input.number,
+          });
 
         return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
           author: ctx.session.uid,
@@ -102,7 +105,6 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-
         // do pending user stuff here
 
         const { url } = await ctx.services.mux.PresignedUrlWithPostMetadata({

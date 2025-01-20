@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { PendingUserService } from "../../services/user/pendingUser";
@@ -6,7 +7,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "../../trpc";
-import { TRPCError } from "@trpc/server";
 
 export const pendingUserRouter = createTRPCRouter({
   createPostForContact: protectedProcedure
@@ -22,12 +22,10 @@ export const pendingUserRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const pendingUserRecord = await PendingUserService.createOrGetPendingUser(
-        {
+      const pendingUserRecord =
+        await ctx.services.pendingUser.createOrGetPendingUser({
           phoneNumber: input.phoneNumber,
-          name: input.contactName,
-        },
-      );
+        });
 
       if (!pendingUserRecord) {
         throw new TRPCError({
@@ -35,19 +33,6 @@ export const pendingUserRouter = createTRPCRouter({
           message: "Pending user not found",
         });
       }
-
-      const post = await PendingUserService.createPostForPendingUser({
-        authorId: ctx.session.user.id,
-        pendingUserId: pendingUserRecord.id,
-        phoneNumber: input.phoneNumber,
-        mediaKey: input.mediaKey,
-        caption: input.caption,
-        width: input.width,
-        height: input.height,
-        mediaType: input.mediaType,
-      });
-
-      return post;
     }),
 
   checkPendingPosts: publicProcedure
@@ -56,8 +41,8 @@ export const pendingUserRouter = createTRPCRouter({
         phoneNumber: z.string(),
       }),
     )
-    .query(async ({ input }) => {
-      return PendingUserService.checkForPendingPosts(input.phoneNumber);
+    .query(async ({ ctx, input }) => {
+      return ctx.services.pendingUser.checkForPendingPosts(input.phoneNumber);
     }),
 
   updatePendingPostsStatus: protectedProcedure
@@ -67,14 +52,14 @@ export const pendingUserRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await PendingUserService.updateUserPendingPostsStatus(
+      await ctx.services.pendingUser.updateUserPendingPostsStatus(
         ctx.session.user.id,
         input.postCount,
       );
     }),
 
   getPendingPosts: protectedProcedure.query(async ({ ctx }) => {
-    return PendingUserService.getPendingPostsForUser(ctx.session.user.id);
+    return ctx.services.pendingUser.getPendingPostsForUser(ctx.session.user.id);
   }),
 
   migratePendingPosts: protectedProcedure
@@ -84,7 +69,7 @@ export const pendingUserRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const migratedPosts = await PendingUserService.migratePendingUserPosts({
+      const migratedPosts = await ctx.services.pendingUser.migratePendingUserPosts({
         pendingUserId: input.pendingUserId,
         newUserId: ctx.session.user.id,
       });

@@ -17,23 +17,6 @@ export const PendingUserRepository = {
       .then((res) => res[0]);
   },
 
-  async createPost(data: {
-    authorId: string;
-    pendingUserId: string;
-    phoneNumber: string;
-    key: string;
-    caption: string;
-    width: number;
-    height: number;
-    mediaType: "image" | "video";
-  }) {
-    return db
-      .insert(schema.postOfUserNotOnApp)
-      .values(data)
-      .returning()
-      .then((res) => res[0]);
-  },
-
   async findPostsByPendingUserId(pendingUserId: string) {
     return db.query.postOfUserNotOnApp.findMany({
       where: eq(schema.postOfUserNotOnApp.pendingUserId, pendingUserId),

@@ -4,7 +4,7 @@ import { PendingUserRepository } from "../../repositories/user/pendingUser";
 
 const PHONE_NUMBER_REGEX = /^\+[1-9]\d{1,14}$/; // E.164 format
 
-export const PendingUserService = {
+export class PendingUserService {
   async validatePhoneNumber(phoneNumber: string) {
     if (!PHONE_NUMBER_REGEX.test(phoneNumber)) {
       throw new TRPCError({
@@ -13,15 +13,9 @@ export const PendingUserService = {
           "Invalid phone number format. Please use international format (e.g., +1234567890)",
       });
     }
-  },
+  }
 
-  async createOrGetPendingUser({
-    phoneNumber,
-    name,
-  }: {
-    phoneNumber: string;
-    name?: string;
-  }) {
+  async createOrGetPendingUser({ phoneNumber }: { phoneNumber: string }) {
     await this.validatePhoneNumber(phoneNumber);
 
     // Check if pending user exists
@@ -36,41 +30,7 @@ export const PendingUserService = {
     }
 
     return pendingUserRecord;
-  },
-
-  async createPostForPendingUser({
-    authorId,
-    pendingUserId,
-    phoneNumber,
-    mediaKey,
-    caption,
-    width,
-    height,
-    mediaType,
-  }: {
-    authorId: string;
-    pendingUserId: string;
-    phoneNumber: string;
-    mediaKey: string;
-    caption: string;
-    width: number;
-    height: number;
-    mediaType: "image" | "video";
-  }) {
-    // Validate phone number format
-    await this.validatePhoneNumber(phoneNumber);
-
-    return PendingUserRepository.createPost({
-      authorId,
-      pendingUserId,
-      phoneNumber,
-      key: mediaKey,
-      caption,
-      width,
-      height,
-      mediaType,
-    });
-  },
+  }
 
   async checkForPendingPosts(phoneNumber: string) {
     const pendingUserRecord =
@@ -92,15 +52,15 @@ export const PendingUserService = {
       pendingUserId: pendingUserRecord.id,
       postCount: posts.length,
     };
-  },
+  }
 
   async updateUserPendingPostsStatus(userId: string, postCount: number) {
     await PendingUserRepository.updateUserPendingPostsStatus(userId, postCount);
-  },
+  }
 
   async getPendingPostsForUser(userId: string) {
     return PendingUserRepository.findPostsByPhoneNumber(userId);
-  },
+  }
 
   async migratePendingUserPosts({
     pendingUserId,
@@ -113,5 +73,5 @@ export const PendingUserService = {
       pendingUserId,
       newUserId,
     });
-  },
-};
+  }
+}
