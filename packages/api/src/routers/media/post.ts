@@ -49,6 +49,8 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        console.log("input", input);
+
         // do pending user stuff here
         const pendingUserRecord =
           await ctx.services.pendingUser.createOrGetPendingUser({
