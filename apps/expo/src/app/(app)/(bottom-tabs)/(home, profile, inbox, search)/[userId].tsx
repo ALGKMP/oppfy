@@ -147,7 +147,7 @@ const OtherProfile = () => {
       {profileData?.friendCount &&
       profileData.friendCount > 0 &&
       !networkRelationships?.blocked ? (
-        <FriendCarousel paddingHorizontal="$2.5" />
+        <FriendCarousel userId={userId} paddingHorizontal="$2.5" />
       ) : (
         <RecommendationCarousel paddingHorizontal="$2.5" />
       )}
