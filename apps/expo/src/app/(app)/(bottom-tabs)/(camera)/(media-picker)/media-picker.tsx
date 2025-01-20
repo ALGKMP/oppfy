@@ -14,41 +14,16 @@ import { FlashList } from "@shopify/flash-list";
 import { Video } from "@tamagui/lucide-icons";
 import { getToken, Stack } from "tamagui";
 
-import useMediaProcessing from "~/hooks/media/useMediaProcessing";
+const MAX_VIDEO_DURATION = 60;
 
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const ITEM_SIZE = SCREEN_WIDTH / NUM_COLUMNS;
 
-const moveVideoToLocalStorage = async (uri: string) => {
-  // Remove file:// prefix if present
-  const cleanUri = uri.replace("file://", "");
-  const filename = cleanUri.split("/").pop() ?? "video.mp4";
-  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
-
-  // Ensure videos directory exists
-  await FileSystem.makeDirectoryAsync(
-    `${FileSystem.documentDirectory}videos/`,
-    {
-      intermediates: true,
-    },
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-  ).catch(() => {});
-
-  // Copy file
-  await FileSystem.copyAsync({
-    from: uri,
-    to: destination,
-  });
-
-  return `file://${destination}`;
-};
-
 const MediaPickerScreen = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { processVideo } = useMediaProcessing();
 
   const { albumId, albumTitle } = useLocalSearchParams<{
     albumId: string;
@@ -83,7 +58,10 @@ const MediaPickerScreen = () => {
       media.assets.map(async (asset) => {
         if (asset.mediaType === "video") {
           const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-          return asset.height >= asset.width && assetInfo.duration <= 60;
+          return (
+            asset.height >= asset.width &&
+            assetInfo.duration <= MAX_VIDEO_DURATION
+          );
         }
         return asset.height >= asset.width;
       }),
@@ -173,7 +151,7 @@ const MediaPickerScreen = () => {
         </Stack>
       );
     },
-    [router, processVideo],
+    [router],
   );
 
   return (
@@ -194,6 +172,30 @@ const MediaPickerScreen = () => {
       }}
     />
   );
+};
+
+const moveVideoToLocalStorage = async (uri: string) => {
+  // Remove file:// prefix if present
+  const cleanUri = uri.replace("file://", "");
+  const filename = cleanUri.split("/").pop() ?? "video.mp4";
+  const destination = `${FileSystem.documentDirectory}videos/${filename}`;
+
+  // Ensure videos directory exists
+  await FileSystem.makeDirectoryAsync(
+    `${FileSystem.documentDirectory}videos/`,
+    {
+      intermediates: true,
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+  ).catch(() => {});
+
+  // Copy file
+  await FileSystem.copyAsync({
+    from: uri,
+    to: destination,
+  });
+
+  return `file://${destination}`;
 };
 
 export default MediaPickerScreen;
