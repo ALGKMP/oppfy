@@ -51,9 +51,16 @@ const ScanQr = () => {
 
         const userId = url.searchParams.get("userId") ?? "";
         const username = url.searchParams.get("username") ?? "";
+        const name = url.searchParams.get("name") ?? "";
+        const profilePictureUrl =
+          url.searchParams.get("profilePictureUrl") ?? "";
 
         setTimeout(() => {
-          routeProfile({ userId, username });
+          routeProfile(userId, {
+            name,
+            username,
+            profilePictureUrl,
+          });
           setIsScanning(true); // Reset scanning state after navigation
         }, 100);
       }

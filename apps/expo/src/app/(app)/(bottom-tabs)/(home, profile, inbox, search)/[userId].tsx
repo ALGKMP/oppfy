@@ -96,25 +96,29 @@ const OtherProfile = () => {
       endpoint="other-profile"
       self={{
         id: profileData?.userId ?? "",
+        name: profileData?.name ?? "",
         username: profileData?.username ?? "",
-        profilePicture: profileData?.profilePictureUrl,
+        profilePictureUrl: profileData?.profilePictureUrl,
       }}
       author={{
         id: item.authorId,
+        name: item.authorName ?? "",
         username: item.authorUsername ?? "",
-        profilePicture: item.authorProfilePicture,
+        profilePictureUrl: item.authorProfilePicture,
       }}
       recipient={{
         id: item.recipientId,
+        name: item.recipientName ?? "",
         username: item.recipientUsername ?? "",
-        profilePicture: item.recipientProfilePicture,
+        profilePictureUrl: item.recipientProfilePicture,
       }}
       media={{
         id: item.postId,
         recipient: {
           id: item.recipientId,
+          name: item.recipientName ?? "",
           username: item.recipientUsername ?? "",
-          profilePicture: item.recipientProfilePicture,
+          profilePictureUrl: item.recipientProfilePicture,
         },
         type: item.mediaType,
         url: item.imageUrl,
@@ -143,7 +147,7 @@ const OtherProfile = () => {
       {profileData?.friendCount &&
       profileData.friendCount > 0 &&
       !networkRelationships?.blocked ? (
-        <FriendCarousel paddingHorizontal="$2.5" onUserPress={routeProfile} />
+        <FriendCarousel paddingHorizontal="$2.5" />
       ) : (
         <RecommendationCarousel paddingHorizontal="$2.5" />
       )}

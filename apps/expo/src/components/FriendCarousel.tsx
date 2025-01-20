@@ -17,7 +17,6 @@ type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
 interface FriendCarouselProps {
   paddingHorizontal?: SpaceTokens;
   paddingVertical?: SpaceTokens;
-  onUserPress: (params: { userId: string; username: string }) => void;
 }
 
 const LoadingCard = ({ width }: { width: number }) => (
@@ -33,7 +32,6 @@ const LoadingCard = ({ width }: { width: number }) => (
 const FriendCarousel = ({
   paddingHorizontal,
   paddingVertical,
-  onUserPress,
 }: FriendCarouselProps) => {
   const { width: windowWidth } = useWindowDimensions();
 
@@ -100,10 +98,9 @@ const FriendCarousel = ({
               width={CARD_WIDTH}
               index={index}
               onPress={() =>
-                routeProfile({
-                  userId: item.userId,
-                  username: item.username,
+                routeProfile(item.userId, {
                   name: item.name,
+                  username: item.username,
                   profilePictureUrl: item.profilePictureUrl,
                 })
               }

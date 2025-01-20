@@ -284,9 +284,10 @@ const Requests = () => {
               }),
           }}
           onPress={() =>
-            routeProfile({
-              userId: item.data.userId,
+            routeProfile(item.data.userId, {
+              name: item.data.name ?? "",
               username: item.data.username,
+              profilePictureUrl: item.data.profilePictureUrl,
             })
           }
         />
@@ -314,9 +315,10 @@ const Requests = () => {
             }),
         }}
         onPress={() =>
-          routeProfile({
-            userId: item.data.userId,
+          routeProfile(item.data.userId, {
+            name: item.data.name ?? "",
             username: item.data.username,
+            profilePictureUrl: item.data.profilePictureUrl,
           })
         }
       />

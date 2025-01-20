@@ -92,13 +92,6 @@ const HomeScreen = () => {
     setViewableItems(visibleItemIds);
   };
 
-  const handleUserPress = useCallback(
-    (params: { userId: string; username: string }) => {
-      void routeProfile(params);
-    },
-    [routeProfile],
-  );
-
   const renderPost = useCallback(
     ({ item }: { item: Post }) => {
       if (profile === undefined) return null;
@@ -111,25 +104,29 @@ const HomeScreen = () => {
           endpoint="home-feed"
           self={{
             id: profile.userId,
+            name: profile.name ?? "",
             username: profile.username,
-            profilePicture: profile.profilePictureUrl,
+            profilePictureUrl: profile.profilePictureUrl,
           }}
           author={{
             id: item.authorId,
+            name: item.authorName ?? "",
             username: item.authorUsername ?? "",
-            profilePicture: item.authorProfilePicture,
+            profilePictureUrl: item.authorProfilePicture,
           }}
           recipient={{
             id: item.recipientId,
+            name: item.recipientName ?? "",
             username: item.recipientUsername ?? "",
-            profilePicture: item.recipientProfilePicture,
+            profilePictureUrl: item.recipientProfilePicture,
           }}
           media={{
             id: item.postId,
             recipient: {
               id: item.recipientId,
+              name: item.recipientName ?? "",
               username: item.recipientUsername ?? "",
-              profilePicture: item.recipientProfilePicture,
+              profilePictureUrl: item.recipientProfilePicture,
             },
             type: item.mediaType,
             url: item.imageUrl,
@@ -160,7 +157,6 @@ const HomeScreen = () => {
             <PostCard.Skeleton key={`loading-post-${index}`} />
           ))}
         </YStack>
-        
       );
     }
 
@@ -241,14 +237,11 @@ const HomeScreen = () => {
 
     return (
       <YStack gap="$4">
-        <RecommendationCarousel
-          paddingHorizontal="$4"
-          onUserPress={handleUserPress}
-        />
+        <RecommendationCarousel paddingHorizontal="$4" />
         <Footer />
       </YStack>
     );
-  }, [isLoading, handleUserPress]);
+  }, [isLoading]);
 
   return (
     <FlashList

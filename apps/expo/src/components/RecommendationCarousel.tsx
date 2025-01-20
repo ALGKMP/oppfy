@@ -115,8 +115,7 @@ const RecommendationCarousel = ({
               width={CARD_WIDTH}
               index={index}
               onPress={() =>
-                routeProfile({
-                  userId: item.userId,
+                routeProfile(item.userId, {
                   name: item.name ?? "",
                   username: item.username,
                   profilePictureUrl: item.profilePictureUrl,

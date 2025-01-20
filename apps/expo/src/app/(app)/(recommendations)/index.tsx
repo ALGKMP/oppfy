@@ -54,10 +54,6 @@ const Recommendations = () => {
     },
   });
 
-  const handleProfilePress = (userId: string, username: string) => {
-    routeProfile({ userId, username });
-  };
-
   const SCREEN_PADDING = getToken("$4", "space") as number;
   const GAP = getToken("$2", "space") as number;
   const TILE_WIDTH = (screenWidth - SCREEN_PADDING * 2 - GAP) / 2;
@@ -93,7 +89,13 @@ const Recommendations = () => {
           profilePictureUrl={item.profilePictureUrl}
           width={TILE_WIDTH}
           index={index}
-          onPress={() => handleProfilePress(item.userId, item.username)}
+          onPress={() =>
+            routeProfile(item.userId, {
+              name: item.name ?? "",
+              username: item.username,
+              profilePictureUrl: item.profilePictureUrl,
+            })
+          }
           actionButton={{
             label:
               item.relationshipStatus === "following"

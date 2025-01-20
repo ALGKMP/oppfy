@@ -50,13 +50,6 @@ const SelfProfile = () => {
 
   const { routeProfile } = useRouteProfile();
 
-  // const handleUserPress = useCallback(
-  //   (params: { userId: string; username: string }) => {
-  //     void routeProfile(params);
-  //   },
-  //   [routeProfile],
-  // );
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refetchPosts();
@@ -93,18 +86,21 @@ const SelfProfile = () => {
       caption={item.caption}
       self={{
         id: profileData?.userId ?? "",
+        name: profileData?.name ?? "",
         username: profileData?.username ?? "",
-        profilePicture: profileData?.profilePictureUrl,
+        profilePictureUrl: profileData?.profilePictureUrl,
       }}
       author={{
         id: item.authorId,
+        name: item.authorName ?? "",
         username: item.authorUsername ?? "",
-        profilePicture: item.authorProfilePicture,
+        profilePictureUrl: item.authorProfilePicture,
       }}
       recipient={{
         id: item.recipientId,
+        name: item.recipientName ?? "",
         username: item.recipientUsername ?? "",
-        profilePicture: item.recipientProfilePicture,
+        profilePictureUrl: item.recipientProfilePicture,
       }}
       media={{
         id: item.postId,
@@ -116,8 +112,9 @@ const SelfProfile = () => {
         },
         recipient: {
           id: item.recipientId,
+          name: item.recipientName ?? "",
           username: item.recipientUsername ?? "",
-          profilePicture: item.recipientProfilePicture,
+          profilePictureUrl: item.recipientProfilePicture,
         },
       }}
       stats={{
@@ -134,14 +131,10 @@ const SelfProfile = () => {
       <Header />
       <YStack>
         {profileData?.friendCount && profileData.friendCount > 0 ? (
-          <FriendCarousel paddingHorizontal="$2.5" onUserPress={routeProfile} />
+          <FriendCarousel paddingHorizontal="$2.5" />
         ) : (
-          <RecommendationCarousel
-            paddingHorizontal="$4"
-            onUserPress={routeProfile}
-          />
+          <RecommendationCarousel paddingHorizontal="$2.5" />
         )}
-        {/* <Button onPress={() => router.push("otherpr")}>TEST</Button> */}
       </YStack>
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">

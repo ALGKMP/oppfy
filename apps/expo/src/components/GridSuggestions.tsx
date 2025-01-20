@@ -41,10 +41,6 @@ const GridSuggestions = () => {
     },
   });
 
-  const handleProfilePress = (userId: string, username: string) => {
-    routeProfile({ userId, username });
-  };
-
   if (!data?.length) {
     return null;
   }
@@ -63,7 +59,13 @@ const GridSuggestions = () => {
           profilePictureUrl={item.profilePictureUrl}
           width={TILE_WIDTH}
           index={index}
-          onPress={() => handleProfilePress(item.userId, item.username)}
+          onPress={() =>
+            routeProfile(item.userId, {
+              name: item.name ?? "",
+              username: item.username,
+              profilePictureUrl: item.profilePictureUrl,
+            })
+          }
           actionButton={{
             label: "Follow",
             onPress: () =>
