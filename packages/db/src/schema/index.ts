@@ -61,6 +61,11 @@ export const reportUserReasonEnum = pgEnum("report_user_reason", [
   "Scam/spam account",
 ]);
 
+export const accountStatusEnum = pgEnum("account_status", [
+  "onApp",
+  "notOnApp",
+]);
+
 export const user = pgTable("user", {
   id: varchar("id", { length: 255 }).primaryKey(),
   profileId: uuid("profile_id")
@@ -73,8 +78,7 @@ export const user = pgTable("user", {
     .default("public")
     .notNull(),
   phoneNumber: text("phone_number").notNull().unique(),
-  hasPendingPosts: boolean("has_pending_posts").default(false).notNull(),
-  pendingPostsCount: integer("pending_posts_count").default(0).notNull(),
+  accountStatus: accountStatusEnum("account_status").default("onApp").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -101,57 +105,6 @@ export const userRelations = relations(user, ({ one, many }) => ({
   }),
   pushTokens: many(pushToken),
 }));
-
-export const pendingUser = pgTable("pendingUser", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  phoneNumber: text("phone_number").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-export const pendingUserRelations = relations(pendingUser, ({ many }) => ({
-  posts: many(postOfUserNotOnApp),
-}));
-
-export const postOfUserNotOnApp = pgTable("postOfUserNotOnApp", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  phoneNumber: text("phone_number").notNull(),
-  authorId: varchar("author_id", { length: 255 })
-    .notNull()
-    .references(() => user.id),
-  pendingUserId: uuid("pending_user_id")
-    .notNull()
-    .references(() => pendingUser.id),
-  caption: text("caption").notNull().default(""),
-  key: text("key").notNull(),
-  width: integer("width").notNull().default(500),
-  height: integer("height").notNull().default(500),
-  mediaType: mediaTypeEnum("media_type").notNull().default("image"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-export const postOfUserNotOnAppRelations = relations(
-  postOfUserNotOnApp,
-  ({ one }) => ({
-    author: one(user, {
-      fields: [postOfUserNotOnApp.authorId],
-      references: [user.id],
-    }),
-    pendingUser: one(pendingUser, {
-      fields: [postOfUserNotOnApp.pendingUserId],
-      references: [pendingUser.id],
-    }),
-  }),
-);
 
 export const contact = pgTable("contact", {
   id: varchar("id", { length: 128 }).primaryKey(),
@@ -644,10 +597,3 @@ export const reportProfileRelations = relations(reportUser, ({ one }) => ({
   }),
 }));
 
-export const test = pgTable("test", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});

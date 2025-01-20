@@ -116,6 +116,8 @@ const useUploadMedia = () => {
         body: photoBlob,
       });
 
+      console.log("response", response);
+
       if (!response.ok) {
         throw new Error("Failed to upload photo");
       }

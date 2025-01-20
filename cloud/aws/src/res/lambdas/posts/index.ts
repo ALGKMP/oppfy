@@ -55,6 +55,8 @@ const lambdaHandler = async (
   event: S3ObjectLambdaEvent,
   _context: Context,
 ): Promise<void> => {
+  console.log("event", event);
+
   const record = event.Records[0];
 
   if (record === undefined) {
@@ -133,6 +135,8 @@ const lambdaHandler = async (
         throw error;
       }
     } else {
+      console.log("here");
+
       // get pending userId
       const pendingUser = await db.query.pendingUser.findFirst({
         where: eq(schema.pendingUser.phoneNumber, metadata.number),
