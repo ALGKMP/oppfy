@@ -2,7 +2,6 @@ import { Text, View } from "react-native";
 import { registerRootComponent } from "expo";
 import { ExpoRoot, SplashScreen } from "expo-router";
 
-void SplashScreen.preventAutoHideAsync();
 export const App = () => {
   console.log("Root AppClip");
   try {
