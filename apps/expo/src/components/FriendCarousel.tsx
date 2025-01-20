@@ -5,14 +5,12 @@ import { FlashList } from "@shopify/flash-list";
 import { getToken, YStack } from "tamagui";
 import type { SpaceTokens, Token } from "tamagui";
 
-import useFriends from "~/hooks/useFriends";
 import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
+import { api } from "~/utils/api";
 import { Spacer } from "./ui";
 import { HeaderTitle } from "./ui/Headings";
 import { UserCard } from "./ui/UserCard";
-
-type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
 
 interface FriendCarouselProps {
   userId?: string;
@@ -108,6 +106,42 @@ const FriendCarousel = ({
       />
     </YStack>
   );
+};
+
+type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
+
+const STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
+interface UseFriendsProps {
+  userId?: string;
+  pageSize?: number;
+}
+
+const useFriends = ({ userId, pageSize = 10 }: UseFriendsProps = {}) => {
+  const query = api.friend.paginateFriendsOthers.useInfiniteQuery(
+    { userId: userId!, pageSize },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      staleTime: STALE_TIME,
+      enabled: !!userId,
+    },
+  );
+
+  const selfQuery = api.friend.paginateFriendsSelf.useInfiniteQuery(
+    { pageSize },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      staleTime: STALE_TIME,
+      enabled: !userId,
+    },
+  );
+
+  const activeQuery = userId ? query : selfQuery;
+
+  return {
+    isLoading: activeQuery.isLoading,
+    friends: activeQuery.data?.pages.flatMap((page) => page.items),
+  };
 };
 
 export default FriendCarousel;
