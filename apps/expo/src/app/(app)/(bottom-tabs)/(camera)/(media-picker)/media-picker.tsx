@@ -78,12 +78,21 @@ const MediaPickerScreen = () => {
       sortBy: [MediaLibrary.SortBy.creationTime],
     });
 
-    // Filter out assets that are wider than tall
-    const filteredAssets = media.assets.filter(
-      (asset) => asset.height >= asset.width,
+    // Filter out assets that are wider than tall and videos longer than 1 minute
+    const filteredAssets = await Promise.all(
+      media.assets.map(async (asset) => {
+        if (asset.mediaType === "video") {
+          const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+          return asset.height >= asset.width && assetInfo.duration <= 60;
+        }
+        return asset.height >= asset.width;
+      }),
     );
 
-    setAssets((prevAssets) => [...prevAssets, ...filteredAssets]);
+    setAssets((prevAssets) => [
+      ...prevAssets,
+      ...media.assets.filter((_, index) => filteredAssets[index]),
+    ]);
     setEndCursor(media.endCursor);
     setHasNextPage(media.hasNextPage);
     setIsLoading(false);
@@ -122,19 +131,11 @@ const MediaPickerScreen = () => {
                 assetInfo.localUri,
               );
 
-              // Process video to 1 minute
-              const processedUri = await processVideo({
-                uri: localUri,
-                startTime: 0,
-                endTime: 60, // 1 minute
-                outputUri: `${FileSystem.documentDirectory}videos/processed_${Date.now()}.mp4`,
-              });
-
               router.dismissTo("/(app)/(bottom-tabs)/(camera)");
               router.push({
                 pathname: "/preview",
                 params: {
-                  uri: processedUri,
+                  uri: localUri,
                   type: assetInfo.mediaType,
                   height: assetInfo.height.toString(),
                   width: assetInfo.width.toString(),
