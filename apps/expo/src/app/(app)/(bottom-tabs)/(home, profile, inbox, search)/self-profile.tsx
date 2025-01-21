@@ -25,6 +25,7 @@ const SelfProfile = () => {
   const { isFirstInStack } = useLocalSearchParams<{
     isFirstInStack: "yes";
   }>();
+  
 
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
