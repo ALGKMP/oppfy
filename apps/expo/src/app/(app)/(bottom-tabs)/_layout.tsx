@@ -129,12 +129,16 @@ const BottomTabsLayout = () => {
         }}
         style={{
           position: "absolute",
-          top: -7,
-          right: -5,
+          top: -6,
+          left: 12,
           minWidth: 18,
           height: 18,
+          paddingHorizontal: 4,
           borderRadius: 9,
           overflow: "hidden",
+          alignItems: "center",
+          justifyContent: "center",
+          transform: [{ translateX: 0 }],
         }}
       >
         <BlurView
@@ -149,16 +153,7 @@ const BottomTabsLayout = () => {
             ...StyleSheet.absoluteFillObject,
           }}
         />
-        <Text
-          color="white"
-          fontSize={10}
-          fontWeight="bold"
-          textAlign="center"
-          style={{
-            paddingHorizontal: 4,
-            lineHeight: 18,
-          }}
-        >
+        <Text color="white" fontSize={10} fontWeight="bold" textAlign="center">
           {count > 99 ? "99+" : count}
         </Text>
       </MotiView>
@@ -194,7 +189,7 @@ const BottomTabsLayout = () => {
           tabBarIcon: (props) => (
             <View>
               {getTabBarIcon("notifications")(props)}
-              <NotificationBadge count={110} />
+              <NotificationBadge count={11} />
               {(unreadNotificationsCount ?? 0) > 0 && (
                 <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
