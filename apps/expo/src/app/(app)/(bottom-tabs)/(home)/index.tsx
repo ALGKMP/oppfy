@@ -25,8 +25,6 @@ import {
 import PostCard from "~/components/Post/PostCard";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { Avatar, HeaderTitle, Icon, Separator } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
-import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -38,14 +36,14 @@ const HomeScreen = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
   const router = useRouter();
-  const { routeProfile } = useRouteProfile();
 
   const insets = useSafeAreaInsets();
 
   const [refreshing, setRefreshing] = useState(false);
   const [viewableItems, setViewableItems] = useState<string[]>([]);
 
-  const { profile, isLoading: isLoadingProfile } = useProfile();
+  const { data: profile, isLoading: isLoadingProfile } =
+    api.profile.getFullProfileSelf.useQuery();
 
   const {
     data: postData,
@@ -102,12 +100,6 @@ const HomeScreen = () => {
           createdAt={item.createdAt}
           caption={item.caption}
           endpoint="home-feed"
-          self={{
-            id: profile.userId,
-            name: profile.name ?? "",
-            username: profile.username,
-            profilePictureUrl: profile.profilePictureUrl,
-          }}
           author={{
             id: item.authorId,
             name: item.authorName ?? "",

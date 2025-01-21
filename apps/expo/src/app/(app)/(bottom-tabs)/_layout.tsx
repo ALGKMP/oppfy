@@ -31,7 +31,6 @@ import {
   YStack,
 } from "~/components/ui";
 import type { IconName } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
 import { api } from "~/utils/api";
 import { storage } from "~/utils/storage";
 
@@ -46,7 +45,6 @@ interface TabBarIconProps {
 const BottomTabsLayout = () => {
   const utils = api.useUtils();
   const bottomSheet = useBottomSheetController();
-  // const { profile } = useProfile();
 
   const { data: unreadNotificationsCount } =
     api.notifications.getUnreadNotificationsCount.useQuery();

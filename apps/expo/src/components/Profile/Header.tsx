@@ -1,6 +1,8 @@
 import React from "react";
 import { View, XStack, YStack } from "tamagui";
 
+import { RouterOutputs } from "@oppfy/api";
+
 import Bio from "~/components/Profile/Bio";
 import HeaderGradient from "~/components/Profile/HeaderGradient";
 import JoinDatePill from "~/components/Profile/JoinDatePill";
@@ -8,8 +10,9 @@ import ProfileActions from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
-import type { NetworkRelationships } from "~/hooks/useProfile";
 import { H3 } from "../ui";
+
+type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
 
 interface HeaderProps {
   userId?: string;

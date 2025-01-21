@@ -14,14 +14,6 @@ import { PostImage } from "./PostImage";
 import { PostStats } from "./PostStats";
 import { PostVideo } from "./PostVideo";
 
-
-interface Self {
-  id: string;
-  name: string;
-  username: string;
-  profilePictureUrl: string | null | undefined;
-}
-
 export interface Author {
   id: string;
   name: string;
@@ -61,7 +53,6 @@ export interface PostCardProps {
   postId: string;
   createdAt: Date;
   caption: string;
-  self: Self;
   author: Author;
   recipient: Recipient;
   media: Media;

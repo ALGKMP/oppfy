@@ -12,7 +12,6 @@ import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -31,13 +30,11 @@ const OtherProfile = () => {
 
   const { userId } = params;
 
-  const {
-    data: profileData,
-    isLoading: isLoadingProfile,
-    networkRelationships,
-  } = useProfile({
-    userId,
-  });
+  const { data: profileData, isLoading: isLoadingProfile } =
+    api.profile.getFullProfileOther.useQuery({ userId: userId });
+
+  const { data: networkRelationships, refetch: refetchNetworkRelationships } =
+    api.profile.getNetworkRelationships.useQuery({ userId });
 
   const {
     data: postsData,
@@ -61,7 +58,7 @@ const OtherProfile = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetchPosts();
+    await Promise.all([refetchPosts(), refetchNetworkRelationships()]);
     setIsRefreshing(false);
   };
 
@@ -90,15 +87,9 @@ const OtherProfile = () => {
   const renderPost = ({ item }: { item: Post }) => (
     <PostCard
       postId={item.postId}
+      endpoint="other-profile"
       createdAt={item.createdAt}
       caption={item.caption}
-      endpoint="other-profile"
-      self={{
-        id: profileData?.userId ?? "",
-        name: profileData?.name ?? "",
-        username: profileData?.username ?? "",
-        profilePictureUrl: profileData?.profilePictureUrl,
-      }}
       author={{
         id: item.authorId,
         name: item.authorName ?? "",

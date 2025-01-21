@@ -12,7 +12,6 @@ import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder, HeaderTitle } from "~/components/ui";
-import useProfile from "~/hooks/useProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -24,7 +23,8 @@ const SelfProfile = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
-  const { data: profileData, isLoading: isLoadingProfile } = useProfile();
+  const { data: profileData, isLoading: isLoadingProfile } =
+    api.profile.getFullProfileSelf.useQuery();
 
   const {
     data: postsData,
@@ -79,12 +79,6 @@ const SelfProfile = () => {
       endpoint="self-profile"
       createdAt={item.createdAt}
       caption={item.caption}
-      self={{
-        id: profileData?.userId ?? "",
-        name: profileData?.name ?? "",
-        username: profileData?.username ?? "",
-        profilePictureUrl: profileData?.profilePictureUrl,
-      }}
       author={{
         id: item.authorId,
         name: item.authorName ?? "",
