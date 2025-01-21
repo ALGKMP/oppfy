@@ -27,9 +27,7 @@ const SelfProfile = () => {
     data: profileData,
     isLoading: isLoadingProfile,
     refetch: refetchProfile,
-  } = api.profile.getFullProfileSelf.useQuery(undefined, {
-    staleTime: 1000 * 60,
-  });
+  } = api.profile.getFullProfileSelf.useQuery(undefined, {});
 
   const {
     data: postsData,
@@ -42,7 +40,6 @@ const SelfProfile = () => {
     { pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      staleTime: 1000 * 60,
     },
   );
 

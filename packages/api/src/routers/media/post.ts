@@ -141,7 +141,10 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.services.post.deletePost(input.postId);
+        await ctx.services.post.deletePost({
+          userId: ctx.session.uid,
+          postId: input.postId,
+        });
       } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

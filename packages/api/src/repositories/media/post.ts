@@ -460,7 +460,7 @@ export class PostRepository {
       // Get the post and verify ownership before deleting
       const post = await tx.query.post.findFirst({
         where: eq(schema.post.id, postId),
-        columns: { authorId: true },
+        columns: { authorId: true, recipientId: true },
       });
 
       if (!post) {
@@ -468,7 +468,7 @@ export class PostRepository {
       }
 
       // Verify ownership
-      if (post.authorId !== userId) {
+      if (post.recipientId !== userId) {
         throw new Error("Unauthorized: User does not own this post");
       }
 
@@ -482,7 +482,7 @@ export class PostRepository {
         .where(
           eq(
             schema.profileStats.profileId,
-            sql`(SELECT profile_id FROM "user" WHERE id = ${post.authorId})`,
+            sql`(SELECT profile_id FROM "user" WHERE id = ${post.recipientId})`,
           ),
         );
     });

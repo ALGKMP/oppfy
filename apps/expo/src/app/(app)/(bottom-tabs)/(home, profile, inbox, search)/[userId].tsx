@@ -34,16 +34,10 @@ const OtherProfile = () => {
     data: profileData,
     isLoading: isLoadingProfile,
     refetch: refetchProfile,
-  } = api.profile.getFullProfileOther.useQuery(
-    { userId: userId },
-    { staleTime: 1000 * 60 },
-  );
+  } = api.profile.getFullProfileOther.useQuery({ userId: userId });
 
   const { data: networkRelationships, refetch: refetchNetworkRelationships } =
-    api.profile.getNetworkRelationships.useQuery(
-      { userId },
-      { staleTime: 1000 * 60 },
-    );
+    api.profile.getNetworkRelationships.useQuery({ userId });
 
   const {
     data: postsData,
@@ -56,7 +50,6 @@ const OtherProfile = () => {
     { userId, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      staleTime: 1000 * 60,
     },
   );
 

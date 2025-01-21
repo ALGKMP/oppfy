@@ -292,7 +292,7 @@ export class PostService {
     }
   }
 
-  async deletePost(postId: string, userId: string) {
+  async deletePost({ postId, userId }: { postId: string; userId: string }) {
     try {
       await this.postRepository.deletePost({ postId, userId });
 

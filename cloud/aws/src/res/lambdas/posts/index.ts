@@ -101,16 +101,23 @@ const lambdaHandler = async (
 
           await tx.insert(schema.postStats).values({ postId: post.insertId });
 
-          // Increment author's profile stats post count
-          await tx
+          // Only increment recipient's profile stats post count since they're the one being posted about
+          console.log(
+            `[PostStats] Incrementing post count for recipient ${metadata.recipient}`,
+          );
+          const recipientStatsResult = await tx
             .update(schema.profileStats)
             .set({ posts: sql`${schema.profileStats.posts} + 1` })
             .where(
               eq(
                 schema.profileStats.profileId,
-                sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.author})`,
+                sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.recipient})`,
               ),
             );
+          console.log(
+            `[PostStats] Recipient update result:`,
+            recipientStatsResult,
+          );
 
           return post;
         });
@@ -156,16 +163,10 @@ const lambdaHandler = async (
           phoneNumber: metadata.number,
         });
 
-        // Increment author's profile stats post count for offApp posts too
-        await tx
-          .update(schema.profileStats)
-          .set({ posts: sql`${schema.profileStats.posts} + 1` })
-          .where(
-            eq(
-              schema.profileStats.profileId,
-              sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.author})`,
-            ),
-          );
+        // For offApp posts, we don't increment any post counts since the recipient isn't on the app
+        console.log(
+          `[PostStats] No post count increment for offApp post since recipient isn't on app`,
+        );
       });
     }
   } catch (error) {
