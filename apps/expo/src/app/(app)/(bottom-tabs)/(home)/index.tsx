@@ -227,13 +227,18 @@ const HomeScreen = () => {
       );
     }
 
+    // we should not show the footer if there are more posts to fetch
+    if (hasNextPage) {
+      return null;
+    }
+
     return (
       <YStack gap="$4">
         <RecommendationCarousel paddingHorizontal="$4" />
         <Footer />
       </YStack>
     );
-  }, [isLoading]);
+  }, [hasNextPage, isLoading]);
 
   return (
     <FlashList
