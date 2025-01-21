@@ -110,8 +110,6 @@ const FriendCarousel = ({
 
 type Friend = RouterOutputs["friend"]["paginateFriendsSelf"]["items"][number];
 
-const STALE_TIME = 5 * 60 * 1000; // 5 minutes
-
 interface UseFriendsProps {
   userId?: string;
   pageSize?: number;
@@ -122,7 +120,6 @@ const useFriends = ({ userId, pageSize = 10 }: UseFriendsProps = {}) => {
     { userId: userId!, pageSize },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      staleTime: STALE_TIME,
       enabled: !!userId,
     },
   );
@@ -131,7 +128,6 @@ const useFriends = ({ userId, pageSize = 10 }: UseFriendsProps = {}) => {
     { pageSize },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      staleTime: STALE_TIME,
       enabled: !userId,
     },
   );

@@ -24,7 +24,7 @@ const SelfProfile = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
-  const { data: profileData } = useProfile();
+  const { data: profileData, isLoading: isLoadingProfile } = useProfile();
 
   const {
     data: postsData,
@@ -37,7 +37,6 @@ const SelfProfile = () => {
     { pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      refetchOnMount: true,
     },
   );
 
@@ -124,14 +123,23 @@ const SelfProfile = () => {
 
   const renderHeader = () => (
     <YStack gap="$2" position="relative">
-      <Header />
-      <YStack>
-        {profileData?.friendCount && profileData.friendCount > 0 ? (
-          <FriendCarousel paddingHorizontal="$2.5" />
-        ) : (
-          <RecommendationCarousel paddingHorizontal="$2.5" />
-        )}
-      </YStack>
+      <Header
+        name={profileData?.name}
+        username={profileData?.username}
+        profilePictureUrl={profileData?.profilePictureUrl}
+        bio={profileData?.bio}
+        createdAt={profileData?.createdAt}
+        postCount={profileData?.postCount}
+        followingCount={profileData?.followingCount}
+        followerCount={profileData?.followerCount}
+        friendCount={profileData?.friendCount}
+        isLoading={isLoadingProfile}
+      />
+      {profileData?.friendCount && profileData.friendCount > 0 ? (
+        <FriendCarousel paddingHorizontal="$2.5" />
+      ) : (
+        <RecommendationCarousel paddingHorizontal="$2.5" />
+      )}
       {(isLoadingPostData || postItems.length > 0) && (
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
           Posts

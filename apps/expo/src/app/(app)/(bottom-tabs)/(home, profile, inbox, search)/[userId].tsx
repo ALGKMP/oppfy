@@ -31,10 +31,13 @@ const OtherProfile = () => {
 
   const { userId } = params;
 
-  const { data: profileData } = useProfile();
-
-  const { data: networkRelationships, refetch: refetchNetworkRelationships } =
-    api.profile.getNetworkRelationships.useQuery({ userId });
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    networkRelationships,
+  } = useProfile({
+    userId,
+  });
 
   const {
     data: postsData,
@@ -48,7 +51,6 @@ const OtherProfile = () => {
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
       enabled: !!userId,
-      refetchOnMount: true,
     },
   );
 
@@ -59,7 +61,7 @@ const OtherProfile = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([refetchPosts(), refetchNetworkRelationships()]);
+    await refetchPosts();
     setIsRefreshing(false);
   };
 
@@ -137,9 +139,19 @@ const OtherProfile = () => {
     <YStack gap="$2" position="relative">
       <Header
         userId={userId}
-        name={params.name}
-        username={params.username}
-        profilePictureUrl={params.profilePictureUrl}
+        name={profileData?.name ?? params.name}
+        username={profileData?.username ?? params.username}
+        profilePictureUrl={
+          profileData?.profilePictureUrl ?? params.profilePictureUrl
+        }
+        bio={profileData?.bio}
+        createdAt={profileData?.createdAt}
+        postCount={profileData?.postCount}
+        followingCount={profileData?.followingCount}
+        followerCount={profileData?.followerCount}
+        friendCount={profileData?.friendCount}
+        isLoading={isLoadingProfile}
+        networkRelationships={networkRelationships}
       />
       {profileData?.friendCount &&
       profileData.friendCount > 0 &&

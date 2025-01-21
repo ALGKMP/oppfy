@@ -46,17 +46,17 @@ interface TabBarIconProps {
 const BottomTabsLayout = () => {
   const utils = api.useUtils();
   const bottomSheet = useBottomSheetController();
-  const { profile } = useProfile();
+  // const { profile } = useProfile();
 
   const { data: unreadNotificationsCount } =
     api.notifications.getUnreadNotificationsCount.useQuery();
 
-  useEffect(() => {
-    const prefetch = async () => {
-      await utils.profile.getFullProfileSelf.prefetch();
-    };
-    void prefetch();
-  }, [utils.profile.getFullProfileSelf]);
+  // useEffect(() => {
+  //   const prefetch = async () => {
+  //     await utils.profile.getFullProfileSelf.prefetch();
+  //   };
+  //   void prefetch();
+  // }, [utils.profile.getFullProfileSelf]);
 
   useEffect(() => {
     const hasSeenWelcome = storage.getBoolean(HAS_SEEN_WELCOME_KEY);
@@ -230,7 +230,7 @@ const BottomTabsLayout = () => {
             return (
               <Animated.View style={animatedStyle}>
                 <Avatar
-                  source={profile?.profilePictureUrl ?? DefaultProfilePicture}
+                  // source={profile?.profilePictureUrl ?? DefaultProfilePicture}
                   size={size}
                   bordered={focused}
                   style={{ opacity: focused ? 1 : 0.5 }}

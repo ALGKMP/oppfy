@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, XStack, YStack } from "tamagui";
 
 import Bio from "~/components/Profile/Bio";
@@ -8,37 +8,42 @@ import ProfileActions from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
-import useProfile from "~/hooks/useProfile";
-import { api } from "~/utils/api";
+import type { NetworkRelationships } from "~/hooks/useProfile";
 import { H3 } from "../ui";
 
 interface HeaderProps {
   userId?: string;
-  name?: string | undefined;
-  username?: string | undefined;
-  profilePictureUrl?: string | undefined;
+  name?: string | null;
+  username?: string;
+  profilePictureUrl?: string | null;
+  bio?: string | null;
+  createdAt?: Date;
+  postCount?: number;
+  followingCount?: number;
+  followerCount?: number;
+  friendCount?: number;
+  isLoading?: boolean;
+  networkRelationships?: NetworkRelationships;
 }
 
-const Header = (
-  { userId, name, username, profilePictureUrl }: HeaderProps = {
-    userId: undefined,
-  },
-) => {
-  const { profile: profileData, isLoading: isLoadingProfileData } = useProfile({
-    userId,
-  });
-
-  const { data: networkRelationships } =
-    api.profile.getNetworkRelationships.useQuery(
-      { userId: userId ?? "" },
-      { enabled: !!userId },
-    );
-
-  // const profile = profileData ?? defaultProfile;
+const Header = ({
+  userId,
+  name,
+  username,
+  profilePictureUrl,
+  bio,
+  createdAt,
+  postCount = 0,
+  followingCount = 0,
+  followerCount = 0,
+  friendCount = 0,
+  isLoading = false,
+  networkRelationships,
+}: HeaderProps) => {
   const isBlocked = networkRelationships?.blocked ?? false;
 
   // Generate a unique key for HeaderGradient based on username
-  const headerKey = `header-gradient-${profileData?.username ?? "default"}`;
+  const headerKey = `header-gradient-${username ?? "default"}`;
 
   return (
     <YStack>
@@ -46,13 +51,11 @@ const Header = (
       <YStack height={140} overflow="hidden" borderRadius="$6">
         <HeaderGradient
           key={headerKey}
-          username={profileData?.username ?? username}
-          profilePictureUrl={
-            profileData?.profilePictureUrl ?? profilePictureUrl
-          }
+          username={username}
+          profilePictureUrl={profilePictureUrl}
         />
         <View position="absolute" bottom={12} right={12}>
-          <JoinDatePill createdAt={profileData?.createdAt ?? undefined} />
+          <JoinDatePill createdAt={createdAt} />
         </View>
       </YStack>
 
@@ -60,28 +63,21 @@ const Header = (
       <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
         <XStack justifyContent="space-between" alignItems="flex-end">
           <ProfileInfo
-            name={profileData?.name ?? name}
-            username={profileData?.username ?? username}
-            profilePictureUrl={
-              profileData?.profilePictureUrl ?? profilePictureUrl
-            }
-            isLoading={isLoadingProfileData}
+            name={name}
+            username={username}
+            profilePictureUrl={profilePictureUrl}
+            isLoading={isLoading}
           />
           <QuickActions
             userId={userId}
-            username={profileData?.username ?? username}
-            profilePictureUrl={
-              profileData?.profilePictureUrl ?? profilePictureUrl
-            }
-            isLoading={isLoadingProfileData}
+            username={username}
+            profilePictureUrl={profilePictureUrl}
+            isLoading={isLoading}
             networkRelationships={networkRelationships}
           />
         </XStack>
 
-        <Bio
-          bio={profileData?.bio ?? undefined}
-          isLoading={isLoadingProfileData}
-        />
+        <Bio bio={bio} isLoading={isLoading} />
 
         <ProfileActions
           userId={userId}
@@ -92,12 +88,12 @@ const Header = (
         {!isBlocked && (
           <Stats
             userId={userId}
-            username={profileData?.username ?? username}
-            postCount={profileData?.postCount ?? 0}
-            followingCount={profileData?.followingCount ?? 0}
-            followerCount={profileData?.followerCount ?? 0}
-            friendCount={profileData?.friendCount ?? 0}
-            isLoading={isLoadingProfileData}
+            username={username}
+            postCount={postCount}
+            followingCount={followingCount}
+            followerCount={followerCount}
+            friendCount={friendCount}
+            isLoading={isLoading}
           />
         )}
       </YStack>
