@@ -75,13 +75,9 @@ const Recommendations = () => {
     );
   }
 
-  if (!data?.length) {
+  if (!data.length) {
     return null;
   }
-
-  return (
-    <Text>Hello World!</Text>
-  )
 
   return (
     <FlatList
