@@ -53,7 +53,15 @@ const FriendCarousel = ({
       </HeaderTitle>
 
       <FlashList<Friend | null>
-        data={isLoading ? Array(4).fill(null) : [...(friends ?? []), null]}
+        // data={isLoading ? Array(4).fill(null) : [...(friends ?? []), null]}
+        data={friends}
+        ListEmptyComponent={
+          <YStack flexDirection="row" gap={CARD_GAP}>
+            {Array(4).fill(null).map((_, i) => (
+              <LoadingCard key={i} width={CARD_WIDTH} />
+            ))}
+          </YStack>
+        }
         horizontal
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
@@ -65,9 +73,9 @@ const FriendCarousel = ({
           ) as number,
         }}
         renderItem={({ item, index }) => {
-          if (isLoading) {
-            return <LoadingCard width={CARD_WIDTH} />;
-          }
+          // if (isLoading) {
+          //   return <LoadingCard width={CARD_WIDTH} />;
+          // }
 
           if (!item) {
             return (
