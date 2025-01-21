@@ -10,7 +10,6 @@ import ProfileActions from "~/components/Profile/ProfileActions";
 import ProfileInfo from "~/components/Profile/ProfileInfo";
 import QuickActions from "~/components/Profile/QuickActions";
 import Stats from "~/components/Profile/Stats";
-import { H3 } from "../ui";
 
 type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
 

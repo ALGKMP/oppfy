@@ -11,7 +11,7 @@ import { createEnv } from "@t3-oss/env-core";
 import type { Context } from "aws-lambda";
 import { z } from "zod";
 
-import { db, eq, schema } from "@oppfy/db";
+import { db, eq, schema, sql } from "@oppfy/db";
 import { sharedValidators } from "@oppfy/validators";
 
 type SnsNotificationData = z.infer<
@@ -100,6 +100,18 @@ const lambdaHandler = async (
           }
 
           await tx.insert(schema.postStats).values({ postId: post.insertId });
+
+          // Increment author's profile stats post count
+          await tx
+            .update(schema.profileStats)
+            .set({ posts: sql`${schema.profileStats.posts} + 1` })
+            .where(
+              eq(
+                schema.profileStats.profileId,
+                sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.author})`,
+              ),
+            );
+
           return post;
         });
 
@@ -133,14 +145,27 @@ const lambdaHandler = async (
         throw error;
       }
     } else {
-      await db.insert(schema.postOfUserNotOnApp).values({
-        key,
-        mediaType: "image" as const,
-        authorId: metadata.author,
-        height: parseInt(metadata.height),
-        width: parseInt(metadata.width),
-        caption: metadata.caption,
-        phoneNumber: metadata.number,
+      await db.transaction(async (tx) => {
+        await tx.insert(schema.postOfUserNotOnApp).values({
+          key,
+          mediaType: "image" as const,
+          authorId: metadata.author,
+          height: parseInt(metadata.height),
+          width: parseInt(metadata.width),
+          caption: metadata.caption,
+          phoneNumber: metadata.number,
+        });
+
+        // Increment author's profile stats post count for offApp posts too
+        await tx
+          .update(schema.profileStats)
+          .set({ posts: sql`${schema.profileStats.posts} + 1` })
+          .where(
+            eq(
+              schema.profileStats.profileId,
+              sql`(SELECT profile_id FROM "user" WHERE id = ${metadata.author})`,
+            ),
+          );
       });
     }
   } catch (error) {

@@ -292,17 +292,31 @@ export class PostService {
     }
   }
 
-  async deletePost(postId: string) {
+  async deletePost(postId: string, userId: string) {
     try {
-      await this.postRepository.deletePost(postId);
+      await this.postRepository.deletePost({ postId, userId });
 
       // if (post.mediaType === "video") {
       //   await this.muxRepository.deleteAsset(post.imageUrl);
       // } else {
       //   await this.s3Repository.deleteObject(env.S3_POST_BUCKET, post.imageUrl);
       // }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in deletePost for postId: ${postId}: `, error);
+
+      if (error instanceof Error) {
+        if (error.message.includes("Unauthorized")) {
+          throw new DomainError(
+            ErrorCode.UNAUTHORIZED,
+            "You are not authorized to delete this post.",
+          );
+        }
+
+        if (error.message.includes("not found")) {
+          throw new DomainError(ErrorCode.POST_NOT_FOUND, "Post not found.");
+        }
+      }
+
       throw new DomainError(
         ErrorCode.FAILED_TO_DELETE_POST,
         "Failed to delete post.",

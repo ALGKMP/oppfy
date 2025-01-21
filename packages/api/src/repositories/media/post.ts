@@ -455,8 +455,37 @@ export class PostRepository {
   }
 
   @handleDatabaseErrors
-  async deletePost(postId: string) {
-    await this.db.delete(schema.post).where(eq(schema.post.id, postId));
+  async deletePost({ userId, postId }: { userId: string; postId: string }) {
+    await this.db.transaction(async (tx) => {
+      // Get the post and verify ownership before deleting
+      const post = await tx.query.post.findFirst({
+        where: eq(schema.post.id, postId),
+        columns: { authorId: true },
+      });
+
+      if (!post) {
+        throw new Error("Post not found");
+      }
+
+      // Verify ownership
+      if (post.authorId !== userId) {
+        throw new Error("Unauthorized: User does not own this post");
+      }
+
+      // Delete the post
+      await tx.delete(schema.post).where(eq(schema.post.id, postId));
+
+      // Decrement author's profile stats post count
+      await tx
+        .update(schema.profileStats)
+        .set({ posts: sql`${schema.profileStats.posts} - 1` })
+        .where(
+          eq(
+            schema.profileStats.profileId,
+            sql`(SELECT profile_id FROM "user" WHERE id = ${post.authorId})`,
+          ),
+        );
+    });
   }
 
   @handleDatabaseErrors
