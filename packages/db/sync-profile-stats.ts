@@ -24,13 +24,13 @@ async function syncProfileStats() {
     console.log(`Found ${users.length} users to process`);
 
     for (const user of users) {
-      // Count regular posts
+      // Count posts where user is the recipient (post owner)
       const regularPostsResult = await db
         .select({
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(schema.post)
-        .where(sql`${schema.post.authorId} = ${user.id}`);
+        .where(sql`${schema.post.recipientId} = ${user.id}`);
 
       // Count friends (where user is either user1 or user2)
       const friendsResult = await db
