@@ -23,8 +23,13 @@ const SelfProfile = () => {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
 
-  const { data: profileData, isLoading: isLoadingProfile } =
-    api.profile.getFullProfileSelf.useQuery();
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    refetch: refetchProfile,
+  } = api.profile.getFullProfileSelf.useQuery(undefined, {
+    staleTime: 1000 * 60,
+  });
 
   const {
     data: postsData,
@@ -37,6 +42,7 @@ const SelfProfile = () => {
     { pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      staleTime: 1000 * 60,
     },
   );
 
@@ -47,7 +53,7 @@ const SelfProfile = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetchPosts();
+    await Promise.all([refetchPosts(), refetchProfile()]);
     setIsRefreshing(false);
   };
 
@@ -118,15 +124,19 @@ const SelfProfile = () => {
   const renderHeader = () => (
     <YStack gap="$2" position="relative">
       <Header
-        name={profileData?.name}
-        username={profileData?.username}
-        profilePictureUrl={profileData?.profilePictureUrl}
-        bio={profileData?.bio}
+        user={{
+          name: profileData?.name ?? null,
+          username: profileData?.username ?? "",
+          profilePictureUrl: profileData?.profilePictureUrl ?? null,
+          bio: profileData?.bio ?? null,
+        }}
+        stats={{
+          postCount: profileData?.postCount ?? 0,
+          followingCount: profileData?.followingCount ?? 0,
+          followerCount: profileData?.followerCount ?? 0,
+          friendCount: profileData?.friendCount ?? 0,
+        }}
         createdAt={profileData?.createdAt}
-        postCount={profileData?.postCount}
-        followingCount={profileData?.followingCount}
-        followerCount={profileData?.followerCount}
-        friendCount={profileData?.friendCount}
         isLoading={isLoadingProfile}
       />
       {profileData?.friendCount && profileData.friendCount > 0 ? (

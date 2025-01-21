@@ -76,7 +76,7 @@ const FriendCarousel = ({
                 onPress={() =>
                   router.push(
                     userId
-                      ? `/connections/${userId}/friends`
+                      ? `/other-connections/${userId}/friends`
                       : "/self-connections/friends",
                   )
                 }

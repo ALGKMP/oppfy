@@ -30,11 +30,20 @@ const OtherProfile = () => {
 
   const { userId } = params;
 
-  const { data: profileData, isLoading: isLoadingProfile } =
-    api.profile.getFullProfileOther.useQuery({ userId: userId });
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    refetch: refetchProfile,
+  } = api.profile.getFullProfileOther.useQuery(
+    { userId: userId },
+    { staleTime: 1000 * 60 },
+  );
 
   const { data: networkRelationships, refetch: refetchNetworkRelationships } =
-    api.profile.getNetworkRelationships.useQuery({ userId });
+    api.profile.getNetworkRelationships.useQuery(
+      { userId },
+      { staleTime: 1000 * 60 },
+    );
 
   const {
     data: postsData,
@@ -47,7 +56,7 @@ const OtherProfile = () => {
     { userId, pageSize: 10 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      enabled: !!userId,
+      staleTime: 1000 * 60,
     },
   );
 
@@ -58,7 +67,11 @@ const OtherProfile = () => {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await Promise.all([refetchPosts(), refetchNetworkRelationships()]);
+    await Promise.all([
+      refetchPosts(),
+      refetchProfile(),
+      refetchNetworkRelationships(),
+    ]);
     setIsRefreshing(false);
   };
 
@@ -129,18 +142,21 @@ const OtherProfile = () => {
   const renderHeader = () => (
     <YStack gap="$2" position="relative">
       <Header
-        userId={userId}
-        name={profileData?.name ?? params.name}
-        username={profileData?.username ?? params.username}
-        profilePictureUrl={
-          profileData?.profilePictureUrl ?? params.profilePictureUrl
-        }
-        bio={profileData?.bio}
+        user={{
+          id: userId,
+          name: profileData?.name ?? params.name ?? null,
+          username: profileData?.username ?? params.username ?? "",
+          profilePictureUrl:
+            profileData?.profilePictureUrl ?? params.profilePictureUrl ?? null,
+          bio: profileData?.bio ?? null,
+        }}
+        stats={{
+          postCount: profileData?.postCount ?? 0,
+          followingCount: profileData?.followingCount ?? 0,
+          followerCount: profileData?.followerCount ?? 0,
+          friendCount: profileData?.friendCount ?? 0,
+        }}
         createdAt={profileData?.createdAt}
-        postCount={profileData?.postCount}
-        followingCount={profileData?.followingCount}
-        followerCount={profileData?.followerCount}
-        friendCount={profileData?.friendCount}
         isLoading={isLoadingProfile}
         networkRelationships={networkRelationships}
       />

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, XStack, YStack } from "tamagui";
 
-import { RouterOutputs } from "@oppfy/api";
+import type { RouterOutputs } from "@oppfy/api";
 
 import Bio from "~/components/Profile/Bio";
 import HeaderGradient from "~/components/Profile/HeaderGradient";
@@ -14,39 +14,40 @@ import { H3 } from "../ui";
 
 type NetworkRelationships = RouterOutputs["profile"]["getNetworkRelationships"];
 
+interface User {
+  id?: string;
+  name: string | null;
+  username: string;
+  profilePictureUrl: string | null;
+  bio: string | null;
+}
+
+interface Stats {
+  postCount: number;
+  followingCount: number;
+  followerCount: number;
+  friendCount: number;
+}
+
 interface HeaderProps {
-  userId?: string;
-  name?: string | null;
-  username?: string;
-  profilePictureUrl?: string | null;
-  bio?: string | null;
+  user: User;
+  stats: Stats;
   createdAt?: Date;
-  postCount?: number;
-  followingCount?: number;
-  followerCount?: number;
-  friendCount?: number;
-  isLoading?: boolean;
   networkRelationships?: NetworkRelationships;
+  isLoading?: boolean;
 }
 
 const Header = ({
-  userId,
-  name,
-  username,
-  profilePictureUrl,
-  bio,
+  user,
+  stats,
   createdAt,
-  postCount = 0,
-  followingCount = 0,
-  followerCount = 0,
-  friendCount = 0,
-  isLoading = false,
   networkRelationships,
+  isLoading = false,
 }: HeaderProps) => {
   const isBlocked = networkRelationships?.blocked ?? false;
 
   // Generate a unique key for HeaderGradient based on username
-  const headerKey = `header-gradient-${username ?? "default"}`;
+  const headerKey = `header-gradient-${user.username ?? "default"}`;
 
   return (
     <YStack>
@@ -54,8 +55,8 @@ const Header = ({
       <YStack height={140} overflow="hidden" borderRadius="$6">
         <HeaderGradient
           key={headerKey}
-          username={username}
-          profilePictureUrl={profilePictureUrl}
+          username={user.username}
+          profilePictureUrl={user.profilePictureUrl}
         />
         <View position="absolute" bottom={12} right={12}>
           <JoinDatePill createdAt={createdAt} />
@@ -66,36 +67,36 @@ const Header = ({
       <YStack marginTop={-60} paddingHorizontal="$4" gap="$4">
         <XStack justifyContent="space-between" alignItems="flex-end">
           <ProfileInfo
-            name={name}
-            username={username}
-            profilePictureUrl={profilePictureUrl}
+            name={user.name}
+            username={user.username}
+            profilePictureUrl={user.profilePictureUrl}
             isLoading={isLoading}
           />
           <QuickActions
-            userId={userId}
-            username={username}
-            profilePictureUrl={profilePictureUrl}
+            userId={user.id}
+            username={user.username}
+            profilePictureUrl={user.profilePictureUrl}
             isLoading={isLoading}
             networkRelationships={networkRelationships}
           />
         </XStack>
 
-        <Bio bio={bio} isLoading={isLoading} />
+        <Bio bio={user.bio} isLoading={isLoading} />
 
         <ProfileActions
-          userId={userId}
+          userId={user.id}
           isDisabled={isBlocked}
           networkRelationships={networkRelationships}
         />
 
         {!isBlocked && (
           <Stats
-            userId={userId}
-            username={username}
-            postCount={postCount}
-            followingCount={followingCount}
-            followerCount={followerCount}
-            friendCount={friendCount}
+            userId={user.id}
+            username={user.username}
+            postCount={stats.postCount}
+            followingCount={stats.followingCount}
+            followerCount={stats.followerCount}
+            friendCount={stats.friendCount}
             isLoading={isLoading}
           />
         )}

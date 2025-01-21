@@ -92,6 +92,7 @@ const QuickActions = ({
         size="$3.5"
         circular
         borderWidth={1.5}
+        borderColor="$red11"
         disabled={isLoading || isBlockActionLoading}
         opacity={isLoading || isBlockActionLoading ? 0.5 : 1}
         onPress={handleBlockAction}
