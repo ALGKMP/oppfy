@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useScrollToTop } from "@react-navigation/native";
 import type { ViewToken } from "@shopify/flash-list";
 import { FlashList } from "@shopify/flash-list";
@@ -11,14 +12,19 @@ import FriendCarousel from "~/components/FriendCarousel";
 import PostCard from "~/components/Post/PostCard";
 import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
-import { EmptyPlaceholder, HeaderTitle } from "~/components/ui";
+import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
 type Post = RouterOutputs["post"]["paginatePostsOfUserSelf"]["items"][number];
 
 const SelfProfile = () => {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
+
+  const { isFirstInStack } = useLocalSearchParams<{
+    isFirstInStack: "yes";
+  }>();
 
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
@@ -145,6 +151,19 @@ const SelfProfile = () => {
         <HeaderTitle icon="document-text" paddingHorizontal="$2.5">
           Posts
         </HeaderTitle>
+      )}
+
+      {isFirstInStack !== "yes" && (
+        <Icon
+          name="chevron-back"
+          onPress={() => router.back()}
+          blurred
+          style={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+          }}
+        />
       )}
     </YStack>
   );
