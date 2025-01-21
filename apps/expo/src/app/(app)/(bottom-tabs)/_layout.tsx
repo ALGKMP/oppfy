@@ -186,20 +186,6 @@ const BottomTabsLayout = () => {
               )}
             </View>
           ),
-          tabBarButton: (props) => (
-            <Pressable
-              {...props}
-              onPress={(event) => {
-                props.onPress?.(event);
-                if (unreadNotificationsCount && unreadNotificationsCount > 0) {
-                  utils.notifications.getUnreadNotificationsCount.setData(
-                    undefined,
-                    0,
-                  );
-                }
-              }}
-            />
-          ),
         }}
       />
 

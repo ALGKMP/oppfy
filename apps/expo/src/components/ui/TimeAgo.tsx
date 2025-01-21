@@ -100,9 +100,9 @@ const defaultFormatTime = ({ value, unit }: TimeFormat): string => {
   if (value === 0 && unit === "second") return "now";
 
   const unitAbbreviations: Record<TimeUnit, string> = {
-    second: "sec",
-    minute: "min",
-    hour: "hr",
+    second: "s",
+    minute: "m",
+    hour: "h",
     day: "d",
     week: "w",
     month: "mo",

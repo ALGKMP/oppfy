@@ -82,10 +82,7 @@ const Stats = ({
       elevation={2}
       opacity={isLoading ? 0.8 : 1}
     >
-      <TouchableOpacity
-        onPress={() => navigateToSection("posts")}
-        disabled={isLoading}
-      >
+      <TouchableOpacity disabled={true}>
         <StatItem label="Posts" value={postCount} isLoading={isLoading} />
       </TouchableOpacity>
       <TouchableOpacity

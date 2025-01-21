@@ -42,6 +42,8 @@ const Inbox = () => {
   const listRef = useRef<FlashList<NotificationItem>>(null);
   useScrollToTop(listRef);
 
+  utils.notifications.getUnreadNotificationsCount.setData(undefined, 0);
+
   const { data: requestsCount, refetch: refetchRequestCount } =
     api.request.countRequests.useQuery(undefined, {
       refetchInterval: REFETCH_INTERVAL,
@@ -194,7 +196,10 @@ const Inbox = () => {
 
     if (pendingRequests > 0) {
       return (
-        <TouchableOpacity onPress={() => router.navigate("/requests")}>
+        <TouchableOpacity
+          onPress={() => router.navigate("/requests")}
+          style={{ marginBottom: getToken("$4", "space") as number }}
+        >
           <CardContainer
             padding="$4"
             orientation="horizontal"
@@ -269,11 +274,11 @@ const Inbox = () => {
       ListFooterComponent={GridSuggestions}
       ItemSeparatorComponent={Spacer}
       ListFooterComponentStyle={{
-        marginTop: getToken("$2", "space"),
+        marginTop: getToken("$2", "space") as number,
       }}
       contentContainerStyle={{
-        paddingBottom: getToken("$4", "space"),
-        paddingHorizontal: getToken("$4", "space"),
+        paddingBottom: getToken("$4", "space") as number,
+        paddingHorizontal: getToken("$4", "space") as number,
       }}
       showsVerticalScrollIndicator={false}
       onEndReached={handleOnEndReached}
