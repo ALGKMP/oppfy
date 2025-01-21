@@ -44,6 +44,10 @@ const Header = ({
   isLoading = false,
 }: HeaderProps) => {
   const isBlocked = networkRelationships?.blocked ?? false;
+  const isPrivate = networkRelationships?.privacy === "private";
+  const isDisabled =
+    isBlocked ||
+    (isPrivate && networkRelationships.targetUserFollowState !== "Following");
 
   // Generate a unique key for HeaderGradient based on username
   const headerKey = `header-gradient-${user.username ?? "default"}`;
@@ -88,17 +92,16 @@ const Header = ({
           networkRelationships={networkRelationships}
         />
 
-        {!isBlocked && (
-          <Stats
-            userId={user.id}
-            username={user.username}
-            postCount={stats.postCount}
-            followingCount={stats.followingCount}
-            followerCount={stats.followerCount}
-            friendCount={stats.friendCount}
-            isLoading={isLoading}
-          />
-        )}
+        <Stats
+          userId={user.id}
+          username={user.username}
+          postCount={stats.postCount}
+          followingCount={stats.followingCount}
+          followerCount={stats.followerCount}
+          friendCount={stats.friendCount}
+          isLoading={isLoading}
+          disabled={isDisabled}
+        />
       </YStack>
     </YStack>
   );
