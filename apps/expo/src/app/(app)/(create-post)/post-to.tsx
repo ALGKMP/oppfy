@@ -193,6 +193,7 @@ const PostTo = () => {
 
   const loadContacts = useCallback(async () => {
     const contactsNotOnApp = await getDeviceContactsNotOnApp();
+
     setContacts(contactsNotOnApp);
     setVisibleContacts(contactsNotOnApp.slice(0, INITIAL_PAGE_SIZE));
     setIsLoadingContacts(false);
@@ -251,6 +252,9 @@ const PostTo = () => {
 
   const onContactSelected = useCallback(
     (contact: Contact) => {
+      const formattedPhoneNumber = parsePhoneNumberWithError(
+        contact.phoneNumbers?.[0]?.number ?? "",
+      ).format("E.164");
       router.navigate({
         pathname: "/create-post",
         params: {
@@ -258,7 +262,7 @@ const PostTo = () => {
           type,
           width,
           height,
-          number: contact.phoneNumbers?.[0]?.number ?? "",
+          number: formattedPhoneNumber,
           userType: "notOnApp",
           recipientName: contact.name ?? "",
           recipientImage: contact.imageAvailable
