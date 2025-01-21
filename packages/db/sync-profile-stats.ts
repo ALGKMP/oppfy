@@ -4,7 +4,7 @@ import postgres from "postgres";
 
 import { env } from "@oppfy/env";
 
-import { schema } from "..";
+import { schema } from ".";
 
 const queryClient = postgres(env.DATABASE_URL);
 const db = drizzle(queryClient);
