@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { ElementType } from "react";
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -129,8 +129,8 @@ const BottomTabsLayout = () => {
         }}
         style={{
           position: "absolute",
-          top: -6,
-          right: -6,
+          top: -7,
+          right: -5,
           minWidth: 18,
           height: 18,
           borderRadius: 9,
@@ -143,7 +143,7 @@ const BottomTabsLayout = () => {
           style={{ ...StyleSheet.absoluteFillObject }}
         />
         <View
-          backgroundColor="$red8"
+          backgroundColor="$red11"
           opacity={0.8}
           style={{
             ...StyleSheet.absoluteFillObject,
@@ -194,10 +194,25 @@ const BottomTabsLayout = () => {
           tabBarIcon: (props) => (
             <View>
               {getTabBarIcon("notifications")(props)}
+              <NotificationBadge count={110} />
               {(unreadNotificationsCount ?? 0) > 0 && (
                 <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
             </View>
+          ),
+          tabBarButton: (props) => (
+            <Pressable
+              {...props}
+              onPress={(event) => {
+                props.onPress?.(event);
+                if (unreadNotificationsCount && unreadNotificationsCount > 0) {
+                  utils.notifications.getUnreadNotificationsCount.setData(
+                    undefined,
+                    0,
+                  );
+                }
+              }}
+            />
           ),
         }}
       />
