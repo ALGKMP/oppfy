@@ -17,9 +17,6 @@ const ProfileInfo = ({
   profilePictureUrl,
   isLoading,
 }: ProfileInfoProps) => {
-  console.log("name", name);
-  console.log("username", username);
-  console.log("profilePictureUrl", profilePictureUrl);
   return (
     <YStack>
       {profilePictureUrl ? (
