@@ -122,10 +122,21 @@ const PostTo = () => {
     return result;
   }, [friendsList, visibleContacts]);
 
-  const searchableItems = items.filter(
-    (item): item is Extract<ListItem, { type: "friend" | "contact" }> =>
-      item.type === "friend" || item.type === "contact",
-  );
+  const searchableItems = useMemo(() => {
+    const result: Extract<ListItem, { type: "friend" | "contact" }>[] = [];
+
+    // Add all friends
+    friendsList.forEach((friend) => {
+      result.push({ type: "friend", data: friend });
+    });
+
+    // Add all contacts (not just visible ones)
+    contacts.forEach((contact) => {
+      result.push({ type: "contact", data: contact });
+    });
+
+    return result;
+  }, [friendsList, contacts]);
 
   const searchOptions: IFuseOptions<ListItem> = {
     keys: [
