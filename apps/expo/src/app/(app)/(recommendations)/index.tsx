@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dimensions, FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getToken } from "tamagui";
+import { getToken, Text } from "tamagui";
 
 import { UserCard } from "~/components/ui/UserCard";
 import useRouteProfile from "~/hooks/useRouteProfile";
@@ -78,6 +78,10 @@ const Recommendations = () => {
   if (!data?.length) {
     return null;
   }
+
+  return (
+    <Text>Hello World!</Text>
+  )
 
   return (
     <FlatList

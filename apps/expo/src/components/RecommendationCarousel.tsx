@@ -80,18 +80,8 @@ const RecommendationCarousel = ({
       </HeaderTitle>
 
       <FlashList<Recommendation | null>
-        // data={isLoading ? Array(4).fill(null) : [...recommendations, null]}
-        data={recommendations}
+        data={isLoading ? Array(4).fill(null) : [...recommendations, null]}
         horizontal
-        ListEmptyComponent={
-          <YStack flexDirection="row" gap={CARD_GAP}>
-            {Array(4)
-              .fill(null)
-              .map((_, i) => (
-                <LoadingCard key={i} width={CARD_WIDTH} />
-              ))}
-          </YStack>
-        }
         showsHorizontalScrollIndicator={false}
         estimatedItemSize={CARD_WIDTH}
         ItemSeparatorComponent={() => <Spacer width={CARD_GAP} />}
@@ -102,9 +92,9 @@ const RecommendationCarousel = ({
           ) as number,
         }}
         renderItem={({ item, index }) => {
-          // if (isLoading) {
-          //   return <LoadingCard width={CARD_WIDTH} />;
-          // }
+          if (isLoading) {
+            return <LoadingCard width={CARD_WIDTH} />;
+          }
 
           if (!item) {
             return (
