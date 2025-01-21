@@ -13,7 +13,6 @@ import Header from "~/components/Profile/Header";
 import RecommendationCarousel from "~/components/RecommendationCarousel";
 import { EmptyPlaceholder, HeaderTitle, Icon } from "~/components/ui";
 import useProfile from "~/hooks/useProfile";
-import useRouteProfile from "~/hooks/useRouteProfile";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 
@@ -21,7 +20,6 @@ type Post = RouterOutputs["post"]["paginatePostsOfUserOther"]["items"][number];
 
 const OtherProfile = () => {
   const router = useRouter();
-  const { routeProfile } = useRouteProfile();
   const insets = useSafeAreaInsets();
 
   const params = useLocalSearchParams<{
@@ -32,8 +30,6 @@ const OtherProfile = () => {
   }>();
 
   const { userId } = params;
-
-  console.log("params", params);
 
   const { data: profileData } = useProfile();
 

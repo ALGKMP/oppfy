@@ -16,7 +16,9 @@ const Recommendations = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data, refetch, isLoading } =
-    api.contacts.getRecommendationProfilesSelf.useQuery();
+    api.contacts.getRecommendationProfilesSelf.useQuery(undefined, {
+      staleTime: 60 * 5000,
+    });
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -75,7 +77,7 @@ const Recommendations = () => {
     );
   }
 
-  if (!data.length) {
+  if (!data?.length) {
     return null;
   }
 
