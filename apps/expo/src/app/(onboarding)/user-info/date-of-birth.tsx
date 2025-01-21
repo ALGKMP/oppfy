@@ -36,7 +36,7 @@ const DateOfBirth = () => {
       dateOfBirth,
     });
 
-    router.push("/user-info/username");
+    router.push("/user-info/profile-picture");
   };
 
   return (

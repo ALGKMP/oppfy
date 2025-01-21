@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 

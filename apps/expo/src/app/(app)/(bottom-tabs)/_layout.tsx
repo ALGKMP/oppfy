@@ -153,7 +153,11 @@ const BottomTabsLayout = () => {
   };
 
   return (
-    <BottomTabs screenOptions={{ headerShown: false }} backBehavior="history">
+    <BottomTabs
+      initialRouteName="(home)"
+      backBehavior="history"
+      screenOptions={{ headerShown: false }}
+    >
       <BottomTabs.Screen
         name="(home)"
         options={{
