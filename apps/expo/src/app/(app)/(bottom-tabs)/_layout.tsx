@@ -189,7 +189,6 @@ const BottomTabsLayout = () => {
           tabBarIcon: (props) => (
             <View>
               {getTabBarIcon("notifications")(props)}
-              <NotificationBadge count={11} />
               {(unreadNotificationsCount ?? 0) > 0 && (
                 <NotificationBadge count={unreadNotificationsCount ?? 0} />
               )}
