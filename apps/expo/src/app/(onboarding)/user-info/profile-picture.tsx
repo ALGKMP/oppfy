@@ -41,7 +41,6 @@ const ProfilePicture = () => {
   useEffect(() => {
     const fn = async () => {
       await syncContacts();
-      await utils.contacts.getRecommendationProfilesSelf.prefetch();
     };
 
     void fn();
