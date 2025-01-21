@@ -4,8 +4,8 @@ import { db, schema } from "@oppfy/db";
 import type { InferInsertModel } from "@oppfy/db/";
 import { auth } from "@oppfy/firebase";
 
-import { handleDatabaseErrors } from "../../errors";
 import { accountStatusEnum } from "../../../../db/src/schema";
+import { handleDatabaseErrors } from "../../errors";
 import { InferEnum } from "../../services/user/user";
 
 export type PrivacySettings = NonNullable<
@@ -36,7 +36,6 @@ export class UserRepository {
         .insert(schema.profileStats)
         .values({ profileId: profile.id })
         .returning({ id: schema.profileStats.id });
-
 
       // Create default notification settings for the user
       const [notificationSetting] = await tx
@@ -237,6 +236,62 @@ export class UserRepository {
                   ),
                 ),
               ),
+          ),
+        );
+    });
+  }
+
+  @handleDatabaseErrors
+  async updateUserId(oldUserId: string, newUserId: string) {
+    await this.db.transaction(async (tx) => {
+      // Update the user's ID in the user table
+      await tx
+        .update(schema.user)
+        .set({ id: newUserId })
+        .where(eq(schema.user.id, oldUserId));
+
+      // Update all related tables that reference the user ID
+      await tx
+        .update(schema.pushToken)
+        .set({ userId: newUserId })
+        .where(eq(schema.pushToken.userId, oldUserId));
+
+      await tx
+        .update(schema.notifications)
+        .set({
+          senderId: newUserId,
+          recipientId: newUserId,
+        })
+        .where(
+          or(
+            eq(schema.notifications.senderId, oldUserId),
+            eq(schema.notifications.recipientId, oldUserId),
+          ),
+        );
+
+      await tx
+        .update(schema.follower)
+        .set({
+          senderId: newUserId,
+          recipientId: newUserId,
+        })
+        .where(
+          or(
+            eq(schema.follower.senderId, oldUserId),
+            eq(schema.follower.recipientId, oldUserId),
+          ),
+        );
+
+      await tx
+        .update(schema.friend)
+        .set({
+          userId1: newUserId,
+          userId2: newUserId,
+        })
+        .where(
+          or(
+            eq(schema.friend.userId1, oldUserId),
+            eq(schema.friend.userId2, oldUserId),
           ),
         );
     });

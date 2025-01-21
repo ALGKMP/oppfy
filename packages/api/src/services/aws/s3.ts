@@ -110,6 +110,7 @@ export class S3Service {
         },
       });
 
+
       return presignedUrl;
     } catch (err) {
       throw new DomainError(
@@ -122,7 +123,7 @@ export class S3Service {
   // post for user not on app
   async uploadPostForUserNotOnAppUrl({
     author,
-    number,
+    recipient,
     caption,
     height,
     width,
@@ -130,7 +131,7 @@ export class S3Service {
     contentType,
   }: {
     author: string;
-    number: string;
+    recipient: string;
     caption: string;
     height: string;
     width: string;
@@ -139,7 +140,7 @@ export class S3Service {
   }) {
     try {
       const currentDate = Date.now();
-      const objectKey = `posts/${currentDate}-${number}-${author}.jpg`;
+      const objectKey = `posts/${currentDate}-${recipient}-${author}.jpg`;
 
       caption = encodeURIComponent(caption);
 
@@ -153,9 +154,11 @@ export class S3Service {
           caption,
           height,
           width,
-          number,
+          recipient,
+          type: "notOnApp",
         },
       });
+
 
       return presignedUrl;
     } catch (err) {

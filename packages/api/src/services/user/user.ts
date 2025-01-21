@@ -146,4 +146,13 @@ export class UserService {
 
     return false;
   }
+
+  async updateUserId(oldUserId: string, newUserId: string) {
+    const user = await this.userRepository.getUser(oldUserId);
+    if (!user) {
+      throw new DomainError(ErrorCode.USER_NOT_FOUND, "User not found");
+    }
+
+    await this.userRepository.updateUserId(oldUserId, newUserId);
+  }
 }

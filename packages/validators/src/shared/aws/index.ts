@@ -17,7 +17,7 @@ export const s3ObjectMetadataForUserOnAppSchema = baseSchema.extend({
 });
 
 export const s3ObjectMetadataForUserNotOnAppSchema = baseSchema.extend({
-  number: z.string(),
+  recipient: z.string(),
   type: z.literal("notOnApp"),
 });
 

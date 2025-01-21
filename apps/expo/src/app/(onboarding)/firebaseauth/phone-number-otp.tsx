@@ -22,7 +22,7 @@ import { useSession } from "~/contexts/SessionContext";
 import { api } from "~/utils/api";
 
 // ! This is for testing purposes only, do not use in production
-auth().settings.appVerificationDisabledForTesting = false;
+auth().settings.appVerificationDisabledForTesting = true;
 
 enum Error {
   INCORRECT_CODE = "Incorrect code. Try again.",
@@ -68,17 +68,10 @@ const PhoneNumberOTP = () => {
   const [phoneNumberOTP, setPhoneNumberOTP] = useState("");
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [checkingPosts, setCheckingPosts] = useState(false);
 
   const createUser = api.user.createUser.useMutation();
   const userOnboardingCompletedMutation =
     api.user.checkOnboardingComplete.useMutation();
-  const checkPendingPosts = api.pendingUser.checkPendingPosts.useQuery(
-    { phoneNumber },
-    { enabled: false },
-  );
-  const updatePendingPostsStatus =
-    api.pendingUser.updatePendingPostsStatus.useMutation();
 
   const isValidPhoneNumberOTP = useMemo(
     () =>
@@ -87,6 +80,8 @@ const PhoneNumberOTP = () => {
   );
 
   const handleNewUser = async (userId: string) => {
+    console.log("handleNewUser", userId, phoneNumber);
+
     if (!phoneNumber) {
       setError(Error.UNKNOWN_ERROR);
       return;
@@ -97,40 +92,11 @@ const PhoneNumberOTP = () => {
       phoneNumber,
     });
 
-    // Check for pending posts and store the status
-    setCheckingPosts(true);
-    try {
-      const result = await checkPendingPosts.refetch();
-      if (result.data?.hasPendingPosts && result.data.postCount !== undefined) {
-        await updatePendingPostsStatus.mutateAsync({
-          postCount: result.data.postCount,
-        });
-      }
-    } catch (error) {
-      console.error("Error checking pending posts:", error);
-    } finally {
-      setCheckingPosts(false);
-    }
-
     router.replace("/user-info/welcome");
   };
 
   const handleExistingUser = async () => {
-    // Check for pending posts and store the status
-    setCheckingPosts(true);
-    try {
-      const result = await checkPendingPosts.refetch();
-      if (result.data?.hasPendingPosts && result.data.postCount !== undefined) {
-        await updatePendingPostsStatus.mutateAsync({
-          postCount: result.data.postCount,
-        });
-      }
-    } catch (error) {
-      console.error("Error checking pending posts:", error);
-    } finally {
-      setCheckingPosts(false);
-    }
-
+    console.log("handleExistingUser", phoneNumber);
     const userOnboardingCompleted =
       await userOnboardingCompletedMutation.mutateAsync();
 
@@ -231,9 +197,9 @@ const PhoneNumberOTP = () => {
       <OnboardingButton
         marginHorizontal="$-4"
         onPress={onSubmit}
-        disabled={!isValidPhoneNumberOTP || isLoading || checkingPosts}
+        disabled={!isValidPhoneNumberOTP || isLoading}
       >
-        {isLoading || checkingPosts ? <Spinner /> : "Verify Code"}
+        {isLoading ? <Spinner /> : "Verify Code"}
       </OnboardingButton>
     </ScreenView>
   );

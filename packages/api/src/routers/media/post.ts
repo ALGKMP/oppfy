@@ -55,14 +55,15 @@ export const postRouter = createTRPCRouter({
           input.number,
         );
 
+        const userId = user ? user.id : randomUUID();
+
         if (!user) {
-          // make ranodm uuid
-          const userId = randomUUID();
           await ctx.services.user.createUser(userId, input.number, "notOnApp");
         }
 
         return await ctx.services.s3.uploadPostForUserNotOnAppUrl({
           author: ctx.session.uid,
+          recipient: userId,
           ...input,
         });
       } catch (err) {
