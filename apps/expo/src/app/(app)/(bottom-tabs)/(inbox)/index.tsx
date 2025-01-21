@@ -4,7 +4,11 @@ import { useRouter } from "expo-router";
 import DefaultProfilePicture from "@assets/default-profile-picture.jpg";
 import { useScrollToTop } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { UserRoundCheck, UserRoundPlus } from "@tamagui/lucide-icons";
+import {
+  UserRoundCheck,
+  UserRoundPlus,
+  UserRoundX,
+} from "@tamagui/lucide-icons";
 import { getToken } from "tamagui";
 
 import GridSuggestions from "~/components/GridSuggestions";
@@ -250,7 +254,7 @@ const Inbox = () => {
 
     if (notificationItems.length === 0) {
       return (
-        <YStack flex={1} justifyContent="center">
+        <YStack flex={1} justifyContent="center" padding="$4">
           <EmptyPlaceholder
             title="No notifications"
             subtitle="You don't have any notifications yet."

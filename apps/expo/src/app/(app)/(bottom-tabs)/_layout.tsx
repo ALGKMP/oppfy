@@ -55,7 +55,7 @@ const BottomTabsLayout = () => {
     const isDev = process.env.NODE_ENV === "development";
     if (isDev || !hasSeenWelcome) {
       // 1 second delay
-      setTimeout(() => {
+      // setTimeout(() => {
         bottomSheet.show({
           snapPoints: ["100%"],
           headerShown: false,
@@ -64,7 +64,7 @@ const BottomTabsLayout = () => {
           enableContentPanningGesture: false,
           children: <WelcomeBottomSheet onComplete={handleDismissWelcome} />,
         });
-      }, 1000);
+      // }, 1000);
     }
     // eslint-disable-next-line react-compiler/react-compiler
     // eslint-disable-next-line react-hooks/exhaustive-deps
