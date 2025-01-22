@@ -1,162 +1,187 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
-import QRCode from "react-native-qrcode-svg";
+import { StyleSheet } from "react-native";
+import { BlurView } from "expo-blur";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Sharing from "expo-sharing";
 import { Ionicons } from "@expo/vector-icons";
-import MaskedView from "@react-native-masked-view/masked-view";
 import { useToastController } from "@tamagui/toast";
-import { H4, styled, Text, Theme, XStack, YStack } from "tamagui";
-import { LinearGradient } from "tamagui/linear-gradient";
+import { Stack, Text, useTheme, View, YStack } from "tamagui";
 
+import BeautifulQRCode from "~/components/QRCode/BeautifulQRCode";
+import { Button, H1 } from "~/components/ui";
 import { api } from "~/utils/api";
 
-const GRADIENT_COLORS = ["#fc00ff", "#9700ff"];
-
 const ShareProfile = () => {
+  const theme = useTheme();
   const utils = api.useUtils();
   const toast = useToastController();
 
-  const userId = utils.profile.getFullProfileSelf.getData()?.userId ?? "";
   const username = utils.profile.getFullProfileSelf.getData()?.username ?? "";
-  const name = utils.profile.getFullProfileSelf.getData()?.name ?? "";
   const profilePictureUrl =
     utils.profile.getFullProfileSelf.getData()?.profilePictureUrl ?? "";
-
   const profileUrl = `https://www.oppfy.app/profile/${username}`;
 
-  const handleShare = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    void Sharing.shareAsync(profileUrl);
+  const handleShare = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await Sharing.shareAsync(profileUrl);
   };
 
-  const handleCopyLink = () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    void Clipboard.setStringAsync(profileUrl);
-    toast.show("Link copied");
+  const handleCopyLink = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await Clipboard.setStringAsync(profileUrl);
+    toast.show("Link copied to clipboard");
   };
 
   return (
-    <LinearGradient flex={1} colors={GRADIENT_COLORS}>
-      <YStack
-        flex={1}
-        padding="$6"
-        alignItems="center"
-        justifyContent="center"
-        gap="$4"
-      >
-        <QRContainer paddingVertical="$8" width="100%">
-          <YStack alignItems="center" gap="$4">
-            <MaskedQRCode value={profileUrl} />
-            <GradientText>{username}</GradientText>
-          </YStack>
-        </QRContainer>
-        <XStack width="100%" gap="$4">
-          <ActionButton
-            onPress={handleShare}
-            icon="share-outline"
-            text="Share profile"
-          />
-          <ActionButton
-            onPress={handleCopyLink}
-            icon="copy-outline"
-            text="Copy Link"
-          />
-        </XStack>
-      </YStack>
-    </LinearGradient>
-  );
-};
-
-const QRContainer = styled(YStack, {
-  alignItems: "center",
-  backgroundColor: "white",
-  borderRadius: 20,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.1,
-  shadowRadius: 12,
-  elevation: 5,
-  width: "100%",
-});
-
-interface GradientTextProps {
-  children: React.ReactNode;
-}
-
-const GradientText = ({ children }: GradientTextProps) => {
-  return (
-    <MaskedView
-      maskElement={
-        <H4 color="black" fontFamily="$silkscreen" fontSize={24}>
-          @{children}
-        </H4>
-      }
-    >
-      <LinearGradient colors={GRADIENT_COLORS}>
-        <H4 color="transparent" fontFamily="$silkscreen" fontSize={24}>
-          @{children}
-        </H4>
-      </LinearGradient>
-    </MaskedView>
-  );
-};
-
-interface MaskedQRCodeProps {
-  value: string;
-}
-
-const MaskedQRCode = ({ value }: MaskedQRCodeProps) => {
-  return (
-    <MaskedView
-      maskElement={
-        <QRCode
-          value={value}
-          size={200}
-          color="black"
-          backgroundColor="transparent"
-        />
-      }
-      style={{ height: 200, width: 200 }}
-    >
+    <Stack f={1}>
       <LinearGradient
-        colors={GRADIENT_COLORS}
+        colors={["#F214FF", "#FF14D4"]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={{ height: 200, width: 200 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
       />
-    </MaskedView>
+      <BlurView intensity={95} tint="light" style={StyleSheet.absoluteFill}>
+        <YStack f={1} p="$6" jc="space-between">
+          <YStack f={1} ai="center" jc="center" gap="$6">
+            {/* Profile Card */}
+            <View
+              width={340}
+              height={420}
+              br={44}
+              ov="hidden"
+              bg="rgba(255,255,255,0.1)"
+              ai="center"
+              jc="center"
+              shadowColor="#000"
+              shadowOffset={{ width: 0, height: 20 }}
+              shadowOpacity={0.2}
+              shadowRadius={40}
+            >
+              {/* Background Layer */}
+              {profilePictureUrl && (
+                <Image
+                  source={profilePictureUrl}
+                  style={[StyleSheet.absoluteFill, { opacity: 0.15 }]}
+                  contentFit="cover"
+                />
+              )}
+              <BlurView
+                intensity={80}
+                tint="light"
+                style={StyleSheet.absoluteFill}
+              />
+
+              {/* Content Container */}
+              <YStack ai="center" gap="$4" py="$6">
+                {/* Profile Picture */}
+                <View
+                  width={80}
+                  height={80}
+                  br={40}
+                  ov="hidden"
+                  bg="white"
+                  shadowColor="#000"
+                  shadowOffset={{ width: 0, height: 8 }}
+                  shadowOpacity={0.2}
+                  shadowRadius={16}
+                >
+                  <Image
+                    source={profilePictureUrl || ""}
+                    style={StyleSheet.absoluteFill}
+                    contentFit="cover"
+                  />
+                </View>
+
+                {/* Username */}
+                <H1
+                  color="white"
+                  size="$8"
+                  fontFamily="$mono"
+                  shadowColor="rgba(0,0,0,0.2)"
+                  shadowOffset={{ width: 0, height: 2 }}
+                  shadowRadius={4}
+                >
+                  @{username}
+                </H1>
+
+                {/* QR Code Container */}
+                <View
+                  mt="$4"
+                  width={270}
+                  height={270}
+                  br={36}
+                  bg="white"
+                  ai="center"
+                  jc="center"
+                  shadowColor="#000"
+                  shadowOffset={{ width: 0, height: 8 }}
+                  shadowOpacity={0.1}
+                  shadowRadius={24}
+                >
+                  <BeautifulQRCode value={profileUrl} size={230} />
+                </View>
+              </YStack>
+
+              {/* Decorative Elements */}
+              <View
+                position="absolute"
+                width={120}
+                height={120}
+                br={60}
+                top={-40}
+                right={-40}
+                bg="rgba(242,20,255,0.15)"
+              />
+              <View
+                position="absolute"
+                width={100}
+                height={100}
+                br={50}
+                bottom={-30}
+                left={-30}
+                bg="rgba(242,20,255,0.15)"
+              />
+            </View>
+          </YStack>
+
+          <YStack gap="$4" mb="$4">
+            <Button
+              size="$6"
+              variant="white"
+              icon={
+                <Ionicons
+                  name="share-outline"
+                  size={24}
+                  color={theme.primary.val as string}
+                />
+              }
+              onPress={handleShare}
+            >
+              Share Profile
+            </Button>
+
+            <Button
+              size="$6"
+              variant="white"
+              icon={
+                <Ionicons
+                  name="copy-outline"
+                  size={24}
+                  color={theme.primary.val as string}
+                />
+              }
+              onPress={handleCopyLink}
+            >
+              Copy Link
+            </Button>
+          </YStack>
+        </YStack>
+      </BlurView>
+    </Stack>
   );
 };
-
-interface ActionButtonProps {
-  onPress: () => void;
-  icon: string;
-  text: string;
-}
-
-const ActionButton = ({ onPress, icon, text }: ActionButtonProps) => (
-  <Theme name="light">
-    <TouchableOpacity onPress={onPress} style={{ flex: 1 }}>
-      <YStack
-        padding="$3"
-        borderRadius="$6"
-        alignItems="center"
-        backgroundColor="white"
-        shadowColor="rgba(0, 0, 0, 0.1)"
-        shadowOffset={{ width: 0, height: 4 }}
-        shadowOpacity={0.1}
-        shadowRadius={8}
-        elevation={2}
-        gap="$2"
-      >
-        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */}
-        <Ionicons name={icon as any} size={28} />
-        <Text>{text}</Text>
-      </YStack>
-    </TouchableOpacity>
-  </Theme>
-);
 
 export default ShareProfile;
