@@ -90,6 +90,7 @@ export default function AppClipScreen() {
         justifyContent="center"
         alignItems="flex-start"
         gap={"$0"}
+        paddingLeft={"$4"}
       >
         <AnimatedText style={animatedStyle1}>YOU'VE</AnimatedText>
         <AnimatedText style={animatedStyle2}>BEEN</AnimatedText>
