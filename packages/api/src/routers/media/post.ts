@@ -122,6 +122,7 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         number: z.string(),
+        name: z.string(),
         caption: z.string().max(255).default(""),
         height: z.string(),
         width: z.string(),
@@ -139,7 +140,7 @@ export const postRouter = createTRPCRouter({
         const userId = user ? user.id : randomUUID();
 
         if (!user) {
-          await ctx.services.user.createUser(userId, input.number, "notOnApp");
+          await ctx.services.user.createUserWithUsername(userId, input.number, input.name, "notOnApp");
         }
 
         const postId = randomUUID().toString();

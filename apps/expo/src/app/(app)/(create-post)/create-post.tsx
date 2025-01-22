@@ -220,6 +220,7 @@ const CreatePost = () => {
 
     console.log("before upload", input);
 
+
     const postId =
       type === "photo"
         ? await uploadPhotoMutation.mutateAsync(input)
