@@ -681,7 +681,7 @@ export class PostService {
       }
 
       if (data.mediaType === "image") {
-        const imageUrl = await this.cloudFrontService.getSignedUrlForPost(
+        const imageUrl = await this.cloudFrontService.getSignedUrlForPublicPost(
           data.imageUrl,
         );
         data.imageUrl = imageUrl;
