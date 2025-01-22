@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { DimensionValue } from "react-native";
-import { Dimensions, Linking, Platform, Pressable, Share, StyleSheet } from "react-native";
+import {
+  Dimensions,
+  Linking,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+} from "react-native";
 import type { TextInput } from "react-native-gesture-handler";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -206,15 +213,12 @@ const CreatePost = () => {
             type: "notOnApp",
           } satisfies UploadMediaInputNotOnApp);
 
-
     console.log("before upload", input);
 
-    const a = await uploadPhotoMutation.mutateAsync(input);
-    console.log("after upload", a);
-
-    const postId = type === "photo"
-      ? a
-      : await uploadVideoMutation.mutateAsync(input);
+    const postId =
+      type === "photo"
+        ? await uploadPhotoMutation.mutateAsync(input)
+        : await uploadVideoMutation.mutateAsync(input);
 
     // await promptForReview();
 
@@ -235,7 +239,7 @@ const CreatePost = () => {
       android: `sms:${params.number}?body=${encodeURIComponent(caption)}`,
     }); */
 
-/*     // Open the SMS app
+    /*     // Open the SMS app
     Linking.openURL(url!).catch(() => {
       console.error('Failed to open SMS app');
     }); */
