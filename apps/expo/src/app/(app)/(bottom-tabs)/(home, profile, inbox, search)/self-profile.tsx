@@ -23,7 +23,7 @@ const SelfProfile = () => {
   const insets = useSafeAreaInsets();
 
   const { isFirstInStack } = useLocalSearchParams<{
-    isFirstInStack: "yes";
+    isFirstInStack: "yes" | "no";
   }>();
   
 

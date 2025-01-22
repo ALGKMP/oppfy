@@ -14,6 +14,7 @@ import { UserCard } from "./ui/UserCard";
 
 interface FriendCarouselProps {
   userId?: string;
+  username?: string;
   paddingVertical?: SpaceTokens;
   paddingHorizontal?: SpaceTokens;
 }
@@ -30,6 +31,7 @@ const LoadingCard = ({ width }: { width: number }) => (
 
 const FriendCarousel = ({
   userId,
+  username,
   paddingVertical,
   paddingHorizontal,
 }: FriendCarouselProps) => {
@@ -74,11 +76,17 @@ const FriendCarousel = ({
               <UserCard.SeeAll
                 width={CARD_WIDTH}
                 onPress={() =>
-                  router.push(
-                    userId
-                      ? `/other-connections/${userId}/friends`
-                      : "/self-connections/friends",
-                  )
+                  userId
+                    ? router.push({
+                        pathname: `/other-connections/friends`,
+                        params: {
+                          userId,
+                          username: username,
+                        },
+                      })
+                    : router.push({
+                        pathname: "/self-connections/friends",
+                      })
                 }
                 index={index}
               />
