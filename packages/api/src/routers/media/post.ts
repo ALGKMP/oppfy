@@ -130,12 +130,9 @@ export const postRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // do pending user stuff here
-        // make/check for account
         const user = await ctx.services.user.getUserByPhoneNumberNoThrow(
           input.number,
         );
-
 
         const userId = user ? user.id : randomUUID();
 

@@ -250,4 +250,15 @@ export class UserRepository {
         .where(eq(schema.user.id, oldUserId));
     });
   }
+
+  @handleDatabaseErrors
+  async updateAccountStatus(
+    userId: string,
+    status: InferEnum<typeof accountStatusEnum>,
+  ) {
+    await this.db
+      .update(schema.user)
+      .set({ accountStatus: status })
+      .where(eq(schema.user.id, userId));
+  }
 }

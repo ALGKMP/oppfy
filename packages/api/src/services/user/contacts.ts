@@ -99,6 +99,8 @@ export class ContactService {
       return [];
     }
 
+    console.log("phoneNumbers", phoneNumbers);
+
     const existingPhoneNumbers =
       await this.userRepository.existingPhoneNumbers(phoneNumbers);
 
